@@ -8,11 +8,11 @@ import TestPage from './containers/TestPage';
 
 export default function Routes() {
   return (
-      <App>
-          <Switch> 
-              <Route path={routes.TEST} component={TestPage} />
-              <Route path={routes.HOME} component={HomePage} />
-          </Switch>
-      </App>
+    <App>
+      <Switch>
+        <Route path={routes.TEST} component={TestPage} />
+        <Route path={routes.HOME} component={HomePage} />
+      </Switch>
+    </App>
   );
 }

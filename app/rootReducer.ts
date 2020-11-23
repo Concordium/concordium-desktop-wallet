@@ -7,6 +7,6 @@ import testReducer from './features/test/testSlice';
 export default function createRootReducer(history: History) {
   return combineReducers({
     router: connectRouter(history),
-      test: testReducer
+    test: testReducer,
   });
 }
