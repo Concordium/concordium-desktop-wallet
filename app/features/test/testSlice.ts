@@ -1,10 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
-import { AppThunk, RootState } from '../../store';
+import * as crypto from 'crypto';
+import { RootState } from '../../store';
 import { getBlockSummary, sendTransaction } from '../../utils/client';
 import { serializeTransaction } from '../../utils/transactionSerialization';
-
-import data from './transfer.json';
+import { makeTestTransferWithScheduleTransaction } from '../../utils/transaction';
 
 const testSlice = createSlice({
   name: 'test',
@@ -37,18 +37,33 @@ export async function showBlockSummary(dispatch, blockHash) {
     );
 }
 
+function makeSignatures(transaction, hash): Buffer {
+  const keyPairs = { 0: '', 1: '' };
+  const signatures = new Array(2);
+
+  for (const index in keyPairs) {
+    const { privateKey } = crypto.generateKeyPairSync('ed25519'); // TODO: Use actual Keys instead of generating random
+    const signature = crypto.sign(null, hash, privateKey);
+    signatures[index] = signature;
+  }
+  return signatures;
+}
+
+function printAsHex(array) {
+  console.log(Buffer.from(array).toString('hex'));
+}
+
 export async function sendTransfer() {
-  const payload = serializeTransaction(data);
+  const payload = serializeTransaction(
+    makeTestTransferWithScheduleTransaction(),
+    makeSignatures
+  );
 
   printAsHex(payload);
 
   sendTransaction(payload)
     .catch((error) => console.log(error))
     .then((response) => console.log(response));
-}
-
-function printAsHex(array) {
-  console.log(Buffer.from(array).toString('hex'));
 }
 
 export default testSlice.reducer;

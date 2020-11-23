@@ -1,11 +1,24 @@
-import bs58check from 'bs58check';
-import * as crypto from 'crypto';
+import { AccountTransaction, TransactionKind } from './transaction.ts';
+import { encodeWord16, encodeWord32, encodeWord64, put, putBase58Check, hashSha256 } from './serializationHelpers';
 
-export function serializeTransaction(data) {
-  const payload = serializeTransferPayload(data.payload);
-  const header = serializeTransactionHeader(data, payload.length);
+export function serializeTransaction(
+  transaction: AccountTransaction,
+  signFunction: (transaction: AccountTransaction, hash: Buffer) => Buffer
+) {
+  const payload = serializeTransferPayload(
+    transaction.transactionKind,
+    transaction.payload
+  );
+  const header = serializeTransactionHeader(
+    transaction.sender,
+    transaction.nonce,
+    transaction.energyAmount,
+    payload.length,
+    transaction.expiry
+  );
 
-  const signatures = makeSignatures(data.keys, header, payload);
+  const hash = hashSha256(header, payload);
+  const signatures = signFunction(transaction, hash);
   const serialSignature = serializeSignature(signatures);
 
   const serialized = new Uint8Array(
@@ -20,9 +33,14 @@ export function serializeTransaction(data) {
 }
 
 function serializeSignature(sigs: Uint8Array[]) {
-  const signatureCount = sigs.length;
-  const size = 1 + signatureCount * (1 + 2 + sigs[0].length); // TODO: dont assume same length
-  // 1 for length, then for each signature, index ( 1 ) + Length of signature ( 2 ) + actual signature ( 64 )
+    // Size should be 1 for number of signatures, then for each signature, index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
+
+  const signaturesCombinedSizes = sigs.reduce(
+    (acc, sig) => acc + sig.length,
+    0
+  );
+    const size = 1 + sigs.length * 3 + signaturesCombinedSizes;
+
   const serialized = new Uint8Array(size);
   serialized[0] = sigs.length; // Number of signatures (word8)
   let index = 1;
@@ -37,85 +55,68 @@ function serializeSignature(sigs: Uint8Array[]) {
   return serialized;
 }
 
-function makeSignatures(keyPairs, header, payload): Buffer {
-  const hash = HashTransaction(header, payload);
-
-  const signatures = new Array(keyPairs.length);
-
-  for (const index in keyPairs) {
-    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519'); // TODO: Use given Keys instead of generating random
-    const signature = crypto.sign(null, hash, privateKey);
-    signatures[index] = signature;
-  }
-  return signatures;
-}
-
-function HashTransaction(header, payload) {
-  const hash = crypto.createHash('sha256');
-
-  hash.update(header);
-  hash.update(payload);
-
-  return hash.digest();
-}
-
-function serializeTransactionHeader(data, payloadSize) {
+function serializeTransactionHeader(
+  sender,
+  nonce,
+  energyAmount,
+  payloadSize,
+  expiry
+) {
   const size = 32 + 8 + 8 + 4 + 8;
   const serialized = new Uint8Array(size);
 
-  putAccountAddress(serialized, 0, data.sender);
-  put(serialized, 32, encodeWord64(data.nonce));
-  put(serialized, 32 + 8, encodeWord64(data.energyAmount));
+  putBase58Check(serialized, 0, sender);
+  put(serialized, 32, encodeWord64(nonce));
+  put(serialized, 32 + 8, encodeWord64(energyAmount));
   put(serialized, 32 + 8 + 8, encodeWord32(payloadSize));
-  put(serialized, 32 + 8 + 8 + 4, encodeWord64(data.expiry));
+  put(serialized, 32 + 8 + 8 + 4, encodeWord64(expiry));
 
   return serialized;
 }
 
-function putAccountAddress(
-  array: Uint8Array,
-  startIndex: number,
-  address: string
-) {
-  const decoded = bs58check.decode(address);
-  for (let i = 1; i < decoded.length; i++) {
-    array[startIndex + i - 1] = decoded[i];
+function serializeTransferPayload(kind: TransactionKind, payload) {
+  switch (kind) {
+    case TransactionKind.Simple_transfer:
+      return serializeSimpleTransfer(payload);
+    case TransactionKind.Deploy_credential:
+      return serializeDeployCredential(payload);
+    case TransactionKind.Transfer_with_schedule:
+      return serializeTransferWithSchedule(payload);
+    default:
+      throw new Error('Unsupported transactionkind');
   }
 }
 
-function serializeTransferPayload(payload) {
+function serializeSimpleTransfer(payload) {
   const size = 1 + 32 + 8;
   const serialized = new Uint8Array(size);
 
-  serialized[0] = 3; // Transaction Type = simpletransfer
-  putAccountAddress(serialized, 1, payload.toaddress.address);
+  serialized[0] = TransactionKind.Simple_transfer;
+  putBase58Check(serialized, 1, payload.toAddress);
   put(serialized, 32 + 1, encodeWord64(payload.amount));
   return serialized;
 }
 
-function put(array, start, input) {
-  for (let i = 0; i < input.length; i++) {
-    array[start + i] = input[i];
+function serializeTransferWithSchedule(payload) {
+  const listLength = payload.schedule.length;
+
+  const size = 1 + 32 + 1 + listLength * (8 + 8);
+  const serialized = new Uint8Array(size);
+
+  function serializeSchedule(period) {
+    put(serialized, index, encodeWord64(period.timestamp));
+    index += 8;
+    put(serialized, index, encodeWord64(period.amount));
+    index += 8;
   }
-}
 
-function encodeWord16(num) {
-  const arr = new ArrayBuffer(2); // an Int32 takes 4 bytes
-  const view = new DataView(arr);
-  view.setUint16(0, num, false); // byteOffset = 0; litteEndian = false
-  return new Uint8Array(arr);
-}
-
-function encodeWord32(num) {
-  const arr = new ArrayBuffer(4); // an Int32 takes 4 bytes
-  const view = new DataView(arr);
-  view.setUint32(0, num, false); // byteOffset = 0; litteEndian = false
-  return new Uint8Array(arr);
-}
-
-function encodeWord64(num) {
-  const arr = new ArrayBuffer(8); // an Int64 takes 8 bytes
-  const view = new DataView(arr);
-  view.setBigUint64(0, BigInt(num), false); // byteOffset = 0; litteEndian = false
-  return new Uint8Array(arr);
+  let index = 0;
+  serialized[index] = TransactionKind.Transfer_with_schedule;
+  index += 1;
+  putBase58Check(serialized, index, payload.toAddress);
+  index += 32;
+  serialized[index] = listLength;
+  index += 1;
+  payload.schedule.forEach(serializeSchedule);
+  return serialized;
 }

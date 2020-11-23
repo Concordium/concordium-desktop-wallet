@@ -1,5 +1,5 @@
 import grpc from 'grpc';
-import services from '../proto/api_grpc_pb';
+import { P2PClient } from '../proto/api_grpc_pb';
 import {
   BlockHash,
   JSONResponse,
@@ -7,7 +7,7 @@ import {
 } from '../proto/api_pb';
 
 const port = 10000;
-const client = new services.P2PClient(
+const client = new P2PClient(
   `localhost:${port}`,
   grpc.credentials.createInsecure()
 );
