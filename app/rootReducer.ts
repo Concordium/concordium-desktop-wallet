@@ -6,9 +6,9 @@ import testReducer from './features/test/testSlice';
 import accountReducer from './features/accounts/accountsSlice';
 
 export default function createRootReducer(history: History) {
-  return combineReducers({
-    router: connectRouter(history),
-    test: testReducer,
-    accounts: accountReducer,
-  });
+    return combineReducers({
+        router: connectRouter(history),
+        test: testReducer,
+        accounts: accountReducer,
+    });
 }

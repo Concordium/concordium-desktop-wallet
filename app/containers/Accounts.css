@@ -1,19 +1,19 @@
 .accountList {
-  display: inline-block;
-  height: 100 %;
-  width: 40 %;
+    display: inline-block;
+    height: 100 %;
+    width: 40 %;
 }
 
 .chosen {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .nonChosen {
 }
 
 .chosenAccount {
-  align-content: right;
-  display: inline-block;
-  height: 100 %;
-  width: 40 %;
+    align-content: right;
+    display: inline-block;
+    height: 100 %;
+    width: 40 %;
 }

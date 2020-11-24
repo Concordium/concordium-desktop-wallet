@@ -1,28 +1,28 @@
 {
-  "sender": "4MkK65HrYvMauNTHTuL23wRDKp4VXkCiTpmoWYFtsrZHV3WwSa",
-  "keys": {
-    "0": {
-      "signKey": "40648c09ec32f72631e397381f02e4592119a17bce560fc137aaf6b6b7fbb8db",
-      "verifyKey": "d048156ec6a94ddc72f233f6f29ee4259de83b02a537c7ddf400c0162a0b1810"
+    "sender": "4MkK65HrYvMauNTHTuL23wRDKp4VXkCiTpmoWYFtsrZHV3WwSa",
+    "keys": {
+        "0": {
+            "signKey": "40648c09ec32f72631e397381f02e4592119a17bce560fc137aaf6b6b7fbb8db",
+            "verifyKey": "d048156ec6a94ddc72f233f6f29ee4259de83b02a537c7ddf400c0162a0b1810"
+        },
+        "1": {
+            "signKey": "8747bcd9555c40204404c171db5e326970a788c1e49ae98ac12d75d87e6a176c",
+            "verifyKey": "a25b18f0cba1d040edd6cd10634181099bd0dcce0e202de3e1ec4717d2dc5776"
+        },
+        "2": {
+            "signKey": "517db451a5fe8e78952f12cd5ac7a391d3c32c81e399845edff2b970af2c8666",
+            "verifyKey": "7d804eadc0b5bdbe3a342d176c226fbecee0e6c245a599ce2e11f2611af9b2e1"
+        }
     },
-    "1": {
-      "signKey": "8747bcd9555c40204404c171db5e326970a788c1e49ae98ac12d75d87e6a176c",
-      "verifyKey": "a25b18f0cba1d040edd6cd10634181099bd0dcce0e202de3e1ec4717d2dc5776"
-    },
-    "2": {
-      "signKey": "517db451a5fe8e78952f12cd5ac7a391d3c32c81e399845edff2b970af2c8666",
-      "verifyKey": "7d804eadc0b5bdbe3a342d176c226fbecee0e6c245a599ce2e11f2611af9b2e1"
+    "nonce": 1,
+    "energyAmount": 165,
+    "expiry": 18446744073709551615,
+    "payload": {
+        "transactionType": "Transfer",
+        "amount": 1,
+        "toaddress": {
+            "type": "AddressAccount",
+            "address": "4bTsJAFQJr5zCp532PCjDmEqeLyqXwUnPRxY4AqJ76XtP6xAqn"
+        }
     }
-  },
-  "nonce": 1,
-  "energyAmount": 165,
-  "expiry": 18446744073709551615,
-  "payload": {
-    "transactionType": "Transfer",
-    "amount": 1,
-    "toaddress": {
-      "type": "AddressAccount",
-      "address": "4bTsJAFQJr5zCp532PCjDmEqeLyqXwUnPRxY4AqJ76XtP6xAqn"
-    }
-  }
 }

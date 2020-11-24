@@ -282,7 +282,8 @@
         }
       }
     ],
-    "singleQuote": true
+      "singleQuote": true,
+      "tabWidth": 4
   },
   "stylelint": {
     "extends": [
