@@ -1,4 +1,10 @@
 {
   "HOME": "/",
-  "TEST": "/test"
+  "TEST": "/test",
+  "ACCOUNTS": "/accounts",
+  "IDENTITIES": "/identities",
+  "ADRESSBOOK": "/address_book",
+  "EXPORTIMPORT": "/export_import",
+  "MULTISIGTRANSACTIONS": "/MultiSignatureTransaction",
+  "SETTINGS": "/settings"
 }

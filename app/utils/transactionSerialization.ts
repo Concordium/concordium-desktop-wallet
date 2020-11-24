@@ -163,26 +163,26 @@ function isInitialInitialCredentialDeploymentInfo(info) {
 }
 
 function serializeInitialCredentialDeploymentInfo(info) {
-    const values = serializeInitialCredentialDeploymentValues(info.idciValues);
-    const { signature } = info;
+  const values = serializeInitialCredentialDeploymentValues(info.idciValues);
+  const { signature } = info;
 
-    const size = values.length + 2 + signature.length;
-    const serialized = new Uint8Array(size);
+  const size = values.length + 2 + signature.length;
+  const serialized = new Uint8Array(size);
 
-    put(serialized, 0, values);
-    put(serialized, values.length, encodeWord16(signature.length));
-    put(serialized, values.length + 2, signature);
+  put(serialized, 0, values);
+  put(serialized, values.length, encodeWord16(signature.length));
+  put(serialized, values.length + 2, signature);
 
-    return serialized;
+  return serialized;
 }
 
 function serializeInitialCredentialDeploymentValues(values): Buffer {
-    const account = serializeAccount(values.account);
-    const { regId } = values;
-    const ipId = encodeWord32(values.ipId);
-    const policy = serializePolicy(values.policy);
+  const account = serializeAccount(values.account);
+  const { regId } = values;
+  const ipId = encodeWord32(values.ipId);
+  const policy = serializePolicy(values.policy);
 
-    return Buffer.concat([account, regId, ipId, policy]);
+  return Buffer.concat([account, regId, ipId, policy]);
 }
 
 function serializeCredentialDeploymentInformation(info) {
