@@ -4,11 +4,14 @@ import routes from '../constants/routes.json';
 
 export default function Routes() {
   const sideBarElements = [];
-  sideBarElements.push({ route: routes.HOME, title: 'Home' });
+  sideBarElements.push({ route: routes.TEST, title: 'Home' });
   sideBarElements.push({ route: routes.ACCOUNTS, title: 'Accounts' });
   sideBarElements.push({ route: routes.IDENTITIES, title: 'Identities' });
-  sideBarElements.push({ route: routes.ADRESSBOOK, title: 'Address Book' });
-  sideBarElements.push({ route: routes.EXPORTIMPORT, title: 'Export/Import' });
+  sideBarElements.push({ route: routes.ADDRESSBOOK, title: 'Address Book' });
+  sideBarElements.push({
+    route: routes.EXPORTIMPORT,
+    title: 'Export/Import',
+  });
   sideBarElements.push({ route: routes.ADRESSBOOK, title: 'Address Book' });
   sideBarElements.push({
     route: routes.MULTISIGTRANSACTIONS,
@@ -18,7 +21,9 @@ export default function Routes() {
   return (
     <div>
       {sideBarElements.map((member, i) => (
-        <Link to={member.route}>{member.title} </Link>
+        <Link to={member.route} key={i}>
+          {member.title}{' '}
+        </Link>
       ))}
     </div>
   );
