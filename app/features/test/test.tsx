@@ -7,6 +7,7 @@ import {
   blockHashValue,
   blockSummary,
   sendTransfer,
+  printCredentialDeployment,
   handleFieldChange,
 } from './testSlice';
 
@@ -52,6 +53,15 @@ export default function Test() {
           type="button"
         >
           sendTransfer
+        </button>
+        <button
+          onClick={() => {
+            printCredentialDeployment();
+          }}
+          data-tclass="btn"
+          type="button"
+        >
+          printCredentialDeployment
         </button>
       </div>
       <textarea value={summary} readOnly />

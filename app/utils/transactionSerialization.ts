@@ -1,5 +1,21 @@
-import { AccountTransaction, TransactionKind } from './transaction.ts';
-import { encodeWord16, encodeWord32, encodeWord64, put, putBase58Check, hashSha256 } from './serializationHelpers';
+import {
+  AccountTransaction,
+  TransactionKind,
+  BlockItemKind,
+  CredentialDeploymentValues,
+  Policy,
+  YearMonth,
+  AttributeTag,
+} from './types.ts';
+import {
+  encodeWord16,
+  encodeWord32,
+  encodeWord64,
+  put,
+  putBase58Check,
+  hashSha256,
+  parseHexString,
+} from './serializationHelpers';
 
 export function serializeTransaction(
   transaction: AccountTransaction,
@@ -25,7 +41,7 @@ export function serializeTransaction(
     2 + serialSignature.length + header.length + payload.length
   );
   serialized[0] = 0; // Version number
-  serialized[1] = 0; // AccountTransactionKind
+  serialized[1] = BlockItemKind.AccountTransactionKind;
   put(serialized, 2, serialSignature);
   put(serialized, 2 + serialSignature.length, header);
   put(serialized, 2 + serialSignature.length + header.length, payload);
@@ -33,13 +49,13 @@ export function serializeTransaction(
 }
 
 function serializeSignature(sigs: Uint8Array[]) {
-    // Size should be 1 for number of signatures, then for each signature, index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
+  // Size should be 1 for number of signatures, then for each signature, index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
 
   const signaturesCombinedSizes = sigs.reduce(
     (acc, sig) => acc + sig.length,
     0
   );
-    const size = 1 + sigs.length * 3 + signaturesCombinedSizes;
+  const size = 1 + sigs.length * 3 + signaturesCombinedSizes;
 
   const serialized = new Uint8Array(size);
   serialized[0] = sigs.length; // Number of signatures (word8)
@@ -118,5 +134,136 @@ function serializeTransferWithSchedule(payload) {
   serialized[index] = listLength;
   index += 1;
   payload.schedule.forEach(serializeSchedule);
+  return serialized;
+}
+
+export function serializeCredentialDeployment(credentialInfo) {
+  let serializedBlockItem;
+  if (isInitialInitialCredentialDeploymentInfo(credentialInfo)) {
+    serializedBlockItem = serializeInitialCredentialDeploymentInfo(
+      credentialInfo
+    );
+  } else {
+    serializedBlockItem = serializeCredentialDeploymentInformation(
+      credentialInfo
+    );
+  }
+
+  const size = 2 + serializedBlockItem.length;
+  const serialized = new Uint8Array(size);
+
+  serialized[0] = 0; // Version number
+  serialized[1] = BlockItemKind.CredentialDeploymentKind;
+  put(serialized, 2, serializedBlockItem);
+  return serialized;
+}
+
+function isInitialInitialCredentialDeploymentInfo(info) {
+  return info.signature;
+}
+
+function serializeInitialCredentialDeploymentInfo(info) {
+    const values = serializeInitialCredentialDeploymentValues(info.idciValues);
+    const { signature } = info;
+
+    const size = values.length + 2 + signature.length;
+    const serialized = new Uint8Array(size);
+
+    put(serialized, 0, values);
+    put(serialized, values.length, encodeWord16(signature.length));
+    put(serialized, values.length + 2, signature);
+
+    return serialized;
+}
+
+function serializeInitialCredentialDeploymentValues(values): Buffer {
+    const account = serializeAccount(values.account);
+    const { regId } = values;
+    const ipId = encodeWord32(values.ipId);
+    const policy = serializePolicy(values.policy);
+
+    return Buffer.concat([account, regId, ipId, policy]);
+}
+
+function serializeCredentialDeploymentInformation(info) {
+  const values = serializeCredentialDeploymentValues(info.values);
+  const { proofs } = info;
+
+  const size = values.length + 4 + proofs.length;
+  const serialized = new Uint8Array(size);
+
+  put(serialized, 0, values);
+  put(serialized, values.length, encodeWord32(proofs.length));
+  put(serialized, values.length + 4, proofs);
+
+  return serialized;
+}
+
+function serializeCredentialDeploymentValues(
+  values: CredentialDeploymentValues
+): Buffer {
+  const account = serializeAccount(values.account);
+  const { regId } = values;
+  const ipId = encodeWord32(values.ipId);
+  const threshold = Buffer.from([values.revocationThreshold]);
+  const arData = serializeArData(values.arData);
+  const policy = serializePolicy(values.policy);
+
+  return Buffer.concat([account, regId, ipId, threshold, arData, policy]);
+}
+
+function serializeAccount(account) {
+  if (account.keys != undefined) {
+    function putKey(list, key) {
+      list.push(Buffer.from([0])); // TODO: Determine what this byte stands for.
+      const serializedKey = parseHexString(key.verifyKey);
+      list.push(serializedKey);
+      return list;
+    }
+    const length = Buffer.from([account.keys.length]);
+    const serializedBuffers = account.keys.reduce(putKey, [length]);
+    serializedBuffers.push(Buffer.from([account.threshold]));
+    return Buffer.concat(serializedBuffers);
+  }
+  // serialize base58check
+}
+
+function serializeArData(arData) {
+  function reducer(list, entry) {
+    return list.concat([
+      encodeWord32(entry[0]),
+      parseHexString(entry[1].encIdCredPubShare),
+    ]);
+  }
+  const entries = Object.entries(arData);
+  const length = encodeWord16(entries.length);
+  const serializedBuffers = entries.reduce(reducer, [length]);
+  return Buffer.concat(serializedBuffers);
+}
+
+function serializePolicy(policy: Policy) {
+  const validTo = serializeYearMonth(policy.validTo);
+  const createdAt = serializeYearMonth(policy.createdAt);
+
+  function serializeMember(list, entry) {
+    const serializedKey = Buffer.from([AttributeTag[entry[0]]]);
+
+    const serializedValue = Buffer.from(entry[1], 'utf8');
+    const valueLength = Buffer.from([serializedValue.length]);
+
+    return list.concat([serializedKey, valueLength, serializedValue]);
+  }
+
+  const entries = Object.entries(policy.revealedAttributes);
+  const length = encodeWord16(entries.length);
+  const items = entries.reduce(serializeMember, [length]);
+
+  return Buffer.concat([validTo, createdAt].concat(items));
+}
+
+function serializeYearMonth(data: YearMonth): Uint8Array {
+  const serialized = new Uint8Array(3);
+  put(serialized, 0, encodeWord16(data.year));
+  serialized[2] = data.month;
   return serialized;
 }

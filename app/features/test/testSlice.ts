@@ -3,8 +3,15 @@ import { createSlice } from '@reduxjs/toolkit';
 import * as crypto from 'crypto';
 import { RootState } from '../../store';
 import { getBlockSummary, sendTransaction } from '../../utils/client';
-import { serializeTransaction } from '../../utils/transactionSerialization';
-import { makeTestTransferWithScheduleTransaction } from '../../utils/transaction';
+import {
+  serializeTransaction,
+  serializeCredentialDeployment,
+} from '../../utils/transactionSerialization';
+import {
+  buildCredDep,
+  makeTestTransferWithScheduleTransaction,
+  binaryVersionAsHex,
+} from '../../utils/test';
 
 const testSlice = createSlice({
   name: 'test',
@@ -51,6 +58,12 @@ function makeSignatures(transaction, hash): Buffer {
 
 function printAsHex(array) {
   console.log(Buffer.from(array).toString('hex'));
+}
+
+export async function printCredentialDeployment() {
+  const cred = buildCredDep();
+  const serialized = serializeCredentialDeployment(cred);
+  printAsHex(serialized);
 }
 
 export async function sendTransfer() {
