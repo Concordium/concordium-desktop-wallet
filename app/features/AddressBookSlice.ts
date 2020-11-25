@@ -23,6 +23,10 @@ const addressBookSlice = createSlice({
             state.addressBook.push(address.payload);
             storage.save(storageKey, state.addressBook);
         },
+        removeFromAddressBook(state, index) {
+            state.addressBook.splice(index.payload, 1);
+            storage.save(storageKey, state.addressBook);
+        },
         chooseIndex(state, index) {
             state.chosenIndex = index.payload;
         },
@@ -33,6 +37,7 @@ export const {
     setAddressBook,
     saveAddressBook,
     addToAddressBook,
+    removeFromAddressBook,
     chooseIndex,
 } = addressBookSlice.actions;
 

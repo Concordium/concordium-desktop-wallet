@@ -5,6 +5,7 @@ import {
     addressBookSelector,
     chooseIndex,
     chosenIndexSelector,
+    removeFromAddressBook
 } from '../features/AddressBookSlice.ts';
 import styles from './Accounts.css';
 import Modal from './Modal';
@@ -49,10 +50,11 @@ export default function AddressBook(): JSX.Element {
                     {addressBook[chosenIndex].name}{' '}
                     {addressBook[chosenIndex].address}{' '}
                     {addressBook[chosenIndex].note}{' '}
+                    <button onClick={() => dispatch(removeFromAddressBook(chosenIndex))}>remove</button> // TODO: Add Conformation prompt?
                 </div>
             )}
             <div className={styles.blob}></div>
             {Modal(modalButton, modalBody)}
         </div>
-    );
+            );
 }
