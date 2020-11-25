@@ -1,6 +1,6 @@
 import storage from 'electron-json-storage';
 
-function decodeData() {
+function decodeData(data) {
     // TODO decrypt data
     return JSON.parse(data);
 }
@@ -16,7 +16,7 @@ export async function load(key) {
             if (err !== undefined) {
                 reject(err);
             } else {
-                resolve(loadData(data));
+                resolve(decodeData(data));
             }
         });
     });

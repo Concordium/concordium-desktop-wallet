@@ -19,6 +19,7 @@ const addressBookSlice = createSlice({
             storage.save(storageKey, addresses.payload);
         },
         addToAddressBook(state, address) {
+            // TODO validate address
             state.addressBook.push(address.payload);
             storage.save(storageKey, state.addressBook);
         },

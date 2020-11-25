@@ -1,59 +1,62 @@
 import grpc from 'grpc';
 import { P2PClient } from '../proto/api_grpc_pb';
 import {
-  BlockHash,
-  JSONResponse,
-  SendTransactionRequest,
+    BlockHash,
+    JSONResponse,
+    SendTransactionRequest,
 } from '../proto/api_pb';
 
 const port = 10000;
 const client = new P2PClient(
-  `localhost:${port}`,
-  grpc.credentials.createInsecure()
+    `localhost:${port}`,
+    grpc.credentials.createInsecure()
 );
 
 function buildMetaData(): MetaData {
-  const meta = new grpc.Metadata();
-  meta.add('authentication', 'rpcadmin');
-  return meta;
+    const meta = new grpc.Metadata();
+    meta.add('authentication', 'rpcadmin');
+    return meta;
 }
 
 function buildSendTransactionRequest(
-  payload: Uint8Array,
-  networkId: number
+    payload: Uint8Array,
+    networkId: number
 ): SendTransactionRequest {
-  const request = new SendTransactionRequest();
-  request.setNetworkId(networkId);
-  request.setPayload(payload);
-  return request;
+    const request = new SendTransactionRequest();
+    request.setNetworkId(networkId);
+    request.setPayload(payload);
+    return request;
 }
 
 export function getBlockSummary(blockHashValue: string): Promise<JSONResponse> {
-  return new Promise<JSONResponse>((resolve, reject) => {
-    const blockHash = new BlockHash();
-    blockHash.setBlockHash(blockHashValue);
+    return new Promise<JSONResponse>((resolve, reject) => {
+        const blockHash = new BlockHash();
+        blockHash.setBlockHash(blockHashValue);
 
-    client.getBlockSummary(blockHash, buildMetaData(), (err, response) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(response);
+        client.getBlockSummary(blockHash, buildMetaData(), (err, response) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(response);
+        });
     });
-  });
 }
 
 export function sendTransaction(
-  transactionPayload: Uint8Array,
-  networkId = 100
+    transactionPayload: Uint8Array,
+    networkId = 100
 ): Promise<JSONResponse> {
-  return new Promise<JSONResponse>((resolve, reject) => {
-    const request = buildSendTransactionRequest(transactionPayload, networkId);
+    return new Promise<JSONResponse>((resolve, reject) => {
+        const request = buildSendTransactionRequest(
+            transactionPayload,
+            networkId
+        );
 
-    client.sendTransaction(request, buildMetaData(), (err, response) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(response);
+        client.sendTransaction(request, buildMetaData(), (err, response) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(response);
+        });
     });
-  });
 }

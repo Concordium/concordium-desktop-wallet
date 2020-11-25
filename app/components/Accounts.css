@@ -17,3 +17,12 @@
     height: 100 %;
     width: 40 %;
 }
+
+.blob {
+    display: block;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+    border: 1px solid blue;
+    background-color: blue;
+}
