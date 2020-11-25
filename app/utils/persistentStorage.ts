@@ -1,9 +1,27 @@
 import storage from 'electron-json-storage';
 
-export async function loadAddressBook() {
-    return JSON.parse(storage.get('addressbook'));
+function decodeData() {
+    // TODO decrypt data
+    return JSON.parse(data);
 }
 
-export async function saveAddressBook(addressBook) {
-    storage.set('addressbook', JSON.stringify(addressBook));
+function encodeData(data) {
+    // TODO encrypt data
+    return JSON.stringify(data);
+}
+
+export async function load(key) {
+    return new Promise(function (resolve, reject) {
+        const raw = storage.get(key, function (err, data) {
+            if (err !== undefined) {
+                reject(err);
+            } else {
+                resolve(loadData(data));
+            }
+        });
+    });
+}
+
+export async function save(key, data) {
+    storage.set(key, encodeData(data));
 }

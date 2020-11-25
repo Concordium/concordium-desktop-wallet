@@ -12,7 +12,6 @@ export default function Routes() {
         route: routes.EXPORTIMPORT,
         title: 'Export/Import',
     });
-    sideBarElements.push({ route: routes.ADRESSBOOK, title: 'Address Book' });
     sideBarElements.push({
         route: routes.MULTISIGTRANSACTIONS,
         title: 'Multi Signature Transactions',
