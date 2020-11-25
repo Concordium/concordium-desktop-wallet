@@ -28,11 +28,12 @@ export async function getIdCredSec(
     transport: Transport,
     identity: number
 ): Promise<{ idCredSecSeed: Buffer }> {
-    const idCredSecSeed = await getAccountPrivateKeySeed(
+    const idCredSecAccountPrivateKeySeed = await getAccountPrivateKeySeed(
         transport,
         0x00,
         identity
-    ).then((result) => result.accountPrivateKeySeed);
+    );
+    const idCredSecSeed = idCredSecAccountPrivateKeySeed.accountPrivateKeySeed;
     return { idCredSecSeed };
 }
 
@@ -40,10 +41,11 @@ export async function getPrfKey(
     transport: Transport,
     identity: number
 ): Promise<{ prfKeySeed: Buffer }> {
-    const prfKeySeed = await getAccountPrivateKeySeed(
+    const idCredSecAccountPrivateKeySeed = await getAccountPrivateKeySeed(
         transport,
         0x01,
         identity
-    ).then((result) => result.accountPrivateKeySeed);
+    );
+    const prfKeySeed = idCredSecAccountPrivateKeySeed.accountPrivateKeySeed;
     return { prfKeySeed };
 }
