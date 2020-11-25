@@ -69,20 +69,16 @@ export async function ledgerTest() {
     const transport = await TransportNodeHid.open('');
     const ledgerClient = new ConcordiumLedgerClient(transport);
     
-    const idCredSec = await ledgerClient.getIdCredSec(0)
-        .then((result) => result.idCredSecSeed);
+    const idCredSec = await ledgerClient.getIdCredSec(0);
     console.log(`idCredSec: ${idCredSec.toString('hex')}`);
 
-    const prfKey = await ledgerClient.getPrfKey(0)
-        .then((result) => result.prfKeySeed);
+    const prfKey = await ledgerClient.getPrfKey(0);
     console.log(`prfKey: ${prfKey.toString('hex')}`);
 
-    const publicKey = await ledgerClient.getPublicKey([0, 0, 0, 0, 0, 0])
-        .then((result) => result.publicKey);
+    const publicKey = await ledgerClient.getPublicKey([0, 0, 0, 0, 0, 0]);
     console.log(`Public-key: ${publicKey.toString('hex')}`);
 
-    const signature = await ledgerClient.signTransfer(makeTestSimpleTransferTransaction(), [0, 0, 0, 0, 0, 0])
-        .then((result) => result.signature);
+    const signature = await ledgerClient.signTransfer(makeTestSimpleTransferTransaction(), [0, 0, 0, 0, 0, 0]);
     console.log(`Signature: ${signature.toString('hex')}`);
 }
 

@@ -12,7 +12,7 @@ export default async function signTransfer(
     transport: Transport,
     path: number[],
     transaction: AccountTransaction
-): Promise<{ signature: Buffer }> {
+): Promise<Buffer> {
     if (transaction.transactionKind !== TransactionKind.Simple_transfer) {
         throw new Error(
             `The received transaction was not a transfer transaction: ${transaction.transactionKind}`
@@ -45,6 +45,5 @@ export default async function signTransfer(
         data
     );
     const signature = response.slice(0, 64);
-
-    return { signature };
+    return signature;
 }

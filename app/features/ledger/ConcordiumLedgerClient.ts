@@ -24,19 +24,19 @@ export default class ConcordiumLedgerClient {
         );
     }
 
-    getPublicKey(path: number[]): Promise<{ publicKey: Buffer }> {
+    getPublicKey(path: number[]): Promise<Buffer> {
         return getPublicKey(this.transport, path);
     }
 
-    getIdCredSec(identity: number): Promise<{ idCredSecSeed: Buffer }> {
+    getIdCredSec(identity: number): Promise<Buffer> {
         return getIdCredSec(this.transport, identity);
     }
 
-    getPrfKey(identity: number): Promise<{ prfKeySeed: Buffer }> {
+    getPrfKey(identity: number): Promise<Buffer> {
         return getPrfKey(this.transport, identity);
     }
 
-    signTransfer(transaction: AccountTransaction, path: number[]): Promise<{ signature: Buffer }> {
+    signTransfer(transaction: AccountTransaction, path: number[]): Promise<Buffer> {
         return signTransfer(this.transport, path, transaction);
     }
 }
