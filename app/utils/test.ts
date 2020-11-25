@@ -33,7 +33,7 @@ export function makeTestSimpleTransferTransaction() {
         expiry: data.expiry,
         transactionKind: TransactionKind.Simple_transfer,
         payload: {
-            toAdress: data.payload.toaddress.address,
+            toAddress: data.payload.toaddress.address,
             amount: data.payload.amount,
         },
     };

@@ -12,9 +12,11 @@ import {
     buildCredDep,
     makeTestTransferWithScheduleTransaction,
     binaryVersionAsHex,
+    makeTestSimpleTransferTransaction,
 } from '../../utils/test';
 
 import ConcordiumLedgerClient from '../ledger/ConcordiumLedgerClient';
+import { AccountTransaction } from '../../utils/types';
 
 const testSlice = createSlice({
     name: 'test',
@@ -66,12 +68,18 @@ function printAsHex(array) {
 export async function ledgerTest() {
     const transport = await TransportNodeHid.open('');
     const ledgerClient = new ConcordiumLedgerClient(transport);
-    const idCredSec = (await ledgerClient.getIdCredSec(0)).idCredSecSeed;
-    const prfKey = (await ledgerClient.getPrfKey(0)).prfKeySeed;
-    const { publicKey } = await ledgerClient.getPublicKey([0, 0, 0, 0, 0, 0]);
-    console.log(`Public-key: ${publicKey.toString('hex')}`);
-    console.log(`idCredSec: ${idCredSec.toString('hex')}`);
-    console.log(`prfKey: ${prfKey.toString('hex')}`);
+    
+    // const idCredSec = (await ledgerClient.getIdCredSec(0)).idCredSecSeed;
+    // console.log(`idCredSec: ${idCredSec.toString('hex')}`);
+
+    // const prfKey = (await ledgerClient.getPrfKey(0)).prfKeySeed;
+    // console.log(`prfKey: ${prfKey.toString('hex')}`);
+
+    // const publicKey = (await ledgerClient.getPublicKey([0, 0, 0, 0, 0, 0])).publicKey;
+    // console.log(`Public-key: ${publicKey.toString('hex')}`);
+
+    const signature = (await ledgerClient.signTransfer(makeTestSimpleTransferTransaction(), [0, 0, 0, 0, 0, 0])).signature;
+    console.log(`Signature: ${signature.toString('hex')}`);
 }
 
 export async function printCredentialDeployment() {

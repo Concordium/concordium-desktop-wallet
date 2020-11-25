@@ -1,6 +1,8 @@
 import type Transport from '@ledgerhq/hw-transport';
 import getPublicKey from './GetPublicKey';
+import signTransfer from './Transfer';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
+import { AccountTransaction } from '../../utils/types';
 
 /**
  * Concordium Ledger API.
@@ -17,7 +19,7 @@ export default class ConcordiumLedgerClient {
 
         transport.decorateAppAPIMethods(
             this,
-            ['getPublicKey', 'getIdCredSec', 'getPrfKey'],
+            ['getPublicKey', 'getIdCredSec', 'getPrfKey', 'signTransfer'],
             'GTU'
         );
     }
@@ -32,5 +34,9 @@ export default class ConcordiumLedgerClient {
 
     getPrfKey(identity: number) {
         return getPrfKey(this.transport, identity);
+    }
+
+    signTransfer(transaction: AccountTransaction, path: number[]) {
+        return signTransfer(this.transport, path, transaction);
     }
 }

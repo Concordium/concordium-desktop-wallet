@@ -6,7 +6,7 @@ export interface AccountTransaction {
   energyAmount: number;
   expiry: number;
   transactionKind: TransactionKind;
-  Payload;
+  payload;
 }
 
 export enum TransactionKind {
