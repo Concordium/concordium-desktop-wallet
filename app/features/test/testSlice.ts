@@ -64,14 +64,14 @@ function printAsHex(array) {
 }
 
 export async function ledgerTest() {
-  const transport = await TransportNodeHid.open('');
-  const ledgerClient = new ConcordiumLedgerClient(transport);
-  const idCredSec = (await ledgerClient.getIdCredSec(0)).idCredSecSeed;
-  const prfKey = (await ledgerClient.getPrfKey(0)).prfKeySeed;
-  const { publicKey } = await ledgerClient.getPublicKey([0, 0, 0, 0, 0, 0]);
-  console.log(`Public-key: ${publicKey.toString('hex')}`);
-  console.log(`idCredSec: ${idCredSec.toString('hex')}`);
-  console.log(`prfKey: ${prfKey.toString('hex')}`);
+    const transport = await TransportNodeHid.open('');
+    const ledgerClient = new ConcordiumLedgerClient(transport);
+    const idCredSec = (await ledgerClient.getIdCredSec(0)).idCredSecSeed;
+    const prfKey = (await ledgerClient.getPrfKey(0)).prfKeySeed;
+    const { publicKey } = await ledgerClient.getPublicKey([0, 0, 0, 0, 0, 0]);
+    console.log(`Public-key: ${publicKey.toString('hex')}`);
+    console.log(`idCredSec: ${idCredSec.toString('hex')}`);
+    console.log(`prfKey: ${prfKey.toString('hex')}`);
 }
 
 export async function printCredentialDeployment() {

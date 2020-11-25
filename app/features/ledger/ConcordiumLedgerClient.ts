@@ -10,27 +10,27 @@ import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
  * const client = new ConcordiumLedgerClient(transport);
  */
 export default class ConcordiumLedgerClient {
-  transport: Transport;
+    transport: Transport;
 
-  constructor(transport: Transport) {
-    this.transport = transport;
+    constructor(transport: Transport) {
+        this.transport = transport;
 
-    transport.decorateAppAPIMethods(
-      this,
-      ['getPublicKey', 'getIdCredSec', 'getPrfKey'],
-      'GTU'
-    );
-  }
+        transport.decorateAppAPIMethods(
+            this,
+            ['getPublicKey', 'getIdCredSec', 'getPrfKey'],
+            'GTU'
+        );
+    }
 
-  getPublicKey(path: number[]) {
-    return getPublicKey(this.transport, path);
-  }
+    getPublicKey(path: number[]) {
+        return getPublicKey(this.transport, path);
+    }
 
-  getIdCredSec(identity: number) {
-    return getIdCredSec(this.transport, identity);
-  }
+    getIdCredSec(identity: number) {
+        return getIdCredSec(this.transport, identity);
+    }
 
-  getPrfKey(identity: number) {
-    return getPrfKey(this.transport, identity);
-  }
+    getPrfKey(identity: number) {
+        return getPrfKey(this.transport, identity);
+    }
 }
