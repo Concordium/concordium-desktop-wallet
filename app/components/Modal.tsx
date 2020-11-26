@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
-
-const modalStyle = {
-    content : {
-        top                   : '50%',
-        left                  : '50%',
-        right                 : 'auto',
-        bottom                : 'auto',
-        marginRight           : '-50%',
-        transform             : 'translate(-50%, -50%)'
-    }
-};
+import styles from './Styling.css';
 
 export default function FunctionalModal(entrance, body) {
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -26,7 +16,11 @@ export default function FunctionalModal(entrance, body) {
     return (
         <>
             {entrance(setModalIsOpenToTrue)}
-            <Modal isOpen={modalIsOpen} ariaHideApp={false} style={modalStyle}>
+            <Modal
+                isOpen={modalIsOpen}
+                ariaHideApp={false}
+                className={styles.modal}
+            >
                 {body(setModalIsOpenToFalse)}
             </Modal>
         </>

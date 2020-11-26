@@ -1,6 +1,13 @@
 import React from 'react';
-import Identities from '../components/Identities';
+import IdentityList from '../components/IdentityList';
+import IdentityView from '../components/IdentityView';
+import styles from './Pages.css';
 
 export default function IdentityPage() {
-    return <Identities />;
+    return (
+        <div className={styles.splitPage}>
+            <IdentityList />
+            <IdentityView />
+        </div>
+    );
 }

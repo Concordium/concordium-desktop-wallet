@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
-import { RootState } from '../../store';
-import * as storage from '../utils/persistentStorage.ts';
+import { RootState } from '../store';
+import * as storage from '../utils/persistentStorage';
 
 const storageKey = 'addressbook';
 
@@ -27,6 +27,9 @@ const addressBookSlice = createSlice({
             state.addressBook.splice(index.payload, 1);
             storage.save(storageKey, state.addressBook);
         },
+        updateAddressBookEntry(state, data) {
+            state.addressBook[data.payload.index] = data.payload.entry;
+        },
         chooseIndex(state, index) {
             state.chosenIndex = index.payload;
         },
@@ -39,6 +42,7 @@ export const {
     addToAddressBook,
     removeFromAddressBook,
     chooseIndex,
+    updateAddressBookEntry,
 } = addressBookSlice.actions;
 
 export function loadAddressBook(dispatch) {

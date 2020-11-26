@@ -1,49 +1,59 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import {
-    addToAddressBook
-} from '../features/AddressBookSlice.ts';
+import React, { useState, useEffect } from 'react';
+import styles from './Styling.css';
 
-export default function AddAddress(close) {
-    const [name, setName] = useState("");
-    const [address, setAddress] = useState("");
-    const [note, setNote] = useState("");
-    const dispatch = useDispatch();
+export default function AddAddress(close, submit, initialValues?) {
+    const [name, setName] = useState('');
+    const [address, setAddress] = useState('');
+    const [note, setNote] = useState('');
 
-    function submit() {
-        const address = {
-            name: name,
-            address: address,
-            note: note
+    useEffect(() => {
+        if (initialValues) {
+            setName(initialValues.name);
+            setAddress(initialValues.address);
+            setNote(initialValues.note);
         }
-        dispatch(addToAddressBook(address));
-            close();
-    };
+    }, [initialValues, setName, setAddress, setNote]);
 
     return (
         <div>
-            <input
-        name="name"
-        placeholder="Enter Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-        data-tid="hashInput"
-        />
-        <input
-        name="address"
-        placeholder="Enter Address"
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
-        data-tid="hashInput"
-        />
-        <input
-        name="notes"
-        placeholder="Enter Notes"
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        data-tid="hashInput"
-        />
-        <button onClick={submit}>submit</button>
+            <span className={styles.modalElement}>
+                <input
+                    name="name"
+                    className={styles.input}
+                    placeholder="Enter Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    data-tid="hashInput"
+                />
+            </span>
+            <span className={styles.modalElement}>
+                <input
+                    name="address"
+                    className={styles.input}
+                    placeholder="Enter Address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    data-tid="hashInput"
+                />
+            </span>
+            <span className={styles.modalElement}>
+                <input
+                    name="notes"
+                    className={styles.input}
+                    placeholder="Enter Notes"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    data-tid="hashInput"
+                />
+            </span>
+            <button
+                onClick={() => {
+                    submit(name, address, note);
+                    close();
+                }}
+            >
+                submit
+            </button>
         </div>
     );
 }

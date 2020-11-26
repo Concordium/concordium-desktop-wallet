@@ -6,6 +6,8 @@ import { History } from 'history';
 import { Store } from '../store';
 import Routes from '../Routes';
 import SideBar from '../components/Sidebar';
+import Header from '../components/Header';
+import styles from '../Main.css';
 
 type Props = {
     store: Store;
@@ -15,8 +17,13 @@ type Props = {
 const Root = ({ store, history }: Props) => (
     <Provider store={store}>
         <ConnectedRouter history={history}>
-            <SideBar />
-            <Routes />
+            <div className={styles.globalDiv}>
+                <SideBar />
+                <div className={styles.rightSide}>
+                    <Header />
+                    <Routes />
+                </div>
+            </div>
         </ConnectedRouter>
     </Provider>
 );

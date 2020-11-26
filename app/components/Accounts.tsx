@@ -1,35 +1,16 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-    chooseAccount,
-    accounts,
-    chosenAccount,
-} from '../features/accounts/accountsSlice.ts';
+import { useSelector } from 'react-redux';
+import { accountsSelector } from '../features/accountsSlice';
 import styles from './Accounts.css';
+import accountListElement from './AccountListElement';
 
-export default function AccountsPage() {
-    const dispatch = useDispatch();
-    const accountList = useSelector(accounts);
-    const chosenIndex = useSelector(chosenAccount);
+export default function AccountList() {
+    const accounts = useSelector(accountsSelector);
 
     return (
-        <div>
+        <div className={styles.halfPage}>
             <div className={styles.accountList}>
-                {accountList.map((account, i) => (
-                    <div
-                        onClick={() => dispatch(chooseAccount(i))}
-                        key={i}
-                        className={
-                            i == chosenIndex ? styles.chosen : styles.nonChosen
-                        }
-                    >
-                        {account}
-                    </div>
-                ))}
-            </div>
-            <div className={styles.chosenAccount}>
-                {' '}
-                {accountList[chosenIndex]}{' '}
+                {accounts.map((account, i) => accountListElement(account, i))}
             </div>
         </div>
     );

@@ -3,7 +3,7 @@ import { connectRouter } from 'connected-react-router';
 import { History } from 'history';
 // eslint-disable-next-line import/no-cycle
 import testReducer from './features/test/testSlice';
-import accountReducer from './features/accounts/accountsSlice';
+import accountReducer from './features/accountsSlice';
 import addressBookReducer from './features/AddressBookSlice';
 
 export default function createRootReducer(history: History) {

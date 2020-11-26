@@ -9,23 +9,29 @@ import AccountsPage from './containers/AccountsPage';
 import TodoPage from './containers/TodoPage';
 import IdentityPage from './containers/IdentityPage';
 import AddressBookPage from './containers/AddressBookPage';
+import styles from './Main.css';
 
 export default function Routes() {
     return (
         <App>
-            <Switch>
-                <Route path={routes.TEST} component={TestPage} />
-                <Route path={routes.ACCOUNTS} component={AccountsPage} />
-                <Route path={routes.IDENTITIES} component={IdentityPage} />
-                <Route path={routes.ADDRESSBOOK} component={AddressBookPage} />
-                <Route path={routes.EXPORTIMPORT} component={TodoPage} />
-                <Route
-                    path={routes.MULTISIGTRANSACTIONS}
-                    component={TodoPage}
-                />
-                <Route path={routes.SETTINGS} component={TodoPage} />
-                <Route path={routes.HOME} component={HomePage} />
-            </Switch>
+            <div className={styles.mainWindow}>
+                <Switch>
+                    <Route path={routes.TEST} component={TestPage} />
+                    <Route path={routes.ACCOUNTS} component={AccountsPage} />
+                    <Route path={routes.IDENTITIES} component={IdentityPage} />
+                    <Route
+                        path={routes.ADDRESSBOOK}
+                        component={AddressBookPage}
+                    />
+                    <Route path={routes.EXPORTIMPORT} component={TodoPage} />
+                    <Route
+                        path={routes.MULTISIGTRANSACTIONS}
+                        component={TodoPage}
+                    />
+                    <Route path={routes.SETTINGS} component={TodoPage} />
+                    <Route path={routes.HOME} component={HomePage} />
+                </Switch>
+            </div>
         </App>
     );
 }
