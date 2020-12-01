@@ -1,5 +1,6 @@
 import fakeIRO from './identity-request-object.json';
 import exampleIRO from './valid_request.json';
+import * as rust from'../..pkg';
 
 const rustPkg = '';
 
@@ -19,7 +20,6 @@ export async function createIdentityRequestObject(ipInfo, arsInfos, global) {
         arsInfos,
         global: global.value,
     };
-    const rust = await import('/home/hjort/Projects/crypto/desktop-wallet/pkg');
     const input_str = JSON.stringify(input);
     console.log(input);
     const output_str = await rust.create_id_request_and_private_data_js(

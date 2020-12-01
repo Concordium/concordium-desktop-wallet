@@ -1,0 +1,20 @@
+[package]
+name = "desktop_wallet"
+version = "0.1.0"
+authors = ["Concordium AG <contact@concordium.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libc = "0.2"
+wasm-bindgen = "0.2.68"
+
+[dependencies.wallet]
+path = "deps/crypto/rust-src/wallet"
+version = "0"
+
+[lib]
+name = "desktop_wallet"
+crate-type = ["cdylib"]
+path = "rust-src/lib.rs"
