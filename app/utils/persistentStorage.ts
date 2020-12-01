@@ -2,7 +2,12 @@ import storage from 'electron-json-storage';
 
 function decodeData(data) {
     // TODO decrypt data
-    return JSON.parse(data);
+    try {
+        return JSON.parse(data);
+    } catch (e) {
+        console.warn(e);
+        return null;
+    }
 }
 
 function encodeData(data) {

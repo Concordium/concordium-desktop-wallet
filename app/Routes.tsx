@@ -9,6 +9,7 @@ import AccountsPage from './containers/AccountsPage';
 import TodoPage from './containers/TodoPage';
 import IdentityPage from './containers/IdentityPage';
 import AddressBookPage from './containers/AddressBookPage';
+import IssuancePage from './containers/IssuancePage';
 import styles from './Main.css';
 
 export default function Routes() {
@@ -18,6 +19,10 @@ export default function Routes() {
                 <Switch>
                     <Route path={routes.TEST} component={TestPage} />
                     <Route path={routes.ACCOUNTS} component={AccountsPage} />
+                    <Route
+                        path={routes.IDENTITYISSUANCE}
+                        component={IssuancePage}
+                    />
                     <Route path={routes.IDENTITIES} component={IdentityPage} />
                     <Route
                         path={routes.ADDRESSBOOK}

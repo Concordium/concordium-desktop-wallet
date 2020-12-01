@@ -2,9 +2,13 @@
     "HOME": "/",
     "TEST": "/test",
     "ACCOUNTS": "/accounts",
-    "IDENTITIES": "/identities",
+    "IDENTITIES": "/identity/listview",
     "ADDRESSBOOK": "/addressbook",
     "EXPORTIMPORT": "/export_import",
     "MULTISIGTRANSACTIONS": "/MultiSignatureTransaction",
-    "SETTINGS": "/settings"
+    "SETTINGS": "/settings",
+    "IDENTITYISSUANCE": "/identity/issuance",
+    "IDENTITYISSUANCE_PICKPROVIDER": "/identity/issuance/pick-provider",
+    "IDENTITYISSUANCE_PICKNAMES": "/identity/issuance/pick-names",
+    "IDENTITYISSUANCE_EXTERNAL": "/identity/issuance/external"
 }

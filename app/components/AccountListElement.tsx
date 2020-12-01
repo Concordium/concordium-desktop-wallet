@@ -18,7 +18,7 @@ export default function AccountListElement(account, index) {
                 index === chosenIndex ? styles.chosenAccountListElement : null
             }`}
         >
-            {account}
+            {account.name}
         </div>
     );
 }

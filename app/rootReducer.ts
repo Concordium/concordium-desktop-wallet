@@ -5,6 +5,7 @@ import { History } from 'history';
 import testReducer from './features/test/testSlice';
 import accountReducer from './features/accountsSlice';
 import addressBookReducer from './features/AddressBookSlice';
+import identityIssuanceReducer from './features/identityIssuanceSlice';
 
 export default function createRootReducer(history: History) {
     return combineReducers({
@@ -12,5 +13,6 @@ export default function createRootReducer(history: History) {
         test: testReducer,
         accounts: accountReducer,
         addressBook: addressBookReducer,
+        identityIssuance: identityIssuanceReducer,
     });
 }

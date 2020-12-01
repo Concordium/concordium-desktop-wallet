@@ -15,13 +15,14 @@ export default function IdentityView() {
     }
 
     const identity = identities[chosenIndex];
+    const chosenAttributes = identity.attributeList.chosenAttributes;
 
     return (
         <div className={styles.halfPage}>
             <div className={styles.chosenAccount}>
                 {' '}
-                {identity.name} {identity.issuer} {identity.expiresAt}{' '}
-                {identity.residenceCountry}{' '}
+                {chosenAttributes.firstName + ' ' + chosenAttributes.lastName} {chosenAttributes.idDocIssuer} {identity.attributeList.validTo}{' '}
+                {chosenAttributes.countryOfResidence}{' '}
             </div>
         </div>
     );
