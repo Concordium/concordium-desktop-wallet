@@ -9,6 +9,7 @@ import {
     sendTransfer,
     printCredentialDeployment,
     handleFieldChange,
+    ledgerTest,
 } from './testSlice';
 
 type ChangeHandler = (e: InputEvent) => void;
@@ -62,6 +63,15 @@ export default function Test() {
                     type="button"
                 >
                     printCredentialDeployment
+                </button>
+                <button
+                    onClick={() => {
+                        ledgerTest();
+                    }}
+                    data-tclass="btn"
+                    type="button"
+                >
+                    LedgerTest
                 </button>
             </div>
             <textarea value={summary} readOnly />

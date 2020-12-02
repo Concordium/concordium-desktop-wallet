@@ -71,7 +71,7 @@ function serializeSignature(sigs: Uint8Array[]) {
     return serialized;
 }
 
-function serializeTransactionHeader(
+export function serializeTransactionHeader(
     sender,
     nonce,
     energyAmount,
@@ -90,7 +90,7 @@ function serializeTransactionHeader(
     return serialized;
 }
 
-function serializeTransferPayload(kind: TransactionKind, payload) {
+export function serializeTransferPayload(kind: TransactionKind, payload) {
     switch (kind) {
         case TransactionKind.Simple_transfer:
             return serializeSimpleTransfer(payload);

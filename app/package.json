@@ -9,6 +9,8 @@
         "postinstall": "yarn electron-rebuild"
     },
     "dependencies": {
+        "@ledgerhq/hw-transport-node-hid": "^5.30.0",
+        "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "bs58check": "^2.1.2",
         "electron-json-storage": "^4.3.0",
         "grpc": "^1.24.4",

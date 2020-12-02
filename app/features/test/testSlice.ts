@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import * as crypto from 'crypto';
+import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 import { RootState } from '../../store';
 import { getBlockSummary, sendTransaction } from '../../utils/client';
 import {
@@ -11,7 +12,11 @@ import {
     buildCredDep,
     makeTestTransferWithScheduleTransaction,
     binaryVersionAsHex,
+    makeTestSimpleTransferTransaction,
 } from '../../utils/test';
+
+import ConcordiumLedgerClient from '../ledger/ConcordiumLedgerClient';
+import { AccountTransaction } from '../../utils/types';
 
 const testSlice = createSlice({
     name: 'test',
@@ -58,6 +63,23 @@ function makeSignatures(transaction, hash): Buffer {
 
 function printAsHex(array) {
     console.log(Buffer.from(array).toString('hex'));
+}
+
+export async function ledgerTest() {
+    const transport = await TransportNodeHid.open('');
+    const ledgerClient = new ConcordiumLedgerClient(transport);
+    
+    const idCredSec = await ledgerClient.getIdCredSec(0);
+    console.log(`idCredSec: ${idCredSec.toString('hex')}`);
+
+    const prfKey = await ledgerClient.getPrfKey(0);
+    console.log(`prfKey: ${prfKey.toString('hex')}`);
+
+    const publicKey = await ledgerClient.getPublicKey([0, 0, 0, 0, 0, 0]);
+    console.log(`Public-key: ${publicKey.toString('hex')}`);
+
+    const signature = await ledgerClient.signTransfer(makeTestSimpleTransferTransaction(), [0, 0, 0, 0, 0, 0]);
+    console.log(`Signature: ${signature.toString('hex')}`);
 }
 
 export async function printCredentialDeployment() {
