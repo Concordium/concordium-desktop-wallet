@@ -11,7 +11,11 @@ export default function AccountView() {
     const chosenIndex = useSelector(chosenAccountSelector);
     const account = accountList[chosenIndex];
 
-    if (account ==undefined || chosenIndex === undefined || chosenIndex >= accountList.length) {
+    if (
+        account === undefined ||
+        chosenIndex === undefined ||
+        chosenIndex >= accountList.length
+    ) {
         return <div />;
     }
 
@@ -19,9 +23,7 @@ export default function AccountView() {
         <div className={styles.halfPage}>
             <div className={styles.chosenAccount}>
                 {' '}
-                {account.name}{' '}
-                {' '}
-                {account.address}{' '}
+                {account.name} {account.address}{' '}
             </div>
         </div>
     );

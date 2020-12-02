@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {  useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { push } from 'connected-react-router';
 import {
     loadProviders,
     providersSelector,
     accountNameSelector,
-    identityNameSelector
+    identityNameSelector,
 } from '../features/identityIssuanceSlice';
-import { addIdentity } from '../features/accountsSlice.ts';
+import { addIdentity } from '../features/accountsSlice';
 import routes from '../constants/routes.json';
 import styles from './IdentyIssuance.css';
 import {
@@ -39,7 +40,7 @@ async function getIdentityReal(provider, global) {
     return idObject;
 }
 
-export default function external() {
+export default function IdentityIssuanceExternal(): JSX.Element {
     const { index } = useParams();
     const dispatch = useDispatch();
     const providers = useSelector(providersSelector);
@@ -51,19 +52,17 @@ export default function external() {
     useEffect(() => {
         if (provider) {
             getGlobal().then((global) =>
-                getIdentity(provider, global).then((id) =>
-                    {
-                        console.log(accountName);
-                        const input = {
-                            identityName: identityName,
-                            identityObject: id.identityObject,
-                            accountName: accountName,
-                            accountAddress: id.accountAddress
-                        }
-                        dispatch(addIdentity(input));
-
-                    }
-                )
+                getIdentity(provider, global).then((id) => {
+                    console.log(accountName);
+                    const input = {
+                        identityName,
+                        identityObject: id.identityObject,
+                        accountName,
+                        accountAddress: id.accountAddress,
+                    };
+                    dispatch(addIdentity(input));
+                    dispatch(push(routes.IDENTITYISSUANCE_FINAL));
+                })
             );
         }
     }, [provider, dispatch, accountName, identityName]);
@@ -72,12 +71,5 @@ export default function external() {
         return <div />;
     }
 
-    return (
-        <webview
-            id="foo"
-            src="https://www.google.com"
-            autosize="on"
-            className={styles.webview}
-        />
-    );
+    return <div>Creating Identity</div>;
 }

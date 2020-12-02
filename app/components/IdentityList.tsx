@@ -1,16 +1,16 @@
-import React, { useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
     chooseIdentity,
     identitiesSelector,
     chosenIdentitySelector,
-    loadIdentities
+    loadIdentities,
 } from '../features/accountsSlice';
 import routes from '../constants/routes.json';
+import identityListElement from './IdentityListElement';
 
 import styles from './Accounts.css';
-import Modal from './Modal';
 
 export default function IdentityList() {
     const dispatch = useDispatch();
@@ -27,19 +27,13 @@ export default function IdentityList() {
                 <button>x</button>
             </Link>
 
-            {identities.map((identity, i) => (
-                <div
-                    onClick={() => dispatch(chooseIdentity(i))}
-                    key={identity.signature}
-                    className={`${styles.accountListElement} ${
-                        i === chosenIndex
-                            ? styles.chosenAccountListElement
-                            : null
-                    }`}
-                >
-                    {identity.attributeList.chosenAttributes.firstName}
-                </div>
-            ))}
+            {identities.map((identity, i) =>
+                identityListElement(
+                    identity,
+                    () => dispatch(chooseIdentity(i)),
+                    i === chosenIndex
+                )
+            )}
         </div>
     );
 }

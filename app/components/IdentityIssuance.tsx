@@ -1,22 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import {
-    loadProviders,
-    providersSelector,
-} from '../features/identityIssuanceSlice';
 import routes from '../constants/routes.json';
-import chooseProvider from './IdentityIssuanceChooseProvider.tsx';
-import pickName from './IdentityIssuancePickName.tsx';
-import external from './IdentityProviderExternal.tsx';
+import chooseProvider from './IdentityIssuanceChooseProvider';
+import pickName from './IdentityIssuancePickName';
+import external from './IdentityProviderExternal';
+import finalPage from './IdentityIssuanceFinal';
 
-
-export default function f() {
+export default function IdentityIssuance(): JSX.Element {
     return (
         <Switch>
-            <Route path={routes.IDENTITYISSUANCE_PICKPROVIDER}  component={chooseProvider} />
-            <Route path={routes.IDENTITYISSUANCE_EXTERNAL + '/:index'}  component={external} />
-            <Route path={routes.IDENTITYISSUANCE}  component={pickName} />
+            <Route
+                path={routes.IDENTITYISSUANCE_PICKPROVIDER}
+                component={chooseProvider}
+            />
+            <Route
+                path={`${routes.IDENTITYISSUANCE_EXTERNAL}/:index`}
+                component={external}
+            />
+            <Route path={routes.IDENTITYISSUANCE_FINAL} component={finalPage} />
+            <Route path={routes.IDENTITYISSUANCE} component={pickName} />
         </Switch>
     );
 }

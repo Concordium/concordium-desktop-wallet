@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import styles from './Styling.css';
-import { push } from 'connected-react-router'
-import { setNames } from '../features/identityIssuanceSlice';
+import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
+import styles from './Styling.css';
+import { setNames } from '../features/identityIssuanceSlice';
 import routes from '../constants/routes.json';
 
-export default function f(submit): JSX.Element {
+export default function IdentityIssuancePickName(submit): JSX.Element {
     const [identity, setIdentity] = useState('');
     const [account, setAccount] = useState('');
     const dispatch = useDispatch();
@@ -13,7 +13,7 @@ export default function f(submit): JSX.Element {
     function submit() {
         const names = {
             accountName: account,
-            identityName: identity
+            identityName: identity,
         };
         dispatch(setNames(names));
         dispatch(push(routes.IDENTITYISSUANCE_PICKPROVIDER));

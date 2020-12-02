@@ -7,7 +7,7 @@ const identityIssuanceSlice = createSlice({
     initialState: {
         providers: [],
         identityName: '',
-        initialAccountName: ''
+        initialAccountName: '',
     },
     reducers: {
         setProviders: (state, providers) => {
@@ -17,7 +17,7 @@ const identityIssuanceSlice = createSlice({
             const { accountName, identityName } = names.payload;
             state.identityName = identityName;
             state.initialAccountName = accountName;
-        }
+        },
     },
 });
 
