@@ -49,7 +49,7 @@ export default {
             NODE_ENV: 'production',
         }),
         new WasmPackPlugin({
-            crateDirectory: '/home/hjort/Projects/crypto/desktop-wallet',
+            crateDirectory: path.resolve(__dirname, '.'),
         }),
     ],
 };

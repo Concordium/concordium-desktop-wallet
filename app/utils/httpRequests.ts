@@ -51,7 +51,7 @@ export async function performIdObjectRequest(
         response_type: 'code',
         redirect_uri: redirectUri,
         state: JSON.stringify({
-            idObjectRequest: idObjectRequest.idObjectRequest,
+            idObjectRequest: idObjectRequest,
         }),
     };
     const response = await getPromise(url, parameters);
@@ -77,6 +77,7 @@ async function sleep(time) {
 
 export async function getIdObject(location) {
     while (true) {
+        console.log("--");
         const data = await pollIdObject(location);
         switch (data.status) {
             case 'done':

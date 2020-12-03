@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './Accounts.css';
 
-export default function AccountListElement(identity, onClick, highlighted) {
+export default function IdentityListElement(identity, onClick, highlighted): JSX.Element {
     return (
         <div
             onClick={onClick}
@@ -10,7 +10,11 @@ export default function AccountListElement(identity, onClick, highlighted) {
                 highlighted ? styles.chosenAccountListElement : null
             }`}
         >
-            {identity.attributeList.chosenAttributes.firstName}
+            {identity.provider}
+            {' '}
+            {identity.status}
+            {' '}
+            {identity.name}
         </div>
     );
 }

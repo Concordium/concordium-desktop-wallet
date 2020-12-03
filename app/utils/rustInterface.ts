@@ -1,6 +1,5 @@
-import * as rust from '../../pkg';
-
 export async function createIdentityRequestObject(ipInfo, arsInfos, global) {
+    const rust = await import('../../pkg');
     const input = {
         ipInfo,
         arsInfos,

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import {
     chooseIdentity,
     identitiesSelector,
-    chosenIdentitySelector,
+    chosenIdentityIndexSelector,
     loadIdentities,
 } from '../features/accountsSlice';
 import routes from '../constants/routes.json';
@@ -15,11 +15,17 @@ import styles from './Accounts.css';
 export default function IdentityList() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
-    const chosenIndex = useSelector(chosenIdentitySelector);
+    const chosenIndex = useSelector(chosenIdentityIndexSelector);
 
     useEffect(() => {
-        loadIdentities(dispatch);
-    }, [dispatch]);
+        if (!identities) {
+            loadIdentities(dispatch);
+        }
+    }, [dispatch, identities]);
+
+    if (!identities) {
+        return <div/>;
+    }
 
     return (
         <div className={styles.halfPage}>

@@ -8,22 +8,17 @@ import {
     accountNameSelector,
     identityNameSelector,
 } from '../features/identityIssuanceSlice';
-import { addIdentity } from '../features/accountsSlice';
+import { addIdentity, confirmIdentity } from '../features/accountsSlice';
 import routes from '../constants/routes.json';
 import styles from './IdentyIssuance.css';
 import {
     getGlobal,
     performIdObjectRequest,
-    getIdObject,
 } from '../utils/httpRequests';
 import { createIdentityRequestObject } from '../utils/rustInterface';
 import identityjson from '../utils/IdentityObject.json';
 
-async function getIdentity() {
-    return identityjson.token;
-}
-
-async function getIdentityReal(provider, global) {
+async function getIdentityLocation(provider, global) {
     const data = await createIdentityRequestObject(
         provider.ipInfo,
         provider.arsInfos,
@@ -34,10 +29,7 @@ async function getIdentityReal(provider, global) {
         'example.com',
         data
     );
-    console.log(idObjectLocation);
-    const idObject = await getIdObject(idObjectLocation).catch(console.warn);
-    console.log(idObject);
-    return idObject;
+    return idObjectLocation;
 }
 
 export default function IdentityIssuanceExternal(): JSX.Element {
@@ -52,15 +44,13 @@ export default function IdentityIssuanceExternal(): JSX.Element {
     useEffect(() => {
         if (provider) {
             getGlobal().then((global) =>
-                getIdentity(provider, global).then((id) => {
-                    console.log(accountName);
+                getIdentityLocation(provider, global).then((location) => {
                     const input = {
                         identityName,
-                        identityObject: id.identityObject,
                         accountName,
-                        accountAddress: id.accountAddress,
                     };
                     dispatch(addIdentity(input));
+                    confirmIdentity(dispatch, identityName, location);
                     dispatch(push(routes.IDENTITYISSUANCE_FINAL));
                 })
             );

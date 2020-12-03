@@ -1,29 +1,44 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import {
-    identitiesSelector,
     chosenIdentitySelector,
 } from '../features/accountsSlice';
 import styles from './Accounts.css';
 
 export default function IdentityView() {
-    const identities = useSelector(identitiesSelector);
-    const chosenIndex = useSelector(chosenIdentitySelector);
+    const identity = useSelector(chosenIdentitySelector);
+    console.log(identity);
 
-    if (chosenIndex === undefined || chosenIndex >= identities.length) {
+    if (identity === undefined) {
         return <div />;
     }
 
-    const identity = identities[chosenIndex];
-    const { chosenAttributes } = identity.attributeList;
+    let attributeDom;
+    if (identity.status === "confirmed" && identity.attributes) {
+        const { chosenAttributes, validTo } = identity.attributes;
+        attributeDom = (
+            <>
+                {`${chosenAttributes.firstName} ${chosenAttributes.lastName}`}{' '}
+                {chosenAttributes.idDocIssuer} {validTo}{' '}
+                {chosenAttributes.countryOfResidence}{' '}
+            </>
+        );
+    } else {
+        attributeDom = (
+            <div />
+        );
+    }
 
     return (
         <div className={styles.halfPage}>
             <div className={styles.chosenAccount}>
-                {' '}
-                {`${chosenAttributes.firstName} ${chosenAttributes.lastName}`}{' '}
-                {chosenAttributes.idDocIssuer} {identity.attributeList.validTo}{' '}
-                {chosenAttributes.countryOfResidence}{' '}
+        {' '}
+        {identity.status}
+        {identity.name}
+        {' '}
+        {
+            attributeDom
+        }
             </div>
         </div>
     );

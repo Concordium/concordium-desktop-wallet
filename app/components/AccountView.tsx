@@ -7,15 +7,9 @@ import {
 import styles from './Accounts.css';
 
 export default function AccountView() {
-    const accountList = useSelector(accountsSelector);
-    const chosenIndex = useSelector(chosenAccountSelector);
-    const account = accountList[chosenIndex];
+    const account = useSelector(chosenAccountSelector);
 
-    if (
-        account === undefined ||
-        chosenIndex === undefined ||
-        chosenIndex >= accountList.length
-    ) {
+    if (account === undefined) {
         return <div />;
     }
 

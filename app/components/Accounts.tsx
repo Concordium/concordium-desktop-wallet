@@ -1,16 +1,17 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     accountsSelector,
     chooseAccount,
-    chosenAccountSelector,
+    chosenAccountIndexSelector,
 } from '../features/accountsSlice';
 import styles from './Accounts.css';
 import accountListElement from './AccountListElement';
 
 export default function AccountList() {
+    const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);
-    const chosenIndex = useSelector(chosenAccountSelector);
+    const chosenIndex = useSelector(chosenAccountIndexSelector);
 
     return (
         <div className={styles.halfPage}>

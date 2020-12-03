@@ -4,9 +4,7 @@ import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
 
 import {
-    accountsSelector,
     chosenAccountSelector,
-    identitiesSelector,
     chosenIdentitySelector,
 } from '../features/accountsSlice';
 
@@ -15,13 +13,8 @@ import identityListElement from './IdentityListElement';
 import styles from './IdentyIssuance.css';
 
 export default function IdentityIssuanceFinal(): JSX.Element {
-    const accounts = useSelector(accountsSelector);
-    const accountIndex = useSelector(chosenAccountSelector);
-    const account = accounts[accountIndex];
-
-    const identities = useSelector(identitiesSelector);
-    const chosenIndex = useSelector(chosenIdentitySelector);
-    const identity = identities[chosenIndex];
+    const account =  useSelector(chosenAccountSelector);
+    const identity = useSelector(chosenIdentitySelector);
 
     if (account === undefined || identity === undefined) {
         return <div />;
