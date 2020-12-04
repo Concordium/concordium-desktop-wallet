@@ -1,0 +1,42 @@
+.accountList {
+    display: inline-block;
+    height: 100%;
+    width: 100%;
+}
+
+.chosenAccount {
+    align-content: right;
+    display: inline-block;
+    height: 100 %;
+    width: 40 %;
+}
+
+.blob {
+    display: block;
+    width: 100px;
+    height: 100px;
+    padding: 5px;
+    border: 1px solid blue;
+    background-color: blue;
+}
+
+.halfPage {
+    width: 50%;
+}
+
+.accountListElement {
+    border: 10 px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 80%;
+    text-align: center;
+    background-color: white;
+    border-style: solid;
+    border-color: black;
+    color: black;
+}
+
+.chosenAccountListElement {
+    font-weight: bold;
+    border-color: blue;
+}

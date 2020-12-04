@@ -1,0 +1,17 @@
+{
+    "name": "concordium-desktop-wallet",
+    "productName": "concordium-desktop-wallet",
+    "version": "0.1.0",
+    "description": "concordium-desktop-wallet",
+    "main": "./out/main.prod.js",
+    "scripts": {
+        "electron-rebuild": "node -r ../internals/scripts/BabelRegister.js ../internals/scripts/ElectronRebuild.js",
+        "postinstall": "yarn electron-rebuild"
+    },
+    "dependencies": {
+        "bs58check": "^2.1.2",
+        "grpc": "^1.24.4",
+        "electron-json-storage": "^4.3.0",
+        "react-modal": "^3.12.1"
+    }
+}
