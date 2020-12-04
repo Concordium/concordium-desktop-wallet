@@ -1,8 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import routes from '../constants/routes.json';
+import styles from '../Main.css';
 
 export default function Routes() {
+    const location = useLocation();
     const sideBarElements = [];
     sideBarElements.push({ route: routes.TEST, title: 'Home' });
     sideBarElements.push({ route: routes.ACCOUNTS, title: 'Accounts' });
@@ -12,16 +14,24 @@ export default function Routes() {
         route: routes.EXPORTIMPORT,
         title: 'Export/Import',
     });
-    sideBarElements.push({ route: routes.ADRESSBOOK, title: 'Address Book' });
     sideBarElements.push({
         route: routes.MULTISIGTRANSACTIONS,
         title: 'Multi Signature Transactions',
     });
     sideBarElements.push({ route: routes.SETTINGS, title: 'Settings' });
+
     return (
-        <div>
-            {sideBarElements.map((member, i) => (
-                <Link to={member.route} key={i}>
+        <div className={styles.sidebar}>
+            {sideBarElements.map(member => (
+                <Link
+                    to={member.route}
+                    key={member.route}
+                    className={`${styles.sidebarListElement} ${
+                        member.route === location.pathname
+                            ? styles.sidebarSelectedListElement
+                            : null
+                    }`}
+                >
                     {member.title}{' '}
                 </Link>
             ))}

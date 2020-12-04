@@ -1,17 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
-import * as crypto from 'crypto';
-import { RootState } from '../../store';
-import { getBlockSummary, sendTransaction } from '../../utils/client';
-import {
-    serializeTransaction,
-    serializeCredentialDeployment,
-} from '../../utils/transactionSerialization';
-import {
-    buildCredDep,
-    makeTestTransferWithScheduleTransaction,
-    binaryVersionAsHex,
-} from '../../utils/test';
+import { RootState } from '../store';
+
+interface Identity {
+    name: string;
+    issuer: string;
+    expiresAt: number;
+    residenceCountry: string;
+} // TODO: Make proper with all details
 
 const accountMasterList = {
     Bob: ['bob1', 'bob2'],
@@ -25,7 +21,20 @@ function getAccounts(identity) {
 const accountsSlice = createSlice({
     name: 'accounts',
     initialState: {
-        identities: [{ name: 'Bob' }, { name: 'Alice' }],
+        identities: [
+            {
+                name: 'Bob',
+                issuer: 'ID',
+                expiresAt: 2021,
+                residenceCountry: 'Denmark',
+            },
+            {
+                name: 'Alice',
+                issuer: 'ID',
+                expiresAt: 2021,
+                residenceCountry: 'Denmark',
+            },
+        ],
         chosenIdentity: undefined,
         accounts: [],
         chosenAccount: undefined,
@@ -41,14 +50,16 @@ const accountsSlice = createSlice({
     },
 });
 
-export const identities = (state: RootState) => state.accounts.identities;
+export const identitiesSelector = (state: RootState) =>
+    state.accounts.identities;
 
-export const accounts = (state: RootState) => state.accounts.accounts;
+export const accountsSelector = (state: RootState) => state.accounts.accounts;
 
-export const chosenIdentity = (state: RootState) =>
+export const chosenIdentitySelector = (state: RootState) =>
     state.accounts.chosenIdentity;
 
-export const chosenAccount = (state: RootState) => state.accounts.chosenAccount;
+export const chosenAccountSelector = (state: RootState) =>
+    state.accounts.chosenAccount;
 
 export const { chooseIdentity, chooseAccount } = accountsSlice.actions;
 

@@ -9,12 +9,12 @@ const store = configuredStore();
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
 document.addEventListener('DOMContentLoaded', () => {
-  // eslint-disable-next-line global-require
-  const Root = require('./containers/Root').default;
-  render(
-    <AppContainer>
-      <Root store={store} history={history} />
-    </AppContainer>,
-    document.getElementById('root')
-  );
+    // eslint-disable-next-line global-require
+    const Root = require('./containers/Root').default;
+    render(
+        <AppContainer>
+            <Root store={store} history={history} />
+        </AppContainer>,
+        document.getElementById('root')
+    );
 });
