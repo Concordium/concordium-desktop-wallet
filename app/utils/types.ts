@@ -1,5 +1,12 @@
 import { AccountAddress } from '../proto/api_pb';
 
+export interface PublicInformationForIp {
+    idCredPub: string;
+    regId: string;
+    verificationKeys: string[];
+    threshold: number;
+}
+
 export interface AccountTransaction {
     sender: AccountAddress;
     nonce: number;

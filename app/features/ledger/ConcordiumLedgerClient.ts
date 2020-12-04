@@ -1,8 +1,9 @@
 import type Transport from '@ledgerhq/hw-transport';
 import getPublicKey from './GetPublicKey';
 import signTransfer from './Transfer';
+import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
-import { AccountTransaction } from '../../utils/types';
+import { AccountTransaction, PublicInformationForIp } from '../../utils/types';
 
 /**
  * Concordium Ledger API.
@@ -41,5 +42,16 @@ export default class ConcordiumLedgerClient {
         path: number[]
     ): Promise<Buffer> {
         return signTransfer(this.transport, path, transaction);
+    }
+
+    signPublicInformationForIp(
+        publicInfoForIp: PublicInformationForIp,
+        path: number[]
+    ): Promise<Buffer> {
+        return signPublicInformationForIp(
+            this.transport,
+            path,
+            publicInfoForIp
+        );
     }
 }
