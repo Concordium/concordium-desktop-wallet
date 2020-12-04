@@ -1,8 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {
-    chosenIdentitySelector,
-} from '../features/accountsSlice';
+import { chosenIdentitySelector } from '../features/accountsSlice';
 import styles from './Accounts.css';
 
 export default function IdentityView() {
@@ -14,7 +12,7 @@ export default function IdentityView() {
     }
 
     let attributeDom;
-    if (identity.status === "confirmed" && identity.attributes) {
+    if (identity.status === 'confirmed' && identity.attributes) {
         const { chosenAttributes, validTo } = identity.attributes;
         attributeDom = (
             <>
@@ -24,21 +22,15 @@ export default function IdentityView() {
             </>
         );
     } else {
-        attributeDom = (
-            <div />
-        );
+        attributeDom = <div />;
     }
 
     return (
         <div className={styles.halfPage}>
             <div className={styles.chosenAccount}>
-        {' '}
-        {identity.status}
-        {identity.name}
-        {' '}
-        {
-            attributeDom
-        }
+                {' '}
+                {identity.status}
+                {identity.name} {attributeDom}
             </div>
         </div>
     );

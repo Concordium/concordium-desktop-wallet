@@ -440,9 +440,7 @@ interface IP2PService_IGetTransactionStatusInBlock
     requestStream: false;
     responseStream: false;
     requestSerialize: grpc.serialize<api_pb.GetTransactionStatusInBlockRequest>;
-    requestDeserialize: grpc.deserialize<
-        api_pb.GetTransactionStatusInBlockRequest
-    >;
+    requestDeserialize: grpc.deserialize<api_pb.GetTransactionStatusInBlockRequest>;
     responseSerialize: grpc.serialize<api_pb.JsonResponse>;
     responseDeserialize: grpc.deserialize<api_pb.JsonResponse>;
 }

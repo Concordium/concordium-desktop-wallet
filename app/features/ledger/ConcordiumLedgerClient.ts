@@ -36,7 +36,10 @@ export default class ConcordiumLedgerClient {
         return getPrfKey(this.transport, identity);
     }
 
-    signTransfer(transaction: AccountTransaction, path: number[]): Promise<Buffer> {
+    signTransfer(
+        transaction: AccountTransaction,
+        path: number[]
+    ): Promise<Buffer> {
         return signTransfer(this.transport, path, transaction);
     }
 }

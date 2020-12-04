@@ -13,7 +13,7 @@ import identityListElement from './IdentityListElement';
 import styles from './IdentyIssuance.css';
 
 export default function IdentityIssuanceFinal(): JSX.Element {
-    const account =  useSelector(chosenAccountSelector);
+    const account = useSelector(chosenAccountSelector);
     const identity = useSelector(chosenIdentitySelector);
 
     if (account === undefined || identity === undefined) {

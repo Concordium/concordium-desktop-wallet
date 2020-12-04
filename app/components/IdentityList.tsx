@@ -24,7 +24,7 @@ export default function IdentityList() {
     }, [dispatch, identities]);
 
     if (!identities) {
-        return <div/>;
+        return <div />;
     }
 
     return (

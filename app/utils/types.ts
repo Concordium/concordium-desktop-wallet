@@ -1,12 +1,12 @@
 import { AccountAddress } from '../proto/api_pb';
 
 export interface AccountTransaction {
-  sender: AccountAddress;
-  nonce: number;
-  energyAmount: number;
-  expiry: number;
-  transactionKind: TransactionKind;
-  payload;
+    sender: AccountAddress;
+    nonce: number;
+    energyAmount: number;
+    expiry: number;
+    transactionKind: TransactionKind;
+    payload;
 }
 
 export enum TransactionKind {
@@ -103,3 +103,10 @@ export enum AttributeTag {
 
 type IpCdiSignature = Uint8Array;
 type Proofs = Uint8Array;
+
+interface PublicInformationForIP {
+    credPub: string;
+    regId: string;
+    publicKeys: string[];
+    threshold: number;
+}

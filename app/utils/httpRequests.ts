@@ -42,6 +42,14 @@ export async function getGlobal() {
     return response.data;
 }
 
+export async function getHTMLform(location) {
+    const response = await getPromise(location);
+    console.log(response);
+    const data = await getResponseBody(response);
+    console.log(data);
+    return data;
+}
+
 export async function performIdObjectRequest(
     url,
     redirectUri,
@@ -51,12 +59,13 @@ export async function performIdObjectRequest(
         response_type: 'code',
         redirect_uri: redirectUri,
         state: JSON.stringify({
-            idObjectRequest: idObjectRequest,
+            idObjectRequest,
         }),
     };
     const response = await getPromise(url, parameters);
     if (response.statusCode === 302) {
         const loc = response.headers.location;
+        console.log(loc);
         return loc.substring(loc.indexOf('=') + 1);
     }
     const message = await getResponseBody(response);
@@ -77,7 +86,7 @@ async function sleep(time) {
 
 export async function getIdObject(location) {
     while (true) {
-        console.log("--");
+        console.log('--');
         const data = await pollIdObject(location);
         switch (data.status) {
             case 'done':
@@ -87,7 +96,7 @@ export async function getIdObject(location) {
             case 'pending':
                 break;
             default:
-                throw new Error('unexpected status: ' + data.status);
+                throw new Error(`unexpected status: ${data.status}`);
         }
         await sleep(10000);
     }

@@ -3,7 +3,6 @@ extern crate failure;
 #[macro_use]
 extern crate serde_json;
 
-use ledger::{ApduCommand, LedgerApp, Error};
 use wasm_bindgen::prelude::*;
 use curve_arithmetic::{Curve};
 use dodis_yampolskiy_prf::secret as prf;
@@ -15,7 +14,6 @@ use std::{
     collections::BTreeMap,
 };
 use serde_json::{from_str, from_value, Value};
-use ed25519_dalek as ed25519;
 use crypto_common::{*};
 use pairing::bls12_381::{Bls12, G1};
 type ExampleCurve = G1;
@@ -57,6 +55,12 @@ pub fn create_id_request_and_private_data_js(input: &str) -> String {
     }
 }
 
+#[wasm_bindgen]
+pub fn call_js(print_function: js_sys::Function) {
+    print_function.call1(&JsValue::null(), &JsValue::from_str("Hello World"));
+}
+
+
 /// Try to extract a field with a given name from the JSON value.
 fn try_get<A: serde::de::DeserializeOwned>(v: &Value, fname: &str) -> Fallible<A> {
     match v.get(fname) {
@@ -66,14 +70,14 @@ fn try_get<A: serde::de::DeserializeOwned>(v: &Value, fname: &str) -> Fallible<A
 }
 
 #[wasm_bindgen]
-pub fn create_id_request_ext(input: &str ) -> String {
-    match create_id_request(input) {
+pub fn create_id_request_ext(input: &str, sign_function: js_sys::Function) -> String {
+    match create_id_request(input, sign_function) {
         Ok(s) => s,
         Err(e) => format!("unable to create request due to: {}", e,)
     }
 }
 
-pub fn create_id_request(input: &str ) -> Fallible<String> {
+pub fn create_id_request(input: &str, sign_function: js_sys::Function) -> Fallible<String> {
     let v: Value = from_str(input)?;
 
     let ip_info: IpInfo<Bls12> = try_get(&v, "ipInfo")?;
@@ -87,7 +91,7 @@ pub fn create_id_request(input: &str ) -> Fallible<String> {
         Threshold(max((l - 1).try_into().unwrap_or(255), 1))
     };
 
-    let prf_key: prf::SecretKey<ExampleCurve> = try_get(&v, "prf_key")?;
+    let prf_key: prf::SecretKey<ExampleCurve> = try_get(&v, "prfKey")?;
     let chi = CredentialHolderInfo::<ExampleCurve> {
         id_cred: try_get(&v, "idCredSec")?,
     };
@@ -101,8 +105,8 @@ pub fn create_id_request(input: &str ) -> Fallible<String> {
     let context = IPContext::new(&ip_info, &ars_infos, &global_context);
 
     let initial_acc_data = InitialAccountDataUsingLedger {
-        ledger: LedgerApp::new()?,
-        public_keys: try_get(&v, "public_keys")?,
+        sign_function,
+        public_keys: try_get(&v, "publicKeys")?,
         threshold: try_get(&v, "threshold")?,
     };
 
@@ -122,11 +126,23 @@ pub fn create_id_request(input: &str ) -> Fallible<String> {
     Ok(response.to_string())
 }
 
-fn fake_sign() -> ed25519::Signature {
-    return ed25519::Signature::new([1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8, ]);
+
+fn sign_public_information_for_ip_aux<C: Curve>(sign_function: &js_sys::Function, info: & PublicInformationForIP<C>) -> Fallible<BTreeMap<KeyIndex, AccountOwnershipSignature>> {
+    let mut signatures = BTreeMap::new();
+
+    let js_signature = match sign_function.call1(&JsValue::null(), &JsValue::from_serde(info)?) {
+        Ok(s) => s,
+        Err(_) => bail!("js function to sign failed"),
+    };
+
+    let signature: AccountOwnershipSignature = js_signature.into_serde()?;
+    signatures.insert(KeyIndex(0), signature);
+
+    return Ok(signatures);
 }
+
 struct InitialAccountDataUsingLedger {
-    ledger: LedgerApp,
+    pub sign_function: js_sys::Function,
     pub public_keys: Vec<VerifyKey>,
     pub threshold: SignatureThreshold,
 }
@@ -141,17 +157,9 @@ impl InitialAccountDataTrait for InitialAccountDataUsingLedger {
     }
 
     fn sign_public_information_for_ip<C: Curve>(&self, info: & PublicInformationForIP<C>) -> BTreeMap<KeyIndex, AccountOwnershipSignature> {
-        let mut signatures = BTreeMap::new();
-
-        let signature = AccountOwnershipSignature::from(fake_sign()); // ledger.sign_public_information_for_ip(info).into();
-        signatures.insert(KeyIndex(0), signature);
-
-        return signatures;
+        match sign_public_information_for_ip_aux(&self.sign_function, info) {
+            Ok(map) => map,
+            Err(_) => BTreeMap::new(),
+        }
     }
 }
-
-
-//#[wasm_bindgen]
-//pub fn generate_pio_js(input: &str) -> String {
-//
-//}
