@@ -18,6 +18,7 @@ import {
 import ConcordiumLedgerClient from '../ledger/ConcordiumLedgerClient';
 import { AccountTransaction } from '../../utils/types';
 import { PublicInformationForIp } from '../ledger/PublicInformationForIp';
+import { AccountPathInput } from '../ledger/Path';
 
 const testSlice = createSlice({
     name: 'test',
@@ -83,9 +84,14 @@ export async function publicInformationForIpTest() {
         threshold: 2,
     };
 
+    const accountPathInput: AccountPathInput = {
+        identityIndex: 0,
+        accountIndex: 0,
+        signatureIndex: 0,
+    };
     const signature = await ledgerClient.signPublicInformationForIp(
         publicInforForIp,
-        [0, 0, 0, 0, 0, 0]
+        accountPathInput
     );
     console.log(`Signature: ${signature.toString('hex')}`);
 }

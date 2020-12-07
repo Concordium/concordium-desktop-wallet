@@ -4,6 +4,7 @@ import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
 import { AccountTransaction, PublicInformationForIp } from '../../utils/types';
+import { AccountPathInput, getAccountPath } from './Path';
 
 /**
  * Concordium Ledger API.
@@ -46,11 +47,12 @@ export default class ConcordiumLedgerClient {
 
     signPublicInformationForIp(
         publicInfoForIp: PublicInformationForIp,
-        path: number[]
+        accountPathInput: AccountPathInput
     ): Promise<Buffer> {
+        const accountPath = getAccountPath(accountPathInput);
         return signPublicInformationForIp(
             this.transport,
-            path,
+            accountPath,
             publicInfoForIp
         );
     }
