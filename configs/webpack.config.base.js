@@ -12,6 +12,8 @@ export default {
 
     module: {
         rules: [
+            { test: /\.worker\.js$/, 
+              loader: "worker-loader!babel-loader?presets[]=es2015" },
             {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
@@ -42,6 +44,7 @@ export default {
 
     optimization: {
         namedModules: true,
+        noEmitOnErrors: false,
     },
 
     plugins: [

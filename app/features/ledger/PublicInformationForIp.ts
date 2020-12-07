@@ -12,7 +12,7 @@ export default async function signPublicInformationForIp(
     const idCredPubBytes = Buffer.from(publicInfoForIp.idCredPub, 'hex');
     const regId = Buffer.from(publicInfoForIp.regId, 'hex');
     const verificationKeysListLength = Uint8Array.of(
-        publicInfoForIp.verificationKeys.length
+        publicInfoForIp.publicKeys.keys.length
     );
 
     const data = Buffer.concat([
@@ -24,11 +24,13 @@ export default async function signPublicInformationForIp(
     let p1 = 0x00;
     const p2 = 0x00;
 
+    console.log("test1");
     await transport.send(0xe0, INS_PUBLIC_INFO_FOR_IP, p1, p2, data);
+    console.log("test2");
 
     p1 = 0x01;
-    for (let i = 0; i < publicInfoForIp.verificationKeys.length; i += 1) {
-        const verificationKey = publicInfoForIp.verificationKeys[i];
+    for (let i = 0; i < verificationKeysListLength; i += 1) {
+        const verificationKey = publicInfoForIp.publicKeys.keys[i];
 
         // eslint-disable-next-line  no-await-in-loop
         await transport.send(
@@ -36,7 +38,7 @@ export default async function signPublicInformationForIp(
             INS_PUBLIC_INFO_FOR_IP,
             p1,
             p2,
-            Buffer.from(verificationKey, 'hex')
+            Buffer.from(verificationKey.verifyKey, 'hex')
         );
     }
 
@@ -46,7 +48,7 @@ export default async function signPublicInformationForIp(
         INS_PUBLIC_INFO_FOR_IP,
         p1,
         p2,
-        Buffer.of(publicInfoForIp.threshold)
+        Buffer.of(publicInfoForIp.publicKeys.threshold)
     );
 
     const signature = response.slice(0, 64);

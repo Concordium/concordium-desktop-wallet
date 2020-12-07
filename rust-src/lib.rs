@@ -3,7 +3,12 @@ extern crate failure;
 #[macro_use]
 extern crate serde_json;
 
+use js_sys::Promise;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::{
+    spawn_local,
+    JsFuture
+};
 use curve_arithmetic::{Curve};
 use dodis_yampolskiy_prf::secret as prf;
 use std::{
@@ -24,6 +29,7 @@ use wallet::{
     //create_pub_to_sec_transfer_ext, create_sec_to_pub_transfer_ext, create_transfer_ext,
     //decrypt_encrypted_amount_ext, generate_accounts_ext,
 };
+use futures::executor::block_on;
 
 use id::{
     account_holder::generate_pio,
@@ -126,13 +132,18 @@ pub fn create_id_request(input: &str, sign_function: js_sys::Function) -> Fallib
     Ok(response.to_string())
 }
 
-
-fn sign_public_information_for_ip_aux<C: Curve>(sign_function: &js_sys::Function, info: & PublicInformationForIP<C>) -> Fallible<BTreeMap<KeyIndex, AccountOwnershipSignature>> {
+async fn sign_public_information_for_ip_aux<C: Curve>(sign_function: &js_sys::Function, info: & PublicInformationForIP<C>) -> Fallible<BTreeMap<KeyIndex, AccountOwnershipSignature>> {
     let mut signatures = BTreeMap::new();
 
-    let js_signature = match sign_function.call1(&JsValue::null(), &JsValue::from_serde(info)?) {
+    console_error_panic_hook::set_once();
+    let js_value_promise = match sign_function.call1(&JsValue::null(), &JsValue::from_serde(info)?) {
         Ok(s) => s,
         Err(_) => bail!("js function to sign failed"),
+    };
+    let promise = Promise::from(js_value_promise);
+    let js_signature = match JsFuture::from(promise).await {
+        Ok(s) => s,
+        Err(e) => bail!("Promise failed to resolve"),
     };
 
     let signature: AccountOwnershipSignature = js_signature.into_serde()?;
@@ -147,6 +158,7 @@ struct InitialAccountDataUsingLedger {
     pub threshold: SignatureThreshold,
 }
 
+
 impl InitialAccountDataTrait for InitialAccountDataUsingLedger {
     fn get_threshold(&self) -> SignatureThreshold {
         return self.threshold;
@@ -157,7 +169,7 @@ impl InitialAccountDataTrait for InitialAccountDataUsingLedger {
     }
 
     fn sign_public_information_for_ip<C: Curve>(&self, info: & PublicInformationForIP<C>) -> BTreeMap<KeyIndex, AccountOwnershipSignature> {
-        match sign_public_information_for_ip_aux(&self.sign_function, info) {
+        match block_on(sign_public_information_for_ip_aux(&self.sign_function, info)) {
             Ok(map) => map,
             Err(_) => BTreeMap::new(),
         }

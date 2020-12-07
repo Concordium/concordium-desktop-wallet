@@ -1,5 +1,3 @@
-import { PublicInformationForIP } from './types';
-
 let rust;
 async function getRust() {
     if (!rust) {
@@ -42,12 +40,11 @@ export async function createIdentityRequestObjectLedger(
         threshold,
     };
 
-    function signFunction(info: PublicInformationForIP) {
-        console.log(info);
-        return "993fdc40bb8af4cb75caf8a53928d247be6285784b29578a06df312c28854c1bfac2fd0183967338b578772398d4120119b0f8cd36bc485a9cfcc5c98245acf34ce7474272b226149c81a1e0d293186e";
-    }
-
-    console.log("ledger version");
-    const output = await rust.create_id_request_ext(JSON.stringify(input), signFunction);
-    return JSON.parse(output);
+    return new Promise((resolve, reject) => {
+        console.log("ledger version");
+        var worker = new Worker('./rust.worker');
+        worker.on('response', message => resolve(JSON.parse(message)));
+        worker.postMessage('iro', JSON.stringify(input));
+    });
 }
+

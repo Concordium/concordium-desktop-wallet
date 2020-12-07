@@ -32,7 +32,7 @@ async function getIdentityLocation(provider, global) {
         }
     ];
     const threshold = 1;
-    const data = await createIdentityRequestObjectAndPrivateData(
+    const data = await createIdentityRequestObjectLedger(
         provider.ipInfo,
         provider.arsInfos,
         global,
