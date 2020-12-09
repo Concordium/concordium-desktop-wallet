@@ -6,23 +6,29 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.dev]
+opt-level = 3
+
+
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 wasm-bindgen = { version = "0.2.68", features = ["serde-serialize"] }
-wasm-bindgen-futures = "0.4.19"
 
-js-sys = "0.3.46"
 libc = "0.2"
 pairing = "0.15"
 failure = "0.1"
 ed25519-dalek = "=1.0.0"
 hex = "0.4"
-futures = "0.3"
+
+hkdf = "0.10.0"
+sha2 = "0.9"
+ff = "0.5"
+
 console_error_panic_hook = "0.1.6"
 
-[dependencies.wallet]
-path = "deps/crypto/rust-src/wallet"
+[dependencies.misc_tools]
+path = "deps/crypto/rust-bins"
 version = "0"
 
 [dependencies.id]
@@ -43,6 +49,10 @@ version = "0"
 
 [dependencies.crypto_common]
 path = "deps/crypto/rust-src/crypto_common"
+version = "0"
+
+[dependencies.pedersen_scheme]
+path = "deps/crypto/rust-src/pedersen_scheme"
 version = "0"
 
 [lib]

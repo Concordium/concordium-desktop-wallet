@@ -2,93 +2,139 @@
 extern crate failure;
 #[macro_use]
 extern crate serde_json;
+extern crate console_error_panic_hook;
+extern crate hex;
 
-use js_sys::Promise;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{
-    spawn_local,
-    JsFuture
-};
-use curve_arithmetic::{Curve};
+use crypto_common::*;
+use curve_arithmetic::Curve;
 use dodis_yampolskiy_prf::secret as prf;
+use hex::FromHex;
+use pairing::bls12_381::{Bls12, G1, Fr};
+use serde_json::{from_str, from_value, Value as SerdeValue};
+use sha2::{Digest, Sha256};
 use std::{
     cmp::max,
-    os::raw::c_char,
-    ffi::{CStr, CString},
-    convert::TryInto,
     collections::BTreeMap,
+    convert::TryInto,
 };
-use serde_json::{from_str, from_value, Value};
-use crypto_common::{*};
-use pairing::bls12_381::{Bls12, G1};
+use wasm_bindgen::prelude::*;
 type ExampleCurve = G1;
-use wallet::{
-    create_id_request_and_private_data_ext,
-    //check_account_address_ext, combine_encrypted_amounts_ext, create_credential_ext,
-    //create_encrypted_transfer_ext,
-    //create_pub_to_sec_transfer_ext, create_sec_to_pub_transfer_ext, create_transfer_ext,
-    //decrypt_encrypted_amount_ext, generate_accounts_ext,
-};
-use futures::executor::block_on;
+use ed25519_dalek as ed25519;
 
+use ::failure::Fallible;
 use id::{
-    account_holder::generate_pio,
-    types::*,
+    account_holder::{build_pub_info_for_ip, generate_pio},
     secret_sharing::Threshold,
+    types::*,
 };
-use::failure::Fallible;
-
-#[wasm_bindgen]
-pub fn create_id_request_and_private_data_js(input: &str) -> String {
-    return unsafe {
-        let cstr: CString = {
-            match CString::new(input) {
-                Ok(s) => s,
-                Err(e) => {
-                    return format!("Could not encode response: {}", e);
-                }
-            }
-        };
-        let mut success: u8 = 127;
-        let output: *mut c_char =  create_id_request_and_private_data_ext(cstr.into_raw(),  &mut success);
-
-        return match CStr::from_ptr(output).to_str() {
-            Ok(s) => s.to_string(),
-            Err(e) => {
-                return format!("Could not decode input string: {}", e);
-            }
-        };
-    }
-}
-
-#[wasm_bindgen]
-pub fn call_js(print_function: js_sys::Function) {
-    print_function.call1(&JsValue::null(), &JsValue::from_str("Hello World"));
-}
+use client_server_helpers::keygen::keygen_bls;
+use pedersen_scheme::value::Value;
 
 
 /// Try to extract a field with a given name from the JSON value.
-fn try_get<A: serde::de::DeserializeOwned>(v: &Value, fname: &str) -> Fallible<A> {
+fn try_get<A: serde::de::DeserializeOwned>(v: &SerdeValue, fname: &str) -> Fallible<A> {
     match v.get(fname) {
         Some(v) => Ok(from_value(v.clone())?),
         None => Err(format_err!("Field {} not present, but should be.", fname)),
     }
 }
 
-#[wasm_bindgen]
-pub fn create_id_request_ext(input: &str, sign_function: js_sys::Function) -> String {
-    match create_id_request(input, sign_function) {
-        Ok(s) => s,
-        Err(e) => format!("unable to create request due to: {}", e,)
+pub fn generate_bls(seed: &str) -> Fallible<Fr> {
+    let key_info = b"";
+
+    match keygen_bls(seed.as_bytes(), key_info) {
+        Ok(s) => Ok(s),
+        Err(_) => Err(format_err!("unable to build parse id_cred_sec.")),
     }
 }
 
-pub fn create_id_request(input: &str, sign_function: js_sys::Function) -> Fallible<String> {
-    let v: Value = from_str(input)?;
+#[wasm_bindgen]
+pub fn build_pub_info_for_ip_ext(
+    input: &str,
+    id_cred_sec_string: &str,
+    prf_key_string: &str,
+) -> String {
+    match build_pub_info_for_ip_aux(input, prf_key_string, id_cred_sec_string) {
+        Ok(s) => s,
+        Err(e) => format!("unable to build PublicInformationForIP due to: {}", e,),
+    }
+}
+
+fn build_pub_info_for_ip_aux(
+    input: &str,
+    id_cred_sec_seed: &str,
+    prf_key_seed: &str,
+) -> Fallible<String> {
+    let v: SerdeValue = from_str(input)?;
 
     let ip_info: IpInfo<Bls12> = try_get(&v, "ipInfo")?;
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
     let ars_infos: BTreeMap<ArIdentity, ArInfo<ExampleCurve>> = try_get(&v, "arsInfos")?;
+    let context = IPContext::new(&ip_info, &ars_infos, &global_context);
+
+    let id_cred_sec = Value::new(generate_bls(id_cred_sec_seed)?);
+    let prf_key = prf::SecretKey::new(generate_bls(prf_key_seed)?);
+
+    let initial_acc_data = InitialAccountDataStruct {
+        public_keys: try_get(&v, "publicKeys")?,
+        threshold: try_get(&v, "threshold")?,
+    };
+
+    let pub_info_for_ip =
+        match build_pub_info_for_ip(&context, &id_cred_sec, &prf_key, &initial_acc_data) {
+            Some(x) => x,
+            None => return Err(format_err!("failed building pub_info_for_ip.")),
+        };
+    let to_sign = Sha256::digest(&to_bytes(&pub_info_for_ip));
+    let response = json!({
+        "pub": pub_info_for_ip,
+        "hash": hex::encode(to_sign),
+        "bytes": hex::encode(&to_bytes(&pub_info_for_ip)),
+    }
+    );
+    Ok(response.to_string())
+}
+
+struct InitialAccountDataStruct {
+    pub public_keys: Vec<VerifyKey>,
+    pub threshold: SignatureThreshold,
+}
+
+impl InitialAccountDataTrait for InitialAccountDataStruct {
+    fn get_threshold(&self) -> SignatureThreshold {
+        return self.threshold;
+    }
+
+    fn get_public_keys(&self) -> Vec<VerifyKey> {
+        return (&self.public_keys).to_vec();
+    }
+}
+
+#[wasm_bindgen]
+pub fn create_id_request_ext(
+    input: &str,
+    signature: &str,
+    id_cred_sec_seed: &str,
+    prf_key_seed: &str,
+) -> String {
+    match create_id_request(input, signature, id_cred_sec_seed, prf_key_seed) {
+        Ok(s) => s,
+        Err(e) => format!("unable to create request due to: {}", e,),
+    }
+}
+
+pub fn create_id_request(
+    input: &str,
+    signature: &str,
+    id_cred_sec_seed: &str,
+    prf_key_seed: &str,
+) -> Fallible<String> {
+    let v: SerdeValue = from_str(input)?;
+
+    let ip_info: IpInfo<Bls12> = try_get(&v, "ipInfo")?;
+    let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
+    let ars_infos: BTreeMap<ArIdentity, ArInfo<ExampleCurve>> = try_get(&v, "arsInfos")?;
+    let context = IPContext::new(&ip_info, &ars_infos, &global_context);
 
     // FIXME: IP defined threshold
     let threshold = {
@@ -97,9 +143,11 @@ pub fn create_id_request(input: &str, sign_function: js_sys::Function) -> Fallib
         Threshold(max((l - 1).try_into().unwrap_or(255), 1))
     };
 
-    let prf_key: prf::SecretKey<ExampleCurve> = try_get(&v, "prfKey")?;
+    let id_cred_sec = Value::new(generate_bls(id_cred_sec_seed)?);
+    let prf_key = prf::SecretKey::new(generate_bls(prf_key_seed)?);
+
     let chi = CredentialHolderInfo::<ExampleCurve> {
-        id_cred: try_get(&v, "idCredSec")?,
+        id_cred: IdCredentials { id_cred_sec },
     };
 
     let aci = AccCredentialInfo {
@@ -107,11 +155,10 @@ pub fn create_id_request(input: &str, sign_function: js_sys::Function) -> Fallib
         prf_key,
     };
 
-    // Choice of anonymity revokers, all of them in this implementation.
-    let context = IPContext::new(&ip_info, &ars_infos, &global_context);
+    let signature_bytes = <[u8; 64]>::from_hex(signature).expect("Decoding failed");
 
-    let initial_acc_data = InitialAccountDataUsingLedger {
-        sign_function,
+    let initial_acc_data = InitialAccountDataWithSignature {
+        signature: ed25519::Signature::new(signature_bytes).into(),
         public_keys: try_get(&v, "publicKeys")?,
         threshold: try_get(&v, "threshold")?,
     };
@@ -126,40 +173,19 @@ pub fn create_id_request(input: &str, sign_function: js_sys::Function) -> Fallib
     let id_use_data = IdObjectUseData { aci, randomness };
 
     let response = json!({
-        "preIdentityObject": Versioned::new(VERSION_0, pio),
+        "idObjectRequest": Versioned::new(VERSION_0, pio),
         "id_use_data": id_use_data,
     });
     Ok(response.to_string())
 }
 
-async fn sign_public_information_for_ip_aux<C: Curve>(sign_function: &js_sys::Function, info: & PublicInformationForIP<C>) -> Fallible<BTreeMap<KeyIndex, AccountOwnershipSignature>> {
-    let mut signatures = BTreeMap::new();
-
-    console_error_panic_hook::set_once();
-    let js_value_promise = match sign_function.call1(&JsValue::null(), &JsValue::from_serde(info)?) {
-        Ok(s) => s,
-        Err(_) => bail!("js function to sign failed"),
-    };
-    let promise = Promise::from(js_value_promise);
-    let js_signature = match JsFuture::from(promise).await {
-        Ok(s) => s,
-        Err(e) => bail!("Promise failed to resolve"),
-    };
-
-    let signature: AccountOwnershipSignature = js_signature.into_serde()?;
-    signatures.insert(KeyIndex(0), signature);
-
-    return Ok(signatures);
-}
-
-struct InitialAccountDataUsingLedger {
-    pub sign_function: js_sys::Function,
+struct InitialAccountDataWithSignature {
+    pub signature: AccountOwnershipSignature,
     pub public_keys: Vec<VerifyKey>,
     pub threshold: SignatureThreshold,
 }
 
-
-impl InitialAccountDataTrait for InitialAccountDataUsingLedger {
+impl InitialAccountDataTrait for InitialAccountDataWithSignature {
     fn get_threshold(&self) -> SignatureThreshold {
         return self.threshold;
     }
@@ -167,11 +193,15 @@ impl InitialAccountDataTrait for InitialAccountDataUsingLedger {
     fn get_public_keys(&self) -> Vec<VerifyKey> {
         return (&self.public_keys).to_vec();
     }
+}
 
-    fn sign_public_information_for_ip<C: Curve>(&self, info: & PublicInformationForIP<C>) -> BTreeMap<KeyIndex, AccountOwnershipSignature> {
-        match block_on(sign_public_information_for_ip_aux(&self.sign_function, info)) {
-            Ok(map) => map,
-            Err(_) => BTreeMap::new(),
-        }
+impl InitialAccountDataWithSigning for InitialAccountDataWithSignature {
+    fn sign_public_information_for_ip<C: Curve>(
+        &self,
+        _: &PublicInformationForIP<C>,
+    ) -> BTreeMap<KeyIndex, AccountOwnershipSignature> {
+        let mut signatures = BTreeMap::new();
+        signatures.insert(KeyIndex(0), self.signature);
+        signatures
     }
 }

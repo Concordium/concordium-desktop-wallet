@@ -250,6 +250,7 @@
     "@reduxjs/toolkit": "^1.4.0",
     "@wasm-tool/wasm-pack-plugin": "^1.3.1",
     "axios": "^0.21.0",
+    "bs58check": "^2.1.2",
     "connected-react-router": "^6.6.1",
     "electron-debug": "^3.1.0",
     "electron-log": "^4.2.4",
@@ -265,8 +266,7 @@
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19",
-    "wasm-pack": "^0.9.1",
-    "worker-threads": "^1.0.0"
+    "wasm-pack": "^0.9.1"
   },
   "devEngines": {
     "node": ">=7.x",

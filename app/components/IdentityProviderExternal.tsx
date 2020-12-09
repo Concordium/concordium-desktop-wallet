@@ -17,29 +17,20 @@ import {
     getHTMLform,
 } from '../utils/httpRequests';
 // import { createIdentityRequestObject } from '../utils/rustInterface';
-import { createIdentityRequestObjectAndPrivateData, createIdentityRequestObjectLedger } from '../utils/rustInterface.ts';
+import {
+    createIdentityRequestObjectAndPrivateData,
+    createIdentityRequestObjectLedger,
+} from '../utils/rustInterface.ts';
 import identityjson from '../utils/IdentityObject.json';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
-async function getIdentityLocation(provider, global) {
-    const prfKey = "1b74286f32f91f03b1a0b5406610b7bba51cbf1fd2764835b8996f77294df9ae";
-    const idCredSec = "0ae0d61e02d5346bb446d62b79c9e381f267820cb270fc989b4d5f1bd25fa5d8";
-    const publicKeys = [
-        {
-            "schemeId": "Ed25519",
-            "verifyKey": "4826d65ad0effc343945d2050e83596705a388c711073e909b2652766cb1371d"
-        }
-    ];
-    const threshold = 1;
+async function getIdentityLocation(provider, global, setText) {
     const data = await createIdentityRequestObjectLedger(
         provider.ipInfo,
         provider.arsInfos,
         global,
-        prfKey,
-        idCredSec,
-        publicKeys,
-        threshold
+        setText
     );
     console.log(data);
     const verifyLocation = await performIdObjectRequest(
@@ -47,23 +38,24 @@ async function getIdentityLocation(provider, global) {
         redirectUri,
         data.idObjectRequest
     );
-    console.log(verifyLocation)
+    console.log(verifyLocation);
     return verifyLocation;
 }
 
-async function effect(provider, setLocation, iframeRef) {
+async function effect(provider, setText, setLocation, iframeRef) {
+    setText("Please Wait");
     const global = await getGlobal();
-    const location = await getIdentityLocation(provider, global);
-    console.log(location);
+    const location = await getIdentityLocation(provider, global, setText);
+
     return new Promise((resolve, reject) => {
-        setLocation(location)
-        iframeRef.current.addEventListener('did-navigate', e => {
+        setLocation(location);
+        iframeRef.current.addEventListener('did-navigate', (e) => {
             console.log(e);
             const loc = e.url;
             if (loc.includes(redirectUri)) {
                 resolve(loc.substring(loc.indexOf('=') + 1));
             }
-        })
+        });
     });
 }
 
@@ -84,18 +76,25 @@ export default function IdentityIssuanceExternal(): JSX.Element {
     const accountName = useSelector(accountNameSelector);
     const identityName = useSelector(identityNameSelector);
     const provider = providers[index];
+    const [text, setText] = useState();
     const [location, setLocation] = useState();
     const iframeRef = useRef(null);
 
     useEffect(() => {
         if (provider) {
-            effect(provider, setLocation, iframeRef).then(location => after(dispatch, accountName, identityName, location));
+            effect(provider, setText, setLocation, iframeRef).then((location) =>
+                after(dispatch, accountName, identityName, location)
+            );
         }
     }, [provider, setLocation, dispatch, accountName, identityName]);
 
     if (!location) {
-        return <div />;
+        return <div>
+            <h2> { text } </h2>
+        </div>;
     }
 
-    return <webview ref={iframeRef} className={styles.webview} src={location}/>
+    return (
+        <webview ref={iframeRef} className={styles.webview} src={location} />
+    );
 }

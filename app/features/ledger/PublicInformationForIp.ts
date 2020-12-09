@@ -24,9 +24,7 @@ export default async function signPublicInformationForIp(
     let p1 = 0x00;
     const p2 = 0x00;
 
-    console.log("test1");
     await transport.send(0xe0, INS_PUBLIC_INFO_FOR_IP, p1, p2, data);
-    console.log("test2");
 
     p1 = 0x01;
     for (let i = 0; i < verificationKeysListLength; i += 1) {
