@@ -1,24 +1,33 @@
-import { parentPort } from "worker_threads";
-import { PublicInformationForIP } from './types';
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
-import  ConcordiumLedgerClient  from '../features/ledger/ConcordiumLedgerClient';
+import registerPromiseWorker from 'promise-worker/register';
+import workerCommands from '../constants/workerCommands.json';
 
-async function createIdentityRequestObject(input) {
-    const transport = await TransportNodeHid.open('');
-    const ledger = new ConcordiumLedgerClient(transport);
-
-    async function signFunction(info: PublicInformationForIP) {
-        console.log(info);
-        const path = [0,0,0,2,0,0];
-        return await ledger.signPublicInformationForIp(info,path);
+let rustReference;
+async function getRust() {
+    if (!rustReference) {
+        rustReference = await import('../../pkg');
     }
-
-    const output = rust.create_id_request_ext(JSON.stringify(input), signFunction);
-    parentPort.message('response', output);
+    return rustReference;
 }
 
-parentPort.on('iro', input => {
-    createIdentityRequestObject(input)
+registerPromiseWorker(async function (message) {
+    const rust = await getRust();
+    // TODO use smarter switching if more commands are added;
+    if (message.command === workerCommands.buildPublicInformationForIp) {
+        const pubInfoForIpString = await rust.build_pub_info_for_ip_ext(
+            message.context,
+            message.idCredSec,
+            message.prfKey
+        );
+        return pubInfoForIpString;
+    }
+    if (message.command === workerCommands.createIdRequest) {
+        const idRequest = rust.create_id_request_ext(
+            message.context,
+            message.signature,
+            message.idCredSec,
+            message.prfKey
+        );
+        return idRequest;
+    }
+    return 'unknown command';
 });
-
-export default null as any;

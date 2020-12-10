@@ -1,39 +1,9 @@
+import PromiseWorker from 'promise-worker';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
+import RustWorker from 'worker-loader!./rust.worker';
 import { PublicInformationForIP } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
-
-let rust;
-async function getRust() {
-    if (!rust) {
-        rust = await import('../../pkg');
-    }
-    return rust;
-}
-
-export async function createIdentityRequestObjectAndPrivateData(
-    ipInfo,
-    arsInfos,
-    global
-) {
-    const rust = await getRust();
-    const input = {
-        ipInfo,
-        arsInfos,
-        global: global.value,
-    };
-    const inputString = JSON.stringify(input);
-    const output = await rust.create_id_request_and_private_data_js(
-        inputString
-    );
-    return JSON.parse(output);
-}
-
-function clean_bls(bls: String): String {
-    console.log(bls);
-    let hexString = bls.substring(3,bls.length - 1);
-    console.log(hexString);
-    return parseInt(hexString).toString();
-}
+import workerCommands from '../constants/workerCommands.json';
 
 export async function createIdentityRequestObjectLedger(
     ipInfo,
@@ -41,27 +11,27 @@ export async function createIdentityRequestObjectLedger(
     global,
     displayMessage
 ) {
-    const rust = await getRust();
-
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
 
     const identity = 3;
 
-    displayMessage("Please confirm exporting prf key on device");
-    const prfKey_seed = await ledger.getPrfKey(identity);
+    displayMessage('Please confirm exporting prf key on device');
+    const prfKeySeed = await ledger.getPrfKey(identity);
 
-    displayMessage("Please confirm exporting id cred sec on device");
-    const idCredSec_seed = await ledger.getIdCredSec(identity);
+    displayMessage('Please confirm exporting id cred sec on device');
+    const idCredSecSeed = await ledger.getIdCredSec(identity);
 
-    const prfKey = prfKey_seed.toString('hex');
-    const idCredSec = idCredSec_seed.toString('hex');
-    displayMessage("Please wait");
+    const prfKey = prfKeySeed.toString('hex');
+    const idCredSec = idCredSecSeed.toString('hex');
+    displayMessage('Please wait');
 
-
-    displayMessage("Please confirm exporting public key on device");
+    displayMessage('Please confirm exporting public key on device');
     const publicKey = await ledger.getPublicKey([0, 0, identity, 2, 0, 0]);
-    displayMessage("Please wait");
+    displayMessage('Please wait');
+
+    const rawWorker = new RustWorker();
+    const worker = new PromiseWorker(rawWorker);
 
     const context = {
         ipInfo,
@@ -75,30 +45,35 @@ export async function createIdentityRequestObjectLedger(
         ],
         threshold: 1,
     };
+
     const contextString = JSON.stringify(context);
-    console.log(context);
-    const pubInfoForIpString = await rust.build_pub_info_for_ip_ext(
-        contextString,
+
+    const pubInfoForIpString = await worker.postMessage({
+        command: workerCommands.buildPublicInformationForIp,
+        context: contextString,
         idCredSec,
         prfKey,
-    );
+    });
+
     console.log(pubInfoForIpString);
     const pubInfoForIp = JSON.parse(pubInfoForIpString);
-    pubInfoForIp.pub.publicKeys.keys[0].verifyKey = "00" + pubInfoForIp.pub.publicKeys.keys[0].verifyKey // TODO: attach schemeId properly.
+    pubInfoForIp.pub.publicKeys.keys[0].verifyKey =
+        '00' + pubInfoForIp.pub.publicKeys.keys[0].verifyKey; // TODO: attach schemeId properly.
 
     const path = [0, 0, identity, 2, 0, 0];
-    displayMessage("Please sign information on device");
+    displayMessage('Please sign information on device');
     const signature = await ledger.signPublicInformationForIp(
         pubInfoForIp.pub,
         path
     );
-    displayMessage("Please wait");
-    const output = rust.create_id_request_ext(
-        contextString,
-        signature.toString('hex'),
+    displayMessage('Please wait');
+    const idRequest = await worker.postMessage({
+        command: workerCommands.createIdRequest,
+        context: contextString,
+        signature: signature.toString('hex'),
         idCredSec,
-        prfKey
-    );
-    console.log(output);
-    return JSON.parse(output);
+        prfKey,
+    });
+    console.log(idRequest);
+    return JSON.parse(idRequest);
 }
