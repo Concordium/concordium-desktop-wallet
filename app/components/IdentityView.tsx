@@ -1,13 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {
-    identitiesSelector,
-    chosenIdentitySelector,
-} from '../features/accountsSlice';
-import styles from './Accounts.css';
+import { identitiesSelector, chosenIdentitySelector } from '../features/IdentitySlice';
+import { Identity } from '../utils/types';
+import styles from './Identity.css';
 
 export default function IdentityView() {
-    const identities = useSelector(identitiesSelector);
+
+    const identities: Identity[] = useSelector(identitiesSelector);
     const chosenIndex = useSelector(chosenIdentitySelector);
 
     if (chosenIndex === undefined || chosenIndex >= identities.length) {
@@ -18,10 +17,9 @@ export default function IdentityView() {
 
     return (
         <div className={styles.halfPage}>
-            <div className={styles.chosenAccount}>
+            <div className={styles.identityListElement}>
                 {' '}
-                {identity.name} {identity.issuer} {identity.expiresAt}{' '}
-                {identity.residenceCountry}{' '}
+                {identity.name}
             </div>
         </div>
     );

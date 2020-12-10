@@ -1,0 +1,29 @@
+.halfPage {
+    width: 50%;
+}
+
+.identityListElement {
+    border: 10 px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    width: 80%;
+    text-align: center;
+    background-color: oldlace;
+    border-style: solid;
+    border-color: black;
+    color: black;
+}
+
+.chosenIdentityListElement {
+    font-weight: bold;
+    border-color: blueviolet;
+}
+
+.chosenIdentity {
+    align-content: right;
+    display: inline-block;
+    height: 100%;
+    width: 40%;
+}

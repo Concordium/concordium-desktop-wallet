@@ -1,5 +1,9 @@
 import { AccountAddress } from '../proto/api_pb';
 
+export interface Identity {
+    name: string
+}
+
 export interface AccountTransaction {
     sender: AccountAddress;
     nonce: number;
