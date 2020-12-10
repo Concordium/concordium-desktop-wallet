@@ -24,8 +24,8 @@ ff = "0.5"
 
 console_error_panic_hook = "0.1.6"
 
-[dependencies.misc_tools]
-path = "deps/crypto/rust-bins"
+[dependencies.keygen_bls]
+path = "deps/crypto/rust-src/keygen_bls"
 version = "0"
 
 [dependencies.id]

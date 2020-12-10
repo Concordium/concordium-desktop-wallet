@@ -17,12 +17,12 @@ type ExampleCurve = G1;
 use ed25519_dalek as ed25519;
 
 use ::failure::Fallible;
-use client_server_helpers::keygen::keygen_bls;
 use id::{
     account_holder::{build_pub_info_for_ip, generate_pio},
     secret_sharing::Threshold,
     types::*,
 };
+use keygen_bls::keygen_bls;
 use pedersen_scheme::value::Value;
 
 /// Try to extract a field with a given name from the JSON value.
