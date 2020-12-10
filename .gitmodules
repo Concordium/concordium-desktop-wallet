@@ -1,6 +1,3 @@
 [submodule "deps/crypto"]
 	path = deps/crypto
 	url = git@gitlab.com:Concordium/crypto.git
-[submodule "simple-client"]
-	path = simple-client
-	url = git@gitlab.com:Concordium/consensus/simple-client.git

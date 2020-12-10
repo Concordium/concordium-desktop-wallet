@@ -1,12 +1,5 @@
 import { AccountAddress } from '../proto/api_pb';
 
-export interface PublicInformationForIp {
-    idCredPub: string;
-    regId: string;
-    verificationKeys: string[];
-    threshold: number;
-}
-
 export interface AccountTransaction {
     sender: AccountAddress;
     nonce: number;
@@ -111,9 +104,13 @@ export enum AttributeTag {
 type IpCdiSignature = Uint8Array;
 type Proofs = Uint8Array;
 
-interface PublicInformationForIP {
-    credPub: string;
+export interface PublicInformationForIp {
+    idCredPub: string;
     regId: string;
-    publicKeys: string[];
+    publicKeys: NewAccount;
+}
+
+export interface NewAccount {
+    keys: string[];
     threshold: number;
 }

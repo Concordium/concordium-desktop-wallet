@@ -16,7 +16,6 @@ import {
     performIdObjectRequest,
     getHTMLform,
 } from '../utils/httpRequests';
-// import { createIdentityRequestObject } from '../utils/rustInterface';
 import { createIdentityRequestObjectLedger } from '../utils/rustInterface';
 import identityjson from '../utils/IdentityObject.json';
 

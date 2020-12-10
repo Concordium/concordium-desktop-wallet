@@ -3,7 +3,7 @@ import { Switch, Route } from 'react-router-dom';
 import routes from '../constants/routes.json';
 import chooseProvider from './IdentityIssuanceChooseProvider';
 import pickName from './IdentityIssuancePickName';
-import external from './IdentityProviderExternal';
+import external from './IdentityIssuanceGenerate';
 import finalPage from './IdentityIssuanceFinal';
 
 export default function IdentityIssuance(): JSX.Element {
