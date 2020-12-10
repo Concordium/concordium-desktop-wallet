@@ -9,27 +9,21 @@ use crypto_common::*;
 use curve_arithmetic::Curve;
 use dodis_yampolskiy_prf::secret as prf;
 use hex::FromHex;
-use pairing::bls12_381::{Bls12, G1, Fr};
+use pairing::bls12_381::{Bls12, Fr, G1};
 use serde_json::{from_str, from_value, Value as SerdeValue};
-use sha2::{Digest, Sha256};
-use std::{
-    cmp::max,
-    collections::BTreeMap,
-    convert::TryInto,
-};
+use std::{cmp::max, collections::BTreeMap, convert::TryInto};
 use wasm_bindgen::prelude::*;
 type ExampleCurve = G1;
 use ed25519_dalek as ed25519;
 
 use ::failure::Fallible;
+use client_server_helpers::keygen::keygen_bls;
 use id::{
     account_holder::{build_pub_info_for_ip, generate_pio},
     secret_sharing::Threshold,
     types::*,
 };
-use client_server_helpers::keygen::keygen_bls;
 use pedersen_scheme::value::Value;
-
 
 /// Try to extract a field with a given name from the JSON value.
 fn try_get<A: serde::de::DeserializeOwned>(v: &SerdeValue, fname: &str) -> Fallible<A> {
@@ -85,29 +79,9 @@ fn build_pub_info_for_ip_aux(
             Some(x) => x,
             None => return Err(format_err!("failed building pub_info_for_ip.")),
         };
-    let to_sign = Sha256::digest(&to_bytes(&pub_info_for_ip));
-    let response = json!({
-        "pub": pub_info_for_ip,
-        "hash": hex::encode(to_sign),
-        "bytes": hex::encode(&to_bytes(&pub_info_for_ip)),
-    }
-    );
+
+    let response = json!(pub_info_for_ip);
     Ok(response.to_string())
-}
-
-struct InitialAccountDataStruct {
-    pub public_keys: Vec<VerifyKey>,
-    pub threshold: SignatureThreshold,
-}
-
-impl InitialAccountDataTrait for InitialAccountDataStruct {
-    fn get_threshold(&self) -> SignatureThreshold {
-        return self.threshold;
-    }
-
-    fn get_public_keys(&self) -> Vec<VerifyKey> {
-        return (&self.public_keys).to_vec();
-    }
 }
 
 #[wasm_bindgen]
@@ -117,13 +91,13 @@ pub fn create_id_request_ext(
     id_cred_sec_seed: &str,
     prf_key_seed: &str,
 ) -> String {
-    match create_id_request(input, signature, id_cred_sec_seed, prf_key_seed) {
+    match create_id_request_aux(input, signature, id_cred_sec_seed, prf_key_seed) {
         Ok(s) => s,
         Err(e) => format!("unable to create request due to: {}", e,),
     }
 }
 
-pub fn create_id_request(
+fn create_id_request_aux(
     input: &str,
     signature: &str,
     id_cred_sec_seed: &str,
@@ -179,6 +153,21 @@ pub fn create_id_request(
     Ok(response.to_string())
 }
 
+struct InitialAccountDataStruct {
+    pub public_keys: Vec<VerifyKey>,
+    pub threshold: SignatureThreshold,
+}
+
+impl InitialAccountDataTrait for InitialAccountDataStruct {
+    fn get_threshold(&self) -> SignatureThreshold {
+        self.threshold
+    }
+
+    fn get_public_keys(&self) -> Vec<VerifyKey> {
+        (&self.public_keys).to_vec()
+    }
+}
+
 struct InitialAccountDataWithSignature {
     pub signature: AccountOwnershipSignature,
     pub public_keys: Vec<VerifyKey>,
@@ -187,11 +176,11 @@ struct InitialAccountDataWithSignature {
 
 impl InitialAccountDataTrait for InitialAccountDataWithSignature {
     fn get_threshold(&self) -> SignatureThreshold {
-        return self.threshold;
+        self.threshold
     }
 
     fn get_public_keys(&self) -> Vec<VerifyKey> {
-        return (&self.public_keys).to_vec();
+        (&self.public_keys).to_vec()
     }
 }
 

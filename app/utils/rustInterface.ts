@@ -57,13 +57,18 @@ export async function createIdentityRequestObjectLedger(
 
     console.log(pubInfoForIpString);
     const pubInfoForIp = JSON.parse(pubInfoForIpString);
-    pubInfoForIp.pub.publicKeys.keys[0].verifyKey =
-        '00' + pubInfoForIp.pub.publicKeys.keys[0].verifyKey; // TODO: attach schemeId properly.
+    pubInfoForIp.publicKeys.keys[0].verifyKey = `00${pubInfoForIp.publicKeys.keys[0].verifyKey}`; // TODO: attach schemeId properly.
 
     const path = [0, 0, identity, 2, 0, 0];
-    displayMessage('Please sign information on device');
+    displayMessage(`
+Please sign information on device:
+Identity Credentials Public (IdCredPub): ${pubInfoForIp.idCredPub}
+Registration ID (RegId): ${pubInfoForIp.regId}
+Verification Key: ${pubInfoForIp.publicKeys.keys[0].verifyKey}
+Threshold: ${pubInfoForIp.publicKeys.threshold}
+`);
     const signature = await ledger.signPublicInformationForIp(
-        pubInfoForIp.pub,
+        pubInfoForIp,
         path
     );
     displayMessage('Please wait');
