@@ -22,7 +22,13 @@ export default class ConcordiumLedgerClient {
 
         transport.decorateAppAPIMethods(
             this,
-            ['getPublicKey', 'getIdCredSec', 'getPrfKey', 'signTransfer', 'signAccountChallenge'],
+            [
+                'getPublicKey',
+                'getIdCredSec',
+                'getPrfKey',
+                'signTransfer',
+                'signAccountChallenge',
+            ],
             'GTU'
         );
     }
@@ -58,7 +64,7 @@ export default class ConcordiumLedgerClient {
         );
     }
 
-    signAccountChallenge(challenge: Buffer): Promise<Buffer> {
-        return signAccountChallenge(this.transport, challenge);
+    signAccountChallenge(challenge: Buffer, path: number[]): Promise<Buffer> {
+        return signAccountChallenge(this.transport, path, challenge);
     }
 }
