@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { identitiesSelector, loadIdentities, chooseIdentity, chosenIdentitySelector } from '../features/IdentitySlice';
+import { Identity } from '../utils/types';
 import styles from './Identity.css';
 
 export default function IdentityList() {
@@ -17,14 +18,14 @@ export default function IdentityList() {
 
     return (
         <div className={styles.halfPage}>
-            {identities.map((identity, i) => (
+            {identities.map((identity: Identity, i) => (
 
                 <div
                     onClick={() => dispatch(chooseIdentity(i))}
                     className={`${styles.identityListElement} ${i === chosenIndex ? styles.chosenIdentityListElement : null}`}
                     key={i}
                 >
-                    {identity.name}
+                    <h1 className={styles.name}>{identity.name}</h1>
                 </div>
             ))}
         </div>
