@@ -3,6 +3,7 @@ import getPublicKey from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
+import { signAccountChallenge } from './AccountChallenge';
 import { AccountTransaction, PublicInformationForIp } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 
@@ -21,7 +22,7 @@ export default class ConcordiumLedgerClient {
 
         transport.decorateAppAPIMethods(
             this,
-            ['getPublicKey', 'getIdCredSec', 'getPrfKey', 'signTransfer'],
+            ['getPublicKey', 'getIdCredSec', 'getPrfKey', 'signTransfer', 'signAccountChallenge'],
             'GTU'
         );
     }
@@ -55,5 +56,9 @@ export default class ConcordiumLedgerClient {
             accountPath,
             publicInfoForIp
         );
+    }
+
+    signAccountChallenge(challenge: Buffer): Promise<Buffer> {
+        return signAccountChallenge(this.transport, challenge);
     }
 }
