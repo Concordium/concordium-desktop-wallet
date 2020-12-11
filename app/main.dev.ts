@@ -19,7 +19,9 @@ export default class AppUpdater {
     constructor() {
         log.transports.file.level = 'info';
         autoUpdater.logger = log;
-        autoUpdater.checkForUpdatesAndNotify();
+
+        // Disable automatic updates for now.
+        // autoUpdater.checkForUpdatesAndNotify();
     }
 }
 
