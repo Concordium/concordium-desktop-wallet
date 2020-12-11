@@ -10,6 +10,7 @@ import TodoPage from './containers/TodoPage';
 import IdentityPage from './containers/IdentityPage';
 import AddressBookPage from './containers/AddressBookPage';
 import IssuancePage from './containers/IssuancePage';
+import AccountCreation from './containers/AccountCreationPage';
 import styles from './Main.css';
 
 export default function Routes() {
@@ -22,6 +23,10 @@ export default function Routes() {
                     <Route
                         path={routes.IDENTITYISSUANCE}
                         component={IssuancePage}
+                    />
+                    <Route
+                        path={routes.ACCOUNTCREATION}
+                        component={AccountCreation}
                     />
                     <Route path={routes.IDENTITIES} component={IdentityPage} />
                     <Route

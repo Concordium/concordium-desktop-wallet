@@ -17,7 +17,6 @@ import {
     getHTMLform,
 } from '../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../utils/rustInterface';
-import identityjson from '../utils/IdentityObject.json';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -68,6 +67,7 @@ export default function IdentityIssuanceExternal(): JSX.Element {
 
     useEffect(() => {
         if (provider) {
+            console.log(JSON.stringify(provider));
             createIdentity(provider, setText, setLocation, iframeRef)
                 .then((verifyLocation) => {
                     const input = {

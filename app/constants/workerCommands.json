@@ -1,4 +1,6 @@
 {
     "createIdRequest": "'createIdRequest'",
-    "buildPublicInformationForIp": "buildPubInfo"
+    "buildPublicInformationForIp": "buildPubInfo",
+    "createUnsignedCredential": "createUnsignedCredential",
+    "createCredential": "createCredential"
 }

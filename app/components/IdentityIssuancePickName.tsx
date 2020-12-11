@@ -5,7 +5,7 @@ import styles from './Styling.css';
 import { setNames } from '../features/identityIssuanceSlice';
 import routes from '../constants/routes.json';
 
-export default function IdentityIssuancePickName(submit): JSX.Element {
+export default function IdentityIssuancePickName(): JSX.Element {
     const [identity, setIdentity] = useState('');
     const [account, setAccount] = useState('');
     const dispatch = useDispatch();

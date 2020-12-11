@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import {
     accountsSelector,
     chooseAccount,
@@ -7,6 +8,7 @@ import {
 } from '../features/accountsSlice';
 import styles from './Accounts.css';
 import accountListElement from './AccountListElement';
+import routes from '../constants/routes.json';
 
 export default function AccountList() {
     const dispatch = useDispatch();
@@ -15,6 +17,9 @@ export default function AccountList() {
 
     return (
         <div className={styles.halfPage}>
+            <Link to={routes.ACCOUNTCREATION}>
+                <button>+</button>
+            </Link>
             <div className={styles.accountList}>
                 {accounts.map((account, index) =>
                     accountListElement(

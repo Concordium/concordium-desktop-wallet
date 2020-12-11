@@ -11,5 +11,11 @@
     "IDENTITYISSUANCE_PICKPROVIDER": "/identity/issuance/pick-provider",
     "IDENTITYISSUANCE_PICKNAMES": "/identity/issuance/pick-names",
     "IDENTITYISSUANCE_EXTERNAL": "/identity/issuance/external",
-    "IDENTITYISSUANCE_FINAL": "/identity/issuance/final"
+    "IDENTITYISSUANCE_FINAL": "/identity/issuance/final",
+    "ACCOUNTCREATION": "/account/create",
+    "ACCOUNTCREATION_PICKNAME": "/account/create/pickName",
+    "ACCOUNTCREATION_CHOOSEIDENTITY": "/account/create/chooseIdentity",
+    "ACCOUNTCREATION_PICK_ATTRIBUTES": "/account/create/PickAttributes",
+    "ACCOUNTCREATION_GENERATE": "/account/create/generate",
+    "ACCOUNTCREATION_FINAL": "/account/create/final"
 }
