@@ -84,7 +84,12 @@ Threshold: ${pubInfoForIp.publicKeys.threshold}
     return JSON.parse(idRequest);
 }
 
-export async function createCredential(identity, context, displayMessage) {
+export async function createCredential(
+    identity,
+    accountNumber,
+    context,
+    displayMessage
+) {
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
 
@@ -92,7 +97,7 @@ export async function createCredential(identity, context, displayMessage) {
     const worker = new PromiseWorker(rawWorker);
 
     displayMessage('Please confirm exporting public key on device');
-    // const publicKey = await ledger.getPublicKey([0, 0, identity.getLedgerId, 2, 0, 0]);
+    // const publicKey = await ledger.getPublicKey([0, 0, identity.getLedgerId, 2, 0, 0]); TODO: use this
     displayMessage('Please wait');
 
     displayMessage('Please confirm exporting prf key on device');
@@ -115,7 +120,7 @@ export async function createCredential(identity, context, displayMessage) {
             },
         ],
         threshold: 1,
-        accountNumber: 1,
+        accountNumber,
         revealedAttributes: [],
         randomness: {
             randomness: identity.getRandomness(),
@@ -124,7 +129,6 @@ export async function createCredential(identity, context, displayMessage) {
         idCredSec: idCredSecSeed.toString('hex'),
     };
 
-    console.log(credentialInput.identityObject);
     const unsignedCredentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createUnsignedCredential,
         input: JSON.stringify(credentialInput),
@@ -136,18 +140,28 @@ export async function createCredential(identity, context, displayMessage) {
     console.log(unsignedCredentialDeploymentInfo);
     displayMessage(`
 Please sign challenge on device:
-Challenge: ${unsignedCredentialDeploymentInfo.proofs.unsigned_challenge}
+Challenge: ${unsignedCredentialDeploymentInfo.unsigned_challenge}
 `);
-    // sign: unsigned_credential.proofs.unsigned_challenge
-    const challengeSignature; // TODO: fix this
+    console.log(unsignedCredentialDeploymentInfo.unsigned_challenge);
+    const path = [0, 0, identity.getLedgerId, 2, accountNumber, 0];
+    const challengeSignature = await ledger.signAccountChallenge(
+        Buffer.from(unsignedCredentialDeploymentInfo.unsigned_challenge, 'hex'),
+        path
+    );
     displayMessage('Please wait');
 
-    const credentialDeploymentInfo = await worker.postMessage({
-        command: workerCommands.createCredential,
-        input: JSON.stringify({
-            unsignedInfo: unsignedCredentialDeploymentInfo,
-            signature: challengeSignature,
-        }),
-    });
+    let credentialDeploymentInfo;
+    try {
+        credentialDeploymentInfo = await worker.postMessage({
+            command: workerCommands.createCredential,
+            input: JSON.stringify({
+                unsignedInfo: unsignedCredentialDeploymentInfo,
+                signature: challengeSignature.toString('hex'),
+            }),
+        });
+    } catch (e) {
+        console.log(e);
+    }
+    console.log(credentialDeploymentInfo);
     return credentialDeploymentInfo;
 }

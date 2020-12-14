@@ -78,7 +78,7 @@ export default function IdentityIssuanceExternal(): JSX.Element {
                     confirmIdentity(dispatch, identityName, verifyLocation);
                     dispatch(push(routes.IDENTITYISSUANCE_FINAL));
                 })
-                .catch(console.log('unable to create identity')); // TODO: handle failure
+                .catch((e) => console.log('unable to create identity', e)); // TODO: handle failure
         }
     }, [provider, setLocation, dispatch, accountName, identityName]);
 
