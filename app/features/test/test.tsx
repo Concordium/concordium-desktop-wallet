@@ -11,6 +11,7 @@ import {
     handleFieldChange,
     ledgerTest,
     publicInformationForIpTest,
+    credentialDeploymentTest,
 } from './testSlice';
 
 type ChangeHandler = (e: InputEvent) => void;
@@ -82,6 +83,15 @@ export default function Test() {
                     type="button"
                 >
                     PublicInfoForIpTest
+                </button>
+                <button
+                    onClick={() => {
+                        credentialDeploymentTest();
+                    }}
+                    data-tclass="btn"
+                    type="button"
+                >
+                    Sign credential deployment
                 </button>
             </div>
             <textarea value={summary} readOnly />
