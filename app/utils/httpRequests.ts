@@ -33,6 +33,11 @@ function getResponseBody(response) {
     });
 }
 
+export async function getTransactions(address) {
+    const response = await walletProxy.get('/v0/accTransactions/' + address);;
+    return response.data;
+}
+
 export async function getIdentityProviders() {
     return walletProxy.get('/v0/ip_info');
 }
