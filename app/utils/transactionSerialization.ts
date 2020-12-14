@@ -17,6 +17,22 @@ import {
     parseHexString,
 } from './serializationHelpers';
 
+export function getTransactionHash(transaction) {
+    const payload = serializeTransferPayload(
+        transaction.transactionKind,
+        transaction.payload
+    );
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    return hashSha256(header, payload);
+}
+
 export function serializeTransaction(
     transaction: AccountTransaction,
     signFunction: (transaction: AccountTransaction, hash: Buffer) => Buffer
@@ -35,6 +51,7 @@ export function serializeTransaction(
 
     const hash = hashSha256(header, payload);
     const signatures = signFunction(transaction, hash);
+    console.log(signatures);
     const serialSignature = serializeSignature(signatures);
 
     const serialized = new Uint8Array(

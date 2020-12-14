@@ -7,8 +7,8 @@
 .chosenAccount {
     align-content: right;
     display: inline-block;
-    height: 100 %;
-    width: 40 %;
+    height: 100%;
+    width: 40%;
 }
 
 .blob {
@@ -25,7 +25,6 @@
 }
 
 .accountListElement {
-    border: 10 px;
     padding-top: 10px;
     padding-bottom: 10px;
     width: 80%;
@@ -39,4 +38,12 @@
 .chosenAccountListElement {
     font-weight: bold;
     border-color: blue;
+}
+
+.accountActionsSpan {
+    display: block;
+}
+
+.accountActionsSpan Link Button {
+    padding-right: 10px;
 }
