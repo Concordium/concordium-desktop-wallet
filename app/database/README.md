@@ -1,4 +1,4 @@
-# Running database migrations
+# Database migrations 
 
 ## Adding a new migration
 
@@ -10,6 +10,4 @@ yarn knex migrate:make migration_filename --knexfile database/knexfile.ts
 
 ## Migrate to latest schema
 
-```console
-yarn knex migrate:latest --knexfile database/knexfile.ts
-```
+The application automatically runs the required migrations at startup.
