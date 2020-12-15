@@ -114,9 +114,14 @@ const createWindow = async () => {
     new AppUpdater();
 
     // Run database migrations at startup to ensure that the schema is up-to-date
-    knex.migrate.latest({ 
-        migrationSource: new WebpackMigrationSource(require.context('./database/migrations', false, /.ts$/))
-    });
+    if (process.env.NODE_ENV === 'production') {
+        knex.migrate.latest({
+            migrationSource: new WebpackMigrationSource(require.context('./database/migrations', false, /.ts$/))
+        });
+    } else {
+        const config = require('./database/knexfile.ts')['development'];
+        knex.migrate.latest(config);
+    }
 };
 
 /**
