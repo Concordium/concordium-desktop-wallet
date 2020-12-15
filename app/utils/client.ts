@@ -4,11 +4,13 @@ import {
     BlockHash,
     JSONResponse,
     SendTransactionRequest,
+    TransactionHash
 } from '../proto/api_pb';
 
 const port = 10000;
+const address = "localhost"; // "172.31.33.57";
 const client = new P2PClient(
-    `localhost:${port}`,
+    `${address}:${port}`,
     grpc.credentials.createInsecure()
 );
 
@@ -53,6 +55,20 @@ export function sendTransaction(
         );
 
         client.sendTransaction(request, buildMetaData(), (err, response) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(response);
+        });
+    });
+}
+
+export function getTransactionStatus(transactionId: string): Promise<JSONResponse> {
+    return new Promise<JSONResponse>((resolve, reject) => {
+        const transactionHash = new TransactionHash();
+        transactionHash.setTransactionHash(transactionId);
+
+        client.getTransactionStatus(transactionHash, buildMetaData(), (err, response) => {
             if (err) {
                 return reject(err);
             }

@@ -5,13 +5,13 @@ import { identitiesSelector } from '../features/accountsSlice';
 import routes from '../constants/routes.json';
 import identityListElement from './IdentityListElement';
 
-export default function AccountCreationChooseIdentity(setIndex): JSX.Element {
+export default function AccountCreationChooseIdentity(setIdentity): JSX.Element {
     const [chosenIndex, chooseIdentity] = useState(0);
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
 
     function submit() {
-        setIndex(chosenIndex);
+        setIdentity(identities[chosenIndex]);
         dispatch(push(routes.ACCOUNTCREATION_GENERATE));
     }
 

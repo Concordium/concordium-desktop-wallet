@@ -5,7 +5,6 @@ import styles from './Accounts.css';
 
 export default function IdentityView() {
     const identity = useSelector(chosenIdentitySelector);
-    console.log(identity);
 
     if (identity === undefined) {
         return <div />;

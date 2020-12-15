@@ -10,6 +10,7 @@ use serde_json::{from_str, from_value, Value as SerdeValue};
 use std::{cmp::max, collections::BTreeMap, convert::TryInto};
 type ExampleCurve = G1;
 use ed25519_dalek as ed25519;
+use sha2::{Digest, Sha256};
 
 use ::failure::Fallible;
 use id::{
@@ -241,7 +242,14 @@ pub fn get_credential_deployment_info_aux(
         proofs: cdp,
     };
 
-    let response = json!(info);
+    let info_as_bytes = &to_bytes(&info);
+    let hex = hex::encode(info_as_bytes);
+    let hash = hex::encode(Sha256::digest(info_as_bytes));
+    let response = json!({
+        "hex": hex,
+        "info": info,
+        "hash": hash
+    });
 
     Ok(response.to_string())
 }

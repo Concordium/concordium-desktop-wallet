@@ -15,7 +15,7 @@ export async function createIdentityRequestObjectLedger(
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
 
-    const identity = 4;
+    const identity = 5;
 
     displayMessage('Please confirm exporting prf key on device');
     const prfKeySeed = await ledger.getPrfKey(identity);
@@ -60,7 +60,12 @@ export async function createIdentityRequestObjectLedger(
     const pubInfoForIp = JSON.parse(pubInfoForIpString);
     pubInfoForIp.publicKeys.keys[0].verifyKey = `00${pubInfoForIp.publicKeys.keys[0].verifyKey}`; // TODO: attach schemeId properly.
 
-    const path = [0, 0, identity, 2, 0, 0];
+    const path = {
+        identityIndex: identity,
+        accountIndex: 0,
+        signatureIndex: 0,
+    }
+
     displayMessage(`
 Please sign information on device:
 Identity Credentials Public (IdCredPub): ${pubInfoForIp.idCredPub}
@@ -88,23 +93,22 @@ export async function createCredential(
     identity,
     accountNumber,
     context,
-    displayMessage
+    displayMessage,
+    ledger
 ) {
-    const transport = await TransportNodeHid.open('');
-    const ledger = new ConcordiumLedgerClient(transport);
 
     const rawWorker = new RustWorker();
     const worker = new PromiseWorker(rawWorker);
 
     displayMessage('Please confirm exporting public key on device');
-    // const publicKey = await ledger.getPublicKey([0, 0, identity.getLedgerId, 2, 0, 0]); TODO: use this
+    const publicKey = await ledger.getPublicKey([0, 0, identity.getLedgerId(), 2, 0, 0]);
     displayMessage('Please wait');
 
     displayMessage('Please confirm exporting prf key on device');
-    const prfKeySeed = await ledger.getPrfKey(identity);
+    const prfKeySeed = await ledger.getPrfKey(identity.getLedgerId());
 
     displayMessage('Please confirm exporting id cred sec on device');
-    const idCredSecSeed = await ledger.getIdCredSec(identity);
+    const idCredSecSeed = await ledger.getIdCredSec(identity.getLedgerId());
     displayMessage('Please wait');
 
     const credentialInput = {
@@ -116,7 +120,7 @@ export async function createCredential(
             {
                 schemeId: 'Ed25519',
                 verifyKey:
-                    '3d0f6d2919f9b47d446426a9b4c3f80557175856b4f886e6340aef337aaf5c6a', // publicKey.toString('hex'),
+                    publicKey.toString('hex'),
             },
         ],
         threshold: 1,
@@ -143,7 +147,7 @@ Please sign challenge on device:
 Challenge: ${unsignedCredentialDeploymentInfo.unsigned_challenge}
 `);
     console.log(unsignedCredentialDeploymentInfo.unsigned_challenge);
-    const path = [0, 0, identity.getLedgerId, 2, accountNumber, 0];
+    const path = [0, 0, identity.getLedgerId(), 2, accountNumber, 0];
     const challengeSignature = await ledger.signAccountChallenge(
         Buffer.from(unsignedCredentialDeploymentInfo.unsigned_challenge, 'hex'),
         path
@@ -163,5 +167,5 @@ Challenge: ${unsignedCredentialDeploymentInfo.unsigned_challenge}
         console.log(e);
     }
     console.log(credentialDeploymentInfo);
-    return credentialDeploymentInfo;
+    return JSON.parse(credentialDeploymentInfo);
 }

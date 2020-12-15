@@ -8,7 +8,7 @@ import {
     accountNameSelector,
     identityNameSelector,
 } from '../features/identityIssuanceSlice';
-import { addIdentity, confirmIdentity } from '../features/accountsSlice';
+import { addIdentity, confirmIdentity, confirmIdentityAction } from '../features/accountsSlice';
 import routes from '../constants/routes.json';
 import styles from './IdentyIssuance.css';
 import {
@@ -17,7 +17,6 @@ import {
     getHTMLform,
 } from '../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../utils/rustInterface';
-
 const redirectUri = 'ConcordiumRedirectToken';
 
 async function getIdentityLocation(provider, global, setText) {
@@ -29,7 +28,7 @@ async function getIdentityLocation(provider, global, setText) {
     );
     console.log(data);
     const verifyLocation = await performIdObjectRequest(
-        'http://localhost:8100/api/identity', // provider.metadata.issuanceStart,
+        provider.metadata.issuanceStart,
         redirectUri,
         data.idObjectRequest
     );
@@ -67,6 +66,7 @@ export default function IdentityIssuanceExternal(): JSX.Element {
 
     useEffect(() => {
         if (provider) {
+
             console.log(JSON.stringify(provider));
             createIdentity(provider, setText, setLocation, iframeRef)
                 .then((verifyLocation) => {
