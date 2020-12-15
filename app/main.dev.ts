@@ -14,6 +14,8 @@ import path from 'path';
 import { app, BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import knex from './database/knex';
+import WebpackMigrationSource from './database/WebpackMigrationSource';
 
 export default class AppUpdater {
     constructor() {
@@ -110,6 +112,18 @@ const createWindow = async () => {
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line
     new AppUpdater();
+
+    // Run database migrations at startup to ensure that the schema is up-to-date
+    if (process.env.NODE_ENV === 'production') {
+        knex.migrate.latest({
+            migrationSource: new WebpackMigrationSource(
+                require.context('./database/migrations', false, /.ts$/)
+            ),
+        });
+    } else {
+        const config = require('./database/knexfile.ts').development;
+        knex.migrate.latest(config);
+    }
 };
 
 /**

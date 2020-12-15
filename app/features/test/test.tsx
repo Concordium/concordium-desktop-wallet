@@ -10,6 +10,7 @@ import {
     printCredentialDeployment,
     handleFieldChange,
 } from './testSlice';
+import { insertIdentity } from '../../database/IdentityDao';
 
 type ChangeHandler = (e: InputEvent) => void;
 
@@ -62,6 +63,15 @@ export default function Test() {
                     type="button"
                 >
                     printCredentialDeployment
+                </button>
+                <button
+                    onClick={() => {
+                        insertIdentity({ name: blockHash });
+                    }}
+                    data-tclass="btn"
+                    type="button"
+                >
+                    Insert identity
                 </button>
             </div>
             <textarea value={summary} readOnly />

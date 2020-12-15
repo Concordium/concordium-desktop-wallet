@@ -22,7 +22,7 @@ export default function Routes() {
 
     return (
         <div className={styles.sidebar}>
-            {sideBarElements.map(member => (
+            {sideBarElements.map((member) => (
                 <Link
                     to={member.route}
                     key={member.route}
