@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, Dispatch } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 import { getAllIdentities } from '../database/IdentityDao';
@@ -8,7 +8,7 @@ const identitySlice = createSlice({
     name: 'identities',
     initialState: {
         identities: [],
-        chosenIdentity: undefined
+        chosenIdentity: undefined,
     },
     reducers: {
         updateIdentities: (state, index) => {
@@ -16,7 +16,7 @@ const identitySlice = createSlice({
         },
         chooseIdentity: (state, index) => {
             state.chosenIdentity = index.payload;
-        }
+        },
     },
 });
 
@@ -28,8 +28,8 @@ export const identitiesSelector = (state: RootState) =>
 export const chosenIdentitySelector = (state: RootState) =>
     state.identities.chosenIdentity;
 
-export async function loadIdentities(dispatch: any) {
-    let identities: Identity[] = await getAllIdentities();
+export async function loadIdentities(dispatch: Dispatch) {
+    const identities: Identity[] = await getAllIdentities();
     dispatch(updateIdentities(identities));
 }
 

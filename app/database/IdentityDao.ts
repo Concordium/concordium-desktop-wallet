@@ -5,13 +5,12 @@ import identityJson from './identity.json';
 const identitiesTable = 'identities';
 
 export async function getAllIdentities(): Promise<Identity[]> {
-    let identities = await knex.select().table(identitiesTable);
-    return identities;
+    return knex.select().table(identitiesTable);
 }
 
 export async function insertIdentity(identity: Identity) {
     // TODO Remove test code.
-    var identityObject = identityJson;
+    const identityObject = identityJson;
     identity.identityObject = JSON.stringify(identityObject);
-    return await knex(identitiesTable).insert(identity);
+    return knex(identitiesTable).insert(identity);
 }
