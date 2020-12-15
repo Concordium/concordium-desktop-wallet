@@ -6,8 +6,18 @@ import { createCredential } from '../utils/rustInterface';
 import identityjson from '../utils/idObject.json';
 import context from '../utils/context.json';
 import { makeCredentialDeploymentPayload } from '../utils/transactionSerialization';
+import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
+import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
+import { serializeCredentialDeployment } from '../utils/transactionSerialization';
+import { sendTransaction } from '../utils/client';
+import { addAccount, confirmAccount } from '../features/accountsSlice';
+
+import signature from '../constants/signature.json';
+import credential from '../constants/credential.json';
 
 async function createAccount(identity, setMessage) {
+    const transport = await TransportNodeHid.open('');
+    const ledger = new ConcordiumLedgerClient(transport);
     setMessage('Please Wait');
 
     const mockIdentity = {
@@ -18,26 +28,24 @@ async function createAccount(identity, setMessage) {
     };
     const accountNumber = 1;
 
-    const credential = await createCredential(
+    const credentialDeploymentInformation = await createCredential(
         mockIdentity,
         accountNumber,
         context,
-        setMessage
+        setMessage,
+        ledger
     );
-    setMessage(`
-Please sign credential on device:
-Credential: ${credential}
-    `);
-    const transport = await TransportNodeHid.open('');
-    const ledger = new ConcordiumLedgerClient(transport);
-
-    const path = [0, 0, mockIdentity.getLedgerId, 2, accountNumber, 0];
-    const Tranactionsignature = ledger.signCredentialDeploymentInfo(credential);
-    setMessage('Please wait');
-
-    const payload = serializeCredentialDeployment(credentialDeploymentInfo);
+    const extra = new Uint8Array(2);
+    extra[0] = 0; // version
+    extra[1] = 1; // credDep Kind
+    const payload = Buffer.concat([extra, Buffer.from(credentialDeploymentInformation.hex,'hex')]);
     const response = sendTransaction(payload);
     console.log(response);
+    return {
+        response: response,
+        hash: credentialDeploymentInformation.hash,
+        info: credentialDeploymentInformation.info
+    };
 }
 
 export default function AccountCreationGenerate(
@@ -47,14 +55,16 @@ export default function AccountCreationGenerate(
     const dispatch = useDispatch();
     const [text, setText] = useState();
 
+    console.log(identity);
     useEffect(() => {
         if (identity !== undefined) {
             createAccount(identity, setText)
-                .then((account) => {
-                    dispatch(addAccount(accountName, account));
+                .then(({response, hash}) => {
+                    dispatch(addAccount({accountName, identityName: identity.name}));
+                    confirmAccount(dispatch, accountName, hash);
                     dispatch(push(routes.IDENTITYISSUANCE_FINAL));
                 })
-                .catch((e) => 'creating account failed: ${e} ');
+                .catch((e) => console.log(`creating account failed: ${e.stack} `));
         }
     }, [identity, dispatch, accountName, setText]);
 

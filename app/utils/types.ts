@@ -14,10 +14,10 @@ export interface NewAccount {
     threshold: number;
 }
 
-// AccountAddress if deploying credentials to an existing account, and 
+// AccountAddress if deploying credentials to an existing account, and
 // NewAccount for deployment of a new account.
 // TODO: Add support for AccountAddress for updating existing account credentials.
-type CredentialAccount =  NewAccount;
+type CredentialAccount = NewAccount;
 
 export interface PublicInformationForIp {
     idCredPub: string;
@@ -65,7 +65,7 @@ interface CredentialDeploymentValues {
     regId: RegId;
     ipId: IpIdentity;
     revocationThreshold: Threshold;
-    arData: any;    // Map with ar data
+    arData: any; // Map with ar data
     policy: Policy;
 }
 
@@ -113,9 +113,4 @@ export interface PublicInformationForIp {
     idCredPub: string;
     regId: string;
     publicKeys: NewAccount;
-}
-
-export interface NewAccount {
-    keys: string[];
-    threshold: number;
 }

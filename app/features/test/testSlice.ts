@@ -16,7 +16,14 @@ import {
 } from '../../utils/test';
 
 import ConcordiumLedgerClient from '../ledger/ConcordiumLedgerClient';
-import { AccountTransaction, CredentialDeploymentInformation, NewAccount, Policy, VerifyKey, YearMonth } from '../../utils/types';
+import {
+    AccountTransaction,
+    CredentialDeploymentInformation,
+    NewAccount,
+    Policy,
+    VerifyKey,
+    YearMonth,
+} from '../../utils/types';
 import { PublicInformationForIp } from '../ledger/PublicInformationForIp';
 import { AccountPathInput } from '../ledger/Path';
 
@@ -73,50 +80,74 @@ export async function credentialDeploymentTest() {
 
     const key: VerifyKey = {
         scheme: 0,
-        key: Buffer.from("b6bc751f1abfb6440ff5cce27d7cdd1e7b0b8ec174f54de426890635b27e7daf", 'hex')
-    }
+        key: Buffer.from(
+            'b6bc751f1abfb6440ff5cce27d7cdd1e7b0b8ec174f54de426890635b27e7daf',
+            'hex'
+        ),
+    };
 
     const newAccount: NewAccount = {
         keys: [key],
-        threshold: 1
-    }
+        threshold: 1,
+    };
 
-    let arData = new Map();
-    arData.set('1', Buffer.from('aca024ce6083d4956edad825c3721da9b61e5b3712606ba1465f7818a43849121bdb3e4d99624e9a74b9436cc8948d178b9b144122aa070372e3fadee4998e1cc21161186a3d19698ad245e10912810df1aaddda16a27f654716108e27758099', 'hex'));
-    arData.set('2', Buffer.from('bac024ce6083d4956edad825c3721da9b61e5b3712606ba1465f7818a43849121bdb3e4d99624e9a74b9436cc8948d178b9b144122aa070372e3fadee4998e1cc21161186a3d19698ad245e10912810df1aaddda16a27f654716108e27758099', 'hex'));
+    const arData = new Map();
+    arData.set(
+        '1',
+        Buffer.from(
+            'aca024ce6083d4956edad825c3721da9b61e5b3712606ba1465f7818a43849121bdb3e4d99624e9a74b9436cc8948d178b9b144122aa070372e3fadee4998e1cc21161186a3d19698ad245e10912810df1aaddda16a27f654716108e27758099',
+            'hex'
+        )
+    );
+    arData.set(
+        '2',
+        Buffer.from(
+            'bac024ce6083d4956edad825c3721da9b61e5b3712606ba1465f7818a43849121bdb3e4d99624e9a74b9436cc8948d178b9b144122aa070372e3fadee4998e1cc21161186a3d19698ad245e10912810df1aaddda16a27f654716108e27758099',
+            'hex'
+        )
+    );
 
     const createdAt: YearMonth = {
         month: 12,
         year: 2020,
-    }
+    };
 
     const validTo: YearMonth = {
         month: 12,
         year: 2021,
-    }
+    };
 
-    let attributes = new Map();
+    const attributes = new Map();
     attributes.set(0, 'John');
     attributes.set(1, 'Doe');
-    const policy: Policy = { 
-        createdAt: createdAt,
-        validTo: validTo,
+    const policy: Policy = {
+        createdAt,
+        validTo,
         revealedAttributes: attributes,
-    }
+    };
 
     const credentialDeployment: CredentialDeploymentInformation = {
         values: {
             account: newAccount,
             ipId: 13,
-            regId: Buffer.from('89a1f69196a1d0423f4936aa664da95de16f40a639dba085073c5a7c8e710c2a402136cc89a39c12ed044e1035649c0f', 'hex'),
+            regId: Buffer.from(
+                '89a1f69196a1d0423f4936aa664da95de16f40a639dba085073c5a7c8e710c2a402136cc89a39c12ed044e1035649c0f',
+                'hex'
+            ),
             revocationThreshold: 2,
-            arData: arData,
-            policy: policy,
+            arData,
+            policy,
         },
-        proofs: Buffer.from('af609b5bf3ad821773144ed066fb4cfe1194e430f4f97aa228f409472f51bddc0f32bf34f2e1048c8bee2d19414eb76a', 'hex'),
-    }
+        proofs: Buffer.from(
+            'af609b5bf3ad821773144ed066fb4cfe1194e430f4f97aa228f409472f51bddc0f32bf34f2e1048c8bee2d19414eb76a',
+            'hex'
+        ),
+    };
 
-    const signature = await ledgerClient.signCredentialDeployment(credentialDeployment, [0,0,2,0,0,0]);
+    const signature = await ledgerClient.signCredentialDeployment(
+        credentialDeployment,
+        [0, 0, 2, 0, 0, 0]
+    );
     console.log(`Signature: ${signature.toString('hex')}`);
 }
 

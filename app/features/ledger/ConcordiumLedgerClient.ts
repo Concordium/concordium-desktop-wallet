@@ -5,7 +5,11 @@ import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
 import { signAccountChallenge } from './AccountChallenge';
 import { signCredentialDeployment } from './CredentialDeployment';
-import { AccountTransaction, PublicInformationForIp, CredentialDeploymentInformation } from '../../utils/types';
+import {
+    AccountTransaction,
+    PublicInformationForIp,
+    CredentialDeploymentInformation,
+} from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 
 /**
@@ -69,7 +73,14 @@ export default class ConcordiumLedgerClient {
         return signAccountChallenge(this.transport, path, challenge);
     }
 
-    signCredentialDeployment(credentialDeployment: CredentialDeploymentInformation, path: number[]): Promise<Buffer> {
-        return signCredentialDeployment(this.transport, credentialDeployment, path);
+    signCredentialDeployment(
+        credentialDeployment: CredentialDeploymentInformation,
+        path: number[]
+    ): Promise<Buffer> {
+        return signCredentialDeployment(
+            this.transport,
+            credentialDeployment,
+            path
+        );
     }
 }

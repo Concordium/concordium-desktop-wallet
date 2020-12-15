@@ -137,7 +137,7 @@ function serializeTransferWithSchedule(payload) {
     return serialized;
 }
 
-export function serializeCredentialDeployment(credentialInfo) {
+export function serializeCredentialDeployment(credentialInfo, signature) {
     let serializedBlockItem;
     if (isInitialInitialCredentialDeploymentInfo(credentialInfo)) {
         serializedBlockItem = serializeInitialCredentialDeploymentInfo(
@@ -166,12 +166,13 @@ function serializeInitialCredentialDeploymentInfo(info) {
     const values = serializeInitialCredentialDeploymentValues(info.idciValues);
     const { signature } = info;
 
-    const size = values.length + 2 + signature.length;
+    const size = 1 + values.length + 2 + signature.length;
     const serialized = new Uint8Array(size);
 
-    put(serialized, 0, values);
-    put(serialized, values.length, encodeWord16(signature.length));
-    put(serialized, values.length + 2, signature);
+    serialized[0] = 0;
+    put(serialized, 1, values);
+    put(serialized, 1 + values.length, encodeWord16(signature.length));
+    put(serialized, 1 + values.length + 2, signature);
 
     return serialized;
 }
@@ -186,15 +187,18 @@ function serializeInitialCredentialDeploymentValues(values): Buffer {
 }
 
 function serializeCredentialDeploymentInformation(info) {
-    const values = serializeCredentialDeploymentValues(info.values);
+    const values = serializeCredentialDeploymentValues(info);
     const { proofs } = info;
 
-    const size = values.length + 4 + proofs.length;
+    const size = 1 + values.length + 4 + proofs.length;
+    console.log(values.length);
+    console.log(proofs.length);
     const serialized = new Uint8Array(size);
 
-    put(serialized, 0, values);
-    put(serialized, values.length, encodeWord32(proofs.length));
-    put(serialized, values.length + 4, proofs);
+    serialized[0] = 1;
+    put(serialized, 1, values);
+    put(serialized, 1 + values.length, encodeWord32(proofs.length));
+    put(serialized, 1 + values.length + 4, proofs);
 
     return serialized;
 }
@@ -203,19 +207,20 @@ function serializeCredentialDeploymentValues(
     values: CredentialDeploymentValues
 ): Buffer {
     const account = serializeAccount(values.account);
-    const { regId } = values;
-    const ipId = encodeWord32(values.ipId);
+    const regId = Buffer.from(values.regId);
+    const ipId = encodeWord32(values.ipIdentity);
     const threshold = Buffer.from([values.revocationThreshold]);
     const arData = serializeArData(values.arData);
     const policy = serializePolicy(values.policy);
 
+    console.log([account, regId, ipId, threshold, arData, policy]);
     return Buffer.concat([account, regId, ipId, threshold, arData, policy]);
 }
 
 function serializeAccount(account) {
     if (account.keys != undefined) {
         function putKey(list, key) {
-            list.push(Buffer.from([0])); // TODO: Determine what this byte stands for.
+            list.push(Buffer.from([0])); // TODO: Determine what this byte stands for. -> its the schemeId
             const serializedKey = parseHexString(key.verifyKey);
             list.push(serializedKey);
             return list;
@@ -263,7 +268,11 @@ function serializePolicy(policy: Policy) {
 
 function serializeYearMonth(data: YearMonth): Uint8Array {
     const serialized = new Uint8Array(3);
-    put(serialized, 0, encodeWord16(data.year));
-    serialized[2] = data.month;
+    const year = parseInt(data.substring(0,4));
+    const month = parseInt(data.substring(4,6));
+
+    put(serialized, 0, encodeWord16(year));
+    serialized[2] = month;
+
     return serialized;
 }

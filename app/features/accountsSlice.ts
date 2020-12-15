@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import * as storage from '../utils/persistentStorage';
 import { getIdObject } from '../utils/httpRequests';
-
+import { getTransactionStatus } from '../utils/client';
 const accountStorageKey = 'accounts';
 const identityStorageKey = 'identities';
 const identityObjectStorageKey = 'identityObjects';
@@ -94,6 +94,19 @@ const accountsSlice = createSlice({
             );
             identity.status = 'rejected';
         },
+        addAccount: (state, data) => {
+            const { identityName, accountName } = data.payload;
+
+            const index = state.identities.findIndex(
+                (identity) => identity.name == identityName
+            );
+
+            state.identities[index].accounts.push(accountName);
+            storage.save(identityStorageKey, state.identities);
+        },
+        confirmAccountAction: (state, data) => {
+            console.log(data.payload, 'has been confirmed');
+        },
     },
 });
 
@@ -126,12 +139,14 @@ export const {
     chooseIdentity,
     chooseAccount,
     addIdentity,
+    addAccount,
 } = accountsSlice.actions;
 const {
     setIdentities,
     setAccounts,
-    confirmIdentityAction,
     rejectIdentityAction,
+    confirmIdentityAction,
+    confirmAccountAction
 } = accountsSlice.actions;
 
 export async function loadIdentities(dispatch) {
@@ -157,5 +172,29 @@ export async function confirmIdentity(dispatch, identityName, location) {
             dispatch(rejectIdentityAction(identityName));
         });
 }
+
+async function sleep(time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+export async function confirmAccount(dispatch, accountName, transactionId) {
+    while (true) {
+        const response =  await getTransactionStatus(transactionId);
+        const data = response.getValue();
+        console.log(data);
+        if (data === "null") {
+            console.log(data);
+        } else {
+            dataObject = JSON.parse(data);
+            const status = dataObject.status;
+            if (status === "finalized") {
+                dispatch(confirmAccountAction(accountName));
+                break;
+            }
+        }
+        await sleep(10000);
+    }
+}
+
 
 export default accountsSlice.reducer;
