@@ -10,6 +10,30 @@ import {
 import ConfirmTransfer from './ConfirmTransfer';
 import locations from '../constants/transferLocations.json';
 import { getTransactionHash } from '../utils/transactionSerialization';
+import { getTransactionStatus } from '../utils/client';
+
+async function sleep(time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+export async function confirmTransaction(transactionId) {
+    while (true) {
+        const response =  await getTransactionStatus(transactionId);
+        const data = response.getValue();
+        console.log(data);
+        if (data === "null") {
+            console.log(data);
+        } else {
+            dataObject = JSON.parse(data);
+            const status = dataObject.status;
+            if (status === "finalized") {
+                console.log("final", data);
+                break;
+            }
+        }
+        await sleep(10000);
+    }
+}
 
 export default function SimpleTransfer(account) {
     const [amount, setAmount] = useState('');
@@ -74,10 +98,19 @@ export default function SimpleTransfer(account) {
         </div>
     );
 
-    const TransferSubmitted = () => (
-        <div>
-            <pre>
-                {`
+    const TransferSubmitted = () => {
+        const dispatch = useDispatch();
+
+        useEffect(() => {
+            let hash = getTransactionHash(transaction).toString(
+                'hex'
+            );
+            confirmTransaction(hash);
+        }, [transaction])
+        return (
+            <div>
+                <pre>
+                    {`
                     Amount: G ${amount}
                     Estimated fee: G 1
                     To: ${recipient.name} (${recipient.address})
@@ -85,12 +118,13 @@ export default function SimpleTransfer(account) {
                         'hex'
                     )}
                     `}
-            </pre>
-            <Link to={routes.ACCOUNTS}>
-                <button>Finish</button>
-            </Link>
-        </div>
-    );
+                </pre>
+                <Link to={routes.ACCOUNTS}>
+                    <button>Finish</button>
+                </Link>
+            </div>
+        )
+    };
 
     function chosenComponent() {
         switch (location) {

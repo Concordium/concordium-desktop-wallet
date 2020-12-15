@@ -4,6 +4,7 @@ import {
     BlockHash,
     JSONResponse,
     SendTransactionRequest,
+    TransactionHash,
 } from '../proto/api_pb';
 
 const port = 10000;
@@ -53,6 +54,21 @@ export function sendTransaction(
         );
 
         client.sendTransaction(request, buildMetaData(), (err, response) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(response);
+        });
+    });
+}
+
+export function getTransactionStatus(transactionId: string): Promise<JSONResponse> {
+    return new Promise<JSONResponse>((resolve, reject) => {
+        const transactionHash = new TransactionHash();
+        console.log(transactionId)
+        transactionHash.setTransactionHash(transactionId);
+
+        client.getTransactionStatus(transactionHash, buildMetaData(), (err, response) => {
             if (err) {
                 return reject(err);
             }

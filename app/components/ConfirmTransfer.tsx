@@ -4,14 +4,14 @@ import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import { AccountTransaction, TransactionKind } from '../utils/types';
 import { sendTransaction } from '../utils/client';
-import { serializeTransaction } from '../utils/transactionSerialization';
+import { serializeTransaction, getTransactionHash } from '../utils/transactionSerialization';
 import locations from '../constants/transferLocations.json';
 
 async function ledgerSignTransfer(transaction) {
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
 
-    const path = [0, 0, 0, 2, 0, 0];
+    const path = [0, 0, 4, 2, 0, 0];
     const signature = await ledger.signTransfer(transaction, path);
     return signature;
 }
@@ -44,7 +44,7 @@ function ConfirmTransferComponent({
             transactionKind: TransactionKind.Simple_transfer,
             payload: {
                 toAddress: recipient.address,
-                amount: toMicro(amount),
+                amount: toMicroUnits(amount),
             },
         };
         setTransaction(transaction);
