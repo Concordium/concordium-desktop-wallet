@@ -94,7 +94,8 @@
       "output": "release"
     },
     "extraResources": [
-      "./resources/**"
+      "./resources/**",
+      "./app/database/migrations/*"
     ],
     "publish": {
       "provider": "github",

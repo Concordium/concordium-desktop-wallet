@@ -10,7 +10,6 @@ import {
 import {
     buildCredDep,
     makeTestTransferWithScheduleTransaction,
-    binaryVersionAsHex,
 } from '../../utils/test';
 
 const testSlice = createSlice({
