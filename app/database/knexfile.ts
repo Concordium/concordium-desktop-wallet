@@ -14,7 +14,18 @@ function fetchDevelopmentFilename(): string {
 }
 
 export default async function getKnexConfiguration(environment: string) {
-    if (environment === 'development') {
+    // Environment is undefined when running knex migrate:make from the CLI, so
+    // this configuration is only used to ensure that migrations end up in the
+    // correct directory.
+    if (!environment) {
+        return {
+            client: 'sqlite3',
+            useNullAsDefault: true,
+            migrations: {
+                directory: './migrations',
+            },
+        };   
+    } else if (environment === 'development') {
         return {
             client: 'sqlite3',
             connection: {
