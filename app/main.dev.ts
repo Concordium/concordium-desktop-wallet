@@ -11,7 +11,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import knex from './database/knex';
@@ -115,16 +115,21 @@ const createWindow = async () => {
 
     // Run database migrations at startup to ensure that the schema is up-to-date
     if (process.env.NODE_ENV === 'production') {
-        knex.migrate.latest({
+        (await knex()).migrate.latest({
             migrationSource: new WebpackMigrationSource(
                 require.context('./database/migrations', false, /.ts$/)
             ),
         });
     } else {
         const config = require('./database/knexfile.ts').development;
-        knex.migrate.latest(config);
+        (await knex()).migrate.latest(config);
     }
 };
+
+// Provides access to the userData path from renderer processes.
+ipcMain.handle('APP_GET_PATH', () => {
+    return app.getPath('userData');
+});
 
 /**
  * Add event listeners...
