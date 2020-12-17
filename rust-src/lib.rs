@@ -158,7 +158,7 @@ struct InitialAccountDataStruct {
     pub threshold: SignatureThreshold,
 }
 
-impl InitialAccountDataTrait for InitialAccountDataStruct {
+impl PublicInitialAccountData for InitialAccountDataStruct {
     fn get_threshold(&self) -> SignatureThreshold {
         self.threshold
     }
@@ -174,7 +174,7 @@ struct InitialAccountDataWithSignature {
     pub threshold: SignatureThreshold,
 }
 
-impl InitialAccountDataTrait for InitialAccountDataWithSignature {
+impl PublicInitialAccountData for InitialAccountDataWithSignature {
     fn get_threshold(&self) -> SignatureThreshold {
         self.threshold
     }
