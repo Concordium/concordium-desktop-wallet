@@ -3,16 +3,24 @@
     "productName": "concordium-desktop-wallet",
     "version": "0.1.0",
     "description": "concordium-desktop-wallet",
-    "main": "./out/main.prod.js",
+    "main": "./main.prod.js",
+    "author": {
+        "name": "Concordium",
+        "email": "contact@concordium.com",
+        "url": "https://concordium.com"
+    },
     "scripts": {
         "electron-rebuild": "node -r ../internals/scripts/BabelRegister.js ../internals/scripts/ElectronRebuild.js",
-        "postinstall": "yarn electron-rebuild"
+        "postinstall": "yarn electron-rebuild install-app-deps"
     },
     "dependencies": {
         "@ledgerhq/hw-transport-node-hid": "^5.30.0",
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "electron-json-storage": "^4.3.0",
         "grpc": "^1.24.4",
-        "react-modal": "^3.12.1"
+        "react-modal": "^3.12.1",
+        "knex": "^0.21.13",
+        "node-abi": "^2.19.3",
+        "sqlite3": "^5.0.0"
     }
 }

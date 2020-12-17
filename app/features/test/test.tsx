@@ -12,6 +12,7 @@ import {
     ledgerTest,
     publicInformationForIpTest,
 } from './testSlice';
+import { insertIdentity } from '../../database/IdentityDao';
 
 type ChangeHandler = (e: InputEvent) => void;
 
@@ -67,7 +68,7 @@ export default function Test() {
                 </button>
                 <button
                     onClick={() => {
-                        ledgerTest();
+                        ledgerTest
                     }}
                     data-tclass="btn"
                     type="button"
@@ -82,6 +83,15 @@ export default function Test() {
                     type="button"
                 >
                     PublicInfoForIpTest
+                </button>
+                <button
+                    onClick={() => {
+                        insertIdentity({ name: blockHash });
+                    }}
+                    data-tclass="btn"
+                    type="button"
+                >
+                    insertIdentity
                 </button>
             </div>
             <textarea value={summary} readOnly />

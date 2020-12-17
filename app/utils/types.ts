@@ -1,5 +1,44 @@
 import { AccountAddress } from '../proto/api_pb';
 
+export interface Versioned<T> {
+    v: number;
+    value: T;
+}
+
+export interface IdentityObject {
+    attributeList: AttributeList;
+    // TODO Implement all the other fields when needed.
+}
+
+export interface AttributeList {
+    createdAt: string;
+    validTo: string;
+    maxAccounts: number;
+    chosenAttributes: ChosenAttributes;
+}
+
+export interface ChosenAttributes {
+    countryOfResidence: string;
+    dob: string;
+    firstName: string;
+    idDocExpiresAt: string;
+    idDocIsseudAt: string;
+    idDocIssuer: string;
+    idDocNo: string;
+    idDocType: string;
+    lastName: string;
+    nationalIdNo: string;
+    nationality: string;
+    sex: number;
+    taxIdNo: string;
+}
+
+export interface Identity {
+    id: number;
+    name: string;
+    identityObject: string;
+}
+
 export interface AccountTransaction {
     sender: AccountAddress;
     nonce: number;
