@@ -18,16 +18,16 @@ async function sleep(time) {
 
 export async function confirmTransaction(transactionId) {
     while (true) {
-        const response =  await getTransactionStatus(transactionId);
+        const response = await getTransactionStatus(transactionId);
         const data = response.getValue();
         console.log(data);
-        if (data === "null") {
+        if (data === 'null') {
             console.log(data);
         } else {
             dataObject = JSON.parse(data);
-            const status = dataObject.status;
-            if (status === "finalized") {
-                console.log("final", data);
+            const { status } = dataObject;
+            if (status === 'finalized') {
+                console.log('final', data);
                 break;
             }
         }
@@ -67,11 +67,15 @@ export default function SimpleTransfer(account) {
                     autoFocus
                 />
             </span>
-            <button onClick={() => setLocation(locations.chooseRecipient)}>
+            <button
+                type="submit"
+                onClick={() => setLocation(locations.chooseRecipient)}
+            >
                 {' '}
                 {recipient ? recipient.name : 'Select Recipient'}{' '}
             </button>
             <button
+                type="submit"
                 onClick={() => setLocation(locations.confirmTransfer)}
                 disabled={!recipient}
             >
@@ -88,7 +92,7 @@ export default function SimpleTransfer(account) {
     const PickRecipient = () => (
         <div>
             <Link to={routes.ACCOUNTS_SIMPLETRANSFER_PICKAMOUNT}>
-                <button>{'<--'}</button>
+                <button type="submit">{'<--'}</button>
             </Link>
             {addressBook.map((entry) => (
                 <div key={entry} onClick={() => chooseRecipientOnClick(entry)}>
@@ -99,14 +103,10 @@ export default function SimpleTransfer(account) {
     );
 
     const TransferSubmitted = () => {
-        const dispatch = useDispatch();
-
         useEffect(() => {
-            let hash = getTransactionHash(transaction).toString(
-                'hex'
-            );
+            const hash = getTransactionHash(transaction).toString('hex');
             confirmTransaction(hash);
-        }, [transaction])
+        }, []);
         return (
             <div>
                 <pre>
@@ -120,10 +120,10 @@ export default function SimpleTransfer(account) {
                     `}
                 </pre>
                 <Link to={routes.ACCOUNTS}>
-                    <button>Finish</button>
+                    <button type="submit">Finish</button>
                 </Link>
             </div>
-        )
+        );
     };
 
     function chosenComponent() {
@@ -139,6 +139,7 @@ export default function SimpleTransfer(account) {
                         recipient={recipient}
                         fromAddress={account.address}
                         amount={amount}
+                        transaction={transaction}
                         setTransaction={setTransaction}
                     />
                 );
@@ -152,7 +153,7 @@ export default function SimpleTransfer(account) {
     return (
         <div>
             <Link to={routes.ACCOUNTS}>
-                <button>x</button>
+                <button type="submit">x</button>
             </Link>
             <div key={location}> {chosenComponent()}</div>
         </div>

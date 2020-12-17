@@ -1,18 +1,22 @@
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
-import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import { AccountTransaction, TransactionKind } from '../utils/types';
 import { sendTransaction } from '../utils/client';
-import { serializeTransaction, getTransactionHash } from '../utils/transactionSerialization';
+import { serializeTransaction } from '../utils/transactionSerialization';
+import LedgerComponent from './LedgerComponent';
+
 import locations from '../constants/transferLocations.json';
 
-async function ledgerSignTransfer(transaction) {
-    const transport = await TransportNodeHid.open('');
-    const ledger = new ConcordiumLedgerClient(transport);
-
+async function ledgerSignTransfer(
+    transaction,
+    ledger,
+    setSerializedTransaction
+) {
     const path = [0, 0, 4, 2, 0, 0];
     const signature = await ledger.signTransfer(transaction, path);
+    setSerializedTransaction(
+        serializeTransaction(transaction, () => [signature])
+    );
     return signature;
 }
 
@@ -25,18 +29,17 @@ function ConfirmTransferComponent({
     amount,
     recipient,
     setLocation,
+    transaction,
     setTransaction,
 }): JSX.element {
-    const [statusMessage, setStatusMessage] = useState(
-        'please confirm transaction'
-    );
     const [serializedTransaction, setSerializedTransaction] = useState(
         undefined
     );
+
     const estimatedFee = 1; // TODO calculate
 
     useEffect(() => {
-        const transaction: AccountTransaction = {
+        const transferTransaction: AccountTransaction = {
             sender: fromAddress,
             nonce: 1,
             energyAmount: 1,
@@ -47,15 +50,8 @@ function ConfirmTransferComponent({
                 amount: toMicroUnits(amount),
             },
         };
-        setTransaction(transaction);
-        ledgerSignTransfer(transaction).then((signature) => {
-            setSerializedTransaction(
-                serializeTransaction(transaction, () => [signature])
-            );
-            setStatusMessage('Transfer has been signed');
-            return true;
-        });
-    }, [setTransaction, setSerializedTransaction, setStatusMessage, fromAddress, amount, recipient]);
+        setTransaction(transferTransaction);
+    }, [setTransaction, fromAddress, amount, recipient]);
 
     async function submit() {
         const response = await sendTransaction(serializedTransaction);
@@ -68,7 +64,10 @@ function ConfirmTransferComponent({
 
     return (
         <div>
-            <button onClick={() => setLocation(locations.pickAmount)}>
+            <button
+                type="button"
+                onClick={() => setLocation(locations.pickAmount)}
+            >
                 {'<--'}
             </button>
             <div>
@@ -77,11 +76,24 @@ function ConfirmTransferComponent({
                         Amount: G ${amount}
                         Estimated fee: G ${estimatedFee}
                         To: ${recipient.name} (${recipient.address})
-                        ${statusMessage}
-            `}
+                    `}
                 </pre>
+
+                <LedgerComponent
+                    ledgerCall={(ledger) =>
+                        ledgerSignTransfer(
+                            transaction,
+                            ledger,
+                            setSerializedTransaction
+                        )
+                    }
+                />
             </div>
-            <button onClick={submit} disabled={!serializedTransaction}>
+            <button
+                type="submit"
+                onClick={submit}
+                disabled={!serializedTransaction}
+            >
                 Submit
             </button>
         </div>
@@ -91,9 +103,27 @@ function ConfirmTransferComponent({
 ConfirmTransferComponent.propTypes = {
     fromAddress: PropTypes.string.isRequired,
     amount: PropTypes.number.isRequired,
-    recipient: PropTypes.object.isRequired,
+    recipient: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        address: PropTypes.string.isRequired,
+    }).isRequired,
+    transaction: PropTypes.shape({
+        sender: PropTypes.string,
+        nonce: PropTypes.number,
+        energyAmount: PropTypes.number,
+        expiry: PropTypes.number,
+        transactionKind: PropTypes.number,
+        payload: PropTypes.shape({
+            toAddress: PropTypes.string,
+            amount: PropTypes.number,
+        }),
+    }),
     setLocation: PropTypes.func.isRequired,
     setTransaction: PropTypes.func.isRequired,
+};
+
+ConfirmTransferComponent.defaultProps = {
+    transaction: undefined,
 };
 
 export default ConfirmTransferComponent;
