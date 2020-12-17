@@ -1,12 +1,14 @@
 import { AccountAddress } from '../proto/api_pb';
 
+type Hex = string;
+
 enum SchemeId {
     Ed25519 = 0,
 }
 
 export interface VerifyKey {
     scheme: SchemeId;
-    key: Buffer;
+    key: Hex;
 }
 
 export interface NewAccount {
@@ -18,13 +20,6 @@ export interface NewAccount {
 // NewAccount for deployment of a new account.
 // TODO: Add support for AccountAddress for updating existing account credentials.
 type CredentialAccount = NewAccount;
-
-export interface PublicInformationForIp {
-    idCredPub: string;
-    regId: string;
-    verificationKeys: string[];
-    threshold: number;
-}
 
 export interface AccountTransaction {
     sender: AccountAddress;
@@ -56,23 +51,19 @@ export enum BlockItemKind {
 }
 
 export interface CredentialDeploymentInformation {
-    values: CredentialDeploymentValues;
-    proofs: Proofs;
-}
-
-interface CredentialDeploymentValues {
     account: CredentialAccount;
     regId: RegId;
     ipId: IpIdentity;
     revocationThreshold: Threshold;
     arData: any; // Map with ar data
     policy: Policy;
+    proofs: Proofs;
 }
 
 type AccountAddress = Uint8Array;
 
 // 48 bytes containing a group element.
-type RegId = Uint8Array;
+type RegId = Hex;
 
 // An integer (32 bit) specifying the identity provider.
 type IpIdentity = number;
@@ -86,10 +77,7 @@ export interface Policy {
     revealedAttributes: any; // Map.Map AttributeTag AttributeValue
 }
 
-export interface YearMonth {
-    year: number; // word16,
-    month: number; // word8
-}
+type YearMonth = string; // "YYYYMM"
 
 export enum AttributeTag {
     firstName = 0,
@@ -107,10 +95,10 @@ export enum AttributeTag {
     taxIdNo = 12,
 }
 
-type Proofs = Uint8Array;
+type Proofs = Hex;
 
 export interface PublicInformationForIp {
-    idCredPub: string;
-    regId: string;
+    idCredPub: Hex;
+    regId: RegId;
     publicKeys: NewAccount;
 }
