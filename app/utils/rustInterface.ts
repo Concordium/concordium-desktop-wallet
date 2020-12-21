@@ -7,6 +7,7 @@ import workerCommands from '../constants/workerCommands.json';
 import { sendTransaction } from './client';
 
 export async function createIdentityRequestObjectLedger(
+    identity,
     ipInfo,
     arsInfos,
     global,
@@ -14,8 +15,6 @@ export async function createIdentityRequestObjectLedger(
 ) {
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
-
-    const identity = 5;
 
     displayMessage('Please confirm exporting prf key on device');
     const prfKeySeed = await ledger.getPrfKey(identity);
@@ -57,7 +56,7 @@ export async function createIdentityRequestObjectLedger(
     });
 
     console.log(pubInfoForIpString);
-    const pubInfoForIp = JSON.parse(pubInfoForIpString);
+    const pubInfoForIp: PublicInformationForIP = JSON.parse(pubInfoForIpString);
     pubInfoForIp.publicKeys.keys[0].verifyKey = `00${pubInfoForIp.publicKeys.keys[0].verifyKey}`; // TODO: attach schemeId properly.
 
     const path = {

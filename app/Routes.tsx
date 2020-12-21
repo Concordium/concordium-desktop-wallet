@@ -5,7 +5,7 @@ import routes from './constants/routes.json';
 import App from './containers/App';
 import HomePage from './containers/HomePage';
 import TestPage from './containers/TestPage';
-import AccountsPage from './containers/AccountsPage';
+import AccountPage from './containers/AccountPage';
 import TodoPage from './containers/TodoPage';
 import IdentityPage from './containers/IdentityPage';
 import AddressBookPage from './containers/AddressBookPage';
@@ -19,7 +19,7 @@ export default function Routes() {
             <div className={styles.mainWindow}>
                 <Switch>
                     <Route path={routes.TEST} component={TestPage} />
-                    <Route path={routes.ACCOUNTS} component={AccountsPage} />
+                    <Route path={routes.ACCOUNTS} component={AccountPage} />
                     <Route
                         path={routes.IDENTITYISSUANCE}
                         component={IssuancePage}

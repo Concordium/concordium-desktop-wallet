@@ -1,9 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
-import * as storage from '../utils/persistentStorage';
-
-const storageKey = 'addressbook';
+import {
+    getAddressBook,
+    insertEntry,
+    updateEntry,
+    removeEntry,
+} from '../database/AddressBookDao';
 
 const addressBookSlice = createSlice({
     name: 'addressBook',
@@ -12,23 +15,8 @@ const addressBookSlice = createSlice({
         chosenIndex: 0,
     },
     reducers: {
-        setAddressBook(state, addresses) {
+        updateAddressBook(state, addresses) {
             state.addressBook = addresses.payload;
-        },
-        saveAddressBook(state, addresses) {
-            storage.save(storageKey, addresses.payload);
-        },
-        addToAddressBook(state, address) {
-            // TODO validate address
-            state.addressBook.push(address.payload);
-            storage.save(storageKey, state.addressBook);
-        },
-        removeFromAddressBook(state, index) {
-            state.addressBook.splice(index.payload, 1);
-            storage.save(storageKey, state.addressBook);
-        },
-        updateAddressBookEntry(state, data) {
-            state.addressBook[data.payload.index] = data.payload.entry;
         },
         chooseIndex(state, index) {
             state.chosenIndex = index.payload;
@@ -36,20 +24,26 @@ const addressBookSlice = createSlice({
     },
 });
 
-export const {
-    setAddressBook,
-    saveAddressBook,
-    addToAddressBook,
-    removeFromAddressBook,
-    chooseIndex,
-    updateAddressBookEntry,
-} = addressBookSlice.actions;
+export const { chooseIndex, updateAddressBook } = addressBookSlice.actions;
 
-export function loadAddressBook(dispatch) {
-    storage
-        .load(storageKey)
-        .then((addresses) => dispatch(setAddressBook(addresses)))
-        .catch(console.log);
+export async function loadAddressBook(dispatch: Dispatch) {
+    const addressBook = await getAddressBook();
+    dispatch(updateAddressBook(addressBook));
+}
+
+export async function updateAddressBookEntry(dispatch, name, newEntry) {
+    await updateEntry(name, newEntry);
+    loadAddressBook(dispatch);
+}
+
+export async function addToAddressBook(dispatch, entry) {
+    await insertEntry(entry);
+    loadAddressBook(dispatch);
+}
+
+export async function removeFromAddressBook(dispatch, entry) {
+    await removeEntry(entry);
+    loadAddressBook(dispatch);
 }
 
 export const addressBookSelector = (state: RootState) =>

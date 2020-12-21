@@ -17,23 +17,26 @@ export default function AddressBookElementView() {
     const chosenEntry = addressBook[chosenIndex];
 
     function submitAddress(name, address, note) {
-        const payload = {
-            index: chosenIndex,
-            entry: {
-                name,
-                address,
-                note,
-            },
+        const entry = {
+            name,
+            address,
+            note,
         };
-        dispatch(updateAddressBookEntry(payload));
+        updateAddressBookEntry(dispatch, chosenEntry.name, entry);
     }
 
-    const modalButton = (open) => <button onClick={open}>edit</button>;
+    const modalButton = (open) => (
+        <button type="button" onClick={open}>
+            edit
+        </button>
+    );
 
     const modalBody = (close) => {
         return (
             <>
-                <button onClick={close}>x</button>
+                <button type="button" onClick={close}>
+                    x
+                </button>
                 {new AddAddress(close, submitAddress, chosenEntry)}
             </>
         );
@@ -49,7 +52,8 @@ export default function AddressBookElementView() {
         <div className={styles.chosenAccount}>
             {chosenEntry.name} {chosenEntry.address} {chosenEntry.note}{' '}
             <button
-                onClick={() => dispatch(removeFromAddressBook(chosenIndex))}
+                type="button"
+                onClick={() => removeFromAddressBook(dispatch, chosenEntry)}
             >
                 remove
             </button>

@@ -7,13 +7,13 @@ export function putBase58Check(
     base58Sstring: string
 ) {
     const decoded = bs58check.decode(base58Sstring);
-    for (let i = 1; i < decoded.length; i++) {
+    for (let i = 1; i < decoded.length; i += 1) {
         array[startIndex + i - 1] = decoded[i];
     }
 }
 
 export function put(array, start, input) {
-    for (let i = 0; i < input.length; i++) {
+    for (let i = 0; i < input.length; i += 1) {
         array[start + i] = input[i];
     }
 }

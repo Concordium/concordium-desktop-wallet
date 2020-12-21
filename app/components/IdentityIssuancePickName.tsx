@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import styles from './Styling.css';
-import { setNames } from '../features/identityIssuanceSlice';
+import { setNames } from '../features/IdentityIssuanceSlice';
 import routes from '../constants/routes.json';
 
 export default function IdentityIssuancePickName(): JSX.Element {
@@ -44,6 +44,7 @@ export default function IdentityIssuancePickName(): JSX.Element {
                 />
             </span>
             <button
+                type="button"
                 onClick={() => {
                     submit();
                 }}

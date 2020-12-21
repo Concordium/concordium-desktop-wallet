@@ -2,12 +2,8 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
-
-import {
-    chosenAccountSelector,
-    chosenIdentitySelector,
-} from '../features/accountsSlice';
-
+import { chosenAccountSelector } from '../features/AccountSlice';
+import { chosenIdentitySelector } from '../features/IdentitySlice';
 import accountListElement from './AccountListElement';
 import identityListElement from './IdentityListElement';
 import styles from './IdentyIssuance.css';
@@ -29,7 +25,7 @@ export default function IdentityIssuanceFinal(): JSX.Element {
                 {accountListElement(account, () => {}, true)}
             </div>
             <Link to={routes.IDENTITIES}>
-                <button>Finished</button>
+                <button type="button">Finished</button>
             </Link>
         </div>
     );
