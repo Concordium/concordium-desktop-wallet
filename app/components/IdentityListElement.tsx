@@ -1,15 +1,18 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import styles from './Accounts.css';
 
-export default function IdentityListElement(
+function IdentityListElement({
     identity,
     onClick,
-    highlighted
-): JSX.Element {
+    highlighted,
+    index,
+}): JSX.Element {
     return (
         <div
             onClick={onClick}
-            key={identity.signature}
+            key={identity.name}
+            tabIndex={index}
             className={`${styles.accountListElement} ${
                 highlighted ? styles.chosenAccountListElement : null
             }`}
@@ -18,3 +21,16 @@ export default function IdentityListElement(
         </div>
     );
 }
+
+IdentityListElement.propTypes = {
+    identity: PropTypes.shape({
+        status: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        provider: PropTypes.string.isRequired,
+    }).isRequired,
+    onClick: PropTypes.func.isRequired,
+    highlighted: PropTypes.bool.isRequired,
+    index: PropTypes.number.isRequired,
+};
+
+export default IdentityListElement;

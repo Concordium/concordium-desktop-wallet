@@ -5,7 +5,7 @@ import {
     accountsSelector,
     chooseAccount,
     chosenAccountIndexSelector,
-} from '../features/accountsSlice';
+} from '../features/AccountSlice';
 import styles from './Accounts.css';
 import accountListElement from './AccountListElement';
 

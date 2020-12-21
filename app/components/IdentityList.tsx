@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
-import identityListElement from './IdentityListElement';
+import IdentityListElement from './IdentityListElement';
 import {
     loadIdentities,
     chooseIdentity,
@@ -30,23 +30,17 @@ export default function IdentityList() {
     return (
         <div className={styles.halfPage}>
             <Link to={routes.IDENTITYISSUANCE}>
-                <button>x</button>
+                <button type="button">x</button>
             </Link>
 
             {identities.map((identity: Identity, i) => (
-                <div
-                    role="button"
-                    tabIndex={i}
+                <IdentityListElement
+                    identity={identity}
+                    highlighted={identity === chosenIdentity}
+                    index={i}
                     onClick={() => dispatch(chooseIdentity(i))}
-                    className={`${styles.identityListElement} ${
-                        identity === chosenIdentity
-                            ? styles.chosenIdentityListElement
-                            : null
-                    }`}
                     key={identity.id}
-                >
-                    <h1 className={styles.name}>{identity.name}</h1>
-                </div>
+                />
             ))}
         </div>
     );

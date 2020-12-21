@@ -1,9 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {
-    accountsSelector,
-    chosenAccountSelector,
-} from '../features/accountsSlice';
+import { chosenAccountSelector } from '../features/AccountSlice';
 import styles from './Accounts.css';
 
 export default function AccountView() {

@@ -24,8 +24,9 @@ export default async function getKnexConfiguration(environment: string) {
             migrations: {
                 directory: './migrations',
             },
-        };   
-    } else if (environment === 'development') {
+        };
+    }
+    if (environment === 'development') {
         return {
             client: 'sqlite3',
             connection: {

@@ -49,7 +49,6 @@ export async function addPendingIdentity(
         codeUri,
         identityProvider,
     };
-    console.log(identity);
     await insertIdentity(identity);
     return loadIdentities(dispatch);
 }

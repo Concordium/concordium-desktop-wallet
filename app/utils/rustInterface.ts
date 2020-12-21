@@ -55,7 +55,7 @@ export async function createIdentityRequestObjectLedger(
     });
 
     console.log(pubInfoForIpString);
-    const pubInfoForIp = JSON.parse(pubInfoForIpString);
+    const pubInfoForIp: PublicInformationForIP = JSON.parse(pubInfoForIpString);
     pubInfoForIp.publicKeys.keys[0].verifyKey = `00${pubInfoForIp.publicKeys.keys[0].verifyKey}`; // TODO: attach schemeId properly.
 
     const path = [0, 0, identity, 2, 0, 0];

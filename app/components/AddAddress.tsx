@@ -47,6 +47,7 @@ export default function AddAddress(close, submit, initialValues?) {
                 />
             </span>
             <button
+                type="submit"
                 onClick={() => {
                     submit(name, address, note);
                     close();

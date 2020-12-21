@@ -14,7 +14,7 @@ function getPromise(urlString, params) {
         path: `${url.pathname}?${new URLSearchParams(params).toString()}`,
     };
     console.log(options);
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         http.get(options, function (res) {
             resolve(res);
         });
@@ -22,7 +22,7 @@ function getPromise(urlString, params) {
 }
 
 function getResponseBody(response) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         let data = '';
         response.on('data', function (chunk) {
             data += chunk;
@@ -86,7 +86,6 @@ async function sleep(time) {
 
 export async function getIdObject(location) {
     while (true) {
-        console.log('--');
         const data = await pollIdObject(location);
         switch (data.status) {
             case 'done':

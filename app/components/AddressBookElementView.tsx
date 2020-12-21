@@ -22,16 +22,21 @@ export default function AddressBookElementView() {
             address,
             note,
         };
-        console.log(entry);
         updateAddressBookEntry(dispatch, chosenEntry.name, entry);
     }
 
-    const modalButton = (open) => <button onClick={open}>edit</button>;
+    const modalButton = (open) => (
+        <button type="button" onClick={open}>
+            edit
+        </button>
+    );
 
     const modalBody = (close) => {
         return (
             <>
-                <button onClick={close}>x</button>
+                <button type="button" onClick={close}>
+                    x
+                </button>
                 {new AddAddress(close, submitAddress, chosenEntry)}
             </>
         );
@@ -47,6 +52,7 @@ export default function AddressBookElementView() {
         <div className={styles.chosenAccount}>
             {chosenEntry.name} {chosenEntry.address} {chosenEntry.note}{' '}
             <button
+                type="button"
                 onClick={() => removeFromAddressBook(dispatch, chosenEntry)}
             >
                 remove

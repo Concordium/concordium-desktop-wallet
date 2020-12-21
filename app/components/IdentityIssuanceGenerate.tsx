@@ -7,9 +7,9 @@ import {
     providersSelector,
     accountNameSelector,
     identityNameSelector,
-} from '../features/identityIssuanceSlice';
+} from '../features/IdentityIssuanceSlice';
 import { addPendingIdentity, confirmIdentity } from '../features/IdentitySlice';
-import { addPendingAccount, confirmAccount } from '../features/accountsSlice';
+import { addPendingAccount, confirmAccount } from '../features/AccountSlice';
 import routes from '../constants/routes.json';
 import styles from './IdentyIssuance.css';
 import {

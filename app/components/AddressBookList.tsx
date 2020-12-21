@@ -29,12 +29,18 @@ export default function AddressBookList(): JSX.Element {
         addToAddressBook(dispatch, entry);
     }
 
-    const modalButton = (open) => <button onClick={open}>+</button>;
+    const modalButton = (open) => (
+        <button type="button" onClick={open}>
+            +
+        </button>
+    );
 
     const modalBody = (close) => {
         return (
             <>
-                <button onClick={close}>x</button>
+                <button type="button" onClick={close}>
+                    x
+                </button>
                 {new AddAddress(close, submitAddress)}
             </>
         );

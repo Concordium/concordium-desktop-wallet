@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import {
     identitiesSelector,
@@ -16,7 +16,6 @@ export default function IdentityView() {
     }
 
     const identity: Identity = identities[chosenIndex];
-    console.log(identity);
 
     if (identity.status !== 'confirmed') {
         return (

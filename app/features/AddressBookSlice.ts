@@ -32,7 +32,6 @@ export async function loadAddressBook(dispatch: Dispatch) {
 }
 
 export async function updateAddressBookEntry(dispatch, name, newEntry) {
-    console.log(entry);
     await updateEntry(name, newEntry);
     loadAddressBook(dispatch);
 }
