@@ -2,12 +2,8 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
-
-import {
-    chosenAccountSelector,
-    chosenIdentitySelector,
-} from '../features/accountsSlice';
-
+import { chosenAccountSelector } from '../features/accountsSlice';
+import { chosenIdentitySelector } from '../features/IdentitySlice';
 import accountListElement from './AccountListElement';
 import identityListElement from './IdentityListElement';
 import styles from './IdentyIssuance.css';

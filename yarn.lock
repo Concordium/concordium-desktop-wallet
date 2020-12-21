@@ -9719,11 +9719,6 @@ mustache@^2.1.1, mustache@^2.1.2, mustache@^2.2.1, mustache@^2.3.0:
   resolved "https://registry.yarnpkg.com/mustache/-/mustache-2.3.2.tgz#a6d4d9c3f91d13359ab889a812954f9230a3d0c5"
   integrity sha512-KpMNwdQsYz3O/SBS1qJ/o3sqUJ5wSb8gb0pul8CO0S56b9Y2ALm8zCfsjPXsqGFfoNBkDwZuZIAjhsZI03gYVQ==
 
-n@^6.8.0:
-  version "6.8.0"
-  resolved "https://registry.yarnpkg.com/n/-/n-6.8.0.tgz#2f619c09e2a12b16ecf96e17e89018273461ad69"
-  integrity sha512-SN8IwJfsJOx1FADDLcVH6hvXVSeQkha4gKgJQ7oDyMM0h2sYxBKvLNcNU5VnprKSqW8jL7pdvjMNIS4miQJSIA==
-
 nan@^2.12.1, nan@^2.13.2:
   version "2.14.2"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.2.tgz#f5376400695168f4cc694ac9393d0c9585eeea19"

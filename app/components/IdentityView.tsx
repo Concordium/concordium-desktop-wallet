@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import {
     identitiesSelector,
@@ -11,21 +11,23 @@ export default function IdentityView() {
     const identities: Identity[] = useSelector(identitiesSelector);
     const chosenIndex = useSelector(chosenIdentitySelector);
 
-    if (identity === undefined) {
+    if (identities === undefined || chosenIndex === undefined) {
         return <div />;
     }
 
     const identity: Identity = identities[chosenIndex];
-    const identityObject: IdentityObject = JSON.parse(identity.identityObject)
-        .value;
+    console.log(identity);
 
-    if (identity.status === 'confirmed' && identity.attributes) {
+    if (identity.status !== 'confirmed') {
         return (
             <div className={styles.halfPage}>
                 <h1 className={styles.name}>{identity.name}</h1>
             </div>
         );
     }
+
+    const identityObject: IdentityObject = JSON.parse(identity.identityObject)
+        .value;
 
     return (
         <div className={styles.halfPage}>

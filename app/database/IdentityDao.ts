@@ -1,16 +1,29 @@
 import { Identity } from '../utils/types';
 import knex from './knex';
-import identityJson from './identity.json';
+import { identitiesTable } from '../constants/databaseNames.json';
 
-const identitiesTable = 'identities';
+export async function getNextId(): Promise<number> {
+    return (
+        (
+            await (await knex())
+                .select('seq')
+                .table('sqlite_sequence')
+                .where('name', identitiesTable)
+                .first()
+        ).seq + 1
+    );
+}
 
 export async function getAllIdentities(): Promise<Identity[]> {
     return (await knex()).select().table(identitiesTable);
 }
 
 export async function insertIdentity(identity: Identity) {
-    // TODO Remove test code.
-    const identityObject = identityJson;
-    identity.identityObject = JSON.stringify(identityObject);
     return (await knex())(identitiesTable).insert(identity);
+}
+
+export async function updateIdentity(identityName: string, updatedValues) {
+    return (await knex())(identitiesTable)
+        .where({ name: identityName })
+        .update(updatedValues);
 }

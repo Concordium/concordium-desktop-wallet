@@ -6,6 +6,7 @@ import identityListElement from './IdentityListElement';
 import {
     loadIdentities,
     chooseIdentity,
+    identitiesSelector,
     chosenIdentitySelector,
 } from '../features/IdentitySlice';
 import { Identity } from '../utils/types';
@@ -14,7 +15,7 @@ import styles from './Identity.css';
 export default function IdentityList() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
-    const chosenIndex = useSelector(chosenIdentityIndexSelector);
+    const chosenIdentity = useSelector(chosenIdentitySelector);
 
     useEffect(() => {
         if (!identities) {
@@ -25,12 +26,6 @@ export default function IdentityList() {
     if (!identities) {
         return <div />;
     }
-
-    useEffect(() => {
-        if (identities.length === 0) {
-            loadIdentities(dispatch);
-        }
-    }, [dispatch, identities.length]);
 
     return (
         <div className={styles.halfPage}>
@@ -44,7 +39,7 @@ export default function IdentityList() {
                     tabIndex={i}
                     onClick={() => dispatch(chooseIdentity(i))}
                     className={`${styles.identityListElement} ${
-                        i === chosenIndex
+                        identity === chosenIdentity
                             ? styles.chosenIdentityListElement
                             : null
                     }`}

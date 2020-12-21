@@ -6,6 +6,7 @@ import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
 
 export async function createIdentityRequestObjectLedger(
+    identity,
     ipInfo,
     arsInfos,
     global,
@@ -13,8 +14,6 @@ export async function createIdentityRequestObjectLedger(
 ) {
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
-
-    const identity = 3;
 
     displayMessage('Please confirm exporting prf key on device');
     const prfKeySeed = await ledger.getPrfKey(identity);

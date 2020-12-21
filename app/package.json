@@ -16,7 +16,6 @@
     "dependencies": {
         "@ledgerhq/hw-transport-node-hid": "^5.30.0",
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
-        "electron-json-storage": "^4.3.0",
         "grpc": "^1.24.4",
         "react-modal": "^3.12.1",
         "knex": "^0.21.13",
