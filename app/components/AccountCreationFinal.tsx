@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
 
-import { chosenAccountSelector } from '../features/accountsSlice';
+import { chosenAccountSelector } from '../features/AccountSlice';
 
 import accountListElement from './AccountListElement';
 import styles from './IdentyIssuance.css';

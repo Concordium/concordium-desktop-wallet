@@ -63,7 +63,7 @@ export async function createIdentityRequestObjectLedger(
         identityIndex: identity,
         accountIndex: 0,
         signatureIndex: 0,
-    }
+    };
 
     displayMessage(`
 Please sign information on device:
@@ -91,16 +91,23 @@ Threshold: ${pubInfoForIp.publicKeys.threshold}
 export async function createCredential(
     identity,
     accountNumber,
-    context,
+    identityProvider,
+    global,
     displayMessage,
     ledger
 ) {
-
     const rawWorker = new RustWorker();
     const worker = new PromiseWorker(rawWorker);
 
     displayMessage('Please confirm exporting public key on device');
-    const publicKey = await ledger.getPublicKey([0, 0, identity.getLedgerId(), 2, 0, 0]);
+    const publicKey = await ledger.getPublicKey([
+        0,
+        0,
+        identity.getLedgerId(),
+        2,
+        0,
+        0,
+    ]);
     displayMessage('Please wait');
 
     displayMessage('Please confirm exporting prf key on device');
@@ -110,16 +117,17 @@ export async function createCredential(
     const idCredSecSeed = await ledger.getIdCredSec(identity.getLedgerId());
     displayMessage('Please wait');
 
+    console.log(identity.getIdentityObject());
+
     const credentialInput = {
-        ipInfo: context.ipInfo,
-        arsInfos: context.arsInfos,
-        global: context.global.value,
+        ipInfo: identityProvider.ipInfo,
+        arsInfos: identityProvider.arsInfos,
+        global,
         identityObject: identity.getIdentityObject(),
         publicKeys: [
             {
                 schemeId: 'Ed25519',
-                verifyKey:
-                    publicKey.toString('hex'),
+                verifyKey: publicKey.toString('hex'),
             },
         ],
         threshold: 1,
@@ -154,17 +162,12 @@ Challenge: ${unsignedCredentialDeploymentInfo.unsigned_challenge}
     displayMessage('Please wait');
 
     let credentialDeploymentInfo;
-    try {
-        credentialDeploymentInfo = await worker.postMessage({
-            command: workerCommands.createCredential,
-            input: JSON.stringify({
-                unsignedInfo: unsignedCredentialDeploymentInfo,
-                signature: challengeSignature.toString('hex'),
-            }),
-        });
-    } catch (e) {
-        console.log(e);
-    }
-    console.log(credentialDeploymentInfo);
+    credentialDeploymentInfo = await worker.postMessage({
+        command: workerCommands.createCredential,
+        input: JSON.stringify({
+            unsignedInfo: unsignedCredentialDeploymentInfo,
+            signature: challengeSignature.toString('hex'),
+        }),
+    });
     return JSON.parse(credentialDeploymentInfo);
 }

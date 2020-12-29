@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { identitiesSelector } from '../features/accountsSlice';
+import { identitiesSelector } from '../features/IdentitySlice';
 import routes from '../constants/routes.json';
-import identityListElement from './IdentityListElement';
+import IdentityListElement from './IdentityListElement';
 
-export default function AccountCreationChooseIdentity(setIdentity): JSX.Element {
+export default function AccountCreationChooseIdentity(
+    setIdentity
+): JSX.Element {
     const [chosenIndex, chooseIdentity] = useState(0);
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
@@ -26,13 +28,15 @@ export default function AccountCreationChooseIdentity(setIdentity): JSX.Element 
             >
                 submit
             </button>
-            {identities.map((identity, i) =>
-                identityListElement(
-                    identity,
-                    () => chooseIdentity(i),
-                    i === chosenIndex
-                )
-            )}
+            {identities.map((identity, i) => (
+                <IdentityListElement
+                    identity={identity}
+                    highlighted={i === chosenIndex}
+                    index={i}
+                    onClick={() => chooseIdentity(i)}
+                    key={identity.id}
+                />
+            ))}
         </div>
     );
 }

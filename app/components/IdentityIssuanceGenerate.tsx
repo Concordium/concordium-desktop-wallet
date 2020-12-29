@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import {
-    loadProviders,
     providersSelector,
     accountNameSelector,
     identityNameSelector,
@@ -22,7 +21,7 @@ import { getNextId } from '../database/IdentityDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
-async function getIdentityLocation(provider, global, setText) {
+async function getProviderLocation(provider, global, setText) {
     const id = await getNextId();
     const data = await createIdentityRequestObjectLedger(
         id,
@@ -31,19 +30,17 @@ async function getIdentityLocation(provider, global, setText) {
         global,
         setText
     );
-    console.log(data);
-    const verifyLocation = await performIdObjectRequest(
-        provider.metadata.issuanceStart,
+    const location = await performIdObjectRequest(
+        provider.metadata.issuanceStart, // 'http://localhost:8100/api/identity',
         redirectUri,
         data.idObjectRequest
     );
-    console.log(verifyLocation);
-    return verifyLocation;
+    return { location, randomness: data.randomness };
 }
 
 async function createIdentity(iframeRef) {
     // TODO: rename this
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         iframeRef.current.addEventListener('did-navigate', (e) => {
             console.log(e);
             const loc = e.url;
@@ -91,16 +88,26 @@ async function generateIdentity(
     try {
         setText('Please Wait');
         const global = await getGlobal();
-        const location = await getIdentityLocation(provider, global, setText);
+        const { location, randomness } = await getProviderLocation(
+            provider,
+            global,
+            setText
+        );
         setLocation(location);
-        const verifyLocation = await createIdentity(iframeRef);
-        addPendingIdentity(dispatch, identityName, verifyLocation, provider);
+        const confirmationLocation = await createIdentity(iframeRef);
+        addPendingIdentity(
+            dispatch,
+            identityName,
+            confirmationLocation,
+            provider,
+            randomness
+        );
         addPendingAccount(dispatch, accountName, identityName, 0);
         confirmIdentityAndInitialAccount(
             dispatch,
             identityName,
             accountName,
-            verifyLocation
+            confirmationLocation
         );
         dispatch(push(routes.IDENTITYISSUANCE_FINAL));
     } catch (e) {

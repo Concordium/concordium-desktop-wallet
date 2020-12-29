@@ -41,13 +41,15 @@ export async function addPendingIdentity(
     dispatch: Dispatch,
     identityName: string,
     codeUri: string,
-    identityProvider
+    identityProvider,
+    randomness: string
 ) {
     const identity = {
         name: identityName,
         status: 'pending',
         codeUri,
-        identityProvider,
+        identityProvider: JSON.stringify(identityProvider),
+        privateIdObjectDataEncrypted: randomness,
     };
     await insertIdentity(identity);
     return loadIdentities(dispatch);

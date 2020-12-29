@@ -6,6 +6,8 @@ import {
     insertAccount,
     updateAccount,
 } from '../database/AccountDao';
+import { getTransactionStatus } from '../utils/client';
+import { sleep } from '../utils/httpRequests';
 
 const accountsSlice = createSlice({
     name: 'accounts',
@@ -17,7 +19,7 @@ const accountsSlice = createSlice({
     reducers: {
         chooseAccount: (state, input) => {
             state.chosenAccountIndex = input.payload;
-            state.chosenAccount = state.chosenIdentity.accounts[input.payload];
+            state.chosenAccount = state.accounts[input.payload];
         },
         updateAccounts: (state, input) => {
             state.accounts = input.payload;
@@ -44,13 +46,17 @@ export async function addPendingAccount(
     dispatch: Dispatch,
     accountName: string,
     identityName: string,
-    accountNumber: number
+    accountNumber: number,
+    accountAddress: string,
+    credentialDeploymentInformation
 ) {
     const account = {
         name: accountName,
         identityName,
         status: 'pending',
         accountNumber,
+        address: accountAddress,
+        credential: credentialDeploymentInformation,
         // initial
     };
 
@@ -58,18 +64,43 @@ export async function addPendingAccount(
     return loadAccounts(dispatch);
 }
 
-export async function confirmAccount(
+export async function confirmAccountFake(
     dispatch: Dispatch,
     accountName: string,
     accountAddress: string,
     credential
 ) {
-    await updateAccount(identityName, {
+    await updateAccount(accountName, {
         status: 'confirmed',
         credential,
         address: accountAddress,
     });
     return loadAccounts(dispatch);
+}
+
+export async function confirmAccount(dispatch, accountName, transactionId) {
+    while (true) {
+        const response = await getTransactionStatus(transactionId);
+        const data = response.getValue();
+        console.log(data);
+        if (data === 'null') {
+            await updateAccount(accountName, {
+                status: 'rejected',
+            });
+            return loadAccounts(dispatch);
+        } else {
+            const dataObject = JSON.parse(data);
+            const { status } = dataObject;
+            if (status === 'finalized') {
+                await updateAccount(accountName, {
+                    status: 'confirmed',
+                    credential: dataObject.credential,
+                });
+                return loadAccounts(dispatch);
+            }
+        }
+        await sleep(10000);
+    }
 }
 
 export default accountsSlice.reducer;

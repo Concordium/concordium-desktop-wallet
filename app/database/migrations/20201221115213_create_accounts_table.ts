@@ -10,6 +10,7 @@ export async function up(knex: Knex): Promise<void> {
             table.string('status');
             table.string('address');
             table.string('identityName');
+            table.string('credential');
         }
     );
 }

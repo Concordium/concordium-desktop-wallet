@@ -205,6 +205,7 @@ pub fn generate_unsigned_credential_aux(
 }
 
 
+
 pub fn get_credential_deployment_info_aux(
     input: &str
 ) -> Fallible<String> {
@@ -237,18 +238,34 @@ pub fn get_credential_deployment_info_aux(
         cred_counter_less_than_max_accounts: unsigned_proofs.cred_counter_less_than_max_accounts,
     };
 
-    let info = CredentialDeploymentInfo {
+    let cdi = CredentialDeploymentInfo {
         values: unsigned_credential_info.values,
         proofs: cdp,
     };
 
-    let info_as_bytes = &to_bytes(&info);
-    let hex = hex::encode(info_as_bytes);
-    let hash = hex::encode(Sha256::digest(info_as_bytes));
+    let cdi_json = json!(cdi);
+
+    let address = AccountAddress::new(&cdi.values.reg_id);
+
+    let acc_cred = AccountCredential::Normal{cdi};
+    let block_item = BlockItem::Deployment(acc_cred);
+
+    let hash = {
+        let info_as_bytes = &to_bytes(&block_item);
+        hex::encode(Sha256::digest(info_as_bytes))
+    };
+
+    let hex = {
+        let versioned =  Versioned::new(VERSION_0, block_item);
+        let versioned_as_bytes = &to_bytes(&versioned);
+        hex::encode(versioned_as_bytes)
+    };
+
     let response = json!({
+        "credInfo": cdi_json,
         "hex": hex,
-        "info": info,
-        "hash": hash
+        "hash": hash,
+        "address": address
     });
 
     Ok(response.to_string())

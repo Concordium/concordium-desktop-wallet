@@ -73,3 +73,29 @@ impl PublicAccountData for AccountDataStruct {
         (&self.public_keys).to_vec()
     }
 }
+
+#[derive(SerdeSerialize, SerdeDeserialize)]
+#[serde(untagged)]
+pub enum BlockItem<
+        P: Pairing,
+    C: Curve<Scalar = P::ScalarField>,
+    AttributeType: Attribute<C::Scalar>,
+    > {
+    Deployment (AccountCredential<P, C, AttributeType>)
+}
+
+impl<
+        P: Pairing,
+    C: Curve<Scalar = P::ScalarField>,
+    AttributeType: Attribute<C::Scalar>,
+    > Serial for BlockItem<P, C, AttributeType> {
+    fn serial<B: Buffer>(&self, out: &mut B) {
+        match self {
+            BlockItem::Deployment(deployment) => {
+                out.write_u8(1).expect("Writing to buffer should succeed.");
+                deployment.serial(out);
+            }
+        }
+    }
+}
+

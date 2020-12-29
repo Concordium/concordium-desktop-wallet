@@ -33,6 +33,14 @@ function getResponseBody(response) {
     });
 }
 
+export async function credDep(cred) {
+    return await walletProxy.put('/v0/submitCredential', cred, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+}
+
 export async function getIdentityProviders() {
     return walletProxy.get('/v0/ip_info');
 }
@@ -80,7 +88,7 @@ async function pollIdObject(location) {
     return JSON.parse(data);
 }
 
-async function sleep(time) {
+export async function sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
