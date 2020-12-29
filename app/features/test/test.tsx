@@ -11,7 +11,9 @@ import {
     handleFieldChange,
     ledgerTest,
     publicInformationForIpTest,
+    credentialDeploymentTest,
 } from './testSlice';
+import { insertIdentity } from '../../database/IdentityDao';
 
 type ChangeHandler = (e: InputEvent) => void;
 
@@ -67,7 +69,7 @@ export default function Test() {
                 </button>
                 <button
                     onClick={() => {
-                        ledgerTest();
+                        ledgerTest
                     }}
                     data-tclass="btn"
                     type="button"
@@ -82,6 +84,24 @@ export default function Test() {
                     type="button"
                 >
                     PublicInfoForIpTest
+                </button>
+                <button
+                    onClick={() => {
+                            insertIdentity({ name: blockHash });
+                    }}
+                    data-tclass="btn"
+                    type="button"
+                >
+                    insertIdentity
+                </button>
+                <button
+                    onClick={() => {
+                        credentialDeploymentTest();
+                    }}
+                    data-tclass="btn"
+                    type="button"
+                >
+                    Sign credential deployment
                 </button>
             </div>
             <textarea value={summary} readOnly />

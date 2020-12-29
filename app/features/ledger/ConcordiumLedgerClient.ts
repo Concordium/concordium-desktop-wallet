@@ -3,7 +3,14 @@ import getPublicKey from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
-import { AccountTransaction, PublicInformationForIp } from '../../utils/types';
+import { signAccountChallenge } from './AccountChallenge';
+import { signCredentialDeployment } from './CredentialDeployment';
+import {
+    AccountTransaction,
+    PublicInformationForIp,
+    CredentialDeploymentInformation,
+} from '../../utils/types';
+import { AccountPathInput, getAccountPath } from './Path';
 
 /**
  * Concordium Ledger API.
@@ -20,7 +27,13 @@ export default class ConcordiumLedgerClient {
 
         transport.decorateAppAPIMethods(
             this,
-            ['getPublicKey', 'getIdCredSec', 'getPrfKey', 'signTransfer'],
+            [
+                'getPublicKey',
+                'getIdCredSec',
+                'getPrfKey',
+                'signTransfer',
+                'signAccountChallenge',
+            ],
             'GTU'
         );
     }
@@ -46,12 +59,28 @@ export default class ConcordiumLedgerClient {
 
     signPublicInformationForIp(
         publicInfoForIp: PublicInformationForIp,
-        path: number[]
+        accountPathInput: AccountPathInput
     ): Promise<Buffer> {
+        const accountPath = getAccountPath(accountPathInput);
         return signPublicInformationForIp(
             this.transport,
-            path,
+            accountPath,
             publicInfoForIp
+        );
+    }
+
+    signAccountChallenge(challenge: Buffer, path: number[]): Promise<Buffer> {
+        return signAccountChallenge(this.transport, path, challenge);
+    }
+
+    signCredentialDeployment(
+        credentialDeployment: CredentialDeploymentInformation,
+        path: number[]
+    ): Promise<Buffer> {
+        return signCredentialDeployment(
+            this.transport,
+            credentialDeployment,
+            path
         );
     }
 }

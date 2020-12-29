@@ -1,5 +1,64 @@
 import { AccountAddress } from '../proto/api_pb';
 
+type Hex = string;
+
+enum SchemeId {
+    Ed25519 = 0,
+}
+
+export interface VerifyKey {
+    scheme: SchemeId;
+    key: Hex;
+}
+
+export interface NewAccount {
+    keys: VerifyKey[];
+    threshold: number;
+}
+
+// AccountAddress if deploying credentials to an existing account, and
+// NewAccount for deployment of a new account.
+// TODO: Add support for AccountAddress for updating existing account credentials.
+type CredentialAccount = NewAccount;
+export interface Versioned<T> {
+    v: number;
+    value: T;
+}
+
+export interface IdentityObject {
+    attributeList: AttributeList;
+    // TODO Implement all the other fields when needed.
+}
+
+export interface AttributeList {
+    createdAt: string;
+    validTo: string;
+    maxAccounts: number;
+    chosenAttributes: ChosenAttributes;
+}
+
+export interface ChosenAttributes {
+    countryOfResidence: string;
+    dob: string;
+    firstName: string;
+    idDocExpiresAt: string;
+    idDocIsseudAt: string;
+    idDocIssuer: string;
+    idDocNo: string;
+    idDocType: string;
+    lastName: string;
+    nationalIdNo: string;
+    nationality: string;
+    sex: number;
+    taxIdNo: string;
+}
+
+export interface Identity {
+    id: number;
+    name: string;
+    identityObject: string;
+}
+
 export interface AccountTransaction {
     sender: AccountAddress;
     nonce: number;
@@ -29,61 +88,34 @@ export enum BlockItemKind {
     UpdateInstructionKind = 2,
 }
 
-type AccountCredentialWithProofs =
-    | InitialCredentialDeploymentInfo
-    | CredentialDeploymentInformation;
-
-interface InitialCredentialDeploymentInfo {
-    icdiValues: InitialCredentialDeploymentValues;
-    signature: IpCdiSignature;
-}
-
-interface InitialCredentialDeploymentValues {
-    account: InitialCredentialAccount;
-    regId: CredentialRegistrationID;
-    ipId: IdentityProviderIdentity;
+export interface CredentialDeploymentInformation {
+    account: CredentialAccount;
+    regId: RegId;
+    ipId: IpIdentity;
+    revocationThreshold: Threshold;
+    arData: any; // Map with ar data
     policy: Policy;
-}
-
-interface CredentialDeploymentInformation {
-    values: CredentialDeploymentValues;
     proofs: Proofs;
 }
 
-interface CredentialDeploymentValues {
-    account: CredentialAccount;
-    regId: CredentialRegistrationID;
-    ipId: IdentityProviderIdentity;
-    revocationThreshold: Threshold;
-    arData; // Map AnonymityRevocationDat,
-    policy: Policy;
-}
-
-interface InitialCredentialAccount {
-    keys: AccountVerificationKey[]; //
-    threshhold: SignatureThreshold;
-}
-
-type SignatureThreshold = number; // word8
-type AccountVerificationKey = Uint8Array;
-
-type CredentialAccount = AccountAddress | InitialCredentialAccount; // InitialCredentialAccount = new account
-
 type AccountAddress = Uint8Array;
 
-type CredentialRegistrationID = Uint8Array; // sized 48 bytes,  "RegIdCred GroupElement"
-type IdentityProviderIdentity = number; // IP_ID word32
-type Threshold = number; // Threshold word8
+// 48 bytes containing a group element.
+type RegId = Hex;
+
+// An integer (32 bit) specifying the identity provider.
+type IpIdentity = number;
+
+// An integer (8 bit) specifying the revocation threshold.
+type Threshold = number;
+
 export interface Policy {
     validTo: YearMonth; // CredentialValidTo
     createdAt: YearMonth; // CredentialCreatedAt
-    revealedAttributes; // Map.Map AttributeTag AttributeValue
+    revealedAttributes: any; // Map.Map AttributeTag AttributeValue
 }
 
-export interface YearMonth {
-    year: number; // word16,
-    month: number; // word8
-}
+type YearMonth = string; // "YYYYMM"
 
 export enum AttributeTag {
     firstName = 0,
@@ -101,16 +133,10 @@ export enum AttributeTag {
     taxIdNo = 12,
 }
 
-type IpCdiSignature = Uint8Array;
-type Proofs = Uint8Array;
+type Proofs = Hex;
 
 export interface PublicInformationForIp {
-    idCredPub: string;
-    regId: string;
+    idCredPub: Hex;
+    regId: RegId;
     publicKeys: NewAccount;
-}
-
-export interface NewAccount {
-    keys: string[];
-    threshold: number;
 }

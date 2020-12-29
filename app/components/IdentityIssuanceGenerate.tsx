@@ -3,48 +3,44 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import {
-    loadProviders,
     providersSelector,
     accountNameSelector,
     identityNameSelector,
-} from '../features/identityIssuanceSlice';
-import { addIdentity, confirmIdentity } from '../features/accountsSlice';
+} from '../features/IdentityIssuanceSlice';
+import { addPendingIdentity, confirmIdentity } from '../features/IdentitySlice';
+import { addPendingAccount, confirmAccount } from '../features/AccountSlice';
 import routes from '../constants/routes.json';
 import styles from './IdentyIssuance.css';
 import {
     getGlobal,
     performIdObjectRequest,
-    getHTMLform,
+    getIdObject,
 } from '../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../utils/rustInterface';
-import identityjson from '../utils/IdentityObject.json';
+import { getNextId } from '../database/IdentityDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
-async function getIdentityLocation(provider, global, setText) {
+async function getProviderLocation(provider, global, setText) {
+    const id = await getNextId();
     const data = await createIdentityRequestObjectLedger(
+        id,
         provider.ipInfo,
         provider.arsInfos,
         global,
         setText
     );
-    console.log(data);
-    const verifyLocation = await performIdObjectRequest(
-        'http://localhost:8100/api/identity', // provider.metadata.issuanceStart,
+    const location = await performIdObjectRequest(
+        provider.metadata.issuanceStart, // 'http://localhost:8100/api/identity',
         redirectUri,
         data.idObjectRequest
     );
-    console.log(verifyLocation);
-    return verifyLocation;
+    return { location, randomness: data.randomness };
 }
 
-async function createIdentity(provider, setText, setLocation, iframeRef) {
-    setText('Please Wait');
-    const global = await getGlobal();
-    const location = await getIdentityLocation(provider, global, setText);
-
-    return new Promise((resolve, reject) => {
-        setLocation(location);
+async function createIdentity(iframeRef) {
+    // TODO: rename this
+    return new Promise((resolve) => {
         iframeRef.current.addEventListener('did-navigate', (e) => {
             console.log(e);
             const loc = e.url;
@@ -55,7 +51,71 @@ async function createIdentity(provider, setText, setLocation, iframeRef) {
     });
 }
 
-export default function IdentityIssuanceExternal(): JSX.Element {
+async function confirmIdentityAndInitialAccount(
+    dispatch: Dispatch,
+    identityName: string,
+    accountName: string,
+    location: string
+) {
+    let token;
+    try {
+        token = await getIdObject(location);
+        await confirmIdentity(dispatch, identityName, token.identityObject);
+        await confirmAccount(
+            dispatch,
+            accountName,
+            token.accountAddress,
+            token.credential
+        );
+    } catch (err) {
+        if (!token) {
+            await rejectIdentity(identityName);
+        } else {
+            console.log(token); // TODO: Handle unable to save identity/account
+        }
+    }
+}
+
+async function generateIdentity(
+    setLocation,
+    setText,
+    dispatch,
+    provider,
+    accountName,
+    identityName,
+    iframeRef
+) {
+    try {
+        setText('Please Wait');
+        const global = await getGlobal();
+        const { location, randomness } = await getProviderLocation(
+            provider,
+            global,
+            setText
+        );
+        setLocation(location);
+        const confirmationLocation = await createIdentity(iframeRef);
+        addPendingIdentity(
+            dispatch,
+            identityName,
+            confirmationLocation,
+            provider,
+            randomness
+        );
+        addPendingAccount(dispatch, accountName, identityName, 0);
+        confirmIdentityAndInitialAccount(
+            dispatch,
+            identityName,
+            accountName,
+            confirmationLocation
+        );
+        dispatch(push(routes.IDENTITYISSUANCE_FINAL));
+    } catch (e) {
+        console.log(`unable to create identity due to ${e.stack}`); // TODO: handle
+    }
+}
+
+export default function IdentityIssuanceGenerate(): JSX.Element {
     const { index } = useParams();
     const dispatch = useDispatch();
     const providers = useSelector(providersSelector);
@@ -68,19 +128,25 @@ export default function IdentityIssuanceExternal(): JSX.Element {
 
     useEffect(() => {
         if (provider) {
-            createIdentity(provider, setText, setLocation, iframeRef)
-                .then((verifyLocation) => {
-                    const input = {
-                        identityName,
-                        accountName,
-                    };
-                    dispatch(addIdentity(input));
-                    confirmIdentity(dispatch, identityName, verifyLocation);
-                    dispatch(push(routes.IDENTITYISSUANCE_FINAL));
-                })
-                .catch(console.log('unable to create identity')); // TODO: handle failure
+            generateIdentity(
+                setLocation,
+                setText,
+                dispatch,
+                provider,
+                accountName,
+                identityName,
+                iframeRef
+            );
         }
-    }, [provider, setLocation, dispatch, accountName, identityName]);
+    }, [
+        provider,
+        setLocation,
+        setText,
+        dispatch,
+        accountName,
+        identityName,
+        iframeRef,
+    ]);
 
     if (!location) {
         return (

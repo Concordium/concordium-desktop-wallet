@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import styles from '../Main.css';
 
-export default function Routes() {
+export default function Routes(): JSX.Element {
     const location = useLocation();
     const title = location.pathname.substring(1); // TODO: make properly
 

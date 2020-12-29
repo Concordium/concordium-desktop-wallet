@@ -3,9 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
     addToAddressBook,
     loadAddressBook,
-    addressBookSelector,
     chooseIndex,
+    addressBookSelector,
     chosenIndexSelector,
+    addToAddressBook,
 } from '../features/AddressBookSlice';
 import styles from './Accounts.css';
 import Modal from './Modal';
@@ -26,15 +27,21 @@ export default function AddressBookList(): JSX.Element {
             address,
             note,
         };
-        dispatch(addToAddressBook(entry));
+        addToAddressBook(dispatch, entry);
     }
 
-    const modalButton = (open) => <button onClick={open}>+</button>;
+    const modalButton = (open) => (
+        <button type="button" onClick={open}>
+            +
+        </button>
+    );
 
     const modalBody = (close) => {
         return (
             <>
-                <button onClick={close}>x</button>
+                <button type="button" onClick={close}>
+                    x
+                </button>
                 {new AddAddress(close, submitAddress)}
             </>
         );

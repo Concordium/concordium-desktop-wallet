@@ -5,6 +5,32 @@ const validSubtrees = [0, 1, 2];
 const concordiumPurpose = 583;
 const concordiumCoinType = 691;
 
+export interface AccountPathInput {
+    identityIndex: number;
+    accountIndex: number;
+    signatureIndex: number;
+}
+
+/**
+ * Constructs a path to an account signature key. The account key derivation path structure
+ * is given by:
+ *
+ *  - m/purpose'/coin_type'/0'/0'/identity'/2'/account_index'/sig_index'/
+ * @param identity index of the identity
+ * @param accountIndex index of the account
+ * @param signatureIndex index of the signature key
+ */
+export function getAccountPath(accountPath: AccountPathInput): number[] {
+    return [
+        0,
+        0,
+        accountPath.identityIndex,
+        2,
+        accountPath.accountIndex,
+        accountPath.signatureIndex,
+    ];
+}
+
 /**
  * Constructs a Buffer containing the key derivation path in serialized form.
  * @param keyDerivationPath the key derivation path to get as bytes in a buffer.

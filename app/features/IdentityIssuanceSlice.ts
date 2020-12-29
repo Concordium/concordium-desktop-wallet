@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+// eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 import { getIdentityProviders } from '../utils/httpRequests';
 
@@ -34,9 +35,9 @@ export const identityNameSelector = (state: RootState) =>
     state.identityIssuance.identityName;
 
 export function loadProviders(dispatch) {
-    getIdentityProviders().then((providers) =>
-        dispatch(setProviders(providers.data))
-    );
+    getIdentityProviders()
+        .then((providers) => dispatch(setProviders(providers.data)))
+        .catch(console.log); // TODO: Handle unable to load providers
 }
 
 export default identityIssuanceSlice.reducer;

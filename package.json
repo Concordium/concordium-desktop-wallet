@@ -94,7 +94,8 @@
       "output": "release"
     },
     "extraResources": [
-      "./resources/**"
+      "./resources/**",
+      "./app/database/migrations/*"
     ],
     "publish": {
       "provider": "github",
@@ -258,9 +259,11 @@
     "history": "^4.7.2",
     "libusb": "^0.0.0-pre",
     "promise-worker": "^2.0.1",
+    "knex": "^0.21.13",
     "react": "^16.13.1",
     "react-dom": "^16.12.0",
     "react-hot-loader": "^4.12.21",
+    "react-modal": "^3.12.1",
     "react-redux": "^7.2.1",
     "react-router-dom": "^5.2.0",
     "redux": "^4.0.5",

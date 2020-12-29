@@ -25,7 +25,7 @@ export default merge(baseConfig, {
 
     output: {
         path: path.join(__dirname, '..'),
-        filename: './out/main.prod.js',
+        filename: './app/main.prod.js',
     },
 
     optimization: {

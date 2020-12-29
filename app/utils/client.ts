@@ -8,8 +8,9 @@ import {
 } from '../proto/api_pb';
 
 const port = 10000;
+const address = '172.31.33.57'; //
 const client = new P2PClient(
-    `localhost:${port}`,
+    `${address}:${port}`,
     grpc.credentials.createInsecure()
 );
 
@@ -62,17 +63,23 @@ export function sendTransaction(
     });
 }
 
-export function getTransactionStatus(transactionId: string): Promise<JSONResponse> {
+export function getTransactionStatus(
+    transactionId: string
+): Promise<JSONResponse> {
     return new Promise<JSONResponse>((resolve, reject) => {
         const transactionHash = new TransactionHash();
         console.log(transactionId)
         transactionHash.setTransactionHash(transactionId);
 
-        client.getTransactionStatus(transactionHash, buildMetaData(), (err, response) => {
-            if (err) {
-                return reject(err);
+        client.getTransactionStatus(
+            transactionHash,
+            buildMetaData(),
+            (err, response) => {
+                if (err) {
+                    return reject(err);
+                }
+                return resolve(response);
             }
-            return resolve(response);
-        });
+        );
     });
 }

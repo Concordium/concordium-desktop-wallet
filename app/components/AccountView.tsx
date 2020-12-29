@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link, Switch, Route } from 'react-router-dom';
-import { chosenAccountSelector } from '../features/accountsSlice';
+import { chosenAccountSelector } from '../features/AccountSlice';
 import styles from './Accounts.css';
 import routes from '../constants/routes.json';
 import simpleTransfer from './SimpleTransfer';

@@ -1,21 +1,21 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import routes from '../constants/routes.json';
+import IdentityListElement from './IdentityListElement';
 import {
+    loadIdentities,
     chooseIdentity,
     identitiesSelector,
-    chosenIdentityIndexSelector,
-    loadIdentities,
-} from '../features/accountsSlice';
-import routes from '../constants/routes.json';
-import identityListElement from './IdentityListElement';
-
-import styles from './Accounts.css';
+    chosenIdentitySelector,
+} from '../features/IdentitySlice';
+import { Identity } from '../utils/types';
+import styles from './Identity.css';
 
 export default function IdentityList() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
-    const chosenIndex = useSelector(chosenIdentityIndexSelector);
+    const chosenIdentity = useSelector(chosenIdentitySelector);
 
     useEffect(() => {
         if (!identities) {
@@ -30,16 +30,18 @@ export default function IdentityList() {
     return (
         <div className={styles.halfPage}>
             <Link to={routes.IDENTITYISSUANCE}>
-                <button>x</button>
+                <button type="button">x</button>
             </Link>
 
-            {identities.map((identity, i) =>
-                identityListElement(
-                    identity,
-                    () => dispatch(chooseIdentity(i)),
-                    i === chosenIndex
-                )
-            )}
+            {identities.map((identity: Identity, i) => (
+                <IdentityListElement
+                    identity={identity}
+                    highlighted={identity === chosenIdentity}
+                    index={i}
+                    onClick={() => dispatch(chooseIdentity(i))}
+                    key={identity.id}
+                />
+            ))}
         </div>
     );
 }
