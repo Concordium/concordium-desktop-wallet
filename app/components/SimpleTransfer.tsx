@@ -22,12 +22,13 @@ export async function confirmTransaction(transactionId) {
         const data = response.getValue();
         console.log(data);
         if (data === 'null') {
-            console.log(data);
+            // TODO: Transaction was rejected / is absent
+           break;
         } else {
-            dataObject = JSON.parse(data);
+            const dataObject = JSON.parse(data);
             const { status } = dataObject;
             if (status === 'finalized') {
-                console.log('final', data);
+                // TODO: Transaction is on the chain
                 break;
             }
         }
@@ -39,6 +40,7 @@ export default function SimpleTransfer(account) {
     const [amount, setAmount] = useState('');
     const [recipient, setRecipient] = useState(undefined);
     const [transaction, setTransaction] = useState(undefined);
+    const [transactionHash, setTransactionHash] = useState(undefined);
     const [location, setLocation] = useState(locations.pickAmount);
 
     const dispatch = useDispatch();
@@ -104,8 +106,7 @@ export default function SimpleTransfer(account) {
 
     const TransferSubmitted = () => {
         useEffect(() => {
-            const hash = getTransactionHash(transaction).toString('hex');
-            confirmTransaction(hash);
+            confirmTransaction(transactionHash);
         }, []);
         return (
             <div>
@@ -114,9 +115,7 @@ export default function SimpleTransfer(account) {
                     Amount: G ${amount}
                     Estimated fee: G 1
                     To: ${recipient.name} (${recipient.address})
-                    TransactionHash: ${getTransactionHash(transaction).toString(
-                        'hex'
-                    )}
+                    TransactionHash: ${transactionHash}
                     `}
                 </pre>
                 <Link to={routes.ACCOUNTS}>
@@ -141,6 +140,8 @@ export default function SimpleTransfer(account) {
                         amount={amount}
                         transaction={transaction}
                         setTransaction={setTransaction}
+                        setTransactionHash={setTransactionHash}
+                        account={account}
                     />
                 );
             case locations.transferSubmitted:

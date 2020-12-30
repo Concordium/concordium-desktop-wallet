@@ -6,7 +6,7 @@ export default function TransferHistory(account) {
 
     useEffect(() => {
         getTransactions(account.address).then(data => {
-            setTransactions(response.transactions);
+            setTransactions(data.transactions);
         })
     }, [])
 
