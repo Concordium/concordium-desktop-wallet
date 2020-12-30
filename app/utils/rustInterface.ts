@@ -105,7 +105,7 @@ export async function createCredential(
         0,
         identity.getLedgerId(),
         2,
-        0,
+        accountNumber,
         0,
     ]);
     displayMessage('Please wait');
@@ -116,8 +116,6 @@ export async function createCredential(
     displayMessage('Please confirm exporting id cred sec on device');
     const idCredSecSeed = await ledger.getIdCredSec(identity.getLedgerId());
     displayMessage('Please wait');
-
-    console.log(identity.getIdentityObject());
 
     const credentialInput = {
         ipInfo: identityProvider.ipInfo,
