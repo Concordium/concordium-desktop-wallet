@@ -98,16 +98,10 @@ export async function createCredential(
 ) {
     const rawWorker = new RustWorker();
     const worker = new PromiseWorker(rawWorker);
+    const path = [0, 0, identity.getLedgerId(), 2, accountNumber, 0];
 
     displayMessage('Please confirm exporting public key on device');
-    const publicKey = await ledger.getPublicKey([
-        0,
-        0,
-        identity.getLedgerId(),
-        2,
-        accountNumber,
-        0,
-    ]);
+    const publicKey = await ledger.getPublicKey(path);
     displayMessage('Please wait');
 
     displayMessage('Please confirm exporting prf key on device');
@@ -152,7 +146,6 @@ Please sign challenge on device:
 Challenge: ${unsignedCredentialDeploymentInfo.unsigned_challenge}
 `);
     console.log(unsignedCredentialDeploymentInfo.unsigned_challenge);
-    const path = [0, 0, identity.getLedgerId(), 2, accountNumber, 0];
     const challengeSignature = await ledger.signAccountChallenge(
         Buffer.from(unsignedCredentialDeploymentInfo.unsigned_challenge, 'hex'),
         path
