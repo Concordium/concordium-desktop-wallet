@@ -8,10 +8,12 @@ const walletProxy = axios.create({
 function getPromise(urlString, params) {
     console.log(urlString);
     const url = new URL(urlString);
+    const searchParams = new URLSearchParams(params);
+    url.searchParams.forEach((value,name) => searchParams.append(name, value));
     const options = {
         hostname: url.hostname,
         port: url.port,
-        path: `${url.pathname}?${new URLSearchParams(params).toString()}`,
+        path: `${url.pathname}?${searchParams.toString()}`,
     };
     console.log(options);
     return new Promise((resolve) => {
