@@ -120,7 +120,7 @@ pub fn create_id_request_aux(
 
     let response = json!({
         "idObjectRequest": Versioned::new(VERSION_0, pio),
-        "randomness": randomness,
+        "randomness_wrapped": randomness,
     });
     Ok(response.to_string())
 }

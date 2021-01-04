@@ -77,15 +77,19 @@ Threshold: ${pubInfoForIp.publicKeys.threshold}
         path
     );
     displayMessage('Please wait');
-    const idRequest = await worker.postMessage({
+    const dataString = await worker.postMessage({
         command: workerCommands.createIdRequest,
         context: contextString,
         signature: signature.toString('hex'),
         idCredSec,
         prfKey,
     });
-    console.log(idRequest);
-    return JSON.parse(idRequest);
+    const data = JSON.parse(dataString);
+
+    return {
+        idObjectRequest: data.idObjectRequest,
+        randomness: data.randomness_wrapped.randomness
+    };
 }
 
 export async function createCredential(
