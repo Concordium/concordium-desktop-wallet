@@ -91,31 +91,32 @@ Threshold: ${pubInfoForIp.publicKeys.threshold}
 export async function createCredential(
     identity,
     accountNumber,
-    identityProvider,
     global,
     displayMessage,
     ledger
 ) {
+    const identityProvider = JSON.parse(identity.identityProvider);
+
     const rawWorker = new RustWorker();
     const worker = new PromiseWorker(rawWorker);
-    const path = [0, 0, identity.getLedgerId(), 2, accountNumber, 0];
+    const path = [0, 0, identity.id, 2, accountNumber, 0];
 
     displayMessage('Please confirm exporting public key on device');
     const publicKey = await ledger.getPublicKey(path);
     displayMessage('Please wait');
 
     displayMessage('Please confirm exporting prf key on device');
-    const prfKeySeed = await ledger.getPrfKey(identity.getLedgerId());
+    const prfKeySeed = await ledger.getPrfKey(identity.id);
 
     displayMessage('Please confirm exporting id cred sec on device');
-    const idCredSecSeed = await ledger.getIdCredSec(identity.getLedgerId());
+    const idCredSecSeed = await ledger.getIdCredSec(identity.id);
     displayMessage('Please wait');
 
     const credentialInput = {
         ipInfo: identityProvider.ipInfo,
         arsInfos: identityProvider.arsInfos,
         global,
-        identityObject: identity.getIdentityObject(),
+        identityObject: JSON.parse(identity.identityObject).value, // TODO: perhaps do this onload?
         publicKeys: [
             {
                 schemeId: 'Ed25519',
@@ -126,7 +127,7 @@ export async function createCredential(
         accountNumber,
         revealedAttributes: [],
         randomness: {
-            randomness: identity.getRandomness(),
+            randomness: identity.randomness,
         },
         prfKey: prfKeySeed.toString('hex'),
         idCredSec: idCredSecSeed.toString('hex'),
@@ -152,8 +153,7 @@ Challenge: ${unsignedCredentialDeploymentInfo.unsigned_challenge}
     );
     displayMessage('Please wait');
 
-    let credentialDeploymentInfo;
-    credentialDeploymentInfo = await worker.postMessage({
+    const credentialDeploymentInfo = await worker.postMessage({
         command: workerCommands.createCredential,
         input: JSON.stringify({
             unsignedInfo: unsignedCredentialDeploymentInfo,

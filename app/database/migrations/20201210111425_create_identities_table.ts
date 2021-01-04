@@ -11,7 +11,7 @@ export async function up(knex: Knex): Promise<void> {
             table.string('codeUri');
             table.string('identityProvider');
             table.string('identityObject');
-            table.string('privateIdObjectDataEncrypted');
+            table.string('randomness');
         })
         .raw('ALTER TABLE identities AUTO_INCREMENT = 0');
 }

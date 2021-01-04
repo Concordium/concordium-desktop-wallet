@@ -31,7 +31,7 @@ async function getProviderLocation(provider, global, setText) {
         setText
     );
     const location = await performIdObjectRequest(
-        provider.metadata.issuanceStart, // 'http://localhost:8100/api/identity',
+        provider.metadata.issuanceStart,
         redirectUri,
         data.idObjectRequest
     );

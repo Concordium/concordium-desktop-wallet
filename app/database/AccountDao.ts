@@ -15,3 +15,12 @@ export async function updateAccount(accountName: string, updatedValues) {
         .where({ name: accountName })
         .update(updatedValues);
 }
+
+export async function getAccountsOfIdentity(
+    identity: string
+): Promise<Account[]> {
+    return (await knex())
+        .select()
+        .table(accountsTable)
+        .where({ identityName: identity });
+}

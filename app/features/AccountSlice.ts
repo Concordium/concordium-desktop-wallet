@@ -5,6 +5,7 @@ import {
     getAllAccounts,
     insertAccount,
     updateAccount,
+    getAccountsOfIdentity,
 } from '../database/AccountDao';
 import { getTransactionStatus } from '../utils/client';
 import { sleep } from '../utils/httpRequests';
@@ -64,20 +65,6 @@ export async function addPendingAccount(
     return loadAccounts(dispatch);
 }
 
-export async function confirmAccountFake(
-    dispatch: Dispatch,
-    accountName: string,
-    accountAddress: string,
-    credential
-) {
-    await updateAccount(accountName, {
-        status: 'confirmed',
-        credential,
-        address: accountAddress,
-    });
-    return loadAccounts(dispatch);
-}
-
 export async function confirmAccount(dispatch, accountName, transactionId) {
     while (true) {
         const response = await getTransactionStatus(transactionId);
@@ -88,19 +75,28 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
                 status: 'rejected',
             });
             return loadAccounts(dispatch);
-        } else {
-            const dataObject = JSON.parse(data);
-            const { status } = dataObject;
-            if (status === 'finalized') {
-                await updateAccount(accountName, {
-                    status: 'confirmed',
-                    credential: dataObject.credential,
-                });
-                return loadAccounts(dispatch);
-            }
         }
+        const dataObject = JSON.parse(data);
+        const { status } = dataObject;
+        if (status === 'finalized') {
+            await updateAccount(accountName, {
+                status: 'confirmed',
+                credential: dataObject.credential,
+            });
+            return loadAccounts(dispatch);
+        }
+
         await sleep(10000);
     }
+}
+
+export async function getNextAccountNumber(identityName) {
+    const accounts: Account[] = await getAccountsOfIdentity(identityName);
+    const currentNumber = accounts.reduce(
+        (num, acc) => Math.max(num, acc.accountNumber),
+        0
+    );
+    return currentNumber + 1;
 }
 
 export default accountsSlice.reducer;
