@@ -3,14 +3,14 @@ import knex from './knex';
 import { identitiesTable } from '../constants/databaseNames.json';
 
 export async function getNextId(): Promise<number> {
-    console.log('test');
     try {
-        const currentId =
-            (await (await knex())
+        const currentId = (
+            await (await knex())
                 .select('seq')
                 .table('sqlite_sequence')
                 .where('name', identitiesTable)
-                .first()).seq;
+                .first()
+        ).seq;
         return currentId + 1;
     } catch (e) {
         console.log(e);

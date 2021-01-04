@@ -20,7 +20,10 @@ export default function AccountCreation(): JSX.Element {
                 path={routes.ACCOUNTCREATION_CHOOSEIDENTITY}
                 component={() => chooseIdentity(setIdentity)}
             />
-            <Route path={routes.ACCOUNTCREATION_FINAL} component={finalPage} />
+            <Route
+                path={routes.ACCOUNTCREATION_FINAL}
+                component={() => finalPage(accountName)}
+            />
             <Route
                 path={routes.ACCOUNTCREATION_GENERATE}
                 component={() => generate(accountName, identity)}

@@ -22,8 +22,6 @@ export default function AccountList() {
         }
     }, [dispatch, accounts]);
 
-    console.log(accounts);
-
     if (!accounts) {
         return <div />;
     }

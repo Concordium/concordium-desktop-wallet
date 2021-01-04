@@ -10,7 +10,8 @@ export default function AccountListElement(account, onClick, highlighted) {
                 highlighted ? styles.chosenAccountListElement : null
             }`}
         >
-            {account.name}
+            {account.status} {account.name}{' '}
+            {account.accountNumber === 0 ? '(initial)' : undefined}
         </div>
     );
 }

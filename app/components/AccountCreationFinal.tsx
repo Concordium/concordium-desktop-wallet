@@ -3,17 +3,19 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
 
-import { chosenAccountSelector } from '../features/AccountSlice';
+import { accountsSelector } from '../features/AccountSlice';
 
 import accountListElement from './AccountListElement';
 import styles from './IdentyIssuance.css';
 
-export default function IdentityIssuanceFinal(): JSX.Element {
-    const account = useSelector(chosenAccountSelector);
+export default function AccountCreationFinal(accountName): JSX.Element {
+    const accounts = useSelector(accountsSelector);
 
-    if (account === undefined) {
+    if (accounts === undefined) {
         return <div />;
     }
+
+    const account = accounts.filter((acc) => acc.name === accountName)[0];
 
     return (
         <div>
@@ -25,7 +27,7 @@ export default function IdentityIssuanceFinal(): JSX.Element {
             <div className={styles.flex}>
                 {accountListElement(account, () => {}, false)}
             </div>
-            <Link to={routes.IDENTITIES}>
+            <Link to={routes.ACCOUNTS}>
                 <button>Finished</button>
             </Link>
         </div>

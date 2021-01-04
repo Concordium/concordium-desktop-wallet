@@ -33,14 +33,6 @@ function getResponseBody(response) {
     });
 }
 
-export async function credDep(cred) {
-    return await walletProxy.put('/v0/submitCredential', cred, {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-}
-
 export async function getIdentityProviders() {
     return walletProxy.get('/v0/ip_info');
 }

@@ -66,9 +66,14 @@ export default function AccountCreationGenerate(
                             accNumber,
                             accountAddress,
                             credentialDeploymentInformation
-                        );
-                        confirmAccount(dispatch, accountName, transactionId);
-                        dispatch(push(routes.ACCOUNTCREATION_FINAL));
+                        ).then(() => {
+                            confirmAccount(
+                                dispatch,
+                                accountName,
+                                transactionId
+                            );
+                            dispatch(push(routes.ACCOUNTCREATION_FINAL));
+                        });
                     }
                 )
                 .catch((e) =>

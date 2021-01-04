@@ -65,6 +65,20 @@ export async function addPendingAccount(
     return loadAccounts(dispatch);
 }
 
+export async function confirmInitialAccount(
+    dispatch,
+    accountName,
+    accountAddress,
+    credential
+) {
+    await updateAccount(accountName, {
+        status: 'confirmed',
+        address: accountAddress,
+        credential,
+    });
+    return await loadAccounts(dispatch);
+}
+
 export async function confirmAccount(dispatch, accountName, transactionId) {
     while (true) {
         const response = await getTransactionStatus(transactionId);
@@ -81,7 +95,6 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
         if (status === 'finalized') {
             await updateAccount(accountName, {
                 status: 'confirmed',
-                credential: dataObject.credential,
             });
             return loadAccounts(dispatch);
         }
