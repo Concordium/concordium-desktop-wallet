@@ -142,3 +142,23 @@ export enum AttributeTag {
 
 type IpCdiSignature = Uint8Array;
 type Proofs = Uint8Array;
+
+// type holds the the type of setting, i.e. multisignature settings, so that
+// the group of settings can be displayed together correctly.
+export interface Settings {
+    type: string;
+    settings: Setting[];
+}
+
+// Reflects an entry of the 'setting' table (excluding the primary key).
+export interface Setting {
+    name: string;
+    value: string;
+    group: number;
+}
+
+// Reflects an entry of the 'setting_group' table.
+export interface SettingGroup {
+    id: number;
+    name: string;
+}
