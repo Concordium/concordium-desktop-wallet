@@ -1,22 +1,44 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { chosenSettingSelector } from '../features/SettingsSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    chosenIndexSelector,
+    settingsSelector,
+    updateSettingEntry,
+} from '../features/SettingsSlice';
 import { Setting } from '../utils/types';
 
 // TODO Fix this
 import styles from './Identity.css';
 
 export default function SettingsView() {
-    const chosenSettings = useSelector(chosenSettingSelector);
+    const dispatch = useDispatch();
+    const settings = useSelector(settingsSelector);
+    const chosenIndex = useSelector(chosenIndexSelector);
 
-    if (chosenSettings === undefined) {
+    if (chosenIndex === undefined) {
         return <div />;
     }
-
+    
     return (
         <div className={styles.halfPage}>
-            {chosenSettings.settings.map((childSetting: Setting) => (
-                <div key={childSetting.name}>
+            {settings[chosenIndex].settings.map((childSetting: Setting, i) => (
+                <div
+                    role="button"
+                    tabIndex={i}
+                    onClick={() => {
+                        // TODO Editing of settings is not going to be a switch like this, as not all settings are
+                        // booleans. We might have to add types on the settings, so that we know which type of
+                        // editing they support.
+                        return updateSettingEntry(dispatch, {
+                            ...childSetting,
+                            value:
+                                childSetting.value === 'false'
+                                    ? 'true'
+                                    : 'false',
+                        });
+                    }}
+                    key={childSetting.name}
+                >
                     <h1>
                         {childSetting.name} - {childSetting.value}
                     </h1>

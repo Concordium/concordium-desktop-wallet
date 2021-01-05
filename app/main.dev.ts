@@ -23,7 +23,7 @@ import WebpackMigrationSource from './database/WebpackMigrationSource';
  * an error prompt is displayed to the user, and the application is terminated.
  */
 async function migrate() {
-    let config: { migrationSource: WebpackMigrationSource; };
+    let config: { migrationSource: WebpackMigrationSource };
     if (process.env.NODE_ENV === 'production') {
         config = {
             migrationSource: new WebpackMigrationSource(
@@ -34,7 +34,6 @@ async function migrate() {
         config = require('./database/knexfile.ts').development;
     }
 
-    
     knex()
         .then((db) => {
             return db.migrate.latest(config).catch((error: Error) => {

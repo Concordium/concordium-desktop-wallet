@@ -15,7 +15,7 @@ export default function SettingsList() {
                 <div
                     role="button"
                     tabIndex={i}
-                    onClick={() => selectSettings(dispatch, setting)}
+                    onClick={() => selectSettings(dispatch, i)}
                     key={setting.type}
                 >
                     <h1>{setting.type}</h1>

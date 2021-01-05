@@ -19,6 +19,12 @@ export async function getSettingGroups() {
     return (await knex()).select().table(settingsGroupTable);
 }
 
+export async function updateEntry(setting: Setting) {
+    return (await knex())(settingsTable)
+        .where({ name: setting.name })
+        .update(setting);
+}
+
 /**
  * Loads all settings from the database. This includes loading the setting groups
  * to correctly group together related settings.
