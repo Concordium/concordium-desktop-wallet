@@ -22,22 +22,15 @@ export default function AccountCreationChooseIdentity(
         return <div />;
     }
 
-    function submit() {
+    function submit(route) {
         setIdentity(identities[chosenIndex]);
-        dispatch(push(routes.ACCOUNTCREATION_GENERATE));
+        dispatch(push(route));
     }
 
     return (
         <div>
             <h2>Choose Identity</h2>
             <p>bla bla</p>
-            <button
-                onClick={() => {
-                    submit();
-                }}
-            >
-                submit
-            </button>
             {identities.map((identity, i) => (
                 <IdentityListElement
                     identity={identity}
@@ -47,6 +40,21 @@ export default function AccountCreationChooseIdentity(
                     key={identity.id}
                 />
             ))}
+            <button
+                disabled={identities[chosenIndex].identityObject == null}
+                onClick={() => {
+                    submit(routes.ACCOUNTCREATION_PICK_ATTRIBUTES);
+                }}
+            >
+                Choose attributes to reveal
+            </button>
+            <button
+                onClick={() => {
+                    submit(routes.ACCOUNTCREATION_GENERATE);
+                }}
+            >
+                Continue without revealing attributes
+            </button>
         </div>
     );
 }

@@ -113,6 +113,7 @@ export async function createCredential(
     identity,
     accountNumber,
     global,
+    attributes,
     displayMessage,
     ledger
 ) {
@@ -139,7 +140,7 @@ export async function createCredential(
         ],
         threshold: 1,
         accountNumber,
-        revealedAttributes: [],
+        revealedAttributes: attributes,
         randomness: {
             randomness: identity.randomness,
         },
@@ -152,6 +153,7 @@ export async function createCredential(
         input: JSON.stringify(credentialInput),
     });
 
+    console.log(unsignedCredentialDeploymentInfoString);
     const unsignedCredentialDeploymentInfo = JSON.parse(
         unsignedCredentialDeploymentInfoString
     );

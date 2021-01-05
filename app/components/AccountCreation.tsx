@@ -11,8 +11,7 @@ import finalPage from './AccountCreationFinal';
 export default function AccountCreation(): JSX.Element {
     const [accountName, setAccountName] = useState('');
     const [identity, setIdentity] = useState('');
-
-    // <Route path={routes.ACCOUNTCREATION_PICK_ATTRIBUTES} component={pickAttributes} />
+    const [chosenAttributes, setChosenAttributes] = useState([]);
 
     return (
         <Switch>
@@ -26,7 +25,13 @@ export default function AccountCreation(): JSX.Element {
             />
             <Route
                 path={routes.ACCOUNTCREATION_GENERATE}
-                component={() => generate(accountName, identity)}
+                component={() =>
+                    generate(accountName, chosenAttributes, identity)
+                }
+            />
+            <Route
+                path={routes.ACCOUNTCREATION_PICK_ATTRIBUTES}
+                component={() => pickAttributes(identity, setChosenAttributes)}
             />
             <Route
                 path={routes.ACCOUNTCREATION}

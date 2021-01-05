@@ -14,7 +14,7 @@ import {
 } from '../features/AccountSlice';
 import { getGlobal } from '../utils/httpRequests';
 
-async function createAccount(identity, setMessage) {
+async function createAccount(identity, attributes, setMessage) {
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
     setMessage('Please Wait');
@@ -25,6 +25,7 @@ async function createAccount(identity, setMessage) {
         identity,
         accountNumber,
         global,
+        attributes,
         setMessage,
         ledger
     );
@@ -44,6 +45,7 @@ async function createAccount(identity, setMessage) {
 
 export default function AccountCreationGenerate(
     accountName,
+    attributes,
     identity
 ): JSX.Element {
     const dispatch = useDispatch();
@@ -51,7 +53,7 @@ export default function AccountCreationGenerate(
 
     useEffect(() => {
         if (identity !== undefined) {
-            createAccount(identity, setText)
+            createAccount(identity, attributes, setText)
                 .then(
                     ({
                         accountAddress,
@@ -80,7 +82,7 @@ export default function AccountCreationGenerate(
                     console.log(`creating account failed: ${e.stack} `)
                 );
         }
-    }, [identity, dispatch, accountName, setText]);
+    }, [identity, dispatch, accountName, setText, attributes]);
 
     return (
         <div>
