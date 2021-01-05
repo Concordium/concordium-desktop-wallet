@@ -11,11 +11,52 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import knex from './database/knex';
 import WebpackMigrationSource from './database/WebpackMigrationSource';
+
+/**
+ * Runs the knex migrations for the embedded sqlite database. This ensures that the
+ * database is up-to-date before the application opens. If a migration fails, then
+ * an error prompt is displayed to the user, and the application is terminated.
+ */
+async function migrate() {
+    let config: { migrationSource: WebpackMigrationSource; };
+    if (process.env.NODE_ENV === 'production') {
+        config = {
+            migrationSource: new WebpackMigrationSource(
+                require.context('./database/migrations', false, /.ts$/)
+            ),
+        };
+    } else {
+        config = require('./database/knexfile.ts').development;
+    }
+
+    
+    knex()
+        .then((db) => {
+            return db.migrate.latest(config).catch((error: Error) => {
+                dialog.showErrorBox(
+                    'Migration error',
+                    `An unexpected error occurred during migration of the database. ${error}`
+                );
+                process.nextTick(() => {
+                    process.exit(0);
+                });
+            });
+        })
+        .catch((error: Error) => {
+            dialog.showErrorBox(
+                'Database error',
+                `An unexpected error occurred while attempting to access the database. ${error}`
+            );
+            process.nextTick(() => {
+                process.exit(0);
+            });
+        });
+}
 
 export default class AppUpdater {
     constructor() {
@@ -113,17 +154,9 @@ const createWindow = async () => {
     // eslint-disable-next-line
     new AppUpdater();
 
-    // Run database migrations at startup to ensure that the schema is up-to-date
-    if (process.env.NODE_ENV === 'production') {
-        (await knex()).migrate.latest({
-            migrationSource: new WebpackMigrationSource(
-                require.context('./database/migrations', false, /.ts$/)
-            ),
-        });
-    } else {
-        const config = require('./database/knexfile.ts').development;
-        (await knex()).migrate.latest(config);
-    }
+    // Migrate database to ensure it is always up-to-date before opening the
+    // application.
+    migrate();
 };
 
 // Provides access to the userData path from renderer processes.
