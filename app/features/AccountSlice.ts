@@ -46,14 +46,14 @@ export async function loadAccounts(dispatch: Dispatch) {
 export async function addPendingAccount(
     dispatch: Dispatch,
     accountName: string,
-    identityName: string,
+    identityId: number,
     accountNumber: number,
     accountAddress: string,
     credentialDeploymentInformation
 ) {
     const account = {
         name: accountName,
-        identityName,
+        identityId,
         status: 'pending',
         accountNumber,
         address: accountAddress,
@@ -103,8 +103,8 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
     }
 }
 
-export async function getNextAccountNumber(identityName) {
-    const accounts: Account[] = await getAccountsOfIdentity(identityName);
+export async function getNextAccountNumber(identityId) {
+    const accounts: Account[] = await getAccountsOfIdentity(identityId);
     const currentNumber = accounts.reduce(
         (num, acc) => Math.max(num, acc.accountNumber),
         0

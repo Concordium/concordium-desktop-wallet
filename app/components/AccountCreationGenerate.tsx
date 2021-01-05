@@ -19,7 +19,7 @@ async function createAccount(identity, attributes, setMessage) {
     const ledger = new ConcordiumLedgerClient(transport);
     setMessage('Please Wait');
 
-    const accountNumber = await getNextAccountNumber(identity.name);
+    const accountNumber = await getNextAccountNumber(identity.id);
     const global = (await getGlobal()).value;
     const credentialDeploymentInformation = await createCredential(
         identity,
@@ -64,7 +64,7 @@ export default function AccountCreationGenerate(
                         addPendingAccount(
                             dispatch,
                             accountName,
-                            identity.name,
+                            identity.id,
                             accNumber,
                             accountAddress,
                             credentialDeploymentInformation
