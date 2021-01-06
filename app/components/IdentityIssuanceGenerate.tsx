@@ -21,8 +21,8 @@ import { getNextId } from '../database/IdentityDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
-async function getProviderLocation(provider, global, setText) {
-    const id = await getNextId();
+async function getProviderLocation(id, provider, setText) {
+    const global = await getGlobal();
     const data = await createIdentityRequestObjectLedger(
         id,
         provider.ipInfo,
@@ -31,7 +31,7 @@ async function getProviderLocation(provider, global, setText) {
         setText
     );
     const location = await performIdObjectRequest(
-        provider.metadata.issuanceStart, // 'http://localhost:8100/api/identity',
+        provider.metadata.issuanceStart,
         redirectUri,
         data.idObjectRequest
     );
@@ -87,22 +87,22 @@ async function generateIdentity(
 ) {
     try {
         setText('Please Wait');
-        const global = await getGlobal();
+        const identityId = await getNextId();
         const { location, randomness } = await getProviderLocation(
+            identityId,
             provider,
-            global,
             setText
         );
         setLocation(location);
         const confirmationLocation = await createIdentity(iframeRef);
-        addPendingIdentity(
+        await addPendingIdentity(
             dispatch,
             identityName,
             confirmationLocation,
             provider,
             randomness
         );
-        addPendingAccount(dispatch, accountName, identityName, 0);
+        await addPendingAccount(dispatch, accountName, identityId, 0);
         confirmIdentityAndInitialAccount(
             dispatch,
             identityName,

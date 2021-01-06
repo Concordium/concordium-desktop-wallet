@@ -40,9 +40,10 @@ pub fn generate_unsigned_credential_ext(
 
 #[wasm_bindgen]
 pub fn get_credential_deployment_info_ext(
-    input: &str
+    signature: &str,
+    unsigned_info: &str
 ) -> String {
-    match get_credential_deployment_info_aux(input) {
+    match get_credential_deployment_info_aux(signature, unsigned_info) {
         Ok(s) => s,
         Err(e) => format!("unable to get credential due to: {}", e),
     }

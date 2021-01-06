@@ -3,15 +3,19 @@ import knex from './knex';
 import { identitiesTable } from '../constants/databaseNames.json';
 
 export async function getNextId(): Promise<number> {
-    return (
-        (
+    try {
+        const currentId = (
             await (await knex())
                 .select('seq')
                 .table('sqlite_sequence')
                 .where('name', identitiesTable)
                 .first()
-        ).seq + 1
-    );
+        ).seq;
+        return currentId + 1;
+    } catch (e) {
+        console.log(e);
+        return 0; // TODO: First check if the table exists, instead of trying and failing
+    }
 }
 
 export async function getAllIdentities(): Promise<Identity[]> {

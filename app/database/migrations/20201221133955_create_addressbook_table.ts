@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
         addressBookTable,
         (table: Knex.TableBuilder) => {
             table.string('name');
-            table.string('address');
+            table.string('address').unique();
             table.string('note');
         }
     );

@@ -15,3 +15,9 @@ export async function updateAccount(accountName: string, updatedValues) {
         .where({ name: accountName })
         .update(updatedValues);
 }
+
+export async function getAccountsOfIdentity(
+    identityId: number
+): Promise<Account[]> {
+    return (await knex()).select().table(accountsTable).where({ identityId });
+}

@@ -49,7 +49,7 @@ export async function addPendingIdentity(
         status: 'pending',
         codeUri,
         identityProvider: JSON.stringify(identityProvider),
-        privateIdObjectDataEncrypted: randomness,
+        randomness,
     };
     await insertIdentity(identity);
     return loadIdentities(dispatch);

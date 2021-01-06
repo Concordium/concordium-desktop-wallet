@@ -7,28 +7,25 @@ import { createCredential } from '../utils/rustInterface';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 
 import { sendTransaction } from '../utils/client';
-import { addPendingAccount, confirmAccount } from '../features/AccountSlice';
+import {
+    addPendingAccount,
+    confirmAccount,
+    getNextAccountNumber,
+} from '../features/AccountSlice';
 import { getGlobal } from '../utils/httpRequests';
 
-async function createAccount(identity, setMessage) {
+async function createAccount(identity, attributes, setMessage) {
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
     setMessage('Please Wait');
 
-    const mockIdentity = {
-        getIdentityObject: () => JSON.parse(identity.identityObject).value,
-        getRandomness: () =>
-            '1643b3ad11b178ca053c523105f24f7a83ed97bdc4033241baf7e4a15f890fe6', // identity.privateIdObjectDataEncrypted,
-        getLedgerId: () => identity.id,
-    };
-    const accountNumber = 3;
-
+    const accountNumber = await getNextAccountNumber(identity.id);
     const global = (await getGlobal()).value;
     const credentialDeploymentInformation = await createCredential(
-        mockIdentity,
+        identity,
         accountNumber,
-        JSON.parse(identity.identityProvider),
         global,
+        attributes,
         setMessage,
         ledger
     );
@@ -48,6 +45,7 @@ async function createAccount(identity, setMessage) {
 
 export default function AccountCreationGenerate(
     accountName,
+    attributes,
     identity
 ): JSX.Element {
     const dispatch = useDispatch();
@@ -55,7 +53,7 @@ export default function AccountCreationGenerate(
 
     useEffect(() => {
         if (identity !== undefined) {
-            createAccount(identity, setText)
+            createAccount(identity, attributes, setText)
                 .then(
                     ({
                         accountAddress,
@@ -66,20 +64,25 @@ export default function AccountCreationGenerate(
                         addPendingAccount(
                             dispatch,
                             accountName,
-                            identity.name,
+                            identity.id,
                             accNumber,
                             accountAddress,
                             credentialDeploymentInformation
-                        );
-                        confirmAccount(dispatch, accountName, transactionId);
-                        dispatch(push(routes.ACCOUNTCREATION_FINAL));
+                        ).then(() => {
+                            confirmAccount(
+                                dispatch,
+                                accountName,
+                                transactionId
+                            );
+                            dispatch(push(routes.ACCOUNTCREATION_FINAL));
+                        });
                     }
                 )
                 .catch((e) =>
                     console.log(`creating account failed: ${e.stack} `)
                 );
         }
-    }, [identity, dispatch, accountName, setText]);
+    }, [identity, dispatch, accountName, setText, attributes]);
 
     return (
         <div>
