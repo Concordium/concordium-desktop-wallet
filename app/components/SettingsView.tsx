@@ -31,10 +31,7 @@ export default function SettingsView() {
                         // editing they support.
                         return updateSettingEntry(dispatch, {
                             ...childSetting,
-                            value:
-                                childSetting.value === 'false'
-                                    ? 'true'
-                                    : 'false',
+                            value: (childSetting.value === 'false').toString()
                         });
                     }}
                     key={childSetting.name}
