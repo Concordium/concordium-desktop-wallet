@@ -10,6 +10,7 @@ import TodoPage from './containers/TodoPage';
 import IdentityPage from './containers/IdentityPage';
 import AddressBookPage from './containers/AddressBookPage';
 import styles from './Main.css';
+import SettingsPage from './containers/SettingsPage';
 
 export default function Routes() {
     return (
@@ -28,7 +29,7 @@ export default function Routes() {
                         path={routes.MULTISIGTRANSACTIONS}
                         component={TodoPage}
                     />
-                    <Route path={routes.SETTINGS} component={TodoPage} />
+                    <Route path={routes.SETTINGS} component={SettingsPage} />
                     <Route path={routes.HOME} component={HomePage} />
                 </Switch>
             </div>
