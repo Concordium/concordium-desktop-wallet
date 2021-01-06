@@ -30,7 +30,7 @@ function getAmount(transaction) {
         case 'transfer':
             return transaction.details.transferAmount;
         case 'encryptedAmountTransfer':
-            return 'encrypted';
+            return transaction.details.transferAmount;
         default:
             return 'unknown';
     }
@@ -40,17 +40,20 @@ function parseAmount(transaction) {
     const transferAmount = getAmount(transaction);
 
     switch (transaction.origin.type) {
-        case 'self':
-            const fee = parseInt(transaction.cost);
+        case 'self': {
+            const fee = parseInt(transaction.cost, 10);
             return {
-                amount: `- G ${fromMicroUnits(parseInt(transferAmount) + fee)}`,
+                amount: `- G ${fromMicroUnits(
+                    parseInt(transferAmount, 10) + fee
+                )}`,
                 amountFormula: `G${fromMicroUnits(
                     transferAmount
                 )} + G${fromMicroUnits(fee)} Fee`,
             };
+        }
         case 'account':
             return {
-                amount: `- G ${fromMicroUnits(transferAmount)}`,
+                amount: `+ G ${fromMicroUnits(transferAmount)}`,
                 amountFormula: '',
             };
         default:
@@ -60,6 +63,7 @@ function parseAmount(transaction) {
 
 function parseTime(epoch) {
     const dtFormat = new Intl.DateTimeFormat('en-GB', {
+        dateStyle: 'short',
         timeStyle: 'short',
         timeZone: 'UTC',
     });

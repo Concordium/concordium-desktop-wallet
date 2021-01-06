@@ -43,6 +43,11 @@ function createCredential(rust, message) {
     return credential;
 }
 
+function decryptAmounts(rust, message) {
+    const decryptedAmounts = rust.decrypt_amounts_ext(message.input);
+    return decryptedAmounts;
+}
+
 function mapCommand(command) {
     switch (command) {
         case workerCommands.buildPublicInformationForIp:
@@ -53,6 +58,8 @@ function mapCommand(command) {
             return createUnsignedCredential;
         case workerCommands.createCredential:
             return createCredential;
+        case workerCommands.decryptAmounts:
+            return decryptAmounts;
         default:
             return () => 'unknown command';
     }

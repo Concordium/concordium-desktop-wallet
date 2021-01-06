@@ -178,3 +178,28 @@ Challenge: ${unsignedCredentialDeploymentInfo.accountOwnershipChallenge}
     console.log(credentialDeploymentInfo);
     return JSON.parse(credentialDeploymentInfo);
 }
+
+export async function decryptAmounts(
+    encryptedAmounts,
+    account,
+    global,
+    ledger
+) {
+    console.log('Please confirm exporting prf key on device');
+    const prfKeySeed = await ledger.getPrfKey(5); // TODO : account.identityId
+    const prfKey = prfKeySeed.toString('hex');
+
+    const input = {
+        global,
+        accountNumber: account.accountNumber,
+        prfKey,
+        encryptedAmounts,
+    };
+
+    const decryptedAmounts = await worker.postMessage({
+        command: workerCommands.decryptAmounts,
+        input: JSON.stringify(input),
+    });
+
+    return JSON.parse(decryptedAmounts);
+}

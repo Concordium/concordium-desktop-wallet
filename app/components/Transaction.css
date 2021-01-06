@@ -3,6 +3,7 @@
     float: left;
     text-align: left;
     width: 40%;
+    margin-left: 50px;
 }
 
 .rightAligned {
@@ -13,4 +14,11 @@
 
 .transactionListElement {
     display: flex;
+    background-color: oldlace;
+    border-style: solid;
+    border-color: black;
+    color: black;
+    border: 10 px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }

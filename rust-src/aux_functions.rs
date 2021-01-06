@@ -1,7 +1,9 @@
 use crate::{
     types::*,
 };
-use crypto_common::*;
+use crypto_common::{types::Amount, *};
+use encrypted_transfers::types::{EncryptedAmount};
+use elgamal::BabyStepGiantStep;
 use dodis_yampolskiy_prf::secret as prf;
 use hex::FromHex;
 use pairing::bls12_381::{Bls12, Fr, G1};
@@ -202,11 +204,9 @@ pub fn generate_unsigned_credential_aux(
     Ok(response.to_string())
 }
 
-
-
 pub fn get_credential_deployment_info_aux(
     signature: &str,
-    unsigned_info: &str
+    unsigned_info: &str,
 ) -> Fallible<String> {
     console_error_panic_hook::set_once();
 
@@ -258,3 +258,37 @@ pub fn get_credential_deployment_info_aux(
 
     Ok(response.to_string())
 }
+
+pub fn decrypt_amounts_aux(
+    input: &str,
+) -> Fallible<String> {
+    let v: SerdeValue = from_str(input)?;
+    let encrypted_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "encryptedAmounts")?;
+
+    let prf_key_string: String = try_get(&v, "prfKey")?;
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
+
+    let account_number: u8 = try_get(&v, "accountNumber")?;
+
+    let scalar: Fr = prf_key.prf_exponent(account_number)?;
+
+    let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
+    let secret_key = elgamal::SecretKey {
+        generator: *global_context.elgamal_generator(),
+        scalar,
+    };
+
+    let m = 1 << 16;
+    let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
+
+    let amounts: Vec<Amount> = encrypted_amounts.iter().map(|encrypted_amount| {
+        encrypted_transfers::decrypt_amount::<id::constants::ArCurve>(
+            &table,
+            &secret_key,
+            &encrypted_amount,
+        )
+    }).collect();
+
+    Ok(json!(amounts).to_string())
+}
+
