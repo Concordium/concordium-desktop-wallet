@@ -1,7 +1,6 @@
 use crate::{
     types::*,
 };
-
 use crypto_common::*;
 use dodis_yampolskiy_prf::secret as prf;
 use hex::FromHex;
@@ -147,7 +146,6 @@ pub fn generate_unsigned_credential_aux(
         threshold: try_get(&v, "threshold")?,
     };
 
-
     let id_string: String = try_get(&v, "idCredSec")?;
     let id_cred_sec = Value::new(generate_bls(&id_string)?);
 
@@ -207,15 +205,13 @@ pub fn generate_unsigned_credential_aux(
 
 
 pub fn get_credential_deployment_info_aux(
-    input: &str
+    signature: &str,
+    unsigned_info: &str
 ) -> Fallible<String> {
-    let v: SerdeValue = from_str(input)?;
-
     console_error_panic_hook::set_once();
 
-    let unsigned_credential_info: UnsignedCredentialDeploymentInfo<Bls12, ExampleCurve, AttributeKind>  = try_get(&v, "unsignedInfo")?;
+    let unsigned_credential_info: UnsignedCredentialDeploymentInfo<Bls12, ExampleCurve, AttributeKind>  = from_str(unsigned_info)?;
 
-    let signature: String = try_get(&v, "signature")?;
     let signature_bytes = <[u8; 64]>::from_hex(signature).expect("Decoding failed");
 
     let mut signatures = BTreeMap::new();
@@ -225,17 +221,9 @@ pub fn get_credential_deployment_info_aux(
         sigs: signatures,
     };
 
-    let unsigned_proofs = unsigned_credential_info.proofs;
-
     let cdp = CredDeploymentProofs {
-        sig: unsigned_proofs.sig,
-        commitments: unsigned_proofs.commitments,
-        challenge: unsigned_proofs.challenge,
-        proof_id_cred_pub: unsigned_proofs.proof_id_cred_pub,
-        proof_reg_id: unsigned_proofs.proof_reg_id,
-        proof_ip_sig: unsigned_proofs.proof_ip_sig,
+        id_proofs: unsigned_credential_info.proofs,
         proof_acc_sk,
-        cred_counter_less_than_max_accounts: unsigned_proofs.cred_counter_less_than_max_accounts,
     };
 
     let cdi = CredentialDeploymentInfo {

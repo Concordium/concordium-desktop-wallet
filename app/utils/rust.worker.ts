@@ -36,7 +36,10 @@ function createUnsignedCredential(rust, message) {
 }
 
 function createCredential(rust, message) {
-    const credential = rust.get_credential_deployment_info_ext(message.input);
+    const credential = rust.get_credential_deployment_info_ext(
+        message.signature,
+        message.unsignedInfo
+    );
     return credential;
 }
 
@@ -55,8 +58,10 @@ function mapCommand(command) {
     }
 }
 
-registerPromiseWorker(async function (message) {
+async function workerFunction(message) {
     const rust = await getRust();
     const func = mapCommand(message.command);
     return func(rust, message);
-});
+}
+
+registerPromiseWorker(workerFunction);

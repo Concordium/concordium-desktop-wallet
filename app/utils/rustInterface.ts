@@ -4,7 +4,6 @@ import RustWorker from 'worker-loader!./rust.worker';
 import { PublicInformationForIP } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
-import { sendTransaction } from './client';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
@@ -159,23 +158,23 @@ export async function createCredential(
     );
     displayMessage(`
 Please sign challenge on device:
-Challenge: ${unsignedCredentialDeploymentInfo.unsigned_challenge}
+Challenge: ${unsignedCredentialDeploymentInfo.accountOwnershipChallenge}
 `);
-
     const path = [0, 0, identity.id, 2, accountNumber, 0];
-
     const challengeSignature = await ledger.signAccountChallenge(
-        Buffer.from(unsignedCredentialDeploymentInfo.unsigned_challenge, 'hex'),
+        Buffer.from(
+            unsignedCredentialDeploymentInfo.accountOwnershipChallenge,
+            'hex'
+        ),
         path
     );
     displayMessage('Please wait');
 
     const credentialDeploymentInfo = await worker.postMessage({
         command: workerCommands.createCredential,
-        input: JSON.stringify({
-            unsignedInfo: unsignedCredentialDeploymentInfo,
-            signature: challengeSignature.toString('hex'),
-        }),
+        signature: challengeSignature.toString('hex'),
+        unsignedInfo: unsignedCredentialDeploymentInfoString,
     });
+    console.log(credentialDeploymentInfo);
     return JSON.parse(credentialDeploymentInfo);
 }
