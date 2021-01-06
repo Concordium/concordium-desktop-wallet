@@ -23,7 +23,7 @@ export async function confirmTransaction(transactionId) {
         console.log(data);
         if (data === 'null') {
             // TODO: Transaction was rejected / is absent
-           break;
+            break;
         } else {
             const dataObject = JSON.parse(data);
             const { status } = dataObject;

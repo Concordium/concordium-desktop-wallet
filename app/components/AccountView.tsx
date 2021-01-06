@@ -33,7 +33,10 @@ export default function AccountView() {
                     path={routes.ACCOUNTS_SIMPLETRANSFER}
                     component={() => simpleTransfer(account)}
                 />
-                <Route path={routes.DEFAULT} component={() => transferHistory(account)} />
+                <Route
+                    path={routes.DEFAULT}
+                    component={() => transferHistory(account)}
+                />
             </Switch>
         </div>
     );

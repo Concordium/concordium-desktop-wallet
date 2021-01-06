@@ -88,17 +88,17 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
                 status: 'rejected',
             });
             return loadAccounts(dispatch);
-        } else {
-            const dataObject = JSON.parse(data);
-            const { status } = dataObject;
-            if (status === 'finalized') {
-                await updateAccount(accountName, {
-                    status: 'confirmed',
-                    credential: dataObject.credential,
-                });
-                return loadAccounts(dispatch);
-            }
         }
+        const dataObject = JSON.parse(data);
+        const { status } = dataObject;
+        if (status === 'finalized') {
+            await updateAccount(accountName, {
+                status: 'confirmed',
+                credential: dataObject.credential,
+            });
+            return loadAccounts(dispatch);
+        }
+
         await sleep(10000);
     }
 }

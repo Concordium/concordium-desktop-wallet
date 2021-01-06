@@ -1,0 +1,16 @@
+.leftAligned {
+    display: flex;
+    float: left;
+    text-align: left;
+    width: 40%;
+}
+
+.rightAligned {
+    float: right;
+    text-align: right;
+    width: 40%;
+}
+
+.transactionListElement {
+    display: flex;
+}
