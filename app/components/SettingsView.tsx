@@ -9,6 +9,7 @@ import BooleanSetting from '../components/settings/BooleanSettingElement';
 
 // TODO The styling is to be updated at some point. This is just a placeholder that can safely be exchanged.
 import styles from './Identity.css';
+import TextSetting from './settings/TextSettingElement';
 
 export default function SettingsView() {
     const settings = useSelector(settingsSelector);
@@ -22,7 +23,7 @@ export default function SettingsView() {
         <div className={styles.halfPage}>
             {settings[chosenIndex].settings.map((childSetting: Setting, i) => (
                 
-                <BooleanSetting setting={childSetting} key={childSetting.name} />   
+                <TextSetting setting={childSetting} key={childSetting.name} />   
 
             ))}
         </div>
