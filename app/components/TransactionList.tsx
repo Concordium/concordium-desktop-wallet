@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-    addressBookSelector,
-    loadAddressBook,
-} from '../features/AddressBookSlice';
 import TransactionListElement from './TransactionListElement';
-import { fromMicroUnits } from '../utils/transactionHelpers';
+import { fromMicroUnits, getHighestId } from '../utils/transactionHelpers';
+import {
+    transactionsSelector,
+    updateTransactions,
+    loadTransactions,
+} from '../features/TransactionSlice';
 
 function determineBalance(transactions) {
     const microBalance = transactions.reduce(
@@ -16,19 +17,14 @@ function determineBalance(transactions) {
 }
 
 interface Props {
-    transactions: Transaction[];
     account: Account;
     chooseElement: () => void;
 }
 
-function TransactionList({ transactions, account, chooseElement }: Props) {
+function TransactionList({ account, chooseElement }: Props) {
     const dispatch = useDispatch();
-    const addressBook = useSelector(addressBookSelector);
+    const transactions = useSelector(transactionsSelector);
     const [balance, setBalance] = useState(0);
-
-    useEffect(() => {
-        loadAddressBook(dispatch);
-    }, [dispatch]);
 
     useEffect(() => {
         setBalance(determineBalance(transactions));
@@ -39,9 +35,10 @@ function TransactionList({ transactions, account, chooseElement }: Props) {
             <button
                 type="button"
                 onClick={() =>
-                    updateTransactions(account, transactions).then(() =>
-                        loadTransactions(account, dispatch)
-                    )
+                    updateTransactions(
+                        account,
+                        getHighestId(transactions)
+                    ).then(() => loadTransactions(account, dispatch))
                 }
             >
                 Update
@@ -50,7 +47,6 @@ function TransactionList({ transactions, account, chooseElement }: Props) {
             {transactions.map((transaction) => (
                 <TransactionListElement
                     transaction={transaction}
-                    addressBook={addressBook}
                     key={transaction.transactionHash}
                     onClick={() => chooseElement(transaction)}
                 />

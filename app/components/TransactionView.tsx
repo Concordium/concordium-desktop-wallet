@@ -11,21 +11,20 @@ interface Props {
 function TransactionView({ transaction, returnFunction }: Props) {
     return (
         <div>
-            Transacion Details
+            Transaction Details
             <button type="button" onClick={returnFunction}>
                 x
             </button>
-            <TransactionListElement
-                transaction={transaction}
-                addressBook={[]}
-            />
+            <TransactionListElement transaction={transaction} />
             <CopiableListElement
                 title="From Address:"
                 value={transaction.fromAddress}
+                note={transaction.fromAddressName}
             />
             <CopiableListElement
                 title="To Address:"
                 value={transaction.toAddress}
+                note={transaction.toAddressName}
             />
             <CopiableListElement
                 title="Transaction Hash"

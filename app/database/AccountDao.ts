@@ -16,8 +16,12 @@ export async function updateAccount(accountName: string, updatedValues) {
         .update(updatedValues);
 }
 
+export async function findAccounts(query) {
+    return (await knex()).select().table(accountsTable).where(query);
+}
+
 export async function getAccountsOfIdentity(
     identityId: number
 ): Promise<Account[]> {
-    return (await knex()).select().table(accountsTable).where({ identityId });
+    return findAccounts({ identityId });
 }

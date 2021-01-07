@@ -3,20 +3,16 @@ import styles from './Transaction.css';
 import { fromMicroUnits } from '../utils/transactionHelpers';
 import { Transaction } from '../utils/types';
 
-function attemptAlias(address, addressBook): string {
-    const filtered = addressBook.filter((x) => x.address === address);
-    if (filtered.length === 0) {
-        return address;
-    }
-    return filtered[0].name;
-}
-
-function getAddress(transaction) {
+function getName(transaction) {
     switch (transaction.originType) {
         case 'self':
-            return transaction.toAddress;
+            return 'toAddressName' in transaction
+                ? transaction.toAddressName
+                : transaction.toAddress;
         case 'account':
-            return transaction.fromAddress;
+            return 'fromAddressName' in transaction
+                ? transaction.fromAddressName
+                : transaction.fromAddress;
         default:
             return 'unknown';
     }
@@ -54,23 +50,18 @@ function parseTime(epoch) {
 
 interface Props {
     transaction: Transaction;
-    addressBook: AddressBookEntry[];
     onClick?: () => void;
 }
 
-function TransactionListElement({
-    transaction,
-    addressBook,
-    onClick,
-}: Props): JSX.element {
+function TransactionListElement({ transaction, onClick }: Props): JSX.element {
     const time = parseTime(transaction.blockTime);
-    const address = attemptAlias(getAddress(transaction), addressBook);
+    const name = getName(transaction);
     const { amount, amountFormula } = parseAmount(transaction);
 
     return (
         <div className={styles.transactionListElement} onClick={onClick}>
             <pre className={styles.leftAligned}>
-                {address} {' \n'}
+                {name} {' \n'}
                 {time}
             </pre>
             <pre className={styles.rightAligned}>

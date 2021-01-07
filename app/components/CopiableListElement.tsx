@@ -1,13 +1,18 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import styles from './Transaction.css';
 
-function CopiableListElement({ title, value, extra }): JSX.element {
+interface Props {
+    title: string;
+    value: string;
+    note?: string;
+}
+
+function CopiableListElement({ title, value, note }: Props): JSX.element {
     return (
         <div className={styles.transactionListElement}>
             <pre className={styles.leftAligned}>
                 {title} {' \n'}
-                {value} {extra}
+                {value} {note ? `(${note})` : undefined}
             </pre>
             <div className={styles.rightAligned}>
                 <button
@@ -21,14 +26,8 @@ function CopiableListElement({ title, value, extra }): JSX.element {
     );
 }
 
-CopiableListElement.propTypes = {
-    title: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
-    extra: PropTypes.string,
-};
-
 CopiableListElement.defaultProps = {
-    extra: '',
+    note: undefined,
 };
 
 export default CopiableListElement;

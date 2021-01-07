@@ -1,5 +1,6 @@
 import * as axios from 'axios';
 import * as http from 'http';
+import { getHighestId } from './transactionHelpers';
 
 const walletProxy = axios.create({
     baseURL: 'http://wallet-proxy.eu.staging.concordium.com/',
@@ -37,9 +38,15 @@ function getResponseBody(response) {
 
 export async function getTransactions(address, id = 0) {
     const response = await walletProxy.get(
-        `/v0/accTransactions/${address}?from=${id}`
+        `/v0/accTransactions/${address}?limit=1000&from=${id}`
     );
-    return response.data;
+    const { transactions, count, limit } = response.data;
+    if (count === limit) {
+        return transactions.push(
+            getTransactions(address, getHighestId(transactions))
+        );
+    }
+    return transactions;
 }
 
 export async function getIdentityProviders() {

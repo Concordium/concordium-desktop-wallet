@@ -10,24 +10,21 @@ import {
 } from '../database/TransactionDao';
 import { Transaction } from '../utils/types';
 import ConcordiumLedgerClient from './ledger/ConcordiumLedgerClient';
+import { attachNames } from '../utils/transactionHelpers';
 
 const transactionSlice = createSlice({
     name: 'transactions',
     initialState: {
-        loadedTransactions: [],
-        chosenIndex: 0,
+        transactions: [],
     },
     reducers: {
         setTransactions(state, transactions) {
-            state.loadedTransactions = transactions.payload;
-        },
-        chooseIndex(state, index) {
-            state.chosenIndex = index.payload;
+            state.transactions = transactions.payload;
         },
     },
 });
 
-const { chooseIndex, setTransactions } = transactionSlice.actions;
+const { setTransactions } = transactionSlice.actions;
 
 async function decryptTransactions(transactions, account) {
     const global = (await getGlobal()).value;
@@ -97,15 +94,12 @@ function convertIncomingTransaction(transaction): Transaction {
 
 export async function loadTransactions(account, dispatch: Dispatch) {
     const transactions = await getTransactionsOfAccount(account);
+    await attachNames(transactions);
     dispatch(setTransactions(transactions));
 }
 
-export async function updateTransactions(account, existingTransactions) {
-    const highestId = existingTransactions.reduce(
-        (id, t) => Math.max(id, t.id),
-        0
-    );
-    const { transactions } = await getTransactions(account.address, highestId);
+export async function updateTransactions(account, fromId) {
+    const transactions = await getTransactions(account.address, fromId);
     if (transactions.length > 0) {
         const decryptedTransactions = await decryptTransactions(
             transactions,
@@ -118,8 +112,6 @@ export async function updateTransactions(account, existingTransactions) {
 }
 
 export const transactionsSelector = (state: RootState) =>
-    state.transactions.loadedTransactions;
-export const chosenIndexSelector = (state: RootState) =>
-    state.transactions.chosenIndex;
+    state.transactions.transactions;
 
 export default transactionSlice.reducer;

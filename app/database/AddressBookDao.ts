@@ -19,3 +19,7 @@ export async function updateEntry(name: string, updatedValues) {
 export async function removeEntry(entry: Account) {
     return (await knex())(addressBookTable).where(entry).del();
 }
+
+export async function findEntries(query) {
+    return (await knex()).select().table(addressBookTable).where(query);
+}
