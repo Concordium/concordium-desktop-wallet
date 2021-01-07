@@ -4,14 +4,16 @@ import { transactionTable } from '../constants/databaseNames.json';
 import { up, down } from './migrations/20201230111229_create_transaction_table';
 
 export async function getTransactionsOfAccount(
-    account: Account
+    account: Account,
+    orderBy = 'id'
 ): Promise<Transaction[]> {
     const { address } = account;
     return (await knex())
         .select()
         .table(transactionTable)
         .where({ toAddress: address })
-        .orWhere({ fromAddress: address });
+        .orWhere({ fromAddress: address })
+        .orderBy(orderBy);
 }
 
 export async function insertTransactions(transactions: Transaction[]) {

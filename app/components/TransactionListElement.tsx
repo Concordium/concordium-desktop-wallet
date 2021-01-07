@@ -1,7 +1,7 @@
-import PropTypes from 'prop-types';
 import React from 'react';
 import styles from './Transaction.css';
 import { fromMicroUnits } from '../utils/transactionHelpers';
+import { Transaction } from '../utils/types';
 
 function attemptAlias(address, addressBook): string {
     const filtered = addressBook.filter((x) => x.address === address);
@@ -52,13 +52,23 @@ function parseTime(epoch) {
     return dtFormat.format(new Date(epoch * 1e3));
 }
 
-function TransactionListElement({ transaction, addressBook }): JSX.element {
+interface Props {
+    transaction: Transaction;
+    addressBook: AddressBookEntry[];
+    onClick?: () => void;
+}
+
+function TransactionListElement({
+    transaction,
+    addressBook,
+    onClick,
+}: Props): JSX.element {
     const time = parseTime(transaction.blockTime);
     const address = attemptAlias(getAddress(transaction), addressBook);
     const { amount, amountFormula } = parseAmount(transaction);
 
     return (
-        <div className={styles.transactionListElement}>
+        <div className={styles.transactionListElement} onClick={onClick}>
             <pre className={styles.leftAligned}>
                 {address} {' \n'}
                 {time}
@@ -71,9 +81,8 @@ function TransactionListElement({ transaction, addressBook }): JSX.element {
     );
 }
 
-TransactionListElement.propTypes = {
-    transaction: PropTypes.object.isRequired,
-    addressBook: PropTypes.array.isRequired,
+TransactionListElement.defaultProps = {
+    onClick: () => {},
 };
 
 export default TransactionListElement;
