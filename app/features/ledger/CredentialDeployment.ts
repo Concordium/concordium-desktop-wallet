@@ -17,8 +17,7 @@ export async function signCredentialDeployment(
     // TODO: Make this value an input to support updating credentials of existing accounts.
     const newAccount = Uint8Array.of(1);
 
-    const verificationKeyListLength =
-        credentialDeployment.account.keys.length;
+    const verificationKeyListLength = credentialDeployment.account.keys.length;
     let data = Buffer.concat([
         pathPrefix,
         newAccount,
@@ -54,9 +53,7 @@ export async function signCredentialDeployment(
     const identityProviderIdentity = Buffer.alloc(4);
     identityProviderIdentity.writeInt32BE(credentialDeployment.ipId, 0);
 
-    const arThreshold = Uint8Array.of(
-        credentialDeployment.revocationThreshold
-    );
+    const arThreshold = Uint8Array.of(credentialDeployment.revocationThreshold);
     const arListLength = credentialDeployment.arData.length;
     const arListLengthAsBytes = Uint8Array.of(arListLength);
 
@@ -73,7 +70,10 @@ export async function signCredentialDeployment(
     p1 = 0x03;
 
     for (const arIdentity of Object.keys(credentialDeployment.arData)) {
-        const encIdCredPub = Buffer.from(credentialDeployment.arData[arIdentity].encIdCredPubShare, 'hex');
+        const encIdCredPub = Buffer.from(
+            credentialDeployment.arData[arIdentity].encIdCredPubShare,
+            'hex'
+        );
         const arData = Buffer.alloc(4);
         arData.writeUInt32BE(arIdentity, 0);
         const data = Buffer.concat([arData, encIdCredPub]);
@@ -90,15 +90,23 @@ export async function signCredentialDeployment(
 
     p1 = 0x04;
     const validTo = Buffer.alloc(3);
-    const ValidToYear = parseInt(credentialDeployment.policy.validTo.substring(0,4));
-    const ValidToMonth = parseInt(credentialDeployment.policy.validTo.substring(4,6));
+    const ValidToYear = parseInt(
+        credentialDeployment.policy.validTo.substring(0, 4)
+    );
+    const ValidToMonth = parseInt(
+        credentialDeployment.policy.validTo.substring(4, 6)
+    );
 
     validTo.writeUInt16BE(ValidToYear, 0);
     validTo.writeUInt8(ValidToMonth, 2);
 
     const createdAt = Buffer.alloc(3);
-    const createdAtYear = parseInt(credentialDeployment.policy.createdAt.substring(0,4));
-    const createdAtMonth = parseInt(credentialDeployment.policy.createdAt.substring(4,6));
+    const createdAtYear = parseInt(
+        credentialDeployment.policy.createdAt.substring(0, 4)
+    );
+    const createdAtMonth = parseInt(
+        credentialDeployment.policy.createdAt.substring(4, 6)
+    );
 
     createdAt.writeUInt16BE(createdAtYear, 0);
     createdAt.writeUInt8(createdAtMonth, 2);
@@ -111,10 +119,11 @@ export async function signCredentialDeployment(
     data = Buffer.concat([validTo, createdAt, attributeListLengthAsBytes]);
     await transport.send(0xe0, INS_SIGN_CREDENTIAL_DEPLOYMENT, p1, p2, data);
 
-    for (const attributeTag of Object.keys (credentialDeployment
-        .policy.revealedAttributes)) {
-        const attributeValue  = credentialDeployment
-            .policy.revealedAttributes[attributeTag];
+    for (const attributeTag of Object.keys(
+        credentialDeployment.policy.revealedAttributes
+    )) {
+        const attributeValue =
+            credentialDeployment.policy.revealedAttributes[attributeTag];
         let data = Buffer.alloc(2);
         data.writeUInt8(attributeTag, 0);
         const serializedAttributeValue = Buffer.from(attributeValue, 'utf-8');

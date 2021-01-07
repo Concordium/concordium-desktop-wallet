@@ -6,11 +6,11 @@ import {
     SendTransactionRequest,
     TransactionHash,
     AccountAddress,
-    Empty
+    Empty,
 } from '../proto/api_pb';
 
 const port = 10000;
-const address = 'localhost'; // '172.31.33.57'; //
+const address = '172.31.33.57'; // 'localhost'; //
 const client = new P2PClient(
     `${address}:${port}`,
     grpc.credentials.createInsecure()
@@ -70,7 +70,6 @@ export function getTransactionStatus(
 ): Promise<JSONResponse> {
     return new Promise<JSONResponse>((resolve, reject) => {
         const transactionHash = new TransactionHash();
-        console.log(transactionId)
         transactionHash.setTransactionHash(transactionId);
 
         client.getTransactionStatus(
@@ -86,9 +85,7 @@ export function getTransactionStatus(
     });
 }
 
-export function getNextAccountNonce(
-    address: string
-): Promise<JSONResponse> {
+export function getNextAccountNonce(address: string): Promise<JSONResponse> {
     return new Promise<JSONResponse>((resolve, reject) => {
         const accountAddress = new AccountAddress();
         accountAddress.setAccountAddress(address);
@@ -106,18 +103,13 @@ export function getNextAccountNonce(
     });
 }
 
-export function getNodeInfo(
-): Promise<NodeInfoResponse> {
+export function getNodeInfo(): Promise<NodeInfoResponse> {
     return new Promise<NodeInfoResponse>((resolve, reject) => {
-        client.nodeInfo(
-            new Empty(),
-            buildMetaData(),
-            (err, response) => {
-                if (err) {
-                    return reject(err);
-                }
-                return resolve(response);
+        client.nodeInfo(new Empty(), buildMetaData(), (err, response) => {
+            if (err) {
+                return reject(err);
             }
-        );
+            return resolve(response);
+        });
     });
 }
