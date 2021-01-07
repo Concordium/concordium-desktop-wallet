@@ -1,10 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import styles from './Transaction.css';
-
-function fromMicroUnits(amount) {
-    return `${Math.floor(amount / 1000000)}.${amount % 1000000}`;
-}
+import { fromMicroUnits } from '../utils/transactionHelpers';
 
 function attemptAlias(address, addressBook): string {
     const filtered = addressBook.filter((x) => x.address === address);
@@ -15,45 +12,30 @@ function attemptAlias(address, addressBook): string {
 }
 
 function getAddress(transaction) {
-    switch (transaction.origin.type) {
+    switch (transaction.originType) {
         case 'self':
-            return transaction.details.transferDestination;
+            return transaction.toAddress;
         case 'account':
-            return transaction.origin.address;
-        default:
-            return 'unknown';
-    }
-}
-
-function getAmount(transaction) {
-    switch (transaction.details.type) {
-        case 'transfer':
-            return transaction.details.transferAmount;
-        case 'encryptedAmountTransfer':
-            return transaction.details.transferAmount;
+            return transaction.fromAddress;
         default:
             return 'unknown';
     }
 }
 
 function parseAmount(transaction) {
-    const transferAmount = getAmount(transaction);
-
-    switch (transaction.origin.type) {
+    switch (transaction.originType) {
         case 'self': {
             const fee = parseInt(transaction.cost, 10);
             return {
-                amount: `- G ${fromMicroUnits(
-                    parseInt(transferAmount, 10) + fee
-                )}`,
-                amountFormula: `G${fromMicroUnits(
-                    transferAmount
-                )} + G${fromMicroUnits(fee)} Fee`,
+                amount: `${fromMicroUnits(transaction.total)}`,
+                amountFormula: `${fromMicroUnits(
+                    -transaction.subtotal
+                )} +${fromMicroUnits(fee)} Fee`,
             };
         }
         case 'account':
             return {
-                amount: `+ G ${fromMicroUnits(transferAmount)}`,
+                amount: `${fromMicroUnits(transaction.total)}`,
                 amountFormula: '',
             };
         default:

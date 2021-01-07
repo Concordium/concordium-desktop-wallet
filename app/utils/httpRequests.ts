@@ -9,7 +9,7 @@ function getPromise(urlString, params) {
     console.log(urlString);
     const url = new URL(urlString);
     const searchParams = new URLSearchParams(params);
-    url.searchParams.forEach((value,name) => searchParams.append(name, value));
+    url.searchParams.forEach((value, name) => searchParams.append(name, value));
     const options = {
         hostname: url.hostname,
         port: url.port,
@@ -35,8 +35,10 @@ function getResponseBody(response) {
     });
 }
 
-export async function getTransactions(address) {
-    const response = await walletProxy.get('/v0/accTransactions/' + address);;
+export async function getTransactions(address, id = 0) {
+    const response = await walletProxy.get(
+        `/v0/accTransactions/${address}?from=${id}`
+    );
     return response.data;
 }
 

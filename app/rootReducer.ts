@@ -7,6 +7,7 @@ import accountReducer from './features/AccountSlice';
 import identityReducer from './features/IdentitySlice';
 import addressBookReducer from './features/AddressBookSlice';
 import identityIssuanceReducer from './features/IdentityIssuanceSlice';
+import transactionReducer from './features/TransactionSlice';
 
 export default function createRootReducer(history: History) {
     return combineReducers({
@@ -16,5 +17,6 @@ export default function createRootReducer(history: History) {
         accounts: accountReducer,
         addressBook: addressBookReducer,
         identityIssuance: identityIssuanceReducer,
+        transactions: transactionReducer,
     });
 }

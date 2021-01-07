@@ -1,8 +1,4 @@
-import {
-    AccountTransaction,
-    TransactionKind,
-    BlockItemKind,
-} from './types';
+import { AccountTransaction, TransactionKind, BlockItemKind } from './types';
 import {
     encodeWord16,
     encodeWord32,
@@ -152,15 +148,15 @@ function serializeUnversionedTransaction(
     return serialized;
 }
 
-
-export function serializeTransaction (
+export function serializeTransaction(
     transaction: AccountTransaction,
     signFunction: (transaction: AccountTransaction, hash: Buffer) => Buffer
 ) {
-    const unversioned = serializeUnversionedTransaction(transaction, signFunction);
-    const serialized = new Uint8Array(
-        1 + unversioned.length
+    const unversioned = serializeUnversionedTransaction(
+        transaction,
+        signFunction
     );
+    const serialized = new Uint8Array(1 + unversioned.length);
     serialized[0] = 0; // Version number
     put(serialized, 1, unversioned);
     return serialized;

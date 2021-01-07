@@ -14,6 +14,7 @@ import {
     credentialDeploymentTest,
 } from './testSlice';
 import { insertIdentity } from '../../database/IdentityDao';
+import { resetTransactions } from '../../database/TransactionDao';
 
 type ChangeHandler = (e: InputEvent) => void;
 
@@ -69,7 +70,7 @@ export default function Test() {
                 </button>
                 <button
                     onClick={() => {
-                        ledgerTest
+                        ledgerTest;
                     }}
                     data-tclass="btn"
                     type="button"
@@ -87,7 +88,7 @@ export default function Test() {
                 </button>
                 <button
                     onClick={() => {
-                            insertIdentity({ name: blockHash });
+                        insertIdentity({ name: blockHash });
                     }}
                     data-tclass="btn"
                     type="button"
@@ -102,6 +103,15 @@ export default function Test() {
                     type="button"
                 >
                     Sign credential deployment
+                </button>
+                <button
+                    onClick={() => {
+                        resetTransactions();
+                    }}
+                    data-tclass="btn"
+                    type="button"
+                >
+                    reset transactions table
                 </button>
             </div>
             <textarea value={summary} readOnly />

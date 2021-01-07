@@ -140,3 +140,37 @@ export interface PublicInformationForIp {
     regId: RegId;
     publicKeys: NewAccount;
 }
+
+export enum TransactionStatus {
+    received = 1,
+    absent = 2,
+    comitted = 3,
+    finalized = 4,
+}
+
+export enum OriginType {
+    self,
+    account,
+    reward,
+    none,
+}
+
+export interface Transaction {
+    remote: boolean;
+    originType: OriginType;
+    transactionKind: TransactionKind;
+    id: number;
+    blockHash: Hex;
+    blockTime: string;
+    total: string;
+    success: boolean;
+    transactionHash?: Hex;
+    subtotal?: string;
+    cost?: string;
+    details: string;
+    encrypted?: string;
+    fromAddress: Hex;
+    toAddress: Hex;
+    status: TransactionStatus;
+    rejectReason?: string;
+}
