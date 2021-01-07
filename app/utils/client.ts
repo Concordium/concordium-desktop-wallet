@@ -6,13 +6,15 @@ import {
     SendTransactionRequest,
     TransactionHash,
     AccountAddress,
+    GetAddressInfoRequest,
     Empty,
 } from '../proto/api_pb';
 
 const port = 10000;
-const address = '172.31.33.57'; // 'localhost'; //
+const clientAddress = '172.31.33.57'; // 'localhost'; //
+
 const client = new P2PClient(
-    `${address}:${port}`,
+    `${clientAddress}:${port}`,
     grpc.credentials.createInsecure()
 );
 
@@ -32,84 +34,64 @@ function buildSendTransactionRequest(
     return request;
 }
 
-export function getBlockSummary(blockHashValue: string): Promise<JSONResponse> {
+function sendPromise(command, input) {
     return new Promise<JSONResponse>((resolve, reject) => {
-        const blockHash = new BlockHash();
-        blockHash.setBlockHash(blockHashValue);
-
-        client.getBlockSummary(blockHash, buildMetaData(), (err, response) => {
+        command.bind(client)(input, buildMetaData(), (err, response) => {
             if (err) {
                 return reject(err);
             }
             return resolve(response);
         });
     });
+}
+
+export function getBlockSummary(blockHashValue: string): Promise<JSONResponse> {
+    const blockHash = new BlockHash();
+    blockHash.setBlockHash(blockHashValue);
+
+    return sendPromise(client.getBlockSummary, blockHash);
 }
 
 export function sendTransaction(
     transactionPayload: Uint8Array,
     networkId = 100
 ): Promise<JSONResponse> {
-    return new Promise<JSONResponse>((resolve, reject) => {
-        const request = buildSendTransactionRequest(
-            transactionPayload,
-            networkId
-        );
+    const request = buildSendTransactionRequest(transactionPayload, networkId);
 
-        client.sendTransaction(request, buildMetaData(), (err, response) => {
-            if (err) {
-                return reject(err);
-            }
-            return resolve(response);
-        });
-    });
+    return sendPromise(client.sendTransaction, request);
 }
 
 export function getTransactionStatus(
     transactionId: string
 ): Promise<JSONResponse> {
-    return new Promise<JSONResponse>((resolve, reject) => {
-        const transactionHash = new TransactionHash();
-        transactionHash.setTransactionHash(transactionId);
+    const transactionHash = new TransactionHash();
+    transactionHash.setTransactionHash(transactionId);
 
-        client.getTransactionStatus(
-            transactionHash,
-            buildMetaData(),
-            (err, response) => {
-                if (err) {
-                    return reject(err);
-                }
-                return resolve(response);
-            }
-        );
-    });
+    return sendPromise(client.getTransactionStatus, transactionHash);
 }
 
 export function getNextAccountNonce(address: string): Promise<JSONResponse> {
-    return new Promise<JSONResponse>((resolve, reject) => {
-        const accountAddress = new AccountAddress();
-        accountAddress.setAccountAddress(address);
+    const accountAddress = new AccountAddress();
+    accountAddress.setAccountAddress(address);
 
-        client.getNextAccountNonce(
-            accountAddress,
-            buildMetaData(),
-            (err, response) => {
-                if (err) {
-                    return reject(err);
-                }
-                return resolve(response);
-            }
-        );
-    });
+    return sendPromise(client.getNextAccountNonce, accountAddress);
+}
+
+export function getConsensusInfo(): Promise<JSONResponse> {
+    return sendPromise(client.getConsensusStatus, new Empty());
+}
+
+export function getAccountInfo(
+    address: string,
+    blockHash: string
+): Promise<JSONResponse> {
+    const requestData = new GetAddressInfoRequest();
+    requestData.setAddress(address);
+    requestData.setBlockHash(blockHash);
+
+    return sendPromise(client.getAccountInfo, requestData);
 }
 
 export function getNodeInfo(): Promise<NodeInfoResponse> {
-    return new Promise<NodeInfoResponse>((resolve, reject) => {
-        client.nodeInfo(new Empty(), buildMetaData(), (err, response) => {
-            if (err) {
-                return reject(err);
-            }
-            return resolve(response);
-        });
-    });
+    return sendPromise(client.nodeInfo, new Empty());
 }
