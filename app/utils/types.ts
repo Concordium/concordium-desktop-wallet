@@ -59,6 +59,15 @@ export interface Identity {
     identityObject: string;
 }
 
+export interface Account {
+    accountNumber: number;
+    name: string;
+    address: Hex;
+    identityId: number;
+    status: string;
+    credential?: string;
+}
+
 export interface AccountTransaction {
     sender: AccountAddress;
     nonce: number;
