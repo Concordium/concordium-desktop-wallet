@@ -53,8 +53,21 @@ export const {
     setAccountInfos,
 } = accountsSlice.actions;
 
-export async function loadAccounts(dispatch: Dispatch) {
+export async function loadAccounts(dispatch: Dispatch, identities = undefined) {
     const accounts: Account[] = await getAllAccounts();
+    if (identities) {
+        await Promise.all(
+            accounts.map(async (account) => {
+                const matchingIds = identities.filter(
+                    (identity) =>
+                        identity.id === parseInt(account.identityId, 10)
+                );
+                if (matchingIds.length > 0) {
+                    account.identityName = matchingIds[0].name;
+                }
+            })
+        );
+    }
     dispatch(updateAccounts(accounts));
 }
 

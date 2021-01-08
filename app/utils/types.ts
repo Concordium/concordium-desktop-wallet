@@ -178,4 +178,5 @@ export interface Transaction {
 export interface AccountInfo {
     accountAmount: string;
     accountReleaseSchedule: AccountReleaseSchedule; // TODO
+    accountBaker: AccountBakerDetails; // TODO
 }

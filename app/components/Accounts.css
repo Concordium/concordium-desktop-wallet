@@ -41,14 +41,6 @@
     border-color: blue;
 }
 
-.accountActionsSpan {
-    display: block;
-}
-
-.accountActionsSpan link button {
-    padding-right: 10px;
-}
-
 .accountBalanceView {
     background-color: #000;
     border-radius: 10px;
@@ -65,14 +57,29 @@
     margin-top: 20px;
 }
 
+
+.accountActionsSpan {
+    display: block;
+}
+
+.accountActionsSpan link button {
+    padding-right: 10px;
+}
+
 .leftAlignedText {
     text-align: left;
     width: 50%;
+    padding-left: 5%;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .rightAlignedText {
     text-align: right;
     width: 50%;
+    padding-right: 5%;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .line {

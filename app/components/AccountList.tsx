@@ -9,6 +9,7 @@ import {
     chosenAccountIndexSelector,
     accountsInfoSelector,
 } from '../features/AccountSlice';
+import { loadIdentities, identitiesSelector } from '../features/IdentitySlice';
 import styles from './Accounts.css';
 import AccountListElement from './AccountListElement';
 import routes from '../constants/routes.json';
@@ -18,10 +19,17 @@ export default function AccountList() {
     const accounts = useSelector(accountsSelector);
     const accountsInfo = useSelector(accountsInfoSelector);
     const chosenIndex = useSelector(chosenAccountIndexSelector);
+    const identities = useSelector(identitiesSelector);
 
     useEffect(() => {
-        loadAccounts(dispatch);
+        loadIdentities(dispatch);
     }, [dispatch]);
+
+    useEffect(() => {
+        if (identities) {
+            loadAccounts(dispatch, identities);
+        }
+    }, [identities, dispatch]);
 
     useEffect(() => {
         if (accounts) {

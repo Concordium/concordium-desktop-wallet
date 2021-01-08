@@ -10,6 +10,15 @@ interface Props {
     highlighted: boolean;
 }
 
+function sidedText(left: string, right: string) {
+    return (
+        <div className={styles.line}>
+            <p className={styles.leftAlignedText}>{left}</p>
+            <p className={styles.rightAlignedText}>{right}</p>
+        </div>
+    );
+}
+
 export default function AccountListElement({
     account,
     accountInfo,
@@ -24,22 +33,33 @@ export default function AccountListElement({
                 highlighted ? styles.chosenAccountListElement : null
             }`}
         >
-            {account.status} {account.name}{' '}
-            {account.accountNumber === 0 ? '(initial)' : undefined}
-            <pre>
-                {account.identityId}
-                {'\n'}
-                Balance:{' '}
-                {accountInfo ? fromMicroUnits(accountInfo.accountAmount) : '0'}
-                {'\n'}
-                At Disposal:{' '}
-                {accountInfo && accountInfo.accountReleaseSchedule
+            <div className={styles.line}>
+                <p className={styles.leftAlignedText}>
+                    {account.name}{' '}
+                    {account.accountNumber === 0 ? '(initial)' : undefined}
+                    {accountInfo && accountInfo.accountBaker
+                        ? '(baker)'
+                        : undefined}
+                    {account.status === 'pending' ? ' ??? ' : undefined}
+                </p>
+                <p className={styles.rightAlignedText}>
+                    {account.identityName}
+                </p>
+            </div>
+            {sidedText(
+                'Balance:',
+                accountInfo ? fromMicroUnits(accountInfo.accountAmount) : '0'
+            )}
+            {sidedText(
+                ' - At Disposal:',
+                accountInfo && accountInfo.accountReleaseSchedule
                     ? fromMicroUnits(
                           accountInfo.accountAmount -
                               accountInfo.accountReleaseSchedule.total
                       )
-                    : '0'}
-            </pre>
+                    : '0'
+            )}
+            {sidedText(' - Staked:', '0')}
         </div>
     );
 }

@@ -20,10 +20,6 @@ function TransactionList({ account, chooseElement, viewingShielded }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);
 
-    useEffect(() => {
-        loadTransactions(account, viewingShielded, dispatch);
-    }, [account, viewingShielded, dispatch]);
-
     return (
         <div className={styles.transactionBox}>
             <button
