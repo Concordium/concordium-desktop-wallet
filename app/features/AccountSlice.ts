@@ -7,13 +7,18 @@ import {
     updateAccount,
     getAccountsOfIdentity,
 } from '../database/AccountDao';
-import { getTransactionStatus } from '../utils/client';
+import {
+    getTransactionStatus,
+    getAccountInfo,
+    getConsensusInfo,
+} from '../utils/client';
 import { sleep } from '../utils/httpRequests';
 
 const accountsSlice = createSlice({
     name: 'accounts',
     initialState: {
         accounts: undefined,
+        accountsInfo: undefined,
         chosenAccount: undefined,
         chosenAccountIndex: undefined,
     },
@@ -25,10 +30,16 @@ const accountsSlice = createSlice({
         updateAccounts: (state, input) => {
             state.accounts = input.payload;
         },
+        setAccountInfos: (state, map) => {
+            state.accountsInfo = map.payload;
+        },
     },
 });
 
 export const accountsSelector = (state: RootState) => state.accounts.accounts;
+
+export const accountsInfoSelector = (state: RootState) =>
+    state.accounts.accountsInfo;
 
 export const chosenAccountSelector = (state: RootState) =>
     state.accounts.chosenAccount;
@@ -36,7 +47,11 @@ export const chosenAccountSelector = (state: RootState) =>
 export const chosenAccountIndexSelector = (state: RootState) =>
     state.accounts.chosenAccountIndex;
 
-export const { chooseAccount, updateAccounts } = accountsSlice.actions;
+export const {
+    chooseAccount,
+    updateAccounts,
+    setAccountInfos,
+} = accountsSlice.actions;
 
 export async function loadAccounts(dispatch: Dispatch) {
     const accounts: Account[] = await getAllAccounts();
@@ -76,14 +91,13 @@ export async function confirmInitialAccount(
         address: accountAddress,
         credential,
     });
-    return await loadAccounts(dispatch);
+    return loadAccounts(dispatch);
 }
 
 export async function confirmAccount(dispatch, accountName, transactionId) {
     while (true) {
         const response = await getTransactionStatus(transactionId);
         const data = response.getValue();
-        console.log(data);
         if (data === 'null') {
             await updateAccount(accountName, {
                 status: 'rejected',
@@ -110,6 +124,38 @@ export async function getNextAccountNumber(identityId) {
         0
     );
     return currentNumber + 1;
+}
+
+function isValidAddress(address): boolean {
+    // TODO: Check length
+    try {
+        if (!address) {
+            return false;
+        }
+        const regex = /[0-9A-Fa-f]{6}/g;
+        regex.test(address);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+export async function loadAccountsInfos(accounts, dispatch) {
+    const map = {};
+    const consenusInfo = JSON.parse((await getConsensusInfo()).getValue());
+    const blockHash = consenusInfo.lastFinalizedBlock;
+    await Promise.all(
+        accounts
+            .filter((account) => isValidAddress(account.address))
+            .map(async (account) => {
+                const response = await getAccountInfo(
+                    account.address,
+                    blockHash
+                );
+                map[account.address] = JSON.parse(response.getValue());
+            })
+    );
+    dispatch(setAccountInfos(map));
 }
 
 export default accountsSlice.reducer;

@@ -1,34 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
     loadAccounts,
+    loadAccountsInfos,
     accountsSelector,
     chooseAccount,
     chosenAccountIndexSelector,
+    accountsInfoSelector,
 } from '../features/AccountSlice';
 import styles from './Accounts.css';
 import AccountListElement from './AccountListElement';
 import routes from '../constants/routes.json';
-import { getConsensusInfo } from '../utils/client';
-
-async function initialize(setLatestBlockHash, dispatch) {
-    const consenusInfo = JSON.parse((await getConsensusInfo()).getValue());
-    setLatestBlockHash(consenusInfo.lastFinalizedBlock);
-    loadAccounts(dispatch);
-}
 
 export default function AccountList() {
     const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);
+    const accountsInfo = useSelector(accountsInfoSelector);
     const chosenIndex = useSelector(chosenAccountIndexSelector);
-    const [latestBlockHash, setLatestBlockHash] = useState(undefined);
 
     useEffect(() => {
-        initialize(setLatestBlockHash, dispatch);
-    }, [dispatch, setLatestBlockHash]);
+        loadAccounts(dispatch);
+    }, [dispatch]);
 
-    if (!accounts || !latestBlockHash) {
+    useEffect(() => {
+        if (accounts) {
+            loadAccountsInfos(accounts, dispatch);
+        }
+    }, [accounts, dispatch]);
+
+    if (!accounts || !accountsInfo) {
         return <div />;
     }
 
@@ -41,8 +42,8 @@ export default function AccountList() {
                 {accounts.map((account, index) => (
                     <AccountListElement
                         account={account}
+                        accountInfo={accountsInfo[account.address]}
                         key={account.address}
-                        latestBlockHash={latestBlockHash}
                         onClick={() => dispatch(chooseAccount(index))}
                         highlighted={index === chosenIndex}
                     />

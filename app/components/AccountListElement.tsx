@@ -1,29 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styles from './Accounts.css';
-import { getAccountInfo } from '../utils/client';
 import { fromMicroUnits } from '../utils/transactionHelpers';
+import { AccountInfo, Account } from '../utils/types';
 
 interface Props {
     account: Account;
-    latestBlockHash: string;
+    accountInfo: AccountInfo;
     onClick: () => void;
     highlighted: boolean;
 }
 
 export default function AccountListElement({
     account,
-    latestBlockHash,
+    accountInfo,
     onClick,
     highlighted,
 }: Props): JSX.element {
-    const [accountInfo, setAccountInfo] = useState(undefined);
-
-    useEffect(() => {
-        getAccountInfo(account.address, latestBlockHash)
-            .then((response) => setAccountInfo(JSON.parse(response.getValue())))
-            .catch(console.log);
-    }, [account, latestBlockHash]);
-
     return (
         <div
             onClick={onClick}

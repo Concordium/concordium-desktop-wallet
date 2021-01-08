@@ -1,20 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import TransactionListElement from './TransactionListElement';
-import { fromMicroUnits, getHighestId } from '../utils/transactionHelpers';
+import { getHighestId } from '../utils/transactionHelpers';
 import {
     transactionsSelector,
     updateTransactions,
     loadTransactions,
 } from '../features/TransactionSlice';
-
-function determineBalance(transactions) {
-    const microBalance = transactions.reduce(
-        (balance, transaction) => balance + parseInt(transaction.total, 10),
-        0
-    );
-    return fromMicroUnits(microBalance);
-}
+import styles from './Transaction.css';
 
 interface Props {
     account: Account;
@@ -24,14 +17,13 @@ interface Props {
 function TransactionList({ account, chooseElement }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);
-    const [balance, setBalance] = useState(0);
 
     useEffect(() => {
-        setBalance(determineBalance(transactions));
-    }, [transactions]);
+        loadTransactions(account, dispatch);
+    }, [account, dispatch]);
 
     return (
-        <div>
+        <div className={styles.transactionBox}>
             <button
                 type="button"
                 onClick={() =>
@@ -43,7 +35,6 @@ function TransactionList({ account, chooseElement }: Props) {
             >
                 Update
             </button>
-            Balance: {balance}
             {transactions.map((transaction) => (
                 <TransactionListElement
                     transaction={transaction}

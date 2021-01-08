@@ -174,3 +174,8 @@ export interface Transaction {
     status: TransactionStatus;
     rejectReason?: string;
 }
+
+export interface AccountInfo {
+    accountAmount: string;
+    accountReleaseSchedule: AccountReleaseSchedule; // TODO
+}

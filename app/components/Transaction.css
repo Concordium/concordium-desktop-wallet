@@ -14,11 +14,32 @@
 
 .transactionListElement {
     display: flex;
-    background-color: oldlace;
+    color: black;
+    border: 0px;
+    border-top: 2px;
+    border-style: solid;
+    border-color: gray;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.transactionBox {
+    background-color: white;
     border-style: solid;
     border-color: black;
     color: black;
     border: 10 px;
+    border-radius: 10px;
+}
+
+.rightAlignedButton {
+    float: right;
+    margin-right: 10%;
+}
+
+.centeredText {
+    font-size: larger;
     padding-top: 10px;
     padding-bottom: 10px;
+    text-align: center;
 }

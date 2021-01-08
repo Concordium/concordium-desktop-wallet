@@ -32,6 +32,8 @@
     border-style: solid;
     border-color: black;
     color: black;
+    border-radius: 10px;
+    margin-bottom: 15px;
 }
 
 .chosenAccountListElement {
@@ -45,4 +47,33 @@
 
 .accountActionsSpan Link Button {
     padding-right: 10px;
+}
+
+.accountBalanceView {
+    background-color: #000000;
+    border-radius: 10px;
+    text-align: center;
+    padding-bottom: 10px;
+    padding-left: 20%;
+    padding-right: 20%;
+}
+
+.accountBalanceView button {
+    margin-left: 20%;
+    margin-right: 20%;
+    margin-top: 20px;
+}
+
+.leftAlignedText {
+    text-align: left;
+    width: 50%;
+}
+
+.rightAlignedText {
+    text-align: right;
+    width: 50%;
+}
+
+.line {
+    display: flex;
 }

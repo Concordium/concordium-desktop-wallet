@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, Switch, Route } from 'react-router-dom';
-import { chosenAccountSelector } from '../features/AccountSlice';
+import {
+    chosenAccountSelector,
+    accountsInfoSelector,
+} from '../features/AccountSlice';
 import styles from './Accounts.css';
 import routes from '../constants/routes.json';
 import simpleTransfer from './SimpleTransfer';
 import transferHistory from './TransferHistory';
+import AccountBalanceView from './AccountBalanceView';
 
 export default function AccountView() {
     const account = useSelector(chosenAccountSelector);
+    const accountsInfo = useSelector(accountsInfoSelector);
+    const [viewingShielded, viewShielded] = useState(false);
 
     if (account === undefined) {
         return <div />;
@@ -16,16 +22,17 @@ export default function AccountView() {
 
     return (
         <div className={styles.halfPage}>
-            <div className={styles.chosenAccount}>
-                {' '}
-                {account.name} {account.address}{' '}
-            </div>
+            <AccountBalanceView
+                accountInfo={accountsInfo[account.address]}
+                viewingShielded={viewingShielded}
+                viewShielded={viewShielded}
+            />
             <span className={styles.accountActionsSpan}>
                 <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
-                    <button>Send</button>
+                    <button type="button">Send</button>
                 </Link>
                 <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
-                    <button>Shield</button>
+                    <button type="button">Shield</button>
                 </Link>
             </span>
             <Switch>

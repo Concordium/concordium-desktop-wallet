@@ -2,6 +2,7 @@ import React from 'react';
 import TransactionListElement from './TransactionListElement';
 import CopiableListElement from './CopiableListElement';
 import { Transaction } from '../utils/types';
+import styles from './Transaction.css';
 
 interface Props {
     transaction: Transaction;
@@ -10,11 +11,17 @@ interface Props {
 
 function TransactionView({ transaction, returnFunction }: Props) {
     return (
-        <div>
-            Transaction Details
-            <button type="button" onClick={returnFunction}>
-                x
-            </button>
+        <div className={styles.transactionBox}>
+            <div className={styles.centeredText}>
+                <b>Transaction Details</b>
+                <button
+                    type="button"
+                    className={styles.rightAlignedButton}
+                    onClick={returnFunction}
+                >
+                    x
+                </button>
+            </div>
             <TransactionListElement transaction={transaction} />
             <CopiableListElement
                 title="From Address:"
