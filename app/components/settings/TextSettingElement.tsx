@@ -1,19 +1,22 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { updateSettingEntry } from '../../features/SettingsSlice';
+import { Setting } from '../../utils/types';
+
+interface Props {
+    setting: Setting;
+}
 
 /**
- * A component for boolean settings that are updated by clicking the 
- * setting.
- * @param props containing a Boolean setting
+ * A component for a text setting that is updated automatically on changes.
  */
-export default function TextSetting(props: any) {
+export default function TextSetting({ setting }: Props) {
     const dispatch = useDispatch();
 
-    let setting = props.setting;
-    let settingValue = setting.value;
-
-    function handleChange(event) {
+    // Ideally this should have a debounce, so that we wait a little before actually
+    // storing to the database. As we are uncertain if there will be a submit button
+    // or not, we will keep it as is for now.
+    function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
         return updateSettingEntry(dispatch, {
             ...setting,
             value: event.target.value,
@@ -22,7 +25,14 @@ export default function TextSetting(props: any) {
 
     return (
         <div>
-            <input type="text" defaultValue={settingValue} onChange={(e) => handleChange(e)} />
+            <label>
+                {setting.name}
+                <input
+                    type="text"
+                    defaultValue={setting.value}
+                    onChange={(e) => handleChange(e)}
+                />
+            </label>
         </div>
     );
 }

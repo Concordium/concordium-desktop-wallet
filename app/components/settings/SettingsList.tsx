@@ -1,9 +1,8 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectSettings, settingsSelector } from '../features/SettingsSlice';
+import { selectSettings, settingsSelector } from '../../features/SettingsSlice';
 
-// TODO Fix this.
-import styles from './Identity.css';
+import styles from './Settings.css';
 
 export default function SettingsList() {
     const dispatch = useDispatch();
