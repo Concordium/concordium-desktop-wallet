@@ -61,6 +61,8 @@ function convertIncomingTransaction(transaction): Transaction {
     let fromAddress;
     if ('transferSource' in transaction.details) {
         fromAddress = transaction.details.transferSource;
+    } else if (transaction.origin.type === 'account') {
+        fromAddress = transaction.origin.address;
     }
     let toAddress;
     if ('transferDestination' in transaction.details) {
@@ -92,8 +94,39 @@ function convertIncomingTransaction(transaction): Transaction {
     };
 }
 
-export async function loadTransactions(account, dispatch: Dispatch) {
-    const transactions = await getTransactionsOfAccount(account);
+function filterUnShieldedBalanceTransaction(transaction) {
+    switch (transaction.transactionKind) {
+        case 'transfer':
+        case 'bakingReward':
+        case 'transferWithSchedule': // TODO Ensure correct
+        case 'transferToEncrypted':
+        case 'transferToPublic':
+            return true;
+        default:
+            return false;
+    }
+}
+
+function filterShieldedBalanceTransaction(transaction) {
+    switch (transaction.transactionKind) {
+        case 'encryptedAmountTransfer':
+        case 'transferToEncrypted':
+        case 'transferToPublic':
+            return true;
+        default:
+            return false;
+    }
+}
+
+export async function loadTransactions(
+    account,
+    viewingShielded,
+    dispatch: Dispatch
+) {
+    const filter = viewingShielded
+        ? filterShieldedBalanceTransaction
+        : filterUnShieldedBalanceTransaction;
+    const transactions = await getTransactionsOfAccount(account, filter);
     await attachNames(transactions);
     dispatch(setTransactions(transactions));
 }

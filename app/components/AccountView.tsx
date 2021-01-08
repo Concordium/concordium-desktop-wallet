@@ -42,7 +42,7 @@ export default function AccountView() {
                 />
                 <Route
                     path={routes.DEFAULT}
-                    component={() => transferHistory(account)}
+                    component={() => transferHistory(account, viewingShielded)}
                 />
             </Switch>
         </div>

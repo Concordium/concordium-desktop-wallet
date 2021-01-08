@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import TransactionListElement from './TransactionListElement';
+import { Transaction } from '../utils/types';
 import { getHighestId } from '../utils/transactionHelpers';
 import {
     transactionsSelector,
@@ -11,16 +12,17 @@ import styles from './Transaction.css';
 
 interface Props {
     account: Account;
-    chooseElement: () => void;
+    chooseElement: (transaction: Transaction) => void;
+    viewingShielded: boolean;
 }
 
-function TransactionList({ account, chooseElement }: Props) {
+function TransactionList({ account, chooseElement, viewingShielded }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);
 
     useEffect(() => {
-        loadTransactions(account, dispatch);
-    }, [account, dispatch]);
+        loadTransactions(account, viewingShielded, dispatch);
+    }, [account, viewingShielded, dispatch]);
 
     return (
         <div className={styles.transactionBox}>
@@ -30,12 +32,14 @@ function TransactionList({ account, chooseElement }: Props) {
                     updateTransactions(
                         account,
                         getHighestId(transactions)
-                    ).then(() => loadTransactions(account, dispatch))
+                    ).then(() =>
+                        loadTransactions(account, viewingShielded, dispatch)
+                    )
                 }
             >
                 Update
             </button>
-            {transactions.map((transaction) => (
+            {transactions.map((transaction: Transaction) => (
                 <TransactionListElement
                     transaction={transaction}
                     key={transaction.transactionHash}

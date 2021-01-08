@@ -5,15 +5,20 @@ import { up, down } from './migrations/20201230111229_create_transaction_table';
 
 export async function getTransactionsOfAccount(
     account: Account,
+    filter: (transction: Transaction) => boolean = undefined,
     orderBy = 'id'
 ): Promise<Transaction[]> {
     const { address } = account;
-    return (await knex())
+    const transactions = await (await knex())
         .select()
         .table(transactionTable)
         .where({ toAddress: address })
         .orWhere({ fromAddress: address })
         .orderBy(orderBy);
+    if (filter) {
+        return transactions.filter(filter);
+    }
+    return transactions;
 }
 
 export async function insertTransactions(transactions: Transaction[]) {

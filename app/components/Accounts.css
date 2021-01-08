@@ -45,17 +45,18 @@
     display: block;
 }
 
-.accountActionsSpan Link Button {
+.accountActionsSpan link button {
     padding-right: 10px;
 }
 
 .accountBalanceView {
-    background-color: #000000;
+    background-color: #000;
     border-radius: 10px;
     text-align: center;
     padding-bottom: 10px;
     padding-left: 20%;
     padding-right: 20%;
+    color: blue;
 }
 
 .accountBalanceView button {
@@ -76,4 +77,16 @@
 
 .line {
     display: flex;
+}
+
+.buttonAsText {
+    background: none;
+    border: none;
+    color: blue;
+    font-size: larger;
+    font-weight: normal;
+}
+
+.buttonAsText:disabled {
+    font-weight: bolder;
 }

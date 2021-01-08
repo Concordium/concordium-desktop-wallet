@@ -6,14 +6,14 @@ import TransactionView from './TransactionView';
 import locations from '../constants/transactionLocations.json';
 
 // TODO Rename this
-export default function TransferHistory(account) {
+export default function TransferHistory(account, viewingShielded) {
     const dispatch = useDispatch();
     const [location, setLocation] = useState(locations.listTransactions);
     const [chosenTransaction, setChosenTransaction] = useState(undefined);
 
     useEffect(() => {
-        loadTransactions(account, dispatch);
-    }, [dispatch, account]);
+        loadTransactions(account, viewingShielded, dispatch);
+    }, [dispatch, account, viewingShielded]);
 
     function chosenComponent() {
         switch (location) {
@@ -21,6 +21,7 @@ export default function TransferHistory(account) {
                 return (
                     <TransactionList
                         account={account}
+                        viewingShielded={viewingShielded}
                         chooseElement={(transaction) => {
                             setChosenTransaction(transaction);
                             setLocation(locations.viewTransaction);
