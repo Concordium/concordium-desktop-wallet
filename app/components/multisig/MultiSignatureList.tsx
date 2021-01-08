@@ -19,7 +19,7 @@ export default function MultiSignatureList() {
     return (
         <div className={styles.halfPage}>
             {Object.keys(MultiSignatureMenuItems).filter(key => isNaN(Number(key))).map((item) => (
-                <div className={styles.menuitem} role="button" onClick={() => dispatch(chooseMenuItem({ item }))}><h3>{item}</h3></div>
+                <div className={styles.menuitem} role="button" onClick={() => dispatch(chooseMenuItem(item))}><h3>{item}</h3></div>
             ))}
         </div>
     );
