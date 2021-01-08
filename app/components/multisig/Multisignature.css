@@ -1,0 +1,18 @@
+.halfPage {
+    width: 50%;
+}
+
+.menuitem {
+    text-align: center;
+    background: #FFFFFF;
+    border: 1px solid #979797;
+    box-sizing: border-box;
+    border-radius: 10px;
+    margin: 20px;
+    margin-left: 100px;
+    padding: 10px;
+    padding-left: 40px;
+    color: black;
+    width: 70%;
+    height: 86px;
+}

@@ -11,6 +11,7 @@ import IdentityPage from './containers/IdentityPage';
 import AddressBookPage from './containers/AddressBookPage';
 import styles from './Main.css';
 import SettingsPage from './containers/SettingsPage';
+import MultiSignaturePage from './containers/MultiSignaturePage';
 
 export default function Routes() {
     return (
@@ -27,7 +28,7 @@ export default function Routes() {
                     <Route path={routes.EXPORTIMPORT} component={TodoPage} />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS}
-                        component={TodoPage}
+                        component={MultiSignaturePage}
                     />
                     <Route path={routes.SETTINGS} component={SettingsPage} />
                     <Route path={routes.HOME} component={HomePage} />
