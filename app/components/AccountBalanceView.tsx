@@ -1,21 +1,22 @@
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styles from './Accounts.css';
 import { fromMicroUnits } from '../utils/transactionHelpers';
 import { Account, AccountInfo } from '../utils/types';
+import {
+    setViewingShielded,
+    viewingShieldedSelector,
+} from '../features/TransactionSlice';
 
 interface Props {
     account: Account;
     accountInfo: AccountInfo;
-    viewingShielded: boolean;
-    viewShielded: (isViewing: boolean) => void;
 }
 
-export default function AccountBalanceView({
-    account,
-    accountInfo,
-    viewingShielded,
-    viewShielded,
-}: Props) {
+export default function AccountBalanceView({ account, accountInfo }: Props) {
+    const dispatch = useDispatch();
+    const viewingShielded = useSelector(viewingShieldedSelector);
+
     if (!accountInfo) {
         return <div className={styles.accountBalanceView} />;
     }
@@ -26,7 +27,7 @@ export default function AccountBalanceView({
                 className={styles.buttonAsText}
                 disabled={!viewingShielded}
                 type="button"
-                onClick={() => viewShielded(false)}
+                onClick={() => dispatch(setViewingShielded(false))}
             >
                 Balance
             </button>
@@ -34,7 +35,7 @@ export default function AccountBalanceView({
                 className={styles.buttonAsText}
                 disabled={viewingShielded}
                 type="button"
-                onClick={() => viewShielded(true)}
+                onClick={() => dispatch(setViewingShielded(true))}
             >
                 Shielded Balance
             </button>

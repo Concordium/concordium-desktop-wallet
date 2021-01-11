@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import TransactionListElement from './TransactionListElement';
 import { Transaction } from '../utils/types';
@@ -7,18 +7,19 @@ import {
     transactionsSelector,
     updateTransactions,
     loadTransactions,
+    viewingShieldedSelector,
 } from '../features/TransactionSlice';
 import styles from './Transaction.css';
 
 interface Props {
     account: Account;
     chooseElement: (transaction: Transaction) => void;
-    viewingShielded: boolean;
 }
 
-function TransactionList({ account, chooseElement, viewingShielded }: Props) {
+function TransactionList({ account, chooseElement }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);
+    const viewingShielded = useSelector(viewingShieldedSelector);
 
     return (
         <div className={styles.transactionBox}>

@@ -5,17 +5,18 @@ import {
     transactionsSelector,
     decryptTransactions,
     loadTransactions,
+    viewingShieldedSelector,
 } from '../features/TransactionSlice';
 import LedgerComponent from './LedgerComponent';
 
 interface Props {
     account: Account;
-    viewingShielded: boolean;
 }
 
-export default function DecryptComponent({ account, viewingShielded }: Props) {
+export default function DecryptComponent({ account }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);
+    const viewingShielded = useSelector(viewingShieldedSelector);
 
     async function ledgerCall(ledger, setMessage) {
         setMessage('Please confirm exporting prf key on device');

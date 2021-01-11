@@ -96,3 +96,10 @@
 .buttonAsText:disabled {
     font-weight: bolder;
 }
+
+.accountListElementUnShieldedBalance {
+    border: 0;
+    padding: 5px;
+    border-top: 2.5px solid gray;
+    border-bottom: 2px solid gray;
+}

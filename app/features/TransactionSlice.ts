@@ -16,13 +16,19 @@ const transactionSlice = createSlice({
     name: 'transactions',
     initialState: {
         transactions: [],
+        viewingShielded: false,
     },
     reducers: {
         setTransactions(state, transactions) {
             state.transactions = transactions.payload;
         },
+        setViewingShielded(state, viewingShielded) {
+            state.viewingShielded = viewingShielded.payload;
+        },
     },
 });
+
+export const { setViewingShielded } = transactionSlice.actions;
 
 const { setTransactions } = transactionSlice.actions;
 
@@ -142,5 +148,8 @@ export async function updateTransactions(account) {
 
 export const transactionsSelector = (state: RootState) =>
     state.transactions.transactions;
+
+export const viewingShieldedSelector = (state: RootState) =>
+    state.transactions.viewingShielded;
 
 export default transactionSlice.reducer;

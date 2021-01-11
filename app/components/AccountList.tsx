@@ -9,6 +9,8 @@ import {
     chosenAccountIndexSelector,
     accountsInfoSelector,
 } from '../features/AccountSlice';
+import { setViewingShielded } from '../features/TransactionSlice';
+
 import { loadIdentities, identitiesSelector } from '../features/IdentitySlice';
 import styles from './Accounts.css';
 import AccountListElement from './AccountListElement';
@@ -52,7 +54,10 @@ export default function AccountList() {
                         account={account}
                         accountInfo={accountsInfo[account.address]}
                         key={account.address}
-                        onClick={() => dispatch(chooseAccount(index))}
+                        onClick={(shielded) => {
+                            dispatch(chooseAccount(index));
+                            dispatch(setViewingShielded(shielded));
+                        }}
                         highlighted={index === chosenIndex}
                     />
                 ))}

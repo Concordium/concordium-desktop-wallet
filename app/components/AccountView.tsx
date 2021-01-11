@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link, Switch, Route } from 'react-router-dom';
 import {
@@ -15,7 +15,6 @@ import DecryptComponent from './DecryptComponent';
 export default function AccountView() {
     const account = useSelector(chosenAccountSelector);
     const accountsInfo = useSelector(accountsInfoSelector);
-    const [viewingShielded, viewShielded] = useState(false);
 
     if (account === undefined) {
         return <div />;
@@ -25,8 +24,6 @@ export default function AccountView() {
             <AccountBalanceView
                 account={account}
                 accountInfo={accountsInfo[account.address]}
-                viewingShielded={viewingShielded}
-                viewShielded={viewShielded}
             />
             <span className={styles.accountActionsSpan}>
                 <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
@@ -43,13 +40,10 @@ export default function AccountView() {
                 />
                 <Route
                     path={routes.DEFAULT}
-                    component={() => transferHistory(account, viewingShielded)}
+                    component={() => transferHistory(account)}
                 />
             </Switch>
-            <DecryptComponent
-                account={account}
-                viewingShielded={viewingShielded}
-            />
+            <DecryptComponent account={account} />
         </div>
     );
 }

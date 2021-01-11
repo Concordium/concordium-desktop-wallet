@@ -27,46 +27,47 @@ export default function AccountListElement({
 }: Props): JSX.element {
     return (
         <div
-            onClick={onClick}
             key={account.address}
             className={`${styles.accountListElement} ${
                 highlighted ? styles.chosenAccountListElement : null
             }`}
         >
-            <div className={styles.line}>
-                <p className={styles.leftAlignedText}>
-                    {account.name}{' '}
-                    {account.accountNumber === 0 ? '(initial)' : undefined}
-                    {accountInfo && accountInfo.accountBaker
-                        ? '(baker)'
-                        : undefined}
-                    {account.status === 'pending' ? ' ??? ' : undefined}
-                </p>
-                <p className={styles.rightAlignedText}>
-                    {account.identityName}
-                </p>
+            {sidedText(
+                `${account.name}${' '}
+                ${account.accountNumber === 0 ? '(initial)' : ''}
+                ${accountInfo && accountInfo.accountBaker ? '(baker)' : ''}
+                ${account.status === 'pending' ? ' ??? ' : ''}`,
+                account.identityName
+            )}
+            <div
+                onClick={() => onClick(false)}
+                className={styles.accountListElementUnShieldedBalance}
+            >
+                {sidedText(
+                    'Balance:',
+                    accountInfo
+                        ? fromMicroUnits(accountInfo.accountAmount)
+                        : '0'
+                )}
+                {sidedText(
+                    ' - At Disposal:',
+                    accountInfo && accountInfo.accountReleaseSchedule
+                        ? fromMicroUnits(
+                              accountInfo.accountAmount -
+                                  accountInfo.accountReleaseSchedule.total
+                          )
+                        : '0'
+                )}
+                {sidedText(' - Staked:', '0')}
             </div>
-            {sidedText(
-                'Balance:',
-                accountInfo ? fromMicroUnits(accountInfo.accountAmount) : '0'
-            )}
-            {sidedText(
-                ' - At Disposal:',
-                accountInfo && accountInfo.accountReleaseSchedule
-                    ? fromMicroUnits(
-                          accountInfo.accountAmount -
-                              accountInfo.accountReleaseSchedule.total
-                      )
-                    : '0'
-            )}
-            {sidedText(' - Staked:', '0')}
-
-            {sidedText(
-                'Shielded Balance:',
-                `${fromMicroUnits(
-                    account.totalDecrypted ? account.totalDecrypted : 0
-                )} ${account.allDecrypted ? '' : ' + ?'}`
-            )}
+            <div onClick={() => onClick(true)}>
+                {sidedText(
+                    'Shielded Balance:',
+                    `${fromMicroUnits(
+                        account.totalDecrypted ? account.totalDecrypted : 0
+                    )} ${account.allDecrypted ? '' : ' + ?'}`
+                )}
+            </div>
         </div>
     );
 }
