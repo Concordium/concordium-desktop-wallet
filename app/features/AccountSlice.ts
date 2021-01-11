@@ -12,7 +12,9 @@ import {
     getAccountInfo,
     getConsensusInfo,
 } from '../utils/client';
-import { sleep } from '../utils/httpRequests';
+import { sleep, getGlobal } from '../utils/httpRequests';
+
+import { decryptAmounts } from '../utils/rustInterface';
 
 const accountsSlice = createSlice({
     name: 'accounts',
@@ -68,7 +70,7 @@ export async function loadAccounts(dispatch: Dispatch, identities = undefined) {
             })
         );
     }
-    dispatch(updateAccounts(accounts));
+    dispatch(updateAccounts(accounts.reverse()));
 }
 
 export async function addPendingAccount(
@@ -159,10 +161,51 @@ export async function loadAccountsInfos(accounts, dispatch) {
                     account.address,
                     blockHash
                 );
-                map[account.address] = JSON.parse(response.getValue());
+                const accountInfo = JSON.parse(response.getValue());
+                const incomingAmounts = JSON.stringify(
+                    accountInfo.accountEncryptedAmount.incomingAmounts
+                );
+                const selfAmounts =
+                    accountInfo.accountEncryptedAmount.selfAmount;
+                if (
+                    !(
+                        account.incomingAmounts === incomingAmounts &&
+                        account.selfAmounts === selfAmounts
+                    )
+                ) {
+                    updateAccount(account.name, {
+                        incomingAmounts,
+                        selfAmounts,
+                        allDecrypted: false,
+                    });
+                }
+                map[account.address] = accountInfo;
             })
     );
     dispatch(setAccountInfos(map));
+}
+
+export async function decryptAccountBalance(dispatch, prfKey, account) {
+    const encryptedAmounts = JSON.parse(account.incomingAmounts);
+    encryptedAmounts.push(account.selfAmounts);
+    const global = (await getGlobal()).value;
+
+    const decryptedAmounts = await decryptAmounts(
+        encryptedAmounts,
+        account,
+        global,
+        prfKey
+    );
+
+    const totalDecrypted = decryptedAmounts.reduce(
+        (acc, amount) => acc + parseInt(amount, 10),
+        0
+    );
+
+    return updateAccount(account.name, {
+        totalDecrypted,
+        allDecrypted: true,
+    });
 }
 
 export default accountsSlice.reducer;

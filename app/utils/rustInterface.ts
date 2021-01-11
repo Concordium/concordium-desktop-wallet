@@ -183,12 +183,8 @@ export async function decryptAmounts(
     encryptedAmounts,
     account,
     global,
-    ledger
+    prfKey
 ) {
-    console.log('Please confirm exporting prf key on device');
-    const prfKeySeed = await ledger.getPrfKey(5); // TODO : account.identityId
-    const prfKey = prfKeySeed.toString('hex');
-
     const input = {
         global,
         accountNumber: account.accountNumber,
@@ -200,6 +196,5 @@ export async function decryptAmounts(
         command: workerCommands.decryptAmounts,
         input: JSON.stringify(input),
     });
-
     return JSON.parse(decryptedAmounts);
 }

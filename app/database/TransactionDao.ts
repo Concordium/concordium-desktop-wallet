@@ -27,9 +27,24 @@ export async function insertTransactions(transactions: Transaction[]) {
     // TODO: merge remote transactions with local ones, or replace.
 }
 
+export async function updateTransaction(id, updatedValues) {
+    return (await knex())(transactionTable).where({ id }).update(updatedValues);
+}
+
 export async function resetTransactions() {
     // TODO: used for testing, eventually should be removed
     const knexInstance = await knex();
     await down(knexInstance);
     await up(knexInstance);
+}
+
+export async function getMaxTransactionsIdOfAccount(account) {
+    const { address } = account;
+    const query = await (await knex())
+        .table(transactionTable)
+        .where({ toAddress: address })
+        .orWhere({ fromAddress: address })
+        .max('id as maxId')
+        .first();
+    return query.maxId;
 }

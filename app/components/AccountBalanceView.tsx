@@ -1,15 +1,17 @@
 import React from 'react';
 import styles from './Accounts.css';
 import { fromMicroUnits } from '../utils/transactionHelpers';
-import { AccountInfo } from '../utils/types';
+import { Account, AccountInfo } from '../utils/types';
 
 interface Props {
+    account: Account;
     accountInfo: AccountInfo;
     viewingShielded: boolean;
     viewShielded: (isViewing: boolean) => void;
 }
 
 export default function AccountBalanceView({
+    account,
     accountInfo,
     viewingShielded,
     viewShielded,
@@ -41,7 +43,12 @@ export default function AccountBalanceView({
 
     let main;
     if (viewingShielded) {
-        main = <h1>{accountInfo.accountEncryptedAmount.selfAmount}</h1>;
+        main = (
+            <h1>
+                {fromMicroUnits(account.totalDecrypted)}{' '}
+                {account.allDecrypted ? '' : ' + ?'}
+            </h1>
+        );
     } else {
         main = (
             <>

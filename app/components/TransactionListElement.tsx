@@ -18,22 +18,59 @@ function getName(transaction) {
     }
 }
 
+function buildOutgoingAmountStrings(total, subtotal, fee) {
+    return {
+        amount: `${fromMicroUnits(total)}`,
+        amountFormula: `${fromMicroUnits(-subtotal)} +${fromMicroUnits(
+            fee
+        )} Fee`,
+    };
+}
+
+function buildIncomingAmountStrings(total) {
+    return {
+        amount: `${fromMicroUnits(total)}`,
+        amountFormula: '',
+    };
+}
+
 function parseAmount(transaction) {
     switch (transaction.originType) {
         case 'self': {
-            const fee = parseInt(transaction.cost, 10);
-            return {
-                amount: `${fromMicroUnits(transaction.total)}`,
-                amountFormula: `${fromMicroUnits(
-                    -transaction.subtotal
-                )} +${fromMicroUnits(fee)} Fee`,
-            };
+            if (transaction.transactionKind === 'encryptedAmountTransfer') {
+                if (transaction.decryptedAmount) {
+                    return buildOutgoingAmountStrings(
+                        transaction.decryptedAmount,
+                        transaction.decryptedAmount - transaction.cost,
+                        transaction.cost
+                    );
+                }
+                return {
+                    amount: 'G ?',
+                    amountFormula: `G ? +${fromMicroUnits(
+                        transaction.cost
+                    )} Fee`,
+                };
+            }
+            return buildOutgoingAmountStrings(
+                transaction.total,
+                transaction.subtotal,
+                transaction.cost
+            );
         }
         case 'account':
-            return {
-                amount: `${fromMicroUnits(transaction.total)}`,
-                amountFormula: '',
-            };
+            if (transaction.transactionKind === 'encryptedAmountTransfer') {
+                if (transaction.decryptedAmount) {
+                    return buildIncomingAmountStrings(
+                        transaction.decryptedAmount
+                    );
+                }
+                return {
+                    amount: 'G ?',
+                    amountFormula: '',
+                };
+            }
+            return buildIncomingAmountStrings(transaction.total);
         default:
             return 'unknown';
     }

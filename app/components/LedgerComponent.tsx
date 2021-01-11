@@ -3,7 +3,14 @@ import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import styles from './Styling.css';
 
-export default function LedgerComponent({ ledgerCall }): JSX.Element {
+interface Props {
+    ledgerCall: (
+        ledger: ConcordiumLedgerClient,
+        setMessage: (string) => void
+    ) => Promise<void>;
+}
+
+export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
     const [ledger, setLedger] = useState(undefined);
     const [statusMessage, setStatusMessage] = useState('Waiting for device');
     const [ready, setReady] = useState(false);
@@ -28,12 +35,12 @@ export default function LedgerComponent({ ledgerCall }): JSX.Element {
         setReady(false);
         try {
             if (ready) {
-                await ledgerCall(ledger);
+                await ledgerCall(ledger, setStatusMessage);
             } else {
                 await getLedger();
             }
         } catch (e) {
-            setStatusMessage(`Something went wrong:  ${e}`);
+            setStatusMessage(`Something went wrong:  ${e.stack}`);
             setReady(true);
         }
     }

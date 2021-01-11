@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 import { getTransactions, getGlobal } from '../utils/httpRequests';
@@ -7,9 +6,10 @@ import { decryptAmounts } from '../utils/rustInterface';
 import {
     getTransactionsOfAccount,
     insertTransactions,
+    updateTransaction,
+    getMaxTransactionsIdOfAccount,
 } from '../database/TransactionDao';
 import { Transaction } from '../utils/types';
-import ConcordiumLedgerClient from './ledger/ConcordiumLedgerClient';
 import { attachNames } from '../utils/transactionHelpers';
 
 const transactionSlice = createSlice({
@@ -26,35 +26,34 @@ const transactionSlice = createSlice({
 
 const { setTransactions } = transactionSlice.actions;
 
-async function decryptTransactions(transactions, account) {
+export async function decryptTransactions(transactions, prfKey, account) {
     const global = (await getGlobal()).value;
-    const indices = [];
-    const encryptedAmounts = [];
+    const encryptedTransfers = transactions.filter(
+        (t) =>
+            t.transactionKind === 'encryptedAmountTransfer' &&
+            t.decryptedAmount === null
+    );
+    const encryptedAmounts = encryptedTransfers.map(
+        (t) => JSON.parse(t.encrypted).encryptedAmount
+    );
 
-    transactions.forEach((t, i) => {
-        if (t.details.type === 'encryptedAmountTransfer') {
-            encryptedAmounts.push(t.encrypted.encryptedAmount);
-            indices.push(i);
-        }
-    });
-
-    if (indices.length > 0) {
-        const transport = await TransportNodeHid.open('');
-        const ledger = new ConcordiumLedgerClient(transport);
-
-        const decryptedAmounts = await decryptAmounts(
+    let decryptedAmounts;
+    if (encryptedTransfers.length > 0) {
+        decryptedAmounts = await decryptAmounts(
             encryptedAmounts,
             account,
             global,
-            ledger
+            prfKey
         );
-
-        indices.forEach((oldIndex, amountIndex) => {
-            transactions[oldIndex].total = decryptedAmounts[amountIndex];
-        });
     }
 
-    return transactions;
+    return Promise.all(
+        encryptedTransfers.map(async (transaction, index) =>
+            updateTransaction(transaction.id, {
+                decryptedAmount: decryptedAmounts[index],
+            })
+        )
+    );
 }
 
 function convertIncomingTransaction(transaction): Transaction {
@@ -131,15 +130,12 @@ export async function loadTransactions(
     dispatch(setTransactions(transactions));
 }
 
-export async function updateTransactions(account, fromId) {
+export async function updateTransactions(account) {
+    const fromId = await getMaxTransactionsIdOfAccount(account);
     const transactions = await getTransactions(account.address, fromId);
     if (transactions.length > 0) {
-        const decryptedTransactions = await decryptTransactions(
-            transactions,
-            account
-        );
         await insertTransactions(
-            decryptedTransactions.map((t) => convertIncomingTransaction(t))
+            transactions.map((t) => convertIncomingTransaction(t))
         );
     }
 }

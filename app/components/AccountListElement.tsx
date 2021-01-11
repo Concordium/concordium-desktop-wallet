@@ -60,6 +60,13 @@ export default function AccountListElement({
                     : '0'
             )}
             {sidedText(' - Staked:', '0')}
+
+            {sidedText(
+                'Shielded Balance:',
+                `${fromMicroUnits(
+                    account.totalDecrypted ? account.totalDecrypted : 0
+                )} ${account.allDecrypted ? '' : ' + ?'}`
+            )}
         </div>
     );
 }

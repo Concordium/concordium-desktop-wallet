@@ -10,6 +10,7 @@ import routes from '../constants/routes.json';
 import simpleTransfer from './SimpleTransfer';
 import transferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
+import DecryptComponent from './DecryptComponent';
 
 export default function AccountView() {
     const account = useSelector(chosenAccountSelector);
@@ -19,10 +20,10 @@ export default function AccountView() {
     if (account === undefined) {
         return <div />;
     }
-
     return (
         <div className={styles.halfPage}>
             <AccountBalanceView
+                account={account}
                 accountInfo={accountsInfo[account.address]}
                 viewingShielded={viewingShielded}
                 viewShielded={viewShielded}
@@ -45,6 +46,10 @@ export default function AccountView() {
                     component={() => transferHistory(account, viewingShielded)}
                 />
             </Switch>
+            <DecryptComponent
+                account={account}
+                viewingShielded={viewingShielded}
+            />
         </div>
     );
 }
