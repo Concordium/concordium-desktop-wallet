@@ -2,7 +2,10 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { addPendingIdentity, confirmIdentity } from '../features/IdentitySlice';
-import { addPendingAccount, confirmAccount } from '../features/AccountSlice';
+import {
+    addPendingAccount,
+    confirmInitialAccount,
+} from '../features/AccountSlice';
 import routes from '../constants/routes.json';
 import styles from './IdentyIssuance.css';
 import {
@@ -55,7 +58,7 @@ async function confirmIdentityAndInitialAccount(
     try {
         token = await getIdObject(location);
         await confirmIdentity(dispatch, identityName, token.identityObject);
-        await confirmAccount(
+        await confirmInitialAccount(
             dispatch,
             accountName,
             token.accountAddress,
@@ -65,6 +68,7 @@ async function confirmIdentityAndInitialAccount(
         if (!token) {
             await rejectIdentity(identityName);
         } else {
+            console.log(err);
             console.log(token); // TODO: Handle unable to save identity/account
         }
     }

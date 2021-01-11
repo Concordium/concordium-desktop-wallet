@@ -47,20 +47,14 @@ export async function addPendingAccount(
     dispatch: Dispatch,
     accountName: string,
     identityId: number,
-    accountNumber: number,
-    accountAddress: string,
-    credentialDeploymentInformation
+    accountNumber: number
 ) {
     const account = {
         name: accountName,
         identityId,
         status: 'pending',
         accountNumber,
-        address: accountAddress,
-        credential: credentialDeploymentInformation,
-        // initial
     };
-
     await insertAccount(account);
     return loadAccounts(dispatch);
 }

@@ -26,7 +26,10 @@ export default function IdentityIssuance(): JSX.Element {
                     generate(identityName, initialAccountName, provider)
                 }
             />
-            <Route path={routes.IDENTITYISSUANCE_FINAL} component={finalPage} />
+            <Route
+                path={routes.IDENTITYISSUANCE_FINAL}
+                component={() => finalPage(identityName, initialAccountName)}
+            />
             <Route
                 component={() =>
                     pickName(setIdentityName, setInitialAccountName)
