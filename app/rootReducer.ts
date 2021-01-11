@@ -6,7 +6,6 @@ import testReducer from './features/test/testSlice';
 import accountReducer from './features/AccountSlice';
 import identityReducer from './features/IdentitySlice';
 import addressBookReducer from './features/AddressBookSlice';
-import identityIssuanceReducer from './features/IdentityIssuanceSlice';
 import transactionReducer from './features/TransactionSlice';
 
 export default function createRootReducer(history: History) {
@@ -16,7 +15,6 @@ export default function createRootReducer(history: History) {
         identities: identityReducer,
         accounts: accountReducer,
         addressBook: addressBookReducer,
-        identityIssuance: identityIssuanceReducer,
         transactions: transactionReducer,
     });
 }

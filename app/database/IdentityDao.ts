@@ -14,7 +14,7 @@ export async function getNextId(): Promise<number> {
         return currentId + 1;
     } catch (e) {
         console.log(e);
-        return 0; // TODO: First check if the table exists, instead of trying and failing
+        return 1; // TODO: First check if the table exists, instead of trying and failing
     }
 }
 

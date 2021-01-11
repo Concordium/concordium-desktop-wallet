@@ -1,14 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import {
-    providersSelector,
-    accountNameSelector,
-    identityNameSelector,
-} from '../features/IdentityIssuanceSlice';
 import { addPendingIdentity, confirmIdentity } from '../features/IdentitySlice';
-import { addPendingAccount, confirmAccount } from '../features/AccountSlice';
+import {
+    addPendingAccount,
+    confirmInitialAccount,
+} from '../features/AccountSlice';
 import routes from '../constants/routes.json';
 import styles from './IdentyIssuance.css';
 import {
@@ -61,7 +58,7 @@ async function confirmIdentityAndInitialAccount(
     try {
         token = await getIdObject(location);
         await confirmIdentity(dispatch, identityName, token.identityObject);
-        await confirmAccount(
+        await confirmInitialAccount(
             dispatch,
             accountName,
             token.accountAddress,
@@ -71,6 +68,7 @@ async function confirmIdentityAndInitialAccount(
         if (!token) {
             await rejectIdentity(identityName);
         } else {
+            console.log(err);
             console.log(token); // TODO: Handle unable to save identity/account
         }
     }
@@ -115,13 +113,12 @@ async function generateIdentity(
     }
 }
 
-export default function IdentityIssuanceGenerate(): JSX.Element {
-    const { index } = useParams();
+export default function IdentityIssuanceGenerate(
+    identityName,
+    accountName,
+    provider
+): JSX.Element {
     const dispatch = useDispatch();
-    const providers = useSelector(providersSelector);
-    const accountName = useSelector(accountNameSelector);
-    const identityName = useSelector(identityNameSelector);
-    const provider = providers[index];
     const [text, setText] = useState();
     const [location, setLocation] = useState();
     const iframeRef = useRef(null);

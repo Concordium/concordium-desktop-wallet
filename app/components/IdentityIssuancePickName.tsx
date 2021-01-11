@@ -2,20 +2,19 @@ import React, { useState } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import styles from './Styling.css';
-import { setNames } from '../features/IdentityIssuanceSlice';
 import routes from '../constants/routes.json';
 
-export default function IdentityIssuancePickName(): JSX.Element {
+export default function IdentityIssuancePickName(
+    setIdentityName,
+    setAccountName
+): JSX.Element {
     const [identity, setIdentity] = useState('');
     const [account, setAccount] = useState('');
     const dispatch = useDispatch();
 
     function submit() {
-        const names = {
-            accountName: account,
-            identityName: identity,
-        };
-        dispatch(setNames(names));
+        setIdentityName(identity);
+        setAccountName(account);
         dispatch(push(routes.IDENTITYISSUANCE_PICKPROVIDER));
     }
 
@@ -49,7 +48,7 @@ export default function IdentityIssuancePickName(): JSX.Element {
                     submit();
                 }}
             >
-                submit
+                Let’s continue
             </button>
         </div>
     );

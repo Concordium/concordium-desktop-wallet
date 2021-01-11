@@ -9,7 +9,7 @@ pub fn build_pub_info_for_ip_ext(
     id_cred_sec_string: &str,
     prf_key_string: &str,
 ) -> String {
-    match build_pub_info_for_ip_aux(input, prf_key_string, id_cred_sec_string) {
+    match build_pub_info_for_ip_aux(input, id_cred_sec_string, prf_key_string) {
         Ok(s) => s,
         Err(e) => format!("unable to build PublicInformationForIP due to: {}", e,),
     }
