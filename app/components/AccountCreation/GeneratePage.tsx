@@ -3,9 +3,9 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 import routes from '../../constants/routes.json';
-import { createCredential } from '../../utils/rustInterface';
+import { createCredential as createCredentialRust } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-
+import { Identity } from '../../utils/types';
 import { sendTransaction } from '../../utils/client';
 import {
     addPendingAccount,
@@ -25,7 +25,7 @@ async function createCredential(
     setMessage('Please Wait');
 
     const global = (await getGlobal()).value;
-    const output = await createCredential(
+    const output = await createCredentialRust(
         identity,
         accountNumber,
         global,
@@ -65,11 +65,17 @@ async function createAccount(identity, attributes, setMessage) {
     return transactionId;
 }
 
-export default function AccountCreationGenerate(
+interface Props {
+    accountName: string;
+    identity: Identity;
+    attributes: string[];
+}
+
+export default function AccountCreationGenerate({
     accountName,
     attributes,
-    identity
-): JSX.Element {
+    identity,
+}: Props): JSX.Element {
     const dispatch = useDispatch();
     const [text, setText] = useState();
 

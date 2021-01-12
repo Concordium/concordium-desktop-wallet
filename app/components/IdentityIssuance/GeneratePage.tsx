@@ -18,6 +18,7 @@ import {
 } from '../../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
+import { IdentityProvider } from '../../utils/types';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -116,11 +117,17 @@ async function generateIdentity(
     }
 }
 
-export default function IdentityIssuanceGenerate(
+interface Props {
+    identityName: string;
+    accountName: string;
+    provider: IdentityProvider;
+}
+
+export default function IdentityIssuanceGenerate({
     identityName,
     accountName,
-    provider
-): JSX.Element {
+    provider,
+}: Props): JSX.Element {
     const dispatch = useDispatch();
     const [text, setText] = useState();
     const [location, setLocation] = useState();

@@ -4,7 +4,13 @@ import { useDispatch } from 'react-redux';
 import styles from '../Styling.css';
 import routes from '../../constants/routes.json';
 
-export default function IdentityIssuancePickName(setAccountName): JSX.Element {
+interface Props {
+    setAccountName: (name: string) => void;
+}
+
+export default function IdentityIssuancePickName({
+    setAccountName,
+}: Props): JSX.Element {
     const [name, setName] = useState('');
     const dispatch = useDispatch();
 

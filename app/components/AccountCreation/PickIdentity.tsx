@@ -7,10 +7,15 @@ import {
 } from '../../features/IdentitySlice';
 import routes from '../../constants/routes.json';
 import IdentityListElement from '../IdentityListElement';
+import { Identity } from '../../utils/types';
 
-export default function AccountCreationChooseIdentity(
-    setIdentity
-): JSX.Element {
+interface Props {
+    setIdentity: (identity: Identity) => void;
+}
+
+export default function AccountCreationChooseIdentity({
+    setIdentity,
+}: Props): JSX.Element {
     const [chosenIndex, chooseIdentity] = useState(0);
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);

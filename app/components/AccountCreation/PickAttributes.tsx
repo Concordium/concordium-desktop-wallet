@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import routes from '../../constants/routes.json';
+import { Identity } from '../../utils/types';
 
-export default function AccountCreationPickAttributes(
+interface Props {
+    identity: Identity;
+    setRevealedAttributes: (attrivutes: string[]) => void;
+}
+
+export default function AccountCreationPickAttributes({
     identity,
-    setRevealedAttributes
-): JSX.Element {
+    setRevealedAttributes,
+}: Props): JSX.Element {
     const dispatch = useDispatch();
     const [attributes, setAttributes] = useState([]);
 

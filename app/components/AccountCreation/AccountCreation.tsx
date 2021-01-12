@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import routes from '../../constants/routes.json';
-import pickName from './PickName';
-import chooseIdentity from './PickIdentity';
-import pickAttributes from './PickAttributes';
-import generate from './GeneratePage';
-import finalPage from './FinalPage';
+import PickName from './PickName';
+import PickIdentity from './PickIdentity';
+import PickAttributes from './PickAttributes';
+import GeneratePage from './GeneratePage';
+import FinalPage from './FinalPage';
 
-// The entrance into the flow is the last Route (which should have the parent route), otherwise the flow is controlled by the components themselves
+// The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
 export default function AccountCreation(): JSX.Element {
     const [accountName, setAccountName] = useState('');
     const [identity, setIdentity] = useState('');
@@ -17,25 +17,33 @@ export default function AccountCreation(): JSX.Element {
         <Switch>
             <Route
                 path={routes.ACCOUNTCREATION_CHOOSEIDENTITY}
-                component={() => chooseIdentity(setIdentity)}
+                render={() => <PickIdentity setIdentity={setIdentity} />}
             />
             <Route
                 path={routes.ACCOUNTCREATION_FINAL}
-                component={() => finalPage(accountName)}
+                render={() => <FinalPage accountName={accountName} />}
             />
             <Route
                 path={routes.ACCOUNTCREATION_GENERATE}
-                component={() =>
-                    generate(accountName, chosenAttributes, identity)
-                }
+                render={() => (
+                    <GeneratePage
+                        accountName={accountName}
+                        chosenAttributes={chosenAttributes}
+                        identity={identity}
+                    />
+                )}
             />
             <Route
                 path={routes.ACCOUNTCREATION_PICK_ATTRIBUTES}
-                component={() => pickAttributes(identity, setChosenAttributes)}
+                render={() => (
+                    <PickAttributes
+                        identity={identity}
+                        setChosenAttributes={setChosenAttributes}
+                    />
+                )}
             />
             <Route
-                path={routes.ACCOUNTCREATION}
-                component={() => pickName(setAccountName)}
+                render={() => <PickName setAccountName={setAccountName} />}
             />
         </Switch>
     );

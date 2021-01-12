@@ -7,7 +7,13 @@ import { accountsSelector } from '../../features/AccountSlice';
 
 import AccountListElement from '../AccountListElement';
 
-export default function AccountCreationFinal(accountName): JSX.Element {
+interface Props {
+    accountName: string;
+}
+
+export default function AccountCreationFinal({
+    accountName,
+}: Props): JSX.Element {
     const accounts = useSelector(accountsSelector);
 
     if (accounts === undefined) {

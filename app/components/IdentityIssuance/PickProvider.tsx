@@ -4,10 +4,15 @@ import { push } from 'connected-react-router';
 import routes from '../../constants/routes.json';
 import styles from './IdentyIssuance.css';
 import { getIdentityProviders } from '../../utils/httpRequests';
+import { IdentityProvider } from '../../utils/types';
 
-export default function IdentityIssuanceChooseProvider(
-    setProvider
-): JSX.Element {
+interface Props {
+    setProvider: (provider: IdentityProvider) => void;
+}
+
+export default function IdentityIssuanceChooseProvider({
+    setProvider,
+}: Props): JSX.Element {
     const dispatch = useDispatch();
     const [providers, setProviders] = useState([]);
 

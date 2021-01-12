@@ -154,3 +154,13 @@ export interface PublicInformationForIp {
     regId: RegId;
     publicKeys: NewAccount;
 }
+
+export interface IdentityProviderMetaData {
+    issuanceStart: string;
+}
+
+export interface IdentityProvider {
+    ipInfo: any;
+    arsInfos: any;
+    metadata: IdentityProviderMetaData;
+}
