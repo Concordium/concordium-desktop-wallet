@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Link, Switch, Route } from 'react-router-dom';
 import {
     chosenAccountSelector,
-    accountsInfoSelector,
+    chosenAccountInfoSelector,
 } from '../features/AccountSlice';
 import styles from './Accounts.css';
 import routes from '../constants/routes.json';
@@ -15,17 +15,14 @@ import DecryptComponent from './DecryptComponent';
 
 export default function AccountView() {
     const account = useSelector(chosenAccountSelector);
-    const accountsInfo = useSelector(accountsInfoSelector);
+    const accountInfo = useSelector(chosenAccountInfoSelector);
 
     if (account === undefined) {
         return <div />;
     }
     return (
         <div className={styles.halfPage}>
-            <AccountBalanceView
-                account={account}
-                accountInfo={accountsInfo[account.address]}
-            />
+            <AccountBalanceView account={account} accountInfo={accountInfo} />
             <span className={styles.accountActionsSpan}>
                 <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
                     <button
@@ -55,9 +52,7 @@ export default function AccountView() {
             <Switch>
                 <Route
                     path={routes.ACCOUNTS_MORE}
-                    component={() =>
-                        moreActions(account, accountsInfo[account.address])
-                    }
+                    component={() => moreActions(account, accountInfo)}
                 />
                 <Route
                     path={routes.ACCOUNTS_SIMPLETRANSFER}

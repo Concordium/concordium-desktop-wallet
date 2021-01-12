@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import styles from './Styling.css';
+import generalStyles from './Styling.css';
+import styles from './Transaction.css';
 import routes from '../constants/routes.json';
 import {
     loadAddressBook,
@@ -9,7 +10,6 @@ import {
 } from '../features/AddressBookSlice';
 import ConfirmTransfer from './ConfirmTransfer';
 import locations from '../constants/transferLocations.json';
-import { getTransactionHash } from '../utils/transactionSerialization';
 import { getTransactionStatus } from '../utils/client';
 
 async function sleep(time) {
@@ -58,10 +58,10 @@ export default function SimpleTransfer(account) {
 
     const PickAmount = () => (
         <div>
-            <span className={styles.modalElement}>
+            <span className={generalStyles.modalElement}>
                 <input
                     name="name"
-                    className={styles.input}
+                    className={generalStyles.input}
                     placeholder="Enter Amount"
                     value={amount}
                     onChange={(e) => updateAmount(e.target.value)}
@@ -153,10 +153,12 @@ export default function SimpleTransfer(account) {
 
     return (
         <div>
-            <Link to={routes.ACCOUNTS}>
-                <button type="submit">x</button>
-            </Link>
-            <div key={location}> {chosenComponent()}</div>
+            <div key={location} className={styles.transactionBox}>
+                <Link to={routes.ACCOUNTS}>
+                    <button type="submit">x</button>
+                </Link>
+                {chosenComponent()}
+            </div>
         </div>
     );
 }

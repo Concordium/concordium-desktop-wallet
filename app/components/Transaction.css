@@ -74,3 +74,16 @@
 .releaseScheduleItem {
     background-color: white;
 }
+
+.TransactionListHeader {
+    display: flex;
+}
+.TransactionListHeader button {
+    background: none;
+    border: none;
+    font-size: larger;
+    width: 30%;
+    margin-left: 2%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}

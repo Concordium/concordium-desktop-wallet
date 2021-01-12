@@ -1,41 +1,18 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import TransactionListElement from './TransactionListElement';
 import { Transaction } from '../utils/types';
-import { getHighestId } from '../utils/transactionHelpers';
-import {
-    transactionsSelector,
-    updateTransactions,
-    loadTransactions,
-    viewingShieldedSelector,
-} from '../features/TransactionSlice';
-import styles from './Transaction.css';
+import { transactionsSelector } from '../features/TransactionSlice';
 
 interface Props {
-    account: Account;
     chooseElement: (transaction: Transaction) => void;
 }
 
-function TransactionList({ account, chooseElement }: Props) {
-    const dispatch = useDispatch();
+function TransactionList({ chooseElement }: Props) {
     const transactions = useSelector(transactionsSelector);
-    const viewingShielded = useSelector(viewingShieldedSelector);
 
     return (
-        <div className={styles.transactionBox}>
-            <button
-                type="button"
-                onClick={() =>
-                    updateTransactions(
-                        account,
-                        getHighestId(transactions)
-                    ).then(() =>
-                        loadTransactions(account, viewingShielded, dispatch)
-                    )
-                }
-            >
-                Update
-            </button>
+        <>
             {transactions.map((transaction: Transaction) => (
                 <TransactionListElement
                     transaction={transaction}
@@ -43,7 +20,7 @@ function TransactionList({ account, chooseElement }: Props) {
                     onClick={() => chooseElement(transaction)}
                 />
             ))}
-        </div>
+        </>
     );
 }
 

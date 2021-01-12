@@ -46,6 +46,11 @@ export const accountsInfoSelector = (state: RootState) =>
 export const chosenAccountSelector = (state: RootState) =>
     state.accounts.chosenAccount;
 
+export const chosenAccountInfoSelector = (state: RootState) =>
+    state.accounts.accountsInfo && state.accounts.chosenAccount
+        ? state.accounts.accountsInfo[state.accounts.chosenAccount.address]
+        : undefined;
+
 export const chosenAccountIndexSelector = (state: RootState) =>
     state.accounts.chosenAccountIndex;
 
@@ -77,13 +82,17 @@ export async function addPendingAccount(
     dispatch: Dispatch,
     accountName: string,
     identityId: number,
-    accountNumber: number
+    accountNumber: number,
+    accountAddress: string,
+    credential
 ) {
     const account = {
         name: accountName,
         identityId,
         status: 'pending',
         accountNumber,
+        address: accountAddress,
+        credential: JSON.stringify(credential),
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
