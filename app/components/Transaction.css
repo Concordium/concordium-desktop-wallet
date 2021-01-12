@@ -15,7 +15,7 @@
 .transactionListElement {
     display: flex;
     color: black;
-    border: 0px;
+    border: 0;
     border-top: 2px;
     border-style: solid;
     border-color: gray;
@@ -42,4 +42,25 @@
     padding-top: 10px;
     padding-bottom: 10px;
     text-align: center;
+}
+
+.moreActionsItem {
+    background-color: white;
+    border-style: solid;
+    border-color: black;
+    color: black;
+    border-radius: 10px;
+    text-align: center;
+    padding: 10px;
+    margin: 10px;
+    width: 80%;
+    margin-left: 10%;
+}
+
+.centerText {
+    text-align: center;
+}
+
+.releaseScheduleItem {
+    background-color: white;
 }

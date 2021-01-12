@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './Transaction.css';
-import { fromMicroUnits } from '../utils/transactionHelpers';
+import { fromMicroUnits, parseTime } from '../utils/transactionHelpers';
 import { Transaction } from '../utils/types';
 
 function getName(transaction) {
@@ -74,15 +74,6 @@ function parseAmount(transaction) {
         default:
             return 'unknown';
     }
-}
-
-function parseTime(epoch) {
-    const dtFormat = new Intl.DateTimeFormat('en-GB', {
-        dateStyle: 'short',
-        timeStyle: 'short',
-        timeZone: 'UTC',
-    });
-    return dtFormat.format(new Date(epoch * 1e3));
 }
 
 interface Props {

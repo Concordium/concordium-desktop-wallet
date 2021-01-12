@@ -58,7 +58,14 @@
 }
 
 .accountActionsSpan {
-    display: block;
+    display: flex;
+}
+
+.accountActionsSpan a {
+    width: 30%;
+    margin: 10px;
+    margin-left: 2.5%;
+    margin-right: 0;
 }
 
 .accountActionsSpan link button {
@@ -102,4 +109,11 @@
     padding: 5px;
     border-top: 2.5px solid gray;
     border-bottom: 2px solid gray;
+}
+
+.accountActionButton {
+    height: 100px;
+    width: 100%;
+    border-radius: 10px;
+    background-color: white;
 }

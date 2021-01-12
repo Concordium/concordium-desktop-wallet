@@ -1,6 +1,11 @@
 import { findAccounts } from '../database/AccountDao';
 import { findEntries } from '../database/AddressBookDao';
 
+export enum TimeUnits {
+    seconds = 1,
+    milliSeconds = 1000,
+}
+
 export function fromMicroUnits(rawAmount) {
     const amount = parseInt(rawAmount, 10);
     const absolute = Math.abs(amount);
@@ -43,4 +48,14 @@ async function attachName(transaction) {
 
 export async function attachNames(transactions) {
     return Promise.all(transactions.map(attachName));
+}
+
+export function parseTime(epoch, unit = TimeUnits.seconds) {
+    const epochSeconds = Math.floor(epoch / unit);
+    const dtFormat = new Intl.DateTimeFormat('en-GB', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+        timeZone: 'UTC',
+    });
+    return dtFormat.format(new Date(epochSeconds * 1e3));
 }

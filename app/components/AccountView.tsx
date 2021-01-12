@@ -7,6 +7,7 @@ import {
 } from '../features/AccountSlice';
 import styles from './Accounts.css';
 import routes from '../constants/routes.json';
+import moreActions from './MoreActions';
 import simpleTransfer from './SimpleTransfer';
 import transferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
@@ -27,13 +28,37 @@ export default function AccountView() {
             />
             <span className={styles.accountActionsSpan}>
                 <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
-                    <button type="button">Send</button>
+                    <button
+                        className={styles.accountActionButton}
+                        type="button"
+                    >
+                        Send
+                    </button>
                 </Link>
                 <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
-                    <button type="button">Shield</button>
+                    <button
+                        className={styles.accountActionButton}
+                        type="button"
+                    >
+                        Shield
+                    </button>
+                </Link>
+                <Link to={routes.ACCOUNTS_MORE}>
+                    <button
+                        className={styles.accountActionButton}
+                        type="button"
+                    >
+                        More
+                    </button>
                 </Link>
             </span>
             <Switch>
+                <Route
+                    path={routes.ACCOUNTS_MORE}
+                    component={() =>
+                        moreActions(account, accountsInfo[account.address])
+                    }
+                />
                 <Route
                     path={routes.ACCOUNTS_SIMPLETRANSFER}
                     component={() => simpleTransfer(account)}

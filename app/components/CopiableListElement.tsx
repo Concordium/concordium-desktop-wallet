@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './Transaction.css';
+import CopyButton from './CopyButton';
 
 interface Props {
     title: string;
@@ -15,12 +16,7 @@ function CopiableListElement({ title, value, note }: Props): JSX.element {
                 {value} {note ? `(${note})` : undefined}
             </pre>
             <div className={styles.rightAligned}>
-                <button
-                    type="button"
-                    onClick={() => navigator.clipboard.writeText(value)}
-                >
-                    copy
-                </button>
+                <CopyButton value={value} />
             </div>
         </div>
     );

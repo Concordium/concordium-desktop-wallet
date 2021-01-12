@@ -7,6 +7,7 @@
     "ACCOUNTS_SIMPLETRANSFER_PICKRECIPIENT": "/accounts/simple-transfer/pick-recipient",
     "ACCOUNTS_SIMPLETRANSFER_PICKAMOUNT": "/accounts/simple-transfer/pick-amount",
     "ACCOUNTS_SIMPLETRANSFER_CONFIRMTRANSFER": "/accounts/simple-transfer/confirm-transfer",
+    "ACCOUNTS_MORE": "/accounts/more",
     "IDENTITIES": "/identity/listview",
     "ADDRESSBOOK": "/addressbook",
     "EXPORTIMPORT": "/export_import",

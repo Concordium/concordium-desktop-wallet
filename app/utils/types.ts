@@ -189,3 +189,9 @@ export interface AccountInfo {
     accountReleaseSchedule: AccountReleaseSchedule; // TODO
     accountBaker: AccountBakerDetails; // TODO
 }
+
+interface ScheduleItem {
+    amount: string;
+    transactions: Hex[];
+    timestamp: number;
+}
