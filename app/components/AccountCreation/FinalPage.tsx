@@ -1,14 +1,19 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import routes from '../constants/routes.json';
+import routes from '../../constants/routes.json';
 
-import { accountsSelector } from '../features/AccountSlice';
+import { accountsSelector } from '../../features/AccountSlice';
 
-import accountListElement from './AccountListElement';
-import styles from './IdentyIssuance.css';
+import AccountListElement from '../AccountListElement';
 
-export default function AccountCreationFinal(accountName): JSX.Element {
+interface Props {
+    accountName: string;
+}
+
+export default function AccountCreationFinal({
+    accountName,
+}: Props): JSX.Element {
     const accounts = useSelector(accountsSelector);
 
     if (accounts === undefined) {
@@ -24,11 +29,14 @@ export default function AccountCreationFinal(accountName): JSX.Element {
                 That was it! Now you just have to wait for your account to be
                 finalized on the block-chain
             </p>
-            <div className={styles.flex}>
-                {accountListElement(account, () => {}, false)}
-            </div>
+            <AccountListElement
+                account={account}
+                onClick={() => {}}
+                highlighted={false}
+                index={0}
+            />
             <Link to={routes.ACCOUNTS}>
-                <button>Finished</button>
+                <button type="button">Finished</button>
             </Link>
         </div>
     );

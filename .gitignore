@@ -43,6 +43,7 @@ dll
 main.js
 main.js.map
 out
+main.prod.js.LICENSE.txt
 
 .idea
 npm-debug.log.*
@@ -55,3 +56,9 @@ npm-debug.log.*
 
 # Automatically generated proto files
 proto/
+
+# ignore rust outputs
+target/
+
+#Ignore Cargo.lock
+Cargo.lock

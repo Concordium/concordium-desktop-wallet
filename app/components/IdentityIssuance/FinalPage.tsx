@@ -1,11 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import routes from '../constants/routes.json';
-import { accountsSelector } from '../features/AccountSlice';
-import { identitiesSelector } from '../features/IdentitySlice';
-import AccountListElement from './AccountListElement';
-import IdentityListElement from './IdentityListElement';
+import routes from '../../constants/routes.json';
+import { accountsSelector } from '../../features/AccountSlice';
+import { identitiesSelector } from '../../features/IdentitySlice';
+import AccountListElement from '../AccountListElement';
+import IdentityListElement from '../IdentityListElement';
 import styles from './IdentyIssuance.css';
 
 interface Props {
@@ -38,7 +38,11 @@ export default function IdentityIssuanceFinal(
                     highlighted
                     index={0}
                 />
-                {AccountListElement(account, () => {}, true)}
+                <AccountListElement
+                    account={account}
+                    onClick={() => {}}
+                    highlighted
+                />
             </div>
             <Link to={routes.IDENTITIES}>
                 <button type="button">Finished</button>

@@ -1,6 +1,7 @@
 import { AccountAddress } from '../proto/api_pb';
 
 type Hex = string;
+type Proofs = Hex;
 
 enum SchemeId {
     Ed25519 = 0,
@@ -57,6 +58,11 @@ export interface Identity {
     id: number;
     name: string;
     identityObject: string;
+    status: string;
+    detail: string;
+    codeUri: string;
+    identityProvider: string;
+    randomness: string;
 }
 
 export interface Account {
@@ -142,8 +148,6 @@ export enum AttributeTag {
     taxIdNo = 12,
 }
 
-type Proofs = Hex;
-
 export interface PublicInformationForIp {
     idCredPub: Hex;
     regId: RegId;
@@ -190,8 +194,38 @@ export interface AccountInfo {
     accountBaker: AccountBakerDetails; // TODO
 }
 
-interface ScheduleItem {
+export interface ScheduleItem {
     amount: string;
     transactions: Hex[];
     timestamp: number;
+}
+
+export interface IdentityProviderMetaData {
+    issuanceStart: string;
+}
+
+export interface IdentityProvider {
+    ipInfo: any;
+    arsInfos: any;
+    metadata: IdentityProviderMetaData;
+}
+
+// type holds the the type of setting, i.e. multisignature settings, so that
+// the group of settings can be displayed together correctly.
+export interface Settings {
+    type: string;
+    settings: Setting[];
+}
+
+// Reflects an entry of the 'setting' table (excluding the primary key).
+export interface Setting {
+    name: string;
+    value: string;
+    group: number;
+}
+
+// Reflects an entry of the 'setting_group' table.
+export interface SettingGroup {
+    id: number;
+    name: string;
 }

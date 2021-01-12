@@ -1,5 +1,5 @@
 import React from 'react';
-import AccountCreation from '../components/AccountCreation';
+import AccountCreation from '../components/AccountCreation/AccountCreation';
 
 export default function IdentityPage() {
     return <AccountCreation />;

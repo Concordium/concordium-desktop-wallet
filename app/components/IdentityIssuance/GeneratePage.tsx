@@ -1,20 +1,24 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { addPendingIdentity, confirmIdentity } from '../features/IdentitySlice';
+import {
+    addPendingIdentity,
+    confirmIdentity,
+} from '../../features/IdentitySlice';
 import {
     addPendingAccount,
     confirmInitialAccount,
-} from '../features/AccountSlice';
-import routes from '../constants/routes.json';
+} from '../../features/AccountSlice';
+import routes from '../../constants/routes.json';
 import styles from './IdentyIssuance.css';
 import {
     getGlobal,
     performIdObjectRequest,
     getIdObject,
-} from '../utils/httpRequests';
-import { createIdentityRequestObjectLedger } from '../utils/rustInterface';
-import { getNextId } from '../database/IdentityDao';
+} from '../../utils/httpRequests';
+import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
+import { getNextId } from '../../database/IdentityDao';
+import { IdentityProvider } from '../../utils/types';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -113,11 +117,17 @@ async function generateIdentity(
     }
 }
 
-export default function IdentityIssuanceGenerate(
+interface Props {
+    identityName: string;
+    accountName: string;
+    provider: IdentityProvider;
+}
+
+export default function IdentityIssuanceGenerate({
     identityName,
     accountName,
-    provider
-): JSX.Element {
+    provider,
+}: Props): JSX.Element {
     const dispatch = useDispatch();
     const [text, setText] = useState();
     const [location, setLocation] = useState();

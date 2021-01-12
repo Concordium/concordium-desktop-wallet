@@ -3,7 +3,7 @@ use crate::{
     aux_functions::*,
 };
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = buildPublicInformationForIp)]
 pub fn build_pub_info_for_ip_ext(
     input: &str,
     id_cred_sec_string: &str,
@@ -15,7 +15,7 @@ pub fn build_pub_info_for_ip_ext(
     }
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = createIdRequest)]
 pub fn create_id_request_ext(
     input: &str,
     signature: &str,
@@ -28,7 +28,7 @@ pub fn create_id_request_ext(
     }
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = generateUnsignedCredential)]
 pub fn generate_unsigned_credential_ext(
     input: &str
 ) -> String {
@@ -38,7 +38,7 @@ pub fn generate_unsigned_credential_ext(
     }
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = getDeploymentInfo)]
 pub fn get_credential_deployment_info_ext(
     signature: &str,
     unsigned_info: &str

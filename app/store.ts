@@ -3,8 +3,10 @@ import { createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
-// eslint-disable-next-line import/no-cycle
+
+/* eslint-disable import/no-cycle */
 import createRootReducer from './rootReducer';
+/* eslint-enable import/no-cycle */
 
 export const history = createHashHistory();
 const rootReducer = createRootReducer(history);

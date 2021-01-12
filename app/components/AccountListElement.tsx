@@ -7,8 +7,9 @@ import SidedText from './SidedText';
 interface Props {
     account: Account;
     accountInfo: AccountInfo;
-    onClick: () => void;
+    onClick: (shielded: boolean) => void;
     highlighted: boolean;
+    index: number;
 }
 
 export default function AccountListElement({
@@ -16,10 +17,12 @@ export default function AccountListElement({
     accountInfo,
     onClick,
     highlighted,
-}: Props): JSX.element {
+    index,
+}: Props): JSX.Element {
     return (
         <div
             key={account.address}
+            tabIndex={index}
             className={`${styles.accountListElement} ${
                 highlighted ? styles.chosenAccountListElement : null
             }`}

@@ -59,6 +59,7 @@ export default function AccountList() {
                             dispatch(setViewingShielded(shielded));
                         }}
                         highlighted={index === chosenIndex}
+                        index={index}
                     />
                 ))}
             </div>
