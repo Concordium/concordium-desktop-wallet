@@ -10,37 +10,28 @@ async function getRust() {
 }
 
 function buildPublicInformationForIp(rust, message) {
-    const pubInfoForIpString = rust.build_pub_info_for_ip_ext(
+    return rust.buildPublicInformationForIp(
         message.context,
         message.idCredSec,
         message.prfKey
     );
-    return pubInfoForIpString;
 }
 
 function createIdRequest(rust, message) {
-    const idRequest = rust.create_id_request_ext(
+    return rust.createIdRequest(
         message.context,
         message.signature,
         message.idCredSec,
         message.prfKey
     );
-    return idRequest;
 }
 
 function createUnsignedCredential(rust, message) {
-    const unsignedCredential = rust.generate_unsigned_credential_ext(
-        message.input
-    );
-    return unsignedCredential;
+    return rust.generateUnsignedCredential(message.input);
 }
 
 function createCredential(rust, message) {
-    const credential = rust.get_credential_deployment_info_ext(
-        message.signature,
-        message.unsignedInfo
-    );
-    return credential;
+    return rust.getDeploymentInfo(message.signature, message.unsignedInfo);
 }
 
 function mapCommand(command) {
