@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import routes from '../constants/routes.json';
+import routes from '../../constants/routes.json';
 
 export default function AccountCreationPickAttributes(
     identity,

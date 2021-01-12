@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import routes from '../constants/routes.json';
-import chooseProvider from './IdentityIssuanceChooseProvider';
-import pickName from './IdentityIssuancePickName';
-import generate from './IdentityIssuanceGenerate';
-import finalPage from './IdentityIssuanceFinal';
+import routes from '../../constants/routes.json';
+import PickProvider from './PickProvider';
+import pickName from './PickName';
+import generate from './GeneratePage';
+import finalPage from './FinalPage';
 
 /**
  * The Last route is the default (because it has no path)
@@ -18,7 +18,7 @@ export default function IdentityIssuance(): JSX.Element {
         <Switch>
             <Route
                 path={routes.IDENTITYISSUANCE_PICKPROVIDER}
-                component={() => chooseProvider(setProvider)}
+                component={() => PickProvider(setProvider)}
             />
             <Route
                 path={routes.IDENTITYISSUANCE_EXTERNAL}

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { loadIdentities, identitiesSelector } from '../features/IdentitySlice';
-import routes from '../constants/routes.json';
-import IdentityListElement from './IdentityListElement';
+import {
+    loadIdentities,
+    identitiesSelector,
+} from '../../features/IdentitySlice';
+import routes from '../../constants/routes.json';
+import IdentityListElement from '../IdentityListElement';
 
 export default function AccountCreationChooseIdentity(
     setIdentity
@@ -41,6 +44,7 @@ export default function AccountCreationChooseIdentity(
                 />
             ))}
             <button
+                type="submit"
                 disabled={identities[chosenIndex].identityObject == null}
                 onClick={() => {
                     submit(routes.ACCOUNTCREATION_PICK_ATTRIBUTES);
@@ -49,6 +53,7 @@ export default function AccountCreationChooseIdentity(
                 Choose attributes to reveal
             </button>
             <button
+                type="submit"
                 onClick={() => {
                     submit(routes.ACCOUNTCREATION_GENERATE);
                 }}

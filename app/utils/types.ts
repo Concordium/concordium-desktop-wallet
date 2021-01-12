@@ -57,6 +57,11 @@ export interface Identity {
     id: number;
     name: string;
     identityObject: string;
+    status: string;
+    detail: string;
+    codeUri: string;
+    identityProvider: string;
+    randomness: string;
 }
 
 export interface Account {

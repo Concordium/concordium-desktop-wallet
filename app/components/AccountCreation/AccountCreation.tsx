@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import routes from '../constants/routes.json';
-import pickName from './AccountCreationPickName';
-import chooseIdentity from './AccountCreationChooseIdentity';
-import pickAttributes from './AccountCreationPickAttributes';
-import generate from './AccountCreationGenerate';
-import finalPage from './AccountCreationFinal';
+import routes from '../../constants/routes.json';
+import pickName from './PickName';
+import chooseIdentity from './PickIdentity';
+import pickAttributes from './PickAttributes';
+import generate from './GeneratePage';
+import finalPage from './FinalPage';
 
 // The entrance into the flow is the last Route (which should have the parent route), otherwise the flow is controlled by the components themselves
 export default function AccountCreation(): JSX.Element {

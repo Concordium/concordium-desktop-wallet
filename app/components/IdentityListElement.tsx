@@ -1,13 +1,20 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styles from './Accounts.css';
+import { Identity } from '../utils/types';
 
-function IdentityListElement({
+interface Props {
+    identity: Identity;
+    onClick: () => void;
+    highlighted: boolean;
+    index: number;
+}
+
+export default function IdentityListElement({
     identity,
     onClick,
     highlighted,
     index,
-}): JSX.Element {
+}: Props): JSX.Element {
     return (
         <div
             onClick={onClick}
@@ -17,20 +24,8 @@ function IdentityListElement({
                 highlighted ? styles.chosenAccountListElement : null
             }`}
         >
-            {identity.provider} {identity.status} {identity.name}
+            {JSON.parse(identity.identityProvider).ipInfo.ipDescription.name}{' '}
+            {identity.status} {identity.name}
         </div>
     );
 }
-
-IdentityListElement.propTypes = {
-    identity: PropTypes.shape({
-        status: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired,
-        provider: PropTypes.string.isRequired,
-    }).isRequired,
-    onClick: PropTypes.func.isRequired,
-    highlighted: PropTypes.bool.isRequired,
-    index: PropTypes.number.isRequired,
-};
-
-export default IdentityListElement;

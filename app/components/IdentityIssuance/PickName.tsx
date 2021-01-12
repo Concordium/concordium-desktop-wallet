@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
-import styles from './Styling.css';
-import routes from '../constants/routes.json';
+import styles from '../Styling.css';
+import routes from '../../constants/routes.json';
 
 export default function IdentityIssuancePickName(
     setIdentityName,

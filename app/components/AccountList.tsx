@@ -8,7 +8,7 @@ import {
     chosenAccountIndexSelector,
 } from '../features/AccountSlice';
 import styles from './Accounts.css';
-import accountListElement from './AccountListElement';
+import AccountListElement from './AccountListElement';
 import routes from '../constants/routes.json';
 
 export default function AccountList() {
@@ -29,16 +29,18 @@ export default function AccountList() {
     return (
         <div className={styles.halfPage}>
             <Link to={routes.ACCOUNTCREATION}>
-                <button>+</button>
+                <button type="button">+</button>
             </Link>
             <div className={styles.accountList}>
-                {accounts.map((account, index) =>
-                    accountListElement(
-                        account,
-                        () => dispatch(chooseAccount(index)),
-                        index === chosenIndex
-                    )
-                )}
+                {accounts.map((account, index) => (
+                    <AccountListElement
+                        key={account.address}
+                        account={account}
+                        onClick={() => dispatch(chooseAccount(index))}
+                        highlighted={index === chosenIndex}
+                        index={index}
+                    />
+                ))}
             </div>
         </div>
     );

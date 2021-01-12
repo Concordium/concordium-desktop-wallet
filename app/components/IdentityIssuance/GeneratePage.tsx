@@ -1,20 +1,23 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { addPendingIdentity, confirmIdentity } from '../features/IdentitySlice';
+import {
+    addPendingIdentity,
+    confirmIdentity,
+} from '../../features/IdentitySlice';
 import {
     addPendingAccount,
     confirmInitialAccount,
-} from '../features/AccountSlice';
-import routes from '../constants/routes.json';
+} from '../../features/AccountSlice';
+import routes from '../../constants/routes.json';
 import styles from './IdentyIssuance.css';
 import {
     getGlobal,
     performIdObjectRequest,
     getIdObject,
-} from '../utils/httpRequests';
-import { createIdentityRequestObjectLedger } from '../utils/rustInterface';
-import { getNextId } from '../database/IdentityDao';
+} from '../../utils/httpRequests';
+import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
+import { getNextId } from '../../database/IdentityDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
