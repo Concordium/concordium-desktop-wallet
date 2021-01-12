@@ -9,7 +9,7 @@ function getPromise(urlString, params) {
     console.log(urlString);
     const url = new URL(urlString);
     const searchParams = new URLSearchParams(params);
-    url.searchParams.forEach((value,name) => searchParams.append(name, value));
+    url.searchParams.forEach((value, name) => searchParams.append(name, value));
     const options = {
         hostname: url.hostname,
         port: url.port,

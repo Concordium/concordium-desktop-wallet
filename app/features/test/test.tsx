@@ -69,7 +69,7 @@ export default function Test() {
                 </button>
                 <button
                     onClick={() => {
-                        ledgerTest
+                        ledgerTest;
                     }}
                     data-tclass="btn"
                     type="button"
@@ -87,7 +87,7 @@ export default function Test() {
                 </button>
                 <button
                     onClick={() => {
-                            insertIdentity({ name: blockHash });
+                        insertIdentity({ name: blockHash });
                     }}
                     data-tclass="btn"
                     type="button"
