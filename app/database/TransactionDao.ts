@@ -1,7 +1,6 @@
 import { Account, Transaction } from '../utils/types';
 import knex from './knex';
 import { transactionTable } from '../constants/databaseNames.json';
-import { up, down } from './migrations/20201230111229_create_transaction_table';
 
 export async function getTransactionsOfAccount(
     account: Account,
@@ -33,9 +32,7 @@ export async function updateTransaction(id, updatedValues) {
 
 export async function resetTransactions() {
     // TODO: used for testing, eventually should be removed
-    const knexInstance = await knex();
-    await down(knexInstance);
-    await up(knexInstance);
+    return (await knex())(transactionTable).del();
 }
 
 export async function getMaxTransactionsIdOfAccount(account) {

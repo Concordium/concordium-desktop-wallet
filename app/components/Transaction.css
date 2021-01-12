@@ -13,6 +13,16 @@
 }
 
 .transactionListElement {
+    color: black;
+    border: 0;
+    border-top: 2px;
+    border-style: solid;
+    border-color: gray;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.CopiableListElement {
     display: flex;
     color: black;
     border: 0;

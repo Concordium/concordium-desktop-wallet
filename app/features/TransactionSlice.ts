@@ -62,6 +62,14 @@ export async function decryptTransactions(transactions, prfKey, account) {
     );
 }
 
+/**
+ * Because the data from the wallet proxy doesn't contain the receiving
+ */
+function getScheduleReceiver(transaction) {
+    const event = transaction.details.events[0];
+    return event.slice(event.lastIndexOf(' ') + 1);
+}
+
 function convertIncomingTransaction(transaction): Transaction {
     let fromAddress;
     if ('transferSource' in transaction.details) {
@@ -76,6 +84,12 @@ function convertIncomingTransaction(transaction): Transaction {
     let encrypted;
     if ('encrypted' in transaction) {
         encrypted = JSON.stringify(transaction.encrypted);
+    }
+
+    if (transaction.details.type === 'transferWithSchedule') {
+        if (transaction.origin.type === 'account') {
+            toAddress = getScheduleReceiver(transaction);
+        }
     }
 
     return {

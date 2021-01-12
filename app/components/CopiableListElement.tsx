@@ -10,7 +10,7 @@ interface Props {
 
 function CopiableListElement({ title, value, note }: Props): JSX.element {
     return (
-        <div className={styles.transactionListElement}>
+        <div className={styles.CopiableListElement}>
             <pre className={styles.leftAligned}>
                 {title} {' \n'}
                 {value} {note ? `(${note})` : undefined}

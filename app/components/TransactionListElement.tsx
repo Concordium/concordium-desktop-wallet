@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './Transaction.css';
 import { fromMicroUnits, parseTime } from '../utils/transactionHelpers';
 import { Transaction } from '../utils/types';
+import SidedText from './SidedText';
 
 function getName(transaction) {
     switch (transaction.originType) {
@@ -76,6 +77,15 @@ function parseAmount(transaction) {
     }
 }
 
+function displayType(kind) {
+    switch (kind) {
+        case 'transferWithSchedule':
+            return '(schedule)';
+        default:
+            return '';
+    }
+}
+
 interface Props {
     transaction: Transaction;
     onClick?: () => void;
@@ -88,14 +98,13 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.element {
 
     return (
         <div className={styles.transactionListElement} onClick={onClick}>
-            <pre className={styles.leftAligned}>
-                {name} {' \n'}
-                {time}
-            </pre>
-            <pre className={styles.rightAligned}>
-                {amount} {' \n'}
-                {amountFormula}
-            </pre>
+            <SidedText
+                left={name.concat(
+                    ` ${displayType(transaction.transactionKind)}`
+                )}
+                right={amount}
+            />
+            <SidedText left={time} right={amountFormula} />
         </div>
     );
 }
