@@ -101,8 +101,8 @@ function ConfirmTransferComponent({
             <div>
                 <pre>
                     {`
-                        Amount: G ${amount}
-                        Estimated fee: G ${estimatedFee}
+                        Amount: \u01E4 ${amount}
+                        Estimated fee: \u01E4 ${estimatedFee}
                         To: ${recipient.name} (${recipient.address})
                     `}
                 </pre>

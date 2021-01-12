@@ -112,8 +112,8 @@ export default function SimpleTransfer(account) {
             <div>
                 <pre>
                     {`
-                    Amount: G ${amount}
-                    Estimated fee: G 1
+                    Amount: \u01E4 ${amount}
+                    Estimated fee: \u01E4 1
                     To: ${recipient.name} (${recipient.address})
                     TransactionHash: ${transactionHash}
                     `}

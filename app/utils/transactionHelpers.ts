@@ -19,7 +19,7 @@ export function fromMicroUnits(rawAmount) {
               )}${microGTU.toString().replace(/0+$/, '')}`;
 
     const negative = amount < 0 ? '-' : '';
-    return `${negative} G ${GTU}${microGTUFormatted}`;
+    return `${negative} \u01E4 ${GTU}${microGTUFormatted}`;
 }
 
 export function getHighestId(transactions) {
