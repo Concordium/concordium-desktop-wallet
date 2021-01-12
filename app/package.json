@@ -17,7 +17,6 @@
         "@ledgerhq/hw-transport-node-hid": "^5.30.0",
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "grpc": "^1.24.4",
-        "react-modal": "^3.12.1",
         "knex": "^0.21.13",
         "node-abi": "^2.19.3",
         "sqlite3": "^5.0.0"
