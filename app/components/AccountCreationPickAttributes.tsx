@@ -12,12 +12,10 @@ export default function AccountCreationPickAttributes(
 
     useEffect(() => {
         const idObject = JSON.parse(identity.identityObject).value;
-        const { chosenAttributes, ...otherAttributes } = idObject.attributeList;
-        const allAttributes = { ...chosenAttributes, ...otherAttributes };
         setAttributes(
-            Object.keys(allAttributes).map((tag) => ({
+            Object.keys(idObject.attributeList.chosenAttributes).map((tag) => ({
                 tag,
-                value: allAttributes[tag],
+                value: idObject.attributeList.chosenAttributes[tag],
                 isChecked: false,
             }))
         );
