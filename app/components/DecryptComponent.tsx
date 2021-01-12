@@ -13,10 +13,15 @@ interface Props {
     account: Account;
 }
 
+// TODO: Figure out where this should be
 export default function DecryptComponent({ account }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
+
+    if (!viewingShielded || account.allDecrypted) {
+        return <></>;
+    }
 
     async function ledgerCall(ledger, setMessage) {
         setMessage('Please confirm exporting prf key on device');
