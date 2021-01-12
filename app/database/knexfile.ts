@@ -21,8 +21,16 @@ export default async function getKnexConfiguration(environment: string) {
         return {
             client: 'sqlite3',
             useNullAsDefault: true,
+            connection: {
+                filename: fetchDevelopmentFilename(),
+            },
             migrations: {
                 directory: './migrations',
+            },
+            pool: {
+                afterCreate: (conn, cb) => {
+                    conn.run('PRAGMA foreign_keys = ON', cb);
+                },
             },
         };
     }
@@ -36,6 +44,11 @@ export default async function getKnexConfiguration(environment: string) {
             migrations: {
                 directory: './app/database/migrations',
             },
+            pool: {
+                afterCreate: (conn, cb) => {
+                    conn.run('PRAGMA foreign_keys = ON', cb);
+                },
+            },
         };
     }
     if (environment === 'production') {
@@ -45,6 +58,11 @@ export default async function getKnexConfiguration(environment: string) {
                 filename: await getProductionFilename(),
             },
             useNullAsDefault: true,
+            pool: {
+                afterCreate: (conn, cb) => {
+                    conn.run('PRAGMA foreign_keys = ON', cb);
+                },
+            },
         };
     }
     throw new Error('Environment has to be development or production.');
