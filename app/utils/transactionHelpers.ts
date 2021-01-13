@@ -1,9 +1,15 @@
 import { findAccounts } from '../database/AccountDao';
 import { findEntries } from '../database/AddressBookDao';
+import { getNextAccountNonce } from './client';
+import { AccountTransaction, TransactionKind } from './types';
 
 export enum TimeUnits {
     seconds = 1e3,
     milliSeconds = 1,
+}
+
+export function toMicroUnits(amount: number): number {
+    return Math.floor(amount * 1000000);
 }
 
 export function fromMicroUnits(rawAmount) {
@@ -57,4 +63,25 @@ export function parseTime(epoch, unit = TimeUnits.seconds) {
         timeZone: 'UTC',
     });
     return dtFormat.format(new Date(epoch * unit));
+}
+
+export async function createSimpleTransferTransaction(
+    fromAddress: string,
+    amount: string,
+    toAddress: string
+) {
+    const nonceJSON = await getNextAccountNonce(fromAddress);
+    const { nonce } = JSON.parse(nonceJSON.getValue());
+    const transferTransaction: AccountTransaction = {
+        sender: fromAddress,
+        nonce,
+        energyAmount: 200, // TODO: Does this need to be set by the user?
+        expiry: 16446744073, // TODO: Don't hardcode?
+        transactionKind: TransactionKind.Simple_transfer,
+        payload: {
+            toAddress,
+            amount: toMicroUnits(amount),
+        },
+    };
+    return transferTransaction;
 }

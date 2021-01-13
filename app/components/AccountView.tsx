@@ -8,7 +8,7 @@ import {
 import styles from './Accounts.css';
 import routes from '../constants/routes.json';
 import moreActions from './MoreActions';
-import simpleTransfer from './SimpleTransfer';
+import simpleTransfer from './Transfers/SimpleTransfer';
 import transferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
 import DecryptComponent from './DecryptComponent';

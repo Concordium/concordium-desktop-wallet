@@ -150,7 +150,7 @@ function serializeUnversionedTransaction(
 
 export function serializeTransaction(
     transaction: AccountTransaction,
-    signFunction: (transaction: AccountTransaction, hash: Buffer) => Buffer
+    signFunction: (transaction: AccountTransaction, hash: Buffer) => [Buffer]
 ) {
     const unversioned = serializeUnversionedTransaction(
         transaction,

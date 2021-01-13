@@ -1,6 +1,6 @@
 {
     "pickAmount": "pick-amount",
-    "chooseRecipient": "choose-recipient",
+    "pickRecipient": "pick-recipient",
     "confirmTransfer": "confirm-transfer",
     "transferSubmitted": "transfer-submitted"
 }

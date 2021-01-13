@@ -70,6 +70,7 @@ export interface Account {
     name: string;
     address: Hex;
     identityId: number;
+    identityName?: string;
     status: string;
     credential?: string;
 }
@@ -228,4 +229,10 @@ export interface Setting {
 export interface SettingGroup {
     id: number;
     name: string;
+}
+
+export interface AddressBookEntry {
+    name: string;
+    address: string;
+    note: string;
 }
