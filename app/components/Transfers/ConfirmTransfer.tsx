@@ -13,6 +13,11 @@ import {
 } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import locations from '../../constants/transferLocations.json';
+import {
+    addPendingTransaction,
+    confirmTransaction,
+    rejectTransaction,
+} from '../../features/TransactionSlice';
 
 export interface Props {
     account: Account;
@@ -27,22 +32,21 @@ async function sleep(time: number) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-export async function confirmTransaction(transactionId: string) {
+export async function waitForFinalization(transactionId: string) {
     while (true) {
         const response = await getTransactionStatus(transactionId);
         const data = response.getValue();
         console.log(data);
         if (data === 'null') {
-            // TODO: Transaction was rejected / is absent
+            return rejectTransaction(transactionId);
             break;
-        } else {
-            const dataObject = JSON.parse(data);
-            const { status } = dataObject;
-            if (status === 'finalized') {
-                // TODO: Transaction is on the chain
-                break;
-            }
         }
+        const dataObject = JSON.parse(data);
+        const { status } = dataObject;
+        if (status === 'finalized') {
+            return confirmTransaction(transactionId, dataObject);
+        }
+
         await sleep(10000);
     }
 }
@@ -80,7 +84,8 @@ export default function ConfirmTransferComponent({
         ]).toString('hex');
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
-            confirmTransaction(transactionHash);
+            addPendingTransaction(transaction, transactionHash, account);
+            waitForFinalization(transactionHash);
             setLocation(locations.transferSubmitted);
         } else {
             // TODO: handle rejection from node

@@ -55,9 +55,12 @@ export async function decryptTransactions(transactions, prfKey, account) {
 
     return Promise.all(
         encryptedTransfers.map(async (transaction, index) =>
-            updateTransaction(transaction.id, {
-                decryptedAmount: decryptedAmounts[index],
-            })
+            updateTransaction(
+                { id: transaction.id },
+                {
+                    decryptedAmount: decryptedAmounts[index],
+                }
+            )
         )
     );
 }
@@ -145,7 +148,11 @@ export async function loadTransactions(
     const filter = viewingShielded
         ? filterShieldedBalanceTransaction
         : filterUnShieldedBalanceTransaction;
-    const transactions = await getTransactionsOfAccount(account, filter);
+    const transactions = await getTransactionsOfAccount(
+        account,
+        filter,
+        'blockTime'
+    );
     await attachNames(transactions);
     dispatch(setTransactions(transactions));
 }
@@ -158,6 +165,46 @@ export async function updateTransactions(account) {
             transactions.map((t) => convertIncomingTransaction(t))
         );
     }
+}
+
+export async function addPendingTransaction(transaction, hash, account) {
+    if (transaction.transactionKind !== 3) {
+        console.log('unsupported transaction type - please implement');
+    }
+
+    const convertedTransaction = {
+        remote: false,
+        originType: 'self',
+        transactionKind: 'transfer',
+        transactionHash: hash,
+        total: -(transaction.payload.amount + transaction.energyAmount),
+        subtotal: -transaction.payload.amount,
+        cost: transaction.energyAmount,
+        fromAddress: transaction.sender,
+        toAddress: transaction.payload.toAddress,
+        blockTime: Date.now() / 1000, // Temporary value, unless it fails
+        status: 'pending',
+    };
+    return insertTransactions([convertedTransaction]);
+}
+
+export async function confirmTransaction(transactionHash, dataObject) {
+    const success = Object.entries(dataObject.outcomes).reduce(
+        (accu, [, event]) => accu && event.result.outcome === 'success',
+        true
+    );
+    const cost = Object.entries(dataObject.outcomes).reduce(
+        (accu, [, event]) => accu + event.cost,
+        0
+    );
+    return updateTransaction(
+        { transactionHash },
+        { status: 'finalized', cost, success }
+    );
+}
+
+export async function rejectTransaction(transactionHash) {
+    return updateTransaction({ transactionHash }, { status: 'rejected' });
 }
 
 export const transactionsSelector = (state: RootState) =>

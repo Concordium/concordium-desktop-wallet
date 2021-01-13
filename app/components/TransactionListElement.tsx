@@ -47,8 +47,8 @@ function parseAmount(transaction) {
                     );
                 }
                 return {
-                    amount: 'G ?',
-                    amountFormula: `G ? +${fromMicroUnits(
+                    amount: '\u01E4 ?',
+                    amountFormula: `\u01E4 ? +${fromMicroUnits(
                         transaction.cost
                     )} Fee`,
                 };
@@ -67,7 +67,7 @@ function parseAmount(transaction) {
                     );
                 }
                 return {
-                    amount: 'G ?',
+                    amount: '\u01E4 ?',
                     amountFormula: '',
                 };
             }
@@ -104,7 +104,14 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.element {
                 )}
                 right={amount}
             />
-            <SidedText left={time} right={amountFormula} />
+            <SidedText
+                left={time}
+                right={amountFormula.concat(
+                    ` ${
+                        transaction.status !== 'finalized' ? ' (Estimated)' : ''
+                    }`
+                )}
+            />
         </div>
     );
 }

@@ -6,6 +6,7 @@ import {
     updateTransactions,
     transactionsSelector,
 } from '../features/TransactionSlice';
+import { loadAccounts } from '../features/AccountSlice';
 import { getHighestId } from '../utils/transactionHelpers';
 import TransactionList from './TransactionList';
 import TransactionView from './TransactionView';

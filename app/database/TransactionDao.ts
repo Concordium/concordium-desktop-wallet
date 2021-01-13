@@ -20,14 +20,40 @@ export async function getTransactionsOfAccount(
     return transactions;
 }
 
-export async function insertTransactions(transactions: Transaction[]) {
-    const table = (await knex())(transactionTable);
-    return table.insert(transactions);
-    // TODO: merge remote transactions with local ones, or replace.
+// Move or replace
+function partition(arr, criteria) {
+    return [
+        arr.filter((item) => criteria(item)),
+        arr.filter((item) => !criteria(item)),
+    ];
 }
 
-export async function updateTransaction(id, updatedValues) {
-    return (await knex())(transactionTable).where({ id }).update(updatedValues);
+export async function updateTransaction(identifier, updatedValues) {
+    return (await knex())(transactionTable)
+        .where(identifier)
+        .update(updatedValues);
+}
+
+export async function insertTransactions(transactions: Transaction[]) {
+    const table = (await knex())(transactionTable);
+    const existingTransactions = await table.select();
+    const [updates, additions] = partition(transactions, (t) =>
+        existingTransactions.some(
+            (t_) => t.transactionHash === t_.transactionHash
+        )
+    );
+    if (additions.length > 0) {
+        await table.insert(additions);
+    }
+    return Promise.all(
+        updates.map(async (transaction) => {
+            const { transactionHash, ...otherFields } = transaction;
+            return updateTransaction(
+                { transactionHash: transaction.transactionHash },
+                otherFields
+            );
+        })
+    );
 }
 
 export async function resetTransactions() {
