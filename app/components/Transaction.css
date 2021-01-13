@@ -75,6 +75,12 @@
     background-color: white;
 }
 
+.TransactionList {
+    overflow: hidden;
+    overflow-y: scroll;
+    max-height: 65vh;
+}
+
 .TransactionListHeader {
     display: flex;
 }
