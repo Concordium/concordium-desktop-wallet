@@ -169,6 +169,6 @@ export interface SettingGroup {
  * settings table, then it should be represented here.
  */
 export enum SettingTypeEnum {
-    TEXT = 'text',
-    BOOLEAN = 'boolean',
+    Text = 'text',
+    Boolean = 'boolean',
 }

@@ -15,21 +15,21 @@ export default function SettingsView() {
     const chosenIndex = useSelector(chosenIndexSelector);
 
     if (chosenIndex === undefined) {
-        return <div />;
+        return null;
     }
 
     return (
         <div className={styles.halfPage}>
             {settings[chosenIndex].settings.map((childSetting: Setting) => {
                 switch (childSetting.type) {
-                    case SettingTypeEnum.BOOLEAN:
+                    case SettingTypeEnum.Boolean:
                         return (
                             <BooleanSetting
                                 setting={childSetting}
                                 key={childSetting.name}
                             />
                         );
-                    case SettingTypeEnum.TEXT:
+                    case SettingTypeEnum.Text:
                         return (
                             <TextSetting
                                 setting={childSetting}
