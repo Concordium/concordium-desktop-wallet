@@ -34,9 +34,14 @@ export default function TransferHistory(account) {
                         updateTransactions(
                             account,
                             getHighestId(transactions)
-                        ).then(() =>
-                            loadTransactions(account, viewingShielded, dispatch)
-                        )
+                        ).then(() => {
+                            loadTransactions(
+                                account,
+                                viewingShielded,
+                                dispatch
+                            );
+                            return loadAccounts(dispatch);
+                        })
                     }
                 >
                     Update

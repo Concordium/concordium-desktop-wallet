@@ -29,9 +29,9 @@ export default function DecryptComponent({ account }: Props) {
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
         await decryptAccountBalance(dispatch, prfKey, account);
-        await loadAccounts(dispatch);
         await decryptTransactions(transactions, prfKey, account);
-        return loadTransactions(account, viewingShielded, dispatch);
+        await loadTransactions(account, viewingShielded, dispatch);
+        return loadAccounts(dispatch);
     }
 
     return <LedgerComponent ledgerCall={ledgerCall} />;

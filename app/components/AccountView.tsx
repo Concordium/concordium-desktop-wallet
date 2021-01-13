@@ -23,7 +23,7 @@ export default function AccountView() {
     }
     return (
         <div className={styles.halfPage}>
-            <AccountBalanceView account={account} accountInfo={accountInfo} />
+            <AccountBalanceView />
             <span className={styles.accountActionsSpan}>
                 <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
                     <button

@@ -3,15 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import {
     loadAccounts,
-    loadAccountsInfos,
     accountsSelector,
     chooseAccount,
     chosenAccountIndexSelector,
     accountsInfoSelector,
 } from '../features/AccountSlice';
 import { setViewingShielded } from '../features/TransactionSlice';
-
-import { loadIdentities, identitiesSelector } from '../features/IdentitySlice';
 import styles from './Accounts.css';
 import AccountListElement from './AccountListElement';
 import routes from '../constants/routes.json';
@@ -21,23 +18,10 @@ export default function AccountList() {
     const accounts = useSelector(accountsSelector);
     const accountsInfo = useSelector(accountsInfoSelector);
     const chosenIndex = useSelector(chosenAccountIndexSelector);
-    const identities = useSelector(identitiesSelector);
 
     useEffect(() => {
-        loadIdentities(dispatch);
+        loadAccounts(dispatch);
     }, [dispatch]);
-
-    useEffect(() => {
-        if (identities) {
-            loadAccounts(dispatch, identities);
-        }
-    }, [identities, dispatch]);
-
-    useEffect(() => {
-        if (accounts) {
-            loadAccountsInfos(accounts, dispatch);
-        }
-    }, [accounts, dispatch]);
 
     if (!accounts || !accountsInfo) {
         return <div />;

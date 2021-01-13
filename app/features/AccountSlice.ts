@@ -30,7 +30,22 @@ const accountsSlice = createSlice({
             state.chosenAccount = state.accounts[input.payload];
         },
         updateAccounts: (state, input) => {
+            const { chosenAccount } = state;
             state.accounts = input.payload;
+            if (chosenAccount) {
+                const matchingAccounts = input.payload.filter(
+                    (acc) => acc.address === chosenAccount.address
+                );
+                if (matchingAccounts.length === 1) {
+                    [state.chosenAccount] = matchingAccounts;
+                    state.chosenAccountIndex = input.payload.indexOf(
+                        matchingAccounts[0]
+                    );
+                } else {
+                    state.chosenAccount = undefined;
+                    state.chosenAccountIndex = undefined;
+                }
+            }
         },
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
@@ -60,22 +75,61 @@ export const {
     setAccountInfos,
 } = accountsSlice.actions;
 
-export async function loadAccounts(dispatch: Dispatch, identities = undefined) {
-    const accounts: Account[] = await getAllAccounts();
-    if (identities) {
-        await Promise.all(
-            accounts.map(async (account) => {
-                const matchingIds = identities.filter(
-                    (identity) =>
-                        identity.id === parseInt(account.identityId, 10)
-                );
-                if (matchingIds.length > 0) {
-                    account.identityName = matchingIds[0].name;
-                }
-            })
-        );
+function isValidAddress(address): boolean {
+    // TODO: Check length
+    try {
+        if (!address) {
+            return false;
+        }
+        const regex = /[0-9A-Fa-f]{6}/g;
+        regex.test(address);
+    } catch (e) {
+        return false;
     }
+    return true;
+}
+
+export async function loadAccountsInfos(accounts, dispatch) {
+    const map = {};
+    const consenusInfo = JSON.parse((await getConsensusInfo()).getValue());
+    const blockHash = consenusInfo.lastFinalizedBlock;
+    await Promise.all(
+        accounts
+            .filter((account) => isValidAddress(account.address))
+            .map(async (account) => {
+                const response = await getAccountInfo(
+                    account.address,
+                    blockHash
+                );
+                const accountInfo = JSON.parse(response.getValue());
+                const incomingAmounts = JSON.stringify(
+                    accountInfo.accountEncryptedAmount.incomingAmounts
+                );
+                const selfAmounts =
+                    accountInfo.accountEncryptedAmount.selfAmount;
+                if (
+                    !(
+                        account.incomingAmounts === incomingAmounts &&
+                        account.selfAmounts === selfAmounts
+                    )
+                ) {
+                    await updateAccount(account.name, {
+                        incomingAmounts,
+                        selfAmounts,
+                        allDecrypted: false,
+                    });
+                }
+                map[account.address] = accountInfo;
+            })
+    );
+    return dispatch(setAccountInfos(map));
+}
+
+export async function loadAccounts(dispatch: Dispatch) {
+    const accounts: Account[] = await getAllAccounts();
+    await loadAccountsInfos(accounts, dispatch);
     dispatch(updateAccounts(accounts.reverse()));
+    return true;
 }
 
 export async function addPendingAccount(
@@ -142,56 +196,6 @@ export async function getNextAccountNumber(identityId) {
         0
     );
     return currentNumber + 1;
-}
-
-function isValidAddress(address): boolean {
-    // TODO: Check length
-    try {
-        if (!address) {
-            return false;
-        }
-        const regex = /[0-9A-Fa-f]{6}/g;
-        regex.test(address);
-    } catch (e) {
-        return false;
-    }
-    return true;
-}
-
-export async function loadAccountsInfos(accounts, dispatch) {
-    const map = {};
-    const consenusInfo = JSON.parse((await getConsensusInfo()).getValue());
-    const blockHash = consenusInfo.lastFinalizedBlock;
-    await Promise.all(
-        accounts
-            .filter((account) => isValidAddress(account.address))
-            .map(async (account) => {
-                const response = await getAccountInfo(
-                    account.address,
-                    blockHash
-                );
-                const accountInfo = JSON.parse(response.getValue());
-                const incomingAmounts = JSON.stringify(
-                    accountInfo.accountEncryptedAmount.incomingAmounts
-                );
-                const selfAmounts =
-                    accountInfo.accountEncryptedAmount.selfAmount;
-                if (
-                    !(
-                        account.incomingAmounts === incomingAmounts &&
-                        account.selfAmounts === selfAmounts
-                    )
-                ) {
-                    updateAccount(account.name, {
-                        incomingAmounts,
-                        selfAmounts,
-                        allDecrypted: false,
-                    });
-                }
-                map[account.address] = accountInfo;
-            })
-    );
-    dispatch(setAccountInfos(map));
 }
 
 export async function decryptAccountBalance(dispatch, prfKey, account) {

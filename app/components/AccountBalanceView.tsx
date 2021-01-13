@@ -2,22 +2,23 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './Accounts.css';
 import { fromMicroUnits } from '../utils/transactionHelpers';
-import { Account, AccountInfo } from '../utils/types';
 import {
     setViewingShielded,
     viewingShieldedSelector,
 } from '../features/TransactionSlice';
+import {
+    chosenAccountSelector,
+    chosenAccountInfoSelector,
+} from '../features/AccountSlice';
 
-interface Props {
-    account: Account;
-    accountInfo: AccountInfo;
-}
-
-export default function AccountBalanceView({ account, accountInfo }: Props) {
+export default function AccountBalanceView() {
     const dispatch = useDispatch();
+    const account = useSelector(chosenAccountSelector);
+    const accountInfo = useSelector(chosenAccountInfoSelector);
+
     const viewingShielded = useSelector(viewingShieldedSelector);
 
-    if (!accountInfo) {
+    if (!account || !accountInfo) {
         return <div className={styles.accountBalanceView} />;
     }
 

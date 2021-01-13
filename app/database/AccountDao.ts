@@ -1,9 +1,27 @@
 import { Account } from '../utils/types';
 import knex from './knex';
-import { accountsTable } from '../constants/databaseNames.json';
+import {
+    accountsTable,
+    identitiesTable,
+} from '../constants/databaseNames.json';
 
+/**
+ * Returns all stored accounts
+ *  - Attaches the identityName unto the account object.
+ */
 export async function getAllAccounts(): Promise<Account[]> {
-    return (await knex()).select().table(accountsTable);
+    return (await knex())
+        .table(accountsTable)
+        .join(
+            identitiesTable,
+            `${accountsTable}.identityId`,
+            '=',
+            `${identitiesTable}.id`
+        )
+        .select(
+            `${accountsTable}.*`,
+            `${identitiesTable}.name as identityName`
+        );
 }
 
 export async function insertAccount(account: Account) {
