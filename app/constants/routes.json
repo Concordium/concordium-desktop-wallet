@@ -6,5 +6,6 @@
     "ADDRESSBOOK": "/addressbook",
     "EXPORTIMPORT": "/export_import",
     "MULTISIGTRANSACTIONS": "/MultiSignatureTransaction",
-    "SETTINGS": "/settings"
+    "SETTINGS": "/settings",
+    "MULTISIGTRANSACTIONS_PROPOSAL": "/MultiSignatureTransaction/create/:type"
 }

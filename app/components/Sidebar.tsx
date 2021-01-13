@@ -27,7 +27,7 @@ export default function Routes() {
                     to={member.route}
                     key={member.route}
                     className={`${styles.sidebarListElement} ${
-                        member.route === location.pathname
+                        location.pathname.startsWith(member.route)
                             ? styles.sidebarSelectedListElement
                             : null
                     }`}
