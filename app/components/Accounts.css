@@ -120,3 +120,8 @@
     border-radius: 10px;
     background-color: white;
 }
+
+.accountActionButtonHighlighted {
+    border-width: 2px;
+    border-color: blue;
+}

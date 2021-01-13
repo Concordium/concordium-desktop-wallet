@@ -43,12 +43,22 @@ export default function TransferHistory(account) {
                 </button>
                 <button
                     type="button"
+                    className={
+                        location === locations.listTransactions
+                            ? styles.TransactionListHighligtedButton
+                            : ''
+                    }
                     onClick={() => setLocation(locations.listTransactions)}
                 >
                     Transfers
                 </button>
                 <button
                     type="button"
+                    className={
+                        location === locations.viewIdentityData
+                            ? styles.TransactionListHighligtedButton
+                            : ''
+                    }
                     onClick={() => setLocation(locations.viewIdentityData)}
                 >
                     Identity Data

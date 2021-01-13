@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Link, Switch, Route } from 'react-router-dom';
+import { Link, Switch, Route, useLocation } from 'react-router-dom';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
@@ -16,6 +16,7 @@ import DecryptComponent from './DecryptComponent';
 export default function AccountView() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
+    const location = useLocation();
 
     if (account === undefined) {
         return <div />;
@@ -26,7 +27,13 @@ export default function AccountView() {
             <span className={styles.accountActionsSpan}>
                 <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
                     <button
-                        className={styles.accountActionButton}
+                        className={`${styles.accountActionButton} ${
+                            location.pathname.startsWith(
+                                routes.ACCOUNTS_SIMPLETRANSFER
+                            )
+                                ? styles.accountActionButtonHighlighted
+                                : ''
+                        }`}
                         type="button"
                     >
                         Send
@@ -34,7 +41,13 @@ export default function AccountView() {
                 </Link>
                 <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
                     <button
-                        className={styles.accountActionButton}
+                        className={`${styles.accountActionButton} ${
+                            location.pathname.startsWith(
+                                routes.ACCOUNTS_SIMPLETRANSFER
+                            )
+                                ? styles.accountActionButtonHighlighted
+                                : ''
+                        }`}
                         type="button"
                     >
                         Shield
@@ -42,7 +55,11 @@ export default function AccountView() {
                 </Link>
                 <Link to={routes.ACCOUNTS_MORE}>
                     <button
-                        className={styles.accountActionButton}
+                        className={`${styles.accountActionButton} ${
+                            location.pathname.startsWith(routes.ACCOUNTS_MORE)
+                                ? styles.accountActionButtonHighlighted
+                                : ''
+                        }`}
                         type="button"
                     >
                         More
