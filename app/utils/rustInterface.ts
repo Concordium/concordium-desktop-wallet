@@ -8,7 +8,7 @@ import workerCommands from '../constants/workerCommands.json';
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
 
-async function getFromLedger(ledger, displayMessage, identity, account) {
+async function getSecretsFromLedger(ledger, displayMessage, identity) {
     displayMessage('Please confirm exporting prf key on device');
     const prfKeySeed = await ledger.getPrfKey(identity);
 
@@ -18,18 +18,28 @@ async function getFromLedger(ledger, displayMessage, identity, account) {
     displayMessage('Please wait');
     const prfKey = prfKeySeed.toString('hex');
     const idCredSec = idCredSecSeed.toString('hex');
+    return { prfKey, idCredSec };
+}
 
+async function getPublicKeyFromLedger(
+    ledger,
+    displayMessage,
+    identity,
+    account
+) {
     displayMessage('Please confirm exporting public key on device');
-    const publicKey = await ledger.getPublicKey([
-        0,
-        0,
-        identity,
-        2,
-        account,
-        0,
-    ]);
+    return ledger.getPublicKey([0, 0, identity, 2, account, 0]);
+}
 
-    return { prfKey, idCredSec, publicKey };
+function prependKeyType(keys) {
+    return keys.map((key) => {
+        if (key.schemeId === 'Ed25519') {
+            key.verifyKey = `00${key.verifyKey}`;
+        } else {
+            throw new Error('Unknown key type');
+        }
+        return key;
+    });
 }
 
 export async function createIdentityRequestObjectLedger(
@@ -42,12 +52,18 @@ export async function createIdentityRequestObjectLedger(
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
 
-    const { prfKey, idCredSec, publicKey } = await getFromLedger(
+    const { prfKey, idCredSec } = await getSecretsFromLedger(
+        ledger,
+        displayMessage,
+        identity
+    );
+    const publicKey = await getPublicKeyFromLedger(
         ledger,
         displayMessage,
         identity,
         0
     );
+
     displayMessage('Please wait');
 
     const context = {
@@ -73,7 +89,8 @@ export async function createIdentityRequestObjectLedger(
     });
 
     const pubInfoForIp: PublicInformationForIP = JSON.parse(pubInfoForIpString);
-    pubInfoForIp.publicKeys.keys[0].verifyKey = `00${pubInfoForIp.publicKeys.keys[0].verifyKey}`; // TODO: attach schemeId properly.
+
+    prependKeyType(pubInfoForIp.publicKeys.keys);
 
     const path = {
         identityIndex: identity,
@@ -115,10 +132,15 @@ export async function createCredential(
     attributes,
     displayMessage,
     ledger
-) {
+): CredentialDeploymentDetails {
     const identityProvider = JSON.parse(identity.identityProvider);
 
-    const { prfKey, idCredSec, publicKey } = await getFromLedger(
+    const { prfKey, idCredSec } = await getSecretsFromLedger(
+        ledger,
+        displayMessage,
+        identity.id
+    );
+    const publicKey = await getPublicKeyFromLedger(
         ledger,
         displayMessage,
         identity.id,
@@ -152,7 +174,6 @@ export async function createCredential(
         input: JSON.stringify(credentialInput),
     });
 
-    console.log(unsignedCredentialDeploymentInfoString);
     const unsignedCredentialDeploymentInfo = JSON.parse(
         unsignedCredentialDeploymentInfoString
     );
@@ -170,11 +191,17 @@ Challenge: ${unsignedCredentialDeploymentInfo.accountOwnershipChallenge}
     );
     displayMessage('Please wait');
 
-    const credentialDeploymentInfo = await worker.postMessage({
+    const credentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createCredential,
         signature: challengeSignature.toString('hex'),
         unsignedInfo: unsignedCredentialDeploymentInfoString,
     });
-    console.log(credentialDeploymentInfo);
-    return JSON.parse(credentialDeploymentInfo);
+    const output = JSON.parse(credentialDeploymentInfoString);
+
+    return {
+        credentialDeploymentInfoHex: output.hex,
+        accountAddress: output.address,
+        credentialDeploymentInfo: output.credInfo,
+        transactionId: output.hash,
+    };
 }

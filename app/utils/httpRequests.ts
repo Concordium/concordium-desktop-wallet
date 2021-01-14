@@ -1,12 +1,17 @@
 import * as axios from 'axios';
 import * as http from 'http';
+import urls from '../constants/urls.json';
 
 const walletProxy = axios.create({
-    baseURL: 'http://wallet-proxy.eu.staging.concordium.com/',
+    baseURL: urls.walletProxy,
 });
 
-function getPromise(urlString, params) {
-    console.log(urlString);
+/**
+ * This performs a http get Request, returning a Promise on the response.
+ * @param {string} urlString: the url at which to perform the getRequest
+ * @param params: Additional URL search parameters to add to the request.
+ */
+function getPromise(urlString: string, params) {
     const url = new URL(urlString);
     const searchParams = new URLSearchParams(params);
     url.searchParams.forEach((value, name) => searchParams.append(name, value));
@@ -15,7 +20,6 @@ function getPromise(urlString, params) {
         port: url.port,
         path: `${url.pathname}?${searchParams.toString()}`,
     };
-    console.log(options);
     return new Promise((resolve) => {
         http.get(options, function (res) {
             resolve(res);
@@ -23,6 +27,9 @@ function getPromise(urlString, params) {
     });
 }
 
+/**
+ * Given a http response, extract its body.
+ */
 function getResponseBody(response) {
     return new Promise((resolve) => {
         let data = '';
@@ -44,14 +51,10 @@ export async function getGlobal() {
     return response.data;
 }
 
-export async function getHTMLform(location) {
-    const response = await getPromise(location);
-    console.log(response);
-    const data = await getResponseBody(response);
-    console.log(data);
-    return data;
-}
-
+/**
+ * This function will perform an IdObjectRequest, and Intercept the redirect,
+ * returning the location, that the Identity Provider attempted to redirect to.
+ */
 export async function performIdObjectRequest(
     url,
     redirectUri,
@@ -67,28 +70,29 @@ export async function performIdObjectRequest(
     const response = await getPromise(url, parameters);
     if (response.statusCode === 302) {
         const loc = response.headers.location;
-        console.log(loc);
         return loc.substring(loc.indexOf('=') + 1);
     }
     const message = await getResponseBody(response);
     throw new Error(`Request failed: ${message}`);
 }
 
-async function pollIdObject(location) {
-    const response = await getPromise(location);
-    console.log(response);
-    const data = await getResponseBody(response);
-    console.log(data);
-    return JSON.parse(data);
-}
-
+/**
+ * Async timeout
+ * time: timeout length, in milliseconds.
+ */
 export async function sleep(time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
+/**
+ * This function should poll the given location, until the location returns an IdObject
+ * TODO: Handle the service being unavailable
+ */
 export async function getIdObject(location) {
     while (true) {
-        const data = await pollIdObject(location);
+        const response = await getPromise(location);
+        const bodyJSON = await getResponseBody(response);
+        const data = JSON.parse(bodyJSON);
         switch (data.status) {
             case 'done':
                 return data.token;

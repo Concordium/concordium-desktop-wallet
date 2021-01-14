@@ -17,21 +17,20 @@ export default function AccountCreationFinal({
     const accounts = useSelector(accountsSelector);
 
     if (accounts === undefined) {
-        return <div />;
+        return null;
     }
 
-    const account = accounts.filter((acc) => acc.name === accountName)[0];
+    const account = accounts.find((acc) => acc.name === accountName);
 
     return (
         <div>
-            <h1>header</h1>
+            <h1>Your account has been submitted</h1>
             <p>
                 That was it! Now you just have to wait for your account to be
-                finalized on the block-chain
+                finalized on the block-chain.
             </p>
             <AccountListElement
                 account={account}
-                onClick={() => {}}
                 highlighted={false}
                 index={0}
             />

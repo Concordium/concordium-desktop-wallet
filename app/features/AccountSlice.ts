@@ -9,6 +9,7 @@ import {
 } from '../database/AccountDao';
 import { getTransactionStatus } from '../utils/client';
 import { sleep } from '../utils/httpRequests';
+import { CredentialDeploymentInformation, AccountStatus } from '../utils/types';
 
 const accountsSlice = createSlice({
     name: 'accounts',
@@ -47,13 +48,17 @@ export async function addPendingAccount(
     dispatch: Dispatch,
     accountName: string,
     identityId: number,
-    accountNumber: number
+    accountNumber: number,
+    accountAddress: string,
+    credentialDeploymentInfo: CredentialDeploymentInformation
 ) {
-    const account = {
+    const account: Account = {
         name: accountName,
         identityId,
-        status: 'pending',
+        status: AccountStatus.pending,
         accountNumber,
+        address: accountAddress,
+        credential: JSON.stringify(credentialDeploymentInfo),
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -66,11 +71,11 @@ export async function confirmInitialAccount(
     credential
 ) {
     await updateAccount(accountName, {
-        status: 'confirmed',
+        status: AccountStatus.confirmed,
         address: accountAddress,
         credential,
     });
-    return await loadAccounts(dispatch);
+    return loadAccounts(dispatch);
 }
 
 export async function confirmAccount(dispatch, accountName, transactionId) {
@@ -80,7 +85,7 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
         console.log(data);
         if (data === 'null') {
             await updateAccount(accountName, {
-                status: 'rejected',
+                status: AccountStatus.rejected,
             });
             return loadAccounts(dispatch);
         }
@@ -88,7 +93,7 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
         const { status } = dataObject;
         if (status === 'finalized') {
             await updateAccount(accountName, {
-                status: 'confirmed',
+                status: AccountStatus.confirmed,
             });
             return loadAccounts(dispatch);
         }

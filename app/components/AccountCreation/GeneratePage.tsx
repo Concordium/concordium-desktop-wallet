@@ -5,7 +5,7 @@ import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 import routes from '../../constants/routes.json';
 import { createCredential as createCredentialRust } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { Identity } from '../../utils/types';
+import { Identity, CredentialDeploymentDetails } from '../../utils/types';
 import { sendTransaction } from '../../utils/client';
 import {
     addPendingAccount,
@@ -25,7 +25,7 @@ async function createCredential(
     setMessage('Please Wait');
 
     const global = (await getGlobal()).value;
-    const output = await createCredentialRust(
+    return createCredentialRust(
         identity,
         accountNumber,
         global,
@@ -33,35 +33,34 @@ async function createCredential(
         setMessage,
         ledger
     );
-    console.log(output);
-    return {
-        credentialHex: output.hex,
-        accountAddress: output.address,
-        credential: output.credInfo,
-        transactionId: output.hash,
-    };
 }
 
 async function createAccount(identity, attributes, setMessage) {
     const accountNumber = await getNextAccountNumber(identity.id);
     const {
-        credential,
-        credentialHex,
+        credentialDeploymentInfoHex,
+        credentialDeploymentInfo,
         accountAddress,
         transactionId,
-    } = await createCredential(identity, accountNumber, attributes, setMessage);
+    }: CredentialDeploymentDetails = await createCredential(
+        identity,
+        accountNumber,
+        attributes,
+        setMessage
+    );
 
-    const payload = Buffer.from(credentialHex, 'hex');
-    const response = await sendTransaction(payload);
-    console.log(response.getValue());
     await addPendingAccount(
         dispatch,
         accountName,
         identity.id,
         accNumber,
         accountAddress,
-        credential
+        credentialDeploymentInfo
     );
+
+    const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
+    const response = await sendTransaction(payload);
+    // TODO Handle the case where we get a negative response from the Node
     return transactionId;
 }
 
@@ -80,16 +79,14 @@ export default function AccountCreationGenerate({
     const [text, setText] = useState();
 
     useEffect(() => {
-        if (identity !== undefined) {
-            createAccount(identity, attributes, setText)
-                .then((transactionId) => {
-                    confirmAccount(dispatch, accountName, transactionId);
-                    return dispatch(push(routes.ACCOUNTCREATION_FINAL));
-                })
-                .catch((e) =>
-                    console.log(`creating account failed: ${e.stack} `)
-                );
-        }
+        createAccount(identity, attributes, setText)
+            .then((transactionId) => {
+                confirmAccount(dispatch, accountName, transactionId);
+                return dispatch(push(routes.ACCOUNTCREATION_FINAL));
+            })
+            .catch(
+                (e) => console.log(`creating account failed: ${e.stack} `) // TODO: handle failure properly
+            );
     }, [identity, dispatch, accountName, setText, attributes]);
 
     return (

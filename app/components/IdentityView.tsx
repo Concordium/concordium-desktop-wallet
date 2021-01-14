@@ -4,7 +4,7 @@ import {
     identitiesSelector,
     chosenIdentitySelector,
 } from '../features/IdentitySlice';
-import { Identity, IdentityObject } from '../utils/types';
+import { Identity, IdentityObject, IdentityStatus } from '../utils/types';
 import styles from './Identity.css';
 
 export default function IdentityView() {
@@ -12,12 +12,12 @@ export default function IdentityView() {
     const chosenIndex = useSelector(chosenIdentitySelector);
 
     if (identities === undefined || chosenIndex === undefined) {
-        return <div />;
+        return null;
     }
 
     const identity: Identity = identities[chosenIndex];
 
-    if (identity.status !== 'confirmed') {
+    if (identity.status !== IdentityStatus.confimed) {
         return (
             <div className={styles.halfPage}>
                 <h1 className={styles.name}>{identity.name}</h1>

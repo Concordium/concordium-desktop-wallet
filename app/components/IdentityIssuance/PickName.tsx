@@ -9,6 +9,7 @@ interface Props {
     setAccountName: (name: string) => void;
 }
 
+// TODO: add Validation to names
 export default function IdentityIssuancePickName({
     setIdentityName,
     setAccountName,
@@ -26,7 +27,13 @@ export default function IdentityIssuancePickName({
     return (
         <div>
             <h2>The initial account and identity names</h2>
-            <p>bla bla</p>
+            <p>
+                The first step of creating a new identity is decide what to name
+                it. Besides naming the identity, you must also pick a name for
+                the initial account of the identity. After choosing your names,
+                you can continue to select an identity provider.
+            </p>
+            <p>What would you like to name your identity?</p>
             <span className={styles.modalElement}>
                 <input
                     name="name"
@@ -37,6 +44,7 @@ export default function IdentityIssuancePickName({
                     data-tid="hashInput"
                 />
             </span>
+            <p>What would you like to name your initial account?</p>
             <span className={styles.modalElement}>
                 <input
                     name="address"
@@ -53,7 +61,7 @@ export default function IdentityIssuancePickName({
                     submit();
                 }}
             >
-                Let’s continue
+                Continue to identity providers
             </button>
         </div>
     );

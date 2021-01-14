@@ -4,12 +4,12 @@ import { Account } from '../utils/types';
 
 interface Props {
     account: Account;
-    onClick: () => void;
-    highlighted: boolean;
+    onClick?: () => void;
+    highlighted?: boolean;
     index: number;
 }
 
-export default function AccountListElement({
+function AccountListElement({
     account,
     onClick,
     highlighted,
@@ -29,3 +29,10 @@ export default function AccountListElement({
         </div>
     );
 }
+
+AccountListElement.defaultProps = {
+    onClick: undefined,
+    highlighted: false,
+};
+
+export default AccountListElement;

@@ -183,3 +183,24 @@ export interface SettingGroup {
     id: number;
     name: string;
 }
+
+// Contains an CredentialDeployment, and all the necessary extra details to complete the deployment
+// TODO: Find better name
+export interface CredentialDeploymentDetails {
+    credentialDeploymentInfo: CredentialDeploymentInformation;
+    credentialDeploymentInfoHex: Hex;
+    accountAddress: Hex;
+    transactionId: Hex;
+}
+
+export enum IdentityStatus {
+    confirmed,
+    rejected,
+    pending,
+}
+
+export enum AccountStatus {
+    confirmed,
+    rejected,
+    pending,
+}

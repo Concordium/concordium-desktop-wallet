@@ -16,9 +16,9 @@ export default function SettingsView() {
     const chosenIndex = useSelector(chosenIndexSelector);
 
     if (chosenIndex === undefined) {
-        return <div />;
+        return null;
     }
-    
+
     return (
         <div className={styles.halfPage}>
             {settings[chosenIndex].settings.map((childSetting: Setting, i) => (
@@ -31,7 +31,7 @@ export default function SettingsView() {
                         // editing they support.
                         return updateSettingEntry(dispatch, {
                             ...childSetting,
-                            value: (childSetting.value === 'false').toString()
+                            value: (childSetting.value === 'false').toString(),
                         });
                     }}
                     key={childSetting.name}

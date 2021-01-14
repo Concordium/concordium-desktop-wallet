@@ -16,6 +16,10 @@ export default function AddressBookElementView() {
     const addressBook = useSelector(addressBookSelector);
     const chosenEntry = addressBook[chosenIndex];
 
+    if (chosenIndex >= addressBook.length) {
+        return null;
+    }
+
     function submitAddress(name, address, note) {
         const entry = {
             name,
@@ -43,10 +47,6 @@ export default function AddressBookElementView() {
     };
 
     const modal = Modal(modalButton, modalBody);
-
-    if (chosenIndex >= addressBook.length) {
-        return <div />;
-    }
 
     return (
         <div className={styles.chosenAccount}>

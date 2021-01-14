@@ -6,7 +6,7 @@ import {
     insertIdentity,
     updateIdentity,
 } from '../database/IdentityDao';
-import { Identity } from '../utils/types';
+import { Identity, IdentityStatus } from '../utils/types';
 
 const identitySlice = createSlice({
     name: 'identities',
@@ -46,7 +46,7 @@ export async function addPendingIdentity(
 ) {
     const identity = {
         name: identityName,
-        status: 'pending',
+        status: IdentityStatus.pending,
         codeUri,
         identityProvider: JSON.stringify(identityProvider),
         randomness,
@@ -61,14 +61,14 @@ export async function confirmIdentity(
     identityObject
 ) {
     await updateIdentity(identityName, {
-        status: 'confirmed',
+        status: IdentityStatus.confirmed,
         identityObject: JSON.stringify(identityObject),
     });
     await loadIdentities(dispatch);
 }
 
 export async function rejectIdentity(dispatch: Dispatch, identityName: string) {
-    await updateIdentity(identityName, { status: 'rejected' });
+    await updateIdentity(identityName, { status: IdentityStatus.rejected });
     await loadIdentities(dispatch);
 }
 

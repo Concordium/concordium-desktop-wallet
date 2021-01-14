@@ -4,12 +4,12 @@ import { Identity } from '../utils/types';
 
 interface Props {
     identity: Identity;
-    onClick: () => void;
-    highlighted: boolean;
+    onClick?: () => void;
+    highlighted?: boolean;
     index: number;
 }
 
-export default function IdentityListElement({
+function IdentityListElement({
     identity,
     onClick,
     highlighted,
@@ -29,3 +29,10 @@ export default function IdentityListElement({
         </div>
     );
 }
+
+IdentityListElement.defaultProps = {
+    onClick: undefined,
+    highlighted: false,
+};
+
+export default IdentityListElement;

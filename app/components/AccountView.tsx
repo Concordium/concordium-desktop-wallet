@@ -7,7 +7,7 @@ export default function AccountView() {
     const account = useSelector(chosenAccountSelector);
 
     if (account === undefined) {
-        return <div />;
+        return null;
     }
 
     return (

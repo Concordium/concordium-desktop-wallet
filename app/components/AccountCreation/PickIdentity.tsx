@@ -13,7 +13,7 @@ interface Props {
     setIdentity: (identity: Identity) => void;
 }
 
-export default function AccountCreationChooseIdentity({
+export default function AccountCreationPickIdentity({
     setIdentity,
 }: Props): JSX.Element {
     const [chosenIndex, chooseIdentity] = useState(0);
@@ -27,7 +27,7 @@ export default function AccountCreationChooseIdentity({
     }, [dispatch, identities]);
 
     if (!identities) {
-        return <div />;
+        return null;
     }
 
     function submit(route) {
@@ -37,8 +37,15 @@ export default function AccountCreationChooseIdentity({
 
     return (
         <div>
-            <h2>Choose Identity</h2>
-            <p>bla bla</p>
+            <h2>Choose an identity</h2>
+            <p>
+                The next step is to choose what identity to use, for creating
+                your new account. Besides choosing your identity, you must
+                decide whether to reveal any attributes on the account, and how
+                many. Besides deciding on an identity, you can decide to reveal
+                a number of attributes on your account, though this is not
+                necessary. Which identity do you want to use?
+            </p>
             {identities.map((identity, i) => (
                 <IdentityListElement
                     identity={identity}
@@ -49,16 +56,16 @@ export default function AccountCreationChooseIdentity({
                 />
             ))}
             <button
-                type="submit"
+                type="button"
                 disabled={identities[chosenIndex].identityObject == null}
                 onClick={() => {
-                    submit(routes.ACCOUNTCREATION_PICK_ATTRIBUTES);
+                    submit(routes.ACCOUNTCREATION_PICKATTRIBUTES);
                 }}
             >
                 Choose attributes to reveal
             </button>
             <button
-                type="submit"
+                type="button"
                 onClick={() => {
                     submit(routes.ACCOUNTCREATION_GENERATE);
                 }}

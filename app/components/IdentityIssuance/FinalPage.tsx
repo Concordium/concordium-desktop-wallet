@@ -20,17 +20,21 @@ export default function IdentityIssuanceFinal(
     const accounts = useSelector(accountsSelector);
     const identities = useSelector(identitiesSelector);
 
-    const account = accounts.filter((acc) => acc.name === accountName)[0];
-    const identity = identities.filter((id) => id.name === identityName)[0];
+    const account = accounts.find((acc) => acc.name === accountName);
+    const identity = identities.find((id) => id.name === identityName);
 
     if (account === undefined || identity === undefined) {
-        return <div />;
+        return null;
     }
 
     return (
         <div>
-            <h1>header</h1>
-            <p>text</p>
+            <h1>Your request is being finished by the provider</h1>
+            <p>
+                While the identity provider is verifying your identity and
+                submitting your initial account, you can see an overview here.
+                Once finished by the provider, you can start using both.
+            </p>
             <div className={styles.flex}>
                 <IdentityListElement
                     identity={identity}
@@ -45,7 +49,7 @@ export default function IdentityIssuanceFinal(
                 />
             </div>
             <Link to={routes.IDENTITIES}>
-                <button type="button">Finished</button>
+                <button type="button">Finished!</button>
             </Link>
         </div>
     );

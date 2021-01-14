@@ -43,7 +43,7 @@ export default function IdentityIssuance(): JSX.Element {
                 render={() => (
                     <PickName
                         setIdentityName={setIdentityName}
-                        setInitialAccountName={setInitialAccountName}
+                        setAccountName={setInitialAccountName}
                     />
                 )}
             />

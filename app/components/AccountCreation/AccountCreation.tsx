@@ -16,7 +16,7 @@ export default function AccountCreation(): JSX.Element {
     return (
         <Switch>
             <Route
-                path={routes.ACCOUNTCREATION_CHOOSEIDENTITY}
+                path={routes.ACCOUNTCREATION_PICKIDENTITY}
                 render={() => <PickIdentity setIdentity={setIdentity} />}
             />
             <Route
@@ -34,7 +34,7 @@ export default function AccountCreation(): JSX.Element {
                 )}
             />
             <Route
-                path={routes.ACCOUNTCREATION_PICK_ATTRIBUTES}
+                path={routes.ACCOUNTCREATION_PICKATTRIBUTES}
                 render={() => (
                     <PickAttributes
                         identity={identity}
