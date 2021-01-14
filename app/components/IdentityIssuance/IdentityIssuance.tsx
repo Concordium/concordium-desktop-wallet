@@ -25,7 +25,7 @@ export default function IdentityIssuance(): JSX.Element {
                 render={() => (
                     <GeneratePage
                         identityName={identityName}
-                        initialAccountName={initialAccountName}
+                        accountName={initialAccountName}
                         provider={provider}
                     />
                 )}
@@ -35,7 +35,7 @@ export default function IdentityIssuance(): JSX.Element {
                 render={() => (
                     <FinalPage
                         identityName={identityName}
-                        initialAccountName={initialAccountName}
+                        accountName={initialAccountName}
                     />
                 )}
             />
@@ -43,7 +43,7 @@ export default function IdentityIssuance(): JSX.Element {
                 render={() => (
                     <PickName
                         setIdentityName={setIdentityName}
-                        setInitialAccountName={setInitialAccountName}
+                        setAccountName={setInitialAccountName}
                     />
                 )}
             />

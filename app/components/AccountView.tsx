@@ -19,7 +19,7 @@ export default function AccountView() {
     const location = useLocation();
 
     if (account === undefined) {
-        return <div />;
+        return null;
     }
     return (
         <div className={styles.halfPage}>

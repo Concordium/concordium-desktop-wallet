@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import routes from '../../constants/routes.json';
-import styles from './IdentyIssuance.css';
+import styles from './IdentityIssuance.css';
 import { getIdentityProviders } from '../../utils/httpRequests';
 import { IdentityProvider } from '../../utils/types';
 
@@ -19,7 +19,7 @@ export default function IdentityIssuanceChooseProvider({
     useEffect(() => {
         getIdentityProviders()
             .then((loadedProviders) => setProviders(loadedProviders.data))
-            .catch(console.log);
+            .catch(console.log); // TODO: Handle that we are unable to load providers.
     }, []);
 
     function onClick(provider) {
@@ -29,6 +29,13 @@ export default function IdentityIssuanceChooseProvider({
 
     return (
         <div>
+            <h2>The identity provider</h2>
+            <p>
+                The next step of creating a new identity is to choose an
+                identity provider. The list of providers will be expanding over
+                time, but the current providers can be seen below. You can check
+                out their privacy policies before selecting a provider.
+            </p>
             {providers.map((provider) => (
                 <div
                     className={styles.providerListElement}

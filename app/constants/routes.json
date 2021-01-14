@@ -20,8 +20,8 @@
     "IDENTITYISSUANCE_FINAL": "/identity/issuance/final",
     "ACCOUNTCREATION": "/account/create",
     "ACCOUNTCREATION_PICKNAME": "/account/create/pickName",
-    "ACCOUNTCREATION_CHOOSEIDENTITY": "/account/create/chooseIdentity",
-    "ACCOUNTCREATION_PICK_ATTRIBUTES": "/account/create/PickAttributes",
+    "ACCOUNTCREATION_PICKIDENTITY": "/account/create/chooseIdentity",
+    "ACCOUNTCREATION_PICKATTRIBUTES": "/account/create/PickAttributes",
     "ACCOUNTCREATION_GENERATE": "/account/create/generate",
     "ACCOUNTCREATION_FINAL": "/account/create/final"
 }

@@ -54,24 +54,42 @@ export interface ChosenAttributes {
     taxIdNo: string;
 }
 
+export enum IdentityStatus {
+    confirmed = 'confirmed',
+    rejected = 'rejected',
+    pending = 'pending',
+}
+
+/**
+ * This Interface models the structure of the identities stored in the database
+ */
 export interface Identity {
     id: number;
     name: string;
     identityObject: string;
-    status: string;
+    status: IdentityStatus;
     detail: string;
     codeUri: string;
     identityProvider: string;
     randomness: string;
 }
 
+export enum AccountStatus {
+    confirmed = 'confirmed',
+    rejected = 'rejected',
+    pending = 'pending',
+}
+
+/**
+ * This Interface models the structure of the accounts stored in the database
+ */
 export interface Account {
     accountNumber: number;
     name: string;
     address: Hex;
     identityId: number;
     identityName?: string;
-    status: string;
+    status: AccountStatus;
     credential?: string;
 }
 
@@ -149,6 +167,10 @@ export enum AttributeTag {
     taxIdNo = 12,
 }
 
+/**
+ * This interface models the PublicInformationForIp structure, which we get from the Crypto Dependency
+ * (And is used during Identity Issuance)
+ */
 export interface PublicInformationForIp {
     idCredPub: Hex;
     regId: RegId;
@@ -203,11 +225,31 @@ export interface ScheduleItem {
 
 export interface IdentityProviderMetaData {
     issuanceStart: string;
+    icon: string;
+}
+
+export interface Description {
+    name: string;
+    url: string;
+    description: string;
+}
+
+export interface IpInfo {
+    ipIdentity: number;
+    ipDescription: Description;
+    ipVerifyKey: Hex;
+    ipCdiVerifyKey: Hex;
+}
+
+export interface ArInfo {
+    arIdentity: number;
+    arDescription: Description;
+    arPublicKey: Hex;
 }
 
 export interface IdentityProvider {
-    ipInfo: any;
-    arsInfos: any;
+    ipInfo: IpInfo;
+    arsInfos: any; // objects with ArInfo fields (and numbers as field names)
     metadata: IdentityProviderMetaData;
 }
 
@@ -235,4 +277,13 @@ export interface AddressBookEntry {
     name: string;
     address: string;
     note: string;
+}
+
+// Contains an CredentialDeployment, and all the necessary extra details to complete the deployment
+// TODO: Find better name
+export interface CredentialDeploymentDetails {
+    credentialDeploymentInfo: CredentialDeploymentInformation;
+    credentialDeploymentInfoHex: Hex;
+    accountAddress: Hex;
+    transactionId: Hex;
 }

@@ -13,8 +13,8 @@ import {
     getConsensusInfo,
 } from '../utils/client';
 import { sleep, getGlobal } from '../utils/httpRequests';
-
 import { decryptAmounts } from '../utils/rustInterface';
+import { CredentialDeploymentInformation, AccountStatus } from '../utils/types';
 
 const accountsSlice = createSlice({
     name: 'accounts',
@@ -138,15 +138,15 @@ export async function addPendingAccount(
     identityId: number,
     accountNumber: number,
     accountAddress: string,
-    credential
+    credentialDeploymentInfo: CredentialDeploymentInformation
 ) {
-    const account = {
+    const account: Account = {
         name: accountName,
         identityId,
-        status: 'pending',
+        status: AccountStatus.pending,
         accountNumber,
         address: accountAddress,
-        credential: JSON.stringify(credential),
+        credential: JSON.stringify(credentialDeploymentInfo),
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -159,7 +159,7 @@ export async function confirmInitialAccount(
     credential
 ) {
     await updateAccount(accountName, {
-        status: 'confirmed',
+        status: AccountStatus.confirmed,
         address: accountAddress,
         credential,
     });
@@ -172,7 +172,7 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
         const data = response.getValue();
         if (data === 'null') {
             await updateAccount(accountName, {
-                status: 'rejected',
+                status: AccountStatus.rejected,
             });
             return loadAccounts(dispatch);
         }
@@ -180,7 +180,7 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
         const { status } = dataObject;
         if (status === 'finalized') {
             await updateAccount(accountName, {
-                status: 'confirmed',
+                status: AccountStatus.confirmed,
             });
             return loadAccounts(dispatch);
         }

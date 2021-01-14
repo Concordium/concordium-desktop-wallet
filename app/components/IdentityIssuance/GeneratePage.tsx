@@ -10,7 +10,7 @@ import {
     confirmInitialAccount,
 } from '../../features/AccountSlice';
 import routes from '../../constants/routes.json';
-import styles from './IdentyIssuance.css';
+import styles from './IdentityIssuance.css';
 import {
     getGlobal,
     performIdObjectRequest,
@@ -22,28 +22,28 @@ import { IdentityProvider } from '../../utils/types';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
-async function getProviderLocation(id, provider, setText) {
+async function createIdentityObjectRequest(
+    id: number,
+    provider: IdentityProvider,
+    setText: (text: string) => void
+) {
     const global = await getGlobal();
-    const data = await createIdentityRequestObjectLedger(
+    return createIdentityRequestObjectLedger(
         id,
         provider.ipInfo,
         provider.arsInfos,
         global,
         setText
     );
-    const location = await performIdObjectRequest(
-        provider.metadata.issuanceStart,
-        redirectUri,
-        data.idObjectRequest
-    );
-    return { location, randomness: data.randomness };
 }
 
-async function createIdentity(iframeRef) {
-    // TODO: rename this
+/**
+ *   This function puts a listener on the given iframeRef, and when it navigates (due to a redirect http response) it resolves,
+ *   and returns the location, which was redirected to.
+ */
+async function handleIdentityProviderLocation(iframeRef) {
     return new Promise((resolve) => {
         iframeRef.current.addEventListener('did-navigate', (e) => {
-            console.log(e);
             const loc = e.url;
             if (loc.includes(redirectUri)) {
                 resolve(loc.substring(loc.indexOf('=') + 1));
@@ -52,6 +52,11 @@ async function createIdentity(iframeRef) {
     });
 }
 
+/**
+ * Listens until, the identityProvider confirms the identity/initial account and returns the identiyObject.
+ * Then updates the identity/initial account in the database.
+ * If not confirmed, the identity will be marked as rejected.
+ */
 async function confirmIdentityAndInitialAccount(
     dispatch: Dispatch,
     identityName: string,
@@ -90,26 +95,33 @@ async function generateIdentity(
     try {
         setText('Please Wait');
         const identityId = await getNextId();
-        const { location, randomness } = await getProviderLocation(
-            identityId,
-            provider,
-            setText
+        const {
+            idObjectRequest,
+            randomness,
+        } = await createIdentityObjectRequest(identityId, provider, setText);
+        const IdentityProviderLocation = await performIdObjectRequest(
+            provider.metadata.issuanceStart,
+            redirectUri,
+            idObjectRequest
         );
-        setLocation(location);
-        const confirmationLocation = await createIdentity(iframeRef);
+        setLocation(IdentityProviderLocation);
+        const identityObjectLocation = await handleIdentityProviderLocation(
+            iframeRef
+        );
+        // TODO: Handle the case where the app closes before we are able to save pendingIdentity
         await addPendingIdentity(
             dispatch,
             identityName,
-            confirmationLocation,
+            identityObjectLocation,
             provider,
             randomness
         );
-        await addPendingAccount(dispatch, accountName, identityId, 0);
+        await addPendingAccount(dispatch, accountName, identityId, 0); // TODO: can we add the address already here?
         confirmIdentityAndInitialAccount(
             dispatch,
             identityName,
             accountName,
-            confirmationLocation
+            identityObjectLocation
         );
         dispatch(push(routes.IDENTITYISSUANCE_FINAL));
     } catch (e) {
@@ -134,17 +146,15 @@ export default function IdentityIssuanceGenerate({
     const iframeRef = useRef(null);
 
     useEffect(() => {
-        if (provider) {
-            generateIdentity(
-                setLocation,
-                setText,
-                dispatch,
-                provider,
-                accountName,
-                identityName,
-                iframeRef
-            );
-        }
+        generateIdentity(
+            setLocation,
+            setText,
+            dispatch,
+            provider,
+            accountName,
+            identityName,
+            iframeRef
+        );
     }, [
         provider,
         setLocation,

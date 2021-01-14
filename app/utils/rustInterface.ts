@@ -1,53 +1,56 @@
 import PromiseWorker from 'promise-worker';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 import RustWorker from 'worker-loader!./rust.worker';
-import { PublicInformationForIP } from './types';
+import { PublicInformationForIP, Identity, IpInfo } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
 
-async function getFromLedger(ledger, displayMessage, identity, account) {
+/**
+ * Returns the PrfKey and IdCredSec seeds for the given identity.
+ */
+async function getSecretsFromLedger(ledger, displayMessage, identity) {
     displayMessage('Please confirm exporting prf key on device');
     const prfKeySeed = await ledger.getPrfKey(identity);
 
     displayMessage('Please confirm exporting id cred sec on device');
     const idCredSecSeed = await ledger.getIdCredSec(identity);
 
-    displayMessage('Please wait');
     const prfKey = prfKeySeed.toString('hex');
     const idCredSec = idCredSecSeed.toString('hex');
-
-    displayMessage('Please confirm exporting public key on device');
-    const publicKey = await ledger.getPublicKey([
-        0,
-        0,
-        identity,
-        2,
-        account,
-        0,
-    ]);
-
-    return { prfKey, idCredSec, publicKey };
+    return { prfKey, idCredSec };
 }
 
+/**
+ *  This function creates an IdentityObjectRequest using the ledger, given the nesessary information and the identity number on the ledger.
+ * Returns the IdentityObjectRequest and the randomness used to generate it.
+ */
 export async function createIdentityRequestObjectLedger(
-    identity,
-    ipInfo,
+    identityNumber: number,
+    ipInfo: IpInfo,
     arsInfos,
     global,
-    displayMessage
+    displayMessage: (message: string) => void
 ) {
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
 
-    const { prfKey, idCredSec, publicKey } = await getFromLedger(
+    const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identity,
-        0
+        identityNumber
     );
+    displayMessage('Please confirm exporting public key on device');
+    const publicKey = await ledger.getPublicKey([
+        0,
+        0,
+        identityNumber,
+        2,
+        0,
+        0,
+    ]);
     displayMessage('Please wait');
 
     const context = {
@@ -73,10 +76,11 @@ export async function createIdentityRequestObjectLedger(
     });
 
     const pubInfoForIp: PublicInformationForIP = JSON.parse(pubInfoForIpString);
-    pubInfoForIp.publicKeys.keys[0].verifyKey = `00${pubInfoForIp.publicKeys.keys[0].verifyKey}`; // TODO: attach schemeId properly.
+
+    prependKeyType(pubInfoForIp.publicKeys.keys);
 
     const path = {
-        identityIndex: identity,
+        identityIndex: identityNumber,
         accountIndex: 0,
         signatureIndex: 0,
     };
@@ -108,22 +112,35 @@ Threshold: ${pubInfoForIp.publicKeys.threshold}
     };
 }
 
+/**
+ *  This function creates a CredentialDeploymentInfo using the ledger, given the nesessary information and the account number.
+ *  Returns a CredentialDeploymentDetails object, which contains the CredentialDeploymentInfo,
+ *  and it's hex, and it's hash (transactionId), and the account address.
+ */
 export async function createCredential(
-    identity,
-    accountNumber,
+    identity: Identity,
+    accountNumber: number,
     global,
-    attributes,
+    attributes: string[],
     displayMessage,
-    ledger
-) {
+    ledger: ConcordiumLedgerClient
+): Promise<CredentialDeploymentDetails> {
     const identityProvider = JSON.parse(identity.identityProvider);
 
-    const { prfKey, idCredSec, publicKey } = await getFromLedger(
+    const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identity.id,
-        accountNumber
+        identity.id
     );
+    displayMessage('Please confirm exporting public key on device');
+    const publicKey = await ledger.getPublicKey([
+        0,
+        0,
+        identity.id,
+        2,
+        accountNumber,
+        0,
+    ]);
     displayMessage('Please wait');
 
     const credentialInput = {
@@ -152,7 +169,6 @@ export async function createCredential(
         input: JSON.stringify(credentialInput),
     });
 
-    console.log(unsignedCredentialDeploymentInfoString);
     const unsignedCredentialDeploymentInfo = JSON.parse(
         unsignedCredentialDeploymentInfoString
     );
@@ -170,13 +186,19 @@ Challenge: ${unsignedCredentialDeploymentInfo.accountOwnershipChallenge}
     );
     displayMessage('Please wait');
 
-    const credentialDeploymentInfo = await worker.postMessage({
+    const credentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createCredential,
         signature: challengeSignature.toString('hex'),
         unsignedInfo: unsignedCredentialDeploymentInfoString,
     });
-    console.log(credentialDeploymentInfo);
-    return JSON.parse(credentialDeploymentInfo);
+    const output = JSON.parse(credentialDeploymentInfoString);
+
+    return {
+        credentialDeploymentInfoHex: output.hex,
+        accountAddress: output.address,
+        credentialDeploymentInfo: output.credInfo,
+        transactionId: output.hash,
+    };
 }
 
 export async function decryptAmounts(

@@ -24,7 +24,7 @@ export default function AccountList() {
     }, [dispatch]);
 
     if (!accounts || !accountsInfo) {
-        return <div />;
+        return null;
     }
 
     return (

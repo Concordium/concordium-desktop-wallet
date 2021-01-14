@@ -16,7 +16,7 @@ export default function SettingsView() {
     const chosenIndex = useSelector(chosenIndexSelector);
 
     if (chosenIndex === undefined) {
-        return <div />;
+        return null;
     }
 
     return (

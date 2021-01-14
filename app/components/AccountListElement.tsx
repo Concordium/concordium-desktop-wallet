@@ -7,12 +7,12 @@ import SidedText from './SidedText';
 interface Props {
     account: Account;
     accountInfo: AccountInfo;
-    onClick: (shielded: boolean) => void;
-    highlighted: boolean;
+    onClick?: (shielded: boolean) => void;
+    highlighted?: boolean;
     index: number;
 }
 
-export default function AccountListElement({
+function AccountListElement({
     account,
     accountInfo,
     onClick,
@@ -70,3 +70,10 @@ export default function AccountListElement({
         </div>
     );
 }
+
+AccountListElement.defaultProps = {
+    onClick: undefined,
+    highlighted: false,
+};
+
+export default AccountListElement;
