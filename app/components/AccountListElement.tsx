@@ -72,7 +72,7 @@ function AccountListElement({
 }
 
 AccountListElement.defaultProps = {
-    onClick: undefined,
+    onClick: () => {},
     highlighted: false,
 };
 

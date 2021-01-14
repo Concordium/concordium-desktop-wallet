@@ -95,7 +95,11 @@ export async function loadAccountsInfos(accounts, dispatch) {
     const blockHash = consenusInfo.lastFinalizedBlock;
     await Promise.all(
         accounts
-            .filter((account) => isValidAddress(account.address))
+            .filter(
+                (account) =>
+                    isValidAddress(account.address) &&
+                    account.status === AccountStatus.confirmed
+            )
             .map(async (account) => {
                 const response = await getAccountInfo(
                     account.address,
