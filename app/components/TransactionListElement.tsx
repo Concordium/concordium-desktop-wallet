@@ -9,11 +9,11 @@ function getName(transaction) {
         case 'self':
             return 'toAddressName' in transaction
                 ? transaction.toAddressName
-                : transaction.toAddress;
+                : transaction.toAddress.slice(0, 6);
         case 'account':
             return 'fromAddressName' in transaction
                 ? transaction.fromAddressName
-                : transaction.fromAddress;
+                : transaction.fromAddress.slice(0, 6);
         default:
             return 'unknown';
     }
