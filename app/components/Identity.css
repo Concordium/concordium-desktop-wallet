@@ -3,21 +3,21 @@
 }
 
 .identityListElement {
-    border-radius: 5px;
-    border: 10 px;
     padding-top: 10px;
     padding-bottom: 10px;
-    margin-left: 50px;
-    margin-bottom: 10px;
     width: 80%;
-    background-color: oldlace;
+    text-align: center;
+    background-color: white;
     border-style: solid;
     border-color: black;
     color: black;
+    border-radius: 10px;
+    margin-bottom: 15px;
 }
 
-.identityListElement .name {
+.identityListElement h2 {
     text-align: center;
+    color: black;
 }
 
 .chosenIdentityListElement {
@@ -30,4 +30,12 @@
     display: inline-block;
     height: 100%;
     width: 40%;
+}
+
+.statusImage {
+    height: 30px;
+}
+
+.providerImage {
+    height: 30px;
 }

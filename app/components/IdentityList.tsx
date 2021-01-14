@@ -33,7 +33,7 @@ export default function IdentityList() {
                 <button type="button">x</button>
             </Link>
 
-            {identities.map((identity: Identity, i) => (
+            {identities.map((identity: Identity, i: number) => (
                 <IdentityListElement
                     identity={identity}
                     highlighted={identity === chosenIdentity}

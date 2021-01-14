@@ -1,9 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {
-    identitiesSelector,
-    chosenIdentitySelector,
-} from '../features/IdentitySlice';
+import { chosenIdentitySelector } from '../features/IdentitySlice';
 import IdentityListElement from './IdentityListElement';
 import { Identity, IdentityObject, IdentityStatus } from '../utils/types';
 import styles from './Identity.css';
@@ -12,14 +9,11 @@ import SidedText from './SidedText';
 import attributeNames from '../constants/attributeNames.json';
 
 export default function IdentityView() {
-    const identities: Identity[] = useSelector(identitiesSelector);
-    const chosenIndex = useSelector(chosenIdentitySelector);
+    const identity = useSelector(chosenIdentitySelector);
 
-    if (identities === undefined || chosenIndex === undefined) {
+    if (identity === undefined) {
         return null;
     }
-
-    const identity: Identity = identities[chosenIndex];
 
     if (identity.status !== IdentityStatus.confimed) {
         return (
