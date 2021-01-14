@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
-import { sendTransaction, getTransactionStatus } from '../../utils/client';
+import { sendTransaction } from '../../utils/client';
 import {
     serializeTransaction,
     getTransactionHash,
 } from '../../utils/transactionSerialization';
 import LedgerComponent from '../LedgerComponent';
-import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
+import {
+    createSimpleTransferTransaction,
+    waitForFinalization,
+} from '../../utils/transactionHelpers';
 import {
     Account,
     AccountTransaction,
@@ -28,29 +31,6 @@ export interface Props {
     setTransaction(transaction: AccountTransaction): void;
 }
 
-async function sleep(time: number) {
-    return new Promise((resolve) => setTimeout(resolve, time));
-}
-
-export async function waitForFinalization(transactionId: string) {
-    while (true) {
-        const response = await getTransactionStatus(transactionId);
-        const data = response.getValue();
-        console.log(data);
-        if (data === 'null') {
-            return rejectTransaction(transactionId);
-            break;
-        }
-        const dataObject = JSON.parse(data);
-        const { status } = dataObject;
-        if (status === 'finalized') {
-            return confirmTransaction(transactionId, dataObject);
-        }
-
-        await sleep(10000);
-    }
-}
-
 export default function ConfirmTransferComponent({
     account,
     amount,
@@ -68,8 +48,11 @@ export default function ConfirmTransferComponent({
             recipient.address
         )
             .then((transferTransaction) => setTransaction(transferTransaction))
-            .catch((e) =>
-                console.log(`unable to create transaction due to : ${e.stack} `)
+            .catch(
+                (e) =>
+                    console.log(
+                        `unable to create transaction due to : ${e.stack} `
+                    ) // TODO: Handle the case where we fail to create the transaction
             );
     }, [setTransaction, account, amount, recipient]);
 
@@ -85,7 +68,12 @@ export default function ConfirmTransferComponent({
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
             addPendingTransaction(transaction, transactionHash, account);
-            waitForFinalization(transactionHash);
+            const dataObject = await waitForFinalization(transactionHash);
+            if (dataObject) {
+                confirmTransaction(transactionHash, dataObject);
+            } else {
+                rejectTransaction(transactionHash);
+            }
             setLocation(locations.transferSubmitted);
         } else {
             // TODO: handle rejection from node

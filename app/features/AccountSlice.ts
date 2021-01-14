@@ -7,14 +7,11 @@ import {
     updateAccount,
     getAccountsOfIdentity,
 } from '../database/AccountDao';
-import {
-    getTransactionStatus,
-    getAccountInfo,
-    getConsensusInfo,
-} from '../utils/client';
-import { sleep, getGlobal } from '../utils/httpRequests';
+import { getAccountInfo, getConsensusInfo } from '../utils/client';
+import { getGlobal } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
 import { CredentialDeploymentInformation, AccountStatus } from '../utils/types';
+import { waitForFinalization } from '../utils/transactionHelpers';
 
 const accountsSlice = createSlice({
     name: 'accounts',
@@ -171,26 +168,17 @@ export async function confirmInitialAccount(
 }
 
 export async function confirmAccount(dispatch, accountName, transactionId) {
-    while (true) {
-        const response = await getTransactionStatus(transactionId);
-        const data = response.getValue();
-        if (data === 'null') {
-            await updateAccount(accountName, {
-                status: AccountStatus.rejected,
-            });
-            return loadAccounts(dispatch);
-        }
-        const dataObject = JSON.parse(data);
-        const { status } = dataObject;
-        if (status === 'finalized') {
-            await updateAccount(accountName, {
-                status: AccountStatus.confirmed,
-            });
-            return loadAccounts(dispatch);
-        }
-
-        await sleep(10000);
+    const finalized = await waitForFinalization(transactionId);
+    if (finalized !== undefined) {
+        await updateAccount(accountName, {
+            status: AccountStatus.confirmed,
+        });
+        return loadAccounts(dispatch);
     }
+    await updateAccount(accountName, {
+        status: AccountStatus.rejected,
+    });
+    return loadAccounts(dispatch);
 }
 
 export async function getNextAccountNumber(identityId) {

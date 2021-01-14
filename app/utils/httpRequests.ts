@@ -1,6 +1,5 @@
 import * as axios from 'axios';
 import * as http from 'http';
-import { getHighestId } from './transactionHelpers';
 import urls from '../constants/urls.json';
 
 const walletProxy = axios.create({
@@ -41,6 +40,10 @@ function getResponseBody(response) {
             resolve(data);
         });
     });
+}
+
+function getHighestId(transactions) {
+    return transactions.reduce((id, t) => Math.max(id, t.id), 0);
 }
 
 export async function getTransactions(address, id = 0) {

@@ -23,8 +23,8 @@ function AccountListElement({
         return (
             (account.accountNumber === 0 ? '(initial)' : '') +
             (accountInfo && accountInfo.accountBaker ? '(baker)' : '') + // TODO: Replace with bakerImage
-            (account.status === AccountStatus.pending ? ' ??? ' : '')
-        ); // TODO: Replace with pendingImage
+            (account.status === AccountStatus.pending ? ' ??? ' : '') // TODO: Replace with pendingImage
+        );
     }
 
     const shielded = account.totalDecrypted

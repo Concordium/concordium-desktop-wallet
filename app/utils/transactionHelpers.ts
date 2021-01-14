@@ -1,7 +1,8 @@
 import { findAccounts } from '../database/AccountDao';
 import { findEntries } from '../database/AddressBookDao';
-import { getNextAccountNonce } from './client';
+import { getNextAccountNonce, getTransactionStatus } from './client';
 import { AccountTransaction, TransactionKind } from './types';
+import { sleep } from './httpRequests';
 
 export enum TimeUnits {
     seconds = 1e3,
@@ -84,4 +85,28 @@ export async function createSimpleTransferTransaction(
         },
     };
     return transferTransaction;
+}
+
+/**
+ *  Monitors the transaction's status, until has been finalized/rejected,
+ *  and updates the transaction accordingly.
+ */
+export async function waitForFinalization(transactionId: string) {
+    return new Promise((resolve) => {
+        while (true) {
+            const response = await getTransactionStatus(transactionId);
+            const data = response.getValue();
+            if (data === 'null') {
+                resolve(undefined);
+                break;
+            }
+            const dataObject = JSON.parse(data);
+            const { status } = dataObject;
+            if (status === 'finalized') {
+                resolve(dataObject);
+                break;
+            }
+            await sleep(10000);
+        }
+    });
 }
