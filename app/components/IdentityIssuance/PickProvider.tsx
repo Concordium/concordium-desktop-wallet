@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import routes from '../../constants/routes.json';
-import styles from './IdentyIssuance.css';
+import styles from './IdentityIssuance.css';
 import { getIdentityProviders } from '../../utils/httpRequests';
 import { IdentityProvider } from '../../utils/types';
 

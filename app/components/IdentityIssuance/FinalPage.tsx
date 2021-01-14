@@ -6,7 +6,7 @@ import { accountsSelector } from '../../features/AccountSlice';
 import { identitiesSelector } from '../../features/IdentitySlice';
 import AccountListElement from '../AccountListElement';
 import IdentityListElement from '../IdentityListElement';
-import styles from './IdentyIssuance.css';
+import styles from './IdentityIssuance.css';
 
 interface Props {
     identityName: string;
