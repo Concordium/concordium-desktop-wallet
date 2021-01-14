@@ -14,12 +14,15 @@ import {
 } from '../../features/AccountSlice';
 import { getGlobal } from '../../utils/httpRequests';
 
+/**
+ *   This function loads the ledger object and creates a credentialDeploymentInfo, and nesessary details
+ */
 async function createCredential(
-    identity,
-    accountNumber,
-    attributes,
-    setMessage
-) {
+    identity: Identity,
+    accountNumber: number,
+    attributes: string[],
+    setMessage: (message: string) => void
+): Promise<CredentialDeploymentDetails> {
     const transport = await TransportNodeHid.open('');
     const ledger = new ConcordiumLedgerClient(transport);
     setMessage('Please Wait');
@@ -35,7 +38,17 @@ async function createCredential(
     );
 }
 
-async function createAccount(identity, attributes, setMessage) {
+/**
+ * This function this creates the credential, then saves the accounts info, and then sends the credentialDeployment to a Node.
+ * Returns the transactionId of the credentialDeployment transaction send.
+ */
+async function createAccount(
+    accountName: string,
+    identity: Identity,
+    attributes: string[],
+    setMessage: (message: string) => void,
+    dispatch
+) {
     const accountNumber = await getNextAccountNumber(identity.id);
     const {
         credentialDeploymentInfoHex,
@@ -53,7 +66,7 @@ async function createAccount(identity, attributes, setMessage) {
         dispatch,
         accountName,
         identity.id,
-        accNumber,
+        accountNumber,
         accountAddress,
         credentialDeploymentInfo
     );
@@ -79,7 +92,7 @@ export default function AccountCreationGenerate({
     const [text, setText] = useState();
 
     useEffect(() => {
-        createAccount(identity, attributes, setText)
+        createAccount(accountName, identity, attributes, setText, dispatch)
             .then((transactionId) => {
                 confirmAccount(dispatch, accountName, transactionId);
                 return dispatch(push(routes.ACCOUNTCREATION_FINAL));

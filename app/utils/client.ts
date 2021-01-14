@@ -10,6 +10,10 @@ import {
     Empty,
 } from '../proto/api_pb';
 
+/**
+ * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
+ */
+
 const port = 10000;
 const clientAddress = '172.31.33.57'; // TODO: This should be a setting? (The user should be able to decide which node to use)
 

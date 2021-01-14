@@ -22,21 +22,25 @@ import { IdentityProvider } from '../../utils/types';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
-async function createIdentityObjectRequest(id, provider, setText) {
+async function createIdentityObjectRequest(
+    id: number,
+    provider: IdentityProvider,
+    setText: (text: string) => void
+) {
     const global = await getGlobal();
-    const data = await createIdentityRequestObjectLedger(
+    return createIdentityRequestObjectLedger(
         id,
         provider.ipInfo,
         provider.arsInfos,
         global,
         setText
     );
-    return {
-        idObjectRequest: data.idObjectRequest,
-        randomness: data.randomness,
-    };
 }
 
+/**
+ *   This function puts a listener on the given iframeRef, and when it navigates (due to a redirect http response) it resolves,
+ *   and returns the location, which was redirected to.
+ */
 async function handleIdentityProviderLocation(iframeRef) {
     return new Promise((resolve) => {
         iframeRef.current.addEventListener('did-navigate', (e) => {
@@ -48,6 +52,11 @@ async function handleIdentityProviderLocation(iframeRef) {
     });
 }
 
+/**
+ * Listens until, the identityProvider confirms the identity/initial account and returns the identiyObject.
+ * Then updates the identity/initial account in the database.
+ * If not confirmed, the identity will be marked as rejected.
+ */
 async function confirmIdentityAndInitialAccount(
     dispatch: Dispatch,
     identityName: string,

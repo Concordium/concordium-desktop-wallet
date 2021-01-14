@@ -8,11 +8,11 @@ import styles from './AccountCreation.css';
 
 interface Props {
     identity: Identity;
-    setRevealedAttributes: (attrivutes: string[]) => void;
+    setChosenAttributes: (attributes: string[]) => void;
 }
 export default function AccountCreationPickAttributes({
     identity,
-    setRevealedAttributes,
+    setChosenAttributes,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [attributes, setAttributes] = useState([]);
@@ -34,7 +34,7 @@ export default function AccountCreationPickAttributes({
         attributes
             .filter((x) => x.isChecked)
             .forEach(({ tag }) => attributeObject.push(tag));
-        setRevealedAttributes(attributeObject);
+        setChosenAttributes(attributeObject);
         dispatch(push(routes.ACCOUNTCREATION_GENERATE));
     }
 

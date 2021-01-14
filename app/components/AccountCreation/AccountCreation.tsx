@@ -28,7 +28,7 @@ export default function AccountCreation(): JSX.Element {
                 render={() => (
                     <GeneratePage
                         accountName={accountName}
-                        chosenAttributes={chosenAttributes}
+                        attributes={chosenAttributes}
                         identity={identity}
                     />
                 )}

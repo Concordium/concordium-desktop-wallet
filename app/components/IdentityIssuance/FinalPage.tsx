@@ -13,10 +13,10 @@ interface Props {
     accountName: string;
 }
 
-export default function IdentityIssuanceFinal(
+export default function IdentityIssuanceFinal({
     identityName,
-    accountName
-): JSX.Element {
+    accountName,
+}: Props): JSX.Element {
     const accounts = useSelector(accountsSelector);
     const identities = useSelector(identitiesSelector);
 
