@@ -7,5 +7,6 @@
     "EXPORTIMPORT": "/export_import",
     "MULTISIGTRANSACTIONS": "/MultiSignatureTransaction",
     "SETTINGS": "/settings",
-    "MULTISIGTRANSACTIONS_PROPOSAL": "/MultiSignatureTransaction/create/:type"
+    "MULTISIGTRANSACTIONS_PROPOSAL": "/MultiSignatureTransaction/create/:type",
+    "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING": "/MultiSignatureTransaction/existing"
 }

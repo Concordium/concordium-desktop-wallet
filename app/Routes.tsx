@@ -12,7 +12,8 @@ import AddressBookPage from './containers/AddressBookPage';
 import styles from './Main.css';
 import SettingsPage from './containers/SettingsPage';
 import MultiSignaturePage from './containers/MultiSignaturePage';
-import MultiSignatureProposalPage from './containers/MultiSignatureProposalPage';
+import MultiSignatureProposalPageRouter from './containers/MultiSignatureProposalPageRouter';
+import ProposalView from './components/multisig/ProposalView';
 
 export default function Routes() {
     return (
@@ -27,7 +28,8 @@ export default function Routes() {
                         component={AddressBookPage}
                     />
                     <Route path={routes.EXPORTIMPORT} component={TodoPage} />
-                    <Route path={routes.MULTISIGTRANSACTIONS_PROPOSAL} component={MultiSignatureProposalPage} />
+                    <Route path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING} component={ProposalView} />
+                    <Route path={routes.MULTISIGTRANSACTIONS_PROPOSAL} component={MultiSignatureProposalPageRouter} />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS}
                         component={MultiSignaturePage}

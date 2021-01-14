@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { settingsSelector } from '../../features/SettingsSlice';
 import { Settings } from '../../utils/types';
 import styles from './Multisignature.css';
-import routes from './../../constants/routes.json';
+import routes from '../../constants/routes.json';
 
 // TODO This enum should probably not reside here.
 /**
@@ -33,7 +33,7 @@ export enum FoundationTransactionTypes {
 export default function MultiSignatureProposalView() {
     const settings: Settings[] = useSelector(settingsSelector);
 
-    let availableTransactionTypes = Object.keys(TransactionTypes).filter(key => isNaN(Number(key)));
+    let availableTransactionTypes = Object.keys(FoundationTransactionTypes).filter(key => isNaN(Number(key)));
     
     // TODO Selecting a specific setting should be moved to its own selector. This is cumbersome and is a pattern that will be
     // re-used at some point. Type conversion could be done by looking at the type field.
@@ -42,15 +42,15 @@ export default function MultiSignatureProposalView() {
     // MONDAY: When clicking load switch component with clicked value that determines which page to load.
     let foundationTransactionsEnabled: boolean = (settings[0].settings.find(obj => obj.name === 'foundationTransactionsEnabled')?.value) === '1';
 
-    if (foundationTransactionsEnabled) {
-        let foundationTransactionTypes = Object.keys(FoundationTransactionTypes).filter(key => isNaN(Number(key)));
-        availableTransactionTypes = availableTransactionTypes.concat(foundationTransactionTypes);
-    }
+    // if (foundationTransactionsEnabled) {
+    //     let foundationTransactionTypes = Object.keys(FoundationTransactionTypes).filter(key => isNaN(Number(key)));
+    //     availableTransactionTypes = availableTransactionTypes.concat(foundationTransactionTypes);
+    // }
 
     return (
         <div>
             {availableTransactionTypes.map((item) => (
-                <Link to={`/MultiSignatureTransaction/create/${item}`}>
+                <Link to={{ pathname: `/MultiSignatureTransaction/create/${item}`, state: FoundationTransactionTypes.UpdateMicroGtuPerEuroRate }}>
                     <div className={styles.transaction}>
                         <h3>{item}</h3>
                     </div>
