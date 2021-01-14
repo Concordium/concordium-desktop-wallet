@@ -1,11 +1,7 @@
 import React from 'react';
-import { AccountInfo, ScheduleItem } from '../utils/types';
+import { AccountInfo, ScheduleItem, TimeStampUnit } from '../utils/types';
 import styles from './Transaction.css';
-import {
-    parseTime,
-    fromMicroUnits,
-    TimeUnits,
-} from '../utils/transactionHelpers';
+import { parseTime, fromMicroUnits } from '../utils/transactionHelpers';
 import SidedText from './SidedText';
 
 interface Props {
@@ -33,7 +29,7 @@ export default function ShowReleaseSchedule({
                         <SidedText
                             left={parseTime(
                                 item.timestamp,
-                                TimeUnits.milliSeconds
+                                TimeStampUnit.milliSeconds
                             )}
                             right={fromMicroUnits(item.amount)}
                         />

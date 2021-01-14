@@ -287,3 +287,12 @@ export interface CredentialDeploymentDetails {
     accountAddress: Hex;
     transactionId: Hex;
 }
+
+/**
+ * Units of Time for the unix timestamp.
+ * Values are set so that (time in unit) * unit = (time in milliseconds)
+ */
+export enum TimeStampUnit {
+    seconds = 1e3,
+    milliSeconds = 1,
+}
