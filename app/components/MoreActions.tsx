@@ -55,9 +55,5 @@ export default function MoreActions(
         }
     }
 
-    return (
-        <div className={styles.transactionBox}>
-            <div key={location}> {chosenComponent()}</div>
-        </div>
-    );
+    return <div className={styles.transactionBox}>{chosenComponent()}</div>;
 }

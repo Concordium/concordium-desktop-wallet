@@ -19,7 +19,7 @@ export default function AccountBalanceView() {
     const viewingShielded = useSelector(viewingShieldedSelector);
 
     if (!account || !accountInfo) {
-        return <div className={styles.accountBalanceView} />;
+        return null; // TODO: add display for pending account (which have no accountinfo)
     }
 
     const buttons = (

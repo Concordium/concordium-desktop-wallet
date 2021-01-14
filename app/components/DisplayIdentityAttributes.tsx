@@ -4,11 +4,12 @@ import attributeNames from '../constants/attributeNames.json';
 import { chosenAccountInfoSelector } from '../features/AccountSlice';
 import SidedText from './SidedText';
 
+// TODO: Use local credential to get attributes?
 export default function DisplayIdentityAttributes(): JSX.element {
     const accountInfo = useSelector(chosenAccountInfoSelector);
 
     if (!accountInfo) {
-        return <div />;
+        return null;
     }
 
     const attributes =

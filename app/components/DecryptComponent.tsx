@@ -20,7 +20,7 @@ export default function DecryptComponent({ account }: Props) {
     const viewingShielded = useSelector(viewingShieldedSelector);
 
     if (!viewingShielded || account.allDecrypted) {
-        return <></>;
+        return null;
     }
 
     async function ledgerCall(ledger, setMessage) {
