@@ -27,7 +27,7 @@ export default function BooleanSetting({ setting }: Props) {
             <label className={styles.switch}>
                 <input
                     type="checkbox"
-                    onClick={() => handleClick()}
+                    onClick={handleClick}
                     defaultChecked={setting.value === '1'}
                 />
                 <span className={styles.slider} />
