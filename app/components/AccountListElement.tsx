@@ -3,6 +3,7 @@ import styles from './Accounts.css';
 import { fromMicroUnits } from '../utils/transactionHelpers';
 import { AccountInfo, Account, AccountStatus } from '../utils/types';
 import SidedText from './SidedText';
+import pendingImage from '../../resources/pending.svg';
 
 interface Props {
     account: Account;
@@ -20,10 +21,21 @@ function AccountListElement({
     index,
 }: Props): JSX.Element {
     function addBadges() {
+        // TODO: Replace (baker) with bakerImage
         return (
-            (account.accountNumber === 0 ? '(initial)' : '') +
-            (accountInfo && accountInfo.accountBaker ? '(baker)' : '') + // TODO: Replace with bakerImage
-            (account.status === AccountStatus.pending ? ' ??? ' : '') // TODO: Replace with pendingImage
+            <>
+                {account.accountNumber === 0 ? '(initial)' : ''}
+                {accountInfo && accountInfo.accountBaker ? '(baker)' : ''}
+                {account.status === AccountStatus.pending ? (
+                    <img
+                        className={styles.pendingImage}
+                        src={pendingImage}
+                        alt="pending"
+                    />
+                ) : (
+                    ''
+                )}
+            </>
         );
     }
 
@@ -47,10 +59,14 @@ function AccountListElement({
                 highlighted ? styles.chosenAccountListElement : null
             }`}
         >
-            <SidedText
-                left={`${account.name}${' '}${addBadges()}`}
-                right={account.identityName}
-            />
+            <div className={styles.line}>
+                <div className={styles.leftAlignedText}>
+                    {account.name} {addBadges()}
+                </div>
+                <p className={styles.rightAlignedText}>
+                    {account.identityName}
+                </p>
+            </div>
             <SidedText
                 left="Account Total:"
                 right={fromMicroUnits(shielded + unShielded) + hidden}

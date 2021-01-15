@@ -125,3 +125,7 @@
     border-width: 2px;
     border-color: blue;
 }
+
+.pendingImage {
+    height: 20px;
+}
