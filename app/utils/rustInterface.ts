@@ -1,9 +1,10 @@
 import PromiseWorker from 'promise-worker';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 import RustWorker from 'worker-loader!./rust.worker';
-import { PublicInformationForIP, Identity, IpInfo } from './types';
+import { PublicInformationForIP, Identity, IpInfo, SchemeId } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
+import { toHex } from './serializationHelpers';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
@@ -21,6 +22,22 @@ async function getSecretsFromLedger(ledger, displayMessage, identity) {
     const prfKey = prfKeySeed.toString('hex');
     const idCredSec = idCredSecSeed.toString('hex');
     return { prfKey, idCredSec };
+}
+
+// Given a list of Keys, for each key, attempts to prepend the schemeId
+// onto the key hex value, and returns the prepended versions.
+function prependKeyType(keys: VerifyKey[]) {
+    return keys.map((key) => {
+        if (key.schemeId in SchemeId) {
+            return {
+                schemeId: key.schemeId,
+                verifyKey: `${toHex(SchemeId[key.schemeId], 2)}${
+                    key.verifyKey
+                }`,
+            };
+        }
+        throw new Error('Unknown key type');
+    });
 }
 
 /**
@@ -77,7 +94,7 @@ export async function createIdentityRequestObjectLedger(
 
     const pubInfoForIp: PublicInformationForIP = JSON.parse(pubInfoForIpString);
 
-    prependKeyType(pubInfoForIp.publicKeys.keys);
+    pubInfoForIp.publicKeys.keys = prependKeyType(pubInfoForIp.publicKeys.keys);
 
     const path = {
         identityIndex: identityNumber,

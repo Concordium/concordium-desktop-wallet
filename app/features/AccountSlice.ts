@@ -144,7 +144,7 @@ export async function addPendingAccount(
     const account: Account = {
         name: accountName,
         identityId,
-        status: AccountStatus.pending,
+        status: AccountStatus.Pending,
         accountNumber,
         address: accountAddress,
         credential: JSON.stringify(credentialDeploymentInfo),
@@ -160,7 +160,7 @@ export async function confirmInitialAccount(
     credential
 ) {
     await updateAccount(accountName, {
-        status: AccountStatus.confirmed,
+        status: AccountStatus.Confirmed,
         address: accountAddress,
         credential,
     });
@@ -173,11 +173,11 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
         await updateAccount(accountName, {
             status: AccountStatus.confirmed,
         });
-        return loadAccounts(dispatch);
+    } else {
+        await updateAccount(accountName, {
+            status: AccountStatus.rejected,
+        });
     }
-    await updateAccount(accountName, {
-        status: AccountStatus.rejected,
-    });
     return loadAccounts(dispatch);
 }
 

@@ -3,19 +3,18 @@ import knex from './knex';
 import { identitiesTable } from '../constants/databaseNames.json';
 
 export async function getNextId(): Promise<number> {
-    try {
-        const currentId = (
-            await (await knex())
-                .select('seq')
-                .table('sqlite_sequence')
-                .where('name', identitiesTable)
-                .first()
-        ).seq;
-        return currentId + 1;
-    } catch (e) {
-        console.log(e);
-        return 1; // TODO: First check if the table exists, instead of trying and failing
+    const result = await (await knex())
+        .select('seq')
+        .table('sqlite_sequence')
+        .where('name', identitiesTable)
+        .first();
+    if (result === undefined) {
+        // this case means that there are no identities added, and so we default to the
+        // starting value of AUTOINCREMENT:
+        return 1;
     }
+    const currentId = result.seq;
+    return currentId + 1;
 }
 
 export async function getAllIdentities(): Promise<Identity[]> {

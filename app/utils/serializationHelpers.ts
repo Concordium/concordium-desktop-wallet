@@ -50,3 +50,13 @@ export function hashSha256(...inputs): Buffer {
 export function parseHexString(hexString): Buffer {
     return Buffer.from(hexString, 'hex');
 }
+
+// Given an integer, outputs the value as Hex,
+// with prepended zeroes according to minLength.
+export function toHex(value, minLength = 2) {
+    let hex = value.toString(16);
+    while (hex.length < minLength) {
+        hex = `0${hex}`;
+    }
+    return hex;
+}

@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { chosenIdentitySelector } from '../features/IdentitySlice';
 import IdentityListElement from './IdentityListElement';
-import { Identity, IdentityObject, IdentityStatus } from '../utils/types';
+import { IdentityObject, IdentityStatus } from '../utils/types';
 import styles from './Identity.css';
 import transactionStyles from './Transaction.css';
 import SidedText from './SidedText';
@@ -15,7 +15,7 @@ export default function IdentityView() {
         return null;
     }
 
-    if (identity.status !== IdentityStatus.confimed) {
+    if (identity.status !== IdentityStatus.Confirmed) {
         return (
             <div className={styles.halfPage}>
                 <h1 className={styles.name}>{identity.name}</h1>
