@@ -31,24 +31,6 @@ export default function TransferHistory(account) {
             <div className={styles.TransactionListHeader}>
                 <button
                     type="button"
-                    onClick={() =>
-                        updateTransactions(
-                            account,
-                            getHighestId(transactions)
-                        ).then(() => {
-                            loadTransactions(
-                                account,
-                                viewingShielded,
-                                dispatch
-                            );
-                            return loadAccounts(dispatch);
-                        })
-                    }
-                >
-                    Update
-                </button>
-                <button
-                    type="button"
                     className={
                         location === locations.listTransactions
                             ? styles.TransactionListHighligtedButton

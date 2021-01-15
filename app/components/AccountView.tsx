@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, Switch, Route, useLocation } from 'react-router-dom';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
 } from '../features/AccountSlice';
+import {
+    viewingShieldedSelector,
+    updateTransactions,
+} from '../features/TransactionSlice';
 import styles from './Accounts.css';
 import routes from '../constants/routes.json';
 import moreActions from './MoreActions';
@@ -17,6 +21,11 @@ export default function AccountView() {
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const location = useLocation();
+    const viewingShielded = useSelector(viewingShieldedSelector);
+
+    useEffect(() => {
+        updateTransactions(account);
+    }, [account]);
 
     if (account === undefined) {
         return null;
