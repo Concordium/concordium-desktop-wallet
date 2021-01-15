@@ -17,7 +17,7 @@ export default function IdentityView() {
 
     const identity: Identity = identities[chosenIndex];
 
-    if (identity.status !== IdentityStatus.confimed) {
+    if (identity.status !== IdentityStatus.Confirmed) {
         return (
             <div className={styles.halfPage}>
                 <h1 className={styles.name}>{identity.name}</h1>

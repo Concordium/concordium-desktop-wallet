@@ -3,7 +3,7 @@ import { AccountAddress } from '../proto/api_pb';
 type Hex = string;
 type Proofs = Hex;
 
-enum SchemeId {
+export enum SchemeId {
     Ed25519 = 0,
 }
 
@@ -55,9 +55,9 @@ export interface ChosenAttributes {
 }
 
 export enum IdentityStatus {
-    confirmed = 'confirmed',
-    rejected = 'rejected',
-    pending = 'pending',
+    Confirmed = 'confirmed',
+    Rejected = 'rejected',
+    Pending = 'pending',
 }
 
 /**
@@ -75,9 +75,9 @@ export interface Identity {
 }
 
 export enum AccountStatus {
-    confirmed = 'confirmed',
-    rejected = 'rejected',
-    pending = 'pending',
+    Confirmed = 'confirmed',
+    Rejected = 'rejected',
+    Pending = 'pending',
 }
 
 /**

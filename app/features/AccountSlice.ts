@@ -55,7 +55,7 @@ export async function addPendingAccount(
     const account: Account = {
         name: accountName,
         identityId,
-        status: AccountStatus.pending,
+        status: AccountStatus.Pending,
         accountNumber,
         address: accountAddress,
         credential: JSON.stringify(credentialDeploymentInfo),
@@ -71,7 +71,7 @@ export async function confirmInitialAccount(
     credential
 ) {
     await updateAccount(accountName, {
-        status: AccountStatus.confirmed,
+        status: AccountStatus.Confirmed,
         address: accountAddress,
         credential,
     });
@@ -85,7 +85,7 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
         console.log(data);
         if (data === 'null') {
             await updateAccount(accountName, {
-                status: AccountStatus.rejected,
+                status: AccountStatus.Rejected,
             });
             return loadAccounts(dispatch);
         }
@@ -93,7 +93,7 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
         const { status } = dataObject;
         if (status === 'finalized') {
             await updateAccount(accountName, {
-                status: AccountStatus.confirmed,
+                status: AccountStatus.Confirmed,
             });
             return loadAccounts(dispatch);
         }

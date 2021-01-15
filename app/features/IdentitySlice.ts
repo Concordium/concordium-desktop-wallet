@@ -46,7 +46,7 @@ export async function addPendingIdentity(
 ) {
     const identity = {
         name: identityName,
-        status: IdentityStatus.pending,
+        status: IdentityStatus.Pending,
         codeUri,
         identityProvider: JSON.stringify(identityProvider),
         randomness,
@@ -61,14 +61,14 @@ export async function confirmIdentity(
     identityObject
 ) {
     await updateIdentity(identityName, {
-        status: IdentityStatus.confirmed,
+        status: IdentityStatus.Confirmed,
         identityObject: JSON.stringify(identityObject),
     });
     await loadIdentities(dispatch);
 }
 
 export async function rejectIdentity(dispatch: Dispatch, identityName: string) {
-    await updateIdentity(identityName, { status: IdentityStatus.rejected });
+    await updateIdentity(identityName, { status: IdentityStatus.Rejected });
     await loadIdentities(dispatch);
 }
 
