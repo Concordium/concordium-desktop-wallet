@@ -11,6 +11,7 @@ export async function up(knex: Knex): Promise<void> {
         .createTable('setting', (table: Knex.TableBuilder) => {
             table.increments('id');
             table.string('name').unique();
+            table.string('type');
             table.string('value');
             table
                 .integer('group')

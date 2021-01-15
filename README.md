@@ -54,6 +54,5 @@ which is only recompiled with a full restart.
 To package apps for the local platform:
 
 ```bash
-
 yarn package
 ```

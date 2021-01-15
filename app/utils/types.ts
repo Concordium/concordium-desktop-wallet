@@ -216,6 +216,7 @@ export interface Settings {
 // Reflects an entry of the 'setting' table (excluding the primary key).
 export interface Setting {
     name: string;
+    type: string;
     value: string;
     group: number;
 }
@@ -224,6 +225,15 @@ export interface Setting {
 export interface SettingGroup {
     id: number;
     name: string;
+}
+
+/**
+ * Enum for the supported types of settings. If adding a new data type to the
+ * settings table, then it should be represented here.
+ */
+export enum SettingTypeEnum {
+    Text = 'text',
+    Boolean = 'boolean',
 }
 
 // Contains an CredentialDeployment, and all the necessary extra details to complete the deployment
