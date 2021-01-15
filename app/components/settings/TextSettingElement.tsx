@@ -30,7 +30,7 @@ export default function TextSetting({ setting }: Props) {
                 <input
                     type="text"
                     defaultValue={setting.value}
-                    onChange={(e) => handleChange(e)}
+                    onChange={handleChange}
                 />
             </label>
         </div>
