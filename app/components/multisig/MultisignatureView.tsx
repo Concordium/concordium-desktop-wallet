@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { chosenMenuSelector } from '../../features/MultiSignatureSlice';
 import { MultiSignatureMenuItems } from './MultiSignatureList';
 import MultiSignatureProposalView from './MultiSignatureCreateProposalView';
+import BrowseTransactionFileView from './BrowseTransactionFileView';
 
 export default function MultisignatureView() {
     const chosenMenu: MultiSignatureMenuItems = useSelector(chosenMenuSelector)
@@ -17,7 +18,7 @@ export default function MultisignatureView() {
         case MultiSignatureMenuItems.ProposedTransactions:
             return <div>Proposed transactions view</div>;
         case MultiSignatureMenuItems.SignTransaction:
-            return <div>Sign transaction view</div>;
+            return <BrowseTransactionFileView />;
         default:
             throw new Error(`An unexpected menu item was selected: ${chosenMenu}`);
     }

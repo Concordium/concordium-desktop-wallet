@@ -21,7 +21,7 @@ enum UpdateType {
     UpdateGASRewards = 8
 }
 
-interface ExchangeRate {
+export interface ExchangeRate {
     // Word 64
     numerator: number;
     // Word 64  
@@ -31,7 +31,7 @@ interface ExchangeRate {
 /**
  * The header part of an update instruction. 
  */
-interface UpdateHeader {
+export interface UpdateHeader {
     // Word 64
     sequenceNumber: number;
 
@@ -45,7 +45,7 @@ interface UpdateHeader {
     payloadSize: number;
 }
 
-interface UpdateInstruction {
+export interface UpdateInstruction {
     header: UpdateHeader;
     
     // Contains the payload for an update instruction. It can be any of the 
@@ -82,8 +82,8 @@ export interface MultiSignatureTransaction {
  */
 function generateUpdateInstruction(): MultiSignatureTransaction {
     const exchangeRatePayload: ExchangeRate = {
-        numerator: 1,
-        denominator: 500
+        numerator: 10000,
+        denominator: 1
     }
 
     // Payload size is statically 17 for ExchangeRate transaction types.

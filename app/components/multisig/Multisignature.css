@@ -66,6 +66,7 @@
     padding-bottom: 40px;
     margin-bottom: 30px;
     height: 500px;
+    color: #181817;
 }
 
 hr {
@@ -118,9 +119,10 @@ hr {
 
 .twocolumn {
     float: left;
-    width: 49%;
+    width: 48%;
     padding: 10px;
     text-align: center;
+    word-wrap: break-word;
 }
 
 .twocolumn button {
