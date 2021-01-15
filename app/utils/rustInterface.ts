@@ -201,9 +201,13 @@ Challenge: ${unsignedCredentialDeploymentInfo.accountOwnershipChallenge}
     };
 }
 
+/**
+ * Given a list of encrypted Amounts, and the associated account, and nesessary details
+ * returns a list of the given amount, decrypted.
+ */
 export async function decryptAmounts(
     encryptedAmounts,
-    account,
+    account: Account,
     global,
     prfKey
 ) {

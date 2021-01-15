@@ -1,11 +1,11 @@
 import React from 'react';
 import TransactionListElement from './TransactionListElement';
 import CopiableListElement from './CopiableListElement';
-import { Transaction } from '../utils/types';
+import { TransferTransaction } from '../utils/types';
 import styles from './Transaction.css';
 
 interface Props {
-    transaction: Transaction;
+    transaction: TransferTransaction;
     returnFunction: () => void;
 }
 

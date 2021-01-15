@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './Transaction.css';
 import { fromMicroUnits, parseTime } from '../utils/transactionHelpers';
-import { Transaction } from '../utils/types';
+import { TransferTransaction } from '../utils/types';
 import SidedText from './SidedText';
 
 function getName(transaction) {
@@ -87,7 +87,7 @@ function displayType(kind) {
 }
 
 interface Props {
-    transaction: Transaction;
+    transaction: TransferTransaction;
     onClick?: () => void;
 }
 

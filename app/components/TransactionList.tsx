@@ -1,12 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import TransactionListElement from './TransactionListElement';
-import { Transaction } from '../utils/types';
+import { TransferTransaction } from '../utils/types';
 import { transactionsSelector } from '../features/TransactionSlice';
 import styles from './Transaction.css';
 
 interface Props {
-    chooseElement: (transaction: Transaction) => void;
+    chooseElement: (transaction: TransferTransaction) => void;
 }
 
 function TransactionList({ chooseElement }: Props): JSX.Element {
@@ -14,7 +14,7 @@ function TransactionList({ chooseElement }: Props): JSX.Element {
 
     return (
         <div className={styles.TransactionList}>
-            {transactions.map((transaction: Transaction) => (
+            {transactions.map((transaction: TransferTransaction) => (
                 <TransactionListElement
                     transaction={transaction}
                     key={transaction.transactionHash}

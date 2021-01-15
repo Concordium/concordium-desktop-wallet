@@ -60,7 +60,8 @@ export async function getTransactions(address, id = 0) {
 }
 
 export async function getIdentityProviders() {
-    return walletProxy.get('/v0/ip_info');
+    const response = await walletProxy.get('/v0/ip_info');
+    return response.data;
 }
 
 export async function getGlobal() {

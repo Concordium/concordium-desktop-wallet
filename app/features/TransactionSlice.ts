@@ -9,7 +9,7 @@ import {
     updateTransaction,
     getMaxTransactionsIdOfAccount,
 } from '../database/TransactionDao';
-import { Transaction } from '../utils/types';
+import { TransferTransaction } from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
 
 const transactionSlice = createSlice({
@@ -73,7 +73,7 @@ function getScheduleReceiver(transaction) {
     return event.slice(event.lastIndexOf(' ') + 1);
 }
 
-function convertIncomingTransaction(transaction): Transaction {
+function convertIncomingTransaction(transaction): TransferTransaction {
     let fromAddress;
     if ('transferSource' in transaction.details) {
         fromAddress = transaction.details.transferSource;

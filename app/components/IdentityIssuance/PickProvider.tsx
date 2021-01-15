@@ -18,7 +18,7 @@ export default function IdentityIssuanceChooseProvider({
 
     useEffect(() => {
         getIdentityProviders()
-            .then((loadedProviders) => setProviders(loadedProviders.data))
+            .then((loadedProviders) => setProviders(loadedProviders))
             .catch(console.log); // TODO: Handle that we are unable to load providers.
     }, []);
 

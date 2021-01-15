@@ -1,12 +1,12 @@
-import { Account, Transaction } from '../utils/types';
+import { Account, TransferTransaction } from '../utils/types';
 import knex from './knex';
 import { transactionTable } from '../constants/databaseNames.json';
 
 export async function getTransactionsOfAccount(
     account: Account,
-    filter: (transction: Transaction) => boolean = undefined,
+    filter: (transction: TransferTransaction) => boolean = undefined,
     orderBy = 'id'
-): Promise<Transaction[]> {
+): Promise<TransferTransaction[]> {
     const { address } = account;
     const transactions = await (await knex())
         .select()
@@ -34,7 +34,7 @@ export async function updateTransaction(identifier, updatedValues) {
         .update(updatedValues);
 }
 
-export async function insertTransactions(transactions: Transaction[]) {
+export async function insertTransactions(transactions: TransferTransaction[]) {
     const table = (await knex())(transactionTable);
     const existingTransactions = await table.select();
     const [updates, additions] = partition(transactions, (t) =>

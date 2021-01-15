@@ -26,18 +26,8 @@ export interface Versioned<T> {
     value: T;
 }
 
-export interface IdentityObject {
-    attributeList: AttributeList;
-    // TODO Implement all the other fields when needed.
-}
-
-export interface AttributeList {
-    createdAt: string;
-    validTo: string;
-    maxAccounts: number;
-    chosenAttributes: ChosenAttributes;
-}
-
+// Reflects the attributes of an Identity, which describes
+// the owner of the identity.
 export interface ChosenAttributes {
     countryOfResidence: string;
     dob: string;
@@ -54,6 +44,22 @@ export interface ChosenAttributes {
     taxIdNo: string;
 }
 
+// Contains the attributes of an identity.
+export interface AttributeList {
+    createdAt: string;
+    validTo: string;
+    maxAccounts: number;
+    chosenAttributes: ChosenAttributes;
+}
+
+// Reflects the structure of an identity's IdentityObject
+// which is created during identity Issuance.
+export interface IdentityObject {
+    attributeList: AttributeList;
+    // TODO Implement all the other fields when needed.
+}
+
+// Statuses that an identity can have.
 export enum IdentityStatus {
     confirmed = 'confirmed',
     rejected = 'rejected',
@@ -61,7 +67,7 @@ export enum IdentityStatus {
 }
 
 /**
- * This Interface models the structure of the identities stored in the database
+ * This Interface models the structure of the identities stored in the database.
  */
 export interface Identity {
     id: number;
@@ -74,6 +80,7 @@ export interface Identity {
     randomness: string;
 }
 
+// Statuses that an account can have.
 export enum AccountStatus {
     confirmed = 'confirmed',
     rejected = 'rejected',
@@ -93,15 +100,7 @@ export interface Account {
     credential?: string;
 }
 
-export interface AccountTransaction {
-    sender: AccountAddress;
-    nonce: number;
-    energyAmount: number;
-    expiry: number;
-    transactionKind: TransactionKind;
-    payload;
-}
-
+// The different types of an AccountTransaction.
 export enum TransactionKind {
     Deploy_module = 0,
     Initialize_smart_contract_instance = 1,
@@ -116,18 +115,32 @@ export enum TransactionKind {
     Transfer_with_schedule = 19,
 } // TODO: Add all kinds (11- 18)
 
+// Structure of an accountTransaction, which is expected
+// the blockchain's nodes
+export interface AccountTransaction {
+    sender: AccountAddress;
+    nonce: number;
+    energyAmount: number;
+    expiry: number;
+    transactionKind: TransactionKind;
+    payload;
+}
+
+// Types of block items, and their identifier numbers
 export enum BlockItemKind {
     AccountTransactionKind = 0,
     CredentialDeploymentKind = 1,
     UpdateInstructionKind = 2,
 }
 
+// Reflects the structure of CredentialDeploymentInformation
+// from the crypto dependency.
 export interface CredentialDeploymentInformation {
     account: CredentialAccount;
     regId: RegId;
     ipId: IpIdentity;
     revocationThreshold: Threshold;
-    arData: any; // Map with ar data
+    arData: any; // Map with ar data TODO: make a type for this
     policy: Policy;
     proofs: Proofs;
 }
@@ -177,6 +190,7 @@ export interface PublicInformationForIp {
     publicKeys: NewAccount;
 }
 
+// Statuses that a Transaction can have.
 export enum TransactionStatus {
     received = 1,
     absent = 2,
@@ -184,6 +198,7 @@ export enum TransactionStatus {
     finalized = 4,
 }
 
+// Types of origins that a Transaction can have.
 export enum OriginType {
     self,
     account,
@@ -191,7 +206,10 @@ export enum OriginType {
     none,
 }
 
-export interface Transaction {
+/**
+ * This Interface models the structure of the transfer transactions stored in the database
+ */
+export interface TransferTransaction {
     remote: boolean;
     originType: OriginType;
     transactionKind: TransactionKind;
@@ -211,29 +229,29 @@ export interface Transaction {
     rejectReason?: string;
 }
 
+// Reflects the structure given by the node,
+// in a getAccountInfo request
 export interface AccountInfo {
     accountAmount: string;
     accountReleaseSchedule: AccountReleaseSchedule; // TODO
     accountBaker: AccountBakerDetails; // TODO
 }
 
+// Reflects the type, which the account Release Schedule is comprised of.
 export interface ScheduleItem {
     amount: string;
     transactions: Hex[];
     timestamp: number;
 }
 
-export interface IdentityProviderMetaData {
-    issuanceStart: string;
-    icon: string;
-}
-
+// A description of an entity, used for Identity Provider and Anonymity Revoker
 export interface Description {
     name: string;
     url: string;
     description: string;
 }
 
+// Identity Provider information
 export interface IpInfo {
     ipIdentity: number;
     ipDescription: Description;
@@ -241,12 +259,21 @@ export interface IpInfo {
     ipCdiVerifyKey: Hex;
 }
 
+// Structure of the metadata which is provided, about an identityProvider,
+// but is not contained in IpInfo.
+export interface IdentityProviderMetaData {
+    issuanceStart: string;
+    icon: string;
+}
+
+// Anonymity Revoker information
 export interface ArInfo {
     arIdentity: number;
     arDescription: Description;
     arPublicKey: Hex;
 }
 
+// Reflects the structure of an Identity Provider.
 export interface IdentityProvider {
     ipInfo: IpInfo;
     arsInfos: any; // objects with ArInfo fields (and numbers as field names)
@@ -273,6 +300,7 @@ export interface SettingGroup {
     name: string;
 }
 
+// Model of the address book entries, as they are stored in the database
 export interface AddressBookEntry {
     name: string;
     address: string;
