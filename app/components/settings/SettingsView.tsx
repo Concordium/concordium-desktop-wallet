@@ -9,6 +9,7 @@ import { Setting, SettingTypeEnum } from '../../utils/types';
 import styles from './Settings.css';
 import BooleanSetting from './BooleanSettingElement';
 import TextSetting from './TextSettingElement';
+import { Form } from 'semantic-ui-react';
 
 export default function SettingsView() {
     const settings = useSelector(settingsSelector);
@@ -19,7 +20,7 @@ export default function SettingsView() {
     }
 
     return (
-        <div className={styles.halfPage}>
+        <Form>
             {settings[chosenIndex].settings.map((childSetting: Setting) => {
                 switch (childSetting.type) {
                     case SettingTypeEnum.Boolean:
@@ -40,6 +41,13 @@ export default function SettingsView() {
                         return '';
                 }
             })}
-        </div>
+        </Form>
     );
 }
+
+
+/**
+ *    <div className={styles.halfPage}>
+
+        </div>
+ */

@@ -1,13 +1,19 @@
 import React from 'react';
-import styles from './Pages.css';
 import SettingsList from '../components/settings/SettingsList';
 import SettingsView from '../components/settings/SettingsView';
+import { Grid } from 'semantic-ui-react';
 
 export default function SettingsPage() {
     return (
-        <div className={styles.splitPage}>
-            <SettingsList />
-            <SettingsView />
-        </div>
+        <Grid container columns={2} divided>
+            <Grid.Row>
+                <Grid.Column>
+                    <SettingsList />
+                </Grid.Column>
+                <Grid.Column>
+                    <SettingsView />
+                </Grid.Column>
+            </Grid.Row>
+        </Grid>
     );
 }

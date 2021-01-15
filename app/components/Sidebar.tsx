@@ -1,40 +1,37 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import routes from '../constants/routes.json';
-import styles from '../Main.css';
+import { Icon, Menu } from 'semantic-ui-react';
 
 export default function Routes() {
     const location = useLocation();
     const sideBarElements = [];
-    sideBarElements.push({ route: routes.TEST, title: 'Home' });
-    sideBarElements.push({ route: routes.ACCOUNTS, title: 'Accounts' });
-    sideBarElements.push({ route: routes.IDENTITIES, title: 'Identities' });
-    sideBarElements.push({ route: routes.ADDRESSBOOK, title: 'Address Book' });
+    sideBarElements.push({ route: routes.TEST, title: 'Home', icon: 'home' });
+    sideBarElements.push({ route: routes.ACCOUNTS, title: 'Accounts', icon: 'account' });
+    sideBarElements.push({ route: routes.IDENTITIES, title: 'Identities', icon: 'phone' });
+    sideBarElements.push({ route: routes.ADDRESSBOOK, title: 'Address Book', icon: 'book' });
     sideBarElements.push({
         route: routes.EXPORTIMPORT,
-        title: 'Export/Import',
+        title: 'Export/Import'
     });
     sideBarElements.push({
         route: routes.MULTISIGTRANSACTIONS,
         title: 'Multi Signature Transactions',
     });
-    sideBarElements.push({ route: routes.SETTINGS, title: 'Settings' });
+    sideBarElements.push({ route: routes.SETTINGS, title: 'Settings', icon: 'settings' });
 
     return (
-        <div className={styles.sidebar}>
+        <Menu icon='labeled' vertical borderless> 
             {sideBarElements.map((member) => (
-                <Link
+                <Menu.Item as={Link}
+                    name={member.icon}
                     to={member.route}
-                    key={member.route}
-                    className={`${styles.sidebarListElement} ${
-                        member.route === location.pathname
-                            ? styles.sidebarSelectedListElement
-                            : null
-                    }`}
+                    active={member.route === location.pathname}
                 >
-                    {member.title}{' '}
-                </Link>
+                    <Icon className={member.icon}/>
+                    {member.title}
+                </Menu.Item>
             ))}
-        </div>
+        </Menu>
     );
 }

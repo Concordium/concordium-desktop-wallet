@@ -6,6 +6,7 @@ import './app.global.css';
 import { updateSettings } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
 
+
 const store = configuredStore();
 
 /**
