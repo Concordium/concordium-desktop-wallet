@@ -15,7 +15,7 @@ import MultiSignaturePage from './containers/MultiSignaturePage';
 import MultiSignatureProposalPageRouter from './containers/MultiSignatureProposalPageRouter';
 import ProposalView from './components/multisig/ProposalView';
 import SignTransactionView from './components/multisig/SignTransactionView';
-import ExportTransactionView from './components/multisig/ExportTransactionView';
+import ExportSignedTransactionView from './components/multisig/ExportSignedTransactionView';
 
 export default function Routes() {
     return (
@@ -30,7 +30,7 @@ export default function Routes() {
                         component={AddressBookPage}
                     />
                     <Route path={routes.EXPORTIMPORT} component={TodoPage} />
-                    <Route path={routes.MULTISIGTRANSACTIONS_EXPORT_TRANSACTION} component={ExportTransactionView} />
+                    <Route path={routes.MULTISIGTRANSACTIONS_EXPORT_TRANSACTION} component={ExportSignedTransactionView} />
                     <Route path={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION} component={SignTransactionView} />
                     <Route path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING} component={ProposalView} />
                     <Route path={routes.MULTISIGTRANSACTIONS_PROPOSAL} component={MultiSignatureProposalPageRouter} />
