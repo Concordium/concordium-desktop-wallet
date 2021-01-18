@@ -4,9 +4,7 @@ import { currentProposalSelector } from '../../features/MultiSignatureSlice';
 import styles from './Multisignature.css';
 import { MultiSignatureTransaction } from './UpdateMicroGtuPerEuro';
 import fs from 'fs';
-
-// TODO Do not use remote directly as it is unsafe. Use a custom IPC like for the database path stuff.
-const { dialog } = require('electron').remote
+import { ipcRenderer } from 'electron';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -21,22 +19,22 @@ export default function ProposalView() {
         throw new Error('The proposal page should not be loaded without a proposal in the state.');
     }
 
-    function exportTransaction() {
-        dialog.showSaveDialog({ title: 'Export transaction' }).then(({ filePath }) => {
-            if (filePath) {
-                fs.writeFile(filePath, currentProposal.transaction, (err) => {
-                    if (err) {
-                        // TODO Better error handling here, or use the synchronous function.
-                        console.error(`Unable to export transaction: ${err}`);
-                    }
-                });
-            }
-        }); 
+    async function exportTransaction() {
+        const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke('SAVE_FILE_DIALOG', 'Export transaction');
+        if (!saveFileDialog.canceled) {
+            return;
+        }
+
+        if (saveFileDialog.filePath) {
+            fs.writeFile(saveFileDialog.filePath, currentProposal.transaction, (err) => {
+                if (err) {
+                    // TODO Better error handling here, or use the synchronous function.
+                    console.error(`Unable to export transaction: ${err}`);
+                }
+            });
+        }
     }
-
-    // Implement a transaction summary that can dynamically display a proper summary of the 
-    // transaction.
-
+    
     return (
         <div className={styles.box}>
             <h1>Your transaction proposal</h1>
