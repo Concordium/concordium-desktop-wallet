@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './Multisignature.css';
 import TransactionDetails from './TransactionDetails';
 import TransactionHashView from './TransactionHashView';
-import { UpdateInstruction } from './UpdateMicroGtuPerEuro';
+import { UpdateInstruction } from '../../utils/types';
 import fs from 'fs';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';

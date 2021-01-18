@@ -163,6 +163,11 @@ ipcMain.handle('APP_GET_PATH', () => {
     return app.getPath('userData');
 });
 
+// Provides access to file dialog windows from renderer processes.
+ipcMain.handle('OPEN_FILE_DIALOG', async (event, title) => {
+    return dialog.showOpenDialog({ title: title});
+});
+
 /**
  * Add event listeners...
  */

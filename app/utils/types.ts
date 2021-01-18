@@ -172,3 +172,38 @@ export enum SettingTypeEnum {
     TEXT = 'text',
     BOOLEAN = 'boolean',
 }
+
+/**
+ * The header part of an update instruction. 
+ */
+export interface UpdateHeader {
+    // Word 64
+    sequenceNumber: number;
+
+    // Word 64
+    effectiveTime: number;
+
+    // Word 64
+    timeout: number;
+
+    // Word 32
+    payloadSize: number;
+}
+
+export interface UpdateInstruction {
+    header: UpdateHeader;
+    
+    // Contains the payload for an update instruction. It can be any of the 
+    // update payloads available.
+    payload: any;
+
+    signatures: string[];
+}
+
+export function instanceOfAccountTransaction(object: any): object is AccountTransaction {
+    return 'transactionKind' in object;
+}
+
+export function instanceOfUpdateInstruction(object: any): object is UpdateInstruction {
+    return 'header' in object;
+}

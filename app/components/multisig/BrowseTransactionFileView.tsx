@@ -4,23 +4,38 @@ import fs from 'fs';
 import routes from '../../constants/routes.json';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-
-// TODO Do not use remote directly as it is unsafe. Use a custom IPC like for the database path stuff.
-// This automatically makes it all async as far as I recall.
-const { dialog } = require('electron').remote
+import { instanceOfAccountTransaction, instanceOfUpdateInstruction } from '../../utils/types';
+import { ipcRenderer } from 'electron';
 
 export default function BrowseTransactionFileView() {
     const dispatch = useDispatch();
 
-    // TODO Perhaps this should be using async methods instead of the synchronous ones?
-    function openFile() {
-        const transactionFileLocationResult = dialog.showOpenDialogSync({ title: 'Open transaction'});
-        if (transactionFileLocationResult && transactionFileLocationResult.length === 1) {
-            const transactionFileLocation = transactionFileLocationResult[0];
-            const transaction = fs.readFileSync(transactionFileLocation, { encoding: 'utf-8' });
+    async function loadTransactionFile() {
+        const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke('OPEN_FILE_DIALOG', 'Load transaction');
+        
+        if (openDialogValue.canceled) {
+            return;
+        }
 
-            // Load the signing page for multi signature transactions.
-            dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION, state: transaction }));
+        if (openDialogValue.filePaths.length === 1) {
+            const transactionFileLocation = openDialogValue.filePaths[0];
+            const transactionString = fs.readFileSync(transactionFileLocation, { encoding: 'utf-8' });
+
+            let transactionObject = undefined;
+            try {
+                transactionObject = JSON.parse(transactionString);
+            } catch (e) {
+                // TODO Replace thrown error with modal that tells the user that the provided file was invalid.
+                throw new Error('Input was not valid JSON.');
+            }
+            
+            if (!(instanceOfUpdateInstruction(transactionObject) || instanceOfAccountTransaction(transactionObject))) {
+                // TODO Replace thrown error with modal that tells the user that the provided file was invalid.
+                throw new Error('Invalid input!');
+            }
+
+            // The loaded file was valid, so proceed by loading the signing page for multi signature transactions.
+            dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION, state: transactionString }));
         }
     }
 
@@ -28,7 +43,7 @@ export default function BrowseTransactionFileView() {
         <div className={styles.subbox}>
             <h1>Sign a transaction</h1>
             <p>Drag and drop proposed multi signature transaction here.</p>
-            <div><button type="button" onClick={() => openFile()}>Browse to file</button></div>
+            <div><button type="button" onClick={loadTransactionFile}>Browse to file</button></div>
         </div>
     );
 }

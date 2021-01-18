@@ -20,6 +20,7 @@ export default function SignTransactionView(props) {
 
     // TODO Validate the input and display an error to the user if the input could not be parsed.
     // Remember that we also have to support account transactions here.
+    
     // TODO The transaction type is required at this point.
     const transaction: UpdateInstruction = JSON.parse(props.location.state);
     let serializedTransaction = serializeUpdateInstruction(transaction);

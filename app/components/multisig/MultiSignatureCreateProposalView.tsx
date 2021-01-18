@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { settingsSelector } from '../../features/SettingsSlice';
 import { Settings } from '../../utils/types';
 import styles from './Multisignature.css';
-import routes from '../../constants/routes.json';
 
 // TODO This enum should probably not reside here.
 /**

@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import styles from './Multisignature.css';
 import routes from '../../constants/routes.json';
 import { updateCurrentProposal } from '../../features/MultiSignatureSlice';
+import { UpdateHeader, UpdateInstruction } from '../../utils/types';
 
 /**
  * Update type enumeration. The numbering is important as that corresponds
@@ -26,33 +27,6 @@ export interface ExchangeRate {
     numerator: number;
     // Word 64  
     denominator: number;
-}
-
-/**
- * The header part of an update instruction. 
- */
-export interface UpdateHeader {
-    // Word 64
-    sequenceNumber: number;
-
-    // Word 64
-    effectiveTime: number;
-
-    // Word 64
-    timeout: number;
-
-    // Word 32
-    payloadSize: number;
-}
-
-export interface UpdateInstruction {
-    header: UpdateHeader;
-    
-    // Contains the payload for an update instruction. It can be any of the 
-    // update payloads available.
-    payload: any;
-
-    signatures: string[];
 }
 
 /**
