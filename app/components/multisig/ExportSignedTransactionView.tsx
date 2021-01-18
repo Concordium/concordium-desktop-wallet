@@ -6,14 +6,14 @@ import { UpdateInstruction } from '../../utils/types';
 import fs from 'fs';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import routes from './../../constants/routes.json';
+import routes from '../../constants/routes.json';
 import { ipcRenderer } from 'electron';
 
 /**
  * Component that contains a button for exporting the signed transaction that is 
  * currently being processed.
  */
-export default function ExportTransactionView(props) {
+export default function ExportSignedTransactionView(props) {
     const dispatch = useDispatch();
 
     const signature = props.location.state.signature;
