@@ -227,3 +227,13 @@ export function instanceOfAccountTransaction(object: any): object is AccountTran
 export function instanceOfUpdateInstruction(object: any): object is UpdateInstruction {
     return 'header' in object;
 }
+
+/**
+ * Interface definition for classes that can serialize and handle
+ * signing of the different transaction types.
+ */
+export interface TransactionHandler<T> {
+    instanceOf: (transaction: T) => boolean;
+    serializeTransaction: (transaction: T) => Buffer;
+    signTransaction: (any, transaction: T) => Promise<Buffer>;
+}

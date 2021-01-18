@@ -4,23 +4,7 @@ import { useDispatch } from 'react-redux';
 import styles from './Multisignature.css';
 import routes from '../../constants/routes.json';
 import { updateCurrentProposal } from '../../features/MultiSignatureSlice';
-import { UpdateHeader, UpdateInstruction } from '../../utils/types';
-
-/**
- * Update type enumeration. The numbering is important as that corresponds
- * to the byte written when serializing the update instruction/
- */
-enum UpdateType {
-    UpdateAuthorization = 0,
-    UpdateProtocol = 1,
-    UpdateElectionDifficulty = 2,
-    UpdateEuroPerEnergy = 3,
-    UpdateMicroGTUPerEuro = 4,
-    UpdateFoundationAccount = 5,
-    UpdateMintDistribution = 6,
-    UpdateTransactionFeeDistribution = 7,
-    UpdateGASRewards = 8
-}
+import { UpdateHeader, UpdateInstruction, Upda, UpdateType } from '../../utils/types';
 
 export interface ExchangeRate {
     // Word 64
@@ -72,6 +56,7 @@ function generateUpdateInstruction(): MultiSignatureTransaction {
         header: updateHeader,
         payload: exchangeRatePayload,
         signatures: [],
+        type: UpdateType.UpdateMicroGTUPerEuro,
     }
 
     const transaction: MultiSignatureTransaction = {

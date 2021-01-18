@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styles from './Multisignature.css';
-import { serializeUpdateInstruction } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import LedgerComponent from '../ledger/LedgerComponent';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
@@ -9,7 +8,14 @@ import TransactionHashView from './TransactionHashView';
 import routes from './../../constants/routes.json';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { instanceOfAccountTransaction, instanceOfUpdateInstruction } from '../../utils/types';
+import { TransactionHandler } from '../../utils/types';
+import { UpdateInstructionHandler } from './UpdateInstructionHandler';
+
+const transactionHandlers: TransactionHandler<any>[] = [
+    new UpdateInstructionHandler(),
+    // TODO Replace with AccountTransactionHandler() when implemented.
+    new UpdateInstructionHandler()
+]
 
 export default function SignTransactionView(props) {
     const [cosign, setCosign] = useState(false);
@@ -18,27 +24,23 @@ export default function SignTransactionView(props) {
     const [transactionDetailsAreCorrect, setTransactionDetailsAreCorrect] = useState(false);
 
     const dispatch = useDispatch();
-
     let transaction = props.location.state;
-    let serializedTransaction = undefined;
-    if (instanceOfUpdateInstruction(transaction)) {
-        serializedTransaction = serializeUpdateInstruction(transaction);
-    } else if (instanceOfAccountTransaction(transaction)) {
-        // TODO Add serialization code for account transaction.
-        throw new Error('Not implemented yet.');
-    } else {
-        throw new Error(`An invalid transaction was provided to the component: ${transaction}`);
+    
+    // TODO: Dynamically choose the correct transaction handler.
+    const transactionHandler = transactionHandlers.find(handler => handler.instanceOf(transaction));
+    if (!transactionHandler) {
+        throw new Error('No transaction handler was found. An invalid transaction has been received.');
     }
+
+    let serializedTransaction = transactionHandler.serializeTransaction(transaction);
     let transactionHash = hashSha256(serializedTransaction).toString('hex');
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-
-
-        // TODO Choice of signing function has to be dynamic here, but they should all return a signature in the same format that is forwarded to the export page.
-        const signature = (await ledger.getPrfKey(0)).toString('hex');
+        let signature = await transactionHandler.signTransaction(ledger, transaction);
+        let signatureAsHex = signature.toString('hex');
 
         // Load the page for exporting the signed transaction.
-        dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS_EXPORT_TRANSACTION, state: { transaction, transactionHash, signature } }));
+        dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS_EXPORT_TRANSACTION, state: { transaction, transactionHash, signatureAsHex }}));
     }
 
     // The device component should only be displayed if the user has clicked
