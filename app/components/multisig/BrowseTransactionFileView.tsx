@@ -35,7 +35,7 @@ export default function BrowseTransactionFileView() {
             }
 
             // The loaded file was valid, so proceed by loading the signing page for multi signature transactions.
-            dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION, state: transactionString }));
+            dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION, state: transactionObject }));
         }
     }
 

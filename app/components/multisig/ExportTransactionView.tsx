@@ -53,9 +53,9 @@ export default function ExportTransactionView(props) {
                 <TransactionHashView transactionHash={transactionHash} />
                 <div>
                     <ul>    
-                        <li><label>The hash matches the one received externally<input type="checkbox"/></label></li>
-                        <li><label>The picture matches the one received externally<input type="checkbox"/></label></li>
-                        <li><label>The transaction details are correct<input type="checkbox"/></label></li>
+                        <li><label>The hash matches the one received externally<input type="checkbox" defaultChecked={true} disabled={true} /></label></li>
+                        <li><label>The picture matches the one received externally<input type="checkbox" defaultChecked={true} disabled={true}/></label></li>
+                        <li><label>The transaction details are correct<input type="checkbox" defaultChecked={true} disabled={true}/></label></li>
                     </ul>
                 </div>
                 <button type="button" onClick={exportSignedTransaction}>Export signed transaction</button>
