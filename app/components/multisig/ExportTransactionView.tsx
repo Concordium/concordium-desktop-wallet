@@ -7,41 +7,42 @@ import fs from 'fs';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import routes from './../../constants/routes.json';
-
-// TODO Do not use remote directly as it is unsafe. Use a custom IPC like for the database path stuff.
-const { dialog } = require('electron').remote
+import { ipcRenderer } from 'electron';
 
 /**
  * Component that contains a button for exporting the signed transaction that is 
- * currently being processed. 
+ * currently being processed.
  */
 export default function ExportTransactionView(props) {
     const dispatch = useDispatch();
-    
+
     const signature = props.location.state.signature;
     const updateInstruction: UpdateInstruction = props.location.state.transaction;
     const transactionHash = props.location.state.transactionHash;
 
-    function exportSignedTransaction() {
+    async function exportSignedTransaction() {
         const signedTransaction = {
             ...updateInstruction,
             signatures: [signature]
         }
         const signedTransactionJson = JSON.stringify(signedTransaction);
+        
+        const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke('SAVE_FILE_DIALOG', 'Export signed transaction');
+        if (saveFileDialog.canceled) {
+            return;
+        }
 
-        dialog.showSaveDialog({ title: 'Export signed transaction' }).then(({ filePath }) => {
-            if (filePath) {
-                fs.writeFile(filePath, signedTransactionJson, (err) => {
-                    if (err) {
-                        // TODO Better error handling here, or use the synchronous function.
-                        console.error(`Unable to export transaction: ${err}`);
-                    }
+        if (saveFileDialog.filePath) {
+            fs.writeFile(saveFileDialog.filePath, signedTransactionJson, (err) => {
+                if (err) {
+                    // TODO Better error handling here.
+                    console.error(`Unable to export transaction: ${err}`);
+                }
 
-                    // Navigate back to the multi signature front page.
-                    dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS}));
-                });
-            }
-        }); 
+                // Navigate back to the multi signature front page.
+                dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS}));
+            });
+        }
     }
 
     return (

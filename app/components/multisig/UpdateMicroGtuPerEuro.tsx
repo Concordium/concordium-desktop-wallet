@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import styles from './Multisignature.css';
 import routes from '../../constants/routes.json';
 import { updateCurrentProposal } from '../../features/MultiSignatureSlice';
-import { UpdateHeader, UpdateInstruction, Upda, UpdateType } from '../../utils/types';
+import { UpdateHeader, UpdateInstruction, UpdateType } from '../../utils/types';
 
 export interface ExchangeRate {
     // Word 64
