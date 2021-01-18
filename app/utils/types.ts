@@ -190,6 +190,8 @@ export interface UpdateHeader {
     payloadSize: number;
 }
 
+// Currently we cannot see the difference between two ExchangeRate update instructions, so this type is 
+// not specific enough. It should also contain the type from the enum.
 export interface UpdateInstruction {
     header: UpdateHeader;
     
@@ -197,7 +199,25 @@ export interface UpdateInstruction {
     // update payloads available.
     payload: any;
 
+    type: UpdateType;
+
     signatures: string[];
+}
+
+/**
+ * Update type enumeration. The numbering/order is important as that corresponds
+ * to the byte written when serializing the update instruction.
+ */
+export enum UpdateType {
+    UpdateAuthorization = 0,
+    UpdateProtocol = 1,
+    UpdateElectionDifficulty = 2,
+    UpdateEuroPerEnergy = 3,
+    UpdateMicroGTUPerEuro = 4,
+    UpdateFoundationAccount = 5,
+    UpdateMintDistribution = 6,
+    UpdateTransactionFeeDistribution = 7,
+    UpdateGASRewards = 8
 }
 
 export function instanceOfAccountTransaction(object: any): object is AccountTransaction {

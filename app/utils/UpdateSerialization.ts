@@ -1,4 +1,5 @@
-import { ExchangeRate, UpdateHeader, UpdateInstruction } from "../components/multisig/UpdateMicroGtuPerEuro";
+import { ExchangeRate } from "../components/multisig/UpdateMicroGtuPerEuro";
+import { UpdateHeader, UpdateInstruction } from "./types";
 
 /**
  * Serializes an UpdateInstruction into its byte representation that can be
@@ -14,9 +15,8 @@ export function serializeUpdateInstruction(updateInstruction: UpdateInstruction)
     };
     let serializedHeader = serializeUpdateHeader(updateHeaderWithPayloadSize);
     
-    // TODO Receive update type and use the enum to serialize correctly here.
     let serializedUpdateType = Buffer.alloc(1);
-    serializedUpdateType.writeInt8(4, 0);
+    serializedUpdateType.writeInt8(updateInstruction.type, 0);
 
     return Buffer.concat([serializedHeader, serializedUpdateType, serializedPayload]);
 }
@@ -27,7 +27,6 @@ export function serializeUpdateInstruction(updateInstruction: UpdateInstruction)
  * accordingly.
  */
 function serializeUpdatePayload(payload): Buffer {
-    console.log(payload);
     return serializeExchangeRate(payload);
 }
 
