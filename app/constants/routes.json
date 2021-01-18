@@ -9,5 +9,6 @@
     "SETTINGS": "/settings",
     "MULTISIGTRANSACTIONS_PROPOSAL": "/MultiSignatureTransaction/create/:type",
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING": "/MultiSignatureTransaction/existing",
-    "MULTISIGTRANSACTIONS_SIGN_TRANSACTION": "/MultiSignatureTransaction/sign"
+    "MULTISIGTRANSACTIONS_SIGN_TRANSACTION": "/MultiSignatureTransaction/sign",
+    "MULTISIGTRANSACTIONS_EXPORT_TRANSACTION": "/MultiSignatureTransaction/export"
 }
