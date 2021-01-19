@@ -25,7 +25,7 @@
     "preinstall": "node ./internals/scripts/CheckYarn.js",
     "prestart": "yarn build",
     "start": "cross-env START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env START_HOT=1 yarn start-renderer-dev",
-    "start:prod": "cross-env NODE_ENV=production electron ./out/main.prod.js",
+    "start:prod": "cross-env NODE_ENV=production electron ./app/main.prod.js",
     "start-main-debug": "yarn start-main-dev --inspect=5858 --remote-debugging-port=9223",
     "start-main-dev": "cross-env START_HOT=1 NODE_ENV=development electron -r ./internals/scripts/BabelRegister ./app/main.dev.ts",
     "start-renderer-dev": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.renderer.dev.babel.js",
@@ -269,8 +269,10 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
-    "source-map-support": "^0.5.19",
-    "wasm-pack": "^0.9.1"
+    "wasm-pack": "^0.9.1",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^2.0.2",
+    "source-map-support": "^0.5.19"
   },
   "devEngines": {
     "node": ">=7.x",
