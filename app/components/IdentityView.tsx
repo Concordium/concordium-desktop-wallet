@@ -1,11 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { List, Grid } from 'semantic-ui-react';
 import { chosenIdentitySelector } from '../features/IdentitySlice';
 import IdentityListElement from './IdentityListElement';
 import { IdentityObject, IdentityStatus } from '../utils/types';
-import styles from './Identity.css';
-import transactionStyles from './Transaction.css';
-import SidedText from './SidedText';
 import attributeNames from '../constants/attributeNames.json';
 
 export default function IdentityView() {
@@ -17,9 +15,9 @@ export default function IdentityView() {
 
     if (identity.status !== IdentityStatus.Confirmed) {
         return (
-            <div className={styles.halfPage}>
-                <h1 className={styles.name}>{identity.name}</h1>
-            </div>
+            <List centered>
+                <IdentityListElement identity={identity} />
+            </List>
         );
     }
 
@@ -27,28 +25,25 @@ export default function IdentityView() {
         .value;
 
     return (
-        <div className={styles.halfPage}>
-            <div className={transactionStyles.transactionBox}>
-                <IdentityListElement
-                    identity={identity}
-                    onClick={() => {}}
-                    highlighted
-                    index={0}
-                />
+        <List centered>
+            <IdentityListElement identity={identity} />
+            <Grid container columns={2} divided="vertically">
                 {Object.keys(identityObject.attributeList.chosenAttributes).map(
                     (attribute) => (
-                        <SidedText
-                            key={attribute}
-                            left={attributeNames[attribute]}
-                            right={
-                                identityObject.attributeList.chosenAttributes[
-                                    attribute
-                                ]
-                            }
-                        />
+                        <Grid.Row key={attribute}>
+                            <Grid.Column textAlign="left">
+                                {attributeNames[attribute]}
+                            </Grid.Column>
+                            <Grid.Column textAlign="right">
+                                {
+                                    identityObject.attributeList
+                                        .chosenAttributes[attribute]
+                                }
+                            </Grid.Column>
+                        </Grid.Row>
                     )
                 )}
-            </div>
-        </div>
+            </Grid>
+        </List>
     );
 }
