@@ -8,15 +8,16 @@ export default function SettingsList() {
     const settings = useSelector(settingsSelector);
 
     return (
-        <Menu vertical size={'massive'}>
-             {settings.map((setting, i) => (
-                 <Menu.Item
+        <Menu vertical size="massive">
+            {settings.map((setting, i) => (
+                <Menu.Item
+                    key={setting.type}
                     name={setting.type}
                     onClick={() => selectSettings(dispatch, i)}
-                 >
-                     <Header>{setting.type}</Header>
-                 </Menu.Item>
-             ))}
+                >
+                    <Header>{setting.type}</Header>
+                </Menu.Item>
+            ))}
         </Menu>
     );
 }

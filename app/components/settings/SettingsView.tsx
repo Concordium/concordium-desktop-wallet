@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { Form } from 'semantic-ui-react';
 import {
     chosenIndexSelector,
     settingsSelector,
@@ -9,7 +10,6 @@ import { Setting, SettingTypeEnum } from '../../utils/types';
 import styles from './Settings.css';
 import BooleanSetting from './BooleanSettingElement';
 import TextSetting from './TextSettingElement';
-import { Form } from 'semantic-ui-react';
 
 export default function SettingsView() {
     const settings = useSelector(settingsSelector);
@@ -44,7 +44,6 @@ export default function SettingsView() {
         </Form>
     );
 }
-
 
 /**
  *    <div className={styles.halfPage}>

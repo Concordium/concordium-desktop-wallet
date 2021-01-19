@@ -8,7 +8,7 @@ export default function Routes() {
     const capitalizedTitle = title.charAt(0).toUpperCase() + title.slice(1);
 
     return (
-        <Segment basic textAlign='center'>
+        <Segment basic textAlign="center">
             <h1>{capitalizedTitle}</h1>
             <Divider />
         </Segment>

@@ -1,7 +1,7 @@
 import React from 'react';
+import { Grid } from 'semantic-ui-react';
 import SettingsList from '../components/settings/SettingsList';
 import SettingsView from '../components/settings/SettingsView';
-import { Grid } from 'semantic-ui-react';
 
 export default function SettingsPage() {
     return (

@@ -26,7 +26,11 @@ export default function TextSetting({ setting }: Props) {
 
     return (
         <Form.Field>
-            <Input label={setting.name} defaultValue={setting.value} onChange={handleChange} />
+            <Input
+                label={setting.name}
+                defaultValue={setting.value}
+                onChange={handleChange}
+            />
         </Form.Field>
     );
 }

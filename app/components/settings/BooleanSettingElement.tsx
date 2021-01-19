@@ -23,7 +23,12 @@ export default function BooleanSetting({ setting }: Props) {
 
     return (
         <Form.Field>
-            <Checkbox toggle label={setting.name} defaultChecked={setting.value === '1'} onClick={handleClick} />
+            <Checkbox
+                toggle
+                label={setting.name}
+                defaultChecked={setting.value === '1'}
+                onClick={handleClick}
+            />
         </Form.Field>
     );
 }
