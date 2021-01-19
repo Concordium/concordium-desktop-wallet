@@ -44,9 +44,3 @@ export default function SettingsView() {
         </Form>
     );
 }
-
-/**
- *    <div className={styles.halfPage}>
-
-        </div>
- */
