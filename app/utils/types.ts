@@ -126,7 +126,7 @@ export interface CredentialDeploymentInformation {
     regId: RegId;
     ipId: IpIdentity;
     revocationThreshold: Threshold;
-    arData: any; // Map with ar data
+    arData: Record<string, unknown>; // Map with ar data
     policy: Policy;
     proofs: Proofs;
 }
@@ -145,7 +145,7 @@ type Threshold = number;
 export interface Policy {
     validTo: YearMonth; // CredentialValidTo
     createdAt: YearMonth; // CredentialCreatedAt
-    revealedAttributes: any; // Map.Map AttributeTag AttributeValue
+    revealedAttributes: Record<string, unknown>; // Map.Map AttributeTag AttributeValue
 }
 
 type YearMonth = string; // "YYYYMM"
@@ -202,7 +202,7 @@ export interface ArInfo {
 
 export interface IdentityProvider {
     ipInfo: IpInfo;
-    arsInfos: any; // objects with ArInfo fields (and numbers as field names)
+    arsInfos: Record<string, ArInfo>; // objects with ArInfo fields (and numbers as field names)
     metadata: IdentityProviderMetaData;
 }
 

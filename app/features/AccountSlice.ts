@@ -82,7 +82,6 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
     while (true) {
         const response = await getTransactionStatus(transactionId);
         const data = response.getValue();
-        console.log(data);
         if (data === 'null') {
             await updateAccount(accountName, {
                 status: AccountStatus.Rejected,

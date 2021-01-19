@@ -77,7 +77,9 @@ async function confirmIdentityAndInitialAccount(
         if (!token) {
             await rejectIdentity(identityName);
         } else {
+            // eslint-disable-next-line no-console
             console.log(err);
+            // eslint-disable-next-line no-console
             console.log(token); // TODO: Handle unable to save identity/account
         }
     }
@@ -125,6 +127,7 @@ async function generateIdentity(
         );
         dispatch(push(routes.IDENTITYISSUANCE_FINAL));
     } catch (e) {
+        // eslint-disable-next-line no-console
         console.log(`unable to create identity due to ${e.stack}`); // TODO: handle
     }
 }

@@ -19,6 +19,7 @@ export default function IdentityIssuanceChooseProvider({
     useEffect(() => {
         getIdentityProviders()
             .then((loadedProviders) => setProviders(loadedProviders.data))
+            // eslint-disable-next-line no-console
             .catch(console.log); // TODO: Handle that we are unable to load providers.
     }, []);
 
