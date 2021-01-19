@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './Accounts.css';
+import { Grid } from 'semantic-ui-react';
 
 interface Props {
     left: string;
@@ -8,9 +8,9 @@ interface Props {
 
 export default function sidedText({ left, right }: Props) {
     return (
-        <div className={styles.line}>
-            <p className={styles.leftAlignedText}>{left}</p>
-            <p className={styles.rightAlignedText}>{right}</p>
-        </div>
+        <Grid.Row>
+            <Grid.Column textAlign="left">{left}</Grid.Column>
+            <Grid.Column textAlign="right">{right}</Grid.Column>
+        </Grid.Row>
     );
 }
