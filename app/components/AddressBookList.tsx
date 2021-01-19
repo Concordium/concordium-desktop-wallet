@@ -29,31 +29,34 @@ export default function AddressBookList(): JSX.Element {
         addToAddressBook(dispatch, entry);
     }
 
-    const modalButton = (open) => (
+    const modalButton = ({ open }) => (
         <button type="button" onClick={open}>
             +
         </button>
     );
 
-    const modalBody = (close) => {
+    const modalBody = ({ close }) => {
         return (
             <>
                 <button type="button" onClick={close}>
                     x
                 </button>
-                {new AddAddress(close, submitAddress)}
+                <AddAddress close={close} submit={submitAddress} />
             </>
         );
     };
 
     return (
         <div className={styles.halfPage}>
-            {Modal(modalButton, modalBody)}
-            {addressBook.map((entry, i) =>
-                AddressBookListElement(entry, i === chosenIndex, () =>
-                    dispatch(chooseIndex(i))
-                )
-            )}
+            <Modal Accessor={modalButton} Body={modalBody} />
+            {addressBook.map((entry, i) => (
+                <AddressBookListElement
+                    key={entry.address}
+                    entry={entry}
+                    isChosen={i === chosenIndex}
+                    onClick={() => dispatch(chooseIndex(i))}
+                />
+            ))}
         </div>
     );
 }

@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import Modal from 'react-modal';
 import styles from './Styling.css';
 
-export default function FunctionalModal(entrance, body) {
+export interface Props {
+    Accessor: JSX.Element; // Must have a open props
+    Body: JSX.Element; // Must have a close props
+}
+
+export default function FunctionalModal({ Accessor, Body }: Props) {
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const setModalIsOpenToTrue = () => {
@@ -15,13 +20,13 @@ export default function FunctionalModal(entrance, body) {
 
     return (
         <>
-            {entrance(setModalIsOpenToTrue)}
+            <Accessor open={setModalIsOpenToTrue} />
             <Modal
                 isOpen={modalIsOpen}
                 ariaHideApp={false}
                 className={styles.modal}
             >
-                {body(setModalIsOpenToFalse)}
+                <Body close={setModalIsOpenToFalse} />
             </Modal>
         </>
     );

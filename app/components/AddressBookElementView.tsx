@@ -29,24 +29,26 @@ export default function AddressBookElementView() {
         updateAddressBookEntry(dispatch, chosenEntry.name, entry);
     }
 
-    const modalButton = (open) => (
+    const modalButton = ({ open }) => (
         <button type="button" onClick={open}>
             edit
         </button>
     );
 
-    const modalBody = (close) => {
+    const modalBody = ({ close }) => {
         return (
             <>
                 <button type="button" onClick={close}>
                     x
                 </button>
-                {new AddAddress(close, submitAddress, chosenEntry)}
+                <AddAddress
+                    close={close}
+                    submit={submitAddress}
+                    initialValues={chosenEntry}
+                />
             </>
         );
     };
-
-    const modal = Modal(modalButton, modalBody);
 
     return (
         <div className={styles.chosenAccount}>
@@ -57,7 +59,7 @@ export default function AddressBookElementView() {
             >
                 remove
             </button>
-            {modal}
+            <Modal Accessor={modalButton} Body={modalBody} />
         </div>
     );
 }

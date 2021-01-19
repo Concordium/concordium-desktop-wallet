@@ -244,3 +244,10 @@ export interface CredentialDeploymentDetails {
     accountAddress: Hex;
     transactionId: Hex;
 }
+
+// Model of the address book entries, as they are stored in the database
+export interface AddressBookEntry {
+    name: string;
+    address: string;
+    note: string;
+}
