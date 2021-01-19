@@ -1,6 +1,6 @@
 import PromiseWorker from 'promise-worker';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
-import RustWorker from 'worker-loader!./rust.worker';
+import RustWorker from './rust.worker';
 import { PublicInformationForIP, Identity, IpInfo, SchemeId } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';

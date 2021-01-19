@@ -5,6 +5,7 @@
 import path from 'path';
 import webpack from 'webpack';
 import { dependencies as externals } from '../app/package.json';
+
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 
 export default {
@@ -13,8 +14,15 @@ export default {
     module: {
         rules: [
             {
-                test: /\.worker\.js$/,
-                loader: 'worker-loader!babel-loader?presets[]=es2015',
+                test: /\.worker\.ts?$/,
+                use: [
+                    {
+                        loader: 'worker-loader',
+                        options: {
+                            publicPath: './',
+                        },
+                    },
+                ],
             },
             {
                 test: /\.tsx?$/,

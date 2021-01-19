@@ -1,3 +1,4 @@
+import 'regenerator-runtime/runtime';
 import registerPromiseWorker from 'promise-worker/register';
 import workerCommands from '../constants/workerCommands.json';
 
