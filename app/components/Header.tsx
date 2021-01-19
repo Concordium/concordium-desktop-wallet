@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Divider, Segment } from 'semantic-ui-react';
 
-export default function Routes() {
+export default function Routes(): JSX.Element {
     const location = useLocation();
     const title = location.pathname.substring(1); // TODO: make properly
     const capitalizedTitle = title.charAt(0).toUpperCase() + title.slice(1);

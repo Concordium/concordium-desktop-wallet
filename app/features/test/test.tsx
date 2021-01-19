@@ -9,6 +9,9 @@ import {
     sendTransfer,
     printCredentialDeployment,
     handleFieldChange,
+    ledgerTest,
+    publicInformationForIpTest,
+    credentialDeploymentTest,
 } from './testSlice';
 import { insertIdentity } from '../../database/IdentityDao';
 
@@ -66,12 +69,39 @@ export default function Test() {
                 </button>
                 <button
                     onClick={() => {
+                        ledgerTest;
+                    }}
+                    data-tclass="btn"
+                    type="button"
+                >
+                    LedgerTest
+                </button>
+                <button
+                    onClick={() => {
+                        publicInformationForIpTest();
+                    }}
+                    data-tclass="btn"
+                    type="button"
+                >
+                    PublicInfoForIpTest
+                </button>
+                <button
+                    onClick={() => {
                         insertIdentity({ name: blockHash });
                     }}
                     data-tclass="btn"
                     type="button"
                 >
-                    Insert identity
+                    insertIdentity
+                </button>
+                <button
+                    onClick={() => {
+                        credentialDeploymentTest();
+                    }}
+                    data-tclass="btn"
+                    type="button"
+                >
+                    Sign credential deployment
                 </button>
             </div>
             <textarea value={summary} readOnly />
