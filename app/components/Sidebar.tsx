@@ -7,16 +7,18 @@ export default function Routes() {
     const location = useLocation();
     const sideBarElements = [];
     sideBarElements.push({ route: routes.TEST, title: 'Home', icon: 'home' });
-    sideBarElements.push({ route: routes.ACCOUNTS, title: 'Accounts', icon: 'account' });
-    sideBarElements.push({ route: routes.IDENTITIES, title: 'Identities', icon: 'phone' });
+    sideBarElements.push({ route: routes.ACCOUNTS, title: 'Accounts', icon: 'user' });
+    sideBarElements.push({ route: routes.IDENTITIES, title: 'Identities', icon: 'id badge' });
     sideBarElements.push({ route: routes.ADDRESSBOOK, title: 'Address Book', icon: 'book' });
     sideBarElements.push({
         route: routes.EXPORTIMPORT,
-        title: 'Export/Import'
+        title: 'Export/Import',
+        icon: 'share'
     });
     sideBarElements.push({
         route: routes.MULTISIGTRANSACTIONS,
         title: 'Multi Signature Transactions',
+        icon: 'gavel'
     });
     sideBarElements.push({ route: routes.SETTINGS, title: 'Settings', icon: 'settings' });
 
