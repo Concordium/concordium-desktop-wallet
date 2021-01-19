@@ -269,8 +269,10 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
-    "source-map-support": "^0.5.19",
-    "wasm-pack": "^0.9.1"
+    "wasm-pack": "^0.9.1",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^2.0.2",
+    "source-map-support": "^0.5.19"
   },
   "devEngines": {
     "node": ">=7.x",

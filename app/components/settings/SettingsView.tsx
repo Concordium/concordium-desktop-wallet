@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { Form } from 'semantic-ui-react';
 import {
     chosenIndexSelector,
     settingsSelector,
@@ -19,7 +20,7 @@ export default function SettingsView() {
     }
 
     return (
-        <div className={styles.halfPage}>
+        <Form>
             {settings[chosenIndex].settings.map((childSetting: Setting) => {
                 switch (childSetting.type) {
                     case SettingTypeEnum.Boolean:
@@ -40,6 +41,6 @@ export default function SettingsView() {
                         return '';
                 }
             })}
-        </div>
+        </Form>
     );
 }
