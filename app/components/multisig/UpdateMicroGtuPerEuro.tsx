@@ -5,6 +5,7 @@ import styles from './Multisignature.css';
 import routes from '../../constants/routes.json';
 import { updateCurrentProposal } from '../../features/MultiSignatureSlice';
 import { UpdateHeader, UpdateInstruction, UpdateType } from '../../utils/types';
+import { insert} from '../../database/MultiSignatureProposalDao';
 
 export interface ExchangeRate {
     // Word 64
@@ -20,15 +21,11 @@ export interface ExchangeRate {
 export interface MultiSignatureTransaction {
     // The JSON serialization of the transaction
     transaction: string;
-    // The type of transaction
-    type: string;
-    // The list of signatures that have been received
-    // for the transaction so far.
-    // Do we need this, or could it be inside the transaction? But it would differ depending on AccountTransaction vs. UpdateInstruction.
-    signatures: string[];
     // The minimum required signatures for the transaction
     // to be accepted on chain.
     threshold: number;
+
+    status: string;
 }
 
 // Generate transaction proposal, should the proposer be the first to sign it? I think that makes sense if that were to be the case.
@@ -62,8 +59,7 @@ function generateUpdateInstruction(): MultiSignatureTransaction {
     const transaction: MultiSignatureTransaction = {
         transaction: JSON.stringify(updateInstruction),
         threshold: 3,
-        signatures: [],
-        type: 'UpdateMicroGtuPerEuro',
+        status: 'open'
     }
 
     return transaction;
@@ -72,9 +68,14 @@ function generateUpdateInstruction(): MultiSignatureTransaction {
 export default function UpdateMicroGtuPerEuroRate() {
     const dispatch = useDispatch();
 
-    function onClick() {
+    async function onClick() {
+        const instruction = generateUpdateInstruction();
+
         // Set the current proposal in the state to the one that was just generated.
-        updateCurrentProposal(dispatch, generateUpdateInstruction());
+        updateCurrentProposal(dispatch, instruction);
+
+        // Save to database.
+        await insert(instruction);
 
         // Navigate to the page that displays the current proposal from the state.
         dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));

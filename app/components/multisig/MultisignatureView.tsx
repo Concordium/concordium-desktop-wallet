@@ -4,6 +4,7 @@ import { chosenMenuSelector } from '../../features/MultiSignatureSlice';
 import { MultiSignatureMenuItems } from './MultiSignatureList';
 import MultiSignatureProposalView from './MultiSignatureCreateProposalView';
 import BrowseTransactionFileView from './BrowseTransactionFileView';
+import ProposalList from './ProposalList';
 
 export default function MultisignatureView() {
     const chosenMenu: MultiSignatureMenuItems = useSelector(chosenMenuSelector)
@@ -16,7 +17,7 @@ export default function MultisignatureView() {
         case MultiSignatureMenuItems.MakeNewProposal:
             return <MultiSignatureProposalView />;
         case MultiSignatureMenuItems.ProposedTransactions:
-            return <div>Proposed transactions view</div>;
+            return <ProposalList />;
         case MultiSignatureMenuItems.SignTransaction:
             return <BrowseTransactionFileView />;
         default:
