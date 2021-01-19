@@ -1,12 +1,12 @@
 import React from 'react';
-import Accounts from '../components/Accounts';
+import AccountList from '../components/AccountList';
 import AccountView from '../components/AccountView';
 import styles from './Pages.css';
 
 export default function AccountsPage() {
     return (
         <div className={styles.splitPage}>
-            <Accounts />
+            <AccountList />
             <AccountView />
         </div>
     );

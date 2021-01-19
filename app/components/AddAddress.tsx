@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Styling.css';
+import { AddressBookEntry } from '../utils/types';
 
-export default function AddAddress(close, submit, initialValues?) {
+interface Props {
+    close(): void;
+    submit(name: string, address: string, note: string): void;
+    initialValues?: AddressBookEntry;
+}
+
+function AddAddress({ close, submit, initialValues }: Props) {
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [note, setNote] = useState('');
@@ -47,6 +54,7 @@ export default function AddAddress(close, submit, initialValues?) {
                 />
             </span>
             <button
+                type="button"
                 onClick={() => {
                     submit(name, address, note);
                     close();
@@ -57,3 +65,9 @@ export default function AddAddress(close, submit, initialValues?) {
         </div>
     );
 }
+
+AddAddress.defaultProps = {
+    initialValues: undefined,
+};
+
+export default AddAddress;

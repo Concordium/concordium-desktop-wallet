@@ -56,3 +56,9 @@ npm-debug.log.*
 
 # Automatically generated proto files
 proto/
+
+# ignore rust outputs
+target/
+
+#Ignore Cargo.lock
+Cargo.lock

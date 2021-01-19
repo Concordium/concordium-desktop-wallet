@@ -16,44 +16,50 @@ export default function AddressBookElementView() {
     const addressBook = useSelector(addressBookSelector);
     const chosenEntry = addressBook[chosenIndex];
 
-    function submitAddress(name, address, note) {
-        const payload = {
-            index: chosenIndex,
-            entry: {
-                name,
-                address,
-                note,
-            },
-        };
-        dispatch(updateAddressBookEntry(payload));
+    if (chosenIndex >= addressBook.length) {
+        return null;
     }
 
-    const modalButton = (open) => <button onClick={open}>edit</button>;
+    function submitAddress(name, address, note) {
+        const entry = {
+            name,
+            address,
+            note,
+        };
+        updateAddressBookEntry(dispatch, chosenEntry.name, entry);
+    }
 
-    const modalBody = (close) => {
+    const modalButton = ({ open }) => (
+        <button type="button" onClick={open}>
+            edit
+        </button>
+    );
+
+    const modalBody = ({ close }) => {
         return (
             <>
-                <button onClick={close}>x</button>
-                {new AddAddress(close, submitAddress, chosenEntry)}
+                <button type="button" onClick={close}>
+                    x
+                </button>
+                <AddAddress
+                    close={close}
+                    submit={submitAddress}
+                    initialValues={chosenEntry}
+                />
             </>
         );
     };
-
-    const modal = Modal(modalButton, modalBody);
-
-    if (chosenIndex >= addressBook.length) {
-        return <div />;
-    }
 
     return (
         <div className={styles.chosenAccount}>
             {chosenEntry.name} {chosenEntry.address} {chosenEntry.note}{' '}
             <button
-                onClick={() => dispatch(removeFromAddressBook(chosenIndex))}
+                type="button"
+                onClick={() => removeFromAddressBook(dispatch, chosenEntry)}
             >
                 remove
             </button>
-            {modal}
+            <Modal Accessor={modalButton} Body={modalBody} />
         </div>
     );
 }

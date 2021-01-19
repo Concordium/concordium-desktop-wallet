@@ -2,9 +2,10 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     loadAddressBook,
-    addressBookSelector,
     chooseIndex,
+    addressBookSelector,
     chosenIndexSelector,
+    addToAddressBook,
 } from '../features/AddressBookSlice';
 import styles from './Accounts.css';
 import Modal from './Modal';
@@ -25,28 +26,37 @@ export default function AddressBookList(): JSX.Element {
             address,
             note,
         };
-        dispatch(addToAddressBook(entry));
+        addToAddressBook(dispatch, entry);
     }
 
-    const modalButton = (open) => <button onClick={open}>+</button>;
+    const modalButton = ({ open }) => (
+        <button type="button" onClick={open}>
+            +
+        </button>
+    );
 
-    const modalBody = (close) => {
+    const modalBody = ({ close }) => {
         return (
             <>
-                <button onClick={close}>x</button>
-                {new AddAddress(close, submitAddress)}
+                <button type="button" onClick={close}>
+                    x
+                </button>
+                <AddAddress close={close} submit={submitAddress} />
             </>
         );
     };
 
     return (
         <div className={styles.halfPage}>
-            {Modal(modalButton, modalBody)}
-            {addressBook.map((entry, i) =>
-                AddressBookListElement(entry, i === chosenIndex, () =>
-                    dispatch(chooseIndex(i))
-                )
-            )}
+            <Modal Accessor={modalButton} Body={modalBody} />
+            {addressBook.map((entry, i) => (
+                <AddressBookListElement
+                    key={entry.address}
+                    entry={entry}
+                    isChosen={i === chosenIndex}
+                    onClick={() => dispatch(chooseIndex(i))}
+                />
+            ))}
         </div>
     );
 }

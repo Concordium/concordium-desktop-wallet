@@ -1,24 +1,38 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-    chooseAccount,
-    chosenAccountSelector,
-} from '../features/accountsSlice';
 import styles from './Accounts.css';
+import { Account } from '../utils/types';
 
-export default function AccountListElement(account, index) {
-    const dispatch = useDispatch();
-    const chosenIndex = useSelector(chosenAccountSelector);
+interface Props {
+    account: Account;
+    onClick?: () => void;
+    highlighted?: boolean;
+    index: number;
+}
 
+function AccountListElement({
+    account,
+    onClick,
+    highlighted,
+    index,
+}: Props): JSX.Element {
     return (
         <div
-            onClick={() => dispatch(chooseAccount(index))}
-            key={index}
+            onClick={onClick}
+            tabIndex={index}
+            key={account.address}
             className={`${styles.accountListElement} ${
-                index === chosenIndex ? styles.chosenAccountListElement : null
+                highlighted ? styles.chosenAccountListElement : null
             }`}
         >
-            {account}
+            {account.status} {account.name}{' '}
+            {account.accountNumber === 0 ? '(initial)' : undefined}
         </div>
     );
 }
+
+AccountListElement.defaultProps = {
+    onClick: undefined,
+    highlighted: false,
+};
+
+export default AccountListElement;
