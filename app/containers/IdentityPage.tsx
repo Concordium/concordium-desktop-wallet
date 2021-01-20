@@ -5,7 +5,7 @@ import IdentityView from '../components/IdentityView';
 
 export default function IdentityPage() {
     return (
-        <Grid container columns={2} divided>
+        <Grid centered columns="equal" divided>
             <Grid.Row>
                 <Grid.Column>
                     <IdentityList />

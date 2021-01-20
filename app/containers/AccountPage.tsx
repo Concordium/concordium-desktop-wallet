@@ -5,7 +5,7 @@ import AccountView from '../components/AccountView';
 
 export default function AccountsPage() {
     return (
-        <Grid container columns={2} divided>
+        <Grid centered columns="equal" divided>
             <Grid.Row>
                 <Grid.Column>
                     <AccountList />
