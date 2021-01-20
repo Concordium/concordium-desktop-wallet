@@ -1,22 +1,29 @@
 import { push } from 'connected-react-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import styles from './Multisignature.css';
+import {
+    Button,
+    Divider,
+    Form,
+    Header,
+    Input,
+    Segment,
+} from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { updateCurrentProposal } from '../../features/MultiSignatureSlice';
 import { UpdateHeader, UpdateInstruction, UpdateType } from '../../utils/types';
-import { insert} from '../../database/MultiSignatureProposalDao';
+import { insert } from '../../database/MultiSignatureProposalDao';
 
 export interface ExchangeRate {
     // Word 64
     numerator: number;
-    // Word 64  
+    // Word 64
     denominator: number;
 }
 
 /**
- * The model for multi signature transaction proposals, which maps into the 
- * database model as well. 
+ * The model for multi signature transaction proposals, which maps into the
+ * database model as well.
  */
 export interface MultiSignatureTransaction {
     // The JSON serialization of the transaction
@@ -30,74 +37,89 @@ export interface MultiSignatureTransaction {
 
 // Generate transaction proposal, should the proposer be the first to sign it? I think that makes sense if that were to be the case.
 
-
 /**
- * Test function for generating a static update instruction. This should happen dynamically based on the 
+ * Test function for generating a static update instruction. This should happen dynamically based on the
  * transaction that is currently being created by the user.
  */
-function generateUpdateInstruction(): MultiSignatureTransaction {
+function generateUpdateInstruction(
+    microGtuPerEuro: number
+): MultiSignatureTransaction {
     const exchangeRatePayload: ExchangeRate = {
-        numerator: 10000,
-        denominator: 1
-    }
+        numerator: microGtuPerEuro,
+        denominator: 1,
+    };
 
     // Payload size is statically 17 for ExchangeRate transaction types.
-    const updateHeader: UpdateHeader = { 
+    const updateHeader: UpdateHeader = {
         effectiveTime: 0,
         payloadSize: 17,
         sequenceNumber: 0,
-        timeout: 0
-    }
+        timeout: 0,
+    };
 
     const updateInstruction: UpdateInstruction = {
         header: updateHeader,
         payload: exchangeRatePayload,
         signatures: [],
         type: UpdateType.UpdateMicroGTUPerEuro,
-    }
+    };
 
     const transaction: MultiSignatureTransaction = {
         transaction: JSON.stringify(updateInstruction),
         threshold: 3,
-        status: 'open'
-    }
+        status: 'open',
+    };
 
     return transaction;
 }
 
 export default function UpdateMicroGtuPerEuroRate() {
+    const [microGtuPerEuro, setMicroGtuPerEuro] = useState<number>();
+
     const dispatch = useDispatch();
 
-    async function onClick() {
-        const instruction = generateUpdateInstruction();
+    async function generateTransaction() {
+        if (microGtuPerEuro) {
+            const instruction = generateUpdateInstruction(microGtuPerEuro);
 
-        // Set the current proposal in the state to the one that was just generated.
-        updateCurrentProposal(dispatch, instruction);
+            // Set the current proposal in the state to the one that was just generated.
+            updateCurrentProposal(dispatch, instruction);
 
-        // Save to database.
-        await insert(instruction);
+            // Save to database.
+            await insert(instruction);
 
-        // Navigate to the page that displays the current proposal from the state.
-        dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
+            // Navigate to the page that displays the current proposal from the state.
+            dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
+        }
     }
 
     return (
-        <div className={styles.centering}>
-            <div className={styles.subbox}>
-                <h3>Transaction Proposal | Update MicroGTU Per Euro</h3>
-                <hr></hr>
-                <div>
-                    <h4 className={styles.readonly}>Current MicroGTU Per Euro Rate:</h4>
-                    <h2 className={styles.readonly}>€ 1.00 = µǤ 1323</h2>
-                </div>
-                <div>
-                    <h4 className={styles.readonly}>New MicroGTU Per Euro Rate:</h4>
-                    <input placeholder="€ 1.00 = µǤ 1338" className={styles.readonly}></input>
-                </div>
-            </div>
-            <div className={styles.test}>
-                <button type="button" onClick={() => onClick()}>Generate Transaction Proposal</button>
-            </div>
-        </div>
+        <Segment>
+            <Header>Transaction Proposal | Update MicroGTU Per Euro</Header>
+            <Divider />
+            <Form>
+                <Form.Input
+                    width="5"
+                    label="Current micro GTU per euro rate"
+                    value={10000}
+                    readOnly
+                />
+                <Form.Input
+                    width="5"
+                    label="New micro GTU per euro rate"
+                    value={microGtuPerEuro}
+                    onChange={(e) => {
+                        if (e.target.value) {
+                            setMicroGtuPerEuro(parseInt(e.target.value));
+                        }
+                    }}
+                />
+                <Form.Field>
+                    <Button primary onClick={generateTransaction}>
+                        Generate transaction proposal
+                    </Button>
+                </Form.Field>
+            </Form>
+        </Segment>
     );
 }

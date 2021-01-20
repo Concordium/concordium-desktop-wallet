@@ -7,7 +7,11 @@ import ProposalView from '../components/multisig/ProposalView';
 export default function MultiSignatureProposalPageRouter(props) {
     return (
         <Switch>
-            <Route render={() => (<MultiSignatureProposalPage type={props.location.state} />)} />
+            <Route
+                render={() => (
+                    <MultiSignatureProposalPage type={props.location.state} />
+                )}
+            />
         </Switch>
     );
 }

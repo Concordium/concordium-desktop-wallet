@@ -1,13 +1,17 @@
 import React from 'react';
+import { Grid } from 'semantic-ui-react';
 import MultiSignatureList from '../components/multisig/MultiSignatureList';
 import MultisignatureView from '../components/multisig/MultisignatureView';
-import styles from './Pages.css';
 
 export default function MultiSignaturePage() {
     return (
-        <div className={styles.splitPage}>
-            <MultiSignatureList />
-            <MultisignatureView />
-        </div>
+        <Grid columns="equal" divided>
+            <Grid.Column>
+                <MultiSignatureList />
+            </Grid.Column>
+            <Grid.Column>
+                <MultisignatureView />
+            </Grid.Column>
+        </Grid>
     );
 }

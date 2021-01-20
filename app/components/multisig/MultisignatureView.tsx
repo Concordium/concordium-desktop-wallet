@@ -7,7 +7,7 @@ import BrowseTransactionFileView from './BrowseTransactionFileView';
 import ProposalList from './ProposalList';
 
 export default function MultisignatureView() {
-    const chosenMenu: MultiSignatureMenuItems = useSelector(chosenMenuSelector)
+    const chosenMenu: MultiSignatureMenuItems = useSelector(chosenMenuSelector);
 
     if (chosenMenu === undefined) {
         return null;
@@ -21,6 +21,8 @@ export default function MultisignatureView() {
         case MultiSignatureMenuItems.SignTransaction:
             return <BrowseTransactionFileView />;
         default:
-            throw new Error(`An unexpected menu item was selected: ${chosenMenu}`);
+            throw new Error(
+                `An unexpected menu item was selected: ${chosenMenu}`
+            );
     }
 }

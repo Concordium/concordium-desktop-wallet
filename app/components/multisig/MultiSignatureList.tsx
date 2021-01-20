@@ -1,7 +1,7 @@
 import React from 'react';
-import { chooseMenuItem } from '../../features/MultiSignatureSlice';
 import { useDispatch } from 'react-redux';
-import styles from './Multisignature.css';
+import { Header, Menu } from 'semantic-ui-react';
+import { chooseMenuItem } from '../../features/MultiSignatureSlice';
 
 /**
  * An enumeration that contains the menu items available in the menu
@@ -13,14 +13,26 @@ export enum MultiSignatureMenuItems {
     SignTransaction,
 }
 
+/**
+ * A component that displays the list of menu items available for the multi signature
+ * transaction functionality.
+ */
 export default function MultiSignatureList() {
     const dispatch = useDispatch();
 
     return (
-        <div className={styles.halfPage}>
-            {Object.keys(MultiSignatureMenuItems).filter(key => isNaN(Number(key))).map((item) => (
-                <div className={styles.menuitem} key={item} role="button" onClick={() => dispatch(chooseMenuItem(item))}><h3>{item}</h3></div>
-            ))}
-        </div>
+        <Menu vertical fluid>
+            {Object.keys(MultiSignatureMenuItems)
+                .filter((key) => isNaN(Number(key)))
+                .map((item, index) => (
+                    <Menu.Item
+                        index={index}
+                        key={item}
+                        onClick={() => dispatch(chooseMenuItem(item))}
+                    >
+                        <Header>{item}</Header>
+                    </Menu.Item>
+                ))}
+        </Menu>
     );
 }

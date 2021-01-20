@@ -1,10 +1,10 @@
 import React from 'react';
+import { Header, Segment } from 'semantic-ui-react';
 import { FoundationTransactionTypes } from '../components/multisig/MultiSignatureCreateProposalView';
 import UpdateMicroGtuPerEuroRate from '../components/multisig/UpdateMicroGtuPerEuro';
-import styles from './../components/multisig/Multisignature.css';
 
 interface Props {
-    type: FoundationTransactionTypes
+    type: FoundationTransactionTypes;
 }
 
 export default function MultiSignatureProposalPage({ type }: Props) {
@@ -18,15 +18,18 @@ export default function MultiSignatureProposalPage({ type }: Props) {
             case FoundationTransactionTypes.UpdateEuroEnergyRate:
                 return <h3>Nice type</h3>;
             default:
-                return <div>Invalid!</div>
+                return <div>Invalid!</div>;
         }
     }
 
     return (
-        <div className={styles.box}>
-            <h1>Add the proposal details</h1>
-            <p>Add all the details for the {FoundationTransactionTypes[type]} proposal below, and generate your transaction proposal.</p>
+        <Segment textAlign="center" secondary>
+            <Header size="large">Add the proposal details</Header>
+            <Segment basic>
+                Add all the details for the {FoundationTransactionTypes[type]}{' '}
+                proposal below, and generate your transaction proposal.
+            </Segment>
             {chooseProposalType(type)}
-        </div>
+        </Segment>
     );
 }

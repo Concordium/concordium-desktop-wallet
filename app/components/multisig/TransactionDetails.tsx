@@ -1,9 +1,9 @@
 import React from 'react';
-import styles from './Multisignature.css';
-import { UpdateInstruction } from './UpdateMicroGtuPerEuro';
+import { Container, Header } from 'semantic-ui-react';
+import { UpdateInstruction } from '../../utils/types';
 
 interface Props {
-    updateInstruction: UpdateInstruction
+    updateInstruction: UpdateInstruction;
 }
 
 /**
@@ -11,8 +11,9 @@ interface Props {
  */
 export default function TransactionDetails({ updateInstruction }: Props) {
     return (
-        <div className={styles.twocolumn}>
-            <h3>Transaction overview</h3>{JSON.stringify(updateInstruction.payload)}
-        </div>
+        <Container>
+            <Header>Transaction overview</Header>
+            {JSON.stringify(updateInstruction.payload)}
+        </Container>
     );
 }

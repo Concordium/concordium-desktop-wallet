@@ -5,19 +5,18 @@ import { getAll } from '../database/MultiSignatureProposalDao';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 
-
 type MultiSignatureSliceState = {
     chosenMenu: MultiSignatureMenuItems;
     currentProposal?: MultiSignatureTransaction;
-    proposals: MultiSignatureTransaction[],
-}
+    proposals: MultiSignatureTransaction[];
+};
 
-const multiSignatureSlice = createSlice({    
+const multiSignatureSlice = createSlice({
     name: 'multisignature',
     initialState: {
         chosenMenu: MultiSignatureMenuItems.MakeNewProposal,
         currentProposal: undefined,
-        proposals: []
+        proposals: [],
     } as MultiSignatureSliceState,
     reducers: {
         chooseMenuItem: (state, input) => {
@@ -28,30 +27,29 @@ const multiSignatureSlice = createSlice({
         },
         setProposals: (state, input) => {
             state.proposals = input.payload;
-        }
+        },
     },
 });
 
 export const {
     chooseMenuItem,
     setCurrentProposal,
-    setProposals
+    setProposals,
 } = multiSignatureSlice.actions;
 
-export const chosenMenuSelector = (state: RootState) => 
+export const chosenMenuSelector = (state: RootState) =>
     state.multisignature.chosenMenu;
 
-export const currentProposalSelector = (state: RootState) => 
+export const currentProposalSelector = (state: RootState) =>
     state.multisignature.currentProposal;
 
-export const proposalsSelector = (state: RootState) => 
+export const proposalsSelector = (state: RootState) =>
     state.multisignature.proposals;
 
 export async function updateCurrentProposal(
     dispatch: Dispatch,
     multiSignatureTransactionProposal: MultiSignatureTransaction
 ) {
-    
     // Save the multi signature transaction to the database, so that it is also persisted.
     dispatch(setCurrentProposal(multiSignatureTransactionProposal));
 }
@@ -63,4 +61,3 @@ export async function loadProposals(dispatch: Dispatch) {
 }
 
 export default multiSignatureSlice.reducer;
-

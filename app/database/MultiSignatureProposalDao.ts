@@ -4,11 +4,13 @@ import knex from './knex';
 const multiSignatureProposalTable = 'multi_signature_proposal';
 
 /**
- * Function for inserting a multi signature transaction proposal 
- * into the database. 
+ * Function for inserting a multi signature transaction proposal
+ * into the database.
  */
 export async function insert(transaction: MultiSignatureTransaction) {
-    return (await knex()).table(multiSignatureProposalTable).insert(transaction);
+    return (await knex())
+        .table(multiSignatureProposalTable)
+        .insert(transaction);
 }
 
 /**

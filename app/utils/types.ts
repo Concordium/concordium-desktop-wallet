@@ -253,7 +253,7 @@ export interface AddressBookEntry {
 }
 
 /**
- * The header part of an update instruction. 
+ * The header part of an update instruction.
  */
 export interface UpdateHeader {
     // Word 64
@@ -269,12 +269,12 @@ export interface UpdateHeader {
     payloadSize: number;
 }
 
-// Currently we cannot see the difference between two ExchangeRate update instructions, so this type is 
+// Currently we cannot see the difference between two ExchangeRate update instructions, so this type is
 // not specific enough. It should also contain the type from the enum.
 export interface UpdateInstruction {
     header: UpdateHeader;
-    
-    // Contains the payload for an update instruction. It can be any of the 
+
+    // Contains the payload for an update instruction. It can be any of the
     // update payloads available.
     payload: any;
 
@@ -296,14 +296,18 @@ export enum UpdateType {
     UpdateFoundationAccount = 5,
     UpdateMintDistribution = 6,
     UpdateTransactionFeeDistribution = 7,
-    UpdateGASRewards = 8
+    UpdateGASRewards = 8,
 }
 
-export function instanceOfAccountTransaction(object: any): object is AccountTransaction {
+export function instanceOfAccountTransaction(
+    object: any
+): object is AccountTransaction {
     return 'transactionKind' in object;
 }
 
-export function instanceOfUpdateInstruction(object: any): object is UpdateInstruction {
+export function instanceOfUpdateInstruction(
+    object: any
+): object is UpdateInstruction {
     return 'header' in object;
 }
 

@@ -1,10 +1,10 @@
 import React from 'react';
-import styles from './Multisignature.css';
+import { Container, Header, Icon } from 'semantic-ui-react';
 
 // TODO Compute identicon for the hash and display it.
 
 interface Props {
-    transactionHash: string
+    transactionHash: string;
 }
 
 /**
@@ -13,9 +13,11 @@ interface Props {
  */
 export default function TransactionHashView({ transactionHash }: Props) {
     return (
-        <div className={styles.twocolumn}>
-            <h3>Transaction Identicon</h3>
-            <p>Transaction hash {transactionHash}</p>
-        </div>
+        <Container>
+            <Header>Transaction identicon</Header>
+            <Icon name="random" size="huge" />
+            <Header>Transaction hash</Header>
+            {transactionHash}
+        </Container>
     );
 }
