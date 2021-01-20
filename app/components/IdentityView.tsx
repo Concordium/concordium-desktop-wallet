@@ -4,18 +4,27 @@ import {
     identitiesSelector,
     chosenIdentitySelector,
 } from '../features/IdentitySlice';
-import { Identity, IdentityObject } from '../utils/types';
+import { Identity, IdentityObject, IdentityStatus } from '../utils/types';
 import styles from './Identity.css';
 
 export default function IdentityView() {
     const identities: Identity[] = useSelector(identitiesSelector);
     const chosenIndex = useSelector(chosenIdentitySelector);
 
-    if (chosenIndex === undefined || chosenIndex >= identities.length) {
-        return <div />;
+    if (identities === undefined || chosenIndex === undefined) {
+        return null;
     }
 
     const identity: Identity = identities[chosenIndex];
+
+    if (identity.status !== IdentityStatus.Confirmed) {
+        return (
+            <div className={styles.halfPage}>
+                <h1 className={styles.name}>{identity.name}</h1>
+            </div>
+        );
+    }
+
     const identityObject: IdentityObject = JSON.parse(identity.identityObject)
         .value;
 

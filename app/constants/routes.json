@@ -2,7 +2,7 @@
     "HOME": "/",
     "TEST": "/test",
     "ACCOUNTS": "/accounts",
-    "IDENTITIES": "/identities",
+    "IDENTITIES": "/identity/listview",
     "ADDRESSBOOK": "/addressbook",
     "EXPORTIMPORT": "/export_import",
     "MULTISIGTRANSACTIONS": "/MultiSignatureTransaction",
@@ -10,5 +10,16 @@
     "MULTISIGTRANSACTIONS_PROPOSAL": "/MultiSignatureTransaction/create/:type",
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING": "/MultiSignatureTransaction/existing",
     "MULTISIGTRANSACTIONS_SIGN_TRANSACTION": "/MultiSignatureTransaction/sign",
-    "MULTISIGTRANSACTIONS_EXPORT_TRANSACTION": "/MultiSignatureTransaction/export"
+    "MULTISIGTRANSACTIONS_EXPORT_TRANSACTION": "/MultiSignatureTransaction/export",
+    "IDENTITYISSUANCE": "/identity/issuance",
+    "IDENTITYISSUANCE_PICKPROVIDER": "/identity/issuance/pick-provider",
+    "IDENTITYISSUANCE_PICKNAMES": "/identity/issuance/pick-names",
+    "IDENTITYISSUANCE_EXTERNAL": "/identity/issuance/external",
+    "IDENTITYISSUANCE_FINAL": "/identity/issuance/final",
+    "ACCOUNTCREATION": "/account/create",
+    "ACCOUNTCREATION_PICKNAME": "/account/create/pickName",
+    "ACCOUNTCREATION_PICKIDENTITY": "/account/create/chooseIdentity",
+    "ACCOUNTCREATION_PICKATTRIBUTES": "/account/create/PickAttributes",
+    "ACCOUNTCREATION_GENERATE": "/account/create/generate",
+    "ACCOUNTCREATION_FINAL": "/account/create/final"
 }

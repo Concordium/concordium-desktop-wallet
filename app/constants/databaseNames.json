@@ -1,0 +1,5 @@
+{
+    "identitiesTable": "identities",
+    "accountsTable": "accounts",
+    "addressBookTable": "addressBook"
+}

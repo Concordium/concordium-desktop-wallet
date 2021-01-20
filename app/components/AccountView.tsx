@@ -1,20 +1,20 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {
-    accountsSelector,
-    chosenAccountSelector,
-} from '../features/accountsSlice';
+import { chosenAccountSelector } from '../features/AccountSlice';
 import styles from './Accounts.css';
 
 export default function AccountView() {
-    const accountList = useSelector(accountsSelector);
-    const chosenIndex = useSelector(chosenAccountSelector);
+    const account = useSelector(chosenAccountSelector);
+
+    if (account === undefined) {
+        return null;
+    }
 
     return (
         <div className={styles.halfPage}>
             <div className={styles.chosenAccount}>
                 {' '}
-                {accountList[chosenIndex]}{' '}
+                {account.name} {account.address}{' '}
             </div>
         </div>
     );

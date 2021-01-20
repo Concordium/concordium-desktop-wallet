@@ -1,40 +1,57 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Icon, Menu } from 'semantic-ui-react';
 import routes from '../constants/routes.json';
-import styles from '../Main.css';
 
 export default function Routes() {
     const location = useLocation();
     const sideBarElements = [];
-    sideBarElements.push({ route: routes.TEST, title: 'Home' });
-    sideBarElements.push({ route: routes.ACCOUNTS, title: 'Accounts' });
-    sideBarElements.push({ route: routes.IDENTITIES, title: 'Identities' });
-    sideBarElements.push({ route: routes.ADDRESSBOOK, title: 'Address Book' });
+    sideBarElements.push({ route: routes.TEST, title: 'Home', icon: 'home' });
+    sideBarElements.push({
+        route: routes.ACCOUNTS,
+        title: 'Accounts',
+        icon: 'user',
+    });
+    sideBarElements.push({
+        route: routes.IDENTITIES,
+        title: 'Identities',
+        icon: 'id badge',
+    });
+    sideBarElements.push({
+        route: routes.ADDRESSBOOK,
+        title: 'Address Book',
+        icon: 'book',
+    });
     sideBarElements.push({
         route: routes.EXPORTIMPORT,
         title: 'Export/Import',
+        icon: 'share',
     });
     sideBarElements.push({
         route: routes.MULTISIGTRANSACTIONS,
         title: 'Multi Signature Transactions',
+        icon: 'gavel',
     });
-    sideBarElements.push({ route: routes.SETTINGS, title: 'Settings' });
+    sideBarElements.push({
+        route: routes.SETTINGS,
+        title: 'Settings',
+        icon: 'settings',
+    });
 
     return (
-        <div className={styles.sidebar}>
+        <Menu icon="labeled" vertical borderless>
             {sideBarElements.map((member) => (
-                <Link
-                    to={member.route}
+                <Menu.Item
                     key={member.route}
-                    className={`${styles.sidebarListElement} ${
-                        location.pathname.startsWith(member.route)
-                            ? styles.sidebarSelectedListElement
-                            : null
-                    }`}
+                    as={Link}
+                    name={member.icon}
+                    to={member.route}
+                    active={member.route === location.pathname}
                 >
-                    {member.title}{' '}
-                </Link>
+                    <Icon className={member.icon} />
+                    {member.title}
+                </Menu.Item>
             ))}
-        </div>
+        </Menu>
     );
 }

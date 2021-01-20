@@ -1,9 +1,12 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
+import routes from '../constants/routes.json';
+import IdentityListElement from './IdentityListElement';
 import {
-    identitiesSelector,
     loadIdentities,
     chooseIdentity,
+    identitiesSelector,
     chosenIdentitySelector,
 } from '../features/IdentitySlice';
 import { Identity } from '../utils/types';
@@ -12,30 +15,32 @@ import styles from './Identity.css';
 export default function IdentityList() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
-    const chosenIndex = useSelector(chosenIdentitySelector);
+    const chosenIdentity = useSelector(chosenIdentitySelector);
 
     useEffect(() => {
-        if (identities.length === 0) {
+        if (!identities) {
             loadIdentities(dispatch);
         }
-    }, [dispatch, identities.length]);
+    }, [dispatch, identities]);
+
+    if (!identities) {
+        return null;
+    }
 
     return (
         <div className={styles.halfPage}>
+            <Link to={routes.IDENTITYISSUANCE}>
+                <button type="button">x</button>
+            </Link>
+
             {identities.map((identity: Identity, i) => (
-                <div
-                    role="button"
-                    tabIndex={i}
+                <IdentityListElement
+                    identity={identity}
+                    highlighted={identity === chosenIdentity}
+                    index={i}
                     onClick={() => dispatch(chooseIdentity(i))}
-                    className={`${styles.identityListElement} ${
-                        i === chosenIndex
-                            ? styles.chosenIdentityListElement
-                            : null
-                    }`}
                     key={identity.id}
-                >
-                    <h1 className={styles.name}>{identity.name}</h1>
-                </div>
+                />
             ))}
         </div>
     );

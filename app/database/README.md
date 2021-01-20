@@ -1,4 +1,4 @@
-# Database migrations 
+# Database migrations
 
 ## Adding a new migration
 

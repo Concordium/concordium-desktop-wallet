@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import { Form, Input } from 'semantic-ui-react';
 import { updateSettingEntry } from '../../features/SettingsSlice';
 import { Setting } from '../../utils/types';
 
@@ -24,15 +25,12 @@ export default function TextSetting({ setting }: Props) {
     }
 
     return (
-        <div>
-            <label>
-                {setting.name}
-                <input
-                    type="text"
-                    defaultValue={setting.value}
-                    onChange={(e) => handleChange(e)}
-                />
-            </label>
-        </div>
+        <Form.Field>
+            <Input
+                label={setting.name}
+                defaultValue={setting.value}
+                onChange={handleChange}
+            />
+        </Form.Field>
     );
 }
