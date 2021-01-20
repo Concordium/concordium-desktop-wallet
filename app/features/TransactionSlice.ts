@@ -167,9 +167,9 @@ export async function updateTransactions(account) {
     }
 }
 
-export async function addPendingTransaction(transaction, hash, account) {
+export async function addPendingTransaction(transaction, hash) {
     if (transaction.transactionKind !== 3) {
-        console.log('unsupported transaction type - please implement');
+        throw new Error('unsupported transaction type - please implement');
     }
 
     const convertedTransaction = {

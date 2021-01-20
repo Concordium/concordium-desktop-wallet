@@ -21,9 +21,7 @@ function getPromise(urlString: string, params) {
         path: `${url.pathname}?${searchParams.toString()}`,
     };
     return new Promise((resolve) => {
-        http.get(options, function (res) {
-            resolve(res);
-        });
+        http.get(options, (res) => resolve(res));
     });
 }
 
@@ -33,12 +31,10 @@ function getPromise(urlString: string, params) {
 function getResponseBody(response) {
     return new Promise((resolve) => {
         let data = '';
-        response.on('data', function (chunk) {
+        response.on('data', (chunk) => {
             data += chunk;
         });
-        response.on('end', function () {
-            resolve(data);
-        });
+        response.on('end', () => resolve(data));
     });
 }
 
@@ -107,8 +103,11 @@ export async function sleep(time) {
  * TODO: Handle the service being unavailable
  */
 export async function getIdObject(location) {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
+        // eslint-disable-next-line no-await-in-loop
         const response = await getPromise(location);
+        // eslint-disable-next-line no-await-in-loop
         const bodyJSON = await getResponseBody(response);
         const data = JSON.parse(bodyJSON);
         switch (data.status) {
@@ -121,6 +120,7 @@ export async function getIdObject(location) {
             default:
                 throw new Error(`unexpected status: ${data.status}`);
         }
+        // eslint-disable-next-line no-await-in-loop
         await sleep(10000);
     }
 }

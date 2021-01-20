@@ -4,7 +4,6 @@ import { Button } from 'semantic-ui-react';
 import {
     loadTransactions,
     viewingShieldedSelector,
-    transactionsSelector,
 } from '../features/TransactionSlice';
 import TransactionList from './TransactionList';
 import TransactionView from './TransactionView';

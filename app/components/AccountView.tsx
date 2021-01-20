@@ -7,10 +7,7 @@ import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
 } from '../features/AccountSlice';
-import {
-    viewingShieldedSelector,
-    updateTransactions,
-} from '../features/TransactionSlice';
+import { updateTransactions } from '../features/TransactionSlice';
 import styles from './Accounts.css';
 import routes from '../constants/routes.json';
 import moreActions from './MoreActions';

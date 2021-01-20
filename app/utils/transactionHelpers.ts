@@ -121,7 +121,9 @@ export async function createSimpleTransferTransaction(
  *  and updates the transaction accordingly.
  */
 export async function waitForFinalization(transactionId: string) {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
+        // eslint-disable-next-line no-await-in-loop
         const response = await getTransactionStatus(transactionId);
         const data = response.getValue();
         if (data === 'null') {
@@ -132,6 +134,7 @@ export async function waitForFinalization(transactionId: string) {
         if (status === 'finalized') {
             return dataObject;
         }
+        // eslint-disable-next-line no-await-in-loop
         await sleep(10000);
     }
 }
