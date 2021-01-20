@@ -30,7 +30,9 @@ export default function IdentityList() {
 
     return (
         <>
-            <Button onClick={() => push(routes.IDENTITYISSUANCE)}>+</Button>
+            <Button onClick={() => dispatch(push(routes.IDENTITYISSUANCE))}>
+                +
+            </Button>
             <List divided>
                 {identities.map((identity: Identity, i: number) => (
                     <List.Item
