@@ -39,7 +39,7 @@ export default function Routes() {
     });
 
     return (
-        <Menu icon="labeled" vertical borderless>
+        <Menu icon="labeled" vertical borderless fixed="left">
             {sideBarElements.map((member) => (
                 <Menu.Item
                     key={member.route}
