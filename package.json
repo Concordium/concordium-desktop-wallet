@@ -258,7 +258,6 @@
     "electron-updater": "^4.3.4",
     "history": "^4.7.2",
     "knex": "^0.21.13",
-    "libusb": "^0.0.0-pre",
     "promise-worker": "^2.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.12.0",

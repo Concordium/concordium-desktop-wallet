@@ -8919,11 +8919,6 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-libusb@^0.0.0-pre:
-  version "0.0.0-pre"
-  resolved "https://registry.yarnpkg.com/libusb/-/libusb-0.0.0-pre.tgz#d0ed0d5de2259eae1063f6cfe63a246c158484bb"
-  integrity sha512-zbiKd6+pqJ/R/RKyOdR4FPfZpxt6WfHevgsCZz/9waLPJ0Hf5frfmZ7oWWYbPV49Qlfa9oNJGdAmuArgo4K3ug==
-
 liftoff@3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/liftoff/-/liftoff-3.1.0.tgz#c9ba6081f908670607ee79062d700df062c52ed3"
