@@ -41,7 +41,7 @@ export default function TransferHistory(account) {
         );
     }
 
-    function chosenComponent() {
+    function ChosenComponent() {
         switch (location) {
             case locations.listTransactions:
                 return (
@@ -77,5 +77,5 @@ export default function TransferHistory(account) {
         }
     }
 
-    return <div key={location}> {chosenComponent()}</div>;
+    return <ChosenComponent />;
 }

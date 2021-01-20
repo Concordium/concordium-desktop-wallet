@@ -1,5 +1,5 @@
 import React from 'react';
-import generalStyles from '../Styling.css';
+import { Card, Input, Button } from 'semantic-ui-react';
 import { AddressBookEntry } from '../../utils/types';
 import locations from '../../constants/transferLocations.json';
 
@@ -24,32 +24,33 @@ export default function PickAmount({
     }
 
     return (
-        <div>
-            <span className={generalStyles.modalElement}>
-                <input
+        <Card fluid centered>
+            <Card.Content textAlign="center">
+                <Card.Header>Transfer Amount</Card.Header>
+                <Input
+                    fluid
                     name="name"
-                    className={generalStyles.input}
                     placeholder="Enter Amount"
                     value={amount}
                     onChange={(e) => updateAmount(e.target.value)}
-                    data-tid="hashInput"
                     autoFocus
                 />
-            </span>
-            <button
-                type="submit"
-                onClick={() => setLocation(locations.pickRecipient)}
-            >
-                {' '}
-                {recipient ? recipient.name : 'Select Recipient'}{' '}
-            </button>
-            <button
-                type="submit"
-                onClick={() => setLocation(locations.confirmTransfer)}
-                disabled={!recipient}
-            >
-                Continue
-            </button>
-        </div>
+                <Button.Group vertical>
+                    <Button
+                        onClick={() => setLocation(locations.pickRecipient)}
+                    >
+                        {' '}
+                        {recipient ? recipient.name : 'Select Recipient'}{' '}
+                    </Button>
+                    <Button
+                        positive
+                        onClick={() => setLocation(locations.confirmTransfer)}
+                        disabled={!recipient}
+                    >
+                        Continue
+                    </Button>
+                </Button.Group>
+            </Card.Content>
+        </Card>
     );
 }

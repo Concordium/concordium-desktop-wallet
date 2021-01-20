@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Menu, Button, Header } from 'semantic-ui-react';
 import {
     loadAddressBook,
     addressBookSelector,
@@ -23,15 +24,19 @@ export default function PickRecipient({
     }, [dispatch]);
 
     return (
-        <div>
-            <button type="submit" onClick={returnFunction}>
-                {'<--'}
-            </button>
-            {addressBook.map((entry: AddressBookEntry) => (
-                <div key={entry.address} onClick={() => pickRecipient(entry)}>
-                    {entry.name}
-                </div>
-            ))}
-        </div>
+        <>
+            <Button onClick={returnFunction}>{'<--'}</Button>
+            <Menu vertical fluid>
+                <Header textAlign="center">Pick Recipient</Header>
+                {addressBook.map((entry: AddressBookEntry) => (
+                    <Menu.Item
+                        key={entry.address}
+                        onClick={() => pickRecipient(entry)}
+                    >
+                        {entry.name}
+                    </Menu.Item>
+                ))}
+            </Menu>
+        </>
     );
 }

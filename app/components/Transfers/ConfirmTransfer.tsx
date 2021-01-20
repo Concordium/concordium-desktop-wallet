@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { Card, Button, Table, Label } from 'semantic-ui-react';
 import { sendTransaction } from '../../utils/client';
 import {
     serializeTransaction,
@@ -8,6 +9,7 @@ import LedgerComponent from '../LedgerComponent';
 import {
     createSimpleTransferTransaction,
     waitForFinalization,
+    fromMicroUnits,
 } from '../../utils/transactionHelpers';
 import {
     Account,
@@ -26,7 +28,6 @@ export interface Props {
     account: Account;
     amount: string;
     recipient: AddressBookEntry;
-    transaction: AccountTransaction;
     setLocation(location: string): void;
     setTransaction(transaction: AccountTransaction): void;
 }
@@ -48,38 +49,36 @@ export default function ConfirmTransferComponent({
     amount,
     recipient,
     setLocation,
-    transaction,
     setTransaction,
 }: Props): JSX.Element {
     const estimatedFee = 1; // TODO calculate
 
-    useEffect(() => {
-        createSimpleTransferTransaction(
+    async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
+        const transferTransaction = await createSimpleTransferTransaction(
             account.address,
             amount,
             recipient.address
-        )
-            .then((transferTransaction) => setTransaction(transferTransaction))
-            .catch(
-                (e) =>
-                    console.log(
-                        `unable to create transaction due to : ${e.stack} `
-                    ) // TODO: Handle the case where we fail to create the transaction
-            );
-    }, [setTransaction, account, amount, recipient]);
-
-    async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
+        );
         const path = [0, 0, account.identityId, 2, account.accountNumber, 0];
-        const signature: Buffer = await ledger.signTransfer(transaction, path);
-        const serializedTransaction = serializeTransaction(transaction, () => [
-            signature,
-        ]);
-        const transactionHash = getTransactionHash(transaction, () => [
+        const signature: Buffer = await ledger.signTransfer(
+            transferTransaction,
+            path
+        );
+        const serializedTransaction = serializeTransaction(
+            transferTransaction,
+            () => [signature]
+        );
+        const transactionHash = getTransactionHash(transferTransaction, () => [
             signature,
         ]).toString('hex');
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
-            addPendingTransaction(transaction, transactionHash, account);
+            setTransaction(transferTransaction);
+            addPendingTransaction(
+                transferTransaction,
+                transactionHash,
+                account
+            );
             monitorTransaction(transactionHash);
             setLocation(locations.transferSubmitted);
         } else {
@@ -88,24 +87,36 @@ export default function ConfirmTransferComponent({
     }
 
     return (
-        <div>
-            <button
-                type="button"
-                onClick={() => setLocation(locations.pickAmount)}
-            >
-                {'<--'}
-            </button>
-            <div>
-                <pre>
-                    {`
-                        Amount: \u01E4 ${amount}
-                        Estimated fee: \u01E4 ${estimatedFee}
-                        To: ${recipient.name} (${recipient.address})
-                    `}
-                </pre>
-
+        <Card fluid centered>
+            <Card.Content textAlign="center">
+                <Button onClick={() => setLocation(locations.pickAmount)}>
+                    {'<--'}
+                </Button>
+                <Card.Header>Confirm Transfer</Card.Header>
+                <Table>
+                    <Table.Row>
+                        <Table.Cell>Amount:</Table.Cell>
+                        <Table.Cell textAlign="right">
+                            {' '}
+                            {'\u01E4'} {fromMicroUnits(amount)}
+                        </Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                        <Table.Cell>Estimated fee:</Table.Cell>
+                        <Table.Cell textAlign="right">
+                            {' '}
+                            {'\u01E4'} {fromMicroUnits(estimatedFee)}{' '}
+                        </Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                        <Table.Cell>To:</Table.Cell>
+                        <Table.Cell textAlign="right">
+                            {recipient.name} <Label>{recipient.address}</Label>
+                        </Table.Cell>
+                    </Table.Row>
+                </Table>
                 <LedgerComponent ledgerCall={ledgerSignTransfer} />
-            </div>
-        </div>
+            </Card.Content>
+        </Card>
     );
 }

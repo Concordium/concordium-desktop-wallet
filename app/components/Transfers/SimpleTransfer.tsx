@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { push } from 'connected-react-router';
-import styles from '../Transaction.css';
+import { Button, Header } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import ConfirmTransfer from './ConfirmTransfer';
 import PickRecipient from './PickRecipient';
@@ -21,7 +20,7 @@ export default function SimpleTransfer(account: Account) {
         setLocation(locations.pickAmount);
     }
 
-    function chosenComponent() {
+    function ChosenComponent() {
         switch (location) {
             case locations.pickAmount:
                 return (
@@ -35,9 +34,7 @@ export default function SimpleTransfer(account: Account) {
             case locations.pickRecipient:
                 return (
                     <PickRecipient
-                        returnFunction={() =>
-                            push(routes.ACCOUNTS_SIMPLETRANSFER_PICKAMOUNT)
-                        }
+                        returnFunction={() => setLocation(locations.pickAmount)}
                         pickRecipient={chooseRecipientOnClick}
                     />
                 );
@@ -48,7 +45,6 @@ export default function SimpleTransfer(account: Account) {
                         recipient={recipient}
                         fromAddress={account.address}
                         amount={amount}
-                        transaction={transaction}
                         setTransaction={setTransaction}
                         account={account}
                     />
@@ -66,13 +62,12 @@ export default function SimpleTransfer(account: Account) {
     }
 
     return (
-        <div>
-            <div key={location} className={styles.transactionBox}>
-                <Link to={routes.ACCOUNTS}>
-                    <button type="submit">x</button>
-                </Link>
-                {chosenComponent()}
-            </div>
-        </div>
+        <>
+            <Link to={routes.ACCOUNTS}>
+                <Button>x</Button>
+            </Link>
+            <Header>Send Transfer</Header>
+            <ChosenComponent />
+        </>
     );
 }
