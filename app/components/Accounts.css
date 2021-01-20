@@ -46,12 +46,8 @@
 
 .accountBalanceView {
     background-color: #000;
-    border-radius: 10px;
     text-align: center;
     padding-bottom: 10px;
-    padding-left: 20%;
-    padding-right: 20%;
-    color: blue;
 }
 
 .accountBalanceView button {
@@ -95,14 +91,6 @@
     display: flex;
 }
 
-.buttonAsText {
-    background: none;
-    border: none;
-    color: blue;
-    font-size: larger;
-    font-weight: normal;
-}
-
 .buttonAsText:disabled {
     font-weight: bolder;
 }
@@ -116,14 +104,6 @@
 
 .accountActionButton {
     height: 100px;
-    width: 100%;
-    border-radius: 10px;
-    background-color: white;
-}
-
-.accountActionButtonHighlighted {
-    border-width: 2px;
-    border-color: blue;
 }
 
 .pendingImage {

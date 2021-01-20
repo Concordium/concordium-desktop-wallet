@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './Transaction.css';
+import { Grid } from 'semantic-ui-react';
 import { fromMicroUnits, parseTime } from '../utils/transactionHelpers';
 import { TransferTransaction } from '../utils/types';
 import SidedText from './SidedText';
@@ -97,7 +97,7 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.element {
     const { amount, amountFormula } = parseAmount(transaction);
 
     return (
-        <div className={styles.transactionListElement} onClick={onClick}>
+        <Grid container columns={2} onClick={onClick}>
             <SidedText
                 left={name.concat(
                     ` ${displayType(transaction.transactionKind)}`
@@ -112,7 +112,7 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.element {
                     }`
                 )}
             />
-        </div>
+        </Grid>
     );
 }
 

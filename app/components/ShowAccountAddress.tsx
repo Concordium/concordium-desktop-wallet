@@ -1,25 +1,22 @@
 import React from 'react';
+import { Header, Button } from 'semantic-ui-react';
 import { Account } from '../utils/types';
-import styles from './Transaction.css';
 import CopyButton from './CopyButton';
 
 interface Props {
     account: Account;
-    returnFunction: () => void;
+    returnFunction(): void;
 }
 
 // TODO display QR?
 
 export default function ShowAccountAddress({ account, returnFunction }: Props) {
     return (
-        <div className={styles.centerText}>
-            <h2> Address </h2>
-            <button onClick={returnFunction} type="submit">
-                x
-            </button>
-
-            {account.address}
+        <>
+            <Button onClick={returnFunction}>x</Button>
+            <Header textAlign="center"> Address </Header>
+            <Header sub>{account.address}</Header>
             <CopyButton value={account.address} />
-        </div>
+        </>
     );
 }

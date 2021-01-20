@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { Link, Switch, Route, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { push } from 'connected-react-router';
+import { Switch, Route, useLocation } from 'react-router-dom';
+import { Card, Button } from 'semantic-ui-react';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
@@ -18,63 +20,41 @@ import AccountBalanceView from './AccountBalanceView';
 import DecryptComponent from './DecryptComponent';
 
 export default function AccountView() {
+    const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const location = useLocation();
-    const viewingShielded = useSelector(viewingShieldedSelector);
+    const buttons = [
+        { route: routes.ACCOUNTS_SIMPLETRANSFER, text: 'Send' },
+        { route: routes.ACCOUNTS_SIMPLETRANSFER, text: 'Shield' },
+        { route: routes.ACCOUNTS_MORE, text: 'More' },
+    ];
 
     useEffect(() => {
-        updateTransactions(account);
+        if (account) {
+            updateTransactions(account);
+        }
     }, [account]);
 
     if (account === undefined) {
         return null;
     }
+
     return (
-        <div className={styles.halfPage}>
+        <Card fluid>
             <AccountBalanceView />
-            <span className={styles.accountActionsSpan}>
-                <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
-                    <button
-                        className={`${styles.accountActionButton} ${
-                            location.pathname.startsWith(
-                                routes.ACCOUNTS_SIMPLETRANSFER
-                            )
-                                ? styles.accountActionButtonHighlighted
-                                : ''
-                        }`}
-                        type="button"
+            <Button.Group>
+                {buttons.map(({ route, text }) => (
+                    <Button
+                        key={route + text}
+                        onClick={() => dispatch(push(route))}
+                        className={styles.accountActionButton}
+                        disabled={location.pathname.startsWith(route)}
                     >
-                        Send
-                    </button>
-                </Link>
-                <Link to={routes.ACCOUNTS_SIMPLETRANSFER}>
-                    <button
-                        className={`${styles.accountActionButton} ${
-                            location.pathname.startsWith(
-                                routes.ACCOUNTS_SIMPLETRANSFER
-                            )
-                                ? styles.accountActionButtonHighlighted
-                                : ''
-                        }`}
-                        type="button"
-                    >
-                        Shield
-                    </button>
-                </Link>
-                <Link to={routes.ACCOUNTS_MORE}>
-                    <button
-                        className={`${styles.accountActionButton} ${
-                            location.pathname.startsWith(routes.ACCOUNTS_MORE)
-                                ? styles.accountActionButtonHighlighted
-                                : ''
-                        }`}
-                        type="button"
-                    >
-                        More
-                    </button>
-                </Link>
-            </span>
+                        {text}
+                    </Button>
+                ))}
+            </Button.Group>
             <Switch>
                 <Route
                     path={routes.ACCOUNTS_MORE}
@@ -90,6 +70,6 @@ export default function AccountView() {
                 />
             </Switch>
             <DecryptComponent account={account} />
-        </div>
+        </Card>
     );
 }

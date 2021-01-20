@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Menu, Button } from 'semantic-ui-react';
 import { Account, AccountInfo } from '../utils/types';
-import styles from './Transaction.css';
 import routes from '../constants/routes.json';
 import locations from '../constants/moreActionLocations.json';
 import ShowAccountAddress from './ShowAccountAddress';
@@ -17,23 +17,24 @@ export default function MoreActions(
     ];
     const [location, setLocation] = useState(locations.list);
 
-    function chosenComponent() {
+    function ChosenComponent() {
         switch (location) {
             case locations.list:
                 return (
                     <>
-                        <Link to={routes.ACCOUNTS}>
-                            <button type="submit">x</button>
-                        </Link>
-                        {items.map((item) => (
-                            <div
-                                onClick={() => setLocation(item.location)}
-                                key={item.location}
-                                className={styles.moreActionsItem}
-                            >
-                                {item.name}
-                            </div>
-                        ))}
+                        <Button as={Link} to={routes.ACCOUNTS} type="submit">
+                            x
+                        </Button>
+                        <Menu vertical>
+                            {items.map((item) => (
+                                <Menu.Item
+                                    onClick={() => setLocation(item.location)}
+                                    key={item.location}
+                                >
+                                    {item.name}
+                                </Menu.Item>
+                            ))}
+                        </Menu>
                     </>
                 );
             case locations.accountAddress:
@@ -51,9 +52,9 @@ export default function MoreActions(
                     />
                 );
             default:
-                return <div />;
+                return null;
         }
     }
 
-    return <div className={styles.transactionBox}>{chosenComponent()}</div>;
+    return <ChosenComponent />;
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Header, Label, Image } from 'semantic-ui-react';
 import { fromMicroUnits } from '../utils/transactionHelpers';
-import { AccountInfo, Account } from '../utils/types';
+import { AccountInfo, Account, AccountStatus } from '../utils/types';
 import SidedText from './SidedText';
 import pendingImage from '../../resources/pending.svg';
 
@@ -34,14 +34,16 @@ function AccountListElement({
                 <Grid.Column textAlign="left">
                     <Header as="h2">
                         {account.name}
-                        <Image
-                            src={pendingImage}
-                            alt="pending"
-                            size="mini"
-                            spaced
-                        />
+                        {account.confirmed === AccountStatus.Pending ? (
+                            <Image
+                                src={pendingImage}
+                                alt="pending"
+                                size="mini"
+                                spaced
+                            />
+                        ) : undefined}
                     </Header>
-                    {account.accountNumber !== 0 ? (
+                    {account.accountNumber === 0 ? (
                         <Label>(Initial)</Label>
                     ) : undefined}
                     {accountInfo && accountInfo.accountBaker ? (

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Button, Container, Header } from 'semantic-ui-react';
 import styles from './Accounts.css';
 import { fromMicroUnits } from '../utils/transactionHelpers';
 import {
@@ -23,66 +24,58 @@ export default function AccountBalanceView() {
     }
 
     const buttons = (
-        <div className={styles.line}>
-            <button
-                className={styles.buttonAsText}
+        <Button.Group>
+            <Button
                 disabled={!viewingShielded}
-                type="button"
                 onClick={() => dispatch(setViewingShielded(false))}
             >
                 Balance
-            </button>
-            <button
-                className={styles.buttonAsText}
+            </Button>
+            <Button
                 disabled={viewingShielded}
-                type="button"
                 onClick={() => dispatch(setViewingShielded(true))}
             >
                 Shielded Balance
-            </button>
-        </div>
+            </Button>
+        </Button.Group>
     );
 
     let main;
     if (viewingShielded) {
         main = (
-            <h1>
+            <Header as="h1" color="blue">
                 {fromMicroUnits(account.totalDecrypted)}{' '}
                 {account.allDecrypted ? '' : ' + ?'}
-            </h1>
+            </Header>
         );
     } else {
         main = (
             <>
-                <h1>{fromMicroUnits(accountInfo.accountAmount)}</h1>
-                <div className={styles.line}>
-                    <p className={styles.leftAlignedText}> At disposal: </p>
-                    <p className={styles.rightAlignedText}>
-                        {fromMicroUnits(
-                            parseInt(accountInfo.accountAmount, 10) -
-                                parseInt(
-                                    accountInfo.accountReleaseSchedule.total,
-                                    10
-                                )
-                        )}{' '}
-                    </p>
-                </div>
-                <br />
-                <div className={styles.line}>
-                    <p className={styles.leftAlignedText}> Staked: </p>
-                    <p className={styles.rightAlignedText}>
-                        {' '}
-                        {fromMicroUnits(0)}{' '}
-                    </p>
-                </div>
+                <Header as="h1" color="blue">
+                    {fromMicroUnits(accountInfo.accountAmount)}
+                </Header>
+                <Header color="blue">
+                    At disposal:
+                    {fromMicroUnits(
+                        parseInt(accountInfo.accountAmount, 10) -
+                            parseInt(
+                                accountInfo.accountReleaseSchedule.total,
+                                10
+                            )
+                    )}{' '}
+                </Header>
+                <Header color="blue">
+                    Staked:
+                    {fromMicroUnits(0)}{' '}
+                </Header>
             </>
         );
     }
 
     return (
-        <div className={styles.accountBalanceView}>
+        <Container className={styles.accountBalanceView}>
             {buttons}
             {main}
-        </div>
+        </Container>
     );
 }

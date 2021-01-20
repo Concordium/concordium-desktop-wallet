@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { Grid } from 'semantic-ui-react';
 import attributeNames from '../constants/attributeNames.json';
 import { chosenAccountInfoSelector } from '../features/AccountSlice';
 import SidedText from './SidedText';
@@ -16,7 +17,7 @@ export default function DisplayIdentityAttributes(): JSX.element {
         accountInfo.accountCredentials[0].value.contents.policy
             .revealedAttributes;
     return (
-        <>
+        <Grid container columns={2} divided="vertically">
             {Object.keys(attributes).map((attribute: string) => (
                 <SidedText
                     key={attribute}
@@ -24,6 +25,6 @@ export default function DisplayIdentityAttributes(): JSX.element {
                     right={attributes[attribute]}
                 />
             ))}
-        </>
+        </Grid>
     );
 }

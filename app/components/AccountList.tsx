@@ -31,7 +31,9 @@ export default function AccountList() {
 
     return (
         <>
-            <Button onClick={() => push(routes.ACCOUNTCREATION)}>+</Button>
+            <Button onClick={() => dispatch(push(routes.ACCOUNTCREATION))}>
+                +
+            </Button>
             <List divided>
                 {accounts.map((account: Account, index: number) => (
                     <List.Item

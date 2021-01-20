@@ -1,25 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Button } from 'semantic-ui-react';
 import {
     loadTransactions,
     viewingShieldedSelector,
-    updateTransactions,
     transactionsSelector,
 } from '../features/TransactionSlice';
-import { loadAccounts } from '../features/AccountSlice';
-import { getHighestId } from '../utils/transactionHelpers';
 import TransactionList from './TransactionList';
 import TransactionView from './TransactionView';
 import DisplayIdentityAttributes from './DisplayIdentityAttributes';
 import locations from '../constants/transactionLocations.json';
-import styles from './Transaction.css';
 
 // TODO Rename this
 export default function TransferHistory(account) {
     const dispatch = useDispatch();
     const [location, setLocation] = useState(locations.listTransactions);
     const [chosenTransaction, setChosenTransaction] = useState(undefined);
-    const transactions = useSelector(transactionsSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
 
     useEffect(() => {
@@ -28,30 +24,20 @@ export default function TransferHistory(account) {
 
     function Header() {
         return (
-            <div className={styles.TransactionListHeader}>
-                <button
-                    type="button"
-                    className={
-                        location === locations.listTransactions
-                            ? styles.TransactionListHighligtedButton
-                            : ''
-                    }
+            <Button.Group>
+                <Button
                     onClick={() => setLocation(locations.listTransactions)}
+                    disabled={location === locations.listTransactions}
                 >
                     Transfers
-                </button>
-                <button
-                    type="button"
-                    className={
-                        location === locations.viewIdentityData
-                            ? styles.TransactionListHighligtedButton
-                            : ''
-                    }
+                </Button>
+                <Button
                     onClick={() => setLocation(locations.viewIdentityData)}
+                    disabled={location === locations.viewIdentityData}
                 >
                     Identity Data
-                </button>
-            </div>
+                </Button>
+            </Button.Group>
         );
     }
 
@@ -59,7 +45,7 @@ export default function TransferHistory(account) {
         switch (location) {
             case locations.listTransactions:
                 return (
-                    <div className={styles.transactionBox}>
+                    <>
                         <Header />
                         <TransactionList
                             viewingShielded={viewingShielded}
@@ -68,7 +54,7 @@ export default function TransferHistory(account) {
                                 setLocation(locations.viewTransaction);
                             }}
                         />
-                    </div>
+                    </>
                 );
             case locations.viewTransaction:
                 return (
@@ -81,13 +67,13 @@ export default function TransferHistory(account) {
                 );
             case locations.viewIdentityData:
                 return (
-                    <div className={styles.transactionBox}>
+                    <>
                         <Header />
                         <DisplayIdentityAttributes />
-                    </div>
+                    </>
                 );
             default:
-                return <div />;
+                return null;
         }
     }
 

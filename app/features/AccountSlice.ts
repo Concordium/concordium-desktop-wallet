@@ -95,7 +95,7 @@ export async function loadAccountsInfos(accounts, dispatch) {
             .filter(
                 (account) =>
                     isValidAddress(account.address) &&
-                    account.status === AccountStatus.confirmed
+                    account.status === AccountStatus.Confirmed
             )
             .map(async (account) => {
                 const response = await getAccountInfo(
@@ -171,11 +171,11 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
     const finalized = await waitForFinalization(transactionId);
     if (finalized !== undefined) {
         await updateAccount(accountName, {
-            status: AccountStatus.confirmed,
+            status: AccountStatus.Confirmed,
         });
     } else {
         await updateAccount(accountName, {
-            status: AccountStatus.rejected,
+            status: AccountStatus.Rejected,
         });
     }
     return loadAccounts(dispatch);

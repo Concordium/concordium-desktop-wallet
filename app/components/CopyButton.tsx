@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from 'semantic-ui-react';
 
 interface Props {
     value: string;
@@ -6,11 +7,8 @@ interface Props {
 
 export default function CopyButton({ value }: Props): JSX.element {
     return (
-        <button
-            type="button"
-            onClick={() => navigator.clipboard.writeText(value)}
-        >
+        <Button onClick={() => navigator.clipboard.writeText(value)}>
             copy
-        </button>
+        </Button>
     );
 }
