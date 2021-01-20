@@ -1,3 +1,4 @@
+/* eslint-disable */
 // This class allows us to do dynamic knex migrations from code. The migrations
 // have to be checked and run at boot up, so that we are certain that all
 // migrations have run before the application starts.

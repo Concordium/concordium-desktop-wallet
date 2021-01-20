@@ -6,8 +6,6 @@ import {
     settingsSelector,
 } from '../../features/SettingsSlice';
 import { Setting, SettingTypeEnum } from '../../utils/types';
-
-import styles from './Settings.css';
 import BooleanSetting from './BooleanSettingElement';
 import TextSetting from './TextSettingElement';
 

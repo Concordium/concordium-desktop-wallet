@@ -72,8 +72,10 @@ async function createAccount(
     );
 
     const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
-    const response = await sendTransaction(payload);
+
     // TODO Handle the case where we get a negative response from the Node
+    await sendTransaction(payload);
+
     return transactionId;
 }
 
@@ -98,6 +100,7 @@ export default function AccountCreationGenerate({
                 return dispatch(push(routes.ACCOUNTCREATION_FINAL));
             })
             .catch(
+                // eslint-disable-next-line no-console
                 (e) => console.log(`creating account failed: ${e.stack} `) // TODO: handle failure properly
             );
     }, [identity, dispatch, accountName, setText, attributes]);

@@ -3,7 +3,7 @@ import getPublicKey from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
-import { signAccountChallenge } from './AccountChallenge';
+import signAccountChallenge from './AccountChallenge';
 import { AccountTransaction, PublicInformationForIp } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 

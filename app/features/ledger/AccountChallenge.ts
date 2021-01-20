@@ -3,7 +3,7 @@ import pathAsBuffer from './Path';
 
 const INS_SIGN_CHALLENGE = 0x30;
 
-export async function signAccountChallenge(
+export default async function signAccountChallenge(
     transport: Transport,
     path: number[],
     challenge: Buffer
