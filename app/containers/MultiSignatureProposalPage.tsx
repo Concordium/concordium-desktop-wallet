@@ -1,22 +1,19 @@
 import React from 'react';
 import { Header, Segment } from 'semantic-ui-react';
-import { FoundationTransactionTypes } from '../components/multisig/MultiSignatureCreateProposalView';
 import UpdateMicroGtuPerEuroRate from '../components/multisig/UpdateMicroGtuPerEuro';
+import { UpdateType } from '../utils/types';
 
 interface Props {
-    type: FoundationTransactionTypes;
+    type: UpdateType;
 }
 
 export default function MultiSignatureProposalPage({ type }: Props) {
     // FIXME This could also be something that is not a foundation transaction!
 
-    function chooseProposalType(type: FoundationTransactionTypes) {
-        console.log(type);
-        switch (type) {
-            case 4:
+    function chooseProposalType(foundationType: UpdateType) {
+        switch (foundationType) {
+            case UpdateType.UpdateMicroGTUPerEuro:
                 return <UpdateMicroGtuPerEuroRate />;
-            case FoundationTransactionTypes.UpdateEuroEnergyRate:
-                return <h3>Nice type</h3>;
             default:
                 return <div>Invalid!</div>;
         }
@@ -26,8 +23,8 @@ export default function MultiSignatureProposalPage({ type }: Props) {
         <Segment textAlign="center" secondary>
             <Header size="large">Add the proposal details</Header>
             <Segment basic>
-                Add all the details for the {FoundationTransactionTypes[type]}{' '}
-                proposal below, and generate your transaction proposal.
+                Add all the details for the {UpdateType[type]} proposal below,
+                and generate your transaction proposal.
             </Segment>
             {chooseProposalType(type)}
         </Segment>

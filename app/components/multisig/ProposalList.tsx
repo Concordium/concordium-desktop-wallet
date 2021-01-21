@@ -23,7 +23,7 @@ export default function ProposalList() {
 
     useEffect(() => {
         loadProposals(dispatch);
-    }, []);
+    }, [dispatch]);
 
     return (
         <Menu vertical fluid>
@@ -31,6 +31,7 @@ export default function ProposalList() {
                 updateCurrentProposal(dispatch, proposal);
                 return (
                     <Menu.Item
+                        key={proposal.transaction}
                         as={Link}
                         to={{
                             pathname:

@@ -1,10 +1,10 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { chosenMenuSelector } from '../../features/MultiSignatureSlice';
-import { MultiSignatureMenuItems } from './MultiSignatureList';
 import MultiSignatureProposalView from './MultiSignatureCreateProposalView';
 import BrowseTransactionFileView from './BrowseTransactionFileView';
 import ProposalList from './ProposalList';
+import { MultiSignatureMenuItems } from '../../utils/types';
 
 export default function MultisignatureView() {
     const chosenMenu: MultiSignatureMenuItems = useSelector(chosenMenuSelector);

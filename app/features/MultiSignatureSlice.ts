@@ -1,9 +1,11 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
-import { MultiSignatureMenuItems } from '../components/multisig/MultiSignatureList';
-import { MultiSignatureTransaction } from '../components/multisig/UpdateMicroGtuPerEuro';
 import { getAll } from '../database/MultiSignatureProposalDao';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
+import {
+    MultiSignatureMenuItems,
+    MultiSignatureTransaction,
+} from '../utils/types';
 
 type MultiSignatureSliceState = {
     chosenMenu: MultiSignatureMenuItems;
@@ -50,13 +52,16 @@ export async function updateCurrentProposal(
     dispatch: Dispatch,
     multiSignatureTransactionProposal: MultiSignatureTransaction
 ) {
-    // Save the multi signature transaction to the database, so that it is also persisted.
+    // Save the multi signature transaction to the database, so that it is also persisted
     dispatch(setCurrentProposal(multiSignatureTransactionProposal));
 }
 
+/**
+ * Loads all proposals from the database and sets the state to be
+ * exactly what was loaded from the database
+ */
 export async function loadProposals(dispatch: Dispatch) {
     const allProposals = await getAll();
-    console.log(allProposals);
     dispatch(setProposals(allProposals));
 }
 

@@ -9,11 +9,9 @@ import {
     Form,
     Grid,
     Header,
-    Icon,
     Segment,
 } from 'semantic-ui-react';
 import { currentProposalSelector } from '../../features/MultiSignatureSlice';
-import styles from './Multisignature.css';
 import { MultiSignatureTransaction } from './UpdateMicroGtuPerEuro';
 import TransactionDetails from './TransactionDetails';
 import TransactionHashView from './TransactionHashView';
@@ -50,8 +48,7 @@ export default function ProposalView() {
                 currentProposal.transaction,
                 (err) => {
                     if (err) {
-                        // TODO Better error handling here, or use the synchronous function.
-                        console.error(`Unable to export transaction: ${err}`);
+                        // TODO Add error handling here.
                     }
                 }
             );

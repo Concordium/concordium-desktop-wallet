@@ -37,21 +37,23 @@ export default function BrowseTransactionFileView() {
                 throw new Error('Input was not valid JSON.');
             }
 
-            if (
-                !(
-                    instanceOfUpdateInstruction(transactionObject) ||
-                    instanceOfAccountTransaction(transactionObject)
-                )
-            ) {
+            // TODO Type should be defined in an ENUM instead of a string.
+            let type;
+            if (instanceOfUpdateInstruction(transactionObject)) {
+                type = 'UpdateInstruction';
+            } else if (instanceOfAccountTransaction(transactionObject)) {
+                // TODO Implement account transaction handler and set it here.
+                throw new Error('Not implemented yet.');
+            } else {
                 // TODO Replace thrown error with modal that tells the user that the provided file was invalid.
-                throw new Error('Invalid input!');
+                throw new Error('Invalid input.');
             }
 
             // The loaded file was valid, so proceed by loading the signing page for multi signature transactions.
             dispatch(
                 push({
                     pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
-                    state: transactionObject,
+                    state: { transaction: transactionObject, type },
                 })
             );
         }

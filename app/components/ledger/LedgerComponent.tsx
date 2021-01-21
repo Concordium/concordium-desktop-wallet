@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 
 import type {
@@ -27,39 +27,43 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
     >(undefined);
     const [waitingForDevice, setWaitingForDevice] = useState<boolean>();
 
-    const ledgerObserver: Observer<DescriptorEvent<string>> = {
-        complete: () => {
-            // TODO When is this event triggered, if at all?
-        },
-        error: (event) => {
-            setStatusMessage('Unable to connect to device');
-            setReady(false);
-        },
-        next: async (event) => {
-            if (event.type === 'add') {
-                setStatusMessage(
-                    `${event.deviceModel.productName} is connected!`
-                );
-                // TODO Can be improved by also checking if the Concordium application is open,
-                // i.e. by calling the get public-key method and verify it went okay. I do not
-                // believe there currently is a better way to check for a specific application.
-                const transport = await TransportNodeHid.open(event.path);
-                setLedger(new ConcordiumLedgerClient(transport));
-                setReady(true);
-                setWaitingForDevice(false);
-            } else {
-                setStatusMessage('Waiting for device');
-                setWaitingForDevice(true);
-                setLedger(undefined);
+    const ledgerObserver: Observer<DescriptorEvent<string>> = useMemo(() => {
+        return {
+            complete: () => {
+                // TODO When is this event triggered, if at all?
+            },
+            error: () => {
+                setStatusMessage('Unable to connect to device');
                 setReady(false);
-            }
-        },
-    };
+            },
+            next: async (event) => {
+                if (event.type === 'add') {
+                    setStatusMessage(
+                        `${event.deviceModel.productName} is connected!`
+                    );
+                    // TODO Can be improved by also checking if the Concordium application is open,
+                    // i.e. by calling the get public-key method and verify it went okay. I do not
+                    // believe there currently is a better way to check for a specific application.
+                    const transport = await TransportNodeHid.open(event.path);
+                    setLedger(new ConcordiumLedgerClient(transport));
+                    setReady(true);
+                    setWaitingForDevice(false);
+                } else {
+                    setStatusMessage('Waiting for device');
+                    setWaitingForDevice(true);
+                    setLedger(undefined);
+                    setReady(false);
+                }
+            },
+        };
+    }, []);
 
-    function listenForLedger() {
-        const subscription = TransportNodeHid.listen(ledgerObserver);
-        setLedgerSubscription(subscription);
-    }
+    const listenForLedger = useCallback(() => {
+        if (!ledgerSubscription) {
+            const subscription = TransportNodeHid.listen(ledgerObserver);
+            setLedgerSubscription(subscription);
+        }
+    }, [ledgerSubscription, ledgerObserver]);
 
     async function submit() {
         setReady(false);
@@ -84,7 +88,7 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
             }
             setLedger(undefined);
         };
-    }, []);
+    }, [ledgerSubscription, listenForLedger]);
 
     return (
         <Card fluid>

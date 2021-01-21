@@ -11,22 +11,25 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
+import { LocationDescriptorObject } from 'history';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import LedgerComponent from '../ledger/LedgerComponent';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import TransactionDetails from './TransactionDetails';
 import TransactionHashView from './TransactionHashView';
 import routes from '../../constants/routes.json';
-import { TransactionHandler } from '../../utils/types';
-import { UpdateInstructionHandler } from './UpdateInstructionHandler';
+import UpdateInstructionHandler from './UpdateInstructionHandler';
 
-const transactionHandlers: TransactionHandler<any>[] = [
-    new UpdateInstructionHandler(),
-    // TODO Replace with AccountTransactionHandler() when implemented.
-    new UpdateInstructionHandler(),
-];
+interface Props {
+    location: LocationDescriptorObject<TransactionInput>;
+}
 
-export default function SignTransactionView(props) {
+interface TransactionInput {
+    transaction;
+    type: string;
+}
+
+export default function SignTransactionView({ location }: Props) {
     const [cosign, setCosign] = useState(false);
     const [hashMatches, setHashMatches] = useState(false);
     const [pictureMatches, setPictureMatches] = useState(false);
@@ -36,26 +39,26 @@ export default function SignTransactionView(props) {
     ] = useState(false);
     const dispatch = useDispatch();
 
-    const transaction = props.location.state;
-    const transactionHandler = transactionHandlers.find((handler) =>
-        handler.instanceOf(transaction)
-    );
-    if (!transactionHandler) {
+    if (!location.state) {
         throw new Error(
             'No transaction handler was found. An invalid transaction has been received.'
         );
     }
 
-    const serializedTransaction = transactionHandler.serializeTransaction(
-        transaction
-    );
+    const { transaction } = location.state;
+    const { type } = location.state;
+
+    // TODO Add AccountTransactionHandler here when implemented.
+    const transactionHandler =
+        type === 'UpdateInstruction'
+            ? new UpdateInstructionHandler(transaction)
+            : new UpdateInstructionHandler(transaction);
+
+    const serializedTransaction = transactionHandler.serializeTransaction();
     const transactionHash = hashSha256(serializedTransaction).toString('hex');
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const signatureBytes = await transactionHandler.signTransaction(
-            ledger,
-            transaction
-        );
+        const signatureBytes = await transactionHandler.signTransaction(ledger);
         const signature = signatureBytes.toString('hex');
 
         // Load the page for exporting the signed transaction.

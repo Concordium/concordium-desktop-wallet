@@ -276,7 +276,7 @@ export interface UpdateInstruction {
 
     // Contains the payload for an update instruction. It can be any of the
     // update payloads available.
-    payload: any;
+    payload;
 
     type: UpdateType;
 
@@ -300,13 +300,13 @@ export enum UpdateType {
 }
 
 export function instanceOfAccountTransaction(
-    object: any
+    object
 ): object is AccountTransaction {
     return 'transactionKind' in object;
 }
 
 export function instanceOfUpdateInstruction(
-    object: any
+    object
 ): object is UpdateInstruction {
     return 'header' in object;
 }
@@ -316,7 +316,32 @@ export function instanceOfUpdateInstruction(
  * signing of the different transaction types.
  */
 export interface TransactionHandler<T> {
-    instanceOf: (transaction: T) => boolean;
-    serializeTransaction: (transaction: T) => Buffer;
-    signTransaction: (any, transaction: T) => Promise<Buffer>;
+    transaction: T;
+    instanceOf: () => boolean;
+    serializeTransaction: () => Buffer;
+    signTransaction: (any) => Promise<Buffer>;
+}
+
+/**
+ * The model for multi signature transaction proposals, which maps into the
+ * database model as well.
+ */
+export interface MultiSignatureTransaction {
+    // The JSON serialization of the transaction
+    transaction: string;
+    // The minimum required signatures for the transaction
+    // to be accepted on chain.
+    threshold: number;
+
+    status: string;
+}
+
+/**
+ *  An enumeration that contains the menu items available in the menu
+ *  on the multisignature page.
+ */
+export enum MultiSignatureMenuItems {
+    MakeNewProposal,
+    ProposedTransactions,
+    SignTransaction,
 }

@@ -17,17 +17,22 @@ import { UpdateInstruction } from '../../utils/types';
 import TransactionHashView from './TransactionHashView';
 import TransactionDetails from './TransactionDetails';
 
+interface Props {
+    signature: string;
+    updateInstruction: UpdateInstruction;
+    transactionHash: string;
+}
+
 /**
  * Component that contains a button for exporting the signed transaction that is
  * currently being processed.
  */
-export default function ExportSignedTransactionView(props) {
+export default function ExportSignedTransactionView(props: Props) {
     const dispatch = useDispatch();
 
-    const { signature } = props.location.state;
-    const updateInstruction: UpdateInstruction =
-        props.location.state.transaction;
-    const { transactionHash } = props.location.state;
+    const { signature } = props;
+    const { updateInstruction } = props;
+    const { transactionHash } = props;
 
     async function exportSignedTransaction() {
         const signedTransaction = {
@@ -50,8 +55,7 @@ export default function ExportSignedTransactionView(props) {
                 signedTransactionJson,
                 (err) => {
                     if (err) {
-                        // TODO Better error handling here.
-                        console.error(`Unable to export transaction: ${err}`);
+                        // TODO Add error handling here.
                     }
 
                     // Navigate back to the multi signature front page.

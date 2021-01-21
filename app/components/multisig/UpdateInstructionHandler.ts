@@ -5,23 +5,26 @@ import {
     UpdateInstruction,
     UpdateType,
 } from '../../utils/types';
-import { serializeUpdateInstruction } from '../../utils/UpdateSerialization';
+import serializeUpdateInstruction from '../../utils/UpdateSerialization';
 
-export class UpdateInstructionHandler
+export default class UpdateInstructionHandler
     implements TransactionHandler<UpdateInstruction> {
-    instanceOf(transaction: UpdateInstruction): boolean {
-        return instanceOfUpdateInstruction(transaction);
+    transaction: UpdateInstruction;
+
+    constructor(transaction: UpdateInstruction) {
+        this.transaction = transaction;
     }
 
-    serializeTransaction(transaction: UpdateInstruction): Buffer {
-        return serializeUpdateInstruction(transaction);
+    instanceOf(): boolean {
+        return instanceOfUpdateInstruction(this.transaction);
     }
 
-    signTransaction(
-        ledger: ConcordiumLedgerClient,
-        transaction: UpdateInstruction
-    ) {
-        const { type } = transaction;
+    serializeTransaction(): Buffer {
+        return serializeUpdateInstruction(this.transaction);
+    }
+
+    signTransaction(ledger: ConcordiumLedgerClient) {
+        const { type } = this.transaction;
         switch (type) {
             case UpdateType.UpdateMicroGTUPerEuro:
                 return ledger.getPrfKey(0);

@@ -1,17 +1,15 @@
 import { push } from 'connected-react-router';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import {
-    Button,
-    Divider,
-    Form,
-    Header,
-    Input,
-    Segment,
-} from 'semantic-ui-react';
+import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { updateCurrentProposal } from '../../features/MultiSignatureSlice';
-import { UpdateHeader, UpdateInstruction, UpdateType } from '../../utils/types';
+import {
+    MultiSignatureTransaction,
+    UpdateHeader,
+    UpdateInstruction,
+    UpdateType,
+} from '../../utils/types';
 import { insert } from '../../database/MultiSignatureProposalDao';
 
 export interface ExchangeRate {
@@ -20,22 +18,6 @@ export interface ExchangeRate {
     // Word 64
     denominator: number;
 }
-
-/**
- * The model for multi signature transaction proposals, which maps into the
- * database model as well.
- */
-export interface MultiSignatureTransaction {
-    // The JSON serialization of the transaction
-    transaction: string;
-    // The minimum required signatures for the transaction
-    // to be accepted on chain.
-    threshold: number;
-
-    status: string;
-}
-
-// Generate transaction proposal, should the proposer be the first to sign it? I think that makes sense if that were to be the case.
 
 /**
  * Test function for generating a static update instruction. This should happen dynamically based on the
@@ -75,6 +57,16 @@ function generateUpdateInstruction(
 
 export default function UpdateMicroGtuPerEuroRate() {
     const [microGtuPerEuro, setMicroGtuPerEuro] = useState<number>();
+    const [
+        currentMicroGtuPerEuro,
+        setCurrentMicroGtuPerEuro,
+    ] = useState<number>();
+
+    // TODO This value should be read from on-chain parameters.
+    if (!currentMicroGtuPerEuro) {
+        setCurrentMicroGtuPerEuro(10000);
+        setMicroGtuPerEuro(10000);
+    }
 
     const dispatch = useDispatch();
 
@@ -101,8 +93,8 @@ export default function UpdateMicroGtuPerEuroRate() {
                 <Form.Input
                     width="5"
                     label="Current micro GTU per euro rate"
-                    value={10000}
                     readOnly
+                    value={currentMicroGtuPerEuro}
                 />
                 <Form.Input
                     width="5"
@@ -110,7 +102,7 @@ export default function UpdateMicroGtuPerEuroRate() {
                     value={microGtuPerEuro}
                     onChange={(e) => {
                         if (e.target.value) {
-                            setMicroGtuPerEuro(parseInt(e.target.value));
+                            setMicroGtuPerEuro(parseInt(e.target.value, 10));
                         }
                     }}
                 />

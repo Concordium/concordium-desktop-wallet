@@ -1,4 +1,4 @@
-import { MultiSignatureTransaction } from '../components/multisig/UpdateMicroGtuPerEuro';
+import { MultiSignatureTransaction } from '../utils/types';
 import knex from './knex';
 
 const multiSignatureProposalTable = 'multi_signature_proposal';

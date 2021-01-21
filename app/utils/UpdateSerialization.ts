@@ -2,29 +2,16 @@ import { ExchangeRate } from '../components/multisig/UpdateMicroGtuPerEuro';
 import { UpdateHeader, UpdateInstruction } from './types';
 
 /**
- * Serializes an UpdateInstruction into its byte representation that can be
- * understood by the chain. Note that this excludes the signatures, and the
- * result of the method is what should be signed before being submitted to
- * the chain.
+ * Serializes an ExchangeRate to bytes.
  */
-export function serializeUpdateInstruction(
-    updateInstruction: UpdateInstruction
-) {
-    const serializedPayload = serializeUpdatePayload(updateInstruction.payload);
-    const updateHeaderWithPayloadSize = {
-        ...updateInstruction.header,
-        payloadSize: serializedPayload.length,
-    };
-    const serializedHeader = serializeUpdateHeader(updateHeaderWithPayloadSize);
-
-    const serializedUpdateType = Buffer.alloc(1);
-    serializedUpdateType.writeInt8(updateInstruction.type, 0);
-
-    return Buffer.concat([
-        serializedHeader,
-        serializedUpdateType,
-        serializedPayload,
-    ]);
+function serializeExchangeRate(exchangeRate: ExchangeRate) {
+    const serializedExchangeRate = Buffer.alloc(16);
+    serializedExchangeRate.writeBigUInt64BE(BigInt(exchangeRate.numerator), 0);
+    serializedExchangeRate.writeBigUInt64BE(
+        BigInt(exchangeRate.denominator),
+        8
+    );
+    return serializedExchangeRate;
 }
 
 /**
@@ -56,14 +43,27 @@ function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
 }
 
 /**
- * Serializes an ExchangeRate to bytes.
+ * Serializes an UpdateInstruction into its byte representation that can be
+ * understood by the chain. Note that this excludes the signatures, and the
+ * result of the method is what should be signed before being submitted to
+ * the chain.
  */
-function serializeExchangeRate(exchangeRate: ExchangeRate) {
-    const serializedExchangeRate = Buffer.alloc(16);
-    serializedExchangeRate.writeBigUInt64BE(BigInt(exchangeRate.numerator), 0);
-    serializedExchangeRate.writeBigUInt64BE(
-        BigInt(exchangeRate.denominator),
-        8
-    );
-    return serializedExchangeRate;
+export default function serializeUpdateInstruction(
+    updateInstruction: UpdateInstruction
+) {
+    const serializedPayload = serializeUpdatePayload(updateInstruction.payload);
+    const updateHeaderWithPayloadSize = {
+        ...updateInstruction.header,
+        payloadSize: serializedPayload.length,
+    };
+    const serializedHeader = serializeUpdateHeader(updateHeaderWithPayloadSize);
+
+    const serializedUpdateType = Buffer.alloc(1);
+    serializedUpdateType.writeInt8(updateInstruction.type, 0);
+
+    return Buffer.concat([
+        serializedHeader,
+        serializedUpdateType,
+        serializedPayload,
+    ]);
 }
