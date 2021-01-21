@@ -36,20 +36,12 @@ async function migrate() {
 
     knex()
         .then((db) => {
-            return db.migrate.latest(config).catch((error: Error) => {
-                dialog.showErrorBox(
-                    'Migration error',
-                    `An unexpected error occurred during migration of the database. ${error}`
-                );
-                process.nextTick(() => {
-                    process.exit(0);
-                });
-            });
+            return db.migrate.latest(config);
         })
         .catch((error: Error) => {
             dialog.showErrorBox(
-                'Database error',
-                `An unexpected error occurred while attempting to access the database. ${error}`
+                'Migration error',
+                `An unexpected error occurred while attempting to migrate the database. ${error}`
             );
             process.nextTick(() => {
                 process.exit(0);
@@ -121,9 +113,11 @@ const createWindow = async () => {
             process.env.ERB_SECURE !== 'true'
                 ? {
                       nodeIntegration: true,
+                      webviewTag: true,
                   }
                 : {
                       preload: path.join(__dirname, 'dist/renderer.prod.js'),
+                      webviewTag: true,
                   },
     });
 

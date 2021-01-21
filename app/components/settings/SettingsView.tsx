@@ -1,12 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { Form } from 'semantic-ui-react';
 import {
     chosenIndexSelector,
     settingsSelector,
 } from '../../features/SettingsSlice';
 import { Setting, SettingTypeEnum } from '../../utils/types';
-
-import styles from './Settings.css';
 import BooleanSetting from './BooleanSettingElement';
 import TextSetting from './TextSettingElement';
 
@@ -19,7 +18,7 @@ export default function SettingsView() {
     }
 
     return (
-        <div className={styles.halfPage}>
+        <Form>
             {settings[chosenIndex].settings.map((childSetting: Setting) => {
                 switch (childSetting.type) {
                     case SettingTypeEnum.Boolean:
@@ -40,6 +39,6 @@ export default function SettingsView() {
                         return '';
                 }
             })}
-        </div>
+        </Form>
     );
 }

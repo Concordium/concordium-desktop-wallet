@@ -3,11 +3,11 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import { hot } from 'react-hot-loader/root';
 import { History } from 'history';
+import { Grid } from 'semantic-ui-react';
 import { Store } from '../store';
 import Routes from '../Routes';
 import SideBar from '../components/Sidebar';
 import Header from '../components/Header';
-import styles from '../Main.css';
 
 type Props = {
     store: Store;
@@ -17,13 +17,16 @@ type Props = {
 const Root = ({ store, history }: Props) => (
     <Provider store={store}>
         <ConnectedRouter history={history}>
-            <div className={styles.globalDiv}>
-                <SideBar />
-                <div className={styles.rightSide}>
+            <Grid columns="equal">
+                <Grid.Column width={3}>
+                    <SideBar />
+                </Grid.Column>
+                <Grid.Column>
                     <Header />
                     <Routes />
-                </div>
-            </div>
+                </Grid.Column>
+                <Grid.Column width={1} />
+            </Grid>
         </ConnectedRouter>
     </Provider>
 );

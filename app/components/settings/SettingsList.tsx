@@ -1,25 +1,23 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Header, Menu } from 'semantic-ui-react';
 import { selectSettings, settingsSelector } from '../../features/SettingsSlice';
-
-import styles from './Settings.css';
 
 export default function SettingsList() {
     const dispatch = useDispatch();
     const settings = useSelector(settingsSelector);
 
     return (
-        <div className={styles.halfPage}>
+        <Menu vertical size="massive">
             {settings.map((setting, i) => (
-                <div
-                    role="button"
-                    tabIndex={i}
-                    onClick={() => selectSettings(dispatch, i)}
+                <Menu.Item
                     key={setting.type}
+                    name={setting.type}
+                    onClick={() => selectSettings(dispatch, i)}
                 >
-                    <h1>{setting.type}</h1>
-                </div>
+                    <Header>{setting.type}</Header>
+                </Menu.Item>
             ))}
-        </div>
+        </Menu>
     );
 }

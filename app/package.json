@@ -14,8 +14,8 @@
         "postinstall": "yarn electron-rebuild install-app-deps"
     },
     "dependencies": {
-        "bs58check": "^2.1.2",
-        "electron-json-storage": "^4.3.0",
+        "@ledgerhq/hw-transport-node-hid": "^5.30.0",
+        "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "grpc": "^1.24.4",
         "knex": "^0.21.13",
         "node-abi": "^2.19.3",

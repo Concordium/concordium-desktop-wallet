@@ -1,21 +1,25 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
-import { getAllIdentities } from '../database/IdentityDao';
-import { Identity } from '../utils/types';
+import {
+    getAllIdentities,
+    insertIdentity,
+    updateIdentity,
+} from '../database/IdentityDao';
+import { Identity, IdentityStatus } from '../utils/types';
 
 const identitySlice = createSlice({
     name: 'identities',
     initialState: {
-        identities: [],
+        identities: undefined,
         chosenIdentity: undefined,
     },
     reducers: {
-        updateIdentities: (state, index) => {
-            state.identities = index.payload;
+        updateIdentities: (state, input) => {
+            state.identities = input.payload;
         },
-        chooseIdentity: (state, index) => {
-            state.chosenIdentity = index.payload;
+        chooseIdentity: (state, input) => {
+            state.chosenIdentity = input.payload;
         },
     },
 });
@@ -31,6 +35,41 @@ export const chosenIdentitySelector = (state: RootState) =>
 export async function loadIdentities(dispatch: Dispatch) {
     const identities: Identity[] = await getAllIdentities();
     dispatch(updateIdentities(identities));
+}
+
+export async function addPendingIdentity(
+    dispatch: Dispatch,
+    identityName: string,
+    codeUri: string,
+    identityProvider,
+    randomness: string
+) {
+    const identity = {
+        name: identityName,
+        status: IdentityStatus.Pending,
+        codeUri,
+        identityProvider: JSON.stringify(identityProvider),
+        randomness,
+    };
+    await insertIdentity(identity);
+    return loadIdentities(dispatch);
+}
+
+export async function confirmIdentity(
+    dispatch: Dispatch,
+    identityName: string,
+    identityObject
+) {
+    await updateIdentity(identityName, {
+        status: IdentityStatus.Confirmed,
+        identityObject: JSON.stringify(identityObject),
+    });
+    await loadIdentities(dispatch);
+}
+
+export async function rejectIdentity(dispatch: Dispatch, identityName: string) {
+    await updateIdentity(identityName, { status: IdentityStatus.Rejected });
+    await loadIdentities(dispatch);
 }
 
 export default identitySlice.reducer;

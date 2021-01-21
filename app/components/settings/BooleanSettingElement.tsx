@@ -1,9 +1,8 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import { Checkbox, Form } from 'semantic-ui-react';
 import { updateSettingEntry } from '../../features/SettingsSlice';
 import { Setting } from '../../utils/types';
-
-import styles from './Settings.css';
 
 interface Props {
     setting: Setting;
@@ -23,16 +22,13 @@ export default function BooleanSetting({ setting }: Props) {
     }
 
     return (
-        <div>
-            <label className={styles.switch}>
-                <input
-                    type="checkbox"
-                    onClick={handleClick}
-                    defaultChecked={setting.value === '1'}
-                />
-                <span className={styles.slider} />
-                <h3>{setting.name}</h3>
-            </label>
-        </div>
+        <Form.Field>
+            <Checkbox
+                toggle
+                label={setting.name}
+                defaultChecked={setting.value === '1'}
+                onClick={handleClick}
+            />
+        </Form.Field>
     );
 }

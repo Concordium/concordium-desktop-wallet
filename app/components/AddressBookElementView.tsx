@@ -1,59 +1,76 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Button, Card, Header, Modal } from 'semantic-ui-react';
 import {
     addressBookSelector,
     chosenIndexSelector,
     removeFromAddressBook,
     updateAddressBookEntry,
 } from '../features/AddressBookSlice';
-import styles from './Accounts.css';
-import Modal from './Modal';
 import AddAddress from './AddAddress';
 
 export default function AddressBookElementView() {
+    const [open, setOpen] = useState(false);
+
     const dispatch = useDispatch();
     const chosenIndex = useSelector(chosenIndexSelector);
     const addressBook = useSelector(addressBookSelector);
     const chosenEntry = addressBook[chosenIndex];
 
-    function submitAddress(name, address, note) {
-        const payload = {
-            index: chosenIndex,
-            entry: {
-                name,
-                address,
-                note,
-            },
-        };
-        dispatch(updateAddressBookEntry(payload));
+    if (chosenIndex >= addressBook.length) {
+        return null;
     }
 
-    const modalButton = (open) => <button onClick={open}>edit</button>;
-
-    const modalBody = (close) => {
-        return (
-            <>
-                <button onClick={close}>x</button>
-                {new AddAddress(close, submitAddress, chosenEntry)}
-            </>
-        );
-    };
-
-    const modal = Modal(modalButton, modalBody);
-
-    if (chosenIndex >= addressBook.length) {
-        return <div />;
+    function submitAddress(name, address, note) {
+        const entry = {
+            name,
+            address,
+            note,
+        };
+        updateAddressBookEntry(dispatch, chosenEntry.name, entry);
     }
 
     return (
-        <div className={styles.chosenAccount}>
-            {chosenEntry.name} {chosenEntry.address} {chosenEntry.note}{' '}
-            <button
-                onClick={() => dispatch(removeFromAddressBook(chosenIndex))}
-            >
-                remove
-            </button>
-            {modal}
-        </div>
+        <Card fluid>
+            <Card.Content>
+                <Card.Header textAlign="center">{chosenEntry.name}</Card.Header>
+                <Card.Description textAlign="center">
+                    <Header size="small">Account address</Header>
+                    {chosenEntry.address}
+                </Card.Description>
+                <Card.Description textAlign="center">
+                    <Header size="small">Notes</Header>
+                    {chosenEntry.note}
+                </Card.Description>
+            </Card.Content>
+            <Button.Group>
+                <Modal
+                    closeIcon
+                    onClose={() => setOpen(false)}
+                    onOpen={() => setOpen(true)}
+                    open={open}
+                    trigger={<Button>Edit</Button>}
+                    dimmer="blurring"
+                    closeOnDimmerClick={false}
+                >
+                    <Modal.Header>
+                        Edit an entry in your address book
+                    </Modal.Header>
+                    <Modal.Content>
+                        <AddAddress
+                            initialValues={chosenEntry}
+                            close={() => setOpen(false)}
+                            submit={submitAddress}
+                        />
+                    </Modal.Content>
+                </Modal>
+                <Button
+                    negative
+                    onClick={() => removeFromAddressBook(dispatch, chosenEntry)}
+                >
+                    Delete
+                </Button>
+            </Button.Group>
+        </Card>
     );
 }

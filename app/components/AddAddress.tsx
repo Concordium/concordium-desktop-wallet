@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import styles from './Styling.css';
+import { Button, Form, Input } from 'semantic-ui-react';
+import { AddressBookEntry } from '../utils/types';
 
-export default function AddAddress(close, submit, initialValues?) {
+interface Props {
+    close(): void;
+    submit(name: string, address: string, note: string): void;
+    initialValues?: AddressBookEntry;
+}
+
+function AddAddress({ close, submit, initialValues }: Props) {
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [note, setNote] = useState('');
@@ -15,45 +22,45 @@ export default function AddAddress(close, submit, initialValues?) {
     }, [initialValues, setName, setAddress, setNote]);
 
     return (
-        <div>
-            <span className={styles.modalElement}>
-                <input
+        <Form
+            onSubmit={() => {
+                submit(name, address, note);
+                close();
+            }}
+        >
+            <Form.Field>
+                <Input
+                    placeholder="Enter recipient name"
                     name="name"
-                    className={styles.input}
-                    placeholder="Enter Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    data-tid="hashInput"
                 />
-            </span>
-            <span className={styles.modalElement}>
-                <input
+            </Form.Field>
+            <Form.Field>
+                <Input
+                    placeholder="Paste the account address here"
                     name="address"
-                    className={styles.input}
-                    placeholder="Enter Address"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    data-tid="hashInput"
                 />
-            </span>
-            <span className={styles.modalElement}>
-                <input
-                    name="notes"
-                    className={styles.input}
-                    placeholder="Enter Notes"
+            </Form.Field>
+            <Form.Field>
+                <Input
+                    placeholder="You can add a note here"
+                    name="note"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    data-tid="hashInput"
                 />
-            </span>
-            <button
-                onClick={() => {
-                    submit(name, address, note);
-                    close();
-                }}
-            >
-                submit
-            </button>
-        </div>
+            </Form.Field>
+            <Button positive type="submit">
+                Submit
+            </Button>
+        </Form>
     );
 }
+
+AddAddress.defaultProps = {
+    initialValues: undefined,
+};
+
+export default AddAddress;

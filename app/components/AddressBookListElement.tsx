@@ -1,16 +1,16 @@
 import React from 'react';
-import styles from './Accounts.css';
+import { Header, Menu } from 'semantic-ui-react';
+import { AddressBookEntry } from '../utils/types';
 
-export default function AddressBookListElement(entry, isChosen, onClick) {
+interface Props {
+    entry: AddressBookEntry;
+    onClick(): void;
+}
+
+export default function AddressBookListElement({ entry, onClick }: Props) {
     return (
-        <div
-            key={entry.address}
-            onClick={() => onClick()}
-            className={`${styles.accountListElement} ${
-                isChosen ? styles.chosenAccountListElement : null
-            }`}
-        >
-            {entry.name}
-        </div>
+        <Menu.Item key={entry.address} onClick={onClick}>
+            <Header>{entry.name}</Header>
+        </Menu.Item>
     );
 }
