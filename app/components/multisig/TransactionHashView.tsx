@@ -1,7 +1,6 @@
 import React from 'react';
 import { Container, Header, Icon } from 'semantic-ui-react';
-
-// TODO Compute identicon for the hash and display it.
+import Identicon from 'react-identicons';
 
 interface Props {
     transactionHash: string;
@@ -15,7 +14,7 @@ export default function TransactionHashView({ transactionHash }: Props) {
     return (
         <Container>
             <Header>Transaction identicon</Header>
-            <Icon name="random" size="huge" />
+            <Identicon string={transactionHash} size={128}/>
             <Header>Transaction hash</Header>
             {transactionHash}
         </Container>
