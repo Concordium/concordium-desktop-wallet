@@ -190,12 +190,11 @@ export interface PublicInformationForIp {
     publicKeys: NewAccount;
 }
 
-// Statuses that a Transaction can have.
+// Statuses that a transaction can have.
 export enum TransactionStatus {
-    received = 1,
-    absent = 2,
-    comitted = 3,
-    finalized = 4,
+    Finalized = 'finalized',
+    Rejected = 'rejected',
+    Pending = 'pending',
 }
 
 // Types of origins that a Transaction can have.

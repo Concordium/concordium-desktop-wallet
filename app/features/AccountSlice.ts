@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import bs58check from 'bs58check';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 import {
@@ -72,20 +73,22 @@ export const {
     setAccountInfos,
 } = accountsSlice.actions;
 
-function isValidAddress(address): boolean {
-    // TODO: Check length
+// Given a string, checks if it is a valid bs58check address.
+// TODO: check length?
+function isValidAddress(address: string): boolean {
     try {
         if (!address) {
             return false;
         }
-        const regex = /[0-9A-Fa-f]{6}/g;
-        regex.test(address);
+        bs58check.decode(address); // This function should an error if invalid checksum
     } catch (e) {
         return false;
     }
     return true;
 }
 
+// Loads the given accounts' infos from the node, then updates the
+// AccountInfo state.
 export async function loadAccountsInfos(accounts, dispatch) {
     const map = {};
     const consenusInfo = JSON.parse((await getConsensusInfo()).getValue());
@@ -126,6 +129,7 @@ export async function loadAccountsInfos(accounts, dispatch) {
     return dispatch(setAccountInfos(map));
 }
 
+// Load accounts into state, and updates their infos
 export async function loadAccounts(dispatch: Dispatch) {
     const accounts: Account[] = await getAllAccounts();
     await loadAccountsInfos(accounts, dispatch);
@@ -133,6 +137,7 @@ export async function loadAccounts(dispatch: Dispatch) {
     return true;
 }
 
+// Add an account with pending status..
 export async function addPendingAccount(
     dispatch: Dispatch,
     accountName: string,
@@ -167,6 +172,8 @@ export async function confirmInitialAccount(
     return loadAccounts(dispatch);
 }
 
+// Attempts to confirm account by checking the status of the given transaction
+// (Which is assumed to be of the credentialdeployment)
 export async function confirmAccount(dispatch, accountName, transactionId) {
     const finalized = await waitForFinalization(transactionId);
     if (finalized !== undefined) {
@@ -181,6 +188,7 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
     return loadAccounts(dispatch);
 }
 
+// Get The next unused account number of the identity with the given ID
 export async function getNextAccountNumber(identityId) {
     const accounts: Account[] = await getAccountsOfIdentity(identityId);
     const currentNumber = accounts.reduce(
@@ -190,6 +198,8 @@ export async function getNextAccountNumber(identityId) {
     return currentNumber + 1;
 }
 
+// Decrypts the shielded account balance of the given account, using the prfKey.
+// This function expects the prfKey to match the account's prfKey.
 export async function decryptAccountBalance(dispatch, prfKey, account) {
     const encryptedAmounts = JSON.parse(account.incomingAmounts);
     encryptedAmounts.push(account.selfAmounts);

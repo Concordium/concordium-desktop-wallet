@@ -61,11 +61,12 @@ async function lookupName(address): string {
  * returns the potentially modified transaction.
  */
 async function attachName(transaction) {
+    const updatedTransaction = { ...transaction };
     const toName = await lookupName(transaction.toAddress);
-    if (toName) transaction.toAddressName = toName;
+    if (toName) updatedTransaction.toAddressName = toName;
     const fromName = await lookupName(transaction.fromAddress);
-    if (fromName) transaction.fromAddressName = fromName;
-    return transaction;
+    if (fromName) updatedTransaction.fromAddressName = fromName;
+    return updatedTransaction;
 }
 
 /**
