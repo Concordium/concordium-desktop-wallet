@@ -1,4 +1,4 @@
-import grpc from 'grpc';
+import { credentials, Metadata } from '@grpc/grpc-js';
 import { P2PClient } from '../proto/concordium_p2p_rpc_grpc_pb';
 import {
     BlockHash,
@@ -19,11 +19,11 @@ const clientAddress = '172.31.33.57'; // TODO: This should be a setting? (The us
 
 const client = new P2PClient(
     `${clientAddress}:${port}`,
-    grpc.credentials.createInsecure()
+    credentials.createInsecure()
 );
 
 function buildMetaData(): MetaData {
-    const meta = new grpc.Metadata();
+    const meta = new Metadata();
     meta.add('authentication', 'rpcadmin');
     return meta;
 }
