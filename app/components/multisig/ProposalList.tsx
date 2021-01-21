@@ -5,11 +5,11 @@ import { Menu } from 'semantic-ui-react';
 import {
     loadProposals,
     proposalsSelector,
-    updateCurrentProposal,
+    setCurrentProposal,
 } from '../../features/MultiSignatureSlice';
 import routes from '../../constants/routes.json';
 
-// TODO The menu item description should be something other than the status. Currently it is not
+// TODO The menu item description should be something other than the JSON of the transaction. Currently it is not
 // clear to me what it should be from our UI sketches, as they only represent simple transfers.
 // Perhaps it should contain the status, and perhaps how many signatures are missing? Type of transaction?
 // Account that created it if not a governance transaction.
@@ -28,7 +28,6 @@ export default function ProposalList() {
     return (
         <Menu vertical fluid>
             {proposals.map((proposal) => {
-                updateCurrentProposal(dispatch, proposal);
                 return (
                     <Menu.Item
                         key={proposal.transaction}
@@ -37,8 +36,9 @@ export default function ProposalList() {
                             pathname:
                                 routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING,
                         }}
+                        onClick={() => dispatch(setCurrentProposal(proposal))}
                     >
-                        {proposal.status}
+                        {proposal.transaction}
                     </Menu.Item>
                 );
             })}
