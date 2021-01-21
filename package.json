@@ -262,16 +262,17 @@
     "react": "^16.13.1",
     "react-dom": "^16.12.0",
     "react-hot-loader": "^4.12.21",
+    "react-identicons": "^1.2.4",
     "react-modal": "^3.12.1",
     "react-redux": "^7.2.1",
     "react-router-dom": "^5.2.0",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
-    "wasm-pack": "^0.9.1",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.2",
-    "source-map-support": "^0.5.19"
+    "source-map-support": "^0.5.19",
+    "wasm-pack": "^0.9.1"
   },
   "devEngines": {
     "node": ">=7.x",

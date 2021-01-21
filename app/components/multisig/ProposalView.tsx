@@ -128,7 +128,7 @@ export default function ProposalView() {
                                 {instruction.signatures.map((signature) => {
                                     return (
                                         <Form.Field key={signature}>
-                                            <Checkbox label="Signed" defaultChecked={true} />
+                                            <Checkbox label="Signed" defaultChecked={true} readOnly />
                                         </Form.Field>
                                     )})}
                                 {unsignedCheckboxes}
@@ -156,7 +156,7 @@ export default function ProposalView() {
                     </Button>
                 </Grid.Column>
                 <Grid.Column>
-                    <Button fluid positive disabled={instruction.signatures.length !== currentProposal.threshold}>
+                    <Button fluid positive disabled={instruction.signatures.length == currentProposal.threshold}>
                         Submit transcation to chain
                     </Button>
                 </Grid.Column>

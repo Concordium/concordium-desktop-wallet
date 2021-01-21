@@ -327,12 +327,14 @@ export interface TransactionHandler<T> {
  * database model as well.
  */
 export interface MultiSignatureTransaction {
+    // logical id in the database
+    id: number;
     // The JSON serialization of the transaction
     transaction: string;
     // The minimum required signatures for the transaction
     // to be accepted on chain.
     threshold: number;
-
+    
     status: string;
 }
 

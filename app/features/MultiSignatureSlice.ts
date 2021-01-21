@@ -1,5 +1,5 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
-import { getAll } from '../database/MultiSignatureProposalDao';
+import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 import {
@@ -48,11 +48,15 @@ export const currentProposalSelector = (state: RootState) =>
 export const proposalsSelector = (state: RootState) =>
     state.multisignature.proposals;
 
+/**
+ * Updates the multi signature transaction in the database, and updates the
+ * state with the updated transaction.
+ */
 export async function updateCurrentProposal(
     dispatch: Dispatch,
     multiSignatureTransactionProposal: MultiSignatureTransaction
 ) {
-    // Save the multi signature transaction to the database, so that it is also persisted
+    updateEntry(multiSignatureTransactionProposal);
     dispatch(setCurrentProposal(multiSignatureTransactionProposal));
 }
 
