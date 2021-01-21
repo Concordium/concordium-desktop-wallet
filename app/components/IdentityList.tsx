@@ -13,6 +13,10 @@ import {
 } from '../features/IdentitySlice';
 import { Identity } from '../utils/types';
 
+/**
+ * Displays the List of local identities, And allows picking the chosen identity.
+ * TODO: move the "IdentityIssuance start button"?
+ */
 export default function IdentityList() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);

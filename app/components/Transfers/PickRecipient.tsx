@@ -12,6 +12,9 @@ interface Props {
     pickRecipient(recipient: AddressBookEntry): void;
 }
 
+/**
+ * Allows the user to pick a entry in the AddressBook.
+ */
 export default function PickRecipient({
     returnFunction,
     pickRecipient,

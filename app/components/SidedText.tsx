@@ -6,6 +6,10 @@ interface Props {
     right: string;
 }
 
+/**
+ * Helper component to display two strings in a grid,
+ * each aligned by their respective side.
+ */
 export default function sidedText({ left, right }: Props) {
     return (
         <Grid.Row>

@@ -91,6 +91,9 @@ interface Props {
     onClick?: () => void;
 }
 
+/**
+ * Displays the given transaction basic information.
+ */
 function TransactionListElement({ transaction, onClick }: Props): JSX.element {
     const time = parseTime(transaction.blockTime);
     const name = getName(transaction);

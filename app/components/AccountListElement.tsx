@@ -10,7 +10,12 @@ interface Props {
     accountInfo: AccountInfo;
     onClick?(shielded: boolean): void;
 }
-
+/**
+ * Displays the information and balances of the given account.
+ * Takes an onClick, which is triggered by when clicking either
+ * the shielded balance (with argument true)
+ * or the public balances (with argument false)
+ */
 function AccountListElement({
     account,
     accountInfo,
@@ -26,7 +31,7 @@ function AccountListElement({
         accountInfo && accountInfo.accountReleaseSchedule
             ? accountInfo.accountReleaseSchedule.total
             : 0;
-    const hidden = account.allDecrypted ? '' : ' + ?'; // Replace with locked Symbol
+    const hidden = account.allDecrypted ? '' : ' + ?'; // TODO: Replace with locked Symbol
 
     return (
         <Grid container columns={2} divided="vertically">

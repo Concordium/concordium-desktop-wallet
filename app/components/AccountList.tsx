@@ -15,6 +15,10 @@ import AccountListElement from './AccountListElement';
 import routes from '../constants/routes.json';
 import { Account } from '../utils/types';
 
+/**
+ * Displays the List of local accounts, And allows picking the chosen account.
+ * TODO: move the "AccountCreation start button"?
+ */
 export default function AccountList() {
     const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);

@@ -6,6 +6,9 @@ import IdentityListElement from './IdentityListElement';
 import { IdentityObject, IdentityStatus } from '../utils/types';
 import attributeNames from '../constants/attributeNames.json';
 
+/**
+ * Detailed view of the chosen identity.
+ */
 export default function IdentityView() {
     const identity = useSelector(chosenIdentitySelector);
 

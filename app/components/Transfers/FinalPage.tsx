@@ -10,7 +10,11 @@ interface Props {
     recipient: AddressBookEntry;
 }
 
-// TODO: fix estimatedFee
+/**
+ * Displays details of a completed transaction.
+ * TODO: fix estimatedFee
+ * TODO: generalize (right now expects simple transfer)
+ */
 export default function FinalPage({
     transaction,
     recipient,

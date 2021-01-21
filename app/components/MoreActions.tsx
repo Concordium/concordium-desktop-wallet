@@ -7,6 +7,11 @@ import locations from '../constants/moreActionLocations.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
 
+/**
+ * Lists additional actions, for the account.
+ * And controls the flow of those actions' pages.
+ * TODO: Find a better name?
+ */
 export default function MoreActions(
     account: Account,
     accountInfo: AccountInfo

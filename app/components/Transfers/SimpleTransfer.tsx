@@ -9,6 +9,9 @@ import FinalPage from './FinalPage';
 import locations from '../../constants/transferLocations.json';
 import { AddressBookEntry, Account } from '../../utils/types';
 
+/**
+ * Controls the flow of creating a simple transfer.
+ */
 export default function SimpleTransfer(account: Account) {
     const [amount, setAmount] = useState('');
     const [recipient, setRecipient] = useState(undefined);

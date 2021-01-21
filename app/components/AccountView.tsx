@@ -16,6 +16,10 @@ import transferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
 import DecryptComponent from './DecryptComponent';
 
+/**
+ * Detailed view of the chosen account and it's transactions.
+ * Also contains controls for sending transfers.
+ */
 export default function AccountView() {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);

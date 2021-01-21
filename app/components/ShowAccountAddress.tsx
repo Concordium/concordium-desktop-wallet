@@ -8,8 +8,10 @@ interface Props {
     returnFunction(): void;
 }
 
-// TODO display QR?
-
+/**
+ * Displays the account's address, and allows the user to copy it.
+ * TODO display QR code of the address?
+ */
 export default function ShowAccountAddress({ account, returnFunction }: Props) {
     return (
         <>

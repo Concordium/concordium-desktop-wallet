@@ -44,6 +44,10 @@ async function monitorTransaction(transactionHash) {
     }
 }
 
+/**
+ *   Builds and Allows signing a simple transfer.
+ *  TODO: generalize this component (when adding other transfers)
+ */
 export default function ConfirmTransferComponent({
     account,
     amount,
@@ -53,6 +57,10 @@ export default function ConfirmTransferComponent({
 }: Props): JSX.Element {
     const estimatedFee = 1; // TODO calculate
 
+    // This function builds the transaction then signs the transaction,
+    // send the transaction, saves it, begins monitoring it's status
+    // and then redirects to final page.
+    // TODO: Break this function up
     async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
         const transferTransaction = await createSimpleTransferTransaction(
             account.address,

@@ -10,6 +10,10 @@ interface Props {
     setAmount(amount: string): void;
 }
 
+/**
+ * Allows the user to enter an amount, and redirects to picking a recipient.
+ * TODO: Rework structure to simplify this component?
+ */
 export default function PickAmount({
     setLocation,
     recipient,

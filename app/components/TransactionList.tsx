@@ -9,6 +9,12 @@ interface Props {
     chooseElement: (transaction: TransferTransaction) => void;
 }
 
+/**
+ * Displays the currently chosen transactions
+ * Takes a function chooseElement, to allows the parent
+ * to get notified of clicked transactions.
+ * TODO: rename chooseElement?
+ */
 function TransactionList({ chooseElement }: Props): JSX.Element {
     const transactions = useSelector(transactionsSelector);
 

@@ -11,8 +11,11 @@ import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
 } from '../features/AccountSlice';
-
-export default function AccountBalanceView() {
+/**
+ * Displays the chosen Account's balance, and contains
+ * buttons to toggle whether viewing shielded or unshielded balance/transactions.
+ */
+export default function AccountBalanceView(): JSX.Element {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);

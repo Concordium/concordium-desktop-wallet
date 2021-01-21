@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Header, Label, Image } from 'semantic-ui-react';
-import { Identity, IdentityStatus } from '../utils/types';
+import { Identity, IdentityStatus, YearMonth } from '../utils/types';
 import pendingImage from '../../resources/pending.svg';
 import successImage from '../../resources/success.svg';
 import rejectedImage from '../../resources/warning.svg';
@@ -9,6 +9,7 @@ interface Props {
     identity: Identity;
 }
 
+// Returns the image corresponding to the given status.
 function statusImage(status: IdentityStatus) {
     switch (status) {
         case IdentityStatus.Confirmed:
@@ -22,7 +23,10 @@ function statusImage(status: IdentityStatus) {
     }
 }
 
-function formatDate(date: string) {
+// given a YearMonth string (YYYYMM), returns
+// a displayable format eg:
+// given "202001" => "January 2020"
+function formatDate(date: YearMonth) {
     const dtFormat = new Intl.DateTimeFormat('en-GB', {
         month: 'long',
         year: 'numeric',
@@ -31,6 +35,10 @@ function formatDate(date: string) {
     return dtFormat.format(new Date(`${date.slice(0, 4)}-${date.slice(4, 6)}`));
 }
 
+/**
+ * Displays the information of the Identity.
+ * TODO: Simplify structure
+ */
 function IdentityListElement({ identity }: Props): JSX.Element {
     const identityProvider = JSON.parse(identity.identityProvider);
     const identityObject = JSON.parse(identity.identityObject);

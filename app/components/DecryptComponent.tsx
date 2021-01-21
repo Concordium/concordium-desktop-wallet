@@ -13,7 +13,10 @@ interface Props {
     account: Account;
 }
 
-// TODO: Figure out where this should be
+/**
+ * Wrapper for the ledger component, for decrypting the account'
+ * shielded balance and transactions.
+ */
 export default function DecryptComponent({ account }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);

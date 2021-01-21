@@ -8,7 +8,11 @@ interface Props {
     accountInfo: AccountInfo;
     returnFunction(): void;
 }
-
+/**
+ * Displays the account's release schedule:
+ * Each release (amount and time)
+ * and the total locked value.
+ */
 export default function ShowReleaseSchedule({
     accountInfo,
     returnFunction,

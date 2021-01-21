@@ -9,6 +9,9 @@ interface Props {
     returnFunction: () => void;
 }
 
+/**
+ * Detailed view of the given transaction.
+ */
 function TransactionView({ transaction, returnFunction }: Props) {
     return (
         <List>
