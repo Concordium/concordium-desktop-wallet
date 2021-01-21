@@ -1,4 +1,4 @@
-import { AccountAddress } from '../proto/api_pb';
+import { AccountAddress } from '../proto/concordium_p2p_rpc_pb';
 
 export interface Versioned<T> {
     v: number;

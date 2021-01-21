@@ -1,10 +1,14 @@
 import grpc from 'grpc';
-import { P2PClient } from '../proto/api_grpc_pb';
+import { P2PClient } from '../proto/concordium_p2p_rpc_grpc_pb';
 import {
     BlockHash,
     JSONResponse,
     SendTransactionRequest,
-} from '../proto/api_pb';
+    TransactionHash,
+    AccountAddress,
+    GetAddressInfoRequest,
+    Empty,
+} from '../proto/concordium_p2p_rpc_pb';
 
 const port = 10000;
 const client = new P2PClient(
