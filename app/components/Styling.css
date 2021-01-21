@@ -1,20 +1,3 @@
-.modal {
-    position: absolute;
-    width: 464px;
-    height: 371px;
-    left: 897px;
-    top: 162px;
-}
-
-.modalElement {
-    display: block;
-    padding-bottom: 25px;
-}
-.modalElement.input {
-    left: 50%;
-    transform: translate(-50%, 0);
-}
-
 .ledgerComponent {
     padding: 10px;
     background-color: white;

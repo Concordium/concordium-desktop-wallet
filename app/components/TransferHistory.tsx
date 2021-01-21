@@ -53,7 +53,7 @@ export default function TransferHistory(account) {
                         <Header />
                         <TransactionList
                             viewingShielded={viewingShielded}
-                            chooseElement={(transaction) => {
+                            onTransactionClick={(transaction) => {
                                 setChosenTransaction(transaction);
                                 setLocation(locations.viewTransaction);
                             }}

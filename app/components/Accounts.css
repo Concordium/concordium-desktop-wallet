@@ -1,29 +1,5 @@
-.accountList {
-    display: inline-block;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    overflow-y: scroll;
-    max-height: 90vh;
-}
-
-.chosenAccount {
-    align-content: right;
-    display: inline-block;
-    width: 40%;
-}
-
-.blob {
-    display: block;
-    width: 100px;
+.accountActionButton {
     height: 100px;
-    padding: 5px;
-    border: 1px solid blue;
-    background-color: blue;
-}
-
-.halfPage {
-    width: 50%;
 }
 
 .accountListElement {
@@ -54,58 +30,4 @@
     margin-left: 20%;
     margin-right: 20%;
     margin-top: 20px;
-}
-
-.accountActionsSpan {
-    display: flex;
-}
-
-.accountActionsSpan a {
-    width: 30%;
-    margin: 10px;
-    margin-left: 2.5%;
-    margin-right: 0;
-}
-
-.accountActionsSpan link button {
-    padding-right: 10px;
-}
-
-.leftAlignedText {
-    text-align: left;
-    width: 50%;
-    padding-left: 5%;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-.rightAlignedText {
-    text-align: right;
-    width: 50%;
-    padding-right: 5%;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
-.line {
-    display: flex;
-}
-
-.buttonAsText:disabled {
-    font-weight: bolder;
-}
-
-.accountListElementUnShieldedBalance {
-    border: 0;
-    padding: 5px;
-    border-top: 2.5px solid gray;
-    border-bottom: 2px solid gray;
-}
-
-.accountActionButton {
-    height: 100px;
-}
-
-.pendingImage {
-    height: 20px;
 }

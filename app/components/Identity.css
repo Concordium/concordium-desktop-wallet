@@ -1,7 +1,3 @@
-.halfPage {
-    width: 50%;
-}
-
 .identityListElement {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -23,19 +19,4 @@
 .chosenIdentityListElement {
     font-weight: bold;
     border-color: blueviolet;
-}
-
-.chosenIdentity {
-    align-content: right;
-    display: inline-block;
-    height: 100%;
-    width: 40%;
-}
-
-.statusImage {
-    height: 30px;
-}
-
-.providerImage {
-    height: 30px;
 }

@@ -6,30 +6,28 @@ import { TransferTransaction } from '../utils/types';
 import { transactionsSelector } from '../features/TransactionSlice';
 
 interface Props {
-    chooseElement: (transaction: TransferTransaction) => void;
+    onTransactionClick: (transaction: TransferTransaction) => void;
 }
 
 /**
  * Displays the currently chosen transactions
  * Takes a function chooseElement, to allows the parent
  * to get notified of clicked transactions.
- * TODO: rename chooseElement?
  */
-function TransactionList({ chooseElement }: Props): JSX.Element {
+function TransactionList({ onTransactionClick }: Props): JSX.Element {
     const transactions = useSelector(transactionsSelector);
 
     return (
         <List>
             <Divider />
             {transactions.map((transaction: TransferTransaction) => (
-                <>
-                    <TransactionListElement
-                        transaction={transaction}
-                        key={transaction.transactionHash}
-                        onClick={() => chooseElement(transaction)}
-                    />
+                <List.Item
+                    onClick={() => onTransactionClick(transaction)}
+                    key={transaction.transactionHash}
+                >
+                    <TransactionListElement transaction={transaction} />
                     <Divider />
-                </>
+                </List.Item>
             ))}
         </List>
     );

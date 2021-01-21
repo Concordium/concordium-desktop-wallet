@@ -88,19 +88,18 @@ function displayType(kind) {
 
 interface Props {
     transaction: TransferTransaction;
-    onClick?: () => void;
 }
 
 /**
  * Displays the given transaction basic information.
  */
-function TransactionListElement({ transaction, onClick }: Props): JSX.element {
+function TransactionListElement({ transaction }: Props): JSX.element {
     const time = parseTime(transaction.blockTime);
     const name = getName(transaction);
     const { amount, amountFormula } = parseAmount(transaction);
 
     return (
-        <Grid container columns={2} onClick={onClick}>
+        <Grid container columns={2}>
             <SidedText
                 left={name.concat(
                     ` ${displayType(transaction.transactionKind)}`
@@ -118,9 +117,5 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.element {
         </Grid>
     );
 }
-
-TransactionListElement.defaultProps = {
-    onClick: () => {},
-};
 
 export default TransactionListElement;
