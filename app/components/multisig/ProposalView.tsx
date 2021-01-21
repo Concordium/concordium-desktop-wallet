@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import fs from 'fs';
 import { ipcRenderer } from 'electron';
 import {
@@ -11,19 +11,19 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
-import { currentProposalSelector } from '../../features/MultiSignatureSlice';
-import { MultiSignatureTransaction } from './UpdateMicroGtuPerEuro';
+import { currentProposalSelector, updateCurrentProposal } from '../../features/MultiSignatureSlice';
 import TransactionDetails from './TransactionDetails';
 import TransactionHashView from './TransactionHashView';
+import { instanceOfUpdateInstruction, MultiSignatureTransaction, UpdateInstruction } from '../../utils/types';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
- * active one in the state.
- *
- * The current transaction proposal is set either when generating a new transaction proposal,
- * or when selecting an existing transaction proposal from the multi signature transaction menu.
+ * active one in the state. The component allows the user to export the proposal, 
+ * add signatures to the proposal, and if the signature threshold has been reached,
+ * then the proposal can be submitted to the chain.
  */
 export default function ProposalView() {
+    const dispatch = useDispatch();
     const currentProposal: MultiSignatureTransaction | undefined = useSelector(
         currentProposalSelector
     );
@@ -31,6 +31,44 @@ export default function ProposalView() {
         throw new Error(
             'The proposal page should not be loaded without a proposal in the state.'
         );
+    }
+
+    async function loadSignatureFile() {
+        const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke(
+            'OPEN_FILE_DIALOG',
+            'Load signature'
+        );
+
+        if (openDialogValue.canceled) {
+            return;
+        }
+
+        if (openDialogValue.filePaths.length === 1) {
+            const transactionFileLocation = openDialogValue.filePaths[0];
+            const transactionString = fs.readFileSync(transactionFileLocation, {
+                encoding: 'utf-8',
+            });
+
+            const transactionObject = JSON.parse(transactionString);
+            if (instanceOfUpdateInstruction(transactionObject)) {
+
+                // TODO Update in database as well.
+                // TODO Validate that the signature is not already present. Give a proper error message if that is the case. (MODAL)
+
+                if (currentProposal) {
+                    let proposal: UpdateInstruction = JSON.parse(currentProposal.transaction);
+                    proposal.signatures = proposal.signatures.concat(transactionObject.signatures);
+                    const updatedProposal = {
+                        ...currentProposal,
+                        transaction: JSON.stringify(proposal)
+                    };
+
+                    updateCurrentProposal(dispatch, updatedProposal);
+                }
+            } else {
+                throw new Error('Unsupported transaction type. Not yet implemented.');
+            }
+        }
     }
 
     async function exportTransaction() {
@@ -55,6 +93,19 @@ export default function ProposalView() {
         }
     }
 
+
+    const instruction: UpdateInstruction = JSON.parse(currentProposal.transaction);
+
+
+    const unsignedCheckboxes = [];
+    for (var i = 0; i < currentProposal.threshold - instruction.signatures.length; i += 1) {
+        unsignedCheckboxes.push((
+            <Form.Field key={i}>
+                <Checkbox label="Awaiting signature" readOnly />
+            </Form.Field>
+        ));
+    }
+
     return (
         <Segment secondary textAlign="center">
             <Header size="large">Your transaction proposal</Header>
@@ -68,23 +119,19 @@ export default function ProposalView() {
                 <Grid columns={3} divided textAlign="center" padded>
                     <Grid.Column>
                         <TransactionDetails
-                            updateInstruction={JSON.parse(
-                                currentProposal.transaction
-                            )}
+                            updateInstruction={instruction}
                         />
                     </Grid.Column>
                     <Grid.Column>
                         <Grid.Row>
                             <Form>
-                                <Form.Field>
-                                    <Checkbox label="Awaiting signature" />
-                                </Form.Field>
-                                <Form.Field>
-                                    <Checkbox label="Awaiting signature" />
-                                </Form.Field>
-                                <Form.Field>
-                                    <Checkbox label="Awaiting signature" />
-                                </Form.Field>
+                                {instruction.signatures.map((signature) => {
+                                    return (
+                                        <Form.Field key={signature}>
+                                            <Checkbox label="Signed" defaultChecked={true} />
+                                        </Form.Field>
+                                    )})}
+                                {unsignedCheckboxes}
                             </Form>
                         </Grid.Row>
                         <Divider />
@@ -93,7 +140,7 @@ export default function ProposalView() {
                                 <Header size="small">
                                     Drag and drop signatures here
                                 </Header>
-                                <Button primary>Or browse to file</Button>
+                                <Button primary onClick={loadSignatureFile}>Or browse to file</Button>
                             </Segment>
                         </Grid.Row>
                     </Grid.Column>
@@ -109,7 +156,7 @@ export default function ProposalView() {
                     </Button>
                 </Grid.Column>
                 <Grid.Column>
-                    <Button fluid positive>
+                    <Button fluid positive disabled={instruction.signatures.length !== currentProposal.threshold}>
                         Submit transcation to chain
                     </Button>
                 </Grid.Column>
