@@ -16,10 +16,15 @@ import routes from '../../constants/routes.json';
 import { UpdateInstruction } from '../../utils/types';
 import TransactionHashView from './TransactionHashView';
 import TransactionDetails from './TransactionDetails';
+import { LocationDescriptorObject } from 'history';
 
 interface Props {
+    location: LocationDescriptorObject<Input>
+}
+
+interface Input {
     signature: string;
-    updateInstruction: UpdateInstruction;
+    transaction: UpdateInstruction;
     transactionHash: string;
 }
 
@@ -27,16 +32,20 @@ interface Props {
  * Component that contains a button for exporting the signed transaction that is
  * currently being processed.
  */
-export default function ExportSignedTransactionView(props: Props) {
+export default function ExportSignedTransactionView({ location }: Props) {
     const dispatch = useDispatch();
 
-    const { signature } = props;
-    const { updateInstruction } = props;
-    const { transactionHash } = props;
+    if (!location.state) {
+        throw new Error('The component received invalid input without the expected state.');
+    }
+
+    const { signature } = location.state;
+    const { transaction } = location.state;
+    const { transactionHash } = location.state;
 
     async function exportSignedTransaction() {
         const signedTransaction = {
-            ...updateInstruction,
+            ...transaction,
             signatures: [signature],
         };
         const signedTransactionJson = JSON.stringify(signedTransaction);
@@ -75,7 +84,7 @@ export default function ExportSignedTransactionView(props: Props) {
                 <Grid.Row>
                     <Grid.Column>
                         <TransactionDetails
-                            updateInstruction={updateInstruction}
+                            updateInstruction={transaction}
                         />
                     </Grid.Column>
                     <Grid.Column>
