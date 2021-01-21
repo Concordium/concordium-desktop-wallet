@@ -11,14 +11,21 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
-import { currentProposalSelector, updateCurrentProposal } from '../../features/MultiSignatureSlice';
+import {
+    currentProposalSelector,
+    updateCurrentProposal,
+} from '../../features/MultiSignatureSlice';
 import TransactionDetails from './TransactionDetails';
 import TransactionHashView from './TransactionHashView';
-import { instanceOfUpdateInstruction, MultiSignatureTransaction, UpdateInstruction } from '../../utils/types';
+import {
+    instanceOfUpdateInstruction,
+    MultiSignatureTransaction,
+    UpdateInstruction,
+} from '../../utils/types';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
- * active one in the state. The component allows the user to export the proposal, 
+ * active one in the state. The component allows the user to export the proposal,
  * add signatures to the proposal, and if the signature threshold has been reached,
  * then the proposal can be submitted to the chain.
  */
@@ -51,22 +58,27 @@ export default function ProposalView() {
 
             const transactionObject = JSON.parse(transactionString);
             if (instanceOfUpdateInstruction(transactionObject)) {
-
                 // TODO Update in database as well.
                 // TODO Validate that the signature is not already present. Give a proper error message if that is the case. (MODAL)
 
                 if (currentProposal) {
-                    let proposal: UpdateInstruction = JSON.parse(currentProposal.transaction);
-                    proposal.signatures = proposal.signatures.concat(transactionObject.signatures);
+                    const proposal: UpdateInstruction = JSON.parse(
+                        currentProposal.transaction
+                    );
+                    proposal.signatures = proposal.signatures.concat(
+                        transactionObject.signatures
+                    );
                     const updatedProposal = {
                         ...currentProposal,
-                        transaction: JSON.stringify(proposal)
+                        transaction: JSON.stringify(proposal),
                     };
 
                     updateCurrentProposal(dispatch, updatedProposal);
                 }
             } else {
-                throw new Error('Unsupported transaction type. Not yet implemented.');
+                throw new Error(
+                    'Unsupported transaction type. Not yet implemented.'
+                );
             }
         }
     }
@@ -93,18 +105,24 @@ export default function ProposalView() {
         }
     }
 
-
-    const instruction: UpdateInstruction = JSON.parse(currentProposal.transaction);
-
+    const instruction: UpdateInstruction = JSON.parse(
+        currentProposal.transaction
+    );
 
     const unsignedCheckboxes = [];
-    for (var i = 0; i < currentProposal.threshold - instruction.signatures.length; i += 1) {
-        unsignedCheckboxes.push((
+    for (
+        let i = 0;
+        i < currentProposal.threshold - instruction.signatures.length;
+        i += 1
+    ) {
+        unsignedCheckboxes.push(
             <Form.Field key={i}>
                 <Checkbox label="Awaiting signature" readOnly />
             </Form.Field>
-        ));
+        );
     }
+
+    const missingSignatures = instruction.signatures.length !== currentProposal.threshold;
 
     return (
         <Segment secondary textAlign="center">
@@ -118,9 +136,7 @@ export default function ProposalView() {
                 <Divider />
                 <Grid columns={3} divided textAlign="center" padded>
                     <Grid.Column>
-                        <TransactionDetails
-                            updateInstruction={instruction}
-                        />
+                        <TransactionDetails updateInstruction={instruction} />
                     </Grid.Column>
                     <Grid.Column>
                         <Grid.Row>
@@ -128,9 +144,14 @@ export default function ProposalView() {
                                 {instruction.signatures.map((signature) => {
                                     return (
                                         <Form.Field key={signature}>
-                                            <Checkbox label="Signed" defaultChecked={true} readOnly />
+                                            <Checkbox
+                                                label="Signed"
+                                                defaultChecked
+                                                readOnly
+                                            />
                                         </Form.Field>
-                                    )})}
+                                    );
+                                })}
                                 {unsignedCheckboxes}
                             </Form>
                         </Grid.Row>
@@ -140,7 +161,9 @@ export default function ProposalView() {
                                 <Header size="small">
                                     Drag and drop signatures here
                                 </Header>
-                                <Button primary onClick={loadSignatureFile}>Or browse to file</Button>
+                                <Button primary onClick={loadSignatureFile} disabled={!missingSignatures}>
+                                    Or browse to file
+                                </Button>
                             </Segment>
                         </Grid.Row>
                     </Grid.Column>
@@ -156,7 +179,11 @@ export default function ProposalView() {
                     </Button>
                 </Grid.Column>
                 <Grid.Column>
-                    <Button fluid positive disabled={instruction.signatures.length == currentProposal.threshold}>
+                    <Button
+                        fluid
+                        positive
+                        disabled={missingSignatures}
+                    >
                         Submit transcation to chain
                     </Button>
                 </Grid.Column>

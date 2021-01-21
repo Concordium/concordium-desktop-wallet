@@ -12,14 +12,14 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
+import { LocationDescriptorObject } from 'history';
 import routes from '../../constants/routes.json';
 import { UpdateInstruction } from '../../utils/types';
 import TransactionHashView from './TransactionHashView';
 import TransactionDetails from './TransactionDetails';
-import { LocationDescriptorObject } from 'history';
 
 interface Props {
-    location: LocationDescriptorObject<Input>
+    location: LocationDescriptorObject<Input>;
 }
 
 interface Input {
@@ -36,7 +36,9 @@ export default function ExportSignedTransactionView({ location }: Props) {
     const dispatch = useDispatch();
 
     if (!location.state) {
-        throw new Error('The component received invalid input without the expected state.');
+        throw new Error(
+            'The component received invalid input without the expected state.'
+        );
     }
 
     const { signature } = location.state;
@@ -83,9 +85,7 @@ export default function ExportSignedTransactionView({ location }: Props) {
             <Grid columns={2} divided textAlign="center" padded>
                 <Grid.Row>
                     <Grid.Column>
-                        <TransactionDetails
-                            updateInstruction={transaction}
-                        />
+                        <TransactionDetails updateInstruction={transaction} />
                     </Grid.Column>
                     <Grid.Column>
                         <TransactionHashView

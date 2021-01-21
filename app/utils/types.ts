@@ -334,7 +334,7 @@ export interface MultiSignatureTransaction {
     // The minimum required signatures for the transaction
     // to be accepted on chain.
     threshold: number;
-    
+
     status: string;
 }
 
@@ -343,7 +343,7 @@ export interface MultiSignatureTransaction {
  *  on the multisignature page.
  */
 export enum MultiSignatureMenuItems {
-    MakeNewProposal,
-    ProposedTransactions,
-    SignTransaction,
+    MakeNewProposal = 'Make new proposal',
+    ProposedTransactions = 'Proposed transactions',
+    SignTransaction = 'Sign transaction',
 }

@@ -16,7 +16,9 @@ export async function insert(transaction: MultiSignatureTransaction) {
 /**
  * Updates the given proposal entry.
  */
-export async function updateEntry(multiSigTransaction: MultiSignatureTransaction) {
+export async function updateEntry(
+    multiSigTransaction: MultiSignatureTransaction
+) {
     return (await knex())(multiSignatureProposalTable)
         .where({ id: multiSigTransaction.id })
         .update(multiSigTransaction);

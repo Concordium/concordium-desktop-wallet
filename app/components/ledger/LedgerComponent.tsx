@@ -25,7 +25,7 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
     const [ledgerSubscription, setLedgerSubscription] = useState<
         Subscription | undefined
     >(undefined);
-    const [waitingForDevice, setWaitingForDevice] = useState<boolean>();
+    const [waitingForDevice, setWaitingForDevice] = useState<boolean>(true);
 
     const ledgerObserver: Observer<DescriptorEvent<string>> = useMemo(() => {
         return {

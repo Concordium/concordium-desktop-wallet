@@ -13,16 +13,20 @@ export default function MultiSignatureList() {
 
     return (
         <Menu vertical fluid>
-            {Object.keys(MultiSignatureMenuItems)
-                .filter((key) => Number.isNaN(Number(key)))
-                .map((item) => (
-                    <Menu.Item
-                        key={item}
-                        onClick={() => dispatch(chooseMenuItem(item))}
-                    >
-                        <Header>{item}</Header>
-                    </Menu.Item>
-                ))}
+            {Object.keys(MultiSignatureMenuItems).map((item) => (
+                <Menu.Item
+                    key={item}
+                    onClick={() => dispatch(chooseMenuItem(item))}
+                >
+                    <Header>
+                        {
+                            MultiSignatureMenuItems[
+                                item as MultiSignatureMenuItems
+                            ]
+                        }
+                    </Header>
+                </Menu.Item>
+            ))}
         </Menu>
     );
 }
