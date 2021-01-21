@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Card, Button, List } from 'semantic-ui-react';
+import { Menu, Card, Button } from 'semantic-ui-react';
 import {
     loadIdentities,
     identitiesSelector,
 } from '../../features/IdentitySlice';
 import routes from '../../constants/routes.json';
-import styles from '../Identity.css';
 import IdentityListElement from '../IdentityListElement';
 import { Identity } from '../../utils/types';
 
@@ -50,21 +49,17 @@ export default function AccountCreationPickIdentity({
                     though this is not necessary. Which identity do you want to
                     use?
                 </Card.Description>
-                <List relaxed>
+                <Menu vertical fluid>
                     {identities.map((identity, i) => (
-                        <List.Item
+                        <Menu.Item
                             key={identity.id}
                             onClick={() => chooseIdentity(i)}
-                            className={`${styles.identityListElement} ${
-                                chosenIndex === i
-                                    ? styles.chosenIdentityListElement
-                                    : null
-                            }`}
+                            active={chosenIndex === i}
                         >
                             <IdentityListElement identity={identity} />
-                        </List.Item>
+                        </Menu.Item>
                     ))}
-                </List>
+                </Menu>
                 <Button.Group>
                     <Button
                         disabled={

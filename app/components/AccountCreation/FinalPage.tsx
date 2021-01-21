@@ -31,11 +31,9 @@ export default function AccountCreationFinal({
                     be finalized on the block-chain.
                 </Card.Description>
                 <Divider />
-                <List horizontal>
-                    <List.Item>
-                        <AccountListElement account={account} />
-                    </List.Item>
-                </List>
+                <Card centered>
+                    <AccountListElement account={account} />
+                </Card>
                 <Divider />
                 <Link to={routes.ACCOUNTS}>
                     <Button>Finished!</Button>
