@@ -20,7 +20,8 @@ import {
     MultiSignatureTransaction,
     UpdateInstruction,
 } from '../../utils/types';
-import { openFile, saveFile } from '../../utils/FileHelper';
+import { saveFile } from '../../utils/FileHelper';
+import DragAndDropFile from '../DragAndDropFile';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -39,16 +40,8 @@ export default function ProposalView() {
         );
     }
 
-    async function loadSignatureFile() {
-        let transactionString;
-        try {
-            transactionString = await openFile('Load transaction');
-        } catch (err) {
-            // Unable to load the file. Do nothing for now.
-            return;
-        }
-
-        const transactionObject = JSON.parse(transactionString);
+    async function loadSignatureFile(file: string) {
+        const transactionObject = JSON.parse(file);
         if (instanceOfUpdateInstruction(transactionObject)) {
             // TODO Validate that the signature is not already present. Give a proper error message if that is the case in a modal or something similar.
 
@@ -126,18 +119,11 @@ export default function ProposalView() {
                         </Grid.Row>
                         <Divider />
                         <Grid.Row>
-                            <Segment placeholder>
-                                <Header size="small">
-                                    Drag and drop signatures here
-                                </Header>
-                                <Button
-                                    primary
-                                    onClick={loadSignatureFile}
-                                    disabled={!missingSignatures}
-                                >
-                                    Or browse to file
-                                </Button>
-                            </Segment>
+                            <DragAndDropFile
+                                text="Drag and drop signatures here"
+                                fileProcessor={loadSignatureFile}
+                                disabled={!missingSignatures}
+                            />
                         </Grid.Row>
                     </Grid.Column>
                     <Grid.Column>
