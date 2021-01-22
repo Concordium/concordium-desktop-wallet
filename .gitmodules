@@ -1,3 +1,6 @@
 [submodule "deps/crypto"]
 	path = deps/crypto
 	url = git@gitlab.com:Concordium/crypto.git
+[submodule "grpc-api"]
+	path = deps/grpc-api
+	url = git@gitlab.com:Concordium/grpc-api.git
