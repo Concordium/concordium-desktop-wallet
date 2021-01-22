@@ -1,15 +1,8 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Card, Button } from 'semantic-ui-react';
+import React, { useState } from 'react';
+import { Card, Button, Modal, Input } from 'semantic-ui-react';
 import { ipcRenderer } from 'electron';
 import fs from 'fs';
 import * as crypto from 'crypto';
-import { loadIdentities, identitiesSelector } from '../features/IdentitySlice';
-import { loadAccounts, accountsSelector } from '../features/AccountSlice';
-import {
-    loadAddressBook,
-    addressBookSelector,
-} from '../features/AddressBookSlice';
 
 function decrypt({ cipherText, metaData }, password) {
     // TODO: ensure this is correct.
@@ -31,41 +24,45 @@ function decrypt({ cipherText, metaData }, password) {
     return data;
 }
 
+async function importData(password) {
+    const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke(
+        'OPEN_FILE_DIALOG',
+        'Load transaction'
+    );
+
+    if (openDialogValue.canceled) {
+        return;
+    }
+
+    if (openDialogValue.filePaths.length === 1) {
+        const fileLocation = openDialogValue.filePaths[0];
+        const fileString = fs.readFileSync(fileLocation, {
+            encoding: 'utf-8',
+        });
+
+        let encryptedData;
+        try {
+            encryptedData = JSON.parse(fileString);
+        } catch (e) {
+            // TODO Replace thrown error with modal that tells the user that the provided file was invalid.
+            throw new Error('Input was not valid JSON.');
+        }
+
+        // TODO ensure correct structure
+
+        const data = decrypt(encryptedData, password);
+        // TODO Save the data
+        console.log(JSON.parse(data));
+    }
+}
+
 export default function Import() {
-    async function importFunction() {
-        const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke(
-            'OPEN_FILE_DIALOG',
-            'Load transaction'
-        );
+    const [password, setPassword] = useState('');
+    const [open, setOpen] = useState(false);
 
-        if (openDialogValue.canceled) {
-            return;
-        }
-
-        if (openDialogValue.filePaths.length === 1) {
-            const fileLocation = openDialogValue.filePaths[0];
-            const fileString = fs.readFileSync(fileLocation, {
-                encoding: 'utf-8',
-            });
-
-            let encryptedData;
-            try {
-                encryptedData = JSON.parse(fileString);
-            } catch (e) {
-                // TODO Replace thrown error with modal that tells the user that the provided file was invalid.
-                throw new Error('Input was not valid JSON.');
-            }
-
-            // TODO ensure correct structure
-
-            // TODO prompt for password
-            const password = 'test';
-
-            console.log(encryptedData);
-            const data = decrypt(encryptedData, password);
-
-            console.log(JSON.parse(data));
-        }
+    async function onClick() {
+        await importData(password);
+        setOpen(false);
     }
 
     return (
@@ -74,8 +71,31 @@ export default function Import() {
             <Card.Description>
                 Choose what ID’s and accounts you want to export below:
             </Card.Description>
+            <Modal
+                closeIcon
+                onClose={() => setOpen(false)}
+                onOpen={() => setOpen(true)}
+                open={open}
+                dimmer="blurring"
+                closeOnDimmerClick={false}
+            >
+                <Modal.Header>Choose a password!</Modal.Header>
+                <Modal.Content>
+                    <Input
+                        fluid
+                        name="name"
+                        placeholder="Enter Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        autoFocus
+                    />
+                    <Button disabled={!password} onClick={onClick}>
+                        Export
+                    </Button>
+                </Modal.Content>
+            </Modal>
             <Card.Content extra>
-                <Button primary onClick={importFunction}>
+                <Button primary onClick={() => setOpen(true)}>
                     Import
                 </Button>
             </Card.Content>

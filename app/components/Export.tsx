@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, Button } from 'semantic-ui-react';
+import { Card, Button, Modal, Input } from 'semantic-ui-react';
 import { ipcRenderer } from 'electron';
 import fs from 'fs';
 import * as crypto from 'crypto';
@@ -36,6 +36,31 @@ function encrypt(data, password) {
     };
 }
 
+async function exportData(data, password) {
+    const encrypted = encrypt(JSON.stringify(data), password);
+
+    const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke(
+        'SAVE_FILE_DIALOG',
+        'Export signed transaction'
+    );
+    if (saveFileDialog.canceled) {
+        return;
+    }
+
+    if (saveFileDialog.filePath) {
+        fs.writeFile(
+            saveFileDialog.filePath,
+            JSON.stringify(encrypted),
+            (err) => {
+                if (err) {
+                    // TODO Add error handling here.
+                }
+                // TODO Announce succesfull export
+            }
+        );
+    }
+}
+
 /**
  * Detailed view of the chosen identity.
  */
@@ -44,6 +69,8 @@ export default function Export() {
     const accounts = useSelector(accountsSelector);
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
+    const [password, setPassword] = useState('');
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         loadAccounts(dispatch);
@@ -55,37 +82,9 @@ export default function Export() {
         return null;
     }
 
-    async function exportData() {
-        const data = {
-            accounts,
-            identities,
-            addressBook,
-        };
-        // TODO prompt for password
-        const encrypted = encrypt(JSON.stringify(data), 'test');
-
-        const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke(
-            'SAVE_FILE_DIALOG',
-            'Export signed transaction'
-        );
-        if (saveFileDialog.canceled) {
-            return;
-        }
-
-        if (saveFileDialog.filePath) {
-            fs.writeFile(
-                saveFileDialog.filePath,
-                JSON.stringify(encrypted),
-                (err) => {
-                    if (err) {
-                        console.log(err);
-                        // TODO Add error handling here.
-                    }
-                    console.log('no error');
-                    // TODO Announce succesfull export
-                }
-            );
-        }
+    async function onClick() {
+        await exportData({ accounts, identities, addressBook }, password);
+        setOpen(false);
     }
 
     return (
@@ -94,7 +93,30 @@ export default function Export() {
             <Card.Description>
                 Choose what ID’s and accounts you want to export below:
             </Card.Description>
-            <Button primary onClick={exportData}>
+            <Modal
+                closeIcon
+                onClose={() => setOpen(false)}
+                onOpen={() => setOpen(true)}
+                open={open}
+                dimmer="blurring"
+                closeOnDimmerClick={false}
+            >
+                <Modal.Header>Choose a password!</Modal.Header>
+                <Modal.Content>
+                    <Input
+                        fluid
+                        name="name"
+                        placeholder="Enter Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        autoFocus
+                    />
+                    <Button disabled={!password} onClick={onClick}>
+                        Export
+                    </Button>
+                </Modal.Content>
+            </Modal>
+            <Button primary onClick={() => setOpen(true)}>
                 Export
             </Button>
         </Card>
