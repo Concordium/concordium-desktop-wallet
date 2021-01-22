@@ -27,8 +27,6 @@ export default function FinalPage({
                     <Table.Row>
                         <Table.Cell>Amount:</Table.Cell>
                         <Table.Cell textAlign="right">
-                            {' '}
-                            {'\u01E4'}{' '}
                             {fromMicroUnits(transaction.payload.amount)}
                         </Table.Cell>
                     </Table.Row>
@@ -36,7 +34,7 @@ export default function FinalPage({
                         <Table.Cell>Estimated fee:</Table.Cell>
                         <Table.Cell textAlign="right">
                             {' '}
-                            {'\u01E4'} {fromMicroUnits(1)}{' '}
+                            {fromMicroUnits(200)}{' '}
                         </Table.Cell>
                     </Table.Row>
                     <Table.Row>

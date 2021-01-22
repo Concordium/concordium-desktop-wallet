@@ -193,6 +193,7 @@ export interface PublicInformationForIp {
 // Statuses that a transaction can have.
 export enum TransactionStatus {
     Finalized = 'finalized',
+    Committed = 'committed',
     Rejected = 'rejected',
     Pending = 'pending',
 }

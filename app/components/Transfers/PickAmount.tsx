@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Input, Button } from 'semantic-ui-react';
+import { Card, Input, Button, Label } from 'semantic-ui-react';
 import { AddressBookEntry } from '../../utils/types';
 import locations from '../../constants/transferLocations.json';
 
@@ -38,6 +38,7 @@ export default function PickAmount({
                     value={amount}
                     onChange={(e) => updateAmount(e.target.value)}
                     autoFocus
+                    label={{ basic: true, content: '\u01E4' }}
                 />
                 <Button.Group vertical>
                     <Button
@@ -49,7 +50,7 @@ export default function PickAmount({
                     <Button
                         positive
                         onClick={() => setLocation(locations.confirmTransfer)}
-                        disabled={!recipient}
+                        disabled={!recipient || !amount}
                     >
                         Continue
                     </Button>

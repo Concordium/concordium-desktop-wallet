@@ -55,7 +55,7 @@ export default function ConfirmTransferComponent({
     setLocation,
     setTransaction,
 }: Props): JSX.Element {
-    const estimatedFee = 1; // TODO calculate
+    const estimatedFee = 200; // TODO calculate
 
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
@@ -94,6 +94,8 @@ export default function ConfirmTransferComponent({
         }
     }
 
+    ledgerSignTransfer({ signTransfer: () => Buffer.from([0]) });
+
     return (
         <Card fluid centered>
             <Card.Content textAlign="center">
@@ -105,15 +107,13 @@ export default function ConfirmTransferComponent({
                     <Table.Row>
                         <Table.Cell>Amount:</Table.Cell>
                         <Table.Cell textAlign="right">
-                            {' '}
-                            {'\u01E4'} {fromMicroUnits(amount)}
+                            {'\u01E4'} {amount}
                         </Table.Cell>
                     </Table.Row>
                     <Table.Row>
                         <Table.Cell>Estimated fee:</Table.Cell>
                         <Table.Cell textAlign="right">
-                            {' '}
-                            {'\u01E4'} {fromMicroUnits(estimatedFee)}{' '}
+                            {fromMicroUnits(estimatedFee)}
                         </Table.Cell>
                     </Table.Row>
                     <Table.Row>

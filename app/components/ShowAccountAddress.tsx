@@ -16,8 +16,13 @@ export default function ShowAccountAddress({ account, returnFunction }: Props) {
     return (
         <>
             <Button onClick={returnFunction}>x</Button>
-            <Header textAlign="center"> Address </Header>
-            <Header sub>{account.address}</Header>
+            <Header textAlign="center">
+                {' '}
+                Address
+                <Header.Subheader textAlign="center">
+                    {account.address}
+                </Header.Subheader>
+            </Header>
             <CopyButton value={account.address} />
         </>
     );

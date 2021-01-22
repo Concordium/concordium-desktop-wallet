@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Header, Label, Image } from 'semantic-ui-react';
+import { Grid, Header, Label, Image, Divider } from 'semantic-ui-react';
 import { fromMicroUnits } from '../utils/transactionHelpers';
 import { AccountInfo, Account, AccountStatus } from '../utils/types';
 import SidedText from './SidedText';
@@ -34,12 +34,12 @@ function AccountListElement({
     const hidden = account.allDecrypted ? '' : ' + ?'; // TODO: Replace with locked Symbol
 
     return (
-        <Grid container columns={2} divided="vertically">
+        <Grid container columns={2} onClick={() => onClick(false)}>
             <Grid.Row>
                 <Grid.Column textAlign="left">
                     <Header as="h2">
                         {account.name}
-                        {account.confirmed === AccountStatus.Pending ? (
+                        {account.status === AccountStatus.Pending ? (
                             <Image
                                 src={pendingImage}
                                 alt="pending"
@@ -57,29 +57,26 @@ function AccountListElement({
                 </Grid.Column>
                 <Grid.Column textAlign="right" content={account.identityName} />
             </Grid.Row>
-            <Grid.Row onClick={() => onClick(false)}>
-                <Grid container columns={2}>
-                    <SidedText
-                        left="Account Total:"
-                        right={fromMicroUnits(shielded + unShielded) + hidden}
-                    />
-                    <SidedText
-                        left="Balance:"
-                        right={fromMicroUnits(unShielded)}
-                    />
-                    <SidedText
-                        left=" - At Disposal:"
-                        right={fromMicroUnits(unShielded - scheduled)}
-                    />
-                    <SidedText left=" - Staked:" right="0" />
-                </Grid>
-            </Grid.Row>
-            <Grid.Row onClick={() => onClick(true)}>
-                <Grid.Column textAlign="left">Shielded Balance:</Grid.Column>
-                <Grid.Column textAlign="right">
-                    {fromMicroUnits(shielded) + hidden}
-                </Grid.Column>
-            </Grid.Row>
+
+            <SidedText
+                left="Account Total:"
+                right={fromMicroUnits(shielded + unShielded) + hidden}
+            />
+            <Divider />
+            <SidedText left="Balance:" right={fromMicroUnits(unShielded)} />
+            <SidedText
+                left=" - At Disposal:"
+                right={fromMicroUnits(unShielded - scheduled)}
+            />
+            <Divider />
+            <SidedText
+                left="Shielded Balance:"
+                right={fromMicroUnits(shielded) + hidden}
+                onClick={(e) => {
+                    e.stopPropagation(); // So that we avoid triggering the parent's onClick
+                    onClick(true);
+                }}
+            />
         </Grid>
     );
 }

@@ -76,7 +76,7 @@ export default function AccountBalanceView(): JSX.Element {
     }
 
     return (
-        <Container className={styles.accountBalanceView}>
+        <Container className={styles.accountBalanceView} fluid>
             {buttons}
             {main}
         </Container>

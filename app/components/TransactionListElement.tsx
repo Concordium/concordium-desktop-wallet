@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid } from 'semantic-ui-react';
 import { fromMicroUnits, parseTime } from '../utils/transactionHelpers';
-import { TransferTransaction } from '../utils/types';
+import { TransferTransaction, TransactionStatus } from '../utils/types';
 import SidedText from './SidedText';
 
 function getName(transaction) {
@@ -86,6 +86,21 @@ function displayType(kind) {
     }
 }
 
+function statusSymbol(status) {
+    switch (status) {
+        case TransactionStatus.Pending:
+            return '';
+        case TransactionStatus.Committed:
+            return '\u2713';
+        case TransactionStatus.Finalized:
+            return '\u2713\u2713';
+        case TransactionStatus.Rejected:
+            return '!';
+        default:
+            return '?';
+    }
+}
+
 interface Props {
     transaction: TransferTransaction;
 }
@@ -107,7 +122,7 @@ function TransactionListElement({ transaction }: Props): JSX.element {
                 right={amount}
             />
             <SidedText
-                left={time}
+                left={`${time} ${statusSymbol(transaction.status)}`}
                 right={amountFormula.concat(
                     ` ${
                         transaction.status !== 'finalized' ? ' (Estimated)' : ''
