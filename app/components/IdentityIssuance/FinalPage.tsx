@@ -1,12 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { Card, Button, List, Divider } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { accountsSelector } from '../../features/AccountSlice';
 import { identitiesSelector } from '../../features/IdentitySlice';
 import AccountListElement from '../AccountListElement';
 import IdentityListElement from '../IdentityListElement';
-import styles from './IdentityIssuance.css';
 
 interface Props {
     identityName: string;
@@ -28,29 +28,31 @@ export default function IdentityIssuanceFinal({
     }
 
     return (
-        <div>
-            <h1>Your request is being finished by the provider</h1>
-            <p>
-                While the identity provider is verifying your identity and
-                submitting your initial account, you can see an overview here.
-                Once finished by the provider, you can start using both.
-            </p>
-            <div className={styles.flex}>
-                <IdentityListElement
-                    identity={identity}
-                    onClick={() => {}}
-                    highlighted
-                    index={0}
-                />
-                <AccountListElement
-                    account={account}
-                    onClick={() => {}}
-                    highlighted
-                />
-            </div>
-            <Link to={routes.IDENTITIES}>
-                <button type="button">Finished!</button>
-            </Link>
-        </div>
+        <Card fluid centered>
+            <Card.Content textAlign="center">
+                <Card.Header>
+                    Your request is being finished by the provider
+                </Card.Header>
+                <Card.Description>
+                    While the identity provider is verifying your identity and
+                    submitting your initial account, you can see an overview
+                    here. Once finished by the provider, you can start using
+                    both.
+                </Card.Description>
+                <Divider />
+                <List horizontal divided>
+                    <List.Item>
+                        <IdentityListElement identity={identity} />
+                    </List.Item>
+                    <List.Item>
+                        <AccountListElement account={account} />
+                    </List.Item>
+                </List>
+                <Divider />
+                <Link to={routes.IDENTITIES}>
+                    <Button>Finished!</Button>
+                </Link>
+            </Card.Content>
+        </Card>
     );
 }
