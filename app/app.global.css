@@ -4,3 +4,7 @@
  */
 
 @import '~semantic-ui-css/semantic.min.css';
+
+body { 
+    word-wrap: break-word; 
+}
