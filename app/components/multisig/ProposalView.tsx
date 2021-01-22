@@ -1,7 +1,5 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import fs from 'fs';
-import { ipcRenderer } from 'electron';
 import {
     Button,
     Checkbox,
@@ -22,6 +20,7 @@ import {
     MultiSignatureTransaction,
     UpdateInstruction,
 } from '../../utils/types';
+import { openFile, saveFile } from '../../utils/FileHelper';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -41,65 +40,35 @@ export default function ProposalView() {
     }
 
     async function loadSignatureFile() {
-        const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke(
-            'OPEN_FILE_DIALOG',
-            'Load signature'
-        );
-
-        if (openDialogValue.canceled) {
+        let transactionString;
+        try {
+            transactionString = await openFile('Load transaction');
+        } catch (err) {
+            // Unable to load the file. Do nothing for now.
             return;
         }
 
-        if (openDialogValue.filePaths.length === 1) {
-            const transactionFileLocation = openDialogValue.filePaths[0];
-            const transactionString = fs.readFileSync(transactionFileLocation, {
-                encoding: 'utf-8',
-            });
+        const transactionObject = JSON.parse(transactionString);
+        if (instanceOfUpdateInstruction(transactionObject)) {
+            // TODO Validate that the signature is not already present. Give a proper error message if that is the case in a modal or something similar.
 
-            const transactionObject = JSON.parse(transactionString);
-            if (instanceOfUpdateInstruction(transactionObject)) {
-                // TODO Validate that the signature is not already present. Give a proper error message if that is the case. (MODAL)
-
-                if (currentProposal) {
-                    const proposal: UpdateInstruction = JSON.parse(
-                        currentProposal.transaction
-                    );
-                    proposal.signatures = proposal.signatures.concat(
-                        transactionObject.signatures
-                    );
-                    const updatedProposal = {
-                        ...currentProposal,
-                        transaction: JSON.stringify(proposal),
-                    };
-
-                    updateCurrentProposal(dispatch, updatedProposal);
-                }
-            } else {
-                throw new Error(
-                    'Unsupported transaction type. Not yet implemented.'
+            if (currentProposal) {
+                const proposal: UpdateInstruction = JSON.parse(
+                    currentProposal.transaction
                 );
+                proposal.signatures = proposal.signatures.concat(
+                    transactionObject.signatures
+                );
+                const updatedProposal = {
+                    ...currentProposal,
+                    transaction: JSON.stringify(proposal),
+                };
+
+                updateCurrentProposal(dispatch, updatedProposal);
             }
-        }
-    }
-
-    async function exportTransaction() {
-        const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke(
-            'SAVE_FILE_DIALOG',
-            'Export transaction'
-        );
-        if (saveFileDialog.canceled) {
-            return;
-        }
-
-        if (saveFileDialog.filePath) {
-            fs.writeFile(
-                saveFileDialog.filePath,
-                currentProposal.transaction,
-                (err) => {
-                    if (err) {
-                        // TODO Add error handling here.
-                    }
-                }
+        } else {
+            throw new Error(
+                'Unsupported transaction type. Not yet implemented.'
             );
         }
     }
@@ -178,7 +147,16 @@ export default function ProposalView() {
             </Segment>
             <Grid columns="equal">
                 <Grid.Column>
-                    <Button fluid primary onClick={() => exportTransaction()}>
+                    <Button
+                        fluid
+                        primary
+                        onClick={() =>
+                            saveFile(
+                                currentProposal.transaction,
+                                'Export transaction'
+                            )
+                        }
+                    >
                         Export transaction proposal
                     </Button>
                 </Grid.Column>

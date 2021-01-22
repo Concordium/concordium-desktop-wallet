@@ -1,8 +1,6 @@
 import React from 'react';
-import fs from 'fs';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { ipcRenderer } from 'electron';
 import {
     Button,
     Checkbox,
@@ -17,6 +15,7 @@ import routes from '../../constants/routes.json';
 import { UpdateInstruction } from '../../utils/types';
 import TransactionHashView from '../TransactionHashView';
 import TransactionDetails from '../TransactionDetails';
+import { saveFile } from '../../utils/FileHelper';
 
 interface Props {
     location: LocationDescriptorObject<Input>;
@@ -52,27 +51,11 @@ export default function ExportSignedTransactionView({ location }: Props) {
         };
         const signedTransactionJson = JSON.stringify(signedTransaction);
 
-        const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke(
-            'SAVE_FILE_DIALOG',
-            'Export signed transaction'
-        );
-        if (saveFileDialog.canceled) {
-            return;
-        }
-
-        if (saveFileDialog.filePath) {
-            fs.writeFile(
-                saveFileDialog.filePath,
-                signedTransactionJson,
-                (err) => {
-                    if (err) {
-                        // TODO Add error handling here.
-                    }
-
-                    // Navigate back to the multi signature front page.
-                    dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
-                }
-            );
+        try {
+            await saveFile(signedTransactionJson, 'Export signed transaction');
+            dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
+        } catch (err) {
+            // Handle error by showing it to the user.
         }
     }
 
