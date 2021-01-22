@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { Card } from 'semantic-ui-react';
 import {
     addPendingIdentity,
     confirmIdentity,
@@ -170,15 +171,25 @@ export default function IdentityIssuanceGenerate({
 
     if (!location) {
         return (
-            <div>
-                <h2>
-                    <pre>{text}</pre>
-                </h2>
-            </div>
+            <Card fluid centered>
+                <Card.Content textAlign="center">
+                    <Card.Header>Generating the Identity</Card.Header>
+                    <Card.Description>{text}</Card.Description>
+                </Card.Content>
+            </Card>
         );
     }
 
     return (
-        <webview ref={iframeRef} className={styles.webview} src={location} />
+        <Card fluid centered>
+            <Card.Content textAlign="center">
+                <Card.Header>Generating the Identity</Card.Header>
+                <webview
+                    ref={iframeRef}
+                    className={styles.webview}
+                    src={location}
+                />
+            </Card.Content>
+        </Card>
     );
 }

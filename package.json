@@ -19,7 +19,7 @@
     "package-mac": "yarn build && electron-builder build --mac",
     "package-linux": "yarn build && electron-builder build --linux",
     "package-win": "yarn build && electron-builder build --win --x64",
-    "postinstall": "node -r @babel/register internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall",
+    "postinstall": "node -r @babel/register internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall  && sh ./internals/scripts/build_protos.sh",
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{ts,tsx,js,jsx,json,html,css,less,scss,yml}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
     "preinstall": "node ./internals/scripts/CheckYarn.js",
@@ -247,6 +247,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.0",
+    "@grpc/grpc-js": "^1.2.4",
     "@hot-loader/react-dom": "^16.13.0",
     "@reduxjs/toolkit": "^1.4.0",
     "@wasm-tool/wasm-pack-plugin": "^1.3.1",
