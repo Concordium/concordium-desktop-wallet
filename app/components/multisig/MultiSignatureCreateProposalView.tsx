@@ -1,44 +1,37 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { Menu } from 'semantic-ui-react';
-import { settingsSelector } from '../../features/SettingsSlice';
-import { Settings, UpdateType } from '../../utils/types';
+import { Header, Segment } from 'semantic-ui-react';
+import UpdateMicroGtuPerEuroRate from './UpdateMicroGtuPerEuro';
+import { UpdateType } from '../../utils/types';
 
-export default function MultiSignatureProposalView() {
-    const settings: Settings[] = useSelector(settingsSelector);
+interface Props {
+    type: UpdateType;
+}
 
-    // TODO Refactor into a selector function in the slice that allows for selecting general settings.
-    const foundationTransactionsEnabled: boolean =
-        settings[0].settings.find(
-            (obj) => obj.name === 'foundationTransactionsEnabled'
-        )?.value === '1';
-
-    let availableTransactionTypes = [];
-    if (foundationTransactionsEnabled) {
-        const foundationTransactionTypes = Object.keys(
-            UpdateType
-        ).filter((key) => Number.isNaN(Number(key)));
-        availableTransactionTypes = availableTransactionTypes.concat(
-            foundationTransactionTypes
-        );
+/**
+ * Component for displaying the UI required to create a multi signature transaction
+ * proposal. It dynamically loads the correct component to show wrapped in a bit of
+ * generic UI.
+ */
+export default function MultiSignatureCreateProposalView({ type }: Props) {
+    function chooseProposalType(foundationType: UpdateType) {
+        switch (foundationType) {
+            case UpdateType.UpdateMicroGTUPerEuro:
+                return <UpdateMicroGtuPerEuroRate />;
+            default:
+                throw new Error(
+                    'An unsupported transaction type was encountered.'
+                );
+        }
     }
 
     return (
-        <Menu vertical fluid size="massive">
-            {availableTransactionTypes.map((item) => (
-                <Menu.Item
-                    key={item}
-                    as={Link}
-                    // TODO Dynamically set state depending on the transaction type. Must also be able to handle account transaction types.
-                    to={{
-                        pathname: `/MultiSignatureTransaction/create/${item}`,
-                        state: UpdateType.UpdateMicroGTUPerEuro,
-                    }}
-                >
-                    {item}
-                </Menu.Item>
-            ))}
-        </Menu>
+        <Segment textAlign="center" secondary>
+            <Header size="large">Add the proposal details</Header>
+            <Segment basic>
+                Add all the details for the {UpdateType[type]} proposal below,
+                and generate your transaction proposal.
+            </Segment>
+            {chooseProposalType(type)}
+        </Segment>
     );
 }

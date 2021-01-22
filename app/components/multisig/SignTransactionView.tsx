@@ -15,8 +15,8 @@ import { LocationDescriptorObject } from 'history';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import LedgerComponent from '../ledger/LedgerComponent';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import TransactionDetails from './TransactionDetails';
-import TransactionHashView from './TransactionHashView';
+import TransactionDetails from '../TransactionDetails';
+import TransactionHashView from '../TransactionHashView';
 import routes from '../../constants/routes.json';
 import UpdateInstructionHandler from './UpdateInstructionHandler';
 

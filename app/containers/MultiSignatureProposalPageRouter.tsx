@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Switch } from 'react-router';
-import MultiSignatureProposalPage from './MultiSignatureProposalPage';
+import MultiSignatureProposalPage from '../components/multisig/MultiSignatureCreateProposalView';
 
 interface Location {
     state;

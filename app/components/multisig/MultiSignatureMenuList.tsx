@@ -8,7 +8,7 @@ import { MultiSignatureMenuItems } from '../../utils/types';
  * A component that displays the list of menu items available for the multi signature
  * transaction functionality.
  */
-export default function MultiSignatureList() {
+export default function MultiSignatureMenuList() {
     const dispatch = useDispatch();
 
     return (

@@ -15,8 +15,8 @@ import {
     currentProposalSelector,
     updateCurrentProposal,
 } from '../../features/MultiSignatureSlice';
-import TransactionDetails from './TransactionDetails';
-import TransactionHashView from './TransactionHashView';
+import TransactionDetails from '../TransactionDetails';
+import TransactionHashView from '../TransactionHashView';
 import {
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
@@ -58,7 +58,6 @@ export default function ProposalView() {
 
             const transactionObject = JSON.parse(transactionString);
             if (instanceOfUpdateInstruction(transactionObject)) {
-                // TODO Update in database as well.
                 // TODO Validate that the signature is not already present. Give a proper error message if that is the case. (MODAL)
 
                 if (currentProposal) {
@@ -122,7 +121,8 @@ export default function ProposalView() {
         );
     }
 
-    const missingSignatures = instruction.signatures.length !== currentProposal.threshold;
+    const missingSignatures =
+        instruction.signatures.length !== currentProposal.threshold;
 
     return (
         <Segment secondary textAlign="center">
@@ -161,7 +161,11 @@ export default function ProposalView() {
                                 <Header size="small">
                                     Drag and drop signatures here
                                 </Header>
-                                <Button primary onClick={loadSignatureFile} disabled={!missingSignatures}>
+                                <Button
+                                    primary
+                                    onClick={loadSignatureFile}
+                                    disabled={!missingSignatures}
+                                >
                                     Or browse to file
                                 </Button>
                             </Segment>
@@ -179,11 +183,7 @@ export default function ProposalView() {
                     </Button>
                 </Grid.Column>
                 <Grid.Column>
-                    <Button
-                        fluid
-                        positive
-                        disabled={missingSignatures}
-                    >
+                    <Button fluid positive disabled={missingSignatures}>
                         Submit transcation to chain
                     </Button>
                 </Grid.Column>

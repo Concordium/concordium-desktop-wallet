@@ -1,5 +1,4 @@
-import { ExchangeRate } from '../components/multisig/UpdateMicroGtuPerEuro';
-import { UpdateHeader, UpdateInstruction } from './types';
+import { ExchangeRate, UpdateHeader, UpdateInstruction } from './types';
 
 /**
  * Serializes an ExchangeRate to bytes.

@@ -5,54 +5,37 @@ import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { updateCurrentProposal } from '../../features/MultiSignatureSlice';
 import {
+    ExchangeRate,
     MultiSignatureTransaction,
-    UpdateHeader,
-    UpdateInstruction,
+    MultiSignatureTransactionStatus,
     UpdateType,
 } from '../../utils/types';
 import { insert } from '../../database/MultiSignatureProposalDao';
-
-export interface ExchangeRate {
-    // Word 64
-    numerator: number;
-    // Word 64
-    denominator: number;
-}
+import createUpdateInstruction from '../../utils/UpdateInstructionHelper';
+import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
 
 /**
- * Test function for generating a static update instruction. This should happen dynamically based on the
- * transaction that is currently being created by the user.
+ * Creates a multi signature transaction containing an update instruction for updating
+ * the micro GTU per euro exchange rate.
  */
-function generateUpdateInstruction(
-    microGtuPerEuro: number
-): MultiSignatureTransaction {
+function createTransaction(microGtuPerEuro: number): MultiSignatureTransaction {
     const exchangeRatePayload: ExchangeRate = {
         numerator: microGtuPerEuro,
         denominator: 1,
     };
 
-    // Payload size is statically 17 for ExchangeRate transaction types.
-    const updateHeader: UpdateHeader = {
-        effectiveTime: 0,
-        payloadSize: 17,
-        sequenceNumber: 0,
-        timeout: 0,
-    };
+    const updateInstruction = createUpdateInstruction(
+        exchangeRatePayload,
+        UpdateType.UpdateMicroGTUPerEuro
+    );
+    // TODO The threshold should be read from on-chain parameters.
+    const multiSignatureTransaction = createMultiSignatureTransaction(
+        updateInstruction,
+        3,
+        MultiSignatureTransactionStatus.Open
+    );
 
-    const updateInstruction: UpdateInstruction = {
-        header: updateHeader,
-        payload: exchangeRatePayload,
-        signatures: [],
-        type: UpdateType.UpdateMicroGTUPerEuro,
-    };
-
-    const transaction: MultiSignatureTransaction = {
-        transaction: JSON.stringify(updateInstruction),
-        threshold: 3,
-        status: 'open',
-    };
-
-    return transaction;
+    return multiSignatureTransaction;
 }
 
 export default function UpdateMicroGtuPerEuroRate() {
@@ -72,13 +55,15 @@ export default function UpdateMicroGtuPerEuroRate() {
 
     async function generateTransaction() {
         if (microGtuPerEuro) {
-            const instruction = generateUpdateInstruction(microGtuPerEuro);
+            const multiSignatureTransaction = createTransaction(
+                microGtuPerEuro
+            );
 
             // Set the current proposal in the state to the one that was just generated.
-            updateCurrentProposal(dispatch, instruction);
+            updateCurrentProposal(dispatch, multiSignatureTransaction);
 
             // Save to database.
-            await insert(instruction);
+            await insert(multiSignatureTransaction);
 
             // Navigate to the page that displays the current proposal from the state.
             dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));

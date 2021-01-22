@@ -15,8 +15,8 @@ import {
 import { LocationDescriptorObject } from 'history';
 import routes from '../../constants/routes.json';
 import { UpdateInstruction } from '../../utils/types';
-import TransactionHashView from './TransactionHashView';
-import TransactionDetails from './TransactionDetails';
+import TransactionHashView from '../TransactionHashView';
+import TransactionDetails from '../TransactionDetails';
 
 interface Props {
     location: LocationDescriptorObject<Input>;

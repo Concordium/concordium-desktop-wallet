@@ -2,7 +2,7 @@ import { createSlice, Dispatch } from '@reduxjs/toolkit';
 import { loadAllSettings, updateEntry } from '../database/SettingsDao';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
-import { Setting } from '../utils/types';
+import { Setting, Settings } from '../utils/types';
 
 const settingsSlice = createSlice({
     name: 'settings',
@@ -26,6 +26,16 @@ export const chosenIndexSelector = (state: RootState) =>
     state.settings.chosenIndex;
 
 export const { chooseSetting, updateSettings } = settingsSlice.actions;
+
+export function findSetting(
+    name: string,
+    settings: Settings[]
+): Setting | undefined {
+    const flattenedSettings = settings.flatMap((settingTopLevel) => {
+        return settingTopLevel.settings;
+    });
+    return flattenedSettings.find((setting) => setting.name === name);
+}
 
 export async function selectSettings(dispatch: Dispatch, index: number) {
     dispatch(chooseSetting({ index }));

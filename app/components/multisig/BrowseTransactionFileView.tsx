@@ -10,9 +10,15 @@ import {
 } from '../../utils/types';
 import routes from '../../constants/routes.json';
 
+/**
+ * Component that displays a drag and drop field where transaction files can
+ * be dropped to initiate signing the transaction. A button can also be used
+ * over the drag and drop field.
+ */
 export default function BrowseTransactionFileView() {
     const dispatch = useDispatch();
 
+    // Promps the user for a file.
     async function loadTransactionFile() {
         const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke(
             'OPEN_FILE_DIALOG',

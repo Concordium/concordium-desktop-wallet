@@ -266,7 +266,7 @@ export interface UpdateHeader {
     timeout: number;
 
     // Word 32
-    payloadSize: number;
+    payloadSize?: number;
 }
 
 // Currently we cannot see the difference between two ExchangeRate update instructions, so this type is
@@ -276,7 +276,8 @@ export interface UpdateInstruction {
 
     // Contains the payload for an update instruction. It can be any of the
     // update payloads available.
-    payload;
+    // TODO Add other update types as they are implemented.
+    payload: ExchangeRate;
 
     type: UpdateType;
 
@@ -323,19 +324,31 @@ export interface TransactionHandler<T> {
 }
 
 /**
+ * Enum for the different states that a multi signature transaction proposal
+ * can through.
+ */
+export enum MultiSignatureTransactionStatus {
+    Open = 'open',
+    Submitted = 'submitted',
+    Rejected = 'rejected',
+    Closed = 'closed',
+    Completed = 'completed',
+}
+
+/**
  * The model for multi signature transaction proposals, which maps into the
  * database model as well.
  */
 export interface MultiSignatureTransaction {
     // logical id in the database
-    id: number;
+    id?: number;
     // The JSON serialization of the transaction
     transaction: string;
     // The minimum required signatures for the transaction
     // to be accepted on chain.
     threshold: number;
 
-    status: string;
+    status: MultiSignatureTransactionStatus;
 }
 
 /**
@@ -346,4 +359,11 @@ export enum MultiSignatureMenuItems {
     MakeNewProposal = 'Make new proposal',
     ProposedTransactions = 'Proposed transactions',
     SignTransaction = 'Sign transaction',
+}
+
+export interface ExchangeRate {
+    // Word 64
+    numerator: number;
+    // Word 64
+    denominator: number;
 }

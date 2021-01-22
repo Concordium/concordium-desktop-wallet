@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Header } from 'semantic-ui-react';
-import { UpdateInstruction } from '../../utils/types';
+import { UpdateInstruction } from '../utils/types';
 
 interface Props {
     updateInstruction: UpdateInstruction;
