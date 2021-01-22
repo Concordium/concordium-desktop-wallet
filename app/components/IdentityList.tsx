@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { List, Button } from 'semantic-ui-react';
-import styles from './Identity.css';
+import { Button, Menu } from 'semantic-ui-react';
 import routes from '../constants/routes.json';
 import IdentityListElement from './IdentityListElement';
 import {
@@ -37,21 +36,17 @@ export default function IdentityList() {
             <Button onClick={() => dispatch(push(routes.IDENTITYISSUANCE))}>
                 +
             </Button>
-            <List divided>
+            <Menu vertical fluid>
                 {identities.map((identity: Identity, i: number) => (
-                    <List.Item
+                    <Menu.Item
                         key={identity.id}
                         onClick={() => dispatch(chooseIdentity(i))}
-                        className={`${styles.identityListElement} ${
-                            chosenIdentity === i
-                                ? styles.chosenIdentityListElement
-                                : null
-                        }`}
+                        active={chosenIdentity === identity}
                     >
                         <IdentityListElement identity={identity} />
-                    </List.Item>
+                    </Menu.Item>
                 ))}
-            </List>
+            </Menu>
         </>
     );
 }
