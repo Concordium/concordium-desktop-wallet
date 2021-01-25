@@ -9,6 +9,9 @@ import { Setting, SettingTypeEnum } from '../../utils/types';
 import BooleanSetting from './BooleanSettingElement';
 import TextSetting from './TextSettingElement';
 
+const foundationTransactionsEnabledWarning =
+    'Foundation transactions cannot be validly signed by anyone other than the foundation. If you are not part of the foundation, then you should keep this setting disabled.';
+
 export default function SettingsView() {
     const settings = useSelector(settingsSelector);
     const chosenIndex = useSelector(chosenIndexSelector);
@@ -20,12 +23,21 @@ export default function SettingsView() {
     return (
         <Form>
             {settings[chosenIndex].settings.map((childSetting: Setting) => {
+                let warning: string | undefined;
+
                 switch (childSetting.type) {
                     case SettingTypeEnum.Boolean:
+                        if (
+                            childSetting.name ===
+                            'foundationTransactionsEnabled'
+                        ) {
+                            warning = foundationTransactionsEnabledWarning;
+                        }
                         return (
                             <BooleanSetting
                                 setting={childSetting}
                                 key={childSetting.name}
+                                warning={warning}
                             />
                         );
                     case SettingTypeEnum.Text:
