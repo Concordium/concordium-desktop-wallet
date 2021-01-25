@@ -16,7 +16,6 @@ interface Props {
  */
 function TransactionList({ onTransactionClick }: Props): JSX.Element {
     const transactions = useSelector(transactionsSelector);
-    console.log(transactions);
 
     return (
         <Menu vertical fluid>

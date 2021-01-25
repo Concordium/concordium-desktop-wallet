@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Container, Header } from 'semantic-ui-react';
 import styles from './Accounts.css';
-import { fromMicroUnits } from '../utils/transactionHelpers';
+import { fromMicroUnits } from '../utils/gtu';
 import {
     setViewingShielded,
     viewingShieldedSelector,
@@ -47,7 +47,7 @@ export default function AccountBalanceView(): JSX.Element {
     if (viewingShielded) {
         main = (
             <Header as="h1" color="blue">
-                {fromMicroUnits(account.totalDecrypted)}{' '}
+                {fromMicroUnits(account.totalDecrypted)}
                 {account.allDecrypted ? '' : ' + ?'}
             </Header>
         );
@@ -65,11 +65,11 @@ export default function AccountBalanceView(): JSX.Element {
                                 accountInfo.accountReleaseSchedule.total,
                                 10
                             )
-                    )}{' '}
+                    )}
                 </Header>
                 <Header color="blue">
                     Staked:
-                    {fromMicroUnits(0)}{' '}
+                    {fromMicroUnits(0)}
                 </Header>
             </>
         );

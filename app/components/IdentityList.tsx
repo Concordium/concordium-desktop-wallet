@@ -37,10 +37,10 @@ export default function IdentityList() {
                 +
             </Button>
             <Menu vertical fluid>
-                {identities.map((identity: Identity, i: number) => (
+                {identities.map((identity: Identity) => (
                     <Menu.Item
                         key={identity.id}
-                        onClick={() => dispatch(chooseIdentity(i))}
+                        onClick={() => dispatch(chooseIdentity(identity))}
                         active={chosenIdentity === identity}
                     >
                         <IdentityListElement identity={identity} />

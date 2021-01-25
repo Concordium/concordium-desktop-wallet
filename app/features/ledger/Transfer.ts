@@ -1,5 +1,5 @@
 import type Transport from '@ledgerhq/hw-transport';
-import { AccountTransaction, TransactionKind } from '../../utils/types';
+import { AccountTransaction, TransactionKindId } from '../../utils/types';
 import {
     serializeTransactionHeader,
     serializeTransferPayload,
@@ -13,14 +13,14 @@ export default async function signTransfer(
     path: number[],
     transaction: AccountTransaction
 ): Promise<Buffer> {
-    if (transaction.transactionKind !== TransactionKind.Simple_transfer) {
+    if (transaction.transactionKind !== TransactionKindId.Simple_transfer) {
         throw new Error(
             `The received transaction was not a transfer transaction: ${transaction.transactionKind}`
         );
     }
 
     const payload = serializeTransferPayload(
-        TransactionKind.Simple_transfer,
+        TransactionKindId.Simple_transfer,
         transaction.payload
     );
 

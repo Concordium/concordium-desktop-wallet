@@ -1,19 +1,20 @@
 import React from 'react';
 import { Grid } from 'semantic-ui-react';
-import { fromMicroUnits, parseTime } from '../utils/transactionHelpers';
-import { TransferTransaction, TransactionStatus } from '../utils/types';
+import { parseTime } from '../utils/transactionHelpers';
+import { getGTUSymbol, fromMicroUnits } from '../utils/gtu';
+import { TransferTransaction, TransactionStatus, OriginType, TransactionKindString } from '../utils/types';
 import SidedText from './SidedText';
 
 function getName(transaction) {
     switch (transaction.originType) {
-        case 'self':
+        case OriginType.Self:
             return 'toAddressName' in transaction
-                ? transaction.toAddressName
-                : transaction.toAddress.slice(0, 6);
-        case 'account':
+                 ? transaction.toAddressName
+                 : transaction.toAddress.slice(0, 6);
+        case OriginType.Account:
             return 'fromAddressName' in transaction
-                ? transaction.fromAddressName
-                : transaction.fromAddress.slice(0, 6);
+                 ? transaction.fromAddressName
+                 : transaction.fromAddress.slice(0, 6);
         default:
             return 'unknown';
     }
@@ -37,8 +38,8 @@ function buildIncomingAmountStrings(total) {
 
 function parseAmount(transaction) {
     switch (transaction.originType) {
-        case 'self': {
-            if (transaction.transactionKind === 'encryptedAmountTransfer') {
+        case OriginType.Self: {
+            if (transaction.transactionKind === TransactionKindString.EncryptedAmountTransfer) {
                 if (transaction.decryptedAmount) {
                     return buildOutgoingAmountStrings(
                         transaction.decryptedAmount,
@@ -47,8 +48,8 @@ function parseAmount(transaction) {
                     );
                 }
                 return {
-                    amount: '\u01E4 ?',
-                    amountFormula: `\u01E4 ? +${fromMicroUnits(
+                    amount: `${getGTUSymbol()} ?`,
+                    amountFormula: `${getGTUSymbol()} ? +${fromMicroUnits(
                         transaction.cost
                     )} Fee`,
                 };
@@ -59,15 +60,15 @@ function parseAmount(transaction) {
                 transaction.cost
             );
         }
-        case 'account':
-            if (transaction.transactionKind === 'encryptedAmountTransfer') {
+        case OriginType.Account:
+            if (transaction.transactionKind === TransactionKindString.EncryptedAmountTransfer) {
                 if (transaction.decryptedAmount) {
                     return buildIncomingAmountStrings(
                         transaction.decryptedAmount
                     );
                 }
                 return {
-                    amount: '\u01E4 ?',
+                    amount: `${getGTUSymbol()} ?`,
                     amountFormula: '',
                 };
             }
@@ -79,7 +80,7 @@ function parseAmount(transaction) {
 
 function displayType(kind) {
     switch (kind) {
-        case 'transferWithSchedule':
+        case TransactionKindString.TransferWithSchedule:
             return '(schedule)';
         default:
             return '';
@@ -125,7 +126,7 @@ function TransactionListElement({ transaction }: Props): JSX.element {
                 left={`${time} ${statusSymbol(transaction.status)}`}
                 right={amountFormula.concat(
                     ` ${
-                        transaction.status !== 'finalized' ? ' (Estimated)' : ''
+                        transaction.status !== TransactionStatus.Finalized ? ' (Estimated)' : ''
                     }`
                 )}
             />

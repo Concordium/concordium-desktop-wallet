@@ -16,7 +16,7 @@ function CopiableListElement({ title, value, note }: Props): JSX.element {
         <Grid container columns={2} divided="vertically">
             <Grid.Row>
                 <Grid.Column textAlign="left">
-                    {title} {' \n'}
+                    {title} {'\n'}
                     {value} {note ? `(${note})` : undefined}
                 </Grid.Column>
                 <Grid.Column textAlign="right">

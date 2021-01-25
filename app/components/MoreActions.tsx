@@ -7,6 +7,11 @@ import locations from '../constants/moreActionLocations.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
 
+const items = [
+    { name: 'Account Address', location: locations.accountAddress },
+    { name: 'Release Schedule', location: locations.releaseSchedule },
+];
+
 /**
  * Lists additional actions, for the account.
  * And controls the flow of those actions' pages.
@@ -16,10 +21,6 @@ export default function MoreActions(
     account: Account,
     accountInfo: AccountInfo
 ) {
-    const items = [
-        { name: 'Account Address', location: locations.accountAddress },
-        { name: 'Release Schedule', location: locations.releaseSchedule },
-    ];
     const [location, setLocation] = useState(locations.list);
 
     function ChosenComponent() {
@@ -27,7 +28,7 @@ export default function MoreActions(
             case locations.list:
                 return (
                     <>
-                        <Button as={Link} to={routes.ACCOUNTS} type="submit">
+                        <Button as={Link} to={routes.ACCOUNTS}>
                             x
                         </Button>
                         <Menu vertical>

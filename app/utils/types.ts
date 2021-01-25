@@ -100,8 +100,27 @@ export interface Account {
     credential?: string;
 }
 
-// The different types of an AccountTransaction.
-export enum TransactionKind {
+export enum TransactionKindString {
+    DeployModule = "deployModule",
+    InitContract = "initContract",
+    Update = "update",
+    Transfer = "transfer",
+    AddBaker = "addBaker",
+    RemoveBaker = "removeBaker",
+    UpdateBakerAccount = "updateBakerAccount",
+    UpdateBakerSignKey = "updateBakerSignKey",
+    DelegateStake = "delegateStake",
+    UndelegateStake = "undelegateStake",
+    UpdateElectionDifficulty = "updateElectionDifficulty",
+    DeployCredential = "deployCredential",
+    BakingReward = "bakingReward",
+    EncryptedAmountTransfer = "encryptedAmountTransfer",
+    TransferToEncrypted = "transferToEncrypted",
+    TransferToPublic = "transferToPublic"
+}
+
+// The ids of the different types of an AccountTransaction.
+export enum TransactionKindId {
     Deploy_module = 0,
     Initialize_smart_contract_instance = 1,
     Update_smart_contract_instance = 2,
@@ -122,7 +141,7 @@ export interface AccountTransaction {
     nonce: number;
     energyAmount: number;
     expiry: number;
-    transactionKind: TransactionKind;
+    transactionKind: TransactionKindId;
     payload;
 }
 
@@ -200,10 +219,10 @@ export enum TransactionStatus {
 
 // Types of origins that a Transaction can have.
 export enum OriginType {
-    self,
-    account,
-    reward,
-    none,
+    Self = 'self',
+    Account = 'account',
+    Reward = 'reward',
+    None = 'none',
 }
 
 /**
@@ -212,7 +231,7 @@ export enum OriginType {
 export interface TransferTransaction {
     remote: boolean;
     originType: OriginType;
-    transactionKind: TransactionKind;
+    transactionKind: TransactionKindString;
     id: number;
     blockHash: Hex;
     blockTime: string;

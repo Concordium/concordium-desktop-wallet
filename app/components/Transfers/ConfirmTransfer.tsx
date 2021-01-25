@@ -9,7 +9,6 @@ import LedgerComponent from '../LedgerComponent';
 import {
     createSimpleTransferTransaction,
     waitForFinalization,
-    fromMicroUnits,
 } from '../../utils/transactionHelpers';
 import {
     Account,
@@ -23,6 +22,8 @@ import {
     confirmTransaction,
     rejectTransaction,
 } from '../../features/TransactionSlice';
+import { getGTUSymbol, fromMicroUnits } from '../../utils/gtu';
+import { getAccountPath } from '../../features/ledger/Path';
 
 export interface Props {
     account: Account;
@@ -67,7 +68,11 @@ export default function ConfirmTransferComponent({
             amount,
             recipient.address
         );
-        const path = [0, 0, account.identityId, 2, account.accountNumber, 0];
+        const path = getAccountPath({
+            identityIndex: account.identityId,
+            accountIndex: account.accountNumber,
+            signatureIndex: 0
+        });
         const signature: Buffer = await ledger.signTransfer(
             transferTransaction,
             path
@@ -94,8 +99,6 @@ export default function ConfirmTransferComponent({
         }
     }
 
-    ledgerSignTransfer({ signTransfer: () => Buffer.from([0]) });
-
     return (
         <Card fluid centered>
             <Card.Content textAlign="center">
@@ -107,7 +110,7 @@ export default function ConfirmTransferComponent({
                     <Table.Row>
                         <Table.Cell>Amount:</Table.Cell>
                         <Table.Cell textAlign="right">
-                            {'\u01E4'} {amount}
+                            {getGTUSymbol()} {amount}
                         </Table.Cell>
                     </Table.Row>
                     <Table.Row>

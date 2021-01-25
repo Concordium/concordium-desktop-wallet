@@ -1,7 +1,8 @@
 import React from 'react';
 import { Header, Grid, Button } from 'semantic-ui-react';
 import { AccountInfo, ScheduleItem, TimeStampUnit } from '../utils/types';
-import { parseTime, fromMicroUnits } from '../utils/transactionHelpers';
+import { parseTime } from '../utils/transactionHelpers';
+import { fromMicroUnits } from '../utils/gtu';
 import SidedText from './SidedText';
 
 interface Props {

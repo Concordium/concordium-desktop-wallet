@@ -17,7 +17,6 @@ export default function ShowAccountAddress({ account, returnFunction }: Props) {
         <>
             <Button onClick={returnFunction}>x</Button>
             <Header textAlign="center">
-                {' '}
                 Address
                 <Header.Subheader textAlign="center">
                     {account.address}

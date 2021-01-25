@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, Input, Button, Label } from 'semantic-ui-react';
 import { AddressBookEntry } from '../../utils/types';
 import locations from '../../constants/transferLocations.json';
+import { getGTUSymbol } from '../../utils/gtu';
 
 interface Props {
     setLocation(location: string): void;
@@ -38,14 +39,13 @@ export default function PickAmount({
                     value={amount}
                     onChange={(e) => updateAmount(e.target.value)}
                     autoFocus
-                    label={{ basic: true, content: '\u01E4' }}
+                    label={{ basic: true, content: getGTUSymbol() }}
                 />
                 <Button.Group vertical>
                     <Button
                         onClick={() => setLocation(locations.pickRecipient)}
                     >
-                        {' '}
-                        {recipient ? recipient.name : 'Select Recipient'}{' '}
+                        {recipient ? recipient.name : 'Select Recipient'}
                     </Button>
                     <Button
                         positive

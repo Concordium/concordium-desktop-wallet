@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
-import { fromMicroUnits } from '../../utils/transactionHelpers';
+import { fromMicroUnits } from '../../utils/gtu';
 import { AccountTransaction, AddressBookEntry } from '../../utils/types';
 
 interface Props {
@@ -33,8 +33,7 @@ export default function FinalPage({
                     <Table.Row>
                         <Table.Cell>Estimated fee:</Table.Cell>
                         <Table.Cell textAlign="right">
-                            {' '}
-                            {fromMicroUnits(200)}{' '}
+                            {fromMicroUnits(200)}
                         </Table.Cell>
                     </Table.Row>
                     <Table.Row>

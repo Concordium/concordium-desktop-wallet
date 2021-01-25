@@ -30,11 +30,11 @@ export default function DisplayIdentityAttributes(): JSX.element {
     }
     return (
         <Grid container columns={2} divided="vertically">
-            {attributeKeys.map((attribute: string) => (
+            {attributeKeys.map((attributeKey: string) => (
                 <SidedText
-                    key={attribute}
-                    left={attributeNames[attribute]}
-                    right={attributes[attribute]}
+                    key={attributeKey}
+                    left={attributeNames[attributeKey]}
+                    right={attributes[attributeKey]}
                 />
             ))}
         </Grid>
