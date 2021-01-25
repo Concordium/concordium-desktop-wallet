@@ -2,56 +2,9 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card, Button, Modal, Input } from 'semantic-ui-react';
-import { ipcRenderer } from 'electron';
-import fs from 'fs';
-import * as crypto from 'crypto';
+import { decrypt } from '../utils/encryption';
+import { loadFile } from '../utils/files';
 import routes from '../constants/routes.json';
-
-function decrypt({ cipherText, metaData }, password) {
-    // TODO: ensure this is correct.
-    const { keyLen, iterations, salt, initializationVector } = metaData;
-    const key = crypto.pbkdf2Sync(
-        password,
-        Buffer.from(salt),
-        iterations,
-        keyLen,
-        'sha256'
-    );
-    const decipher = crypto.createDecipheriv(
-        'aes-256-cbc',
-        key,
-        Buffer.from(initializationVector)
-    );
-    let data = decipher.update(cipherText, 'hex', 'utf8');
-    data += decipher.final('utf8');
-    return data;
-}
-
-async function loadFile() {
-    const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke(
-        'OPEN_FILE_DIALOG',
-        'Load transaction'
-    );
-
-    if (openDialogValue.canceled) {
-        return undefined;
-    }
-
-    if (openDialogValue.filePaths.length === 1) {
-        const fileLocation = openDialogValue.filePaths[0];
-        const fileString = fs.readFileSync(fileLocation, {
-            encoding: 'utf-8',
-        });
-
-        try {
-            return JSON.parse(fileString);
-        } catch (e) {
-            // TODO Replace thrown error with modal that tells the user that the provided file was invalid.
-            throw new Error('Input was not valid JSON.');
-        }
-    }
-    return undefined;
-}
 
 export default function Import() {
     const dispatch = useDispatch();
@@ -59,7 +12,7 @@ export default function Import() {
     const [file, setFile] = useState('');
     const [open, setOpen] = useState(false);
 
-    async function onClick() {
+    async function modalButtonOnClick() {
         const data = JSON.parse(decrypt(file, password));
         // TODO ensure correct structure
         setOpen(false);
@@ -71,6 +24,20 @@ export default function Import() {
         );
     }
 
+    async function browseFilesButtonOnClick() {
+        const rawData = await loadFile();
+        let encryptedData;
+        try {
+            encryptedData = JSON.parse(rawData);
+        } catch (e) {
+            // TODO Replace thrown error with modal that tells the user that the provided file was invalid.
+            throw new Error('Input was not valid JSON.');
+        }
+        if (encryptedData !== undefined) {
+            setFile(encryptedData);
+            setOpen(true);
+        }
+    }
     return (
         <Card fluid style={{ height: '75vh' }}>
             <Card.Header textAlign="center">Import</Card.Header>
@@ -95,28 +62,13 @@ export default function Import() {
                         onChange={(e) => setPassword(e.target.value)}
                         autoFocus
                     />
-                    <Button disabled={!password} onClick={onClick}>
+                    <Button disabled={!password} onClick={modalButtonOnClick}>
                         Import
                     </Button>
                 </Modal.Content>
             </Modal>
             <Card.Content extra>
-                <Button
-                    primary
-                    onClick={() => {
-                        loadFile()
-                            .then((encryptedData) => {
-                                if (encryptedData !== undefined) {
-                                    setFile(encryptedData);
-                                    setOpen(true);
-                                }
-                                return true;
-                            })
-                            .catch(() => {
-                                throw new Error('Unexpected Error');
-                            });
-                    }}
-                >
+                <Button primary onClick={browseFilesButtonOnClick}>
                     Browse to file
                 </Button>
             </Card.Content>

@@ -1,65 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Card, Button, Modal, Input } from 'semantic-ui-react';
-import { ipcRenderer } from 'electron';
-import fs from 'fs';
-import * as crypto from 'crypto';
+import { encrypt } from '../utils/encryption';
+import { saveToFile } from '../utils/files';
 import { loadIdentities, identitiesSelector } from '../features/IdentitySlice';
 import { loadAccounts, accountsSelector } from '../features/AccountSlice';
 import {
     loadAddressBook,
     addressBookSelector,
 } from '../features/AddressBookSlice';
-
-function encrypt(data, password) {
-    // TODO: ensure this is correct.
-    const keyLen = 32;
-    const iterations = 10000;
-    const salt = crypto.randomBytes(16);
-    const key = crypto.pbkdf2Sync(password, salt, iterations, keyLen, 'sha256');
-    const initializationVector = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv(
-        'aes-256-cbc',
-        key,
-        initializationVector
-    );
-    let cipherText = cipher.update(data, 'utf8', 'hex');
-    cipherText += cipher.final('hex');
-    return {
-        cipherText,
-        metaData: {
-            keyLen,
-            iterations,
-            salt,
-            initializationVector,
-        },
-    };
-}
-
-async function exportData(data, password) {
-    const encrypted = encrypt(JSON.stringify(data), password);
-
-    const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke(
-        'SAVE_FILE_DIALOG',
-        'Export signed transaction'
-    );
-    if (saveFileDialog.canceled) {
-        return;
-    }
-
-    if (saveFileDialog.filePath) {
-        fs.writeFile(
-            saveFileDialog.filePath,
-            JSON.stringify(encrypted),
-            (err) => {
-                if (err) {
-                    // TODO Add error handling here.
-                }
-                // TODO Announce succesfull export
-            }
-        );
-    }
-}
 
 /**
  * Detailed view of the chosen identity.
@@ -70,7 +19,8 @@ export default function Export() {
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
     const [password, setPassword] = useState('');
-    const [open, setOpen] = useState(false);
+    const [openPasswordModal, setOpenPasswordModal] = useState(false);
+    const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
 
     useEffect(() => {
         loadAccounts(dispatch);
@@ -87,11 +37,13 @@ export default function Export() {
             const { identityName, ...other } = acc;
             return other;
         });
-        await exportData(
-            { accounts: cleanAccounts, identities, addressBook },
-            password
-        );
-        setOpen(false);
+        const data = { accounts: cleanAccounts, identities, addressBook };
+        const encrypted = encrypt(JSON.stringify(data), password);
+        const successful = await saveToFile(encrypted); // TODO handle error
+        if (successful) {
+            setOpenPasswordModal(false);
+            setOpenConfirmationModal(true);
+        }
     }
 
     return (
@@ -102,9 +54,9 @@ export default function Export() {
             </Card.Description>
             <Modal
                 closeIcon
-                onClose={() => setOpen(false)}
-                onOpen={() => setOpen(true)}
-                open={open}
+                centered
+                onClose={() => setOpenPasswordModal(false)}
+                open={openPasswordModal}
                 dimmer="blurring"
                 closeOnDimmerClick={false}
             >
@@ -123,8 +75,25 @@ export default function Export() {
                     </Button>
                 </Modal.Content>
             </Modal>
+            <Modal
+                centered
+                open={openConfirmationModal}
+                dimmer="blurring"
+                closeOnDimmerClick={false}
+            >
+                <Modal.Header>Export was Successful</Modal.Header>
+                <Modal.Content>
+                    <Button
+                        disabled={!password}
+                        onClick={() => setOpenConfirmationModal(false)}
+                    >
+                        Ok, thanks!
+                    </Button>
+                </Modal.Content>
+            </Modal>
+
             <Card.Content extra>
-                <Button primary onClick={() => setOpen(true)}>
+                <Button primary onClick={() => setOpenPasswordModal(true)}>
                     Export
                 </Button>
             </Card.Content>

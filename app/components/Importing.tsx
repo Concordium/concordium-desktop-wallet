@@ -18,6 +18,13 @@ const accountFields = [
 ];
 const addressBookFields = ['name', 'address', 'note'];
 
+/**
+ * Checks whether the entry has a "duplicate" in the given list
+ * This is determined by equality of the given fields.
+ * If the commonFields parameter is given, the function also checks
+ * that there are no shared fields, except for those specified in commonFields.
+ * Returns true if the entry is not a duplicate.
+ */
 function checkDuplicates(entry, list, fields, commonFields = undefined) {
     const allEqual = list.find((abe) =>
         fields.map((field) => abe[field] === entry[field]).every(Boolean)
@@ -42,7 +49,7 @@ function checkDuplicates(entry, list, fields, commonFields = undefined) {
         throw new Error('disallowed'); // TODO use custom error
     }
 
-    // TODO inform commonField collision
+    // TODO inform of commonField collision.
 
     return true;
 }
@@ -158,7 +165,7 @@ export default function Importing({ location }: Props) {
                                     identityFields
                                 )
                                     ? ''
-                                    : '(Already Exists)'}
+                                    : '(Already existed)'}
                             </List.Header>
                             <List.Content>
                                 Accounts:
@@ -180,7 +187,7 @@ export default function Importing({ location }: Props) {
                                                     accountFields
                                                 )
                                                     ? ''
-                                                    : '(Already Exists)'}
+                                                    : '(Already existed)'}
                                             </List.Item>
                                         ))}
                                 </List.List>
@@ -202,7 +209,7 @@ export default function Importing({ location }: Props) {
                                 addressBookFields
                             )
                                 ? ''
-                                : '(Already Exists)'}
+                                : '(Already existed)'}
                         </List.Item>
                     ))}
                 </List>
