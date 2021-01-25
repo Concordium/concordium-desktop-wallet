@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Card, Button, Modal, Input } from 'semantic-ui-react';
+import { Card, Button } from 'semantic-ui-react';
 import { decrypt } from '../utils/encryption';
 import { loadFile } from '../utils/files';
 import routes from '../constants/routes.json';
+import InputModal from './InputModal';
 
 export default function Import() {
     const dispatch = useDispatch();
-    const [password, setPassword] = useState('');
     const [file, setFile] = useState('');
     const [open, setOpen] = useState(false);
 
-    async function modalButtonOnClick() {
+    async function modalButtonOnClick(password) {
         const data = JSON.parse(decrypt(file, password));
         // TODO ensure correct structure
         setOpen(false);
@@ -44,29 +44,15 @@ export default function Import() {
             <Card.Description>
                 Choose what ID’s and accounts you want to export below:
             </Card.Description>
-            <Modal
-                closeIcon
+            <InputModal
+                title="Enter password used when exporting!"
+                buttonText="Import"
+                validValue={(password) => password}
+                buttonOnClick={modalButtonOnClick}
+                placeholder="Enter Password"
                 onClose={() => setOpen(false)}
-                onOpen={() => setOpen(true)}
                 open={open}
-                dimmer="blurring"
-                closeOnDimmerClick={false}
-            >
-                <Modal.Header>Choose a password!</Modal.Header>
-                <Modal.Content>
-                    <Input
-                        fluid
-                        name="name"
-                        placeholder="Enter Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        autoFocus
-                    />
-                    <Button disabled={!password} onClick={modalButtonOnClick}>
-                        Import
-                    </Button>
-                </Modal.Content>
-            </Modal>
+            />
             <Card.Content extra>
                 <Button primary onClick={browseFilesButtonOnClick}>
                     Browse to file

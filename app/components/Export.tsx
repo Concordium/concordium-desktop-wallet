@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, Button, Modal, Input } from 'semantic-ui-react';
+import { Card, Button } from 'semantic-ui-react';
 import { encrypt } from '../utils/encryption';
 import { saveToFile } from '../utils/files';
 import { loadIdentities, identitiesSelector } from '../features/IdentitySlice';
@@ -9,6 +9,8 @@ import {
     loadAddressBook,
     addressBookSelector,
 } from '../features/AddressBookSlice';
+import InputModal from './InputModal';
+import MessageModal from './MessageModal';
 
 /**
  * Detailed view of the chosen identity.
@@ -18,7 +20,6 @@ export default function Export() {
     const accounts = useSelector(accountsSelector);
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
-    const [password, setPassword] = useState('');
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
     const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
 
@@ -32,7 +33,7 @@ export default function Export() {
         return null;
     }
 
-    async function onClick() {
+    async function onClick(password: string) {
         const cleanAccounts = accounts.map((acc) => {
             const { identityName, ...other } = acc;
             return other;
@@ -52,46 +53,21 @@ export default function Export() {
             <Card.Description>
                 Choose what ID’s and accounts you want to export below:
             </Card.Description>
-            <Modal
-                closeIcon
-                centered
+            <InputModal
+                title="Choose a password!"
+                buttonText="Export"
+                validValue={(password) => password}
+                buttonOnClick={onClick}
+                placeholder="Enter Password"
                 onClose={() => setOpenPasswordModal(false)}
                 open={openPasswordModal}
-                dimmer="blurring"
-                closeOnDimmerClick={false}
-            >
-                <Modal.Header>Choose a password!</Modal.Header>
-                <Modal.Content>
-                    <Input
-                        fluid
-                        name="name"
-                        placeholder="Enter Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        autoFocus
-                    />
-                    <Button disabled={!password} onClick={onClick}>
-                        Export
-                    </Button>
-                </Modal.Content>
-            </Modal>
-            <Modal
-                centered
+            />
+            <MessageModal
+                title="Export was Successful"
+                buttonText="Ok, thanks!"
+                onClose={() => setOpenConfirmationModal(false)}
                 open={openConfirmationModal}
-                dimmer="blurring"
-                closeOnDimmerClick={false}
-            >
-                <Modal.Header>Export was Successful</Modal.Header>
-                <Modal.Content>
-                    <Button
-                        disabled={!password}
-                        onClick={() => setOpenConfirmationModal(false)}
-                    >
-                        Ok, thanks!
-                    </Button>
-                </Modal.Content>
-            </Modal>
-
+            />
             <Card.Content extra>
                 <Button primary onClick={() => setOpenPasswordModal(true)}>
                     Export
