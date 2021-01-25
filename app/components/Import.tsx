@@ -6,17 +6,32 @@ import { decrypt } from '../utils/encryption';
 import { loadFile } from '../utils/files';
 import routes from '../constants/routes.json';
 import InputModal from './InputModal';
+import MessageModal from './MessageModal';
 
 export default function Import() {
     const dispatch = useDispatch();
     const [file, setFile] = useState('');
-    const [open, setOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [messageModalOpen, setMessageModalOpen] = useState(false);
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false);
 
     async function modalButtonOnClick(password) {
-        const data = JSON.parse(decrypt(file, password));
-        // TODO ensure correct structure
-        setOpen(false);
-        return dispatch(
+        let decryptedFile;
+        try {
+            decryptedFile = decrypt(file, password);
+        } catch (e) {
+            setPasswordModalOpen(false);
+            setErrorMessage(
+                'Unable to decrypt file! (likely incorrect password)'
+            );
+            setMessageModalOpen(true);
+            return;
+        }
+
+        const data = JSON.parse(decryptedFile);
+        // TODO ensure data has the correct structure
+        setPasswordModalOpen(false);
+        dispatch(
             push({
                 pathname: routes.IMPORT,
                 state: data,
@@ -29,13 +44,16 @@ export default function Import() {
         let encryptedData;
         try {
             encryptedData = JSON.parse(rawData);
+            // TODO ensure data has correct structure
         } catch (e) {
-            // TODO Replace thrown error with modal that tells the user that the provided file was invalid.
-            throw new Error('Input was not valid JSON.');
+            setPasswordModalOpen(false);
+            setErrorMessage('This file is not a valid Export File!');
+            setMessageModalOpen(true);
+            return;
         }
         if (encryptedData !== undefined) {
             setFile(encryptedData);
-            setOpen(true);
+            setPasswordModalOpen(true);
         }
     }
     return (
@@ -50,8 +68,14 @@ export default function Import() {
                 validValue={(password) => password}
                 buttonOnClick={modalButtonOnClick}
                 placeholder="Enter Password"
-                onClose={() => setOpen(false)}
-                open={open}
+                onClose={() => setPasswordModalOpen(false)}
+                open={passwordModalOpen}
+            />
+            <MessageModal
+                title={errorMessage}
+                buttonText="Ok, thanks!"
+                onClose={() => setMessageModalOpen(false)}
+                open={messageModalOpen}
             />
             <Card.Content extra>
                 <Button primary onClick={browseFilesButtonOnClick}>
