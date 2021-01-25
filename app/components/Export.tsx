@@ -83,12 +83,19 @@ export default function Export() {
     }
 
     async function onClick() {
-        await exportData({ accounts, identities, addressBook }, password);
+        const cleanAccounts = accounts.map((acc) => {
+            const { identityName, ...other } = acc;
+            return other;
+        });
+        await exportData(
+            { accounts: cleanAccounts, identities, addressBook },
+            password
+        );
         setOpen(false);
     }
 
     return (
-        <Card>
+        <Card fluid style={{ height: '75vh' }}>
             <Card.Header>Export</Card.Header>
             <Card.Description>
                 Choose what ID’s and accounts you want to export below:
@@ -116,9 +123,11 @@ export default function Export() {
                     </Button>
                 </Modal.Content>
             </Modal>
-            <Button primary onClick={() => setOpen(true)}>
-                Export
-            </Button>
+            <Card.Content extra>
+                <Button primary onClick={() => setOpen(true)}>
+                    Export
+                </Button>
+            </Card.Content>
         </Card>
     );
 }

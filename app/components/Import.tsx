@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { push } from 'connected-react-router';
 import { Card, Button, Modal, Input } from 'semantic-ui-react';
 import { ipcRenderer } from 'electron';
 import fs from 'fs';
 import * as crypto from 'crypto';
+import routes from '../constants/routes.json';
 
 function decrypt({ cipherText, metaData }, password) {
     // TODO: ensure this is correct.
@@ -24,14 +27,14 @@ function decrypt({ cipherText, metaData }, password) {
     return data;
 }
 
-async function importData(password) {
+async function loadFile() {
     const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke(
         'OPEN_FILE_DIALOG',
         'Load transaction'
     );
 
     if (openDialogValue.canceled) {
-        return;
+        return undefined;
     }
 
     if (openDialogValue.filePaths.length === 1) {
@@ -40,29 +43,32 @@ async function importData(password) {
             encoding: 'utf-8',
         });
 
-        let encryptedData;
         try {
-            encryptedData = JSON.parse(fileString);
+            return JSON.parse(fileString);
         } catch (e) {
             // TODO Replace thrown error with modal that tells the user that the provided file was invalid.
             throw new Error('Input was not valid JSON.');
         }
-
-        // TODO ensure correct structure
-
-        const data = decrypt(encryptedData, password);
-        // TODO Save the data
-        console.log(JSON.parse(data));
     }
+    return undefined;
 }
 
 export default function Import() {
+    const dispatch = useDispatch();
     const [password, setPassword] = useState('');
+    const [file, setFile] = useState('');
     const [open, setOpen] = useState(false);
 
     async function onClick() {
-        await importData(password);
+        const data = JSON.parse(decrypt(file, password));
+        // TODO ensure correct structure
         setOpen(false);
+        return dispatch(
+            push({
+                pathname: routes.IMPORT,
+                state: data,
+            })
+        );
     }
 
     return (
@@ -90,13 +96,28 @@ export default function Import() {
                         autoFocus
                     />
                     <Button disabled={!password} onClick={onClick}>
-                        Export
+                        Import
                     </Button>
                 </Modal.Content>
             </Modal>
             <Card.Content extra>
-                <Button primary onClick={() => setOpen(true)}>
-                    Import
+                <Button
+                    primary
+                    onClick={() => {
+                        loadFile()
+                            .then((encryptedData) => {
+                                if (encryptedData !== undefined) {
+                                    setFile(encryptedData);
+                                    setOpen(true);
+                                }
+                                return true;
+                            })
+                            .catch(() => {
+                                throw new Error('Unexpected Error');
+                            });
+                    }}
+                >
+                    Browse to file
                 </Button>
             </Card.Content>
         </Card>

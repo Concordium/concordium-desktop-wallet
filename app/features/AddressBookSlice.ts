@@ -46,6 +46,10 @@ export async function removeFromAddressBook(dispatch, entry) {
     loadAddressBook(dispatch);
 }
 
+export async function importEntry(entry) {
+    return insertEntry(entry);
+}
+
 export const addressBookSelector = (state: RootState) =>
     state.addressBook.addressBook;
 export const chosenIndexSelector = (state: RootState) =>

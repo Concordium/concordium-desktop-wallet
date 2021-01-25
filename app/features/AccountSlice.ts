@@ -223,4 +223,8 @@ export async function decryptAccountBalance(dispatch, prfKey, account) {
     });
 }
 
+export async function importAccount(account) {
+    await insertAccount(account);
+}
+
 export default accountsSlice.reducer;
