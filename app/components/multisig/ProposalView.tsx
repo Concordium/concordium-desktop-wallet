@@ -18,10 +18,13 @@ import TransactionHashView from '../TransactionHashView';
 import {
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
+    MultiSignatureTransactionStatus,
     UpdateInstruction,
 } from '../../utils/types';
 import { saveFile } from '../../utils/FileHelper';
 import DragAndDropFile from '../DragAndDropFile';
+import { sendTransaction } from '../../utils/client';
+import { serializeForSubmission } from '../../utils/UpdateSerialization';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -69,6 +72,24 @@ export default function ProposalView() {
     const instruction: UpdateInstruction = JSON.parse(
         currentProposal.transaction
     );
+
+    async function submitTransaction() {
+        const payload = serializeForSubmission(instruction);
+        const submitted = (await sendTransaction(payload)).getValue();
+        if (submitted) {
+            const submittedProposal = {
+                ...currentProposal,
+                status: MultiSignatureTransactionStatus.Submitted,
+            };
+            updateCurrentProposal(dispatch, submittedProposal);
+        } else {
+            const failedProposal = {
+                ...currentProposal,
+                status: MultiSignatureTransactionStatus.Failed,
+            };
+            updateCurrentProposal(dispatch, failedProposal);
+        }
+    }
 
     const unsignedCheckboxes = [];
     for (
@@ -136,6 +157,10 @@ export default function ProposalView() {
                     <Button
                         fluid
                         primary
+                        disabled={
+                            currentProposal.status !==
+                            MultiSignatureTransactionStatus.Open
+                        }
                         onClick={() =>
                             saveFile(
                                 currentProposal.transaction,
@@ -147,7 +172,16 @@ export default function ProposalView() {
                     </Button>
                 </Grid.Column>
                 <Grid.Column>
-                    <Button fluid positive disabled={missingSignatures}>
+                    <Button
+                        fluid
+                        positive
+                        disabled={
+                            missingSignatures ||
+                            currentProposal.status !==
+                                MultiSignatureTransactionStatus.Open
+                        }
+                        onClick={submitTransaction}
+                    >
                         Submit transcation to chain
                     </Button>
                 </Grid.Column>

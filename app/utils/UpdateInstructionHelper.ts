@@ -10,7 +10,7 @@ export default function createUpdateInstruction(
 ) {
     const updateHeader: UpdateHeader = {
         effectiveTime: Date.now() + 864000000,
-        sequenceNumber: 0,
+        sequenceNumber: 4,
         timeout: Date.now() + 864000000 * 7,
     };
 

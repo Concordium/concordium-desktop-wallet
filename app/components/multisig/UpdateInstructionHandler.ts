@@ -5,7 +5,7 @@ import {
     UpdateInstruction,
     UpdateType,
 } from '../../utils/types';
-import serializeUpdateInstruction from '../../utils/UpdateSerialization';
+import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 
 export default class UpdateInstructionHandler
     implements TransactionHandler<UpdateInstruction> {
@@ -20,14 +20,14 @@ export default class UpdateInstructionHandler
     }
 
     serializeTransaction(): Buffer {
-        return serializeUpdateInstruction(this.transaction);
+        return serializeUpdateInstructionHeaderAndPayload(this.transaction);
     }
 
     signTransaction(ledger: ConcordiumLedgerClient) {
         const { type } = this.transaction;
         switch (type) {
             case UpdateType.UpdateMicroGTUPerEuro:
-                return ledger.getPrfKey(0);
+                return ledger.signMicroGtuPerEuro(this.transaction);
             default:
                 throw Error(`Unsupported UpdateType: ${type}`);
         }

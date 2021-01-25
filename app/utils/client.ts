@@ -2,7 +2,7 @@ import { credentials, Metadata } from '@grpc/grpc-js';
 import { P2PClient } from '../proto/concordium_p2p_rpc_grpc_pb';
 import {
     BlockHash,
-    JSONResponse,
+    JsonResponse,
     SendTransactionRequest,
     TransactionHash,
     AccountAddress,
@@ -39,7 +39,7 @@ function buildSendTransactionRequest(
 }
 
 function sendPromise(command, input) {
-    return new Promise<JSONResponse>((resolve, reject) => {
+    return new Promise<JsonResponse>((resolve, reject) => {
         command.bind(client)(input, buildMetaData(), (err, response) => {
             if (err) {
                 return reject(err);
@@ -49,7 +49,7 @@ function sendPromise(command, input) {
     });
 }
 
-export function getBlockSummary(blockHashValue: string): Promise<JSONResponse> {
+export function getBlockSummary(blockHashValue: string): Promise<JsonResponse> {
     const blockHash = new BlockHash();
     blockHash.setBlockHash(blockHashValue);
 
@@ -59,7 +59,7 @@ export function getBlockSummary(blockHashValue: string): Promise<JSONResponse> {
 export function sendTransaction(
     transactionPayload: Uint8Array,
     networkId = 100
-): Promise<JSONResponse> {
+): Promise<JsonResponse> {
     const request = buildSendTransactionRequest(transactionPayload, networkId);
 
     return sendPromise(client.sendTransaction, request);
@@ -67,28 +67,28 @@ export function sendTransaction(
 
 export function getTransactionStatus(
     transactionId: string
-): Promise<JSONResponse> {
+): Promise<JsonResponse> {
     const transactionHash = new TransactionHash();
     transactionHash.setTransactionHash(transactionId);
 
     return sendPromise(client.getTransactionStatus, transactionHash);
 }
 
-export function getNextAccountNonce(address: string): Promise<JSONResponse> {
+export function getNextAccountNonce(address: string): Promise<JsonResponse> {
     const accountAddress = new AccountAddress();
     accountAddress.setAccountAddress(address);
 
     return sendPromise(client.getNextAccountNonce, accountAddress);
 }
 
-export function getConsensusInfo(): Promise<JSONResponse> {
+export function getConsensusInfo(): Promise<JsonResponse> {
     return sendPromise(client.getConsensusStatus, new Empty());
 }
 
 export function getAccountInfo(
     address: string,
     blockHash: string
-): Promise<JSONResponse> {
+): Promise<JsonResponse> {
     const requestData = new GetAddressInfoRequest();
     requestData.setAddress(address);
     requestData.setBlockHash(blockHash);

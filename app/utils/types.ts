@@ -333,6 +333,7 @@ export enum MultiSignatureTransactionStatus {
     Rejected = 'rejected',
     Closed = 'closed',
     Completed = 'completed',
+    Failed = 'failed',
 }
 
 /**

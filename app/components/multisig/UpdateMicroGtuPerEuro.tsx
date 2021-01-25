@@ -31,7 +31,7 @@ function createTransaction(microGtuPerEuro: number): MultiSignatureTransaction {
     // TODO The threshold should be read from on-chain parameters.
     const multiSignatureTransaction = createMultiSignatureTransaction(
         updateInstruction,
-        3,
+        1,
         MultiSignatureTransactionStatus.Open
     );
 
