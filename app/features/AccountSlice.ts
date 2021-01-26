@@ -7,12 +7,17 @@ import {
     updateAccount,
     getAccountsOfIdentity,
 } from '../database/AccountDao';
-import { getAccountInfo, getConsensusInfo } from '../utils/client';
 import { getGlobal } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
-import { CredentialDeploymentInformation, AccountStatus } from '../utils/types';
+import {
+    CredentialDeploymentInformation,
+    AccountStatus,
+    AccountEncryptedAmount,
+    Account,
+} from '../utils/types';
 import { waitForFinalization } from '../utils/transactionHelpers';
-import { isValidAddress } from '../utils/addressHelpers';
+import { isValidAddress } from '../utils/accountHelpers';
+import { getAccountInfos } from '../utils/clientHelpers';
 
 const accountsSlice = createSlice({
     name: 'accounts',
@@ -73,52 +78,58 @@ export const {
     setAccountInfos,
 } = accountsSlice.actions;
 
+// given an account and the accountEncryptedAmount from the accountInfo
+// determine whether the account has received or sent new funds,
+// and in that case update the state of the account to reflect that.
+function updateAccountEncryptedAmount(
+    account: Account,
+    accountEncryptedAmount: AccountEncryptedAmount
+): Promise<void> {
+    const { incomingAmounts } = accountEncryptedAmount;
+    const selfAmounts = accountEncryptedAmount.selfAmount;
+    const incomingAmountsString = JSON.stringify(incomingAmounts);
+    if (
+        !(
+            account.incomingAmounts === incomingAmountsString &&
+            account.selfAmounts === selfAmounts
+        )
+    ) {
+        return updateAccount(account.name, {
+            incomingAmountsString,
+            selfAmounts,
+            allDecrypted: false,
+        });
+    }
+    return Promise.resolve();
+}
+
 // Loads the given accounts' infos from the node, then updates the
 // AccountInfo state.
-export async function loadAccountsInfos(accounts, dispatch) {
+export async function loadAccountInfos(accounts, dispatch) {
     const map = {};
-    const consenusInfo = JSON.parse((await getConsensusInfo()).getValue());
-    const blockHash = consenusInfo.lastFinalizedBlock;
-    await Promise.all(
-        accounts
-            .filter(
-                (account) =>
-                    isValidAddress(account.address) &&
-                    account.status === AccountStatus.Confirmed
-            )
-            .map(async (account) => {
-                const response = await getAccountInfo(
-                    account.address,
-                    blockHash
-                );
-                const accountInfo = JSON.parse(response.getValue());
-                const incomingAmounts = JSON.stringify(
-                    accountInfo.accountEncryptedAmount.incomingAmounts
-                );
-                const selfAmounts =
-                    accountInfo.accountEncryptedAmount.selfAmount;
-                if (
-                    !(
-                        account.incomingAmounts === incomingAmounts &&
-                        account.selfAmounts === selfAmounts
-                    )
-                ) {
-                    await updateAccount(account.name, {
-                        incomingAmounts,
-                        selfAmounts,
-                        allDecrypted: false,
-                    });
-                }
-                map[account.address] = accountInfo;
-            })
+    const confirmedAccounts = accounts.filter(
+        (account) =>
+            isValidAddress(account.address) &&
+            account.status === AccountStatus.Confirmed
     );
+    const accountInfos = await getAccountInfos(confirmedAccounts);
+    const updateEncryptedAmountsPromises = accountInfos.map(
+        ({ account, accountInfo }) => {
+            map[account.address] = accountInfo;
+            return updateAccountEncryptedAmount(
+                account,
+                accountInfo.accountEncryptedAmount
+            );
+        }
+    );
+    await Promise.all(updateEncryptedAmountsPromises);
     return dispatch(setAccountInfos(map));
 }
 
 // Load accounts into state, and updates their infos
 export async function loadAccounts(dispatch: Dispatch) {
     const accounts: Account[] = await getAllAccounts();
-    await loadAccountsInfos(accounts, dispatch);
+    await loadAccountInfos(accounts, dispatch);
     dispatch(updateAccounts(accounts.reverse()));
     return true;
 }

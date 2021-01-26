@@ -2,12 +2,9 @@ import React from 'react';
 import { Grid, Header, Label, Image, Divider } from 'semantic-ui-react';
 import { fromMicroUnits } from '../utils/gtu';
 import { AccountInfo, Account, AccountStatus } from '../utils/types';
+import { isInitialAccount } from '../utils/accountHelpers';
 import SidedText from './SidedText';
 import pendingImage from '../../resources/pending.svg';
-
-function isInitialAccount(account: Account) {
-    return account.accountNumber === 0;
-}
 
 interface Props {
     account: Account;

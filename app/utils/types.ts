@@ -248,12 +248,22 @@ export interface TransferTransaction {
     rejectReason?: string;
 }
 
+export type EncryptedAmount = Hex;
+
+export interface AccountEncryptedAmount {
+    selfAmount: EncryptedAmount;
+    incomingAmounts: EncryptedAmount[];
+    startIndex: number;
+    numAggregated?: number;
+}
+
 // Reflects the structure given by the node,
 // in a getAccountInfo request
 export interface AccountInfo {
     accountAmount: string;
     accountReleaseSchedule: AccountReleaseSchedule; // TODO
     accountBaker: AccountBakerDetails; // TODO
+    accountEncryptedAmount: AccountEncryptedAmount;
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.

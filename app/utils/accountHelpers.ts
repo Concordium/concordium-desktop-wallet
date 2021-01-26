@@ -14,4 +14,6 @@ export function isValidAddress(address: string): boolean {
     return true;
 }
 
-export const dummy = 0;
+export function isInitialAccount(account: Account) {
+    return account.accountNumber === 0;
+}
