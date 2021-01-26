@@ -6,11 +6,12 @@ import { UpdateHeader, UpdateInstruction, UpdateType } from './types';
 
 export default function createUpdateInstruction(
     updatePayload,
-    updateType: UpdateType
+    updateType: UpdateType,
+    sequenceNumber: number
 ) {
     const updateHeader: UpdateHeader = {
         effectiveTime: Date.now() + 864000000,
-        sequenceNumber: 4,
+        sequenceNumber,
         timeout: Date.now() + 864000000 * 7,
     };
 

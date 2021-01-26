@@ -1,7 +1,14 @@
 import { push } from 'connected-react-router';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
+import {
+    Button,
+    Divider,
+    Form,
+    Header,
+    Input,
+    Segment,
+} from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { updateCurrentProposal } from '../../features/MultiSignatureSlice';
 import {
@@ -13,12 +20,17 @@ import {
 import { insert } from '../../database/MultiSignatureProposalDao';
 import createUpdateInstruction from '../../utils/UpdateInstructionHelper';
 import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
+import { BlockSummary } from '../../utils/client';
 
 /**
  * Creates a multi signature transaction containing an update instruction for updating
  * the micro GTU per euro exchange rate.
  */
-function createTransaction(microGtuPerEuro: number): MultiSignatureTransaction {
+function createTransaction(
+    microGtuPerEuro: number,
+    sequenceNumber: number,
+    threshold: number
+): MultiSignatureTransaction {
     const exchangeRatePayload: ExchangeRate = {
         numerator: microGtuPerEuro,
         denominator: 1,
@@ -26,29 +38,37 @@ function createTransaction(microGtuPerEuro: number): MultiSignatureTransaction {
 
     const updateInstruction = createUpdateInstruction(
         exchangeRatePayload,
-        UpdateType.UpdateMicroGTUPerEuro
+        UpdateType.UpdateMicroGTUPerEuro,
+        sequenceNumber
     );
-    // TODO The threshold should be read from on-chain parameters.
+
     const multiSignatureTransaction = createMultiSignatureTransaction(
         updateInstruction,
-        1,
+        threshold,
         MultiSignatureTransactionStatus.Open
     );
 
     return multiSignatureTransaction;
 }
 
-export default function UpdateMicroGtuPerEuroRate() {
+interface Props {
+    blockSummary: BlockSummary;
+}
+
+export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
     const [microGtuPerEuro, setMicroGtuPerEuro] = useState<number>();
     const [
         currentMicroGtuPerEuro,
         setCurrentMicroGtuPerEuro,
     ] = useState<number>();
 
-    // TODO This value should be read from on-chain parameters.
     if (!currentMicroGtuPerEuro) {
-        setCurrentMicroGtuPerEuro(10000);
-        setMicroGtuPerEuro(10000);
+        setCurrentMicroGtuPerEuro(
+            blockSummary.updates.chainParameters.microGTUPerEuro.numerator
+        );
+        setMicroGtuPerEuro(
+            blockSummary.updates.chainParameters.microGTUPerEuro.numerator
+        );
     }
 
     const dispatch = useDispatch();
@@ -56,7 +76,10 @@ export default function UpdateMicroGtuPerEuroRate() {
     async function generateTransaction() {
         if (microGtuPerEuro) {
             const multiSignatureTransaction = createTransaction(
-                microGtuPerEuro
+                microGtuPerEuro,
+                blockSummary.updates.updateQueues.microGTUPerEuro
+                    .nextSequenceNumber,
+                blockSummary.updates.authorizations.microGTUPerEuro.threshold
             );
 
             // Set the current proposal in the state to the one that was just generated.
@@ -75,22 +98,28 @@ export default function UpdateMicroGtuPerEuroRate() {
             <Header>Transaction Proposal | Update MicroGTU Per Euro</Header>
             <Divider />
             <Form>
-                <Form.Input
-                    width="5"
-                    label="Current micro GTU per euro rate"
-                    readOnly
-                    value={currentMicroGtuPerEuro}
-                />
-                <Form.Input
-                    width="5"
-                    label="New micro GTU per euro rate"
-                    value={microGtuPerEuro}
-                    onChange={(e) => {
-                        if (e.target.value) {
-                            setMicroGtuPerEuro(parseInt(e.target.value, 10));
-                        }
-                    }}
-                />
+                <Form.Field inline>
+                    <Input
+                        width="5"
+                        label="Current micro GTU per euro rate"
+                        readOnly
+                        value={currentMicroGtuPerEuro}
+                    />
+                </Form.Field>
+                <Form.Field inline>
+                    <Input
+                        width="5"
+                        label="New micro GTU per euro rate"
+                        value={microGtuPerEuro}
+                        onChange={(e) => {
+                            if (e.target.value) {
+                                setMicroGtuPerEuro(
+                                    parseInt(e.target.value, 10)
+                                );
+                            }
+                        }}
+                    />
+                </Form.Field>
                 <Form.Field>
                     <Button primary onClick={generateTransaction}>
                         Generate transaction proposal
