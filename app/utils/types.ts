@@ -269,18 +269,13 @@ export interface UpdateHeader {
     payloadSize?: number;
 }
 
-// Currently we cannot see the difference between two ExchangeRate update instructions, so this type is
-// not specific enough. It should also contain the type from the enum.
 export interface UpdateInstruction {
     header: UpdateHeader;
-
     // Contains the payload for an update instruction. It can be any of the
     // update payloads available.
     // TODO Add other update types as they are implemented.
     payload: ExchangeRate;
-
     type: UpdateType;
-
     signatures: string[];
 }
 
@@ -325,7 +320,7 @@ export interface TransactionHandler<T> {
 
 /**
  * Enum for the different states that a multi signature transaction proposal
- * can through.
+ * can go through.
  */
 export enum MultiSignatureTransactionStatus {
     Open = 'open',
@@ -348,7 +343,7 @@ export interface MultiSignatureTransaction {
     // The minimum required signatures for the transaction
     // to be accepted on chain.
     threshold: number;
-
+    // The current state of the proposal
     status: MultiSignatureTransactionStatus;
 }
 

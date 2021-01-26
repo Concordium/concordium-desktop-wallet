@@ -34,7 +34,7 @@ import { hashSha256 } from '../../utils/serializationHelpers';
  * Component that displays the multi signature transaction proposal that is currently the
  * active one in the state. The component allows the user to export the proposal,
  * add signatures to the proposal, and if the signature threshold has been reached,
- * then the proposal can be submitted to the chain.
+ * then the proposal can be submitted to a node.
  */
 export default function ProposalView() {
     const dispatch = useDispatch();

@@ -11,11 +11,6 @@ import routes from '../../constants/routes.json';
 import { UpdateInstruction, UpdateType } from '../../utils/types';
 import TransactionDetails from '../TransactionDetails';
 
-// TODO The menu item description should be something other than the JSON of the transaction. Currently it is not
-// clear to me what it should be from our UI sketches, as they only represent simple transfers.
-// Perhaps it should contain the status, and perhaps how many signatures are missing? Type of transaction?
-// Account that created it if not a governance transaction.
-
 /**
  * Component that displays a list of multi signature transaction proposals.
  */

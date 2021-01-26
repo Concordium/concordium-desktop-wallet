@@ -25,17 +25,32 @@ export const settingsSelector = (state: RootState) => state.settings.settings;
 export const chosenIndexSelector = (state: RootState) =>
     state.settings.chosenIndex;
 
-export const { chooseSetting, updateSettings } = settingsSlice.actions;
-
-export function findSetting(
-    name: string,
-    settings: Settings[]
-): Setting | undefined {
+/**
+ * Searches the settings for a setting with the provided name.
+ * @param name name of the setting to find
+ * @param settings the settings to search
+ */
+function findSetting(name: string, settings: Settings[]): Setting | undefined {
     const flattenedSettings = settings.flatMap((settingTopLevel) => {
         return settingTopLevel.settings;
     });
     return flattenedSettings.find((setting) => setting.name === name);
 }
+
+export const foundationTransactionsEnabledSelector = (
+    state: RootState
+): boolean => {
+    const result = findSetting(
+        'foundationTransactionsEnabled',
+        state.settings.settings
+    );
+    if (result && result.value === '1') {
+        return true;
+    }
+    return false;
+};
+
+export const { chooseSetting, updateSettings } = settingsSlice.actions;
 
 export async function selectSettings(dispatch: Dispatch, index: number) {
     dispatch(chooseSetting({ index }));
