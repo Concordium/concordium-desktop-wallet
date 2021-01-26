@@ -33,7 +33,10 @@ function serializeUpdatePayload(payload): Buffer {
  */
 function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
     const serializedUpdateHeader = Buffer.alloc(28);
-    serializedUpdateHeader.writeBigUInt64BE(BigInt(updateHeader.sequenceNumber), 0);
+    serializedUpdateHeader.writeBigUInt64BE(
+        BigInt(updateHeader.sequenceNumber),
+        0
+    );
     serializedUpdateHeader.writeBigUInt64BE(
         BigInt(updateHeader.effectiveTime),
         8
