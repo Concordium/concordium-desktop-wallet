@@ -10,8 +10,8 @@ export function isValidGTU(amount) {
 /**
  * Given a GTU amount, convert to microGTU
  */
-export function toMicroUnits(amount: number): number {
-    return Math.floor(amount * 1000000);
+export function toMicroUnits(amount: BigInt): BigInt {
+    return amount * 1000000n;
 }
 
 /**
@@ -19,12 +19,12 @@ export function toMicroUnits(amount: number): number {
  * in a displayable format.
  */
 export function fromMicroUnits(rawAmount) {
-    const amount = parseInt(rawAmount, 10);
-    const absolute = Math.abs(amount);
-    const GTU = Math.floor(absolute / 1000000);
-    const microGTU = absolute % 1000000;
+    const amount = BigInt(rawAmount);
+    const absolute = amount < 0 ? -amount : amount;
+    const GTU = absolute / 1000000n;
+    const microGTU = absolute % 1000000n;
     const microGTUFormatted =
-        microGTU === 0
+        microGTU === 0n
             ? ''
             : `.${'0'.repeat(
                   6 - microGTU.toString().length

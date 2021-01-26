@@ -59,7 +59,7 @@ export async function attachNames(transactions) {
  */
 export async function createSimpleTransferTransaction(
     fromAddress: string,
-    amount: string,
+    amount: BigInt,
     toAddress: string
 ) {
     const nonceJSON = await getNextAccountNonce(fromAddress);

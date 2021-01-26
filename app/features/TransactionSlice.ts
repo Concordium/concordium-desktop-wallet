@@ -190,7 +190,7 @@ export async function updateTransactions(account) {
     }
 }
 
-// Add a pending transaction to storage.
+// Add a pending transaction to storage
 export async function addPendingTransaction(transaction, hash) {
     if (transaction.transactionKind !== TransactionKindId.Simple_transfer) {
         throw new Error('unsupported transaction type - please implement');
@@ -201,8 +201,10 @@ export async function addPendingTransaction(transaction, hash) {
         originType: 'self',
         transactionKind: TransactionKindString.Transfer,
         transactionHash: hash,
-        total: -(transaction.payload.amount + transaction.energyAmount),
-        subtotal: -transaction.payload.amount,
+        total: (-(
+            transaction.payload.amount + BigInt(transaction.energyAmount)
+        )).toString(),
+        subtotal: (-transaction.payload.amount).toString(),
         cost: transaction.energyAmount,
         fromAddress: transaction.sender,
         toAddress: transaction.payload.toAddress,

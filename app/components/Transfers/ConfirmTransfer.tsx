@@ -65,7 +65,7 @@ export default function ConfirmTransferComponent({
     async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
         const transferTransaction = await createSimpleTransferTransaction(
             account.address,
-            amount,
+            BigInt(amount),
             recipient.address
         );
         const path = getAccountPath({
