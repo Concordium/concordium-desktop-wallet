@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import bs58check from 'bs58check';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 import {
@@ -13,6 +12,7 @@ import { getGlobal } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
 import { CredentialDeploymentInformation, AccountStatus } from '../utils/types';
 import { waitForFinalization } from '../utils/transactionHelpers';
+import { isValidAddress } from '../utils/addressHelpers';
 
 const accountsSlice = createSlice({
     name: 'accounts',
@@ -72,20 +72,6 @@ export const {
     updateAccounts,
     setAccountInfos,
 } = accountsSlice.actions;
-
-// Given a string, checks if it is a valid bs58check address.
-// TODO: check length?
-function isValidAddress(address: string): boolean {
-    try {
-        if (!address) {
-            return false;
-        }
-        bs58check.decode(address); // This function should an error if invalid checksum
-    } catch (e) {
-        return false;
-    }
-    return true;
-}
 
 // Loads the given accounts' infos from the node, then updates the
 // AccountInfo state.

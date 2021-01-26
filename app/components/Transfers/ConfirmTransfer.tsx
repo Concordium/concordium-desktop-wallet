@@ -71,7 +71,7 @@ export default function ConfirmTransferComponent({
         const path = getAccountPath({
             identityIndex: account.identityId,
             accountIndex: account.accountNumber,
-            signatureIndex: 0
+            signatureIndex: 0,
         });
         const signature: Buffer = await ledger.signTransfer(
             transferTransaction,
@@ -107,24 +107,27 @@ export default function ConfirmTransferComponent({
                 </Button>
                 <Card.Header>Confirm Transfer</Card.Header>
                 <Table>
-                    <Table.Row>
-                        <Table.Cell>Amount:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {getGTUSymbol()} {amount}
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>Estimated fee:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {fromMicroUnits(estimatedFee)}
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>To:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {recipient.name} <Label>{recipient.address}</Label>
-                        </Table.Cell>
-                    </Table.Row>
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell>Amount:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {getGTUSymbol()} {amount}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>Estimated fee:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {fromMicroUnits(estimatedFee)}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>To:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {recipient.name}{' '}
+                                <Label>{recipient.address}</Label>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
                 </Table>
                 <LedgerComponent ledgerCall={ledgerSignTransfer} />
             </Card.Content>

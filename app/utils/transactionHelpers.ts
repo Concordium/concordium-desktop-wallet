@@ -1,7 +1,7 @@
 import { findAccounts } from '../database/AccountDao';
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './client';
-import { AccountTransaction, TransactionKindId, TimeStampUnit } from './types';
+import { AccountTransaction, TransactionKindId } from './types';
 import { sleep } from './httpRequests';
 import { toMicroUnits } from './gtu';
 /**
@@ -14,7 +14,7 @@ export function getHighestId(transactions) {
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
  * If the address is found, return the name, otherwise returns undefined;
- * TODO: if accounts are added to the AddressBook, then only lookup AddressBook.
+ * TODO: when accounts are added to the AddressBook, then only lookup AddressBook.
  */
 async function lookupName(address): string {
     const accounts = await findAccounts({ address });
@@ -36,9 +36,13 @@ async function lookupName(address): string {
 async function attachName(transaction) {
     const updatedTransaction = { ...transaction };
     const toName = await lookupName(transaction.toAddress);
-    if (toName) updatedTransaction.toAddressName = toName;
+    if (toName) {
+        updatedTransaction.toAddressName = toName;
+    }
     const fromName = await lookupName(transaction.fromAddress);
-    if (fromName) updatedTransaction.fromAddressName = fromName;
+    if (fromName) {
+        updatedTransaction.fromAddressName = fromName;
+    }
     return updatedTransaction;
 }
 
@@ -47,22 +51,6 @@ async function attachName(transaction) {
  */
 export async function attachNames(transactions) {
     return Promise.all(transactions.map(attachName));
-}
-
-/**
- * Given a unix timeStamp, return the date in a displayable format.
- * Assumes the timestamp is in seconds, otherwise the unit should be specified.
- */
-export function parseTime(
-    timeStamp,
-    unit: TimeStampUnit = TimeStampUnit.seconds
-) {
-    const dtFormat = new Intl.DateTimeFormat('en-GB', {
-        dateStyle: 'short',
-        timeStyle: 'short',
-        timeZone: 'UTC',
-    });
-    return dtFormat.format(new Date(timeStamp * unit));
 }
 
 /**

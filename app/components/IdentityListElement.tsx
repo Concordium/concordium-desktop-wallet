@@ -1,6 +1,6 @@
 import React from 'react';
 import { Grid, Header, Label, Image } from 'semantic-ui-react';
-import { Identity, IdentityStatus, YearMonth } from '../utils/types';
+import { Identity, IdentityStatus } from '../utils/types';
 import pendingImage from '../../resources/pending.svg';
 import successImage from '../../resources/success.svg';
 import rejectedImage from '../../resources/warning.svg';

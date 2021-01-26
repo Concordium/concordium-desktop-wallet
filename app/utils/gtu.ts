@@ -2,6 +2,11 @@ export function getGTUSymbol() {
     return '\u01E4';
 }
 
+// Checks that the input is a number and that it does not split micro units
+export function isValidGTU(amount) {
+    return !Number.isNaN(amount) && Number.isInteger(amount * 1000000);
+}
+
 /**
  * Given a GTU amount, convert to microGTU
  */
@@ -20,10 +25,10 @@ export function fromMicroUnits(rawAmount) {
     const microGTU = absolute % 1000000;
     const microGTUFormatted =
         microGTU === 0
-        ? ''
-        : `.${'0'.repeat(
-6 - microGTU.toString().length
-)}${microGTU.toString().replace(/0+$/, '')}`;
+            ? ''
+            : `.${'0'.repeat(
+                  6 - microGTU.toString().length
+              )}${microGTU.toString().replace(/0+$/, '')}`;
 
     const negative = amount < 0 ? '-' : '';
     return `${negative} ${getGTUSymbol()} ${GTU}${microGTUFormatted}`;

@@ -1,4 +1,8 @@
-import { AccountTransaction, TransactionKindId as TransactionKind, BlockItemKind } from './types';
+import {
+    AccountTransaction,
+    TransactionKindId as TransactionKind,
+    BlockItemKind,
+} from './types';
 import {
     encodeWord16,
     encodeWord32,

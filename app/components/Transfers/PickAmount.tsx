@@ -1,8 +1,8 @@
 import React from 'react';
-import { Card, Input, Button, Label } from 'semantic-ui-react';
+import { Card, Input, Button } from 'semantic-ui-react';
 import { AddressBookEntry } from '../../utils/types';
 import locations from '../../constants/transferLocations.json';
-import { getGTUSymbol } from '../../utils/gtu';
+import { getGTUSymbol, isValidGTU } from '../../utils/gtu';
 
 interface Props {
     setLocation(location: string): void;
@@ -22,8 +22,7 @@ export default function PickAmount({
     setAmount,
 }: Props) {
     function updateAmount(newAmount) {
-        /// Checks that the input is a number and that it does not split micro units
-        if (!Number.isNaN(newAmount) && Number.isInteger(newAmount * 1000000)) {
+        if (isValidGTU(newAmount)) {
             setAmount(newAmount);
         }
     }

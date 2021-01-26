@@ -9,7 +9,13 @@ import {
     updateTransaction,
     getMaxTransactionsIdOfAccount,
 } from '../database/TransactionDao';
-import { TransferTransaction, TransactionStatus, TransactionKindString } from '../utils/types';
+import {
+    TransferTransaction,
+    TransactionStatus,
+    TransactionKindString,
+    TransactionKindId,
+    OriginType,
+} from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
 
 const transactionSlice = createSlice({
@@ -39,7 +45,8 @@ export async function decryptTransactions(transactions, prfKey, account) {
     const global = (await getGlobal()).value;
     const encryptedTransfers = transactions.filter(
         (t) =>
-            t.transactionKind === TransactionKindString.EncryptedAmountTransfer &&
+            t.transactionKind ===
+                TransactionKindString.EncryptedAmountTransfer &&
             t.decryptedAmount === null
     );
     const encryptedAmounts = encryptedTransfers.map(
@@ -69,8 +76,8 @@ export async function decryptTransactions(transactions, prfKey, account) {
 }
 
 /**
- * Because the data from the wallet proxy doesn't contain the receiving
- * address, except in the event string.
+ * We have to do it like this, because the data from the wallet proxy
+ * doesn't contain the receiving address, except in the event string.
  */
 function getScheduleReceiver(transaction) {
     const event = transaction.details.events[0];
@@ -84,7 +91,7 @@ function convertIncomingTransaction(transaction): TransferTransaction {
     let fromAddress;
     if ('transferSource' in transaction.details) {
         fromAddress = transaction.details.transferSource;
-    } else if (transaction.origin.type === 'account') {
+    } else if (transaction.origin.type === OriginType.Account) {
         fromAddress = transaction.origin.address;
     }
     let toAddress;
@@ -96,8 +103,10 @@ function convertIncomingTransaction(transaction): TransferTransaction {
         encrypted = JSON.stringify(transaction.encrypted);
     }
 
-    if (transaction.details.type === TransactionKindString.TransferWithSchedule) {
-        if (transaction.origin.type === 'account') {
+    if (
+        transaction.details.type === TransactionKindString.TransferWithSchedule
+    ) {
+        if (transaction.origin.type === OriginType.Account) {
             toAddress = getScheduleReceiver(transaction);
         }
     }
@@ -183,7 +192,7 @@ export async function updateTransactions(account) {
 
 // Add a pending transaction to storage.
 export async function addPendingTransaction(transaction, hash) {
-    if (transaction.transactionKind !== 3) {
+    if (transaction.transactionKind !== TransactionKindId.Simple_transfer) {
         throw new Error('unsupported transaction type - please implement');
     }
 

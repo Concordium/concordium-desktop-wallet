@@ -1,20 +1,25 @@
 import React from 'react';
 import { Grid } from 'semantic-ui-react';
-import { parseTime } from '../utils/transactionHelpers';
+import { parseTime } from '../utils/timeHelpers';
 import { getGTUSymbol, fromMicroUnits } from '../utils/gtu';
-import { TransferTransaction, TransactionStatus, OriginType, TransactionKindString } from '../utils/types';
+import {
+    TransferTransaction,
+    TransactionStatus,
+    OriginType,
+    TransactionKindString,
+} from '../utils/types';
 import SidedText from './SidedText';
 
 function getName(transaction) {
     switch (transaction.originType) {
         case OriginType.Self:
             return 'toAddressName' in transaction
-                 ? transaction.toAddressName
-                 : transaction.toAddress.slice(0, 6);
+                ? transaction.toAddressName
+                : transaction.toAddress.slice(0, 6);
         case OriginType.Account:
             return 'fromAddressName' in transaction
-                 ? transaction.fromAddressName
-                 : transaction.fromAddress.slice(0, 6);
+                ? transaction.fromAddressName
+                : transaction.fromAddress.slice(0, 6);
         default:
             return 'unknown';
     }
@@ -39,7 +44,10 @@ function buildIncomingAmountStrings(total) {
 function parseAmount(transaction) {
     switch (transaction.originType) {
         case OriginType.Self: {
-            if (transaction.transactionKind === TransactionKindString.EncryptedAmountTransfer) {
+            if (
+                transaction.transactionKind ===
+                TransactionKindString.EncryptedAmountTransfer
+            ) {
                 if (transaction.decryptedAmount) {
                     return buildOutgoingAmountStrings(
                         transaction.decryptedAmount,
@@ -61,7 +69,10 @@ function parseAmount(transaction) {
             );
         }
         case OriginType.Account:
-            if (transaction.transactionKind === TransactionKindString.EncryptedAmountTransfer) {
+            if (
+                transaction.transactionKind ===
+                TransactionKindString.EncryptedAmountTransfer
+            ) {
                 if (transaction.decryptedAmount) {
                     return buildIncomingAmountStrings(
                         transaction.decryptedAmount
@@ -126,7 +137,9 @@ function TransactionListElement({ transaction }: Props): JSX.element {
                 left={`${time} ${statusSymbol(transaction.status)}`}
                 right={amountFormula.concat(
                     ` ${
-                        transaction.status !== TransactionStatus.Finalized ? ' (Estimated)' : ''
+                        transaction.status !== TransactionStatus.Finalized
+                            ? ' (Estimated)'
+                            : ''
                     }`
                 )}
             />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Menu, Divider } from 'semantic-ui-react';
+import { Menu } from 'semantic-ui-react';
 import TransactionListElement from './TransactionListElement';
 import { TransferTransaction } from '../utils/types';
 import { transactionsSelector } from '../features/TransactionSlice';

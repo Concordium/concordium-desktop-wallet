@@ -101,22 +101,22 @@ export interface Account {
 }
 
 export enum TransactionKindString {
-    DeployModule = "deployModule",
-    InitContract = "initContract",
-    Update = "update",
-    Transfer = "transfer",
-    AddBaker = "addBaker",
-    RemoveBaker = "removeBaker",
-    UpdateBakerAccount = "updateBakerAccount",
-    UpdateBakerSignKey = "updateBakerSignKey",
-    DelegateStake = "delegateStake",
-    UndelegateStake = "undelegateStake",
-    UpdateElectionDifficulty = "updateElectionDifficulty",
-    DeployCredential = "deployCredential",
-    BakingReward = "bakingReward",
-    EncryptedAmountTransfer = "encryptedAmountTransfer",
-    TransferToEncrypted = "transferToEncrypted",
-    TransferToPublic = "transferToPublic"
+    DeployModule = 'deployModule',
+    InitContract = 'initContract',
+    Update = 'update',
+    Transfer = 'transfer',
+    AddBaker = 'addBaker',
+    RemoveBaker = 'removeBaker',
+    UpdateBakerAccount = 'updateBakerAccount',
+    UpdateBakerSignKey = 'updateBakerSignKey',
+    DelegateStake = 'delegateStake',
+    UndelegateStake = 'undelegateStake',
+    UpdateElectionDifficulty = 'updateElectionDifficulty',
+    DeployCredential = 'deployCredential',
+    BakingReward = 'bakingReward',
+    EncryptedAmountTransfer = 'encryptedAmountTransfer',
+    TransferToEncrypted = 'transferToEncrypted',
+    TransferToPublic = 'transferToPublic',
 }
 
 // The ids of the different types of an AccountTransaction.
