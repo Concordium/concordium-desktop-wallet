@@ -28,7 +28,7 @@ export default function MultiSignatureCreateProposalView() {
                     as={Link}
                     // TODO Dynamically set state depending on the transaction type. Must also be able to handle account transaction types.
                     to={{
-                        pathname: `/MultiSignatureTransaction/create/${item}`,
+                        pathname: `/MultiSignatureTransaction/create`,
                         state: UpdateType.UpdateMicroGTUPerEuro,
                     }}
                 >

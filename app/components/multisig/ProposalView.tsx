@@ -24,7 +24,11 @@ import {
 import { saveFile } from '../../utils/FileHelper';
 import DragAndDropFile from '../DragAndDropFile';
 import { sendTransaction } from '../../utils/client';
-import { serializeForSubmission } from '../../utils/UpdateSerialization';
+import {
+    serializeForSubmission,
+    serializeUpdateInstructionHeaderAndPayload,
+} from '../../utils/UpdateSerialization';
+import { hashSha256 } from '../../utils/serializationHelpers';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -72,6 +76,9 @@ export default function ProposalView() {
     const instruction: UpdateInstruction = JSON.parse(
         currentProposal.transaction
     );
+    const transactionHash = hashSha256(
+        serializeUpdateInstructionHeaderAndPayload(instruction)
+    ).toString('hex');
 
     async function submitTransaction() {
         const payload = serializeForSubmission(instruction);
@@ -148,7 +155,9 @@ export default function ProposalView() {
                         </Grid.Row>
                     </Grid.Column>
                     <Grid.Column>
-                        <TransactionHashView transactionHash="Hash should be here" />
+                        <TransactionHashView
+                            transactionHash={transactionHash}
+                        />
                     </Grid.Column>
                 </Grid>
             </Segment>
