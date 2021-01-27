@@ -1,15 +1,15 @@
 import type Transport from '@ledgerhq/hw-transport';
 import { UpdateInstruction } from '../../utils/types';
-import pathAsBuffer, { getGovernancePath } from './Path';
+import pathAsBuffer from './Path';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 
 const INS_EXCHANGE_RATE = 0x06;
 
 export default async function signUpdateMicroGtuPerEuro(
     transport: Transport,
+    path: number[],
     transaction: UpdateInstruction
 ): Promise<Buffer> {
-    const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
     const data = Buffer.concat([
         pathAsBuffer(path),
         serializeUpdateInstructionHeaderAndPayload(transaction),

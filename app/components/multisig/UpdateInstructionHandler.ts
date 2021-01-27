@@ -1,4 +1,5 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import { getGovernancePath } from '../../features/ledger/Path';
 import {
     instanceOfUpdateInstruction,
     TransactionHandler,
@@ -24,10 +25,11 @@ export default class UpdateInstructionHandler
     }
 
     signTransaction(ledger: ConcordiumLedgerClient) {
+        const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
         const { type } = this.transaction;
         switch (type) {
             case UpdateType.UpdateMicroGTUPerEuro:
-                return ledger.signMicroGtuPerEuro(this.transaction);
+                return ledger.signMicroGtuPerEuro(this.transaction, path);
             default:
                 throw Error(`Unsupported UpdateType: ${type}`);
         }
