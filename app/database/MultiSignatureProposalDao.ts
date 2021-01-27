@@ -1,7 +1,6 @@
 import { MultiSignatureTransaction } from '../utils/types';
 import knex from './knex';
-
-const multiSignatureProposalTable = 'multi_signature_proposal';
+import { multiSignatureProposalTable } from '../constants/databaseNames.json';
 
 /**
  * Function for inserting a multi signature transaction proposal
