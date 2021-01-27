@@ -120,6 +120,7 @@ export default function SignTransactionView({ location }: Props) {
                                 <Checkbox
                                     label="The hash matches the one received exactly"
                                     defaultChecked={hashMatches}
+                                    disabled={cosign}
                                     onChange={() =>
                                         setHashMatches(!hashMatches)
                                     }
@@ -129,6 +130,7 @@ export default function SignTransactionView({ location }: Props) {
                                 <Checkbox
                                     label="The picture matches the one received exactly"
                                     defaultChecked={pictureMatches}
+                                    disabled={cosign}
                                     onChange={() =>
                                         setPictureMatches(!pictureMatches)
                                     }
@@ -140,6 +142,7 @@ export default function SignTransactionView({ location }: Props) {
                                     defaultChecked={
                                         transactionDetailsAreCorrect
                                     }
+                                    disabled={cosign}
                                     onChange={() =>
                                         setTransactionDetailsAreCorrect(
                                             !transactionDetailsAreCorrect
