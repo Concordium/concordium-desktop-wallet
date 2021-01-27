@@ -57,7 +57,7 @@ export default function BrowseTransactionFileView() {
         dispatch(
             push({
                 pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
-                state: { transaction: transactionObject, type },
+                state: { transaction: file, type },
             })
         );
     }
