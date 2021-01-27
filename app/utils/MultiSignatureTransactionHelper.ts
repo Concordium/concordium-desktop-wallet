@@ -1,3 +1,4 @@
+import { stringify } from 'json-bigint';
 import {
     AccountTransaction,
     MultiSignatureTransaction,
@@ -17,7 +18,7 @@ export default function createMultiSignatureTransaction(
     status: MultiSignatureTransactionStatus
 ) {
     const multiSignatureTransaction: MultiSignatureTransaction = {
-        transaction: JSON.stringify(transaction),
+        transaction: stringify(transaction),
         threshold,
         status,
     };

@@ -9,6 +9,7 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
+import { parse } from 'json-bigint';
 import {
     currentProposalSelector,
     updateCurrentProposal,
@@ -73,9 +74,7 @@ export default function ProposalView() {
         }
     }
 
-    const instruction: UpdateInstruction = JSON.parse(
-        currentProposal.transaction
-    );
+    const instruction: UpdateInstruction = parse(currentProposal.transaction);
     const transactionHash = hashSha256(
         serializeUpdateInstructionHeaderAndPayload(instruction)
     ).toString('hex');

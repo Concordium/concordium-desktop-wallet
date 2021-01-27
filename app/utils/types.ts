@@ -334,7 +334,7 @@ export enum MultiSignatureTransactionStatus {
  */
 export interface MultiSignatureTransaction {
     // logical id in the database
-    id?: number;
+    id: number;
     // The JSON serialization of the transaction
     transaction: string;
     // The minimum required signatures for the transaction
