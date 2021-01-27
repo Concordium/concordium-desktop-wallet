@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
-import styles from '../Styling.css';
+import { Card, Form, Label, Input, Button } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 
 interface Props {
@@ -21,30 +21,28 @@ export default function IdentityIssuancePickName({
     }
 
     return (
-        <div>
-            <h2>Naming your new account</h2>
-            <p>
-                The first step of creating a new account, is giving it a name.
-            </p>
-            <p>What would you like to name your account?</p>
-            <span className={styles.modalElement}>
-                <input
-                    name="name"
-                    className={styles.input}
-                    placeholder="Account name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    data-tid="hashInput"
-                />
-            </span>
-            <button
-                type="button"
-                onClick={() => {
-                    submit();
-                }}
-            >
-                Next
-            </button>
-        </div>
+        <Card fluid centered>
+            <Card.Content textAlign="center">
+                <Card.Header>Naming your new account</Card.Header>
+                <Card.Description>
+                    The first step of creating a new account, is giving it a
+                    name.
+                </Card.Description>
+                <Form onSubmit={submit}>
+                    <Label>What would you like to name your account?</Label>
+                    <Form.Field>
+                        <Input
+                            name="name"
+                            placeholder="Account name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </Form.Field>
+                    <Button positive type="submit">
+                        Next
+                    </Button>
+                </Form>
+            </Card.Content>
+        </Card>
     );
 }

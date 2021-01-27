@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { Card, Button, Grid, Checkbox } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { Identity } from '../../utils/types';
 import IdentityListElement from '../IdentityListElement';
-import styles from './AccountCreation.css';
 
 interface Props {
     identity: Identity;
@@ -39,49 +39,50 @@ export default function AccountCreationPickAttributes({
     }
 
     return (
-        <div className={styles.splitPage}>
-            <div className={styles.pickAttributesLeftSide}>
-                <h2>Choose which attributes to reveal</h2>
-                <p>
-                    On the right you can choose which attributes you want to
-                    reveal on your account. You can choose however many you
-                    want, including none. Which attributes do you want to
-                    reveal?
-                </p>
-                <button
-                    type="button"
-                    onClick={() => {
-                        submit();
-                    }}
-                >
-                    Submit with revealed attributes
-                </button>
-            </div>
-            <div className={styles.pickAttributesRightSide}>
-                <IdentityListElement
-                    identity={identity}
-                    highlighted
-                    index={0}
-                />
-                {attributes.map((attribute, i) => (
-                    <div
-                        className={styles.AttributeItem}
-                        key={attribute.tag}
-                        onClick={() => {
-                            // TODO: find better way?
-                            const newAttributes = [...attributes];
-                            newAttributes[i].isChecked = !newAttributes[i]
-                                .isChecked;
-                            setAttributes(newAttributes);
-                        }}
-                    >
-                        <input checked={attribute.isChecked} type="checkbox" />
-                        <p>
-                            {attribute.tag}: {attribute.value}{' '}
-                        </p>
-                    </div>
-                ))}
-            </div>
-        </div>
+        <Grid stretched container columns={2}>
+            <Grid.Column>
+                <Card fluid centered>
+                    <Card.Content textAlign="center">
+                        <Card.Header>
+                            Choose which attributes to reveal
+                        </Card.Header>
+                        <Card.Description>
+                            On the right you can choose which attributes you
+                            want to reveal on your account. You can choose
+                            however many you want, including none. Which
+                            attributes do you want to reveal?
+                        </Card.Description>
+                        <Button onClick={submit}>
+                            Submit with revealed attributes
+                        </Button>
+                    </Card.Content>
+                </Card>
+            </Grid.Column>
+            <Grid.Column>
+                <Card centered>
+                    <IdentityListElement
+                        identity={identity}
+                        highlighted
+                        index={0}
+                    />
+                </Card>
+                <Card centered>
+                    {attributes.map((attribute, i) => (
+                        <Checkbox
+                            key={attribute.tag}
+                            checked={attribute.isChecked}
+                            label={`${attribute.tag}: ${attribute.value}`}
+                            onClick={() => {
+                                // TODO: find better way?
+                                const newAttributes = [...attributes];
+                                newAttributes[i].isChecked = !newAttributes[i]
+                                    .isChecked;
+                                setAttributes(newAttributes);
+                            }}
+                        />
+                    ))}
+                </Card>
+            </Grid.Column>
+        </Grid>
     );
 }

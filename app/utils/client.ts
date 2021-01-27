@@ -1,5 +1,5 @@
-import grpc from 'grpc';
-import { P2PClient } from '../proto/api_grpc_pb';
+import { credentials, Metadata } from '@grpc/grpc-js';
+import { P2PClient } from '../proto/concordium_p2p_rpc_grpc_pb';
 import {
     BlockHash,
     JSONResponse,
@@ -8,7 +8,7 @@ import {
     AccountAddress,
     GetAddressInfoRequest,
     Empty,
-} from '../proto/api_pb';
+} from '../proto/concordium_p2p_rpc_pb';
 
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
@@ -19,11 +19,11 @@ const clientAddress = '172.31.33.57'; // TODO: This should be a setting? (The us
 
 const client = new P2PClient(
     `${clientAddress}:${port}`,
-    grpc.credentials.createInsecure()
+    credentials.createInsecure()
 );
 
 function buildMetaData(): MetaData {
-    const meta = new grpc.Metadata();
+    const meta = new Metadata();
     meta.add('authentication', 'rpcadmin');
     return meta;
 }

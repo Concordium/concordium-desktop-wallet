@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
+import { Card } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { createCredential as createCredentialRust } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
@@ -106,10 +107,11 @@ export default function AccountCreationGenerate({
     }, [identity, dispatch, accountName, setText, attributes]);
 
     return (
-        <div>
-            <h2>
-                <pre>{text}</pre>
-            </h2>
-        </div>
+        <Card fluid centered>
+            <Card.Content textAlign="center">
+                <Card.Header>Generating the Identity</Card.Header>
+                <Card.Description>{text}</Card.Description>
+            </Card.Content>
+        </Card>
     );
 }
