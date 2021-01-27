@@ -32,6 +32,12 @@ import {
 } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
 
+interface ModalErrorInput {
+    show: boolean;
+    header?: string;
+    content?: string;
+}
+
 /**
  * Component that displays the multi signature transaction proposal that is currently the
  * active one in the state. The component allows the user to export the proposal,
@@ -39,7 +45,9 @@ import { hashSha256 } from '../../utils/serializationHelpers';
  * then the proposal can be submitted to a node.
  */
 export default function ProposalView() {
-    const [showError, setShowError] = useState(false);
+    const [showError, setShowError] = useState<ModalErrorInput>({
+        show: false,
+    });
     const dispatch = useDispatch();
     const currentProposal: MultiSignatureTransaction | undefined = useSelector(
         currentProposalSelector
@@ -53,8 +61,6 @@ export default function ProposalView() {
     async function loadSignatureFile(file: string) {
         const transactionObject = parse(file);
         if (instanceOfUpdateInstruction(transactionObject)) {
-            // TODO Validate that the signature is not already present. Give a proper error message if that is the case in a modal or something similar.
-
             if (currentProposal) {
                 const proposal: UpdateInstruction = parse(
                     currentProposal.transaction
@@ -69,7 +75,12 @@ export default function ProposalView() {
                 ) {
                     const signature = transactionObject.signatures[i];
                     if (proposal.signatures.includes(signature)) {
-                        setShowError(true);
+                        setShowError({
+                            show: true,
+                            header: 'Duplicate signature',
+                            content:
+                                'The loaded signature file contains a signature that is already present on the proposal.',
+                        });
                         return;
                     }
                 }
@@ -85,9 +96,12 @@ export default function ProposalView() {
                 updateCurrentProposal(dispatch, updatedProposal);
             }
         } else {
-            throw new Error(
-                'Unsupported transaction type. Not yet implemented.'
-            );
+            setShowError({
+                show: true,
+                header: 'Invalid signature file',
+                content:
+                    'The loaded signature file is invalid. It should contain a signature for an account transaction or an update instruction in the exact format exported by this application.',
+            });
         }
     }
 
@@ -132,18 +146,19 @@ export default function ProposalView() {
 
     return (
         <Segment secondary textAlign="center">
-            <Modal open={showError}>
-                <Modal.Header>Duplicate signature</Modal.Header>
-                <Modal.Content>
-                    The loaded signature file contains a signature that is
-                    already present on the proposal.
-                </Modal.Content>
-                <Modal.Actions>
-                    <Button positive onClick={() => setShowError(false)}>
-                        Okay
-                    </Button>
-                </Modal.Actions>
-            </Modal>
+            <Modal
+                open={showError.show}
+                header={showError.header}
+                content={showError.content}
+                actions={[
+                    {
+                        key: 'okay',
+                        content: 'Okay',
+                        positive: true,
+                        onClick: () => setShowError({ show: false }),
+                    },
+                ]}
+            />
 
             <Header size="large">Your transaction proposal</Header>
             <Segment basic>
