@@ -2,6 +2,8 @@ import { AccountAddress } from '../proto/concordium_p2p_rpc_pb';
 
 type Hex = string;
 type Proofs = Hex;
+type Word64 = BigInt;
+type Word32 = number;
 
 export enum SchemeId {
     Ed25519 = 0,
@@ -253,20 +255,15 @@ export interface AddressBookEntry {
 }
 
 /**
- * The header part of an update instruction.
+ * The header part of an update instruction. The payload size is allowed
+ * optional so that the header can be created before knowing the payload
+ * size of the associated payload.
  */
 export interface UpdateHeader {
-    // Word 64
-    sequenceNumber: number;
-
-    // Word 64
-    effectiveTime: number;
-
-    // Word 64
-    timeout: number;
-
-    // Word 32
-    payloadSize?: number;
+    sequenceNumber: Word64;
+    effectiveTime: Word64;
+    timeout: Word64;
+    payloadSize?: Word32;
 }
 
 export interface UpdateInstruction {
