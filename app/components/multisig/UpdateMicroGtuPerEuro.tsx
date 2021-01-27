@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
-import { updateCurrentProposal } from '../../features/MultiSignatureSlice';
+import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import {
     ExchangeRate,
     MultiSignatureTransaction,
@@ -59,11 +59,11 @@ export default function UpdateMicroGtuPerEuroRate() {
                 microGtuPerEuro
             );
 
-            // Set the current proposal in the state to the one that was just generated.
-            updateCurrentProposal(dispatch, multiSignatureTransaction);
-
             // Save to database.
             await insert(multiSignatureTransaction);
+
+            // Set the current proposal in the state to the one that was just generated.
+            dispatch(setCurrentProposal(multiSignatureTransaction));
 
             // Navigate to the page that displays the current proposal from the state.
             dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
