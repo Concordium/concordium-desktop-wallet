@@ -7,7 +7,6 @@ import {
     Form,
     Grid,
     Header,
-    Modal,
     Segment,
 } from 'semantic-ui-react';
 import { parse, stringify } from 'json-bigint';
@@ -31,12 +30,7 @@ import {
     serializeUpdateInstructionHeaderAndPayload,
 } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
-
-interface ModalErrorInput {
-    show: boolean;
-    header?: string;
-    content?: string;
-}
+import SimpleErrorModal, { ModalErrorInput } from './SimpleErrorModal';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -146,20 +140,12 @@ export default function ProposalView() {
 
     return (
         <Segment secondary textAlign="center">
-            <Modal
-                open={showError.show}
+            <SimpleErrorModal
+                show={showError.show}
                 header={showError.header}
                 content={showError.content}
-                actions={[
-                    {
-                        key: 'okay',
-                        content: 'Okay',
-                        positive: true,
-                        onClick: () => setShowError({ show: false }),
-                    },
-                ]}
+                onClick={() => setShowError({ show: false })}
             />
-
             <Header size="large">Your transaction proposal</Header>
             <Segment basic>
                 Your transaction proposal has been generated. An overview can be
