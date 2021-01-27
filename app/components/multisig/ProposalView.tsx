@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
@@ -7,9 +7,10 @@ import {
     Form,
     Grid,
     Header,
+    Modal,
     Segment,
 } from 'semantic-ui-react';
-import { parse } from 'json-bigint';
+import { parse, stringify } from 'json-bigint';
 import {
     currentProposalSelector,
     updateCurrentProposal,
@@ -38,6 +39,7 @@ import { hashSha256 } from '../../utils/serializationHelpers';
  * then the proposal can be submitted to a node.
  */
 export default function ProposalView() {
+    const [showError, setShowError] = useState(false);
     const dispatch = useDispatch();
     const currentProposal: MultiSignatureTransaction | undefined = useSelector(
         currentProposalSelector
@@ -49,20 +51,35 @@ export default function ProposalView() {
     }
 
     async function loadSignatureFile(file: string) {
-        const transactionObject = JSON.parse(file);
+        const transactionObject = parse(file);
         if (instanceOfUpdateInstruction(transactionObject)) {
             // TODO Validate that the signature is not already present. Give a proper error message if that is the case in a modal or something similar.
 
             if (currentProposal) {
-                const proposal: UpdateInstruction = JSON.parse(
+                const proposal: UpdateInstruction = parse(
                     currentProposal.transaction
                 );
+
+                // If the loaded signature already exists on the proposal,
+                // then show a modal to the user.
+                for (
+                    let i = 0;
+                    i < transactionObject.signatures.length;
+                    i += 1
+                ) {
+                    const signature = transactionObject.signatures[i];
+                    if (proposal.signatures.includes(signature)) {
+                        setShowError(true);
+                        return;
+                    }
+                }
+
                 proposal.signatures = proposal.signatures.concat(
                     transactionObject.signatures
                 );
                 const updatedProposal = {
                     ...currentProposal,
-                    transaction: JSON.stringify(proposal),
+                    transaction: stringify(proposal),
                 };
 
                 updateCurrentProposal(dispatch, updatedProposal);
@@ -115,6 +132,19 @@ export default function ProposalView() {
 
     return (
         <Segment secondary textAlign="center">
+            <Modal open={showError}>
+                <Modal.Header>Duplicate signature</Modal.Header>
+                <Modal.Content>
+                    The loaded signature file contains a signature that is
+                    already present on the proposal.
+                </Modal.Content>
+                <Modal.Actions>
+                    <Button positive onClick={() => setShowError(false)}>
+                        Okay
+                    </Button>
+                </Modal.Actions>
+            </Modal>
+
             <Header size="large">Your transaction proposal</Header>
             <Segment basic>
                 Your transaction proposal has been generated. An overview can be
