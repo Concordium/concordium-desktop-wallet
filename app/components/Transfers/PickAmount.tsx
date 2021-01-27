@@ -22,7 +22,8 @@ export default function PickAmount({
     setAmount,
 }: Props) {
     function updateAmount(newAmount) {
-        if (isValidGTU(newAmount)) {
+        // Only allow valid gtu strings, and the empty string.
+        if (!newAmount || isValidGTU(newAmount)) {
             setAmount(newAmount);
         }
     }

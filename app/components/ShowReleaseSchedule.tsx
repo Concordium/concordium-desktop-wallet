@@ -2,7 +2,7 @@ import React from 'react';
 import { Header, Grid, Button } from 'semantic-ui-react';
 import { AccountInfo, ScheduleItem, TimeStampUnit } from '../utils/types';
 import { parseTime } from '../utils/timeHelpers';
-import { fromMicroUnits } from '../utils/gtu';
+import { displayAsGTU } from '../utils/gtu';
 import SidedText from './SidedText';
 
 interface Props {
@@ -32,13 +32,13 @@ export default function ShowReleaseSchedule({
                                 item.timestamp,
                                 TimeStampUnit.milliSeconds
                             )}
-                            right={fromMicroUnits(item.amount)}
+                            right={displayAsGTU(item.amount)}
                         />
                     )
                 )}
                 <SidedText
                     left="Total:"
-                    right={fromMicroUnits(
+                    right={displayAsGTU(
                         accountInfo.accountReleaseSchedule.total
                     )}
                 />

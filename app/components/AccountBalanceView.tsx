@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Container, Header } from 'semantic-ui-react';
 import styles from './Accounts.css';
-import { fromMicroUnits } from '../utils/gtu';
+import { displayAsGTU } from '../utils/gtu';
 import {
     setViewingShielded,
     viewingShieldedSelector,
@@ -47,7 +47,7 @@ export default function AccountBalanceView(): JSX.Element {
     if (viewingShielded) {
         main = (
             <Header as="h1" color="blue">
-                {fromMicroUnits(account.totalDecrypted)}
+                {displayAsGTU(account.totalDecrypted)}
                 {account.allDecrypted ? '' : ' + ?'}
             </Header>
         );
@@ -55,21 +55,18 @@ export default function AccountBalanceView(): JSX.Element {
         main = (
             <>
                 <Header as="h1" color="blue">
-                    {fromMicroUnits(accountInfo.accountAmount)}
+                    {displayAsGTU(accountInfo.accountAmount)}
                 </Header>
                 <Header color="blue">
                     At disposal:
-                    {fromMicroUnits(
-                        parseInt(accountInfo.accountAmount, 10) -
-                            parseInt(
-                                accountInfo.accountReleaseSchedule.total,
-                                10
-                            )
+                    {displayAsGTU(
+                        BigInt(accountInfo.accountAmount) -
+                            BigInt(accountInfo.accountReleaseSchedule.total)
                     )}
                 </Header>
                 <Header color="blue">
                     Staked:
-                    {fromMicroUnits(0)}
+                    {displayAsGTU(0n)}
                 </Header>
             </>
         );

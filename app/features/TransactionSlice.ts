@@ -183,7 +183,7 @@ export async function loadTransactions(
 
 // Update the transaction from remote source.
 export async function updateTransactions(account) {
-    const fromId = await getMaxTransactionsIdOfAccount(account);
+    const fromId = (await getMaxTransactionsIdOfAccount(account)) || 0;
     const transactions = await getTransactions(account.address, fromId);
     if (transactions.length > 0) {
         await insertTransactions(transactions.map(convertIncomingTransaction));

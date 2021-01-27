@@ -22,7 +22,7 @@ import {
     confirmTransaction,
     rejectTransaction,
 } from '../../features/TransactionSlice';
-import { getGTUSymbol, fromMicroUnits } from '../../utils/gtu';
+import { getGTUSymbol, displayAsGTU } from '../../utils/gtu';
 import { getAccountPath } from '../../features/ledger/Path';
 
 export interface Props {
@@ -56,7 +56,7 @@ export default function ConfirmTransferComponent({
     setLocation,
     setTransaction,
 }: Props): JSX.Element {
-    const estimatedFee = 200; // TODO calculate
+    const estimatedFee = 200n; // TODO calculate
 
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
@@ -117,7 +117,7 @@ export default function ConfirmTransferComponent({
                         <Table.Row>
                             <Table.Cell>Estimated fee:</Table.Cell>
                             <Table.Cell textAlign="right">
-                                {fromMicroUnits(estimatedFee)}
+                                {displayAsGTU(estimatedFee)}
                             </Table.Cell>
                         </Table.Row>
                         <Table.Row>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid } from 'semantic-ui-react';
 import { parseTime } from '../utils/timeHelpers';
-import { getGTUSymbol, fromMicroUnits } from '../utils/gtu';
+import { getGTUSymbol, displayAsGTU } from '../utils/gtu';
 import {
     TransferTransaction,
     TransactionStatus,
@@ -27,16 +27,14 @@ function getName(transaction) {
 
 function buildOutgoingAmountStrings(total, subtotal, fee) {
     return {
-        amount: `${fromMicroUnits(total)}`,
-        amountFormula: `${fromMicroUnits(-subtotal)} +${fromMicroUnits(
-            fee
-        )} Fee`,
+        amount: `${displayAsGTU(total)}`,
+        amountFormula: `${displayAsGTU(-subtotal)} +${displayAsGTU(fee)} Fee`,
     };
 }
 
 function buildIncomingAmountStrings(total) {
     return {
-        amount: `${fromMicroUnits(total)}`,
+        amount: `${displayAsGTU(total)}`,
         amountFormula: '',
     };
 }
@@ -57,7 +55,7 @@ function parseAmount(transaction) {
                 }
                 return {
                     amount: `${getGTUSymbol()} ?`,
-                    amountFormula: `${getGTUSymbol()} ? +${fromMicroUnits(
+                    amountFormula: `${getGTUSymbol()} ? +${displayAsGTU(
                         transaction.cost
                     )} Fee`,
                 };
