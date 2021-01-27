@@ -2,6 +2,9 @@ import React from 'react';
 import { Container, Header } from 'semantic-ui-react';
 import { UpdateInstruction } from '../utils/types';
 
+// TODO Implement a proper view of the supported transaction types, including account
+// transactions.
+
 interface Props {
     updateInstruction: UpdateInstruction;
 }

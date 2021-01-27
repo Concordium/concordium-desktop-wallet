@@ -2,6 +2,8 @@ import React from 'react';
 import { Button, Header, Icon, Segment } from 'semantic-ui-react';
 import { openFile } from '../utils/FileHelper';
 
+// TODO Add support for actual drag&drop functionality.
+
 interface Props {
     text: string;
     fileProcessor: (string) => void;
