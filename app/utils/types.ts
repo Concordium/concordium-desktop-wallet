@@ -355,8 +355,6 @@ export enum MultiSignatureMenuItems {
 }
 
 export interface ExchangeRate {
-    // Word 64
-    numerator: number;
-    // Word 64
-    denominator: number;
+    numerator: Word64;
+    denominator: Word64;
 }

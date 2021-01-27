@@ -18,10 +18,10 @@ import createMultiSignatureTransaction from '../../utils/MultiSignatureTransacti
  * Creates a multi signature transaction containing an update instruction for updating
  * the micro GTU per euro exchange rate.
  */
-function createTransaction(microGtuPerEuro: number): MultiSignatureTransaction {
+function createTransaction(microGtuPerEuro: BigInt): MultiSignatureTransaction {
     const exchangeRatePayload: ExchangeRate = {
         numerator: microGtuPerEuro,
-        denominator: 1,
+        denominator: BigInt(1),
     };
 
     const updateInstruction = createUpdateInstruction(
@@ -39,16 +39,16 @@ function createTransaction(microGtuPerEuro: number): MultiSignatureTransaction {
 }
 
 export default function UpdateMicroGtuPerEuroRate() {
-    const [microGtuPerEuro, setMicroGtuPerEuro] = useState<number>();
+    const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
     const [
         currentMicroGtuPerEuro,
         setCurrentMicroGtuPerEuro,
-    ] = useState<number>();
+    ] = useState<BigInt>();
 
     // TODO This value should be read from on-chain parameters.
     if (!currentMicroGtuPerEuro) {
-        setCurrentMicroGtuPerEuro(10000);
-        setMicroGtuPerEuro(10000);
+        setCurrentMicroGtuPerEuro(BigInt(10000));
+        setMicroGtuPerEuro(BigInt(10000));
     }
 
     const dispatch = useDispatch();
@@ -79,15 +79,19 @@ export default function UpdateMicroGtuPerEuroRate() {
                     width="5"
                     label="Current micro GTU per euro rate"
                     readOnly
-                    value={currentMicroGtuPerEuro}
+                    value={currentMicroGtuPerEuro?.toString()}
                 />
                 <Form.Input
                     width="5"
                     label="New micro GTU per euro rate"
-                    value={microGtuPerEuro}
+                    value={microGtuPerEuro?.toString()}
                     onChange={(e) => {
                         if (e.target.value) {
-                            setMicroGtuPerEuro(parseInt(e.target.value, 10));
+                            try {
+                                setMicroGtuPerEuro(BigInt(e.target.value));
+                            } catch (error) {
+                                // The input was not a valid BigInt, so do no updates based on the input.
+                            }
                         }
                     }}
                 />
