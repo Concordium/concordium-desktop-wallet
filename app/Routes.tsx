@@ -14,10 +14,10 @@ import AccountCreation from './containers/AccountCreationPage';
 import styles from './Main.css';
 import SettingsPage from './containers/SettingsPage';
 import MultiSignaturePage from './containers/MultiSignaturePage';
-import MultiSignatureProposalPageRouter from './containers/MultiSignatureProposalPageRouter';
 import ProposalView from './components/multisig/ProposalView';
 import SignTransactionView from './components/multisig/SignTransactionView';
 import ExportSignedTransactionView from './components/multisig/ExportSignedTransactionView';
+import MultiSignatureCreateProposalView from './components/multisig/MultiSignatureCreateProposalView';
 
 export default function Routes() {
     return (
@@ -54,7 +54,7 @@ export default function Routes() {
                     />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
-                        component={MultiSignatureProposalPageRouter}
+                        component={MultiSignatureCreateProposalView}
                     />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS}

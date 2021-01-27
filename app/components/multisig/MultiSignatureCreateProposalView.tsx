@@ -3,8 +3,12 @@ import { Header, Segment } from 'semantic-ui-react';
 import UpdateMicroGtuPerEuroRate from './UpdateMicroGtuPerEuro';
 import { UpdateType } from '../../utils/types';
 
+interface Location {
+    state: UpdateType;
+}
+
 interface Props {
-    type: UpdateType;
+    location: Location;
 }
 
 /**
@@ -12,7 +16,8 @@ interface Props {
  * proposal. It dynamically loads the correct component to show wrapped in a bit of
  * generic UI.
  */
-export default function MultiSignatureCreateProposalView({ type }: Props) {
+export default function MultiSignatureCreateProposalView({ location }: Props) {
+    const type = location.state;
     function chooseProposalType(foundationType: UpdateType) {
         switch (foundationType) {
             case UpdateType.UpdateMicroGTUPerEuro:
