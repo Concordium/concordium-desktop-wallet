@@ -191,7 +191,7 @@ export default function ProposalView() {
                         }
                         onClick={submitTransaction}
                     >
-                        Submit transcation to chain
+                        Submit transaction to chain
                     </Button>
                 </Grid.Column>
             </Grid>
