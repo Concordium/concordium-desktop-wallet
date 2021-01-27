@@ -38,7 +38,7 @@ export default function BooleanSetting({ setting, warning }: Props) {
     );
 
     const enableWarningModal = (
-        <Modal trigger={toggleCheckbox} open={open}>
+        <Modal open={open}>
             <Modal.Header>Warning</Modal.Header>
             <Modal.Content>{warning}</Modal.Content>
             <Modal.Actions>
@@ -49,7 +49,8 @@ export default function BooleanSetting({ setting, warning }: Props) {
 
     return (
         <Form.Field>
-            {(warning && enableWarningModal) || toggleCheckbox}
+            {enableWarningModal}
+            {toggleCheckbox}
         </Form.Field>
     );
 }
