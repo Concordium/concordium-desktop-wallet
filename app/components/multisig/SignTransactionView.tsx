@@ -18,7 +18,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import TransactionDetails from '../TransactionDetails';
 import TransactionHashView from '../TransactionHashView';
 import routes from '../../constants/routes.json';
-import UpdateInstructionHandler from './UpdateInstructionHandler';
+import UpdateInstructionHandler from '../../utils/UpdateInstructionHandler';
 
 interface Props {
     location: LocationDescriptorObject<TransactionInput>;
