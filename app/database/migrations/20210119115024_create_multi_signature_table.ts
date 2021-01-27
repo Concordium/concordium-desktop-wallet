@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
         multiSignatureProposalTable,
         (table: Knex.TableBuilder) => {
             table.increments('id');
-            table.string('transaction');
+            table.json('transaction');
             table.integer('threshold');
             table.string('status');
         }
