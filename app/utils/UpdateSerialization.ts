@@ -10,12 +10,9 @@ import {
  */
 function serializeExchangeRate(exchangeRate: ExchangeRate) {
     const serializedExchangeRate = Buffer.alloc(16);
+    serializedExchangeRate.writeBigUInt64BE(BigInt(exchangeRate.numerator), 0);
     serializedExchangeRate.writeBigUInt64BE(
-        exchangeRate.numerator.valueOf(),
-        0
-    );
-    serializedExchangeRate.writeBigUInt64BE(
-        exchangeRate.denominator.valueOf(),
+        BigInt(exchangeRate.denominator),
         8
     );
     return serializedExchangeRate;
@@ -37,14 +34,14 @@ function serializeUpdatePayload(payload): Buffer {
 function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
     const serializedUpdateHeader = Buffer.alloc(28);
     serializedUpdateHeader.writeBigUInt64BE(
-        updateHeader.sequenceNumber.valueOf(),
+        BigInt(updateHeader.sequenceNumber),
         0
     );
     serializedUpdateHeader.writeBigUInt64BE(
-        updateHeader.effectiveTime.valueOf(),
+        BigInt(updateHeader.effectiveTime),
         8
     );
-    serializedUpdateHeader.writeBigUInt64BE(updateHeader.timeout.valueOf(), 16);
+    serializedUpdateHeader.writeBigUInt64BE(BigInt(updateHeader.timeout), 16);
     serializedUpdateHeader.writeInt32BE(updateHeader.payloadSize, 24);
     return serializedUpdateHeader;
 }
