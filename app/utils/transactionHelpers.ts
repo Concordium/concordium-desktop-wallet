@@ -3,7 +3,6 @@ import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './client';
 import { AccountTransaction, TransactionKindId } from './types';
 import { sleep } from './httpRequests';
-import { toMicroUnits } from './gtu';
 /**
  * return highest id of given transactions
  */
@@ -72,7 +71,7 @@ export async function createSimpleTransferTransaction(
         transactionKind: TransactionKindId.Simple_transfer,
         payload: {
             toAddress,
-            amount: toMicroUnits(amount),
+            amount: amount.toString(),
         },
     };
     return transferTransaction;

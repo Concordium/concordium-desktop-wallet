@@ -22,12 +22,12 @@ import {
     confirmTransaction,
     rejectTransaction,
 } from '../../features/TransactionSlice';
-import { getGTUSymbol, displayAsGTU } from '../../utils/gtu';
+import { displayAsGTU } from '../../utils/gtu';
 import { getAccountPath } from '../../features/ledger/Path';
 
 export interface Props {
     account: Account;
-    amount: string;
+    amount: BigInt;
     recipient: AddressBookEntry;
     setLocation(location: string): void;
     setTransaction(transaction: AccountTransaction): void;
@@ -65,7 +65,7 @@ export default function ConfirmTransferComponent({
     async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
         const transferTransaction = await createSimpleTransferTransaction(
             account.address,
-            BigInt(amount),
+            amount,
             recipient.address
         );
         const path = getAccountPath({
@@ -111,7 +111,7 @@ export default function ConfirmTransferComponent({
                         <Table.Row>
                             <Table.Cell>Amount:</Table.Cell>
                             <Table.Cell textAlign="right">
-                                {getGTUSymbol()} {amount}
+                                {displayAsGTU(amount)}
                             </Table.Cell>
                         </Table.Row>
                         <Table.Row>

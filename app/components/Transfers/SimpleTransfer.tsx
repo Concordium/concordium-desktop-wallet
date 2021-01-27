@@ -8,12 +8,13 @@ import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
 import locations from '../../constants/transferLocations.json';
 import { AddressBookEntry, Account } from '../../utils/types';
+import { toMicroUnits } from '../../utils/gtu';
 
 /**
  * Controls the flow of creating a simple transfer.
  */
 export default function SimpleTransfer(account: Account) {
-    const [amount, setAmount] = useState('');
+    const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState(undefined);
     const [transaction, setTransaction] = useState(undefined);
     const [location, setLocation] = useState(locations.pickAmount);
@@ -47,7 +48,7 @@ export default function SimpleTransfer(account: Account) {
                         setLocation={setLocation}
                         recipient={recipient}
                         fromAddress={account.address}
-                        amount={amount}
+                        amount={toMicroUnits(amount)}
                         setTransaction={setTransaction}
                         account={account}
                     />
