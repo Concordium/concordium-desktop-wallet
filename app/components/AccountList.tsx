@@ -1,47 +1,59 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { push } from 'connected-react-router';
+import { Menu, Button } from 'semantic-ui-react';
 import {
     loadAccounts,
     accountsSelector,
     chooseAccount,
     chosenAccountIndexSelector,
+    accountsInfoSelector,
 } from '../features/AccountSlice';
-import styles from './Accounts.css';
+import { setViewingShielded } from '../features/TransactionSlice';
 import AccountListElement from './AccountListElement';
 import routes from '../constants/routes.json';
+import { Account } from '../utils/types';
 
+/**
+ * Displays the List of local accounts, And allows picking the chosen account.
+ * TODO: move the "AccountCreation start button"?
+ */
 export default function AccountList() {
     const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);
+    const accountsInfo = useSelector(accountsInfoSelector);
     const chosenIndex = useSelector(chosenAccountIndexSelector);
 
     useEffect(() => {
-        if (!accounts) {
-            loadAccounts(dispatch);
-        }
-    }, [dispatch, accounts]);
+        loadAccounts(dispatch);
+    }, [dispatch]);
 
-    if (!accounts) {
+    if (!accounts || !accountsInfo) {
         return null;
     }
 
     return (
-        <div className={styles.halfPage}>
-            <Link to={routes.ACCOUNTCREATION}>
-                <button type="button">+</button>
-            </Link>
-            <div className={styles.accountList}>
-                {accounts.map((account, index) => (
-                    <AccountListElement
+        <>
+            <Button onClick={() => dispatch(push(routes.ACCOUNTCREATION))}>
+                +
+            </Button>
+            <Menu vertical fluid>
+                {accounts.map((account: Account, index: number) => (
+                    <Menu.Item
                         key={account.address}
-                        account={account}
-                        onClick={() => dispatch(chooseAccount(index))}
-                        highlighted={index === chosenIndex}
-                        index={index}
-                    />
+                        active={index === chosenIndex}
+                    >
+                        <AccountListElement
+                            account={account}
+                            accountInfo={accountsInfo[account.address]}
+                            onClick={(shielded) => {
+                                dispatch(chooseAccount(index));
+                                dispatch(setViewingShielded(shielded));
+                            }}
+                        />
+                    </Menu.Item>
                 ))}
-            </div>
-        </div>
+            </Menu>
+        </>
     );
 }

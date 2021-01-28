@@ -7,8 +7,7 @@ import ProposalList from './ProposalList';
 import { MultiSignatureMenuItems } from '../../utils/types';
 
 /**
- * Component that displays the component corresponding to the
- * chosen multi signature menu item.
+ * This switches component corresponding to the chosen multi signature menu item.
  */
 export default function MultiSignatureMenuView() {
     const chosenMenu: MultiSignatureMenuItems = useSelector(chosenMenuSelector);

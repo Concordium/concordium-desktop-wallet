@@ -7,6 +7,7 @@ import identityReducer from './features/IdentitySlice';
 import settingsReducer from './features/SettingsSlice';
 import addressBookReducer from './features/AddressBookSlice';
 import multiSignatureReducer from './features/MultiSignatureSlice';
+import transactionReducer from './features/TransactionSlice';
 /* eslint-disable import/no-cycle */
 
 export default function createRootReducer(history: History) {
@@ -17,5 +18,6 @@ export default function createRootReducer(history: History) {
         accounts: accountReducer,
         addressBook: addressBookReducer,
         multisignature: multiSignatureReducer,
+        transactions: transactionReducer,
     });
 }

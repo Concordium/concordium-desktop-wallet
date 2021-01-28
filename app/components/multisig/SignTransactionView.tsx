@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import {
@@ -18,7 +18,12 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import TransactionDetails from '../TransactionDetails';
 import TransactionHashView from '../TransactionHashView';
 import routes from '../../constants/routes.json';
-import UpdateInstructionHandler from './UpdateInstructionHandler';
+import UpdateInstructionHandler from '../../utils/UpdateInstructionHandler';
+import {
+    AccountTransaction,
+    TransactionHandler,
+    UpdateInstruction,
+} from '../../utils/types';
 
 interface Props {
     location: LocationDescriptorObject<TransactionInput>;
@@ -37,6 +42,12 @@ export default function SignTransactionView({ location }: Props) {
         transactionDetailsAreCorrect,
         setTransactionDetailsAreCorrect,
     ] = useState(false);
+
+    const [transactionHash, setTransactionHash] = useState<string>();
+    const [transactionHandler, setTransactionHandler] = useState<
+        TransactionHandler<UpdateInstruction | AccountTransaction>
+    >();
+
     const dispatch = useDispatch();
 
     if (!location.state) {
@@ -48,14 +59,18 @@ export default function SignTransactionView({ location }: Props) {
     const { transaction } = location.state;
     const { type } = location.state;
 
-    // TODO Add AccountTransactionHandler here when implemented.
-    const transactionHandler =
-        type === 'UpdateInstruction'
-            ? new UpdateInstructionHandler(transaction)
-            : new UpdateInstructionHandler(transaction);
+    useEffect(() => {
+        // TODO Add AccountTransactionHandler here when implemented.
+        const transactionHandlerValue =
+            type === 'UpdateInstruction'
+                ? new UpdateInstructionHandler(transaction)
+                : new UpdateInstructionHandler(transaction);
+        setTransactionHandler(transactionHandlerValue);
 
-    const serializedTransaction = transactionHandler.serializeTransaction();
-    const transactionHash = hashSha256(serializedTransaction).toString('hex');
+        const serialized = transactionHandlerValue.serializeTransaction();
+        const hashed = hashSha256(serialized).toString('hex');
+        setTransactionHash(hashed);
+    }, [setTransactionHandler, setTransactionHash, type, transaction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
         const signatureBytes = await transactionHandler.signTransaction(ledger);

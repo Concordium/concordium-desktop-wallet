@@ -13,8 +13,12 @@ import {
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
 
+interface Location {
+    state: UpdateType;
+}
+
 interface Props {
-    type: UpdateType;
+    location: Location;
 }
 
 /**
@@ -24,10 +28,12 @@ interface Props {
  * The component retrieves the block summary of the last finalized block, which
  * is used to get the threshold and sequence number required for update instructions.
  */
-export default function MultiSignatureCreateProposalView({ type }: Props) {
+export default function MultiSignatureCreateProposalView({ location }: Props) {
     const [blockSummary, setBlockSummary] = useState<BlockSummary>();
     const [loading, setLoading] = useState(true);
     const dispatch = useDispatch();
+
+    const type = location.state;
 
     function chooseProposalType(foundationType: UpdateType) {
         switch (foundationType) {

@@ -107,7 +107,7 @@ export function getConsensusStatus(): Promise<ConsensusStatus> {
 }
 
 interface UpdateQueue {
-    nextSequenceNumber: number;
+    nextSequenceNumber: BigInt;
     queue;
 }
 

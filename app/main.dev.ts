@@ -16,6 +16,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import knex from './database/knex';
 import WebpackMigrationSource from './database/WebpackMigrationSource';
+import ipcCommands from './constants/ipcCommands.json';
 
 /**
  * Runs the knex migrations for the embedded sqlite database. This ensures that the
@@ -153,17 +154,17 @@ const createWindow = async () => {
 };
 
 // Provides access to the userData path from renderer processes.
-ipcMain.handle('APP_GET_PATH', () => {
+ipcMain.handle(ipcCommands.appGetPath, () => {
     return app.getPath('userData');
 });
 
 // Provides access to file dialog windows from renderer processes.
-ipcMain.handle('OPEN_FILE_DIALOG', async (event, title) => {
+ipcMain.handle(ipcCommands.openFileDialog, async (event, title) => {
     return dialog.showOpenDialog({ title });
 });
 
 // Provides access to save file dialog from renderer processes.
-ipcMain.handle('SAVE_FILE_DIALOG', async (event, title) => {
+ipcMain.handle(ipcCommands.saveFileDialog, async (event, title) => {
     return dialog.showSaveDialog({ title });
 });
 

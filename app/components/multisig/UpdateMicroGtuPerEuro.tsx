@@ -1,16 +1,9 @@
 import { push } from 'connected-react-router';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import {
-    Button,
-    Divider,
-    Form,
-    Header,
-    Input,
-    Segment,
-} from 'semantic-ui-react';
+import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
-import { updateCurrentProposal } from '../../features/MultiSignatureSlice';
+import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import {
     ExchangeRate,
     MultiSignatureTransaction,
@@ -27,13 +20,13 @@ import { BlockSummary } from '../../utils/client';
  * the micro GTU per euro exchange rate.
  */
 function createTransaction(
-    microGtuPerEuro: number,
-    sequenceNumber: number,
+    microGtuPerEuro: BigInt,
+    sequenceNumber: BigInt,
     threshold: number
 ): MultiSignatureTransaction {
     const exchangeRatePayload: ExchangeRate = {
         numerator: microGtuPerEuro,
-        denominator: 1,
+        denominator: 1n,
     };
 
     const updateInstruction = createUpdateInstruction(
@@ -56,11 +49,11 @@ interface Props {
 }
 
 export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
-    const [microGtuPerEuro, setMicroGtuPerEuro] = useState<number>();
+    const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
     const [
         currentMicroGtuPerEuro,
         setCurrentMicroGtuPerEuro,
-    ] = useState<number>();
+    ] = useState<BigInt>();
 
     if (!currentMicroGtuPerEuro) {
         setCurrentMicroGtuPerEuro(
@@ -82,11 +75,11 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
                 blockSummary.updates.authorizations.microGTUPerEuro.threshold
             );
 
-            // Set the current proposal in the state to the one that was just generated.
-            updateCurrentProposal(dispatch, multiSignatureTransaction);
-
             // Save to database.
             await insert(multiSignatureTransaction);
+
+            // Set the current proposal in the state to the one that was just generated.
+            dispatch(setCurrentProposal(multiSignatureTransaction));
 
             // Navigate to the page that displays the current proposal from the state.
             dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
@@ -98,28 +91,28 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
             <Header>Transaction Proposal | Update MicroGTU Per Euro</Header>
             <Divider />
             <Form>
-                <Form.Field inline>
-                    <Input
-                        width="5"
-                        label="Current micro GTU per euro rate"
-                        readOnly
-                        value={currentMicroGtuPerEuro}
-                    />
-                </Form.Field>
-                <Form.Field inline>
-                    <Input
-                        width="5"
-                        label="New micro GTU per euro rate"
-                        value={microGtuPerEuro}
-                        onChange={(e) => {
-                            if (e.target.value) {
-                                setMicroGtuPerEuro(
-                                    parseInt(e.target.value, 10)
-                                );
+                <Form.Input
+                    inline
+                    width="5"
+                    label="Current micro GTU per euro rate"
+                    readOnly
+                    value={currentMicroGtuPerEuro?.toString()}
+                />
+                <Form.Input
+                    inline
+                    width="5"
+                    label="New micro GTU per euro rate"
+                    value={microGtuPerEuro?.toString()}
+                    onChange={(e) => {
+                        if (e.target.value) {
+                            try {
+                                setMicroGtuPerEuro(BigInt(e.target.value));
+                            } catch (error) {
+                                // The input was not a valid BigInt, so do no updates based on the input.
                             }
-                        }}
-                    />
-                </Form.Field>
+                        }
+                    }}
+                />
                 <Form.Field>
                     <Button primary onClick={generateTransaction}>
                         Generate transaction proposal

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { push } from 'connected-react-router';
+import { Button, Menu } from 'semantic-ui-react';
 import routes from '../constants/routes.json';
 import IdentityListElement from './IdentityListElement';
 import {
@@ -10,8 +11,11 @@ import {
     chosenIdentitySelector,
 } from '../features/IdentitySlice';
 import { Identity } from '../utils/types';
-import styles from './Identity.css';
 
+/**
+ * Displays the List of local identities, And allows picking the chosen identity.
+ * TODO: move the "IdentityIssuance start button"?
+ */
 export default function IdentityList() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
@@ -28,20 +32,21 @@ export default function IdentityList() {
     }
 
     return (
-        <div className={styles.halfPage}>
-            <Link to={routes.IDENTITYISSUANCE}>
-                <button type="button">x</button>
-            </Link>
-
-            {identities.map((identity: Identity, i) => (
-                <IdentityListElement
-                    identity={identity}
-                    highlighted={identity === chosenIdentity}
-                    index={i}
-                    onClick={() => dispatch(chooseIdentity(i))}
-                    key={identity.id}
-                />
-            ))}
-        </div>
+        <>
+            <Button onClick={() => dispatch(push(routes.IDENTITYISSUANCE))}>
+                +
+            </Button>
+            <Menu vertical fluid>
+                {identities.map((identity: Identity) => (
+                    <Menu.Item
+                        key={identity.id}
+                        onClick={() => dispatch(chooseIdentity(identity))}
+                        active={chosenIdentity === identity}
+                    >
+                        <IdentityListElement identity={identity} />
+                    </Menu.Item>
+                ))}
+            </Menu>
+        </>
     );
 }

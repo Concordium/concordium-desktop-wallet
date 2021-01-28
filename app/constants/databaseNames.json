@@ -1,5 +1,7 @@
 {
     "identitiesTable": "identities",
     "accountsTable": "accounts",
-    "addressBookTable": "addressBook"
+    "addressBookTable": "addressBook",
+    "multiSignatureProposalTable": "multi_signature_proposal",
+    "transactionTable": "transactions"
 }

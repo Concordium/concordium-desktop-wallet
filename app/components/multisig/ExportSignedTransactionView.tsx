@@ -55,7 +55,7 @@ export default function ExportSignedTransactionView({ location }: Props) {
             await saveFile(signedTransactionJson, 'Export signed transaction');
             dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
         } catch (err) {
-            // Handle error by showing it to the user.
+            // TODO Handle error by showing it to the user.
         }
     }
 

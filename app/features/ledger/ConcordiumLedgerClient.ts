@@ -73,7 +73,10 @@ export default class ConcordiumLedgerClient {
         return signAccountChallenge(this.transport, path, challenge);
     }
 
-    signMicroGtuPerEuro(transaction: UpdateInstruction): Promise<Buffer> {
-        return signUpdateMicroGtuPerEuro(this.transport, transaction);
+    signMicroGtuPerEuro(
+        transaction: UpdateInstruction,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateMicroGtuPerEuro(this.transport, path, transaction);
     }
 }

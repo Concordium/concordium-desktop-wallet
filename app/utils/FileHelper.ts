@@ -1,5 +1,6 @@
 import { ipcRenderer } from 'electron';
 import fs from 'fs';
+import ipcCommands from '../constants/ipcCommands.json';
 
 /**
  * Opens an 'open file' prompt where the user can select a file to be read.
@@ -7,7 +8,7 @@ import fs from 'fs';
  */
 export async function openFile(title: string): Promise<string> {
     const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke(
-        'OPEN_FILE_DIALOG',
+        ipcCommands.openFileDialog,
         title
     );
 
@@ -28,13 +29,14 @@ export async function openFile(title: string): Promise<string> {
 }
 
 /**
- * Opens a 'save file' promot where the user can select where to save a file.
+ * Opens a 'save file' prompt where the user can select where to save a file, and writes
+ * the data to that destination.
  * @param data the string to save to a file
  * @param title the title of the save file window
  */
 export async function saveFile(data: string, title: string) {
     const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke(
-        'SAVE_FILE_DIALOG',
+        ipcCommands.saveFileDialog,
         title
     );
 
@@ -52,5 +54,5 @@ export async function saveFile(data: string, title: string) {
             return Promise.resolve();
         });
     }
-    return Promise.resolve();
+    return Promise.reject(new Error('No file path was selected by the user.'));
 }
