@@ -446,7 +446,7 @@ export enum MultiSignatureTransactionStatus {
  */
 export interface MultiSignatureTransaction {
     // logical id in the database
-    id: number;
+    id?: number;
     // The JSON serialization of the transaction
     transaction: string;
     // The minimum required signatures for the transaction
@@ -469,12 +469,4 @@ export enum MultiSignatureMenuItems {
 export interface ExchangeRate {
     numerator: Word64;
     denominator: Word64;
-}
-
-// Statuses that a transaction can have.
-export enum TransactionStatus {
-    Finalized = 'finalized',
-    Committed = 'committed',
-    Rejected = 'rejected',
-    Pending = 'pending',
 }
