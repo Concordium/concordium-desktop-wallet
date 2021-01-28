@@ -4,10 +4,10 @@ export function getGTUSymbol(): string {
 
 const microGTUPerGTU = 1000000n;
 const separator = '.';
-const gtuFormat = new RegExp('^\\d+(\\.\\d{0,6})?$');
+const gtuFormat = new RegExp('^(0|[1-9]\\d*)(\\.\\d{1,6})?$');
 
 // Checks that the input is a valid GTU string.
-export function isValidGTU(amount: string): boolean {
+export function isValidGTUString(amount: string): boolean {
     // Only allow numerals, and only allow millionth decimals (in order to keep microGTU atomic)
     return gtuFormat.test(amount);
 }
@@ -26,7 +26,7 @@ function parseSubGTU(subGTU: string) {
  * Given a GTU string, convert to microGTU
  */
 export function toMicroUnits(amount: string): BigInt {
-    if (!isValidGTU(amount)) {
+    if (!isValidGTUString(amount)) {
         throw new Error('Given string that was not a valid GTU string.');
     }
     if (amount.includes(separator)) {
@@ -47,7 +47,7 @@ export function toMicroUnits(amount: string): BigInt {
 export function displayAsGTU(microGTUAmount: BigInt | string) {
     let amount = microGTUAmount;
     if (typeof microGTUAmount === 'string') {
-        amount = BigInt(microGTUAmount);
+        amount = toMicroUnits(microGTUAmount);
     }
     const isNegative = amount < 0;
     const absolute = isNegative ? -amount : amount;
@@ -61,5 +61,5 @@ export function displayAsGTU(microGTUAmount: BigInt | string) {
               )}${microGTU.toString().replace(/0+$/, '')}`;
 
     const negative = isNegative ? '-' : '';
-    return `${negative} ${getGTUSymbol()} ${GTU}${microGTUFormatted}`;
+    return `${negative}${getGTUSymbol()}${GTU}${microGTUFormatted}`;
 }

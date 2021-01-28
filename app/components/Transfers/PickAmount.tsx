@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Input, Button } from 'semantic-ui-react';
 import { AddressBookEntry } from '../../utils/types';
 import locations from '../../constants/transferLocations.json';
-import { getGTUSymbol, isValidGTU } from '../../utils/gtu';
+import { getGTUSymbol, isValidGTUString } from '../../utils/gtu';
 
 interface Props {
     setLocation(location: string): void;
@@ -14,6 +14,7 @@ interface Props {
 /**
  * Allows the user to enter an amount, and redirects to picking a recipient.
  * TODO: Rework structure to simplify this component?
+ * TODO: Add an error label, describing the issue (on debounce);
  */
 export default function PickAmount({
     setLocation,
@@ -21,11 +22,10 @@ export default function PickAmount({
     amount,
     setAmount,
 }: Props) {
+    const validInput = isValidGTUString(amount);
+
     function updateAmount(newAmount) {
-        // Only allow valid gtu strings, and the empty string.
-        if (!newAmount || isValidGTU(newAmount)) {
-            setAmount(newAmount);
-        }
+        setAmount(newAmount);
     }
 
     return (
@@ -36,6 +36,7 @@ export default function PickAmount({
                     fluid
                     name="name"
                     placeholder="Enter Amount"
+                    error={!validInput}
                     value={amount}
                     onChange={(e) => updateAmount(e.target.value)}
                     autoFocus
@@ -50,7 +51,7 @@ export default function PickAmount({
                     <Button
                         positive
                         onClick={() => setLocation(locations.confirmTransfer)}
-                        disabled={!recipient || !amount}
+                        disabled={!recipient || !validInput}
                     >
                         Continue
                     </Button>
