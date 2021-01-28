@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card, Button } from 'semantic-ui-react';
 import { decrypt } from '../utils/encryption';
-import { loadFile } from '../utils/files';
+import { openFile } from '../utils/FileHelper';
 import routes from '../constants/routes.json';
 import InputModal from './InputModal';
 import MessageModal from './MessageModal';
@@ -47,7 +47,7 @@ export default function Import() {
     }
 
     async function browseFilesButtonOnClick() {
-        const rawData = await loadFile();
+        const rawData = await openFile('Choose Exported File');
         if (rawData) {
             let encryptedData;
             try {

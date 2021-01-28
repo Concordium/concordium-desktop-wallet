@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Card, Button } from 'semantic-ui-react';
 import { encrypt } from '../utils/encryption';
-import { saveToFile } from '../utils/files';
+import { saveFile } from '../utils/FileHelper';
 import { loadIdentities, identitiesSelector } from '../features/IdentitySlice';
 import { loadAccounts, accountsSelector } from '../features/AccountSlice';
 import {
@@ -22,6 +22,7 @@ export default function Export() {
     const addressBook = useSelector(addressBookSelector);
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
     const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState<string>();
 
     useEffect(() => {
         loadAccounts(dispatch);
@@ -41,11 +42,15 @@ export default function Export() {
         });
         const data = { accounts: cleanAccounts, identities, addressBook };
         const encrypted = encrypt(JSON.stringify(data), password);
-        const successful = await saveToFile(encrypted); // TODO handle error
-        if (successful) {
-            setOpenPasswordModal(false);
-            setOpenConfirmationModal(true);
+
+        try {
+            await saveFile(JSON.stringify(encrypted));
+            setModalMessage('Export was Successful');
+        } catch (error) {
+            setModalMessage('Export failed');
         }
+        setOpenPasswordModal(false);
+        setOpenConfirmationModal(true);
     }
 
     return (
@@ -60,7 +65,7 @@ export default function Export() {
                 open={openPasswordModal}
             />
             <MessageModal
-                title="Export was Successful"
+                title={modalMessage}
                 buttonText="Ok, thanks!"
                 onClose={() => setOpenConfirmationModal(false)}
                 open={openConfirmationModal}
