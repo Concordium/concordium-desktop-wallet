@@ -323,8 +323,8 @@ export enum MultiSignatureTransactionStatus {
     Open = 'open',
     Submitted = 'submitted',
     Rejected = 'rejected',
-    Closed = 'closed',
-    Completed = 'completed',
+    Finalized = 'finalized',
+    Committed = 'committed',
     Failed = 'failed',
 }
 
@@ -357,4 +357,12 @@ export enum MultiSignatureMenuItems {
 export interface ExchangeRate {
     numerator: Word64;
     denominator: Word64;
+}
+
+// Statuses that a transaction can have.
+export enum TransactionStatus {
+    Finalized = 'finalized',
+    Committed = 'committed',
+    Rejected = 'rejected',
+    Pending = 'pending',
 }

@@ -30,6 +30,7 @@ import {
     serializeUpdateInstructionHeaderAndPayload,
 } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
+import { getMultiSignatureTransactionStatus } from '../../node/TransactionStatusPoller';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -88,6 +89,7 @@ export default function ProposalView() {
                 status: MultiSignatureTransactionStatus.Submitted,
             };
             updateCurrentProposal(dispatch, submittedProposal);
+            getMultiSignatureTransactionStatus(submittedProposal, dispatch);
         } else {
             const failedProposal = {
                 ...currentProposal,

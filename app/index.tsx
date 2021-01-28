@@ -5,6 +5,9 @@ import { history, configuredStore } from './store';
 import './app.global.css';
 import { updateSettings } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
+import { getAll } from './database/MultiSignatureProposalDao';
+import getMultiSignatureTransactionStatus from './node/TransactionStatusPoller';
+import { MultiSignatureTransactionStatus } from './utils/types';
 
 const store = configuredStore();
 
@@ -16,6 +19,23 @@ async function loadSettingsIntoStore() {
     return store.dispatch(updateSettings(settings));
 }
 loadSettingsIntoStore();
+
+/**
+ * Load all submitted proposals from the database, and
+ * start listening for their status towards the node.
+ */
+async function listenForTransactionStatus(dispatch) {
+    const allProposals = await getAll();
+    allProposals
+        .filter(
+            (proposal) =>
+                proposal.status === MultiSignatureTransactionStatus.Submitted
+        )
+        .forEach((proposal) => {
+            getMultiSignatureTransactionStatus(proposal, dispatch);
+        });
+}
+listenForTransactionStatus(store.dispatch);
 
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
