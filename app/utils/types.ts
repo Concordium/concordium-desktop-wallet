@@ -2,6 +2,8 @@ import { AccountAddress } from '../proto/concordium_p2p_rpc_pb';
 
 type Hex = string;
 type Proofs = Hex;
+type Word64 = BigInt;
+type Word32 = number;
 
 export enum SchemeId {
     Ed25519 = 0,
@@ -362,4 +364,109 @@ export interface AddressBookEntry {
     name: string;
     address: string;
     note: string;
+}
+
+/**
+ * The header part of an update instruction. The payload size is allowed
+ * optional so that the header can be created before knowing the payload
+ * size of the associated payload.
+ */
+export interface UpdateHeader {
+    sequenceNumber: Word64;
+    effectiveTime: Word64;
+    timeout: Word64;
+    payloadSize?: Word32;
+}
+
+export interface UpdateInstruction {
+    header: UpdateHeader;
+    // Contains the payload for an update instruction. It can be any of the
+    // update payloads available.
+    // TODO Add other update types as they are implemented.
+    payload: ExchangeRate;
+    type: UpdateType;
+    signatures: string[];
+}
+
+/**
+ * Update type enumeration. The numbering/order is important as that corresponds
+ * to the byte written when serializing the update instruction.
+ */
+export enum UpdateType {
+    UpdateAuthorization = 0,
+    UpdateProtocol = 1,
+    UpdateElectionDifficulty = 2,
+    UpdateEuroPerEnergy = 3,
+    UpdateMicroGTUPerEuro = 4,
+    UpdateFoundationAccount = 5,
+    UpdateMintDistribution = 6,
+    UpdateTransactionFeeDistribution = 7,
+    UpdateGASRewards = 8,
+}
+
+export function instanceOfAccountTransaction(
+    object
+): object is AccountTransaction {
+    return 'transactionKind' in object;
+}
+
+export function instanceOfUpdateInstruction(
+    object
+): object is UpdateInstruction {
+    return 'header' in object;
+}
+
+/**
+ * Interface definition for classes that can serialize and handle
+ * signing of the different transaction types.
+ */
+export interface TransactionHandler<T> {
+    transaction: T;
+    instanceOf: () => boolean;
+    serializeTransaction: () => Buffer;
+    signTransaction: (any) => Promise<Buffer>;
+}
+
+/**
+ * Enum for the different states that a multi signature transaction proposal
+ * can go through.
+ */
+export enum MultiSignatureTransactionStatus {
+    Open = 'open',
+    Submitted = 'submitted',
+    Rejected = 'rejected',
+    Closed = 'closed',
+    Completed = 'completed',
+    Failed = 'failed',
+}
+
+/**
+ * The model for multi signature transaction proposals, which maps into the
+ * database model as well.
+ */
+export interface MultiSignatureTransaction {
+    // logical id in the database
+    id: number;
+    // The JSON serialization of the transaction
+    transaction: string;
+    // The minimum required signatures for the transaction
+    // to be accepted on chain.
+    threshold: number;
+    // The current state of the proposal
+    status: MultiSignatureTransactionStatus;
+}
+
+/**
+ *  An enumeration that contains the menu items available in the menu
+ *  on the multisignature page.
+ */
+export enum MultiSignatureMenuItems {
+    MakeNewProposal = 'Make new proposal',
+    ProposedTransactions = 'Proposed transactions',
+    SignTransaction = 'Sign transaction',
+}
+
+export interface ExchangeRate {
+    numerator: Word64;
+    denominator: Word64;
 }

@@ -13,6 +13,11 @@ import IssuancePage from './containers/IssuancePage';
 import AccountCreation from './containers/AccountCreationPage';
 import styles from './Main.css';
 import SettingsPage from './containers/SettingsPage';
+import MultiSignaturePage from './containers/MultiSignaturePage';
+import ProposalView from './components/multisig/ProposalView';
+import SignTransactionView from './components/multisig/SignTransactionView';
+import ExportSignedTransactionView from './components/multisig/ExportSignedTransactionView';
+import MultiSignatureCreateProposalView from './components/multisig/MultiSignatureCreateProposalView';
 
 export default function Routes() {
     return (
@@ -36,8 +41,24 @@ export default function Routes() {
                     />
                     <Route path={routes.EXPORTIMPORT} component={TodoPage} />
                     <Route
+                        path={routes.MULTISIGTRANSACTIONS_EXPORT_TRANSACTION}
+                        component={ExportSignedTransactionView}
+                    />
+                    <Route
+                        path={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION}
+                        component={SignTransactionView}
+                    />
+                    <Route
+                        path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}
+                        component={ProposalView}
+                    />
+                    <Route
+                        path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
+                        component={MultiSignatureCreateProposalView}
+                    />
+                    <Route
                         path={routes.MULTISIGTRANSACTIONS}
-                        component={TodoPage}
+                        component={MultiSignaturePage}
                     />
                     <Route path={routes.SETTINGS} component={SettingsPage} />
                     <Route path={routes.HOME} component={HomePage} />
