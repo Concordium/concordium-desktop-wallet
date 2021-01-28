@@ -1,14 +1,14 @@
 import { Dispatch, AnyAction } from 'redux';
 import { updateEntry } from '../database/MultiSignatureProposalDao';
 import { loadProposals } from '../features/MultiSignatureSlice';
-import { getTransactionStatus } from '../utils/client';
-import { hashSha256 } from '../utils/serializationHelpers';
+import { getTransactionStatus } from './client';
+import { hashSha256 } from './serializationHelpers';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     TransactionStatus,
-} from '../utils/types';
-import { serializeUpdateInstruction } from '../utils/UpdateSerialization';
+} from './types';
+import { serializeUpdateInstruction } from './UpdateSerialization';
 
 // Poll every 15 seconds.
 const pollingIntervalMs = 15000;

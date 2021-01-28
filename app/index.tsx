@@ -6,7 +6,7 @@ import './app.global.css';
 import { updateSettings } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
 import { getAll } from './database/MultiSignatureProposalDao';
-import getMultiSignatureTransactionStatus from './node/TransactionStatusPoller';
+import getMultiSignatureTransactionStatus from './utils/TransactionStatusPoller';
 import { MultiSignatureTransactionStatus } from './utils/types';
 
 const store = configuredStore();
