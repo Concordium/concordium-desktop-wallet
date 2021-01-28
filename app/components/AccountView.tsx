@@ -17,7 +17,7 @@ import AccountBalanceView from './AccountBalanceView';
 import DecryptComponent from './DecryptComponent';
 
 /**
- * Detailed view of the chosen account and it's transactions.
+ * Detailed view of the chosen account and its transactions.
  * Also contains controls for sending transfers.
  */
 export default function AccountView() {
@@ -26,9 +26,9 @@ export default function AccountView() {
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const location = useLocation();
     const buttons = [
-        { route: routes.ACCOUNTS_SIMPLETRANSFER, text: 'Send' },
-        { route: routes.ACCOUNTS_SIMPLETRANSFER, text: 'Shield' },
-        { route: routes.ACCOUNTS_MORE, text: 'More' },
+        { route: routes.ACCOUNTS_SIMPLETRANSFER, label: 'Send' },
+        { route: routes.ACCOUNTS_SIMPLETRANSFER, label: 'Shield' },
+        { route: routes.ACCOUNTS_MORE, label: 'More' },
     ];
 
     useEffect(() => {
@@ -42,35 +42,41 @@ export default function AccountView() {
     }
 
     return (
-        <Card fluid>
-            <AccountBalanceView />
-            <Button.Group>
-                {buttons.map(({ route, text }) => (
-                    <Button
-                        key={route + text}
-                        onClick={() => dispatch(push(route))}
-                        className={styles.accountActionButton}
-                        disabled={location.pathname.startsWith(route)}
-                    >
-                        {text}
-                    </Button>
-                ))}
-            </Button.Group>
-            <Switch>
-                <Route
-                    path={routes.ACCOUNTS_MORE}
-                    component={() => moreActions(account, accountInfo)}
-                />
-                <Route
-                    path={routes.ACCOUNTS_SIMPLETRANSFER}
-                    component={() => simpleTransfer(account)}
-                />
-                <Route
-                    path={routes.DEFAULT}
-                    component={() => transferHistory(account)}
-                />
-            </Switch>
-            <DecryptComponent account={account} />
-        </Card>
+        <Card.Group itemsPerRow={1}>
+            <Card>
+                <AccountBalanceView />
+            </Card>
+            <Card>
+                <Button.Group>
+                    {buttons.map(({ route, label }) => (
+                        <Button
+                            key={route + label}
+                            onClick={() => dispatch(push(route))}
+                            className={styles.accountActionButton}
+                            disabled={location.pathname.startsWith(route)}
+                        >
+                            {label}
+                        </Button>
+                    ))}
+                </Button.Group>
+            </Card>
+            <Card>
+                <Switch>
+                    <Route
+                        path={routes.ACCOUNTS_MORE}
+                        component={() => moreActions(account, accountInfo)}
+                    />
+                    <Route
+                        path={routes.ACCOUNTS_SIMPLETRANSFER}
+                        component={() => simpleTransfer(account)}
+                    />
+                    <Route
+                        path={routes.DEFAULT}
+                        component={() => transferHistory(account)}
+                    />
+                </Switch>
+                <DecryptComponent account={account} />
+            </Card>
+        </Card.Group>
     );
 }

@@ -1,6 +1,7 @@
 import * as axios from 'axios';
 import * as http from 'http';
 import urls from '../constants/urls.json';
+import { walletProxytransactionLimit } from '../constants/externalConstants.json';
 
 const walletProxy = axios.create({
     baseURL: urls.walletProxy,
@@ -44,7 +45,7 @@ function getHighestId(transactions) {
 
 export async function getTransactions(address, id = 0) {
     const response = await walletProxy.get(
-        `/v0/accTransactions/${address}?limit=1000&from=${id}`
+        `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}`
     );
     const { transactions, count, limit } = response.data;
     if (count === limit) {

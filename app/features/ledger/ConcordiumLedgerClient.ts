@@ -4,8 +4,13 @@ import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
 import signAccountChallenge from './AccountChallenge';
-import { AccountTransaction, PublicInformationForIp } from '../../utils/types';
+import {
+    AccountTransaction,
+    PublicInformationForIp,
+    UpdateInstruction,
+} from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
+import signUpdateMicroGtuPerEuro from './MicroGtuPerEuro';
 
 /**
  * Concordium Ledger API.
@@ -66,5 +71,12 @@ export default class ConcordiumLedgerClient {
 
     signAccountChallenge(challenge: Buffer, path: number[]): Promise<Buffer> {
         return signAccountChallenge(this.transport, path, challenge);
+    }
+
+    signMicroGtuPerEuro(
+        transaction: UpdateInstruction,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateMicroGtuPerEuro(this.transport, path, transaction);
     }
 }

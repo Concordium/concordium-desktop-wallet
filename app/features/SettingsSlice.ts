@@ -2,7 +2,7 @@ import { createSlice, Dispatch } from '@reduxjs/toolkit';
 import { loadAllSettings, updateEntry } from '../database/SettingsDao';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
-import { Setting } from '../utils/types';
+import { Setting, Settings } from '../utils/types';
 
 const settingsSlice = createSlice({
     name: 'settings',
@@ -24,6 +24,31 @@ export const settingsSelector = (state: RootState) => state.settings.settings;
 
 export const chosenIndexSelector = (state: RootState) =>
     state.settings.chosenIndex;
+
+/**
+ * Searches the settings for a setting with the provided name.
+ * @param name name of the setting to find
+ * @param settings the settings to search
+ */
+function findSetting(name: string, settings: Settings[]): Setting | undefined {
+    const flattenedSettings = settings.flatMap((settingTopLevel) => {
+        return settingTopLevel.settings;
+    });
+    return flattenedSettings.find((setting) => setting.name === name);
+}
+
+export const foundationTransactionsEnabledSelector = (
+    state: RootState
+): boolean => {
+    const result = findSetting(
+        'foundationTransactionsEnabled',
+        state.settings.settings
+    );
+    if (result && result.value === '1') {
+        return true;
+    }
+    return false;
+};
 
 export const { chooseSetting, updateSettings } = settingsSlice.actions;
 

@@ -8,7 +8,7 @@ export default function SettingsList() {
     const settings = useSelector(settingsSelector);
 
     return (
-        <Menu vertical size="massive">
+        <Menu vertical size="massive" fluid>
             {settings.map((setting, i) => (
                 <Menu.Item
                     key={setting.type}

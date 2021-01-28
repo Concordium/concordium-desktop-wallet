@@ -21,9 +21,9 @@ export async function up(knex: Knex): Promise<void> {
             table.string('cost');
             table.integer('energy');
             // Blobs:
-            table.string('origin');
-            table.string('details');
-            table.string('encrypted');
+            table.json('origin');
+            table.json('details');
+            table.json('encrypted');
             // Others
             table.string('fromAddress').index();
             table.string('toAddress').index();

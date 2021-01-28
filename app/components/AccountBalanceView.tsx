@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Container, Header } from 'semantic-ui-react';
 import styles from './Accounts.css';
-import { fromMicroUnits } from '../utils/transactionHelpers';
+import { displayAsGTU } from '../utils/gtu';
 import {
     setViewingShielded,
     viewingShieldedSelector,
@@ -19,12 +19,13 @@ export default function AccountBalanceView(): JSX.Element {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
-
     const viewingShielded = useSelector(viewingShieldedSelector);
 
     if (!account || !accountInfo) {
         return null; // TODO: add display for pending account (which have no accountinfo)
     }
+
+    const totalDecrypted = account.totalDecrypted || 0n;
 
     const buttons = (
         <Button.Group>
@@ -47,7 +48,7 @@ export default function AccountBalanceView(): JSX.Element {
     if (viewingShielded) {
         main = (
             <Header as="h1" color="blue">
-                {fromMicroUnits(account.totalDecrypted)}{' '}
+                {displayAsGTU(totalDecrypted)}
                 {account.allDecrypted ? '' : ' + ?'}
             </Header>
         );
@@ -55,28 +56,25 @@ export default function AccountBalanceView(): JSX.Element {
         main = (
             <>
                 <Header as="h1" color="blue">
-                    {fromMicroUnits(accountInfo.accountAmount)}
+                    {displayAsGTU(accountInfo.accountAmount)}
                 </Header>
                 <Header color="blue">
                     At disposal:
-                    {fromMicroUnits(
-                        parseInt(accountInfo.accountAmount, 10) -
-                            parseInt(
-                                accountInfo.accountReleaseSchedule.total,
-                                10
-                            )
-                    )}{' '}
+                    {displayAsGTU(
+                        BigInt(accountInfo.accountAmount) -
+                            BigInt(accountInfo.accountReleaseSchedule.total)
+                    )}
                 </Header>
                 <Header color="blue">
                     Staked:
-                    {fromMicroUnits(0)}{' '}
+                    {displayAsGTU(0n)}
                 </Header>
             </>
         );
     }
 
     return (
-        <Container className={styles.accountBalanceView}>
+        <Container className={styles.accountBalanceView} fluid>
             {buttons}
             {main}
         </Container>
