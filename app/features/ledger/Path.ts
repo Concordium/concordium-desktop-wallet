@@ -11,6 +11,11 @@ export interface AccountPathInput {
     signatureIndex: number;
 }
 
+export interface GovernancePathInput {
+    purpose: number;
+    keyIndex: number;
+}
+
 /**
  * Constructs a path to an account signature key. The account key derivation path structure
  * is given by:
@@ -32,6 +37,17 @@ export function getAccountPath(accountPath: AccountPathInput): number[] {
 }
 
 /**
+ * Constructs a path to a governance signature key. The governance key derivation path structure
+ * is given by:
+ *
+ *  - m/purpose'/coin_type'/2'/gov_purpose’/key_index'/
+ * @param governancePath
+ */
+export function getGovernancePath(governancePath: GovernancePathInput) {
+    return [2, governancePath.purpose, governancePath.keyIndex];
+}
+
+/**
  * Constructs a Buffer containing the key derivation path in serialized form.
  * @param keyDerivationPath the key derivation path to get as bytes in a buffer.
  */
@@ -43,10 +59,10 @@ export default function pathAsBuffer(keyDerivationPath: number[]): Buffer {
         throw new Error(`An invalid subtree was provided: ${subtree}`);
     }
 
-    // Governance subtree has a depth of exactly 3 + 2.
-    if (subtree === 2 && keyDerivationPath.length !== 5) {
+    // Governance subtree has a depth of exactly 3.
+    if (subtree === 2 && keyDerivationPath.length !== 3) {
         throw new Error(
-            `A governance derivation path was supplied, but the path does not have length 5: ${keyDerivationPath.length}`
+            `A governance derivation path was supplied, but the path does not have length 3: ${keyDerivationPath.length}`
         );
     }
 

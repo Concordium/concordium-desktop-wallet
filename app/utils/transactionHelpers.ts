@@ -1,36 +1,8 @@
 import { findAccounts } from '../database/AccountDao';
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './client';
-import { AccountTransaction, TransactionKind, TimeStampUnit } from './types';
+import { AccountTransaction, TransactionKindId } from './types';
 import { sleep } from './httpRequests';
-
-/**
- * Given a GTU amount, convert to microGTU
- */
-export function toMicroUnits(amount: number): number {
-    return Math.floor(amount * 1000000);
-}
-
-/**
- * Given a microGTU amount, returns the same amount in GTU
- * in a displayable format.
- */
-export function fromMicroUnits(rawAmount) {
-    const amount = parseInt(rawAmount, 10);
-    const absolute = Math.abs(amount);
-    const GTU = Math.floor(absolute / 1000000);
-    const microGTU = absolute % 1000000;
-    const microGTUFormatted =
-        microGTU === 0
-            ? ''
-            : `.${'0'.repeat(
-                  6 - microGTU.toString().length
-              )}${microGTU.toString().replace(/0+$/, '')}`;
-
-    const negative = amount < 0 ? '-' : '';
-    return `${negative} \u01E4 ${GTU}${microGTUFormatted}`;
-}
-
 /**
  * return highest id of given transactions
  */
@@ -41,7 +13,7 @@ export function getHighestId(transactions) {
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
  * If the address is found, return the name, otherwise returns undefined;
- * TODO: if accounts are added to the AddressBook, then only lookup AddressBook.
+ * TODO: when accounts are added to the AddressBook, then only lookup AddressBook.
  */
 async function lookupName(address): string {
     const accounts = await findAccounts({ address });
@@ -63,9 +35,13 @@ async function lookupName(address): string {
 async function attachName(transaction) {
     const updatedTransaction = { ...transaction };
     const toName = await lookupName(transaction.toAddress);
-    if (toName) updatedTransaction.toAddressName = toName;
+    if (toName) {
+        updatedTransaction.toAddressName = toName;
+    }
     const fromName = await lookupName(transaction.fromAddress);
-    if (fromName) updatedTransaction.fromAddressName = fromName;
+    if (fromName) {
+        updatedTransaction.fromAddressName = fromName;
+    }
     return updatedTransaction;
 }
 
@@ -77,28 +53,12 @@ export async function attachNames(transactions) {
 }
 
 /**
- * Given a unix timeStamp, return the date in a displayable format.
- * Assumes the timestamp is in seconds, otherwise the unit should be specified.
- */
-export function parseTime(
-    timeStamp,
-    unit: TimeStampUnit = TimeStampUnit.seconds
-) {
-    const dtFormat = new Intl.DateTimeFormat('en-GB', {
-        dateStyle: 'short',
-        timeStyle: 'short',
-        timeZone: 'UTC',
-    });
-    return dtFormat.format(new Date(timeStamp * unit));
-}
-
-/**
  *  Constructs a, simple transfer, transaction object,
  * Given the fromAddress, toAddress and the amount.
  */
 export async function createSimpleTransferTransaction(
     fromAddress: string,
-    amount: string,
+    amount: BigInt,
     toAddress: string
 ) {
     const nonceJSON = await getNextAccountNonce(fromAddress);
@@ -108,10 +68,10 @@ export async function createSimpleTransferTransaction(
         nonce,
         energyAmount: 200, // TODO: Does this need to be set by the user?
         expiry: 16446744073, // TODO: Don't hardcode?
-        transactionKind: TransactionKind.Simple_transfer,
+        transactionKind: TransactionKindId.Simple_transfer,
         payload: {
             toAddress,
-            amount: toMicroUnits(amount),
+            amount: amount.toString(),
         },
     };
     return transferTransaction;

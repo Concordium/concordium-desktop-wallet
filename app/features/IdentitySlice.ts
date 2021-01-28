@@ -19,7 +19,7 @@ const identitySlice = createSlice({
             state.identities = input.payload;
         },
         chooseIdentity: (state, input) => {
-            state.chosenIdentity = state.identities[input.payload];
+            state.chosenIdentity = input.payload;
         },
     },
 });

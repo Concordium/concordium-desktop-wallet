@@ -9,9 +9,14 @@ import {
     updateTransaction,
     getMaxTransactionsIdOfAccount,
 } from '../database/TransactionDao';
-import { TransferTransaction, TransactionStatus } from '../utils/types';
+import {
+    TransferTransaction,
+    TransactionStatus,
+    TransactionKindString,
+    TransactionKindId,
+    OriginType,
+} from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
-import TransactionKinds from '../constants/transactionKinds.json';
 
 const transactionSlice = createSlice({
     name: 'transactions',
@@ -40,7 +45,8 @@ export async function decryptTransactions(transactions, prfKey, account) {
     const global = (await getGlobal()).value;
     const encryptedTransfers = transactions.filter(
         (t) =>
-            t.transactionKind === TransactionKinds.EncryptedAmountTransfer &&
+            t.transactionKind ===
+                TransactionKindString.EncryptedAmountTransfer &&
             t.decryptedAmount === null
     );
     const encryptedAmounts = encryptedTransfers.map(
@@ -70,8 +76,8 @@ export async function decryptTransactions(transactions, prfKey, account) {
 }
 
 /**
- * Because the data from the wallet proxy doesn't contain the receiving
- * address, except in the event string.
+ * We have to do it like this, because the data from the wallet proxy
+ * doesn't contain the receiving address, except in the event string.
  */
 function getScheduleReceiver(transaction) {
     const event = transaction.details.events[0];
@@ -85,7 +91,7 @@ function convertIncomingTransaction(transaction): TransferTransaction {
     let fromAddress;
     if ('transferSource' in transaction.details) {
         fromAddress = transaction.details.transferSource;
-    } else if (transaction.origin.type === 'account') {
+    } else if (transaction.origin.type === OriginType.Account) {
         fromAddress = transaction.origin.address;
     }
     let toAddress;
@@ -97,8 +103,10 @@ function convertIncomingTransaction(transaction): TransferTransaction {
         encrypted = JSON.stringify(transaction.encrypted);
     }
 
-    if (transaction.details.type === TransactionKinds.TransferWithSchedule) {
-        if (transaction.origin.type === 'account') {
+    if (
+        transaction.details.type === TransactionKindString.TransferWithSchedule
+    ) {
+        if (transaction.origin.type === OriginType.Account) {
             toAddress = getScheduleReceiver(transaction);
         }
     }
@@ -129,11 +137,11 @@ function convertIncomingTransaction(transaction): TransferTransaction {
  */
 function filterUnShieldedBalanceTransaction(transaction) {
     switch (transaction.transactionKind) {
-        case TransactionKinds.Transfer:
-        case TransactionKinds.BakingReward:
-        case TransactionKinds.TransferWithSchedule:
-        case TransactionKinds.TransferToEncrypted:
-        case TransactionKinds.TransferToPublic:
+        case TransactionKindString.Transfer:
+        case TransactionKindString.BakingReward:
+        case TransactionKindString.TransferWithSchedule:
+        case TransactionKindString.TransferToEncrypted:
+        case TransactionKindString.TransferToPublic:
             return true;
         default:
             return false;
@@ -145,9 +153,9 @@ function filterUnShieldedBalanceTransaction(transaction) {
  */
 function filterShieldedBalanceTransaction(transaction) {
     switch (transaction.transactionKind) {
-        case TransactionKinds.EncryptedAmountTransfer:
-        case TransactionKinds.TransferToEncrypted:
-        case TransactionKinds.TransferToPublic:
+        case TransactionKindString.EncryptedAmountTransfer:
+        case TransactionKindString.TransferToEncrypted:
+        case TransactionKindString.TransferToPublic:
             return true;
         default:
             return false;
@@ -175,26 +183,28 @@ export async function loadTransactions(
 
 // Update the transaction from remote source.
 export async function updateTransactions(account) {
-    const fromId = await getMaxTransactionsIdOfAccount(account);
+    const fromId = (await getMaxTransactionsIdOfAccount(account)) || 0;
     const transactions = await getTransactions(account.address, fromId);
     if (transactions.length > 0) {
         await insertTransactions(transactions.map(convertIncomingTransaction));
     }
 }
 
-// Add a pending transaction to storage.
+// Add a pending transaction to storage
 export async function addPendingTransaction(transaction, hash) {
-    if (transaction.transactionKind !== 3) {
+    if (transaction.transactionKind !== TransactionKindId.Simple_transfer) {
         throw new Error('unsupported transaction type - please implement');
     }
 
     const convertedTransaction = {
         remote: false,
         originType: 'self',
-        transactionKind: TransactionKinds.Transfer,
+        transactionKind: TransactionKindString.Transfer,
         transactionHash: hash,
-        total: -(transaction.payload.amount + transaction.energyAmount),
-        subtotal: -transaction.payload.amount,
+        total: (-(
+            transaction.payload.amount + BigInt(transaction.energyAmount)
+        )).toString(),
+        subtotal: (-transaction.payload.amount).toString(),
         cost: transaction.energyAmount,
         fromAddress: transaction.sender,
         toAddress: transaction.payload.toAddress,

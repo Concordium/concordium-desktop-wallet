@@ -20,6 +20,6 @@ export async function removeEntry(entry: AddressBookEntry) {
     return (await knex())(addressBookTable).where(entry).del();
 }
 
-export async function findEntries(query) {
-    return (await knex()).select().table(addressBookTable).where(query);
+export async function findEntries(condition) {
+    return (await knex()).select().table(addressBookTable).where(condition);
 }

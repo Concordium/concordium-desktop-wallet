@@ -9,7 +9,6 @@ import LedgerComponent from '../LedgerComponent';
 import {
     createSimpleTransferTransaction,
     waitForFinalization,
-    fromMicroUnits,
 } from '../../utils/transactionHelpers';
 import {
     Account,
@@ -23,10 +22,12 @@ import {
     confirmTransaction,
     rejectTransaction,
 } from '../../features/TransactionSlice';
+import { displayAsGTU } from '../../utils/gtu';
+import { getAccountPath } from '../../features/ledger/Path';
 
 export interface Props {
     account: Account;
-    amount: string;
+    amount: BigInt;
     recipient: AddressBookEntry;
     setLocation(location: string): void;
     setTransaction(transaction: AccountTransaction): void;
@@ -55,7 +56,7 @@ export default function ConfirmTransferComponent({
     setLocation,
     setTransaction,
 }: Props): JSX.Element {
-    const estimatedFee = 1; // TODO calculate
+    const estimatedFee = 200n; // TODO calculate
 
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
@@ -67,7 +68,11 @@ export default function ConfirmTransferComponent({
             amount,
             recipient.address
         );
-        const path = [0, 0, account.identityId, 2, account.accountNumber, 0];
+        const path = getAccountPath({
+            identityIndex: account.identityId,
+            accountIndex: account.accountNumber,
+            signatureIndex: 0,
+        });
         const signature: Buffer = await ledger.signTransfer(
             transferTransaction,
             path
@@ -102,26 +107,27 @@ export default function ConfirmTransferComponent({
                 </Button>
                 <Card.Header>Confirm Transfer</Card.Header>
                 <Table>
-                    <Table.Row>
-                        <Table.Cell>Amount:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {' '}
-                            {'\u01E4'} {fromMicroUnits(amount)}
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>Estimated fee:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {' '}
-                            {'\u01E4'} {fromMicroUnits(estimatedFee)}{' '}
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>To:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {recipient.name} <Label>{recipient.address}</Label>
-                        </Table.Cell>
-                    </Table.Row>
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell>Amount:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {displayAsGTU(amount)}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>Estimated fee:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {displayAsGTU(estimatedFee)}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>To:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {recipient.name}{' '}
+                                <Label>{recipient.address}</Label>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
                 </Table>
                 <LedgerComponent ledgerCall={ledgerSignTransfer} />
             </Card.Content>

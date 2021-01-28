@@ -2,6 +2,8 @@ import { AccountAddress } from '../proto/concordium_p2p_rpc_pb';
 
 type Hex = string;
 type Proofs = Hex;
+type Word64 = BigInt;
+type Word32 = number;
 
 export enum SchemeId {
     Ed25519 = 0,
@@ -100,8 +102,27 @@ export interface Account {
     credential?: string;
 }
 
-// The different types of an AccountTransaction.
-export enum TransactionKind {
+export enum TransactionKindString {
+    DeployModule = 'deployModule',
+    InitContract = 'initContract',
+    Update = 'update',
+    Transfer = 'transfer',
+    AddBaker = 'addBaker',
+    RemoveBaker = 'removeBaker',
+    UpdateBakerAccount = 'updateBakerAccount',
+    UpdateBakerSignKey = 'updateBakerSignKey',
+    DelegateStake = 'delegateStake',
+    UndelegateStake = 'undelegateStake',
+    UpdateElectionDifficulty = 'updateElectionDifficulty',
+    DeployCredential = 'deployCredential',
+    BakingReward = 'bakingReward',
+    EncryptedAmountTransfer = 'encryptedAmountTransfer',
+    TransferToEncrypted = 'transferToEncrypted',
+    TransferToPublic = 'transferToPublic',
+}
+
+// The ids of the different types of an AccountTransaction.
+export enum TransactionKindId {
     Deploy_module = 0,
     Initialize_smart_contract_instance = 1,
     Update_smart_contract_instance = 2,
@@ -122,7 +143,7 @@ export interface AccountTransaction {
     nonce: number;
     energyAmount: number;
     expiry: number;
-    transactionKind: TransactionKind;
+    transactionKind: TransactionKindId;
     payload;
 }
 
@@ -193,16 +214,17 @@ export interface PublicInformationForIp {
 // Statuses that a transaction can have.
 export enum TransactionStatus {
     Finalized = 'finalized',
+    Committed = 'committed',
     Rejected = 'rejected',
     Pending = 'pending',
 }
 
 // Types of origins that a Transaction can have.
 export enum OriginType {
-    self,
-    account,
-    reward,
-    none,
+    Self = 'self',
+    Account = 'account',
+    Reward = 'reward',
+    None = 'none',
 }
 
 /**
@@ -211,7 +233,7 @@ export enum OriginType {
 export interface TransferTransaction {
     remote: boolean;
     originType: OriginType;
-    transactionKind: TransactionKind;
+    transactionKind: TransactionKindString;
     id: number;
     blockHash: Hex;
     blockTime: string;
@@ -228,12 +250,22 @@ export interface TransferTransaction {
     rejectReason?: string;
 }
 
+export type EncryptedAmount = Hex;
+
+export interface AccountEncryptedAmount {
+    selfAmount: EncryptedAmount;
+    incomingAmounts: EncryptedAmount[];
+    startIndex: number;
+    numAggregated?: number;
+}
+
 // Reflects the structure given by the node,
 // in a getAccountInfo request
 export interface AccountInfo {
     accountAmount: string;
     accountReleaseSchedule: AccountReleaseSchedule; // TODO
     accountBaker: AccountBakerDetails; // TODO
+    accountEncryptedAmount: AccountEncryptedAmount;
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.
@@ -332,4 +364,109 @@ export interface AddressBookEntry {
     name: string;
     address: string;
     note: string;
+}
+
+/**
+ * The header part of an update instruction. The payload size is allowed
+ * optional so that the header can be created before knowing the payload
+ * size of the associated payload.
+ */
+export interface UpdateHeader {
+    sequenceNumber: Word64;
+    effectiveTime: Word64;
+    timeout: Word64;
+    payloadSize?: Word32;
+}
+
+export interface UpdateInstruction {
+    header: UpdateHeader;
+    // Contains the payload for an update instruction. It can be any of the
+    // update payloads available.
+    // TODO Add other update types as they are implemented.
+    payload: ExchangeRate;
+    type: UpdateType;
+    signatures: string[];
+}
+
+/**
+ * Update type enumeration. The numbering/order is important as that corresponds
+ * to the byte written when serializing the update instruction.
+ */
+export enum UpdateType {
+    UpdateAuthorization = 0,
+    UpdateProtocol = 1,
+    UpdateElectionDifficulty = 2,
+    UpdateEuroPerEnergy = 3,
+    UpdateMicroGTUPerEuro = 4,
+    UpdateFoundationAccount = 5,
+    UpdateMintDistribution = 6,
+    UpdateTransactionFeeDistribution = 7,
+    UpdateGASRewards = 8,
+}
+
+export function instanceOfAccountTransaction(
+    object
+): object is AccountTransaction {
+    return 'transactionKind' in object;
+}
+
+export function instanceOfUpdateInstruction(
+    object
+): object is UpdateInstruction {
+    return 'header' in object;
+}
+
+/**
+ * Interface definition for classes that can serialize and handle
+ * signing of the different transaction types.
+ */
+export interface TransactionHandler<T> {
+    transaction: T;
+    instanceOf: () => boolean;
+    serializeTransaction: () => Buffer;
+    signTransaction: (any) => Promise<Buffer>;
+}
+
+/**
+ * Enum for the different states that a multi signature transaction proposal
+ * can go through.
+ */
+export enum MultiSignatureTransactionStatus {
+    Open = 'open',
+    Submitted = 'submitted',
+    Rejected = 'rejected',
+    Closed = 'closed',
+    Completed = 'completed',
+    Failed = 'failed',
+}
+
+/**
+ * The model for multi signature transaction proposals, which maps into the
+ * database model as well.
+ */
+export interface MultiSignatureTransaction {
+    // logical id in the database
+    id: number;
+    // The JSON serialization of the transaction
+    transaction: string;
+    // The minimum required signatures for the transaction
+    // to be accepted on chain.
+    threshold: number;
+    // The current state of the proposal
+    status: MultiSignatureTransactionStatus;
+}
+
+/**
+ *  An enumeration that contains the menu items available in the menu
+ *  on the multisignature page.
+ */
+export enum MultiSignatureMenuItems {
+    MakeNewProposal = 'Make new proposal',
+    ProposedTransactions = 'Proposed transactions',
+    SignTransaction = 'Sign transaction',
+}
+
+export interface ExchangeRate {
+    numerator: Word64;
+    denominator: Word64;
 }

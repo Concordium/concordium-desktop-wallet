@@ -9,7 +9,7 @@ export async function up(knex: Knex): Promise<void> {
         .table(accountsTable, (table) => {
             table.string('incomingAmounts').defaultTo('[]');
             table.string('selfAmounts').defaultTo('');
-            table.integer('totalDecrypted').defaultTo('');
+            table.string('totalDecrypted').defaultTo('');
             table.boolean('allDecrypted').defaultTo(true);
         })
         .table(transactionTable, (table) => {
