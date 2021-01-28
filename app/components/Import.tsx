@@ -7,48 +7,10 @@ import { loadFile } from '../utils/files';
 import routes from '../constants/routes.json';
 import InputModal from './InputModal';
 import MessageModal from './MessageModal';
-
-interface Validation {
-    isValid: boolean;
-    reason?: string;
-}
-
-// TODO add unit tests
-function validateEncryptedStructure(encryptedData): Validation {
-    if (!'cipherText' in encryptedData) {
-        return { isValid: false, reason: 'missing cipherText field.' };
-    }
-    if (!'metaData' in encryptedData) {
-        return { isValid: false, reason: 'missing metaData field.' };
-    }
-    const metaDataFields = [
-        'keyLen',
-        'iterations',
-        'salt',
-        'initializationVector',
-    ];
-
-    const missingField = metaDataFields.find(
-        (field) => !(field in encryptedData.metaData)
-    );
-    if (missingField) {
-        return {
-            isValid: false,
-            reason: `missing metadata.${missingField} value.`,
-        };
-    }
-    return { isValid: true };
-}
-
-// TODO add unit tests
-function validateImportStructure(data): Validation {
-    const fields = ['identities', 'accounts', 'addressBook'];
-    const missingField = fields.find((field) => !(field in data));
-    if (missingField) {
-        return { isValid: false, reason: `missing${missingField} value.` };
-    }
-    return { isValid: true };
-}
+import {
+    validateImportStructure,
+    validateEncryptedStructure,
+} from '../utils/importHelpers';
 
 export default function Import() {
     const dispatch = useDispatch();
@@ -103,12 +65,9 @@ export default function Import() {
             }
         }
     }
+
     return (
-        <Card fluid style={{ height: '75vh' }}>
-            <Card.Header textAlign="center">Import</Card.Header>
-            <Card.Description>
-                Choose what ID’s and accounts you want to export below:
-            </Card.Description>
+        <>
             <InputModal
                 title="Enter password used when exporting!"
                 buttonText="Import"
@@ -124,11 +83,17 @@ export default function Import() {
                 onClose={() => setMessageModalOpen(false)}
                 open={messageModalOpen}
             />
-            <Card.Content extra>
-                <Button primary onClick={browseFilesButtonOnClick}>
-                    Browse to file
-                </Button>
-            </Card.Content>
-        </Card>
+            <Card fluid style={{ height: '75vh' }}>
+                <Card.Header textAlign="center">Import</Card.Header>
+                <Card.Description>
+                    Choose what ID’s and accounts you want to export below:
+                </Card.Description>
+                <Card.Content extra>
+                    <Button primary onClick={browseFilesButtonOnClick}>
+                        Browse to file
+                    </Button>
+                </Card.Content>
+            </Card>
+        </>
     );
 }

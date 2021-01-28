@@ -1,6 +1,7 @@
 import { Account, TransferTransaction } from '../utils/types';
 import knex from './knex';
 import { transactionTable } from '../constants/databaseNames.json';
+import { partition } from '../utils/basicHelpers';
 
 export async function getTransactionsOfAccount(
     account: Account,
@@ -18,14 +19,6 @@ export async function getTransactionsOfAccount(
         return transactions.filter(filter);
     }
     return transactions;
-}
-
-// Move or replace
-function partition(arr, criteria) {
-    return [
-        arr.filter((item) => criteria(item)),
-        arr.filter((item) => !criteria(item)),
-    ];
 }
 
 export async function updateTransaction(identifier, updatedValues) {

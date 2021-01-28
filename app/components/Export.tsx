@@ -49,11 +49,7 @@ export default function Export() {
     }
 
     return (
-        <Card fluid style={{ height: '75vh' }}>
-            <Card.Header textAlign="center">Export</Card.Header>
-            <Card.Description>
-                Choose what ID’s and accounts you want to export below:
-            </Card.Description>
+        <>
             <InputModal
                 title="Choose a password!"
                 buttonText="Export"
@@ -69,11 +65,17 @@ export default function Export() {
                 onClose={() => setOpenConfirmationModal(false)}
                 open={openConfirmationModal}
             />
-            <Card.Content extra>
-                <Button primary onClick={() => setOpenPasswordModal(true)}>
-                    Export
-                </Button>
-            </Card.Content>
-        </Card>
+            <Card fluid style={{ height: '75vh' }}>
+                <Card.Header textAlign="center">Export</Card.Header>
+                <Card.Description>
+                    Choose what ID’s and accounts you want to export below:
+                </Card.Description>
+                <Card.Content extra>
+                    <Button primary onClick={() => setOpenPasswordModal(true)}>
+                        Export
+                    </Button>
+                </Card.Content>
+            </Card>
+        </>
     );
 }
