@@ -13,7 +13,7 @@ import IssuancePage from './containers/IssuancePage';
 import AccountCreation from './containers/AccountCreationPage';
 import styles from './Main.css';
 import ImportExport from './containers/ImportExportPage';
-import Importing from './components/Importing';
+import PerformImport from './components/PerformImport';
 import SettingsPage from './containers/SettingsPage';
 
 export default function Routes() {
@@ -36,7 +36,7 @@ export default function Routes() {
                         path={routes.ADDRESSBOOK}
                         component={AddressBookPage}
                     />
-                    <Route path={routes.IMPORT} component={Importing} />
+                    <Route path={routes.IMPORT} component={PerformImport} />
                     <Route
                         path={routes.EXPORTIMPORT}
                         component={ImportExport}

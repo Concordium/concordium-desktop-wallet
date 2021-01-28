@@ -26,7 +26,10 @@ export default function InputModal({
         <Modal
             closeIcon
             centered
-            onClose={onClose}
+            onClose={() => {
+                setValue('');
+                onClose();
+            }}
             open={open}
             dimmer="blurring"
             closeOnDimmerClick={false}
@@ -43,7 +46,10 @@ export default function InputModal({
                 />
                 <Button
                     disabled={!validValue(value)}
-                    onClick={() => buttonOnClick(value)}
+                    onClick={() => {
+                        buttonOnClick(value);
+                        setValue('');
+                    }}
                 >
                     {buttonText}
                 </Button>

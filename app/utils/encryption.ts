@@ -1,5 +1,7 @@
 import * as crypto from 'crypto';
 
+// TODO add unit tests to ensure correctness of methods.
+
 /**
  * Encrypts the data using
  * pbkdf2 to generate a key from the password

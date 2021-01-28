@@ -3,7 +3,7 @@ import { Grid } from 'semantic-ui-react';
 import Export from '../components/Export';
 import Import from '../components/Import';
 
-export default function AccountsPage() {
+export default function ImportExportPage() {
     return (
         <Grid centered columns="equal" divided>
             <Grid.Row>

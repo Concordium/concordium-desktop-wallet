@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Modal, Grid, Card, Button, List, Header } from 'semantic-ui-react';
+import { Grid, Card, Button, List, Header } from 'semantic-ui-react';
 import { AddressBookEntry, Account, Identity } from '../utils/types';
 import routes from '../constants/routes.json';
 import { identitiesSelector, importIdentity } from '../features/IdentitySlice';
 import { accountsSelector, importAccount } from '../features/AccountSlice';
 import { addressBookSelector, importEntry } from '../features/AddressBookSlice';
+import MessageModal from './MessageModal';
 
 const identityFields = ['id', 'name', 'randomness']; // TODO more
 const accountFields = [
@@ -120,25 +121,16 @@ export default function Importing({ location }: Props) {
 
     return (
         <Grid columns="equal" divided>
-            <Modal
-                closeIcon
-                onClose={() => setOpen(false)}
-                onOpen={() => setOpen(true)}
+            <MessageModal
+                title="Unable to complete import!"
+                buttonText="return!"
+                onClose={() => dispatch(push(routes.EXPORTIMPORT))}
                 open={open}
-                dimmer="blurring"
-                closeOnDimmerClick={false}
-            >
-                <Modal.Header>Unable to complete import!</Modal.Header>
-                <Modal.Content>
-                    <Button onClick={() => dispatch(push(routes.EXPORTIMPORT))}>
-                        return
-                    </Button>
-                </Modal.Content>
-            </Modal>
+            />
             <Grid.Column>
                 <Card fluid style={{ height: '75vh' }}>
                     <Card.Header textAlign="center">
-                        Import succesful
+                        Import successful
                     </Card.Header>
                     <Card.Description>
                         That’s it! Your import completed successfully.

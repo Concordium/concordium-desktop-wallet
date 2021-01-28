@@ -34,6 +34,7 @@ export default function Export() {
     }
 
     async function onClick(password: string) {
+        // We strip the identityName, as it is superfluous.
         const cleanAccounts = accounts.map((acc) => {
             const { identityName, ...other } = acc;
             return other;
@@ -49,7 +50,7 @@ export default function Export() {
 
     return (
         <Card fluid style={{ height: '75vh' }}>
-            <Card.Header>Export</Card.Header>
+            <Card.Header textAlign="center">Export</Card.Header>
             <Card.Description>
                 Choose what ID’s and accounts you want to export below:
             </Card.Description>
