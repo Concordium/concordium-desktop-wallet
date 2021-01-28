@@ -9,9 +9,9 @@ export default function createUpdateInstruction(
     updateType: UpdateType
 ) {
     const updateHeader: UpdateHeader = {
-        effectiveTime: BigInt(Date.now()) + BigInt(864000000),
+        effectiveTime: BigInt(Date.now()) + 864000000n,
         sequenceNumber: BigInt(4),
-        timeout: BigInt(Date.now()) + BigInt(864000000) * BigInt(7),
+        timeout: BigInt(Date.now()) + 864000000n * 7n,
     };
 
     const updateInstruction: UpdateInstruction = {

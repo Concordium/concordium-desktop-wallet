@@ -21,7 +21,7 @@ import createMultiSignatureTransaction from '../../utils/MultiSignatureTransacti
 function createTransaction(microGtuPerEuro: BigInt): MultiSignatureTransaction {
     const exchangeRatePayload: ExchangeRate = {
         numerator: microGtuPerEuro,
-        denominator: BigInt(1),
+        denominator: 1n,
     };
 
     const updateInstruction = createUpdateInstruction(

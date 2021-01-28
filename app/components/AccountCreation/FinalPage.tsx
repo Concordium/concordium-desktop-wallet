@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Card, Button, List, Divider } from 'semantic-ui-react';
+import { Card, Button, Divider } from 'semantic-ui-react';
 
 import routes from '../../constants/routes.json';
 import { accountsSelector } from '../../features/AccountSlice';

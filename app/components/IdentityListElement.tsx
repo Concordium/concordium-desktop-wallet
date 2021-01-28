@@ -1,38 +1,79 @@
 import React from 'react';
-import styles from './Accounts.css';
-import { Identity } from '../utils/types';
+import { Grid, Header, Label, Image } from 'semantic-ui-react';
+import { Identity, IdentityStatus } from '../utils/types';
+import pendingImage from '../../resources/pending.svg';
+import successImage from '../../resources/success.svg';
+import rejectedImage from '../../resources/warning.svg';
+import { formatDate } from '../utils/timeHelpers';
 
 interface Props {
     identity: Identity;
-    onClick?: () => void;
-    highlighted?: boolean;
-    index: number;
 }
 
-function IdentityListElement({
-    identity,
-    onClick,
-    highlighted,
-    index,
-}: Props): JSX.Element {
+// Returns the image corresponding to the given status.
+function statusImage(status: IdentityStatus) {
+    switch (status) {
+        case IdentityStatus.Confirmed:
+            return successImage;
+        case IdentityStatus.Rejected:
+            return rejectedImage;
+        case IdentityStatus.Pending:
+            return pendingImage;
+        default:
+            return undefined;
+    }
+}
+
+/**
+ * Displays the information of the Identity.
+ * TODO: Simplify structure
+ */
+function IdentityListElement({ identity }: Props): JSX.Element {
+    const identityProvider = JSON.parse(identity.identityProvider);
+    const identityObject = JSON.parse(identity.identityObject);
     return (
-        <div
-            onClick={onClick}
-            key={identity.name}
-            tabIndex={index}
-            className={`${styles.accountListElement} ${
-                highlighted ? styles.chosenAccountListElement : null
-            }`}
-        >
-            {JSON.parse(identity.identityProvider).ipInfo.ipDescription.name}{' '}
-            {identity.status} {identity.name}
-        </div>
+        <Grid columns={3}>
+            <Grid.Row>
+                <Grid.Column textAlign="left">
+                    <Image
+                        src={`data:image/png;base64, ${identityProvider.metadata.icon}`}
+                        alt={identity.status}
+                        size="mini"
+                        spaced
+                    />
+                    <Image
+                        src={statusImage(identity.status)}
+                        alt={identity.status}
+                        size="mini"
+                        spaced
+                    />
+                </Grid.Column>
+                <Grid.Column />
+                <Grid.Column textAlign="right">
+                    <Label content="Identity" />
+                </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+                <Grid.Column />
+                <Grid.Column>
+                    <Header textAlign="center"> {identity.name} </Header>
+                </Grid.Column>
+                <Grid.Column />
+            </Grid.Row>
+            <Grid.Row>
+                <Grid.Column />
+                <Grid.Column>
+                    <Label>
+                        {identityObject
+                            ? ` Expires on ${formatDate(
+                                  identityObject.value.attributeList.validTo
+                              )} `
+                            : undefined}
+                    </Label>
+                </Grid.Column>
+            </Grid.Row>
+        </Grid>
     );
 }
-
-IdentityListElement.defaultProps = {
-    onClick: undefined,
-    highlighted: false,
-};
 
 export default IdentityListElement;

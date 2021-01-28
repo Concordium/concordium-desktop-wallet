@@ -1,11 +1,7 @@
 import {
     AccountTransaction,
-    TransactionKind,
+    TransactionKindId as TransactionKind,
     BlockItemKind,
-    CredentialDeploymentValues,
-    Policy,
-    YearMonth,
-    AttributeTag,
 } from './types';
 import {
     encodeWord16,
@@ -14,7 +10,6 @@ import {
     put,
     putBase58Check,
     hashSha256,
-    parseHexString,
 } from './serializationHelpers';
 
 function serializeSimpleTransfer(payload) {
@@ -51,7 +46,7 @@ function serializeTransferWithSchedule(payload) {
     return serialized;
 }
 
-export function serializeCredentialDeployment(credentialInfo, signature) {
+export function serializeCredentialDeployment(credentialInfo) {
     let serializedBlockItem;
     if (isInitialInitialCredentialDeploymentInfo(credentialInfo)) {
         serializedBlockItem = serializeInitialCredentialDeploymentInfo(
@@ -127,7 +122,7 @@ function serializeSignature(sigs: Uint8Array[]) {
     return serialized;
 }
 
-export function serializeTransaction(
+function serializeUnversionedTransaction(
     transaction: AccountTransaction,
     signFunction: (transaction: AccountTransaction, hash: Buffer) => Buffer
 ) {
@@ -148,12 +143,30 @@ export function serializeTransaction(
     const serialSignature = serializeSignature(signatures);
 
     const serialized = new Uint8Array(
-        2 + serialSignature.length + header.length + payload.length
+        1 + serialSignature.length + header.length + payload.length
     );
-    serialized[0] = 0; // Version number
-    serialized[1] = BlockItemKind.AccountTransactionKind;
-    put(serialized, 2, serialSignature);
-    put(serialized, 2 + serialSignature.length, header);
-    put(serialized, 2 + serialSignature.length + header.length, payload);
+    serialized[0] = BlockItemKind.AccountTransactionKind;
+    put(serialized, 1, serialSignature);
+    put(serialized, 1 + serialSignature.length, header);
+    put(serialized, 1 + serialSignature.length + header.length, payload);
     return serialized;
+}
+
+export function serializeTransaction(
+    transaction: AccountTransaction,
+    signFunction: (transaction: AccountTransaction, hash: Buffer) => [Buffer]
+) {
+    const unversioned = serializeUnversionedTransaction(
+        transaction,
+        signFunction
+    );
+    const serialized = new Uint8Array(1 + unversioned.length);
+    serialized[0] = 0; // Version number
+    put(serialized, 1, unversioned);
+    return serialized;
+}
+
+export function getTransactionHash(transaction, signature) {
+    const serialized = serializeUnversionedTransaction(transaction, signature);
+    return hashSha256(serialized);
 }
