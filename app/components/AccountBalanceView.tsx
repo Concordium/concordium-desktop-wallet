@@ -19,12 +19,13 @@ export default function AccountBalanceView(): JSX.Element {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
-
     const viewingShielded = useSelector(viewingShieldedSelector);
 
     if (!account || !accountInfo) {
         return null; // TODO: add display for pending account (which have no accountinfo)
     }
+
+    const totalDecrypted = account.totalDecrypted || 0n;
 
     const buttons = (
         <Button.Group>
@@ -47,7 +48,7 @@ export default function AccountBalanceView(): JSX.Element {
     if (viewingShielded) {
         main = (
             <Header as="h1" color="blue">
-                {displayAsGTU(account.totalDecrypted)}
+                {displayAsGTU(totalDecrypted)}
                 {account.allDecrypted ? '' : ' + ?'}
             </Header>
         );

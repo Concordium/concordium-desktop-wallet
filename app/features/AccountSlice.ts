@@ -209,10 +209,9 @@ export async function decryptAccountBalance(dispatch, prfKey, account) {
         prfKey
     );
 
-    const totalDecrypted = decryptedAmounts.reduce(
-        (acc, amount) => acc + parseInt(amount, 10),
-        0
-    );
+    const totalDecrypted = decryptedAmounts
+        .reduce((acc, amount) => acc + BigInt(amount), 0n)
+        .toString();
 
     return updateAccount(account.name, {
         totalDecrypted,
