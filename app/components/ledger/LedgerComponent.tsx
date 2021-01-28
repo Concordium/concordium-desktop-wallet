@@ -108,7 +108,7 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
                 </Card.Description>
             </Card.Content>
             <Card.Content extra textAlign="center">
-                <Button primary onClick={() => submit()} disabled={!ready}>
+                <Button primary onClick={submit} disabled={!ready}>
                     Submit
                 </Button>
             </Card.Content>
