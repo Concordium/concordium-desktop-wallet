@@ -30,7 +30,7 @@ import {
     serializeUpdateInstructionHeaderAndPayload,
 } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
-import { getMultiSignatureTransactionStatus } from '../../node/TransactionStatusPoller';
+import getMultiSignatureTransactionStatus from '../../node/TransactionStatusPoller';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
