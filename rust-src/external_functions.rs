@@ -48,3 +48,15 @@ pub fn get_credential_deployment_info_ext(
         Err(e) => format!("unable to get credential due to: {}", e),
     }
 }
+
+#[wasm_bindgen]
+pub fn decrypt_amounts_ext(
+    input: &str
+) -> String {
+    match decrypt_amounts_aux(input) {
+        Ok(s) => s,
+        Err(e) => format!("unable to decrypt transactions due to: {}", e),
+    }
+}
+
+

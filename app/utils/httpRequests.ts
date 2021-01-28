@@ -1,6 +1,7 @@
 import * as axios from 'axios';
 import * as http from 'http';
 import urls from '../constants/urls.json';
+import { walletProxytransactionLimit } from '../constants/externalConstants.json';
 
 const walletProxy = axios.create({
     baseURL: urls.walletProxy,
@@ -21,9 +22,7 @@ function getPromise(urlString: string, params) {
         path: `${url.pathname}?${searchParams.toString()}`,
     };
     return new Promise((resolve) => {
-        http.get(options, function (res) {
-            resolve(res);
-        });
+        http.get(options, (res) => resolve(res));
     });
 }
 
@@ -33,17 +32,33 @@ function getPromise(urlString: string, params) {
 function getResponseBody(response) {
     return new Promise((resolve) => {
         let data = '';
-        response.on('data', function (chunk) {
+        response.on('data', (chunk) => {
             data += chunk;
         });
-        response.on('end', function () {
-            resolve(data);
-        });
+        response.on('end', () => resolve(data));
     });
 }
 
+function getHighestId(transactions) {
+    return transactions.reduce((id, t) => Math.max(id, t.id), 0);
+}
+
+export async function getTransactions(address, id = 0) {
+    const response = await walletProxy.get(
+        `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}`
+    );
+    const { transactions, count, limit } = response.data;
+    if (count === limit) {
+        return transactions.push(
+            getTransactions(address, getHighestId(transactions))
+        );
+    }
+    return transactions;
+}
+
 export async function getIdentityProviders() {
-    return walletProxy.get('/v0/ip_info');
+    const response = await walletProxy.get('/v0/ip_info');
+    return response.data;
 }
 
 export async function getGlobal() {
@@ -89,8 +104,11 @@ export async function sleep(time) {
  * TODO: Handle the service being unavailable
  */
 export async function getIdObject(location) {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
+        // eslint-disable-next-line no-await-in-loop
         const response = await getPromise(location);
+        // eslint-disable-next-line no-await-in-loop
         const bodyJSON = await getResponseBody(response);
         const data = JSON.parse(bodyJSON);
         switch (data.status) {
@@ -103,6 +121,7 @@ export async function getIdObject(location) {
             default:
                 throw new Error(`unexpected status: ${data.status}`);
         }
+        // eslint-disable-next-line no-await-in-loop
         await sleep(10000);
     }
 }

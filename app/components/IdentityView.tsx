@@ -1,27 +1,26 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import {
-    identitiesSelector,
-    chosenIdentitySelector,
-} from '../features/IdentitySlice';
-import { Identity, IdentityObject, IdentityStatus } from '../utils/types';
-import styles from './Identity.css';
+import { List, Grid } from 'semantic-ui-react';
+import { chosenIdentitySelector } from '../features/IdentitySlice';
+import IdentityListElement from './IdentityListElement';
+import { IdentityObject, IdentityStatus } from '../utils/types';
+import attributeNames from '../constants/attributeNames.json';
 
+/**
+ * Detailed view of the chosen identity.
+ */
 export default function IdentityView() {
-    const identities: Identity[] = useSelector(identitiesSelector);
-    const chosenIndex = useSelector(chosenIdentitySelector);
+    const identity = useSelector(chosenIdentitySelector);
 
-    if (identities === undefined || chosenIndex === undefined) {
+    if (identity === undefined) {
         return null;
     }
 
-    const identity: Identity = identities[chosenIndex];
-
     if (identity.status !== IdentityStatus.Confirmed) {
         return (
-            <div className={styles.halfPage}>
-                <h1 className={styles.name}>{identity.name}</h1>
-            </div>
+            <List centered>
+                <IdentityListElement identity={identity} />
+            </List>
         );
     }
 
@@ -29,81 +28,25 @@ export default function IdentityView() {
         .value;
 
     return (
-        <div className={styles.halfPage}>
-            <div className={styles.identityListElement}>
-                <h1 className={styles.name}>{identity.name}</h1>
-
-                <ul>
-                    <li>
-                        Country of residence -{' '}
-                        {
-                            identityObject.attributeList.chosenAttributes
-                                .countryOfResidence
-                        }
-                    </li>
-                    <li>
-                        Date of birth -{' '}
-                        {identityObject.attributeList.chosenAttributes.dob}
-                    </li>
-                    <li>
-                        First name -{' '}
-                        {
-                            identityObject.attributeList.chosenAttributes
-                                .firstName
-                        }
-                    </li>
-                    <li>
-                        ID valid to - {identityObject.attributeList.validTo}
-                    </li>
-                    <li>
-                        ID valid from - {identityObject.attributeList.createdAt}
-                    </li>
-                    <li>
-                        Identity document issuer -{' '}
-                        {
-                            identityObject.attributeList.chosenAttributes
-                                .idDocIssuer
-                        }
-                    </li>
-                    <li>
-                        Identity document number -{' '}
-                        {identityObject.attributeList.chosenAttributes.idDocNo}
-                    </li>
-                    <li>
-                        Identity document type -{' '}
-                        {
-                            identityObject.attributeList.chosenAttributes
-                                .idDocType
-                        }
-                    </li>
-                    <li>
-                        Last name -{' '}
-                        {identityObject.attributeList.chosenAttributes.lastName}
-                    </li>
-                    <li>
-                        National ID number -{' '}
-                        {
-                            identityObject.attributeList.chosenAttributes
-                                .nationalIdNo
-                        }
-                    </li>
-                    <li>
-                        Country of nationality -{' '}
-                        {
-                            identityObject.attributeList.chosenAttributes
-                                .nationality
-                        }
-                    </li>
-                    <li>
-                        Sex -{' '}
-                        {identityObject.attributeList.chosenAttributes.sex}
-                    </li>
-                    <li>
-                        Tax ID number -{' '}
-                        {identityObject.attributeList.chosenAttributes.taxIdNo}
-                    </li>
-                </ul>
-            </div>
-        </div>
+        <List centered>
+            <IdentityListElement identity={identity} />
+            <Grid container columns={2} divided="vertically">
+                {Object.keys(identityObject.attributeList.chosenAttributes).map(
+                    (attribute) => (
+                        <Grid.Row key={attribute}>
+                            <Grid.Column textAlign="left">
+                                {attributeNames[attribute]}
+                            </Grid.Column>
+                            <Grid.Column textAlign="right">
+                                {
+                                    identityObject.attributeList
+                                        .chosenAttributes[attribute]
+                                }
+                            </Grid.Column>
+                        </Grid.Row>
+                    )
+                )}
+            </Grid>
+        </List>
     );
 }

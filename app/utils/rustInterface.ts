@@ -217,3 +217,27 @@ Challenge: ${unsignedCredentialDeploymentInfo.accountOwnershipChallenge}
         transactionId: output.hash,
     };
 }
+
+/**
+ * Given a list of encrypted Amounts, and the associated account, and nesessary details
+ * returns a list of the given amount, decrypted.
+ */
+export async function decryptAmounts(
+    encryptedAmounts,
+    account: Account,
+    global,
+    prfKey
+) {
+    const input = {
+        global,
+        accountNumber: account.accountNumber,
+        prfKey,
+        encryptedAmounts,
+    };
+
+    const decryptedAmounts = await worker.postMessage({
+        command: workerCommands.decryptAmounts,
+        input: JSON.stringify(input),
+    });
+    return JSON.parse(decryptedAmounts);
+}

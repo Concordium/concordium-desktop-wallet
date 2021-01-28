@@ -7,14 +7,23 @@ import {
     updateAccount,
     getAccountsOfIdentity,
 } from '../database/AccountDao';
-import { getTransactionStatus } from '../utils/client';
-import { sleep } from '../utils/httpRequests';
-import { CredentialDeploymentInformation, AccountStatus } from '../utils/types';
+import { getGlobal } from '../utils/httpRequests';
+import { decryptAmounts } from '../utils/rustInterface';
+import {
+    CredentialDeploymentInformation,
+    AccountStatus,
+    AccountEncryptedAmount,
+    Account,
+} from '../utils/types';
+import { waitForFinalization } from '../utils/transactionHelpers';
+import { isValidAddress } from '../utils/accountHelpers';
+import { getAccountInfos } from '../utils/clientHelpers';
 
 const accountsSlice = createSlice({
     name: 'accounts',
     initialState: {
         accounts: undefined,
+        accountsInfo: undefined,
         chosenAccount: undefined,
         chosenAccountIndex: undefined,
     },
@@ -24,26 +33,108 @@ const accountsSlice = createSlice({
             state.chosenAccount = state.accounts[input.payload];
         },
         updateAccounts: (state, input) => {
+            const { chosenAccount } = state;
             state.accounts = input.payload;
+            if (chosenAccount) {
+                const matchingAccounts = input.payload.filter(
+                    (acc) => acc.address === chosenAccount.address
+                );
+                if (matchingAccounts.length === 1) {
+                    [state.chosenAccount] = matchingAccounts;
+                    state.chosenAccountIndex = input.payload.indexOf(
+                        matchingAccounts[0]
+                    );
+                } else {
+                    state.chosenAccount = undefined;
+                    state.chosenAccountIndex = undefined;
+                }
+            }
+        },
+        setAccountInfos: (state, map) => {
+            state.accountsInfo = map.payload;
         },
     },
 });
 
 export const accountsSelector = (state: RootState) => state.accounts.accounts;
 
+export const accountsInfoSelector = (state: RootState) =>
+    state.accounts.accountsInfo;
+
 export const chosenAccountSelector = (state: RootState) =>
     state.accounts.chosenAccount;
+
+export const chosenAccountInfoSelector = (state: RootState) =>
+    state.accounts.accountsInfo && state.accounts.chosenAccount
+        ? state.accounts.accountsInfo[state.accounts.chosenAccount.address]
+        : undefined;
 
 export const chosenAccountIndexSelector = (state: RootState) =>
     state.accounts.chosenAccountIndex;
 
-export const { chooseAccount, updateAccounts } = accountsSlice.actions;
+export const {
+    chooseAccount,
+    updateAccounts,
+    setAccountInfos,
+} = accountsSlice.actions;
 
-export async function loadAccounts(dispatch: Dispatch) {
-    const accounts: Account[] = await getAllAccounts();
-    dispatch(updateAccounts(accounts));
+// given an account and the accountEncryptedAmount from the accountInfo
+// determine whether the account has received or sent new funds,
+// and in that case update the state of the account to reflect that.
+function updateAccountEncryptedAmount(
+    account: Account,
+    accountEncryptedAmount: AccountEncryptedAmount
+): Promise<void> {
+    const { incomingAmounts } = accountEncryptedAmount;
+    const selfAmounts = accountEncryptedAmount.selfAmount;
+    const incomingAmountsString = JSON.stringify(incomingAmounts);
+    if (
+        !(
+            account.incomingAmounts === incomingAmountsString &&
+            account.selfAmounts === selfAmounts
+        )
+    ) {
+        return updateAccount(account.name, {
+            incomingAmounts: incomingAmountsString,
+            selfAmounts,
+            allDecrypted: false,
+        });
+    }
+    return Promise.resolve();
 }
 
+// Loads the given accounts' infos from the node, then updates the
+// AccountInfo state.
+export async function loadAccountInfos(accounts, dispatch) {
+    const map = {};
+    const confirmedAccounts = accounts.filter(
+        (account) =>
+            isValidAddress(account.address) &&
+            account.status === AccountStatus.Confirmed
+    );
+    const accountInfos = await getAccountInfos(confirmedAccounts);
+    const updateEncryptedAmountsPromises = accountInfos.map(
+        ({ account, accountInfo }) => {
+            map[account.address] = accountInfo;
+            return updateAccountEncryptedAmount(
+                account,
+                accountInfo.accountEncryptedAmount
+            );
+        }
+    );
+    await Promise.all(updateEncryptedAmountsPromises);
+    return dispatch(setAccountInfos(map));
+}
+
+// Load accounts into state, and updates their infos
+export async function loadAccounts(dispatch: Dispatch) {
+    const accounts: Account[] = await getAllAccounts();
+    await loadAccountInfos(accounts, dispatch);
+    dispatch(updateAccounts(accounts.reverse()));
+    return true;
+}
+
+// Add an account with pending status..
 export async function addPendingAccount(
     dispatch: Dispatch,
     accountName: string,
@@ -78,29 +169,23 @@ export async function confirmInitialAccount(
     return loadAccounts(dispatch);
 }
 
+// Attempts to confirm account by checking the status of the given transaction
+// (Which is assumed to be of the credentialdeployment)
 export async function confirmAccount(dispatch, accountName, transactionId) {
-    while (true) {
-        const response = await getTransactionStatus(transactionId);
-        const data = response.getValue();
-        if (data === 'null') {
-            await updateAccount(accountName, {
-                status: AccountStatus.Rejected,
-            });
-            return loadAccounts(dispatch);
-        }
-        const dataObject = JSON.parse(data);
-        const { status } = dataObject;
-        if (status === 'finalized') {
-            await updateAccount(accountName, {
-                status: AccountStatus.Confirmed,
-            });
-            return loadAccounts(dispatch);
-        }
-
-        await sleep(10000);
+    const finalized = await waitForFinalization(transactionId);
+    if (finalized !== undefined) {
+        await updateAccount(accountName, {
+            status: AccountStatus.Confirmed,
+        });
+    } else {
+        await updateAccount(accountName, {
+            status: AccountStatus.Rejected,
+        });
     }
+    return loadAccounts(dispatch);
 }
 
+// Get The next unused account number of the identity with the given ID
 export async function getNextAccountNumber(identityId) {
     const accounts: Account[] = await getAccountsOfIdentity(identityId);
     const currentNumber = accounts.reduce(
@@ -108,6 +193,30 @@ export async function getNextAccountNumber(identityId) {
         0
     );
     return currentNumber + 1;
+}
+
+// Decrypts the shielded account balance of the given account, using the prfKey.
+// This function expects the prfKey to match the account's prfKey.
+export async function decryptAccountBalance(dispatch, prfKey, account) {
+    const encryptedAmounts = JSON.parse(account.incomingAmounts);
+    encryptedAmounts.push(account.selfAmounts);
+    const global = (await getGlobal()).value;
+
+    const decryptedAmounts = await decryptAmounts(
+        encryptedAmounts,
+        account,
+        global,
+        prfKey
+    );
+
+    const totalDecrypted = decryptedAmounts
+        .reduce((acc, amount) => acc + BigInt(amount), 0n)
+        .toString();
+
+    return updateAccount(account.name, {
+        totalDecrypted,
+        allDecrypted: true,
+    });
 }
 
 export default accountsSlice.reducer;
