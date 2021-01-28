@@ -6,6 +6,7 @@ import accountReducer from './features/AccountSlice';
 import identityReducer from './features/IdentitySlice';
 import settingsReducer from './features/SettingsSlice';
 import addressBookReducer from './features/AddressBookSlice';
+import transactionReducer from './features/TransactionSlice';
 /* eslint-disable import/no-cycle */
 
 export default function createRootReducer(history: History) {
@@ -15,5 +16,6 @@ export default function createRootReducer(history: History) {
         settings: settingsReducer,
         accounts: accountReducer,
         addressBook: addressBookReducer,
+        transactions: transactionReducer,
     });
 }
