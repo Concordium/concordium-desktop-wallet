@@ -95,7 +95,7 @@ function updateAccountEncryptedAmount(
         )
     ) {
         return updateAccount(account.name, {
-            incomingAmountsString,
+            incomingAmounts: incomingAmountsString,
             selfAmounts,
             allDecrypted: false,
         });
