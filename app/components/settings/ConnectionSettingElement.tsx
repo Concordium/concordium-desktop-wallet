@@ -10,7 +10,9 @@ interface Props {
 }
 
 /**
- * A component for a text setting that is updated automatically on changes.
+ * A component for connection settings that are updated automatically on changes.
+ *  N.B. right now is fixed to node location setting.
+ *  TODO: Change label to Modal?
  */
 export default function ConnectionSetting({ setting }: Props) {
     const dispatch = useDispatch();

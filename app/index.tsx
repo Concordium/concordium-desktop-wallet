@@ -9,6 +9,7 @@ import { setClientLocation } from './utils/client';
 
 const store = configuredStore();
 
+// Extracts node location from settings, and pass them to the grpc client.
 function startClient(settings) {
     const nodeSettings = settings.find((setting) => setting.type === 'node')
         .settings;
