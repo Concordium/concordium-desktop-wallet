@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Card, Button } from 'semantic-ui-react';
+import { Card } from 'semantic-ui-react';
 import { decrypt } from '../utils/encryption';
-import { openFile } from '../utils/FileHelper';
 import routes from '../constants/routes.json';
 import InputModal from './InputModal';
 import MessageModal from './MessageModal';
+import DragAndDropFile from './DragAndDropFile';
 import {
     validateImportStructure,
     validateEncryptedStructure,
@@ -46,8 +46,7 @@ export default function Import() {
         );
     }
 
-    async function browseFilesButtonOnClick() {
-        const rawData = await openFile('Choose Exported File');
+    async function fileProcessor(rawData) {
         if (rawData) {
             let encryptedData;
             try {
@@ -85,13 +84,11 @@ export default function Import() {
             />
             <Card fluid style={{ height: '75vh' }}>
                 <Card.Header textAlign="center">Import</Card.Header>
-                <Card.Description>
-                    Choose what ID’s and accounts you want to export below:
-                </Card.Description>
                 <Card.Content extra>
-                    <Button primary onClick={browseFilesButtonOnClick}>
-                        Browse to file
-                    </Button>
+                    <DragAndDropFile
+                        text="Drag and drop your file here"
+                        fileProcessor={fileProcessor}
+                    />
                 </Card.Content>
             </Card>
         </>

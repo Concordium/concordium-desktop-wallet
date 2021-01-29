@@ -6,7 +6,6 @@ import App from './containers/App';
 import HomePage from './containers/HomePage';
 import TestPage from './containers/TestPage';
 import AccountPage from './containers/AccountPage';
-import TodoPage from './containers/TodoPage';
 import IdentityPage from './containers/IdentityPage';
 import AddressBookPage from './containers/AddressBookPage';
 import IssuancePage from './containers/IssuancePage';

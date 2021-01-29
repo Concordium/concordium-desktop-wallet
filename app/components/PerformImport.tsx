@@ -46,7 +46,7 @@ async function performImport(importedData, existingData, setDuplicates) {
     setDuplicates.addressBook(duplicates);
 }
 
-export default function Importing({ location }: Props) {
+export default function PerformImport({ location }: Props) {
     const dispatch = useDispatch();
     const importedData = location.state;
     const accounts = useSelector(accountsSelector);
@@ -82,6 +82,41 @@ export default function Importing({ location }: Props) {
         setDuplicateIdentities,
     ]);
 
+    const accountList = (identity) => (
+        <List.List relaxed="false">
+            {importedData.accounts
+                .filter(
+                    (account: Account) =>
+                        parseInt(account.identityId, 10) ===
+                        parseInt(identity.id, 10)
+                )
+                .map((account: Account) => (
+                    <List.Item key={account.address}>
+                        {account.name}
+                        {duplicateAccounts.includes(account)
+                            ? ' (Already existed)'
+                            : ''}
+                    </List.Item>
+                ))}
+        </List.List>
+    );
+
+    const AddressBookList = (
+        <List size="big">
+            <List.Item>
+                <List.Header>Recipient accounts:</List.Header>
+            </List.Item>
+            {importedData.addressBook.map((entry: AddressBookEntry) => (
+                <List.Item key={entry.address}>
+                    {entry.name}
+                    {duplicateEntries.includes(entry)
+                        ? ' (Already existed)'
+                        : ''}
+                </List.Item>
+            ))}
+        </List>
+    );
+
     return (
         <>
             <MessageModal
@@ -116,56 +151,20 @@ export default function Importing({ location }: Props) {
                         {importedData.identities.map((identity: Identity) => (
                             <List.Item key={identity.id}>
                                 <List.Header>
-                                    ID: {identity.name}{' '}
+                                    ID: {identity.name}
                                     {duplicateIdentities.includes(identity)
-                                        ? '(Already existed)'
+                                        ? ' (Already existed)'
                                         : ''}
                                 </List.Header>
                                 <List.Content>
                                     Accounts:
-                                    <List.List relaxed="false">
-                                        {importedData.accounts
-                                            .filter(
-                                                (account: Account) =>
-                                                    parseInt(
-                                                        account.identityId,
-                                                        10
-                                                    ) ===
-                                                    parseInt(identity.id, 10)
-                                            )
-                                            .map((account: Account) => (
-                                                <List.Item
-                                                    key={account.address}
-                                                >
-                                                    {account.name}{' '}
-                                                    {duplicateAccounts.includes(
-                                                        account
-                                                    )
-                                                        ? '(Already existed)'
-                                                        : ''}
-                                                </List.Item>
-                                            ))}
-                                    </List.List>
+                                    {accountList(identity)}
                                 </List.Content>
                             </List.Item>
                         ))}
                     </List>
                     <Header>Address Book</Header>
-                    <List size="big">
-                        <List.Item>
-                            <List.Header>Recipient accounts:</List.Header>
-                        </List.Item>
-                        {importedData.addressBook.map(
-                            (entry: AddressBookEntry) => (
-                                <List.Item key={entry.address}>
-                                    {entry.name}{' '}
-                                    {duplicateEntries.includes(entry)
-                                        ? '(Already existed)'
-                                        : ''}
-                                </List.Item>
-                            )
-                        )}
-                    </List>
+                    {AddressBookList}
                 </Grid.Column>
             </Grid>
         </>

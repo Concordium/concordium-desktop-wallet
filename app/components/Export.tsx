@@ -30,7 +30,11 @@ export default function Export() {
         loadAddressBook(dispatch);
     }, [dispatch]);
 
-    if (identities === undefined || accounts === undefined) {
+    if (
+        identities === undefined ||
+        accounts === undefined ||
+        addressBook === undefined
+    ) {
         return null;
     }
 
