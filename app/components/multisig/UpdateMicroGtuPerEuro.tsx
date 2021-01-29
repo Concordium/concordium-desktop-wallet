@@ -75,8 +75,9 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
                 blockSummary.updates.authorizations.microGTUPerEuro.threshold
             );
 
-            // Save to database.
-            await insert(multiSignatureTransaction);
+            // Save to database and use the assigned id to update the local object.
+            const entryId = (await insert(multiSignatureTransaction))[0];
+            multiSignatureTransaction.id = entryId;
 
             // Set the current proposal in the state to the one that was just generated.
             dispatch(setCurrentProposal(multiSignatureTransaction));

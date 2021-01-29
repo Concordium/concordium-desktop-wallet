@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
@@ -9,7 +9,7 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
-import { parse } from 'json-bigint';
+import { parse, stringify } from 'json-bigint';
 import {
     currentProposalSelector,
     updateCurrentProposal,
@@ -30,6 +30,7 @@ import {
     serializeUpdateInstructionHeaderAndPayload,
 } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
+import SimpleErrorModal, { ModalErrorInput } from '../SimpleErrorModal';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -38,6 +39,9 @@ import { hashSha256 } from '../../utils/serializationHelpers';
  * then the proposal can be submitted to a node.
  */
 export default function ProposalView() {
+    const [showError, setShowError] = useState<ModalErrorInput>({
+        show: false,
+    });
     const dispatch = useDispatch();
     const currentProposal: MultiSignatureTransaction | undefined = useSelector(
         currentProposalSelector
@@ -49,28 +53,61 @@ export default function ProposalView() {
     }
 
     async function loadSignatureFile(file: string) {
-        const transactionObject = JSON.parse(file);
-        if (instanceOfUpdateInstruction(transactionObject)) {
-            // TODO Validate that the signature is not already present. Give a proper error message if that is the case in a modal or something similar.
+        let transactionObject;
+        try {
+            transactionObject = parse(file);
+        } catch (error) {
+            setShowError({
+                show: true,
+                header: 'Invalid file',
+                content:
+                    'The chosen file was invalid. A file containing a signed multi signature transaction proposal in JSON format was expected.',
+            });
+            return;
+        }
 
+        if (instanceOfUpdateInstruction(transactionObject)) {
             if (currentProposal) {
-                const proposal: UpdateInstruction = JSON.parse(
+                const proposal: UpdateInstruction = parse(
                     currentProposal.transaction
                 );
+
+                // If the loaded signature already exists on the proposal,
+                // then show a modal to the user.
+                for (
+                    let i = 0;
+                    i < transactionObject.signatures.length;
+                    i += 1
+                ) {
+                    const signature = transactionObject.signatures[i];
+                    if (proposal.signatures.includes(signature)) {
+                        setShowError({
+                            show: true,
+                            header: 'Duplicate signature',
+                            content:
+                                'The loaded signature file contains a signature that is already present on the proposal.',
+                        });
+                        return;
+                    }
+                }
+
                 proposal.signatures = proposal.signatures.concat(
                     transactionObject.signatures
                 );
                 const updatedProposal = {
                     ...currentProposal,
-                    transaction: JSON.stringify(proposal),
+                    transaction: stringify(proposal),
                 };
 
                 updateCurrentProposal(dispatch, updatedProposal);
             }
         } else {
-            throw new Error(
-                'Unsupported transaction type. Not yet implemented.'
-            );
+            setShowError({
+                show: true,
+                header: 'Invalid signature file',
+                content:
+                    'The loaded signature file is invalid. It should contain a signature for an account transaction or an update instruction in the exact format exported by this application.',
+            });
         }
     }
 
@@ -115,6 +152,12 @@ export default function ProposalView() {
 
     return (
         <Segment secondary textAlign="center">
+            <SimpleErrorModal
+                show={showError.show}
+                header={showError.header}
+                content={showError.content}
+                onClick={() => setShowError({ show: false })}
+            />
             <Header size="large">Your transaction proposal</Header>
             <Segment basic>
                 Your transaction proposal has been generated. An overview can be
