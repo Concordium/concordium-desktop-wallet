@@ -31,7 +31,7 @@ export default function SimpleErrorModal({
                     key: 'okay',
                     content: 'Okay',
                     positive: true,
-                    onClick: () => onClick(),
+                    onClick,
                 },
             ]}
         />
