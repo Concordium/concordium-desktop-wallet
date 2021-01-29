@@ -13,9 +13,7 @@ export async function openFile(title: string): Promise<string> {
     );
 
     if (openDialogValue.canceled) {
-        return Promise.reject(
-            new Error('File opening was cancelled by the user.')
-        );
+        throw new Error('File opening was cancelled by the user.');
     }
 
     if (openDialogValue.filePaths.length === 1) {
@@ -25,7 +23,7 @@ export async function openFile(title: string): Promise<string> {
         });
         return fileAsString;
     }
-    return Promise.reject(new Error('The user did not select a file to open.'));
+    throw new Error('The user did not select a file to open.');
 }
 
 /**
@@ -41,18 +39,18 @@ export async function saveFile(data: string, title: string) {
     );
 
     if (saveFileDialog.canceled) {
-        return Promise.reject(
-            new Error('Saving file was cancelled by the user.')
-        );
+        throw new Error('Saving file was cancelled by the user.');
     }
 
     if (saveFileDialog.filePath) {
-        fs.writeFile(saveFileDialog.filePath, data, (err) => {
-            if (err) {
-                return Promise.reject(new Error(`Unable to save file: ${err}`));
-            }
-            return Promise.resolve();
+        return new Promise((resolve, reject) => {
+            fs.writeFile(saveFileDialog.filePath, data, (err) => {
+                if (err) {
+                    reject(new Error(`Unable to save file: ${err}`));
+                }
+                resolve();
+            });
         });
     }
-    return Promise.reject(new Error('No file path was selected by the user.'));
+    throw new Error('No file path was selected by the user.');
 }
