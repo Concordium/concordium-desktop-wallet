@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Grid, Card, Button, List, Header } from 'semantic-ui-react';
+import {
+    Grid,
+    Button,
+    List,
+    Header,
+    Segment,
+    Divider,
+} from 'semantic-ui-react';
 import { AddressBookEntry, Account, Identity } from '../utils/types';
 import routes from '../constants/routes.json';
 import { identitiesSelector } from '../features/IdentitySlice';
@@ -125,48 +132,51 @@ export default function PerformImport({ location }: Props) {
                 onClose={() => dispatch(push(routes.EXPORTIMPORT))}
                 open={open}
             />
-            <Grid columns="equal" divided>
-                <Grid.Column>
-                    <Card fluid style={{ height: '75vh' }}>
-                        <Card.Header textAlign="center">
-                            Import successful
-                        </Card.Header>
-                        <Card.Description>
-                            That’s it! Your import completed successfully.
-                        </Card.Description>
-                        <Card.Content extra>
+
+            <Segment textAlign="center">
+                <Grid columns="equal" divided>
+                    <Grid.Column>
+                        <Segment basic>
+                            <Header size="large">Import successful</Header>
+                            That&apos;s it! Your import completed successfully.
+                            <Divider hidden />
                             <Button
+                                fluid
                                 primary
                                 onClick={() =>
                                     dispatch(push(routes.EXPORTIMPORT))
                                 }
                             >
-                                Okay, Thanks!
+                                Okay, thanks!
                             </Button>
-                        </Card.Content>
-                    </Card>
-                </Grid.Column>
-                <Grid.Column>
-                    <List size="big" relaxed="very">
-                        {importedData.identities.map((identity: Identity) => (
-                            <List.Item key={identity.id}>
-                                <List.Header>
-                                    ID: {identity.name}
-                                    {duplicateIdentities.includes(identity)
-                                        ? ' (Already existed)'
-                                        : ''}
-                                </List.Header>
-                                <List.Content>
-                                    Accounts:
-                                    {accountList(identity)}
-                                </List.Content>
-                            </List.Item>
-                        ))}
-                    </List>
-                    <Header>Address Book</Header>
-                    {AddressBookList}
-                </Grid.Column>
-            </Grid>
+                        </Segment>
+                    </Grid.Column>
+                    <Grid.Column>
+                        <List size="big" relaxed="very">
+                            {importedData.identities.map(
+                                (identity: Identity) => (
+                                    <List.Item key={identity.id}>
+                                        <List.Header>
+                                            ID: {identity.name}
+                                            {duplicateIdentities.includes(
+                                                identity
+                                            )
+                                                ? ' (Already existed)'
+                                                : ''}
+                                        </List.Header>
+                                        <List.Content>
+                                            Accounts:
+                                            {accountList(identity)}
+                                        </List.Content>
+                                    </List.Item>
+                                )
+                            )}
+                        </List>
+                        <Header>Address Book</Header>
+                        {AddressBookList}
+                    </Grid.Column>
+                </Grid>
+            </Segment>
         </>
     );
 }

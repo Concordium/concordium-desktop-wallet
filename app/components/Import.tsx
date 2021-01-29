@@ -30,7 +30,7 @@ export default function Import() {
         try {
             decryptedFile = decrypt(file, password);
         } catch (e) {
-            fail('Unable to decrypt file! (likely incorrect password)');
+            fail('Unable to decrypt file');
             return;
         }
         const data = JSON.parse(decryptedFile);
@@ -68,11 +68,11 @@ export default function Import() {
     return (
         <>
             <InputModal
-                title="Enter password used when exporting!"
+                title="Enter your password"
                 buttonText="Import"
                 validValue={(password) => password}
                 buttonOnClick={modalButtonOnClick}
-                placeholder="Enter Password"
+                placeholder="Enter the password you chose upon exporting your file"
                 onClose={() => setPasswordModalOpen(false)}
                 open={passwordModalOpen}
             />
