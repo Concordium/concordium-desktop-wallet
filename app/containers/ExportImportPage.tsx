@@ -1,9 +1,9 @@
 import React from 'react';
 import { Grid, Segment } from 'semantic-ui-react';
-import Export from '../components/Export';
-import Import from '../components/Import';
+import Export from '../components/exportImport/Export';
+import Import from '../components/exportImport/Import';
 
-export default function ImportExportPage() {
+export default function ExportImportPage() {
     return (
         <Segment>
             <Grid centered columns="equal" divided>

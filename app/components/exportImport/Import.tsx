@@ -2,16 +2,20 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Header, Segment } from 'semantic-ui-react';
-import { decrypt } from '../utils/encryption';
-import routes from '../constants/routes.json';
-import InputModal from './InputModal';
-import MessageModal from './MessageModal';
-import DragAndDropFile from './DragAndDropFile';
+import { decrypt } from '../../utils/encryption';
+import routes from '../../constants/routes.json';
+import InputModal from '../InputModal';
+import MessageModal from '../MessageModal';
+import DragAndDropFile from '../DragAndDropFile';
 import {
     validateImportStructure,
     validateEncryptedStructure,
-} from '../utils/importHelpers';
+} from '../../utils/importHelpers';
 
+/**
+ * Component to start importing identities/account/addressBook.
+ * Allows the user to choose a file, then parses/validates/decrypts the file.
+ */
 export default function Import() {
     const dispatch = useDispatch();
     const [file, setFile] = useState('');
@@ -25,7 +29,10 @@ export default function Import() {
         setPasswordModalOpen(false);
     }
 
-    async function modalButtonOnClick(password) {
+    // Attempts to decrypt the file, using the given password
+    // then parses/validates the data.
+    // If it succeeds, redirect to PerformImport to finish importing.
+    async function decryptAndParseData(password) {
         let decryptedFile;
         try {
             decryptedFile = decrypt(file, password);
@@ -46,6 +53,7 @@ export default function Import() {
         );
     }
 
+    // Attempts to parse/validate the given (encrypted) data.
     async function fileProcessor(rawData) {
         if (rawData) {
             let encryptedData;
@@ -71,7 +79,7 @@ export default function Import() {
                 title="Enter your password"
                 buttonText="Import"
                 validValue={(password) => password}
-                buttonOnClick={modalButtonOnClick}
+                buttonOnClick={decryptAndParseData}
                 placeholder="Enter the password you chose upon exporting your file"
                 onClose={() => setPasswordModalOpen(false)}
                 open={passwordModalOpen}

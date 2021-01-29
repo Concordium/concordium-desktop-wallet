@@ -1,6 +1,6 @@
 import { importIdentity } from '../features/IdentitySlice';
 import { importAccount } from '../features/AccountSlice';
-import { importEntry } from '../features/AddressBookSlice';
+import { importAddressBookEntry } from '../features/AddressBookSlice';
 import { partition } from './basicHelpers';
 
 const identityFields = ['id', 'name', 'randomness']; // TODO are there any other fields we should check?
@@ -84,7 +84,7 @@ export async function importEntries(entries, addressBook): Promise<void> {
         checkDuplicates(entry, addressBook, addressBookFields, ['note'])
     );
     if (nonDuplicates.length > 0) {
-        await importEntry(nonDuplicates);
+        await importAddressBookEntry(nonDuplicates);
     }
     return duplicates;
 }

@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Header, Segment, Divider } from 'semantic-ui-react';
-import { encrypt } from '../utils/encryption';
-import { saveFile } from '../utils/FileHelper';
-import { loadIdentities, identitiesSelector } from '../features/IdentitySlice';
-import { loadAccounts, accountsSelector } from '../features/AccountSlice';
+import { encrypt } from '../../utils/encryption';
+import { saveFile } from '../../utils/FileHelper';
+import {
+    loadIdentities,
+    identitiesSelector,
+} from '../../features/IdentitySlice';
+import { loadAccounts, accountsSelector } from '../../features/AccountSlice';
 import {
     loadAddressBook,
     addressBookSelector,
-} from '../features/AddressBookSlice';
-import InputModal from './InputModal';
-import MessageModal from './MessageModal';
+} from '../../features/AddressBookSlice';
+import InputModal from '../InputModal';
+import MessageModal from '../MessageModal';
 
 /**
- * Detailed view of the chosen identity.
+ * Component for exporting identities/account/addressBook.
+ * TODO: allow partial export
  */
 export default function Export() {
     const dispatch = useDispatch();
@@ -38,7 +42,7 @@ export default function Export() {
         return null;
     }
 
-    async function onClick(password: string) {
+    async function exportData(password: string) {
         // We strip the identityName, as it is superfluous.
         const cleanAccounts = accounts.map((acc) => {
             const { identityName, ...other } = acc;
@@ -63,7 +67,7 @@ export default function Export() {
                 title="Choose a password"
                 buttonText="Export"
                 validValue={(password) => password}
-                buttonOnClick={onClick}
+                buttonOnClick={exportData}
                 placeholder="Enter your password"
                 onClose={() => setOpenPasswordModal(false)}
                 open={openPasswordModal}

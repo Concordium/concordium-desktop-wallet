@@ -46,7 +46,7 @@ export async function removeFromAddressBook(dispatch, entry) {
     loadAddressBook(dispatch);
 }
 
-export async function importEntry(entry) {
+export async function importAddressBookEntry(entry) {
     return insertEntry(entry);
 }
 

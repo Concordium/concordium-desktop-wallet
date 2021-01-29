@@ -11,8 +11,8 @@ import AddressBookPage from './containers/AddressBookPage';
 import IssuancePage from './containers/IssuancePage';
 import AccountCreation from './containers/AccountCreationPage';
 import styles from './Main.css';
-import ImportExport from './containers/ImportExportPage';
-import PerformImport from './components/PerformImport';
+import ExportImport from './containers/ExportImportPage';
+import PerformImport from './components/exportImport/PerformImport';
 import SettingsPage from './containers/SettingsPage';
 import MultiSignaturePage from './containers/MultiSignaturePage';
 import ProposalView from './components/multisig/ProposalView';
@@ -43,7 +43,7 @@ export default function Routes() {
                     <Route path={routes.IMPORT} component={PerformImport} />
                     <Route
                         path={routes.EXPORTIMPORT}
-                        component={ImportExport}
+                        component={ExportImport}
                     />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS_EXPORT_TRANSACTION}

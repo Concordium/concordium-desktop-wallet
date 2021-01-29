@@ -9,17 +9,17 @@ import {
     Segment,
     Divider,
 } from 'semantic-ui-react';
-import { AddressBookEntry, Account, Identity } from '../utils/types';
-import routes from '../constants/routes.json';
-import { identitiesSelector } from '../features/IdentitySlice';
-import { accountsSelector } from '../features/AccountSlice';
-import { addressBookSelector } from '../features/AddressBookSlice';
-import MessageModal from './MessageModal';
+import { AddressBookEntry, Account, Identity } from '../../utils/types';
+import routes from '../../constants/routes.json';
+import { identitiesSelector } from '../../features/IdentitySlice';
+import { accountsSelector } from '../../features/AccountSlice';
+import { addressBookSelector } from '../../features/AddressBookSlice';
+import MessageModal from '../MessageModal';
 import {
     importIdentities,
     importAccounts,
     importEntries,
-} from '../utils/importHelpers';
+} from '../../utils/importHelpers';
 
 interface State {
     accounts: Account[];
@@ -53,6 +53,12 @@ async function performImport(importedData, existingData, setDuplicates) {
     setDuplicates.addressBook(duplicates);
 }
 
+/**
+ * Component to import identities/accounts/addressBookEntries.
+ * Expects prop.location.state to contain identities/accounts/addressBookEntries.
+ * Checks for duplicates and saves the input.
+ * Displays the imported entries.
+ */
 export default function PerformImport({ location }: Props) {
     const dispatch = useDispatch();
     const importedData = location.state;
