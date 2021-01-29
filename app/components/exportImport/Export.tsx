@@ -55,7 +55,8 @@ export default function Export() {
             await saveFile(JSON.stringify(encrypted));
             setModalMessage('Export was successful');
         } catch (error) {
-            setModalMessage('Export failed');
+            // Export was cancelled.
+            // TODO: inform user in the case where export was not canceled, but did indeed fail.
         }
         setOpenPasswordModal(false);
         setOpenConfirmationModal(true);
