@@ -5,18 +5,20 @@ interface Props {
     title: string;
     buttonText: string;
     open: boolean;
+    type?: string;
     onClose(): void;
     placeholder: string;
     validValue(value: string): boolean;
     buttonOnClick(value: string): void;
 }
 
-export default function InputModal({
+function InputModal({
     title,
     buttonText,
     validValue,
     buttonOnClick,
     placeholder,
+    type,
     open,
     onClose,
 }: Props) {
@@ -42,6 +44,7 @@ export default function InputModal({
                     placeholder={placeholder}
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
+                    type={type}
                     autoFocus
                 />
             </Modal.Content>
@@ -60,3 +63,9 @@ export default function InputModal({
         </Modal>
     );
 }
+
+InputModal.defaultProps = {
+    type: 'text',
+};
+
+export default InputModal;

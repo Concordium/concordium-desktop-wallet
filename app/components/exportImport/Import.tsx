@@ -82,6 +82,7 @@ export default function Import() {
                 buttonOnClick={decryptAndParseData}
                 placeholder="Enter the password you chose upon exporting your file"
                 onClose={() => setPasswordModalOpen(false)}
+                type="password"
                 open={passwordModalOpen}
             />
             <MessageModal

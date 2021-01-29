@@ -70,6 +70,7 @@ export default function Export() {
                 buttonOnClick={exportData}
                 placeholder="Enter your password"
                 onClose={() => setOpenPasswordModal(false)}
+                type="password"
                 open={openPasswordModal}
             />
             <MessageModal
