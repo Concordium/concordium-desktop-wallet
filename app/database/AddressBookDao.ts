@@ -1,8 +1,8 @@
-import { Account, AddressBookEntry } from '../utils/types';
+import { AddressBookEntry } from '../utils/types';
 import knex from './knex';
 import { addressBookTable } from '../constants/databaseNames.json';
 
-export async function getAddressBook(): Promise<Account[]> {
+export async function getAddressBook(): Promise<AddressBookEntry[]> {
     return (await knex()).select().table(addressBookTable);
 }
 
