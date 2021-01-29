@@ -21,8 +21,9 @@ export default function DragAndDropFile({
             transactionString = await openFile('Open file');
             fileProcessor(transactionString);
         } catch (err) {
-            // Unable to load the file.
-            // TODO Display that there was an error to the user.
+            // An error is thrown if the user cancels the open file menu, or if
+            // no file was selected. Therefore this error can be ignored, as nothing
+            // should happen.
         }
     }
 

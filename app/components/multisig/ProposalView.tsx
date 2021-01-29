@@ -30,7 +30,7 @@ import {
     serializeUpdateInstructionHeaderAndPayload,
 } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
-import SimpleErrorModal, { ModalErrorInput } from './SimpleErrorModal';
+import SimpleErrorModal, { ModalErrorInput } from '../SimpleErrorModal';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -53,7 +53,19 @@ export default function ProposalView() {
     }
 
     async function loadSignatureFile(file: string) {
-        const transactionObject = parse(file);
+        let transactionObject;
+        try {
+            transactionObject = parse(file);
+        } catch (error) {
+            setShowError({
+                show: true,
+                header: 'Invalid file',
+                content:
+                    'The chosen file was invalid. A file containing a signed multi signature transaction proposal in JSON format was expected.',
+            });
+            return;
+        }
+
         if (instanceOfUpdateInstruction(transactionObject)) {
             if (currentProposal) {
                 const proposal: UpdateInstruction = parse(

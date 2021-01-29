@@ -9,7 +9,7 @@ import {
 } from '../../utils/types';
 import routes from '../../constants/routes.json';
 import DragAndDropFile from '../DragAndDropFile';
-import SimpleErrorModal, { ModalErrorInput } from './SimpleErrorModal';
+import SimpleErrorModal, { ModalErrorInput } from '../SimpleErrorModal';
 
 /**
  * Component that displays a drag and drop field where transaction files can
