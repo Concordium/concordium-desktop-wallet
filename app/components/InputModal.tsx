@@ -44,7 +44,10 @@ export default function InputModal({
                     onChange={(e) => setValue(e.target.value)}
                     autoFocus
                 />
+            </Modal.Content>
+            <Modal.Actions>
                 <Button
+                    primary
                     disabled={!validValue(value)}
                     onClick={() => {
                         buttonOnClick(value);
@@ -53,7 +56,7 @@ export default function InputModal({
                 >
                     {buttonText}
                 </Button>
-            </Modal.Content>
+            </Modal.Actions>
         </Modal>
     );
 }

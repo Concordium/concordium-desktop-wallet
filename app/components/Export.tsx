@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card, Button } from 'semantic-ui-react';
+import { Button, Header, Segment, Divider } from 'semantic-ui-react';
 import { encrypt } from '../utils/encryption';
 import { saveFile } from '../utils/FileHelper';
 import { loadIdentities, identitiesSelector } from '../features/IdentitySlice';
@@ -60,11 +60,11 @@ export default function Export() {
     return (
         <>
             <InputModal
-                title="Choose a password!"
+                title="Choose a password"
                 buttonText="Export"
                 validValue={(password) => password}
                 buttonOnClick={onClick}
-                placeholder="Enter Password"
+                placeholder="Enter your password"
                 onClose={() => setOpenPasswordModal(false)}
                 open={openPasswordModal}
             />
@@ -74,17 +74,21 @@ export default function Export() {
                 onClose={() => setOpenConfirmationModal(false)}
                 open={openConfirmationModal}
             />
-            <Card fluid style={{ height: '75vh' }}>
-                <Card.Header textAlign="center">Export</Card.Header>
-                <Card.Description>
-                    Choose what ID’s and accounts you want to export below:
-                </Card.Description>
-                <Card.Content extra>
-                    <Button primary onClick={() => setOpenPasswordModal(true)}>
-                        Export
-                    </Button>
-                </Card.Content>
-            </Card>
+            <Segment basic textAlign="center">
+                <Header textAlign="center" size="large">
+                    Export
+                </Header>
+                Here you can choose to export all your identities, accounts and
+                the address book.
+                <Divider hidden />
+                <Button
+                    primary
+                    onClick={() => setOpenPasswordModal(true)}
+                    fluid
+                >
+                    Export
+                </Button>
+            </Segment>
         </>
     );
 }

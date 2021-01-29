@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Card } from 'semantic-ui-react';
+import { Header, Segment } from 'semantic-ui-react';
 import { decrypt } from '../utils/encryption';
 import routes from '../constants/routes.json';
 import InputModal from './InputModal';
@@ -82,15 +82,13 @@ export default function Import() {
                 onClose={() => setMessageModalOpen(false)}
                 open={messageModalOpen}
             />
-            <Card fluid style={{ height: '75vh' }}>
-                <Card.Header textAlign="center">Import</Card.Header>
-                <Card.Content extra>
-                    <DragAndDropFile
-                        text="Drag and drop your file here"
-                        fileProcessor={fileProcessor}
-                    />
-                </Card.Content>
-            </Card>
+            <Segment basic textAlign="center">
+                <Header size="large">Import</Header>
+                <DragAndDropFile
+                    text="Drag and drop your file here"
+                    fileProcessor={fileProcessor}
+                />
+            </Segment>
         </>
     );
 }
