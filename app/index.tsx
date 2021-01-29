@@ -5,9 +5,19 @@ import { history, configuredStore } from './store';
 import './app.global.css';
 import { updateSettings } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
-import { startClient } from './utils/client';
+import { setClientLocation } from './utils/client';
 
 const store = configuredStore();
+
+function startClient(settings) {
+    const nodeSettings = settings.find((setting) => setting.type === 'node')
+        .settings;
+    const nodeLocationSetting = nodeSettings.find(
+        (setting) => setting.id === 4
+    );
+    const { address, port } = JSON.parse(nodeLocationSetting.value);
+    setClientLocation(address, port);
+}
 
 /**
  * Loads settings from the database into the store.

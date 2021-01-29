@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Form, Input, Button, Header, Label } from 'semantic-ui-react';
 import { updateSettingEntry } from '../../features/SettingsSlice';
 import { Setting } from '../../utils/types';
-import { updateClient, getNodeInfo } from '../../utils/client';
+import { setClientLocation, getNodeInfo } from '../../utils/client';
 
 interface Props {
     setting: Setting;
@@ -23,7 +23,7 @@ export default function ConnectionSetting({ setting }: Props) {
     // storing to the database. As we are uncertain if there will be a submit button
     // or not, we will keep it as is for now.
     function updateValue(newAddress: string, newPort: string) {
-        updateClient(newAddress, newPort); // TODO: generalize
+        setClientLocation(newAddress, newPort); // TODO: generalize
         return updateSettingEntry(dispatch, {
             ...setting,
             value: JSON.stringify({

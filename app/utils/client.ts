@@ -17,19 +17,7 @@ import {
 let client;
 const clientCredentials = credentials.createInsecure();
 
-export function startClient(settings) {
-    // TODO: find a more robust way to get settings.
-    const nodeSettings = settings.find((setting) => setting.type === 'node')
-        .settings;
-    const nodeLocationSetting = nodeSettings.find(
-        (setting) => setting.id === 4
-    );
-    const { address, port } = JSON.parse(nodeLocationSetting.value);
-
-    client = new P2PClient(`${address}:${port}`, clientCredentials);
-}
-
-export function updateClient(address, port) {
+export function setClientLocation(address, port) {
     client = new P2PClient(`${address}:${port}`, clientCredentials);
 }
 
