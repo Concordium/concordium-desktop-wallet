@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'semantic-ui-react';
-import { BlockSummary } from '../../utils/client';
+import { BlockSummary } from '../../utils/NodeApiTypes';
 
 interface Props {
     onError: () => void;
@@ -15,6 +15,9 @@ interface Props {
  * provided 'execution' function. When accepting the opened modal, the supplied
  * 'onError' callback is called. If everything went well, then the 'onSuccess'
  * function is called with the result of the 'execution' function.
+ *
+ * Note: this component has only been verified to work in the case where the
+ * onError function navigates away from where this component was placed.
  */
 export default function DynamicModal({
     onError,
@@ -24,12 +27,12 @@ export default function DynamicModal({
     content,
 }: Props) {
     const [open, setOpen] = useState(false);
-    const [successful, setSuccessful] = useState(false);
+    const [started, setStarted] = useState(false);
 
     const runner = async () => {
+        setStarted(true);
         try {
             const result = await execution();
-            setSuccessful(true);
             onSuccess(result);
         } catch (error) {
             setOpen(true);
@@ -37,7 +40,7 @@ export default function DynamicModal({
     };
 
     useEffect(() => {
-        if (!successful) {
+        if (!started) {
             runner();
         }
     });
