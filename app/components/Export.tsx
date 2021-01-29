@@ -49,7 +49,7 @@ export default function Export() {
 
         try {
             await saveFile(JSON.stringify(encrypted));
-            setModalMessage('Export was Successful');
+            setModalMessage('Export was successful');
         } catch (error) {
             setModalMessage('Export failed');
         }

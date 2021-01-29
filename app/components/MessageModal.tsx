@@ -24,9 +24,11 @@ export default function MessageModal({
             closeOnDimmerClick={false}
         >
             <Modal.Header>{title}</Modal.Header>
-            <Modal.Content>
-                <Button onClick={onClose}>{buttonText}</Button>
-            </Modal.Content>
+            <Modal.Actions>
+                <Button primary onClick={onClose}>
+                    {buttonText}
+                </Button>
+            </Modal.Actions>
         </Modal>
     );
 }
