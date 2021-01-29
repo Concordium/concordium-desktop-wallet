@@ -9,6 +9,7 @@ import {
     GetAddressInfoRequest,
     Empty,
 } from '../proto/concordium_p2p_rpc_pb';
+import { BlockSummary, ConsensusStatus } from './NodeApiTypes';
 
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
@@ -49,13 +50,6 @@ function sendPromise(command, input) {
     });
 }
 
-export function getBlockSummary(blockHashValue: string): Promise<JsonResponse> {
-    const blockHash = new BlockHash();
-    blockHash.setBlockHash(blockHashValue);
-
-    return sendPromise(client.getBlockSummary, blockHash);
-}
-
 export function sendTransaction(
     transactionPayload: Uint8Array,
     networkId = 100
@@ -81,8 +75,38 @@ export function getNextAccountNonce(address: string): Promise<JsonResponse> {
     return sendPromise(client.getNextAccountNonce, accountAddress);
 }
 
-export function getConsensusInfo(): Promise<JsonResponse> {
-    return sendPromise(client.getConsensusStatus, new Empty());
+function sendPromiseParseResult<T>(command, input) {
+    return new Promise<T>((resolve, reject) => {
+        command.bind(client)(input, buildMetaData(), (err, response) => {
+            if (err) {
+                return reject(err);
+            }
+            return resolve(JSON.parse(response.getValue()));
+        });
+    });
+}
+
+/**
+ * Retrieves the ConsensusStatus information from the node.
+ */
+export function getConsensusStatus(): Promise<ConsensusStatus> {
+    return sendPromiseParseResult<ConsensusStatus>(
+        client.getConsensusStatus,
+        new Empty()
+    );
+}
+
+/**
+ * Retrieves the block summary for the provided block hash from the node.
+ * @param blockHashValue the block hash to retrieve the block summary for
+ */
+export function getBlockSummary(blockHashValue: string): Promise<BlockSummary> {
+    const blockHash = new BlockHash();
+    blockHash.setBlockHash(blockHashValue);
+    return sendPromiseParseResult<BlockSummary>(
+        client.getBlockSummary,
+        blockHash
+    );
 }
 
 export function getAccountInfo(
