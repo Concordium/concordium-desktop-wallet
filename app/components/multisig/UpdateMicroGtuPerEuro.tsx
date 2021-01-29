@@ -13,7 +13,7 @@ import {
 import { insert } from '../../database/MultiSignatureProposalDao';
 import createUpdateInstruction from '../../utils/UpdateInstructionHelper';
 import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
-import { BlockSummary } from '../../utils/client';
+import { BlockSummary } from '../../utils/NodeApiTypes';
 
 /**
  * Creates a multi signature transaction containing an update instruction for updating

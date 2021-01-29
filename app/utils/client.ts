@@ -9,7 +9,7 @@ import {
     GetAddressInfoRequest,
     Empty,
 } from '../proto/concordium_p2p_rpc_pb';
-import { ExchangeRate } from './types';
+import { BlockSummary, ConsensusStatus } from './NodeApiTypes';
 
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
@@ -87,16 +87,6 @@ function sendPromiseParseResult<T>(command, input) {
 }
 
 /**
- * Model that matches what is returned by the node when getting the
- * current consensus status.
- * Currently only the fields required by existing functionality has been
- * added. If additional fields are required, then extend the interface.
- */
-export interface ConsensusStatus {
-    lastFinalizedBlock: string;
-}
-
-/**
  * Retrieves the ConsensusStatus information from the node.
  */
 export function getConsensusStatus(): Promise<ConsensusStatus> {
@@ -104,38 +94,6 @@ export function getConsensusStatus(): Promise<ConsensusStatus> {
         client.getConsensusStatus,
         new Empty()
     );
-}
-
-interface UpdateQueue {
-    nextSequenceNumber: BigInt;
-    queue;
-}
-
-interface UpdateQueues {
-    microGTUPerEuro: UpdateQueue;
-}
-
-interface Authorization {
-    threshold: number;
-    authorizedKeys: number[];
-}
-
-interface Authorizations {
-    microGTUPerEuro: Authorization;
-}
-
-interface ChainParameters {
-    microGTUPerEuro: ExchangeRate;
-}
-
-interface Updates {
-    authorizations: Authorizations;
-    chainParameters: ChainParameters;
-    updateQueues: UpdateQueues;
-}
-
-export interface BlockSummary {
-    updates: Updates;
 }
 
 /**
