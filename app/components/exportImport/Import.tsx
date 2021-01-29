@@ -40,7 +40,13 @@ export default function Import() {
             fail('Unable to decrypt file');
             return;
         }
-        const data = JSON.parse(decryptedFile);
+        let data;
+        try {
+            data = JSON.parse(decryptedFile);
+        } catch (e) {
+            fail('Unable to parse decrypted data!');
+            return;
+        }
         const validation = validateImportStructure(data);
         if (!validation.isValid) {
             fail(`This file is invalid due to: ${validation.reason}`);
