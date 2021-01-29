@@ -339,6 +339,7 @@ export interface SettingGroup {
 export enum SettingTypeEnum {
     Text = 'text',
     Boolean = 'boolean',
+    Connection = 'connection',
 }
 
 // Contains an CredentialDeployment, and all the necessary extra details to complete the deployment

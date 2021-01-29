@@ -8,6 +8,7 @@ import {
 import { Setting, SettingTypeEnum } from '../../utils/types';
 import BooleanSetting from './BooleanSettingElement';
 import TextSetting from './TextSettingElement';
+import ConnectionSettingElement from './ConnectionSettingElement';
 
 // A static definition of warning messages, where the key matches the
 // setting name that the warning is for.
@@ -44,6 +45,13 @@ export default function SettingsView() {
                     case SettingTypeEnum.Text:
                         return (
                             <TextSetting
+                                setting={childSetting}
+                                key={childSetting.name}
+                            />
+                        );
+                    case SettingTypeEnum.Connection:
+                        return (
+                            <ConnectionSettingElement
                                 setting={childSetting}
                                 key={childSetting.name}
                             />

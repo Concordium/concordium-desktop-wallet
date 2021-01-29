@@ -5,6 +5,7 @@ import { history, configuredStore } from './store';
 import './app.global.css';
 import { updateSettings } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
+import { startClient } from './utils/client';
 
 const store = configuredStore();
 
@@ -13,6 +14,7 @@ const store = configuredStore();
  */
 async function loadSettingsIntoStore() {
     const settings = await loadAllSettings();
+    startClient(settings);
     return store.dispatch(updateSettings(settings));
 }
 loadSettingsIntoStore();

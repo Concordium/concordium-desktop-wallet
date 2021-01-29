@@ -14,13 +14,24 @@ import {
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  */
 
-const port = 10000;
-const clientAddress = '172.31.33.57'; // TODO: This should be a setting? (The user should be able to decide which node to use)
+let client;
+const clientCredentials = credentials.createInsecure();
 
-const client = new P2PClient(
-    `${clientAddress}:${port}`,
-    credentials.createInsecure()
-);
+export function startClient(settings) {
+    // TODO: find a more robust way to get settings.
+    const nodeSettings = settings.find((setting) => setting.type === 'node')
+        .settings;
+    const nodeLocationSetting = nodeSettings.find(
+        (setting) => setting.id === 4
+    );
+    const { address, port } = JSON.parse(nodeLocationSetting.value);
+
+    client = new P2PClient(`${address}:${port}`, clientCredentials);
+}
+
+export function updateClient(address, port) {
+    client = new P2PClient(`${address}:${port}`, clientCredentials);
+}
 
 function buildMetaData(): MetaData {
     const meta = new Metadata();
