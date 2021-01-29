@@ -2,5 +2,6 @@
     "identitiesTable": "identities",
     "accountsTable": "accounts",
     "addressBookTable": "addressBook",
-    "multiSignatureProposalTable": "multi_signature_proposal"
+    "multiSignatureProposalTable": "multi_signature_proposal",
+    "transactionTable": "transactions"
 }
