@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Menu, Button, Header, Input, Container } from 'semantic-ui-react';
+import {
+    Menu,
+    Button,
+    Header,
+    Input,
+    Container,
+    Modal,
+} from 'semantic-ui-react';
 import {
     loadAddressBook,
     addressBookSelector,
+    addToAddressBook,
 } from '../../features/AddressBookSlice';
+import AddAddress from '../AddAddress';
 import { AddressBookEntry } from '../../utils/types';
 
 interface Props {
@@ -22,10 +31,20 @@ export default function PickRecipient({
     const addressBook = useSelector(addressBookSelector);
     const dispatch = useDispatch();
     const [filter, setFilter] = useState<string>('');
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         loadAddressBook(dispatch);
     }, [dispatch]);
+
+    function submitAddress(name, address, note) {
+        const entry = {
+            name,
+            address,
+            note,
+        };
+        addToAddressBook(dispatch, entry);
+    }
 
     return (
         <>
@@ -40,6 +59,25 @@ export default function PickRecipient({
                     onChange={(e) => setFilter(e.target.value)}
                     autoFocus
                 />
+                <Modal
+                    closeIcon
+                    onClose={() => setOpen(false)}
+                    onOpen={() => setOpen(true)}
+                    open={open}
+                    trigger={<Button>Create new Entry</Button>}
+                    dimmer="blurring"
+                    closeOnDimmerClick={false}
+                >
+                    <Modal.Header>
+                        Add an entry to your address book
+                    </Modal.Header>
+                    <Modal.Content>
+                        <AddAddress
+                            close={() => setOpen(false)}
+                            submit={submitAddress}
+                        />
+                    </Modal.Content>
+                </Modal>
                 <Menu vertical fluid>
                     {addressBook
                         .filter((entry: AddressBookEntry) =>
