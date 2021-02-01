@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Form, Input, Button, Header, Label } from 'semantic-ui-react';
+import { Form, Input, Button, Header, Label, Segment } from 'semantic-ui-react';
 import { updateSettingEntry } from '../../features/SettingsSlice';
 import { Setting } from '../../utils/types';
 import { setClientLocation, getNodeInfo } from '../../utils/client';
@@ -38,37 +38,45 @@ export default function ConnectionSetting({ setting }: Props) {
         // TODO: generalize
         try {
             const result = await getNodeInfo();
-            setTestResult(`success, id: ${result.getNodeId()}`);
+            setTestResult(`Connected to node with id: ${result.getNodeId()}`);
         } catch (e) {
-            setTestResult('Unable to Connect');
+            setTestResult('Unable to connect');
         }
     }
 
     return (
-        <Form.Field>
-            <Header>{setting.name}</Header>
-            <Input
-                label="Address"
-                defaultValue={address}
-                onChange={(event) => {
-                    const newAddress = event.target.value;
-                    setAddress(newAddress);
-                    updateValue(newAddress, port);
-                }}
-            />
-            <Input
-                label="Port"
-                defaultValue={port}
-                onChange={(event) => {
-                    const newPort = event.target.value;
-                    setPort(newPort);
-                    updateValue(address, newPort);
-                }}
-            />
-            <Button as="div" labelPosition="right">
-                <Button onClick={testConnection}>Test Connection!</Button>
-                <Label basic>{testResult}</Label>
-            </Button>
-        </Form.Field>
+        <Segment>
+            <Form.Field>
+                <Header>{setting.name}</Header>
+                <Form.Field>
+                    <Input
+                        label="Address"
+                        defaultValue={address}
+                        onChange={(event) => {
+                            const newAddress = event.target.value;
+                            setAddress(newAddress);
+                            updateValue(newAddress, port);
+                        }}
+                    />
+                </Form.Field>
+                <Form.Field>
+                    <Input
+                        label="Port"
+                        defaultValue={port}
+                        onChange={(event) => {
+                            const newPort = event.target.value;
+                            setPort(newPort);
+                            updateValue(address, newPort);
+                        }}
+                    />
+                </Form.Field>
+                <Button as="div" labelPosition="right">
+                    <Button positive onClick={testConnection}>
+                        Test connection
+                    </Button>
+                    <Label basic>{testResult}</Label>
+                </Button>
+            </Form.Field>
+        </Segment>
     );
 }
