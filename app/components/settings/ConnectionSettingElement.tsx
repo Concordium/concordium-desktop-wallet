@@ -11,6 +11,7 @@ interface Props {
 
 const portRangeMax = 65535;
 // Determine whether the given string represent a valid port value.
+// TODO: improve this not allow non-integer input like ''100adadaifo'.
 function validatePort(port: string) {
     try {
         const portValue = parseInt(port, 10);
