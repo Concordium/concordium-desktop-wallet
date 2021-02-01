@@ -11,15 +11,78 @@ import {
 } from 'semantic-ui-react';
 import { AddressBookEntry, Account, Identity } from '../../utils/types';
 import routes from '../../constants/routes.json';
-import { identitiesSelector } from '../../features/IdentitySlice';
-import { accountsSelector } from '../../features/AccountSlice';
-import { addressBookSelector } from '../../features/AddressBookSlice';
-import MessageModal from '../MessageModal';
 import {
-    importIdentities,
-    importAccounts,
-    importEntries,
-} from '../../utils/importHelpers';
+    importIdentity,
+    identitiesSelector,
+} from '../../features/IdentitySlice';
+import { importAccount, accountsSelector } from '../../features/AccountSlice';
+import {
+    importAddressBookEntry,
+    addressBookSelector,
+} from '../../features/AddressBookSlice';
+import MessageModal from '../MessageModal';
+import { checkDuplicates } from '../../utils/importHelpers';
+import { partition } from '../../utils/basicHelpers';
+
+type IdentityKeys = keyof Identity;
+type AccountKeys = keyof Account;
+type AddressBookEntryKeys = keyof AddressBookEntry;
+
+export const identityFields: Partial<IdentityKeys> = [
+    'id',
+    'name',
+    'randomness',
+]; // TODO are there any other fields we should check?
+export const accountFields: AccountKeys = [
+    'name',
+    'address',
+    'accountNumber',
+    'identityId',
+    'credential',
+];
+export const addressBookFields: AddressBookEntryKeys = [
+    'name',
+    'address',
+    'note',
+];
+
+export async function importIdentities(
+    newIdentities,
+    existingIdentities
+): Promise<void> {
+    const [nonDuplicates, duplicates] = partition(
+        newIdentities,
+        (newIdentity) =>
+            checkDuplicates(newIdentity, existingIdentities, identityFields, [])
+    );
+    if (nonDuplicates.length > 0) {
+        await importIdentity(nonDuplicates);
+    }
+    return duplicates;
+}
+
+export async function importAccounts(
+    newAccounts,
+    existingAccounts
+): Promise<void> {
+    const [nonDuplicates, duplicates] = partition(newAccounts, (newAccount) =>
+        checkDuplicates(newAccount, existingAccounts, accountFields, [])
+    );
+    if (nonDuplicates.length > 0) {
+        await importAccount(nonDuplicates);
+    }
+    return duplicates;
+}
+
+export async function importEntries(entries, addressBook): Promise<void> {
+    const [nonDuplicates, duplicates] = partition(entries, (entry) =>
+        checkDuplicates(entry, addressBook, addressBookFields, ['note'])
+    );
+    if (nonDuplicates.length > 0) {
+        await importAddressBookEntry(nonDuplicates);
+    }
+    return duplicates;
+}
 
 interface State {
     accounts: Account[];

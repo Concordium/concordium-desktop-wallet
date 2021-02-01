@@ -1,23 +1,3 @@
-import { importIdentity } from '../features/IdentitySlice';
-import { importAccount } from '../features/AccountSlice';
-import { importAddressBookEntry } from '../features/AddressBookSlice';
-import { Account, Identity, AddressBookEntry } from './types';
-import { partition } from './basicHelpers';
-
-type IdentityKeys = keyof Identity;
-type AccountKeys = keyof Account;
-type AddressBookEntryKeys = keyof AddressBookEntry;
-
-const identityFields: Partial<IdentityKeys> = ['id', 'name', 'randomness']; // TODO are there any other fields we should check?
-const accountFields: AccountKeys = [
-    'name',
-    'address',
-    'accountNumber',
-    'identityId',
-    'credential',
-];
-const addressBookFields: AddressBookEntryKeys = ['name', 'address', 'note'];
-
 /**
  * Checks whether the entry has a "duplicate" in the given list
  * This is determined by equality of the given fields.
@@ -54,44 +34,6 @@ export function checkDuplicates(entry, list, fields, commonFields = undefined) {
     // TODO inform of commonField collision.
 
     return true;
-}
-
-export async function importIdentities(
-    newIdentities,
-    existingIdentities
-): Promise<void> {
-    const [nonDuplicates, duplicates] = partition(
-        newIdentities,
-        (newIdentity) =>
-            checkDuplicates(newIdentity, existingIdentities, identityFields, [])
-    );
-    if (nonDuplicates.length > 0) {
-        await importIdentity(nonDuplicates);
-    }
-    return duplicates;
-}
-
-export async function importAccounts(
-    newAccounts,
-    existingAccounts
-): Promise<void> {
-    const [nonDuplicates, duplicates] = partition(newAccounts, (newAccount) =>
-        checkDuplicates(newAccount, existingAccounts, accountFields, [])
-    );
-    if (nonDuplicates.length > 0) {
-        await importAccount(nonDuplicates);
-    }
-    return duplicates;
-}
-
-export async function importEntries(entries, addressBook): Promise<void> {
-    const [nonDuplicates, duplicates] = partition(entries, (entry) =>
-        checkDuplicates(entry, addressBook, addressBookFields, ['note'])
-    );
-    if (nonDuplicates.length > 0) {
-        await importAddressBookEntry(nonDuplicates);
-    }
-    return duplicates;
 }
 
 interface Validation {
