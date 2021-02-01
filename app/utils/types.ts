@@ -474,18 +474,18 @@ export interface ExchangeRate {
 /**
  * The basic color types supported by Semantic UI components color property.
  */
-export type ColorType =
-    | 'blue'
-    | 'olive'
-    | 'green'
-    | 'red'
-    | 'grey'
-    | 'orange'
-    | 'yellow'
-    | 'teal'
-    | 'violet'
-    | 'purple'
-    | 'pink'
-    | 'brown'
-    | 'black'
-    | undefined;
+export enum ColorType {
+    Blue = 'blue',
+    Olive = 'olive',
+    Green = 'green',
+    Red = 'red',
+    Grey = 'grey',
+    Orange = 'orange',
+    Yellow = 'yellow',
+    Teal = 'teal',
+    Violet = 'violet',
+    Purple = 'purple',
+    Pink = 'pink',
+    Brown = 'brown',
+    Black = 'black',
+}

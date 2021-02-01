@@ -4,7 +4,7 @@ import { ColorType } from '../../utils/types';
 
 interface Props<T extends string> {
     status: T;
-    colorMap: Map<T, ColorType>;
+    color: ColorType | undefined;
 }
 
 /**
@@ -12,10 +12,10 @@ interface Props<T extends string> {
  */
 export default function StatusLabel<T extends string>({
     status,
-    colorMap,
+    color,
 }: Props<T>) {
     return (
-        <Label color={colorMap.get(status)}>
+        <Label color={color}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
         </Label>
     );

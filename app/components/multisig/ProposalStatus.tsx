@@ -16,10 +16,10 @@ interface Props {
 }
 
 const statusColorMap = new Map<MultiSignatureTransactionStatus, ColorType>([
-    [MultiSignatureTransactionStatus.Open, 'blue'],
-    [MultiSignatureTransactionStatus.Submitted, 'olive'],
-    [MultiSignatureTransactionStatus.Finalized, 'green'],
-    [MultiSignatureTransactionStatus.Failed, 'red'],
+    [MultiSignatureTransactionStatus.Open, ColorType.Blue],
+    [MultiSignatureTransactionStatus.Submitted, ColorType.Olive],
+    [MultiSignatureTransactionStatus.Finalized, ColorType.Green],
+    [MultiSignatureTransactionStatus.Failed, ColorType.Red],
 ]);
 
 /**
@@ -45,7 +45,7 @@ export default function ProposalStatus({ proposal }: Props) {
                 <Grid.Column>
                     <StatusLabel
                         status={proposal.status}
-                        colorMap={statusColorMap}
+                        color={statusColorMap.get(proposal.status)}
                     />
                 </Grid.Column>
             </Grid.Row>
