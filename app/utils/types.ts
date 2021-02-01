@@ -10,8 +10,8 @@ export enum SchemeId {
 }
 
 export interface VerifyKey {
-    scheme: SchemeId;
-    key: Hex;
+    schemeId: SchemeId;
+    verifyKey: Hex;
 }
 
 export interface NewAccount {
