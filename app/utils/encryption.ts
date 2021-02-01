@@ -1,7 +1,5 @@
 import * as crypto from 'crypto';
 
-// TODO add unit tests to ensure correctness of methods.
-
 const cipherAlgorithm = 'aes-256-cbc';
 const hashAlgorithm = 'sha256';
 const cipherEncoding = 'hex';

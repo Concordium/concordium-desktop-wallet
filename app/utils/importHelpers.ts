@@ -1,17 +1,22 @@
 import { importIdentity } from '../features/IdentitySlice';
 import { importAccount } from '../features/AccountSlice';
 import { importAddressBookEntry } from '../features/AddressBookSlice';
+import { Account, Identity, AddressBookEntry } from './types';
 import { partition } from './basicHelpers';
 
-const identityFields = ['id', 'name', 'randomness']; // TODO are there any other fields we should check?
-const accountFields = [
+type IdentityKeys = keyof Identity;
+type AccountKeys = keyof Account;
+type AddressBookEntryKeys = keyof AddressBookEntry;
+
+const identityFields: Partial<IdentityKeys> = ['id', 'name', 'randomness']; // TODO are there any other fields we should check?
+const accountFields: AccountKeys = [
     'name',
     'address',
     'accountNumber',
     'identityId',
     'credential',
 ];
-const addressBookFields = ['name', 'address', 'note'];
+const addressBookFields: AddressBookEntryKeys = ['name', 'address', 'note'];
 
 /**
  * Checks whether the entry has a "duplicate" in the given list
@@ -20,7 +25,7 @@ const addressBookFields = ['name', 'address', 'note'];
  * that there are no shared fields, except for those specified in commonFields.
  * Returns true if the entry is not a duplicate.
  */
-function checkDuplicates(entry, list, fields, commonFields = undefined) {
+export function checkDuplicates(entry, list, fields, commonFields = undefined) {
     const allEqual = list.find((listElement) =>
         fields
             .map((field) => listElement[field] === entry[field])
