@@ -1,40 +1,21 @@
 import React from 'react';
 import { Label } from 'semantic-ui-react';
-import { MultiSignatureTransactionStatus } from '../../utils/types';
+import { ColorType } from '../../utils/types';
 
-type ColorType =
-    | 'blue'
-    | 'olive'
-    | 'green'
-    | 'red'
-    | 'grey'
-    | 'orange'
-    | 'yellow'
-    | 'teal'
-    | 'violet'
-    | 'purple'
-    | 'pink'
-    | 'brown'
-    | 'black'
-    | undefined;
-
-interface Props {
-    status: MultiSignatureTransactionStatus;
+interface Props<T extends string> {
+    status: T;
+    colorMap: Map<T, ColorType>;
 }
-
-const statusColorMap = new Map<MultiSignatureTransactionStatus, ColorType>([
-    [MultiSignatureTransactionStatus.Open, 'blue'],
-    [MultiSignatureTransactionStatus.Submitted, 'olive'],
-    [MultiSignatureTransactionStatus.Finalized, 'green'],
-    [MultiSignatureTransactionStatus.Failed, 'red'],
-]);
 
 /**
  * Component that displays a label with a color corresponding to the supplied status.
  */
-export default function StatusLabel({ status }: Props) {
+export default function StatusLabel<T extends string>({
+    status,
+    colorMap,
+}: Props<T>) {
     return (
-        <Label color={statusColorMap.get(status)}>
+        <Label color={colorMap.get(status)}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
         </Label>
     );

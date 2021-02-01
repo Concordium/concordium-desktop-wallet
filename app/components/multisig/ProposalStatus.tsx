@@ -1,6 +1,11 @@
 import React from 'react';
 import { Grid, Header } from 'semantic-ui-react';
-import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
+import {
+    ColorType,
+    MultiSignatureTransaction,
+    MultiSignatureTransactionStatus,
+    UpdateType,
+} from '../../utils/types';
 import TransactionDetails from '../TransactionDetails';
 import StatusLabel from './StatusLabel';
 
@@ -9,6 +14,13 @@ import StatusLabel from './StatusLabel';
 interface Props {
     proposal: MultiSignatureTransaction;
 }
+
+const statusColorMap = new Map<MultiSignatureTransactionStatus, ColorType>([
+    [MultiSignatureTransactionStatus.Open, 'blue'],
+    [MultiSignatureTransactionStatus.Submitted, 'olive'],
+    [MultiSignatureTransactionStatus.Finalized, 'green'],
+    [MultiSignatureTransactionStatus.Failed, 'red'],
+]);
 
 /**
  * Component that displays a status overview of a multi signature proposal.
@@ -31,7 +43,10 @@ export default function ProposalStatus({ proposal }: Props) {
             </Grid.Row>
             <Grid.Row>
                 <Grid.Column>
-                    <StatusLabel status={proposal.status} />
+                    <StatusLabel
+                        status={proposal.status}
+                        colorMap={statusColorMap}
+                    />
                 </Grid.Column>
             </Grid.Row>
         </Grid>

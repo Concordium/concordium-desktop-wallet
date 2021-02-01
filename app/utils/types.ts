@@ -470,3 +470,22 @@ export interface ExchangeRate {
     numerator: Word64;
     denominator: Word64;
 }
+
+/**
+ * The basic color types supported by Semantic UI components color property.
+ */
+export type ColorType =
+    | 'blue'
+    | 'olive'
+    | 'green'
+    | 'red'
+    | 'grey'
+    | 'orange'
+    | 'yellow'
+    | 'teal'
+    | 'violet'
+    | 'purple'
+    | 'pink'
+    | 'brown'
+    | 'black'
+    | undefined;
