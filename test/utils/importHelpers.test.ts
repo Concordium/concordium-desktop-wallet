@@ -1,39 +1,4 @@
-/*
-import {
-    checkDuplicates
-} from '../../app/utils/importHelpers';
-*/
-// TODO: figure out how to import this function
-function checkDuplicates(entry, list, fields, commonFields = undefined) {
-    const allEqual = list.find((listElement) =>
-        fields
-            .map((field) => listElement[field] === entry[field])
-            .every(Boolean)
-    );
-
-    if (allEqual) {
-        return false;
-    }
-
-    if (commonFields === undefined) {
-        return true;
-    }
-
-    const anyEqual = list.find((listElement) =>
-        fields
-            .filter((field) => !commonFields.includes(field))
-            .map((field) => listElement[field] === entry[field])
-            .some(Boolean)
-    );
-
-    if (anyEqual) {
-        throw new Error('disallowed'); // TODO use custom error
-    }
-
-    // TODO inform of commonField collision.
-
-    return true;
-}
+import { checkDuplicates } from '../../app/utils/importHelpers';
 
 test('CheckDuplicates should return true, when sharing some fields', () => {
     const x = { a: 1, b: 1, c: 1 };
