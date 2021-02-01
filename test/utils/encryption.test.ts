@@ -14,3 +14,20 @@ test('Decrypt should fail, if given a different password', () => {
         'bad decrypt'
     );
 });
+
+test('Encrypt should not give same cipherText, even when given different passwords', () => {
+    const clearText = 'test message';
+    const password = 'test password';
+    const password2 = 'another test password';
+    expect(encrypt(clearText, password).cipherText).not.toEqual(
+        encrypt(clearText, password2).cipherText
+    );
+});
+
+test('Encrypt should not give same cipherText, even when given the same password', () => {
+    const clearText = 'test message';
+    const password = 'test password';
+    expect(encrypt(clearText, password).cipherText).not.toEqual(
+        encrypt(clearText, password).cipherText
+    );
+});
