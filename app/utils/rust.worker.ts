@@ -2,15 +2,35 @@ import 'regenerator-runtime/runtime';
 import registerPromiseWorker from 'promise-worker/register';
 import workerCommands from '../constants/workerCommands.json';
 
-let rustReference;
-async function getRust() {
+interface RustInterface {
+    buildPublicInformationForIp(
+        context: string,
+        idCredSec: string,
+        prfKey: string
+    ): string;
+    createIdRequest(
+        context: string,
+        signature: string,
+        idCredSec: string,
+        prfKey: string
+    ): string;
+    generateUnsignedCredential(context: string): string;
+    getDeploymentInfo(signature: string, unsignedInfo: string): string;
+    decrypt_amounts_ext(amounts: string): string;
+}
+
+let rustReference: RustInterface;
+async function getRust(): Promise<RustInterface> {
     if (!rustReference) {
         rustReference = await import('../../pkg');
     }
     return rustReference;
 }
 
-function buildPublicInformationForIp(rust, message) {
+function buildPublicInformationForIp(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
     return rust.buildPublicInformationForIp(
         message.context,
         message.idCredSec,
@@ -18,7 +38,7 @@ function buildPublicInformationForIp(rust, message) {
     );
 }
 
-function createIdRequest(rust, message) {
+function createIdRequest(rust: RustInterface, message: Record<string, string>) {
     return rust.createIdRequest(
         message.context,
         message.signature,
@@ -27,20 +47,26 @@ function createIdRequest(rust, message) {
     );
 }
 
-function createUnsignedCredential(rust, message) {
+function createUnsignedCredential(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
     return rust.generateUnsignedCredential(message.input);
 }
 
-function createCredential(rust, message) {
+function createCredential(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
     return rust.getDeploymentInfo(message.signature, message.unsignedInfo);
 }
 
-function decryptAmounts(rust, message) {
+function decryptAmounts(rust: RustInterface, message: Record<string, string>) {
     const decryptedAmounts = rust.decrypt_amounts_ext(message.input);
     return decryptedAmounts;
 }
 
-function mapCommand(command) {
+function mapCommand(command: string) {
     switch (command) {
         case workerCommands.buildPublicInformationForIp:
             return buildPublicInformationForIp;
@@ -57,7 +83,7 @@ function mapCommand(command) {
     }
 }
 
-async function workerFunction(message) {
+async function workerFunction(message: Record<string, string>) {
     const rust = await getRust();
     const func = mapCommand(message.command);
     return func(rust, message);
