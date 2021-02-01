@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Menu, Button, Header } from 'semantic-ui-react';
+import { Menu, Button, Header, Input, Container } from 'semantic-ui-react';
 import {
     loadAddressBook,
     addressBookSelector,
@@ -21,6 +21,7 @@ export default function PickRecipient({
 }: Props) {
     const addressBook = useSelector(addressBookSelector);
     const dispatch = useDispatch();
+    const [filter, setFilter] = useState<string>('');
 
     useEffect(() => {
         loadAddressBook(dispatch);
@@ -29,17 +30,33 @@ export default function PickRecipient({
     return (
         <>
             <Button onClick={returnFunction}>{'<--'}</Button>
-            <Menu vertical fluid>
+            <Container>
                 <Header textAlign="center">Pick Recipient</Header>
-                {addressBook.map((entry: AddressBookEntry) => (
-                    <Menu.Item
-                        key={entry.address}
-                        onClick={() => pickRecipient(entry)}
-                    >
-                        {entry.name}
-                    </Menu.Item>
-                ))}
-            </Menu>
+                <Input
+                    fluid
+                    name="name"
+                    placeholder="Filter name"
+                    value={filter}
+                    onChange={(e) => setFilter(e.target.value)}
+                    autoFocus
+                />
+                <Menu vertical fluid>
+                    {addressBook
+                        .filter((entry: AddressBookEntry) =>
+                            entry.name.includes(filter)
+                        )
+                        .map((entry: AddressBookEntry) => (
+                            <Menu.Item
+                                key={entry.address}
+                                tabIndex="0"
+                                onKeyPress={() => pickRecipient(entry)}
+                                onClick={() => pickRecipient(entry)}
+                            >
+                                {entry.name}
+                            </Menu.Item>
+                        ))}
+                </Menu>
+            </Container>
         </>
     );
 }
