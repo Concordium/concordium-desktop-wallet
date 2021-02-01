@@ -12,6 +12,7 @@ import {
     Segment,
 } from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
+import { parse } from 'json-bigint';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import LedgerComponent from '../ledger/LedgerComponent';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
@@ -30,7 +31,7 @@ interface Props {
 }
 
 interface TransactionInput {
-    transaction;
+    transaction: string;
     type: string;
 }
 
@@ -60,11 +61,12 @@ export default function SignTransactionView({ location }: Props) {
     const { type } = location.state;
 
     useEffect(() => {
+        const transactionObject = parse(transaction);
         // TODO Add AccountTransactionHandler here when implemented.
         const transactionHandlerValue =
             type === 'UpdateInstruction'
-                ? new UpdateInstructionHandler(transaction)
-                : new UpdateInstructionHandler(transaction);
+                ? new UpdateInstructionHandler(transactionObject)
+                : new UpdateInstructionHandler(transactionObject);
         setTransactionHandler(transactionHandlerValue);
 
         const serialized = transactionHandlerValue.serializeTransaction();
@@ -120,6 +122,7 @@ export default function SignTransactionView({ location }: Props) {
                                 <Checkbox
                                     label="The hash matches the one received exactly"
                                     defaultChecked={hashMatches}
+                                    disabled={cosign}
                                     onChange={() =>
                                         setHashMatches(!hashMatches)
                                     }
@@ -129,6 +132,7 @@ export default function SignTransactionView({ location }: Props) {
                                 <Checkbox
                                     label="The picture matches the one received exactly"
                                     defaultChecked={pictureMatches}
+                                    disabled={cosign}
                                     onChange={() =>
                                         setPictureMatches(!pictureMatches)
                                     }
@@ -140,6 +144,7 @@ export default function SignTransactionView({ location }: Props) {
                                     defaultChecked={
                                         transactionDetailsAreCorrect
                                     }
+                                    disabled={cosign}
                                     onChange={() =>
                                         setTransactionDetailsAreCorrect(
                                             !transactionDetailsAreCorrect
