@@ -12,7 +12,6 @@ interface Props {
 /**
  * A component for connection settings that are updated automatically on changes.
  *  N.B. right now is fixed to node location setting.
- *  TODO: Change label to Modal?
  */
 export default function ConnectionSetting({ setting }: Props) {
     const dispatch = useDispatch();
@@ -35,7 +34,7 @@ export default function ConnectionSetting({ setting }: Props) {
         });
     }
 
-    async function onClick() {
+    async function testConnection() {
         // TODO: generalize
         try {
             const result = await getNodeInfo();
@@ -67,7 +66,7 @@ export default function ConnectionSetting({ setting }: Props) {
                 }}
             />
             <Button as="div" labelPosition="right">
-                <Button onClick={onClick}>Test Connection!</Button>
+                <Button onClick={testConnection}>Test Connection!</Button>
                 <Label basic>{testResult}</Label>
             </Button>
         </Form.Field>

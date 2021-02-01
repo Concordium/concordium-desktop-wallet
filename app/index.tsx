@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { history, configuredStore } from './store';
 import './app.global.css';
-import { updateSettings } from './features/SettingsSlice';
+import { updateSettings, findSetting } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
 import { setClientLocation } from './utils/client';
 
@@ -11,11 +11,7 @@ const store = configuredStore();
 
 // Extracts node location from settings, and pass them to the grpc client.
 function startClient(settings) {
-    const nodeSettings = settings.find((setting) => setting.type === 'node')
-        .settings;
-    const nodeLocationSetting = nodeSettings.find(
-        (setting) => setting.id === 4
-    );
+    const nodeLocationSetting = findSetting('Node location', settings);
     const { address, port } = JSON.parse(nodeLocationSetting.value);
     setClientLocation(address, port);
 }

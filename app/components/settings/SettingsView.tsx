@@ -57,7 +57,7 @@ export default function SettingsView() {
                             />
                         );
                     default:
-                        return '';
+                        return null;
                 }
             })}
         </Form>
