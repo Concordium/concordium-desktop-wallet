@@ -56,6 +56,11 @@ export function validateEncryptedStructure(encryptedData): Validation {
         'initializationVector',
     ];
 
+    // Check that metaData is an object, so we don't crash when checking it's fields.
+    if (typeof encryptedData.metaData !== 'object') {
+        return { isValid: false, reason: 'malformed metaData.' };
+    }
+
     const missingField = metaDataFields.find(
         (field) => !(field in encryptedData.metaData)
     );
@@ -71,6 +76,12 @@ export function validateEncryptedStructure(encryptedData): Validation {
 // TODO add unit tests
 export function validateImportStructure(data): Validation {
     const fields = ['identities', 'accounts', 'addressBook'];
+
+    // Check that data is an object, so we don't crash when checking it's fields.
+    if (typeof data !== 'object') {
+        return { isValid: false, reason: 'malformed data.' };
+    }
+
     const missingField = fields.find((field) => !(field in data));
     if (missingField) {
         return { isValid: false, reason: `missing${missingField} value.` };
