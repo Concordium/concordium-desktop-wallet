@@ -5,7 +5,7 @@ import {
     serializeTransaction,
     getTransactionHash,
 } from '../../utils/transactionSerialization';
-import LedgerComponent from '../LedgerComponent';
+import LedgerComponent from '../ledger/LedgerComponent';
 import {
     createSimpleTransferTransaction,
     waitForFinalization,
