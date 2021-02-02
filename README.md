@@ -4,10 +4,10 @@ This is the repository for the desktop wallet.
 
 You need the following to build and run the project:
 
--   Nodejs, npm (try latest version. Alternatively nodejs 15.7 and npm 7.4 works)
-    -   Versions are controlled easiest by using nvm (node version manager)
+-   Nodejs 12.18.3 (use NVM to target specific node version easily)
+-   NPM 6.4.6 (comes automatically with node version above)
 -   Yarn 1.x (https://classic.yarnpkg.com/en/docs/install)
--   Python 3.x (https://www.python.org/downloads/)
+-   Python 2.x (https://www.python.org/downloads/)
 -   Rust (https://www.rust-lang.org/tools/install)
 
 ## Install
