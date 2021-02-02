@@ -8,12 +8,17 @@ import type {
 } from '@ledgerhq/hw-transport';
 import { Button, Card, Divider, Loader, Segment } from 'semantic-ui-react';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import { AppAndVersion } from '../../features/ledger/GetAppAndVersion';
 
 interface Props {
     ledgerCall: (
         ledger: ConcordiumLedgerClient,
         setMessage: (string) => void
     ) => Promise<void>;
+}
+
+function isConcordiumApp({ name }: AppAndVersion) {
+    return name === 'Concordium';
 }
 
 export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
@@ -30,7 +35,7 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
     const ledgerObserver: Observer<DescriptorEvent<string>> = useMemo(() => {
         return {
             complete: () => {
-                // TODO When is this event triggered, if at all?
+                // This is expected to never trigger.
             },
             error: () => {
                 setStatusMessage('Unable to connect to device');
@@ -38,16 +43,26 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
             },
             next: async (event) => {
                 if (event.type === 'add') {
-                    setStatusMessage(
-                        `${event.deviceModel.productName} is connected!`
-                    );
-                    // TODO Can be improved by also checking if the Concordium application is open,
-                    // i.e. by calling the get public-key method and verify it went okay. I do not
-                    // believe there currently is a better way to check for a specific application.
                     const transport = await TransportNodeHid.open(event.path);
-                    setLedger(new ConcordiumLedgerClient(transport));
-                    setReady(true);
-                    setWaitingForDevice(false);
+                    const concordiumClient = new ConcordiumLedgerClient(
+                        transport
+                    );
+                    const appAndVersion = await concordiumClient.getAppAndVersion();
+
+                    if (isConcordiumApp(appAndVersion)) {
+                        setStatusMessage(
+                            `${event.deviceModel.productName} is ready!`
+                        );
+                        setLedger(concordiumClient);
+                        setReady(true);
+                        setWaitingForDevice(false);
+                    } else {
+                        // The device has been connected, but the Concordium application has not
+                        // been opened yet.
+                        setStatusMessage(
+                            `Please open the Concordium application on your ${event.deviceModel.productName}`
+                        );
+                    }
                 } else {
                     setStatusMessage('Waiting for device');
                     setWaitingForDevice(true);
@@ -72,7 +87,6 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
                 await ledgerCall(ledger, setStatusMessage);
             }
         } catch (e) {
-            // TODO Log or output error.
             setStatusMessage(
                 'An error occurred while communcating with your device'
             );
