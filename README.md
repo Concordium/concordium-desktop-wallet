@@ -1,10 +1,18 @@
 This is the repository for the desktop wallet.
 
+## Dependencies
+
+You need the following to build and run the project:
+
+-   Nodejs, npm (try latest version. Alternatively nodejs 15.7 and npm 7.4 works)
+    -   Versions are controlled easiest by using nvm (node version manager)
+-   Yarn 1.x (https://classic.yarnpkg.com/en/docs/install)
+-   Python 3.x (https://www.python.org/downloads/)
+-   Rust (https://www.rust-lang.org/tools/install)
+
 ## Install
 
-First, Install yarn: https://classic.yarnpkg.com/en/docs/install
-
-Then, clone the repo via git.
+Clone the repo via git.
 
 ```bash
 git clone https://gitlab.com/Concordium/desktopwallet.git
