@@ -8,7 +8,7 @@ import pendingImage from '../../resources/pending.svg';
 
 interface Props {
     account: Account;
-    accountInfo: AccountInfo;
+    accountInfo?: AccountInfo | undefined;
     onClick?(shielded: boolean): void;
 }
 /**
@@ -81,6 +81,7 @@ function AccountListElement({
 }
 
 AccountListElement.defaultProps = {
+    accountInfo: undefined,
     onClick: () => {},
 };
 

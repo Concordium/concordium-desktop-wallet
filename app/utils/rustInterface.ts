@@ -10,6 +10,7 @@ import {
     Account,
     CredentialDeploymentDetails,
     VerifyKey,
+    Global,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -17,8 +18,6 @@ import { toHex } from './serializationHelpers';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
-
-type Global = any; // TODO: add Global type
 
 /**
  * Returns the PrfKey and IdCredSec seeds for the given identity.

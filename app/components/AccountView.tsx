@@ -41,6 +41,10 @@ export default function AccountView() {
         return null;
     }
 
+    if (accountInfo === undefined) {
+        return null; // TODO: Handle AccountInfo not available, either the account is not confirmed, or we can't reach the node.
+    }
+
     return (
         <Card.Group itemsPerRow={1}>
             <Card>

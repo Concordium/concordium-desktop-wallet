@@ -8,6 +8,7 @@ import {
     viewingShieldedSelector,
 } from '../features/TransactionSlice';
 import LedgerComponent from './LedgerComponent';
+import { Account } from '../utils/types';
 
 interface Props {
     account: Account;

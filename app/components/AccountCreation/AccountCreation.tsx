@@ -6,12 +6,13 @@ import PickIdentity from './PickIdentity';
 import PickAttributes from './PickAttributes';
 import GeneratePage from './GeneratePage';
 import FinalPage from './FinalPage';
+import { Identity, dummyIdentity } from '../../utils/types';
 
 // The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
 export default function AccountCreation(): JSX.Element {
     const [accountName, setAccountName] = useState('');
-    const [identity, setIdentity] = useState('');
-    const [chosenAttributes, setChosenAttributes] = useState([]);
+    const [identity, setIdentity] = useState<Identity>(dummyIdentity);
+    const [chosenAttributes, setChosenAttributes] = useState<string[]>([]);
 
     return (
         <Switch>

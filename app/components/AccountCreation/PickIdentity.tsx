@@ -16,7 +16,7 @@ interface Props {
 
 export default function AccountCreationPickIdentity({
     setIdentity,
-}: Props): JSX.Element {
+}: Props): JSX.Element | null {
     const [chosenIndex, chooseIdentity] = useState(0);
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
@@ -31,7 +31,7 @@ export default function AccountCreationPickIdentity({
         return null;
     }
 
-    function submit(route) {
+    function submit(route: string) {
         setIdentity(identities[chosenIndex]);
         dispatch(push(route));
     }
@@ -50,7 +50,7 @@ export default function AccountCreationPickIdentity({
                     use?
                 </Card.Description>
                 <Menu vertical fluid>
-                    {identities.map((identity, i) => (
+                    {identities.map((identity: Identity, i: number) => (
                         <Menu.Item
                             key={identity.id}
                             onClick={() => chooseIdentity(i)}

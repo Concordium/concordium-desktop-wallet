@@ -14,19 +14,29 @@ import {
     AccountStatus,
     AccountEncryptedAmount,
     Account,
+    AccountInfo,
 } from '../utils/types';
 import { waitForFinalization } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
 import { getAccountInfos } from '../utils/clientHelpers';
 
+interface AccountState {
+    accounts: Account[];
+    accountsInfo: Record<string, AccountInfo>;
+    chosenAccount: Account;
+    chosenAccountIndex: number;
+}
+
+const initialState: AccountState = {
+    accounts: [],
+    accountsInfo: undefined,
+    chosenAccount: undefined,
+    chosenAccountIndex: undefined,
+};
+
 const accountsSlice = createSlice({
     name: 'accounts',
-    initialState: {
-        accounts: undefined,
-        accountsInfo: undefined,
-        chosenAccount: undefined,
-        chosenAccountIndex: undefined,
-    },
+    initialState,
     reducers: {
         chooseAccount: (state, input) => {
             state.chosenAccountIndex = input.payload;

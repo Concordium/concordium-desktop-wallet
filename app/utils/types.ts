@@ -82,6 +82,17 @@ export interface Identity {
     randomness: string;
 }
 
+export const dummyIdentity: Identity = {
+    id: 0,
+    name: '',
+    identityObject: '',
+    status: IdentityStatus.Pending,
+    detail: '',
+    codeUri: '',
+    identityProvider: '',
+    randomness: '',
+};
+
 // Statuses that an account can have.
 export enum AccountStatus {
     Confirmed = 'confirmed',
@@ -100,6 +111,10 @@ export interface Account {
     identityName?: string;
     status: AccountStatus;
     credential?: string;
+    totalDecrypted?: string;
+    allDecrypted?: boolean;
+    incomingAmounts?: string;
+    selfAmounts?: string;
 }
 
 export enum TransactionKindString {
@@ -302,6 +317,12 @@ export interface ArInfo {
     arIdentity: number;
     arDescription: Description;
     arPublicKey: Hex;
+}
+
+export interface Global {
+    onChainCommitmentKey: string;
+    bulletproofGenerators: string;
+    genesisString: string;
 }
 
 // Reflects the structure of an Identity Provider.

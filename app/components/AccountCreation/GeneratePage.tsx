@@ -48,7 +48,7 @@ async function createAccount(
     identity: Identity,
     attributes: string[],
     setMessage: (message: string) => void,
-    dispatch
+    dispatch: Dispatch
 ) {
     const accountNumber = await getNextAccountNumber(identity.id);
     const {
@@ -92,7 +92,7 @@ export default function AccountCreationGenerate({
     identity,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const [text, setText] = useState();
+    const [text, setText] = useState<string>();
 
     useEffect(() => {
         createAccount(accountName, identity, attributes, setText, dispatch)

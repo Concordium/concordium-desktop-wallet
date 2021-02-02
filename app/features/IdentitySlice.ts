@@ -8,12 +8,19 @@ import {
 } from '../database/IdentityDao';
 import { Identity, IdentityStatus } from '../utils/types';
 
+interface IdentityState {
+    identities: Identity[];
+    chosenIdentity: Identity;
+}
+
+IdentityState = {
+    identities: undefined,
+    chosenIdentity: undefined,
+};
+
 const identitySlice = createSlice({
     name: 'identities',
-    initialState: {
-        identities: undefined,
-        chosenIdentity: undefined,
-    },
+    initialState,
     reducers: {
         updateIdentities: (state, input) => {
             state.identities = input.payload;
