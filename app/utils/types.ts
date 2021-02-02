@@ -364,7 +364,7 @@ export interface AddressBookEntry {
     name: string;
     address: string;
     note: string;
-    readOnly?: boolean;
+    readOnly: boolean;
 }
 
 /**
