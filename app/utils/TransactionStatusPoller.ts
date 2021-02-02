@@ -10,8 +10,8 @@ import {
 } from './types';
 import { serializeUpdateInstruction } from './UpdateSerialization';
 
-// Poll every 15 seconds.
-const pollingIntervalMs = 15000;
+// Poll every 20 seconds
+const pollingIntervalMs = 20000;
 
 /**
  * Queries the node for the status of the transaction with the provided transaction hash.
@@ -21,9 +21,16 @@ const pollingIntervalMs = 15000;
 async function getStatus(transactionHash: string): Promise<TransactionStatus> {
     return new Promise((resolve) => {
         const interval = setInterval(async () => {
-            const response = (
-                await getTransactionStatus(transactionHash)
-            ).getValue();
+            let response;
+            try {
+                response = (
+                    await getTransactionStatus(transactionHash)
+                ).getValue();
+            } catch (err) {
+                // This happens if the node cannot be reached. Just wait for the next
+                // interval and try again.
+                return;
+            }
             if (response === 'null') {
                 clearInterval(interval);
                 resolve(TransactionStatus.Rejected);
