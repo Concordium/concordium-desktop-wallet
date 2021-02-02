@@ -40,6 +40,7 @@ export default function PickRecipient({ pickRecipient }: Props) {
             note,
         };
         addToAddressBook(dispatch, entry);
+        pickRecipient(entry);
     }
 
     return (
