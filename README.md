@@ -9,6 +9,7 @@ You need the following to build and run the project:
 -   Yarn 1.x (https://classic.yarnpkg.com/en/docs/install)
 -   Python 2.x (https://www.python.org/downloads/)
 -   Rust (https://www.rust-lang.org/tools/install)
+-   Wasm-pack (https://rustwasm.github.io/wasm-pack/installer/)
 
 ## Install
 
