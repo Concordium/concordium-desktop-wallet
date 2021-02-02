@@ -24,7 +24,6 @@ export default function AccountBalanceView(): JSX.Element | null {
     if (!account || !accountInfo) {
         return null; // TODO: add display for pending account (which have no accountinfo)
     }
-
     const totalDecrypted = account.totalDecrypted || 0n;
 
     const buttons = (

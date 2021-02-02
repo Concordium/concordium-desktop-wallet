@@ -7,13 +7,21 @@ import {
     updateEntry,
     removeEntry,
 } from '../database/AddressBookDao';
+import { AddressBookEntry } from '../utils/types';
+
+interface AddressBookState {
+    addressBook: AddressBookEntry[];
+    chosenIndex: number;
+}
+
+const initialState: AddressBookState = {
+    addressBook: [],
+    chosenIndex: 0,
+};
 
 const addressBookSlice = createSlice({
     name: 'addressBook',
-    initialState: {
-        addressBook: [],
-        chosenIndex: 0,
-    },
+    initialState,
     reducers: {
         updateAddressBook(state, addresses) {
             state.addressBook = addresses.payload;

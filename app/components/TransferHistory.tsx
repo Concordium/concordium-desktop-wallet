@@ -9,6 +9,7 @@ import TransactionList from './TransactionList';
 import TransactionView from './TransactionView';
 import DisplayIdentityAttributes from './DisplayIdentityAttributes';
 import locations from '../constants/transactionLocations.json';
+import { Account, TransferTransaction } from '../utils/types';
 
 /**
  * Contains view of the account's transactions,
@@ -16,10 +17,12 @@ import locations from '../constants/transactionLocations.json';
  * display of the account's revealedAttributes.
  * TODO Rename this.
  */
-export default function TransferHistory(account) {
+export default function TransferHistory(account: Account) {
     const dispatch = useDispatch();
     const [location, setLocation] = useState(locations.listTransactions);
-    const [chosenTransaction, setChosenTransaction] = useState(undefined);
+    const [chosenTransaction, setChosenTransaction] = useState<
+        TransferTransaction | undefined
+    >(undefined);
     const viewingShielded = useSelector(viewingShieldedSelector);
 
     useEffect(() => {
@@ -52,7 +55,6 @@ export default function TransferHistory(account) {
                     <>
                         <Header />
                         <TransactionList
-                            viewingShielded={viewingShielded}
                             onTransactionClick={(transaction) => {
                                 setChosenTransaction(transaction);
                                 setLocation(locations.viewTransaction);
@@ -61,6 +63,9 @@ export default function TransferHistory(account) {
                     </>
                 );
             case locations.viewTransaction:
+                if (chosenTransaction === undefined) {
+                    return null;
+                }
                 return (
                     <TransactionView
                         transaction={chosenTransaction}

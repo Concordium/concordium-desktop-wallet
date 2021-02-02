@@ -134,6 +134,7 @@ export enum TransactionKindString {
     EncryptedAmountTransfer = 'encryptedAmountTransfer',
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
+    TransferWithSchedule = 'transferWithSchedule', // TODO confirm
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -195,7 +196,7 @@ type Threshold = number;
 export interface Policy {
     validTo: YearMonth; // CredentialValidTo
     createdAt: YearMonth; // CredentialCreatedAt
-    revealedAttributes: Record<string, unknown>; // Map.Map AttributeTag AttributeValue
+    revealedAttributes: Record<string, string>; // Map.Map AttributeTag AttributeValue
 }
 
 type YearMonth = string; // "YYYYMM"
@@ -263,6 +264,9 @@ export interface TransferTransaction {
     toAddress: Hex;
     status: TransactionStatus;
     rejectReason?: string;
+    fromAddressName?: string;
+    toAddressName?: string;
+    decryptedAmount?: string;
 }
 
 export type EncryptedAmount = Hex;
@@ -274,13 +278,19 @@ export interface AccountEncryptedAmount {
     numAggregated?: number;
 }
 
+export interface TypedCredentialDeploymentInformation {
+    contents: CredentialDeploymentInformation;
+    type: string;
+}
+
 // Reflects the structure given by the node,
-// in a getAccountInfo request
+// in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
     accountReleaseSchedule: AccountReleaseSchedule; // TODO
     accountBaker: AccountBakerDetails; // TODO
     accountEncryptedAmount: AccountEncryptedAmount;
+    accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.
@@ -331,6 +341,12 @@ export interface IdentityProvider {
     arsInfos: Record<string, ArInfo>; // objects with ArInfo fields (and numbers as field names)
     metadata: IdentityProviderMetaData;
 }
+
+export const IdentityProviderPlaceHolder: IdentityProvider = {
+    ipInfo: undefined,
+    arsInfo: {},
+    metaData: undefined,
+};
 
 // type holds the the type of setting, i.e. multisignature settings, so that
 // the group of settings can be displayed together correctly.

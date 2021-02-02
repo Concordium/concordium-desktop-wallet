@@ -32,7 +32,7 @@ export default function IdentityView() {
             <IdentityListElement identity={identity} />
             <Grid container columns={2} divided="vertically">
                 {Object.keys(identityObject.attributeList.chosenAttributes).map(
-                    (attribute) => (
+                    (attribute: string) => (
                         <Grid.Row key={attribute}>
                             <Grid.Column textAlign="left">
                                 {attributeNames[attribute]}

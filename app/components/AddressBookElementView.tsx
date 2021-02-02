@@ -21,7 +21,7 @@ export default function AddressBookElementView() {
         return null;
     }
 
-    function submitAddress(name, address, note) {
+    function submitAddress(name: string, address: string, note: string) {
         const entry = {
             name,
             address,

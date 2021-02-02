@@ -141,7 +141,6 @@ export async function loadAccounts(dispatch: Dispatch) {
     const accounts: Account[] = await getAllAccounts();
     await loadAccountInfos(accounts, dispatch);
     dispatch(updateAccounts(accounts.reverse()));
-    return true;
 }
 
 // Add an account with pending status..
@@ -150,8 +149,8 @@ export async function addPendingAccount(
     accountName: string,
     identityId: number,
     accountNumber: number,
-    accountAddress: string,
-    credentialDeploymentInfo: CredentialDeploymentInformation
+    accountAddress: string = undefined,
+    credentialDeploymentInfo: CredentialDeploymentInformation = undefined
 ) {
     const account: Account = {
         name: accountName,

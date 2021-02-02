@@ -38,7 +38,7 @@ function TransactionView({ transaction, returnFunction }: Props) {
             <Divider />
             <CopiableListElement
                 title="Transaction Hash"
-                value={transaction.transactionHash}
+                value={transaction.transactionHash || 'No Transaction.'}
             />
             <Divider />
             <CopiableListElement

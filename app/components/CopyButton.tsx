@@ -8,7 +8,7 @@ interface Props {
 /**
  * Button, that, when pressed, copies the given value into the user's clipboard.
  */
-export default function CopyButton({ value }: Props): JSX.element {
+export default function CopyButton({ value }: Props): JSX.Element {
     return (
         <Button onClick={() => navigator.clipboard.writeText(value)}>
             copy

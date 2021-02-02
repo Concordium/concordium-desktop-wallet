@@ -9,7 +9,7 @@ import SidedText from './SidedText';
  *  DIsplays the revealed Attributes of the chosen account.
  *  TODO: Use local credential to get attributes?
  */
-export default function DisplayIdentityAttributes(): JSX.element {
+export default function DisplayIdentityAttributes(): JSX.Element | null {
     const accountInfo = useSelector(chosenAccountInfoSelector);
 
     if (!accountInfo) {

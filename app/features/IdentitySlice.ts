@@ -13,7 +13,7 @@ interface IdentityState {
     chosenIdentity: Identity;
 }
 
-IdentityState = {
+const initialState: IdentityState = {
     identities: undefined,
     chosenIdentity: undefined,
 };

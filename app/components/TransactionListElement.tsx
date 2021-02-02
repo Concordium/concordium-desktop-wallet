@@ -10,60 +10,70 @@ import {
 } from '../utils/types';
 import SidedText from './SidedText';
 
-function getName(transaction) {
+function getName(transaction: TransferTransaction) {
     switch (transaction.originType) {
         case OriginType.Self:
-            return 'toAddressName' in transaction
-                ? transaction.toAddressName
-                : transaction.toAddress.slice(0, 6);
+            if (transaction.toAddressName !== undefined) {
+                return transaction.toAddressName;
+            }
+            return transaction.toAddress.slice(0, 6);
+
         case OriginType.Account:
-            return 'fromAddressName' in transaction
-                ? transaction.fromAddressName
-                : transaction.fromAddress.slice(0, 6);
+            if (transaction.fromAddressName !== undefined) {
+                return transaction.fromAddressName;
+            }
+            return transaction.fromAddress.slice(0, 6);
+
         default:
             return 'unknown';
     }
 }
 
-function buildOutgoingAmountStrings(total, subtotal, fee) {
+function buildOutgoingAmountStrings(
+    total: bigint,
+    subtotal: bigint,
+    fee: bigint
+) {
     return {
         amount: `${displayAsGTU(total)}`,
         amountFormula: `${displayAsGTU(-subtotal)} +${displayAsGTU(fee)} Fee`,
     };
 }
 
-function buildIncomingAmountStrings(total) {
+function buildIncomingAmountStrings(total: bigint) {
     return {
         amount: `${displayAsGTU(total)}`,
         amountFormula: '',
     };
 }
 
-function parseAmount(transaction) {
+function parseAmount(transaction: TransferTransaction) {
     switch (transaction.originType) {
         case OriginType.Self: {
+            const cost = BigInt(transaction.cost);
             if (
                 transaction.transactionKind ===
                 TransactionKindString.EncryptedAmountTransfer
             ) {
                 if (transaction.decryptedAmount) {
+                    const total = BigInt(transaction.decryptedAmount);
                     return buildOutgoingAmountStrings(
-                        transaction.decryptedAmount,
-                        transaction.decryptedAmount - transaction.cost,
-                        transaction.cost
+                        total,
+                        total - cost,
+                        cost
                     );
                 }
                 return {
                     amount: `${getGTUSymbol()} ?`,
                     amountFormula: `${getGTUSymbol()} ? +${displayAsGTU(
-                        transaction.cost
+                        cost
                     )} Fee`,
                 };
             }
             return buildOutgoingAmountStrings(
-                transaction.total,
-                transaction.subtotal,
-                transaction.cost
+                BigInt(transaction.total),
+                BigInt(transaction.subtotal),
+                cost
             );
         }
         case OriginType.Account:
@@ -73,7 +83,7 @@ function parseAmount(transaction) {
             ) {
                 if (transaction.decryptedAmount) {
                     return buildIncomingAmountStrings(
-                        transaction.decryptedAmount
+                        BigInt(transaction.decryptedAmount)
                     );
                 }
                 return {
@@ -81,13 +91,16 @@ function parseAmount(transaction) {
                     amountFormula: '',
                 };
             }
-            return buildIncomingAmountStrings(transaction.total);
+            return buildIncomingAmountStrings(BigInt(transaction.total));
         default:
-            return 'unknown';
+            return {
+                amount: `${getGTUSymbol()} ?`,
+                amountFormula: 'Parsing failed',
+            };
     }
 }
 
-function displayType(kind) {
+function displayType(kind: TransactionKindString) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
             return '(schedule)';
@@ -96,7 +109,7 @@ function displayType(kind) {
     }
 }
 
-function statusSymbol(status) {
+function statusSymbol(status: TransactionStatus) {
     switch (status) {
         case TransactionStatus.Pending:
             return '';
@@ -118,7 +131,7 @@ interface Props {
 /**
  * Displays the given transaction basic information.
  */
-function TransactionListElement({ transaction }: Props): JSX.element {
+function TransactionListElement({ transaction }: Props): JSX.Element {
     const time = parseTime(transaction.blockTime);
     const name = getName(transaction);
     const { amount, amountFormula } = parseAmount(transaction);
