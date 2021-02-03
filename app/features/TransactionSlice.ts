@@ -104,17 +104,20 @@ function convertIncomingTransaction(
     transaction: IncomingTransaction
 ): TransferTransaction {
     let fromAddress = '';
-    if ('transferSource' in transaction.details) {
+    if (transaction.details.transferSource) {
         fromAddress = transaction.details.transferSource;
-    } else if (transaction.origin.type === OriginType.Account) {
+    } else if (
+        transaction.origin.type === OriginType.Account &&
+        transaction.origin.address
+    ) {
         fromAddress = transaction.origin.address;
     }
     let toAddress = '';
-    if ('transferDestination' in transaction.details) {
+    if (transaction.details.transferDestination) {
         toAddress = transaction.details.transferDestination;
     }
     let encrypted;
-    if ('encrypted' in transaction) {
+    if (transaction.encrypted) {
         encrypted = JSON.stringify(transaction.encrypted);
     }
 
@@ -205,38 +208,59 @@ export async function updateTransactions(account: Account) {
     }
 }
 
+function convertSimpleTransfer(
+    transaction: AccountTransaction,
+    hash: string
+): TransferTransaction {
+    const { payload } = transaction;
+    const estimatedTotal = payload.amount + BigInt(transaction.energyAmount);
+
+    return {
+        id: -1,
+        blockHash: 'pending',
+        remote: false,
+        originType: OriginType.Self,
+        transactionKind: TransactionKindString.Transfer,
+        transactionHash: hash,
+        total: (-estimatedTotal).toString(),
+        subtotal: (-payload.amount).toString(),
+        cost: transaction.energyAmount,
+        fromAddress: transaction.sender,
+        toAddress: transaction.payload.toAddress,
+        blockTime: (Date.now() / 1000).toString(), // Temporary value, unless it fails
+        status: TransactionStatus.Pending,
+    };
+}
+
 // Add a pending transaction to storage
 export async function addPendingTransaction(
     transaction: AccountTransaction,
     hash: string
 ) {
-    if (transaction.transactionKind !== TransactionKindId.Simple_transfer) {
+    let convertedTransaction;
+    if (transaction.transactionKind === TransactionKindId.Simple_transfer) {
+        convertedTransaction = convertSimpleTransfer(transaction, hash);
+    } else {
         throw new Error('unsupported transaction type - please implement');
     }
 
-    const convertedTransaction = {
-        remote: false,
-        originType: 'self',
-        transactionKind: TransactionKindString.Transfer,
-        transactionHash: hash,
-        total: (-(
-            transaction.payload.amount + BigInt(transaction.energyAmount)
-        )).toString(),
-        subtotal: (-transaction.payload.amount).toString(),
-        cost: transaction.energyAmount,
-        fromAddress: transaction.sender,
-        toAddress: transaction.payload.toAddress,
-        blockTime: Date.now() / 1000, // Temporary value, unless it fails
-        status: TransactionStatus.Pending,
-    };
     return insertTransactions([convertedTransaction]);
+}
+
+interface EventResult {
+    outcome: string;
+}
+
+interface Event {
+    result: EventResult;
+    cost: string;
 }
 
 // Set the transaction's status to confirmed, update the cost and whether it succeded.
 // TODO: update Total to reflect change in cost.
 export async function confirmTransaction(
     transactionHash: string,
-    dataObject: Record<string, unknown>
+    dataObject: Record<string, Event>
 ) {
     const success = Object.entries(dataObject.outcomes).reduce(
         (accu, [, event]) => accu && event.result.outcome === 'success',

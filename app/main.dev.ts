@@ -159,12 +159,12 @@ ipcMain.handle(ipcCommands.appGetPath, () => {
 });
 
 // Provides access to file dialog windows from renderer processes.
-ipcMain.handle(ipcCommands.openFileDialog, async (event, title) => {
+ipcMain.handle(ipcCommands.openFileDialog, async (_event, title) => {
     return dialog.showOpenDialog({ title });
 });
 
 // Provides access to save file dialog from renderer processes.
-ipcMain.handle(ipcCommands.saveFileDialog, async (event, title) => {
+ipcMain.handle(ipcCommands.saveFileDialog, async (_event, title) => {
     return dialog.showSaveDialog({ title });
 });
 

@@ -24,7 +24,7 @@ import { getAccountInfos } from '../utils/clientHelpers';
 interface AccountState {
     accounts: Account[];
     accountsInfo: Record<string, AccountInfo>;
-    chosenAccount: Account;
+    chosenAccount: Account | undefined;
     chosenAccountIndex: number;
 }
 

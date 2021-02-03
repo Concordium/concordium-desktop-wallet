@@ -48,12 +48,18 @@ export async function updateAddressBookEntry(
     loadAddressBook(dispatch);
 }
 
-export async function addToAddressBook(dispatch, entry: AddressBookEntry) {
+export async function addToAddressBook(
+    dispatch: Dispatch,
+    entry: AddressBookEntry
+) {
     await insertEntry(entry);
     loadAddressBook(dispatch);
 }
 
-export async function removeFromAddressBook(dispatch, entry: AddressBookEntry) {
+export async function removeFromAddressBook(
+    dispatch: Dispatch,
+    entry: AddressBookEntry
+) {
     await removeEntry(entry);
     loadAddressBook(dispatch);
 }

@@ -85,17 +85,6 @@ export interface Identity {
     randomness: string;
 }
 
-export const dummyIdentity: Identity = {
-    id: 0,
-    name: '',
-    identityObject: '',
-    status: IdentityStatus.Pending,
-    detail: '',
-    codeUri: '',
-    identityProvider: '',
-    randomness: '',
-};
-
 // Statuses that an account can have.
 export enum AccountStatus {
     Confirmed = 'confirmed',
@@ -274,11 +263,11 @@ export interface TransferTransaction {
     blockHash: Hex;
     blockTime: string;
     total: string;
-    success: boolean;
+    success?: boolean;
     transactionHash?: Hex;
     subtotal?: string;
     cost?: string;
-    details: string;
+    details?: string;
     encrypted?: string;
     fromAddress: Hex;
     toAddress: Hex;
@@ -287,6 +276,7 @@ export interface TransferTransaction {
     fromAddressName?: string;
     toAddressName?: string;
     decryptedAmount?: string;
+    origin?: string;
 }
 
 export type EncryptedAmount = Hex;
