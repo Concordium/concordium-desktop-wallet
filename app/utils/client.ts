@@ -15,6 +15,7 @@ import { BlockSummary, ConsensusStatus } from './NodeApiTypes';
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  */
 
+const defaultDeadlineMs = 15000;
 let client;
 const clientCredentials = credentials.createInsecure();
 
@@ -38,13 +39,29 @@ function buildSendTransactionRequest(
     return request;
 }
 
+/**
+ * Sends a command with GRPC to the node with the provided input.
+ * @param command command to execute
+ * @param input input for the command
+ */
 function sendPromise(command, input) {
+    const defaultDeadline = new Date(new Date().getTime() + defaultDeadlineMs);
     return new Promise<JsonResponse>((resolve, reject) => {
-        command.bind(client)(input, buildMetaData(), (err, response) => {
-            if (err) {
-                return reject(err);
+        client.waitForReady(defaultDeadline, (error) => {
+            if (error) {
+                return reject(error);
             }
-            return resolve(response);
+
+            return command.bind(client)(
+                input,
+                buildMetaData(),
+                (err, response) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(response);
+                }
+            );
         });
     });
 }
@@ -74,13 +91,30 @@ export function getNextAccountNonce(address: string): Promise<JsonResponse> {
     return sendPromise(client.getNextAccountNonce, accountAddress);
 }
 
+/**
+ * Executes the provided GRPC command towards the node with the provided
+ * input.
+ * @param command command to execute towards the node
+ * @param input input for the command
+ */
 function sendPromiseParseResult<T>(command, input) {
+    const defaultDeadline = new Date(new Date().getTime() + defaultDeadlineMs);
     return new Promise<T>((resolve, reject) => {
-        command.bind(client)(input, buildMetaData(), (err, response) => {
-            if (err) {
-                return reject(err);
+        client.waitForReady(defaultDeadline, (error) => {
+            if (error) {
+                return reject(error);
             }
-            return resolve(JSON.parse(response.getValue()));
+
+            return command.bind(client)(
+                input,
+                buildMetaData(),
+                (err, response) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(JSON.parse(response.getValue()));
+                }
+            );
         });
     });
 }

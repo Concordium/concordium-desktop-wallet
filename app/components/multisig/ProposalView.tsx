@@ -30,6 +30,7 @@ import {
     serializeUpdateInstructionHeaderAndPayload,
 } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
+import getMultiSignatureTransactionStatus from '../../utils/TransactionStatusPoller';
 import SimpleErrorModal, { ModalErrorInput } from '../SimpleErrorModal';
 
 /**
@@ -125,6 +126,7 @@ export default function ProposalView() {
                 status: MultiSignatureTransactionStatus.Submitted,
             };
             updateCurrentProposal(dispatch, submittedProposal);
+            getMultiSignatureTransactionStatus(submittedProposal, dispatch);
         } else {
             const failedProposal = {
                 ...currentProposal,
