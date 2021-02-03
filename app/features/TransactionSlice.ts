@@ -18,6 +18,7 @@ import {
     Account,
     AccountTransaction,
     IncomingTransaction,
+    Dispatch,
 } from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
 

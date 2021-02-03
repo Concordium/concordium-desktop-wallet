@@ -1,3 +1,8 @@
+import { Dispatch as GenericDispatch } from 'react';
+import { PayloadAction } from '@reduxjs/toolkit';
+
+export type Dispatch = GenericDispatch<PayloadAction>;
+
 export type Hex = string;
 type Proofs = Hex;
 type Word64 = BigInt;

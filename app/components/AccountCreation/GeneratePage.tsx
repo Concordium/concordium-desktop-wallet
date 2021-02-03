@@ -6,7 +6,11 @@ import { Card } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { createCredential as createCredentialRust } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { Identity, CredentialDeploymentDetails } from '../../utils/types';
+import {
+    Identity,
+    CredentialDeploymentDetails,
+    Dispatch,
+} from '../../utils/types';
 import { sendTransaction } from '../../utils/client';
 import {
     addPendingAccount,

@@ -20,7 +20,7 @@ import {
 } from '../../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
-import { IdentityProvider } from '../../utils/types';
+import { IdentityProvider, Dispatch } from '../../utils/types';
 
 const redirectUri = 'ConcordiumRedirectToken';
 

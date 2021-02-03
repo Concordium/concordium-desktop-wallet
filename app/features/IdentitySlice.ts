@@ -1,4 +1,4 @@
-import { createSlice, Dispatch } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 import {
@@ -11,6 +11,7 @@ import {
     IdentityStatus,
     IdentityObject,
     IdentityProvider,
+    Dispatch,
 } from '../utils/types';
 
 interface IdentityState {

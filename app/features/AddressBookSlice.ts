@@ -7,7 +7,7 @@ import {
     updateEntry,
     removeEntry,
 } from '../database/AddressBookDao';
-import { AddressBookEntry } from '../utils/types';
+import { AddressBookEntry, Dispatch } from '../utils/types';
 
 interface AddressBookState {
     addressBook: AddressBookEntry[];
@@ -40,7 +40,7 @@ export async function loadAddressBook(dispatch: Dispatch) {
 }
 
 export async function updateAddressBookEntry(
-    dispatch,
+    dispatch: Dispatch,
     name: string,
     newEntry: AddressBookEntry
 ) {

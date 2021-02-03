@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { Dispatch } from 'react';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 import {
@@ -16,6 +15,7 @@ import {
     AccountEncryptedAmount,
     Account,
     AccountInfo,
+    Dispatch,
 } from '../utils/types';
 import { waitForFinalization } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
