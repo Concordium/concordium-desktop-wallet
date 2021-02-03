@@ -364,7 +364,7 @@ export enum TimeStampUnit {
 export interface AddressBookEntry {
     name: string;
     address: string;
-    note: string;
+    note?: string;
 }
 
 /**

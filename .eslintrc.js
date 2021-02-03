@@ -11,6 +11,7 @@ module.exports = {
                 },
             },
         ],
+        'react/jsx-props-no-spreading': 'off',
     },
     parserOptions: {
         ecmaVersion: 2020,

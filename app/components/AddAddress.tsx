@@ -1,55 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Form, Input } from 'semantic-ui-react';
+import React from 'react';
+import { Button, Form, Input, TextArea } from 'semantic-ui-react';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { AddressBookEntry } from '../utils/types';
 
 interface Props {
     close(): void;
-    submit(name: string, address: string, note: string): void;
+    submit(name: string, address: string, note?: string): void;
     initialValues?: AddressBookEntry;
 }
 
 function AddAddress({ close, submit, initialValues }: Props) {
-    const [name, setName] = useState('');
-    const [address, setAddress] = useState('');
-    const [note, setNote] = useState('');
+    const { control, handleSubmit } = useForm<AddressBookEntry>({
+        defaultValues: initialValues,
+    });
 
-    useEffect(() => {
-        if (initialValues) {
-            setName(initialValues.name);
-            setAddress(initialValues.address);
-            setNote(initialValues.note);
-        }
-    }, [initialValues, setName, setAddress, setNote]);
+    const onSubmit: SubmitHandler<AddressBookEntry> = ({
+        address,
+        name,
+        note,
+    }) => {
+        submit(name, address, note);
+        close();
+    };
 
     return (
-        <Form
-            onSubmit={() => {
-                submit(name, address, note);
-                close();
-            }}
-        >
+        <Form onSubmit={handleSubmit(onSubmit)}>
             <Form.Field>
-                <Input
-                    placeholder="Enter recipient name"
+                <Controller
                     name="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    control={control}
+                    rules={{ required: true }}
+                    render={(props) => (
+                        <Input {...props} placeholder="Enter recipient name" />
+                    )}
                 />
             </Form.Field>
             <Form.Field>
-                <Input
-                    placeholder="Paste the account address here"
+                <Controller
                     name="address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    control={control}
+                    rules={{ required: true }}
+                    render={(props) => (
+                        <Input
+                            {...props}
+                            placeholder="Paste the account address here"
+                        />
+                    )}
                 />
             </Form.Field>
             <Form.Field>
-                <Input
-                    placeholder="You can add a note here"
+                <Controller
                     name="note"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
+                    control={control}
+                    rules={{ maxLength: 255 }}
+                    render={(props) => (
+                        <TextArea
+                            {...props}
+                            placeholder="You can add a note here"
+                        />
+                    )}
                 />
             </Form.Field>
             <Button positive type="submit">
