@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
-import styles from './Styling.css';
+import styles from './Styling.module.scss';
 
 interface Props {
     ledgerCall: (
