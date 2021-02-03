@@ -114,9 +114,9 @@ export default merge(baseConfig, {
                     },
                 ],
             },
-            // SASS support - compile all other .scss files and pipe it to style.css
+            // SASS support - compile all module.scss files and pipe it to style.css
             {
-                test: /^((?!\.global).)*\.(scss|sass)$/,
+                test: /\.module\.(scss|sass)$/,
                 use: [
                     {
                         loader: 'style-loader',
