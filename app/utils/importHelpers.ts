@@ -43,10 +43,10 @@ interface Validation {
 
 // TODO add unit tests
 export function validateEncryptedStructure(encryptedData): Validation {
-    if (!'cipherText' in encryptedData) {
+    if (!encryptedData.cipherText) {
         return { isValid: false, reason: 'missing cipherText field.' };
     }
-    if (!'metaData' in encryptedData) {
+    if (!encryptedData.metaData) {
         return { isValid: false, reason: 'missing metaData field.' };
     }
     const metaDataFields = [
