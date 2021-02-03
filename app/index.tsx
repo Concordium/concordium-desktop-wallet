@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { render } from 'react-dom';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
 import { history, configuredStore } from './store';
-import './app.global.scss';
+import './styles/app.global.scss';
 import { updateSettings, findSetting } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
 import { getAll } from './database/MultiSignatureProposalDao';
