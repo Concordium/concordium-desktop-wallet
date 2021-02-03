@@ -111,6 +111,12 @@ export default merge(baseConfig, {
                     },
                     {
                         loader: 'sass-loader',
+                        options: {
+                            sourceMap: true,
+                            sassOptions: {
+                                includePaths: ['node_modules', 'app/styles'],
+                            },
+                        },
                     },
                 ],
             },
@@ -137,6 +143,12 @@ export default merge(baseConfig, {
                     },
                     {
                         loader: 'sass-loader',
+                        options: {
+                            sourceMap: true,
+                            sassOptions: {
+                                includePaths: ['node_modules', 'app/styles'],
+                            },
+                        },
                     },
                 ],
             },
