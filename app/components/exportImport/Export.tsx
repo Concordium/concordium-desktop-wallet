@@ -54,12 +54,12 @@ export default function Export() {
         try {
             await saveFile(JSON.stringify(encrypted));
             setModalMessage('Export was successful');
+            setOpenConfirmationModal(true);
         } catch (error) {
             // Export was cancelled.
             // TODO: inform user in the case where export was not canceled, but did indeed fail.
         }
         setOpenPasswordModal(false);
-        setOpenConfirmationModal(true);
     }
 
     return (
