@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Header } from 'semantic-ui-react';
+import { Button, Header, Grid } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import ConfirmTransfer from './ConfirmTransfer';
 import PickRecipient from './PickRecipient';
@@ -44,12 +44,7 @@ export default function SimpleTransfer(account: Account) {
                     />
                 );
             case locations.pickRecipient:
-                return (
-                    <PickRecipient
-                        returnFunction={() => setLocation(locations.pickAmount)}
-                        pickRecipient={chooseRecipientOnClick}
-                    />
-                );
+                return <PickRecipient pickRecipient={chooseRecipientOnClick} />;
             case locations.confirmTransfer:
                 if (!recipient) {
                     return null;
@@ -78,12 +73,35 @@ export default function SimpleTransfer(account: Account) {
         }
     }
 
+    function ReturnButton() {
+        switch (location) {
+            case locations.pickRecipient:
+            case locations.confirmTransfer:
+                return (
+                    <Button onClick={() => setLocation(locations.pickAmount)}>
+                        {'<--'}
+                    </Button>
+                );
+            default:
+                return null;
+        }
+    }
+
     return (
         <>
-            <Link to={routes.ACCOUNTS}>
-                <Button>x</Button>
-            </Link>
-            <Header>Send Transfer</Header>
+            <Grid columns="3">
+                <Grid.Column>
+                    <ReturnButton />
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                    <Header>Send Transfer</Header>
+                </Grid.Column>
+                <Grid.Column textAlign="right">
+                    <Link to={routes.ACCOUNTS}>
+                        <Button>x</Button>
+                    </Link>
+                </Grid.Column>
+            </Grid>
             <ChosenComponent />
         </>
     );

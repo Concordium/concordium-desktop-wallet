@@ -1,4 +1,3 @@
-import { findAccounts } from '../database/AccountDao';
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './client';
 import {
@@ -17,13 +16,8 @@ export function getHighestId(transactions: TransferTransaction[]) {
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
  * If the address is found, return the name, otherwise returns undefined;
- * TODO: when accounts are added to the AddressBook, then only lookup AddressBook.
  */
 async function lookupName(address: string): Promise<string | undefined> {
-    const accounts = await findAccounts({ address });
-    if (accounts.length > 0) {
-        return accounts[0].name;
-    }
     const entries = await findEntries({ address });
     if (entries.length > 0) {
         return entries[0].name;

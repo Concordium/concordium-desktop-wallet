@@ -62,3 +62,6 @@ target/
 
 #Ignore Cargo.lock
 Cargo.lock
+
+#VSCode
+.vscode/

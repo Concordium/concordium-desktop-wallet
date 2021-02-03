@@ -36,7 +36,9 @@ function buildOutgoingAmountStrings(
 ) {
     return {
         amount: `${displayAsGTU(total)}`,
-        amountFormula: `${displayAsGTU(-subtotal)} +${displayAsGTU(fee)} Fee`,
+        amountFormula: `${displayAsGTU(-BigInt(subtotal))} +${displayAsGTU(
+            fee
+        )} Fee`,
     };
 }
 

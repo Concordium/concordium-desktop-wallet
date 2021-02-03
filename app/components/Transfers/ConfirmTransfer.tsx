@@ -1,11 +1,11 @@
 import React from 'react';
-import { Card, Button, Table, Label } from 'semantic-ui-react';
+import { Card, Table, Label } from 'semantic-ui-react';
 import { sendTransaction } from '../../utils/client';
 import {
     serializeTransaction,
     getTransactionHash,
 } from '../../utils/transactionSerialization';
-import LedgerComponent from '../LedgerComponent';
+import LedgerComponent from '../ledger/LedgerComponent';
 import {
     createSimpleTransferTransaction,
     waitForFinalization,
@@ -98,9 +98,6 @@ export default function ConfirmTransferComponent({
     return (
         <Card fluid centered>
             <Card.Content textAlign="center">
-                <Button onClick={() => setLocation(locations.pickAmount)}>
-                    {'<--'}
-                </Button>
                 <Card.Header>Confirm Transfer</Card.Header>
                 <Table>
                     <Table.Body>

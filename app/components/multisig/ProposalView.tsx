@@ -30,6 +30,7 @@ import {
     serializeUpdateInstructionHeaderAndPayload,
 } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
+import getMultiSignatureTransactionStatus from '../../utils/TransactionStatusPoller';
 import SimpleErrorModal, { ModalErrorInput } from '../SimpleErrorModal';
 
 /**
@@ -122,10 +123,12 @@ export default function ProposalView() {
         };
         if (submitted) {
             modifiedProposal.status = MultiSignatureTransactionStatus.Submitted;
+            updateCurrentProposal(dispatch, modifiedProposal);
+            getMultiSignatureTransactionStatus(modifiedProposal, dispatch);
         } else {
             modifiedProposal.status = MultiSignatureTransactionStatus.Failed;
+            updateCurrentProposal(dispatch, modifiedProposal);
         }
-        updateCurrentProposal(dispatch, modifiedProposal);
     }
 
     const unsignedCheckboxes = [];

@@ -18,6 +18,7 @@ import {
     getNextAccountNumber,
 } from '../../features/AccountSlice';
 import { getGlobal } from '../../utils/httpRequests';
+import { addToAddressBook } from '../../features/AddressBookSlice';
 
 /**
  *   This function loads the ledger object and creates a credentialDeploymentInfo, and nesessary details
@@ -75,6 +76,12 @@ async function createAccount(
         accountAddress,
         credentialDeploymentInfo
     );
+    addToAddressBook(dispatch, {
+        name: accountName,
+        address: accountAddress,
+        note: `Account ${accountNumber} of ${identity.name}`, // TODO: have better note
+        readOnly: true,
+    });
 
     const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
 

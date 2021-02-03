@@ -11,6 +11,7 @@ import {
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import signUpdateMicroGtuPerEuro from './MicroGtuPerEuro';
+import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
 
 /**
  * Concordium Ledger API.
@@ -78,5 +79,9 @@ export default class ConcordiumLedgerClient {
         path: number[]
     ): Promise<Buffer> {
         return signUpdateMicroGtuPerEuro(this.transport, path, transaction);
+    }
+
+    getAppAndVersion(): Promise<AppAndVersion> {
+        return getAppAndVersion(this.transport);
     }
 }

@@ -7,9 +7,9 @@ import {
     loadTransactions,
     viewingShieldedSelector,
 } from '../features/TransactionSlice';
-import LedgerComponent from './LedgerComponent';
 import { Account } from '../utils/types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
+import LedgerComponent from './ledger/LedgerComponent';
 
 interface Props {
     account: Account;

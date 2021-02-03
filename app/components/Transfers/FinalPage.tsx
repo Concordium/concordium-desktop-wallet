@@ -24,24 +24,27 @@ export default function FinalPage({
             <Card.Content textAlign="center">
                 <Card.Header>Transfer Submitted!</Card.Header>
                 <Table>
-                    <Table.Row>
-                        <Table.Cell>Amount:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {displayAsGTU(transaction.payload.amount)}
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>Estimated fee:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {displayAsGTU(200n)}
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>To:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {recipient.name} <Label>{recipient.address}</Label>
-                        </Table.Cell>
-                    </Table.Row>
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell>Amount:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {displayAsGTU(transaction.payload.amount)}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>Estimated fee:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {displayAsGTU(200n)}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>To:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {recipient.name}{' '}
+                                <Label>{recipient.address}</Label>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
                 </Table>
                 <Link to={routes.ACCOUNTS}>
                     <Button>Finish</Button>

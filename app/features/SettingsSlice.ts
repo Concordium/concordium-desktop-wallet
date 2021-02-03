@@ -35,7 +35,10 @@ export const chosenIndexSelector = (state: RootState) =>
  * @param name name of the setting to find
  * @param settings the settings to search
  */
-function findSetting(name: string, settings: Settings[]): Setting | undefined {
+export function findSetting(
+    name: string,
+    settings: Settings[]
+): Setting | undefined {
     const flattenedSettings = settings.flatMap((settingTopLevel) => {
         return settingTopLevel.settings;
     });

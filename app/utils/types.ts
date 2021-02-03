@@ -385,6 +385,7 @@ export interface SettingGroup {
 export enum SettingTypeEnum {
     Text = 'text',
     Boolean = 'boolean',
+    Connection = 'connection',
 }
 
 // Contains an CredentialDeployment, and all the necessary extra details to complete the deployment
@@ -410,6 +411,7 @@ export interface AddressBookEntry {
     name: string;
     address: string;
     note: string;
+    readOnly: boolean;
 }
 
 /**
@@ -482,8 +484,8 @@ export enum MultiSignatureTransactionStatus {
     Open = 'open',
     Submitted = 'submitted',
     Rejected = 'rejected',
-    Closed = 'closed',
-    Completed = 'completed',
+    Finalized = 'finalized',
+    Committed = 'committed',
     Failed = 'failed',
 }
 
@@ -547,4 +549,23 @@ export interface IncomingTransaction {
     transactionHash: Hex;
     subtotal?: Hex;
     cost?: Hex;
+}
+
+/**
+ * The basic color types supported by Semantic UI components color property.
+ */
+export enum ColorType {
+    Blue = 'blue',
+    Olive = 'olive',
+    Green = 'green',
+    Red = 'red',
+    Grey = 'grey',
+    Orange = 'orange',
+    Yellow = 'yellow',
+    Teal = 'teal',
+    Violet = 'violet',
+    Purple = 'purple',
+    Pink = 'pink',
+    Brown = 'brown',
+    Black = 'black',
 }

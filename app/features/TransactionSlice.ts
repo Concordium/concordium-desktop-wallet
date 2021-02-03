@@ -213,7 +213,8 @@ function convertSimpleTransfer(
     hash: string
 ): TransferTransaction {
     const { payload } = transaction;
-    const estimatedTotal = payload.amount + BigInt(transaction.energyAmount);
+    const estimatedTotal =
+        BigInt(payload.amount) + BigInt(transaction.energyAmount);
 
     return {
         id: -1,
