@@ -11,7 +11,7 @@ import IdentityPage from './containers/IdentityPage';
 import AddressBookPage from './containers/AddressBookPage';
 import IssuancePage from './containers/IssuancePage';
 import AccountCreation from './containers/AccountCreationPage';
-import styles from './Main.css';
+import styles from './main.module.scss';
 import SettingsPage from './containers/SettingsPage';
 import MultiSignaturePage from './containers/MultiSignaturePage';
 import ProposalView from './components/multisig/ProposalView';
