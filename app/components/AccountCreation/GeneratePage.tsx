@@ -75,7 +75,7 @@ async function createAccount(
     addToAddressBook(dispatch, {
         name: accountName,
         address: accountAddress,
-        note: `${accountNumber}'th account of ${identity.name}`, // TODO: have better note
+        note: `Account ${accountNumber} of ${identity.name}`, // TODO: have better note
         readOnly: true,
     });
 
