@@ -12,7 +12,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 interface Props {
     ledgerCall: (
         ledger: ConcordiumLedgerClient,
-        setMessage: (string) => void
+        setMessage: (message: string) => void
     ) => Promise<void>;
 }
 

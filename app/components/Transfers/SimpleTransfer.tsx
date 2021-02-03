@@ -7,7 +7,11 @@ import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
 import locations from '../../constants/transferLocations.json';
-import { AddressBookEntry, Account } from '../../utils/types';
+import {
+    AddressBookEntry,
+    Account,
+    AccountTransaction,
+} from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 
 /**
@@ -15,9 +19,13 @@ import { toMicroUnits } from '../../utils/gtu';
  */
 export default function SimpleTransfer(account: Account) {
     const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
-    const [recipient, setRecipient] = useState(undefined);
-    const [transaction, setTransaction] = useState(undefined);
-    const [location, setLocation] = useState(locations.pickAmount);
+    const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
+        undefined
+    );
+    const [transaction, setTransaction] = useState<
+        AccountTransaction | undefined
+    >(undefined);
+    const [location, setLocation] = useState<string>(locations.pickAmount);
 
     function chooseRecipientOnClick(entry: AddressBookEntry) {
         setRecipient(entry);
@@ -43,17 +51,22 @@ export default function SimpleTransfer(account: Account) {
                     />
                 );
             case locations.confirmTransfer:
+                if (!recipient) {
+                    return null;
+                }
                 return (
                     <ConfirmTransfer
                         setLocation={setLocation}
                         recipient={recipient}
-                        fromAddress={account.address}
                         amount={toMicroUnits(amount)}
                         setTransaction={setTransaction}
                         account={account}
                     />
                 );
             case locations.transferSubmitted:
+                if (!recipient || !transaction) {
+                    return null;
+                }
                 return (
                     <FinalPage
                         transaction={transaction}

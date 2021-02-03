@@ -36,7 +36,7 @@ export interface Props {
 /**
  * Wait for the transaction to be finalized (or rejected) and update accordingly
  */
-async function monitorTransaction(transactionHash) {
+async function monitorTransaction(transactionHash: string) {
     const dataObject = await waitForFinalization(transactionHash);
     if (dataObject) {
         confirmTransaction(transactionHash, dataObject);
@@ -87,11 +87,7 @@ export default function ConfirmTransferComponent({
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
             setTransaction(transferTransaction);
-            addPendingTransaction(
-                transferTransaction,
-                transactionHash,
-                account
-            );
+            addPendingTransaction(transferTransaction, transactionHash);
             monitorTransaction(transactionHash);
             setLocation(locations.transferSubmitted);
         } else {

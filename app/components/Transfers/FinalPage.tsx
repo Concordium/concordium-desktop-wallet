@@ -33,7 +33,7 @@ export default function FinalPage({
                     <Table.Row>
                         <Table.Cell>Estimated fee:</Table.Cell>
                         <Table.Cell textAlign="right">
-                            {displayAsGTU(200)}
+                            {displayAsGTU(200n)}
                         </Table.Cell>
                     </Table.Row>
                     <Table.Row>
