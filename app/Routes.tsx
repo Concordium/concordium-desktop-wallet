@@ -15,9 +15,10 @@ import styles from './Main.css';
 import SettingsPage from './containers/SettingsPage';
 import MultiSignaturePage from './containers/MultiSignaturePage';
 import ProposalView from './components/multisig/ProposalView';
-import SignTransactionView from './components/multisig/SignTransactionView';
+import CosignTransactionProposalView from './components/multisig/CosignTransactionProposalView';
 import ExportSignedTransactionView from './components/multisig/ExportSignedTransactionView';
 import MultiSignatureCreateProposalView from './components/multisig/MultiSignatureCreateProposalView';
+import SignTransactionProposalView from './components/multisig/SignTransactionProposalView';
 
 export default function Routes() {
     return (
@@ -46,7 +47,11 @@ export default function Routes() {
                     />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION}
-                        component={SignTransactionView}
+                        component={SignTransactionProposalView}
+                    />
+                    <Route
+                        path={routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION}
+                        component={CosignTransactionProposalView}
                     />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}
