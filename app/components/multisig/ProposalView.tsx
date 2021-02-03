@@ -43,9 +43,7 @@ export default function ProposalView() {
         show: false,
     });
     const dispatch = useDispatch();
-    const currentProposal: MultiSignatureTransaction | undefined = useSelector(
-        currentProposalSelector
-    );
+    const currentProposal = useSelector(currentProposalSelector);
     if (!currentProposal) {
         throw new Error(
             'The proposal page should not be loaded without a proposal in the state.'
@@ -119,19 +117,15 @@ export default function ProposalView() {
     async function submitTransaction() {
         const payload = serializeForSubmission(instruction);
         const submitted = (await sendTransaction(payload)).getValue();
+        const modifiedProposal: MultiSignatureTransaction = {
+            ...currentProposal,
+        };
         if (submitted) {
-            const submittedProposal = {
-                ...currentProposal,
-                status: MultiSignatureTransactionStatus.Submitted,
-            };
-            updateCurrentProposal(dispatch, submittedProposal);
+            modifiedProposal.status = MultiSignatureTransactionStatus.Submitted;
         } else {
-            const failedProposal = {
-                ...currentProposal,
-                status: MultiSignatureTransactionStatus.Failed,
-            };
-            updateCurrentProposal(dispatch, failedProposal);
+            modifiedProposal.status = MultiSignatureTransactionStatus.Failed;
         }
+        updateCurrentProposal(dispatch, modifiedProposal);
     }
 
     const unsignedCheckboxes = [];

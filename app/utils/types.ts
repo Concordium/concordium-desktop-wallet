@@ -112,7 +112,7 @@ export interface Account {
     status: AccountStatus;
     credential?: string;
     totalDecrypted?: string;
-    allDecrypted?: boolean;
+    allDecrypted?: boolMuean;
     incomingAmounts?: string;
     selfAmounts?: string;
 }

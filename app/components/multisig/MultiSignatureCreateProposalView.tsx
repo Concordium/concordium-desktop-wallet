@@ -4,12 +4,8 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import UpdateMicroGtuPerEuroRate from './UpdateMicroGtuPerEuro';
 import { UpdateType } from '../../utils/types';
-import {
-    BlockSummary,
-    ConsensusStatus,
-    getBlockSummary,
-    getConsensusStatus,
-} from '../../utils/client';
+import { getBlockSummary, getConsensusStatus } from '../../utils/client';
+import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
 
@@ -36,6 +32,9 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     const type = location.state;
 
     function chooseProposalType(foundationType: UpdateType) {
+        if (!blockSummary) {
+            return null;
+        }
         switch (foundationType) {
             case UpdateType.UpdateMicroGTUPerEuro:
                 return (
@@ -75,7 +74,7 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                 configured node. Verify your node settings, and check that
                 the node is running."
             />
-            {blockSummary && chooseProposalType(type)}
+            {chooseProposalType(type)}
         </Segment>
     );
 }

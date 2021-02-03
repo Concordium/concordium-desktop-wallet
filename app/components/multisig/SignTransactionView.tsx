@@ -35,6 +35,23 @@ interface TransactionInput {
     type: string;
 }
 
+function createTransactionHandler(state: TransactionInput | undefined) {
+    if (!state) {
+        throw new Error(
+            'No transaction handler was found. An invalid transaction has been received.'
+        );
+    }
+    const { transaction, type } = state;
+
+    const transactionObject = parse(transaction);
+    // TODO Add AccountTransactionHandler here when implemented.
+    const transactionHandlerValue =
+        type === 'UpdateInstruction'
+            ? new UpdateInstructionHandler(transactionObject)
+            : new UpdateInstructionHandler(transactionObject);
+    return transactionHandlerValue;
+}
+
 export default function SignTransactionView({ location }: Props) {
     const [cosign, setCosign] = useState(false);
     const [hashMatches, setHashMatches] = useState(false);
@@ -45,9 +62,9 @@ export default function SignTransactionView({ location }: Props) {
     ] = useState(false);
 
     const [transactionHash, setTransactionHash] = useState<string>();
-    const [transactionHandler, setTransactionHandler] = useState<
+    const [transactionHandler] = useState<
         TransactionHandler<UpdateInstruction | AccountTransaction>
-    >();
+    >(() => createTransactionHandler(location.state));
 
     const dispatch = useDispatch();
 
@@ -58,21 +75,12 @@ export default function SignTransactionView({ location }: Props) {
     }
 
     const { transaction } = location.state;
-    const { type } = location.state;
 
     useEffect(() => {
-        const transactionObject = parse(transaction);
-        // TODO Add AccountTransactionHandler here when implemented.
-        const transactionHandlerValue =
-            type === 'UpdateInstruction'
-                ? new UpdateInstructionHandler(transactionObject)
-                : new UpdateInstructionHandler(transactionObject);
-        setTransactionHandler(transactionHandlerValue);
-
-        const serialized = transactionHandlerValue.serializeTransaction();
+        const serialized = transactionHandler.serializeTransaction();
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
-    }, [setTransactionHandler, setTransactionHash, type, transaction]);
+    }, [setTransactionHash, transactionHandler]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
         const signatureBytes = await transactionHandler.signTransaction(ledger);
@@ -107,12 +115,12 @@ export default function SignTransactionView({ location }: Props) {
                     <Grid.Row>
                         <Grid.Column>
                             <TransactionDetails
-                                updateInstruction={transaction}
+                                updateInstruction={parse(transaction)}
                             />
                         </Grid.Column>
                         <Grid.Column>
                             <TransactionHashView
-                                transactionHash={transactionHash}
+                                transactionHash={transactionHash || ''}
                             />
                         </Grid.Column>
                     </Grid.Row>
