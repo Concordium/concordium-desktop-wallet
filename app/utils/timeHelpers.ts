@@ -17,7 +17,7 @@ export function formatDate(date: YearMonth) {
  * Assumes the timestamp is in seconds, otherwise the unit should be specified.
  */
 export function parseTime(
-    timeStamp,
+    timeStamp: number,
     unit: TimeStampUnit = TimeStampUnit.seconds
 ) {
     const dtFormat = new Intl.DateTimeFormat('en-GB', {

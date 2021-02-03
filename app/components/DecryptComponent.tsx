@@ -36,7 +36,7 @@ export default function DecryptComponent({ account }: Props) {
         const prfKeySeed = await ledger.getPrfKey(account.identityId);
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
-        await decryptAccountBalance(dispatch, prfKey, account);
+        await decryptAccountBalance(prfKey, account);
         await decryptTransactions(transactions, prfKey, account);
         await loadTransactions(account, viewingShielded, dispatch);
         return loadAccounts(dispatch);

@@ -13,7 +13,7 @@ const settingsSlice = createSlice({
     name: 'settings',
     initialState: {
         settings: [],
-        chosenIndex: undefined,
+        chosenIndex: 0,
     } as SettingsState,
     reducers: {
         chooseSetting: (state, input) => {

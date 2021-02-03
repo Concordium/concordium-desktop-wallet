@@ -28,7 +28,7 @@ async function createCredential(
     const ledger = new ConcordiumLedgerClient(transport);
     setMessage('Please Wait');
 
-    const global = (await getGlobal()).value;
+    const global = await getGlobal();
     return createCredentialRust(
         identity,
         accountNumber,

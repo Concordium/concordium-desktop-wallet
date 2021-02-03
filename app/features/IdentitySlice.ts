@@ -6,15 +6,20 @@ import {
     insertIdentity,
     updateIdentity,
 } from '../database/IdentityDao';
-import { Identity, IdentityStatus } from '../utils/types';
+import {
+    Identity,
+    IdentityStatus,
+    IdentityObject,
+    IdentityProvider,
+} from '../utils/types';
 
 interface IdentityState {
     identities: Identity[];
-    chosenIdentity: Identity;
+    chosenIdentity: Identity | undefined;
 }
 
 const initialState: IdentityState = {
-    identities: undefined,
+    identities: [],
     chosenIdentity: undefined,
 };
 
@@ -48,7 +53,7 @@ export async function addPendingIdentity(
     dispatch: Dispatch,
     identityName: string,
     codeUri: string,
-    identityProvider,
+    identityProvider: IdentityProvider,
     randomness: string
 ) {
     const identity = {
@@ -65,7 +70,7 @@ export async function addPendingIdentity(
 export async function confirmIdentity(
     dispatch: Dispatch,
     identityName: string,
-    identityObject
+    identityObject: IdentityObject
 ) {
     await updateIdentity(identityName, {
         status: IdentityStatus.Confirmed,

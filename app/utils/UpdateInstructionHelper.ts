@@ -1,11 +1,17 @@
-import { UpdateHeader, UpdateInstruction, UpdateType } from './types';
+import {
+    UpdateHeader,
+    UpdateInstruction,
+    UpdateType,
+    ExchangeRate,
+} from './types';
 
 // TODO Effective time should perhaps have a default, but it should also be possible to
 // provide the value as input, so that the user can decide the value.
 // Where to get the sequence number from?
+// TODO Add other update types as they are implemented.
 
 export default function createUpdateInstruction(
-    updatePayload,
+    updatePayload: ExchangeRate,
     updateType: UpdateType,
     sequenceNumber: BigInt
 ) {

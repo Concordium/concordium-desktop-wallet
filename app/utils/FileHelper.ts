@@ -42,15 +42,16 @@ export async function saveFile(data: string, title: string) {
         throw new Error('Saving file was cancelled by the user.');
     }
 
-    if (saveFileDialog.filePath) {
-        return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
+        if (!saveFileDialog.filePath) {
+            reject(new Error('No file path was selected by the user.'));
+        } else {
             fs.writeFile(saveFileDialog.filePath, data, (err) => {
                 if (err) {
                     reject(new Error(`Unable to save file: ${err}`));
                 }
                 resolve();
             });
-        });
-    }
-    throw new Error('No file path was selected by the user.');
+        }
+    });
 }

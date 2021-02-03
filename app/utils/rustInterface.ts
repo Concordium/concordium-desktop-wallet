@@ -87,7 +87,7 @@ export async function createIdentityRequestObjectLedger(
     const context = {
         ipInfo,
         arsInfos,
-        global: global.value,
+        global,
         publicKeys: [
             {
                 schemeId: 'Ed25519',

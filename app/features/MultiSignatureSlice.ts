@@ -9,7 +9,7 @@ import {
 
 type MultiSignatureSliceState = {
     chosenMenu: MultiSignatureMenuItems;
-    currentProposal: MultiSignatureTransaction;
+    currentProposal: MultiSignatureTransaction | undefined;
     proposals: MultiSignatureTransaction[];
 };
 

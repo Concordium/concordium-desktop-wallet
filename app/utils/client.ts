@@ -1,12 +1,14 @@
-import { credentials, Metadata } from '@grpc/grpc-js';
+import { credentials, Metadata, ServiceError } from '@grpc/grpc-js';
 import { P2PClient } from '../proto/concordium_p2p_rpc_grpc_pb';
 import {
+    BoolResponse,
     BlockHash,
     JsonResponse,
     SendTransactionRequest,
     TransactionHash,
     AccountAddress,
     GetAddressInfoRequest,
+    NodeInfoResponse,
     Empty,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus } from './NodeApiTypes';
@@ -23,7 +25,7 @@ const client = new P2PClient(
     credentials.createInsecure()
 );
 
-function buildMetaData(): MetaData {
+function buildMetaData(): Metadata {
     const meta = new Metadata();
     meta.add('authentication', 'rpcadmin');
     return meta;
@@ -39,8 +41,14 @@ function buildSendTransactionRequest(
     return request;
 }
 
-function sendPromise(command, input) {
-    return new Promise<JsonResponse>((resolve, reject) => {
+type Command<T, Response> = (
+    input: T,
+    metadata: Metadata,
+    callback: (error: ServiceError, response: Response) => void
+) => Promise<Response>;
+
+function sendPromise<T, Response>(command: Command<T, Response>, input: T) {
+    return new Promise<Response>((resolve, reject) => {
         command.bind(client)(input, buildMetaData(), (err, response) => {
             if (err) {
                 return reject(err);
@@ -50,10 +58,18 @@ function sendPromise(command, input) {
     });
 }
 
+async function sendPromiseParseResult<T>(
+    command: Command<T, JsonResponse>,
+    input: T
+) {
+    const response = await sendPromise<T, JsonResponse>(command, input);
+    return JSON.parse(response.getValue());
+}
+
 export function sendTransaction(
     transactionPayload: Uint8Array,
     networkId = 100
-): Promise<JsonResponse> {
+): Promise<BoolResponse> {
     const request = buildSendTransactionRequest(transactionPayload, networkId);
 
     return sendPromise(client.sendTransaction, request);
@@ -75,25 +91,11 @@ export function getNextAccountNonce(address: string): Promise<JsonResponse> {
     return sendPromise(client.getNextAccountNonce, accountAddress);
 }
 
-function sendPromiseParseResult<T>(command, input) {
-    return new Promise<T>((resolve, reject) => {
-        command.bind(client)(input, buildMetaData(), (err, response) => {
-            if (err) {
-                return reject(err);
-            }
-            return resolve(JSON.parse(response.getValue()));
-        });
-    });
-}
-
 /**
  * Retrieves the ConsensusStatus information from the node.
  */
 export function getConsensusStatus(): Promise<ConsensusStatus> {
-    return sendPromiseParseResult<ConsensusStatus>(
-        client.getConsensusStatus,
-        new Empty()
-    );
+    return sendPromiseParseResult(client.getConsensusStatus, new Empty());
 }
 
 /**
@@ -103,10 +105,7 @@ export function getConsensusStatus(): Promise<ConsensusStatus> {
 export function getBlockSummary(blockHashValue: string): Promise<BlockSummary> {
     const blockHash = new BlockHash();
     blockHash.setBlockHash(blockHashValue);
-    return sendPromiseParseResult<BlockSummary>(
-        client.getBlockSummary,
-        blockHash
-    );
+    return sendPromiseParseResult(client.getBlockSummary, blockHash);
 }
 
 export function getAccountInfo(

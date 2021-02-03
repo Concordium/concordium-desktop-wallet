@@ -25,7 +25,10 @@ export async function insertIdentity(identity: Identity) {
     return (await knex())(identitiesTable).insert(identity);
 }
 
-export async function updateIdentity(identityName: string, updatedValues) {
+export async function updateIdentity(
+    identityName: string,
+    updatedValues: Record<string, unknown>
+) {
     return (await knex())(identitiesTable)
         .where({ name: identityName })
         .update(updatedValues);

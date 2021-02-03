@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { Dispatch } from 'react';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 import {
@@ -29,9 +30,9 @@ interface AccountState {
 
 const initialState: AccountState = {
     accounts: [],
-    accountsInfo: undefined,
+    accountsInfo: {},
     chosenAccount: undefined,
-    chosenAccountIndex: undefined,
+    chosenAccountIndex: -1,
 };
 
 const accountsSlice = createSlice({
@@ -47,7 +48,7 @@ const accountsSlice = createSlice({
             state.accounts = input.payload;
             if (chosenAccount) {
                 const matchingAccounts = input.payload.filter(
-                    (acc) => acc.address === chosenAccount.address
+                    (acc: Account) => acc.address === chosenAccount.address
                 );
                 if (matchingAccounts.length === 1) {
                     [state.chosenAccount] = matchingAccounts;
@@ -115,8 +116,11 @@ function updateAccountEncryptedAmount(
 
 // Loads the given accounts' infos from the node, then updates the
 // AccountInfo state.
-export async function loadAccountInfos(accounts, dispatch) {
-    const map = {};
+export async function loadAccountInfos(
+    accounts: Account[],
+    dispatch: Dispatch
+) {
+    const map: Record<string, AccountInfo> = {};
     const confirmedAccounts = accounts.filter(
         (account) =>
             isValidAddress(account.address) &&
@@ -149,8 +153,10 @@ export async function addPendingAccount(
     accountName: string,
     identityId: number,
     accountNumber: number,
-    accountAddress: string = undefined,
-    credentialDeploymentInfo: CredentialDeploymentInformation = undefined
+    accountAddress = '',
+    credentialDeploymentInfo:
+        | CredentialDeploymentInformation
+        | undefined = undefined
 ) {
     const account: Account = {
         name: accountName,
@@ -165,10 +171,10 @@ export async function addPendingAccount(
 }
 
 export async function confirmInitialAccount(
-    dispatch,
-    accountName,
-    accountAddress,
-    credential
+    dispatch: Dispatch,
+    accountName: string,
+    accountAddress: string,
+    credential: CredentialDeploymentInformation
 ) {
     await updateAccount(accountName, {
         status: AccountStatus.Confirmed,
@@ -180,7 +186,11 @@ export async function confirmInitialAccount(
 
 // Attempts to confirm account by checking the status of the given transaction
 // (Which is assumed to be of the credentialdeployment)
-export async function confirmAccount(dispatch, accountName, transactionId) {
+export async function confirmAccount(
+    dispatch: Dispatch,
+    accountName: string,
+    transactionId: string
+) {
     const finalized = await waitForFinalization(transactionId);
     if (finalized !== undefined) {
         await updateAccount(accountName, {
@@ -195,7 +205,7 @@ export async function confirmAccount(dispatch, accountName, transactionId) {
 }
 
 // Get The next unused account number of the identity with the given ID
-export async function getNextAccountNumber(identityId) {
+export async function getNextAccountNumber(identityId: number) {
     const accounts: Account[] = await getAccountsOfIdentity(identityId);
     const currentNumber = accounts.reduce(
         (num, acc) => Math.max(num, acc.accountNumber),
@@ -206,10 +216,13 @@ export async function getNextAccountNumber(identityId) {
 
 // Decrypts the shielded account balance of the given account, using the prfKey.
 // This function expects the prfKey to match the account's prfKey.
-export async function decryptAccountBalance(dispatch, prfKey, account) {
+export async function decryptAccountBalance(prfKey: string, account: Account) {
+    if (!account.incomingAmounts) {
+        throw new Error('Unexpected missing field!');
+    }
     const encryptedAmounts = JSON.parse(account.incomingAmounts);
     encryptedAmounts.push(account.selfAmounts);
-    const global = (await getGlobal()).value;
+    const global = await getGlobal();
 
     const decryptedAmounts = await decryptAmounts(
         encryptedAmounts,

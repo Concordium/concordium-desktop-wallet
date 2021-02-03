@@ -1,6 +1,4 @@
-import { AccountAddress } from '../proto/concordium_p2p_rpc_pb';
-
-type Hex = string;
+export type Hex = string;
 type Proofs = Hex;
 type Word64 = BigInt;
 type Word32 = number;
@@ -112,7 +110,7 @@ export interface Account {
     status: AccountStatus;
     credential?: string;
     totalDecrypted?: string;
-    allDecrypted?: boolMuean;
+    allDecrypted?: boolean;
     incomingAmounts?: string;
     selfAmounts?: string;
 }
@@ -152,15 +150,34 @@ export enum TransactionKindId {
     Transfer_with_schedule = 19,
 } // TODO: Add all kinds (11- 18)
 
+export interface SimpleTransferPayload {
+    amount: string;
+    toAddress: string;
+}
+
+export interface SchedulePoint {
+    timestamp: string;
+    amount: string;
+}
+
+export interface ScheduledTransferPayload {
+    schedule: SchedulePoint[];
+    toAddress: string;
+}
+
+export type TransactionPayload =
+    | ScheduledTransferPayload
+    | SimpleTransferPayload;
+
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
 export interface AccountTransaction {
-    sender: AccountAddress;
-    nonce: number;
-    energyAmount: number;
-    expiry: number;
+    sender: Hex;
+    nonce: string;
+    energyAmount: string;
+    expiry: string;
     transactionKind: TransactionKindId;
-    payload;
+    payload: TransactionPayload;
 }
 
 // Types of block items, and their identifier numbers
@@ -182,8 +199,6 @@ export interface CredentialDeploymentInformation {
     proofs: Proofs;
 }
 
-type AccountAddress = Uint8Array;
-
 // 48 bytes containing a group element.
 type RegId = Hex;
 
@@ -199,7 +214,7 @@ export interface Policy {
     revealedAttributes: Record<string, string>; // Map.Map AttributeTag AttributeValue
 }
 
-type YearMonth = string; // "YYYYMM"
+export type YearMonth = string; // "YYYYMM"
 
 export enum AttributeTag {
     firstName = 0,
@@ -283,12 +298,17 @@ export interface TypedCredentialDeploymentInformation {
     type: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AccountReleaseSchedule = any; // TODO
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AccountBakerDetails = any; // TODO
+
 // Reflects the structure given by the node,
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
-    accountReleaseSchedule: AccountReleaseSchedule; // TODO
-    accountBaker: AccountBakerDetails; // TODO
+    accountReleaseSchedule: AccountReleaseSchedule;
+    accountBaker: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
     accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
 }
@@ -341,12 +361,6 @@ export interface IdentityProvider {
     arsInfos: Record<string, ArInfo>; // objects with ArInfo fields (and numbers as field names)
     metadata: IdentityProviderMetaData;
 }
-
-export const IdentityProviderPlaceHolder: IdentityProvider = {
-    ipInfo: undefined,
-    arsInfo: {},
-    metaData: undefined,
-};
 
 // type holds the the type of setting, i.e. multisignature settings, so that
 // the group of settings can be displayed together correctly.
@@ -425,6 +439,7 @@ export interface UpdateInstruction {
     signatures: string[];
 }
 
+export type Transaction = AccountTransaction | UpdateInstruction;
 /**
  * Update type enumeration. The numbering/order is important as that corresponds
  * to the byte written when serializing the update instruction.
@@ -442,13 +457,13 @@ export enum UpdateType {
 }
 
 export function instanceOfAccountTransaction(
-    object
+    object: Transaction
 ): object is AccountTransaction {
     return 'transactionKind' in object;
 }
 
 export function instanceOfUpdateInstruction(
-    object
+    object: Transaction
 ): object is UpdateInstruction {
     return 'header' in object;
 }
@@ -457,11 +472,11 @@ export function instanceOfUpdateInstruction(
  * Interface definition for classes that can serialize and handle
  * signing of the different transaction types.
  */
-export interface TransactionHandler<T> {
+export interface TransactionHandler<T, S> {
     transaction: T;
     instanceOf: () => boolean;
     serializeTransaction: () => Buffer;
-    signTransaction: (any) => Promise<Buffer>;
+    signTransaction: (signer: S) => Promise<Buffer>;
 }
 
 /**
@@ -483,7 +498,7 @@ export enum MultiSignatureTransactionStatus {
  */
 export interface MultiSignatureTransaction {
     // logical id in the database
-    id: number;
+    id?: number;
     // The JSON serialization of the transaction
     transaction: string;
     // The minimum required signatures for the transaction
@@ -506,4 +521,35 @@ export enum MultiSignatureMenuItems {
 export interface ExchangeRate {
     numerator: Word64;
     denominator: Word64;
+}
+
+export interface TransactionDetails {
+    events: string[];
+    transferSource?: Hex;
+    transferDestination?: Hex;
+    type: TransactionKindString;
+    outcome: string;
+}
+
+export interface TransactionOrigin {
+    type: OriginType;
+    address?: Hex;
+}
+
+export interface EncryptedInfo {
+    encryptedAmount: string;
+    incomingAmounts: string[];
+}
+
+export interface IncomingTransaction {
+    id: number;
+    blockHash: Hex;
+    blockTime: string;
+    total: string;
+    details: TransactionDetails;
+    origin: TransactionOrigin;
+    encrypted?: EncryptedInfo;
+    transactionHash: Hex;
+    subtotal?: Hex;
+    cost?: Hex;
 }
