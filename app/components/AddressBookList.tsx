@@ -7,7 +7,7 @@ import {
     addressBookSelector,
     addToAddressBook,
 } from '../features/AddressBookSlice';
-import AddAddress from './AddAddress';
+import AddAddress from './AddAddress/AddAddress';
 import AddressBookListElement from './AddressBookListElement';
 
 export default function AddressBookList(): JSX.Element {

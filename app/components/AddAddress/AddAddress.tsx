@@ -1,7 +1,9 @@
 import React from 'react';
 import { Button, Form } from 'semantic-ui-react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { AddressBookEntry } from '../utils/types';
+
+import { AddressBookEntry } from '../../utils/types';
+import styles from './AddAddress.module.scss';
 
 interface Props {
     close(): void;
@@ -12,12 +14,7 @@ interface Props {
 const NOTE_MAX_LENGTH = 255;
 
 function AddAddress({ close, submit, initialValues }: Props) {
-    const {
-        handleSubmit,
-        errors,
-        formState,
-        control,
-    } = useForm<AddressBookEntry>({
+    const { handleSubmit, errors, control } = useForm<AddressBookEntry>({
         defaultValues: initialValues,
         mode: 'onTouched',
     });
@@ -60,21 +57,13 @@ function AddAddress({ close, submit, initialValues }: Props) {
                     },
                 }}
                 render={(p) => (
-                    <div style={{ position: 'relative', marginBottom: '2em' }}>
+                    <div className={styles.fieldWrapper}>
                         <Form.Input
                             {...p}
                             placeholder="Paste the account address here"
                             error={errors.address?.message}
                         />
-                        <div
-                            className="text-small text-right"
-                            style={{
-                                position: 'absolute',
-                                bottom: -5,
-                                right: 0,
-                                transform: 'translateY(100%)',
-                            }}
-                        >
+                        <div className={styles.valueLength}>
                             {(p.value as string)?.length ?? 0}
                         </div>
                     </div>
@@ -90,7 +79,7 @@ function AddAddress({ close, submit, initialValues }: Props) {
                     },
                 }}
                 render={(p) => (
-                    <div style={{ position: 'relative', marginBottom: '2em' }}>
+                    <div className={styles.fieldWrapper}>
                         <Form.TextArea
                             {...p}
                             value={(p.value as string)?.substring(
@@ -100,15 +89,7 @@ function AddAddress({ close, submit, initialValues }: Props) {
                             placeholder="You can add a note here"
                             error={errors.note?.message}
                         />
-                        <div
-                            className="text-small text-right"
-                            style={{
-                                position: 'absolute',
-                                bottom: -5,
-                                right: 0,
-                                transform: 'translateY(100%)',
-                            }}
-                        >
+                        <div className={styles.valueLength}>
                             {(p.value as string)?.length ?? 0} /{' '}
                             {NOTE_MAX_LENGTH}
                         </div>

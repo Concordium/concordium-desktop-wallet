@@ -1,0 +1,13 @@
+.fieldWrapper {
+    position: relative;
+    margin-bottom: 2em;
+}
+
+.valueLength {
+    composes: textRight from global;
+    composes: textSmall from global;
+    position: absolute;
+    bottom: -5px;
+    right: 0;
+    transform: translateY(100%);
+}

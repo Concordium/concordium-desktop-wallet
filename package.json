@@ -42,7 +42,7 @@
     "{*.json,.{babelrc,eslintrc,prettierrc,stylelintrc}}": [
       "prettier --ignore-path .eslintignore --parser json --write"
     ],
-    "*.{css,scss}": [
+    "*.{css,scss} --ignore-pattern *.module.{css,scss}": [
       "stylelint --ignore-path .eslintignore --syntax scss --fix",
       "prettier --ignore-path .eslintignore --single-quote --write"
     ],

@@ -7,7 +7,7 @@ import {
     removeFromAddressBook,
     updateAddressBookEntry,
 } from '../features/AddressBookSlice';
-import AddAddress from './AddAddress';
+import AddAddress from './AddAddress/AddAddress';
 
 export default function AddressBookElementView() {
     const [open, setOpen] = useState(false);
