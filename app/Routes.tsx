@@ -2,22 +2,22 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import routes from './constants/routes.json';
-import App from './containers/App';
-import HomePage from './containers/HomePage';
-import TestPage from './containers/TestPage';
-import AccountPage from './containers/AccountPage';
-import TodoPage from './containers/TodoPage';
-import IdentityPage from './containers/IdentityPage';
-import AddressBookPage from './containers/AddressBookPage';
-import IssuancePage from './containers/IssuancePage';
-import AccountCreation from './containers/AccountCreationPage';
-import SettingsPage from './containers/SettingsPage';
-import MultiSignaturePage from './containers/MultiSignaturePage';
-import ProposalView from './components/multisig/ProposalView';
-import SignTransactionView from './components/multisig/SignTransactionView';
-import ExportSignedTransactionView from './components/multisig/ExportSignedTransactionView';
-import MultiSignatureCreateProposalView from './components/multisig/MultiSignatureCreateProposalView';
-import SubmittedProposalView from './components/multisig/SubmittedProposalView';
+import App from './shell/App';
+import HomePage from './pages/HomePage';
+import TestPage from './pages/TestPage';
+import AccountPage from './pages/Accounts/AccountPage';
+import TodoPage from './pages/TodoPage';
+import IdentityPage from './pages/Identities/IdentityPage';
+import AddressBookPage from './pages/AddressBook/AddressBookPage';
+import IssuancePage from './pages/IdentityIssuance/IssuancePage';
+import AccountCreation from './pages/AccountCreation/AccountCreationPage';
+import SettingsPage from './pages/settings/SettingsPage';
+import MultiSignaturePage from './pages/multisig/MultiSignaturePage';
+import ProposalView from './pages/multisig/ProposalView';
+import SignTransactionView from './pages/multisig/SignTransactionView';
+import ExportSignedTransactionView from './pages/multisig/ExportSignedTransactionView';
+import MultiSignatureCreateProposalView from './pages/multisig/MultiSignatureCreateProposalView';
+import SubmittedProposalView from './pages/multisig/SubmittedProposalView';
 
 export default function Routes() {
     return (
