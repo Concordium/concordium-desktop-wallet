@@ -10,6 +10,7 @@ import {
     Segment,
 } from 'semantic-ui-react';
 import { parse, stringify } from 'json-bigint';
+import { push } from 'connected-react-router';
 import {
     currentProposalSelector,
     updateCurrentProposal,
@@ -32,6 +33,7 @@ import {
 import { hashSha256 } from '../../utils/serializationHelpers';
 import getMultiSignatureTransactionStatus from '../../utils/TransactionStatusPoller';
 import SimpleErrorModal, { ModalErrorInput } from '../SimpleErrorModal';
+import routes from '../../constants/routes.json';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -127,6 +129,12 @@ export default function ProposalView() {
             };
             updateCurrentProposal(dispatch, submittedProposal);
             getMultiSignatureTransactionStatus(submittedProposal, dispatch);
+            dispatch(
+                push({
+                    pathname: routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION,
+                    state: stringify(submittedProposal),
+                })
+            );
         } else {
             const failedProposal = {
                 ...currentProposal,

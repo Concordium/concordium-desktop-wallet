@@ -28,7 +28,9 @@ function getName(transaction) {
 function buildOutgoingAmountStrings(total, subtotal, fee) {
     return {
         amount: `${displayAsGTU(total)}`,
-        amountFormula: `${displayAsGTU(-subtotal)} +${displayAsGTU(fee)} Fee`,
+        amountFormula: `${displayAsGTU(-BigInt(subtotal))} +${displayAsGTU(
+            fee
+        )} Fee`,
     };
 }
 
@@ -49,7 +51,8 @@ function parseAmount(transaction) {
                 if (transaction.decryptedAmount) {
                     return buildOutgoingAmountStrings(
                         transaction.decryptedAmount,
-                        transaction.decryptedAmount - transaction.cost,
+                        BigInt(transaction.decryptedAmount) -
+                            BigInt(transaction.cost),
                         transaction.cost
                     );
                 }
