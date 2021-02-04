@@ -8,7 +8,7 @@ import {
     chosenAccountInfoSelector,
 } from '../features/AccountSlice';
 import { updateTransactions } from '../features/TransactionSlice';
-import styles from './Accounts.css';
+import styles from './Accounts.module.scss';
 import routes from '../constants/routes.json';
 import moreActions from './MoreActions';
 import simpleTransfer from './Transfers/SimpleTransfer';

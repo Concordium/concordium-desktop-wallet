@@ -11,7 +11,7 @@ import {
     confirmInitialAccount,
 } from '../../features/AccountSlice';
 import routes from '../../constants/routes.json';
-import styles from './IdentityIssuance.css';
+import styles from './IdentityIssuance.module.scss';
 import {
     getGlobal,
     performIdObjectRequest,
