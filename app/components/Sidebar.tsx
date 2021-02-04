@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Icon, Menu } from 'semantic-ui-react';
 import routes from '../constants/routes.json';
+import { version } from '../../package.json';
 
 export default function Routes() {
     const location = useLocation();
@@ -52,6 +53,9 @@ export default function Routes() {
                     {member.title}
                 </Menu.Item>
             ))}
+            <div style={{ position: 'absolute', bottom: '0', width: '100%' }}>
+                <Menu.Item key="version">V{version}</Menu.Item>
+            </div>
         </Menu>
     );
 }

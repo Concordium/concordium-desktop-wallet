@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Container, Header } from 'semantic-ui-react';
-import styles from './Accounts.css';
+import styles from './Accounts.module.scss';
 import { displayAsGTU } from '../utils/gtu';
 import {
     setViewingShielded,

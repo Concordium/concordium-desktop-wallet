@@ -3,8 +3,9 @@
  *        See https://github.com/webpack-contrib/sass-loader#imports
  */
 
+//  Third party
 @import '~semantic-ui-css/semantic.min.css';
 
-body {
-    word-wrap: break-word;
-}
+// Global styles
+@import 'config/bundle';
+@import 'elements/bundle';
