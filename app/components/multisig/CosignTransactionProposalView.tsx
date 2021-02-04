@@ -4,7 +4,6 @@ import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { parse } from 'json-bigint';
 import { hashSha256 } from '../../utils/serializationHelpers';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import routes from '../../constants/routes.json';
 import UpdateInstructionHandler from '../../utils/UpdateInstructionHandler';
 import {
@@ -23,7 +22,11 @@ interface TransactionInput {
     type: string;
 }
 
-export default function SignTransactionView({ location }: Props) {
+/**
+ * Component that displays an overview of an imported multi signature transaction proposal
+ * that is to be signed.
+ */
+export default function CosignTransactionProposalView({ location }: Props) {
     const [transactionHash, setTransactionHash] = useState<string>();
     const [transactionHandler, setTransactionHandler] = useState<
         TransactionHandler<UpdateInstruction | AccountTransaction>
@@ -40,6 +43,9 @@ export default function SignTransactionView({ location }: Props) {
     const { transaction } = location.state;
     const { type } = location.state;
 
+    // TODO Support account transactions too.
+    const updateInstruction = parse(transaction);
+
     useEffect(() => {
         const transactionObject = parse(transaction);
         // TODO Add AccountTransactionHandler here when implemented.
@@ -54,7 +60,9 @@ export default function SignTransactionView({ location }: Props) {
         setTransactionHash(hashed);
     }, [setTransactionHandler, setTransactionHash, type, transaction]);
 
-    async function signingFunction(ledger: ConcordiumLedgerClient) {
+    async function signingFunction<ConcordiumLedgerClient>(
+        ledger: ConcordiumLedgerClient
+    ) {
         const signatureBytes = await transactionHandler.signTransaction(ledger);
         const signature = signatureBytes.toString('hex');
 
@@ -73,9 +81,13 @@ export default function SignTransactionView({ location }: Props) {
         'The transaction details are correct',
     ];
 
+    if (!transactionHash) {
+        return null;
+    }
+
     return (
         <GenericSignTransactionProposalView
-            transaction={transaction}
+            transaction={updateInstruction}
             transactionHash={transactionHash}
             signFunction={signingFunction}
             checkboxes={checkboxLabels}

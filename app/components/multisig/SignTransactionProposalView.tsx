@@ -4,7 +4,6 @@ import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { parse, stringify } from 'json-bigint';
 import { hashSha256 } from '../../utils/serializationHelpers';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import routes from '../../constants/routes.json';
 import UpdateInstructionHandler from '../../utils/UpdateInstructionHandler';
 import {
@@ -21,6 +20,11 @@ interface Props {
     location: LocationDescriptorObject<string>;
 }
 
+/**
+ * Component that displays an overview of a  multi signature transaction
+ * proposal that is to be signed before being generated and persisted
+ * to the database.
+ */
 export default function SignTransactionProposalView({ location }: Props) {
     const [transactionHash, setTransactionHash] = useState<string>();
     const [transactionHandler, setTransactionHandler] = useState<
@@ -58,7 +62,9 @@ export default function SignTransactionProposalView({ location }: Props) {
         setTransactionHash(hashed);
     }, [setTransactionHandler, setTransactionHash, type, transaction]);
 
-    async function signingFunction(ledger: ConcordiumLedgerClient) {
+    async function signingFunction<ConcordiumLedgerClient>(
+        ledger: ConcordiumLedgerClient
+    ) {
         const signatureBytes = await transactionHandler.signTransaction(ledger);
         const signature = signatureBytes.toString('hex');
 
@@ -79,6 +85,10 @@ export default function SignTransactionProposalView({ location }: Props) {
 
         // Navigate to the page that displays the current proposal from the state.
         dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
+    }
+
+    if (!transactionHash) {
+        return null;
     }
 
     return (

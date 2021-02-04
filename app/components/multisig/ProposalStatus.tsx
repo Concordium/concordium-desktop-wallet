@@ -39,7 +39,7 @@ export default function ProposalStatus({ proposal }: Props) {
                 </Grid.Column>
             </Grid.Row>
             <Grid.Row centered>
-                <TransactionDetails updateInstruction={updateInstruction} />
+                <TransactionDetails transaction={updateInstruction} />
             </Grid.Row>
             <Grid.Row>
                 <Grid.Column>

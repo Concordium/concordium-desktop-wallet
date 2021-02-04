@@ -17,12 +17,12 @@ import { AccountTransaction, UpdateInstruction } from '../../utils/types';
 interface Props {
     transaction: AccountTransaction | UpdateInstruction;
     transactionHash: string;
-    signFunction(): void;
+    signFunction: <T>(input: T) => Promise<void>;
     checkboxes: string[];
     signText: string;
 }
 
-export default function SignTransactionView({
+export default function GenericSignTransactionProposalView({
     transaction,
     transactionHash,
     signFunction,
@@ -35,7 +35,7 @@ export default function SignTransactionView({
     );
 
     // The device component should only be displayed if the user has clicked
-    // to co-sign the transaction.
+    // to sign the transaction.
     let ledgerComponent;
     if (signing) {
         ledgerComponent = <LedgerComponent ledgerCall={signFunction} />;
@@ -53,9 +53,7 @@ export default function SignTransactionView({
                 <Grid columns={2} divided textAlign="center" padded>
                     <Grid.Row>
                         <Grid.Column>
-                            <TransactionDetails
-                                updateInstruction={transaction}
-                            />
+                            <TransactionDetails transaction={transaction} />
                         </Grid.Column>
                         <Grid.Column>
                             <TransactionHashView
