@@ -7,7 +7,7 @@ import { Identity, IdentityObject } from '../../utils/types';
 import IdentityListElement from '../IdentityListElement';
 
 interface Props {
-    identity: Identity | undefined;
+    identity: Identity;
     setChosenAttributes: (attributes: string[]) => void;
 }
 
@@ -23,10 +23,6 @@ export default function AccountCreationPickAttributes({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [attributes, setAttributes] = useState<Attribute[]>([]);
-
-    if (!identity) {
-        throw new Error('Unexpected missing indentity');
-    }
 
     useEffect(() => {
         const identityObject: IdentityObject = JSON.parse(
