@@ -47,7 +47,13 @@ export function toMicroUnits(amount: string): BigInt {
 export function displayAsGTU(microGTUAmount: BigInt | string) {
     let amount = microGTUAmount;
     if (typeof microGTUAmount === 'string') {
-        amount = toMicroUnits(microGTUAmount);
+        try {
+            amount = BigInt(microGTUAmount);
+        } catch (e) {
+            throw new Error(
+                'Given string that was not a valid microGTU string.'
+            );
+        }
     }
     const isNegative = amount < 0;
     const absolute = isNegative ? -amount : amount;
