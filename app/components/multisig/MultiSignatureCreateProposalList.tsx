@@ -6,7 +6,6 @@ import { foundationTransactionsEnabledSelector } from '../../features/SettingsSl
 import { UpdateType } from '../../utils/types';
 
 // TODO Show non-foundation transaction types.
-// TODO Dynamically set state when linking to the transaction type that was chosen.
 
 /**
  * Component that displays a menu containing the available multi signature
@@ -34,10 +33,10 @@ export default function MultiSignatureCreateProposalView() {
                 <Menu.Item
                     key={item}
                     as={Link}
-                    // TODO Dynamically set state depending on the transaction type. Must also be able to handle account transaction types.
+                    // TODO Must also be able to handle account transaction types.
                     to={{
                         pathname: `/MultiSignatureTransaction/create`,
-                        state: UpdateType.UpdateMicroGTUPerEuro,
+                        state: UpdateType[item],
                     }}
                 >
                     {item}

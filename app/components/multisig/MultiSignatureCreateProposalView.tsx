@@ -12,6 +12,7 @@ import {
 } from '../../utils/client';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
+import UpdateEuroPerEnergy from './UpdateEuroPerEnergy';
 
 interface Location {
     state: UpdateType;
@@ -41,9 +42,12 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                 return (
                     <UpdateMicroGtuPerEuroRate blockSummary={blockSummary} />
                 );
+            case UpdateType.UpdateEuroPerEnergy:
+                return <UpdateEuroPerEnergy blockSummary={blockSummary} />;
             default:
-                throw new Error(
-                    'An unsupported transaction type was encountered.'
+                return (
+                    // TODO Update when all types have been implemented.
+                    <Header>Not implemented yet</Header>
                 );
         }
     }

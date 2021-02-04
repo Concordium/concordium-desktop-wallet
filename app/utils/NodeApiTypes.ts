@@ -33,6 +33,7 @@ interface Authorizations {
 
 interface ChainParameters {
     microGTUPerEuro: ExchangeRate;
+    euroPerEnergy: ExchangeRate;
 }
 
 interface Updates {
