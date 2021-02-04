@@ -30,6 +30,8 @@ export default class UpdateInstructionHandler
         switch (type) {
             case UpdateType.UpdateMicroGTUPerEuro:
                 return ledger.signMicroGtuPerEuro(this.transaction, path);
+            case UpdateType.UpdateEuroPerEnergy:
+                return ledger.signEuroPerEnergy(this.transaction, path);
             default:
                 throw Error(`Unsupported UpdateType: ${type}`);
         }
