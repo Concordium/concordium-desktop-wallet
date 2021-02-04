@@ -7,7 +7,7 @@ import {
     addressBookSelector,
     addToAddressBook,
 } from '../../features/AddressBookSlice';
-import AddAddress from '../../components/AddAddress';
+import AddressBookEntryForm from '../../components/AddressBookEntryForm';
 import AddressBookListElement from './AddressBookListElement';
 
 export default function AddressBookList(): JSX.Element {
@@ -45,7 +45,7 @@ export default function AddressBookList(): JSX.Element {
                         Add an entry to your address book
                     </Modal.Header>
                     <Modal.Content>
-                        <AddAddress
+                        <AddressBookEntryForm
                             close={() => setOpen(false)}
                             submit={submitAddress}
                         />

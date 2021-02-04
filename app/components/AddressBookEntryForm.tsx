@@ -8,7 +8,7 @@ interface Props {
     initialValues?: AddressBookEntry;
 }
 
-function AddAddress({ close, submit, initialValues }: Props) {
+function AddressBookEntryForm({ close, submit, initialValues }: Props) {
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [note, setNote] = useState('');
@@ -59,8 +59,8 @@ function AddAddress({ close, submit, initialValues }: Props) {
     );
 }
 
-AddAddress.defaultProps = {
+AddressBookEntryForm.defaultProps = {
     initialValues: undefined,
 };
 
-export default AddAddress;
+export default AddressBookEntryForm;

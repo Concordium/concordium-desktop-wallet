@@ -7,7 +7,7 @@ import {
     removeFromAddressBook,
     updateAddressBookEntry,
 } from '../../features/AddressBookSlice';
-import AddAddress from '../../components/AddAddress';
+import AddressBookEntryForm from '../../components/AddressBookEntryForm';
 
 export default function AddressBookElementView() {
     const [open, setOpen] = useState(false);
@@ -60,7 +60,7 @@ export default function AddressBookElementView() {
                         Edit an entry in your address book
                     </Modal.Header>
                     <Modal.Content>
-                        <AddAddress
+                        <AddressBookEntryForm
                             initialValues={chosenEntry}
                             close={() => setOpen(false)}
                             submit={submitAddress}
