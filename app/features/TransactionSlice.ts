@@ -13,12 +13,13 @@ import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
-    TransactionKindId,
     OriginType,
     Account,
     AccountTransaction,
     IncomingTransaction,
     Dispatch,
+    SimpleTransfer,
+    instanceOfSimpleTransfer,
 } from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
 
@@ -209,7 +210,7 @@ export async function updateTransactions(account: Account) {
 }
 
 function convertSimpleTransfer(
-    transaction: AccountTransaction,
+    transaction: SimpleTransfer,
     hash: string
 ): TransferTransaction {
     const { payload } = transaction;
@@ -238,8 +239,8 @@ export async function addPendingTransaction(
     transaction: AccountTransaction,
     hash: string
 ) {
-    let convertedTransaction;
-    if (transaction.transactionKind === TransactionKindId.Simple_transfer) {
+    let convertedTransaction: TransferTransaction;
+    if (instanceOfSimpleTransfer(transaction)) {
         convertedTransaction = convertSimpleTransfer(transaction, hash);
     } else {
         throw new Error('unsupported transaction type - please implement');
@@ -273,7 +274,7 @@ export async function confirmTransaction(
     );
     return updateTransaction(
         { transactionHash },
-        { status: TransactionStatus.Finalized, cost, success }
+        { status: TransactionStatus.Finalized, cost: cost.toString(), success }
     );
 }
 

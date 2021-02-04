@@ -23,7 +23,7 @@ function createTransaction(
     microGtuPerEuro: BigInt,
     sequenceNumber: BigInt,
     threshold: number
-): MultiSignatureTransaction {
+): Partial<MultiSignatureTransaction> {
     const exchangeRatePayload: ExchangeRate = {
         numerator: microGtuPerEuro,
         denominator: 1n,

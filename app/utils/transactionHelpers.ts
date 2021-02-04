@@ -1,9 +1,9 @@
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './client';
 import {
-    AccountTransaction,
     TransactionKindId,
     TransferTransaction,
+    SimpleTransfer,
 } from './types';
 import { sleep } from './httpRequests';
 /**
@@ -67,7 +67,7 @@ export async function createSimpleTransferTransaction(
 ) {
     const nonceJSON = await getNextAccountNonce(fromAddress);
     const { nonce } = JSON.parse(nonceJSON.getValue());
-    const transferTransaction: AccountTransaction = {
+    const transferTransaction: SimpleTransfer = {
         sender: fromAddress,
         nonce,
         energyAmount, // TODO: Does this need to be set by the user?

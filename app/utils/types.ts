@@ -1,7 +1,6 @@
-import { Dispatch as GenericDispatch } from 'react';
-import { PayloadAction } from '@reduxjs/toolkit';
+import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 
-export type Dispatch = GenericDispatch<PayloadAction>;
+export type Dispatch = GenericDispatch<AnyAction>;
 
 export type Hex = string;
 type Proofs = Hex;
@@ -13,7 +12,7 @@ export enum SchemeId {
 }
 
 export interface VerifyKey {
-    schemeId: SchemeId;
+    schemeId: string;
     verifyKey: Hex;
 }
 
@@ -33,20 +32,20 @@ export interface Versioned<T> {
 
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
-export interface ChosenAttributes {
-    countryOfResidence: string;
-    dob: string;
-    firstName: string;
-    idDocExpiresAt: string;
-    idDocIsseudAt: string;
-    idDocIssuer: string;
-    idDocNo: string;
-    idDocType: string;
-    lastName: string;
-    nationalIdNo: string;
-    nationality: string;
-    sex: number;
-    taxIdNo: string;
+export enum ChosenAttributes {
+    countryOfResidence,
+    dob,
+    firstName,
+    idDocExpiresAt,
+    idDocIsseudAt,
+    idDocIssuer,
+    idDocNo,
+    idDocType,
+    lastName,
+    nationalIdNo,
+    nationality,
+    sex,
+    taxIdNo,
 }
 
 // Contains the attributes of an identity.
@@ -54,7 +53,7 @@ export interface AttributeList {
     createdAt: string;
     validTo: string;
     maxAccounts: number;
-    chosenAttributes: ChosenAttributes;
+    chosenAttributes: Record<string, string>;
 }
 
 // Reflects the structure of an identity's IdentityObject
@@ -172,6 +171,10 @@ export interface AccountTransaction {
     expiry: string;
     transactionKind: TransactionKindId;
     payload: TransactionPayload;
+}
+
+export interface SimpleTransfer extends AccountTransaction {
+    payload: SimpleTransferPayload;
 }
 
 // Types of block items, and their identifier numbers
@@ -312,7 +315,7 @@ export interface AccountInfo {
 export interface ScheduleItem {
     amount: string;
     transactions: Hex[];
-    timestamp: number;
+    timestamp: string;
 }
 
 // A description of an entity, used for Identity Provider and Anonymity Revoker
@@ -465,6 +468,12 @@ export function instanceOfUpdateInstruction(
     return 'header' in object;
 }
 
+export function instanceOfSimpleTransfer(
+    object: AccountTransaction
+): object is SimpleTransfer {
+    return object.transactionKind === TransactionKindId.Simple_transfer;
+}
+
 /**
  * Interface definition for classes that can serialize and handle
  * signing of the different transaction types.
@@ -495,7 +504,7 @@ export enum MultiSignatureTransactionStatus {
  */
 export interface MultiSignatureTransaction {
     // logical id in the database
-    id?: number;
+    id: number;
     // The JSON serialization of the transaction
     transaction: string;
     // The minimum required signatures for the transaction

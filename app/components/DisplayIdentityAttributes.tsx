@@ -1,9 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Grid, Header } from 'semantic-ui-react';
-import attributeNames from '../constants/attributeNames.json';
+import attributeNamesJson from '../constants/attributeNames.json';
 import { chosenAccountInfoSelector } from '../features/AccountSlice';
 import SidedText from './SidedText';
+
+const attributeNames: Record<string, string> = attributeNamesJson;
 
 /**
  *  DIsplays the revealed Attributes of the chosen account.
@@ -30,13 +32,15 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
     }
     return (
         <Grid container columns={2} divided="vertically">
-            {attributeKeys.map((attributeKey: string) => (
-                <SidedText
-                    key={attributeKey}
-                    left={attributeNames[attributeKey]}
-                    right={attributes[attributeKey]}
-                />
-            ))}
+            {attributeKeys.map((attributeKey: string) => {
+                return (
+                    <SidedText
+                        key={attributeKey}
+                        left={attributeNames[attributeKey]}
+                        right={attributes[attributeKey]}
+                    />
+                );
+            })}
         </Grid>
     );
 }

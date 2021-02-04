@@ -116,6 +116,12 @@ export default function ProposalView() {
     ).toString('hex');
 
     async function submitTransaction() {
+        if (!currentProposal) {
+            // TODO: can we remove this without getting a type error.
+            throw new Error(
+                'The proposal page should not be loaded without a proposal in the state.'
+            );
+        }
         const payload = serializeForSubmission(instruction);
         const submitted = (await sendTransaction(payload)).getValue();
         const modifiedProposal: MultiSignatureTransaction = {

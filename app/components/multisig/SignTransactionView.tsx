@@ -63,7 +63,10 @@ export default function SignTransactionView({ location }: Props) {
 
     const [transactionHash, setTransactionHash] = useState<string>();
     const [transactionHandler] = useState<
-        TransactionHandler<UpdateInstruction | AccountTransaction>
+        TransactionHandler<
+            UpdateInstruction | AccountTransaction,
+            ConcordiumLedgerClient
+        >
     >(() => createTransactionHandler(location.state));
 
     const dispatch = useDispatch();

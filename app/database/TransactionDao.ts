@@ -27,7 +27,7 @@ function partition<T>(arr: T[], criteria: (t: T) => boolean) {
 
 export async function updateTransaction(
     identifier: Record<string, unknown>,
-    updatedValues: Record<string, unknown>
+    updatedValues: Partial<TransferTransaction>
 ) {
     return (await knex())(transactionTable)
         .where(identifier)

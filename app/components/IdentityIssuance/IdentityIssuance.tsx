@@ -5,18 +5,13 @@ import PickProvider from './PickProvider';
 import PickName from './PickName';
 import GeneratePage from './GeneratePage';
 import FinalPage from './FinalPage';
-import {
-    IdentityProvider,
-    IdentityProviderPlaceHolder,
-} from '../../utils/types';
+import { IdentityProvider } from '../../utils/types';
 
 /**
  * The Last route is the default (because it has no path)
  */
 export default function IdentityIssuance(): JSX.Element {
-    const [provider, setProvider] = useState<IdentityProvider>(
-        IdentityProviderPlaceHolder
-    );
+    const [provider, setProvider] = useState<IdentityProvider | undefined>();
     const [initialAccountName, setInitialAccountName] = useState<string>('');
     const [identityName, setIdentityName] = useState<string>('');
 

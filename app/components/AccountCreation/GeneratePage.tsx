@@ -93,7 +93,7 @@ async function createAccount(
 
 interface Props {
     accountName: string;
-    identity: Identity;
+    identity: Identity | undefined;
     attributes: string[];
 }
 
@@ -104,6 +104,10 @@ export default function AccountCreationGenerate({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [text, setText] = useState<string>();
+
+    if (!identity) {
+        throw new Error('Unexpected missing indentity');
+    }
 
     useEffect(() => {
         createAccount(accountName, identity, attributes, setText, dispatch)

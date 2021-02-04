@@ -1,5 +1,7 @@
 import PromiseWorker from 'promise-worker';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error : has no default export.
 import RustWorker from './rust.worker';
 import {
     PublicInformationForIp,
@@ -42,12 +44,11 @@ async function getSecretsFromLedger(
 // onto the key hex value, and returns the prepended versions.
 function prependKeyType(keys: VerifyKey[]) {
     return keys.map((key) => {
-        if (key.schemeId in SchemeId) {
+        const scheme = key.schemeId as keyof typeof SchemeId;
+        if (SchemeId[scheme]) {
             return {
                 schemeId: key.schemeId,
-                verifyKey: `${toHex(SchemeId[key.schemeId], 2)}${
-                    key.verifyKey
-                }`,
+                verifyKey: `${toHex(SchemeId[scheme], 2)}${key.verifyKey}`,
             };
         }
         throw new Error('Unknown key type');

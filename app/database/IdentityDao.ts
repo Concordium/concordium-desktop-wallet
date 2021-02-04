@@ -21,7 +21,7 @@ export async function getAllIdentities(): Promise<Identity[]> {
     return (await knex()).select().table(identitiesTable);
 }
 
-export async function insertIdentity(identity: Identity) {
+export async function insertIdentity(identity: Partial<Identity>) {
     return (await knex())(identitiesTable).insert(identity);
 }
 

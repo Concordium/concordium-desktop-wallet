@@ -57,7 +57,7 @@ const accountsSlice = createSlice({
                     );
                 } else {
                     state.chosenAccount = undefined;
-                    state.chosenAccountIndex = undefined;
+                    state.chosenAccountIndex = -1;
                 }
             }
         },

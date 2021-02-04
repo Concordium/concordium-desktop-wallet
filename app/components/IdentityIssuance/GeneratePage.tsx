@@ -47,13 +47,18 @@ async function createIdentityObjectRequest(
 async function handleIdentityProviderLocation(
     iframeRef: RefObject<HTMLIFrameElement>
 ): Promise<string> {
-    return new Promise((resolve) => {
-        iframeRef.current.addEventListener('did-navigate', (e: Event) => {
-            const loc = e.url;
-            if (loc.includes(redirectUri)) {
-                resolve(loc.substring(loc.indexOf('=') + 1));
-            }
-        });
+    return new Promise((resolve, reject) => {
+        if (!iframeRef.current) {
+            reject(new Error('Unexpected missing reference to webView.'));
+        } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            iframeRef.current.addEventListener('did-navigate', (e: any) => {
+                const loc = e.url;
+                if (loc.includes(redirectUri)) {
+                    resolve(loc.substring(loc.indexOf('=') + 1));
+                }
+            });
+        }
     });
 }
 
@@ -146,7 +151,7 @@ async function generateIdentity(
 interface Props {
     identityName: string;
     accountName: string;
-    provider: IdentityProvider;
+    provider: IdentityProvider | undefined;
 }
 
 export default function IdentityIssuanceGenerate({
@@ -158,6 +163,10 @@ export default function IdentityIssuanceGenerate({
     const [text, setText] = useState<string>();
     const [location, setLocation] = useState<string>();
     const iframeRef = useRef<HTMLIFrameElement>(null);
+
+    if (!provider) {
+        throw new Error('unexpected missing identity Provder');
+    }
 
     useEffect(() => {
         generateIdentity(

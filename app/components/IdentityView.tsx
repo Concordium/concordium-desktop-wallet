@@ -4,7 +4,9 @@ import { List, Grid } from 'semantic-ui-react';
 import { chosenIdentitySelector } from '../features/IdentitySlice';
 import IdentityListElement from './IdentityListElement';
 import { IdentityObject, IdentityStatus } from '../utils/types';
-import attributeNames from '../constants/attributeNames.json';
+import attributeNamesJson from '../constants/attributeNames.json';
+
+const attributeNames: Record<string, string> = attributeNamesJson;
 
 /**
  * Detailed view of the chosen identity.

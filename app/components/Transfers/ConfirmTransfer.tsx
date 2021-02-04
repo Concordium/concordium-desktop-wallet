@@ -10,11 +10,7 @@ import {
     createSimpleTransferTransaction,
     waitForFinalization,
 } from '../../utils/transactionHelpers';
-import {
-    Account,
-    AccountTransaction,
-    AddressBookEntry,
-} from '../../utils/types';
+import { Account, SimpleTransfer, AddressBookEntry } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import locations from '../../constants/transferLocations.json';
 import {
@@ -27,10 +23,10 @@ import { getAccountPath } from '../../features/ledger/Path';
 
 export interface Props {
     account: Account;
-    amount: BigInt;
+    amount: bigint;
     recipient: AddressBookEntry;
     setLocation(location: string): void;
-    setTransaction(transaction: AccountTransaction): void;
+    setTransaction(transaction: SimpleTransfer): void;
 }
 
 /**

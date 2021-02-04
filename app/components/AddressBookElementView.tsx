@@ -26,6 +26,7 @@ export default function AddressBookElementView() {
             name,
             address,
             note,
+            readOnly: false,
         };
         updateAddressBookEntry(dispatch, chosenEntry.name, entry);
     }

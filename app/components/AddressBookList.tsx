@@ -24,6 +24,7 @@ export default function AddressBookList(): JSX.Element {
             name,
             address,
             note,
+            readOnly: false,
         };
         addToAddressBook(dispatch, entry);
     }
