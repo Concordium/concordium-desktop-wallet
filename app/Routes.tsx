@@ -9,7 +9,7 @@ import AccountPage from './pages/Accounts/AccountPage';
 import TodoPage from './pages/TodoPage';
 import IdentityPage from './pages/Identities/IdentityPage';
 import AddressBookPage from './pages/AddressBook/AddressBookPage';
-import IssuancePage from './pages/IdentityIssuance/IssuancePage';
+import IssuancePage from './pages/IdentityIssuance/IdentityIssuancePage';
 import AccountCreation from './pages/AccountCreation/AccountCreationPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import MultiSignaturePage from './pages/multisig/MultiSignaturePage';

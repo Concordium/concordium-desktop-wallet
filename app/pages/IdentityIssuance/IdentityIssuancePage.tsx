@@ -10,7 +10,7 @@ import { IdentityProvider } from '../../utils/types';
 /**
  * The Last route is the default (because it has no path)
  */
-export default function IdentityIssuance(): JSX.Element {
+export default function IdentityIssuancePage(): JSX.Element {
     const [provider, setProvider] = useState<IdentityProvider | undefined>();
     const [initialAccountName, setInitialAccountName] = useState<string>('');
     const [identityName, setIdentityName] = useState<string>('');
