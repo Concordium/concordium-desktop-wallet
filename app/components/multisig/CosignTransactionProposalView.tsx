@@ -1,23 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import {
-    Button,
-    Checkbox,
-    Container,
-    Divider,
-    Form,
-    Grid,
-    Header,
-    Segment,
-} from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
 import { parse } from 'json-bigint';
 import { hashSha256 } from '../../utils/serializationHelpers';
-import LedgerComponent from '../ledger/LedgerComponent';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import TransactionDetails from '../TransactionDetails';
-import TransactionHashView from '../TransactionHashView';
 import routes from '../../constants/routes.json';
 import UpdateInstructionHandler from '../../utils/UpdateInstructionHandler';
 import {
@@ -25,6 +12,7 @@ import {
     TransactionHandler,
     UpdateInstruction,
 } from '../../utils/types';
+import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 
 interface Props {
     location: LocationDescriptorObject<TransactionInput>;
@@ -36,14 +24,6 @@ interface TransactionInput {
 }
 
 export default function SignTransactionView({ location }: Props) {
-    const [cosign, setCosign] = useState(false);
-    const [hashMatches, setHashMatches] = useState(false);
-    const [pictureMatches, setPictureMatches] = useState(false);
-    const [
-        transactionDetailsAreCorrect,
-        setTransactionDetailsAreCorrect,
-    ] = useState(false);
-
     const [transactionHash, setTransactionHash] = useState<string>();
     const [transactionHandler, setTransactionHandler] = useState<
         TransactionHandler<UpdateInstruction | AccountTransaction>
@@ -87,91 +67,19 @@ export default function SignTransactionView({ location }: Props) {
         );
     }
 
-    // The device component should only be displayed if the user has clicked
-    // to co-sign the transaction.
-    let ledgerComponent;
-    if (cosign) {
-        ledgerComponent = <LedgerComponent ledgerCall={signingFunction} />;
-    } else {
-        ledgerComponent = null;
-    }
+    const checkboxLabels = [
+        'The hash matches the one received exactly',
+        'The picture matches the one received exactly',
+        'The transaction details are correct',
+    ];
 
     return (
-        <Container>
-            <Segment>
-                <Header textAlign="center">
-                    Transaction signing confirmation | Transaction Type
-                </Header>
-                <Divider />
-                <Grid columns={2} divided textAlign="center" padded>
-                    <Grid.Row>
-                        <Grid.Column>
-                            <TransactionDetails
-                                updateInstruction={transaction}
-                            />
-                        </Grid.Column>
-                        <Grid.Column>
-                            <TransactionHashView
-                                transactionHash={transactionHash}
-                            />
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Form>
-                            <Form.Field>
-                                <Checkbox
-                                    label="The hash matches the one received exactly"
-                                    defaultChecked={hashMatches}
-                                    disabled={cosign}
-                                    onChange={() =>
-                                        setHashMatches(!hashMatches)
-                                    }
-                                />
-                            </Form.Field>
-                            <Form.Field>
-                                <Checkbox
-                                    label="The picture matches the one received exactly"
-                                    defaultChecked={pictureMatches}
-                                    disabled={cosign}
-                                    onChange={() =>
-                                        setPictureMatches(!pictureMatches)
-                                    }
-                                />
-                            </Form.Field>
-                            <Form.Field>
-                                <Checkbox
-                                    label="The transaction details are correct"
-                                    defaultChecked={
-                                        transactionDetailsAreCorrect
-                                    }
-                                    disabled={cosign}
-                                    onChange={() =>
-                                        setTransactionDetailsAreCorrect(
-                                            !transactionDetailsAreCorrect
-                                        )
-                                    }
-                                />
-                            </Form.Field>
-                            <Form.Field>
-                                <Button
-                                    positive
-                                    fluid
-                                    onClick={() => setCosign(true)}
-                                    disabled={
-                                        cosign ||
-                                        !hashMatches ||
-                                        !pictureMatches ||
-                                        !transactionDetailsAreCorrect
-                                    }
-                                >
-                                    Co-sign
-                                </Button>
-                            </Form.Field>
-                        </Form>
-                    </Grid.Row>
-                </Grid>
-            </Segment>
-            {ledgerComponent}
-        </Container>
+        <GenericSignTransactionProposalView
+            transaction={transaction}
+            transactionHash={transactionHash}
+            signFunction={signingFunction}
+            checkboxes={checkboxLabels}
+            signText="Co-sign"
+        />
     );
 }

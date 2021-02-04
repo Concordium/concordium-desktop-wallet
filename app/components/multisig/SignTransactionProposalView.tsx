@@ -1,23 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import {
-    Button,
-    Checkbox,
-    Container,
-    Divider,
-    Form,
-    Grid,
-    Header,
-    Segment,
-} from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
 import { parse, stringify } from 'json-bigint';
 import { hashSha256 } from '../../utils/serializationHelpers';
-import LedgerComponent from '../ledger/LedgerComponent';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import TransactionDetails from '../TransactionDetails';
-import TransactionHashView from '../TransactionHashView';
 import routes from '../../constants/routes.json';
 import UpdateInstructionHandler from '../../utils/UpdateInstructionHandler';
 import {
@@ -28,18 +15,13 @@ import {
 } from '../../utils/types';
 import { insert } from '../../database/MultiSignatureProposalDao';
 import { setCurrentProposal } from '../../features/MultiSignatureSlice';
+import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 
 interface Props {
     location: LocationDescriptorObject<string>;
 }
 
 export default function SignTransactionProposalView({ location }: Props) {
-    const [sign, setSign] = useState(false);
-    const [
-        transactionDetailsAreCorrect,
-        setTransactionDetailsAreCorrect,
-    ] = useState(false);
-
     const [transactionHash, setTransactionHash] = useState<string>();
     const [transactionHandler, setTransactionHandler] = useState<
         TransactionHandler<UpdateInstruction | AccountTransaction>
@@ -99,68 +81,13 @@ export default function SignTransactionProposalView({ location }: Props) {
         dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
     }
 
-    // The device component should only be displayed if the user has clicked
-    // to co-sign the transaction.
-    let ledgerComponent;
-    if (sign) {
-        ledgerComponent = <LedgerComponent ledgerCall={signingFunction} />;
-    } else {
-        ledgerComponent = null;
-    }
-
     return (
-        <Container>
-            <Segment>
-                <Header textAlign="center">
-                    Transaction signing confirmation | Transaction Type
-                </Header>
-                <Divider />
-                <Grid columns={2} divided textAlign="center" padded>
-                    <Grid.Row>
-                        <Grid.Column>
-                            <TransactionDetails
-                                updateInstruction={updateInstruction}
-                            />
-                        </Grid.Column>
-                        <Grid.Column>
-                            <TransactionHashView
-                                transactionHash={transactionHash}
-                            />
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Form>
-                            <Form.Field>
-                                <Checkbox
-                                    label="The transaction details are correct"
-                                    defaultChecked={
-                                        transactionDetailsAreCorrect
-                                    }
-                                    disabled={sign}
-                                    onChange={() =>
-                                        setTransactionDetailsAreCorrect(
-                                            !transactionDetailsAreCorrect
-                                        )
-                                    }
-                                />
-                            </Form.Field>
-                            <Form.Field>
-                                <Button
-                                    positive
-                                    fluid
-                                    onClick={() => setSign(true)}
-                                    disabled={
-                                        sign || !transactionDetailsAreCorrect
-                                    }
-                                >
-                                    Sign
-                                </Button>
-                            </Form.Field>
-                        </Form>
-                    </Grid.Row>
-                </Grid>
-            </Segment>
-            {ledgerComponent}
-        </Container>
+        <GenericSignTransactionProposalView
+            transaction={updateInstruction}
+            transactionHash={transactionHash}
+            signFunction={signingFunction}
+            checkboxes={['The transaction details are correct']}
+            signText="Sign"
+        />
     );
 }
