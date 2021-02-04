@@ -111,12 +111,18 @@ export default merge(baseConfig, {
                     },
                     {
                         loader: 'sass-loader',
+                        options: {
+                            sourceMap: true,
+                            sassOptions: {
+                                includePaths: ['node_modules', 'app/styles'],
+                            },
+                        },
                     },
                 ],
             },
-            // SASS support - compile all other .scss files and pipe it to style.css
+            // SASS support - compile all module.scss files and pipe it to style.css
             {
-                test: /^((?!\.global).)*\.(scss|sass)$/,
+                test: /\.module\.(scss|sass)$/,
                 use: [
                     {
                         loader: 'style-loader',
@@ -137,6 +143,12 @@ export default merge(baseConfig, {
                     },
                     {
                         loader: 'sass-loader',
+                        options: {
+                            sourceMap: true,
+                            sassOptions: {
+                                includePaths: ['node_modules', 'app/styles'],
+                            },
+                        },
                     },
                 ],
             },

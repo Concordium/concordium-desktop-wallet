@@ -8,6 +8,7 @@ export async function up(knex: Knex): Promise<void> {
             table.string('name');
             table.string('address').unique();
             table.string('note');
+            table.boolean('readOnly').defaultTo(false);
         }
     );
 }

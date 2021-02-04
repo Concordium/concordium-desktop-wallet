@@ -11,7 +11,7 @@ import {
     confirmInitialAccount,
 } from '../../features/AccountSlice';
 import routes from '../../constants/routes.json';
-import styles from './IdentityIssuance.css';
+import styles from './IdentityIssuance.module.scss';
 import {
     getGlobal,
     performIdObjectRequest,
@@ -20,6 +20,7 @@ import {
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
 import { IdentityProvider } from '../../utils/types';
+import { addToAddressBook } from '../../features/AddressBookSlice';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -74,6 +75,12 @@ async function confirmIdentityAndInitialAccount(
             token.accountAddress,
             token.credential
         );
+        addToAddressBook(dispatch, {
+            name: accountName,
+            address: token.accountAddress,
+            note: `Initial account of ${identityName}`,
+            readOnly: true,
+        });
     } catch (err) {
         if (!token) {
             await rejectIdentity(identityName);

@@ -23,8 +23,11 @@ export async function up(knex: Knex): Promise<void> {
         },
         {
             name: 'Node location',
-            type: SettingTypeEnum.Text,
-            value: '127.0.0.1:5100',
+            type: SettingTypeEnum.Connection,
+            value: JSON.stringify({
+                address: '127.0.0.1',
+                port: '10000',
+            }),
             group: '2',
         },
         {

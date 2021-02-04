@@ -72,3 +72,27 @@ test('A fractional µGTU amount is displayed correctly', () => {
 test('A zero µGTU amount is displayed correctly', () => {
     expect(displayAsGTU(BigInt(0))).toBe(`${getGTUSymbol()}0`);
 });
+
+test('A non-fractional µGTU string is displayed correctly', () => {
+    expect(displayAsGTU('1000000')).toBe(`${getGTUSymbol()}1`);
+});
+
+test('A fractional µGTU string is displayed correctly', () => {
+    expect(displayAsGTU('450000')).toBe(`${getGTUSymbol()}0.45`);
+});
+
+test('A zero µGTU string is displayed correctly', () => {
+    expect(displayAsGTU('0')).toBe(`${getGTUSymbol()}0`);
+});
+
+test('a fractional GTU string throws exception', () => {
+    expect(() => {
+        displayAsGTU('1.04');
+    }).toThrow();
+});
+
+test('a non numeric string throws exception', () => {
+    expect(() => {
+        displayAsGTU('invalidInput');
+    }).toThrow();
+});

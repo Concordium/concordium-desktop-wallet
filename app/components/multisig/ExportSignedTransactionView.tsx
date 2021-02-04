@@ -11,8 +11,8 @@ import {
     Segment,
 } from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
+import { parse } from 'json-bigint';
 import routes from '../../constants/routes.json';
-import { UpdateInstruction } from '../../utils/types';
 import TransactionHashView from '../TransactionHashView';
 import TransactionDetails from '../TransactionDetails';
 import { saveFile } from '../../utils/FileHelper';
@@ -23,7 +23,7 @@ interface Props {
 
 interface Input {
     signature: string;
-    transaction: UpdateInstruction;
+    transaction: string;
     transactionHash: string;
 }
 
@@ -44,9 +44,11 @@ export default function ExportSignedTransactionView({ location }: Props) {
     const { transaction } = location.state;
     const { transactionHash } = location.state;
 
+    const transactionObject = parse(transaction);
+
     async function exportSignedTransaction() {
         const signedTransaction = {
-            ...transaction,
+            ...transactionObject,
             signatures: [signature],
         };
         const signedTransactionJson = JSON.stringify(signedTransaction);
@@ -68,7 +70,9 @@ export default function ExportSignedTransactionView({ location }: Props) {
             <Grid columns={2} divided textAlign="center" padded>
                 <Grid.Row>
                     <Grid.Column>
-                        <TransactionDetails updateInstruction={transaction} />
+                        <TransactionDetails
+                            updateInstruction={transactionObject}
+                        />
                     </Grid.Column>
                     <Grid.Column>
                         <TransactionHashView

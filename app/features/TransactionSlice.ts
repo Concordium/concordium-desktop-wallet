@@ -202,7 +202,8 @@ export async function addPendingTransaction(transaction, hash) {
         transactionKind: TransactionKindString.Transfer,
         transactionHash: hash,
         total: (-(
-            transaction.payload.amount + BigInt(transaction.energyAmount)
+            BigInt(transaction.payload.amount) +
+            BigInt(transaction.energyAmount)
         )).toString(),
         subtotal: (-transaction.payload.amount).toString(),
         cost: transaction.energyAmount,

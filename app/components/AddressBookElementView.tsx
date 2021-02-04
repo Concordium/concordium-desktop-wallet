@@ -49,7 +49,9 @@ export default function AddressBookElementView() {
                     onClose={() => setOpen(false)}
                     onOpen={() => setOpen(true)}
                     open={open}
-                    trigger={<Button>Edit</Button>}
+                    trigger={
+                        <Button disabled={chosenEntry.readOnly}>Edit</Button>
+                    }
                     dimmer="blurring"
                     closeOnDimmerClick={false}
                 >
@@ -66,6 +68,7 @@ export default function AddressBookElementView() {
                 </Modal>
                 <Button
                     negative
+                    disabled={chosenEntry.readOnly}
                     onClick={() => removeFromAddressBook(dispatch, chosenEntry)}
                 >
                     Delete

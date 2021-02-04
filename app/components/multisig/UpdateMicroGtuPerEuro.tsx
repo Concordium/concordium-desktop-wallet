@@ -13,12 +13,17 @@ import {
 import { insert } from '../../database/MultiSignatureProposalDao';
 import createUpdateInstruction from '../../utils/UpdateInstructionHelper';
 import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
+import { BlockSummary } from '../../utils/NodeApiTypes';
 
 /**
  * Creates a multi signature transaction containing an update instruction for updating
  * the micro GTU per euro exchange rate.
  */
-function createTransaction(microGtuPerEuro: BigInt): MultiSignatureTransaction {
+function createTransaction(
+    microGtuPerEuro: BigInt,
+    sequenceNumber: BigInt,
+    threshold: number
+): MultiSignatureTransaction {
     const exchangeRatePayload: ExchangeRate = {
         numerator: microGtuPerEuro,
         denominator: 1n,
@@ -26,29 +31,37 @@ function createTransaction(microGtuPerEuro: BigInt): MultiSignatureTransaction {
 
     const updateInstruction = createUpdateInstruction(
         exchangeRatePayload,
-        UpdateType.UpdateMicroGTUPerEuro
+        UpdateType.UpdateMicroGTUPerEuro,
+        sequenceNumber
     );
-    // TODO The threshold should be read from on-chain parameters.
+
     const multiSignatureTransaction = createMultiSignatureTransaction(
         updateInstruction,
-        1,
+        threshold,
         MultiSignatureTransactionStatus.Open
     );
 
     return multiSignatureTransaction;
 }
 
-export default function UpdateMicroGtuPerEuroRate() {
+interface Props {
+    blockSummary: BlockSummary;
+}
+
+export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
     const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
     const [
         currentMicroGtuPerEuro,
         setCurrentMicroGtuPerEuro,
     ] = useState<BigInt>();
 
-    // TODO This value should be read from on-chain parameters.
     if (!currentMicroGtuPerEuro) {
-        setCurrentMicroGtuPerEuro(BigInt(10000));
-        setMicroGtuPerEuro(BigInt(10000));
+        setCurrentMicroGtuPerEuro(
+            blockSummary.updates.chainParameters.microGTUPerEuro.numerator
+        );
+        setMicroGtuPerEuro(
+            blockSummary.updates.chainParameters.microGTUPerEuro.numerator
+        );
     }
 
     const dispatch = useDispatch();
@@ -56,11 +69,15 @@ export default function UpdateMicroGtuPerEuroRate() {
     async function generateTransaction() {
         if (microGtuPerEuro) {
             const multiSignatureTransaction = createTransaction(
-                microGtuPerEuro
+                microGtuPerEuro,
+                blockSummary.updates.updateQueues.microGTUPerEuro
+                    .nextSequenceNumber,
+                blockSummary.updates.authorizations.microGTUPerEuro.threshold
             );
 
-            // Save to database.
-            await insert(multiSignatureTransaction);
+            // Save to database and use the assigned id to update the local object.
+            const entryId = (await insert(multiSignatureTransaction))[0];
+            multiSignatureTransaction.id = entryId;
 
             // Set the current proposal in the state to the one that was just generated.
             dispatch(setCurrentProposal(multiSignatureTransaction));
@@ -76,12 +93,14 @@ export default function UpdateMicroGtuPerEuroRate() {
             <Divider />
             <Form>
                 <Form.Input
+                    inline
                     width="5"
                     label="Current micro GTU per euro rate"
                     readOnly
                     value={currentMicroGtuPerEuro?.toString()}
                 />
                 <Form.Input
+                    inline
                     width="5"
                     label="New micro GTU per euro rate"
                     value={microGtuPerEuro?.toString()}

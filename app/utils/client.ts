@@ -9,18 +9,19 @@ import {
     GetAddressInfoRequest,
     Empty,
 } from '../proto/concordium_p2p_rpc_pb';
+import { BlockSummary, ConsensusStatus } from './NodeApiTypes';
 
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  */
 
-const port = 10000;
-const clientAddress = '172.31.33.57'; // TODO: This should be a setting? (The user should be able to decide which node to use)
+const defaultDeadlineMs = 15000;
+let client;
+const clientCredentials = credentials.createInsecure();
 
-const client = new P2PClient(
-    `${clientAddress}:${port}`,
-    credentials.createInsecure()
-);
+export function setClientLocation(address, port) {
+    client = new P2PClient(`${address}:${port}`, clientCredentials);
+}
 
 function buildMetaData(): MetaData {
     const meta = new Metadata();
@@ -38,22 +39,31 @@ function buildSendTransactionRequest(
     return request;
 }
 
+/**
+ * Sends a command with GRPC to the node with the provided input.
+ * @param command command to execute
+ * @param input input for the command
+ */
 function sendPromise(command, input) {
+    const defaultDeadline = new Date(new Date().getTime() + defaultDeadlineMs);
     return new Promise<JsonResponse>((resolve, reject) => {
-        command.bind(client)(input, buildMetaData(), (err, response) => {
-            if (err) {
-                return reject(err);
+        client.waitForReady(defaultDeadline, (error) => {
+            if (error) {
+                return reject(error);
             }
-            return resolve(response);
+
+            return command.bind(client)(
+                input,
+                buildMetaData(),
+                (err, response) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(response);
+                }
+            );
         });
     });
-}
-
-export function getBlockSummary(blockHashValue: string): Promise<JsonResponse> {
-    const blockHash = new BlockHash();
-    blockHash.setBlockHash(blockHashValue);
-
-    return sendPromise(client.getBlockSummary, blockHash);
 }
 
 export function sendTransaction(
@@ -81,8 +91,55 @@ export function getNextAccountNonce(address: string): Promise<JsonResponse> {
     return sendPromise(client.getNextAccountNonce, accountAddress);
 }
 
-export function getConsensusInfo(): Promise<JsonResponse> {
-    return sendPromise(client.getConsensusStatus, new Empty());
+/**
+ * Executes the provided GRPC command towards the node with the provided
+ * input.
+ * @param command command to execute towards the node
+ * @param input input for the command
+ */
+function sendPromiseParseResult<T>(command, input) {
+    const defaultDeadline = new Date(new Date().getTime() + defaultDeadlineMs);
+    return new Promise<T>((resolve, reject) => {
+        client.waitForReady(defaultDeadline, (error) => {
+            if (error) {
+                return reject(error);
+            }
+
+            return command.bind(client)(
+                input,
+                buildMetaData(),
+                (err, response) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    return resolve(JSON.parse(response.getValue()));
+                }
+            );
+        });
+    });
+}
+
+/**
+ * Retrieves the ConsensusStatus information from the node.
+ */
+export function getConsensusStatus(): Promise<ConsensusStatus> {
+    return sendPromiseParseResult<ConsensusStatus>(
+        client.getConsensusStatus,
+        new Empty()
+    );
+}
+
+/**
+ * Retrieves the block summary for the provided block hash from the node.
+ * @param blockHashValue the block hash to retrieve the block summary for
+ */
+export function getBlockSummary(blockHashValue: string): Promise<BlockSummary> {
+    const blockHash = new BlockHash();
+    blockHash.setBlockHash(blockHashValue);
+    return sendPromiseParseResult<BlockSummary>(
+        client.getBlockSummary,
+        blockHash
+    );
 }
 
 export function getAccountInfo(
