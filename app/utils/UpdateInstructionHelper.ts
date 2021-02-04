@@ -1,4 +1,21 @@
-import { UpdateHeader, UpdateInstruction, UpdateType } from './types';
+import { BlockSummary } from './NodeApiTypes';
+import {
+    MultiSignatureTransaction,
+    UpdateHeader,
+    UpdateInstruction,
+    UpdateType,
+} from './types';
+
+/**
+ * The Props interface used by components for handling parameter update
+ * transactions.
+ */
+export interface UpdateProps {
+    blockSummary: BlockSummary;
+    generateTransaction: (
+        multiSignatureTransaction: MultiSignatureTransaction
+    ) => Promise<void>;
+}
 
 // TODO Effective time should perhaps have a default, but it should also be possible to
 // provide the value as input, so that the user can decide the value.

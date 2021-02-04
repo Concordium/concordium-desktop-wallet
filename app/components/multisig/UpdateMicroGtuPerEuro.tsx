@@ -1,19 +1,15 @@
-import { push } from 'connected-react-router';
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
-import routes from '../../constants/routes.json';
-import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import {
     ExchangeRate,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateType,
 } from '../../utils/types';
-import { insert } from '../../database/MultiSignatureProposalDao';
-import createUpdateInstruction from '../../utils/UpdateInstructionHelper';
+import createUpdateInstruction, {
+    UpdateProps,
+} from '../../utils/UpdateInstructionHelper';
 import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
-import { BlockSummary } from '../../utils/NodeApiTypes';
 
 /**
  * Creates a multi signature transaction containing an update instruction for updating
@@ -44,11 +40,10 @@ function createTransaction(
     return multiSignatureTransaction;
 }
 
-interface Props {
-    blockSummary: BlockSummary;
-}
-
-export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
+export default function UpdateMicroGtuPerEuroRate({
+    blockSummary,
+    generateTransaction,
+}: UpdateProps) {
     const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
     const [
         currentMicroGtuPerEuro,
@@ -64,27 +59,8 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
         );
     }
 
-    const dispatch = useDispatch();
-
-    async function generateTransaction() {
-        if (microGtuPerEuro) {
-            const multiSignatureTransaction = createTransaction(
-                microGtuPerEuro,
-                blockSummary.updates.updateQueues.microGTUPerEuro
-                    .nextSequenceNumber,
-                blockSummary.updates.authorizations.microGTUPerEuro.threshold
-            );
-
-            // Save to database and use the assigned id to update the local object.
-            const entryId = (await insert(multiSignatureTransaction))[0];
-            multiSignatureTransaction.id = entryId;
-
-            // Set the current proposal in the state to the one that was just generated.
-            dispatch(setCurrentProposal(multiSignatureTransaction));
-
-            // Navigate to the page that displays the current proposal from the state.
-            dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
-        }
+    if (!microGtuPerEuro) {
+        return null;
     }
 
     return (
@@ -115,7 +91,20 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
                     }}
                 />
                 <Form.Field>
-                    <Button primary onClick={generateTransaction}>
+                    <Button
+                        primary
+                        onClick={() =>
+                            generateTransaction(
+                                createTransaction(
+                                    microGtuPerEuro,
+                                    blockSummary.updates.updateQueues
+                                        .microGTUPerEuro.nextSequenceNumber,
+                                    blockSummary.updates.authorizations
+                                        .microGTUPerEuro.threshold
+                                )
+                            )
+                        }
+                    >
                         Generate transaction proposal
                     </Button>
                 </Form.Field>

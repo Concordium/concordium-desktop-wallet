@@ -57,7 +57,10 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
         switch (foundationType) {
             case UpdateType.UpdateMicroGTUPerEuro:
                 return (
-                    <UpdateMicroGtuPerEuroRate blockSummary={blockSummary} />
+                    <UpdateMicroGtuPerEuroRate
+                        blockSummary={blockSummary}
+                        generateTransaction={generateTransaction}
+                    />
                 );
             case UpdateType.UpdateEuroPerEnergy:
                 return (

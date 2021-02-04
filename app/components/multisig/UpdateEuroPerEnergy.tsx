@@ -8,21 +8,15 @@ import {
     Segment,
 } from 'semantic-ui-react';
 import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
-import { BlockSummary } from '../../utils/NodeApiTypes';
 import {
     ExchangeRate,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateType,
 } from '../../utils/types';
-import createUpdateInstruction from '../../utils/UpdateInstructionHelper';
-
-interface Props {
-    blockSummary: BlockSummary;
-    generateTransaction: (
-        multiSignatureTransaction: MultiSignatureTransaction
-    ) => Promise<void>;
-}
+import createUpdateInstruction, {
+    UpdateProps,
+} from '../../utils/UpdateInstructionHelper';
 
 function createTransaction(
     euroPerEnergy: ExchangeRate,
@@ -45,7 +39,7 @@ function createTransaction(
 export default function UpdateEuroPerEnergy({
     blockSummary,
     generateTransaction,
-}: Props) {
+}: UpdateProps) {
     const [euroPerEnergy, setEuroPerEnergy] = useState<ExchangeRate>();
     const currentEuroPerEnergy =
         blockSummary.updates.chainParameters.euroPerEnergy;
