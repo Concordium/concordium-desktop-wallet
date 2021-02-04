@@ -9,7 +9,7 @@ import {
 import { serializeUpdateInstructionHeaderAndPayload } from './UpdateSerialization';
 
 export default class UpdateInstructionHandler
-    implements TransactionHandler<UpdateInstruction> {
+    implements TransactionHandler<UpdateInstruction, ConcordiumLedgerClient> {
     transaction: UpdateInstruction;
 
     constructor(transaction: UpdateInstruction) {

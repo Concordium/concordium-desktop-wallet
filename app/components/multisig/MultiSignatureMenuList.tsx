@@ -18,13 +18,7 @@ export default function MultiSignatureMenuList() {
                     key={item}
                     onClick={() => dispatch(chooseMenuItem(item))}
                 >
-                    <Header>
-                        {
-                            MultiSignatureMenuItems[
-                                item as MultiSignatureMenuItems
-                            ]
-                        }
-                    </Header>
+                    <Header>{item}</Header>
                 </Menu.Item>
             ))}
         </Menu>

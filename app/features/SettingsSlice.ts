@@ -4,12 +4,17 @@ import { loadAllSettings, updateEntry } from '../database/SettingsDao';
 import { RootState } from '../store';
 import { Setting, Settings } from '../utils/types';
 
+interface SettingsState {
+    settings: Settings[];
+    chosenIndex: number;
+}
+
 const settingsSlice = createSlice({
     name: 'settings',
     initialState: {
         settings: [],
-        chosenIndex: undefined,
-    },
+        chosenIndex: 0,
+    } as SettingsState,
     reducers: {
         chooseSetting: (state, input) => {
             state.chosenIndex = input.payload.index;

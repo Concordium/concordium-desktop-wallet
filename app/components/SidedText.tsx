@@ -4,7 +4,7 @@ import { Grid } from 'semantic-ui-react';
 interface Props {
     left: string;
     right: string;
-    onClick?(): void;
+    onClick?(e: Event): void;
 }
 
 /**

@@ -17,7 +17,7 @@ export default function createMultiSignatureTransaction(
     threshold: number,
     status: MultiSignatureTransactionStatus
 ) {
-    const multiSignatureTransaction: MultiSignatureTransaction = {
+    const multiSignatureTransaction: Partial<MultiSignatureTransaction> = {
         transaction: stringify(transaction),
         threshold,
         status,

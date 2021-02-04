@@ -1,7 +1,19 @@
 import PromiseWorker from 'promise-worker';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error : has no default export.
 import RustWorker from './rust.worker';
-import { PublicInformationForIP, Identity, IpInfo, SchemeId } from './types';
+import {
+    PublicInformationForIp,
+    Identity,
+    IpInfo,
+    SchemeId,
+    ArInfo,
+    Account,
+    CredentialDeploymentDetails,
+    VerifyKey,
+    Global,
+} from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
 import { toHex } from './serializationHelpers';
@@ -12,12 +24,16 @@ const worker = new PromiseWorker(rawWorker);
 /**
  * Returns the PrfKey and IdCredSec seeds for the given identity.
  */
-async function getSecretsFromLedger(ledger, displayMessage, identity) {
+async function getSecretsFromLedger(
+    ledger: ConcordiumLedgerClient,
+    displayMessage: (message: string) => void,
+    identityNumber: number
+) {
     displayMessage('Please confirm exporting prf key on device');
-    const prfKeySeed = await ledger.getPrfKey(identity);
+    const prfKeySeed = await ledger.getPrfKey(identityNumber);
 
     displayMessage('Please confirm exporting id cred sec on device');
-    const idCredSecSeed = await ledger.getIdCredSec(identity);
+    const idCredSecSeed = await ledger.getIdCredSec(identityNumber);
 
     const prfKey = prfKeySeed.toString('hex');
     const idCredSec = idCredSecSeed.toString('hex');
@@ -28,12 +44,11 @@ async function getSecretsFromLedger(ledger, displayMessage, identity) {
 // onto the key hex value, and returns the prepended versions.
 function prependKeyType(keys: VerifyKey[]) {
     return keys.map((key) => {
-        if (key.schemeId in SchemeId) {
+        const scheme = key.schemeId as keyof typeof SchemeId;
+        if (SchemeId[scheme]) {
             return {
                 schemeId: key.schemeId,
-                verifyKey: `${toHex(SchemeId[key.schemeId], 2)}${
-                    key.verifyKey
-                }`,
+                verifyKey: `${toHex(SchemeId[scheme], 2)}${key.verifyKey}`,
             };
         }
         throw new Error('Unknown key type');
@@ -47,8 +62,8 @@ function prependKeyType(keys: VerifyKey[]) {
 export async function createIdentityRequestObjectLedger(
     identityNumber: number,
     ipInfo: IpInfo,
-    arsInfos,
-    global,
+    arsInfos: Record<string, ArInfo>,
+    global: Global,
     displayMessage: (message: string) => void
 ) {
     const transport = await TransportNodeHid.open('');
@@ -73,7 +88,7 @@ export async function createIdentityRequestObjectLedger(
     const context = {
         ipInfo,
         arsInfos,
-        global: global.value,
+        global,
         publicKeys: [
             {
                 schemeId: 'Ed25519',
@@ -92,7 +107,7 @@ export async function createIdentityRequestObjectLedger(
         prfKey,
     });
 
-    const pubInfoForIp: PublicInformationForIP = JSON.parse(pubInfoForIpString);
+    const pubInfoForIp: PublicInformationForIp = JSON.parse(pubInfoForIpString);
 
     pubInfoForIp.publicKeys.keys = prependKeyType(pubInfoForIp.publicKeys.keys);
 
@@ -137,9 +152,9 @@ Threshold: ${pubInfoForIp.publicKeys.threshold}
 export async function createCredential(
     identity: Identity,
     accountNumber: number,
-    global,
+    global: Global,
     attributes: string[],
-    displayMessage,
+    displayMessage: (message: string) => void,
     ledger: ConcordiumLedgerClient
 ): Promise<CredentialDeploymentDetails> {
     const identityProvider = JSON.parse(identity.identityProvider);
@@ -223,11 +238,11 @@ Challenge: ${unsignedCredentialDeploymentInfo.accountOwnershipChallenge}
  * returns a list of the given amount, decrypted.
  */
 export async function decryptAmounts(
-    encryptedAmounts,
+    encryptedAmounts: string[],
     account: Account,
-    global,
-    prfKey
-) {
+    global: Global,
+    prfKey: string
+): Promise<string[]> {
     const input = {
         global,
         accountNumber: account.accountNumber,

@@ -7,6 +7,8 @@ import {
     loadTransactions,
     viewingShieldedSelector,
 } from '../features/TransactionSlice';
+import { Account } from '../utils/types';
+import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import LedgerComponent from './ledger/LedgerComponent';
 
 interface Props {
@@ -26,12 +28,15 @@ export default function DecryptComponent({ account }: Props) {
         return null;
     }
 
-    async function ledgerCall(ledger, setMessage) {
+    async function ledgerCall(
+        ledger: ConcordiumLedgerClient,
+        setMessage: (message: string) => void
+    ) {
         setMessage('Please confirm exporting prf key on device');
         const prfKeySeed = await ledger.getPrfKey(account.identityId);
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
-        await decryptAccountBalance(dispatch, prfKey, account);
+        await decryptAccountBalance(prfKey, account);
         await decryptTransactions(transactions, prfKey, account);
         await loadTransactions(account, viewingShielded, dispatch);
         return loadAccounts(dispatch);

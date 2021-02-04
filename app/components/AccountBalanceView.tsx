@@ -15,7 +15,7 @@ import {
  * Displays the chosen Account's balance, and contains
  * buttons to toggle whether viewing shielded or unshielded balance/transactions.
  */
-export default function AccountBalanceView(): JSX.Element {
+export default function AccountBalanceView(): JSX.Element | null {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
@@ -24,7 +24,6 @@ export default function AccountBalanceView(): JSX.Element {
     if (!account || !accountInfo) {
         return null; // TODO: add display for pending account (which have no accountinfo)
     }
-
     const totalDecrypted = account.totalDecrypted || 0n;
 
     const buttons = (

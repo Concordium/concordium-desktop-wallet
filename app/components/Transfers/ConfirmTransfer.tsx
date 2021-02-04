@@ -10,11 +10,7 @@ import {
     createSimpleTransferTransaction,
     waitForFinalization,
 } from '../../utils/transactionHelpers';
-import {
-    Account,
-    AccountTransaction,
-    AddressBookEntry,
-} from '../../utils/types';
+import { Account, SimpleTransfer, AddressBookEntry } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import locations from '../../constants/transferLocations.json';
 import {
@@ -27,16 +23,16 @@ import { getAccountPath } from '../../features/ledger/Path';
 
 export interface Props {
     account: Account;
-    amount: BigInt;
+    amount: bigint;
     recipient: AddressBookEntry;
     setLocation(location: string): void;
-    setTransaction(transaction: AccountTransaction): void;
+    setTransaction(transaction: SimpleTransfer): void;
 }
 
 /**
  * Wait for the transaction to be finalized (or rejected) and update accordingly
  */
-async function monitorTransaction(transactionHash) {
+async function monitorTransaction(transactionHash: string) {
     const dataObject = await waitForFinalization(transactionHash);
     if (dataObject) {
         confirmTransaction(transactionHash, dataObject);
@@ -87,11 +83,7 @@ export default function ConfirmTransferComponent({
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
             setTransaction(transferTransaction);
-            addPendingTransaction(
-                transferTransaction,
-                transactionHash,
-                account
-            );
+            addPendingTransaction(transferTransaction, transactionHash);
             monitorTransaction(transactionHash);
             setLocation(locations.transferSubmitted);
         } else {
