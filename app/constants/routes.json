@@ -17,6 +17,7 @@
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING": "/MultiSignatureTransaction/existing",
     "MULTISIGTRANSACTIONS_SIGN_TRANSACTION": "/MultiSignatureTransaction/sign",
     "MULTISIGTRANSACTIONS_EXPORT_TRANSACTION": "/MultiSignatureTransaction/export",
+    "MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION": "/MultiSignatureTransaction/submitted",
     "IDENTITYISSUANCE": "/identity/issuance",
     "IDENTITYISSUANCE_PICKPROVIDER": "/identity/issuance/pick-provider",
     "IDENTITYISSUANCE_PICKNAMES": "/identity/issuance/pick-names",
