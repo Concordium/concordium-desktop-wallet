@@ -17,11 +17,15 @@ import { BlockSummary, ConsensusStatus } from './NodeApiTypes';
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  */
 
+interface GRPCClient extends P2PClient {
+    waitForReady?(date: Date, cb: (error: ServiceError) => void): void;
+}
+
 const defaultDeadlineMs = 15000;
-let client;
+let client: GRPCClient;
 const clientCredentials = credentials.createInsecure();
 
-export function setClientLocation(address, port) {
+export function setClientLocation(address: string, port: string) {
     client = new P2PClient(`${address}:${port}`, clientCredentials);
 }
 
@@ -55,22 +59,26 @@ type Command<T, Response> = (
 function sendPromise<T, Response>(command: Command<T, Response>, input: T) {
     const defaultDeadline = new Date(new Date().getTime() + defaultDeadlineMs);
     return new Promise<Response>((resolve, reject) => {
-        client.waitForReady(defaultDeadline, (error) => {
-            if (error) {
-                return reject(error);
-            }
-
-            return command.bind(client)(
-                input,
-                buildMetaData(),
-                (err, response) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    return resolve(response);
+        if (client.waitForReady === undefined) {
+            reject(new Error('Unexpected missing client function'));
+        } else {
+            client.waitForReady(defaultDeadline, (error) => {
+                if (error) {
+                    return reject(error);
                 }
-            );
-        });
+
+                return command.bind(client)(
+                    input,
+                    buildMetaData(),
+                    (err, response) => {
+                        if (err) {
+                            return reject(err);
+                        }
+                        return resolve(response);
+                    }
+                );
+            });
+        }
     });
 }
 
