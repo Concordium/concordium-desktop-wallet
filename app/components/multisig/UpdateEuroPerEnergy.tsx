@@ -19,6 +19,9 @@ import createUpdateInstruction from '../../utils/UpdateInstructionHelper';
 
 interface Props {
     blockSummary: BlockSummary;
+    generateTransaction: (
+        multiSignatureTransaction: MultiSignatureTransaction
+    ) => Promise<void>;
 }
 
 function createTransaction(
@@ -39,10 +42,16 @@ function createTransaction(
     return multiSignatureTransaction;
 }
 
-export default function UpdateEuroPerEnergy({ blockSummary }: Props) {
+export default function UpdateEuroPerEnergy({
+    blockSummary,
+    generateTransaction,
+}: Props) {
     const [euroPerEnergy, setEuroPerEnergy] = useState<ExchangeRate>();
     const currentEuroPerEnergy =
         blockSummary.updates.chainParameters.euroPerEnergy;
+    const sequenceNumber =
+        blockSummary.updates.updateQueues.euroPerEnergy.nextSequenceNumber;
+    const { threshold } = blockSummary.updates.authorizations.euroPerEnergy;
 
     if (!euroPerEnergy) {
         setEuroPerEnergy(currentEuroPerEnergy);
@@ -99,7 +108,20 @@ export default function UpdateEuroPerEnergy({ blockSummary }: Props) {
                     />
                 </Form.Group>
             </Form>
-            <Button primary>Generate transaction proposal</Button>
+            <Button
+                primary
+                onClick={() =>
+                    generateTransaction(
+                        createTransaction(
+                            euroPerEnergy,
+                            sequenceNumber,
+                            threshold
+                        )
+                    )
+                }
+            >
+                Generate transaction proposal
+            </Button>
         </Segment>
     );
 }
