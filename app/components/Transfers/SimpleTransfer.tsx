@@ -7,7 +7,11 @@ import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
 import locations from '../../constants/transferLocations.json';
-import { AddressBookEntry, Account, SimpleTransfer } from '../../utils/types';
+import {
+    AddressBookEntry,
+    Account,
+    SimpleTransfer as SimpleTransferType,
+} from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 
 /**
@@ -18,9 +22,9 @@ export default function SimpleTransfer(account: Account) {
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
         undefined
     );
-    const [transaction, setTransaction] = useState<SimpleTransfer | undefined>(
-        undefined
-    );
+    const [transaction, setTransaction] = useState<
+        SimpleTransferType | undefined
+    >(undefined);
     const [location, setLocation] = useState<string>(locations.pickAmount);
 
     function chooseRecipientOnClick(entry: AddressBookEntry) {
