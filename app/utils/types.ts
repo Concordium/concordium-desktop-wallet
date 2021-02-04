@@ -1,6 +1,8 @@
-import { AccountAddress } from '../proto/concordium_p2p_rpc_pb';
+import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 
-type Hex = string;
+export type Dispatch = GenericDispatch<AnyAction>;
+
+export type Hex = string;
 type Proofs = Hex;
 type Word64 = BigInt;
 type Word32 = number;
@@ -10,8 +12,8 @@ export enum SchemeId {
 }
 
 export interface VerifyKey {
-    scheme: SchemeId;
-    key: Hex;
+    schemeId: string;
+    verifyKey: Hex;
 }
 
 export interface NewAccount {
@@ -30,20 +32,20 @@ export interface Versioned<T> {
 
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
-export interface ChosenAttributes {
-    countryOfResidence: string;
-    dob: string;
-    firstName: string;
-    idDocExpiresAt: string;
-    idDocIsseudAt: string;
-    idDocIssuer: string;
-    idDocNo: string;
-    idDocType: string;
-    lastName: string;
-    nationalIdNo: string;
-    nationality: string;
-    sex: number;
-    taxIdNo: string;
+export enum ChosenAttributes {
+    countryOfResidence,
+    dob,
+    firstName,
+    idDocExpiresAt,
+    idDocIsseudAt,
+    idDocIssuer,
+    idDocNo,
+    idDocType,
+    lastName,
+    nationalIdNo,
+    nationality,
+    sex,
+    taxIdNo,
 }
 
 // Contains the attributes of an identity.
@@ -51,7 +53,7 @@ export interface AttributeList {
     createdAt: string;
     validTo: string;
     maxAccounts: number;
-    chosenAttributes: ChosenAttributes;
+    chosenAttributes: Record<string, string>;
 }
 
 // Reflects the structure of an identity's IdentityObject
@@ -100,6 +102,10 @@ export interface Account {
     identityName?: string;
     status: AccountStatus;
     credential?: string;
+    totalDecrypted?: string;
+    allDecrypted?: boolean;
+    incomingAmounts?: string;
+    selfAmounts?: string;
 }
 
 export enum TransactionKindString {
@@ -119,6 +125,7 @@ export enum TransactionKindString {
     EncryptedAmountTransfer = 'encryptedAmountTransfer',
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
+    TransferWithSchedule = 'transferWithSchedule', // TODO confirm
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -136,15 +143,38 @@ export enum TransactionKindId {
     Transfer_with_schedule = 19,
 } // TODO: Add all kinds (11- 18)
 
+export interface SimpleTransferPayload {
+    amount: string;
+    toAddress: string;
+}
+
+export interface SchedulePoint {
+    timestamp: string;
+    amount: string;
+}
+
+export interface ScheduledTransferPayload {
+    schedule: SchedulePoint[];
+    toAddress: string;
+}
+
+export type TransactionPayload =
+    | ScheduledTransferPayload
+    | SimpleTransferPayload;
+
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
 export interface AccountTransaction {
-    sender: AccountAddress;
-    nonce: number;
-    energyAmount: number;
-    expiry: number;
+    sender: Hex;
+    nonce: string;
+    energyAmount: string;
+    expiry: string;
     transactionKind: TransactionKindId;
-    payload;
+    payload: TransactionPayload;
+}
+
+export interface SimpleTransfer extends AccountTransaction {
+    payload: SimpleTransferPayload;
 }
 
 // Types of block items, and their identifier numbers
@@ -166,8 +196,6 @@ export interface CredentialDeploymentInformation {
     proofs: Proofs;
 }
 
-type AccountAddress = Uint8Array;
-
 // 48 bytes containing a group element.
 type RegId = Hex;
 
@@ -180,10 +208,10 @@ type Threshold = number;
 export interface Policy {
     validTo: YearMonth; // CredentialValidTo
     createdAt: YearMonth; // CredentialCreatedAt
-    revealedAttributes: Record<string, unknown>; // Map.Map AttributeTag AttributeValue
+    revealedAttributes: Record<string, string>; // Map.Map AttributeTag AttributeValue
 }
 
-type YearMonth = string; // "YYYYMM"
+export type YearMonth = string; // "YYYYMM"
 
 export enum AttributeTag {
     firstName = 0,
@@ -238,16 +266,20 @@ export interface TransferTransaction {
     blockHash: Hex;
     blockTime: string;
     total: string;
-    success: boolean;
+    success?: boolean;
     transactionHash?: Hex;
     subtotal?: string;
     cost?: string;
-    details: string;
+    details?: string;
     encrypted?: string;
     fromAddress: Hex;
     toAddress: Hex;
     status: TransactionStatus;
     rejectReason?: string;
+    fromAddressName?: string;
+    toAddressName?: string;
+    decryptedAmount?: string;
+    origin?: string;
 }
 
 export type EncryptedAmount = Hex;
@@ -259,20 +291,31 @@ export interface AccountEncryptedAmount {
     numAggregated?: number;
 }
 
+export interface TypedCredentialDeploymentInformation {
+    contents: CredentialDeploymentInformation;
+    type: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AccountReleaseSchedule = any; // TODO
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AccountBakerDetails = any; // TODO
+
 // Reflects the structure given by the node,
-// in a getAccountInfo request
+// in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
-    accountReleaseSchedule: AccountReleaseSchedule; // TODO
-    accountBaker: AccountBakerDetails; // TODO
+    accountReleaseSchedule: AccountReleaseSchedule;
+    accountBaker: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
+    accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.
 export interface ScheduleItem {
     amount: string;
     transactions: Hex[];
-    timestamp: number;
+    timestamp: string;
 }
 
 // A description of an entity, used for Identity Provider and Anonymity Revoker
@@ -302,6 +345,12 @@ export interface ArInfo {
     arIdentity: number;
     arDescription: Description;
     arPublicKey: Hex;
+}
+
+export interface Global {
+    onChainCommitmentKey: string;
+    bulletproofGenerators: string;
+    genesisString: string;
 }
 
 // Reflects the structure of an Identity Provider.
@@ -390,6 +439,7 @@ export interface UpdateInstruction {
     signatures: string[];
 }
 
+export type Transaction = AccountTransaction | UpdateInstruction;
 /**
  * Update type enumeration. The numbering/order is important as that corresponds
  * to the byte written when serializing the update instruction.
@@ -407,26 +457,32 @@ export enum UpdateType {
 }
 
 export function instanceOfAccountTransaction(
-    object
+    object: Transaction
 ): object is AccountTransaction {
     return 'transactionKind' in object;
 }
 
 export function instanceOfUpdateInstruction(
-    object
+    object: Transaction
 ): object is UpdateInstruction {
     return 'header' in object;
+}
+
+export function instanceOfSimpleTransfer(
+    object: AccountTransaction
+): object is SimpleTransfer {
+    return object.transactionKind === TransactionKindId.Simple_transfer;
 }
 
 /**
  * Interface definition for classes that can serialize and handle
  * signing of the different transaction types.
  */
-export interface TransactionHandler<T> {
+export interface TransactionHandler<T, S> {
     transaction: T;
     instanceOf: () => boolean;
     serializeTransaction: () => Buffer;
-    signTransaction: (any) => Promise<Buffer>;
+    signTransaction: (signer: S) => Promise<Buffer>;
 }
 
 /**
@@ -448,7 +504,7 @@ export enum MultiSignatureTransactionStatus {
  */
 export interface MultiSignatureTransaction {
     // logical id in the database
-    id?: number;
+    id: number;
     // The JSON serialization of the transaction
     transaction: string;
     // The minimum required signatures for the transaction
@@ -473,6 +529,37 @@ export interface ExchangeRate {
     denominator: Word64;
 }
 
+export interface TransactionDetails {
+    events: string[];
+    transferSource?: Hex;
+    transferDestination?: Hex;
+    type: TransactionKindString;
+    outcome: string;
+}
+
+export interface TransactionOrigin {
+    type: OriginType;
+    address?: Hex;
+}
+
+export interface EncryptedInfo {
+    encryptedAmount: string;
+    incomingAmounts: string[];
+}
+
+export interface IncomingTransaction {
+    id: number;
+    blockHash: Hex;
+    blockTime: string;
+    total: string;
+    details: TransactionDetails;
+    origin: TransactionOrigin;
+    encrypted?: EncryptedInfo;
+    transactionHash: Hex;
+    subtotal?: Hex;
+    cost?: Hex;
+}
+
 /**
  * The basic color types supported by Semantic UI components color property.
  */
@@ -490,4 +577,22 @@ export enum ColorType {
     Pink = 'pink',
     Brown = 'brown',
     Black = 'black',
+}
+
+export interface MetaData {
+    keyLen: number;
+    iterations: number;
+    salt: string;
+    initializationVector: string;
+}
+
+export interface EncryptedData {
+    cipherText: string;
+    metaData: MetaData;
+}
+
+export interface ExportData {
+    accounts: Account[];
+    identities: Identity[];
+    addressBook: AddressBookEntry[];
 }

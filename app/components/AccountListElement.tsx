@@ -6,11 +6,14 @@ import { isInitialAccount } from '../utils/accountHelpers';
 import SidedText from './SidedText';
 import pendingImage from '../../resources/pending.svg';
 
+const nop = () => {};
+
 interface Props {
     account: Account;
-    accountInfo: AccountInfo;
+    accountInfo?: AccountInfo | undefined;
     onClick?(shielded: boolean): void;
 }
+
 /**
  * Displays the information and balances of the given account.
  * Takes an onClick, which is triggered by when clicking either
@@ -20,7 +23,7 @@ interface Props {
 function AccountListElement({
     account,
     accountInfo,
-    onClick,
+    onClick = nop,
 }: Props): JSX.Element {
     const shielded = account.totalDecrypted
         ? BigInt(account.totalDecrypted)
@@ -81,7 +84,8 @@ function AccountListElement({
 }
 
 AccountListElement.defaultProps = {
-    onClick: () => {},
+    accountInfo: undefined,
+    onClick: nop,
 };
 
 export default AccountListElement;

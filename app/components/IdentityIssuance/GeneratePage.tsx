@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, RefObject } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card } from 'semantic-ui-react';
 import {
     addPendingIdentity,
     confirmIdentity,
+    rejectIdentity,
 } from '../../features/IdentitySlice';
 import {
     addPendingAccount,
@@ -19,7 +20,7 @@ import {
 } from '../../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
-import { IdentityProvider } from '../../utils/types';
+import { IdentityProvider, Dispatch } from '../../utils/types';
 import { addToAddressBook } from '../../features/AddressBookSlice';
 
 const redirectUri = 'ConcordiumRedirectToken';
@@ -43,14 +44,21 @@ async function createIdentityObjectRequest(
  *   This function puts a listener on the given iframeRef, and when it navigates (due to a redirect http response) it resolves,
  *   and returns the location, which was redirected to.
  */
-async function handleIdentityProviderLocation(iframeRef) {
-    return new Promise((resolve) => {
-        iframeRef.current.addEventListener('did-navigate', (e) => {
-            const loc = e.url;
-            if (loc.includes(redirectUri)) {
-                resolve(loc.substring(loc.indexOf('=') + 1));
-            }
-        });
+async function handleIdentityProviderLocation(
+    iframeRef: RefObject<HTMLIFrameElement>
+): Promise<string> {
+    return new Promise((resolve, reject) => {
+        if (!iframeRef.current) {
+            reject(new Error('Unexpected missing reference to webView.'));
+        } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            iframeRef.current.addEventListener('did-navigate', (e: any) => {
+                const loc = e.url;
+                if (loc.includes(redirectUri)) {
+                    resolve(loc.substring(loc.indexOf('=') + 1));
+                }
+            });
+        }
     });
 }
 
@@ -83,7 +91,7 @@ async function confirmIdentityAndInitialAccount(
         });
     } catch (err) {
         if (!token) {
-            await rejectIdentity(identityName);
+            await rejectIdentity(dispatch, identityName);
         } else {
             // eslint-disable-next-line no-console
             console.log(err);
@@ -94,13 +102,13 @@ async function confirmIdentityAndInitialAccount(
 }
 
 async function generateIdentity(
-    setLocation,
-    setText,
-    dispatch,
-    provider,
-    accountName,
-    identityName,
-    iframeRef
+    setLocation: (location: string) => void,
+    setText: (text: string) => void,
+    dispatch: Dispatch,
+    provider: IdentityProvider,
+    accountName: string,
+    identityName: string,
+    iframeRef: RefObject<HTMLIFrameElement>
 ) {
     try {
         setText('Please Wait');
@@ -152,9 +160,9 @@ export default function IdentityIssuanceGenerate({
     provider,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const [text, setText] = useState();
-    const [location, setLocation] = useState();
-    const iframeRef = useRef(null);
+    const [text, setText] = useState<string>();
+    const [location, setLocation] = useState<string>();
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
     useEffect(() => {
         generateIdentity(

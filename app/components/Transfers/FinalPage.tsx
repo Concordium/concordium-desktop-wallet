@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { displayAsGTU } from '../../utils/gtu';
-import { AccountTransaction, AddressBookEntry } from '../../utils/types';
+import { AddressBookEntry, SimpleTransfer } from '../../utils/types';
 
 interface Props {
-    transaction: AccountTransaction;
+    transaction: SimpleTransfer;
     recipient: AddressBookEntry;
 }
 

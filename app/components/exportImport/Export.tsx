@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Header, Segment, Divider } from 'semantic-ui-react';
 import { encrypt } from '../../utils/encryption';
+import { validatePassword } from '../../utils/importHelpers';
 import { saveFile } from '../../utils/FileHelper';
 import {
     loadIdentities,
@@ -26,7 +27,7 @@ export default function Export() {
     const addressBook = useSelector(addressBookSelector);
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
     const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
-    const [modalMessage, setModalMessage] = useState<string>();
+    const [modalMessage, setModalMessage] = useState<string>('');
 
     useEffect(() => {
         loadAccounts(dispatch);
@@ -52,7 +53,7 @@ export default function Export() {
         const encrypted = encrypt(JSON.stringify(data), password);
 
         try {
-            await saveFile(JSON.stringify(encrypted));
+            await saveFile(JSON.stringify(encrypted), 'Export your data');
             setModalMessage('Export was successful');
             setOpenConfirmationModal(true);
         } catch (error) {
@@ -67,7 +68,7 @@ export default function Export() {
             <InputModal
                 title="Choose a password"
                 buttonText="Export"
-                validValue={(password) => password}
+                validValue={(password) => validatePassword(password)}
                 buttonOnClick={exportData}
                 placeholder="Enter your password"
                 onClose={() => setOpenPasswordModal(false)}

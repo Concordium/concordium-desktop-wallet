@@ -1,4 +1,5 @@
 import bs58check from 'bs58check';
+import { Account } from './types';
 
 // Given a string, checks if it is a valid bs58check address.
 // TODO: check length?
@@ -14,6 +15,6 @@ export function isValidAddress(address: string): boolean {
     return true;
 }
 
-export function isInitialAccount(account: Account) {
+export function isInitialAccount(account: Account): boolean {
     return account.accountNumber === 0;
 }

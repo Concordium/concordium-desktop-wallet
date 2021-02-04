@@ -2,6 +2,10 @@ import {
     AccountTransaction,
     TransactionKindId as TransactionKind,
     BlockItemKind,
+    ScheduledTransferPayload,
+    SimpleTransferPayload,
+    SchedulePoint,
+    TransactionPayload,
 } from './types';
 import {
     encodeWord16,
@@ -12,27 +16,27 @@ import {
     hashSha256,
 } from './serializationHelpers';
 
-function serializeSimpleTransfer(payload) {
+function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     const size = 1 + 32 + 8;
     const serialized = new Uint8Array(size);
 
     serialized[0] = TransactionKind.Simple_transfer;
     putBase58Check(serialized, 1, payload.toAddress);
-    put(serialized, 32 + 1, encodeWord64(payload.amount));
+    put(serialized, 32 + 1, encodeWord64(BigInt(payload.amount)));
     return serialized;
 }
 
-function serializeTransferWithSchedule(payload) {
+function serializeTransferWithSchedule(payload: ScheduledTransferPayload) {
     let index = 0;
     const listLength = payload.schedule.length;
 
     const size = 1 + 32 + 1 + listLength * (8 + 8);
     const serialized = new Uint8Array(size);
 
-    function serializeSchedule(period) {
-        put(serialized, index, encodeWord64(period.timestamp));
+    function serializeSchedule(period: SchedulePoint) {
+        put(serialized, index, encodeWord64(BigInt(period.timestamp)));
         index += 8;
-        put(serialized, index, encodeWord64(period.amount));
+        put(serialized, index, encodeWord64(BigInt(period.amount)));
         index += 8;
     }
 
@@ -46,54 +50,36 @@ function serializeTransferWithSchedule(payload) {
     return serialized;
 }
 
-export function serializeCredentialDeployment(credentialInfo) {
-    let serializedBlockItem;
-    if (isInitialInitialCredentialDeploymentInfo(credentialInfo)) {
-        serializedBlockItem = serializeInitialCredentialDeploymentInfo(
-            credentialInfo
-        );
-    } else {
-        serializedBlockItem = serializeCredentialDeploymentInformation(
-            credentialInfo
-        );
-    }
-
-    const size = 2 + serializedBlockItem.length;
-    const serialized = new Uint8Array(size);
-
-    serialized[0] = 0; // Version number
-    serialized[1] = BlockItemKind.CredentialDeploymentKind;
-    put(serialized, 2, serializedBlockItem);
-    return serialized;
-}
-
 export function serializeTransactionHeader(
-    sender,
-    nonce,
-    energyAmount,
-    payloadSize,
-    expiry
+    sender: string,
+    nonce: string,
+    energyAmount: string,
+    payloadSize: number,
+    expiry: string
 ) {
     const size = 32 + 8 + 8 + 4 + 8;
     const serialized = new Uint8Array(size);
 
     putBase58Check(serialized, 0, sender);
-    put(serialized, 32, encodeWord64(nonce));
-    put(serialized, 32 + 8, encodeWord64(energyAmount));
+    put(serialized, 32, encodeWord64(BigInt(nonce)));
+    put(serialized, 32 + 8, encodeWord64(BigInt(energyAmount)));
     put(serialized, 32 + 8 + 8, encodeWord32(payloadSize));
-    put(serialized, 32 + 8 + 8 + 4, encodeWord64(expiry));
+    put(serialized, 32 + 8 + 8 + 4, encodeWord64(BigInt(expiry)));
 
     return serialized;
 }
 
-export function serializeTransferPayload(kind: TransactionKind, payload) {
+export function serializeTransferPayload(
+    kind: TransactionKind,
+    payload: TransactionPayload
+) {
     switch (kind) {
         case TransactionKind.Simple_transfer:
-            return serializeSimpleTransfer(payload);
-        case TransactionKind.Deploy_credential:
-            return serializeDeployCredential(payload);
+            return serializeSimpleTransfer(payload as SimpleTransferPayload);
         case TransactionKind.Transfer_with_schedule:
-            return serializeTransferWithSchedule(payload);
+            return serializeTransferWithSchedule(
+                payload as ScheduledTransferPayload
+            );
         default:
             throw new Error('Unsupported transactionkind');
     }
@@ -122,9 +108,11 @@ function serializeSignature(sigs: Uint8Array[]) {
     return serialized;
 }
 
+type SignFunction = (transaction: AccountTransaction, hash: Buffer) => [Buffer];
+
 function serializeUnversionedTransaction(
     transaction: AccountTransaction,
-    signFunction: (transaction: AccountTransaction, hash: Buffer) => Buffer
+    signFunction: SignFunction
 ) {
     const payload = serializeTransferPayload(
         transaction.transactionKind,
@@ -154,7 +142,7 @@ function serializeUnversionedTransaction(
 
 export function serializeTransaction(
     transaction: AccountTransaction,
-    signFunction: (transaction: AccountTransaction, hash: Buffer) => [Buffer]
+    signFunction: SignFunction
 ) {
     const unversioned = serializeUnversionedTransaction(
         transaction,
@@ -166,7 +154,13 @@ export function serializeTransaction(
     return serialized;
 }
 
-export function getTransactionHash(transaction, signature) {
-    const serialized = serializeUnversionedTransaction(transaction, signature);
+export function getTransactionHash(
+    transaction: AccountTransaction,
+    signFunction: SignFunction
+) {
+    const serialized = serializeUnversionedTransaction(
+        transaction,
+        signFunction
+    );
     return hashSha256(serialized);
 }

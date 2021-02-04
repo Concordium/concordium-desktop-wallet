@@ -14,7 +14,7 @@ export default function IdentityIssuanceChooseProvider({
     setProvider,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const [providers, setProviders] = useState([]);
+    const [providers, setProviders] = useState<IdentityProvider[]>([]);
 
     useEffect(() => {
         getIdentityProviders()
@@ -23,7 +23,7 @@ export default function IdentityIssuanceChooseProvider({
             .catch(console.log); // TODO: Handle that we are unable to load providers.
     }, []);
 
-    function onClick(provider) {
+    function onClick(provider: IdentityProvider) {
         setProvider(provider);
         dispatch(push(routes.IDENTITYISSUANCE_EXTERNAL));
     }

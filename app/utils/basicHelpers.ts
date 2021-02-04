@@ -6,7 +6,10 @@
  * function.
  * Return [ Matching, NonMatching ]
  */
-export function partition<T>(array: T[], criteria: (T) => boolean): [T[], T[]] {
+export function partition<T>(
+    array: T[],
+    criteria: (testee: T) => boolean
+): [T[], T[]] {
     return [
         array.filter((item) => criteria(item)),
         array.filter((item) => !criteria(item)),

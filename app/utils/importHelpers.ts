@@ -1,3 +1,5 @@
+import { EncryptedData, ExportData } from './types';
+
 /**
  * Checks whether the entry has a "duplicate" in the given list
  * This is determined by equality of the given fields.
@@ -5,7 +7,12 @@
  * that there are no shared fields, except for those specified in commonFields.
  * Returns true if the entry is not a duplicate.
  */
-export function checkDuplicates(entry, list, fields, commonFields = undefined) {
+export function checkDuplicates<T>(
+    entry: T,
+    list: T[],
+    fields: (keyof T)[],
+    commonFields: (keyof T)[] | undefined = undefined
+) {
     const allEqual = list.find((listElement) =>
         fields
             .map((field) => listElement[field] === entry[field])
@@ -42,7 +49,9 @@ interface Validation {
 }
 
 // TODO add unit tests
-export function validateEncryptedStructure(encryptedData): Validation {
+export function validateEncryptedStructure(
+    encryptedData: EncryptedData
+): Validation {
     if (!encryptedData.cipherText) {
         return { isValid: false, reason: 'missing cipherText field.' };
     }
@@ -74,7 +83,7 @@ export function validateEncryptedStructure(encryptedData): Validation {
 }
 
 // TODO add unit tests
-export function validateImportStructure(data): Validation {
+export function validateImportStructure(data: ExportData): Validation {
     const fields = ['identities', 'accounts', 'addressBook'];
 
     // Check that data is an object, so we don't crash when checking it's fields.
@@ -87,4 +96,8 @@ export function validateImportStructure(data): Validation {
         return { isValid: false, reason: `missing${missingField} value.` };
     }
     return { isValid: true };
+}
+
+export function validatePassword(password: string) {
+    return password.length >= 6;
 }

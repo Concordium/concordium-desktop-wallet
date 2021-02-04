@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Button } from 'semantic-ui-react';
-import { BlockSummary } from '../../utils/NodeApiTypes';
 
-interface Props {
+interface Props<T> {
     onError: () => void;
-    onSuccess: (arg) => void;
-    execution: () => Promise<BlockSummary>;
+    onSuccess: (arg: T) => void;
+    execution: () => Promise<T>;
     title: string;
     content: string;
 }
@@ -19,13 +18,13 @@ interface Props {
  * Note: this component has only been verified to work in the case where the
  * onError function navigates away from where this component was placed.
  */
-export default function DynamicModal({
+export default function DynamicModal<T>({
     onError,
     onSuccess,
     execution,
     title,
     content,
-}: Props) {
+}: Props<T>) {
     const [open, setOpen] = useState(false);
     const [started, setStarted] = useState(false);
 

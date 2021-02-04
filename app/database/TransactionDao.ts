@@ -5,7 +5,7 @@ import { partition } from '../utils/basicHelpers';
 
 export async function getTransactionsOfAccount(
     account: Account,
-    filter: (transction: TransferTransaction) => boolean = undefined,
+    filter: (transction: TransferTransaction) => boolean = () => true,
     orderBy = 'id'
 ): Promise<TransferTransaction[]> {
     const { address } = account;
@@ -15,13 +15,13 @@ export async function getTransactionsOfAccount(
         .where({ toAddress: address })
         .orWhere({ fromAddress: address })
         .orderBy(orderBy);
-    if (filter) {
-        return transactions.filter(filter);
-    }
-    return transactions;
+    return transactions.filter(filter);
 }
 
-export async function updateTransaction(identifier, updatedValues) {
+export async function updateTransaction(
+    identifier: Record<string, unknown>,
+    updatedValues: Partial<TransferTransaction>
+) {
     return (await knex())(transactionTable)
         .where(identifier)
         .update(updatedValues);
@@ -29,7 +29,7 @@ export async function updateTransaction(identifier, updatedValues) {
 
 export async function insertTransactions(transactions: TransferTransaction[]) {
     const table = (await knex())(transactionTable);
-    const existingTransactions = await table.select();
+    const existingTransactions: TransferTransaction[] = await table.select();
     const [updates, additions] = partition(transactions, (t) =>
         existingTransactions.some(
             (t_) => t.transactionHash === t_.transactionHash
@@ -54,7 +54,7 @@ export async function resetTransactions() {
     return (await knex())(transactionTable).del();
 }
 
-export async function getMaxTransactionsIdOfAccount(account) {
+export async function getMaxTransactionsIdOfAccount(account: Account) {
     const { address } = account;
     const query = await (await knex())
         .table(transactionTable)

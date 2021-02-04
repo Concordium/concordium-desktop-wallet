@@ -9,10 +9,15 @@ import {
     Segment,
     Divider,
 } from 'semantic-ui-react';
-import { AddressBookEntry, Account, Identity } from '../../utils/types';
+import {
+    AddressBookEntry,
+    Account,
+    Identity,
+    ExportData,
+} from '../../utils/types';
 import routes from '../../constants/routes.json';
 import {
-    importIdentity,
+    importIdentities,
     identitiesSelector,
 } from '../../features/IdentitySlice';
 import { importAccount, accountsSelector } from '../../features/AccountSlice';
@@ -24,47 +29,43 @@ import MessageModal from '../MessageModal';
 import { checkDuplicates } from '../../utils/importHelpers';
 import { partition } from '../../utils/basicHelpers';
 
-type IdentityKeys = keyof Identity;
-type AccountKeys = keyof Account;
-type AddressBookEntryKeys = keyof AddressBookEntry;
+type IdentityKey = keyof Identity;
+type AccountKey = keyof Account;
+type AddressBookEntryKey = keyof AddressBookEntry;
 
-export const identityFields: Partial<IdentityKeys> = [
-    'id',
-    'name',
-    'randomness',
-]; // TODO are there any other fields we should check?
-export const accountFields: AccountKeys = [
+export const identityFields: IdentityKey[] = ['id', 'name', 'randomness']; // TODO are there any other fields we should check?
+export const accountFields: AccountKey[] = [
     'name',
     'address',
     'accountNumber',
     'identityId',
     'credential',
 ];
-export const addressBookFields: AddressBookEntryKeys = [
+export const addressBookFields: AddressBookEntryKey[] = [
     'name',
     'address',
     'note',
 ];
 
-export async function importIdentities(
-    newIdentities,
-    existingIdentities
-): Promise<void> {
+export async function importNewIdentities(
+    newIdentities: Identity[],
+    existingIdentities: Identity[]
+): Promise<Identity[]> {
     const [nonDuplicates, duplicates] = partition(
         newIdentities,
         (newIdentity) =>
             checkDuplicates(newIdentity, existingIdentities, identityFields, [])
     );
     if (nonDuplicates.length > 0) {
-        await importIdentity(nonDuplicates);
+        await importIdentities(nonDuplicates);
     }
     return duplicates;
 }
 
 export async function importAccounts(
-    newAccounts,
-    existingAccounts
-): Promise<void> {
+    newAccounts: Account[],
+    existingAccounts: Account[]
+): Promise<Account[]> {
     const [nonDuplicates, duplicates] = partition(newAccounts, (newAccount) =>
         checkDuplicates(newAccount, existingAccounts, accountFields, [])
     );
@@ -74,7 +75,10 @@ export async function importAccounts(
     return duplicates;
 }
 
-export async function importEntries(entries, addressBook): Promise<void> {
+export async function importEntries(
+    entries: AddressBookEntry[],
+    addressBook: AddressBookEntry[]
+): Promise<AddressBookEntry[]> {
     const [nonDuplicates, duplicates] = partition(entries, (entry) =>
         checkDuplicates(entry, addressBook, addressBookFields, ['note'])
     );
@@ -98,22 +102,32 @@ interface Props {
     location: Location;
 }
 
-async function performImport(importedData, existingData, setDuplicates) {
-    let duplicates = await importIdentities(
+interface SetDuplicates {
+    identities(duplicates: Identity[]): void;
+    accounts(duplicates: Account[]): void;
+    addressBook(duplicates: AddressBookEntry[]): void;
+}
+
+async function performImport(
+    importedData: ExportData,
+    existingData: ExportData,
+    setDuplicates: SetDuplicates
+) {
+    const duplicateIdentities = await importNewIdentities(
         importedData.identities,
         existingData.identities
     );
-    setDuplicates.identities(duplicates);
-    duplicates = await importAccounts(
+    setDuplicates.identities(duplicateIdentities);
+    const duplicateAccounts = await importAccounts(
         importedData.accounts,
         existingData.accounts
     );
-    setDuplicates.accounts(duplicates);
-    duplicates = await importEntries(
+    setDuplicates.accounts(duplicateAccounts);
+    const duplicateEntries = await importEntries(
         importedData.addressBook,
         existingData.addressBook
     );
-    setDuplicates.addressBook(duplicates);
+    setDuplicates.addressBook(duplicateEntries);
 }
 
 /**
@@ -128,9 +142,13 @@ export default function PerformImport({ location }: Props) {
     const accounts = useSelector(accountsSelector);
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
-    const [duplicateIdentities, setDuplicateIdentities] = useState([]);
-    const [duplicateAccounts, setDuplicateAccounts] = useState([]);
-    const [duplicateEntries, setDuplicateEntries] = useState([]);
+    const [duplicateIdentities, setDuplicateIdentities] = useState<Identity[]>(
+        []
+    );
+    const [duplicateAccounts, setDuplicateAccounts] = useState<Account[]>([]);
+    const [duplicateEntries, setDuplicateEntries] = useState<
+        AddressBookEntry[]
+    >([]);
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -158,13 +176,11 @@ export default function PerformImport({ location }: Props) {
         setDuplicateIdentities,
     ]);
 
-    const accountList = (identity) => (
+    const accountList = (identity: Identity) => (
         <List.List relaxed="false">
             {importedData.accounts
                 .filter(
-                    (account: Account) =>
-                        parseInt(account.identityId, 10) ===
-                        parseInt(identity.id, 10)
+                    (account: Account) => account.identityId === identity.id
                 )
                 .map((account: Account) => (
                     <List.Item key={account.address}>

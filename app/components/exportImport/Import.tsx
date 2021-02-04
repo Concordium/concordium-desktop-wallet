@@ -8,9 +8,11 @@ import InputModal from '../InputModal';
 import MessageModal from '../MessageModal';
 import DragAndDropFile from '../DragAndDropFile';
 import {
+    validatePassword,
     validateImportStructure,
     validateEncryptedStructure,
 } from '../../utils/importHelpers';
+import { EncryptedData } from '../../utils/types';
 
 /**
  * Component to start importing identities/account/addressBook.
@@ -18,12 +20,12 @@ import {
  */
 export default function Import() {
     const dispatch = useDispatch();
-    const [file, setFile] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [file, setFile] = useState<EncryptedData | undefined>();
+    const [errorMessage, setErrorMessage] = useState<string>('');
     const [messageModalOpen, setMessageModalOpen] = useState(false);
     const [passwordModalOpen, setPasswordModalOpen] = useState(false);
 
-    function fail(message) {
+    function fail(message: string) {
         setErrorMessage(message);
         setMessageModalOpen(true);
         setPasswordModalOpen(false);
@@ -32,7 +34,11 @@ export default function Import() {
     // Attempts to decrypt the file, using the given password
     // then parses/validates the data.
     // If it succeeds, redirect to PerformImport to finish importing.
-    async function decryptAndParseData(password) {
+    async function decryptAndParseData(password: string) {
+        if (!file) {
+            fail('Unexpected missing data');
+            return;
+        }
         let decryptedFile;
         try {
             decryptedFile = decrypt(file, password);
@@ -60,7 +66,7 @@ export default function Import() {
     }
 
     // Attempts to parse/validate the given (encrypted) data.
-    async function fileProcessor(rawData) {
+    async function fileProcessor(rawData: string) {
         if (rawData) {
             let encryptedData;
             try {
@@ -84,7 +90,7 @@ export default function Import() {
             <InputModal
                 title="Enter your password"
                 buttonText="Import"
-                validValue={(password) => password}
+                validValue={(password) => validatePassword(password)}
                 buttonOnClick={decryptAndParseData}
                 placeholder="Enter the password you chose upon exporting your file"
                 onClose={() => setPasswordModalOpen(false)}

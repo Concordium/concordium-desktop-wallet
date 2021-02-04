@@ -6,7 +6,7 @@ import { getGTUSymbol, isValidGTUString } from '../../utils/gtu';
 
 interface Props {
     setLocation(location: string): void;
-    recipient: AddressBookEntry;
+    recipient: AddressBookEntry | undefined;
     amount: string;
     setAmount(amount: string): void;
 }
@@ -24,7 +24,7 @@ export default function PickAmount({
 }: Props) {
     const validInput = isValidGTUString(amount);
 
-    function updateAmount(newAmount) {
+    function updateAmount(newAmount: string) {
         setAmount(newAmount);
     }
 

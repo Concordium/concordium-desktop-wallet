@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import { EncryptedData } from './types';
 
 const cipherAlgorithm = 'aes-256-cbc';
 const hashAlgorithm = 'sha256';
@@ -11,7 +12,7 @@ const cipherEncoding = 'hex';
  * return the ciphertext and the parameters needed
  * to decrypt.
  */
-export function encrypt(data, password) {
+export function encrypt(data: string, password: string) {
     const keyLen = 32;
     const iterations = 10000;
     const salt = crypto.randomBytes(16);
@@ -49,7 +50,10 @@ export function encrypt(data, password) {
  * Second parameter must be the same password used
  * during encryption, otherwise the method will fail.
  */
-export function decrypt({ cipherText, metaData }, password) {
+export function decrypt(
+    { cipherText, metaData }: EncryptedData,
+    password: string
+) {
     const { keyLen, iterations, salt, initializationVector } = metaData;
     const key = crypto.pbkdf2Sync(
         password,

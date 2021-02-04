@@ -18,7 +18,7 @@ export default function MultiSignatureCreateProposalView() {
         foundationTransactionsEnabledSelector
     );
 
-    let availableTransactionTypes = [];
+    let availableTransactionTypes: string[] = [];
     if (foundationTransactionsEnabled) {
         const foundationTransactionTypes = Object.keys(
             UpdateType
