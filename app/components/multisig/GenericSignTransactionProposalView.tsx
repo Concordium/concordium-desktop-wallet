@@ -9,13 +9,14 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
+import { parse } from 'json-bigint';
 import LedgerComponent from '../ledger/LedgerComponent';
 import TransactionDetails from '../TransactionDetails';
 import TransactionHashView from '../TransactionHashView';
 import { AccountTransaction, UpdateInstruction } from '../../utils/types';
 
 interface Props {
-    transaction: AccountTransaction | UpdateInstruction;
+    transaction: string;
     transactionHash: string;
     signFunction: <T>(input: T) => Promise<void>;
     checkboxes: string[];
@@ -32,6 +33,10 @@ export default function GenericSignTransactionProposalView({
     const [signing, setSigning] = useState(false);
     const [checkboxesStatus, setCheckBoxesStatus] = useState(
         new Array(checkboxes.length).fill(false)
+    );
+
+    const transactionObject: UpdateInstruction | AccountTransaction = parse(
+        transaction
     );
 
     // The device component should only be displayed if the user has clicked
@@ -53,7 +58,9 @@ export default function GenericSignTransactionProposalView({
                 <Grid columns={2} divided textAlign="center" padded>
                     <Grid.Row>
                         <Grid.Column>
-                            <TransactionDetails transaction={transaction} />
+                            <TransactionDetails
+                                transaction={transactionObject}
+                            />
                         </Grid.Column>
                         <Grid.Column>
                             <TransactionHashView

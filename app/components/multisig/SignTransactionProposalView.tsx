@@ -93,7 +93,7 @@ export default function SignTransactionProposalView({ location }: Props) {
 
     return (
         <GenericSignTransactionProposalView
-            transaction={updateInstruction}
+            transaction={transaction}
             transactionHash={transactionHash}
             signFunction={signingFunction}
             checkboxes={['The transaction details are correct']}

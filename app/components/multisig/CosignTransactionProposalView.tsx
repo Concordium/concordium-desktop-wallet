@@ -43,9 +43,6 @@ export default function CosignTransactionProposalView({ location }: Props) {
     const { transaction } = location.state;
     const { type } = location.state;
 
-    // TODO Support account transactions too.
-    const updateInstruction = parse(transaction);
-
     useEffect(() => {
         const transactionObject = parse(transaction);
         // TODO Add AccountTransactionHandler here when implemented.
@@ -87,7 +84,7 @@ export default function CosignTransactionProposalView({ location }: Props) {
 
     return (
         <GenericSignTransactionProposalView
-            transaction={updateInstruction}
+            transaction={transaction}
             transactionHash={transactionHash}
             signFunction={signingFunction}
             checkboxes={checkboxLabels}
