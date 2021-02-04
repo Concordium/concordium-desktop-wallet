@@ -1,7 +1,6 @@
 {
     "name": "concordium-desktop-wallet",
     "productName": "concordium-desktop-wallet",
-    "version": "0.1.0",
     "description": "concordium-desktop-wallet",
     "main": "./main.prod.js",
     "author": {
