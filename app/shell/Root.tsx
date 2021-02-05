@@ -5,7 +5,7 @@ import { hot } from 'react-hot-loader/root';
 import { History } from 'history';
 import { Grid } from 'semantic-ui-react';
 import { Store } from '../store';
-import Routes from '../Routes';
+import Routes from './Routes';
 import SideBar from './Sidebar';
 import Header from './Header';
 
