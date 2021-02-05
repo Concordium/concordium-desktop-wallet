@@ -51,7 +51,6 @@ export default function SimpleTransfer(account: Account) {
                 }
                 return (
                     <ConfirmTransfer
-                        setLocation={setLocation}
                         recipient={recipient}
                         amount={toMicroUnits(amount)}
                         setTransaction={setTransaction}
