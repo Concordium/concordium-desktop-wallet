@@ -13,7 +13,7 @@ export async function up(knex: Knex): Promise<void> {
             table.string('status');
             table.string('address');
             table
-                .string('identityId')
+                .integer('identityId')
                 .unsigned()
                 .notNullable()
                 .references('id')
