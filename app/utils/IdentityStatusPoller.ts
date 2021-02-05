@@ -1,9 +1,10 @@
-import { Dispatch, Identity } from './types';
+import { Dispatch, Identity, IdentityStatus } from './types';
 import { getIdObject } from './httpRequests';
 import { getAccountsOfIdentity } from '../database/AccountDao';
 import { confirmIdentity, rejectIdentity } from '../features/IdentitySlice';
 import { confirmInitialAccount } from '../features/AccountSlice';
 import { addToAddressBook } from '../features/AddressBookSlice';
+import { getAllIdentities } from '../database/IdentityDao';
 
 /**
  * Listens until, the identityProvider confirms the identity/initial account and returns the identiyObject.
@@ -65,4 +66,11 @@ export async function resumeIdentityStatusPolling(
         accountName,
         location
     );
+}
+
+export default async function listenForIdentityStatus(dispatch: Dispatch) {
+    const identities = await getAllIdentities();
+    identities
+        .filter((identity) => identity.status === IdentityStatus.Pending)
+        .forEach((identity) => resumeIdentityStatusPolling(identity, dispatch));
 }

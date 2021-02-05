@@ -1,13 +1,23 @@
-import { Dispatch, Account } from './types';
+import { Dispatch, Account, AccountStatus } from './types';
 import { confirmAccount } from '../features/AccountSlice';
+import { isInitialAccount } from './accountHelpers';
+import { getAllAccounts } from '../database/AccountDao';
 
-export default function resumeAccountStatusPolling(
-    account: Account,
-    dispatch: Dispatch
-) {
+function resumeAccountStatusPolling(account: Account, dispatch: Dispatch) {
     const { name, credentialDeploymentId } = account;
     if (!credentialDeploymentId) {
         throw new Error('Unexpected missing credentialDeploymentId.');
     }
     return confirmAccount(dispatch, name, credentialDeploymentId);
+}
+
+export default async function listenForAccountStatus(dispatch: Dispatch) {
+    const accounts = await getAllAccounts();
+    accounts
+        .filter(
+            (account) =>
+                account.status === AccountStatus.Pending &&
+                !isInitialAccount(account)
+        )
+        .forEach((account) => resumeAccountStatusPolling(account, dispatch));
 }

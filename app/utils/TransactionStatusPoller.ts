@@ -1,4 +1,5 @@
-import { updateEntry } from '../database/MultiSignatureProposalDao';
+import { getPendingTransactions } from '../database/TransactionDao';
+import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
 import { loadProposals } from '../features/MultiSignatureSlice';
 import { getTransactionStatus } from './client';
 import { hashSha256 } from './serializationHelpers';
@@ -100,4 +101,25 @@ export async function monitorTransactionStatus(transactionHash: string) {
     } else {
         rejectTransaction(transactionHash);
     }
+}
+
+/**
+ * Load all submitted proposals and sent transfers from the database, and
+ * start listening for their status towards the node.
+ */
+export default async function listenForTransactionStatus(dispatch: Dispatch) {
+    const transfers = await getPendingTransactions();
+    transfers.forEach((transfer) =>
+        monitorTransactionStatus(transfer.transactionHash)
+    );
+
+    const allProposals = await getAll();
+    allProposals
+        .filter(
+            (proposal) =>
+                proposal.status === MultiSignatureTransactionStatus.Submitted
+        )
+        .forEach((proposal) => {
+            getMultiSignatureTransactionStatus(proposal, dispatch);
+        });
 }
