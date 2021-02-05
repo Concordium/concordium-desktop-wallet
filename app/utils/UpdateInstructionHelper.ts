@@ -1,3 +1,4 @@
+import { parse } from 'json-bigint';
 import { BlockSummary } from './NodeApiTypes';
 import {
     ExchangeRate,
@@ -6,6 +7,12 @@ import {
     UpdateInstruction,
     UpdateType,
 } from './types';
+import UpdateInstructionHandler from './UpdateInstructionHandler';
+
+export interface TransactionInput {
+    transaction: string;
+    type: string;
+}
 
 /**
  * The Props interface used by components for handling parameter update
@@ -42,4 +49,21 @@ export default function createUpdateInstruction(
     };
 
     return updateInstruction;
+}
+
+export function createTransactionHandler(state: TransactionInput | undefined) {
+    if (!state) {
+        throw new Error(
+            'No transaction handler was found. An invalid transaction has been received.'
+        );
+    }
+    const { transaction, type } = state;
+
+    const transactionObject = parse(transaction);
+    // TODO Add AccountTransactionHandler here when implemented.
+    const transactionHandlerValue =
+        type === 'UpdateInstruction'
+            ? new UpdateInstructionHandler(transactionObject)
+            : new UpdateInstructionHandler(transactionObject);
+    return transactionHandlerValue;
 }

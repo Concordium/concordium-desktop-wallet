@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Icon, Menu } from 'semantic-ui-react';
 import routes from '../constants/routes.json';
-import { version } from '../../package.json';
+import { version } from '../package.json';
 
 export default function Routes() {
     const location = useLocation();

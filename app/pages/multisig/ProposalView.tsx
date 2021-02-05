@@ -181,7 +181,7 @@ export default function ProposalView() {
                 <Divider />
                 <Grid columns={3} divided textAlign="center" padded>
                     <Grid.Column>
-                        <TransactionDetails updateInstruction={instruction} />
+                        <TransactionDetails transaction={instruction} />
                     </Grid.Column>
                     <Grid.Column>
                         <Grid.Row>

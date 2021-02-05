@@ -50,6 +50,10 @@ export default function UpdateMicroGtuPerEuroRate({
         setCurrentMicroGtuPerEuro,
     ] = useState<BigInt>();
 
+    const sequenceNumber =
+        blockSummary.updates.updateQueues.microGTUPerEuro.nextSequenceNumber;
+    const { threshold } = blockSummary.updates.authorizations.microGTUPerEuro;
+
     if (!currentMicroGtuPerEuro) {
         setCurrentMicroGtuPerEuro(
             blockSummary.updates.chainParameters.microGTUPerEuro.numerator
@@ -90,25 +94,21 @@ export default function UpdateMicroGtuPerEuroRate({
                         }
                     }}
                 />
-                <Form.Field>
-                    <Button
-                        primary
-                        onClick={() =>
-                            generateTransaction(
-                                createTransaction(
-                                    microGtuPerEuro,
-                                    blockSummary.updates.updateQueues
-                                        .microGTUPerEuro.nextSequenceNumber,
-                                    blockSummary.updates.authorizations
-                                        .microGTUPerEuro.threshold
-                                )
-                            )
-                        }
-                    >
-                        Generate transaction proposal
-                    </Button>
-                </Form.Field>
             </Form>
+            <Button
+                primary
+                onClick={() =>
+                    generateTransaction(
+                        createTransaction(
+                            microGtuPerEuro,
+                            sequenceNumber,
+                            threshold
+                        )
+                    )
+                }
+            >
+                Generate transaction proposal
+            </Button>
         </Segment>
     );
 }

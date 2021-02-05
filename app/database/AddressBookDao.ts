@@ -6,7 +6,9 @@ export async function getAddressBook(): Promise<AddressBookEntry[]> {
     return (await knex()).select().table(addressBookTable);
 }
 
-export async function insertEntry(entry: AddressBookEntry) {
+export async function insertEntry(
+    entry: AddressBookEntry | AddressBookEntry[]
+) {
     return (await knex())(addressBookTable).insert(entry);
 }
 
