@@ -2,12 +2,12 @@ import { combineReducers } from 'redux';
 import { connectRouter } from 'connected-react-router';
 import { History } from 'history';
 /* eslint-disable import/no-cycle */
-import accountReducer from './features/AccountSlice';
-import identityReducer from './features/IdentitySlice';
-import settingsReducer from './features/SettingsSlice';
-import addressBookReducer from './features/AddressBookSlice';
-import multiSignatureReducer from './features/MultiSignatureSlice';
-import transactionReducer from './features/TransactionSlice';
+import accountReducer from '../features/AccountSlice';
+import identityReducer from '../features/IdentitySlice';
+import settingsReducer from '../features/SettingsSlice';
+import addressBookReducer from '../features/AddressBookSlice';
+import multiSignatureReducer from '../features/MultiSignatureSlice';
+import transactionReducer from '../features/TransactionSlice';
 /* eslint-disable import/no-cycle */
 
 export default function createRootReducer(history: History) {

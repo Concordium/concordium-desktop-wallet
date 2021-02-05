@@ -4,7 +4,7 @@ import { ConnectedRouter } from 'connected-react-router';
 import { hot } from 'react-hot-loader/root';
 import { History } from 'history';
 import { Grid } from 'semantic-ui-react';
-import { Store } from '../store';
+import { Store } from '../store/store';
 import Routes from './Routes';
 import SideBar from './Sidebar';
 import Header from './Header';
