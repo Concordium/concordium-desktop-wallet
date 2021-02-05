@@ -3,6 +3,7 @@ import { getIdObject } from './httpRequests';
 import { getAccountsOfIdentity } from '../database/AccountDao';
 import { confirmIdentity, rejectIdentity } from '../features/IdentitySlice';
 import { confirmInitialAccount } from '../features/AccountSlice';
+import { isInitialAccount } from './accountHelpers';
 import { addToAddressBook } from '../features/AddressBookSlice';
 import { getAllIdentities } from '../database/IdentityDao';
 
@@ -47,7 +48,7 @@ export async function confirmIdentityAndInitialAccount(
 
 async function findInitialAccount(identity: Identity) {
     const accounts = await getAccountsOfIdentity(identity.id);
-    return accounts.find((account) => account.accountNumber === 0);
+    return accounts.find(isInitialAccount);
 }
 
 export async function resumeIdentityStatusPolling(
