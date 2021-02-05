@@ -10,7 +10,9 @@ interface Props
     initialValues?: AddressBookEntry;
 }
 
-const fieldNames: EqualRecord<Omit<AddressBookEntry, 'readOnly'>> = {
+const fieldNames: NotOptional<
+    EqualRecord<Omit<AddressBookEntry, 'readOnly'>>
+> = {
     name: 'name',
     address: 'address',
     note: 'note',
