@@ -12,6 +12,8 @@ import chalk from 'chalk';
 import { merge } from 'webpack-merge';
 import { spawn, execSync } from 'child_process';
 import baseConfig from './webpack.config.base';
+import assetsConfig from './webpack.config.assets';
+import stylesConfig from './webpack.config.styles';
 import CheckNodeEnv from '../internals/scripts/CheckNodeEnv';
 
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
@@ -40,7 +42,7 @@ if (!requiredByDLLConfig && !(fs.existsSync(dll) && fs.existsSync(manifest))) {
     execSync('yarn build-dll');
 }
 
-export default merge(baseConfig, {
+export default merge(baseConfig, assetsConfig, stylesConfig(false), {
     devtool: 'inline-source-map',
 
     mode: 'development',
@@ -61,153 +63,6 @@ export default merge(baseConfig, {
         filename: 'renderer.dev.js',
     },
 
-    module: {
-        rules: [
-            {
-                test: /\.global\.css$/,
-                use: [
-                    {
-                        loader: 'style-loader',
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            sourceMap: true,
-                        },
-                    },
-                ],
-            },
-            {
-                test: /^((?!\.global).)*\.css$/,
-                use: [
-                    {
-                        loader: 'style-loader',
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            modules: {
-                                localIdentName:
-                                    '[name]__[local]__[hash:base64:5]',
-                            },
-                            sourceMap: true,
-                            importLoaders: 1,
-                        },
-                    },
-                ],
-            },
-            // SASS support - compile all .global.scss files and pipe it to style.css
-            {
-                test: /\.global\.(scss|sass)$/,
-                use: [
-                    {
-                        loader: 'style-loader',
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            sourceMap: true,
-                        },
-                    },
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            sourceMap: true,
-                            sassOptions: {
-                                includePaths: ['node_modules', 'app/styles'],
-                            },
-                        },
-                    },
-                ],
-            },
-            // SASS support - compile all module.scss files and pipe it to style.css
-            {
-                test: /\.module\.(scss|sass)$/,
-                use: [
-                    {
-                        loader: 'style-loader',
-                    },
-                    {
-                        loader: '@teamsupercell/typings-for-css-modules-loader',
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            modules: {
-                                localIdentName:
-                                    '[name]__[local]__[hash:base64:5]',
-                            },
-                            sourceMap: true,
-                            importLoaders: 1,
-                        },
-                    },
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            sourceMap: true,
-                            sassOptions: {
-                                includePaths: ['node_modules', 'app/styles'],
-                            },
-                        },
-                    },
-                ],
-            },
-            // WOFF Font
-            {
-                test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'application/font-woff',
-                    },
-                },
-            },
-            // WOFF2 Font
-            {
-                test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'application/font-woff',
-                    },
-                },
-            },
-            // TTF Font
-            {
-                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'application/octet-stream',
-                    },
-                },
-            },
-            // EOT Font
-            {
-                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-                use: 'file-loader',
-            },
-            // SVG Font
-            {
-                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'image/svg+xml',
-                    },
-                },
-            },
-            // Common Image Formats
-            {
-                test: /\.(?:ico|gif|png|jpg|jpeg|webp)$/,
-                use: 'url-loader',
-            },
-        ],
-    },
     resolve: {
         alias: {
             'react-dom': '@hot-loader/react-dom',
