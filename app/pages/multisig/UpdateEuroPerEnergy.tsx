@@ -38,7 +38,7 @@ function createTransaction(
 
 export default function UpdateEuroPerEnergy({
     blockSummary,
-    generateTransaction,
+    forwardTransaction,
 }: UpdateProps) {
     const [euroPerEnergy, setEuroPerEnergy] = useState<ExchangeRate>();
     const currentEuroPerEnergy =
@@ -105,7 +105,7 @@ export default function UpdateEuroPerEnergy({
             <Button
                 primary
                 onClick={() =>
-                    generateTransaction(
+                    forwardTransaction(
                         createTransaction(
                             euroPerEnergy,
                             sequenceNumber,

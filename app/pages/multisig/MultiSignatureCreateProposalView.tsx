@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { stringify } from 'json-bigint';
 import UpdateMicroGtuPerEuroRate from './UpdateMicroGtuPerEuro';
 import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
 import { getBlockSummary, getConsensusStatus } from '../../utils/client';
@@ -9,8 +10,6 @@ import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
 import UpdateEuroPerEnergy from './UpdateEuroPerEnergy';
-import { insert } from '../../database/MultiSignatureProposalDao';
-import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 
 interface Location {
     state: UpdateType;
@@ -36,22 +35,18 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     const type: UpdateType = location.state;
 
     /**
-     * Inserts the provided multi signature transaction into the database and
-     * the state, and then navigates to the created proposal.
+     * Forwards the multi signature transactions to the signing page.
      */
-    // TODO: When signing before exporting has been added, then this has to be updated too
-    async function generateTransaction(
+    async function forwardTransactionToSigningPage(
         multiSignatureTransaction: Partial<MultiSignatureTransaction>
     ) {
-        // Save to database and use the assigned id to update the local object.
-        const entryId = (await insert(multiSignatureTransaction))[0];
-        multiSignatureTransaction.id = entryId;
-
-        // Set the current proposal in the state to the one that was just generated.
-        dispatch(setCurrentProposal(multiSignatureTransaction));
-
-        // Navigate to the page that displays the current proposal from the state.
-        dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
+        // Forward the transaction under creation to the signing page.
+        dispatch(
+            push({
+                pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
+                state: stringify(multiSignatureTransaction),
+            })
+        );
     }
 
     function chooseProposalType(foundationType: UpdateType) {
@@ -63,14 +58,14 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                 return (
                     <UpdateMicroGtuPerEuroRate
                         blockSummary={blockSummary}
-                        generateTransaction={generateTransaction}
+                        forwardTransaction={forwardTransactionToSigningPage}
                     />
                 );
             case UpdateType.UpdateEuroPerEnergy:
                 return (
                     <UpdateEuroPerEnergy
                         blockSummary={blockSummary}
-                        generateTransaction={generateTransaction}
+                        forwardTransaction={forwardTransactionToSigningPage}
                     />
                 );
             default:

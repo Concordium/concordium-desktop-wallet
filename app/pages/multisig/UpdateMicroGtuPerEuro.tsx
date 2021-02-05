@@ -42,7 +42,7 @@ function createTransaction(
 
 export default function UpdateMicroGtuPerEuroRate({
     blockSummary,
-    generateTransaction,
+    forwardTransaction,
 }: UpdateProps) {
     const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
     const [
@@ -98,7 +98,7 @@ export default function UpdateMicroGtuPerEuroRate({
             <Button
                 primary
                 onClick={() =>
-                    generateTransaction(
+                    forwardTransaction(
                         createTransaction(
                             microGtuPerEuro,
                             sequenceNumber,

@@ -20,7 +20,7 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
-    generateTransaction: (
+    forwardTransaction: (
         multiSignatureTransaction: Partial<MultiSignatureTransaction>
     ) => Promise<void>;
 }
