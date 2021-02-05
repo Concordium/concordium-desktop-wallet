@@ -13,8 +13,13 @@ import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
-    TransactionKindId,
     OriginType,
+    Account,
+    AccountTransaction,
+    IncomingTransaction,
+    Dispatch,
+    SimpleTransfer,
+    instanceOfSimpleTransfer,
 } from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
 
@@ -41,27 +46,36 @@ const { setTransactions } = transactionSlice.actions;
 // Decrypts the encrypted transfers in the given transacion list, using the prfKey.
 // This function expects the prfKey to match the account's prfKey,
 // and that the account is the receiver of the transactions.
-export async function decryptTransactions(transactions, prfKey, account) {
-    const global = (await getGlobal()).value;
+export async function decryptTransactions(
+    transactions: TransferTransaction[],
+    prfKey: string,
+    account: Account
+) {
+    const global = await getGlobal();
     const encryptedTransfers = transactions.filter(
         (t) =>
             t.transactionKind ===
                 TransactionKindString.EncryptedAmountTransfer &&
             t.decryptedAmount === null
     );
-    const encryptedAmounts = encryptedTransfers.map(
-        (t) => JSON.parse(t.encrypted).encryptedAmount
-    );
 
-    let decryptedAmounts;
     if (encryptedTransfers.length > 0) {
-        decryptedAmounts = await decryptAmounts(
-            encryptedAmounts,
-            account,
-            global,
-            prfKey
-        );
+        return Promise.resolve();
     }
+
+    const encryptedAmounts = encryptedTransfers.map((t) => {
+        if (!t.encrypted) {
+            throw new Error('Unexpected missing field');
+        }
+        return JSON.parse(t.encrypted).encryptedAmount;
+    });
+
+    const decryptedAmounts = await decryptAmounts(
+        encryptedAmounts,
+        account,
+        global,
+        prfKey
+    );
 
     return Promise.all(
         encryptedTransfers.map(async (transaction, index) =>
@@ -79,7 +93,7 @@ export async function decryptTransactions(transactions, prfKey, account) {
  * We have to do it like this, because the data from the wallet proxy
  * doesn't contain the receiving address, except in the event string.
  */
-function getScheduleReceiver(transaction) {
+function getScheduleReceiver(transaction: IncomingTransaction) {
     const event = transaction.details.events[0];
     return event.slice(event.lastIndexOf(' ') + 1);
 }
@@ -87,19 +101,24 @@ function getScheduleReceiver(transaction) {
 /*
  * Converts the given transaction into the structure, which is used in the database.
  */
-function convertIncomingTransaction(transaction): TransferTransaction {
-    let fromAddress;
-    if ('transferSource' in transaction.details) {
+function convertIncomingTransaction(
+    transaction: IncomingTransaction
+): TransferTransaction {
+    let fromAddress = '';
+    if (transaction.details.transferSource) {
         fromAddress = transaction.details.transferSource;
-    } else if (transaction.origin.type === OriginType.Account) {
+    } else if (
+        transaction.origin.type === OriginType.Account &&
+        transaction.origin.address
+    ) {
         fromAddress = transaction.origin.address;
     }
-    let toAddress;
-    if ('transferDestination' in transaction.details) {
+    let toAddress = '';
+    if (transaction.details.transferDestination) {
         toAddress = transaction.details.transferDestination;
     }
     let encrypted;
-    if ('encrypted' in transaction) {
+    if (transaction.encrypted) {
         encrypted = JSON.stringify(transaction.encrypted);
     }
 
@@ -135,7 +154,7 @@ function convertIncomingTransaction(transaction): TransferTransaction {
 /**
  * Determine whether the transaction affects unshielded balance.
  */
-function filterUnShieldedBalanceTransaction(transaction) {
+function filterUnShieldedBalanceTransaction(transaction: TransferTransaction) {
     switch (transaction.transactionKind) {
         case TransactionKindString.Transfer:
         case TransactionKindString.BakingReward:
@@ -151,7 +170,7 @@ function filterUnShieldedBalanceTransaction(transaction) {
 /**
  * Determine whether the transaction affects shielded balance.
  */
-function filterShieldedBalanceTransaction(transaction) {
+function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
     switch (transaction.transactionKind) {
         case TransactionKindString.EncryptedAmountTransfer:
         case TransactionKindString.TransferToEncrypted:
@@ -165,8 +184,8 @@ function filterShieldedBalanceTransaction(transaction) {
 // Load transactions from storage.
 // Filters according to viewingShielded parameter
 export async function loadTransactions(
-    account,
-    viewingShielded,
+    account: Account,
+    viewingShielded: boolean,
     dispatch: Dispatch
 ) {
     const filter = viewingShielded
@@ -182,7 +201,7 @@ export async function loadTransactions(
 }
 
 // Update the transaction from remote source.
-export async function updateTransactions(account) {
+export async function updateTransactions(account: Account) {
     const fromId = (await getMaxTransactionsIdOfAccount(account)) || 0;
     const transactions = await getTransactions(account.address, fromId);
     if (transactions.length > 0) {
@@ -190,34 +209,61 @@ export async function updateTransactions(account) {
     }
 }
 
-// Add a pending transaction to storage
-export async function addPendingTransaction(transaction, hash) {
-    if (transaction.transactionKind !== TransactionKindId.Simple_transfer) {
-        throw new Error('unsupported transaction type - please implement');
-    }
+function convertSimpleTransfer(
+    transaction: SimpleTransfer,
+    hash: string
+): TransferTransaction {
+    const { payload } = transaction;
+    const estimatedTotal =
+        BigInt(payload.amount) + BigInt(transaction.energyAmount);
 
-    const convertedTransaction = {
+    return {
+        id: -1,
+        blockHash: 'pending',
         remote: false,
-        originType: 'self',
+        originType: OriginType.Self,
         transactionKind: TransactionKindString.Transfer,
         transactionHash: hash,
-        total: (-(
-            BigInt(transaction.payload.amount) +
-            BigInt(transaction.energyAmount)
-        )).toString(),
-        subtotal: (-transaction.payload.amount).toString(),
+        total: (-estimatedTotal).toString(),
+        subtotal: (-payload.amount).toString(),
         cost: transaction.energyAmount,
         fromAddress: transaction.sender,
         toAddress: transaction.payload.toAddress,
-        blockTime: Date.now() / 1000, // Temporary value, unless it fails
+        blockTime: (Date.now() / 1000).toString(), // Temporary value, unless it fails
         status: TransactionStatus.Pending,
     };
+}
+
+// Add a pending transaction to storage
+export async function addPendingTransaction(
+    transaction: AccountTransaction,
+    hash: string
+) {
+    let convertedTransaction: TransferTransaction;
+    if (instanceOfSimpleTransfer(transaction)) {
+        convertedTransaction = convertSimpleTransfer(transaction, hash);
+    } else {
+        throw new Error('unsupported transaction type - please implement');
+    }
+
     return insertTransactions([convertedTransaction]);
+}
+
+interface EventResult {
+    outcome: string;
+}
+
+interface Event {
+    result: EventResult;
+    cost: string;
 }
 
 // Set the transaction's status to confirmed, update the cost and whether it succeded.
 // TODO: update Total to reflect change in cost.
-export async function confirmTransaction(transactionHash, dataObject) {
+export async function confirmTransaction(
+    transactionHash: string,
+    dataObject: Record<string, Event>
+) {
     const success = Object.entries(dataObject.outcomes).reduce(
         (accu, [, event]) => accu && event.result.outcome === 'success',
         true
@@ -228,12 +274,12 @@ export async function confirmTransaction(transactionHash, dataObject) {
     );
     return updateTransaction(
         { transactionHash },
-        { status: TransactionStatus.Finalized, cost, success }
+        { status: TransactionStatus.Finalized, cost: cost.toString(), success }
     );
 }
 
 // Set the transaction's status to rejected.
-export async function rejectTransaction(transactionHash) {
+export async function rejectTransaction(transactionHash: string) {
     return updateTransaction(
         { transactionHash },
         { status: TransactionStatus.Rejected }

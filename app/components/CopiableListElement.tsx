@@ -11,7 +11,7 @@ interface Props {
 /**
  * This Display the title (and the note) and contains an CopyButton, that, when pressed, copies the given value into the user's clipboard.
  */
-function CopiableListElement({ title, value, note }: Props): JSX.element {
+function CopiableListElement({ title, value, note }: Props): JSX.Element {
     return (
         <Grid container columns={2} divided="vertically">
             <Grid.Row>

@@ -46,9 +46,7 @@ export default function ProposalView() {
         show: false,
     });
     const dispatch = useDispatch();
-    const currentProposal: MultiSignatureTransaction | undefined = useSelector(
-        currentProposalSelector
-    );
+    const currentProposal = useSelector(currentProposalSelector);
     if (!currentProposal) {
         throw new Error(
             'The proposal page should not be loaded without a proposal in the state.'
@@ -120,27 +118,30 @@ export default function ProposalView() {
     ).toString('hex');
 
     async function submitTransaction() {
+        if (!currentProposal) {
+            // TODO: can we remove this without getting a type error.
+            throw new Error(
+                'The proposal page should not be loaded without a proposal in the state.'
+            );
+        }
         const payload = serializeForSubmission(instruction);
         const submitted = (await sendTransaction(payload)).getValue();
+        const modifiedProposal: MultiSignatureTransaction = {
+            ...currentProposal,
+        };
         if (submitted) {
-            const submittedProposal = {
-                ...currentProposal,
-                status: MultiSignatureTransactionStatus.Submitted,
-            };
-            updateCurrentProposal(dispatch, submittedProposal);
-            getMultiSignatureTransactionStatus(submittedProposal, dispatch);
+            modifiedProposal.status = MultiSignatureTransactionStatus.Submitted;
+            updateCurrentProposal(dispatch, modifiedProposal);
+            getMultiSignatureTransactionStatus(modifiedProposal, dispatch);
             dispatch(
                 push({
                     pathname: routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION,
-                    state: stringify(submittedProposal),
+                    state: stringify(modifiedProposal),
                 })
             );
         } else {
-            const failedProposal = {
-                ...currentProposal,
-                status: MultiSignatureTransactionStatus.Failed,
-            };
-            updateCurrentProposal(dispatch, failedProposal);
+            modifiedProposal.status = MultiSignatureTransactionStatus.Failed;
+            updateCurrentProposal(dispatch, modifiedProposal);
         }
     }
 

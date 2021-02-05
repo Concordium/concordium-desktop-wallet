@@ -4,7 +4,9 @@ import { List, Grid } from 'semantic-ui-react';
 import { chosenIdentitySelector } from '../features/IdentitySlice';
 import IdentityListElement from './IdentityListElement';
 import { IdentityObject, IdentityStatus } from '../utils/types';
-import attributeNames from '../constants/attributeNames.json';
+import attributeNamesJson from '../constants/attributeNames.json';
+
+const attributeNames: Record<string, string> = attributeNamesJson;
 
 /**
  * Detailed view of the chosen identity.
@@ -32,7 +34,7 @@ export default function IdentityView() {
             <IdentityListElement identity={identity} />
             <Grid container columns={2} divided="vertically">
                 {Object.keys(identityObject.attributeList.chosenAttributes).map(
-                    (attribute) => (
+                    (attribute: string) => (
                         <Grid.Row key={attribute}>
                             <Grid.Column textAlign="left">
                                 {attributeNames[attribute]}

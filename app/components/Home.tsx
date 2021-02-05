@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import routes from '../constants/routes.json';
-import styles from './Home.css';
+import styles from './Home.module.scss';
 
 export default function Home(): JSX.Element {
     return (

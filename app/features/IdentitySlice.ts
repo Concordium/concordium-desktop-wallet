@@ -1,4 +1,4 @@
-import { createSlice, Dispatch } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store';
 import {
@@ -6,14 +6,27 @@ import {
     insertIdentity,
     updateIdentity,
 } from '../database/IdentityDao';
-import { Identity, IdentityStatus } from '../utils/types';
+import {
+    Identity,
+    IdentityStatus,
+    IdentityObject,
+    IdentityProvider,
+    Dispatch,
+} from '../utils/types';
+
+interface IdentityState {
+    identities: Identity[];
+    chosenIdentity: Identity | undefined;
+}
+
+const initialState: IdentityState = {
+    identities: [],
+    chosenIdentity: undefined,
+};
 
 const identitySlice = createSlice({
     name: 'identities',
-    initialState: {
-        identities: undefined,
-        chosenIdentity: undefined,
-    },
+    initialState,
     reducers: {
         updateIdentities: (state, input) => {
             state.identities = input.payload;
@@ -41,7 +54,7 @@ export async function addPendingIdentity(
     dispatch: Dispatch,
     identityName: string,
     codeUri: string,
-    identityProvider,
+    identityProvider: IdentityProvider,
     randomness: string
 ) {
     const identity = {
@@ -58,7 +71,7 @@ export async function addPendingIdentity(
 export async function confirmIdentity(
     dispatch: Dispatch,
     identityName: string,
-    identityObject
+    identityObject: IdentityObject
 ) {
     await updateIdentity(identityName, {
         status: IdentityStatus.Confirmed,

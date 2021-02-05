@@ -13,7 +13,7 @@ interface Props {
 
 export default function AccountCreationFinal({
     accountName,
-}: Props): JSX.Element {
+}: Props): JSX.Element | null {
     const accounts = useSelector(accountsSelector);
 
     if (accounts === undefined) {
@@ -21,6 +21,12 @@ export default function AccountCreationFinal({
     }
 
     const account = accounts.find((acc) => acc.name === accountName);
+
+    if (account === undefined) {
+        throw new Error(
+            'Newly created account not found. This should not happen'
+        );
+    }
 
     return (
         <Card fluid centered>

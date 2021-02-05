@@ -14,11 +14,12 @@ import LedgerComponent from '../ledger/LedgerComponent';
 import TransactionDetails from '../TransactionDetails';
 import TransactionHashView from '../TransactionHashView';
 import { AccountTransaction, UpdateInstruction } from '../../utils/types';
+import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 
-interface Props {
+interface Props<T> {
     transaction: string;
     transactionHash: string;
-    signFunction: <T>(input: T) => Promise<void>;
+    signFunction: (input: T) => Promise<void>;
     checkboxes: string[];
     signText: string;
 }
@@ -29,7 +30,7 @@ export default function GenericSignTransactionProposalView({
     signFunction,
     checkboxes,
     signText,
-}: Props) {
+}: Props<ConcordiumLedgerClient>) {
     const [signing, setSigning] = useState(false);
     const [checkboxesStatus, setCheckBoxesStatus] = useState(
         new Array(checkboxes.length).fill(false)

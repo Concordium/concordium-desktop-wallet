@@ -8,7 +8,7 @@ import {
     chosenAccountInfoSelector,
 } from '../features/AccountSlice';
 import { updateTransactions } from '../features/TransactionSlice';
-import styles from './Accounts.css';
+import styles from './Accounts.module.scss';
 import routes from '../constants/routes.json';
 import moreActions from './MoreActions';
 import simpleTransfer from './Transfers/SimpleTransfer';
@@ -39,6 +39,10 @@ export default function AccountView() {
 
     if (account === undefined) {
         return null;
+    }
+
+    if (accountInfo === undefined) {
+        return null; // TODO: Handle AccountInfo not available, either the account is not confirmed, or we can't reach the node.
     }
 
     return (

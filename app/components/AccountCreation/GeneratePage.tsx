@@ -6,7 +6,11 @@ import { Card } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { createCredential as createCredentialRust } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { Identity, CredentialDeploymentDetails } from '../../utils/types';
+import {
+    Identity,
+    CredentialDeploymentDetails,
+    Dispatch,
+} from '../../utils/types';
 import { sendTransaction } from '../../utils/client';
 import {
     addPendingAccount,
@@ -29,7 +33,7 @@ async function createCredential(
     const ledger = new ConcordiumLedgerClient(transport);
     setMessage('Please Wait');
 
-    const global = (await getGlobal()).value;
+    const global = await getGlobal();
     return createCredentialRust(
         identity,
         accountNumber,
@@ -49,7 +53,7 @@ async function createAccount(
     identity: Identity,
     attributes: string[],
     setMessage: (message: string) => void,
-    dispatch
+    dispatch: Dispatch
 ) {
     const accountNumber = await getNextAccountNumber(identity.id);
     const {
@@ -99,7 +103,7 @@ export default function AccountCreationGenerate({
     identity,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const [text, setText] = useState();
+    const [text, setText] = useState<string>();
 
     useEffect(() => {
         createAccount(accountName, identity, attributes, setText, dispatch)

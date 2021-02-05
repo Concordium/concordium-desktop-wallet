@@ -19,11 +19,12 @@ export default function AddressBookList(): JSX.Element {
     }, [dispatch]);
     const addressBook = useSelector(addressBookSelector);
 
-    function submitAddress(name, address, note) {
+    function submitAddress(name: string, address: string, note: string) {
         const entry = {
             name,
             address,
             note,
+            readOnly: false,
         };
         addToAddressBook(dispatch, entry);
     }

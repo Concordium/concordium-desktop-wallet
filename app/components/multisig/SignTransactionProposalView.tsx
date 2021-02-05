@@ -5,7 +5,6 @@ import { LocationDescriptorObject } from 'history';
 import { parse, stringify } from 'json-bigint';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import routes from '../../constants/routes.json';
-import UpdateInstructionHandler from '../../utils/UpdateInstructionHandler';
 import {
     AccountTransaction,
     MultiSignatureTransaction,
@@ -15,6 +14,8 @@ import {
 import { insert } from '../../database/MultiSignatureProposalDao';
 import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
+import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import { createTransactionHandler } from '../../utils/UpdateInstructionHelper';
 
 interface Props {
     location: LocationDescriptorObject<string>;
@@ -27,11 +28,6 @@ interface Props {
  */
 export default function SignTransactionProposalView({ location }: Props) {
     const [transactionHash, setTransactionHash] = useState<string>();
-    const [transactionHandler, setTransactionHandler] = useState<
-        TransactionHandler<UpdateInstruction | AccountTransaction>
-    >();
-
-    const dispatch = useDispatch();
 
     if (!location.state) {
         throw new Error(
@@ -43,28 +39,27 @@ export default function SignTransactionProposalView({ location }: Props) {
         location.state
     );
     const { transaction } = multiSignatureTransaction;
+    const type = 'UpdateInstruction';
+
+    const [transactionHandler] = useState<
+        TransactionHandler<
+            UpdateInstruction | AccountTransaction,
+            ConcordiumLedgerClient
+        >
+    >(() => createTransactionHandler({ transaction, type }));
+
+    const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
-    const type = 'UpdateInstruction';
     const updateInstruction: UpdateInstruction = parse(transaction);
 
     useEffect(() => {
-        const transactionObject = parse(transaction);
-        // TODO Add AccountTransactionHandler here when implemented.
-        const transactionHandlerValue =
-            type === 'UpdateInstruction'
-                ? new UpdateInstructionHandler(transactionObject)
-                : new UpdateInstructionHandler(transactionObject);
-        setTransactionHandler(transactionHandlerValue);
-
-        const serialized = transactionHandlerValue.serializeTransaction();
+        const serialized = transactionHandler.serializeTransaction();
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
-    }, [setTransactionHandler, setTransactionHash, type, transaction]);
+    }, [setTransactionHash, transactionHandler]);
 
-    async function signingFunction<ConcordiumLedgerClient>(
-        ledger: ConcordiumLedgerClient
-    ) {
+    async function signingFunction(ledger: ConcordiumLedgerClient) {
         const signatureBytes = await transactionHandler.signTransaction(ledger);
         const signature = signatureBytes.toString('hex');
 

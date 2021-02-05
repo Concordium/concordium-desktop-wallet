@@ -68,9 +68,7 @@ export default function SubmittedProposalView({ location }: Props) {
                 <Divider />
                 <Grid columns={2} divided textAlign="center" padded>
                     <Grid.Column>
-                        <TransactionDetails
-                            updateInstruction={updateInstruction}
-                        />
+                        <TransactionDetails transaction={updateInstruction} />
                     </Grid.Column>
                     <Grid.Column>
                         <TransactionHashView
