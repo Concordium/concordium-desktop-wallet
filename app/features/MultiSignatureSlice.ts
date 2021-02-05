@@ -1,7 +1,7 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
 // eslint-disable-next-line import/no-cycle
-import { RootState } from '../store';
+import { RootState } from '../store/store';
 import {
     MultiSignatureMenuItems,
     MultiSignatureTransaction,
