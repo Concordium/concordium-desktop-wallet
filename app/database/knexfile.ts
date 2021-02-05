@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import getPath from './UserDataPathAccessor';
 
 async function getProductionFilename(): Promise<string> {
@@ -28,7 +29,7 @@ export default async function getKnexConfiguration(environment: string) {
                 directory: './migrations',
             },
             pool: {
-                afterCreate: (conn, cb) => {
+                afterCreate: (conn: any, cb: any) => {
                     conn.run('PRAGMA foreign_keys = ON', cb);
                 },
             },
@@ -45,7 +46,7 @@ export default async function getKnexConfiguration(environment: string) {
                 directory: './app/database/migrations',
             },
             pool: {
-                afterCreate: (conn, cb) => {
+                afterCreate: (conn: any, cb: any) => {
                     conn.run('PRAGMA foreign_keys = ON', cb);
                 },
             },
@@ -59,7 +60,7 @@ export default async function getKnexConfiguration(environment: string) {
             },
             useNullAsDefault: true,
             pool: {
-                afterCreate: (conn, cb) => {
+                afterCreate: (conn: any, cb: any) => {
                     conn.run('PRAGMA foreign_keys = ON', cb);
                 },
             },

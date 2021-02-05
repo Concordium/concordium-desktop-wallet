@@ -20,6 +20,8 @@ export async function up(knex: Knex): Promise<void> {
             table.string('subtotal');
             table.string('cost');
             table.integer('energy');
+            // Local storage of decrypted amount
+            table.string('decryptedAmount');
             // Blobs:
             table.json('origin');
             table.json('details');

@@ -13,7 +13,7 @@ import { AppAndVersion } from '../../features/ledger/GetAppAndVersion';
 interface Props {
     ledgerCall: (
         ledger: ConcordiumLedgerClient,
-        setMessage: (string) => void
+        setMessage: (message: string) => void
     ) => Promise<void>;
 }
 
@@ -41,7 +41,8 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
                 setStatusMessage('Unable to connect to device');
                 setReady(false);
             },
-            next: async (event) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            next: async (event: any) => {
                 if (event.type === 'add') {
                     const transport = await TransportNodeHid.open(event.path);
                     const concordiumClient = new ConcordiumLedgerClient(

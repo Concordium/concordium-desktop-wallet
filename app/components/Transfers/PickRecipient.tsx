@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-    Menu,
-    Button,
-    Header,
-    Input,
-    Container,
-    Modal,
-} from 'semantic-ui-react';
+import { Menu, Button, Header, Input, Container } from 'semantic-ui-react';
 import {
     loadAddressBook,
     addressBookSelector,
@@ -32,11 +25,12 @@ export default function PickRecipient({ pickRecipient }: Props) {
         loadAddressBook(dispatch);
     }, [dispatch]);
 
-    function submitAddress(name, address, note) {
+    function submitAddress(name: string, address: string, note: string) {
         const entry = {
             name,
             address,
             note,
+            readOnly: false,
         };
         addToAddressBook(dispatch, entry);
         pickRecipient(entry);

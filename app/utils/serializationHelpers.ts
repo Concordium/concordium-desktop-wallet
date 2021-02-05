@@ -12,34 +12,36 @@ export function putBase58Check(
     }
 }
 
-export function put(array, start, input) {
+type Indexable = Buffer | Uint8Array;
+
+export function put(array: Indexable, start: number, input: Indexable) {
     for (let i = 0; i < input.length; i += 1) {
         array[start + i] = input[i];
     }
 }
 
-export function encodeWord16(value): Uint8Array {
+export function encodeWord16(value: number): Uint8Array {
     const arr = new ArrayBuffer(2); // an Int16 takes 2 bytes
     const view = new DataView(arr);
     view.setUint16(0, value, false); // byteOffset = 0; litteEndian = false
     return new Uint8Array(arr);
 }
 
-export function encodeWord32(value): Uint8Array {
+export function encodeWord32(value: number): Uint8Array {
     const arr = new ArrayBuffer(4); // an Int32 takes 4 bytes
     const view = new DataView(arr);
     view.setUint32(0, value, false); // byteOffset = 0; litteEndian = false
     return new Uint8Array(arr);
 }
 
-export function encodeWord64(value): Uint8Array {
+export function encodeWord64(value: bigint): Uint8Array {
     const arr = new ArrayBuffer(8); // an Int64 takes 8 bytes
     const view = new DataView(arr);
-    view.setBigUint64(0, BigInt(value), false); // byteOffset = 0; litteEndian = false
+    view.setBigUint64(0, value, false); // byteOffset = 0; litteEndian = false
     return new Uint8Array(arr);
 }
 
-export function hashSha256(...inputs): Buffer {
+export function hashSha256(...inputs: Indexable[]): Buffer {
     const hash = crypto.createHash('sha256');
 
     inputs.forEach((input) => hash.update(input));
@@ -47,13 +49,13 @@ export function hashSha256(...inputs): Buffer {
     return hash.digest();
 }
 
-export function parseHexString(hexString): Buffer {
+export function parseHexString(hexString: string): Buffer {
     return Buffer.from(hexString, 'hex');
 }
 
 // Given an integer, outputs the value as Hex,
 // with prepended zeroes according to minLength.
-export function toHex(value, minLength = 2) {
+export function toHex(value: number, minLength = 2) {
     let hex = value.toString(16);
     while (hex.length < minLength) {
         hex = `0${hex}`;

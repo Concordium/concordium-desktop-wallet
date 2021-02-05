@@ -6,7 +6,7 @@ import { multiSignatureProposalTable } from '../constants/databaseNames.json';
  * Function for inserting a multi signature transaction proposal
  * into the database.
  */
-export async function insert(transaction: MultiSignatureTransaction) {
+export async function insert(transaction: Partial<MultiSignatureTransaction>) {
     return (await knex())
         .table(multiSignatureProposalTable)
         .insert(transaction);
