@@ -1,6 +1,7 @@
 import { Account, TransferTransaction } from '../utils/types';
 import knex from './knex';
 import { transactionTable } from '../constants/databaseNames.json';
+import { partition } from '../utils/basicHelpers';
 
 export async function getTransactionsOfAccount(
     account: Account,
@@ -15,14 +16,6 @@ export async function getTransactionsOfAccount(
         .orWhere({ fromAddress: address })
         .orderBy(orderBy);
     return transactions.filter(filter);
-}
-
-// Move or replace
-function partition<T>(arr: T[], criteria: (t: T) => boolean) {
-    return [
-        arr.filter((item) => criteria(item)),
-        arr.filter((item) => !criteria(item)),
-    ];
 }
 
 export async function updateTransaction(
