@@ -6,7 +6,6 @@ import App from './App';
 import HomePage from '../pages/HomePage';
 import TestPage from '../pages/TestPage';
 import AccountPage from '../pages/Accounts/AccountPage';
-import TodoPage from '../pages/TodoPage';
 import IdentityPage from '../pages/Identities/IdentityPage';
 import AddressBookPage from '../pages/AddressBook/AddressBookPage';
 import IssuancePage from '../pages/IdentityIssuance/IdentityIssuancePage';
@@ -18,6 +17,8 @@ import SignTransactionView from '../pages/multisig/SignTransactionView';
 import ExportSignedTransactionView from '../pages/multisig/ExportSignedTransactionView';
 import MultiSignatureCreateProposalView from '../pages/multisig/MultiSignatureCreateProposalView';
 import SubmittedProposalView from '../pages/multisig/SubmittedProposalView';
+import ExportImport from '../pages/exportImport/ExportImportPage';
+import PerformImport from '../pages/exportImport/PerformImport';
 
 export default function Routes() {
     return (
@@ -35,7 +36,8 @@ export default function Routes() {
                 />
                 <Route path={routes.IDENTITIES} component={IdentityPage} />
                 <Route path={routes.ADDRESSBOOK} component={AddressBookPage} />
-                <Route path={routes.EXPORTIMPORT} component={TodoPage} />
+                <Route path={routes.IMPORT} component={PerformImport} />
+                <Route path={routes.EXPORTIMPORT} component={ExportImport} />
                 <Route
                     path={routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION}
                     component={SubmittedProposalView}

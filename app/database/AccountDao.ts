@@ -24,7 +24,7 @@ export async function getAllAccounts(): Promise<Account[]> {
         );
 }
 
-export async function insertAccount(account: Account) {
+export async function insertAccount(account: Account | Account[]) {
     return (await knex())(accountsTable).insert(account);
 }
 

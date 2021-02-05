@@ -579,3 +579,24 @@ export enum ColorType {
     Brown = 'brown',
     Black = 'black',
 }
+
+export interface EncryptionMetaData {
+    keyLen: number;
+    iterations: number;
+    salt: string;
+    initializationVector: string;
+    encryptionMethod: string;
+    keyDerivationMethod: string;
+    hashAlgorithm: string;
+}
+
+export interface EncryptedData {
+    cipherText: string;
+    metaData: EncryptionMetaData;
+}
+
+export interface ExportData {
+    accounts: Account[];
+    identities: Identity[];
+    addressBook: AddressBookEntry[];
+}

@@ -243,4 +243,8 @@ export async function decryptAccountBalance(prfKey: string, account: Account) {
     });
 }
 
+export async function importAccount(account: Account | Account[]) {
+    await insertAccount(account);
+}
+
 export default accountsSlice.reducer;
