@@ -16,6 +16,7 @@
     "SETTINGS": "/settings",
     "MULTISIGTRANSACTIONS_PROPOSAL": "/MultiSignatureTransaction/create",
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING": "/MultiSignatureTransaction/existing",
+    "MULTISIGTRANSACTIONS_COSIGN_TRANSACTION": "/MultiSignatureTransaction/cosign",
     "MULTISIGTRANSACTIONS_SIGN_TRANSACTION": "/MultiSignatureTransaction/sign",
     "MULTISIGTRANSACTIONS_EXPORT_TRANSACTION": "/MultiSignatureTransaction/export",
     "MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION": "/MultiSignatureTransaction/submitted",
