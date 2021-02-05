@@ -23,13 +23,18 @@ export default function IdentityIssuancePage(): JSX.Element {
             />
             <Route
                 path={routes.IDENTITYISSUANCE_EXTERNAL}
-                render={() => (
-                    <GeneratePage
-                        identityName={identityName}
-                        accountName={initialAccountName}
-                        provider={provider}
-                    />
-                )}
+                render={() => {
+                    if (provider) {
+                        return (
+                            <GeneratePage
+                                identityName={identityName}
+                                accountName={initialAccountName}
+                                provider={provider}
+                            />
+                        );
+                    }
+                    throw new Error('Unexpected missing identity Provder!');
+                }}
             />
             <Route
                 path={routes.IDENTITYISSUANCE_FINAL}

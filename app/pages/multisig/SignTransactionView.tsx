@@ -107,6 +107,15 @@ export default function SignTransactionView({ location }: Props) {
         ledgerComponent = null;
     }
 
+    let transactionHashView;
+    if (transactionHash) {
+        transactionHashView = (
+            <TransactionHashView transactionHash={transactionHash} />
+        );
+    } else {
+        transactionHashView = null;
+    }
+
     return (
         <Container>
             <Segment>
@@ -121,11 +130,7 @@ export default function SignTransactionView({ location }: Props) {
                                 updateInstruction={parse(transaction)}
                             />
                         </Grid.Column>
-                        <Grid.Column>
-                            <TransactionHashView
-                                transactionHash={transactionHash || ''}
-                            />
-                        </Grid.Column>
+                        <Grid.Column>{transactionHashView}</Grid.Column>
                     </Grid.Row>
                     <Grid.Row>
                         <Form>

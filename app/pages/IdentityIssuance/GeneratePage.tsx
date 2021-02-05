@@ -151,7 +151,7 @@ async function generateIdentity(
 interface Props {
     identityName: string;
     accountName: string;
-    provider: IdentityProvider | undefined;
+    provider: IdentityProvider;
 }
 
 export default function IdentityIssuanceGenerate({
@@ -163,10 +163,6 @@ export default function IdentityIssuanceGenerate({
     const [text, setText] = useState<string>();
     const [location, setLocation] = useState<string>();
     const iframeRef = useRef<HTMLIFrameElement>(null);
-
-    if (!provider) {
-        throw new Error('unexpected missing identity Provder');
-    }
 
     useEffect(() => {
         generateIdentity(
