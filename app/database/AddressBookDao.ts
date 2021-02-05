@@ -1,4 +1,4 @@
-import { Account } from '../utils/types';
+import { Account, AddressBookEntry } from '../utils/types';
 import knex from './knex';
 import { addressBookTable } from '../constants/databaseNames.json';
 
@@ -10,7 +10,10 @@ export async function insertEntry(entry: Account) {
     return (await knex())(addressBookTable).insert(entry);
 }
 
-export async function updateEntry(name: string, updatedValues) {
+export async function updateEntry(
+    name: string,
+    updatedValues: AddressBookEntry
+) {
     return (await knex())(addressBookTable)
         .where({ name })
         .update(updatedValues);

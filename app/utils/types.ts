@@ -491,3 +491,9 @@ export enum ColorType {
     Brown = 'brown',
     Black = 'black',
 }
+
+export type NotOptional<T> = {
+    [P in keyof T]-?: T[P];
+};
+
+export type EqualRecord<T> = { [P in keyof T]-?: P };

@@ -13,7 +13,7 @@ import {
     addressBookSelector,
     addToAddressBook,
 } from '../../features/AddressBookSlice';
-import AddAddress from '../AddAddress';
+import UpsertAddress from '../UpsertAddress';
 import { AddressBookEntry } from '../../utils/types';
 
 interface Props {
@@ -27,7 +27,6 @@ export default function PickRecipient({ pickRecipient }: Props) {
     const addressBook = useSelector(addressBookSelector);
     const dispatch = useDispatch();
     const [filter, setFilter] = useState<string>('');
-    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         loadAddressBook(dispatch);
@@ -54,23 +53,10 @@ export default function PickRecipient({ pickRecipient }: Props) {
                 onChange={(e) => setFilter(e.target.value)}
                 autoFocus
             />
-            <Modal
-                closeIcon
-                onClose={() => setOpen(false)}
-                onOpen={() => setOpen(true)}
-                open={open}
+            <UpsertAddress
                 trigger={<Button>Create new Entry</Button>}
-                dimmer="blurring"
-                closeOnDimmerClick={false}
-            >
-                <Modal.Header>Add an entry to your address book</Modal.Header>
-                <Modal.Content>
-                    <AddAddress
-                        close={() => setOpen(false)}
-                        submit={submitAddress}
-                    />
-                </Modal.Content>
-            </Modal>
+                submit={submitAddress}
+            />
             <Menu vertical fluid>
                 {addressBook
                     .filter((entry: AddressBookEntry) =>
