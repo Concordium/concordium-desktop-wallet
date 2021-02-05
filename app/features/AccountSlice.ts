@@ -126,6 +126,9 @@ export async function loadAccountInfos(
             isValidAddress(account.address) &&
             account.status === AccountStatus.Confirmed
     );
+    if (confirmedAccounts.length === 0) {
+        return Promise.resolve();
+    }
     const accountInfos = await getAccountInfos(confirmedAccounts);
     const updateEncryptedAmountsPromises = accountInfos.map(
         ({ account, accountInfo }) => {
@@ -143,8 +146,8 @@ export async function loadAccountInfos(
 // Load accounts into state, and updates their infos
 export async function loadAccounts(dispatch: Dispatch) {
     const accounts: Account[] = await getAllAccounts();
-    await loadAccountInfos(accounts, dispatch);
     dispatch(updateAccounts(accounts.reverse()));
+    return accounts;
 }
 
 // Add an account with pending status..

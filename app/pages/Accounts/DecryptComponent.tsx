@@ -42,7 +42,7 @@ export default function DecryptComponent({ account }: Props) {
         await decryptAccountBalance(prfKey, account);
         await decryptTransactions(transactions, prfKey, account);
         await loadTransactions(account, viewingShielded, dispatch);
-        return loadAccounts(dispatch);
+        await loadAccounts(dispatch);
     }
 
     return <LedgerComponent ledgerCall={ledgerCall} />;
