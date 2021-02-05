@@ -1,7 +1,7 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 import { loadAllSettings, updateEntry } from '../database/SettingsDao';
 // eslint-disable-next-line import/no-cycle
-import { RootState } from '../store';
+import { RootState } from '../store/store';
 import { Setting, Settings } from '../utils/types';
 
 interface SettingsState {
