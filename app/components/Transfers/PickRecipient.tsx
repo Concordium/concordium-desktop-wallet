@@ -13,7 +13,7 @@ import {
     addressBookSelector,
     addToAddressBook,
 } from '../../features/AddressBookSlice';
-import AddAddress from '../AddAddress';
+import AddressBookEntryForm from '../AddressBookEntryForm';
 import { AddressBookEntry } from '../../utils/types';
 
 interface Props {
@@ -66,7 +66,7 @@ export default function PickRecipient({ pickRecipient }: Props) {
             >
                 <Modal.Header>Add an entry to your address book</Modal.Header>
                 <Modal.Content>
-                    <AddAddress
+                    <AddressBookEntryForm
                         close={() => setOpen(false)}
                         submit={submitAddress}
                     />
