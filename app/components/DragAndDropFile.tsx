@@ -6,7 +6,7 @@ import { openFile } from '../utils/FileHelper';
 
 interface Props {
     text: string;
-    fileProcessor: (string) => void;
+    fileProcessor: (fileContents: string) => void;
     disabled?: boolean;
 }
 

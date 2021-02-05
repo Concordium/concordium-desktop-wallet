@@ -1,19 +1,27 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
-import { RootState } from '../store';
+import { RootState } from '../store/store';
 import {
     getAddressBook,
     insertEntry,
     updateEntry,
     removeEntry,
 } from '../database/AddressBookDao';
+import { AddressBookEntry, Dispatch } from '../utils/types';
+
+interface AddressBookState {
+    addressBook: AddressBookEntry[];
+    chosenIndex: number;
+}
+
+const initialState: AddressBookState = {
+    addressBook: [],
+    chosenIndex: 0,
+};
 
 const addressBookSlice = createSlice({
     name: 'addressBook',
-    initialState: {
-        addressBook: [],
-        chosenIndex: 0,
-    },
+    initialState,
     reducers: {
         updateAddressBook(state, addresses) {
             state.addressBook = addresses.payload;
@@ -31,17 +39,27 @@ export async function loadAddressBook(dispatch: Dispatch) {
     dispatch(updateAddressBook(addressBook));
 }
 
-export async function updateAddressBookEntry(dispatch, name, newEntry) {
+export async function updateAddressBookEntry(
+    dispatch: Dispatch,
+    name: string,
+    newEntry: AddressBookEntry
+) {
     await updateEntry(name, newEntry);
     loadAddressBook(dispatch);
 }
 
-export async function addToAddressBook(dispatch, entry) {
+export async function addToAddressBook(
+    dispatch: Dispatch,
+    entry: AddressBookEntry
+) {
     await insertEntry(entry);
     loadAddressBook(dispatch);
 }
 
-export async function removeFromAddressBook(dispatch, entry) {
+export async function removeFromAddressBook(
+    dispatch: Dispatch,
+    entry: AddressBookEntry
+) {
     await removeEntry(entry);
     loadAddressBook(dispatch);
 }

@@ -60,7 +60,7 @@ export default merge(baseConfig, {
             },
             // Pipe other styles through css modules and append to style.css
             {
-                test: /^((?!\.global).)*\.css$/,
+                test: /\.module\.css$/,
                 use: [
                     {
                         loader: MiniCssExtractPlugin.loader,
@@ -95,13 +95,16 @@ export default merge(baseConfig, {
                         loader: 'sass-loader',
                         options: {
                             sourceMap: true,
+                            sassOptions: {
+                                includePaths: ['node_modules', 'app/styles'],
+                            },
                         },
                     },
                 ],
             },
-            // Add SASS support  - compile all other .scss files and pipe it to style.css
+            // Add SASS support  - compile all .module.scss files and pipe it to style.css
             {
-                test: /^((?!\.global).)*\.(scss|sass)$/,
+                test: /\.module\.(scss|sass)$/,
                 use: [
                     {
                         loader: MiniCssExtractPlugin.loader,
@@ -121,6 +124,9 @@ export default merge(baseConfig, {
                         loader: 'sass-loader',
                         options: {
                             sourceMap: true,
+                            sassOptions: {
+                                includePaths: ['node_modules', 'app/styles'],
+                            },
                         },
                     },
                 ],

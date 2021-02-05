@@ -17,13 +17,16 @@ export function formatDate(date: YearMonth) {
  * Assumes the timestamp is in seconds, otherwise the unit should be specified.
  */
 export function parseTime(
-    timeStamp,
+    timeStamp: string,
     unit: TimeStampUnit = TimeStampUnit.seconds
 ) {
     const dtFormat = new Intl.DateTimeFormat('en-GB', {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error : https://github.com/microsoft/TypeScript/issues/35865
         dateStyle: 'short',
         timeStyle: 'short',
-        timeZone: 'UTC',
     });
-    return dtFormat.format(new Date(timeStamp * unit));
+
+    const timeStampCorrectUnit = BigInt(timeStamp) * BigInt(unit);
+    return dtFormat.format(new Date(timeStampCorrectUnit.toString()));
 }

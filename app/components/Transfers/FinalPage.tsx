@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { displayAsGTU } from '../../utils/gtu';
-import { AccountTransaction, AddressBookEntry } from '../../utils/types';
+import { AddressBookEntry, SimpleTransfer } from '../../utils/types';
 
 interface Props {
-    transaction: AccountTransaction;
+    transaction: SimpleTransfer;
     recipient: AddressBookEntry;
 }
 
@@ -24,24 +24,27 @@ export default function FinalPage({
             <Card.Content textAlign="center">
                 <Card.Header>Transfer Submitted!</Card.Header>
                 <Table>
-                    <Table.Row>
-                        <Table.Cell>Amount:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {displayAsGTU(transaction.payload.amount)}
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>Estimated fee:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {displayAsGTU(200)}
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>To:</Table.Cell>
-                        <Table.Cell textAlign="right">
-                            {recipient.name} <Label>{recipient.address}</Label>
-                        </Table.Cell>
-                    </Table.Row>
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell>Amount:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {displayAsGTU(transaction.payload.amount)}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>Estimated fee:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {displayAsGTU(200n)}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>To:</Table.Cell>
+                            <Table.Cell textAlign="right">
+                                {recipient.name}{' '}
+                                <Label>{recipient.address}</Label>
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
                 </Table>
                 <Link to={routes.ACCOUNTS}>
                     <Button>Finish</Button>

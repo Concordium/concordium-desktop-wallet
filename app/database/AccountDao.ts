@@ -28,14 +28,17 @@ export async function insertAccount(account: Account) {
     return (await knex())(accountsTable).insert(account);
 }
 
-export async function updateAccount(accountName: string, updatedValues) {
+export async function updateAccount(
+    accountName: string,
+    updatedValues: Record<string, unknown>
+) {
     return (await knex())(accountsTable)
         .where({ name: accountName })
         .update(updatedValues);
 }
 
-export async function findAccounts(query) {
-    return (await knex()).select().table(accountsTable).where(query);
+export async function findAccounts(condition: Record<string, unknown>) {
+    return (await knex()).select().table(accountsTable).where(condition);
 }
 
 export async function getAccountsOfIdentity(

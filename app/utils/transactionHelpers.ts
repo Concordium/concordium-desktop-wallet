@@ -1,25 +1,23 @@
-import { findAccounts } from '../database/AccountDao';
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './client';
-import { AccountTransaction, TransactionKindId } from './types';
+import {
+    TransactionKindId,
+    TransferTransaction,
+    SimpleTransfer,
+} from './types';
 import { sleep } from './httpRequests';
 /**
  * return highest id of given transactions
  */
-export function getHighestId(transactions) {
+export function getHighestId(transactions: TransferTransaction[]) {
     return transactions.reduce((id, t) => Math.max(id, t.id), 0);
 }
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
  * If the address is found, return the name, otherwise returns undefined;
- * TODO: when accounts are added to the AddressBook, then only lookup AddressBook.
  */
-async function lookupName(address): string {
-    const accounts = await findAccounts({ address });
-    if (accounts.length > 0) {
-        return accounts[0].name;
-    }
+async function lookupName(address: string): Promise<string | undefined> {
     const entries = await findEntries({ address });
     if (entries.length > 0) {
         return entries[0].name;
@@ -32,7 +30,9 @@ async function lookupName(address): string {
  * toAddressName/fromAddressName fields, if successful.
  * returns the potentially modified transaction.
  */
-async function attachName(transaction) {
+async function attachName(
+    transaction: TransferTransaction
+): Promise<TransferTransaction> {
     const updatedTransaction = { ...transaction };
     const toName = await lookupName(transaction.toAddress);
     if (toName) {
@@ -48,7 +48,9 @@ async function attachName(transaction) {
 /**
  * AttachName for a list of transaction. See attachName.
  */
-export async function attachNames(transactions) {
+export async function attachNames(
+    transactions: TransferTransaction[]
+): Promise<TransferTransaction[]> {
     return Promise.all(transactions.map(attachName));
 }
 
@@ -59,15 +61,17 @@ export async function attachNames(transactions) {
 export async function createSimpleTransferTransaction(
     fromAddress: string,
     amount: BigInt,
-    toAddress: string
+    toAddress: string,
+    expiry = '16446744073',
+    energyAmount = '200'
 ) {
     const nonceJSON = await getNextAccountNonce(fromAddress);
     const { nonce } = JSON.parse(nonceJSON.getValue());
-    const transferTransaction: AccountTransaction = {
+    const transferTransaction: SimpleTransfer = {
         sender: fromAddress,
         nonce,
-        energyAmount: 200, // TODO: Does this need to be set by the user?
-        expiry: 16446744073, // TODO: Don't hardcode?
+        energyAmount, // TODO: Does this need to be set by the user?
+        expiry, // TODO: Don't hardcode?
         transactionKind: TransactionKindId.Simple_transfer,
         payload: {
             toAddress,

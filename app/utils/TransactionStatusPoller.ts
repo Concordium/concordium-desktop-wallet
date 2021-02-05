@@ -1,4 +1,3 @@
-import { Dispatch, AnyAction } from 'redux';
 import { updateEntry } from '../database/MultiSignatureProposalDao';
 import { loadProposals } from '../features/MultiSignatureSlice';
 import { getTransactionStatus } from './client';
@@ -7,6 +6,7 @@ import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     TransactionStatus,
+    Dispatch,
 } from './types';
 import { serializeUpdateInstruction } from './UpdateSerialization';
 
@@ -54,7 +54,7 @@ async function getStatus(transactionHash: string): Promise<TransactionStatus> {
  */
 export default async function getMultiSignatureTransactionStatus(
     proposal: MultiSignatureTransaction,
-    dispatch: Dispatch<AnyAction>
+    dispatch: Dispatch
 ) {
     const updateInstruction = JSON.parse(proposal.transaction);
     const serializedUpdateInstruction = serializeUpdateInstruction(

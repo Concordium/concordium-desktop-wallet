@@ -22,8 +22,9 @@ function serializeExchangeRate(exchangeRate: ExchangeRate) {
  * Serializes the payload of an UpdateInstruction. As the payload can contain
  * different types, this function has to determine the type and then serialize
  * accordingly.
+ * TODO change type when adding other update types.
  */
-function serializeUpdatePayload(payload): Buffer {
+function serializeUpdatePayload(payload: ExchangeRate): Buffer {
     return serializeExchangeRate(payload);
 }
 
@@ -42,6 +43,9 @@ function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
         8
     );
     serializedUpdateHeader.writeBigUInt64BE(BigInt(updateHeader.timeout), 16);
+    if (!updateHeader.payloadSize) {
+        throw new Error('Unexpected missing payloadSize');
+    }
     serializedUpdateHeader.writeInt32BE(updateHeader.payloadSize, 24);
     return serializedUpdateHeader;
 }

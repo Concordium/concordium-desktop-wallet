@@ -11,15 +11,12 @@ export default async function signPublicInformationForIp(
 ): Promise<Buffer> {
     const idCredPubBytes = Buffer.from(publicInfoForIp.idCredPub, 'hex');
     const regId = Buffer.from(publicInfoForIp.regId, 'hex');
-    const verificationKeysListLength = Uint8Array.of(
-        publicInfoForIp.publicKeys.keys.length
-    );
-
+    const verificationKeysListLength = publicInfoForIp.publicKeys.keys.length;
     const data = Buffer.concat([
         pathAsBuffer(path),
         idCredPubBytes,
         regId,
-        verificationKeysListLength,
+        Uint8Array.of(verificationKeysListLength),
     ]);
     let p1 = 0x00;
     const p2 = 0x00;

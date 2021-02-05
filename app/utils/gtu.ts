@@ -25,7 +25,7 @@ function parseSubGTU(subGTU: string) {
 /**
  * Given a GTU string, convert to microGTU
  */
-export function toMicroUnits(amount: string): BigInt {
+export function toMicroUnits(amount: string): bigint {
     if (!isValidGTUString(amount)) {
         throw new Error('Given string that was not a valid GTU string.');
     }
@@ -44,10 +44,18 @@ export function toMicroUnits(amount: string): BigInt {
  * Allows input type string, because microGTU from external sources are strings.
  * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
  */
-export function displayAsGTU(microGTUAmount: BigInt | string) {
-    let amount = microGTUAmount;
+export function displayAsGTU(microGTUAmount: bigint | string) {
+    let amount: bigint;
     if (typeof microGTUAmount === 'string') {
-        amount = toMicroUnits(microGTUAmount);
+        try {
+            amount = BigInt(microGTUAmount);
+        } catch (e) {
+            throw new Error(
+                'Given string that was not a valid microGTU string.'
+            );
+        }
+    } else {
+        amount = microGTUAmount;
     }
     const isNegative = amount < 0;
     const absolute = isNegative ? -amount : amount;

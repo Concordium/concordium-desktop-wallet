@@ -1,7 +1,7 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
 // eslint-disable-next-line import/no-cycle
-import { RootState } from '../store';
+import { RootState } from '../store/store';
 import {
     MultiSignatureMenuItems,
     MultiSignatureTransaction,
@@ -9,7 +9,7 @@ import {
 
 type MultiSignatureSliceState = {
     chosenMenu: MultiSignatureMenuItems;
-    currentProposal?: MultiSignatureTransaction;
+    currentProposal: MultiSignatureTransaction | undefined;
     proposals: MultiSignatureTransaction[];
 };
 
@@ -22,7 +22,10 @@ const multiSignatureSlice = createSlice({
     } as MultiSignatureSliceState,
     reducers: {
         chooseMenuItem: (state, input) => {
-            state.chosenMenu = MultiSignatureMenuItems[input.payload];
+            state.chosenMenu =
+                MultiSignatureMenuItems[
+                    input.payload as keyof typeof MultiSignatureMenuItems
+                ];
         },
         setCurrentProposal: (state, input) => {
             state.currentProposal = input.payload;

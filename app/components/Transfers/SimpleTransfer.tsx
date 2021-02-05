@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Header } from 'semantic-ui-react';
+import { Button, Header, Grid } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import ConfirmTransfer from './ConfirmTransfer';
 import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
 import locations from '../../constants/transferLocations.json';
-import { AddressBookEntry, Account } from '../../utils/types';
+import {
+    AddressBookEntry,
+    Account,
+    SimpleTransfer as SimpleTransferType,
+} from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 
 /**
@@ -15,9 +19,13 @@ import { toMicroUnits } from '../../utils/gtu';
  */
 export default function SimpleTransfer(account: Account) {
     const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
-    const [recipient, setRecipient] = useState(undefined);
-    const [transaction, setTransaction] = useState(undefined);
-    const [location, setLocation] = useState(locations.pickAmount);
+    const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
+        undefined
+    );
+    const [transaction, setTransaction] = useState<
+        SimpleTransferType | undefined
+    >(undefined);
+    const [location, setLocation] = useState<string>(locations.pickAmount);
 
     function chooseRecipientOnClick(entry: AddressBookEntry) {
         setRecipient(entry);
@@ -36,24 +44,24 @@ export default function SimpleTransfer(account: Account) {
                     />
                 );
             case locations.pickRecipient:
-                return (
-                    <PickRecipient
-                        returnFunction={() => setLocation(locations.pickAmount)}
-                        pickRecipient={chooseRecipientOnClick}
-                    />
-                );
+                return <PickRecipient pickRecipient={chooseRecipientOnClick} />;
             case locations.confirmTransfer:
+                if (!recipient) {
+                    return null;
+                }
                 return (
                     <ConfirmTransfer
                         setLocation={setLocation}
                         recipient={recipient}
-                        fromAddress={account.address}
                         amount={toMicroUnits(amount)}
                         setTransaction={setTransaction}
                         account={account}
                     />
                 );
             case locations.transferSubmitted:
+                if (!recipient || !transaction) {
+                    return null;
+                }
                 return (
                     <FinalPage
                         transaction={transaction}
@@ -65,12 +73,35 @@ export default function SimpleTransfer(account: Account) {
         }
     }
 
+    function ReturnButton() {
+        switch (location) {
+            case locations.pickRecipient:
+            case locations.confirmTransfer:
+                return (
+                    <Button onClick={() => setLocation(locations.pickAmount)}>
+                        {'<--'}
+                    </Button>
+                );
+            default:
+                return null;
+        }
+    }
+
     return (
         <>
-            <Link to={routes.ACCOUNTS}>
-                <Button>x</Button>
-            </Link>
-            <Header>Send Transfer</Header>
+            <Grid columns="3">
+                <Grid.Column>
+                    <ReturnButton />
+                </Grid.Column>
+                <Grid.Column textAlign="center">
+                    <Header>Send Transfer</Header>
+                </Grid.Column>
+                <Grid.Column textAlign="right">
+                    <Link to={routes.ACCOUNTS}>
+                        <Button>x</Button>
+                    </Link>
+                </Grid.Column>
+            </Grid>
             <ChosenComponent />
         </>
     );

@@ -1,0 +1,7 @@
+// Fix references to internal files in sematic-ui-sass lib.
+$icons-font-path: '../../node_modules/semantic-ui-sass/icons';
+$flags-image-path: '../../node_modules/semantic-ui-sass/images';
+
+// Theming should be done before import.
+
+@import 'semantic-ui-sass/semantic-ui';

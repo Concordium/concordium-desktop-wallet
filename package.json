@@ -2,6 +2,7 @@
   "name": "concordium-desktop-wallet",
   "productName": "DesktopWallet",
   "description": "Concordium desktop wallet",
+  "version": "0.1.0",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.babel.js --colors",
@@ -162,6 +163,7 @@
     "@babel/preset-typescript": "^7.12.1",
     "@babel/register": "^7.12.1",
     "@teamsupercell/typings-for-css-modules-loader": "^2.4.0",
+    "@types/bs58check": "^2.1.0",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/history": "^4.7.7",
@@ -272,8 +274,8 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
-    "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.2",
+    "semantic-ui-sass": "^2.4.2",
     "source-map-support": "^0.5.19",
     "wasm-pack": "^0.9.1"
   },
@@ -316,7 +318,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "tsc && lint-staged"
     }
   }
 }
