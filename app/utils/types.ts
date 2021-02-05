@@ -579,16 +579,19 @@ export enum ColorType {
     Black = 'black',
 }
 
-export interface MetaData {
+export interface EncryptionMetaData {
     keyLen: number;
     iterations: number;
     salt: string;
     initializationVector: string;
+    encryptionMethod: string;
+    keyDerivationMethod: string;
+    hashAlgorithm: string;
 }
 
 export interface EncryptedData {
     cipherText: string;
-    metaData: MetaData;
+    metaData: EncryptionMetaData;
 }
 
 export interface ExportData {

@@ -1,7 +1,8 @@
 import * as crypto from 'crypto';
 import { EncryptedData } from './types';
 
-const cipherAlgorithm = 'aes-256-cbc';
+const encryptionMethod = 'aes-256-cbc';
+const keyDerivationMethod = 'PBKDF2';
 const hashAlgorithm = 'sha256';
 const cipherEncoding = 'hex';
 
@@ -12,7 +13,7 @@ const cipherEncoding = 'hex';
  * return the ciphertext and the parameters needed
  * to decrypt.
  */
-export function encrypt(data: string, password: string) {
+export function encrypt(data: string, password: string): EncryptedData {
     const keyLen = 32;
     const iterations = 10000;
     const salt = crypto.randomBytes(16);
@@ -25,7 +26,7 @@ export function encrypt(data: string, password: string) {
     );
     const initializationVector = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(
-        cipherAlgorithm,
+        encryptionMethod,
         key,
         initializationVector
     );
@@ -36,8 +37,11 @@ export function encrypt(data: string, password: string) {
         metaData: {
             keyLen,
             iterations,
-            salt,
-            initializationVector,
+            salt: salt.toString('hex'),
+            initializationVector: initializationVector.toString('hex'),
+            encryptionMethod,
+            keyDerivationMethod,
+            hashAlgorithm,
         },
     };
 }
@@ -53,19 +57,19 @@ export function encrypt(data: string, password: string) {
 export function decrypt(
     { cipherText, metaData }: EncryptedData,
     password: string
-) {
+): string {
     const { keyLen, iterations, salt, initializationVector } = metaData;
     const key = crypto.pbkdf2Sync(
         password,
-        Buffer.from(salt),
+        Buffer.from(salt, 'hex'),
         iterations,
         keyLen,
         hashAlgorithm
     );
     const decipher = crypto.createDecipheriv(
-        cipherAlgorithm,
+        encryptionMethod,
         key,
-        Buffer.from(initializationVector)
+        Buffer.from(initializationVector, 'hex')
     );
     let data = decipher.update(cipherText, cipherEncoding, 'utf8');
     data += decipher.final('utf8');

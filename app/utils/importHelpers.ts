@@ -63,6 +63,9 @@ export function validateEncryptedStructure(
         'iterations',
         'salt',
         'initializationVector',
+        'encryptionMethod',
+        'keyDerivationMethod',
+        'hashAlgorithm',
     ];
 
     // Check that metaData is an object, so we don't crash when checking it's fields.
