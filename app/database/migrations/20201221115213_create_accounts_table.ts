@@ -20,6 +20,7 @@ export async function up(knex: Knex): Promise<void> {
                 .inTable(identitiesTable)
                 .index();
             table.string('credential');
+            table.string('credentialDeploymentId');
             table.string('incomingAmounts').defaultTo('[]');
             table.string('selfAmounts').defaultTo('');
             table.string('totalDecrypted').defaultTo('');

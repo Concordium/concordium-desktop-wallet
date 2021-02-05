@@ -9,6 +9,11 @@ import {
     Dispatch,
 } from './types';
 import { serializeUpdateInstruction } from './UpdateSerialization';
+import { waitForFinalization } from './transactionHelpers';
+import {
+    confirmTransaction,
+    rejectTransaction,
+} from '../features/TransactionSlice';
 
 // Poll every 20 seconds
 const pollingIntervalMs = 20000;
@@ -52,7 +57,7 @@ async function getStatus(transactionHash: string): Promise<TransactionStatus> {
  * @param proposal the transaction proposal to listen for the status of
  * @param dispatch
  */
-export default async function getMultiSignatureTransactionStatus(
+export async function getMultiSignatureTransactionStatus(
     proposal: MultiSignatureTransaction,
     dispatch: Dispatch
 ) {
@@ -83,4 +88,16 @@ export default async function getMultiSignatureTransactionStatus(
     // Update the proposal and reload state from the database.
     await updateEntry(updatedProposal);
     loadProposals(dispatch);
+}
+
+/**
+ * Wait for the transaction to be finalized (or rejected) and update accordingly
+ */
+export async function monitorTransactionStatus(transactionHash: string) {
+    const dataObject = await waitForFinalization(transactionHash);
+    if (dataObject) {
+        confirmTransaction(transactionHash, dataObject);
+    } else {
+        rejectTransaction(transactionHash);
+    }
 }

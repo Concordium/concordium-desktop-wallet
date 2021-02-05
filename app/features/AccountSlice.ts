@@ -156,7 +156,8 @@ export async function addPendingAccount(
     accountAddress = '',
     credentialDeploymentInfo:
         | CredentialDeploymentInformation
-        | undefined = undefined
+        | undefined = undefined,
+    credentialDeploymentId = ''
 ) {
     const account: Account = {
         name: accountName,
@@ -165,6 +166,7 @@ export async function addPendingAccount(
         accountNumber,
         address: accountAddress,
         credential: JSON.stringify(credentialDeploymentInfo),
+        credentialDeploymentId,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);

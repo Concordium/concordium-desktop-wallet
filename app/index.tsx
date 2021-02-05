@@ -6,13 +6,23 @@ import './styles/app.global.scss';
 import { updateSettings, findSetting } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
 import { getAll } from './database/MultiSignatureProposalDao';
-import getMultiSignatureTransactionStatus from './utils/TransactionStatusPoller';
+import {
+    getMultiSignatureTransactionStatus,
+    monitorTransactionStatus,
+} from './utils/TransactionStatusPoller';
 import {
     MultiSignatureTransactionStatus,
     Settings,
     Dispatch,
+    IdentityStatus,
+    AccountStatus,
 } from './utils/types';
 import { setClientLocation } from './utils/client';
+import { getAllIdentities } from './database/IdentityDao';
+import { resumeIdentityStatusPolling } from './utils/IdentityStatusPoller';
+import resumeAccountStatusPolling from './utils/AccountStatusPoller';
+import { getAllAccounts } from './database/AccountDao';
+import { getPendingTransactions } from './database/TransactionDao';
 
 const store = configuredStore();
 
@@ -37,11 +47,33 @@ async function loadSettingsIntoStore() {
 }
 loadSettingsIntoStore();
 
+// TODO filter out initial accounts
+async function listenForAccountStatus(dispatch: Dispatch) {
+    const accounts = await getAllAccounts();
+    accounts
+        .filter((account) => account.status === AccountStatus.Pending)
+        .forEach((account) => resumeAccountStatusPolling(account, dispatch));
+}
+listenForAccountStatus(store.dispatch);
+
+async function listenForIdentityStatus(dispatch: Dispatch) {
+    const identities = await getAllIdentities();
+    identities
+        .filter((identity) => identity.status === IdentityStatus.Pending)
+        .forEach((identity) => resumeIdentityStatusPolling(identity, dispatch));
+}
+listenForIdentityStatus(store.dispatch);
+
 /**
- * Load all submitted proposals from the database, and
+ * Load all submitted proposals and sent transfers from the database, and
  * start listening for their status towards the node.
  */
 async function listenForTransactionStatus(dispatch: Dispatch) {
+    const transfers = await getPendingTransactions();
+    transfers.forEach((transfer) =>
+        monitorTransactionStatus(transfer.transactionHash)
+    );
+
     const allProposals = await getAll();
     allProposals
         .filter(

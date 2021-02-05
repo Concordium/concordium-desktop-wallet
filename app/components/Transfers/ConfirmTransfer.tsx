@@ -6,18 +6,12 @@ import {
     getTransactionHash,
 } from '../../utils/transactionSerialization';
 import LedgerComponent from '../ledger/LedgerComponent';
-import {
-    createSimpleTransferTransaction,
-    waitForFinalization,
-} from '../../utils/transactionHelpers';
+import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
+import { monitorTransactionStatus } from '../../utils/TransactionStatusPoller';
 import { Account, SimpleTransfer, AddressBookEntry } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import locations from '../../constants/transferLocations.json';
-import {
-    addPendingTransaction,
-    confirmTransaction,
-    rejectTransaction,
-} from '../../features/TransactionSlice';
+import { addPendingTransaction } from '../../features/TransactionSlice';
 import { displayAsGTU } from '../../utils/gtu';
 import { getAccountPath } from '../../features/ledger/Path';
 
@@ -27,18 +21,6 @@ export interface Props {
     recipient: AddressBookEntry;
     setLocation(location: string): void;
     setTransaction(transaction: SimpleTransfer): void;
-}
-
-/**
- * Wait for the transaction to be finalized (or rejected) and update accordingly
- */
-async function monitorTransaction(transactionHash: string) {
-    const dataObject = await waitForFinalization(transactionHash);
-    if (dataObject) {
-        confirmTransaction(transactionHash, dataObject);
-    } else {
-        rejectTransaction(transactionHash);
-    }
 }
 
 /**
@@ -84,7 +66,7 @@ export default function ConfirmTransferComponent({
         if (response.getValue()) {
             setTransaction(transferTransaction);
             addPendingTransaction(transferTransaction, transactionHash);
-            monitorTransaction(transactionHash);
+            monitorTransactionStatus(transactionHash);
             setLocation(locations.transferSubmitted);
         } else {
             // TODO: handle rejection from node

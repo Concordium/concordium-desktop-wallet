@@ -31,7 +31,7 @@ import {
     serializeUpdateInstructionHeaderAndPayload,
 } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
-import getMultiSignatureTransactionStatus from '../../utils/TransactionStatusPoller';
+import { getMultiSignatureTransactionStatus } from '../../utils/TransactionStatusPoller';
 import SimpleErrorModal, { ModalErrorInput } from '../SimpleErrorModal';
 import routes from '../../constants/routes.json';
 
