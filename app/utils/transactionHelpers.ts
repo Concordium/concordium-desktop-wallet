@@ -4,8 +4,9 @@ import {
     TransactionKindId,
     TransferTransaction,
     SimpleTransfer,
+    TransactionEvent,
+    TransactionStatus,
 } from './types';
-import { sleep } from './httpRequests';
 /**
  * return highest id of given transactions
  */
@@ -81,25 +82,49 @@ export async function createSimpleTransferTransaction(
     return transferTransaction;
 }
 
-/**
- *  Monitors the transaction's status, until has been finalized/rejected,
- *  and updates the transaction accordingly.
- */
-export async function waitForFinalization(transactionId: string) {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-        // eslint-disable-next-line no-await-in-loop
-        const response = await getTransactionStatus(transactionId);
-        const data = response.getValue();
-        if (data === 'null') {
-            return undefined;
-        }
-        const dataObject = JSON.parse(data);
-        const { status } = dataObject;
-        if (status === 'finalized') {
-            return dataObject;
-        }
-        // eslint-disable-next-line no-await-in-loop
-        await sleep(10000);
+export async function getDataObject(
+    transactionHash: string
+): Promise<Record<string, TransactionEvent>> {
+    const data = (await getTransactionStatus(transactionHash)).getValue();
+    if (data === 'null') {
+        throw new Error('Unexpected missing data object!');
     }
+    return JSON.parse(data);
+}
+
+/**
+ * Queries the node for the status of the transaction with the provided transaction hash.
+ * The polling will continue until the transaction becomes absent or finalized.
+ * @param transactionHash the hash of the transaction to get the status for
+ * @param pollingIntervalM, optional, interval between polling in milliSeconds, defaults to every 20 seconds.
+ */
+export async function getStatus(
+    transactionHash: string,
+    pollingIntervalMs = 20000
+): Promise<TransactionStatus> {
+    return new Promise((resolve) => {
+        const interval = setInterval(async () => {
+            let response;
+            try {
+                response = (
+                    await getTransactionStatus(transactionHash)
+                ).getValue();
+            } catch (err) {
+                // This happens if the node cannot be reached. Just wait for the next
+                // interval and try again.
+                return;
+            }
+            if (response === 'null') {
+                clearInterval(interval);
+                resolve(TransactionStatus.Rejected);
+                return;
+            }
+
+            const { status } = JSON.parse(response);
+            if (status === 'finalized') {
+                clearInterval(interval);
+                resolve(TransactionStatus.Finalized);
+            }
+        }, pollingIntervalMs);
+    });
 }

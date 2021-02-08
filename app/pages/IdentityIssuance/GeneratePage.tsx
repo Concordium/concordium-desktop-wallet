@@ -2,26 +2,15 @@ import React, { useState, useRef, RefObject } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card } from 'semantic-ui-react';
-import {
-    addPendingIdentity,
-    confirmIdentity,
-    rejectIdentity,
-} from '../../features/IdentitySlice';
-import {
-    addPendingAccount,
-    confirmInitialAccount,
-} from '../../features/AccountSlice';
+import { addPendingIdentity } from '../../features/IdentitySlice';
+import { addPendingAccount } from '../../features/AccountSlice';
 import routes from '../../constants/routes.json';
 import styles from './IdentityIssuance.module.scss';
-import {
-    getGlobal,
-    performIdObjectRequest,
-    getIdObject,
-} from '../../utils/httpRequests';
+import { getGlobal, performIdObjectRequest } from '../../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
 import { IdentityProvider, Dispatch } from '../../utils/types';
-import { addToAddressBook } from '../../features/AddressBookSlice';
+import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoller';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 
@@ -64,44 +53,6 @@ async function handleIdentityProviderLocation(
             });
         }
     });
-}
-/**
- * Listens until, the identityProvider confirms the identity/initial account and returns the identiyObject.
- * Then updates the identity/initial account in the database.
- * If not confirmed, the identity will be marked as rejected.
- */
-async function confirmIdentityAndInitialAccount(
-    dispatch: Dispatch,
-    identityName: string,
-    accountName: string,
-    location: string
-) {
-    let token;
-    try {
-        token = await getIdObject(location);
-        await confirmIdentity(dispatch, identityName, token.identityObject);
-        await confirmInitialAccount(
-            dispatch,
-            accountName,
-            token.accountAddress,
-            token.credential
-        );
-        addToAddressBook(dispatch, {
-            name: accountName,
-            address: token.accountAddress,
-            note: `Initial account of ${identityName}`,
-            readOnly: true,
-        });
-    } catch (err) {
-        if (!token) {
-            await rejectIdentity(dispatch, identityName);
-        } else {
-            // eslint-disable-next-line no-console
-            console.log(err);
-            // eslint-disable-next-line no-console
-            console.log(token); // TODO: Handle unable to save identity/account
-        }
-    }
 }
 
 async function generateIdentity(

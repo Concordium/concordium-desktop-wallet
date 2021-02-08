@@ -5,54 +5,37 @@ import { history, configuredStore } from './store/store';
 import './styles/app.global.scss';
 import { updateSettings, findSetting } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
-import { getAll } from './database/MultiSignatureProposalDao';
-import getMultiSignatureTransactionStatus from './utils/TransactionStatusPoller';
-import {
-    MultiSignatureTransactionStatus,
-    Settings,
-    Dispatch,
-} from './utils/types';
-import { setClientLocation } from './utils/client';
+import listenForTransactionStatus from './utils/TransactionStatusPoller';
+import { Dispatch } from './utils/types';
+import { startClient } from './utils/client';
+import listenForIdentityStatus from './utils/IdentityStatusPoller';
+import listenForAccountStatus from './utils/AccountStatusPoller';
 
 const store = configuredStore();
-
-// Extracts node location from settings, and pass them to the grpc client.
-function startClient(settings: Settings[]) {
-    const nodeLocationSetting = findSetting('Node location', settings);
-    if (nodeLocationSetting) {
-        const { address, port } = JSON.parse(nodeLocationSetting.value);
-        setClientLocation(address, port);
-    } else {
-        throw new Error('unable to find Node location settings.');
-    }
-}
 
 /**
  * Loads settings from the database into the store.
  */
 async function loadSettingsIntoStore() {
     const settings = await loadAllSettings();
-    startClient(settings);
+    const nodeLocationSetting = findSetting('Node location', settings);
+    if (nodeLocationSetting) {
+        startClient(nodeLocationSetting);
+    } else {
+        throw new Error('unable to find Node location settings.');
+    }
     return store.dispatch(updateSettings(settings));
 }
-loadSettingsIntoStore();
 
-/**
- * Load all submitted proposals from the database, and
- * start listening for their status towards the node.
- */
-async function listenForTransactionStatus(dispatch: Dispatch) {
-    const allProposals = await getAll();
-    allProposals
-        .filter(
-            (proposal) =>
-                proposal.status === MultiSignatureTransactionStatus.Submitted
-        )
-        .forEach((proposal) => {
-            getMultiSignatureTransactionStatus(proposal, dispatch);
-        });
+async function onLoad(dispatch: Dispatch) {
+    await loadSettingsIntoStore();
+
+    listenForAccountStatus(dispatch);
+    listenForIdentityStatus(dispatch);
+    listenForTransactionStatus(dispatch);
 }
-listenForTransactionStatus(store.dispatch);
+
+onLoad(store.dispatch);
 
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 

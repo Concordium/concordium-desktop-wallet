@@ -27,6 +27,6 @@ export function parseTime(
         timeStyle: 'short',
     });
 
-    const timeStampCorrectUnit = BigInt(timeStamp) * BigInt(unit);
-    return dtFormat.format(new Date(timeStampCorrectUnit.toString()));
+    const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
+    return dtFormat.format(new Date(timeStampCorrectUnit));
 }
