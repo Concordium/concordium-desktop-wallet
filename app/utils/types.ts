@@ -600,3 +600,12 @@ export interface ExportData {
     identities: Identity[];
     addressBook: AddressBookEntry[];
 }
+
+interface EventResult {
+    outcome: string;
+}
+
+export interface TransactionEvent {
+    result: EventResult;
+    cost: string;
+}
