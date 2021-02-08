@@ -1,5 +1,5 @@
 import type Transport from '@ledgerhq/hw-transport';
-import { UpdateInstruction } from '../../utils/types';
+import { ExchangeRate, UpdateInstruction } from '../../utils/types';
 import pathAsBuffer from './Path';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 
@@ -8,11 +8,15 @@ const INS_EXCHANGE_RATE = 0x06;
 export default async function signUpdateEuroPerEnergy(
     transport: Transport,
     path: number[],
-    transaction: UpdateInstruction
+    transaction: UpdateInstruction<ExchangeRate>,
+    serializedPayload: Buffer
 ): Promise<Buffer> {
     const data = Buffer.concat([
         pathAsBuffer(path),
-        serializeUpdateInstructionHeaderAndPayload(transaction),
+        serializeUpdateInstructionHeaderAndPayload(
+            transaction,
+            serializedPayload
+        ),
     ]);
 
     const p1 = 0x01;

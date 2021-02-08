@@ -8,11 +8,13 @@ import { hashSha256 } from '../../utils/serializationHelpers';
 import {
     MultiSignatureTransaction,
     UpdateInstruction,
+    UpdateInstructionPayload,
 } from '../../utils/types';
 import TransactionDetails from '../../components/TransactionDetails';
 import TransactionHashView from '../../components/TransactionHashView';
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
+import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 
 interface Props {
     location: LocationDescriptorObject<string>;
@@ -52,11 +54,16 @@ export default function SubmittedProposalView({ location }: Props) {
     );
 
     // TODO Support account transactions.
-    const updateInstruction: UpdateInstruction = parse(
+    const updateInstruction: UpdateInstruction<UpdateInstructionPayload> = parse(
         multiSignatureTransaction.transaction
     );
     const handler = findHandler(updateInstruction);
-    const transactionHash = hashSha256(handler.serialize()).toString('hex');
+    const transactionHash = hashSha256(
+        serializeUpdateInstructionHeaderAndPayload(
+            updateInstruction,
+            handler.serializePayload()
+        )
+    ).toString('hex');
 
     return (
         <Segment secondary textAlign="center">

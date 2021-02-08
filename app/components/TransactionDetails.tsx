@@ -5,6 +5,7 @@ import {
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
     UpdateInstruction,
+    UpdateInstructionPayload,
 } from '../utils/types';
 import findHandler from '../utils/updates/HandlerFinder';
 
@@ -12,10 +13,16 @@ import findHandler from '../utils/updates/HandlerFinder';
 // transactions.
 
 interface Props {
-    transaction: UpdateInstruction | AccountTransaction;
+    transaction:
+        | UpdateInstruction<UpdateInstructionPayload>
+        | AccountTransaction;
 }
 
-function generateView(transaction: UpdateInstruction | AccountTransaction) {
+function generateView(
+    transaction:
+        | UpdateInstruction<UpdateInstructionPayload>
+        | AccountTransaction
+) {
     if (instanceOfUpdateInstruction(transaction)) {
         const handler = findHandler(transaction);
         return handler.view();

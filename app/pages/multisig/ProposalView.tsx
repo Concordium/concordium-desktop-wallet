@@ -22,6 +22,7 @@ import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateInstruction,
+    UpdateInstructionPayload,
 } from '../../utils/types';
 import { saveFile } from '../../utils/FileHelper';
 import DragAndDropFile from '../../components/DragAndDropFile';
@@ -36,6 +37,7 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '../../components/SimpleErrorModal';
 import routes from '../../constants/routes.json';
+import findHandler from '../../utils/updates/HandlerFinder';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -71,7 +73,7 @@ export default function ProposalView() {
 
         if (instanceOfUpdateInstruction(transactionObject)) {
             if (currentProposal) {
-                const proposal: UpdateInstruction = parse(
+                const proposal: UpdateInstruction<UpdateInstructionPayload> = parse(
                     currentProposal.transaction
                 );
 
@@ -114,9 +116,17 @@ export default function ProposalView() {
         }
     }
 
-    const instruction: UpdateInstruction = parse(currentProposal.transaction);
+    const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
+        currentProposal.transaction
+    );
+    const handler = findHandler(instruction);
+    const serializedPayload = handler.serializePayload();
+
     const transactionHash = hashSha256(
-        serializeUpdateInstructionHeaderAndPayload(instruction)
+        serializeUpdateInstructionHeaderAndPayload(
+            instruction,
+            serializedPayload
+        )
     ).toString('hex');
 
     async function submitTransaction() {
@@ -126,7 +136,7 @@ export default function ProposalView() {
                 'The proposal page should not be loaded without a proposal in the state.'
             );
         }
-        const payload = serializeForSubmission(instruction);
+        const payload = serializeForSubmission(instruction, serializedPayload);
         const submitted = (await sendTransaction(payload)).getValue();
         const modifiedProposal: MultiSignatureTransaction = {
             ...currentProposal,

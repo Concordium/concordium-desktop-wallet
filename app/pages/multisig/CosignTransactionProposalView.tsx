@@ -10,7 +10,11 @@ import {
     createTransactionHandler,
     TransactionInput,
 } from '../../utils/UpdateInstructionHelper';
-import { TransactionHandler, UpdateInstruction } from '../../utils/types';
+import {
+    TransactionHandler,
+    UpdateInstruction,
+    UpdateInstructionPayload,
+} from '../../utils/types';
 
 interface Props {
     location: LocationDescriptorObject<TransactionInput>;
@@ -23,7 +27,10 @@ interface Props {
 export default function CosignTransactionProposalView({ location }: Props) {
     const [transactionHash, setTransactionHash] = useState<string>();
     const [transactionHandler] = useState<
-        TransactionHandler<UpdateInstruction, ConcordiumLedgerClient>
+        TransactionHandler<
+            UpdateInstruction<UpdateInstructionPayload>,
+            ConcordiumLedgerClient
+        >
     >(() => createTransactionHandler(location.state));
 
     const dispatch = useDispatch();
@@ -37,7 +44,7 @@ export default function CosignTransactionProposalView({ location }: Props) {
     const { transaction } = location.state;
 
     useEffect(() => {
-        const serialized = transactionHandler.serialize();
+        const serialized = transactionHandler.serializePayload();
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
     }, [setTransactionHash, transactionHandler]);

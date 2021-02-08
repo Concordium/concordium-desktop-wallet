@@ -13,7 +13,11 @@ import { parse } from 'json-bigint';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import TransactionDetails from '../../components/TransactionDetails';
 import TransactionHashView from '../../components/TransactionHashView';
-import { AccountTransaction, UpdateInstruction } from '../../utils/types';
+import {
+    AccountTransaction,
+    UpdateInstruction,
+    UpdateInstructionPayload,
+} from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 
 interface Props<T> {
@@ -36,9 +40,9 @@ export default function GenericSignTransactionProposalView({
         new Array(checkboxes.length).fill(false)
     );
 
-    const transactionObject: UpdateInstruction | AccountTransaction = parse(
-        transaction
-    );
+    const transactionObject:
+        | UpdateInstruction<UpdateInstructionPayload>
+        | AccountTransaction = parse(transaction);
 
     // The device component should only be displayed if the user has clicked
     // to sign the transaction.

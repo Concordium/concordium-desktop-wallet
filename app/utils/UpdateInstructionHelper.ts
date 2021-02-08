@@ -1,7 +1,6 @@
 import { parse } from 'json-bigint';
 import { BlockSummary } from './NodeApiTypes';
 import {
-    ExchangeRate,
     MultiSignatureTransaction,
     UpdateHeader,
     UpdateInstruction,
@@ -30,8 +29,8 @@ export interface UpdateProps {
 // Where to get the sequence number from?
 // TODO Add other update types as they are implemented.
 
-export default function createUpdateInstruction(
-    updatePayload: ExchangeRate,
+export default function createUpdateInstruction<T>(
+    updatePayload: T,
     updateType: UpdateType,
     sequenceNumber: BigInt
 ) {
@@ -41,7 +40,7 @@ export default function createUpdateInstruction(
         timeout: BigInt(Date.now()) + 864000000n * 7n,
     };
 
-    const updateInstruction: UpdateInstruction = {
+    const updateInstruction: UpdateInstruction<T> = {
         header: updateHeader,
         payload: updatePayload,
         signatures: [],
