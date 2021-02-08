@@ -8,7 +8,7 @@ import { addToAddressBook } from '../features/AddressBookSlice';
 import { getAllIdentities } from '../database/IdentityDao';
 
 /**
- * Listens until, the identityProvider confirms the identity/initial account and returns the identiyObject.
+ * Listens until, the identityProvider confirms the identity/initial account and returns the identityObject.
  * Then updates the identity/initial account in the database.
  * If not confirmed, the identity will be marked as rejected.
  */
