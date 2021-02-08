@@ -64,6 +64,12 @@ export async function removeFromAddressBook(
     loadAddressBook(dispatch);
 }
 
+export async function importAddressBookEntry(
+    entry: AddressBookEntry | AddressBookEntry[]
+) {
+    return insertEntry(entry);
+}
+
 export const addressBookSelector = (state: RootState) =>
     state.addressBook.addressBook;
 export const chosenIndexSelector = (state: RootState) =>

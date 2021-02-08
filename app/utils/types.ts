@@ -101,6 +101,7 @@ export interface Account {
     identityId: number;
     identityName?: string;
     status: AccountStatus;
+    credentialDeploymentHash?: string;
     credential?: string;
     totalDecrypted?: string;
     allDecrypted?: boolean;
@@ -267,7 +268,7 @@ export interface TransferTransaction {
     blockTime: string;
     total: string;
     success?: boolean;
-    transactionHash?: Hex;
+    transactionHash: Hex;
     subtotal?: string;
     cost?: string;
     details?: string;
@@ -577,4 +578,34 @@ export enum ColorType {
     Pink = 'pink',
     Brown = 'brown',
     Black = 'black',
+}
+
+export interface EncryptionMetaData {
+    keyLen: number;
+    iterations: number;
+    salt: string;
+    initializationVector: string;
+    encryptionMethod: string;
+    keyDerivationMethod: string;
+    hashAlgorithm: string;
+}
+
+export interface EncryptedData {
+    cipherText: string;
+    metaData: EncryptionMetaData;
+}
+
+export interface ExportData {
+    accounts: Account[];
+    identities: Identity[];
+    addressBook: AddressBookEntry[];
+}
+
+interface EventResult {
+    outcome: string;
+}
+
+export interface TransactionEvent {
+    result: EventResult;
+    cost: string;
 }

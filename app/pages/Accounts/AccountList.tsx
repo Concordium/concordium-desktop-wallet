@@ -4,6 +4,7 @@ import { push } from 'connected-react-router';
 import { Menu, Button } from 'semantic-ui-react';
 import {
     loadAccounts,
+    loadAccountInfos,
     accountsSelector,
     chooseAccount,
     chosenAccountIndexSelector,
@@ -12,7 +13,16 @@ import {
 import { setViewingShielded } from '../../features/TransactionSlice';
 import AccountListElement from '../../components/AccountListElement';
 import routes from '../../constants/routes.json';
-import { Account } from '../../utils/types';
+import { Account, Dispatch } from '../../utils/types';
+
+async function load(dispatch: Dispatch) {
+    const accounts = await loadAccounts(dispatch);
+    try {
+        loadAccountInfos(accounts, dispatch);
+    } catch (e) {
+        throw new Error('Unable to load AccountInfo'); // TODO: Handle the case where we can't reach the node
+    }
+}
 
 /**
  * Displays the List of local accounts, And allows picking the chosen account.
@@ -25,7 +35,7 @@ export default function AccountList() {
     const chosenIndex = useSelector(chosenAccountIndexSelector);
 
     useEffect(() => {
-        loadAccounts(dispatch);
+        load(dispatch);
     }, [dispatch]);
 
     if (!accounts || !accountsInfo) {

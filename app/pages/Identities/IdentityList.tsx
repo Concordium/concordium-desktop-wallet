@@ -22,10 +22,8 @@ export default function IdentityList() {
     const chosenIdentity = useSelector(chosenIdentitySelector);
 
     useEffect(() => {
-        if (!identities) {
-            loadIdentities(dispatch);
-        }
-    }, [dispatch, identities]);
+        loadIdentities(dispatch);
+    }, [dispatch]);
 
     if (!identities) {
         return null;

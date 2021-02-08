@@ -12,12 +12,13 @@ import { decryptAmounts } from '../utils/rustInterface';
 import {
     CredentialDeploymentInformation,
     AccountStatus,
+    TransactionStatus,
     AccountEncryptedAmount,
     Account,
     AccountInfo,
     Dispatch,
 } from '../utils/types';
-import { waitForFinalization } from '../utils/transactionHelpers';
+import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
 import { getAccountInfos } from '../utils/clientHelpers';
 
@@ -126,6 +127,9 @@ export async function loadAccountInfos(
             isValidAddress(account.address) &&
             account.status === AccountStatus.Confirmed
     );
+    if (confirmedAccounts.length === 0) {
+        return Promise.resolve();
+    }
     const accountInfos = await getAccountInfos(confirmedAccounts);
     const updateEncryptedAmountsPromises = accountInfos.map(
         ({ account, accountInfo }) => {
@@ -143,8 +147,8 @@ export async function loadAccountInfos(
 // Load accounts into state, and updates their infos
 export async function loadAccounts(dispatch: Dispatch) {
     const accounts: Account[] = await getAllAccounts();
-    await loadAccountInfos(accounts, dispatch);
     dispatch(updateAccounts(accounts.reverse()));
+    return accounts;
 }
 
 // Add an account with pending status..
@@ -156,7 +160,8 @@ export async function addPendingAccount(
     accountAddress = '',
     credentialDeploymentInfo:
         | CredentialDeploymentInformation
-        | undefined = undefined
+        | undefined = undefined,
+    credentialDeploymentHash = ''
 ) {
     const account: Account = {
         name: accountName,
@@ -165,6 +170,7 @@ export async function addPendingAccount(
         accountNumber,
         address: accountAddress,
         credential: JSON.stringify(credentialDeploymentInfo),
+        credentialDeploymentHash,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -191,15 +197,20 @@ export async function confirmAccount(
     accountName: string,
     transactionId: string
 ) {
-    const finalized = await waitForFinalization(transactionId);
-    if (finalized !== undefined) {
-        await updateAccount(accountName, {
-            status: AccountStatus.Confirmed,
-        });
-    } else {
-        await updateAccount(accountName, {
-            status: AccountStatus.Rejected,
-        });
+    const status = await getStatus(transactionId);
+    switch (status) {
+        case TransactionStatus.Rejected:
+            await updateAccount(accountName, {
+                status: AccountStatus.Rejected,
+            });
+            break;
+        case TransactionStatus.Finalized:
+            await updateAccount(accountName, {
+                status: AccountStatus.Confirmed,
+            });
+            break;
+        default:
+            throw new Error('Unexpected status was returned by the poller!');
     }
     return loadAccounts(dispatch);
 }
@@ -239,6 +250,10 @@ export async function decryptAccountBalance(prfKey: string, account: Account) {
         totalDecrypted,
         allDecrypted: true,
     });
+}
+
+export async function importAccount(account: Account | Account[]) {
+    await insertAccount(account);
 }
 
 export default accountsSlice.reducer;
