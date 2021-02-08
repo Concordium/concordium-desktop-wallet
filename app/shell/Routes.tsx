@@ -28,7 +28,7 @@ export default function Routes() {
             <Switch>
                 <Route path={routes.TEST} component={TestPage} />
                 <Route
-                    path={routes.ACCOUNTS_SIMPLETRANSFER_SUBMITTRANSFER}
+                    path={routes.SUBMITTRANSFER}
                     component={SubmitTransfer}
                 />
                 <Route path={routes.ACCOUNTS} component={AccountPage} />

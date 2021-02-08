@@ -8,7 +8,7 @@
     "ACCOUNTS_SIMPLETRANSFER_PICKAMOUNT": "/accounts/simple-transfer/pick-amount",
     "ACCOUNTS_SIMPLETRANSFER_CONFIRMTRANSFER": "/accounts/simple-transfer/confirm-transfer",
     "ACCOUNTS_SIMPLETRANSFER_TRANSFERSUBMITTED": "/accounts/simple-transfer/transfer-submitted",
-    "ACCOUNTS_SIMPLETRANSFER_SUBMITTRANSFER": "/accounts/simple-transfer/submit-transfer",
+    "SUBMITTRANSFER": "/submit-transfer",
     "ACCOUNTS_MORE": "/accounts/more",
     "IDENTITIES": "/identity/listview",
     "ADDRESSBOOK": "/addressbook",

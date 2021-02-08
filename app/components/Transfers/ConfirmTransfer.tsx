@@ -35,7 +35,7 @@ export default function ConfirmTransferComponent({
         );
         dispatch(
             push({
-                pathname: routes.ACCOUNTS_SIMPLETRANSFER_SUBMITTRANSFER,
+                pathname: routes.SUBMITTRANSFER,
                 state: {
                     transaction: transferTransaction,
                     account,
