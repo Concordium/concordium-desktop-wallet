@@ -112,13 +112,13 @@ export default function UpdateMicroGtuPerEuroRate({
                     label="Current micro GTU per euro rate"
                     readOnly
                     type="number"
-                    value={currentMicroGtuPerEuro}
+                    value={`${currentMicroGtuPerEuro}`}
                 />
                 <Form.Input
                     inline
                     width="5"
                     label="New micro GTU per euro rate"
-                    value={microGtuPerEuro}
+                    value={`${microGtuPerEuro}`}
                     type="number"
                     onChange={(e) => trySetMicroGtuPerEuro(e.target.value)}
                 />
