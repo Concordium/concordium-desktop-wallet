@@ -11,7 +11,7 @@ import {
     getTransactionHash,
 } from '../utils/transactionSerialization';
 import { waitForFinalization } from '../utils/transactionHelpers';
-import { Account, AccountTransaction } from '../utils/types';
+import { Account, AccountTransaction, AddressBookEntry } from '../utils/types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import {
     addPendingTransaction,
@@ -24,6 +24,7 @@ import TransactionDetails from '../components/TransactionDetails';
 interface State {
     transaction: AccountTransaction;
     account: Account;
+    recipient: AddressBookEntry;
 }
 
 interface Props {
@@ -49,7 +50,7 @@ export default function SubmitTransfer({ location }: Props) {
         throw new Error('Unexpected missing state.');
     }
 
-    const { account, transaction } = location.state;
+    const { account, transaction, recipient } = location.state;
 
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
@@ -76,7 +77,7 @@ export default function SubmitTransfer({ location }: Props) {
             dispatch(
                 push({
                     pathname: routes.ACCOUNTS_SIMPLETRANSFER_TRANSFERSUBMITTED,
-                    state: transaction,
+                    state: { transaction, recipient },
                 })
             );
         } else {

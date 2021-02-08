@@ -4,14 +4,13 @@ import { useDispatch } from 'react-redux';
 import { Card, Table, Label, Button } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
-import { Account, SimpleTransfer, AddressBookEntry } from '../../utils/types';
+import { Account, AddressBookEntry } from '../../utils/types';
 import { displayAsGTU } from '../../utils/gtu';
 
 export interface Props {
     account: Account;
     amount: bigint;
     recipient: AddressBookEntry;
-    setTransaction(transaction: SimpleTransfer): void;
 }
 
 /**
@@ -22,7 +21,6 @@ export default function ConfirmTransferComponent({
     account,
     amount,
     recipient,
-    setTransaction,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const estimatedFee = 200n; // TODO calculate
@@ -35,7 +33,6 @@ export default function ConfirmTransferComponent({
             amount,
             recipient.address
         );
-        setTransaction(transferTransaction);
         dispatch(
             push({
                 pathname: routes.ACCOUNTS_SIMPLETRANSFER_SUBMITTRANSFER,
