@@ -44,7 +44,8 @@ test('An empty string is not allowed', () => {
 });
 
 test('Undefined is not allowed', () => {
-    expect(isValidGTUString(undefined)).toBe(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(isValidGTUString(undefined as any)).toBe(false);
 });
 
 test('Whole number GTU string is converted to µGTU correctly', () => {
