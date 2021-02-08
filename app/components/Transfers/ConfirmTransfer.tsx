@@ -39,6 +39,7 @@ export default function ConfirmTransferComponent({
                 state: {
                     transaction: transferTransaction,
                     account,
+                    recipient,
                 },
             })
         );
