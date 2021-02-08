@@ -8,7 +8,7 @@
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.js --colors",
     "build-e2e": "cross-env E2E_BUILD=true yarn build",
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.js --colors",
-    "build-main-dev": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.main.dev.js --colors",
+    "build-main-dev": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.main.dev.js --colors --progress",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.js --colors",
     "electron-rebuild": "electron-rebuild --parallel --force --types prod,dev,optional --module-dir app",
     "lint": "cross-env NODE_ENV=development eslint . --cache --ext .ts,.tsx",
@@ -30,7 +30,7 @@
     "start:prod": "cross-env NODE_ENV=production electron ./app/main.prod.js",
     "start:dev": "cross-env START_HOT=1 NODE_ENV=development electron ./app/main.dev.js",
     "start:dev-debug": "yarn start:dev --inspect=5858 --remote-debugging-port=9223",
-    "start-renderer-dev": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.renderer.dev.js",
+    "start-renderer-dev": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.renderer.dev.js --colors --progress",
     "test": "cross-env BABEL_DISABLE_CACHE=1 jest",
     "test-all": "yarn lint && yarn tsc && yarn build && yarn test",
     "test-e2e": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe electron:./app ./test/e2e/HomePage.e2e.ts",
@@ -320,7 +320,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "tsc && lint-staged"
+      "pre-commit": "lint-staged"
     }
   }
 }

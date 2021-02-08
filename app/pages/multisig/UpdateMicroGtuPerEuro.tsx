@@ -1,5 +1,5 @@
 import { push } from 'connected-react-router';
-import React, { useState } from 'react';
+import React, { useState, ReactElement } from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
@@ -48,7 +48,9 @@ interface Props {
     blockSummary: BlockSummary;
 }
 
-export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
+export default function UpdateMicroGtuPerEuroRate({
+    blockSummary,
+}: Props): ReactElement {
     const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
     const [
         currentMicroGtuPerEuro,
@@ -87,6 +89,18 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
         }
     }
 
+    function trySetMicroGtuPerEuro(v: string): void {
+        if (!v) {
+            return;
+        }
+
+        try {
+            setMicroGtuPerEuro(BigInt(v));
+        } catch (error) {
+            // The input was not a valid BigInt, so do no updates based on the input.
+        }
+    }
+
     return (
         <Segment>
             <Header>Transaction Proposal | Update MicroGTU Per Euro</Header>
@@ -97,22 +111,16 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
                     width="5"
                     label="Current micro GTU per euro rate"
                     readOnly
-                    value={currentMicroGtuPerEuro?.toString()}
+                    type="number"
+                    value={currentMicroGtuPerEuro}
                 />
                 <Form.Input
                     inline
                     width="5"
                     label="New micro GTU per euro rate"
-                    value={microGtuPerEuro?.toString()}
-                    onChange={(e) => {
-                        if (e.target.value) {
-                            try {
-                                setMicroGtuPerEuro(BigInt(e.target.value));
-                            } catch (error) {
-                                // The input was not a valid BigInt, so do no updates based on the input.
-                            }
-                        }
-                    }}
+                    value={microGtuPerEuro}
+                    type="number"
+                    onChange={(e) => trySetMicroGtuPerEuro(e.target.value)}
                 />
                 <Form.Field>
                     <Button primary onClick={generateTransaction}>

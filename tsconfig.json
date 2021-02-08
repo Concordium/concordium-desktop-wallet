@@ -1,14 +1,10 @@
 {
     "compilerOptions": {
         "target": "ES2020",
-        "module": "CommonJS",
+        "module": "ESNext",
         "lib": ["dom", "esnext", "webworker"],
-        "declaration": true,
-        "declarationMap": true,
-        "noEmit": true,
         "jsx": "react",
         "strict": true,
-        "pretty": true,
         "sourceMap": true,
         /* Additional Checks */
         "noUnusedLocals": true,
@@ -17,7 +13,6 @@
         "noFallthroughCasesInSwitch": true,
         /* Module Resolution Options */
         "moduleResolution": "node",
-        "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
         "allowJs": true,
