@@ -27,12 +27,8 @@ module.exports = {
             {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        cacheDirectory: true,
-                    },
-                },
+                include: /src/,
+                use: [{ loader: 'ts-loader' }],
             },
         ],
     },
