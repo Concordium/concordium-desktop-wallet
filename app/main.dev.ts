@@ -1,4 +1,4 @@
-/* eslint global-require: off, no-console: off */
+/* eslint no-console: off, @typescript-eslint/no-var-requires: off */
 
 /**
  * This module executes inside of electron's main process. You can start
