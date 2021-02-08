@@ -101,7 +101,7 @@ export interface Account {
     identityId: number;
     identityName?: string;
     status: AccountStatus;
-    credentialDeploymentId?: string;
+    credentialDeploymentHash?: string;
     credential?: string;
     totalDecrypted?: string;
     allDecrypted?: boolean;
