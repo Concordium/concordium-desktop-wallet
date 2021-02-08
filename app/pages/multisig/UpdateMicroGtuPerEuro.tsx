@@ -97,6 +97,7 @@ export default function UpdateMicroGtuPerEuroRate({
             </Form>
             <Button
                 primary
+                // TODO Validate that the input is a reduced fraction (otherwise the chain will reject it anyway.)
                 onClick={() =>
                     forwardTransaction(
                         createTransaction(
