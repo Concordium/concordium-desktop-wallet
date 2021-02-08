@@ -12,7 +12,7 @@ import {
     Empty,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus } from './NodeApiTypes';
-
+import { Setting } from './types';
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
  */
@@ -27,6 +27,12 @@ const clientCredentials = credentials.createInsecure();
 
 export function setClientLocation(address: string, port: string) {
     client = new P2PClient(`${address}:${port}`, clientCredentials);
+}
+
+// Extracts node location from settings, and pass them to the grpc client.
+export function startClient(nodeLocationSetting: Setting) {
+    const { address, port } = JSON.parse(nodeLocationSetting.value);
+    setClientLocation(address, port);
 }
 
 function buildMetaData(): Metadata {

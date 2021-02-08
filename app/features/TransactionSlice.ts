@@ -20,6 +20,7 @@ import {
     Dispatch,
     SimpleTransfer,
     instanceOfSimpleTransfer,
+    TransactionEvent,
 } from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
 
@@ -249,20 +250,11 @@ export async function addPendingTransaction(
     return insertTransactions([convertedTransaction]);
 }
 
-interface EventResult {
-    outcome: string;
-}
-
-interface Event {
-    result: EventResult;
-    cost: string;
-}
-
 // Set the transaction's status to confirmed, update the cost and whether it succeded.
 // TODO: update Total to reflect change in cost.
 export async function confirmTransaction(
     transactionHash: string,
-    dataObject: Record<string, Event>
+    dataObject: Record<string, TransactionEvent>
 ) {
     const success = Object.entries(dataObject.outcomes).reduce(
         (accu, [, event]) => accu && event.result.outcome === 'success',
