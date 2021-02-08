@@ -101,6 +101,7 @@ export interface Account {
     identityId: number;
     identityName?: string;
     status: AccountStatus;
+    credentialDeploymentHash?: string;
     credential?: string;
     totalDecrypted?: string;
     allDecrypted?: boolean;
@@ -267,7 +268,7 @@ export interface TransferTransaction {
     blockTime: string;
     total: string;
     success?: boolean;
-    transactionHash?: Hex;
+    transactionHash: Hex;
     subtotal?: string;
     cost?: string;
     details?: string;
@@ -599,4 +600,13 @@ export interface ExportData {
     accounts: Account[];
     identities: Identity[];
     addressBook: AddressBookEntry[];
+}
+
+interface EventResult {
+    outcome: string;
+}
+
+export interface TransactionEvent {
+    result: EventResult;
+    cost: string;
 }

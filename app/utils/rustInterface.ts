@@ -45,7 +45,7 @@ async function getSecretsFromLedger(
 function prependKeyType(keys: VerifyKey[]) {
     return keys.map((key) => {
         const scheme = key.schemeId as keyof typeof SchemeId;
-        if (SchemeId[scheme]) {
+        if (SchemeId[scheme] !== undefined) {
             return {
                 schemeId: key.schemeId,
                 verifyKey: `${toHex(SchemeId[scheme], 2)}${key.verifyKey}`,
