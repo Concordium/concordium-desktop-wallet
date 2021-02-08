@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, RefObject } from 'react';
+import React, { useState, useRef, RefObject } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card } from 'semantic-ui-react';
@@ -22,13 +22,16 @@ import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
 import { IdentityProvider, Dispatch } from '../../utils/types';
 import { addToAddressBook } from '../../features/AddressBookSlice';
+import LedgerComponent from '../../components/ledger/LedgerComponent';
+import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
 async function createIdentityObjectRequest(
     id: number,
     provider: IdentityProvider,
-    setText: (text: string) => void
+    setMessage: (text: string) => void,
+    ledger: ConcordiumLedgerClient
 ) {
     const global = await getGlobal();
     return createIdentityRequestObjectLedger(
@@ -36,7 +39,8 @@ async function createIdentityObjectRequest(
         provider.ipInfo,
         provider.arsInfos,
         global,
-        setText
+        setMessage,
+        ledger
     );
 }
 
@@ -61,7 +65,6 @@ async function handleIdentityProviderLocation(
         }
     });
 }
-
 /**
  * Listens until, the identityProvider confirms the identity/initial account and returns the identiyObject.
  * Then updates the identity/initial account in the database.
@@ -102,8 +105,10 @@ async function confirmIdentityAndInitialAccount(
 }
 
 async function generateIdentity(
+    idObjectRequest: string,
+    randomness: string,
+    identityId: number,
     setLocation: (location: string) => void,
-    setText: (text: string) => void,
     dispatch: Dispatch,
     provider: IdentityProvider,
     accountName: string,
@@ -112,12 +117,6 @@ async function generateIdentity(
     onError: (message: string) => void
 ) {
     try {
-        setText('Please Wait');
-        const identityId = await getNextId();
-        const {
-            idObjectRequest,
-            randomness,
-        } = await createIdentityObjectRequest(identityId, provider, setText);
         const IdentityProviderLocation = await performIdObjectRequest(
             provider.metadata.issuanceStart,
             redirectUri,
@@ -162,14 +161,28 @@ export default function IdentityIssuanceGenerate({
     onError,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const [text, setText] = useState<string>();
     const [location, setLocation] = useState<string>();
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
-    useEffect(() => {
+    async function withLedger(
+        ledger: ConcordiumLedgerClient,
+        setMessage: (message: string) => void
+    ) {
+        const identityId = await getNextId();
+        const {
+            idObjectRequest,
+            randomness,
+        } = await createIdentityObjectRequest(
+            identityId,
+            provider,
+            setMessage,
+            ledger
+        );
         generateIdentity(
+            idObjectRequest,
+            randomness,
+            identityId,
             setLocation,
-            setText,
             dispatch,
             provider,
             accountName,
@@ -177,23 +190,14 @@ export default function IdentityIssuanceGenerate({
             iframeRef,
             onError
         );
-    }, [
-        provider,
-        setLocation,
-        setText,
-        dispatch,
-        accountName,
-        identityName,
-        iframeRef,
-        onError,
-    ]);
+    }
 
     if (!location) {
         return (
             <Card fluid centered>
                 <Card.Content textAlign="center">
                     <Card.Header>Generating the Identity</Card.Header>
-                    <Card.Description>{text}</Card.Description>
+                    <LedgerComponent ledgerCall={withLedger} />
                 </Card.Content>
             </Card>
         );
