@@ -57,7 +57,7 @@ listenForTransactionStatus(store.dispatch);
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // eslint-disable-next-line global-require
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const Root = require('./shell/Root').default;
     render(
         <AppContainer>

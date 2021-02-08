@@ -1,0 +1,27 @@
+{
+    "extends": [
+        "erb",
+        "plugin:prettier/recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+        // A temporary hack related to IDE not resolving correct package.json
+        "import/no-extraneous-dependencies": "off",
+        "jsx-a11y/label-has-associated-control": [
+            "error",
+            {
+                "required": {
+                    "some": ["nesting", "id"]
+                }
+            }
+        ],
+        "global-require": "off"
+    },
+    "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module",
+        "project": "./tsconfig.json",
+        "tsconfigRootDir": ".",
+        "createDefaultProgram": true
+    }
+}
