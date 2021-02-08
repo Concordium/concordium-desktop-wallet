@@ -43,18 +43,23 @@ yarn start
 Alternatively you can, in one terminal, run:
 
 ```bash
-yarn start-renderer-dev
+yarn build-main-dev && yarn start-renderer-dev
 ```
 
-This will start the webpack server, and then, in another terminal, run:
+This will:
+
+-   Build the electron main script
+-   Start the webpack server for the electron renderer
+
+Then, in another terminal, run:
 
 ```bash
-yarn start-main-dev
+yarn start:dev
 ```
 
 To open the app.
 
-This way, you can get quicker reloads, because you only need to restart start-main-dev,
+This way, you can get quicker reloads, because you only need to restart start:dev,
 as the renderer thread will recompile in the background. N.B. This doesn't apply for changes in the rust code,
 which is only recompiled with a full restart.
 

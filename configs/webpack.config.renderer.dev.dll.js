@@ -9,6 +9,7 @@ const { merge } = require('webpack-merge');
 const baseConfig = require('./webpack.config.base');
 const { dependencies } = require('../package.json');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
+const rendererDevConfig = require('./webpack.config.renderer.dev');
 
 CheckNodeEnv('development');
 
@@ -28,7 +29,7 @@ module.exports = merge(baseConfig, {
     /**
      * Use `module` from `webpack.config.renderer.dev.js`
      */
-    module: require('./webpack.config.renderer.dev').default.module,
+    module: rendererDevConfig.module,
 
     entry: {
         renderer: Object.keys(dependencies || {}),

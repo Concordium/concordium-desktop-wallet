@@ -118,8 +118,6 @@
   "license": "MIT",
   "devDependencies": {
     "@amilajack/testcafe-browser-provider-electron": "^0.0.15-alpha.1",
-    "@babel/plugin-proposal-do-expressions": "^7.12.1",
-    "@babel/register": "^7.12.1",
     "@teamsupercell/typings-for-css-modules-loader": "^2.4.0",
     "@types/bs58check": "^2.1.0",
     "@types/enzyme": "^3.10.5",
