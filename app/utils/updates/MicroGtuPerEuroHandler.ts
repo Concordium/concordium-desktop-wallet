@@ -4,7 +4,7 @@ import MicroGtuPerEuroView from '../../pages/multisig/MicroGtuPerEuroView';
 import { TransactionHandler, UpdateInstruction } from '../types';
 import { serializeUpdateInstructionHeaderAndPayload } from '../UpdateSerialization';
 
-export default class MicroGtuPerEuro
+export default class MicroGtuPerEuroHandler
     implements TransactionHandler<UpdateInstruction, ConcordiumLedgerClient> {
     transaction: UpdateInstruction;
 

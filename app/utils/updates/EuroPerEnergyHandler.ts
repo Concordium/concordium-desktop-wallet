@@ -4,7 +4,7 @@ import EuroPerEnergyView from '../../pages/multisig/EuroPerEnergyView';
 import { TransactionHandler, UpdateInstruction } from '../types';
 import { serializeUpdateInstructionHeaderAndPayload } from '../UpdateSerialization';
 
-export default class EuroPerEnergy
+export default class EuroPerEnergyHandler
     implements TransactionHandler<UpdateInstruction, ConcordiumLedgerClient> {
     transaction: UpdateInstruction;
 
