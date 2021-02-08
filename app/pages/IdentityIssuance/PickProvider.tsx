@@ -7,11 +7,13 @@ import { getIdentityProviders } from '../../utils/httpRequests';
 import { IdentityProvider } from '../../utils/types';
 
 interface Props {
-    setProvider: (provider: IdentityProvider) => void;
+    setProvider(provider: IdentityProvider): void;
+    onError(message: string): void;
 }
 
 export default function IdentityIssuanceChooseProvider({
     setProvider,
+    onError,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [providers, setProviders] = useState<IdentityProvider[]>([]);
@@ -20,8 +22,8 @@ export default function IdentityIssuanceChooseProvider({
         getIdentityProviders()
             .then((loadedProviders) => setProviders(loadedProviders))
             // eslint-disable-next-line no-console
-            .catch(console.log); // TODO: Handle that we are unable to load providers.
-    }, []);
+            .catch(() => onError('Unable to load identity providers')); // TODO: Handle that we are unable to load providers.
+    }, [onError]);
 
     function onClick(provider: IdentityProvider) {
         setProvider(provider);

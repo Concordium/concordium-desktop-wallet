@@ -108,7 +108,8 @@ async function generateIdentity(
     provider: IdentityProvider,
     accountName: string,
     identityName: string,
-    iframeRef: RefObject<HTMLIFrameElement>
+    iframeRef: RefObject<HTMLIFrameElement>,
+    onError: (message: string) => void
 ) {
     try {
         setText('Please Wait');
@@ -143,8 +144,7 @@ async function generateIdentity(
         );
         dispatch(push(routes.IDENTITYISSUANCE_FINAL));
     } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log(`unable to create identity due to ${e.stack}`); // TODO: handle
+        onError(`Failed to  create identity due to ${e.stack}`);
     }
 }
 
@@ -152,12 +152,14 @@ interface Props {
     identityName: string;
     accountName: string;
     provider: IdentityProvider;
+    onError(message: string): void;
 }
 
 export default function IdentityIssuanceGenerate({
     identityName,
     accountName,
     provider,
+    onError,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [text, setText] = useState<string>();
@@ -172,7 +174,8 @@ export default function IdentityIssuanceGenerate({
             provider,
             accountName,
             identityName,
-            iframeRef
+            iframeRef,
+            onError
         );
     }, [
         provider,
@@ -182,6 +185,7 @@ export default function IdentityIssuanceGenerate({
         accountName,
         identityName,
         iframeRef,
+        onError,
     ]);
 
     if (!location) {
