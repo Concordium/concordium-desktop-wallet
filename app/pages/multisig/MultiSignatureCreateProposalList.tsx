@@ -32,18 +32,18 @@ export default function MultiSignatureCreateProposalView() {
 
     return (
         <Menu vertical fluid size="massive">
-            {availableTransactionTypes.map((item) => {
+            {availableTransactionTypes.map(([updateType, label]) => {
                 return (
                     <Menu.Item
-                        key={item[0]}
+                        key={updateType}
                         as={Link}
                         // TODO Must also be able to handle account transaction types.
                         to={{
                             pathname: `/MultiSignatureTransaction/create`,
-                            state: item[0],
+                            state: updateType,
                         }}
                     >
-                        {item[1]}
+                        {label}
                     </Menu.Item>
                 );
             })}
