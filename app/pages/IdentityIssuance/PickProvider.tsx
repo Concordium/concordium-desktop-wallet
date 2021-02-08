@@ -22,7 +22,7 @@ export default function IdentityIssuanceChooseProvider({
         getIdentityProviders()
             .then((loadedProviders) => setProviders(loadedProviders))
             // eslint-disable-next-line no-console
-            .catch(() => onError('Unable to load identity providers')); // TODO: Handle that we are unable to load providers.
+            .catch(() => onError('Unable to load identity providers'));
     }, [onError]);
 
     function onClick(provider: IdentityProvider) {

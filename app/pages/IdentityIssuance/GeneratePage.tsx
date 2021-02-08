@@ -67,6 +67,7 @@ async function generateIdentity(
     iframeRef: RefObject<HTMLIFrameElement>,
     onError: (message: string) => void
 ) {
+    let identityObjectLocation;
     try {
         const IdentityProviderLocation = await performIdObjectRequest(
             provider.metadata.issuanceStart,
@@ -74,7 +75,7 @@ async function generateIdentity(
             idObjectRequest
         );
         setLocation(IdentityProviderLocation);
-        const identityObjectLocation = await handleIdentityProviderLocation(
+        identityObjectLocation = await handleIdentityProviderLocation(
             iframeRef
         );
         // TODO: Handle the case where the app closes before we are able to save pendingIdentity
@@ -86,6 +87,11 @@ async function generateIdentity(
             randomness
         );
         await addPendingAccount(dispatch, accountName, identityId, 0); // TODO: can we add the address already here?
+    } catch (e) {
+        onError(`Failed to create identity due to ${e.stack}`);
+        return;
+    }
+    try {
         confirmIdentityAndInitialAccount(
             dispatch,
             identityName,
@@ -94,7 +100,7 @@ async function generateIdentity(
         );
         dispatch(push(routes.IDENTITYISSUANCE_FINAL));
     } catch (e) {
-        onError(`Failed to  create identity due to ${e.stack}`);
+        onError(`Failed to confirm identity`);
     }
 }
 
