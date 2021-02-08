@@ -11,9 +11,9 @@ import webpack from 'webpack';
 import chalk from 'chalk';
 import { merge } from 'webpack-merge';
 import { spawn, execSync } from 'child_process';
-import baseConfig from './webpack.config.base';
-import assetsConfig from './webpack.config.assets';
-import stylesConfig from './webpack.config.styles';
+import baseConfig from './partials/webpack.config.base';
+import assetsConfig from './partials/webpack.config.assets';
+import stylesConfig from './partials/webpack.config.styles';
 import CheckNodeEnv from '../internals/scripts/CheckNodeEnv';
 
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's

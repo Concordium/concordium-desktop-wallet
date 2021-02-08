@@ -4,7 +4,7 @@
 
 import path from 'path';
 import webpack from 'webpack';
-import { dependencies as externals } from '../app/package.json';
+import { dependencies as externals } from '../../app/package.json';
 
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 

@@ -8,9 +8,9 @@ import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { merge } from 'webpack-merge';
 import TerserPlugin from 'terser-webpack-plugin';
-import baseConfig from './webpack.config.base';
-import assetsConfig from './webpack.config.assets';
-import stylesConfig from './webpack.config.styles';
+import baseConfig from './partials/webpack.config.base';
+import assetsConfig from './partials/webpack.config.assets';
+import stylesConfig from './partials/webpack.config.styles';
 import CheckNodeEnv from '../internals/scripts/CheckNodeEnv';
 import DeleteSourceMaps from '../internals/scripts/DeleteSourceMaps';
 
