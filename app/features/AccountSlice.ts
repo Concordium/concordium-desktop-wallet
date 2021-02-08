@@ -96,7 +96,7 @@ export const {
 function updateAccountEncryptedAmount(
     account: Account,
     accountEncryptedAmount: AccountEncryptedAmount
-): Promise<void> {
+): Promise<void | number> {
     const { incomingAmounts } = accountEncryptedAmount;
     const selfAmounts = accountEncryptedAmount.selfAmount;
     const incomingAmountsString = JSON.stringify(incomingAmounts);

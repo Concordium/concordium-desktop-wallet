@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Icon, Modal } from 'semantic-ui-react';
 import { AddressBookEntry } from '../../utils/types';
 
@@ -7,7 +7,7 @@ interface DeleteAddressProps {
     onRemove(entry: AddressBookEntry): void;
 }
 
-const DeleteAddress: FC<DeleteAddressProps> = ({ entry, onRemove }) => {
+export default function DeleteAddress({ entry, onRemove }: DeleteAddressProps) {
     const [open, setOpen] = useState(false);
 
     function remove(): void {
@@ -50,6 +50,4 @@ const DeleteAddress: FC<DeleteAddressProps> = ({ entry, onRemove }) => {
             </Modal.Actions>
         </Modal>
     );
-};
-
-export default DeleteAddress;
+}

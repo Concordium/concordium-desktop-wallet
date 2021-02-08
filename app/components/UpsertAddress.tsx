@@ -3,34 +3,55 @@ import { Button, Form, Modal } from 'semantic-ui-react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 
 import { AddressBookEntry, EqualRecord, NotOptional } from '../utils/types';
+import { isValidAddress } from '../utils/accountHelpers';
 
 interface Props
     extends Pick<NotOptional<ComponentProps<typeof Modal>>, 'trigger'> {
     submit(name: string, address: string, note?: string): void;
-    initialValues?: AddressBookEntry;
+    initialValues?: AddressBookEntryForm;
 }
 
-const fieldNames: NotOptional<
-    EqualRecord<Omit<AddressBookEntry, 'readOnly'>>
-> = {
+type AddressBookEntryForm = Omit<AddressBookEntry, 'readOnly'>;
+
+const fieldNames: NotOptional<EqualRecord<AddressBookEntryForm>> = {
     name: 'name',
     address: 'address',
     note: 'note',
 };
 
-const NOTE_MAX_LENGTH = 255;
+const noteMaxLength = 255;
 
-function UpsertAddress({ submit, initialValues, trigger }: Props) {
+function validateAddress(v: string): string | undefined {
+    if (isValidAddress(v)) {
+        return undefined;
+    }
+    return 'Address format is invalid';
+}
+
+export default function UpsertAddress({
+    submit,
+    initialValues,
+    trigger,
+}: Props) {
     const [open, setOpen] = useState(false);
 
     const isEditMode = initialValues !== undefined;
     const header = useMemo(
-        () => (isEditMode ? 'Edit recipient' : 'Add new recepient'),
+        () => (isEditMode ? 'Edit recipient' : 'Add new recipient'),
         [isEditMode]
     );
+    const defaultValues: AddressBookEntryForm = useMemo(
+        () => ({
+            address: '',
+            name: '',
+            note: '',
+            ...initialValues,
+        }),
+        [initialValues]
+    );
 
-    const { handleSubmit, errors, control } = useForm<AddressBookEntry>({
-        defaultValues: initialValues,
+    const { handleSubmit, errors, control } = useForm<AddressBookEntryForm>({
+        defaultValues,
         mode: 'onTouched',
     });
 
@@ -60,7 +81,7 @@ function UpsertAddress({ submit, initialValues, trigger }: Props) {
                         name={fieldNames.name}
                         control={control}
                         rules={{ required: 'Name required' }}
-                        render={(p) => (
+                        render={({ ref, ...p }) => (
                             <Form.Input
                                 {...p}
                                 placeholder="Recipient Name"
@@ -81,8 +102,9 @@ function UpsertAddress({ submit, initialValues, trigger }: Props) {
                                 value: 50,
                                 message: 'Address should be 50 characters',
                             },
+                            validate: validateAddress,
                         }}
-                        render={(p) => (
+                        render={({ ref, ...p }) => (
                             <Form.Input
                                 {...p}
                                 placeholder="Paste the account address here"
@@ -95,17 +117,17 @@ function UpsertAddress({ submit, initialValues, trigger }: Props) {
                         control={control}
                         rules={{
                             maxLength: {
-                                value: NOTE_MAX_LENGTH,
+                                value: noteMaxLength,
                                 message:
                                     'Message cannot be longer than 255 characters',
                             },
                         }}
-                        render={(p) => (
+                        render={({ ref, ...p }) => (
                             <Form.Input
                                 {...p}
                                 value={(p.value as string)?.substring(
                                     0,
-                                    NOTE_MAX_LENGTH - 1
+                                    noteMaxLength - 1
                                 )}
                                 label="Notes"
                                 placeholder="You can add a note here"
@@ -121,5 +143,3 @@ function UpsertAddress({ submit, initialValues, trigger }: Props) {
         </Modal>
     );
 }
-
-export default UpsertAddress;
