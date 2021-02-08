@@ -278,7 +278,7 @@ module.exports = merge(baseConfig, {
         before() {
             if (process.env.START_HOT) {
                 console.log('Starting Main Process...');
-                spawn('npm', ['run', 'start-main-dev'], {
+                spawn('npm', ['run', 'start:dev'], {
                     shell: true,
                     env: process.env,
                     stdio: 'inherit',

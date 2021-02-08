@@ -6,19 +6,17 @@
 const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
-const TerserPlugin = require('terser-webpack-plugin');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const baseConfig = require('./webpack.config.base');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
-const DeleteSourceMaps = require('../internals/scripts/DeleteSourceMaps');
 
-CheckNodeEnv('production');
-DeleteSourceMaps();
+if (process.env.NODE_ENV === 'production') {
+    CheckNodeEnv('development');
+}
 
 module.exports = merge(baseConfig, {
-    devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
+    devtool: 'inline-source-map',
 
-    mode: 'production',
+    mode: 'development',
 
     target: 'electron-main',
 
@@ -26,42 +24,12 @@ module.exports = merge(baseConfig, {
 
     output: {
         path: path.join(__dirname, '..'),
-        filename: './app/main.prod.js',
-    },
-
-    optimization: {
-        minimizer: process.env.E2E_BUILD
-            ? []
-            : [
-                  new TerserPlugin({
-                      parallel: true,
-                      sourceMap: true,
-                      cache: true,
-                  }),
-              ],
+        filename: './app/main.dev.js',
     },
 
     plugins: [
-        new BundleAnalyzerPlugin({
-            analyzerMode:
-                process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
-            openAnalyzer: process.env.OPEN_ANALYZER === 'true',
-        }),
-
-        /**
-         * Create global constants which can be configured at compile time.
-         *
-         * Useful for allowing different behaviour between development builds and
-         * release builds
-         *
-         * NODE_ENV should be production so that modules do not perform certain
-         * development checks
-         */
         new webpack.EnvironmentPlugin({
-            NODE_ENV: 'production',
-            DEBUG_PROD: false,
-            START_MINIMIZED: false,
-            E2E_BUILD: false,
+            NODE_ENV: 'development',
         }),
     ],
 
