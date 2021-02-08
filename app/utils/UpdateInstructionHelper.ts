@@ -7,7 +7,7 @@ import {
     UpdateInstruction,
     UpdateType,
 } from './types';
-import UpdateInstructionHandler from './UpdateInstructionHandler';
+import findHandler from './updates/HandlerFinder';
 
 export interface TransactionInput {
     transaction: string;
@@ -61,9 +61,10 @@ export function createTransactionHandler(state: TransactionInput | undefined) {
 
     const transactionObject = parse(transaction);
     // TODO Add AccountTransactionHandler here when implemented.
-    const transactionHandlerValue =
-        type === 'UpdateInstruction'
-            ? new UpdateInstructionHandler(transactionObject)
-            : new UpdateInstructionHandler(transactionObject);
-    return transactionHandlerValue;
+
+    if (type === 'UpdateInstruction') {
+        const handler = findHandler(transactionObject);
+        return handler;
+    }
+    throw new Error('Account transaction support not yet implemented.');
 }

@@ -9,10 +9,10 @@ import {
     MultiSignatureTransaction,
     UpdateInstruction,
 } from '../../utils/types';
-import UpdateInstructionHandler from '../../utils/UpdateInstructionHandler';
 import TransactionDetails from '../../components/TransactionDetails';
 import TransactionHashView from '../../components/TransactionHashView';
 import routes from '../../constants/routes.json';
+import findHandler from '../../utils/updates/HandlerFinder';
 
 interface Props {
     location: LocationDescriptorObject<string>;
@@ -55,10 +55,8 @@ export default function SubmittedProposalView({ location }: Props) {
     const updateInstruction: UpdateInstruction = parse(
         multiSignatureTransaction.transaction
     );
-    const handler = new UpdateInstructionHandler(updateInstruction);
-    const transactionHash = hashSha256(handler.serializeTransaction()).toString(
-        'hex'
-    );
+    const handler = findHandler(updateInstruction);
+    const transactionHash = hashSha256(handler.serialize()).toString('hex');
 
     return (
         <Segment secondary textAlign="center">

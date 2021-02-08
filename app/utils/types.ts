@@ -475,14 +475,15 @@ export function instanceOfSimpleTransfer(
 }
 
 /**
- * Interface definition for classes that can serialize and handle
- * signing of the different transaction types.
+ * Interface definition for a class that handles a specific type
+ * of transaction. The handler can serialize and sign the transaction,
+ * and generate a view of the transaction.
  */
 export interface TransactionHandler<T, S> {
     transaction: T;
-    instanceOf: () => boolean;
-    serializeTransaction: () => Buffer;
+    serialize: () => Buffer;
     signTransaction: (signer: S) => Promise<Buffer>;
+    view: () => JSX.Element;
 }
 
 /**
