@@ -1,22 +1,22 @@
 import React from 'react';
 import { Container, Header } from 'semantic-ui-react';
-import { UpdateInstruction } from '../utils/types';
+import { AccountTransaction, UpdateInstruction } from '../utils/types';
 
 // TODO Implement a proper view of the supported transaction types, including account
 // transactions.
 
 interface Props {
-    updateInstruction: UpdateInstruction;
+    transaction: UpdateInstruction | AccountTransaction;
 }
 
 /**
  * Component that displays the details of a transaction in a human readable way.
  */
-export default function TransactionDetails({ updateInstruction }: Props) {
+export default function TransactionDetails({ transaction }: Props) {
     return (
         <Container>
             <Header>Transaction overview</Header>
-            {JSON.stringify(updateInstruction.payload)}
+            {JSON.stringify(transaction.payload)}
         </Container>
     );
 }
