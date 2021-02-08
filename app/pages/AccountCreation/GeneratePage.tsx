@@ -74,7 +74,8 @@ async function createAccount(
         identity.id,
         accountNumber,
         accountAddress,
-        credentialDeploymentInfo
+        credentialDeploymentInfo,
+        transactionId
     );
     addToAddressBook(dispatch, {
         name: accountName,

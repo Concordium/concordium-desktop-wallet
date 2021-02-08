@@ -85,4 +85,8 @@ export async function rejectIdentity(dispatch: Dispatch, identityName: string) {
     await loadIdentities(dispatch);
 }
 
+export async function importIdentities(identities: Identity | Identity[]) {
+    await insertIdentity(identities);
+}
+
 export default identitySlice.reducer;

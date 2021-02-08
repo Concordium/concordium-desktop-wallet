@@ -1,10 +1,15 @@
-import { Account, TransferTransaction } from '../utils/types';
+import {
+    Account,
+    TransferTransaction,
+    TransactionStatus,
+} from '../utils/types';
 import knex from './knex';
 import { transactionTable } from '../constants/databaseNames.json';
+import { partition } from '../utils/basicHelpers';
 
 export async function getTransactionsOfAccount(
     account: Account,
-    filter: (transction: TransferTransaction) => boolean = () => true,
+    filter: (transaction: TransferTransaction) => boolean = () => true,
     orderBy = 'id'
 ): Promise<TransferTransaction[]> {
     const { address } = account;
@@ -15,14 +20,6 @@ export async function getTransactionsOfAccount(
         .orWhere({ fromAddress: address })
         .orderBy(orderBy);
     return transactions.filter(filter);
-}
-
-// Move or replace
-function partition<T>(arr: T[], criteria: (t: T) => boolean) {
-    return [
-        arr.filter((item) => criteria(item)),
-        arr.filter((item) => !criteria(item)),
-    ];
 }
 
 export async function updateTransaction(
@@ -70,4 +67,15 @@ export async function getMaxTransactionsIdOfAccount(account: Account) {
         .max('id as maxId')
         .first();
     return query.maxId;
+}
+
+export async function getPendingTransactions(
+    orderBy = 'id'
+): Promise<TransferTransaction[]> {
+    const transactions = await (await knex())
+        .select()
+        .table(transactionTable)
+        .where({ status: TransactionStatus.Pending })
+        .orderBy(orderBy);
+    return transactions;
 }

@@ -70,9 +70,7 @@ export default function ExportSignedTransactionView({ location }: Props) {
             <Grid columns={2} divided textAlign="center" padded>
                 <Grid.Row>
                     <Grid.Column>
-                        <TransactionDetails
-                            updateInstruction={transactionObject}
-                        />
+                        <TransactionDetails transaction={transactionObject} />
                     </Grid.Column>
                     <Grid.Column>
                         <TransactionHashView
