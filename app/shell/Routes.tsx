@@ -13,7 +13,8 @@ import AccountCreation from '../pages/AccountCreation/AccountCreationPage';
 import SettingsPage from '../pages/settings/SettingsPage';
 import MultiSignaturePage from '../pages/multisig/MultiSignaturePage';
 import ProposalView from '../pages/multisig/ProposalView';
-import SignTransactionView from '../pages/multisig/SignTransactionView';
+import CosignTransactionProposalView from '../pages/multisig/CosignTransactionProposalView';
+import SignTransactionProposalView from '../pages/multisig/SignTransactionProposalView';
 import ExportSignedTransactionView from '../pages/multisig/ExportSignedTransactionView';
 import MultiSignatureCreateProposalView from '../pages/multisig/MultiSignatureCreateProposalView';
 import SubmittedProposalView from '../pages/multisig/SubmittedProposalView';
@@ -48,7 +49,11 @@ export default function Routes(): ReactElement {
                 />
                 <Route
                     path={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION}
-                    component={SignTransactionView}
+                    component={SignTransactionProposalView}
+                />
+                <Route
+                    path={routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION}
+                    component={CosignTransactionProposalView}
                 />
                 <Route
                     path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}

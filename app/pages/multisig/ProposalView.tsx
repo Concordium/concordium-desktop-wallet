@@ -31,7 +31,7 @@ import {
     serializeUpdateInstructionHeaderAndPayload,
 } from '../../utils/UpdateSerialization';
 import { hashSha256 } from '../../utils/serializationHelpers';
-import getMultiSignatureTransactionStatus from '../../utils/TransactionStatusPoller';
+import { getMultiSignatureTransactionStatus } from '../../utils/TransactionStatusPoller';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '../../components/SimpleErrorModal';
@@ -181,7 +181,7 @@ export default function ProposalView() {
                 <Divider />
                 <Grid columns={3} divided textAlign="center" padded>
                     <Grid.Column>
-                        <TransactionDetails updateInstruction={instruction} />
+                        <TransactionDetails transaction={instruction} />
                     </Grid.Column>
                     <Grid.Column>
                         <Grid.Row>

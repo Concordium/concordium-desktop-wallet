@@ -2,15 +2,14 @@ import { push } from 'connected-react-router';
 import React, { useState, ReactElement } from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
+import { stringify } from 'json-bigint';
 import routes from '../../constants/routes.json';
-import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import {
     ExchangeRate,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateType,
 } from '../../utils/types';
-import { insert } from '../../database/MultiSignatureProposalDao';
 import createUpdateInstruction from '../../utils/UpdateInstructionHelper';
 import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
 import { BlockSummary } from '../../utils/NodeApiTypes';
@@ -77,15 +76,13 @@ export default function UpdateMicroGtuPerEuroRate({
                 blockSummary.updates.authorizations.microGTUPerEuro.threshold
             );
 
-            // Save to database and use the assigned id to update the local object.
-            const entryId = (await insert(multiSignatureTransaction))[0];
-            multiSignatureTransaction.id = entryId;
-
-            // Set the current proposal in the state to the one that was just generated.
-            dispatch(setCurrentProposal(multiSignatureTransaction));
-
-            // Navigate to the page that displays the current proposal from the state.
-            dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
+            // Navigate to signing page.
+            dispatch(
+                push({
+                    pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
+                    state: stringify(multiSignatureTransaction),
+                })
+            );
         }
     }
 
@@ -122,12 +119,10 @@ export default function UpdateMicroGtuPerEuroRate({
                     type="number"
                     onChange={(e) => trySetMicroGtuPerEuro(e.target.value)}
                 />
-                <Form.Field>
-                    <Button primary onClick={generateTransaction}>
-                        Generate transaction proposal
-                    </Button>
-                </Form.Field>
             </Form>
+            <Button primary onClick={generateTransaction}>
+                Generate transaction proposal
+            </Button>
         </Segment>
     );
 }
