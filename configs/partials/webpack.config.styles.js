@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-const { join } = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { fromRoot } = require('../helpers/pathHelpers');
 
 const STYLE_LOADER_NAME = 'style-loader';
 const TYPINGS_LOADER_NAME = '@teamsupercell/typings-for-css-modules-loader';
@@ -9,8 +9,8 @@ const TYPINGS_LOADER_NAME = '@teamsupercell/typings-for-css-modules-loader';
 const config = {
     resolve: {
         alias: {
-            '../../theme.config$': join(__dirname, '/semantic-ui/theme.config'),
-            '../semantic-ui/site': join(__dirname, '/semantic-ui/site'),
+            '../../theme.config$': fromRoot('./app/semantic-ui/theme.config'),
+            '../semantic-ui/site': fromRoot('./app/semantic-ui/site'),
         },
     },
     module: {

@@ -10,14 +10,15 @@ const baseConfig = require('./partials/webpack.config.base');
 const { dependencies } = require('../package.json');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
 const rendererDevConfig = require('./webpack.config.renderer.dev');
+const { fromRoot } = require('./helpers/pathHelpers');
 
 CheckNodeEnv('development');
 
-const dist = path.join(__dirname, '..', 'dll');
-const excludeDeps = ['semantic-ui-less'];
+const dist = fromRoot('./dll');
+const excludeDeps = ['semantic-ui-less', 'fomantic-ui-less'];
 
 module.exports = merge(baseConfig, {
-    context: path.join(__dirname, '..'),
+    context: fromRoot('.'),
 
     devtool: 'eval',
 
@@ -67,9 +68,9 @@ module.exports = merge(baseConfig, {
         new webpack.LoaderOptionsPlugin({
             debug: true,
             options: {
-                context: path.join(__dirname, '..', 'app'),
+                context: fromRoot('./app'),
                 output: {
-                    path: path.join(__dirname, '..', 'dll'),
+                    path: fromRoot('./dll'),
                 },
             },
         }),

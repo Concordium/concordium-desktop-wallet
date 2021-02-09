@@ -16,6 +16,7 @@ const baseConfig = require('./partials/webpack.config.base');
 const assetsConfig = require('./partials/webpack.config.assets');
 const stylesConfig = require('./partials/webpack.config.styles');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
+const { fromRoot } = require('./helpers/pathHelpers');
 
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
 // at the dev webpack config is not accidentally run in a production environment
@@ -25,7 +26,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const port = process.env.PORT || 1212;
 const publicPath = `http://localhost:${port}/dist`;
-const dll = path.join(__dirname, '..', 'dll');
+const dll = fromRoot('./dll');
 const manifest = path.resolve(dll, 'renderer.json');
 const requiredByDLLConfig = module.parent.filename.includes(
     'webpack.config.renderer.dev.dll'
@@ -73,7 +74,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
         requiredByDLLConfig
             ? null
             : new webpack.DllReferencePlugin({
-                  context: path.join(__dirname, '..', 'dll'),
+                  context: dll,
                   manifest: require(manifest),
                   sourceType: 'var',
               }),

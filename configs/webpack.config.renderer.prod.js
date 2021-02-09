@@ -3,7 +3,6 @@
  * Build config for electron renderer process
  */
 
-const path = require('path');
 const webpack = require('webpack');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
@@ -14,6 +13,7 @@ const assetsConfig = require('./partials/webpack.config.assets');
 const stylesConfig = require('./partials/webpack.config.styles');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
 const DeleteSourceMaps = require('../internals/scripts/DeleteSourceMaps');
+const { fromRoot } = require('./helpers/pathHelpers');
 
 CheckNodeEnv('production');
 DeleteSourceMaps();
@@ -31,11 +31,11 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
     entry: [
         'core-js',
         'regenerator-runtime/runtime',
-        path.join(__dirname, '..', 'app/index.tsx'),
+        fromRoot('./app/index.tsx'),
     ],
 
     output: {
-        path: path.join(__dirname, '..', 'app/dist'),
+        path: fromRoot('./app/dist'),
         publicPath: './dist/',
         filename: 'renderer.prod.js',
     },

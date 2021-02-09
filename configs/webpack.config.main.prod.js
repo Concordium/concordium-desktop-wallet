@@ -3,7 +3,6 @@
  * Webpack config for production electron main process
  */
 
-const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -11,6 +10,7 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const baseConfig = require('./partials/webpack.config.base');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
 const DeleteSourceMaps = require('../internals/scripts/DeleteSourceMaps');
+const { fromRoot } = require('./helpers/pathHelpers');
 
 CheckNodeEnv('production');
 DeleteSourceMaps();
@@ -25,8 +25,8 @@ module.exports = merge(baseConfig, {
     entry: './app/main.dev.ts',
 
     output: {
-        path: path.join(__dirname, '..'),
-        filename: './app/main.prod.js',
+        path: fromRoot('./app'),
+        filename: 'main.prod.js',
     },
 
     optimization: {
