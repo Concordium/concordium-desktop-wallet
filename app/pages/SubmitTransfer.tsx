@@ -10,14 +10,10 @@ import {
     serializeTransaction,
     getTransactionHash,
 } from '../utils/transactionSerialization';
-import { waitForFinalization } from '../utils/transactionHelpers';
+import { monitorTransactionStatus } from '../utils/TransactionStatusPoller';
 import { Account, AccountTransaction, AddressBookEntry } from '../utils/types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
-import {
-    addPendingTransaction,
-    confirmTransaction,
-    rejectTransaction,
-} from '../features/TransactionSlice';
+import { addPendingTransaction } from '../features/TransactionSlice';
 import { getAccountPath } from '../features/ledger/Path';
 import TransactionDetails from '../components/TransactionDetails';
 
@@ -29,18 +25,6 @@ interface State {
 
 interface Props {
     location: LocationDescriptorObject<State>;
-}
-
-/**
- * Wait for the transaction to be finalized (or rejected) and update accordingly
- */
-async function monitorTransaction(transactionHash: string) {
-    const dataObject = await waitForFinalization(transactionHash);
-    if (dataObject) {
-        confirmTransaction(transactionHash, dataObject);
-    } else {
-        rejectTransaction(transactionHash);
-    }
 }
 
 export default function SubmitTransfer({ location }: Props) {
@@ -72,7 +56,7 @@ export default function SubmitTransfer({ location }: Props) {
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
             addPendingTransaction(transaction, transactionHash);
-            monitorTransaction(transactionHash);
+            monitorTransactionStatus(transactionHash);
 
             dispatch(
                 push({
