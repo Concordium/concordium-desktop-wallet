@@ -1,15 +1,28 @@
 import { parse } from 'json-bigint';
+import { BlockSummary } from './NodeApiTypes';
 import {
+    ExchangeRate,
+    MultiSignatureTransaction,
     UpdateHeader,
     UpdateInstruction,
     UpdateType,
-    ExchangeRate,
 } from './types';
-import UpdateInstructionHandler from './UpdateInstructionHandler';
+import findHandler from './updates/HandlerFinder';
 
 export interface TransactionInput {
     transaction: string;
     type: string;
+}
+
+/**
+ * The Props interface used by components for handling parameter update
+ * transactions.
+ */
+export interface UpdateProps {
+    blockSummary: BlockSummary;
+    forwardTransaction: (
+        multiSignatureTransaction: Partial<MultiSignatureTransaction>
+    ) => Promise<void>;
 }
 
 // TODO Effective time should perhaps have a default, but it should also be possible to
@@ -48,9 +61,10 @@ export function createTransactionHandler(state: TransactionInput | undefined) {
 
     const transactionObject = parse(transaction);
     // TODO Add AccountTransactionHandler here when implemented.
-    const transactionHandlerValue =
-        type === 'UpdateInstruction'
-            ? new UpdateInstructionHandler(transactionObject)
-            : new UpdateInstructionHandler(transactionObject);
-    return transactionHandlerValue;
+
+    if (type === 'UpdateInstruction') {
+        const handler = findHandler(transactionObject);
+        return handler;
+    }
+    throw new Error('Account transaction support not yet implemented.');
 }
