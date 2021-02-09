@@ -1,20 +1,21 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * Webpack config for production electron main process
  */
 
-import path from 'path';
-import webpack from 'webpack';
-import { merge } from 'webpack-merge';
-import TerserPlugin from 'terser-webpack-plugin';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import baseConfig from './partials/webpack.config.base';
-import CheckNodeEnv from '../internals/scripts/CheckNodeEnv';
-import DeleteSourceMaps from '../internals/scripts/DeleteSourceMaps';
+const path = require('path');
+const webpack = require('webpack');
+const { merge } = require('webpack-merge');
+const TerserPlugin = require('terser-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const baseConfig = require('./partials/webpack.config.base');
+const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
+const DeleteSourceMaps = require('../internals/scripts/DeleteSourceMaps');
 
 CheckNodeEnv('production');
 DeleteSourceMaps();
 
-export default merge(baseConfig, {
+module.exports = merge(baseConfig, {
     devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
 
     mode: 'production',

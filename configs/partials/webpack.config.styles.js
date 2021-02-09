@@ -1,11 +1,12 @@
-import { join } from 'path';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+/* eslint-disable @typescript-eslint/no-var-requires */
+
+const { join } = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const STYLE_LOADER_NAME = 'style-loader';
 const TYPINGS_LOADER_NAME = '@teamsupercell/typings-for-css-modules-loader';
 
 const config = {
-    // ...
     resolve: {
         alias: {
             '../../theme.config$': join(__dirname, '/semantic-ui/theme.config'),
@@ -105,6 +106,7 @@ const config = {
                     },
                 ],
             },
+            // Less is used solely for compiling the semantic-ui theme.
             {
                 test: /\.less$/,
                 use: [

@@ -6,7 +6,12 @@ import { foundationTransactionsEnabledSelector } from '../../features/SettingsSl
 import { UpdateType } from '../../utils/types';
 
 // TODO Show non-foundation transaction types.
-// TODO Dynamically set state when linking to the transaction type that was chosen.
+
+// Defines the list of options for creating multi signature transactions.
+const multiSigTransactionTypesMap: [UpdateType, string][] = [
+    [UpdateType.UpdateMicroGTUPerEuro, 'Update µGTU per euro'],
+    [UpdateType.UpdateEuroPerEnergy, 'Update Euro per energy'],
+];
 
 /**
  * Component that displays a menu containing the available multi signature
@@ -18,31 +23,30 @@ export default function MultiSignatureCreateProposalView() {
         foundationTransactionsEnabledSelector
     );
 
-    let availableTransactionTypes: string[] = [];
+    let availableTransactionTypes: [UpdateType, string][] = [];
     if (foundationTransactionsEnabled) {
-        const foundationTransactionTypes = Object.keys(
-            UpdateType
-        ).filter((key) => Number.isNaN(Number(key)));
         availableTransactionTypes = availableTransactionTypes.concat(
-            foundationTransactionTypes
+            multiSigTransactionTypesMap
         );
     }
 
     return (
         <Menu vertical fluid size="massive">
-            {availableTransactionTypes.map((item) => (
-                <Menu.Item
-                    key={item}
-                    as={Link}
-                    // TODO Dynamically set state depending on the transaction type. Must also be able to handle account transaction types.
-                    to={{
-                        pathname: `/MultiSignatureTransaction/create`,
-                        state: UpdateType.UpdateMicroGTUPerEuro,
-                    }}
-                >
-                    {item}
-                </Menu.Item>
-            ))}
+            {availableTransactionTypes.map(([updateType, label]) => {
+                return (
+                    <Menu.Item
+                        key={updateType}
+                        as={Link}
+                        // TODO Must also be able to handle account transaction types.
+                        to={{
+                            pathname: `/MultiSignatureTransaction/create`,
+                            state: updateType,
+                        }}
+                    >
+                        {label}
+                    </Menu.Item>
+                );
+            })}
         </Menu>
     );
 }

@@ -3,12 +3,13 @@ import {
     ExchangeRate,
     UpdateHeader,
     UpdateInstruction,
+    UpdateInstructionPayload,
 } from './types';
 
 /**
  * Serializes an ExchangeRate to bytes.
  */
-function serializeExchangeRate(exchangeRate: ExchangeRate) {
+export default function serializeExchangeRate(exchangeRate: ExchangeRate) {
     const serializedExchangeRate = Buffer.alloc(16);
     serializedExchangeRate.writeBigUInt64BE(BigInt(exchangeRate.numerator), 0);
     serializedExchangeRate.writeBigUInt64BE(
@@ -16,16 +17,6 @@ function serializeExchangeRate(exchangeRate: ExchangeRate) {
         8
     );
     return serializedExchangeRate;
-}
-
-/**
- * Serializes the payload of an UpdateInstruction. As the payload can contain
- * different types, this function has to determine the type and then serialize
- * accordingly.
- * TODO change type when adding other update types.
- */
-function serializeUpdatePayload(payload: ExchangeRate): Buffer {
-    return serializeExchangeRate(payload);
 }
 
 /**
@@ -79,9 +70,9 @@ function serializeUpdateSignatures(signatures: Buffer[]): Buffer {
  * that is sent to the chain.
  */
 export function serializeUpdateInstructionHeaderAndPayload(
-    updateInstruction: UpdateInstruction
+    updateInstruction: UpdateInstruction<UpdateInstructionPayload>,
+    serializedPayload: Buffer
 ) {
-    const serializedPayload = serializeUpdatePayload(updateInstruction.payload);
     const updateHeaderWithPayloadSize = {
         ...updateInstruction.header,
         payloadSize: serializedPayload.length + 1,
@@ -107,10 +98,12 @@ export function serializeUpdateInstructionHeaderAndPayload(
  * @param updateInstruction the transaction to serialize
  */
 export function serializeUpdateInstruction(
-    updateInstruction: UpdateInstruction
+    updateInstruction: UpdateInstruction<UpdateInstructionPayload>,
+    serializedPayload: Buffer
 ) {
     const serializedHeaderAndPayload = serializeUpdateInstructionHeaderAndPayload(
-        updateInstruction
+        updateInstruction,
+        serializedPayload
     );
 
     const signaturesAsBytes = updateInstruction.signatures.map((signature) =>
@@ -134,12 +127,18 @@ export function serializeUpdateInstruction(
  * with a version (currently hardcoded as 0), as that is required by the node.
  * @param updateInstruction the transaction to serialize
  */
-export function serializeForSubmission(updateInstruction: UpdateInstruction) {
+export function serializeForSubmission(
+    updateInstruction: UpdateInstruction<UpdateInstructionPayload>,
+    serializedPayload: Buffer
+) {
     // Currently versioning is hardcoded to 0. This value might be changed if
     // the interface is updated at some point.
     const version = Buffer.alloc(1);
     version.writeInt8(0, 0);
 
-    const serializedTransaction = serializeUpdateInstruction(updateInstruction);
+    const serializedTransaction = serializeUpdateInstruction(
+        updateInstruction,
+        serializedPayload
+    );
     return Buffer.concat([version, serializedTransaction]);
 }

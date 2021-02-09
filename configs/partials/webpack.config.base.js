@@ -1,14 +1,14 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * Base webpack config used across other specific configs
  */
 
-import path from 'path';
-import webpack from 'webpack';
-import { dependencies as externals } from '../../app/package.json';
-
+const path = require('path');
+const webpack = require('webpack');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
+const { dependencies: externals } = require('../../app/package.json');
 
-export default {
+module.exports = {
     externals: [...Object.keys(externals || {})],
 
     module: {
@@ -27,12 +27,8 @@ export default {
             {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        cacheDirectory: true,
-                    },
-                },
+                include: /app/,
+                use: [{ loader: 'ts-loader' }],
             },
         ],
     },

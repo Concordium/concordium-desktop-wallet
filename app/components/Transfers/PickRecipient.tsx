@@ -1,19 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-    Menu,
-    Button,
-    Header,
-    Input,
-    Container,
-    Modal,
-} from 'semantic-ui-react';
+import { Menu, Button, Header, Input, Container } from 'semantic-ui-react';
 import {
     loadAddressBook,
     addressBookSelector,
     addToAddressBook,
 } from '../../features/AddressBookSlice';
-import AddressBookEntryForm from '../AddressBookEntryForm';
+import UpsertAddress from '../UpsertAddress';
 import { AddressBookEntry } from '../../utils/types';
 
 interface Props {
@@ -27,7 +20,6 @@ export default function PickRecipient({ pickRecipient }: Props) {
     const addressBook = useSelector(addressBookSelector);
     const dispatch = useDispatch();
     const [filter, setFilter] = useState<string>('');
-    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         loadAddressBook(dispatch);
@@ -55,23 +47,10 @@ export default function PickRecipient({ pickRecipient }: Props) {
                 onChange={(e) => setFilter(e.target.value)}
                 autoFocus
             />
-            <Modal
-                closeIcon
-                onClose={() => setOpen(false)}
-                onOpen={() => setOpen(true)}
-                open={open}
+            <UpsertAddress
                 trigger={<Button>Create new Entry</Button>}
-                dimmer="blurring"
-                closeOnDimmerClick={false}
-            >
-                <Modal.Header>Add an entry to your address book</Modal.Header>
-                <Modal.Content>
-                    <AddressBookEntryForm
-                        close={() => setOpen(false)}
-                        submit={submitAddress}
-                    />
-                </Modal.Content>
-            </Modal>
+                submit={submitAddress}
+            />
             <Menu vertical fluid>
                 {addressBook
                     .filter((entry: AddressBookEntry) =>

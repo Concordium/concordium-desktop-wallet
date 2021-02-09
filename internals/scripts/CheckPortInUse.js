@@ -1,5 +1,6 @@
-import chalk from 'chalk';
-import detectPort from 'detect-port';
+/* eslint-disable @typescript-eslint/no-var-requires */
+const chalk = require('chalk');
+const detectPort = require('detect-port');
 
 const port = process.env.PORT || '1212';
 

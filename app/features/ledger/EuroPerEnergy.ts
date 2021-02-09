@@ -5,11 +5,11 @@ import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSe
 
 const INS_EXCHANGE_RATE = 0x06;
 
-export default async function signUpdateMicroGtuPerEuro(
+export default async function signUpdateEuroPerEnergy(
     transport: Transport,
     path: number[],
-    serializedPayload: Buffer,
-    transaction: UpdateInstruction<ExchangeRate>
+    transaction: UpdateInstruction<ExchangeRate>,
+    serializedPayload: Buffer
 ): Promise<Buffer> {
     const data = Buffer.concat([
         pathAsBuffer(path),
@@ -19,7 +19,7 @@ export default async function signUpdateMicroGtuPerEuro(
         ),
     ]);
 
-    const p1 = 0x00;
+    const p1 = 0x01;
     const p2 = 0x00;
 
     const response = await transport.send(

@@ -1,23 +1,24 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * Build config for electron renderer process
  */
 
-import path from 'path';
-import webpack from 'webpack';
-import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import { merge } from 'webpack-merge';
-import TerserPlugin from 'terser-webpack-plugin';
-import baseConfig from './partials/webpack.config.base';
-import assetsConfig from './partials/webpack.config.assets';
-import stylesConfig from './partials/webpack.config.styles';
-import CheckNodeEnv from '../internals/scripts/CheckNodeEnv';
-import DeleteSourceMaps from '../internals/scripts/DeleteSourceMaps';
+const path = require('path');
+const webpack = require('webpack');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const { merge } = require('webpack-merge');
+const TerserPlugin = require('terser-webpack-plugin');
+const baseConfig = require('./partials/webpack.config.base');
+const assetsConfig = require('./partials/webpack.config.assets');
+const stylesConfig = require('./partials/webpack.config.styles');
+const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
+const DeleteSourceMaps = require('../internals/scripts/DeleteSourceMaps');
 
 CheckNodeEnv('production');
 DeleteSourceMaps();
 
-export default merge(baseConfig, assetsConfig, stylesConfig(true), {
+module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
     devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
 
     mode: 'production',

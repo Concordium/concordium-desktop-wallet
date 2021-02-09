@@ -1,4 +1,3 @@
-import { getPendingTransactions } from '../database/TransactionDao';
 import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
 import { loadProposals } from '../features/MultiSignatureSlice';
 import { hashSha256 } from './serializationHelpers';
@@ -9,11 +8,13 @@ import {
     Dispatch,
 } from './types';
 import { serializeUpdateInstruction } from './UpdateSerialization';
-import { getStatus, getDataObject } from './transactionHelpers';
 import {
     confirmTransaction,
     rejectTransaction,
 } from '../features/TransactionSlice';
+import { getPendingTransactions } from '../database/TransactionDao';
+import { getStatus, getDataObject } from './transactionHelpers';
+import findHandler from './updates/HandlerFinder';
 
 /**
  * Poll for the transaction status of the provided multi signature transaction proposal, and
@@ -26,8 +27,11 @@ export async function getMultiSignatureTransactionStatus(
     dispatch: Dispatch
 ) {
     const updateInstruction = JSON.parse(proposal.transaction);
+    const handler = findHandler(updateInstruction);
+
     const serializedUpdateInstruction = serializeUpdateInstruction(
-        updateInstruction
+        updateInstruction,
+        handler.serializePayload()
     );
     const transactionHash = hashSha256(serializedUpdateInstruction).toString(
         'hex'

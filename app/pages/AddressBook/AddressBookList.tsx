@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Button, List, Menu, Modal } from 'semantic-ui-react';
+import { Button, List, Menu } from 'semantic-ui-react';
 import {
     loadAddressBook,
     chooseIndex,
     addressBookSelector,
     addToAddressBook,
 } from '../../features/AddressBookSlice';
-import AddressBookEntryForm from '../../components/AddressBookEntryForm';
+import UpsertAddress from '../../components/UpsertAddress';
 import AddressBookListElement from './AddressBookListElement';
 
 export default function AddressBookList(): JSX.Element {
-    const [open, setOpen] = useState(false);
-
     const dispatch = useDispatch();
     useEffect(() => {
         loadAddressBook(dispatch);
@@ -32,25 +30,10 @@ export default function AddressBookList(): JSX.Element {
     return (
         <List>
             <List.Item>
-                <Modal
-                    closeIcon
-                    onClose={() => setOpen(false)}
-                    onOpen={() => setOpen(true)}
-                    open={open}
+                <UpsertAddress
                     trigger={<Button>Add entry</Button>}
-                    dimmer="blurring"
-                    closeOnDimmerClick={false}
-                >
-                    <Modal.Header>
-                        Add an entry to your address book
-                    </Modal.Header>
-                    <Modal.Content>
-                        <AddressBookEntryForm
-                            close={() => setOpen(false)}
-                            submit={submitAddress}
-                        />
-                    </Modal.Content>
-                </Modal>
+                    submit={submitAddress}
+                />
             </List.Item>
             <List.Item>
                 <Menu vertical size="massive" fluid>

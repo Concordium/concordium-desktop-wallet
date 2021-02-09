@@ -6,12 +6,14 @@ import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
 import signAccountChallenge from './AccountChallenge';
 import {
     AccountTransaction,
+    ExchangeRate,
     PublicInformationForIp,
     UpdateInstruction,
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import signUpdateMicroGtuPerEuro from './MicroGtuPerEuro';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
+import signUpdateEuroPerEnergy from './EuroPerEnergy';
 
 /**
  * Concordium Ledger API.
@@ -75,10 +77,29 @@ export default class ConcordiumLedgerClient {
     }
 
     signMicroGtuPerEuro(
-        transaction: UpdateInstruction,
+        transaction: UpdateInstruction<ExchangeRate>,
+        serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return signUpdateMicroGtuPerEuro(this.transport, path, transaction);
+        return signUpdateMicroGtuPerEuro(
+            this.transport,
+            path,
+            serializedPayload,
+            transaction
+        );
+    }
+
+    signEuroPerEnergy(
+        transaction: UpdateInstruction<ExchangeRate>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateEuroPerEnergy(
+            this.transport,
+            path,
+            transaction,
+            serializedPayload
+        );
     }
 
     getAppAndVersion(): Promise<AppAndVersion> {
