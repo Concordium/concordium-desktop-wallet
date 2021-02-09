@@ -430,7 +430,7 @@ export interface UpdateHeader {
     payloadSize?: Word32;
 }
 
-export interface UpdateInstruction<T> {
+export interface UpdateInstruction<T extends UpdateInstructionPayload> {
     header: UpdateHeader;
     payload: T;
     type: UpdateType;
