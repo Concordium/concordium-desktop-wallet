@@ -8,6 +8,7 @@ const TYPINGS_LOADER_NAME = '@teamsupercell/typings-for-css-modules-loader';
 
 const config = {
     resolve: {
+        // Followed instructions linked from official documentation: https://marekurbanowicz.medium.com/how-to-customize-fomantic-ui-with-less-and-webpack-applicable-to-semantic-ui-too-fbf98a74506c
         alias: {
             '../../theme.config$': fromRoot('./app/semantic-ui/theme.config'),
             '../semantic-ui/site': fromRoot('./app/semantic-ui/site'),
