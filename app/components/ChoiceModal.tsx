@@ -1,4 +1,6 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
+import { push } from 'connected-react-router';
 import { Button, Modal } from 'semantic-ui-react';
 import { Action } from '../utils/types';
 
@@ -17,9 +19,9 @@ export default function ChoiceModal({
     open,
     postAction,
 }: Props) {
+    const dispatch = useDispatch();
     return (
         <Modal
-            closeIcon
             centered
             open={open}
             dimmer="blurring"
@@ -28,12 +30,14 @@ export default function ChoiceModal({
             <Modal.Header>{title}</Modal.Header>
             <Modal.Content>{description}</Modal.Content>
             <Modal.Actions>
-                {actions.map(({ label, onClick }) => (
+                {actions.map(({ label, location }) => (
                     <Button
                         primary
                         key={label}
                         onClick={() => {
-                            onClick();
+                            if (location) {
+                                dispatch(push(location));
+                            }
                             postAction();
                         }}
                     >

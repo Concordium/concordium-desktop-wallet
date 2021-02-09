@@ -34,6 +34,9 @@ export const errorSelector = (state: RootState) => state.error;
 
 export const { updateError, closeModal } = errorSlice.actions;
 
+/**
+ * Displays the given message in a modal.
+ */
 export function informError(
     dispatch: Dispatch,
     title: string,
@@ -45,9 +48,27 @@ export function informError(
         actions: [
             {
                 label: 'ok thanks!',
-                onClick: () => {},
             },
         ],
+        open: true,
+    };
+    dispatch(updateError(error));
+}
+
+/**
+ * Displays a message, and allows multiple actions,
+ * i.e. locations to redirect to.
+ */
+export function choiceError(
+    dispatch: Dispatch,
+    title: string,
+    description: string,
+    actions: Action[]
+) {
+    const error = {
+        title,
+        description,
+        actions,
         open: true,
     };
     dispatch(updateError(error));

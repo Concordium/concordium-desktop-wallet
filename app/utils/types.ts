@@ -612,5 +612,5 @@ export interface TransactionEvent {
 
 export interface Action {
     label: string;
-    onClick(): void;
+    location?: string;
 }

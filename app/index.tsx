@@ -10,7 +10,6 @@ import { Dispatch } from './utils/types';
 import { startClient } from './utils/client';
 import listenForIdentityStatus from './utils/IdentityStatusPoller';
 import listenForAccountStatus from './utils/AccountStatusPoller';
-import { informError } from './features/ErrorSlice';
 
 const store = configuredStore();
 
@@ -30,7 +29,6 @@ async function loadSettingsIntoStore() {
 
 async function onLoad(dispatch: Dispatch) {
     await loadSettingsIntoStore();
-    informError(dispatch, `test`);
     listenForAccountStatus(dispatch);
     listenForIdentityStatus(dispatch);
     listenForTransactionStatus(dispatch);

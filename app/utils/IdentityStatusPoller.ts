@@ -5,8 +5,25 @@ import { confirmIdentity, rejectIdentity } from '../features/IdentitySlice';
 import { confirmInitialAccount } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
 import { addToAddressBook } from '../features/AddressBookSlice';
-import { informError } from '../features/ErrorSlice';
+import { choiceError } from '../features/ErrorSlice';
 import { getAllIdentities } from '../database/IdentityDao';
+import routes from '../constants/routes.json';
+
+function identityIssuanceFailed(
+    dispatch: Dispatch,
+    identityName: string,
+    err: Error | string
+) {
+    choiceError(
+        dispatch,
+        `The identity and initial account creation failed (${identityName})`,
+        `Unfortunately something went wrong with your new identity and initial account. ${err}. You can either go back and try again, or try again later.`,
+        [
+            { label: 'Try Again', location: routes.IDENTITYISSUANCE },
+            { label: 'Later' },
+        ]
+    );
+}
 
 /**
  * Listens until, the identityProvider confirms the identity/initial account and returns the identityObject.
@@ -22,35 +39,27 @@ export async function confirmIdentityAndInitialAccount(
     let token;
     try {
         token = await getIdObject(location);
-        await confirmIdentity(dispatch, identityName, token.identityObject);
-        await confirmInitialAccount(
-            dispatch,
-            accountName,
-            token.accountAddress,
-            token.credential
-        );
-        addToAddressBook(dispatch, {
-            name: accountName,
-            address: token.accountAddress,
-            note: `Initial account of ${identityName}`,
-            readOnly: true,
-        });
-    } catch (err) {
         if (!token) {
             await rejectIdentity(dispatch, identityName);
-            informError(
-                dispatch,
-                `Your Identity ${identityName} was rejected.`
-            );
+            identityIssuanceFailed(dispatch, identityName, token.detail);
         } else {
-            informError(
+            await confirmIdentity(dispatch, identityName, token.identityObject);
+            await confirmInitialAccount(
                 dispatch,
-                `Your Identity ${identityName} could not be confirmed.`,
-                `An error occurred while confirming the identity: ${err}`
+                accountName,
+                token.accountAddress,
+                token.credential
             );
-            // eslint-disable-next-line no-console
-            console.log(token); // TODO: Handle unable to save identity/account
+            addToAddressBook(dispatch, {
+                name: accountName,
+                address: token.accountAddress,
+                note: `Initial account of ${identityName}`,
+                readOnly: true,
+            });
         }
+    } catch (err) {
+        await rejectIdentity(dispatch, identityName);
+        identityIssuanceFailed(dispatch, identityName, err);
     }
 }
 
