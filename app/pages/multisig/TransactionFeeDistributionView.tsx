@@ -1,15 +1,14 @@
 import React from 'react';
 import { Progress } from 'semantic-ui-react';
 import { ColorType, TransactionFeeDistribution } from '../../utils/types';
+import { hundredThousand } from '../../constants/updateConstants.json';
 
 interface Props {
     transactionFeeDistribution: TransactionFeeDistribution;
 }
 
-const hundredThousand = 100000;
-
 /**
- * Displays an overview of a euro per energy transaction payload.
+ * Displays an overview of a transaction fee distribution transaction payload.
  */
 export default function TransactionFeeDistributionView({
     transactionFeeDistribution,
@@ -25,21 +24,21 @@ export default function TransactionFeeDistributionView({
                 value={transactionFeeDistribution.baker}
                 total={hundredThousand}
                 progress="percent"
-                label="New baker reward"
+                label="Baker reward"
                 color={ColorType.Blue}
             />
             <Progress
                 value={transactionFeeDistribution.gasAccount}
                 total={hundredThousand}
                 progress="percent"
-                label="New GAS account share"
+                label="GAS account share"
                 color={ColorType.Teal}
             />
             <Progress
                 value={foundationShare}
                 total={hundredThousand}
                 progress="percent"
-                label="New foundation share"
+                label="Foundation share"
                 color={ColorType.Grey}
             />
         </>

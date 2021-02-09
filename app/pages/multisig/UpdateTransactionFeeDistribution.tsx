@@ -11,8 +11,7 @@ import {
 import createUpdateInstruction, {
     UpdateProps,
 } from '../../utils/UpdateInstructionHelper';
-
-const hundredThousand = 100000;
+import { hundredThousand } from '../../constants/updateConstants.json';
 
 function createTransaction(
     transactionFeeDistribution: TransactionFeeDistribution,
