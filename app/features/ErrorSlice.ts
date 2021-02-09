@@ -40,16 +40,13 @@ export const { updateError, closeModal } = errorSlice.actions;
 export function informError(
     dispatch: Dispatch,
     title: string,
-    description = ''
+    description = '',
+    action: Action = { label: 'ok thanks!' }
 ) {
     const error = {
         title,
         description,
-        actions: [
-            {
-                label: 'ok thanks!',
-            },
-        ],
+        actions: [action],
         open: true,
     };
     dispatch(updateError(error));

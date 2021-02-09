@@ -13,8 +13,16 @@ import { IdentityProvider, Dispatch } from '../../utils/types';
 import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoller';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import { informError } from '../../features/ErrorSlice';
 
 const redirectUri = 'ConcordiumRedirectToken';
+
+function onError(dispatch: Dispatch, message: string) {
+    informError(dispatch, 'Unable to create identity', message, {
+        label: 'Return to identities',
+        location: routes.IDENTITIES,
+    });
+}
 
 async function createIdentityObjectRequest(
     id: number,
@@ -49,6 +57,8 @@ async function handleIdentityProviderLocation(
                 const loc = e.url;
                 if (loc.includes(redirectUri)) {
                     resolve(loc.substring(loc.indexOf('=') + 1));
+                } else if (e.httpResponseCode !== 200) {
+                    reject(new Error(e.toString()));
                 }
             });
         }
@@ -64,8 +74,7 @@ async function generateIdentity(
     provider: IdentityProvider,
     accountName: string,
     identityName: string,
-    iframeRef: RefObject<HTMLIFrameElement>,
-    onError: (message: string) => void
+    iframeRef: RefObject<HTMLIFrameElement>
 ) {
     let identityObjectLocation;
     try {
@@ -88,7 +97,7 @@ async function generateIdentity(
         );
         await addPendingAccount(dispatch, accountName, identityId, 0); // TODO: can we add the address already here?
     } catch (e) {
-        onError(`Failed to create identity due to ${e.stack}`);
+        onError(dispatch, `Failed to create identity due to ${e.stack}`);
         return;
     }
     try {
@@ -100,7 +109,7 @@ async function generateIdentity(
         );
         dispatch(push(routes.IDENTITYISSUANCE_FINAL));
     } catch (e) {
-        onError(`Failed to confirm identity`);
+        onError(dispatch, `Failed to confirm identity`);
     }
 }
 
@@ -108,14 +117,12 @@ interface Props {
     identityName: string;
     accountName: string;
     provider: IdentityProvider;
-    onError(message: string): void;
 }
 
 export default function IdentityIssuanceGenerate({
     identityName,
     accountName,
     provider,
-    onError,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [location, setLocation] = useState<string>();
@@ -144,8 +151,7 @@ export default function IdentityIssuanceGenerate({
             provider,
             accountName,
             identityName,
-            iframeRef,
-            onError
+            iframeRef
         );
     }
 
