@@ -15,6 +15,7 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../../utils/types';
+import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 
 interface Props {
     location: LocationDescriptorObject<TransactionInput>;
@@ -44,7 +45,10 @@ export default function CosignTransactionProposalView({ location }: Props) {
     const { transaction } = location.state;
 
     useEffect(() => {
-        const serialized = transactionHandler.serializePayload();
+        const serialized = serializeUpdateInstructionHeaderAndPayload(
+            transactionHandler.transaction,
+            transactionHandler.serializePayload()
+        );
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
     }, [setTransactionHash, transactionHandler]);

@@ -16,6 +16,7 @@ import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { createTransactionHandler } from '../../utils/UpdateInstructionHelper';
+import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 
 interface Props {
     location: LocationDescriptorObject<string>;
@@ -56,7 +57,10 @@ export default function SignTransactionProposalView({ location }: Props) {
     );
 
     useEffect(() => {
-        const serialized = transactionHandler.serializePayload();
+        const serialized = serializeUpdateInstructionHeaderAndPayload(
+            transactionHandler.transaction,
+            transactionHandler.serializePayload()
+        );
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
     }, [setTransactionHash, transactionHandler]);
