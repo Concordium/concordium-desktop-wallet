@@ -6,7 +6,6 @@ import { parse, stringify } from 'json-bigint';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import routes from '../../constants/routes.json';
 import {
-    AccountTransaction,
     MultiSignatureTransaction,
     TransactionHandler,
     UpdateInstruction,
@@ -42,10 +41,7 @@ export default function SignTransactionProposalView({ location }: Props) {
     const type = 'UpdateInstruction';
 
     const [transactionHandler] = useState<
-        TransactionHandler<
-            UpdateInstruction | AccountTransaction,
-            ConcordiumLedgerClient
-        >
+        TransactionHandler<UpdateInstruction, ConcordiumLedgerClient>
     >(() => createTransactionHandler({ transaction, type }));
 
     const dispatch = useDispatch();
@@ -54,7 +50,7 @@ export default function SignTransactionProposalView({ location }: Props) {
     const updateInstruction: UpdateInstruction = parse(transaction);
 
     useEffect(() => {
-        const serialized = transactionHandler.serializeTransaction();
+        const serialized = transactionHandler.serialize();
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
     }, [setTransactionHash, transactionHandler]);

@@ -12,6 +12,7 @@ import {
 import { AccountPathInput, getAccountPath } from './Path';
 import signUpdateMicroGtuPerEuro from './MicroGtuPerEuro';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
+import signUpdateEuroPerEnergy from './EuroPerEnergy';
 
 /**
  * Concordium Ledger API.
@@ -79,6 +80,13 @@ export default class ConcordiumLedgerClient {
         path: number[]
     ): Promise<Buffer> {
         return signUpdateMicroGtuPerEuro(this.transport, path, transaction);
+    }
+
+    signEuroPerEnergy(
+        transaction: UpdateInstruction,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateEuroPerEnergy(this.transport, path, transaction);
     }
 
     getAppAndVersion(): Promise<AppAndVersion> {

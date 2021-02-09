@@ -20,6 +20,7 @@ interface UpdateQueue {
 
 interface UpdateQueues {
     microGTUPerEuro: UpdateQueue;
+    euroPerEnergy: UpdateQueue;
 }
 
 interface Authorization {
@@ -29,10 +30,12 @@ interface Authorization {
 
 interface Authorizations {
     microGTUPerEuro: Authorization;
+    euroPerEnergy: Authorization;
 }
 
 interface ChainParameters {
     microGTUPerEuro: ExchangeRate;
+    euroPerEnergy: ExchangeRate;
 }
 
 interface Updates {

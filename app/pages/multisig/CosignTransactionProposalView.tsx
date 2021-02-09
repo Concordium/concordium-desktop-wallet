@@ -4,17 +4,13 @@ import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import routes from '../../constants/routes.json';
-import {
-    AccountTransaction,
-    TransactionHandler,
-    UpdateInstruction,
-} from '../../utils/types';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import {
     createTransactionHandler,
     TransactionInput,
 } from '../../utils/UpdateInstructionHelper';
+import { TransactionHandler, UpdateInstruction } from '../../utils/types';
 
 interface Props {
     location: LocationDescriptorObject<TransactionInput>;
@@ -27,10 +23,7 @@ interface Props {
 export default function CosignTransactionProposalView({ location }: Props) {
     const [transactionHash, setTransactionHash] = useState<string>();
     const [transactionHandler] = useState<
-        TransactionHandler<
-            UpdateInstruction | AccountTransaction,
-            ConcordiumLedgerClient
-        >
+        TransactionHandler<UpdateInstruction, ConcordiumLedgerClient>
     >(() => createTransactionHandler(location.state));
 
     const dispatch = useDispatch();
@@ -44,7 +37,7 @@ export default function CosignTransactionProposalView({ location }: Props) {
     const { transaction } = location.state;
 
     useEffect(() => {
-        const serialized = transactionHandler.serializeTransaction();
+        const serialized = transactionHandler.serialize();
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
     }, [setTransactionHash, transactionHandler]);

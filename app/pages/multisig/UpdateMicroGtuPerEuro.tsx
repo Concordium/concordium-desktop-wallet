@@ -1,18 +1,15 @@
-import { push } from 'connected-react-router';
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
-import { stringify } from 'json-bigint';
-import routes from '../../constants/routes.json';
 import {
     ExchangeRate,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateType,
 } from '../../utils/types';
-import createUpdateInstruction from '../../utils/UpdateInstructionHelper';
+import createUpdateInstruction, {
+    UpdateProps,
+} from '../../utils/UpdateInstructionHelper';
 import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
-import { BlockSummary } from '../../utils/NodeApiTypes';
 
 /**
  * Creates a multi signature transaction containing an update instruction for updating
@@ -43,16 +40,19 @@ function createTransaction(
     return multiSignatureTransaction;
 }
 
-interface Props {
-    blockSummary: BlockSummary;
-}
-
-export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
+export default function UpdateMicroGtuPerEuroRate({
+    blockSummary,
+    forwardTransaction,
+}: UpdateProps) {
     const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
     const [
         currentMicroGtuPerEuro,
         setCurrentMicroGtuPerEuro,
     ] = useState<BigInt>();
+
+    const sequenceNumber =
+        blockSummary.updates.updateQueues.microGTUPerEuro.nextSequenceNumber;
+    const { threshold } = blockSummary.updates.authorizations.microGTUPerEuro;
 
     if (!currentMicroGtuPerEuro) {
         setCurrentMicroGtuPerEuro(
@@ -63,25 +63,8 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
         );
     }
 
-    const dispatch = useDispatch();
-
-    async function generateTransaction() {
-        if (microGtuPerEuro) {
-            const multiSignatureTransaction = createTransaction(
-                microGtuPerEuro,
-                blockSummary.updates.updateQueues.microGTUPerEuro
-                    .nextSequenceNumber,
-                blockSummary.updates.authorizations.microGTUPerEuro.threshold
-            );
-
-            // Navigate to signing page.
-            dispatch(
-                push({
-                    pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
-                    state: stringify(multiSignatureTransaction),
-                })
-            );
-        }
+    if (!microGtuPerEuro) {
+        return null;
     }
 
     return (
@@ -112,7 +95,19 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
                     }}
                 />
             </Form>
-            <Button primary onClick={generateTransaction}>
+            <Button
+                primary
+                // TODO Validate that the input is a reduced fraction (otherwise the chain will reject it anyway.)
+                onClick={() =>
+                    forwardTransaction(
+                        createTransaction(
+                            microGtuPerEuro,
+                            sequenceNumber,
+                            threshold
+                        )
+                    )
+                }
+            >
                 Generate transaction proposal
             </Button>
         </Segment>
