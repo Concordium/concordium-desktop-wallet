@@ -8,7 +8,7 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../types';
-import serializeExchangeRate from './UpdatePayloadSerialization';
+import serializeExchangeRate from '../UpdateSerialization';
 
 export default class EuroPerEnergyHandler
     implements

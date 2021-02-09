@@ -1,9 +1,23 @@
 import {
     BlockItemKind,
+    ExchangeRate,
     UpdateHeader,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from './types';
+
+/**
+ * Serializes an ExchangeRate to bytes.
+ */
+export default function serializeExchangeRate(exchangeRate: ExchangeRate) {
+    const serializedExchangeRate = Buffer.alloc(16);
+    serializedExchangeRate.writeBigUInt64BE(BigInt(exchangeRate.numerator), 0);
+    serializedExchangeRate.writeBigUInt64BE(
+        BigInt(exchangeRate.denominator),
+        8
+    );
+    return serializedExchangeRate;
+}
 
 /**
  * Serializes an UpdateHeader to exactly 28 bytes. See the interface
