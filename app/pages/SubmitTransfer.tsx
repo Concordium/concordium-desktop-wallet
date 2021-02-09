@@ -27,6 +27,11 @@ interface Props {
     location: LocationDescriptorObject<State>;
 }
 
+/**
+ * Receives transaction to sign, using the ledger,
+ * and then submits it.
+ * TODO generalize, as right now it only really works with simple transfers.
+ */
 export default function SubmitTransfer({ location }: Props) {
     const dispatch = useDispatch();
 

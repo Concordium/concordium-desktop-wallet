@@ -14,8 +14,8 @@ export interface Props {
 }
 
 /**
- *   Builds and Allows signing a simple transfer.
- *  TODO: generalize this component (when adding other transfers)
+ * Displays the chosen details of the transaction.
+ * And forwards the user to submitting/signing the transaction.
  */
 export default function ConfirmTransferComponent({
     account,

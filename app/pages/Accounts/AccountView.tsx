@@ -68,7 +68,12 @@ export default function AccountView() {
                 <Switch>
                     <Route
                         path={routes.ACCOUNTS_MORE}
-                        component={() => MoreActions(account, accountInfo)}
+                        render={() => (
+                            <MoreActions
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
+                        )}
                     />
                     <Route
                         path={routes.ACCOUNTS_SIMPLETRANSFER}
