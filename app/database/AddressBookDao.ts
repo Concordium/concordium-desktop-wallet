@@ -2,8 +2,15 @@ import { AddressBookEntry } from '../utils/types';
 import knex from './knex';
 import { addressBookTable } from '../constants/databaseNames.json';
 
+function sanitizeAddressBookEntry(e: AddressBookEntry): AddressBookEntry {
+    return { ...e, readOnly: Boolean(e.readOnly) };
+}
+
 export async function getAddressBook(): Promise<AddressBookEntry[]> {
-    return (await knex()).select().table(addressBookTable);
+    return (await knex())
+        .select()
+        .table(addressBookTable)
+        .then((e) => e.map(sanitizeAddressBookEntry));
 }
 
 export async function insertEntry(
@@ -25,6 +32,12 @@ export async function removeEntry(entry: AddressBookEntry) {
     return (await knex())(addressBookTable).where(entry).del();
 }
 
-export async function findEntries(condition: Partial<AddressBookEntry>) {
-    return (await knex()).select().table(addressBookTable).where(condition);
+export async function findEntries(
+    condition: Partial<AddressBookEntry>
+): Promise<AddressBookEntry[]> {
+    return (await knex())
+        .select()
+        .table(addressBookTable)
+        .where(condition)
+        .then((e) => e.map(sanitizeAddressBookEntry));
 }

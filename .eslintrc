@@ -16,7 +16,9 @@
             }
         ],
         "global-require": "off",
-        "@typescript-eslint/explicit-module-boundary-types": "off"
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "react/jsx-props-no-spreading": "off",
+        "react/require-default-props": "off"
     },
     "parserOptions": {
         "ecmaVersion": 2020,

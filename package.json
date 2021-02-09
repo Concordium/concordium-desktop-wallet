@@ -44,7 +44,7 @@
     "{*.json,.{eslintrc,prettierrc,stylelintrc}}": [
       "prettier --ignore-path .eslintignore --parser json --write"
     ],
-    "*.{css,scss}": [
+    "*.{css,scss} --ignore-pattern *.module.{css,scss}": [
       "stylelint --ignore-path .eslintignore --syntax scss --fix",
       "prettier --ignore-path .eslintignore --single-quote --write"
     ],
@@ -219,6 +219,7 @@
     "promise-worker": "^2.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.12.0",
+    "react-hook-form": "^6.15.1",
     "react-hot-loader": "^4.12.21",
     "react-identicons": "^1.2.4",
     "react-modal": "^3.12.1",
