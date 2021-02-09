@@ -1,5 +1,5 @@
 import { push } from 'connected-react-router';
-import React, { useState, ReactElement } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
 import { stringify } from 'json-bigint';
@@ -49,7 +49,7 @@ interface Props {
 
 export default function UpdateMicroGtuPerEuroRate({
     blockSummary,
-}: Props): ReactElement {
+}: Props): JSX.Element {
     const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
     const [
         currentMicroGtuPerEuro,

@@ -1,4 +1,4 @@
-import React, { useEffect, ReactElement } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Menu } from 'semantic-ui-react';
@@ -24,7 +24,7 @@ function newestFirst(
 /**
  * Component that displays a list of multi signature transaction proposals.
  */
-export default function ProposalList(): ReactElement {
+export default function ProposalList(): JSX.Element {
     const dispatch = useDispatch();
     const proposals = useSelector(proposalsSelector);
 
