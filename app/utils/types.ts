@@ -414,7 +414,7 @@ export enum TimeStampUnit {
 export interface AddressBookEntry {
     name: string;
     address: string;
-    note: string;
+    note?: string;
     readOnly: boolean;
 }
 
@@ -580,6 +580,12 @@ export enum ColorType {
     Brown = 'brown',
     Black = 'black',
 }
+
+export type NotOptional<T> = {
+    [P in keyof T]-?: T[P];
+};
+
+export type EqualRecord<T> = { [P in keyof T]: P };
 
 export interface EncryptionMetaData {
     keyLen: number;

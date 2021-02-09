@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Button, Card, Header, Modal } from 'semantic-ui-react';
+import { Button, Card, Header } from 'semantic-ui-react';
 import {
     addressBookSelector,
     chosenIndexSelector,
     removeFromAddressBook,
     updateAddressBookEntry,
 } from '../../features/AddressBookSlice';
-import AddressBookEntryForm from '../../components/AddressBookEntryForm';
+import DeleteAddress from './DeleteAddress';
+import UpsertAddress from '../../components/UpsertAddress';
 
 export default function AddressBookElementView() {
-    const [open, setOpen] = useState(false);
-
     const dispatch = useDispatch();
     const chosenIndex = useSelector(chosenIndexSelector);
     const addressBook = useSelector(addressBookSelector);
@@ -45,35 +44,17 @@ export default function AddressBookElementView() {
                 </Card.Description>
             </Card.Content>
             <Button.Group>
-                <Modal
-                    closeIcon
-                    onClose={() => setOpen(false)}
-                    onOpen={() => setOpen(true)}
-                    open={open}
+                <UpsertAddress
                     trigger={
                         <Button disabled={chosenEntry.readOnly}>Edit</Button>
                     }
-                    dimmer="blurring"
-                    closeOnDimmerClick={false}
-                >
-                    <Modal.Header>
-                        Edit an entry in your address book
-                    </Modal.Header>
-                    <Modal.Content>
-                        <AddressBookEntryForm
-                            initialValues={chosenEntry}
-                            close={() => setOpen(false)}
-                            submit={submitAddress}
-                        />
-                    </Modal.Content>
-                </Modal>
-                <Button
-                    negative
-                    disabled={chosenEntry.readOnly}
-                    onClick={() => removeFromAddressBook(dispatch, chosenEntry)}
-                >
-                    Delete
-                </Button>
+                    initialValues={chosenEntry}
+                    submit={submitAddress}
+                />
+                <DeleteAddress
+                    entry={chosenEntry}
+                    onRemove={(entry) => removeFromAddressBook(dispatch, entry)}
+                />
             </Button.Group>
         </Card>
     );
