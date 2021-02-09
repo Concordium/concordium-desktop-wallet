@@ -1,25 +1,25 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernancePath } from '../../features/ledger/Path';
-import MicroGtuPerEuroView from '../../pages/multisig/MicroGtuPerEuroView';
+import TransactionFeeDistributionView from '../../pages/multisig/TransactionFeeDistributionView';
 import {
-    ExchangeRate,
-    isExchangeRate,
+    isTransactionFeeDistribution,
+    TransactionFeeDistribution,
     TransactionHandler,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../types';
-import { serializeExchangeRate } from '../UpdateSerialization';
+import { serializeTransactionFeeDistribution } from '../UpdateSerialization';
 
-export default class MicroGtuPerEuroHandler
+export default class TransactionFeeDistributionHandler
     implements
         TransactionHandler<
-            UpdateInstruction<ExchangeRate>,
+            UpdateInstruction<TransactionFeeDistribution>,
             ConcordiumLedgerClient
         > {
-    transaction: UpdateInstruction<ExchangeRate>;
+    transaction: UpdateInstruction<TransactionFeeDistribution>;
 
     constructor(transaction: UpdateInstruction<UpdateInstructionPayload>) {
-        if (isExchangeRate(transaction)) {
+        if (isTransactionFeeDistribution(transaction)) {
             this.transaction = transaction;
         } else {
             throw Error('Invalid transaction type was given as input.');
@@ -27,12 +27,12 @@ export default class MicroGtuPerEuroHandler
     }
 
     serializePayload() {
-        return serializeExchangeRate(this.transaction.payload);
+        return serializeTransactionFeeDistribution(this.transaction.payload);
     }
 
     signTransaction(ledger: ConcordiumLedgerClient) {
         const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
-        return ledger.signMicroGtuPerEuro(
+        return ledger.signTransactionFeeDistribution(
             this.transaction,
             this.serializePayload(),
             path
@@ -40,6 +40,8 @@ export default class MicroGtuPerEuroHandler
     }
 
     view() {
-        return MicroGtuPerEuroView({ exchangeRate: this.transaction.payload });
+        return TransactionFeeDistributionView({
+            transactionFeeDistribution: this.transaction.payload,
+        });
     }
 }
