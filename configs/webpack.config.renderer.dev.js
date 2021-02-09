@@ -1,54 +1,74 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /**
- * Build config for electron renderer process
+ * Build config for development electron renderer process that uses
+ * Hot-Module-Replacement
+ *
+ * https://webpack.js.org/concepts/hot-module-replacement/
  */
 
-import path from 'path';
-import webpack from 'webpack';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import { merge } from 'webpack-merge';
-import TerserPlugin from 'terser-webpack-plugin';
-import baseConfig from './webpack.config.base';
-import CheckNodeEnv from '../internals/scripts/CheckNodeEnv';
-import DeleteSourceMaps from '../internals/scripts/DeleteSourceMaps';
+const path = require('path');
+const fs = require('fs');
+const webpack = require('webpack');
+const chalk = require('chalk');
+const { merge } = require('webpack-merge');
+const { spawn, execSync } = require('child_process');
+const baseConfig = require('./webpack.config.base');
+const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
 
-CheckNodeEnv('production');
-DeleteSourceMaps();
+// When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
+// at the dev webpack config is not accidentally run in a production environment
+if (process.env.NODE_ENV === 'production') {
+    CheckNodeEnv('development');
+}
 
-export default merge(baseConfig, {
-    devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
+const port = process.env.PORT || 1212;
+const publicPath = `http://localhost:${port}/dist`;
+const dll = path.join(__dirname, '..', 'dll');
+const manifest = path.resolve(dll, 'renderer.json');
+const requiredByDLLConfig = module.parent.filename.includes(
+    'webpack.config.renderer.dev.dll'
+);
 
-    mode: 'production',
+/**
+ * Warn if the DLL is not built
+ */
+if (!requiredByDLLConfig && !(fs.existsSync(dll) && fs.existsSync(manifest))) {
+    console.log(
+        chalk.black.bgYellow.bold(
+            'The DLL files are missing. Sit back while we build them for you with "yarn build-dll"'
+        )
+    );
+    execSync('yarn build-dll');
+}
 
-    target:
-        process.env.E2E_BUILD || process.env.ERB_SECURE !== 'true'
-            ? 'electron-renderer'
-            : 'electron-preload',
+module.exports = merge(baseConfig, {
+    devtool: 'inline-source-map',
+
+    mode: 'development',
+
+    target: 'electron-renderer',
 
     entry: [
         'core-js',
         'regenerator-runtime/runtime',
-        path.join(__dirname, '..', 'app/index.tsx'),
+        ...(process.env.PLAIN_HMR ? [] : ['react-hot-loader/patch']),
+        `webpack-dev-server/client?http://localhost:${port}/`,
+        'webpack/hot/only-dev-server',
+        require.resolve('../app/index.tsx'),
     ],
 
     output: {
-        path: path.join(__dirname, '..', 'app/dist'),
-        publicPath: './dist/',
-        filename: 'renderer.prod.js',
+        publicPath: `http://localhost:${port}/dist/`,
+        filename: 'renderer.dev.js',
     },
 
     module: {
         rules: [
-            // Extract all .global.css to style.css as is
             {
                 test: /\.global\.css$/,
                 use: [
                     {
-                        loader: MiniCssExtractPlugin.loader,
-                        options: {
-                            publicPath: './',
-                        },
+                        loader: 'style-loader',
                     },
                     {
                         loader: 'css-loader',
@@ -58,12 +78,11 @@ export default merge(baseConfig, {
                     },
                 ],
             },
-            // Pipe other styles through css modules and append to style.css
             {
-                test: /\.module\.css$/,
+                test: /^((?!\.global).)*\.css$/,
                 use: [
                     {
-                        loader: MiniCssExtractPlugin.loader,
+                        loader: 'style-loader',
                     },
                     {
                         loader: 'css-loader',
@@ -73,22 +92,22 @@ export default merge(baseConfig, {
                                     '[name]__[local]__[hash:base64:5]',
                             },
                             sourceMap: true,
+                            importLoaders: 1,
                         },
                     },
                 ],
             },
-            // Add SASS support  - compile all .global.scss files and pipe it to style.css
+            // SASS support - compile all .global.scss files and pipe it to style.css
             {
                 test: /\.global\.(scss|sass)$/,
                 use: [
                     {
-                        loader: MiniCssExtractPlugin.loader,
+                        loader: 'style-loader',
                     },
                     {
                         loader: 'css-loader',
                         options: {
                             sourceMap: true,
-                            importLoaders: 1,
                         },
                     },
                     {
@@ -102,12 +121,15 @@ export default merge(baseConfig, {
                     },
                 ],
             },
-            // Add SASS support  - compile all .module.scss files and pipe it to style.css
+            // SASS support - compile all module.scss files and pipe it to style.css
             {
                 test: /\.module\.(scss|sass)$/,
                 use: [
                     {
-                        loader: MiniCssExtractPlugin.loader,
+                        loader: 'style-loader',
+                    },
+                    {
+                        loader: '@teamsupercell/typings-for-css-modules-loader',
                     },
                     {
                         loader: 'css-loader',
@@ -116,8 +138,8 @@ export default merge(baseConfig, {
                                 localIdentName:
                                     '[name]__[local]__[hash:base64:5]',
                             },
-                            importLoaders: 1,
                             sourceMap: true,
+                            importLoaders: 1,
                         },
                     },
                     {
@@ -187,28 +209,26 @@ export default merge(baseConfig, {
             },
         ],
     },
-
-    optimization: {
-        minimizer: process.env.E2E_BUILD
-            ? []
-            : [
-                  new TerserPlugin({
-                      parallel: true,
-                      sourceMap: true,
-                      cache: true,
-                  }),
-                  new OptimizeCSSAssetsPlugin({
-                      cssProcessorOptions: {
-                          map: {
-                              inline: false,
-                              annotation: true,
-                          },
-                      },
-                  }),
-              ],
+    resolve: {
+        alias: {
+            'react-dom': '@hot-loader/react-dom',
+        },
     },
-
     plugins: [
+        requiredByDLLConfig
+            ? null
+            : new webpack.DllReferencePlugin({
+                  context: path.join(__dirname, '..', 'dll'),
+                  manifest: require(manifest),
+                  sourceType: 'var',
+              }),
+
+        new webpack.HotModuleReplacementPlugin({
+            multiStep: true,
+        }),
+
+        new webpack.NoEmitOnErrorsPlugin(),
+
         /**
          * Create global constants which can be configured at compile time.
          *
@@ -217,21 +237,55 @@ export default merge(baseConfig, {
          *
          * NODE_ENV should be production so that modules do not perform certain
          * development checks
+         *
+         * By default, use 'development' as NODE_ENV. This can be overriden with
+         * 'staging', for example, by changing the ENV variables in the npm scripts
          */
         new webpack.EnvironmentPlugin({
-            NODE_ENV: 'production',
-            DEBUG_PROD: false,
-            E2E_BUILD: false,
+            NODE_ENV: 'development',
         }),
 
-        new MiniCssExtractPlugin({
-            filename: 'style.css',
-        }),
-
-        new BundleAnalyzerPlugin({
-            analyzerMode:
-                process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
-            openAnalyzer: process.env.OPEN_ANALYZER === 'true',
+        new webpack.LoaderOptionsPlugin({
+            debug: true,
         }),
     ],
+
+    node: {
+        __dirname: false,
+        __filename: false,
+    },
+
+    devServer: {
+        port,
+        publicPath,
+        compress: true,
+        noInfo: false,
+        stats: 'errors-only',
+        inline: true,
+        lazy: false,
+        hot: true,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        contentBase: path.join(__dirname, 'dist'),
+        watchOptions: {
+            aggregateTimeout: 300,
+            ignored: /node_modules/,
+            poll: 100,
+        },
+        historyApiFallback: {
+            verbose: true,
+            disableDotRule: false,
+        },
+        before() {
+            if (process.env.START_HOT) {
+                console.log('Starting Main Process...');
+                spawn('npm', ['run', 'start:dev'], {
+                    shell: true,
+                    env: process.env,
+                    stdio: 'inherit',
+                })
+                    .on('close', (code) => process.exit(code))
+                    .on('error', (spawnError) => console.error(spawnError));
+            }
+        },
+    },
 });

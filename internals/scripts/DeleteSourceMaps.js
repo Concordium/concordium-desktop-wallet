@@ -1,7 +1,8 @@
-import path from 'path';
-import rimraf from 'rimraf';
+/* eslint-disable @typescript-eslint/no-var-requires */
+const path = require('path');
+const rimraf = require('rimraf');
 
-export default function deleteSourceMaps() {
+module.exports = function deleteSourceMaps() {
     rimraf.sync(path.join(__dirname, '../../app/dist/*.js.map'));
     rimraf.sync(path.join(__dirname, '../../app/*.js.map'));
-}
+};

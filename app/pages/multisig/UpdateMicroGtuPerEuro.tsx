@@ -43,7 +43,7 @@ function createTransaction(
 export default function UpdateMicroGtuPerEuroRate({
     blockSummary,
     forwardTransaction,
-}: UpdateProps) {
+}: UpdateProps): JSX.Element | null {
     const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
     const [
         currentMicroGtuPerEuro,
@@ -67,6 +67,18 @@ export default function UpdateMicroGtuPerEuroRate({
         return null;
     }
 
+    function trySetMicroGtuPerEuro(v: string): void {
+        if (!v) {
+            return;
+        }
+
+        try {
+            setMicroGtuPerEuro(BigInt(v));
+        } catch (error) {
+            // The input was not a valid BigInt, so do no updates based on the input.
+        }
+    }
+
     return (
         <Segment>
             <Header>Transaction Proposal | Update MicroGTU Per Euro</Header>
@@ -77,22 +89,16 @@ export default function UpdateMicroGtuPerEuroRate({
                     width="5"
                     label="Current micro GTU per euro rate"
                     readOnly
-                    value={currentMicroGtuPerEuro?.toString()}
+                    type="number"
+                    value={`${currentMicroGtuPerEuro}`}
                 />
                 <Form.Input
                     inline
                     width="5"
                     label="New micro GTU per euro rate"
-                    value={microGtuPerEuro?.toString()}
-                    onChange={(e) => {
-                        if (e.target.value) {
-                            try {
-                                setMicroGtuPerEuro(BigInt(e.target.value));
-                            } catch (error) {
-                                // The input was not a valid BigInt, so do no updates based on the input.
-                            }
-                        }
-                    }}
+                    value={`${microGtuPerEuro}`}
+                    type="number"
+                    onChange={(e) => trySetMicroGtuPerEuro(e.target.value)}
                 />
             </Form>
             <Button

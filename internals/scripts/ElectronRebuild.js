@@ -1,7 +1,8 @@
-import path from 'path';
-import { execSync } from 'child_process';
-import fs from 'fs';
-import { dependencies } from '../../app/package.json';
+/* eslint-disable @typescript-eslint/no-var-requires */
+const path = require('path');
+const { execSync } = require('child_process');
+const fs = require('fs');
+const { dependencies } = require('../../app/package.json');
 
 const nodeModulesPath = path.join(__dirname, '..', '..', 'app', 'node_modules');
 
