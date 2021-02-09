@@ -23,6 +23,25 @@ interface Props {
     attributes: string[];
 }
 
+async function sendCredential(credentialDeploymentInfoHex: string) {
+    const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
+
+    try {
+        const response = await sendTransaction(payload);
+        if (response) {
+            return;
+        }
+        // TODO: Should we delete the pending account?
+        throw new Error(
+            'We were unable to deploy the credential, due to the node rejecting the transaction.'
+        );
+    } catch (e) {
+        throw new Error(
+            'We were unable to deploy the credential, because the node could not be reached.'
+        );
+    }
+}
+
 export default function AccountCreationGenerate({
     accountName,
     attributes,
@@ -30,9 +49,8 @@ export default function AccountCreationGenerate({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
 
-    async function afterLedger(
+    async function saveAccount(
         {
-            credentialDeploymentInfoHex,
             credentialDeploymentInfo,
             accountAddress,
             transactionId,
@@ -54,26 +72,9 @@ export default function AccountCreationGenerate({
             note: `Account ${accountNumber} of ${identity.name}`, // TODO: have better note
             readOnly: true,
         });
-
-        const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
-
-        try {
-            const response = await sendTransaction(payload);
-            if (response) {
-                return transactionId;
-            }
-            // TODO: Should we delete the pending account?
-            throw new Error(
-                'We were unable to deploy the credential, due to the node rejecting the transaction.'
-            );
-        } catch (e) {
-            throw new Error(
-                'We were unable to deploy the credential, because the node could not be reached.'
-            );
-        }
     }
 
-    async function withLedger(
+    async function createAccount(
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
@@ -90,11 +91,15 @@ export default function AccountCreationGenerate({
         );
 
         try {
-            const transactionId = await afterLedger(
-                credentialDeploymentDetails,
-                accountNumber
+            saveAccount(credentialDeploymentDetails, accountNumber);
+            sendCredential(
+                credentialDeploymentDetails.credentialDeploymentInfoHex
             );
-            confirmAccount(dispatch, accountName, transactionId);
+            confirmAccount(
+                dispatch,
+                accountName,
+                credentialDeploymentDetails.transactionId
+            );
             dispatch(push(routes.ACCOUNTCREATION_FINAL));
         } catch (e) {
             choiceError(dispatch, 'Unable to create account', `${e}`, [
@@ -108,7 +113,7 @@ export default function AccountCreationGenerate({
             <Card.Content textAlign="center">
                 <Card.Header>Generating the Account Credentials</Card.Header>
                 <Card.Content textAlign="center">
-                    <LedgerComponent ledgerCall={withLedger} />
+                    <LedgerComponent ledgerCall={createAccount} />
                 </Card.Content>
             </Card.Content>
         </Card>
