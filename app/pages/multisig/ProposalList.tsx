@@ -24,7 +24,7 @@ function newestFirst(
 /**
  * Component that displays a list of multi signature transaction proposals.
  */
-export default function ProposalList() {
+export default function ProposalList(): JSX.Element {
     const dispatch = useDispatch();
     const proposals = useSelector(proposalsSelector);
 

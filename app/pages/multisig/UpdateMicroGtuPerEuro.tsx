@@ -1,18 +1,15 @@
-import { push } from 'connected-react-router';
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
-import { stringify } from 'json-bigint';
-import routes from '../../constants/routes.json';
 import {
     ExchangeRate,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateType,
 } from '../../utils/types';
-import createUpdateInstruction from '../../utils/UpdateInstructionHelper';
+import createUpdateInstruction, {
+    UpdateProps,
+} from '../../utils/UpdateInstructionHelper';
 import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
-import { BlockSummary } from '../../utils/NodeApiTypes';
 
 /**
  * Creates a multi signature transaction containing an update instruction for updating
@@ -43,16 +40,19 @@ function createTransaction(
     return multiSignatureTransaction;
 }
 
-interface Props {
-    blockSummary: BlockSummary;
-}
-
-export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
+export default function UpdateMicroGtuPerEuroRate({
+    blockSummary,
+    forwardTransaction,
+}: UpdateProps): JSX.Element | null {
     const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
     const [
         currentMicroGtuPerEuro,
         setCurrentMicroGtuPerEuro,
     ] = useState<BigInt>();
+
+    const sequenceNumber =
+        blockSummary.updates.updateQueues.microGTUPerEuro.nextSequenceNumber;
+    const { threshold } = blockSummary.updates.authorizations.microGTUPerEuro;
 
     if (!currentMicroGtuPerEuro) {
         setCurrentMicroGtuPerEuro(
@@ -63,24 +63,19 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
         );
     }
 
-    const dispatch = useDispatch();
+    if (!microGtuPerEuro) {
+        return null;
+    }
 
-    async function generateTransaction() {
-        if (microGtuPerEuro) {
-            const multiSignatureTransaction = createTransaction(
-                microGtuPerEuro,
-                blockSummary.updates.updateQueues.microGTUPerEuro
-                    .nextSequenceNumber,
-                blockSummary.updates.authorizations.microGTUPerEuro.threshold
-            );
+    function trySetMicroGtuPerEuro(v: string): void {
+        if (!v) {
+            return;
+        }
 
-            // Navigate to signing page.
-            dispatch(
-                push({
-                    pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
-                    state: stringify(multiSignatureTransaction),
-                })
-            );
+        try {
+            setMicroGtuPerEuro(BigInt(v));
+        } catch (error) {
+            // The input was not a valid BigInt, so do no updates based on the input.
         }
     }
 
@@ -94,25 +89,31 @@ export default function UpdateMicroGtuPerEuroRate({ blockSummary }: Props) {
                     width="5"
                     label="Current micro GTU per euro rate"
                     readOnly
-                    value={currentMicroGtuPerEuro?.toString()}
+                    type="number"
+                    value={`${currentMicroGtuPerEuro}`}
                 />
                 <Form.Input
                     inline
                     width="5"
                     label="New micro GTU per euro rate"
-                    value={microGtuPerEuro?.toString()}
-                    onChange={(e) => {
-                        if (e.target.value) {
-                            try {
-                                setMicroGtuPerEuro(BigInt(e.target.value));
-                            } catch (error) {
-                                // The input was not a valid BigInt, so do no updates based on the input.
-                            }
-                        }
-                    }}
+                    value={`${microGtuPerEuro}`}
+                    type="number"
+                    onChange={(e) => trySetMicroGtuPerEuro(e.target.value)}
                 />
             </Form>
-            <Button primary onClick={generateTransaction}>
+            <Button
+                primary
+                // TODO Validate that the input is a reduced fraction (otherwise the chain will reject it anyway.)
+                onClick={() =>
+                    forwardTransaction(
+                        createTransaction(
+                            microGtuPerEuro,
+                            sequenceNumber,
+                            threshold
+                        )
+                    )
+                }
+            >
                 Generate transaction proposal
             </Button>
         </Segment>

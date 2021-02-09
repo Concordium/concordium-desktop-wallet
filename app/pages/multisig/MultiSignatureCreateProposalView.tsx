@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { stringify } from 'json-bigint';
 import UpdateMicroGtuPerEuroRate from './UpdateMicroGtuPerEuro';
-import { UpdateType } from '../../utils/types';
+import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
 import { getBlockSummary, getConsensusStatus } from '../../utils/client';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
+import UpdateEuroPerEnergy from './UpdateEuroPerEnergy';
 
 interface Location {
     state: UpdateType;
@@ -29,7 +31,23 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     const [loading, setLoading] = useState(true);
     const dispatch = useDispatch();
 
-    const type = location.state;
+    // TODO Add support for account transactions.
+    const type: UpdateType = location.state;
+
+    /**
+     * Forwards the multi signature transactions to the signing page.
+     */
+    async function forwardTransactionToSigningPage(
+        multiSignatureTransaction: Partial<MultiSignatureTransaction>
+    ) {
+        // Forward the transaction under creation to the signing page.
+        dispatch(
+            push({
+                pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
+                state: stringify(multiSignatureTransaction),
+            })
+        );
+    }
 
     function chooseProposalType(foundationType: UpdateType) {
         if (!blockSummary) {
@@ -38,11 +56,22 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
         switch (foundationType) {
             case UpdateType.UpdateMicroGTUPerEuro:
                 return (
-                    <UpdateMicroGtuPerEuroRate blockSummary={blockSummary} />
+                    <UpdateMicroGtuPerEuroRate
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                );
+            case UpdateType.UpdateEuroPerEnergy:
+                return (
+                    <UpdateEuroPerEnergy
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
                 );
             default:
-                throw new Error(
-                    'An unsupported transaction type was encountered.'
+                return (
+                    // TODO Update when all types have been implemented.
+                    <Header>Not implemented yet</Header>
                 );
         }
     }

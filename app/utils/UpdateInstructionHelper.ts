@@ -1,15 +1,28 @@
 import { parse } from 'json-bigint';
+import { BlockSummary } from './NodeApiTypes';
 import {
+    MultiSignatureTransaction,
     UpdateHeader,
     UpdateInstruction,
+    UpdateInstructionPayload,
     UpdateType,
-    ExchangeRate,
 } from './types';
-import UpdateInstructionHandler from './UpdateInstructionHandler';
+import findHandler from './updates/HandlerFinder';
 
 export interface TransactionInput {
     transaction: string;
     type: string;
+}
+
+/**
+ * The Props interface used by components for handling parameter update
+ * transactions.
+ */
+export interface UpdateProps {
+    blockSummary: BlockSummary;
+    forwardTransaction: (
+        multiSignatureTransaction: Partial<MultiSignatureTransaction>
+    ) => Promise<void>;
 }
 
 // TODO Effective time should perhaps have a default, but it should also be possible to
@@ -17,18 +30,16 @@ export interface TransactionInput {
 // Where to get the sequence number from?
 // TODO Add other update types as they are implemented.
 
-export default function createUpdateInstruction(
-    updatePayload: ExchangeRate,
-    updateType: UpdateType,
-    sequenceNumber: BigInt
-) {
+export default function createUpdateInstruction<
+    T extends UpdateInstructionPayload
+>(updatePayload: T, updateType: UpdateType, sequenceNumber: BigInt) {
     const updateHeader: UpdateHeader = {
         effectiveTime: BigInt(Date.now()) + 864000000n,
         sequenceNumber,
         timeout: BigInt(Date.now()) + 864000000n * 7n,
     };
 
-    const updateInstruction: UpdateInstruction = {
+    const updateInstruction: UpdateInstruction<T> = {
         header: updateHeader,
         payload: updatePayload,
         signatures: [],
@@ -48,9 +59,10 @@ export function createTransactionHandler(state: TransactionInput | undefined) {
 
     const transactionObject = parse(transaction);
     // TODO Add AccountTransactionHandler here when implemented.
-    const transactionHandlerValue =
-        type === 'UpdateInstruction'
-            ? new UpdateInstructionHandler(transactionObject)
-            : new UpdateInstructionHandler(transactionObject);
-    return transactionHandlerValue;
+
+    if (type === 'UpdateInstruction') {
+        const handler = findHandler(transactionObject);
+        return handler;
+    }
+    throw new Error('Account transaction support not yet implemented.');
 }

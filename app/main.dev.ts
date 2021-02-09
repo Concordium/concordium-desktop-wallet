@@ -1,4 +1,4 @@
-/* eslint global-require: off, no-console: off */
+/* eslint no-console: off, @typescript-eslint/no-var-requires: off */
 
 /**
  * This module executes inside of electron's main process. You can start
@@ -24,16 +24,11 @@ import ipcCommands from './constants/ipcCommands.json';
  * an error prompt is displayed to the user, and the application is terminated.
  */
 async function migrate() {
-    let config: { migrationSource: WebpackMigrationSource };
-    if (process.env.NODE_ENV === 'production') {
-        config = {
-            migrationSource: new WebpackMigrationSource(
-                require.context('./database/migrations', false, /.ts$/)
-            ),
-        };
-    } else {
-        config = require('./database/knexfile.ts').development;
-    }
+    const config = {
+        migrationSource: new WebpackMigrationSource(
+            require.context('./database/migrations', false, /.ts$/)
+        ),
+    };
 
     knex()
         .then((db) => {

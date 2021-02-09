@@ -58,15 +58,18 @@ export async function resetTransactions() {
     return (await knex())(transactionTable).del();
 }
 
-export async function getMaxTransactionsIdOfAccount(account: Account) {
+export async function getMaxTransactionsIdOfAccount(
+    account: Account
+): Promise<number | undefined> {
     const { address } = account;
     const query = await (await knex())
-        .table(transactionTable)
+        .table<TransferTransaction>(transactionTable)
         .where({ toAddress: address })
         .orWhere({ fromAddress: address })
-        .max('id as maxId')
+        .max<{ maxId: TransferTransaction['id'] }>('id as maxId')
         .first();
-    return query.maxId;
+
+    return query?.maxId;
 }
 
 export async function getPendingTransactions(
