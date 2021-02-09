@@ -37,10 +37,9 @@ export const configuredStore = (initialState?: RootState) => {
     });
 
     if (process.env.NODE_ENV === 'development' && module.hot) {
-        module.hot.accept(
-            './rootReducer',
-            // eslint-disable-next-line global-require
-            () => store.replaceReducer(require('./rootReducer').default)
+        module.hot.accept('./rootReducer', () =>
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
+            store.replaceReducer(require('./rootReducer').default)
         );
     }
     return store;
