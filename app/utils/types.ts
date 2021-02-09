@@ -609,3 +609,8 @@ export interface TransactionEvent {
     result: EventResult;
     cost: string;
 }
+
+export interface Action {
+    label: string;
+    onClick(): void;
+}

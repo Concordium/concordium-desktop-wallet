@@ -5,6 +5,7 @@ import { confirmIdentity, rejectIdentity } from '../features/IdentitySlice';
 import { confirmInitialAccount } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
 import { addToAddressBook } from '../features/AddressBookSlice';
+import { informError } from '../features/ErrorSlice';
 import { getAllIdentities } from '../database/IdentityDao';
 
 /**
@@ -37,9 +38,16 @@ export async function confirmIdentityAndInitialAccount(
     } catch (err) {
         if (!token) {
             await rejectIdentity(dispatch, identityName);
+            informError(
+                dispatch,
+                `Your Identity ${identityName} was rejected.`
+            );
         } else {
-            // eslint-disable-next-line no-console
-            console.log(err);
+            informError(
+                dispatch,
+                `Your Identity ${identityName} could not be confirmed.`,
+                `An error occurred while confirming the identity: ${err}`
+            );
             // eslint-disable-next-line no-console
             console.log(token); // TODO: Handle unable to save identity/account
         }
