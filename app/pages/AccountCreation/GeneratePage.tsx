@@ -19,6 +19,7 @@ import {
 } from '../../features/AccountSlice';
 import { getGlobal } from '../../utils/httpRequests';
 import { addToAddressBook } from '../../features/AddressBookSlice';
+import { choiceError } from '../../features/ErrorSlice';
 
 /**
  *   This function loads the ledger object and creates a credentialDeploymentInfo, and nesessary details
@@ -86,10 +87,20 @@ async function createAccount(
 
     const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
 
-    // TODO Handle the case where we get a negative response from the Node
-    await sendTransaction(payload);
-
-    return transactionId;
+    try {
+        const response = await sendTransaction(payload);
+        if (response) {
+            return transactionId;
+        }
+        // TODO: Should we delete the pending account?
+        throw new Error(
+            'We were unable to deploy the credential, due to the node rejecting the transaction.'
+        );
+    } catch (e) {
+        throw new Error(
+            'We were unable to deploy the credential, because the node could not be reached.'
+        );
+    }
 }
 
 interface Props {
@@ -113,8 +124,10 @@ export default function AccountCreationGenerate({
                 return dispatch(push(routes.ACCOUNTCREATION_FINAL));
             })
             .catch(
-                // eslint-disable-next-line no-console
-                (e) => console.log(`creating account failed: ${e.stack} `) // TODO: handle failure properly
+                (e) =>
+                    choiceError(dispatch, 'Unable to create account', `${e}`, [
+                        { label: 'ok, thanks', location: routes.ACCOUNTS },
+                    ]) // TODO: handle failure properly.
             );
     }, [identity, dispatch, accountName, setText, attributes]);
 
