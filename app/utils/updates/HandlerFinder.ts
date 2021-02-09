@@ -1,11 +1,19 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { TransactionHandler, UpdateInstruction, UpdateType } from '../types';
+import {
+    TransactionHandler,
+    UpdateInstruction,
+    UpdateInstructionPayload,
+    UpdateType,
+} from '../types';
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
 import MicroGtuPerEuroHandler from './MicroGtuPerEuroHandler';
 
 export default function findHandler(
-    transaction: UpdateInstruction
-): TransactionHandler<UpdateInstruction, ConcordiumLedgerClient> {
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): TransactionHandler<
+    UpdateInstruction<UpdateInstructionPayload>,
+    ConcordiumLedgerClient
+> {
     switch (transaction.type) {
         case UpdateType.UpdateMicroGTUPerEuro:
             return new MicroGtuPerEuroHandler(transaction);

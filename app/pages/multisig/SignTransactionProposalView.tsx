@@ -9,12 +9,14 @@ import {
     MultiSignatureTransaction,
     TransactionHandler,
     UpdateInstruction,
+    UpdateInstructionPayload,
 } from '../../utils/types';
 import { insert } from '../../database/MultiSignatureProposalDao';
 import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { createTransactionHandler } from '../../utils/UpdateInstructionHelper';
+import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 
 interface Props {
     location: LocationDescriptorObject<string>;
@@ -41,16 +43,24 @@ export default function SignTransactionProposalView({ location }: Props) {
     const type = 'UpdateInstruction';
 
     const [transactionHandler] = useState<
-        TransactionHandler<UpdateInstruction, ConcordiumLedgerClient>
+        TransactionHandler<
+            UpdateInstruction<UpdateInstructionPayload>,
+            ConcordiumLedgerClient
+        >
     >(() => createTransactionHandler({ transaction, type }));
 
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
-    const updateInstruction: UpdateInstruction = parse(transaction);
+    const updateInstruction: UpdateInstruction<UpdateInstructionPayload> = parse(
+        transaction
+    );
 
     useEffect(() => {
-        const serialized = transactionHandler.serialize();
+        const serialized = serializeUpdateInstructionHeaderAndPayload(
+            transactionHandler.transaction,
+            transactionHandler.serializePayload()
+        );
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
     }, [setTransactionHash, transactionHandler]);

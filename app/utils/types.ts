@@ -430,17 +430,18 @@ export interface UpdateHeader {
     payloadSize?: Word32;
 }
 
-export interface UpdateInstruction {
+export interface UpdateInstruction<T extends UpdateInstructionPayload> {
     header: UpdateHeader;
-    // Contains the payload for an update instruction. It can be any of the
-    // update payloads available.
-    // TODO Add other update types as they are implemented.
-    payload: ExchangeRate;
+    payload: T;
     type: UpdateType;
     signatures: string[];
 }
 
-export type Transaction = AccountTransaction | UpdateInstruction;
+export type UpdateInstructionPayload = ExchangeRate;
+
+export type Transaction =
+    | AccountTransaction
+    | UpdateInstruction<UpdateInstructionPayload>;
 /**
  * Update type enumeration. The numbering/order is important as that corresponds
  * to the byte written when serializing the update instruction.
@@ -465,7 +466,7 @@ export function instanceOfAccountTransaction(
 
 export function instanceOfUpdateInstruction(
     object: Transaction
-): object is UpdateInstruction {
+): object is UpdateInstruction<UpdateInstructionPayload> {
     return 'header' in object;
 }
 
@@ -475,6 +476,15 @@ export function instanceOfSimpleTransfer(
     return object.transactionKind === TransactionKindId.Simple_transfer;
 }
 
+export function isExchangeRate(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<ExchangeRate> {
+    return (
+        'numerator' in transaction.payload &&
+        'denominator' in transaction.payload
+    );
+}
+
 /**
  * Interface definition for a class that handles a specific type
  * of transaction. The handler can serialize and sign the transaction,
@@ -482,7 +492,7 @@ export function instanceOfSimpleTransfer(
  */
 export interface TransactionHandler<T, S> {
     transaction: T;
-    serialize: () => Buffer;
+    serializePayload: () => Buffer;
     signTransaction: (signer: S) => Promise<Buffer>;
     view: () => JSX.Element;
 }

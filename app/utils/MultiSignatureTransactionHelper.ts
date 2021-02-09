@@ -4,6 +4,7 @@ import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateInstruction,
+    UpdateInstructionPayload,
 } from './types';
 
 /**
@@ -13,7 +14,9 @@ import {
  * @param status the current status of multi signature transaction
  */
 export default function createMultiSignatureTransaction(
-    transaction: UpdateInstruction | AccountTransaction,
+    transaction:
+        | UpdateInstruction<UpdateInstructionPayload>
+        | AccountTransaction,
     threshold: number,
     status: MultiSignatureTransactionStatus
 ) {
