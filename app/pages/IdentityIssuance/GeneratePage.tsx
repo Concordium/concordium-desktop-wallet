@@ -6,7 +6,12 @@ import { addPendingIdentity } from '../../features/IdentitySlice';
 import { addPendingAccount } from '../../features/AccountSlice';
 import routes from '../../constants/routes.json';
 import styles from './IdentityIssuance.module.scss';
-import { getGlobal, performIdObjectRequest } from '../../utils/httpRequests';
+import {
+    getGlobal,
+    getPromise,
+    getResponseBody,
+    performIdObjectRequest,
+} from '../../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
 import { IdentityProvider, Dispatch } from '../../utils/types';
@@ -16,6 +21,11 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { informError } from '../../features/ErrorSlice';
 
 const redirectUri = 'ConcordiumRedirectToken';
+
+async function getBody(url: string) {
+    const response = await getPromise(url);
+    return getResponseBody(response);
+}
 
 function onError(dispatch: Dispatch, message: string) {
     informError(dispatch, 'Unable to create identity', message, {
@@ -52,15 +62,18 @@ async function handleIdentityProviderLocation(
         if (!iframeRef.current) {
             reject(new Error('Unexpected missing reference to webView.'));
         } else {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            iframeRef.current.addEventListener('did-navigate', (e: any) => {
-                const loc = e.url;
-                if (loc.includes(redirectUri)) {
-                    resolve(loc.substring(loc.indexOf('=') + 1));
-                } else if (e.httpResponseCode !== 200) {
-                    reject(new Error(e.toString()));
+            iframeRef.current.addEventListener(
+                'did-navigate',
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                async (e: any) => {
+                    const loc = e.url;
+                    if (loc.includes(redirectUri)) {
+                        resolve(loc.substring(loc.indexOf('=') + 1));
+                    } else if (e.httpResponseCode !== 200) {
+                        reject(new Error(await getBody(e.url)));
+                    }
                 }
-            });
+            );
         }
     });
 }
@@ -97,7 +110,7 @@ async function generateIdentity(
         );
         await addPendingAccount(dispatch, accountName, identityId, 0); // TODO: can we add the address already here?
     } catch (e) {
-        onError(dispatch, `Failed to create identity due to ${e.stack}`);
+        onError(dispatch, `Failed to create identity due to ${e}`);
         return;
     }
     try {
