@@ -116,6 +116,9 @@
     "url": "https://concordium.com"
   },
   "license": "MIT",
+  "resolutions": {
+    "acorn": "npm:acorn-with-stage3"
+  },
   "devDependencies": {
     "@amilajack/testcafe-browser-provider-electron": "^0.0.15-alpha.1",
     "@teamsupercell/typings-for-css-modules-loader": "^2.4.0",
