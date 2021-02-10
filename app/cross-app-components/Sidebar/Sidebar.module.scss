@@ -27,7 +27,10 @@
 }
 
 .item {
+    composes: h6 from global;
     flex: 0 0 94px;
+    text-decoration: none;
+    color: $color-text;
 
     &Active {
         background-color: $color-background;
