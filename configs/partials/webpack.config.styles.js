@@ -6,7 +6,10 @@ const { fromRoot } = require('../helpers/pathHelpers');
 const STYLE_LOADER_NAME = 'style-loader';
 const TYPINGS_LOADER_NAME = '@teamsupercell/typings-for-css-modules-loader';
 
-const config = {
+const getLocalIdentName = (isProd) =>
+    isProd ? '[hash:base64]' : '[name]__[local]--[hash:base64:5]';
+
+const config = (isProd) => ({
     resolve: {
         // Followed instructions linked from official documentation: https://marekurbanowicz.medium.com/how-to-customize-fomantic-ui-with-less-and-webpack-applicable-to-semantic-ui-too-fbf98a74506c
         alias: {
@@ -44,8 +47,7 @@ const config = {
                         loader: 'css-loader',
                         options: {
                             modules: {
-                                localIdentName:
-                                    '[name]__[local]__[hash:base64:5]',
+                                localIdentName: getLocalIdentName(isProd),
                             },
                             sourceMap: true,
                         },
@@ -91,8 +93,7 @@ const config = {
                         loader: 'css-loader',
                         options: {
                             modules: {
-                                localIdentName:
-                                    '[name]__[local]__[hash:base64:5]',
+                                localIdentName: getLocalIdentName(isProd),
                             },
                             importLoaders: 1,
                             sourceMap: true,
@@ -109,20 +110,9 @@ const config = {
                     },
                 ],
             },
-            // Less is used solely for compiling the semantic-ui theme.
-            {
-                test: /\.less$/,
-                use: [
-                    {
-                        loader: STYLE_LOADER_NAME,
-                    },
-                    'css-loader',
-                    'less-loader',
-                ],
-            },
         ],
     },
-};
+});
 
 const extractLoader = {
     loader: MiniCssExtractPlugin.loader,
