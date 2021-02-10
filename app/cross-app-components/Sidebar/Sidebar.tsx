@@ -4,29 +4,29 @@ import { version } from '../../package.json';
 
 import styles from './Sidebar.module.scss';
 
-export interface SidebarItem {
+export interface SidebarLink {
     route: string;
     icon: JSX.Element;
     title: string;
 }
 
 export interface SidebarProps {
-    items: SidebarItem[];
+    links: SidebarLink[];
 }
 
-export default function Sidebar({ items }: SidebarProps) {
+export default function Sidebar({ links }: SidebarProps) {
     return (
         <nav className={styles.root}>
             <div className={styles.items}>
-                {items.map((i) => (
+                {links.map((l) => (
                     <NavLink
-                        key={i.route}
+                        key={l.route}
                         className={styles.item}
-                        to={i.route}
+                        to={l.route}
                         activeClassName={styles.itemActive}
                     >
-                        {i.icon}
-                        {i.title}
+                        {l.icon}
+                        <span className={styles.title}>{l.title}</span>
                     </NavLink>
                 ))}
             </div>

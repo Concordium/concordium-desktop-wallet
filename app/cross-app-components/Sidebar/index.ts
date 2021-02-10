@@ -1,1 +1,1 @@
-export { default, SidebarItem } from './Sidebar';
+export { default, SidebarLink } from './Sidebar';

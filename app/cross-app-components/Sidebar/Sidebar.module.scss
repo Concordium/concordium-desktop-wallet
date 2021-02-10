@@ -8,7 +8,6 @@
     flex-direction: column;
     justify-content: space-between;
     box-shadow: inset -10px 0 15px -10px $color-grey;
-    z-index: -1;
 }
 
 .items {
@@ -19,6 +18,7 @@
 
 .bottom,
 .item {
+    composes: h6 from global;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -27,7 +27,6 @@
 }
 
 .item {
-    composes: h6 from global;
     flex: 0 0 94px;
     text-decoration: none;
     color: $color-text;
@@ -36,6 +35,10 @@
         background-color: $color-background;
         box-shadow: 0 0 15px 0px $color-grey;
     }
+}
+
+.title {
+    margin-top: 5px;
 }
 
 .bottom {
