@@ -1,0 +1,9 @@
+@import 'config/bundle';
+
+.icon {
+    display: block;
+    border-radius: 50%;
+    height: 20px;
+    width: 20px;
+    background-color: $color-text;
+}

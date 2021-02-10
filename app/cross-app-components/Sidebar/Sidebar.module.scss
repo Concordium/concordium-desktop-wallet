@@ -6,13 +6,33 @@
     width: $sidebar-width;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+}
+
+.items {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.bottom,
+.item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .item {
-    width: 100%;
     flex: 0 0 94px;
 
     &Active {
         background-color: $color-light-grey;
     }
+}
+
+.bottom {
+    padding: 10px 0;
+    color: $color-text-faded;
 }
