@@ -64,6 +64,28 @@ export default function UpdateTransactionFeeDistribution({
                 transactionFeeDistribution?.gasAccount);
     }
 
+    function updateTransactionFee(
+        inputValue: string,
+        property: keyof TransactionFeeDistribution,
+        distribution: TransactionFeeDistribution
+    ) {
+        if (inputValue) {
+            let value;
+            try {
+                value = parseInt(inputValue, 10);
+            } catch (error) {
+                // Input not a valid integer. Do nothing.
+                return;
+            }
+
+            const updatedTransactionFeeDistribution = {
+                ...distribution,
+            };
+            updatedTransactionFeeDistribution[property] = value;
+            setTransactionFeeDistribution(updatedTransactionFeeDistribution);
+        }
+    }
+
     if (!transactionFeeDistribution) {
         setTransactionFeeDistribution({
             baker: currentBakerFee,
@@ -71,6 +93,28 @@ export default function UpdateTransactionFeeDistribution({
         });
         return null;
     }
+
+    const generateTransactionButton = (
+        <Button
+            primary
+            disabled={
+                transactionFeeDistribution.baker +
+                    transactionFeeDistribution.gasAccount >
+                rewardFractionResolution
+            }
+            onClick={() =>
+                forwardTransaction(
+                    createTransaction(
+                        transactionFeeDistribution,
+                        sequenceNumber,
+                        threshold
+                    )
+                )
+            }
+        >
+            Generate transaction proposal
+        </Button>
+    );
 
     return (
         <>
@@ -129,33 +173,11 @@ export default function UpdateTransactionFeeDistribution({
                                 onChange={(
                                     e: React.ChangeEvent<HTMLInputElement>
                                 ) => {
-                                    if (e.target.value) {
-                                        let bakerValue;
-                                        try {
-                                            bakerValue = parseInt(
-                                                e.target.value,
-                                                10
-                                            );
-                                        } catch (error) {
-                                            // Input not a valid integer. Do nothing.
-                                            return;
-                                        }
-
-                                        if (
-                                            bakerValue >
-                                                rewardFractionResolution ||
-                                            bakerValue +
-                                                transactionFeeDistribution.gasAccount >
-                                                rewardFractionResolution
-                                        ) {
-                                            return;
-                                        }
-
-                                        setTransactionFeeDistribution({
-                                            ...transactionFeeDistribution,
-                                            baker: bakerValue,
-                                        });
-                                    }
+                                    updateTransactionFee(
+                                        e.target.value,
+                                        'baker',
+                                        transactionFeeDistribution
+                                    );
                                 }}
                             />
                             <Form.Field
@@ -165,52 +187,18 @@ export default function UpdateTransactionFeeDistribution({
                                 onChange={(
                                     e: React.ChangeEvent<HTMLInputElement>
                                 ) => {
-                                    if (e.target.value) {
-                                        let gasAccountValue;
-                                        try {
-                                            gasAccountValue = parseInt(
-                                                e.target.value,
-                                                10
-                                            );
-                                        } catch (error) {
-                                            // Input not a valid integer. Do nothing.
-                                            return;
-                                        }
-                                        if (
-                                            gasAccountValue >
-                                                rewardFractionResolution ||
-                                            gasAccountValue +
-                                                transactionFeeDistribution.baker >
-                                                rewardFractionResolution
-                                        ) {
-                                            return;
-                                        }
-
-                                        setTransactionFeeDistribution({
-                                            ...transactionFeeDistribution,
-                                            gasAccount: gasAccountValue,
-                                        });
-                                    }
+                                    updateTransactionFee(
+                                        e.target.value,
+                                        'gasAccount',
+                                        transactionFeeDistribution
+                                    );
                                 }}
                             />
                         </Form.Group>
                     </Form>
                 </Grid.Column>
             </Grid>
-            <Button
-                primary
-                onClick={() =>
-                    forwardTransaction(
-                        createTransaction(
-                            transactionFeeDistribution,
-                            sequenceNumber,
-                            threshold
-                        )
-                    )
-                }
-            >
-                Generate transaction proposal
-            </Button>
+            {generateTransactionButton}
         </>
     );
 }
