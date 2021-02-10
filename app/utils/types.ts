@@ -482,17 +482,15 @@ export function isExchangeRate(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<ExchangeRate> {
     return (
-        'numerator' in transaction.payload &&
-        'denominator' in transaction.payload
+        UpdateType.UpdateMicroGTUPerEuro === transaction.type ||
+        UpdateType.UpdateEuroPerEnergy === transaction.type
     );
 }
 
 export function isTransactionFeeDistribution(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<TransactionFeeDistribution> {
-    return (
-        'baker' in transaction.payload && 'gasAccount' in transaction.payload
-    );
+    return UpdateType.UpdateTransactionFeeDistribution === transaction.type;
 }
 
 /**
