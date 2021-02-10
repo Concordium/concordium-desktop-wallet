@@ -10,8 +10,10 @@ const config = {
     resolve: {
         // Followed instructions linked from official documentation: https://marekurbanowicz.medium.com/how-to-customize-fomantic-ui-with-less-and-webpack-applicable-to-semantic-ui-too-fbf98a74506c
         alias: {
-            '../../theme.config$': fromRoot('./app/semantic-ui/theme.config'),
-            '../semantic-ui/site': fromRoot('./app/semantic-ui/site'),
+            '../../theme.config$': fromRoot(
+                './app/styles/semantic-ui/theme.config'
+            ),
+            '../semantic-ui/site': fromRoot('./app/styles/semantic-ui/site'),
         },
     },
     module: {
