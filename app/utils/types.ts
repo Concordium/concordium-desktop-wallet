@@ -494,6 +494,12 @@ export function isTransactionFeeDistribution(
     return UpdateType.UpdateTransactionFeeDistribution === transaction.type;
 }
 
+export function isFoundationAccount(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<FoundationAccount> {
+    return UpdateType.UpdateFoundationAccount === transaction.type;
+}
+
 /**
  * Interface definition for a class that handles a specific type
  * of transaction. The handler can serialize and sign the transaction,

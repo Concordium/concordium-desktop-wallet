@@ -1,6 +1,8 @@
+import { putBase58Check } from './serializationHelpers';
 import {
     BlockItemKind,
     ExchangeRate,
+    FoundationAccount,
     TransactionFeeDistribution,
     UpdateHeader,
     UpdateInstruction,
@@ -36,6 +38,17 @@ export function serializeTransactionFeeDistribution(
         4
     );
     return serializedTransactionFeeDistribution;
+}
+
+/**
+ * Serializes a FoundationAccount to bytes.
+ */
+export function serializeFoundationAccount(
+    foundationAccount: FoundationAccount
+) {
+    const serializedFoundationAccount = Buffer.alloc(32);
+    putBase58Check(serializedFoundationAccount, 0, foundationAccount.address);
+    return serializedFoundationAccount;
 }
 
 /**
