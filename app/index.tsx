@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 import { render } from 'react-dom';
 import { AppContainer as ReactHotAppContainer } from 'react-hot-loader';
+import Root from './shell/Root';
 import { history, configuredStore } from './store/store';
 import { updateSettings, findSetting } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
@@ -40,13 +41,11 @@ onLoad(store.dispatch);
 
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
-document.addEventListener('DOMContentLoaded', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const Root = require('./shell/Root').default;
+document.addEventListener('DOMContentLoaded', () =>
     render(
         <AppContainer>
             <Root store={store} history={history} />
         </AppContainer>,
         document.getElementById('root')
-    );
-});
+    )
+);

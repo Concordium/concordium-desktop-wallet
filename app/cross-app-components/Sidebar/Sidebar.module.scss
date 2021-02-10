@@ -1,0 +1,18 @@
+@import 'config/bundle';
+
+.root {
+    position: fixed;
+    height: 100vh;
+    width: $sidebar-width;
+    display: flex;
+    flex-direction: column;
+}
+
+.item {
+    width: 100%;
+    flex: 0 0 94px;
+
+    &Active {
+        background-color: $color-light-grey;
+    }
+}
