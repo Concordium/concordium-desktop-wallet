@@ -1,3 +1,17 @@
 /*******************************
          Site Overrides
 *******************************/
+
+/* Close icon */
+@closeColor: @textColor;
+@closeTop: (@headerVerticalPadding - @closeHitBoxOffset + (@lineHeight - 1em));
+@closeRight: 1rem;
+
+@innerCloseTop: @closeTop;
+@innerCloseRight: @closeRight;
+
+@mobileCloseTop: 0.5rem;
+@mobileCloseRight: 0.5rem;
+
+/* Actions */
+@actionAlign: center;
