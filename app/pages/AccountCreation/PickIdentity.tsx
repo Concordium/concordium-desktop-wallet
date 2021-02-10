@@ -30,6 +30,22 @@ export default function AccountCreationPickIdentity({
     if (!identities) {
         return null;
     }
+    if (identities.length === 0) {
+        return (
+            <Card fluid centered>
+                <Card.Content textAlign="center">
+                    <Card.Header>No identities found</Card.Header>
+                    <Card.Description>
+                        Please create an identity before attempting to create an
+                        account.
+                    </Card.Description>
+                    <Button onClick={() => dispatch(push(routes.ACCOUNTS))}>
+                        Return to accounts
+                    </Button>
+                </Card.Content>
+            </Card>
+        );
+    }
 
     function submit(route: string) {
         setIdentity(identities[chosenIndex]);
