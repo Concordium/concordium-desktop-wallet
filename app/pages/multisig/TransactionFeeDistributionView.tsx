@@ -1,7 +1,7 @@
 import React from 'react';
 import { Progress } from 'semantic-ui-react';
 import { ColorType, TransactionFeeDistribution } from '../../utils/types';
-import { hundredThousand } from '../../constants/updateConstants.json';
+import { rewardFractionResolution } from '../../constants/updateConstants.json';
 
 interface Props {
     transactionFeeDistribution: TransactionFeeDistribution;
@@ -14,7 +14,7 @@ export default function TransactionFeeDistributionView({
     transactionFeeDistribution,
 }: Props) {
     const foundationShare =
-        hundredThousand -
+        rewardFractionResolution -
         (transactionFeeDistribution.baker +
             transactionFeeDistribution.gasAccount);
 
@@ -22,21 +22,21 @@ export default function TransactionFeeDistributionView({
         <>
             <Progress
                 value={transactionFeeDistribution.baker}
-                total={hundredThousand}
+                total={rewardFractionResolution}
                 progress="percent"
                 label="Baker reward"
                 color={ColorType.Blue}
             />
             <Progress
                 value={transactionFeeDistribution.gasAccount}
-                total={hundredThousand}
+                total={rewardFractionResolution}
                 progress="percent"
                 label="GAS account share"
                 color={ColorType.Teal}
             />
             <Progress
                 value={foundationShare}
-                total={hundredThousand}
+                total={rewardFractionResolution}
                 progress="percent"
                 label="Foundation share"
                 color={ColorType.Grey}
