@@ -18,15 +18,34 @@ export function formatDate(date: YearMonth) {
  */
 export function parseTime(
     timeStamp: string,
-    unit: TimeStampUnit = TimeStampUnit.seconds
-) {
-    const dtFormat = new Intl.DateTimeFormat('en-GB', {
+    unit: TimeStampUnit = TimeStampUnit.seconds,
+    formatOptions: Intl.DateTimeFormatOptions = {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-expect-error : https://github.com/microsoft/TypeScript/issues/35865
         dateStyle: 'short',
         timeStyle: 'short',
-    });
+    }
+) {
+    const dtFormat = new Intl.DateTimeFormat('en-GB', formatOptions);
 
     const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
     return dtFormat.format(new Date(timeStampCorrectUnit));
+}
+
+export function getDate(
+    timeStamp: string,
+    unit: TimeStampUnit = TimeStampUnit.seconds
+) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error : https://github.com/microsoft/TypeScript/issues/35865
+    return parseTime(timeStamp, unit, { dateStyle: 'short' });
+}
+
+export function getTime(
+    timeStamp: string,
+    unit: TimeStampUnit = TimeStampUnit.seconds
+) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error : https://github.com/microsoft/TypeScript/issues/35865
+    return parseTime(timeStamp, unit, { timeStyle: 'short' });
 }

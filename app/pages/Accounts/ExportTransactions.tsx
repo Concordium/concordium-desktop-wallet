@@ -5,6 +5,7 @@ import { updateTransactions } from '../../features/TransactionSlice';
 import { getTransactionsOfAccount } from '../../database/TransactionDao';
 import { saveFile } from '../../utils/FileHelper';
 import { toCSV } from '../../utils/basicHelpers';
+import { getDate, getTime } from '../../utils/timeHelpers';
 import { attachNames } from '../../utils/transactionHelpers';
 
 interface Props {
@@ -13,7 +14,8 @@ interface Props {
 }
 
 const exportedFields = [
-    'blockTime',
+    'date',
+    'time',
     'transactionHash',
     'transactionKind',
     'fromAddressName',
@@ -26,11 +28,15 @@ const exportedFields = [
 ];
 
 function parseTransaction(transaction: TransferTransaction) {
-    return exportedFields.map(
-        (field) =>
-            transaction[field as keyof TransferTransaction]?.toString() ||
-            'unknown'
-    );
+    const fieldValues: Record<string, string> = {};
+    Object.entries(transaction).forEach(([key, value]) => {
+        fieldValues[key] = value?.toString();
+    });
+
+    fieldValues.date = getDate(transaction.blockTime);
+    fieldValues.time = getTime(transaction.blockTime);
+
+    return exportedFields.map((field) => fieldValues[field]);
 }
 
 async function exportTransactions(account: Account) {
