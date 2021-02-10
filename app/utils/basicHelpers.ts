@@ -1,6 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-// This is a helper function file, so we do not want to use default export
-
 /**
  * Partitions the array according to the given criteria
  * function.
@@ -16,6 +13,11 @@ export function partition<T>(
     ];
 }
 
+/**
+ * Given a list of elements, a function to parse the elements to string array,
+ * and the names of the elements' fields, outputs
+ * csv string, with the names first, and the values of each element per line.
+ */
 export function toCSV<T>(
     elements: T[],
     parseElement: (element: T) => (string | undefined)[],

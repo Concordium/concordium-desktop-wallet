@@ -7,6 +7,7 @@ import { saveFile } from '../../utils/FileHelper';
 import { toCSV } from '../../utils/basicHelpers';
 import { getDate, getTime } from '../../utils/timeHelpers';
 import { attachNames } from '../../utils/transactionHelpers';
+import exportTransactionFields from '../../constants/exportTransactionFields.json';
 
 interface Props {
     account: Account;
@@ -15,32 +16,23 @@ interface Props {
 
 const getName = (i: string[]) => i[0];
 const getLabel = (i: string[]) => i[1];
-const exportedFields = [
-    ['date', 'date'],
-    ['time', 'time'],
-    ['transactionHash', 'hash'],
-    ['transactionKind', 'type'],
-    ['fromAddressName', 'from name'],
-    ['toAddressName', 'to name'],
-    ['fromAddress', 'from address'],
-    ['toAddress', 'to address'],
-    ['cost', 'fee amount'],
-    ['subtotal', 'amount'],
-    ['total', 'balance change'],
-];
+const exportedFields = Object.entries(exportTransactionFields);
 
+// Parse a transaction into a array of values, corresponding to those of the exported fields.
 function parseTransaction(transaction: TransferTransaction) {
     const fieldValues: Record<string, string> = {};
     Object.entries(transaction).forEach(([key, value]) => {
         fieldValues[key] = value?.toString();
     });
 
+    // We split up the blockTime into date and time fields.
     fieldValues.date = getDate(transaction.blockTime);
     fieldValues.time = getTime(transaction.blockTime);
 
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }
 
+// Updates transactions of the account, converts them to csv and saves the file.
 async function exportTransactions(account: Account) {
     await updateTransactions(account); // update from remote
     let transactions = await getTransactionsOfAccount(account); // load from database

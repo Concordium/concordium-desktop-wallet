@@ -13,7 +13,7 @@ export function formatDate(date: YearMonth) {
 }
 
 /**
- * Given a unix timeStamp, return the date in a displayable format.
+ * Given a unix timeStamp, return the date and time in a displayable format.
  * Assumes the timestamp is in seconds, otherwise the unit should be specified.
  */
 export function parseTime(
@@ -32,6 +32,10 @@ export function parseTime(
     return dtFormat.format(new Date(timeStampCorrectUnit));
 }
 
+/**
+ * Given a unix timeStamp, return the date.
+ * Assumes the timestamp is in seconds, otherwise the unit should be specified.
+ */
 export function getDate(
     timeStamp: string,
     unit: TimeStampUnit = TimeStampUnit.seconds
@@ -41,6 +45,10 @@ export function getDate(
     return parseTime(timeStamp, unit, { dateStyle: 'short' });
 }
 
+/**
+ * Given a unix timeStamp, return the time of day.
+ * Assumes the timestamp is in seconds, otherwise the unit should be specified.
+ */
 export function getTime(
     timeStamp: string,
     unit: TimeStampUnit = TimeStampUnit.seconds
