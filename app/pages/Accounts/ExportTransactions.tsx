@@ -13,18 +13,20 @@ interface Props {
     returnFunction(): void;
 }
 
+const getName = (i: string[]) => i[0];
+const getLabel = (i: string[]) => i[1];
 const exportedFields = [
-    'date',
-    'time',
-    'transactionHash',
-    'transactionKind',
-    'fromAddressName',
-    'toAddressName',
-    'fromAddress',
-    'toAddress',
-    'cost',
-    'subtotal',
-    'total',
+    ['date', 'date'],
+    ['time', 'time'],
+    ['transactionHash', 'hash'],
+    ['transactionKind', 'type'],
+    ['fromAddressName', 'from name'],
+    ['toAddressName', 'to name'],
+    ['fromAddress', 'from address'],
+    ['toAddress', 'to address'],
+    ['cost', 'fee amount'],
+    ['subtotal', 'amount'],
+    ['total', 'balance change'],
 ];
 
 function parseTransaction(transaction: TransferTransaction) {
@@ -36,7 +38,7 @@ function parseTransaction(transaction: TransferTransaction) {
     fieldValues.date = getDate(transaction.blockTime);
     fieldValues.time = getTime(transaction.blockTime);
 
-    return exportedFields.map((field) => fieldValues[field]);
+    return exportedFields.map((field) => fieldValues[getName(field)]);
 }
 
 async function exportTransactions(account: Account) {
@@ -44,7 +46,11 @@ async function exportTransactions(account: Account) {
     let transactions = await getTransactionsOfAccount(account); // load from database
     transactions = await attachNames(transactions);
 
-    const csv = toCSV(transactions, parseTransaction, exportedFields);
+    const csv = toCSV(
+        transactions,
+        parseTransaction,
+        exportedFields.map(getLabel)
+    );
     try {
         await saveFile(csv, 'Export Transactions');
     } catch (e) {
