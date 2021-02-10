@@ -15,3 +15,13 @@ export function partition<T>(
         array.filter((item) => !criteria(item)),
     ];
 }
+
+export function toCSV<T>(
+    elements: T[],
+    parseElement: (element: T) => (string | undefined)[],
+    fieldNames: string[]
+): string {
+    return `${fieldNames.join(',')}\n${elements
+        .map((element) => parseElement(element).join(','))
+        .join('\n')}`;
+}
