@@ -15,7 +15,6 @@ const { fromRoot } = require('./helpers/pathHelpers');
 CheckNodeEnv('development');
 
 const dist = fromRoot('./dll');
-const excludeDeps = ['semantic-ui-less', 'fomantic-ui-less'];
 
 module.exports = merge(baseConfig, {
     context: fromRoot('.'),
@@ -34,9 +33,7 @@ module.exports = merge(baseConfig, {
     module: rendererDevConfig.module,
 
     entry: {
-        renderer: Object.keys(dependencies || {}).filter(
-            (d) => !excludeDeps.includes(d)
-        ),
+        renderer: Object.keys(dependencies || {}),
     },
 
     output: {

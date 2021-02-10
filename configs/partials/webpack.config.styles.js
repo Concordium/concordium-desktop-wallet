@@ -9,7 +9,17 @@ const TYPINGS_LOADER_NAME = '@teamsupercell/typings-for-css-modules-loader';
 const getLocalIdentName = (isProd) =>
     isProd ? '[hash:base64]' : '[name]__[local]--[hash:base64:5]';
 
-const config = (isProd) => ({
+const styleLoader = {
+    loader: STYLE_LOADER_NAME,
+};
+
+const extractLoader = {
+    loader: MiniCssExtractPlugin.loader,
+};
+
+const getOutputLoader = (isProd) => (isProd ? extractLoader : styleLoader);
+
+module.exports = (isProd) => ({
     resolve: {
         // Followed instructions linked from official documentation: https://marekurbanowicz.medium.com/how-to-customize-fomantic-ui-with-less-and-webpack-applicable-to-semantic-ui-too-fbf98a74506c
         alias: {
@@ -25,9 +35,7 @@ const config = (isProd) => ({
             {
                 test: /\.global\.css$/,
                 use: [
-                    {
-                        loader: STYLE_LOADER_NAME,
-                    },
+                    getOutputLoader(isProd),
                     {
                         loader: 'css-loader',
                         options: {
@@ -40,9 +48,7 @@ const config = (isProd) => ({
             {
                 test: /\.module\.css$/,
                 use: [
-                    {
-                        loader: STYLE_LOADER_NAME,
-                    },
+                    getOutputLoader(isProd),
                     {
                         loader: 'css-loader',
                         options: {
@@ -58,9 +64,7 @@ const config = (isProd) => ({
             {
                 test: /\.global\.(scss|sass)$/,
                 use: [
-                    {
-                        loader: STYLE_LOADER_NAME,
-                    },
+                    getOutputLoader(isProd),
                     {
                         loader: 'css-loader',
                         options: {
@@ -83,10 +87,8 @@ const config = (isProd) => ({
             {
                 test: /\.module\.(scss|sass)$/,
                 use: [
-                    {
-                        loader: STYLE_LOADER_NAME,
-                    },
-                    {
+                    getOutputLoader(isProd),
+                    !isProd && {
                         loader: TYPINGS_LOADER_NAME,
                     },
                     {
@@ -108,51 +110,14 @@ const config = (isProd) => ({
                             },
                         },
                     },
-                ],
+                ].filter((u) => !!u),
             },
         ],
     },
-});
-
-const extractLoader = {
-    loader: MiniCssExtractPlugin.loader,
-};
-
-function mapStyleToExtractLoader(l) {
-    if (l.loader !== STYLE_LOADER_NAME) {
-        return l;
-    }
-
-    return extractLoader;
-}
-
-function removeModuleTypingsLoader(useConfig) {
-    return useConfig
-        .map((l) => {
-            if (l !== TYPINGS_LOADER_NAME) {
-                return l;
-            }
-
-            return undefined;
-        })
-        .filter((l) => !!l);
-}
-
-const prodConfig = {
-    ...config,
-    module: {
-        ...config.module,
-        rules: config.module.rules.map((r) => ({
-            ...r,
-            use: removeModuleTypingsLoader(r.use.map(mapStyleToExtractLoader)),
-        })),
-    },
     plugins: [
-        ...(config.plugins || []),
-        new MiniCssExtractPlugin({
-            filename: 'style.css',
-        }),
-    ],
-};
-
-module.exports = (isProd) => (!isProd ? config : prodConfig);
+        isProd &&
+            new MiniCssExtractPlugin({
+                filename: 'style.css',
+            }),
+    ].filter((p) => !!p),
+});
