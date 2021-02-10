@@ -1,5 +1,7 @@
 @import 'config/bundle';
 
+$sidebar-link-height: $page-header-height;
+
 .root {
     position: fixed;
     height: 100vh;
@@ -27,7 +29,7 @@
 }
 
 .item {
-    flex: 0 0 94px;
+    flex: 0 0 $sidebar-link-height;
     text-decoration: none;
     color: $color-text;
 

@@ -1,0 +1,20 @@
+@import 'config/bundle';
+
+.root {
+    display: flex;
+    justify-content: center;
+    margin: 0 20px;
+    padding: 0 20px;
+    height: $page-header-height;
+    border-bottom: 1px solid $color-lines;
+}
+
+.button {
+    height: 39px;
+    padding: 0 10px;
+    border-radius: 5px;
+
+    &:hover, &:focus {
+        background-color: $color-off-white;
+    }
+}
