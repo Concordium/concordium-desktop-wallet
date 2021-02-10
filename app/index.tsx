@@ -10,7 +10,6 @@ import { startClient } from './utils/client';
 import listenForIdentityStatus from './utils/IdentityStatusPoller';
 import listenForAccountStatus from './utils/AccountStatusPoller';
 
-import 'semantic-ui-less/semantic.less';
 import './styles/app.global.scss';
 
 const store = configuredStore();
