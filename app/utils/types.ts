@@ -6,6 +6,7 @@ export type Hex = string;
 type Proofs = Hex;
 type Word64 = BigInt;
 type Word32 = number;
+type Word8 = number;
 
 export enum SchemeId {
     Ed25519 = 0,
@@ -570,6 +571,17 @@ export interface TransactionFeeDistribution {
 
 export interface FoundationAccount {
     address: string;
+}
+
+interface MintRate {
+    mantissa: Word32;
+    exponent: Word8;
+}
+
+export interface MintDistribution {
+    mintPerSlot: MintRate;
+    bakingReward: RewardFraction;
+    finalizationReward: RewardFraction;
 }
 
 export interface TransactionDetails {
