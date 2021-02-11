@@ -35,7 +35,9 @@
     "test-all": "yarn lint && yarn test-tsc && yarn build && yarn test",
     "test-e2e": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe electron:./app ./test/e2e/HomePage.e2e.ts",
     "test-e2e-live": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe --live electron:./app ./test/e2e/HomePage.e2e.ts",
-    "test-watch": "yarn test --watch"
+    "test-watch": "yarn test --watch",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -121,6 +123,11 @@
   },
   "devDependencies": {
     "@amilajack/testcafe-browser-provider-electron": "^0.0.15-alpha.1",
+    "@babel/core": "^7.12.13",
+    "@storybook/addon-actions": "^6.1.17",
+    "@storybook/addon-essentials": "^6.1.17",
+    "@storybook/addon-links": "^6.1.17",
+    "@storybook/react": "^6.1.17",
     "@teamsupercell/typings-for-css-modules-loader": "^2.4.0",
     "@types/bs58check": "^2.1.0",
     "@types/enzyme": "^3.10.5",
@@ -141,6 +148,7 @@
     "@typescript-eslint/eslint-plugin": "^3.6.1",
     "@typescript-eslint/parser": "^3.6.1",
     "@wasm-tool/wasm-pack-plugin": "^1.3.1",
+    "babel-loader": "^8.2.2",
     "browserslist-config-erb": "^0.0.1",
     "chalk": "^4.1.0",
     "concurrently": "^5.3.0",
@@ -171,6 +179,7 @@
     "eslint-plugin-react-hooks": "^4.0.8",
     "eslint-plugin-testcafe": "^0.2.1",
     "file-loader": "^6.0.0",
+    "fork-ts-checker-webpack-plugin": "^6.1.0",
     "grpc-tools": "^1.9.1",
     "grpc_tools_node_protoc_ts": "^5.0.1",
     "husky": "^4.2.5",

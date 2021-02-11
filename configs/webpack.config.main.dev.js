@@ -5,7 +5,7 @@
 
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
-const baseConfig = require('./partials/webpack.config.base');
+const { baseConfig } = require('./partials');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
 const { fromRoot } = require('./helpers/pathHelpers');
 
