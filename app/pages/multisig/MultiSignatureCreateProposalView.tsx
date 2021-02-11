@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Header, Segment } from 'semantic-ui-react';
+import { Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
@@ -12,6 +12,7 @@ import DynamicModal from './DynamicModal';
 import UpdateEuroPerEnergy from './UpdateEuroPerEnergy';
 import UpdateTransactionFeeDistribution from './UpdateTransactionFeeDistribution';
 import UpdateFoundationAccount from './UpdateFoundationAccount';
+import UpdateMintDistribution from './UpdateMintDistribution';
 
 interface Location {
     state: UpdateType;
@@ -35,6 +36,7 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
 
     // TODO Add support for account transactions.
     const type: UpdateType = location.state;
+    const displayType = UpdateType[type];
 
     /**
      * Forwards the multi signature transactions to the signing page.
@@ -84,6 +86,13 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                         forwardTransaction={forwardTransactionToSigningPage}
                     />
                 );
+            case UpdateType.UpdateMintDistribution:
+                return (
+                    <UpdateMintDistribution
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                );
             default:
                 return (
                     // TODO Update when all types have been implemented.
@@ -119,7 +128,11 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                 configured node. Verify your node settings, and check that
                 the node is running."
             />
-            {chooseProposalType(type)}
+            <Segment>
+                <Header>Transaction Proposal | {displayType}</Header>
+                <Divider />
+                {chooseProposalType(type)}
+            </Segment>
         </Segment>
     );
 }

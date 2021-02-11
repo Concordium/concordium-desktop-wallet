@@ -569,7 +569,7 @@ export interface ExchangeRate {
  * denominator is implicitly 100000, and the interface therefore
  * only contains the numerator value.
  */
-type RewardFraction = Word32;
+export type RewardFraction = Word32;
 
 export interface TransactionFeeDistribution {
     baker: RewardFraction;
@@ -580,7 +580,7 @@ export interface FoundationAccount {
     address: string;
 }
 
-interface MintRate {
+export interface MintRate {
     mantissa: Word32;
     exponent: Word8;
 }
