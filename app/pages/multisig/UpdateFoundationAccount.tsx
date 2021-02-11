@@ -1,33 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Form } from 'semantic-ui-react';
-import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
-import {
-    FoundationAccount,
-    MultiSignatureTransaction,
-    MultiSignatureTransactionStatus,
-    UpdateType,
-} from '../../utils/types';
-import createUpdateInstruction, {
-    UpdateProps,
-} from '../../utils/UpdateInstructionHelper';
-
-function createTransaction(
-    foundationAccount: FoundationAccount,
-    sequenceNumber: BigInt,
-    threshold: number
-): Partial<MultiSignatureTransaction> {
-    const updateInstruction = createUpdateInstruction(
-        foundationAccount,
-        UpdateType.UpdateFoundationAccount,
-        sequenceNumber
-    );
-    const multiSignatureTransaction = createMultiSignatureTransaction(
-        updateInstruction,
-        threshold,
-        MultiSignatureTransactionStatus.Open
-    );
-    return multiSignatureTransaction;
-}
+import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
+import { FoundationAccount, UpdateType } from '../../utils/types';
+import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 
 export default function UpdateFoundationAccount({
     blockSummary,
@@ -79,8 +54,9 @@ export default function UpdateFoundationAccount({
                 primary
                 onClick={() =>
                     forwardTransaction(
-                        createTransaction(
+                        createUpdateMultiSignatureTransaction(
                             foundationAccount,
+                            UpdateType.UpdateFoundationAccount,
                             sequenceNumber,
                             threshold
                         )

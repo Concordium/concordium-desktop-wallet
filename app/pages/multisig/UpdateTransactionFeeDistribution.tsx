@@ -1,35 +1,13 @@
 import React, { useState } from 'react';
 import { Button, Form, Grid, Input, Progress } from 'semantic-ui-react';
-import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
+import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 import {
     ColorType,
-    MultiSignatureTransaction,
-    MultiSignatureTransactionStatus,
     TransactionFeeDistribution,
     UpdateType,
 } from '../../utils/types';
-import createUpdateInstruction, {
-    UpdateProps,
-} from '../../utils/UpdateInstructionHelper';
+import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 import { rewardFractionResolution } from '../../constants/updateConstants.json';
-
-function createTransaction(
-    transactionFeeDistribution: TransactionFeeDistribution,
-    sequenceNumber: BigInt,
-    threshold: number
-): Partial<MultiSignatureTransaction> {
-    const updateInstruction = createUpdateInstruction(
-        transactionFeeDistribution,
-        UpdateType.UpdateTransactionFeeDistribution,
-        sequenceNumber
-    );
-    const multiSignatureTransaction = createMultiSignatureTransaction(
-        updateInstruction,
-        threshold,
-        MultiSignatureTransactionStatus.Open
-    );
-    return multiSignatureTransaction;
-}
 
 export default function UpdateTransactionFeeDistribution({
     blockSummary,
@@ -104,8 +82,9 @@ export default function UpdateTransactionFeeDistribution({
             }
             onClick={() =>
                 forwardTransaction(
-                    createTransaction(
+                    createUpdateMultiSignatureTransaction(
                         transactionFeeDistribution,
+                        UpdateType.UpdateTransactionFeeDistribution,
                         sequenceNumber,
                         threshold
                     )
