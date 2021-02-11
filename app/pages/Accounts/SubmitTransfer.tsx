@@ -3,19 +3,23 @@ import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import { Container, Segment, Header, Grid } from 'semantic-ui-react';
-import routes from '../constants/routes.json';
-import LedgerComponent from '../components/ledger/LedgerComponent';
-import { sendTransaction } from '../utils/client';
+import routes from '../../constants/routes.json';
+import LedgerComponent from '../../components/ledger/LedgerComponent';
+import { sendTransaction } from '../../utils/client';
 import {
     serializeTransaction,
     getTransactionHash,
-} from '../utils/transactionSerialization';
-import { monitorTransactionStatus } from '../utils/TransactionStatusPoller';
-import { Account, AccountTransaction, AddressBookEntry } from '../utils/types';
-import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
-import { addPendingTransaction } from '../features/TransactionSlice';
-import { getAccountPath } from '../features/ledger/Path';
-import TransactionDetails from '../components/TransactionDetails';
+} from '../../utils/transactionSerialization';
+import { monitorTransactionStatus } from '../../utils/TransactionStatusPoller';
+import {
+    Account,
+    AccountTransaction,
+    AddressBookEntry,
+} from '../../utils/types';
+import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import { addPendingTransaction } from '../../features/TransactionSlice';
+import { getAccountPath } from '../../features/ledger/Path';
+import TransactionDetails from '../../components/TransactionDetails';
 
 interface State {
     transaction: AccountTransaction;

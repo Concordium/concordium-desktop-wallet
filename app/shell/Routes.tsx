@@ -20,7 +20,7 @@ import MultiSignatureCreateProposalView from '../pages/multisig/MultiSignatureCr
 import SubmittedProposalView from '../pages/multisig/SubmittedProposalView';
 import ExportImport from '../pages/exportImport/ExportImportPage';
 import PerformImport from '../pages/exportImport/PerformImport';
-import SubmitTransfer from '../pages/SubmitTransfer';
+import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
 
 export default function Routes() {
     return (
