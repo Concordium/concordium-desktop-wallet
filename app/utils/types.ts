@@ -439,7 +439,8 @@ export interface UpdateInstruction<T extends UpdateInstructionPayload> {
 
 export type UpdateInstructionPayload =
     | ExchangeRate
-    | TransactionFeeDistribution;
+    | TransactionFeeDistribution
+    | FoundationAccount;
 
 export type Transaction =
     | AccountTransaction
@@ -491,6 +492,12 @@ export function isTransactionFeeDistribution(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<TransactionFeeDistribution> {
     return UpdateType.UpdateTransactionFeeDistribution === transaction.type;
+}
+
+export function isFoundationAccount(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<FoundationAccount> {
+    return UpdateType.UpdateFoundationAccount === transaction.type;
 }
 
 /**
@@ -559,6 +566,10 @@ type RewardFraction = Word32;
 export interface TransactionFeeDistribution {
     baker: RewardFraction;
     gasAccount: RewardFraction;
+}
+
+export interface FoundationAccount {
+    address: string;
 }
 
 export interface TransactionDetails {

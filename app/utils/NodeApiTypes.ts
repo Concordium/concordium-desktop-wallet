@@ -22,6 +22,7 @@ interface UpdateQueues {
     microGTUPerEuro: UpdateQueue;
     euroPerEnergy: UpdateQueue;
     transactionFeeDistribution: UpdateQueue;
+    foundationAccount: UpdateQueue;
 }
 
 interface Authorization {
@@ -33,6 +34,7 @@ interface Authorizations {
     microGTUPerEuro: Authorization;
     euroPerEnergy: Authorization;
     transactionFeeDistribution: Authorization;
+    foundationAccount: Authorization;
 }
 
 interface RewardParameters {
@@ -51,6 +53,15 @@ interface Updates {
     updateQueues: UpdateQueues;
 }
 
+interface MintEvent {
+    tag: string;
+    foundationAccount: string;
+    mintPlatformDevleopmentCharge: number;
+    mintFinalizationReward: number;
+    mintBakingReward: number;
+}
+
 export interface BlockSummary {
     updates: Updates;
+    specialEvents: [MintEvent];
 }

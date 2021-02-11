@@ -1,44 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
-import {
-    ExchangeRate,
-    MultiSignatureTransaction,
-    MultiSignatureTransactionStatus,
-    UpdateType,
-} from '../../utils/types';
-import createUpdateInstruction, {
-    UpdateProps,
-} from '../../utils/UpdateInstructionHelper';
-import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
-
-/**
- * Creates a multi signature transaction containing an update instruction for updating
- * the micro GTU per euro exchange rate.
- */
-function createTransaction(
-    microGtuPerEuro: BigInt,
-    sequenceNumber: BigInt,
-    threshold: number
-): Partial<MultiSignatureTransaction> {
-    const exchangeRatePayload: ExchangeRate = {
-        numerator: microGtuPerEuro,
-        denominator: 1n,
-    };
-
-    const updateInstruction = createUpdateInstruction(
-        exchangeRatePayload,
-        UpdateType.UpdateMicroGTUPerEuro,
-        sequenceNumber
-    );
-
-    const multiSignatureTransaction = createMultiSignatureTransaction(
-        updateInstruction,
-        threshold,
-        MultiSignatureTransactionStatus.Open
-    );
-
-    return multiSignatureTransaction;
-}
+import { UpdateType } from '../../utils/types';
+import { UpdateProps } from '../../utils/UpdateInstructionHelper';
+import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 
 export default function UpdateMicroGtuPerEuroRate({
     blockSummary,
@@ -106,8 +70,9 @@ export default function UpdateMicroGtuPerEuroRate({
                 // TODO Validate that the input is a reduced fraction (otherwise the chain will reject it anyway.)
                 onClick={() =>
                     forwardTransaction(
-                        createTransaction(
-                            microGtuPerEuro,
+                        createUpdateMultiSignatureTransaction(
+                            { numerator: microGtuPerEuro, denominator: 1n },
+                            UpdateType.UpdateMicroGTUPerEuro,
                             sequenceNumber,
                             threshold
                         )
