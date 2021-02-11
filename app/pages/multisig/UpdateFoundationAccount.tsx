@@ -13,6 +13,9 @@ export default function UpdateFoundationAccount({
         setFoundationAccount,
     ] = useState<FoundationAccount>();
 
+    // TODO We should not get the current foundation address from this field, as it is
+    // kind of hacky. The current API does not support a better solution, but when it does
+    // we should update this extraction.
     const currentFoundationAccount: FoundationAccount = {
         address: blockSummary.specialEvents[0].foundationAccount,
     };
