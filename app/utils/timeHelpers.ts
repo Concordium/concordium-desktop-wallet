@@ -33,27 +33,13 @@ export function parseTime(
 }
 
 /**
- * Given a unix timeStamp, return the date.
+ * Given a unix timeStamp, return the date in ISO formatted string.
  * Assumes the timestamp is in seconds, otherwise the unit should be specified.
  */
-export function getDate(
+export function getISOFormat(
     timeStamp: string,
     unit: TimeStampUnit = TimeStampUnit.seconds
 ) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error : https://github.com/microsoft/TypeScript/issues/35865
-    return parseTime(timeStamp, unit, { dateStyle: 'short' });
-}
-
-/**
- * Given a unix timeStamp, return the time of day.
- * Assumes the timestamp is in seconds, otherwise the unit should be specified.
- */
-export function getTime(
-    timeStamp: string,
-    unit: TimeStampUnit = TimeStampUnit.seconds
-) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error : https://github.com/microsoft/TypeScript/issues/35865
-    return parseTime(timeStamp, unit, { timeStyle: 'short' });
+    const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
+    return new Date(timeStampCorrectUnit).toISOString();
 }

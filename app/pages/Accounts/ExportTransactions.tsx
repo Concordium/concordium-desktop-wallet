@@ -5,7 +5,7 @@ import { updateTransactions } from '../../features/TransactionSlice';
 import { getTransactionsOfAccount } from '../../database/TransactionDao';
 import { saveFile } from '../../utils/FileHelper';
 import { toCSV } from '../../utils/basicHelpers';
-import { getDate, getTime } from '../../utils/timeHelpers';
+import { getISOFormat } from '../../utils/timeHelpers';
 import { attachNames } from '../../utils/transactionHelpers';
 import exportTransactionFields from '../../constants/exportTransactionFields.json';
 
@@ -25,9 +25,7 @@ function parseTransaction(transaction: TransferTransaction) {
         fieldValues[key] = value?.toString();
     });
 
-    // We split up the blockTime into date and time fields.
-    fieldValues.date = getDate(transaction.blockTime);
-    fieldValues.time = getTime(transaction.blockTime);
+    fieldValues.dateTime = getISOFormat(transaction.blockTime);
 
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }
