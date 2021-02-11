@@ -8,6 +8,7 @@ import {
     AccountTransaction,
     ExchangeRate,
     FoundationAccount,
+    MintDistribution,
     PublicInformationForIp,
     TransactionFeeDistribution,
     UpdateInstruction,
@@ -18,6 +19,7 @@ import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
 import signUpdateEuroPerEnergy from './EuroPerEnergy';
 import signUpdateTransactionFeeDistribution from './TransactionFeeDistribution';
 import signUpdateFoundationAccount from './FoundationAccount';
+import signUpdateMintDistribution from './MintDistribution';
 
 /**
  * Concordium Ledger API.
@@ -125,6 +127,19 @@ export default class ConcordiumLedgerClient {
         path: number[]
     ): Promise<Buffer> {
         return signUpdateFoundationAccount(
+            this.transport,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signMintDistribution(
+        transaction: UpdateInstruction<MintDistribution>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateMintDistribution(
             this.transport,
             path,
             transaction,
