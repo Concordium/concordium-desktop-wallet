@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-    Button,
-    Divider,
-    Form,
-    Header,
-    Input,
-    Segment,
-} from 'semantic-ui-react';
+import { Button, Form, Input } from 'semantic-ui-react';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 import { ExchangeRate, UpdateType } from '../../utils/types';
 import { UpdateProps } from '../../utils/UpdateInstructionHelper';
@@ -28,9 +21,7 @@ export default function UpdateEuroPerEnergy({
     }
 
     return (
-        <Segment>
-            <Header>Transaction Proposal | Update Euro Per Energy</Header>
-            <Divider />
+        <>
             <Form>
                 <Form.Group widths="equal">
                     <Form.Field
@@ -92,6 +83,6 @@ export default function UpdateEuroPerEnergy({
             >
                 Generate transaction proposal
             </Button>
-        </Segment>
+        </>
     );
 }
