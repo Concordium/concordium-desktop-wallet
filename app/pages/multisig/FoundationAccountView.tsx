@@ -6,7 +6,7 @@ interface Props {
 }
 
 /**
- * Displays an overview of a euro per energy transaction payload.
+ * Displays an overview of a foundation account transaction payload.
  */
 export default function FoundationAccountView({ foundationAccount }: Props) {
     return <>Foundation account: {foundationAccount.address}</>;

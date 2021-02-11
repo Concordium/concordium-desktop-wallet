@@ -11,13 +11,17 @@ import DisplayIdentityAttributes from './DisplayIdentityAttributes';
 import locations from '../../constants/transactionLocations.json';
 import { Account, TransferTransaction } from '../../utils/types';
 
+interface Props {
+    account: Account;
+}
+
 /**
  * Contains view of the account's transactions,
  * detailed view of a chosen one, and
  * display of the account's revealedAttributes.
  * TODO Rename this.
  */
-export default function TransferHistory(account: Account) {
+export default function TransferHistory({ account }: Props) {
     const dispatch = useDispatch();
     const [location, setLocation] = useState(locations.listTransactions);
     const [chosenTransaction, setChosenTransaction] = useState<
