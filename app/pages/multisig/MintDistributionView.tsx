@@ -8,7 +8,7 @@ interface Props {
 }
 
 /**
- * Displays an overview of a euro per energy transaction payload.
+ * Displays an overview of a mint distribution transaction payload.
  */
 export default function MintDistributionView({ mintDistribution }: Props) {
     return (
