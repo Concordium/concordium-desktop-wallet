@@ -9,7 +9,7 @@ import { UpdateType } from '../../utils/types';
 
 // Defines the list of options for creating multi signature transactions.
 const multiSigTransactionTypesMap: [UpdateType, string][] = [
-    [UpdateType.UpdateMicroGTUPerEuro, 'Update µGTU per euro'],
+    [UpdateType.UpdateMicroGTUPerEuro, 'Update µGTU per Euro'],
     [UpdateType.UpdateEuroPerEnergy, 'Update Euro per energy'],
     [
         UpdateType.UpdateTransactionFeeDistribution,

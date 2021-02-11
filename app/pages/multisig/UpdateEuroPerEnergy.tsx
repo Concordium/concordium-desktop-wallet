@@ -74,7 +74,7 @@ export default function UpdateEuroPerEnergy({
                     forwardTransaction(
                         createUpdateMultiSignatureTransaction(
                             euroPerEnergy,
-                            UpdateType.UpdateMicroGTUPerEuro,
+                            UpdateType.UpdateEuroPerEnergy,
                             sequenceNumber,
                             threshold
                         )

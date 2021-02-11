@@ -14,12 +14,8 @@ import {
     UpdateInstruction,
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
-import signUpdateMicroGtuPerEuro from './MicroGtuPerEuro';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
-import signUpdateEuroPerEnergy from './EuroPerEnergy';
-import signUpdateTransactionFeeDistribution from './TransactionFeeDistribution';
-import signUpdateFoundationAccount from './FoundationAccount';
-import signUpdateMintDistribution from './MintDistribution';
+import signUpdateTransaction from './SignUpdateTransaction';
 
 /**
  * Concordium Ledger API.
@@ -87,11 +83,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return signUpdateMicroGtuPerEuro(
+        return signUpdateTransaction(
             this.transport,
+            0x06,
             path,
-            serializedPayload,
-            transaction
+            transaction,
+            serializedPayload
         );
     }
 
@@ -100,8 +97,9 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return signUpdateEuroPerEnergy(
+        return signUpdateTransaction(
             this.transport,
+            0x06,
             path,
             transaction,
             serializedPayload
@@ -113,8 +111,9 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return signUpdateTransactionFeeDistribution(
+        return signUpdateTransaction(
             this.transport,
+            0x22,
             path,
             transaction,
             serializedPayload
@@ -126,8 +125,9 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return signUpdateFoundationAccount(
+        return signUpdateTransaction(
             this.transport,
+            0x24,
             path,
             transaction,
             serializedPayload
@@ -139,8 +139,9 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return signUpdateMintDistribution(
+        return signUpdateTransaction(
             this.transport,
+            0x25,
             path,
             transaction,
             serializedPayload
