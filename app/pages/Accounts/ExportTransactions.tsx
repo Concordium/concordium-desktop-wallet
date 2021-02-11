@@ -32,7 +32,6 @@ function parseTransaction(transaction: TransferTransaction) {
 
 // Updates transactions of the account, converts them to csv and saves the file.
 async function exportTransactions(account: Account) {
-    await updateTransactions(account); // update from remote
     let transactions = await getTransactionsOfAccount(account); // load from database
     transactions = await attachNames(transactions);
 
