@@ -6,6 +6,7 @@ import routes from '../../constants/routes.json';
 import locations from '../../constants/moreActionLocations.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
+import ScheduleTransfer from './scheduleTransfer';
 
 interface Props {
     account: Account;
@@ -14,7 +15,14 @@ interface Props {
 
 const items = [
     { name: 'Account Address', location: locations.accountAddress },
-    { name: 'Release Schedule', location: locations.releaseSchedule },
+    {
+        name: 'Inspect release schedule',
+        location: locations.inspectReleaseSchedule,
+    },
+    {
+        name: 'Send funds with a release schedule',
+        location: locations.createScheduledTransfer,
+    },
 ];
 
 /**
@@ -52,7 +60,14 @@ export default function MoreActions({ account, accountInfo }: Props) {
                         returnFunction={() => setLocation(locations.list)}
                     />
                 );
-            case locations.releaseSchedule:
+            case locations.createScheduledTransfer:
+                return (
+                    <ScheduleTransfer
+                        account={account}
+                        returnFunction={() => setLocation(locations.list)}
+                    />
+                );
+            case locations.inspectReleaseSchedule:
                 return (
                     <ShowReleaseSchedule
                         accountInfo={accountInfo}
