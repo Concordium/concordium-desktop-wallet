@@ -37,8 +37,7 @@ async function exportTransactions(account: Account) {
     transactions = await attachNames(transactions);
 
     const csv = toCSV(
-        transactions,
-        parseTransaction,
+        transactions.map(parseTransaction),
         exportedFields.map(getLabel)
     );
     try {

@@ -18,12 +18,8 @@ export function partition<T>(
  * and the names of the elements' fields, outputs
  * csv string, with the names first, and the values of each element per line.
  */
-export function toCSV<T>(
-    elements: T[],
-    parseElement: (element: T) => (string | undefined)[],
-    fieldNames: string[]
-): string {
+export function toCSV(elements: string[][], fieldNames: string[]): string {
     return `${fieldNames.join(',')}\n${elements
-        .map((element) => parseElement(element).join(','))
+        .map((element) => element.join(','))
         .join('\n')}`;
 }
