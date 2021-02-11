@@ -483,7 +483,8 @@ export interface UpdateInstruction<T extends UpdateInstructionPayload> {
 export type UpdateInstructionPayload =
     | ExchangeRate
     | TransactionFeeDistribution
-    | FoundationAccount;
+    | FoundationAccount
+    | MintDistribution;
 
 export type Transaction =
     | AccountTransaction
@@ -547,6 +548,12 @@ export function isFoundationAccount(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<FoundationAccount> {
     return UpdateType.UpdateFoundationAccount === transaction.type;
+}
+
+export function isMintDistribution(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<MintDistribution> {
+    return UpdateType.UpdateMintDistribution === transaction.type;
 }
 
 /**

@@ -8,6 +8,7 @@ import {
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
 import FoundationAccountHandler from './FoundationAccountHandler';
 import MicroGtuPerEuroHandler from './MicroGtuPerEuroHandler';
+import MintDistributionHandler from './MintDistributionHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 
 export default function findHandler(
@@ -25,6 +26,8 @@ export default function findHandler(
             return new TransactionFeeDistributionHandler(transaction);
         case UpdateType.UpdateFoundationAccount:
             return new FoundationAccountHandler(transaction);
+        case UpdateType.UpdateMintDistribution:
+            return new MintDistributionHandler(transaction);
         default:
             throw new Error(
                 `Unsupported transaction type: ${transaction.type}`
