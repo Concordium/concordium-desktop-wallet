@@ -28,7 +28,17 @@ module.exports = {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
                 include: /app/,
-                use: [{ loader: 'ts-loader' }],
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            plugins: [
+                                '@babel/plugin-proposal-optional-chaining',
+                            ],
+                        },
+                    },
+                    'ts-loader',
+                ],
             },
         ],
     },
