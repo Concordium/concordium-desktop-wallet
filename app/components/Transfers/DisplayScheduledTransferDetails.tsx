@@ -6,6 +6,7 @@ import {
     TimeStampUnit,
 } from '../../utils/types';
 import { parseTime } from '../../utils/timeHelpers';
+import { getScheduledTransferAmount } from '../../utils/transactionHelpers';
 import { displayAsGTU } from '../../utils/gtu';
 import SidedText from '../SidedText';
 
@@ -19,11 +20,7 @@ interface Props {
  * Displays an overview of a scheduledTransfer.
  */
 export default function Display({ transaction, fromName, toName }: Props) {
-    const amount = transaction.payload.schedule.reduce(
-        (total, point) => total + BigInt(point.amount),
-        0n
-    );
-
+    const amount = getScheduledTransferAmount(transaction);
     return (
         <List>
             <List.Item>

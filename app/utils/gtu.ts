@@ -6,6 +6,10 @@ const microGTUPerGTU = 1000000n;
 const separator = '.';
 const gtuFormat = new RegExp('^(0|[1-9]\\d*)(\\.\\d{1,6})?$');
 
+/**
+ * Given an ambigous input, convert it into a bigint.
+ * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
+ */
 function toBigInt(input: bigint | string): bigint {
     if (typeof input === 'string') {
         try {
@@ -35,10 +39,15 @@ function parseSubGTU(subGTU: string) {
     return result;
 }
 
+/**
+ * Convert a microGTU amount to a gtu string.
+ * Should be used for user interaction.
+ * N.B. Gives the absolute value of the amount.
+ * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
+ */
 export function toGTUString(microGTUAmount: bigint | string): string {
     const amount: bigint = toBigInt(microGTUAmount);
-    const isNegative = amount < 0;
-    const absolute = isNegative ? -amount : amount;
+    const absolute = amount < 0 ? -amount : amount;
     const GTU = absolute / microGTUPerGTU;
     const microGTU = absolute % microGTUPerGTU;
     const microGTUFormatted =

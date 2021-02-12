@@ -38,10 +38,9 @@ const intervals: Interval[] = [
 ];
 
 /**
- * Receives transaction to sign, using the ledger,
- * and then submits it.
+ * Allows the user to build the schedule of a scheduled transfer.
  */
-export default function SubmitTransfer({ location }: Props) {
+export default function BuildSchedule({ location }: Props) {
     const dispatch = useDispatch();
     const [releases, setReleases] = useState<number>(1);
     const [chosenInterval, setChosenInterval] = useState<Interval>(

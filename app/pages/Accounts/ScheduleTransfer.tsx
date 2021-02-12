@@ -28,10 +28,9 @@ interface Props {
 }
 
 /**
- * Displays the account's address, and allows the user to copy it.
- * TODO display QR code of the address?
+ * Controls the flow of creating a scheduled transfer.
  */
-export default function ShowAccountAddress({ account, returnFunction }: Props) {
+export default function ScheduleTransfer({ account, returnFunction }: Props) {
     const dispatch = useDispatch();
     const location = useLocation<State>();
 
