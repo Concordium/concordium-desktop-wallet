@@ -11,6 +11,7 @@ import {
     AddressBookEntry,
     AccountTransaction,
     instanceOfScheduledTransfer,
+    instanceOfSimpleTransfer,
     TransactionPayload,
     TimeStampUnit,
 } from '../../utils/types';
@@ -28,7 +29,10 @@ function getAmount(transaction: AccountTransaction) {
     if (instanceOfScheduledTransfer(transaction)) {
         return getScheduledTransferAmount(transaction);
     }
-    return transaction.payload.amount;
+    if (instanceOfSimpleTransfer(transaction)) {
+        return transaction.payload.amount;
+    }
+    throw new Error('Unsupported transaction type - please implement');
 }
 
 function displayNote(transaction: AccountTransaction<TransactionPayload>) {

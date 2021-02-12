@@ -166,7 +166,7 @@ export type TransactionPayload =
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
 export interface AccountTransaction<
-    PayloadType extends TransactionPayload = SimpleTransferPayload
+    PayloadType extends TransactionPayload = TransactionPayload
 > {
     sender: Hex;
     nonce: string;
