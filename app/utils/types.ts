@@ -591,6 +591,13 @@ export interface MintDistribution {
     finalizationReward: RewardFraction;
 }
 
+export interface ProtocolUpdate {
+    message: string;
+    specificationUrl: string;
+    specificationHash: Buffer;
+    specificationAuxiliaryData: Buffer;
+}
+
 export interface TransactionDetails {
     events: string[];
     transferSource?: Hex;

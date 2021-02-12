@@ -4,6 +4,7 @@ import {
     ExchangeRate,
     FoundationAccount,
     MintDistribution,
+    ProtocolUpdate,
     TransactionFeeDistribution,
     UpdateHeader,
     UpdateInstruction,
@@ -72,6 +73,56 @@ export function serializeMintDistribution(mintDistribution: MintDistribution) {
     );
 
     return serializedMintDistribution;
+}
+
+/**
+ * Serializes a ProtocolUpdate to bytes.
+ */
+export function serializeProtocolUpdate(protocolUpdate: ProtocolUpdate) {
+    const encodedMessage = new TextEncoder().encode(protocolUpdate.message);
+    const encodedSpecificationUrl = new TextEncoder().encode(
+        protocolUpdate.specificationUrl
+    );
+
+    const payloadLength =
+        8 +
+        encodedMessage.length +
+        8 +
+        encodedSpecificationUrl.length +
+        protocolUpdate.specificationHash.length +
+        protocolUpdate.specificationAuxiliaryData.length;
+
+    let offset = 0;
+    const serializedProtocolUpdate = Buffer.alloc(8 + payloadLength);
+    offset += serializedProtocolUpdate.writeBigUInt64BE(
+        BigInt(payloadLength),
+        offset
+    );
+    offset += serializedProtocolUpdate.writeBigUInt64BE(
+        BigInt(encodedMessage.length),
+        offset
+    );
+    offset += serializedProtocolUpdate.write(
+        protocolUpdate.message,
+        offset,
+        'utf-8'
+    );
+    offset += serializedProtocolUpdate.writeBigUInt64BE(
+        BigInt(encodedSpecificationUrl.length),
+        offset
+    );
+    offset += serializedProtocolUpdate.write(
+        protocolUpdate.specificationUrl,
+        offset,
+        'utf-8'
+    );
+
+    const finalSerialization = Buffer.concat([
+        serializedProtocolUpdate,
+        protocolUpdate.specificationHash,
+        protocolUpdate.specificationAuxiliaryData,
+    ]);
+    return finalSerialization;
 }
 
 /**
