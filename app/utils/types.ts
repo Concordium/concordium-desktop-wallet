@@ -442,7 +442,8 @@ export type UpdateInstructionPayload =
     | ExchangeRate
     | TransactionFeeDistribution
     | FoundationAccount
-    | MintDistribution;
+    | MintDistribution
+    | ProtocolUpdate;
 
 export type Transaction =
     | AccountTransaction
@@ -506,6 +507,12 @@ export function isMintDistribution(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<MintDistribution> {
     return UpdateType.UpdateMintDistribution === transaction.type;
+}
+
+export function isProtocolUpdate(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<ProtocolUpdate> {
+    return UpdateType.UpdateProtocol === transaction.type;
 }
 
 /**

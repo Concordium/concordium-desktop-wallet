@@ -9,6 +9,7 @@ import {
     ExchangeRate,
     FoundationAccount,
     MintDistribution,
+    ProtocolUpdate,
     PublicInformationForIp,
     TransactionFeeDistribution,
     UpdateInstruction,
@@ -146,6 +147,14 @@ export default class ConcordiumLedgerClient {
             transaction,
             serializedPayload
         );
+    }
+
+    signProtocolUpdate(
+        transaction: UpdateInstruction<ProtocolUpdate>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return this.signProtocolUpdate(transaction, serializedPayload, path);
     }
 
     getAppAndVersion(): Promise<AppAndVersion> {

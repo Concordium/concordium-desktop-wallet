@@ -9,6 +9,7 @@ import {
     UpdateHeader,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateType,
 } from './types';
 
 /**
@@ -75,22 +76,58 @@ export function serializeMintDistribution(mintDistribution: MintDistribution) {
     return serializedMintDistribution;
 }
 
+export interface SerializedString {
+    length: Buffer;
+    message: Uint8Array;
+}
+
+/**
+ * Serializes a string as its UTF-8 encoding pre-fixed with the length
+ * of the encoding. We restrict the length of the input to be less than
+ * what can be handled safely in a number value.
+ * @param input the string to serialize
+ */
+export function serializeUtf8String(input: string): SerializedString {
+    // A UTF-8 character can take up to 4 bytes per character.
+    if (input.length > Number.MAX_SAFE_INTEGER / 4) {
+        throw new Error(`The string was too long: ${input.length}`);
+    }
+
+    const encoded = new TextEncoder().encode(input);
+    const serializedLength = Buffer.alloc(8);
+    serializedLength.writeBigInt64BE(BigInt(encoded.length), 0);
+    return { length: serializedLength, message: encoded };
+}
+
+export interface SerializedProtocolUpdate {
+    serialization: Buffer;
+    payloadLength: Buffer;
+    message: SerializedString;
+}
+
 /**
  * Serializes a ProtocolUpdate to bytes.
  */
-export function serializeProtocolUpdate(protocolUpdate: ProtocolUpdate) {
-    const encodedMessage = new TextEncoder().encode(protocolUpdate.message);
-    const encodedSpecificationUrl = new TextEncoder().encode(
+export function serializeProtocolUpdate(
+    protocolUpdate: ProtocolUpdate
+): SerializedProtocolUpdate {
+    const encodedMessage = serializeUtf8String(protocolUpdate.message);
+    const encoedMessageMessage = encodedMessage.message;
+
+    const encodedSpecificationUrl = serializeUtf8String(
         protocolUpdate.specificationUrl
-    );
+    ).message;
 
     const payloadLength =
         8 +
-        encodedMessage.length +
+        encoedMessageMessage.length +
         8 +
         encodedSpecificationUrl.length +
         protocolUpdate.specificationHash.length +
         protocolUpdate.specificationAuxiliaryData.length;
+
+    const serializedPayloadLength = Buffer.alloc(8);
+    serializedPayloadLength.writeBigInt64BE(BigInt(payloadLength), 0);
 
     let offset = 0;
     const serializedProtocolUpdate = Buffer.alloc(8 + payloadLength);
@@ -111,7 +148,7 @@ export function serializeProtocolUpdate(protocolUpdate: ProtocolUpdate) {
         BigInt(encodedSpecificationUrl.length),
         offset
     );
-    offset += serializedProtocolUpdate.write(
+    serializedProtocolUpdate.write(
         protocolUpdate.specificationUrl,
         offset,
         'utf-8'
@@ -122,14 +159,19 @@ export function serializeProtocolUpdate(protocolUpdate: ProtocolUpdate) {
         protocolUpdate.specificationHash,
         protocolUpdate.specificationAuxiliaryData,
     ]);
-    return finalSerialization;
+
+    return {
+        serialization: finalSerialization,
+        payloadLength: serializedPayloadLength,
+        message: encodedMessage,
+    };
 }
 
 /**
  * Serializes an UpdateHeader to exactly 28 bytes. See the interface
  * UpdateHeader for comments regarding the byte allocation for each field.
  */
-function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
+export function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
     const serializedUpdateHeader = Buffer.alloc(28);
     serializedUpdateHeader.writeBigUInt64BE(
         BigInt(updateHeader.sequenceNumber),
@@ -171,6 +213,15 @@ function serializeUpdateSignatures(signatures: Buffer[]): Buffer {
 }
 
 /**
+ * Serializes an update type to its byte representation.
+ */
+export function serializeUpdateType(updateType: UpdateType) {
+    const serializedUpdateType = Buffer.alloc(1);
+    serializedUpdateType.writeInt8(updateType, 0);
+    return serializedUpdateType;
+}
+
+/**
  * Serializes an UpdateInstruction into its byte representation that is to be
  * signed. Note that this excludes the signatures that are part of the serialization
  * that is sent to the chain.
@@ -184,9 +235,7 @@ export function serializeUpdateInstructionHeaderAndPayload(
         payloadSize: serializedPayload.length + 1,
     };
     const serializedHeader = serializeUpdateHeader(updateHeaderWithPayloadSize);
-
-    const serializedUpdateType = Buffer.alloc(1);
-    serializedUpdateType.writeInt8(updateInstruction.type, 0);
+    const serializedUpdateType = serializeUpdateType(updateInstruction.type);
 
     return Buffer.concat([
         serializedHeader,
