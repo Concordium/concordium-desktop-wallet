@@ -6,7 +6,7 @@ import routes from '../../constants/routes.json';
 import locations from '../../constants/moreActionLocations.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
-import ScheduleTransfer from './scheduleTransfer';
+import ScheduleTransfer from './ScheduleTransfer';
 
 interface Props {
     account: Account;

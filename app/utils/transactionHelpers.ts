@@ -6,6 +6,8 @@ import {
     SimpleTransfer,
     TransactionEvent,
     TransactionStatus,
+    ScheduledTransfer,
+    SchedulePoint,
 } from './types';
 /**
  * return highest id of given transactions
@@ -77,6 +79,53 @@ export async function createSimpleTransferTransaction(
         payload: {
             toAddress,
             amount: amount.toString(),
+        },
+    };
+    return transferTransaction;
+}
+
+export function createSchedule(
+    totalAmount: bigint,
+    releases: number,
+    starting: number,
+    interval: number
+): SchedulePoint[] {
+    // TODO what to do if releases dont divide amount.
+    const releaseAmount = (totalAmount / BigInt(releases)).toString();
+    const schedule = [];
+    let timestamp = starting;
+    for (let i = 0; i < releases; i += 1) {
+        schedule.push({
+            amount: releaseAmount,
+            timestamp: timestamp.toString(),
+        });
+        timestamp += interval;
+    }
+    return schedule;
+}
+
+/**
+ *  Constructs a, simple transfer, transaction object,
+ * Given the fromAddress, toAddress and the amount.
+ */
+export async function createScheduledTransferTransaction(
+    fromAddress: string,
+    toAddress: string,
+    schedule: SchedulePoint[],
+    expiry = '16446744073',
+    energyAmount = '20000'
+) {
+    const nonceJSON = await getNextAccountNonce(fromAddress);
+    const { nonce } = JSON.parse(nonceJSON.getValue());
+    const transferTransaction: ScheduledTransfer = {
+        sender: fromAddress,
+        nonce,
+        energyAmount, // TODO: Does this need to be set by the user?
+        expiry, // TODO: Don't hardcode?
+        transactionKind: TransactionKindId.Transfer_with_schedule,
+        payload: {
+            toAddress,
+            schedule,
         },
     };
     return transferTransaction;

@@ -165,18 +165,20 @@ export type TransactionPayload =
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
-export interface AccountTransaction {
+export interface AccountTransaction<
+    PayloadType extends TransactionPayload = SimpleTransferPayload
+> {
     sender: Hex;
     nonce: string;
     energyAmount: string;
     expiry: string;
     transactionKind: TransactionKindId;
-    payload: TransactionPayload;
+    payload: PayloadType;
 }
 
-export interface SimpleTransfer extends AccountTransaction {
-    payload: SimpleTransferPayload;
-}
+export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
+
+export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -473,9 +475,15 @@ export function instanceOfUpdateInstruction(
 }
 
 export function instanceOfSimpleTransfer(
-    object: AccountTransaction
+    object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
     return object.transactionKind === TransactionKindId.Simple_transfer;
+}
+
+export function instanceOfScheduledTransfer(
+    object: AccountTransaction<TransactionPayload>
+): object is ScheduledTransfer {
+    return object.transactionKind === TransactionKindId.Transfer_with_schedule;
 }
 
 export function isExchangeRate(

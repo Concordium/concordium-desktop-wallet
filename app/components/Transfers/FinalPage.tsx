@@ -36,7 +36,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
                         <Table.Row>
                             <Table.Cell>Amount:</Table.Cell>
                             <Table.Cell textAlign="right">
-                                {displayAsGTU(transaction.payload.amount)}
+                                {displayAsGTU(transaction.payload.amount || 0n)}
                             </Table.Cell>
                         </Table.Row>
                         <Table.Row>

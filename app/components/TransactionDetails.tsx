@@ -28,7 +28,7 @@ function generateView(
         return handler.view();
     }
     if (instanceOfAccountTransaction(transaction)) {
-        throw new Error('Not yet implemented.');
+        return transaction.toString();
     }
     throw new Error(`Unsupported transaction type: ${transaction}`);
 }

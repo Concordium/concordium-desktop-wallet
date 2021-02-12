@@ -21,6 +21,8 @@ import {
     SimpleTransfer,
     instanceOfSimpleTransfer,
     TransactionEvent,
+    ScheduledTransfer,
+    instanceOfScheduledTransfer,
 } from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
 
@@ -229,7 +231,35 @@ function convertSimpleTransfer(
         subtotal: (-payload.amount).toString(),
         cost: transaction.energyAmount,
         fromAddress: transaction.sender,
-        toAddress: transaction.payload.toAddress,
+        toAddress: payload.toAddress,
+        blockTime: (Date.now() / 1000).toString(), // Temporary value, unless it fails
+        status: TransactionStatus.Pending,
+    };
+}
+
+function convertScheduledTransfer(
+    transaction: ScheduledTransfer,
+    hash: string
+): TransferTransaction {
+    const { payload } = transaction;
+    const amount = payload.schedule.reduce(
+        (total, point) => total + BigInt(point.amount),
+        0n
+    );
+    const estimatedTotal = amount + BigInt(transaction.energyAmount);
+
+    return {
+        id: -1,
+        blockHash: 'pending',
+        remote: false,
+        originType: OriginType.Self,
+        transactionKind: TransactionKindString.TransferWithSchedule,
+        transactionHash: hash,
+        total: (-estimatedTotal).toString(),
+        subtotal: (-amount).toString(),
+        cost: transaction.energyAmount,
+        fromAddress: transaction.sender,
+        toAddress: payload.toAddress,
         blockTime: (Date.now() / 1000).toString(), // Temporary value, unless it fails
         status: TransactionStatus.Pending,
     };
@@ -243,6 +273,8 @@ export async function addPendingTransaction(
     let convertedTransaction: TransferTransaction;
     if (instanceOfSimpleTransfer(transaction)) {
         convertedTransaction = convertSimpleTransfer(transaction, hash);
+    } else if (instanceOfScheduledTransfer(transaction)) {
+        convertedTransaction = convertScheduledTransfer(transaction, hash);
     } else {
         throw new Error('unsupported transaction type - please implement');
     }

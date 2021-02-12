@@ -37,6 +37,8 @@ export default function ConfirmTransferComponent({
             push({
                 pathname: routes.SUBMITTRANSFER,
                 state: {
+                    returnLocation:
+                        routes.ACCOUNTS_SIMPLETRANSFER_TRANSFERSUBMITTED,
                     transaction: transferTransaction,
                     account,
                     recipient,
