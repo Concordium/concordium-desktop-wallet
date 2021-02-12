@@ -177,3 +177,12 @@ export async function getStatus(
         }, pollingIntervalMs);
     });
 }
+
+export function getScheduledTransferAmount(
+    transaction: ScheduledTransfer
+): bigint {
+    return transaction.payload.schedule.reduce(
+        (total, point) => total + BigInt(point.amount),
+        0n
+    );
+}

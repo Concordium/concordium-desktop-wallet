@@ -39,9 +39,11 @@ export default function ConfirmTransferComponent({
                 state: {
                     returnLocation:
                         routes.ACCOUNTS_SIMPLETRANSFER_TRANSFERSUBMITTED,
+                    returnState: {
+                        recipient,
+                    },
                     transaction: transferTransaction,
                     account,
-                    recipient,
                 },
             })
         );

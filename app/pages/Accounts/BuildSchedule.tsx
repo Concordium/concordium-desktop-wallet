@@ -9,6 +9,7 @@ import {
     createSchedule,
     createScheduledTransferTransaction,
 } from '../../utils/transactionHelpers';
+import locations from '../../constants/transferLocations.json';
 
 interface State {
     account: Account;
@@ -53,10 +54,13 @@ export default function SubmitTransfer({ location }: Props) {
                 pathname: routes.SUBMITTRANSFER,
                 state: {
                     returnLocation:
-                        routes.ACCOUNTS_SIMPLETRANSFER_TRANSFERSUBMITTED,
+                        routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+                    returnState: {
+                        recipient,
+                        initialPage: locations.transferSubmitted,
+                    },
                     transaction,
                     account,
-                    recipient,
                 },
             })
         );

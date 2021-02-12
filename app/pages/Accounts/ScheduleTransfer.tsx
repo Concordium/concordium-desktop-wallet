@@ -1,13 +1,25 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { useLocation } from 'react-router-dom';
 import { Button } from 'semantic-ui-react';
-import { Account, AddressBookEntry } from '../../utils/types';
+import {
+    Account,
+    AddressBookEntry,
+    AccountTransaction,
+} from '../../utils/types';
 import locations from '../../constants/transferLocations.json';
 import PickRecipient from '../../components/Transfers/PickRecipient';
 import PickAmount from '../../components/Transfers/PickAmount';
+import FinalPage from '../../components/Transfers/FinalPage';
 import routes from '../../constants/routes.json';
 import { toMicroUnits } from '../../utils/gtu';
+
+interface State {
+    transaction: AccountTransaction;
+    recipient: AddressBookEntry;
+    initialPage: string;
+}
 
 interface Props {
     account: Account;
@@ -20,20 +32,23 @@ interface Props {
  */
 export default function ShowAccountAddress({ account, returnFunction }: Props) {
     const dispatch = useDispatch();
+    const location = useLocation<State>();
 
     const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
         undefined
     );
-    const [location, setLocation] = useState<string>(locations.pickAmount);
+    const [subLocation, setSubLocation] = useState<string>(
+        location?.state?.initialPage || locations.pickAmount
+    );
 
     function chooseRecipientOnClick(entry: AddressBookEntry) {
         setRecipient(entry);
-        setLocation(locations.pickAmount);
+        setSubLocation(locations.pickAmount);
     }
 
     function ChosenComponent() {
-        switch (location) {
+        switch (subLocation) {
             case locations.pickAmount:
                 return (
                     <PickAmount
@@ -41,7 +56,7 @@ export default function ShowAccountAddress({ account, returnFunction }: Props) {
                         amount={amount}
                         setAmount={setAmount}
                         toPickRecipient={() =>
-                            setLocation(locations.pickRecipient)
+                            setSubLocation(locations.pickRecipient)
                         }
                         toConfirmTransfer={() =>
                             dispatch(
@@ -60,6 +75,9 @@ export default function ShowAccountAddress({ account, returnFunction }: Props) {
                 );
             case locations.pickRecipient:
                 return <PickRecipient pickRecipient={chooseRecipientOnClick} />;
+            case locations.transferSubmitted: {
+                return <FinalPage location={location} />;
+            }
             default:
                 return <div />;
         }

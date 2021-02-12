@@ -24,7 +24,10 @@ import {
     ScheduledTransfer,
     instanceOfScheduledTransfer,
 } from '../utils/types';
-import { attachNames } from '../utils/transactionHelpers';
+import {
+    attachNames,
+    getScheduledTransferAmount,
+} from '../utils/transactionHelpers';
 
 const transactionSlice = createSlice({
     name: 'transactions',
@@ -242,10 +245,7 @@ function convertScheduledTransfer(
     hash: string
 ): TransferTransaction {
     const { payload } = transaction;
-    const amount = payload.schedule.reduce(
-        (total, point) => total + BigInt(point.amount),
-        0n
-    );
+    const amount = getScheduledTransferAmount(transaction);
     const estimatedTotal = amount + BigInt(transaction.energyAmount);
 
     return {
