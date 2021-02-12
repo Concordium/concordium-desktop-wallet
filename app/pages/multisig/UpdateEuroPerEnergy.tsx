@@ -7,34 +7,9 @@ import {
     Input,
     Segment,
 } from 'semantic-ui-react';
-import createMultiSignatureTransaction from '../../utils/MultiSignatureTransactionHelper';
-import {
-    ExchangeRate,
-    MultiSignatureTransaction,
-    MultiSignatureTransactionStatus,
-    UpdateType,
-} from '../../utils/types';
-import createUpdateInstruction, {
-    UpdateProps,
-} from '../../utils/UpdateInstructionHelper';
-
-function createTransaction(
-    euroPerEnergy: ExchangeRate,
-    sequenceNumber: BigInt,
-    threshold: number
-): Partial<MultiSignatureTransaction> {
-    const updateInstruction = createUpdateInstruction(
-        euroPerEnergy,
-        UpdateType.UpdateEuroPerEnergy,
-        sequenceNumber
-    );
-    const multiSignatureTransaction = createMultiSignatureTransaction(
-        updateInstruction,
-        threshold,
-        MultiSignatureTransactionStatus.Open
-    );
-    return multiSignatureTransaction;
-}
+import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
+import { ExchangeRate, UpdateType } from '../../utils/types';
+import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 
 export default function UpdateEuroPerEnergy({
     blockSummary,
@@ -106,8 +81,9 @@ export default function UpdateEuroPerEnergy({
                 primary
                 onClick={() =>
                     forwardTransaction(
-                        createTransaction(
+                        createUpdateMultiSignatureTransaction(
                             euroPerEnergy,
+                            UpdateType.UpdateMicroGTUPerEuro,
                             sequenceNumber,
                             threshold
                         )

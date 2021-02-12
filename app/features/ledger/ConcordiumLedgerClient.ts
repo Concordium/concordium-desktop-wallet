@@ -7,6 +7,7 @@ import signAccountChallenge from './AccountChallenge';
 import {
     AccountTransaction,
     ExchangeRate,
+    FoundationAccount,
     PublicInformationForIp,
     TransactionFeeDistribution,
     UpdateInstruction,
@@ -16,6 +17,7 @@ import signUpdateMicroGtuPerEuro from './MicroGtuPerEuro';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
 import signUpdateEuroPerEnergy from './EuroPerEnergy';
 import signUpdateTransactionFeeDistribution from './TransactionFeeDistribution';
+import signUpdateFoundationAccount from './FoundationAccount';
 
 /**
  * Concordium Ledger API.
@@ -110,6 +112,19 @@ export default class ConcordiumLedgerClient {
         path: number[]
     ): Promise<Buffer> {
         return signUpdateTransactionFeeDistribution(
+            this.transport,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signFoundationAccount(
+        transaction: UpdateInstruction<FoundationAccount>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateFoundationAccount(
             this.transport,
             path,
             transaction,

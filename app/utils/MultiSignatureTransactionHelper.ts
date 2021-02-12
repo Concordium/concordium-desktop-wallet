@@ -5,7 +5,9 @@ import {
     MultiSignatureTransactionStatus,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateType,
 } from './types';
+import createUpdateInstruction from './UpdateInstructionHelper';
 
 /**
  * Creates a multi signature transaction for the given input.
@@ -26,4 +28,26 @@ export default function createMultiSignatureTransaction(
         status,
     };
     return multiSignatureTransaction;
+}
+
+/**
+ * Creates a multi signature transaction for an update instruction in its initial
+ * open status.
+ */
+export function createUpdateMultiSignatureTransaction(
+    payload: UpdateInstructionPayload,
+    updateType: UpdateType,
+    sequenceNumber: BigInt,
+    threshold: number
+) {
+    const updateInstruction = createUpdateInstruction(
+        payload,
+        updateType,
+        sequenceNumber
+    );
+    return createMultiSignatureTransaction(
+        updateInstruction,
+        threshold,
+        MultiSignatureTransactionStatus.Open
+    );
 }

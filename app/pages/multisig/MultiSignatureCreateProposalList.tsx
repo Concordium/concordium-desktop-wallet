@@ -15,6 +15,7 @@ const multiSigTransactionTypesMap: [UpdateType, string][] = [
         UpdateType.UpdateTransactionFeeDistribution,
         'Update transaction fee distribution',
     ],
+    [UpdateType.UpdateFoundationAccount, 'Update foundation account address'],
 ];
 
 /**
