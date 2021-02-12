@@ -215,53 +215,59 @@ export async function updateTransactions(account: Account) {
     }
 }
 
-function convertSimpleTransfer(
-    transaction: SimpleTransfer,
-    hash: string
-): TransferTransaction {
-    const { payload } = transaction;
-    const estimatedTotal =
-        BigInt(payload.amount) + BigInt(transaction.energyAmount);
+type TypeSpecific = Pick<
+    TransferTransaction,
+    'transactionKind' | 'total' | 'subtotal'
+>;
+function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
+    const amount = BigInt(transaction.payload.amount);
+    const estimatedTotal = amount + BigInt(transaction.energyAmount); // Fix this: convert from energy to cost
 
     return {
-        id: -1,
-        blockHash: 'pending',
-        remote: false,
-        originType: OriginType.Self,
         transactionKind: TransactionKindString.Transfer,
-        transactionHash: hash,
         total: (-estimatedTotal).toString(),
-        subtotal: (-payload.amount).toString(),
-        cost: transaction.energyAmount,
-        fromAddress: transaction.sender,
-        toAddress: payload.toAddress,
-        blockTime: (Date.now() / 1000).toString(), // Temporary value, unless it fails
-        status: TransactionStatus.Pending,
+        subtotal: (-amount).toString(),
     };
 }
 
 function convertScheduledTransfer(
-    transaction: ScheduledTransfer,
+    transaction: ScheduledTransfer
+): TypeSpecific {
+    const amount = getScheduledTransferAmount(transaction);
+    const estimatedTotal = amount + BigInt(transaction.energyAmount); // Fix this: convert from energy to cost
+
+    return {
+        transactionKind: TransactionKindString.TransferWithSchedule,
+        total: (-estimatedTotal).toString(),
+        subtotal: (-amount).toString(),
+    };
+}
+
+function convertAccountTransaction(
+    transaction: AccountTransaction,
     hash: string
 ): TransferTransaction {
-    const { payload } = transaction;
-    const amount = getScheduledTransferAmount(transaction);
-    const estimatedTotal = amount + BigInt(transaction.energyAmount);
+    let typeSpecific;
+    if (instanceOfSimpleTransfer(transaction)) {
+        typeSpecific = convertSimpleTransfer(transaction);
+    } else if (instanceOfScheduledTransfer(transaction)) {
+        typeSpecific = convertScheduledTransfer(transaction);
+    } else {
+        throw new Error('unsupported transaction type - please implement');
+    }
 
     return {
         id: -1,
         blockHash: 'pending',
         remote: false,
         originType: OriginType.Self,
-        transactionKind: TransactionKindString.TransferWithSchedule,
         transactionHash: hash,
-        total: (-estimatedTotal).toString(),
-        subtotal: (-amount).toString(),
-        cost: transaction.energyAmount,
+        cost: transaction.energyAmount, // Fix this: convert from energy to cost
         fromAddress: transaction.sender,
-        toAddress: payload.toAddress,
+        toAddress: transaction.payload.toAddress,
         blockTime: (Date.now() / 1000).toString(), // Temporary value, unless it fails
         status: TransactionStatus.Pending,
+        ...typeSpecific,
     };
 }
 
@@ -270,15 +276,7 @@ export async function addPendingTransaction(
     transaction: AccountTransaction,
     hash: string
 ) {
-    let convertedTransaction: TransferTransaction;
-    if (instanceOfSimpleTransfer(transaction)) {
-        convertedTransaction = convertSimpleTransfer(transaction, hash);
-    } else if (instanceOfScheduledTransfer(transaction)) {
-        convertedTransaction = convertScheduledTransfer(transaction, hash);
-    } else {
-        throw new Error('unsupported transaction type - please implement');
-    }
-
+    const convertedTransaction = convertAccountTransaction(transaction, hash);
     return insertTransactions([convertedTransaction]);
 }
 
