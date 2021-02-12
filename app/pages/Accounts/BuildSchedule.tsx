@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
-import { List, Header, Button, Input } from 'semantic-ui-react';
+import { Card, Label, List, Header, Button, Input } from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
 import routes from '../../constants/routes.json';
 import { Account, AddressBookEntry } from '../../utils/types';
+import { displayAsGTU } from '../../utils/gtu';
 import {
     createSchedule,
     createScheduledTransferTransaction,
@@ -21,7 +23,19 @@ interface Props {
     location: LocationDescriptorObject<State>;
 }
 
-const minute = 60000;
+const second = 1000;
+
+interface Interval {
+    label: string;
+    value: number;
+}
+const intervals: Interval[] = [
+    { label: 'Second', value: 1 * second },
+    { label: 'Minute', value: 60 * second },
+    { label: 'Hour', value: 60 * 60 * second },
+    { label: 'Day', value: 24 * 60 * 60 * second },
+    { label: 'Week', value: 7 * 24 * 60 * 60 * second },
+];
 
 /**
  * Receives transaction to sign, using the ledger,
@@ -29,7 +43,13 @@ const minute = 60000;
  */
 export default function SubmitTransfer({ location }: Props) {
     const dispatch = useDispatch();
-    const [releases, setReleases] = useState<number>(1); // This is a string, to allows user input in GTU
+    const [releases, setReleases] = useState<number>(1);
+    const [chosenInterval, setChosenInterval] = useState<Interval>(
+        intervals[0]
+    );
+    const [startTime, setStartTime] = useState<number>(
+        new Date().getTime() + 5 * 60 * second
+    ); // TODO Decide appropiate default
 
     if (!location.state) {
         throw new Error('Unexpected missing state.');
@@ -41,8 +61,8 @@ export default function SubmitTransfer({ location }: Props) {
         const schedule = createSchedule(
             BigInt(amount),
             releases,
-            new Date().getTime() + 5 * minute,
-            minute
+            startTime,
+            chosenInterval.value
         );
         const transaction = await createScheduledTransferTransaction(
             account.address,
@@ -67,23 +87,43 @@ export default function SubmitTransfer({ location }: Props) {
     }
 
     return (
-        <>
+        <Card fluid>
+            <Button
+                as={Link}
+                to={{
+                    pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+                    state: { amount, recipient },
+                }}
+            >
+                {'<--'}
+            </Button>
+            <Header> Send fund with a release schedule</Header>
+            <Button as={Link} to={routes.ACCOUNTS}>
+                x
+            </Button>
+
             <List>
                 <List.Item>
                     <Header textAlign="center">
-                        Send funds {amount} to {recipient.name}
+                        Send funds {displayAsGTU(amount)} to {recipient.name}
                     </Header>
                 </List.Item>
                 <List.Item>Regular Interval</List.Item>
                 <List.Item>
                     Release Every:
                     <Button.Group>
-                        <Button>Second</Button>
-                        <Button>Minute</Button>
-                        <Button>Hour</Button>
+                        {intervals.map((interval: Interval) => (
+                            <Button
+                                key={interval.label}
+                                onClick={() => setChosenInterval(interval)}
+                            >
+                                {interval.label}
+                            </Button>
+                        ))}
                     </Button.Group>
                 </List.Item>
                 <List.Item>
+                    <Label>Enter amount of releases</Label>
                     <Input
                         fluid
                         name="name"
@@ -96,11 +136,24 @@ export default function SubmitTransfer({ location }: Props) {
                         type="number"
                     />
                 </List.Item>
-                <List.Item>Starting: 5 minutes from now</List.Item>
                 <List.Item>
-                    <Button onClick={createTransaction} />
+                    <Label>Enter starting time:</Label>
+                    <Input
+                        fluid
+                        name="name"
+                        placeholder="Enter Starting time"
+                        value={startTime}
+                        onChange={(e) =>
+                            setStartTime(parseInt(e.target.value, 10))
+                        }
+                        autoFocus
+                        type="number"
+                    />
+                </List.Item>
+                <List.Item>
+                    <Button onClick={createTransaction}>submit</Button>
                 </List.Item>
             </List>
-        </>
+        </Card>
     );
 }

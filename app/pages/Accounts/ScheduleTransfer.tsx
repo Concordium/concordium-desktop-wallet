@@ -13,9 +13,10 @@ import PickRecipient from '../../components/Transfers/PickRecipient';
 import PickAmount from '../../components/Transfers/PickAmount';
 import FinalPage from '../../components/Transfers/FinalPage';
 import routes from '../../constants/routes.json';
-import { toMicroUnits } from '../../utils/gtu';
+import { toMicroUnits, toGTUString } from '../../utils/gtu';
 
 interface State {
+    amount: string;
     transaction: AccountTransaction;
     recipient: AddressBookEntry;
     initialPage: string;
@@ -34,9 +35,11 @@ export default function ShowAccountAddress({ account, returnFunction }: Props) {
     const dispatch = useDispatch();
     const location = useLocation<State>();
 
-    const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string>(
+        location?.state?.amount ? toGTUString(location?.state?.amount) : ''
+    ); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
-        undefined
+        location?.state?.recipient || undefined
     );
     const [subLocation, setSubLocation] = useState<string>(
         location?.state?.initialPage || locations.pickAmount
