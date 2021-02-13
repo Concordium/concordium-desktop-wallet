@@ -116,9 +116,6 @@
     "email": "shj@concordium.com",
     "url": "https://concordium.com"
   },
-  "resolutions": {
-    "acorn": "https://github.com/soerenbf/acorn-with-stage3#acorn-6"
-  },
   "license": "MIT",
   "devDependencies": {
     "@amilajack/testcafe-browser-provider-electron": "^0.0.15-alpha.1",
