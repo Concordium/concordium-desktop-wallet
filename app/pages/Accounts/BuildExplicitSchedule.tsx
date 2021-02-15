@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+    Grid,
     Header,
     Label,
     List,
@@ -104,21 +105,29 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
                 </Card>
             </List.Item>
             <List.Item>
-                <List.List>
+                <Grid textAlign="center" columns="4">
                     {schedule.map((schedulePoint, index) => (
-                        <List.Item key={schedulePoint.timestamp}>
-                            {index}.{' '}
-                            {parseTime(
-                                schedulePoint.timestamp,
-                                TimeStampUnit.milliSeconds
-                            )}{' '}
-                            {displayAsGTU(schedulePoint.amount)}
-                            <Button onClick={() => removeFromSchedule(index)}>
-                                x
-                            </Button>
-                        </List.Item>
+                        <Grid.Row key={schedulePoint.timestamp}>
+                            <Grid.Column>{index}.</Grid.Column>
+                            <Grid.Column>
+                                {parseTime(
+                                    schedulePoint.timestamp,
+                                    TimeStampUnit.milliSeconds
+                                )}{' '}
+                            </Grid.Column>
+                            <Grid.Column>
+                                {displayAsGTU(schedulePoint.amount)}
+                            </Grid.Column>
+                            <Grid.Column>
+                                <Button
+                                    onClick={() => removeFromSchedule(index)}
+                                >
+                                    x
+                                </Button>
+                            </Grid.Column>
+                        </Grid.Row>
                     ))}
-                </List.List>
+                </Grid>
             </List.Item>
             <List.Item>
                 <Button onClick={() => submitSchedule(schedule)}>submit</Button>
