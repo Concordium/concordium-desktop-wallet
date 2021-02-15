@@ -11,6 +11,11 @@ You need the following to build and run the project:
 -   Rust (https://www.rust-lang.org/tools/install)
 -   Wasm-pack (https://rustwasm.github.io/wasm-pack/installer/)
 
+### Windows
+
+On Windows you can run it either through e.g. Git bash, or if you want to run it from the Command Prompt, then
+you must add `sh` on your PATH for the proto build to run. You can get `sh` bundled with Git bash.
+
 ## Install
 
 Clone the repo via git.
