@@ -30,7 +30,6 @@ export default function DisplaySimpleTransfer({
                 {transaction.payload.toAddress}
             </List.Item>
             <List.Item>
-                {' '}
                 Amount:
                 <Header>{displayAsGTU(transaction.payload.amount)}</Header>
             </List.Item>
