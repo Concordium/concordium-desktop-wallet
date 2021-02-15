@@ -10,9 +10,9 @@ import {
 import { updateTransactions } from '../../features/TransactionSlice';
 import styles from './Accounts.module.scss';
 import routes from '../../constants/routes.json';
-import moreActions from './MoreActions';
-import simpleTransfer from '../../components/Transfers/SimpleTransfer';
-import transferHistory from './TransferHistory';
+import MoreActions from './MoreActions';
+import SimpleTransfer from '../../components/Transfers/SimpleTransfer';
+import TransferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
 import DecryptComponent from './DecryptComponent';
 
@@ -68,15 +68,20 @@ export default function AccountView() {
                 <Switch>
                     <Route
                         path={routes.ACCOUNTS_MORE}
-                        component={() => moreActions(account, accountInfo)}
+                        render={() => (
+                            <MoreActions
+                                account={account}
+                                accountInfo={accountInfo}
+                            />
+                        )}
                     />
                     <Route
                         path={routes.ACCOUNTS_SIMPLETRANSFER}
-                        component={() => simpleTransfer(account)}
+                        render={() => <SimpleTransfer account={account} />}
                     />
                     <Route
                         path={routes.DEFAULT}
-                        component={() => transferHistory(account)}
+                        render={() => <TransferHistory account={account} />}
                     />
                 </Switch>
                 <DecryptComponent account={account} />

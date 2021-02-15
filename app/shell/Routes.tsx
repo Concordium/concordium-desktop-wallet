@@ -19,12 +19,17 @@ import MultiSignatureCreateProposalView from '../pages/multisig/MultiSignatureCr
 import SubmittedProposalView from '../pages/multisig/SubmittedProposalView';
 import ExportImport from '../pages/exportImport/ExportImportPage';
 import PerformImport from '../pages/exportImport/PerformImport';
+import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
 
 export default function Routes(): JSX.Element {
     return (
         <App>
             <Switch>
                 <Route path={routes.TEST} component={TestPage} />
+                <Route
+                    path={routes.SUBMITTRANSFER}
+                    component={SubmitTransfer}
+                />
                 <Route path={routes.ACCOUNTS} component={AccountPage} />
                 <Route
                     path={routes.IDENTITYISSUANCE}

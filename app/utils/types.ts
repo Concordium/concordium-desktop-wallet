@@ -437,7 +437,10 @@ export interface UpdateInstruction<T extends UpdateInstructionPayload> {
     signatures: string[];
 }
 
-export type UpdateInstructionPayload = ExchangeRate;
+export type UpdateInstructionPayload =
+    | ExchangeRate
+    | TransactionFeeDistribution
+    | FoundationAccount;
 
 export type Transaction =
     | AccountTransaction
@@ -480,9 +483,21 @@ export function isExchangeRate(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<ExchangeRate> {
     return (
-        'numerator' in transaction.payload &&
-        'denominator' in transaction.payload
+        UpdateType.UpdateMicroGTUPerEuro === transaction.type ||
+        UpdateType.UpdateEuroPerEnergy === transaction.type
     );
+}
+
+export function isTransactionFeeDistribution(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<TransactionFeeDistribution> {
+    return UpdateType.UpdateTransactionFeeDistribution === transaction.type;
+}
+
+export function isFoundationAccount(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<FoundationAccount> {
+    return UpdateType.UpdateFoundationAccount === transaction.type;
 }
 
 /**
@@ -539,6 +554,22 @@ export enum MultiSignatureMenuItems {
 export interface ExchangeRate {
     numerator: Word64;
     denominator: Word64;
+}
+
+/**
+ * A reward fraction with a resolution of 1/100000, i.e. the
+ * denominator is implicitly 100000, and the interface therefore
+ * only contains the numerator value.
+ */
+type RewardFraction = Word32;
+
+export interface TransactionFeeDistribution {
+    baker: RewardFraction;
+    gasAccount: RewardFraction;
+}
+
+export interface FoundationAccount {
+    address: string;
 }
 
 export interface TransactionDetails {

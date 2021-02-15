@@ -1,25 +1,25 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernancePath } from '../../features/ledger/Path';
-import MicroGtuPerEuroView from '../../pages/multisig/MicroGtuPerEuroView';
+import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
 import {
-    ExchangeRate,
-    isExchangeRate,
+    FoundationAccount,
+    isFoundationAccount,
     TransactionHandler,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../types';
-import { serializeExchangeRate } from '../UpdateSerialization';
+import { serializeFoundationAccount } from '../UpdateSerialization';
 
-export default class MicroGtuPerEuroHandler
+export default class FoundationAccountHandler
     implements
         TransactionHandler<
-            UpdateInstruction<ExchangeRate>,
+            UpdateInstruction<FoundationAccount>,
             ConcordiumLedgerClient
         > {
-    transaction: UpdateInstruction<ExchangeRate>;
+    transaction: UpdateInstruction<FoundationAccount>;
 
     constructor(transaction: UpdateInstruction<UpdateInstructionPayload>) {
-        if (isExchangeRate(transaction)) {
+        if (isFoundationAccount(transaction)) {
             this.transaction = transaction;
         } else {
             throw Error('Invalid transaction type was given as input.');
@@ -27,12 +27,12 @@ export default class MicroGtuPerEuroHandler
     }
 
     serializePayload() {
-        return serializeExchangeRate(this.transaction.payload);
+        return serializeFoundationAccount(this.transaction.payload);
     }
 
     signTransaction(ledger: ConcordiumLedgerClient) {
         const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
-        return ledger.signMicroGtuPerEuro(
+        return ledger.signFoundationAccount(
             this.transaction,
             this.serializePayload(),
             path
@@ -40,6 +40,8 @@ export default class MicroGtuPerEuroHandler
     }
 
     view() {
-        return MicroGtuPerEuroView({ exchangeRate: this.transaction.payload });
+        return FoundationAccountView({
+            foundationAccount: this.transaction.payload,
+        });
     }
 }

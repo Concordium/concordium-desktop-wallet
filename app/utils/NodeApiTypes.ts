@@ -1,4 +1,4 @@
-import { ExchangeRate } from './types';
+import { ExchangeRate, TransactionFeeDistribution } from './types';
 
 // This file contains interfaces that matches what is returned
 // from the Concordium Node using GRPC.
@@ -21,6 +21,8 @@ interface UpdateQueue {
 interface UpdateQueues {
     microGTUPerEuro: UpdateQueue;
     euroPerEnergy: UpdateQueue;
+    transactionFeeDistribution: UpdateQueue;
+    foundationAccount: UpdateQueue;
 }
 
 interface Authorization {
@@ -31,11 +33,18 @@ interface Authorization {
 interface Authorizations {
     microGTUPerEuro: Authorization;
     euroPerEnergy: Authorization;
+    transactionFeeDistribution: Authorization;
+    foundationAccount: Authorization;
+}
+
+interface RewardParameters {
+    transactionFeeDistribution: TransactionFeeDistribution;
 }
 
 interface ChainParameters {
     microGTUPerEuro: ExchangeRate;
     euroPerEnergy: ExchangeRate;
+    rewardParameters: RewardParameters;
 }
 
 interface Updates {
@@ -44,6 +53,15 @@ interface Updates {
     updateQueues: UpdateQueues;
 }
 
+interface MintEvent {
+    tag: string;
+    foundationAccount: string;
+    mintPlatformDevleopmentCharge: number;
+    mintFinalizationReward: number;
+    mintBakingReward: number;
+}
+
 export interface BlockSummary {
     updates: Updates;
+    specialEvents: [MintEvent];
 }

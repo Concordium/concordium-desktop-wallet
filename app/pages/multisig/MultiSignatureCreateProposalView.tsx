@@ -10,6 +10,8 @@ import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
 import UpdateEuroPerEnergy from './UpdateEuroPerEnergy';
+import UpdateTransactionFeeDistribution from './UpdateTransactionFeeDistribution';
+import UpdateFoundationAccount from './UpdateFoundationAccount';
 
 interface Location {
     state: UpdateType;
@@ -64,6 +66,20 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
             case UpdateType.UpdateEuroPerEnergy:
                 return (
                     <UpdateEuroPerEnergy
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                );
+            case UpdateType.UpdateTransactionFeeDistribution:
+                return (
+                    <UpdateTransactionFeeDistribution
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                );
+            case UpdateType.UpdateFoundationAccount:
+                return (
+                    <UpdateFoundationAccount
                         blockSummary={blockSummary}
                         forwardTransaction={forwardTransactionToSigningPage}
                     />

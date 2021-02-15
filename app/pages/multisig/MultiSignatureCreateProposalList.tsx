@@ -11,6 +11,11 @@ import { UpdateType } from '../../utils/types';
 const multiSigTransactionTypesMap: [UpdateType, string][] = [
     [UpdateType.UpdateMicroGTUPerEuro, 'Update µGTU per euro'],
     [UpdateType.UpdateEuroPerEnergy, 'Update Euro per energy'],
+    [
+        UpdateType.UpdateTransactionFeeDistribution,
+        'Update transaction fee distribution',
+    ],
+    [UpdateType.UpdateFoundationAccount, 'Update foundation account address'],
 ];
 
 /**
