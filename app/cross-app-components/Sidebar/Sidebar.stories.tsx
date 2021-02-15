@@ -1,20 +1,58 @@
 /* eslint-disable import/prefer-default-export */
-import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
+import { Meta, Story } from '@storybook/react/types-6-0';
 import { BrowserRouter } from 'react-router-dom';
 
 import Sidebar, { SidebarLink, SidebarProps } from './Sidebar';
+import MainLayout from '../MainLayout';
+
+enum Backgrounds {
+    LIGHT = '#fbfbf9',
+    DARK = '#000',
+}
 
 export default {
-    title: 'Example/Sidebar',
+    title: 'Cross App Components/Sidebar',
     component: Sidebar,
+    parameters: {
+        backgrounds: {
+            default: 'light',
+            values: [
+                {
+                    name: 'light',
+                    value: Backgrounds.LIGHT,
+                },
+                {
+                    name: 'dark',
+                    value: Backgrounds.DARK,
+                },
+            ],
+        },
+    },
 } as Meta;
 
-const Template: Story<SidebarProps> = (args) => (
-    <BrowserRouter>
-        <Sidebar {...args} style={{ position: 'relative', height: 'auto' }} />
-    </BrowserRouter>
-);
+const Template: Story<SidebarProps> = (args, { globals }) => {
+    const isDarkBg = globals?.backgrounds?.value === Backgrounds.DARK;
+
+    return (
+        <div className={isDarkBg ? 'theme-dark' : 'theme-light'}>
+            <BrowserRouter>
+                <Sidebar {...args} style={{ position: 'absolute' }} />
+                <MainLayout>
+                    <h1
+                        style={{
+                            textAlign: 'center',
+                            margin: 0,
+                            paddingTop: '1em',
+                        }}
+                    >
+                        Page content
+                    </h1>
+                </MainLayout>
+            </BrowserRouter>
+        </div>
+    );
+};
 
 const links: SidebarLink[] = [
     {
@@ -54,7 +92,7 @@ const links: SidebarLink[] = [
     },
 ];
 
-export const Test = Template.bind({});
-Test.args = {
+export const Light = Template.bind({});
+Light.args = {
     links,
 };
