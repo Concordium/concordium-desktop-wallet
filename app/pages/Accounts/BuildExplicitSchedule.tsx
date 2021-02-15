@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { Label, List, Button, Input, Card, Form } from 'semantic-ui-react';
+import {
+    Header,
+    Label,
+    List,
+    Button,
+    Input,
+    Card,
+    Form,
+} from 'semantic-ui-react';
 import { Schedule, TimeStampUnit } from '../../utils/types';
 import { displayAsGTU, isValidGTUString, toMicroUnits } from '../../utils/gtu';
 import { parseTime } from '../../utils/timeHelpers';
@@ -15,6 +23,8 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
     const [schedule, setSchedule] = useState<Schedule>([]);
     const [pointAmount, setAmount] = useState<string>('');
     const [usedAmount, setUsedAmount] = useState<bigint>(0n);
+
+    const [adding, setAdding] = useState<boolean>(false);
 
     const [pointTimestamp, setTimestamp] = useState<number>(getNow()); // TODO Decide appropiate default
 
@@ -36,6 +46,40 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
         setSchedule(schedule.slice(0, index).concat(schedule.slice(index + 1)));
     }
 
+    const addSchedulePointForm = (
+        <Form onSubmit={addToSchedule}>
+            <Label>Amount:</Label>
+            <Input
+                fluid
+                name="name"
+                placeholder="Enter Amount"
+                value={pointAmount}
+                onChange={(e) => setAmount(e.target.value)}
+                autoFocus
+            />
+            <Label>Release time:</Label>
+            <Input
+                fluid
+                name="name"
+                placeholder="Enter Release time"
+                value={pointTimestamp}
+                onChange={(e) => setTimestamp(parseInt(e.target.value, 10))}
+                autoFocus
+                type="number"
+            />
+            <Button
+                disabled={
+                    !isValidGTUString(pointAmount) ||
+                    toMicroUnits(pointAmount) + usedAmount > amount
+                }
+                type="submit"
+            >
+                {' '}
+                Add{' '}
+            </Button>
+        </Form>
+    );
+
     return (
         <>
             <List.Item>Releases:</List.Item>
@@ -45,39 +89,15 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
             </List.Item>
             <List.Item>
                 <Card>
-                    <Form onSubmit={addToSchedule}>
-                        <Label>Amount:</Label>
-                        <Input
-                            fluid
-                            name="name"
-                            placeholder="Enter Amount"
-                            value={pointAmount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            autoFocus
-                        />
-                        <Label>Release time:</Label>
-                        <Input
-                            fluid
-                            name="name"
-                            placeholder="Enter Release time"
-                            value={pointTimestamp}
-                            onChange={(e) =>
-                                setTimestamp(parseInt(e.target.value, 10))
-                            }
-                            autoFocus
-                            type="number"
-                        />
+                    <Header>
+                        Add release to schedule
                         <Button
-                            disabled={
-                                !isValidGTUString(pointAmount) ||
-                                toMicroUnits(pointAmount) + usedAmount > amount
-                            }
-                            type="submit"
-                        >
-                            {' '}
-                            Add{' '}
-                        </Button>
-                    </Form>
+                            compact
+                            content={adding ? 'x' : '+'}
+                            onClick={() => setAdding(!adding)}
+                        />
+                    </Header>
+                    {adding ? addSchedulePointForm : null}
                 </Card>
             </List.Item>
             <List.Item>
