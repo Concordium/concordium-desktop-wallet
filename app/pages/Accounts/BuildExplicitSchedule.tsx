@@ -44,7 +44,16 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
     }
 
     function removeFromSchedule(index: number) {
+        setUsedAmount(usedAmount - BigInt(schedule[index].amount));
         setSchedule(schedule.slice(0, index).concat(schedule.slice(index + 1)));
+    }
+
+    function validateCurrentAmount(): boolean {
+        if (pointAmount && isValidGTUString(pointAmount)) {
+            const value = toMicroUnits(pointAmount);
+            return value > 0n && value + usedAmount <= amount;
+        }
+        return false;
     }
 
     const addSchedulePointForm = (
@@ -64,13 +73,7 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
                 value={pointTimestamp}
                 setValue={setTimestamp}
             />
-            <Button
-                disabled={
-                    !isValidGTUString(pointAmount) ||
-                    toMicroUnits(pointAmount) + usedAmount > amount
-                }
-                type="submit"
-            >
+            <Button disabled={!validateCurrentAmount()} type="submit">
                 Add
             </Button>
         </Form>
