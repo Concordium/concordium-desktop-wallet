@@ -6,7 +6,6 @@
 const path = require('path');
 const webpack = require('webpack');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const { dependencies: externals } = require('../../app/package.json');
 
@@ -30,11 +29,18 @@ module.exports = {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
                 include: /app/,
-                loader: 'ts-loader',
-                options: {
-                    // disable type checker - we will use it in fork plugin
-                    transpileOnly: true,
-                },
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            plugins: [
+                                '@babel/plugin-proposal-optional-chaining',
+                                '@babel/plugin-proposal-nullish-coalescing-operator',
+                            ],
+                        },
+                    },
+                    'ts-loader',
+                ],
             },
         ],
     },
@@ -66,6 +72,5 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, '.'),
         }),
-        new ForkTsCheckerWebpackPlugin(),
     ],
 };
