@@ -1,6 +1,9 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import clsx from 'clsx';
+
 import { version } from '../../package.json';
+import { ClassNameAndStyle } from '../../utils/types';
 
 import styles from './Sidebar.module.scss';
 
@@ -10,13 +13,13 @@ export interface SidebarLink {
     title: string;
 }
 
-export interface SidebarProps {
+export interface SidebarProps extends ClassNameAndStyle {
     links: SidebarLink[];
 }
 
-export default function Sidebar({ links }: SidebarProps) {
+export default function Sidebar({ links, className, style }: SidebarProps) {
     return (
-        <nav className={styles.root}>
+        <nav className={clsx(styles.root, className)} style={style}>
             <div className={styles.items}>
                 {links.map((l) => (
                     <NavLink

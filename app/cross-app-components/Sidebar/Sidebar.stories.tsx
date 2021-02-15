@@ -12,43 +12,43 @@ export default {
 
 const Template: Story<SidebarProps> = (args) => (
     <BrowserRouter>
-        <Sidebar {...args} />
+        <Sidebar {...args} style={{ position: 'relative', height: 'auto' }} />
     </BrowserRouter>
 );
 
 const links: SidebarLink[] = [
     {
-        route: '',
+        route: '/',
         title: 'Home',
         icon: <i />,
     },
     {
-        route: '',
+        route: '/1',
         title: 'Accounts',
         icon: <i />,
     },
     {
-        route: '',
+        route: '/2',
         title: 'Identities',
         icon: <i />,
     },
     {
-        route: '',
+        route: '/3',
         title: 'Address Book',
         icon: <i />,
     },
     {
-        route: '',
+        route: '/4',
         title: 'Export/Import',
         icon: <i />,
     },
     {
-        route: '',
+        route: '/5',
         title: 'Multi Signature Transactions',
         icon: <i />,
     },
     {
-        route: '',
+        route: '/6',
         title: 'Settings',
         icon: <i />,
     },
