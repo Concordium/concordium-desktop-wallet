@@ -24,6 +24,14 @@ function TransactionView({ transaction, returnFunction }: Props) {
                 <TransactionListElement transaction={transaction} />
                 <Divider />
             </List.Item>
+            {transaction.success === null || transaction.success ? null : (
+                <List.Item>
+                    <Header color="red" textAlign="center">
+                        Failed: {transaction.rejectReason}
+                    </Header>
+                    <Divider />
+                </List.Item>
+            )}
             <CopiableListElement
                 title="From Address:"
                 value={transaction.fromAddress}

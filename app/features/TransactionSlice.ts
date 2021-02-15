@@ -287,17 +287,26 @@ export async function confirmTransaction(
     transactionHash: string,
     dataObject: Record<string, TransactionEvent>
 ) {
-    const success = Object.entries(dataObject.outcomes).reduce(
-        (accu, [, event]) => accu && event.result.outcome === 'success',
+    const outcomes = Object.values(dataObject.outcomes);
+    const success = outcomes.reduce(
+        (accu, event) => accu && event.result.outcome === 'success',
         true
     );
-    const cost = Object.entries(dataObject.outcomes).reduce(
-        (accu, [, event]) => accu + event.cost,
-        0
-    );
+    const cost = outcomes.reduce((accu, event) => accu + event.cost, 0);
+    let rejectReason;
+    if (!success) {
+        rejectReason = outcomes.find(
+            (event) => event.result.outcome !== 'success'
+        ).result.rejectReason.tag;
+    }
     return updateTransaction(
         { transactionHash },
-        { status: TransactionStatus.Finalized, cost: cost.toString(), success }
+        {
+            status: TransactionStatus.Finalized,
+            cost: cost.toString(),
+            success,
+            rejectReason,
+        }
     );
 }
 
