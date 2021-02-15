@@ -11,6 +11,7 @@ import {
 import { Schedule, TimeStampUnit } from '../../utils/types';
 import { displayAsGTU, isValidGTUString, toMicroUnits } from '../../utils/gtu';
 import { parseTime } from '../../utils/timeHelpers';
+import InputTimeStamp from '../../components/InputTimeStamp';
 
 interface Props {
     submitSchedule(schedule: Schedule): void;
@@ -58,14 +59,10 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
                 autoFocus
             />
             <Label>Release time:</Label>
-            <Input
-                fluid
-                name="name"
+            <InputTimeStamp
                 placeholder="Enter Release time"
                 value={pointTimestamp}
-                onChange={(e) => setTimestamp(parseInt(e.target.value, 10))}
-                autoFocus
-                type="number"
+                setValue={setTimestamp}
             />
             <Button
                 disabled={
@@ -74,8 +71,7 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
                 }
                 type="submit"
             >
-                {' '}
-                Add{' '}
+                Add
             </Button>
         </Form>
     );

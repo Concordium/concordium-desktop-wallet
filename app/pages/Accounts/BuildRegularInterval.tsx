@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Label, List, Button, Input } from 'semantic-ui-react';
 import { Schedule } from '../../utils/types';
 import { createRegularIntervalSchedule } from '../../utils/transactionHelpers';
+import InputTimeStamp from '../../components/InputTimeStamp';
 
 const second = 1000;
 
@@ -70,14 +71,10 @@ export default function RegularInterval({ submitSchedule, amount }: Props) {
             </List.Item>
             <List.Item>
                 <Label>Enter starting time:</Label>
-                <Input
-                    fluid
-                    name="name"
+                <InputTimeStamp
                     placeholder="Enter Starting time"
                     value={startTime}
-                    onChange={(e) => setStartTime(parseInt(e.target.value, 10))}
-                    autoFocus
-                    type="number"
+                    setValue={setStartTime}
                 />
             </List.Item>
             <List.Item>
