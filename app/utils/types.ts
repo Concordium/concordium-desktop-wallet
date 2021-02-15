@@ -6,6 +6,7 @@ export type Hex = string;
 type Proofs = Hex;
 type Word64 = BigInt;
 type Word32 = number;
+type Word8 = number;
 
 export enum SchemeId {
     Ed25519 = 0,
@@ -440,7 +441,8 @@ export interface UpdateInstruction<T extends UpdateInstructionPayload> {
 export type UpdateInstructionPayload =
     | ExchangeRate
     | TransactionFeeDistribution
-    | FoundationAccount;
+    | FoundationAccount
+    | MintDistribution;
 
 export type Transaction =
     | AccountTransaction
@@ -498,6 +500,12 @@ export function isFoundationAccount(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<FoundationAccount> {
     return UpdateType.UpdateFoundationAccount === transaction.type;
+}
+
+export function isMintDistribution(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<MintDistribution> {
+    return UpdateType.UpdateMintDistribution === transaction.type;
 }
 
 /**
@@ -561,7 +569,7 @@ export interface ExchangeRate {
  * denominator is implicitly 100000, and the interface therefore
  * only contains the numerator value.
  */
-type RewardFraction = Word32;
+export type RewardFraction = Word32;
 
 export interface TransactionFeeDistribution {
     baker: RewardFraction;
@@ -570,6 +578,17 @@ export interface TransactionFeeDistribution {
 
 export interface FoundationAccount {
     address: string;
+}
+
+export interface MintRate {
+    mantissa: Word32;
+    exponent: Word8;
+}
+
+export interface MintDistribution {
+    mintPerSlot: MintRate;
+    bakingReward: RewardFraction;
+    finalizationReward: RewardFraction;
 }
 
 export interface TransactionDetails {
