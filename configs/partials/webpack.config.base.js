@@ -29,7 +29,18 @@ module.exports = {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
                 include: /app/,
-                loader: 'ts-loader',
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            plugins: [
+                                '@babel/plugin-proposal-optional-chaining',
+                                '@babel/plugin-proposal-nullish-coalescing-operator',
+                            ],
+                        },
+                    },
+                    'ts-loader',
+                ],
             },
         ],
     },
