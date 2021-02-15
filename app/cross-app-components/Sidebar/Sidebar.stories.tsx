@@ -29,30 +29,35 @@ export default {
             ],
         },
     },
+    decorators: [
+        (StoryComponent, { globals }) => {
+            const isDarkBg = globals?.backgrounds?.value === Backgrounds.DARK;
+
+            return (
+                <div className={isDarkBg ? 'theme-dark' : 'theme-light'}>
+                    <BrowserRouter>
+                        {StoryComponent()}
+                        <MainLayout>
+                            <h1
+                                style={{
+                                    textAlign: 'center',
+                                    margin: 0,
+                                    paddingTop: '1em',
+                                }}
+                            >
+                                Page content
+                            </h1>
+                        </MainLayout>
+                    </BrowserRouter>
+                </div>
+            );
+        },
+    ],
 } as Meta;
 
-const Template: Story<SidebarProps> = (args, { globals }) => {
-    const isDarkBg = globals?.backgrounds?.value === Backgrounds.DARK;
-
-    return (
-        <div className={isDarkBg ? 'theme-dark' : 'theme-light'}>
-            <BrowserRouter>
-                <Sidebar {...args} style={{ position: 'absolute' }} />
-                <MainLayout>
-                    <h1
-                        style={{
-                            textAlign: 'center',
-                            margin: 0,
-                            paddingTop: '1em',
-                        }}
-                    >
-                        Page content
-                    </h1>
-                </MainLayout>
-            </BrowserRouter>
-        </div>
-    );
-};
+const Template: Story<SidebarProps> = (args) => (
+    <Sidebar {...args} style={{ position: 'absolute' }} />
+);
 
 const links: SidebarLink[] = [
     {
