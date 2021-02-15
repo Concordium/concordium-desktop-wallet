@@ -217,7 +217,7 @@ export async function updateTransactions(account: Account) {
 
 type TypeSpecific = Pick<
     TransferTransaction,
-    'transactionKind' | 'total' | 'subtotal'
+    'transactionKind' | 'total' | 'subtotal' | 'schedule'
 >;
 function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
@@ -240,6 +240,7 @@ function convertScheduledTransfer(
         transactionKind: TransactionKindString.TransferWithSchedule,
         total: (-estimatedTotal).toString(),
         subtotal: (-amount).toString(),
+        schedule: JSON.stringify(transaction.payload.schedule),
     };
 }
 

@@ -276,6 +276,7 @@ export interface TransferTransaction {
     cost?: string;
     details?: string;
     encrypted?: string;
+    schedule?: string;
     fromAddress: Hex;
     toAddress: Hex;
     status: TransactionStatus;
