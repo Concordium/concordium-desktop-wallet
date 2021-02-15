@@ -3,10 +3,12 @@
 .root {
     display: flex;
     justify-content: center;
+    align-items: center;
     margin: 0 20px;
     padding: 0 20px;
     height: $page-header-height;
     border-bottom: 1px solid $color-lines;
+    position: relative;
 }
 
 .button {
@@ -17,4 +19,14 @@
     &:hover, &:focus {
         background-color: $color-off-white;
     }
+}
+
+.leftButtons {
+    position: absolute;
+    left: 0;
+}
+
+.rightButtons {
+    position: absolute;
+    right: 0;
 }
