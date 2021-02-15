@@ -183,14 +183,14 @@ export default function UpdateMintDistribution({
                         value={mintDistribution.bakingReward}
                         total={rewardFractionResolution}
                         progress="percent"
-                        label="Current baking reward fraction"
+                        label="New baking reward fraction"
                         color={ColorType.Blue}
                     />
                     <Progress
                         value={mintDistribution.finalizationReward}
                         total={rewardFractionResolution}
                         progress="percent"
-                        label="Current finalization reward fraction"
+                        label="New finalization reward fraction"
                         color={ColorType.Teal}
                     />
                     <Progress
@@ -201,7 +201,7 @@ export default function UpdateMintDistribution({
                         }
                         total={rewardFractionResolution}
                         progress="percent"
-                        label="Current foundation reward fraction"
+                        label="New foundation reward fraction"
                         color={ColorType.Grey}
                     />
                     <Form>
