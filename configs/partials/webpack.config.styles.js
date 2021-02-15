@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { fromRoot } = require('../helpers/pathHelpers');
 
 const STYLE_LOADER_NAME = 'style-loader';
 const TYPINGS_LOADER_NAME = '@teamsupercell/typings-for-css-modules-loader';
@@ -20,15 +19,6 @@ const extractLoader = {
 const getOutputLoader = (isProd) => (isProd ? extractLoader : styleLoader);
 
 module.exports = (isProd) => ({
-    resolve: {
-        // Followed instructions linked from official documentation: https://marekurbanowicz.medium.com/how-to-customize-fomantic-ui-with-less-and-webpack-applicable-to-semantic-ui-too-fbf98a74506c
-        alias: {
-            '../../theme.config$': fromRoot(
-                './app/styles/semantic-ui/theme.config'
-            ),
-            '../semantic-ui/site': fromRoot('./app/styles/semantic-ui/site'),
-        },
-    },
     module: {
         rules: [
             // Extract all .global.css to style.css as is
