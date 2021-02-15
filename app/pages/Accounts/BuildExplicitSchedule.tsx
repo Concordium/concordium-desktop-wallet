@@ -20,6 +20,9 @@ interface Props {
 
 const getNow = () => new Date().getTime();
 
+/**
+ * Component to build a "explicit" schedule, by adding invidual releases.
+ */
 export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
     const [schedule, setSchedule] = useState<Schedule>([]);
     const [pointAmount, setAmount] = useState<string>('');
@@ -87,10 +90,11 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
                 schedule)
             </List.Item>
             <List.Item>
-                <Card>
+                <Card centered>
                     <Header>
                         Add release to schedule
                         <Button
+                            floated="right"
                             compact
                             content={adding ? 'x' : '+'}
                             onClick={() => setAdding(!adding)}

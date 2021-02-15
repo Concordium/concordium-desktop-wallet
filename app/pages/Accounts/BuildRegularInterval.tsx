@@ -23,6 +23,9 @@ interface Props {
     amount: bigint;
 }
 
+/**
+ * Component to build a "regular interval" schedule.
+ */
 export default function RegularInterval({ submitSchedule, amount }: Props) {
     const [releases, setReleases] = useState<number>(1);
     const [chosenInterval, setChosenInterval] = useState<Interval>(
