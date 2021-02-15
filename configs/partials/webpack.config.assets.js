@@ -1,4 +1,10 @@
-module.exports = {
+/* eslint-disable @typescript-eslint/no-var-requires */
+const path = require('path');
+
+const pathToSvgAssets = path.resolve(__dirname, '../../app/assets/svg');
+
+module.exports.pathToSvgAssets = pathToSvgAssets;
+module.exports.config = {
     module: {
         rules: [
             // WOFF Font
@@ -42,13 +48,8 @@ module.exports = {
             // SVG Font
             {
                 test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'image/svg+xml',
-                    },
-                },
+                include: pathToSvgAssets,
+                use: ['@svgr/webpack'],
             },
             // Common Image Formats
             {

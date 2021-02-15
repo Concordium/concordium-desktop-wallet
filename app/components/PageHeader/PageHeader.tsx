@@ -1,27 +1,35 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useMemo } from 'react';
 
 import PageHeaderButton, { PageHeaderButtonProps } from './PageHeaderButton';
 
 import styles from './PageHeader.module.scss';
 
-interface PageHeaderProps {
+export interface PageHeaderProps {
     children: ReactElement | ReactElement[];
 }
 
-export default function PageHeader({ children }: PageHeaderProps): JSX.Element {
-    const reactChildren = React.Children.toArray(children) as ReactElement[];
+function isPageHeaderButton(
+    el: ReactElement
+): el is ReactElement<PageHeaderButtonProps> {
+    return el.type === PageHeaderButton;
+}
 
-    const rightButtons = reactChildren.filter(
-        (c) =>
-            c.type === PageHeaderButton &&
-            (c.props as PageHeaderButtonProps).align === 'right'
-    );
-    const leftButtons = reactChildren.filter(
-        (c) =>
-            c.type === PageHeaderButton &&
-            (c.props as PageHeaderButtonProps).align === 'left'
-    );
-    const heading = reactChildren.filter((c) => c.type !== PageHeaderButton);
+function PageHeader({ children }: PageHeaderProps): JSX.Element {
+    const { heading, rightButtons, leftButtons } = useMemo(() => {
+        const reactChildren = React.Children.toArray(
+            children
+        ) as ReactElement[];
+
+        return {
+            heading: reactChildren.filter((c) => !isPageHeaderButton(c)),
+            rightButtons: reactChildren.filter(
+                (c) => isPageHeaderButton(c) && c.props.align === 'right'
+            ),
+            leftButtons: reactChildren.filter(
+                (c) => isPageHeaderButton(c) && c.props.align === 'left'
+            ),
+        };
+    }, [children]);
 
     return (
         <header className={styles.root}>
@@ -33,3 +41,5 @@ export default function PageHeader({ children }: PageHeaderProps): JSX.Element {
 }
 
 PageHeader.Button = PageHeaderButton;
+
+export default PageHeader;

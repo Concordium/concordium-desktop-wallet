@@ -15,18 +15,38 @@
     height: 39px;
     padding: 0 10px;
     border-radius: 5px;
+    background-color: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover, &:focus {
         background-color: $color-off-white;
+        outline: none;
+    }
+
+    .leftButtons & {
+        margin-left: 10px;
+    }
+
+    .rightButtons & {
+        margin-right: 10px;
     }
 }
 
-.leftButtons {
+.leftButtons,
+.rightButtons {
     position: absolute;
-    left: 0;
+    display: flex;
+    align-items: center;
+}
+
+.leftButtons {
+    left: 10px;
 }
 
 .rightButtons {
-    position: absolute;
-    right: 0;
+    right: 10px;
+    
 }

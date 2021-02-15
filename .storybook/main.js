@@ -1,4 +1,5 @@
 const { baseConfig, assetsConfig, stylesConfig } = require('../configs/partials');
+const { pathToSvgAssets } = require('../configs/partials/webpack.config.assets');
 
 module.exports = {
   "stories": [
@@ -12,11 +13,13 @@ module.exports = {
     // `configType` has a value of 'DEVELOPMENT' or 'PRODUCTION'
     // You can change the configuration based on that.
     // 'PRODUCTION' is used when building the static version of storybook.
-    const stylesConfigDev = stylesConfig(false);
+    const fileLoaderRule = config.module.rules.find(rule => rule.test.test('.svg'));
+    fileLoaderRule.exclude = pathToSvgAssets;
+
     config.module.rules = [
       ...(config.module.rules || []),
       ...baseConfig.module.rules,
-      ...stylesConfigDev.module.rules,
+      ...stylesConfig(false).module.rules,
       ...assetsConfig.module.rules
     ];
 
