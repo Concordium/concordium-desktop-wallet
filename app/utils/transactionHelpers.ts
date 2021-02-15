@@ -84,7 +84,7 @@ export async function createSimpleTransferTransaction(
     return transferTransaction;
 }
 
-export function createSchedule(
+export function createRegularIntervalSchedule(
     totalAmount: bigint,
     releases: number,
     starting: number,

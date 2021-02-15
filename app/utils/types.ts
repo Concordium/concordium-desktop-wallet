@@ -153,9 +153,10 @@ export interface SchedulePoint {
     timestamp: string;
     amount: string;
 }
+export type Schedule = SchedulePoint[];
 
 export interface ScheduledTransferPayload {
-    schedule: SchedulePoint[];
+    schedule: Schedule;
     toAddress: string;
 }
 
