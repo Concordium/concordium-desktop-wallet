@@ -2,8 +2,8 @@ import React from 'react';
 import { Grid } from 'semantic-ui-react';
 
 interface Props {
-    left: string;
-    right: string;
+    left: string | JSX.Element;
+    right: string | JSX.Element;
     onClick?(e: Event): void;
 }
 
