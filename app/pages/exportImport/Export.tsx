@@ -4,11 +4,8 @@ import { Button, Header, Segment, Divider } from 'semantic-ui-react';
 import { encrypt } from '../../utils/encryption';
 import { validatePassword } from '../../utils/importHelpers';
 import { saveFile } from '../../utils/FileHelper';
-import {
-    loadIdentities,
-    identitiesSelector,
-} from '../../features/IdentitySlice';
-import { loadAccounts, accountsSelector } from '../../features/AccountSlice';
+import { identitiesSelector } from '../../features/IdentitySlice';
+import { accountsSelector } from '../../features/AccountSlice';
 import {
     loadAddressBook,
     addressBookSelector,
@@ -30,8 +27,6 @@ export default function Export() {
     const [modalMessage, setModalMessage] = useState<string>('');
 
     useEffect(() => {
-        loadAccounts(dispatch);
-        loadIdentities(dispatch);
         loadAddressBook(dispatch);
     }, [dispatch]);
 
