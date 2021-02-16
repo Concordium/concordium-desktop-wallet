@@ -94,11 +94,7 @@ export default function SubmitTransfer({ location }: Props) {
                 </Container>
                 <Grid columns={2} divided textAlign="center" padded>
                     <Grid.Column>
-                        <TransactionDetails
-                            transaction={transaction}
-                            fromName={recipient.name}
-                            toName={account.name}
-                        />
+                        <TransactionDetails transaction={transaction} />
                     </Grid.Column>
                     <Grid.Column>
                         <LedgerComponent ledgerCall={ledgerSignTransfer} />

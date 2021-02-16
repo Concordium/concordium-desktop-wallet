@@ -18,16 +18,12 @@ interface Props {
     transaction:
         | UpdateInstruction<UpdateInstructionPayload>
         | AccountTransaction;
-    toName?: string;
-    fromName?: string;
 }
 
 function generateView(
     transaction:
         | UpdateInstruction<UpdateInstructionPayload>
-        | AccountTransaction,
-    toName?: string,
-    fromName?: string
+        | AccountTransaction
 ) {
     if (instanceOfUpdateInstruction(transaction)) {
         const handler = findHandler(transaction);
@@ -35,13 +31,7 @@ function generateView(
     }
     if (instanceOfAccountTransaction(transaction)) {
         if (instanceOfSimpleTransfer(transaction)) {
-            return (
-                <SimpleTransferDetails
-                    transaction={transaction}
-                    toName={toName}
-                    fromName={fromName}
-                />
-            );
+            return <SimpleTransferDetails transaction={transaction} />;
         }
     }
     throw new Error(`Unsupported transaction type: ${transaction}`);
@@ -51,18 +41,12 @@ function generateView(
  * Component that displays the details of a transaction in a human readable way.
  * @param {Transaction} transaction: The transaction, which details is displayed.
  * @param {string} transaction: The transaction, which details is displayed.
- * @param {string} toName: Optional parameter for an AccountTransaction, chosen name of the sender.
- * @param {string} fromName: Optional parameter for an AccountTransaction, chosen name of the recipient.
  */
-export default function TransactionDetails({
-    transaction,
-    toName,
-    fromName,
-}: Props) {
+export default function TransactionDetails({ transaction }: Props) {
     return (
         <Container>
             <Header>Transaction overview</Header>
-            {generateView(transaction, toName, fromName)}
+            {generateView(transaction)}
         </Container>
     );
 }
