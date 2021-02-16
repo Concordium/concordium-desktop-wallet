@@ -2,7 +2,6 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import routes from '../constants/routes.json';
 import HomePage from '../pages/HomePage';
-import TestPage from '../pages/TestPage';
 import AccountPage from '../pages/Accounts/AccountPage';
 import IdentityPage from '../pages/Identities/IdentityPage';
 import AddressBookPage from '../pages/AddressBook/AddressBookPage';
@@ -23,7 +22,6 @@ import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
 export default function Routes(): JSX.Element {
     return (
         <Switch>
-            <Route path={routes.TEST} component={TestPage} />
             <Route path={routes.SUBMITTRANSFER} component={SubmitTransfer} />
             <Route path={routes.ACCOUNTS} component={AccountPage} />
             <Route path={routes.IDENTITYISSUANCE} component={IssuancePage} />

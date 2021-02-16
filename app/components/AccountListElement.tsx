@@ -4,7 +4,7 @@ import { displayAsGTU } from '../utils/gtu';
 import { AccountInfo, Account, AccountStatus } from '../utils/types';
 import { isInitialAccount } from '../utils/accountHelpers';
 import SidedText from './SidedText';
-import pendingImage from '../../resources/pending.svg';
+import pendingImage from '../../resources/svg/pending.svg';
 
 const nop = () => {};
 

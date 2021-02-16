@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
 
-const pathToSvgAssets = path.resolve(__dirname, '../../app/assets/svg');
+const pathToSvgAssets = path.resolve(__dirname, '../../resources/svg');
 
 module.exports.pathToSvgAssets = pathToSvgAssets;
 module.exports.config = {

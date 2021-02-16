@@ -1,7 +1,6 @@
 {
     "HOME": "/",
     "DEFAULT": "/",
-    "TEST": "/test",
     "ACCOUNTS": "/accounts",
     "ACCOUNTS_SIMPLETRANSFER": "/accounts/simple-transfer",
     "ACCOUNTS_SIMPLETRANSFER_PICKRECIPIENT": "/accounts/simple-transfer/pick-recipient",

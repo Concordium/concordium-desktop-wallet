@@ -2,18 +2,16 @@ import React from 'react';
 import Sidebar, { SidebarLink } from '../../cross-app-components/Sidebar';
 import routes from '../../constants/routes.json';
 
+import GtuIcon from '../../../resources/svg/gtu.svg';
+import CogIcon from '../../../resources/svg/cog.svg';
+
 import styles from './Sidebar.module.scss';
 
 const links: SidebarLink[] = [
     {
-        route: routes.TEST,
-        title: 'Home',
-        icon: <i className={styles.icon} />,
-    },
-    {
         route: routes.ACCOUNTS,
         title: 'Accounts',
-        icon: <i className={styles.icon} />,
+        icon: <GtuIcon />,
     },
     {
         route: routes.IDENTITIES,
@@ -38,7 +36,7 @@ const links: SidebarLink[] = [
     {
         route: routes.SETTINGS,
         title: 'Settings',
-        icon: <i className={styles.icon} />,
+        icon: <CogIcon />,
     },
 ];
 

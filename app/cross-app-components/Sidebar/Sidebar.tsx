@@ -4,6 +4,7 @@ import clsx from 'clsx';
 
 import { version } from '../../package.json';
 import { ClassNameAndStyle } from '../../utils/types';
+import LogoIcon from '../../../resources/svg/logo.svg';
 
 import styles from './Sidebar.module.scss';
 
@@ -21,6 +22,13 @@ export default function Sidebar({ links, className, style }: SidebarProps) {
     return (
         <nav className={clsx(styles.root, className)} style={style}>
             <div className={styles.items}>
+                <NavLink
+                    className={styles.item}
+                    to="/"
+                    activeClassName={styles.itemActive}
+                >
+                    <LogoIcon height="56" />
+                </NavLink>
                 {links.map((l) => (
                     <NavLink
                         key={l.route}
