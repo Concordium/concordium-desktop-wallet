@@ -48,6 +48,18 @@ module.exports.config = {
             // SVG Font
             {
                 test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+                exclude: pathToSvgAssets,
+                use: {
+                    loader: 'url-loader',
+                    options: {
+                        limit: 10000,
+                        mimetype: 'image/svg+xml',
+                    },
+                },
+            },
+            // SVG Inline
+            {
+                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
                 include: pathToSvgAssets,
                 use: ['@svgr/webpack'],
             },

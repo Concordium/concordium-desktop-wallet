@@ -26,8 +26,9 @@ export default function Sidebar({ links, className, style }: SidebarProps) {
                     className={styles.item}
                     to="/"
                     activeClassName={styles.itemActive}
+                    exact
                 >
-                    <LogoIcon height="56" />
+                    <LogoIcon height="57" />
                 </NavLink>
                 {links.map((l) => (
                     <NavLink

@@ -3,12 +3,10 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import { hot } from 'react-hot-loader/root';
 import { History } from 'history';
-import { Store } from '../../store/store';
-import Routes from '../Routes';
-import Sidebar from '../Sidebar';
-import MainLayout from '../../cross-app-components/MainLayout';
-
-import styles from './Root.module.scss';
+import { Store } from '../store/store';
+import Routes from './Routes';
+import Sidebar from './Sidebar';
+import MainLayout from '../cross-app-components/MainLayout';
 
 type Props = {
     store: Store;
@@ -19,7 +17,7 @@ const Root = ({ store, history }: Props) => (
     <Provider store={store}>
         <ConnectedRouter history={history}>
             <Sidebar />
-            <MainLayout className={styles.root}>
+            <MainLayout>
                 <Routes />
             </MainLayout>
         </ConnectedRouter>
