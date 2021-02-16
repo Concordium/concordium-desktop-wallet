@@ -108,9 +108,10 @@ function getScheduleReceiver(transaction: IncomingTransaction) {
  * Converts the given transaction into the structure, which is used in the database.
  */
 function convertIncomingTransaction(
-    transaction: IncomingTransaction
-): TransferTransaction {
-    let fromAddress = '';
+    transaction: IncomingTransaction,
+    accountAddress: string
+): Partial<TransferTransaction> {
+    let fromAddress;
     if (transaction.details.transferSource) {
         fromAddress = transaction.details.transferSource;
     } else if (
@@ -118,8 +119,10 @@ function convertIncomingTransaction(
         transaction.origin.address
     ) {
         fromAddress = transaction.origin.address;
+    } else if (transaction.origin.type === OriginType.Self) {
+        fromAddress = accountAddress;
     }
-    let toAddress = '';
+    let toAddress;
     if (transaction.details.transferDestination) {
         toAddress = transaction.details.transferDestination;
     }
@@ -211,7 +214,11 @@ export async function updateTransactions(account: Account) {
     const fromId = (await getMaxTransactionsIdOfAccount(account)) || 0;
     const transactions = await getTransactions(account.address, fromId);
     if (transactions.length > 0) {
-        await insertTransactions(transactions.map(convertIncomingTransaction));
+        await insertTransactions(
+            transactions.map((transaction) =>
+                convertIncomingTransaction(transaction, account.address)
+            )
+        );
     }
 }
 

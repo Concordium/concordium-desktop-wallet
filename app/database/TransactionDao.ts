@@ -31,7 +31,9 @@ export async function updateTransaction(
         .update(updatedValues);
 }
 
-export async function insertTransactions(transactions: TransferTransaction[]) {
+export async function insertTransactions(
+    transactions: Partial<TransferTransaction>[]
+) {
     const table = (await knex())(transactionTable);
     const existingTransactions: TransferTransaction[] = await table.select();
     const [updates, additions] = partition(transactions, (t) =>
