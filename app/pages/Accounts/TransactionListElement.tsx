@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid } from 'semantic-ui-react';
+import { Grid, Icon } from 'semantic-ui-react';
 import { parseTime } from '../../utils/timeHelpers';
 import { getGTUSymbol, displayAsGTU } from '../../utils/gtu';
 import {
@@ -9,6 +9,7 @@ import {
     TransactionKindString,
 } from '../../utils/types';
 import SidedText from '../../components/SidedText';
+import { isFailed } from '../../utils/transactionHelpers';
 
 function getName(transaction: TransferTransaction) {
     switch (transaction.originType) {
@@ -105,7 +106,7 @@ function parseAmount(transaction: TransferTransaction) {
 function displayType(kind: TransactionKindString) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
-            return '(schedule)';
+            return ' (schedule)';
         default:
             return '';
     }
@@ -141,9 +142,14 @@ function TransactionListElement({ transaction }: Props): JSX.Element {
     return (
         <Grid container columns={2}>
             <SidedText
-                left={name.concat(
-                    ` ${displayType(transaction.transactionKind)}`
-                )}
+                left={
+                    <>
+                        {isFailed(transaction) ? (
+                            <Icon name="warning circle" color="red" />
+                        ) : null}
+                        {name.concat(displayType(transaction.transactionKind))}
+                    </>
+                }
                 right={amount}
             />
             <SidedText

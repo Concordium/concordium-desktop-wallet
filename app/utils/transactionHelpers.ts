@@ -186,3 +186,11 @@ export function getScheduledTransferAmount(
         0n
     );
 }
+
+export function isFailed(transaction: TransferTransaction) {
+    return (
+        transaction.success === false ||
+        transaction.success === 0 ||
+        transaction.status === TransactionStatus.Rejected
+    );
+}
