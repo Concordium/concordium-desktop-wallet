@@ -6,6 +6,14 @@ body {
     font-weight: $font-weight-regular;
 }
 
+h1, .h1
+h2, .h2
+h3, .h3
+h5, .h5
+h6, .h6 {
+    line-height: 1.2;
+}
+
 h1, .h1 {
     font-size: $font-size-h1;
     font-weight: $font-weight-regular;

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Grid, Header, Label, Image } from 'semantic-ui-react';
 import { Identity, IdentityStatus } from '../utils/types';
-import pendingImage from '../../resources/svg/pending.svg';
-import successImage from '../../resources/svg/success.svg';
-import rejectedImage from '../../resources/svg/warning.svg';
+import pendingImage from '../../resources/svg/pending_old.svg';
+import successImage from '../../resources/svg/success_old.svg';
+import rejectedImage from '../../resources/svg/warning_old.svg';
 import { formatDate } from '../utils/timeHelpers';
 
 interface Props {
