@@ -5,6 +5,8 @@ import {
     UnpackNestedValue,
     useForm,
 } from 'react-hook-form';
+import { connectWithFormUncontrolled } from './common/connectWithForm';
+import Input from './Input/Input';
 
 interface FormProps<T extends Record<string, unknown>> {
     defaultValues: UnpackNestedValue<DeepPartial<T>>;
@@ -27,3 +29,5 @@ export default function Form<T extends Record<string, unknown>>({
         </FormProvider>
     );
 }
+
+Form.Input = connectWithFormUncontrolled(Input);
