@@ -164,20 +164,26 @@ ipcMain.handle(ipcCommands.saveFileDialog, async (_event, title) => {
     return dialog.showSaveDialog({ title });
 });
 
-// Provides access to save file dialog from renderer processes.
-ipcMain.handle(ipcCommands.grpcSetLocation, async (_event, address, port) => {
-    return setClientLocation(address, port);
-});
-
-// Provides access to save file dialog from renderer processes.
-ipcMain.handle(ipcCommands.grpcCall, async (_event, command, input) => {
-    try {
-        const response = await grpcCall(command, input);
-        return { successful: true, response };
-    } catch (error) {
-        return { successful: false, error };
+// Updates the location of the grpc endpoint.
+ipcMain.handle(
+    ipcCommands.grpcSetLocation,
+    async (_event, address: string, port: string) => {
+        return setClientLocation(address, port);
     }
-});
+);
+
+// Performs the given grpc command, with the given input;
+ipcMain.handle(
+    ipcCommands.grpcCall,
+    async (_event, command: string, input: Record<string, string>) => {
+        try {
+            const response = await grpcCall(command, input);
+            return { successful: true, response };
+        } catch (error) {
+            return { successful: false, error };
+        }
+    }
+);
 
 /**
  * Add event listeners...

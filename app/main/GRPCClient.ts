@@ -12,6 +12,7 @@ import grpcMethods from '../constants/grpcMethods.json';
 
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
+ * N.B. This file belongs to the main thread, and should not be used directly from the renderer thread.
  */
 
 interface GRPCClient extends P2PClient {

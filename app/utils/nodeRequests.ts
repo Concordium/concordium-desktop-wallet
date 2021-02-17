@@ -11,8 +11,12 @@ import ipcCommands from '../constants/ipcCommands.json';
 
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
+ * The requests will be sent to the main thread, which will execute them.
  */
 
+/**
+ * Updates the location of the node endpoint;
+ */
 export function setClientLocation(address: string, port: string) {
     return ipcRenderer.invoke(ipcCommands.grpcSetLocation, address, port);
 }
