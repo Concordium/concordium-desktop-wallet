@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import React, { ComponentType, RefAttributes } from 'react';
 import {
     ControllerRenderProps,
@@ -26,18 +25,20 @@ export function connectWithFormUncontrolled<
 ): (
     props: UncontrolledConnectorProps & Omit<TProps, 'ref' | 'error'>
 ) => JSX.Element {
-    const { register, errors } = useFormContext();
-
     // eslint-disable-next-line react/display-name
-    return ({ rules, name, ...props }) => (
-        <Field
-            ref={register(rules)}
-            error={errors[name]}
-            name={name}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            {...(props as any)}
-        />
-    );
+    return ({ rules, name, ...props }) => {
+        const { register, errors } = useFormContext();
+
+        return (
+            <Field
+                ref={register(rules)}
+                error={errors[name]}
+                name={name}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                {...(props as any)}
+            />
+        );
+    };
 }
 
 interface ControlledFieldProps<TValue>
@@ -56,9 +57,8 @@ export function connectWithFormControlled<
 >(
     Field: ComponentType<TProps>
 ): (props: Omit<TProps, 'error'> & ControlledConnectorProps) => JSX.Element {
-    const { control, errors } = useFormContext();
-
     return ({ name, rules, defaultValue, ...props }) => {
+        const { control, errors } = useFormContext();
         const {
             field: { ref, ...fieldProps },
         } = useController({ name, rules, defaultValue, control });

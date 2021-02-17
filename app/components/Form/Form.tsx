@@ -1,10 +1,11 @@
 import React, { ComponentType, PropsWithChildren } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
-import { connectWithFormUncontrolled } from './common/connectWithForm';
-import Input from './Input/Input';
+import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 
-interface FormProps<T extends Record<string, unknown>> {
-    onSubmit(values: T): void;
+import { connectWithFormUncontrolled } from './common/connectWithForm';
+import Input from './Input';
+
+interface FormProps<TFormValues> {
+    onSubmit: SubmitHandler<TFormValues>;
 }
 
 export default function Form<T extends Record<string, unknown>>({

@@ -1,9 +1,10 @@
 import React, { ComponentProps, useMemo, useState } from 'react';
-import { Button, Form, Modal } from 'semantic-ui-react';
-import { useForm, Controller, SubmitHandler } from 'react-hook-form';
+import { Modal } from 'semantic-ui-react';
+import { SubmitHandler } from 'react-hook-form';
 
 import { AddressBookEntry, EqualRecord, NotOptional } from '../utils/types';
 import { isValidAddress } from '../utils/accountHelpers';
+import Form from './Form';
 
 interface Props
     extends Pick<NotOptional<ComponentProps<typeof Modal>>, 'trigger'> {
@@ -40,22 +41,8 @@ export default function UpsertAddress({
         () => (isEditMode ? 'Edit recipient' : 'Add new recipient'),
         [isEditMode]
     );
-    const defaultValues: AddressBookEntryForm = useMemo(
-        () => ({
-            address: '',
-            name: '',
-            note: '',
-            ...initialValues,
-        }),
-        [initialValues]
-    );
 
-    const { handleSubmit, errors, control } = useForm<AddressBookEntryForm>({
-        defaultValues,
-        mode: 'onTouched',
-    });
-
-    const onSubmit: SubmitHandler<AddressBookEntry> = ({
+    const handleSubmit: SubmitHandler<AddressBookEntryForm> = ({
         address,
         name,
         note,
@@ -76,22 +63,14 @@ export default function UpsertAddress({
         >
             <Modal.Header>{header}</Modal.Header>
             <Modal.Content>
-                <Form onSubmit={handleSubmit(onSubmit)}>
-                    <Controller
+                <Form<AddressBookEntryForm> onSubmit={handleSubmit}>
+                    <Form.Input
                         name={fieldNames.name}
-                        control={control}
                         rules={{ required: 'Name required' }}
-                        render={({ ref, ...p }) => (
-                            <Form.Input
-                                {...p}
-                                placeholder="Recipient Name"
-                                error={errors.name?.message}
-                            />
-                        )}
+                        placeholder="Recipient Name"
                     />
-                    <Controller
+                    <Form.Input
                         name={fieldNames.address}
-                        control={control}
                         rules={{
                             required: 'Address should be 50 characters',
                             minLength: {
@@ -104,17 +83,10 @@ export default function UpsertAddress({
                             },
                             validate: validateAddress,
                         }}
-                        render={({ ref, ...p }) => (
-                            <Form.Input
-                                {...p}
-                                placeholder="Paste the account address here"
-                                error={errors.address?.message}
-                            />
-                        )}
+                        placeholder="Paste the account address here"
                     />
-                    <Controller
+                    <Form.Input
                         name={fieldNames.note}
-                        control={control}
                         rules={{
                             maxLength: {
                                 value: noteMaxLength,
@@ -122,22 +94,9 @@ export default function UpsertAddress({
                                     'Message cannot be longer than 255 characters',
                             },
                         }}
-                        render={({ ref, ...p }) => (
-                            <Form.Input
-                                {...p}
-                                value={(p.value as string)?.substring(
-                                    0,
-                                    noteMaxLength - 1
-                                )}
-                                label="Notes"
-                                placeholder="You can add a note here"
-                                error={errors.note?.message}
-                            />
-                        )}
+                        placeholder="You can add a note here"
                     />
-                    <Button positive type="submit">
-                        Submit
-                    </Button>
+                    <button type="submit">Submit</button>
                 </Form>
             </Modal.Content>
         </Modal>
