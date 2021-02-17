@@ -1,17 +1,20 @@
 import clsx from 'clsx';
-import React, { forwardRef, InputHTMLAttributes } from 'react';
+import React, { forwardRef, TextareaHTMLAttributes } from 'react';
 
 import { FieldCommonProps } from '../common';
 
-import styles from './Input.module.scss';
+import styles from './TextArea.module.scss';
 
-export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'name'> &
+export type TextAreaProps = Omit<
+    TextareaHTMLAttributes<HTMLTextAreaElement>,
+    'name'
+> &
     FieldCommonProps;
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
+const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     ({ error, className, ...props }, ref) => {
         return (
-            <input
+            <textarea
                 className={clsx(
                     styles.field,
                     className,
@@ -24,6 +27,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     }
 );
 
-Input.displayName = 'Input';
+TextArea.displayName = 'TextArea';
 
-export default Input;
+export default TextArea;

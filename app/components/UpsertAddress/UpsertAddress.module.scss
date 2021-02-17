@@ -1,0 +1,22 @@
+@import 'config/bundle';
+
+.content {
+    max-width: 264px;
+    margin: 0 auto;
+}
+
+.input {
+    display: block;
+    width: 100%;
+    font-size: $font-size-body3;
+}
+
+.name {
+    composes: input;
+    font-size: $font-size-h2;
+}
+
+.address {
+    composes: input;
+    resize: none;
+}
