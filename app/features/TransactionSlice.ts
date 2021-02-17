@@ -17,6 +17,7 @@ import {
     AccountTransaction,
     Dispatch,
     TransactionEvent,
+    RejectReason,
 } from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
 import {
@@ -175,9 +176,10 @@ export async function confirmTransaction(
     const cost = outcomes.reduce((accu, event) => accu + event.cost, 0);
     let rejectReason;
     if (!success) {
-        rejectReason = outcomes.find(
+        const { tag } = outcomes.find(
             (event) => event.result.outcome !== 'success'
-        ).result.rejectReason.tag;
+        ).result.rejectReason;
+        rejectReason = RejectReason[tag as keyof typeof RejectReason];
     }
     return updateTransaction(
         { transactionHash },

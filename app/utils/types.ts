@@ -319,7 +319,7 @@ export interface TransferTransaction {
     fromAddress: Hex;
     toAddress: Hex;
     status: TransactionStatus;
-    rejectReason?: keyof typeof RejectReason;
+    rejectReason?: string;
     fromAddressName?: string;
     toAddressName?: string;
     decryptedAmount?: string;
@@ -641,6 +641,7 @@ export interface MintDistribution {
 
 export interface TransactionDetails {
     events: string[];
+    rejectReason?: string;
     transferSource?: Hex;
     transferDestination?: Hex;
     type: TransactionKindString;
