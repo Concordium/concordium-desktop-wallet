@@ -1,4 +1,5 @@
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
+import { HTMLAttributes } from 'react';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -676,3 +677,8 @@ export interface TransactionEvent {
     result: EventResult;
     cost: string;
 }
+
+export type ClassNameAndStyle = Pick<
+    HTMLAttributes<HTMLElement>,
+    'style' | 'className'
+>;

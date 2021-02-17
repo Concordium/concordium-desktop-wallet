@@ -1,8 +1,76 @@
-// styling of h1, p, b, i, blockquote, etc. goes here
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+body {
+    font-family: $font-family;
+    font-size: $font-size-body2;
+    font-weight: $font-weight-regular;
+}
+
+h1, .h1
+h2, .h2
+h3, .h3
+h5, .h5
+h6, .h6 {
+    line-height: 1.2;
+}
+
+h1, .h1 {
+    font-size: $font-size-h1;
+    font-weight: $font-weight-regular;
+}
+
+h2, .h2 {
+    font-size: $font-size-h2;
+    font-weight: $font-weight-emphasized;
+}
+
+h3, .h3 {
+    font-size: $font-size-h3;
+    font-weight: $font-weight-regular;
+}
+
+h5, .h5 {
+    font-size: $font-size-h5;
+    font-weight: $font-weight-bold;
+}
+
+h6, .h6 {
+    font-size: $font-size-h6;
+    font-weight: $font-weight-regular;
+}
+
+.body1 {
+    font-size: $font-size-body1;
+}
+
+.body2 {
+    font-size: $font-size-body2;
+}
+
+.body3 {
+    font-size: $font-size-body3;
+}
+
+.body4 {
+    font-size: $font-size-body4;
+}
+
+.bodyLight {
+    font-weight: $font-weight-light;
+}
+
+.bodyRegular {
+    font-weight: $font-weight-regular;
+}
+
+.bodyEmphasized {
+    font-weight: $font-weight-emphasized;
+}
+
 .textRight {
     text-align: right;
 }
 
-.textSmall {
-    font-size: 10px;
+.textFaded {
+    color: $color-text-faded;
 }

@@ -3,11 +3,11 @@
  * Webpack config for production electron main process
  */
 
-const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
-const baseConfig = require('./webpack.config.base');
+const { baseConfig } = require('./partials');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
+const { fromRoot } = require('./helpers/pathHelpers');
 
 if (process.env.NODE_ENV === 'production') {
     CheckNodeEnv('development');
@@ -23,8 +23,8 @@ module.exports = merge(baseConfig, {
     entry: './app/main.dev.ts',
 
     output: {
-        path: path.join(__dirname, '..'),
-        filename: './app/main.dev.js',
+        path: fromRoot('./app'),
+        filename: 'main.dev.js',
     },
 
     plugins: [
