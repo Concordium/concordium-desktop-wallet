@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Menu, Button, Header, Input, Container } from 'semantic-ui-react';
 import {
-    loadAddressBook,
     addressBookSelector,
     addToAddressBook,
 } from '../../features/AddressBookSlice';
@@ -20,10 +19,6 @@ export default function PickRecipient({ pickRecipient }: Props) {
     const addressBook = useSelector(addressBookSelector);
     const dispatch = useDispatch();
     const [filter, setFilter] = useState<string>('');
-
-    useEffect(() => {
-        loadAddressBook(dispatch);
-    }, [dispatch]); // TODO: this should not happen in the view. We should move this to
 
     function submitAddress(name: string, address: string, note: string) {
         const entry = {

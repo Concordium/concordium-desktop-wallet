@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { List, Menu } from 'semantic-ui-react';
 import {
-    loadAddressBook,
     chooseIndex,
     addressBookSelector,
 } from '../../features/AddressBookSlice';
@@ -10,9 +9,6 @@ import AddressBookListElement from './AddressBookListElement';
 
 export default function AddressBookList(): JSX.Element {
     const dispatch = useDispatch();
-    useEffect(() => {
-        loadAddressBook(dispatch);
-    }, [dispatch]);
 
     const addressBook = useSelector(addressBookSelector);
 

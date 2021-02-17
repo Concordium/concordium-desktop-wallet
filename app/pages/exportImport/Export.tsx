@@ -9,10 +9,7 @@ import {
     identitiesSelector,
 } from '../../features/IdentitySlice';
 import { loadAccounts, accountsSelector } from '../../features/AccountSlice';
-import {
-    loadAddressBook,
-    addressBookSelector,
-} from '../../features/AddressBookSlice';
+import { addressBookSelector } from '../../features/AddressBookSlice';
 import InputModal from '../../components/InputModal';
 import MessageModal from '../../components/MessageModal';
 
@@ -32,7 +29,6 @@ export default function Export() {
     useEffect(() => {
         loadAccounts(dispatch);
         loadIdentities(dispatch);
-        loadAddressBook(dispatch);
     }, [dispatch]);
 
     if (
