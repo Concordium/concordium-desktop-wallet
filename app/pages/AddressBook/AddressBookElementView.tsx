@@ -45,12 +45,13 @@ export default function AddressBookElementView() {
             </Card.Content>
             <Button.Group>
                 <UpsertAddress
-                    trigger={
-                        <Button disabled={chosenEntry.readOnly}>Edit</Button>
-                    }
+                    as={Button}
+                    disabled={chosenEntry.readOnly}
                     initialValues={chosenEntry}
                     submit={submitAddress}
-                />
+                >
+                    Edit
+                </UpsertAddress>
                 <DeleteAddress
                     entry={chosenEntry}
                     onRemove={(entry) => removeFromAddressBook(dispatch, entry)}

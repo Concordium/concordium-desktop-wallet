@@ -23,7 +23,7 @@ export default function PickRecipient({ pickRecipient }: Props) {
 
     useEffect(() => {
         loadAddressBook(dispatch);
-    }, [dispatch]);
+    }, [dispatch]); // TODO: this should not happen in the view. We should move this to
 
     function submitAddress(name: string, address: string, note: string) {
         const entry = {
@@ -47,10 +47,9 @@ export default function PickRecipient({ pickRecipient }: Props) {
                 onChange={(e) => setFilter(e.target.value)}
                 autoFocus
             />
-            <UpsertAddress
-                trigger={<Button>Create new Entry</Button>}
-                submit={submitAddress}
-            />
+            <UpsertAddress as={Button} submit={submitAddress}>
+                Create new Entry
+            </UpsertAddress>
             <Menu vertical fluid>
                 {addressBook
                     .filter((entry: AddressBookEntry) =>

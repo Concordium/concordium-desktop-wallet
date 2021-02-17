@@ -11,9 +11,24 @@ export interface PageHeaderProps {
 function isPageHeaderButton(
     el: ReactElement
 ): el is ReactElement<PageHeaderButtonProps> {
-    return el.type === PageHeaderButton;
+    return (
+        el.type === PageHeaderButton ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (el.props as any).as === PageHeaderButton
+    );
 }
 
+/**
+ * @description
+ * Used on pages as a header element. Add buttons to the header by adding <PageHeader.Button /> as sub components.
+ *
+ * @example
+ * <PageHeader>
+ *   <PageHeader.Button align="left">-</PageHeader.Button>
+ *   <h1>Title</h1>
+ *   <ComposingComponent as={PageHeader.Button} align="left">+</ComposingComponent>
+ * </PageHeader>
+ */
 export default function PageHeader({ children }: PageHeaderProps): JSX.Element {
     const { heading, rightButtons, leftButtons } = useMemo(() => {
         const reactChildren = React.Children.toArray(

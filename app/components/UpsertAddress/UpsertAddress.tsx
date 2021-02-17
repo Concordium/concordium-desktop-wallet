@@ -1,4 +1,9 @@
-import React, { ComponentProps, useMemo, useState } from 'react';
+import React, {
+    ComponentType,
+    PropsWithChildren,
+    useMemo,
+    useState,
+} from 'react';
 import { Modal } from 'semantic-ui-react';
 import { SubmitHandler } from 'react-hook-form';
 
@@ -8,11 +13,11 @@ import Form from '../Form';
 
 import styles from './UpsertAddress.module.scss';
 
-interface Props
-    extends Pick<NotOptional<ComponentProps<typeof Modal>>, 'trigger'> {
+type Props<TAsProps> = Omit<TAsProps, 'onClick' | 'children'> & {
+    as: ComponentType<TAsProps>;
     submit(name: string, address: string, note?: string): void;
     initialValues?: AddressBookEntryForm;
-}
+};
 
 type AddressBookEntryForm = Omit<AddressBookEntry, 'readOnly'>;
 
@@ -31,11 +36,12 @@ function validateAddress(v: string): string | undefined {
     return 'Address format is invalid';
 }
 
-export default function UpsertAddress({
+export default function UpsertAddress<TAsProps>({
     submit,
     initialValues,
-    trigger,
-}: Props) {
+    as: As,
+    ...asProps
+}: PropsWithChildren<Props<TAsProps>>) {
     const [open, setOpen] = useState(false);
 
     const isEditMode = initialValues !== undefined;
@@ -59,7 +65,8 @@ export default function UpsertAddress({
             onClose={() => setOpen(false)}
             onOpen={() => setOpen(true)}
             open={open}
-            trigger={trigger}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            trigger={<As {...(asProps as any)} />}
             dimmer="blurring"
             closeOnDimmerClick={false}
         >
