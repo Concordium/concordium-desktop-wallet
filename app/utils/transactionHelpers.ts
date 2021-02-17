@@ -114,8 +114,7 @@ export async function createScheduledTransferTransaction(
     expiry = '16446744073',
     energyAmount = '20000'
 ) {
-    const nonceJSON = await getNextAccountNonce(fromAddress);
-    const { nonce } = JSON.parse(nonceJSON.getValue());
+    const { nonce } = await getNextAccountNonce(fromAddress);
     const transferTransaction: ScheduledTransfer = {
         sender: fromAddress,
         nonce,
