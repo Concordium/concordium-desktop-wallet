@@ -1,25 +1,17 @@
-import React, { PropsWithChildren } from 'react';
-import {
-    DeepPartial,
-    FormProvider,
-    UnpackNestedValue,
-    useForm,
-} from 'react-hook-form';
+import React, { ComponentType, PropsWithChildren } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { connectWithFormUncontrolled } from './common/connectWithForm';
 import Input from './Input/Input';
 
 interface FormProps<T extends Record<string, unknown>> {
-    defaultValues: UnpackNestedValue<DeepPartial<T>>;
     onSubmit(values: T): void;
 }
 
 export default function Form<T extends Record<string, unknown>>({
     children,
-    defaultValues,
     onSubmit,
 }: PropsWithChildren<FormProps<T>>): JSX.Element {
     const { ...methods } = useForm<T>({
-        defaultValues,
         mode: 'onTouched',
     });
 
@@ -31,3 +23,4 @@ export default function Form<T extends Record<string, unknown>>({
 }
 
 Form.Input = connectWithFormUncontrolled(Input);
+(Form.Input as ComponentType).displayName = 'ConnectedInput';

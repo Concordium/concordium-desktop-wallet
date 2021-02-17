@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { ComponentType, RefAttributes } from 'react';
 import {
+    ControllerRenderProps,
     RegisterOptions,
     useController,
     UseControllerOptions,
@@ -8,11 +9,11 @@ import {
 } from 'react-hook-form';
 import { FieldCommonProps } from '.';
 
-type Ref = RefAttributes<
+type ValidRef = RefAttributes<
     HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 >;
 
-type UncontrolledFieldProps = FieldCommonProps & Ref;
+type UncontrolledFieldProps = FieldCommonProps & ValidRef;
 
 interface UncontrolledConnectorProps {
     rules?: RegisterOptions;
@@ -39,7 +40,9 @@ export function connectWithFormUncontrolled<
     );
 }
 
-interface ControlledFieldProps<TValue> extends FieldCommonProps {
+interface ControlledFieldProps<TValue>
+    extends FieldCommonProps,
+        Pick<ControllerRenderProps, 'onChange' | 'onBlur'> {
     defaultValue: TValue;
 }
 type ControlledConnectorProps = Omit<
