@@ -32,6 +32,11 @@ Then install dependencies:
 yarn
 ```
 
+### Windows
+
+On Windows you can run the above through e.g. Git bash, or if you want to run it from the Command Prompt, then
+you must add `sh` to your PATH for the proto build to run. You can get `sh` bundled with Git bash.
+
 ## Starting Development
 
 Start the app in the `dev` environment.
