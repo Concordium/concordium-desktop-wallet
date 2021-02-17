@@ -7,17 +7,17 @@ import React, {
 } from 'react';
 import { Modal } from 'semantic-ui-react';
 import { SubmitHandler } from 'react-hook-form';
-
 import { useDispatch } from 'react-redux';
+
 import { AddressBookEntry, EqualRecord, NotOptional } from '../../utils/types';
 import { isValidAddress } from '../../utils/accountHelpers';
-import Form from '../Form';
-
-import styles from './UpsertAddress.module.scss';
 import {
     addToAddressBook,
     updateAddressBookEntry,
 } from '../../features/AddressBookSlice';
+import Form from '../Form';
+
+import styles from './UpsertAddress.module.scss';
 
 type Props<TAsProps> = Omit<TAsProps, 'onClick' | 'children'> & {
     as: ComponentType<TAsProps>;
