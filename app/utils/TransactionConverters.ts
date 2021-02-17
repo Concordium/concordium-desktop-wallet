@@ -40,6 +40,13 @@ export function convertIncomingTransaction(
         encrypted = JSON.stringify(transaction.encrypted);
     }
 
+    let { subtotal } = transaction;
+    if (!subtotal && transaction.cost) {
+        subtotal = (
+            BigInt(transaction.total) - BigInt(transaction.cost)
+        ).toString();
+    }
+
     return {
         remote: true,
         originType: transaction.origin.type,
