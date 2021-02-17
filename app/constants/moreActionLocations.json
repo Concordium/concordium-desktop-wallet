@@ -1,5 +1,6 @@
 {
     "accountAddress": "account-address",
-    "releaseSchedule": "release-schedule",
+    "createScheduledTransfer": "create-scheduled-transfer",
+    "inspectReleaseSchedule": "inspect-release-schedule",
     "list": "list"
 }

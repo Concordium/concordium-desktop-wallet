@@ -2,7 +2,8 @@ import React from 'react';
 import { List, Button, Header, Divider } from 'semantic-ui-react';
 import TransactionListElement from './TransactionListElement';
 import CopiableListElement from '../../components/CopiableListElement';
-import { TransferTransaction } from '../../utils/types';
+import { TransferTransaction, RejectReason } from '../../utils/types';
+import { isFailed } from '../../utils/transactionHelpers';
 
 interface Props {
     transaction: TransferTransaction;
@@ -24,6 +25,17 @@ function TransactionView({ transaction, returnFunction }: Props) {
                 <TransactionListElement transaction={transaction} />
                 <Divider />
             </List.Item>
+            {isFailed(transaction) ? (
+                <List.Item>
+                    <Header color="red" textAlign="center">
+                        Failed:{' '}
+                        {transaction.rejectReason
+                            ? RejectReason[transaction.rejectReason]
+                            : null}
+                    </Header>
+                    <Divider />
+                </List.Item>
+            ) : null}
             <CopiableListElement
                 title="From Address:"
                 value={transaction.fromAddress}

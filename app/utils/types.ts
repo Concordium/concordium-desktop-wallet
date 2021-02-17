@@ -155,9 +155,10 @@ export interface SchedulePoint {
     timestamp: string;
     amount: string;
 }
+export type Schedule = SchedulePoint[];
 
 export interface ScheduledTransferPayload {
-    schedule: SchedulePoint[];
+    schedule: Schedule;
     toAddress: string;
 }
 
@@ -167,18 +168,20 @@ export type TransactionPayload =
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
-export interface AccountTransaction {
+export interface AccountTransaction<
+    PayloadType extends TransactionPayload = TransactionPayload
+> {
     sender: Hex;
     nonce: string;
     energyAmount: string;
     expiry: string;
     transactionKind: TransactionKindId;
-    payload: TransactionPayload;
+    payload: PayloadType;
 }
 
-export interface SimpleTransfer extends AccountTransaction {
-    payload: SimpleTransferPayload;
-}
+export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
+
+export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -258,27 +261,66 @@ export enum OriginType {
     None = 'none',
 }
 
+// Possible Reasons for a transaction to fail on the blockchain.
+// Should be kept in sync with `RejectReason` found in
+// <https://gitlab.com/Concordium/concordium-base/-/blob/master/haskell-src/Concordium/Types/Execution.hs#L653>
+export enum RejectReason {
+    ModuleNotWF = 'Smart contract module failed to typecheck',
+    ModuleHashAlreadyExists = 'A module with this hash already exists',
+    InvalidAccountReference = 'Referenced account does not exists',
+    InvalidModuleReference = 'Referenced module does not exists',
+    InvalidContractAddress = 'No smart contract instance exists with the given contract address ',
+    ReceiverAccountNoCredential = 'The receiving account has no valid credential',
+    ReceiverContractNoCredential = 'The receiving smart contract instance has no valid credential',
+    AmountTooLarge = 'Insufficient funds',
+    SerializationFailure = 'The transaction body was malformed',
+    OutOfEnergy = 'The transaction ran out of energy',
+    Rejected = 'Rejected by contract logic',
+    NonExistentRewardAccount = 'The designated reward account does not exist',
+    InvalidProof = 'Proof that the baker owns relevant private keys is not valid',
+    InvalidInitMethod = 'Invalid Initial method, no such contract found in module ',
+    InvalidReceiveMethod = 'Invalid receive function in module, missing receive function in contract',
+    RuntimeFailure = 'Runtime failure when executing smart contract',
+    DuplicateAggregationKey = 'Duplicate aggregation key',
+    NonExistentAccountKey = 'Encountered index to which no account key belongs when removing or updating keys',
+    KeyIndexAlreadyInUse = 'The requested key index is already in use',
+    InvalidAccountKeySignThreshold = 'The requested sign threshold would exceed the number of keys on the account',
+    InvalidEncryptedAmountTransferProof = 'The shielded amount transfer has an invalid proof',
+    EncryptedAmountSelfTransfer = 'An shielded amount transfer from the account to itself is not allowed',
+    InvalidTransferToPublicProof = 'The shielding has an invalid proof',
+    InvalidIndexOnEncryptedTransfer = 'The provided shielded transfer index is out of bounds',
+    ZeroScheduledAmount = 'Attempt to transfer 0 GTU with schedule',
+    NonIncreasingSchedule = 'Attempt to transfer amount with non-increasing schedule',
+    FirstScheduledReleaseExpired = 'The first scheduled release is in the past',
+    ScheduledSelfTransfer = 'Attempt to transfer from account A to A with schedule',
+    AlreadyABaker = 'Baker with ID  already exists',
+    NotABaker = 'Account is not a baker',
+    InsufficientBalanceForBakerStake = 'Sender account has insufficient balance to cover the requested stake',
+    BakerInCooldown = 'Request to make change to the baker while the baker is in the cooldown period',
+}
+
 /**
  * This Interface models the structure of the transfer transactions stored in the database
  */
 export interface TransferTransaction {
-    remote: boolean;
+    remote: boolean | 0 | 1; // SQlite converts booleans to 0/1
     originType: OriginType;
     transactionKind: TransactionKindString;
     id: number;
     blockHash: Hex;
     blockTime: string;
     total: string;
-    success?: boolean;
+    success?: boolean | 0 | 1; // SQlite converts booleans to 0/1
     transactionHash: Hex;
     subtotal?: string;
     cost?: string;
     details?: string;
     encrypted?: string;
+    schedule?: string;
     fromAddress: Hex;
     toAddress: Hex;
     status: TransactionStatus;
-    rejectReason?: string;
+    rejectReason?: keyof typeof RejectReason;
     fromAddressName?: string;
     toAddressName?: string;
     decryptedAmount?: string;
@@ -477,9 +519,15 @@ export function instanceOfUpdateInstruction(
 }
 
 export function instanceOfSimpleTransfer(
-    object: AccountTransaction
+    object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
     return object.transactionKind === TransactionKindId.Simple_transfer;
+}
+
+export function instanceOfScheduledTransfer(
+    object: AccountTransaction<TransactionPayload>
+): object is ScheduledTransfer {
+    return object.transactionKind === TransactionKindId.Transfer_with_schedule;
 }
 
 export function isExchangeRate(

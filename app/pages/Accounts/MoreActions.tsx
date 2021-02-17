@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import { push } from 'connected-react-router';
+import { Switch, Route, Link } from 'react-router-dom';
 import { Menu, Button } from 'semantic-ui-react';
 import { Account, AccountInfo } from '../../utils/types';
 import routes from '../../constants/routes.json';
-import locations from '../../constants/moreActionLocations.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
+import ScheduleTransfer from './ScheduleTransfer';
 
 interface Props {
     account: Account;
@@ -13,8 +15,15 @@ interface Props {
 }
 
 const items = [
-    { name: 'Account Address', location: locations.accountAddress },
-    { name: 'Release Schedule', location: locations.releaseSchedule },
+    { name: 'Account Address', location: routes.ACCOUNTS_MORE_ADDRESS },
+    {
+        name: 'Inspect release schedule',
+        location: routes.ACCOUNTS_MORE_INSPECTRELEASESCHEDULE,
+    },
+    {
+        name: 'Send funds with a release schedule',
+        location: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+    },
 ];
 
 /**
@@ -23,46 +32,63 @@ const items = [
  * TODO: Find a better name?
  */
 export default function MoreActions({ account, accountInfo }: Props) {
-    const [location, setLocation] = useState(locations.list);
+    const dispatch = useDispatch();
 
-    function ChosenComponent() {
-        switch (location) {
-            case locations.list:
-                return (
-                    <>
-                        <Button as={Link} to={routes.ACCOUNTS}>
-                            x
-                        </Button>
-                        <Menu vertical>
-                            {items.map((item) => (
-                                <Menu.Item
-                                    onClick={() => setLocation(item.location)}
-                                    key={item.location}
-                                >
-                                    {item.name}
-                                </Menu.Item>
-                            ))}
-                        </Menu>
-                    </>
-                );
-            case locations.accountAddress:
-                return (
+    function MoreActionsMenu() {
+        return (
+            <>
+                <Button as={Link} to={routes.ACCOUNTS}>
+                    x
+                </Button>
+                <Menu vertical>
+                    {items.map((item) => (
+                        <Menu.Item
+                            onClick={() => dispatch(push(item.location))}
+                            key={item.location}
+                        >
+                            {item.name}
+                        </Menu.Item>
+                    ))}
+                </Menu>
+            </>
+        );
+    }
+    return (
+        <Switch>
+            <Route
+                path={routes.ACCOUNTS_MORE_ADDRESS}
+                render={() => (
                     <ShowAccountAddress
                         account={account}
-                        returnFunction={() => setLocation(locations.list)}
+                        returnFunction={() =>
+                            dispatch(push(routes.ACCOUNTS_MORE))
+                        }
                     />
-                );
-            case locations.releaseSchedule:
-                return (
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_INSPECTRELEASESCHEDULE}
+                render={() => (
                     <ShowReleaseSchedule
                         accountInfo={accountInfo}
-                        returnFunction={() => setLocation(locations.list)}
+                        returnFunction={() =>
+                            dispatch(push(routes.ACCOUNTS_MORE))
+                        }
                     />
-                );
-            default:
-                return null;
-        }
-    }
-
-    return <ChosenComponent />;
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER}
+                render={() => (
+                    <ScheduleTransfer
+                        account={account}
+                        returnFunction={() =>
+                            dispatch(push(routes.ACCOUNTS_MORE))
+                        }
+                    />
+                )}
+            />
+            <Route component={MoreActionsMenu} />
+        </Switch>
+    );
 }
