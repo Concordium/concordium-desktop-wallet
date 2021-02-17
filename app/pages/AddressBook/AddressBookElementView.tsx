@@ -5,7 +5,6 @@ import {
     addressBookSelector,
     chosenIndexSelector,
     removeFromAddressBook,
-    updateAddressBookEntry,
 } from '../../features/AddressBookSlice';
 import DeleteAddress from './DeleteAddress';
 import UpsertAddress from '../../components/UpsertAddress';
@@ -18,16 +17,6 @@ export default function AddressBookElementView() {
 
     if (chosenIndex >= addressBook.length) {
         return null;
-    }
-
-    function submitAddress(name: string, address: string, note: string) {
-        const entry = {
-            name,
-            address,
-            note,
-            readOnly: false,
-        };
-        updateAddressBookEntry(dispatch, chosenEntry.name, entry);
     }
 
     return (
@@ -48,7 +37,6 @@ export default function AddressBookElementView() {
                     as={Button}
                     disabled={chosenEntry.readOnly}
                     initialValues={chosenEntry}
-                    submit={submitAddress}
                 >
                     Edit
                 </UpsertAddress>

@@ -9,7 +9,6 @@ import AddressBookListElement from './AddressBookListElement';
 
 export default function AddressBookList(): JSX.Element {
     const dispatch = useDispatch();
-
     const addressBook = useSelector(addressBookSelector);
 
     return (

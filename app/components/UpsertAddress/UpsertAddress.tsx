@@ -1,22 +1,28 @@
 import React, {
     ComponentType,
     PropsWithChildren,
+    useCallback,
     useMemo,
     useState,
 } from 'react';
 import { Modal } from 'semantic-ui-react';
 import { SubmitHandler } from 'react-hook-form';
 
+import { useDispatch } from 'react-redux';
 import { AddressBookEntry, EqualRecord, NotOptional } from '../../utils/types';
 import { isValidAddress } from '../../utils/accountHelpers';
 import Form from '../Form';
 
 import styles from './UpsertAddress.module.scss';
+import {
+    addToAddressBook,
+    updateAddressBookEntry,
+} from '../../features/AddressBookSlice';
 
 type Props<TAsProps> = Omit<TAsProps, 'onClick' | 'children'> & {
     as: ComponentType<TAsProps>;
-    submit(name: string, address: string, note?: string): void;
     initialValues?: AddressBookEntryForm;
+    onSubmit?(name: string, address: string, note?: string): void;
 };
 
 type AddressBookEntryForm = Omit<AddressBookEntry, 'readOnly'>;
@@ -37,12 +43,13 @@ function validateAddress(v: string): string | undefined {
 }
 
 export default function UpsertAddress<TAsProps>({
-    submit,
+    onSubmit,
     initialValues,
     as: As,
     ...asProps
 }: PropsWithChildren<Props<TAsProps>>) {
     const [open, setOpen] = useState(false);
+    const dispatch = useDispatch();
 
     const isEditMode = initialValues !== undefined;
     const header = useMemo(
@@ -50,14 +57,33 @@ export default function UpsertAddress<TAsProps>({
         [isEditMode]
     );
 
-    const handleSubmit: SubmitHandler<AddressBookEntryForm> = ({
-        address,
-        name,
-        note,
-    }) => {
-        submit(name, address, note);
-        setOpen(false);
-    };
+    const upsertAddress = useCallback(
+        (values: AddressBookEntryForm) => {
+            const entry: AddressBookEntry = { ...values, readOnly: false };
+
+            if (isEditMode && initialValues) {
+                updateAddressBookEntry(dispatch, initialValues.name, entry);
+            } else {
+                addToAddressBook(dispatch, entry);
+            }
+        },
+        [isEditMode, initialValues, dispatch]
+    );
+
+    const handleSubmit: SubmitHandler<AddressBookEntryForm> = useCallback(
+        (values) => {
+            upsertAddress(values);
+
+            const { name, address, note } = values;
+
+            if (onSubmit) {
+                onSubmit(name, address, note);
+            }
+
+            setOpen(false);
+        },
+        [onSubmit, setOpen, upsertAddress]
+    );
 
     return (
         <Modal
@@ -80,6 +106,7 @@ export default function UpsertAddress<TAsProps>({
                     name={fieldNames.name}
                     rules={{ required: 'Name required' }}
                     placeholder="Recipient Name"
+                    defaultValue={initialValues?.name}
                 />
                 <Form.TextArea
                     className={styles.address}
@@ -97,6 +124,7 @@ export default function UpsertAddress<TAsProps>({
                         validate: validateAddress,
                     }}
                     placeholder="Paste the account address here"
+                    defaultValue={initialValues?.address}
                 />
                 <Form.Input
                     className={styles.input}
@@ -109,6 +137,7 @@ export default function UpsertAddress<TAsProps>({
                         },
                     }}
                     placeholder="You can add a note here"
+                    defaultValue={initialValues?.note}
                 />
                 <button type="submit">Submit</button>
             </Form>
