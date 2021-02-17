@@ -17,7 +17,7 @@ import log from 'electron-log';
 import knex from './database/knex';
 import WebpackMigrationSource from './database/WebpackMigrationSource';
 import ipcCommands from './constants/ipcCommands.json';
-import { setClientLocation, grpcCall } from './main/client';
+import { setClientLocation, grpcCall } from './main/GRPCClient';
 
 /**
  * Runs the knex migrations for the embedded sqlite database. This ensures that the

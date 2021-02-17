@@ -1,5 +1,5 @@
 import { findEntries } from '../database/AddressBookDao';
-import { getNextAccountNonce, getTransactionStatus } from './client';
+import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
 import {
     TransactionKindId,
     TransferTransaction,

@@ -8,6 +8,7 @@ import {
     GetAddressInfoRequest,
     Empty,
 } from '../proto/concordium_p2p_rpc_pb';
+import grpcMethods from '../constants/grpcMethods.json';
 
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
@@ -136,30 +137,30 @@ function getNodeInfo() {
 
 export function grpcCall(name: string, input: Record<string, string>) {
     switch (name) {
-        case 'nodeInfo':
+        case grpcMethods.nodeInfo:
             return getNodeInfo();
-        case 'getConsensusStatus':
+        case grpcMethods.getConsensusStatus:
             return getConsensusStatus();
-        case 'sendTransaction': {
+        case grpcMethods.sendTransaction: {
             const { transactionPayload, networkId } = input;
             return sendTransaction(
                 Uint8Array.from(Buffer.from(transactionPayload, 'hex')),
                 parseInt(networkId, 10)
             );
         }
-        case 'getTransactionStatus': {
+        case grpcMethods.getTransactionStatus: {
             const { transactionId } = input;
             return getTransactionStatus(transactionId);
         }
-        case 'getNextAccountNonce': {
+        case grpcMethods.getNextAccountNonce: {
             const { address } = input;
             return getNextAccountNonce(address);
         }
-        case 'getBlockSummary': {
+        case grpcMethods.getBlockSummary: {
             const { blockHashValue } = input;
             return getBlockSummary(blockHashValue);
         }
-        case 'getAccountInfo': {
+        case grpcMethods.getAccountInfo: {
             const { address, blockHash } = input;
             return getAccountInfo(address, blockHash);
         }

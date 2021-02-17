@@ -1,4 +1,4 @@
-import { getConsensusStatus, getAccountInfo } from './client';
+import { getConsensusStatus, getAccountInfo } from './nodeRequests';
 import { AccountInfo, Account } from './types';
 
 export interface AccountInfoPair {
