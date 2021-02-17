@@ -17,6 +17,7 @@ import log from 'electron-log';
 import knex from './database/knex';
 import WebpackMigrationSource from './database/WebpackMigrationSource';
 import ipcCommands from './constants/ipcCommands.json';
+import { setClientLocation, grpcCall } from './main/client';
 
 /**
  * Runs the knex migrations for the embedded sqlite database. This ensures that the
@@ -161,6 +162,16 @@ ipcMain.handle(ipcCommands.openFileDialog, async (_event, title) => {
 // Provides access to save file dialog from renderer processes.
 ipcMain.handle(ipcCommands.saveFileDialog, async (_event, title) => {
     return dialog.showSaveDialog({ title });
+});
+
+// Provides access to save file dialog from renderer processes.
+ipcMain.handle(ipcCommands.grpcSetLocation, async (_event, address, port) => {
+    return setClientLocation(address, port);
+});
+
+// Provides access to save file dialog from renderer processes.
+ipcMain.handle(ipcCommands.grpcCall, async (_event, command, input) => {
+    return grpcCall(command, input);
 });
 
 /**

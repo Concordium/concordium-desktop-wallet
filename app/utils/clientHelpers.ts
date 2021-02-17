@@ -15,8 +15,10 @@ export async function getAccountInfos(
     const blockHash = consensusStatus.lastFinalizedBlock;
     const accountInfos: AccountInfoPair[] = await Promise.all(
         accounts.map(async (account) => {
-            const response = await getAccountInfo(account.address, blockHash);
-            const accountInfo = JSON.parse(response.getValue());
+            const accountInfo = await getAccountInfo(
+                account.address,
+                blockHash
+            );
             return { account, accountInfo };
         })
     );
