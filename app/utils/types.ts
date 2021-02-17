@@ -591,6 +591,13 @@ export interface MintDistribution {
     finalizationReward: RewardFraction;
 }
 
+export interface GasRewards {
+    baker: RewardFraction;
+    finalizationProof: RewardFraction;
+    accountCreation: RewardFraction;
+    chainUpdate: RewardFraction;
+}
+
 export interface TransactionDetails {
     events: string[];
     transferSource?: Hex;
