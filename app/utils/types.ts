@@ -307,7 +307,7 @@ export interface TransferTransaction {
     remote: boolean | 0 | 1; // SQlite converts booleans to 0/1
     originType: OriginType;
     transactionKind: TransactionKindString;
-    id: number;
+    id?: number; // only remote transactions have ids.
     blockHash: Hex;
     blockTime: string;
     total: string;

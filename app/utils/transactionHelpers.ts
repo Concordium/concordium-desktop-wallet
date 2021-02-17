@@ -10,12 +10,6 @@ import {
     ScheduledTransfer,
     SchedulePoint,
 } from './types';
-/**
- * return highest id of given transactions
- */
-export function getHighestId(transactions: TransferTransaction[]) {
-    return transactions.reduce((id, t) => Math.max(id, t.id), 0);
-}
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries

@@ -120,7 +120,6 @@ export function convertAccountTransaction(
     }
 
     return {
-        id: -1,
         blockHash: 'pending',
         remote: false,
         originType: OriginType.Self,
