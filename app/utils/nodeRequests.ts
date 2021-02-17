@@ -28,11 +28,19 @@ export function startClient(nodeLocationSetting: Setting) {
  * @param command command to execute
  * @param input input for the command
  */
-function sendPromise(
+async function sendPromise(
     command: string,
     input: Record<string, string> = {}
 ): Promise<Uint8Array> {
-    return ipcRenderer.invoke(ipcCommands.grpcCall, command, input);
+    const result = await ipcRenderer.invoke(
+        ipcCommands.grpcCall,
+        command,
+        input
+    );
+    if (result.successful) {
+        return result.response;
+    }
+    throw new Error(result.error);
 }
 
 /**

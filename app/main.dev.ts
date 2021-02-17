@@ -171,7 +171,12 @@ ipcMain.handle(ipcCommands.grpcSetLocation, async (_event, address, port) => {
 
 // Provides access to save file dialog from renderer processes.
 ipcMain.handle(ipcCommands.grpcCall, async (_event, command, input) => {
-    return grpcCall(command, input);
+    try {
+        const response = await grpcCall(command, input);
+        return { successful: true, response };
+    } catch (error) {
+        return { successful: false, error };
+    }
 });
 
 /**
