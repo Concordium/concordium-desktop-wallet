@@ -1,25 +1,30 @@
 import React, { ComponentType, FC, RefAttributes } from 'react';
 import {
     ControllerRenderProps,
+    FieldError,
     RegisterOptions,
     useController,
     UseControllerOptions,
     useFormContext,
 } from 'react-hook-form';
-import { FieldCommonProps } from '.';
+import { CommonFieldProps } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getDisplayName(Field: ComponentType<any>): string {
     return `Connected${Field.displayName ?? 'Field'}`;
 }
 
+interface CommonConnectorProps {
+    name: string;
+}
+
 type ValidRef = RefAttributes<
     HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 >;
 
-type UncontrolledFieldProps = FieldCommonProps & ValidRef;
+type UncontrolledFieldProps = CommonFieldProps & ValidRef;
 
-interface UncontrolledConnectorProps {
+interface UncontrolledConnectorProps extends CommonConnectorProps {
     rules?: RegisterOptions;
 }
 
@@ -40,7 +45,7 @@ export function connectWithFormUncontrolled<
         const fieldProps: TProps = {
             ref: register(rules),
             name,
-            error: errors[name],
+            error: (errors[name] as FieldError | undefined)?.message,
             ...props,
         } as TProps;
 
@@ -53,14 +58,12 @@ export function connectWithFormUncontrolled<
 }
 
 interface ControlledFieldProps<TValue>
-    extends FieldCommonProps,
+    extends CommonFieldProps,
         Pick<ControllerRenderProps, 'onChange' | 'onBlur'> {
     value: TValue;
 }
-type ControlledConnectorProps = Omit<
-    UseControllerOptions,
-    'onFocus' | 'control'
->;
+type ControlledConnectorProps = CommonConnectorProps &
+    Omit<UseControllerOptions, 'onFocus' | 'control'>;
 
 export function connectWithFormControlled<
     TValue,
@@ -80,7 +83,7 @@ export function connectWithFormControlled<
         } = useController({ name, rules, defaultValue, control });
 
         const p: TProps = {
-            error: errors[name],
+            error: (errors[name] as FieldError | undefined)?.message,
             ...fieldProps,
             ...props,
         } as TProps;

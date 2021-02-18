@@ -7,7 +7,7 @@ import React, {
     useMemo,
 } from 'react';
 
-import { FieldCommonProps } from '../common';
+import { CommonFieldProps } from '../common';
 
 import styles from './TextArea.module.scss';
 
@@ -17,8 +17,8 @@ function scaleTextArea(el: HTMLTextAreaElement) {
 }
 
 export interface TextAreaProps
-    extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'name'>,
-        FieldCommonProps {
+    extends TextareaHTMLAttributes<HTMLTextAreaElement>,
+        CommonFieldProps {
     autoScale?: boolean;
 }
 
@@ -70,7 +70,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                     styles.field,
                     className,
                     autoScale && styles.autoScale,
-                    error && styles.fieldInvalid
+                    error !== undefined && styles.fieldInvalid
                 )}
                 ref={setRef}
                 onChange={handleChange}

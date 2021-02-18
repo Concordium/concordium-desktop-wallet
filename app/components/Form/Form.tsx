@@ -1,5 +1,6 @@
 import React, { FormHTMLAttributes, PropsWithChildren } from 'react';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import Checkbox from './Checkbox';
 
 import { connectWithFormUncontrolled } from './common/connectWithForm';
 import Input from './Input';
@@ -30,3 +31,4 @@ export default function Form<T extends Record<string, unknown>>({
 
 Form.Input = connectWithFormUncontrolled(Input);
 Form.TextArea = connectWithFormUncontrolled(TextArea);
+Form.Checkbox = connectWithFormUncontrolled(Checkbox);

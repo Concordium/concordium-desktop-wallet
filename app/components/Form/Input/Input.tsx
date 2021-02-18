@@ -1,12 +1,11 @@
 import clsx from 'clsx';
 import React, { forwardRef, InputHTMLAttributes } from 'react';
 
-import { FieldCommonProps } from '../common';
+import { CommonFieldProps } from '../common';
 
 import styles from './Input.module.scss';
 
-export type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'name'> &
-    FieldCommonProps;
+type InputProps = InputHTMLAttributes<HTMLInputElement> & CommonFieldProps;
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
     ({ error, className, ...props }, ref) => {
@@ -15,7 +14,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 className={clsx(
                     styles.field,
                     className,
-                    error && styles.fieldInvalid
+                    error !== undefined && styles.fieldInvalid
                 )}
                 ref={ref}
                 {...props}
