@@ -1,9 +1,10 @@
 import React, { FormHTMLAttributes, PropsWithChildren } from 'react';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import Checkbox from './Checkbox';
 
 import { connectWithFormUncontrolled } from './common/connectWithForm';
 import Input from './Input';
+import Switch from './Switch';
+import Checkbox from './Checkbox';
 import TextArea from './TextArea';
 
 interface FormProps<TFormValues>
@@ -32,3 +33,4 @@ export default function Form<T extends Record<string, unknown>>({
 Form.Input = connectWithFormUncontrolled(Input);
 Form.TextArea = connectWithFormUncontrolled(TextArea);
 Form.Checkbox = connectWithFormUncontrolled(Checkbox);
+Form.Switch = connectWithFormUncontrolled(Switch);

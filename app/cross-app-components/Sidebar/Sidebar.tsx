@@ -42,7 +42,7 @@ export default function Sidebar({ links, className, style }: SidebarProps) {
                     </NavLink>
                 ))}
             </div>
-            <div className={styles.bottom}>{version}</div>
+            <div className={styles.bottom}>V {version}</div>
         </nav>
     );
 }
