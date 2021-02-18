@@ -25,11 +25,6 @@ install-dependencies:
             - target/
     script:
         - yarn
-    only:
-        changes:
-            - yarn.lock
-        refs:
-            - merge_requests
 
 build-job:
     extends: .pre-loader
