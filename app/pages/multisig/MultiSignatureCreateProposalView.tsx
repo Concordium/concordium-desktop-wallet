@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Header, Segment } from 'semantic-ui-react';
+import { Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
@@ -10,6 +10,9 @@ import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
 import UpdateEuroPerEnergy from './UpdateEuroPerEnergy';
+import UpdateTransactionFeeDistribution from './UpdateTransactionFeeDistribution';
+import UpdateFoundationAccount from './UpdateFoundationAccount';
+import UpdateMintDistribution from './UpdateMintDistribution';
 
 interface Location {
     state: UpdateType;
@@ -33,6 +36,7 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
 
     // TODO Add support for account transactions.
     const type: UpdateType = location.state;
+    const displayType = UpdateType[type];
 
     /**
      * Forwards the multi signature transactions to the signing page.
@@ -64,6 +68,27 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
             case UpdateType.UpdateEuroPerEnergy:
                 return (
                     <UpdateEuroPerEnergy
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                );
+            case UpdateType.UpdateTransactionFeeDistribution:
+                return (
+                    <UpdateTransactionFeeDistribution
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                );
+            case UpdateType.UpdateFoundationAccount:
+                return (
+                    <UpdateFoundationAccount
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                );
+            case UpdateType.UpdateMintDistribution:
+                return (
+                    <UpdateMintDistribution
                         blockSummary={blockSummary}
                         forwardTransaction={forwardTransactionToSigningPage}
                     />
@@ -103,7 +128,11 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                 configured node. Verify your node settings, and check that
                 the node is running."
             />
-            {chooseProposalType(type)}
+            <Segment>
+                <Header>Transaction Proposal | {displayType}</Header>
+                <Divider />
+                {chooseProposalType(type)}
+            </Segment>
         </Segment>
     );
 }

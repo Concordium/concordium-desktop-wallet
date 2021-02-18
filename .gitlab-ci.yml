@@ -1,0 +1,73 @@
+default:
+    image: 192549843005.dkr.ecr.eu-west-1.amazonaws.com/concordium/desktop-wallet-ci:latest
+
+stages:
+    - dependencies
+    - build
+    - test
+
+.pre-loader:
+    variables:
+        GIT_SUBMODULE_STRATEGY: normal
+    only:
+        - merge_requests
+
+install-dependencies:
+    extends: .pre-loader
+    stage: dependencies
+    cache:
+        key: ${CI_COMMIT_REF_SLUG}
+        paths:
+            - node_modules/
+            - app/node_modules/
+            - dll/
+            - pkg/
+            - target/
+    script:
+        - yarn
+
+build-job:
+    extends: .pre-loader
+    stage: build
+    cache:
+        key: ${CI_COMMIT_REF_SLUG}
+        paths:
+            - node_modules/
+            - app/node_modules/
+            - app/proto/
+            - app/main.prod.js
+            - app/dist/
+            - pkg/
+            - target/
+    script:
+        - yarn build-proto
+        - yarn build
+
+lint-job:
+    extends: .pre-loader
+    stage: test
+    cache:
+        key: ${CI_COMMIT_REF_SLUG}
+        paths:
+            - node_modules/
+            - app/node_modules/
+            - app/proto/
+            - dll/
+        policy: pull
+    script:
+        - yarn lint
+
+test-job:
+    extends: .pre-loader
+    stage: test
+    cache:
+        key: ${CI_COMMIT_REF_SLUG}
+        paths:
+            - node_modules/
+            - app/node_modules/
+            - dll/
+            - app/main.prod.js
+            - app/dist/
+        policy: pull
+    script:
+        - yarn test

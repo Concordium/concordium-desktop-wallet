@@ -1,97 +1,62 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { Switch, Route, Link } from 'react-router-dom';
+import { push } from 'connected-react-router';
+
 import { Button, Header, Grid } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import ConfirmTransfer from './ConfirmTransfer';
 import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import locations from '../../constants/transferLocations.json';
-import {
-    AddressBookEntry,
-    Account,
-    SimpleTransfer as SimpleTransferType,
-} from '../../utils/types';
+import { AddressBookEntry, Account } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
+
+interface Props {
+    account: Account;
+}
 
 /**
  * Controls the flow of creating a simple transfer.
  */
-export default function SimpleTransfer(account: Account) {
+export default function SimpleTransfer({ account }: Props) {
+    const dispatch = useDispatch();
+
     const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
         undefined
     );
-    const [transaction, setTransaction] = useState<
-        SimpleTransferType | undefined
-    >(undefined);
-    const [location, setLocation] = useState<string>(locations.pickAmount);
 
     function chooseRecipientOnClick(entry: AddressBookEntry) {
         setRecipient(entry);
-        setLocation(locations.pickAmount);
-    }
-
-    function ChosenComponent() {
-        switch (location) {
-            case locations.pickAmount:
-                return (
-                    <PickAmount
-                        setLocation={setLocation}
-                        recipient={recipient}
-                        amount={amount}
-                        setAmount={setAmount}
-                    />
-                );
-            case locations.pickRecipient:
-                return <PickRecipient pickRecipient={chooseRecipientOnClick} />;
-            case locations.confirmTransfer:
-                if (!recipient) {
-                    return null;
-                }
-                return (
-                    <ConfirmTransfer
-                        setLocation={setLocation}
-                        recipient={recipient}
-                        amount={toMicroUnits(amount)}
-                        setTransaction={setTransaction}
-                        account={account}
-                    />
-                );
-            case locations.transferSubmitted:
-                if (!recipient || !transaction) {
-                    return null;
-                }
-                return (
-                    <FinalPage
-                        transaction={transaction}
-                        recipient={recipient}
-                    />
-                );
-            default:
-                return <div />;
-        }
-    }
-
-    function ReturnButton() {
-        switch (location) {
-            case locations.pickRecipient:
-            case locations.confirmTransfer:
-                return (
-                    <Button onClick={() => setLocation(locations.pickAmount)}>
-                        {'<--'}
-                    </Button>
-                );
-            default:
-                return null;
-        }
+        dispatch(push(routes.ACCOUNTS_SIMPLETRANSFER_PICKAMOUNT));
     }
 
     return (
         <>
             <Grid columns="3">
                 <Grid.Column>
-                    <ReturnButton />
+                    <Switch>
+                        <Route
+                            path={[
+                                routes.ACCOUNTS_SIMPLETRANSFER_PICKRECIPIENT,
+                                routes.ACCOUNTS_SIMPLETRANSFER_CONFIRMTRANSFER,
+                            ]}
+                            render={() => (
+                                <Button
+                                    onClick={() =>
+                                        dispatch(
+                                            push(
+                                                routes.ACCOUNTS_SIMPLETRANSFER_PICKAMOUNT
+                                            )
+                                        )
+                                    }
+                                >
+                                    {'<--'}
+                                </Button>
+                            )}
+                        />
+                    </Switch>
                 </Grid.Column>
                 <Grid.Column textAlign="center">
                     <Header>Send Transfer</Header>
@@ -102,7 +67,46 @@ export default function SimpleTransfer(account: Account) {
                     </Link>
                 </Grid.Column>
             </Grid>
-            <ChosenComponent />
+            <Switch>
+                <Route
+                    path={routes.ACCOUNTS_SIMPLETRANSFER_PICKRECIPIENT}
+                    render={() => (
+                        <PickRecipient pickRecipient={chooseRecipientOnClick} />
+                    )}
+                />
+                <Route
+                    path={routes.ACCOUNTS_SIMPLETRANSFER_CONFIRMTRANSFER}
+                    render={() => {
+                        if (!recipient) {
+                            return null;
+                        }
+                        return (
+                            <ConfirmTransfer
+                                recipient={recipient}
+                                amount={toMicroUnits(amount)}
+                                account={account}
+                            />
+                        );
+                    }}
+                />
+                <Route
+                    path={routes.ACCOUNTS_SIMPLETRANSFER_TRANSFERSUBMITTED}
+                    component={FinalPage}
+                />
+                <Route
+                    path={[
+                        routes.ACCOUNTS_SIMPLETRANSFER_PICKAMOUNT,
+                        routes.ACCOUNTS_SIMPLETRANSFER,
+                    ]}
+                    render={() => (
+                        <PickAmount
+                            recipient={recipient}
+                            amount={amount}
+                            setAmount={setAmount}
+                        />
+                    )}
+                />
+            </Switch>
         </>
     );
 }
