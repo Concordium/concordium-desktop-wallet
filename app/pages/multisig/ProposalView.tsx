@@ -57,10 +57,10 @@ export default function ProposalView() {
         );
     }
 
-    async function loadSignatureFile(file: string) {
+    async function loadSignatureFile(file: Buffer) {
         let transactionObject;
         try {
-            transactionObject = parse(file);
+            transactionObject = parse(file.toString('utf-8'));
         } catch (error) {
             setShowError({
                 show: true,
