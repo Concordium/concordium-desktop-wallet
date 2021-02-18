@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Header, Button } from 'semantic-ui-react';
 import { Account, TransferTransaction } from '../../utils/types';
 import { getTransactionsOfAccount } from '../../database/TransactionDao';
@@ -7,6 +7,7 @@ import { toCSV } from '../../utils/basicHelpers';
 import { getISOFormat } from '../../utils/timeHelpers';
 import { attachNames } from '../../utils/transactionHelpers';
 import exportTransactionFields from '../../constants/exportTransactionFields.json';
+import ErrorModal from '../../components/SimpleErrorModal';
 
 interface Props {
     account: Account;
@@ -30,7 +31,7 @@ function parseTransaction(transaction: TransferTransaction) {
 }
 
 // Updates transactions of the account, converts them to csv and saves the file.
-async function exportTransactions(account: Account) {
+async function exportTransactions(account: Account, openModal: () => void) {
     let transactions = await getTransactionsOfAccount(account); // load from database
     transactions = await attachNames(transactions);
 
@@ -41,17 +42,28 @@ async function exportTransactions(account: Account) {
     try {
         await saveFile(csv, 'Export Transactions');
     } catch (e) {
-        // Export was cancelled.
-        // TODO: inform user in the case where export was not canceled, but did indeed fail.
+        openModal();
     }
 }
 
 export default function ExportTransactions({ account, returnFunction }: Props) {
+    const [modalOpen, setModalOpen] = useState(false);
     return (
         <>
+            <ErrorModal
+                show={modalOpen}
+                header="Export failed"
+                onClick={() => setModalOpen(false)}
+            />
             <Button onClick={returnFunction}>x</Button>
             <Header textAlign="center">Export Transactions</Header>
-            <Button onClick={() => exportTransactions(account)}>Export</Button>
+            <Button
+                onClick={() =>
+                    exportTransactions(account, () => setModalOpen(true))
+                }
+            >
+                Export
+            </Button>
         </>
     );
 }
