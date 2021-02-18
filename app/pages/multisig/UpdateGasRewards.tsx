@@ -22,6 +22,17 @@ import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatur
 // TODO Do input validation.
 
 /**
+ * Update the state using the received set state function with the input received, which
+ * is assumed to be an integer.
+ */
+function updateState(
+    setStateFunction: React.Dispatch<React.SetStateAction<number | undefined>>,
+    input: string
+) {
+    setStateFunction(parseInt(input, 10));
+}
+
+/**
  * The component used for creating an update transaction for updating the
  * GAS rewards chain parameters.
  */
@@ -129,11 +140,9 @@ export default function UpdateGasRewards({
                     <Input
                         label="Baker reward"
                         value={bakerReward}
-                        onChange={(e) => {
-                            if (e.target.value) {
-                                setBakerReward(parseInt(e.target.value, 10));
-                            }
-                        }}
+                        onChange={(e) =>
+                            updateState(setBakerReward, e.target.value)
+                        }
                         fluid
                     />
                 </List.Item>
@@ -141,13 +150,12 @@ export default function UpdateGasRewards({
                     <Input
                         label="Finalization proof reward"
                         value={finalizationProofReward}
-                        onChange={(e) => {
-                            if (e.target.value) {
-                                setFinalizationProofReward(
-                                    parseInt(e.target.value, 10)
-                                );
-                            }
-                        }}
+                        onChange={(e) =>
+                            updateState(
+                                setFinalizationProofReward,
+                                e.target.value
+                            )
+                        }
                         fluid
                     />
                 </List.Item>
@@ -155,13 +163,12 @@ export default function UpdateGasRewards({
                     <Input
                         label="Account creation reward"
                         value={accountCreationReward}
-                        onChange={(e) => {
-                            if (e.target.value) {
-                                setAccountCreationReward(
-                                    parseInt(e.target.value, 10)
-                                );
-                            }
-                        }}
+                        onChange={(e) =>
+                            updateState(
+                                setAccountCreationReward,
+                                e.target.value
+                            )
+                        }
                         fluid
                     />
                 </List.Item>
@@ -169,13 +176,9 @@ export default function UpdateGasRewards({
                     <Input
                         label="Chain update reward"
                         value={chainUpdateReward}
-                        onChange={(e) => {
-                            if (e.target.value) {
-                                setChainUpdateReward(
-                                    parseInt(e.target.value, 10)
-                                );
-                            }
-                        }}
+                        onChange={(e) =>
+                            updateState(setChainUpdateReward, e.target.value)
+                        }
                         fluid
                     />
                 </List.Item>

@@ -3,7 +3,7 @@ import { Header, Label, Progress } from 'semantic-ui-react';
 import { ColorType, GasRewards } from '../../utils/types';
 import { rewardFractionResolution } from '../../constants/updateConstants.json';
 
-// TODO Make the UI better when drawinsg are available, and non-semantic UI
+// TODO Make the UI better when drawings are available, and non-semantic UI
 // components are ready.
 
 interface Props {
