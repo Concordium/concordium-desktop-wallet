@@ -1,7 +1,6 @@
 {
     "HOME": "/",
     "DEFAULT": "/",
-    "TEST": "/test",
     "ACCOUNTS": "/accounts",
     "ACCOUNTS_SIMPLETRANSFER": "/accounts/simple-transfer",
     "ACCOUNTS_SIMPLETRANSFER_PICKRECIPIENT": "/accounts/simple-transfer/pick-recipient",
@@ -10,7 +9,7 @@
     "ACCOUNTS_SIMPLETRANSFER_TRANSFERSUBMITTED": "/accounts/simple-transfer/transfer-submitted",
     "SUBMITTRANSFER": "/submit-transfer",
     "ACCOUNTS_MORE": "/accounts/more",
-    "IDENTITIES": "/identity/listview",
+    "IDENTITIES": "/identity",
     "ADDRESSBOOK": "/addressbook",
     "EXPORTIMPORT": "/export_import",
     "IMPORT": "/export_import/import",

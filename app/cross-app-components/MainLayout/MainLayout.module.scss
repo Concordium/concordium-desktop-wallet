@@ -1,0 +1,9 @@
+@import 'config/bundle';
+
+.root {
+    position: relative;
+    left: $sidebar-width;
+    background-color: $color-background;
+    width: calc(100% - #{$sidebar-width});
+    min-height: 100vh;
+}
