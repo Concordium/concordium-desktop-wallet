@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import { Menu, Card, Button } from 'semantic-ui-react';
 import {
     loadIdentities,
-    identitiesSelector,
+    confirmedIdentitiesSelector,
 } from '../../features/IdentitySlice';
 import routes from '../../constants/routes.json';
 import IdentityListElement from '../../components/IdentityListElement';
@@ -19,7 +19,7 @@ export default function AccountCreationPickIdentity({
 }: Props): JSX.Element | null {
     const [chosenIndex, chooseIdentity] = useState(0);
     const dispatch = useDispatch();
-    const identities = useSelector(identitiesSelector);
+    const identities = useSelector(confirmedIdentitiesSelector);
 
     useEffect(() => {
         if (!identities) {
@@ -37,7 +37,7 @@ export default function AccountCreationPickIdentity({
                     <Card.Header>No identities found</Card.Header>
                     <Card.Description>
                         Please create an identity before attempting to create an
-                        account.
+                        account, and wait until it has been confirmed.
                     </Card.Description>
                     <Button onClick={() => dispatch(push(routes.ACCOUNTS))}>
                         Return to accounts
@@ -78,9 +78,6 @@ export default function AccountCreationPickIdentity({
                 </Menu>
                 <Button.Group>
                     <Button
-                        disabled={
-                            identities[chosenIndex].identityObject == null
-                        }
                         onClick={() => {
                             submit(routes.ACCOUNTCREATION_PICKATTRIBUTES);
                         }}
