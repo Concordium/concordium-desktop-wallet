@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { Form, Input, Button, Header, Label, Segment } from 'semantic-ui-react';
 import { updateSettingEntry } from '../../features/SettingsSlice';
 import { Setting } from '../../utils/types';
-import { setClientLocation, getNodeInfo } from '../../utils/client';
+import { setClientLocation, getNodeInfo } from '../../utils/nodeRequests';
 
 interface Props {
     setting: Setting;
