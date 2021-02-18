@@ -10,5 +10,5 @@ interface Props {
  * Displays an overview of a protocol update transaction payload.
  */
 export default function ProtocolUpdateView({ protocolUpdate }: Props) {
-    return <Segment basic>{protocolUpdate}</Segment>;
+    return <Segment basic>{protocolUpdate.message}</Segment>;
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
-import { parse, stringify } from 'json-bigint';
+import { parse, stringify } from '../../utils/JsonBuffer';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import routes from '../../constants/routes.json';
 import {

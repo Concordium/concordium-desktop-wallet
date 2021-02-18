@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { stringify } from 'json-bigint';
+import { stringify } from '../../utils/JsonBuffer';
 import UpdateMicroGtuPerEuroRate from './UpdateMicroGtuPerEuro';
 import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
 import { getBlockSummary, getConsensusStatus } from '../../utils/client';
@@ -13,6 +13,7 @@ import UpdateEuroPerEnergy from './UpdateEuroPerEnergy';
 import UpdateTransactionFeeDistribution from './UpdateTransactionFeeDistribution';
 import UpdateFoundationAccount from './UpdateFoundationAccount';
 import UpdateMintDistribution from './UpdateMintDistribution';
+import UpdateProtocol from './UpdateProtocol';
 
 interface Location {
     state: UpdateType;
@@ -89,6 +90,13 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
             case UpdateType.UpdateMintDistribution:
                 return (
                     <UpdateMintDistribution
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                );
+            case UpdateType.UpdateProtocol:
+                return (
+                    <UpdateProtocol
                         blockSummary={blockSummary}
                         forwardTransaction={forwardTransactionToSigningPage}
                     />

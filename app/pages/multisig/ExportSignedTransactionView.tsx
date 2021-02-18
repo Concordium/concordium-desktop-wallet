@@ -11,7 +11,7 @@ import {
     Segment,
 } from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
-import { parse } from 'json-bigint';
+import { parse } from '../../utils/JsonBuffer';
 import routes from '../../constants/routes.json';
 import TransactionHashView from '../../components/TransactionHashView';
 import TransactionDetails from '../../components/TransactionDetails';

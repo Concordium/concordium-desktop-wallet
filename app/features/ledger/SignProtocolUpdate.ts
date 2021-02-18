@@ -17,7 +17,7 @@ function toChunks(array: Uint8Array, chunkSize: number) {
     return R;
 }
 
-export default async function signUpdateTransaction(
+export default async function signUpdateProtocolTransaction(
     transport: Transport,
     path: number[],
     transaction: UpdateInstruction<ProtocolUpdate>,
@@ -27,6 +27,7 @@ export default async function signUpdateTransaction(
         ...transaction.header,
         payloadSize: serializedPayload.length + 1,
     };
+
     const serializedHeader = serializeUpdateHeader(updateHeaderWithPayloadSize);
     const serializedUpdateType = serializeUpdateType(transaction.type);
     const serializedProtocolUpdate = serializeProtocolUpdate(

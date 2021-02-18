@@ -17,6 +17,7 @@ import {
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
 import signUpdateTransaction from './SignUpdateTransaction';
+import signUpdateProtocolTransaction from './SignProtocolUpdate';
 
 /**
  * Concordium Ledger API.
@@ -154,7 +155,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return this.signProtocolUpdate(transaction, serializedPayload, path);
+        return signUpdateProtocolTransaction(
+            this.transport,
+            path,
+            transaction,
+            serializedPayload
+        );
     }
 
     getAppAndVersion(): Promise<AppAndVersion> {

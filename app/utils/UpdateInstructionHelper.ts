@@ -1,4 +1,4 @@
-import { parse } from 'json-bigint';
+import { parse } from './JsonBuffer';
 import { BlockSummary } from './NodeApiTypes';
 import {
     MultiSignatureTransaction,

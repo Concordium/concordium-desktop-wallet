@@ -9,8 +9,8 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
-import { parse, stringify } from 'json-bigint';
 import { push } from 'connected-react-router';
+import { parse, stringify } from '../../utils/JsonBuffer';
 import {
     currentProposalSelector,
     updateCurrentProposal,

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card, Header } from 'semantic-ui-react';
-import { parse } from 'json-bigint';
+import { parse } from '../../utils/JsonBuffer';
 import {
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,

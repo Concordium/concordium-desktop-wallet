@@ -1,4 +1,4 @@
-import { stringify } from 'json-bigint';
+import { stringify } from './JsonBuffer';
 import {
     AccountTransaction,
     MultiSignatureTransaction,

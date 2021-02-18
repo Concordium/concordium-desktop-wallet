@@ -28,6 +28,7 @@ interface UpdateQueues {
     transactionFeeDistribution: UpdateQueue;
     foundationAccount: UpdateQueue;
     mintDistribution: UpdateQueue;
+    protocol: UpdateQueue;
 }
 
 interface Authorization {
@@ -41,6 +42,7 @@ interface Authorizations {
     transactionFeeDistribution: Authorization;
     foundationAccount: Authorization;
     mintDistribution: Authorization;
+    protocol: Authorization;
 }
 
 // The node returns the mint per slot value as a scientific notation String,
