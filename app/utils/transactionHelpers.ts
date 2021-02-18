@@ -1,5 +1,5 @@
 import { findEntries } from '../database/AddressBookDao';
-import { getNextAccountNonce, getTransactionStatus } from './client';
+import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -66,8 +66,7 @@ export async function createSimpleTransferTransaction(
     expiry = '16446744073',
     energyAmount = '200'
 ) {
-    const nonceJSON = await getNextAccountNonce(fromAddress);
-    const { nonce } = JSON.parse(nonceJSON.getValue());
+    const { nonce } = await getNextAccountNonce(fromAddress);
     const transferTransaction: SimpleTransfer = {
         sender: fromAddress,
         nonce,

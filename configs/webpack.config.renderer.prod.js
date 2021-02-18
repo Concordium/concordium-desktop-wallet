@@ -3,21 +3,20 @@
  * Build config for electron renderer process
  */
 
-const path = require('path');
 const webpack = require('webpack');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { merge } = require('webpack-merge');
 const TerserPlugin = require('terser-webpack-plugin');
-const baseConfig = require('./webpack.config.base');
+const { baseConfig, assetsConfig, stylesConfig } = require('./partials');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
 const DeleteSourceMaps = require('../internals/scripts/DeleteSourceMaps');
+const { fromRoot } = require('./helpers/pathHelpers');
 
 CheckNodeEnv('production');
 DeleteSourceMaps();
 
-module.exports = merge(baseConfig, {
+module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
     devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
 
     mode: 'production',
@@ -30,163 +29,13 @@ module.exports = merge(baseConfig, {
     entry: [
         'core-js',
         'regenerator-runtime/runtime',
-        path.join(__dirname, '..', 'app/index.tsx'),
+        fromRoot('./app/index.tsx'),
     ],
 
     output: {
-        path: path.join(__dirname, '..', 'app/dist'),
+        path: fromRoot('./app/dist'),
         publicPath: './dist/',
         filename: 'renderer.prod.js',
-    },
-
-    module: {
-        rules: [
-            // Extract all .global.css to style.css as is
-            {
-                test: /\.global\.css$/,
-                use: [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                        options: {
-                            publicPath: './',
-                        },
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            sourceMap: true,
-                        },
-                    },
-                ],
-            },
-            // Pipe other styles through css modules and append to style.css
-            {
-                test: /\.module\.css$/,
-                use: [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            modules: {
-                                localIdentName:
-                                    '[name]__[local]__[hash:base64:5]',
-                            },
-                            sourceMap: true,
-                        },
-                    },
-                ],
-            },
-            // Add SASS support  - compile all .global.scss files and pipe it to style.css
-            {
-                test: /\.global\.(scss|sass)$/,
-                use: [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            sourceMap: true,
-                            importLoaders: 1,
-                        },
-                    },
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            sourceMap: true,
-                            sassOptions: {
-                                includePaths: ['node_modules', 'app/styles'],
-                            },
-                        },
-                    },
-                ],
-            },
-            // Add SASS support  - compile all .module.scss files and pipe it to style.css
-            {
-                test: /\.module\.(scss|sass)$/,
-                use: [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            modules: {
-                                localIdentName:
-                                    '[name]__[local]__[hash:base64:5]',
-                            },
-                            importLoaders: 1,
-                            sourceMap: true,
-                        },
-                    },
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            sourceMap: true,
-                            sassOptions: {
-                                includePaths: ['node_modules', 'app/styles'],
-                            },
-                        },
-                    },
-                ],
-            },
-            // WOFF Font
-            {
-                test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'application/font-woff',
-                    },
-                },
-            },
-            // WOFF2 Font
-            {
-                test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'application/font-woff',
-                    },
-                },
-            },
-            // TTF Font
-            {
-                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'application/octet-stream',
-                    },
-                },
-            },
-            // EOT Font
-            {
-                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-                use: 'file-loader',
-            },
-            // SVG Font
-            {
-                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'image/svg+xml',
-                    },
-                },
-            },
-            // Common Image Formats
-            {
-                test: /\.(?:ico|gif|png|jpg|jpeg|webp)$/,
-                use: 'url-loader',
-            },
-        ],
     },
 
     optimization: {
@@ -223,10 +72,6 @@ module.exports = merge(baseConfig, {
             NODE_ENV: 'production',
             DEBUG_PROD: false,
             E2E_BUILD: false,
-        }),
-
-        new MiniCssExtractPlugin({
-            filename: 'style.css',
         }),
 
         new BundleAnalyzerPlugin({

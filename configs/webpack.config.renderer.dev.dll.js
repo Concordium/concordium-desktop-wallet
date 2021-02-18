@@ -6,17 +6,18 @@
 const webpack = require('webpack');
 const path = require('path');
 const { merge } = require('webpack-merge');
-const baseConfig = require('./webpack.config.base');
+const { baseConfig } = require('./partials');
 const { dependencies } = require('../package.json');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
 const rendererDevConfig = require('./webpack.config.renderer.dev');
+const { fromRoot } = require('./helpers/pathHelpers');
 
 CheckNodeEnv('development');
 
-const dist = path.join(__dirname, '..', 'dll');
+const dist = fromRoot('./dll');
 
 module.exports = merge(baseConfig, {
-    context: path.join(__dirname, '..'),
+    context: fromRoot('.'),
 
     devtool: 'eval',
 
@@ -64,9 +65,9 @@ module.exports = merge(baseConfig, {
         new webpack.LoaderOptionsPlugin({
             debug: true,
             options: {
-                context: path.join(__dirname, '..', 'app'),
+                context: fromRoot('./app'),
                 output: {
-                    path: path.join(__dirname, '..', 'dll'),
+                    path: fromRoot('./dll'),
                 },
             },
         }),

@@ -8,6 +8,7 @@
     "build-e2e": "cross-env E2E_BUILD=true yarn build",
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.js --colors",
     "build-main-dev": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.main.dev.js --colors --progress",
+    "build-proto": "sh ./internals/scripts/build_protos.sh",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.js --colors",
     "build-renderer-dev": "cross-env NODE_ENV=development webpack --config configs/webpack.config.renderer.dev.js --colors --progress",
     "electron-rebuild": "electron-rebuild --parallel --force --types prod,dev,optional --module-dir app",
@@ -118,9 +119,10 @@
   "license": "MIT",
   "devDependencies": {
     "@amilajack/testcafe-browser-provider-electron": "^0.0.15-alpha.1",
-    "@babel/core": "^7.12.16",
+    "@babel/core": "^7.12.13",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.12.13",
     "@babel/plugin-proposal-optional-chaining": "^7.12.16",
+    "@svgr/webpack": "^5.5.0",
     "@teamsupercell/typings-for-css-modules-loader": "^2.4.0",
     "@types/bs58check": "^2.1.0",
     "@types/enzyme": "^3.10.5",
@@ -213,6 +215,7 @@
     "@reduxjs/toolkit": "^1.4.0",
     "axios": "^0.21.0",
     "bs58check": "^2.1.2",
+    "clsx": "^1.1.1",
     "connected-react-router": "^6.6.1",
     "electron-debug": "^3.1.0",
     "electron-log": "^4.2.4",
@@ -232,8 +235,8 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
+    "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.2",
-    "semantic-ui-sass": "^2.4.2",
     "source-map-support": "^0.5.19"
   },
   "devEngines": {

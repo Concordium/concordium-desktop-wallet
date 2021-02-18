@@ -1,0 +1,49 @@
+@import 'config/bundle';
+
+$sidebar-link-height: $page-header-height;
+
+.root {
+    position: fixed;
+    height: 100vh;
+    width: $sidebar-width;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: inset -10px 0 15px -10px $color-grey;
+}
+
+.items {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.bottom,
+.item {
+    composes: h6 from global;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.item {
+    flex: 0 0 $sidebar-link-height;
+    text-decoration: none;
+    color: $color-text;
+
+    &Active {
+        background-color: $color-background;
+        box-shadow: 0 0 15px 0px $color-grey;
+    }
+}
+
+.title {
+    margin-top: 5px;
+}
+
+.bottom {
+    padding: 10px 0;
+    color: $color-text-faded;
+}

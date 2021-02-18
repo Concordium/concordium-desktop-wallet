@@ -11,7 +11,7 @@ import {
     CredentialDeploymentDetails,
     Dispatch,
 } from '../../utils/types';
-import { sendTransaction } from '../../utils/client';
+import { sendTransaction } from '../../utils/nodeRequests';
 import {
     addPendingAccount,
     confirmAccount,
