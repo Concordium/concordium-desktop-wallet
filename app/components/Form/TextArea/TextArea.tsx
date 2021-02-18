@@ -52,6 +52,10 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 
                 scaleTextArea(instance);
 
+                if (!ref) {
+                    return;
+                }
+
                 if (typeof ref === 'function') {
                     ref(instance);
                 } else {
