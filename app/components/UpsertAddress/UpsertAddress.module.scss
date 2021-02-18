@@ -15,9 +15,3 @@
     composes: input;
     font-size: $font-size-h2;
 }
-
-.address {
-    composes: input;
-    resize: none;
-    overflow: hidden;
-}

@@ -1,1 +1,6 @@
 @import '../common/common';
+
+.autoScale {
+    resize: none;
+    overflow: hidden;
+}

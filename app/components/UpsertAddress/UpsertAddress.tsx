@@ -117,7 +117,7 @@ export default function UpsertAddress<TAsProps>({
                     defaultValue={initialValues?.name}
                 />
                 <Form.TextArea
-                    className={styles.address}
+                    className={styles.input}
                     name={fieldNames.address}
                     rules={{
                         required: 'Address required',
