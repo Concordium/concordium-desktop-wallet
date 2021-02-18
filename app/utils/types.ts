@@ -1,4 +1,5 @@
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
+import { HTMLAttributes } from 'react';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -6,6 +7,7 @@ export type Hex = string;
 type Proofs = Hex;
 type Word64 = BigInt;
 type Word32 = number;
+type Word8 = number;
 
 export enum SchemeId {
     Ed25519 = 0,
@@ -442,7 +444,8 @@ export interface UpdateInstruction<T extends UpdateInstructionPayload> {
 export type UpdateInstructionPayload =
     | ExchangeRate
     | TransactionFeeDistribution
-    | FoundationAccount;
+    | FoundationAccount
+    | MintDistribution;
 
 export type Transaction =
     | AccountTransaction
@@ -508,6 +511,12 @@ export function isFoundationAccount(
     return UpdateType.UpdateFoundationAccount === transaction.type;
 }
 
+export function isMintDistribution(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<MintDistribution> {
+    return UpdateType.UpdateMintDistribution === transaction.type;
+}
+
 /**
  * Interface definition for a class that handles a specific type
  * of transaction. The handler can serialize and sign the transaction,
@@ -569,7 +578,7 @@ export interface ExchangeRate {
  * denominator is implicitly 100000, and the interface therefore
  * only contains the numerator value.
  */
-type RewardFraction = Word32;
+export type RewardFraction = Word32;
 
 export interface TransactionFeeDistribution {
     baker: RewardFraction;
@@ -578,6 +587,17 @@ export interface TransactionFeeDistribution {
 
 export interface FoundationAccount {
     address: string;
+}
+
+export interface MintRate {
+    mantissa: Word32;
+    exponent: Word8;
+}
+
+export interface MintDistribution {
+    mintPerSlot: MintRate;
+    bakingReward: RewardFraction;
+    finalizationReward: RewardFraction;
 }
 
 export interface TransactionDetails {
@@ -665,3 +685,8 @@ export interface TransactionEvent {
     result: EventResult;
     cost: string;
 }
+
+export type ClassNameAndStyle = Pick<
+    HTMLAttributes<HTMLElement>,
+    'style' | 'className'
+>;

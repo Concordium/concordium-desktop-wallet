@@ -3,6 +3,7 @@ import {
     BlockItemKind,
     ExchangeRate,
     FoundationAccount,
+    MintDistribution,
     TransactionFeeDistribution,
     UpdateHeader,
     UpdateInstruction,
@@ -49,6 +50,28 @@ export function serializeFoundationAccount(
     const serializedFoundationAccount = Buffer.alloc(32);
     putBase58Check(serializedFoundationAccount, 0, foundationAccount.address);
     return serializedFoundationAccount;
+}
+
+/**
+ * Serializes a MintDistribution to bytes.
+ */
+export function serializeMintDistribution(mintDistribution: MintDistribution) {
+    const serializedMintDistribution = Buffer.alloc(13);
+    serializedMintDistribution.writeUInt32BE(
+        mintDistribution.mintPerSlot.mantissa,
+        0
+    );
+    serializedMintDistribution.writeInt8(
+        mintDistribution.mintPerSlot.exponent,
+        4
+    );
+    serializedMintDistribution.writeUInt32BE(mintDistribution.bakingReward, 5);
+    serializedMintDistribution.writeUInt32BE(
+        mintDistribution.finalizationReward,
+        9
+    );
+
+    return serializedMintDistribution;
 }
 
 /**

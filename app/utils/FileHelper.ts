@@ -42,7 +42,7 @@ export async function saveFile(data: string, title: string) {
         throw new Error('Saving file was cancelled by the user.');
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
         if (!saveFileDialog.filePath) {
             reject(new Error('No file path was selected by the user.'));
         } else {

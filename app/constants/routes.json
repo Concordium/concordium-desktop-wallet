@@ -1,7 +1,6 @@
 {
     "HOME": "/",
     "DEFAULT": "/",
-    "TEST": "/test",
     "ACCOUNTS": "/accounts",
     "ACCOUNTS_SCHEDULED_TRANSFER": "/accounts/scheduledTransfer/init",
     "ACCOUNTS_SCHEDULED_TRANSFER_SUBMITTED": "/accounts/scheduledTransfer/submitted",

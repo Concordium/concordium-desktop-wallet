@@ -1,20 +1,18 @@
 import { credentials, Metadata, ServiceError } from '@grpc/grpc-js';
 import { P2PClient } from '../proto/concordium_p2p_rpc_grpc_pb';
 import {
-    BoolResponse,
     BlockHash,
-    JsonResponse,
     SendTransactionRequest,
     TransactionHash,
     AccountAddress,
     GetAddressInfoRequest,
-    NodeInfoResponse,
     Empty,
 } from '../proto/concordium_p2p_rpc_pb';
-import { BlockSummary, ConsensusStatus } from './NodeApiTypes';
-import { Setting } from './types';
+import grpcMethods from '../constants/grpcMethods.json';
+
 /**
  * All these methods are wrappers to call a Concordium Node / P2PClient using GRPC.
+ * N.B. This file belongs to the main thread, and should not be used directly from the renderer thread.
  */
 
 interface GRPCClient extends P2PClient {
@@ -27,12 +25,6 @@ const clientCredentials = credentials.createInsecure();
 
 export function setClientLocation(address: string, port: string) {
     client = new P2PClient(`${address}:${port}`, clientCredentials);
-}
-
-// Extracts node location from settings, and pass them to the grpc client.
-export function startClient(nodeLocationSetting: Setting) {
-    const { address, port } = JSON.parse(nodeLocationSetting.value);
-    setClientLocation(address, port);
 }
 
 function buildMetaData(): Metadata {
@@ -51,6 +43,10 @@ function buildSendTransactionRequest(
     return request;
 }
 
+interface Serializable {
+    serializeBinary(): Uint8Array;
+}
+
 type Command<T, Response> = (
     input: T,
     metadata: Metadata,
@@ -62,9 +58,12 @@ type Command<T, Response> = (
  * @param command command to execute
  * @param input input for the command
  */
-function sendPromise<T, Response>(command: Command<T, Response>, input: T) {
+function sendPromise<T, Response extends Serializable>(
+    command: Command<T, Response>,
+    input: T
+) {
     const defaultDeadline = new Date(new Date().getTime() + defaultDeadlineMs);
-    return new Promise<Response>((resolve, reject) => {
+    return new Promise<Uint8Array>((resolve, reject) => {
         if (client.waitForReady === undefined) {
             reject(new Error('Unexpected missing client function'));
         } else {
@@ -80,7 +79,7 @@ function sendPromise<T, Response>(command: Command<T, Response>, input: T) {
                         if (err) {
                             return reject(err);
                         }
-                        return resolve(response);
+                        return resolve(response.serializeBinary());
                     }
                 );
             });
@@ -88,39 +87,20 @@ function sendPromise<T, Response>(command: Command<T, Response>, input: T) {
     });
 }
 
-/**
- * Executes the provided GRPC command towards the node with the provided
- * input.
- * @param command command to execute towards the node
- * @param input input for the command
- */
-async function sendPromiseParseResult<T>(
-    command: Command<T, JsonResponse>,
-    input: T
-) {
-    const response = await sendPromise<T, JsonResponse>(command, input);
-    return JSON.parse(response.getValue());
-}
-
-export function sendTransaction(
-    transactionPayload: Uint8Array,
-    networkId = 100
-): Promise<BoolResponse> {
+function sendTransaction(transactionPayload: Uint8Array, networkId = 100) {
     const request = buildSendTransactionRequest(transactionPayload, networkId);
 
     return sendPromise(client.sendTransaction, request);
 }
 
-export function getTransactionStatus(
-    transactionId: string
-): Promise<JsonResponse> {
+function getTransactionStatus(transactionId: string) {
     const transactionHash = new TransactionHash();
     transactionHash.setTransactionHash(transactionId);
 
     return sendPromise(client.getTransactionStatus, transactionHash);
 }
 
-export function getNextAccountNonce(address: string): Promise<JsonResponse> {
+function getNextAccountNonce(address: string) {
     const accountAddress = new AccountAddress();
     accountAddress.setAccountAddress(address);
 
@@ -130,24 +110,21 @@ export function getNextAccountNonce(address: string): Promise<JsonResponse> {
 /**
  * Retrieves the ConsensusStatus information from the node.
  */
-export function getConsensusStatus(): Promise<ConsensusStatus> {
-    return sendPromiseParseResult(client.getConsensusStatus, new Empty());
+function getConsensusStatus() {
+    return sendPromise(client.getConsensusStatus, new Empty());
 }
 
 /**
  * Retrieves the block summary for the provided block hash from the node.
  * @param blockHashValue the block hash to retrieve the block summary for
  */
-export function getBlockSummary(blockHashValue: string): Promise<BlockSummary> {
+function getBlockSummary(blockHashValue: string) {
     const blockHash = new BlockHash();
     blockHash.setBlockHash(blockHashValue);
-    return sendPromiseParseResult(client.getBlockSummary, blockHash);
+    return sendPromise(client.getBlockSummary, blockHash);
 }
 
-export function getAccountInfo(
-    address: string,
-    blockHash: string
-): Promise<JsonResponse> {
+function getAccountInfo(address: string, blockHash: string) {
     const requestData = new GetAddressInfoRequest();
     requestData.setAddress(address);
     requestData.setBlockHash(blockHash);
@@ -155,6 +132,41 @@ export function getAccountInfo(
     return sendPromise(client.getAccountInfo, requestData);
 }
 
-export function getNodeInfo(): Promise<NodeInfoResponse> {
+function getNodeInfo() {
     return sendPromise(client.nodeInfo, new Empty());
+}
+
+export function grpcCall(name: string, input: Record<string, string>) {
+    switch (name) {
+        case grpcMethods.nodeInfo:
+            return getNodeInfo();
+        case grpcMethods.getConsensusStatus:
+            return getConsensusStatus();
+        case grpcMethods.sendTransaction: {
+            const { transactionPayload, networkId } = input;
+            return sendTransaction(
+                Uint8Array.from(Buffer.from(transactionPayload, 'hex')),
+                parseInt(networkId, 10)
+            );
+        }
+        case grpcMethods.getTransactionStatus: {
+            const { transactionId } = input;
+            return getTransactionStatus(transactionId);
+        }
+        case grpcMethods.getNextAccountNonce: {
+            const { address } = input;
+            return getNextAccountNonce(address);
+        }
+        case grpcMethods.getBlockSummary: {
+            const { blockHashValue } = input;
+            return getBlockSummary(blockHashValue);
+        }
+        case grpcMethods.getAccountInfo: {
+            const { address, blockHash } = input;
+            return getAccountInfo(address, blockHash);
+        }
+        default: {
+            throw new Error('unknown GRPC call');
+        }
+    }
 }

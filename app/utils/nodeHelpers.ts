@@ -1,4 +1,4 @@
-import { getConsensusStatus, getAccountInfo } from './client';
+import { getConsensusStatus, getAccountInfo } from './nodeRequests';
 import { AccountInfo, Account } from './types';
 
 export interface AccountInfoPair {
@@ -15,8 +15,10 @@ export async function getAccountInfos(
     const blockHash = consensusStatus.lastFinalizedBlock;
     const accountInfos: AccountInfoPair[] = await Promise.all(
         accounts.map(async (account) => {
-            const response = await getAccountInfo(account.address, blockHash);
-            const accountInfo = JSON.parse(response.getValue());
+            const accountInfo = await getAccountInfo(
+                account.address,
+                blockHash
+            );
             return { account, accountInfo };
         })
     );

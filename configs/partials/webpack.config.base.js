@@ -6,7 +6,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
-const { dependencies: externals } = require('../app/package.json');
+
+const { dependencies: externals } = require('../../app/package.json');
 
 module.exports = {
     externals: [...Object.keys(externals || {})],
@@ -28,7 +29,18 @@ module.exports = {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
                 include: /app/,
-                use: [{ loader: 'ts-loader' }],
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            plugins: [
+                                '@babel/plugin-proposal-optional-chaining',
+                                '@babel/plugin-proposal-nullish-coalescing-operator',
+                            ],
+                        },
+                    },
+                    'ts-loader',
+                ],
             },
         ],
     },

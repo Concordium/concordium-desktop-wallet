@@ -4,13 +4,14 @@ import {
     AccountTransaction,
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
+    instanceOfSimpleTransfer,
     UpdateInstruction,
     UpdateInstructionPayload,
-    instanceOfSimpleTransfer,
     instanceOfScheduledTransfer,
 } from '../utils/types';
 import findHandler from '../utils/updates/HandlerFinder';
 import DisplayScheduleTransfer from './Transfers/DisplayScheduledTransferDetails';
+import SimpleTransferDetails from './Transfers/DisplaySimpleTransfer';
 
 // TODO Implement a proper view of the supported transaction types, including account
 // transactions.
@@ -32,7 +33,7 @@ function generateView(
     }
     if (instanceOfAccountTransaction(transaction)) {
         if (instanceOfSimpleTransfer(transaction)) {
-            return transaction.toString();
+            return <SimpleTransferDetails transaction={transaction} />;
         }
         if (instanceOfScheduledTransfer(transaction)) {
             return <DisplayScheduleTransfer transaction={transaction} />;
@@ -43,6 +44,8 @@ function generateView(
 
 /**
  * Component that displays the details of a transaction in a human readable way.
+ * @param {Transaction} transaction: The transaction, which details is displayed.
+ * @param {string} transaction: The transaction, which details is displayed.
  */
 export default function TransactionDetails({ transaction }: Props) {
     return (
