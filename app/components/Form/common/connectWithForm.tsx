@@ -1,4 +1,4 @@
-import React, { ComponentType, RefAttributes } from 'react';
+import React, { ComponentType, FC, RefAttributes } from 'react';
 import {
     ControllerRenderProps,
     RegisterOptions,
@@ -7,6 +7,11 @@ import {
     useFormContext,
 } from 'react-hook-form';
 import { FieldCommonProps } from '.';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getDisplayName(Field: ComponentType<any>): string {
+    return `Connected${Field.displayName ?? 'Field'}`;
+}
 
 type ValidRef = RefAttributes<
     HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -25,7 +30,11 @@ export function connectWithFormUncontrolled<
 ): (
     props: UncontrolledConnectorProps & Omit<TProps, 'ref' | 'error'>
 ) => JSX.Element {
-    return ({ rules, name, ...props }) => {
+    const Connected: ReturnType<typeof connectWithFormUncontrolled> = ({
+        rules,
+        name,
+        ...props
+    }) => {
         const { register, errors } = useFormContext();
 
         const fieldProps: TProps = {
@@ -37,6 +46,10 @@ export function connectWithFormUncontrolled<
 
         return <Field {...fieldProps} />;
     };
+
+    (Connected as FC).displayName = getDisplayName(Field);
+
+    return Connected;
 }
 
 interface ControlledFieldProps<TValue>
@@ -55,7 +68,12 @@ export function connectWithFormControlled<
 >(
     Field: ComponentType<TProps>
 ): (props: Omit<TProps, 'error'> & ControlledConnectorProps) => JSX.Element {
-    return ({ name, rules, defaultValue, ...props }) => {
+    const Connected: ReturnType<typeof connectWithFormControlled> = ({
+        name,
+        rules,
+        defaultValue,
+        ...props
+    }) => {
         const { control, errors } = useFormContext();
         const {
             field: { ref, ...fieldProps },
@@ -69,4 +87,8 @@ export function connectWithFormControlled<
 
         return <Field {...p} />;
     };
+
+    (Connected as FC).displayName = getDisplayName(Field);
+
+    return Connected;
 }

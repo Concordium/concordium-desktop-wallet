@@ -27,13 +27,11 @@ interface HasOnClick {
     onClick?(): void;
 }
 
-type Props<TAsProps extends PropsWithChildren<HasOnClick>> = WithAsPropOmit<
-    TAsProps,
-    'onClick' | 'children'
-> & {
-    initialValues?: AddressBookEntryForm;
-    onSubmit?(name: string, address: string, note?: string): void;
-};
+type Props<TAsProps extends HasOnClick> = WithAsPropOmit<TAsProps, 'onClick'> &
+    PropsWithChildren<{
+        initialValues?: AddressBookEntryForm;
+        onSubmit?(name: string, address: string, note?: string): void;
+    }>;
 
 type AddressBookEntryForm = Omit<AddressBookEntry, 'readOnly'>;
 
@@ -57,7 +55,7 @@ export default function UpsertAddress<TAsProps>({
     initialValues,
     as: As,
     ...asProps
-}: PropsWithChildren<Props<TAsProps>>) {
+}: Props<TAsProps>) {
     const [open, setOpen] = useState(false);
     const dispatch = useDispatch();
 
@@ -135,6 +133,7 @@ export default function UpsertAddress<TAsProps>({
                     }}
                     placeholder="Paste the account address here"
                     defaultValue={initialValues?.address}
+                    autoScale
                 />
                 <Form.Input
                     className={styles.input}

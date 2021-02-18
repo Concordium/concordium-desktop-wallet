@@ -1,4 +1,4 @@
-import React, { FC, FormHTMLAttributes, PropsWithChildren } from 'react';
+import React, { FormHTMLAttributes, PropsWithChildren } from 'react';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 
 import { connectWithFormUncontrolled } from './common/connectWithForm';
@@ -29,7 +29,4 @@ export default function Form<T extends Record<string, unknown>>({
 }
 
 Form.Input = connectWithFormUncontrolled(Input);
-(Form.Input as FC).displayName = 'ConnectedInput';
-
 Form.TextArea = connectWithFormUncontrolled(TextArea);
-(Form.TextArea as FC).displayName = 'ConnectedTextArea';

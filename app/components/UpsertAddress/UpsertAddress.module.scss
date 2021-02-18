@@ -19,4 +19,5 @@
 .address {
     composes: input;
     resize: none;
+    overflow: hidden;
 }
