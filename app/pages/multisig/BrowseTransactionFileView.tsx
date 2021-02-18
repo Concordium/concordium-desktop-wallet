@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card, Header } from 'semantic-ui-react';
-import { parse } from '../../utils/JsonBuffer';
+import { parse } from 'json-bigint';
 import {
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
@@ -25,9 +25,10 @@ export default function BrowseTransactionFileView() {
     const dispatch = useDispatch();
 
     async function loadTransactionFile(file: Buffer) {
+        const fileString = file.toString('utf-8');
         let transactionObject;
         try {
-            transactionObject = parse(file.toString('utf-8'));
+            transactionObject = parse(fileString);
         } catch (e) {
             setShowError({
                 show: true,
@@ -59,7 +60,7 @@ export default function BrowseTransactionFileView() {
         dispatch(
             push({
                 pathname: routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION,
-                state: { transaction: file, type },
+                state: { transaction: fileString, type },
             })
         );
     }

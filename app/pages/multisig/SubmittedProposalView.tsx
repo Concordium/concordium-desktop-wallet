@@ -3,7 +3,7 @@ import { LocationDescriptorObject } from 'history';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Divider, Grid, Header, Segment } from 'semantic-ui-react';
-import { parse } from '../../utils/JsonBuffer';
+import { parse } from 'json-bigint';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import {
     MultiSignatureTransaction,

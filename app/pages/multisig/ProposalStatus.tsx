@@ -1,5 +1,6 @@
 import React from 'react';
 import { Grid, Header } from 'semantic-ui-react';
+import { parse } from 'json-bigint';
 import {
     ColorType,
     MultiSignatureTransaction,
@@ -8,7 +9,6 @@ import {
 } from '../../utils/types';
 import TransactionDetails from '../../components/TransactionDetails';
 import StatusLabel from './StatusLabel';
-import { parse } from '../../utils/JsonBuffer';
 
 // TODO This component should also have support for account transactions.
 

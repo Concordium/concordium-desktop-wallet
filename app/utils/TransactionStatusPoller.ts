@@ -1,3 +1,4 @@
+import { parse } from 'json-bigint';
 import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
 import { loadProposals } from '../features/MultiSignatureSlice';
 import { hashSha256 } from './serializationHelpers';
@@ -15,7 +16,6 @@ import {
 import { getPendingTransactions } from '../database/TransactionDao';
 import { getStatus, getDataObject } from './transactionHelpers';
 import findHandler from './updates/HandlerFinder';
-import { parse } from './JsonBuffer';
 
 /**
  * Poll for the transaction status of the provided multi signature transaction proposal, and

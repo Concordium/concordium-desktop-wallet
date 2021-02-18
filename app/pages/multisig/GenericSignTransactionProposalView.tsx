@@ -9,7 +9,7 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
-import { parse } from '../../utils/JsonBuffer';
+import { parse } from 'json-bigint';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import TransactionDetails from '../../components/TransactionDetails';
 import TransactionHashView from '../../components/TransactionHashView';

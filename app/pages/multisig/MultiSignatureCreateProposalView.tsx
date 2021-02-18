@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { stringify } from '../../utils/JsonBuffer';
+import { stringify } from 'json-bigint';
 import UpdateMicroGtuPerEuroRate from './UpdateMicroGtuPerEuro';
 import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
 import { getBlockSummary, getConsensusStatus } from '../../utils/client';

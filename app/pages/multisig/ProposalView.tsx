@@ -10,7 +10,7 @@ import {
     Segment,
 } from 'semantic-ui-react';
 import { push } from 'connected-react-router';
-import { parse, stringify } from '../../utils/JsonBuffer';
+import { parse, stringify } from 'json-bigint';
 import {
     currentProposalSelector,
     updateCurrentProposal,
