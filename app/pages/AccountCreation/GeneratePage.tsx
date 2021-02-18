@@ -1,15 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { createCredential } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import {
-    Identity,
-    CredentialDeploymentDetails,
-    Dispatch,
-} from '../../utils/types';
+import { Identity, CredentialDeploymentDetails } from '../../utils/types';
 import { sendTransaction } from '../../utils/client';
 import {
     addPendingAccount,
@@ -18,20 +14,13 @@ import {
 } from '../../features/AccountSlice';
 import { getGlobal } from '../../utils/httpRequests';
 import { addToAddressBook } from '../../features/AddressBookSlice';
-import { informError } from '../../features/ErrorSlice';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
+import ErrorModal from '../../components/SimpleErrorModal';
 
 interface Props {
     accountName: string;
     identity: Identity;
     attributes: string[];
-}
-
-function onError(dispatch: Dispatch, message: string) {
-    informError(dispatch, 'Unable to create accounts', message, {
-        label: 'Return to accounts',
-        location: routes.ACCOUNTS,
-    });
 }
 
 async function sendCredential(credentialDeploymentInfoHex: string) {
@@ -59,6 +48,8 @@ export default function AccountCreationGenerate({
     identity,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalContent, setModalContent] = useState('');
 
     async function saveAccount(
         {
@@ -85,6 +76,11 @@ export default function AccountCreationGenerate({
         });
     }
 
+    function onError(message: string) {
+        setModalContent(message);
+        setModalOpen(true);
+    }
+
     async function createAccount(
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
@@ -94,13 +90,13 @@ export default function AccountCreationGenerate({
         try {
             global = await getGlobal();
         } catch (e) {
-            onError(dispatch, `Unable to load the genesis`);
+            onError(`Unable to load the genesis`);
             return;
         }
         try {
             accountNumber = await getNextAccountNumber(identity.id);
         } catch (e) {
-            onError(dispatch, `Unable to create account due to ${e}`);
+            onError(`Unable to create account due to ${e}`);
             return;
         }
 
@@ -125,12 +121,18 @@ export default function AccountCreationGenerate({
             );
             dispatch(push(routes.ACCOUNTCREATION_FINAL));
         } catch (e) {
-            onError(dispatch, `Unable to create account due to ${e}`);
+            onError(`Unable to create account due to ${e}`);
         }
     }
 
     return (
         <Card fluid centered>
+            <ErrorModal
+                header="Unable to create accounts"
+                content={modalContent}
+                show={modalOpen}
+                onClick={() => dispatch(push(routes.ACCOUNTS))}
+            />
             <Card.Content textAlign="center">
                 <Card.Header>Generating the Account Credentials</Card.Header>
                 <Card.Content textAlign="center">
