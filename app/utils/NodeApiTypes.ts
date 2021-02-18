@@ -81,3 +81,7 @@ export interface BlockSummary {
     updates: Updates;
     specialEvents: [MintEvent];
 }
+
+export interface AccountNonce {
+    nonce: string;
+}

@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import { Container, Segment, Header, Grid } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { sendTransaction } from '../../utils/client';
+import { sendTransaction } from '../../utils/nodeRequests';
 import {
     serializeTransaction,
     getTransactionHash,
