@@ -1,7 +1,6 @@
 import React from 'react';
 import { Header, Button } from 'semantic-ui-react';
 import { Account, TransferTransaction } from '../../utils/types';
-import { updateTransactions } from '../../features/TransactionSlice';
 import { getTransactionsOfAccount } from '../../database/TransactionDao';
 import { saveFile } from '../../utils/FileHelper';
 import { toCSV } from '../../utils/basicHelpers';
