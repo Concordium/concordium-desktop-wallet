@@ -19,7 +19,8 @@ $sidebar-link-height: $page-header-height;
 }
 
 .bottom,
-.item {
+.item,
+.itemContent {
     composes: h6 from global;
     display: flex;
     flex-direction: column;
@@ -36,6 +37,22 @@ $sidebar-link-height: $page-header-height;
     &Active {
         background-color: $color-background;
         box-shadow: 0 0 15px 0px $color-grey;
+    }
+
+    &:focus,
+    &:hover {
+        color: inherit;
+        outline: none;
+    }
+}
+
+.itemContent {
+    transform: scale(1);
+    transition: transform ease-in .1s;
+
+    .item:not(.itemActive):hover &,
+    .item:not(.itemActive):focus & {
+        transform: scale(1.1);
     }
 }
 

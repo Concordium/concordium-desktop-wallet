@@ -52,7 +52,9 @@ export default function Sidebar<THasSwitch extends boolean = false>({
                     activeClassName={styles.itemActive}
                     exact
                 >
-                    <LogoIcon height="57" />
+                    <span className={styles.itemContent}>
+                        <LogoIcon height="57" />
+                    </span>
                 </NavLink>
                 {links.map((l) => (
                     <NavLink
@@ -61,8 +63,10 @@ export default function Sidebar<THasSwitch extends boolean = false>({
                         to={l.route}
                         activeClassName={styles.itemActive}
                     >
-                        {l.icon}
-                        <span className={styles.title}>{l.title}</span>
+                        <span className={styles.itemContent}>
+                            {l.icon}
+                            <span className={styles.title}>{l.title}</span>
+                        </span>
                     </NavLink>
                 ))}
             </div>
