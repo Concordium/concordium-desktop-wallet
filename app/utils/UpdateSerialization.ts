@@ -119,19 +119,27 @@ export function serializeProtocolUpdate(
         protocolUpdate.specificationUrl
     );
 
+    const auxiliaryData = Buffer.from(
+        protocolUpdate.specificationAuxiliaryData,
+        'base64'
+    );
+    const specificationHash = Buffer.from(
+        protocolUpdate.specificationHash,
+        'hex'
+    );
+
     const payloadLength =
         8 +
         encodedMessage.message.length +
         8 +
         encodedSpecificationUrl.message.length +
-        protocolUpdate.specificationHash.length +
-        protocolUpdate.specificationAuxiliaryData.length;
+        specificationHash.length +
+        auxiliaryData.length;
 
     const serializedPayloadLength = Buffer.alloc(8);
     serializedPayloadLength.writeBigInt64BE(BigInt(payloadLength), 0);
 
     let offset = 0;
-
     let buffer = Buffer.alloc(16);
     offset += buffer.writeBigUInt64BE(BigInt(payloadLength), offset);
     buffer.writeBigUInt64BE(BigInt(encodedMessage.message.length), offset);
@@ -150,8 +158,8 @@ export function serializeProtocolUpdate(
     const finalSerialization = Buffer.concat([
         buffer,
         specificationUrlBuffer,
-        protocolUpdate.specificationHash,
-        protocolUpdate.specificationAuxiliaryData,
+        specificationHash,
+        auxiliaryData,
     ]);
 
     return {
@@ -159,8 +167,8 @@ export function serializeProtocolUpdate(
         payloadLength: serializedPayloadLength,
         message: encodedMessage,
         specificationUrl: encodedSpecificationUrl,
-        transactionHash: protocolUpdate.specificationHash,
-        auxiliaryData: protocolUpdate.specificationAuxiliaryData,
+        transactionHash: specificationHash,
+        auxiliaryData,
     };
 }
 

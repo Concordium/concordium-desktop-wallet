@@ -24,8 +24,8 @@ export default function UpdateProtocol({
         const initialProtocolUpdate: ProtocolUpdate = {
             message: '',
             specificationUrl: '',
-            specificationHash: Buffer.alloc(0),
-            specificationAuxiliaryData: Buffer.alloc(0),
+            specificationHash: '',
+            specificationAuxiliaryData: '',
         };
         setProtocolUpdate(initialProtocolUpdate);
         return null;
@@ -35,7 +35,7 @@ export default function UpdateProtocol({
         if (protocolUpdate) {
             const updatedProtocolUpdate: ProtocolUpdate = {
                 ...protocolUpdate,
-                specificationAuxiliaryData: auxiliaryData,
+                specificationAuxiliaryData: auxiliaryData.toString('base64'),
             };
             setProtocolUpdate(updatedProtocolUpdate);
         }
@@ -75,11 +75,11 @@ export default function UpdateProtocol({
                 label="Specification hash"
                 placeholder="Enter your specification hash here"
                 fluid
-                value={protocolUpdate.specificationHash.toString('hex')}
+                value={protocolUpdate.specificationHash}
                 onChange={(e) => {
                     const updatedProtocolUpdate = {
                         ...protocolUpdate,
-                        specificationHash: Buffer.from(e.target.value, 'hex'),
+                        specificationHash: e.target.value,
                     };
                     setProtocolUpdate(updatedProtocolUpdate);
                 }}

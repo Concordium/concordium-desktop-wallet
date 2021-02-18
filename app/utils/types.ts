@@ -601,8 +601,8 @@ export interface MintDistribution {
 export interface ProtocolUpdate {
     message: string;
     specificationUrl: string;
-    specificationHash: Buffer;
-    specificationAuxiliaryData: Buffer;
+    specificationHash: Hex;
+    specificationAuxiliaryData: string;
 }
 
 export interface TransactionDetails {
