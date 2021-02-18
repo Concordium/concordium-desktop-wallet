@@ -11,9 +11,13 @@ import {
     addPendingAccount,
     confirmAccount,
     getNextAccountNumber,
+    removeAccount,
 } from '../../features/AccountSlice';
 import { getGlobal } from '../../utils/httpRequests';
-import { addToAddressBook } from '../../features/AddressBookSlice';
+import {
+    addToAddressBook,
+    removeFromAddressBook,
+} from '../../features/AddressBookSlice';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import ErrorModal from '../../components/SimpleErrorModal';
 
@@ -21,25 +25,6 @@ interface Props {
     accountName: string;
     identity: Identity;
     attributes: string[];
-}
-
-async function sendCredential(credentialDeploymentInfoHex: string) {
-    const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
-
-    try {
-        const response = await sendTransaction(payload);
-        if (response) {
-            return;
-        }
-        // TODO: Should we delete the pending account?
-        throw new Error(
-            'We were unable to deploy the credential, due to the node rejecting the transaction.'
-        );
-    } catch (e) {
-        throw new Error(
-            'We were unable to deploy the credential, because the node could not be reached.'
-        );
-    }
 }
 
 export default function AccountCreationGenerate({
@@ -50,6 +35,29 @@ export default function AccountCreationGenerate({
     const dispatch = useDispatch();
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState('');
+
+    async function sendCredential({
+        credentialDeploymentInfoHex,
+        accountAddress,
+    }: CredentialDeploymentDetails) {
+        const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
+        let response;
+        try {
+            response = await sendTransaction(payload);
+        } catch (e) {
+            throw new Error(
+                'We were unable to deploy the credential, because the node could not be reached.'
+            );
+        }
+        if (response && response.getValue()) {
+            return;
+        }
+        removeAccount(dispatch, accountAddress);
+        removeFromAddressBook(dispatch, { address: accountAddress });
+        throw new Error(
+            'We were unable to deploy the credential, due to the node rejecting the transaction.'
+        );
+    }
 
     async function saveAccount(
         {
@@ -111,9 +119,7 @@ export default function AccountCreationGenerate({
 
         try {
             await saveAccount(credentialDeploymentDetails, accountNumber);
-            await sendCredential(
-                credentialDeploymentDetails.credentialDeploymentInfoHex
-            );
+            await sendCredential(credentialDeploymentDetails);
             confirmAccount(
                 dispatch,
                 accountName,
