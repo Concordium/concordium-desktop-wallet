@@ -5,10 +5,7 @@ import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatur
 import { ProtocolUpdate, UpdateType } from '../../utils/types';
 import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 
-function temp() {
-    // TODO Fix openFile interface so that one can also just get the raw Buffer instead of the
-    // parsed string value.
-}
+// TODO Update UI with new components and better validation, i.e. specification hash has to be 32 bytes exactly (64 hex chars).
 
 /**
  * Component for creating an update protocol transaction.
@@ -32,6 +29,16 @@ export default function UpdateProtocol({
         };
         setProtocolUpdate(initialProtocolUpdate);
         return null;
+    }
+
+    function loadAuxiliaryData(auxiliaryData: Buffer) {
+        if (protocolUpdate) {
+            const updatedProtocolUpdate: ProtocolUpdate = {
+                ...protocolUpdate,
+                specificationAuxiliaryData: auxiliaryData,
+            };
+            setProtocolUpdate(updatedProtocolUpdate);
+        }
     }
 
     return (
@@ -80,7 +87,7 @@ export default function UpdateProtocol({
             <Divider clearing hidden />
             <DragAndDropFile
                 text="Drag and drop specification auxiliary data"
-                fileProcessor={temp}
+                fileProcessor={loadAuxiliaryData}
             />
             <Button
                 primary

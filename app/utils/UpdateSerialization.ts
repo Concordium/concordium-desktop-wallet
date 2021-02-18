@@ -103,6 +103,9 @@ export interface SerializedProtocolUpdate {
     serialization: Buffer;
     payloadLength: Buffer;
     message: SerializedString;
+    specificationUrl: SerializedString;
+    transactionHash: Buffer;
+    auxiliaryData: Buffer;
 }
 
 /**
@@ -114,13 +117,13 @@ export function serializeProtocolUpdate(
     const encodedMessage = serializeUtf8String(protocolUpdate.message);
     const encodedSpecificationUrl = serializeUtf8String(
         protocolUpdate.specificationUrl
-    ).message;
+    );
 
     const payloadLength =
         8 +
         encodedMessage.message.length +
         8 +
-        encodedSpecificationUrl.length +
+        encodedSpecificationUrl.message.length +
         protocolUpdate.specificationHash.length +
         protocolUpdate.specificationAuxiliaryData.length;
 
@@ -136,12 +139,12 @@ export function serializeProtocolUpdate(
 
     let specificationUrlBuffer = Buffer.alloc(8);
     specificationUrlBuffer.writeBigUInt64BE(
-        BigInt(encodedSpecificationUrl.length),
+        BigInt(encodedSpecificationUrl.message.length),
         0
     );
     specificationUrlBuffer = Buffer.concat([
         specificationUrlBuffer,
-        encodedSpecificationUrl,
+        encodedSpecificationUrl.message,
     ]);
 
     const finalSerialization = Buffer.concat([
@@ -155,6 +158,9 @@ export function serializeProtocolUpdate(
         serialization: finalSerialization,
         payloadLength: serializedPayloadLength,
         message: encodedMessage,
+        specificationUrl: encodedSpecificationUrl,
+        transactionHash: protocolUpdate.specificationHash,
+        auxiliaryData: protocolUpdate.specificationAuxiliaryData,
     };
 }
 

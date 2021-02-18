@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import type Transport from '@ledgerhq/hw-transport';
 import { ProtocolUpdate, UpdateInstruction } from '../../utils/types';
 import pathAsBuffer from './Path';
@@ -53,17 +54,79 @@ export default async function signUpdateProtocolTransaction(
 
     // Stream the message bytes (maximum of 255 bytes per packet)
     p1 = 0x02;
-    const chunks = toChunks(serializedProtocolUpdate.message.message, 255);
-    chunks.forEach(async (chunk) => {
+    const messageChunks = toChunks(
+        serializedProtocolUpdate.message.message,
+        255
+    );
+    for (let i = 0; i < messageChunks.length; i += 1) {
         await transport.send(
             0xe0,
             INS_PROTOCOL_UPDATE,
             p1,
             p2,
-            Buffer.from(chunk)
+            Buffer.from(messageChunks[i])
         );
-    });
+    }
 
-    const signature = Buffer.alloc(0);
-    return signature;
+    // Send specification URL length.
+    p1 = 0x01;
+    const specificationUrlLengthData =
+        serializedProtocolUpdate.specificationUrl.length;
+    await transport.send(
+        0xe0,
+        INS_PROTOCOL_UPDATE,
+        p1,
+        p2,
+        specificationUrlLengthData
+    );
+
+    // Stream the specification URL bytes (maximum of 255 bytes per packet)
+    p1 = 0x02;
+    const urlChunks = toChunks(
+        serializedProtocolUpdate.specificationUrl.message,
+        255
+    );
+    for (let i = 0; i < urlChunks.length; i += 1) {
+        await transport.send(
+            0xe0,
+            INS_PROTOCOL_UPDATE,
+            p1,
+            p2,
+            Buffer.from(urlChunks[i])
+        );
+    }
+
+    // Send the transaction hash.
+    p1 = 0x03;
+    await transport.send(
+        0xe0,
+        INS_PROTOCOL_UPDATE,
+        p1,
+        p2,
+        serializedProtocolUpdate.transactionHash
+    );
+
+    // Send auxiliary data in 255 byte chunks.
+    p1 = 0x04;
+    const auxiliaryDataChunks = toChunks(
+        serializedProtocolUpdate.auxiliaryData,
+        255
+    );
+    for (let j = 0; j < auxiliaryDataChunks.length; j += 1) {
+        const result = await transport.send(
+            0xe0,
+            INS_PROTOCOL_UPDATE,
+            p1,
+            p2,
+            Buffer.from(auxiliaryDataChunks[j])
+        );
+
+        if (j === auxiliaryDataChunks.length - 1) {
+            return result.slice(0, 64);
+        }
+    }
+
+    throw new Error(
+        'A signature was not returned by the Ledger device. This can only happen due to an implementation error.'
+    );
 }

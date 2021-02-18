@@ -15,6 +15,7 @@ import {
 import { getPendingTransactions } from '../database/TransactionDao';
 import { getStatus, getDataObject } from './transactionHelpers';
 import findHandler from './updates/HandlerFinder';
+import { parse } from './JsonBuffer';
 
 /**
  * Poll for the transaction status of the provided multi signature transaction proposal, and
@@ -26,7 +27,7 @@ export async function getMultiSignatureTransactionStatus(
     proposal: MultiSignatureTransaction,
     dispatch: Dispatch
 ) {
-    const updateInstruction = JSON.parse(proposal.transaction);
+    const updateInstruction = parse(proposal.transaction);
     const handler = findHandler(updateInstruction);
 
     const serializedUpdateInstruction = serializeUpdateInstruction(
