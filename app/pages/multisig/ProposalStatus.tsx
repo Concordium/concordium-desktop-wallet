@@ -8,6 +8,7 @@ import {
 } from '../../utils/types';
 import TransactionDetails from '../../components/TransactionDetails';
 import StatusLabel from './StatusLabel';
+import { parse } from '../../utils/JsonBuffer';
 
 // TODO This component should also have support for account transactions.
 
@@ -26,7 +27,7 @@ const statusColorMap = new Map<MultiSignatureTransactionStatus, ColorType>([
  * Component that displays a status overview of a multi signature proposal.
  */
 export default function ProposalStatus({ proposal }: Props) {
-    const updateInstruction = JSON.parse(proposal.transaction);
+    const updateInstruction = parse(proposal.transaction);
 
     return (
         <Grid padded>
