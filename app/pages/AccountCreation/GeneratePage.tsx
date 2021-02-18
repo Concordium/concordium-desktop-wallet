@@ -5,7 +5,11 @@ import { Card } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { createCredential } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { Identity, CredentialDeploymentDetails } from '../../utils/types';
+import {
+    Identity,
+    CredentialDeploymentDetails,
+    Dispatch,
+} from '../../utils/types';
 import { sendTransaction } from '../../utils/client';
 import {
     addPendingAccount,
@@ -14,13 +18,20 @@ import {
 } from '../../features/AccountSlice';
 import { getGlobal } from '../../utils/httpRequests';
 import { addToAddressBook } from '../../features/AddressBookSlice';
-import { choiceError } from '../../features/ErrorSlice';
+import { informError } from '../../features/ErrorSlice';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 
 interface Props {
     accountName: string;
     identity: Identity;
     attributes: string[];
+}
+
+function onError(dispatch: Dispatch, message: string) {
+    informError(dispatch, 'Unable to create accounts', message, {
+        label: 'Return to accounts',
+        location: routes.ACCOUNTS,
+    });
 }
 
 async function sendCredential(credentialDeploymentInfoHex: string) {
@@ -78,8 +89,20 @@ export default function AccountCreationGenerate({
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
-        const global = await getGlobal();
-        const accountNumber = await getNextAccountNumber(identity.id);
+        let global;
+        let accountNumber;
+        try {
+            global = await getGlobal();
+        } catch (e) {
+            onError(dispatch, `Unable to load the genesis`);
+            return;
+        }
+        try {
+            accountNumber = await getNextAccountNumber(identity.id);
+        } catch (e) {
+            onError(dispatch, `Unable to create account due to ${e}`);
+            return;
+        }
 
         const credentialDeploymentDetails = await createCredential(
             identity,
@@ -102,9 +125,7 @@ export default function AccountCreationGenerate({
             );
             dispatch(push(routes.ACCOUNTCREATION_FINAL));
         } catch (e) {
-            choiceError(dispatch, 'Unable to create account', `${e}`, [
-                { label: 'ok, thanks', location: routes.ACCOUNTS },
-            ]); // TODO: handle failure properly.
+            onError(dispatch, `Unable to create account due to ${e}`);
         }
     }
 
