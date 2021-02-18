@@ -29,22 +29,21 @@ export function connectWithFormUncontrolled<
     return ({ rules, name, ...props }) => {
         const { register, errors } = useFormContext();
 
-        return (
-            <Field
-                ref={register(rules)}
-                error={errors[name]}
-                name={name}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                {...(props as any)}
-            />
-        );
+        const fieldProps: TProps = {
+            ref: register(rules),
+            name,
+            error: errors[name],
+            ...props,
+        } as TProps;
+
+        return <Field {...fieldProps} />;
     };
 }
 
 interface ControlledFieldProps<TValue>
     extends FieldCommonProps,
         Pick<ControllerRenderProps, 'onChange' | 'onBlur'> {
-    defaultValue: TValue;
+    value: TValue;
 }
 type ControlledConnectorProps = Omit<
     UseControllerOptions,
@@ -63,9 +62,12 @@ export function connectWithFormControlled<
             field: { ref, ...fieldProps },
         } = useController({ name, rules, defaultValue, control });
 
-        return (
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            <Field {...fieldProps} error={errors[name]} {...(props as any)} />
-        );
+        const p: TProps = {
+            error: errors[name],
+            ...fieldProps,
+            ...props,
+        } as TProps;
+
+        return <Field {...p} />;
     };
 }
