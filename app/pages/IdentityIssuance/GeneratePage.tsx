@@ -18,20 +18,12 @@ import { IdentityProvider, Dispatch } from '../../utils/types';
 import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoller';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { informError } from '../../features/ErrorSlice';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
 async function getBody(url: string) {
     const response = await getPromise(url);
     return getResponseBody(response);
-}
-
-function onError(dispatch: Dispatch, message: string) {
-    informError(dispatch, 'Unable to create identity', message, {
-        label: 'Return to identities',
-        location: routes.IDENTITIES,
-    });
 }
 
 async function createIdentityObjectRequest(
@@ -87,7 +79,8 @@ async function generateIdentity(
     provider: IdentityProvider,
     accountName: string,
     identityName: string,
-    iframeRef: RefObject<HTMLIFrameElement>
+    iframeRef: RefObject<HTMLIFrameElement>,
+    onError: (message: string) => void
 ) {
     let identityObjectLocation;
     try {
@@ -110,7 +103,7 @@ async function generateIdentity(
         );
         await addPendingAccount(dispatch, accountName, identityId, 0); // TODO: can we add the address already here?
     } catch (e) {
-        onError(dispatch, `Failed to create identity due to ${e}`);
+        onError(`Failed to create identity due to ${e}`);
         return;
     }
     try {
@@ -122,7 +115,7 @@ async function generateIdentity(
         );
         dispatch(push(routes.IDENTITYISSUANCE_FINAL));
     } catch (e) {
-        onError(dispatch, `Failed to confirm identity`);
+        onError(`Failed to confirm identity`);
     }
 }
 
@@ -130,12 +123,14 @@ interface Props {
     identityName: string;
     accountName: string;
     provider: IdentityProvider;
+    onError(message: string): void;
 }
 
 export default function IdentityIssuanceGenerate({
     identityName,
     accountName,
     provider,
+    onError,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [location, setLocation] = useState<string>();
@@ -164,7 +159,8 @@ export default function IdentityIssuanceGenerate({
             provider,
             accountName,
             identityName,
-            iframeRef
+            iframeRef,
+            onError
         );
     }
 

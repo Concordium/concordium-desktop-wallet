@@ -128,7 +128,7 @@ export default function AccountCreationGenerate({
     return (
         <Card fluid centered>
             <ErrorModal
-                header="Unable to create accounts"
+                header="Unable to create account"
                 content={modalContent}
                 show={modalOpen}
                 onClick={() => dispatch(push(routes.ACCOUNTS))}

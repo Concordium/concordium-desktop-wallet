@@ -5,14 +5,15 @@ import { Card, List, Image, Button, Divider } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { getIdentityProviders } from '../../utils/httpRequests';
 import { IdentityProvider } from '../../utils/types';
-import { informError } from '../../features/ErrorSlice';
 
 interface Props {
     setProvider(provider: IdentityProvider): void;
+    onError(message: string): void;
 }
 
 export default function IdentityIssuanceChooseProvider({
     setProvider,
+    onError,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [providers, setProviders] = useState<IdentityProvider[]>([]);
@@ -20,18 +21,8 @@ export default function IdentityIssuanceChooseProvider({
     useEffect(() => {
         getIdentityProviders()
             .then((loadedProviders) => setProviders(loadedProviders))
-            .catch(() =>
-                informError(
-                    dispatch,
-                    'Unable to load identity providers',
-                    undefined,
-                    {
-                        label: 'Return to identities',
-                        location: routes.IDENTITIES,
-                    }
-                )
-            );
-    }, [dispatch]);
+            .catch(() => onError('Unable to load identity providers'));
+    }, [dispatch, onError]);
 
     function onClick(provider: IdentityProvider) {
         setProvider(provider);
