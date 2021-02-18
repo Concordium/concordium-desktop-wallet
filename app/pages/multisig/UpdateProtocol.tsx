@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Divider, Input, Segment } from 'semantic-ui-react';
 import DragAndDropFile from '../../components/DragAndDropFile';
+import { isHex } from '../../utils/basicHelpers';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 import { ProtocolUpdate, UpdateType } from '../../utils/types';
 import { UpdateProps } from '../../utils/UpdateInstructionHelper';
@@ -91,6 +92,12 @@ export default function UpdateProtocol({
             />
             <Button
                 primary
+                disabled={
+                    protocolUpdate.specificationHash.length !== 64 ||
+                    !isHex(protocolUpdate.specificationHash) ||
+                    !protocolUpdate.message ||
+                    !protocolUpdate.specificationUrl
+                }
                 onClick={() =>
                     forwardTransaction(
                         createUpdateMultiSignatureTransaction(

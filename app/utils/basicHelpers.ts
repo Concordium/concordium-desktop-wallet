@@ -15,3 +15,11 @@ export function partition<T>(
         array.filter((item) => !criteria(item)),
     ];
 }
+
+/**
+ * Checks if the input string is a valid hexadecimal string.
+ * @param str the string to check for hexadecimal
+ */
+export function isHex(str: string): boolean {
+    return /^[A-F0-9]+$/i.test(str);
+}
