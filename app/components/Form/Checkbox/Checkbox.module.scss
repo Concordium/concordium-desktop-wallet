@@ -14,18 +14,28 @@
     width: 14px;
     height: 14px;
     border: 1px solid $color-grey;
-    border-radius: 20%;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: border-color $form-transition;
 
-    input:checked + &::before {
-        content: '';
-        display: block;
-        width: 50%;
-        height: 50%;
-        background-color: $color-grey;
+    &Large {
+        width: 26px;
+        height: 26px;
+    }
+
+    svg {
+        opacity: 0;
+        transition: opacity $form-transition;
+        
+        .checkbox:not(.checkboxLarge) & {
+            transform: scale(.6);
+        }
+
+        input:checked + & {
+            opacity: 1;
+        }
     }
 
     input:focus + & {

@@ -6,17 +6,18 @@ import React, {
 } from 'react';
 
 import { CommonFieldProps } from '../common';
+import Checkmark from '../../../../resources/svg/checkmark-blue.svg';
 
 import styles from './Checkbox.module.scss';
 
 interface CheckboxProps
     extends CommonFieldProps,
-        InputHTMLAttributes<HTMLInputElement> {
+        Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
     /**
      * @description
-     * className added to the inner checkbox element.
+     * size of checkbox (defaults to regular)
      */
-    checkboxClassName?: string;
+    size?: 'regular' | 'large';
 }
 
 /**
@@ -27,7 +28,7 @@ interface CheckboxProps
  * <Checkbox name="checkbox">This is a checkbox</Checkbox>
  */
 const Checkbox = forwardRef<HTMLInputElement, PropsWithChildren<CheckboxProps>>(
-    ({ children, error, className, checkboxClassName, ...props }, ref) => {
+    ({ children, error, className, size = 'regular', ...props }, ref) => {
         return (
             <label
                 className={clsx(
@@ -37,7 +38,14 @@ const Checkbox = forwardRef<HTMLInputElement, PropsWithChildren<CheckboxProps>>(
                 )}
             >
                 <input type="checkbox" ref={ref} {...props} />
-                <div className={clsx(styles.checkbox, checkboxClassName)} />
+                <div
+                    className={clsx(
+                        styles.checkbox,
+                        size === 'large' && styles.checkboxLarge
+                    )}
+                >
+                    <Checkmark />
+                </div>
                 {children && <div className={styles.text}>{children}</div>}
             </label>
         );
