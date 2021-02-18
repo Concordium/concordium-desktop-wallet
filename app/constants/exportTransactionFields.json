@@ -1,6 +1,6 @@
 {
     "dateTime": "dateTime",
-    "transactionHash": "hash",
+    "transactionHash": "transaction hash",
     "transactionKind": "type",
     "fromAddressName": "from name",
     "toAddressName": "to name",
