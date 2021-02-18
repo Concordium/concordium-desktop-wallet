@@ -1,4 +1,5 @@
 @import 'config/bundle';
+@import '../common/common';
 
 .root {
     display: flex;
@@ -19,6 +20,7 @@
     align-items: center;
     justify-content: center;
     margin-right: 7px;
+    transition: border-color $form-transition;
 
     input:checked + &::before {
         content: '';
@@ -29,7 +31,7 @@
     }
 
     input:focus + & {
-        border-color: $color-pale-blue;
+        border-color: $form-color-focus;
     }
 
     .rootInvalid & {

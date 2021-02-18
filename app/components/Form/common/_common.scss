@@ -1,21 +1,24 @@
 @import 'config/bundle';
 
+$form-color-focus: $color-pale-blue;
+$form-transition: linear .1s;
+
 .field {
     border: none;
     border-bottom: 1px solid $color-off-black;
     text-align: center;
     font-size: $font-size-body2;
     font-family: $font-family;
-    transition: border-bottom-color linear .1s;
+    transition: border-color $form-transition;
 
     &:focus {
         outline: none;
-        border-bottom-color: $color-pale-blue;
+        border-color: $form-color-focus;
     }
 
     &::placeholder {
         color: $color-text-faded;
-        transition: color linear .1s;
+        transition: color $form-transition;
     }
 
     &:focus::placeholder {
@@ -23,6 +26,6 @@
     }
 
     &Invalid {
-        border-bottom-color: $color-salmon-red;
+        border-color: $color-salmon-red;
     }
 }

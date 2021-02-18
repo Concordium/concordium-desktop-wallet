@@ -1,4 +1,5 @@
 @import 'config/bundle';
+@import '../common/common';
 
 $track-height: 18px;
 $track-width: 35px;
@@ -19,7 +20,6 @@ $transition: linear .05s;
     position: relative;
     width: $track-width;
     height: $track-height;
-    border: 1px solid $color-grey;
     border-radius: $track-height / 2;
     margin-right: 10px;
 }
@@ -30,8 +30,10 @@ $transition: linear .05s;
         height: 100%;
         border-radius: $track-height / 2;
     }
-
+    
+    border: 1px solid $color-grey;
     overflow: hidden;
+    transition: border-color $form-transition;
 
     &::before {
         content: '';
@@ -44,10 +46,15 @@ $transition: linear .05s;
             transform: translateX(0);
         }
     }
+
+    input:focus + & {
+        border-color: $form-color-focus;
+    }
 }
 
 $handle-size: $track-height;
 $handle-scale: scale(1.02);
+
 .handle {
     background-color: $color-off-white;
     width: $handle-size;
@@ -56,11 +63,11 @@ $handle-scale: scale(1.02);
     position: absolute;
     left: 0;
     top: 0;
-    transform: translate(-1px, -1px) $handle-scale;
+    transform: translate(0, 0) $handle-scale;
     box-shadow: 0 0 4px $color-grey;
     transition: transform $transition;
     
     input:checked ~ & {
-        transform: translate($track-width - $handle-size - 1px, -1px) $handle-scale;
+        transform: translate($track-width - $handle-size, 0) $handle-scale;
     }
 }
