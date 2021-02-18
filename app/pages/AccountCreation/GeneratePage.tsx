@@ -6,7 +6,7 @@ import routes from '../../constants/routes.json';
 import { createCredential } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { Identity, CredentialDeploymentDetails } from '../../utils/types';
-import { sendTransaction } from '../../utils/client';
+import { sendTransaction } from '../../utils/nodeRequests';
 import {
     addPendingAccount,
     confirmAccount,

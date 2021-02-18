@@ -6,7 +6,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
-const { dependencies: externals } = require('../app/package.json');
+
+const { dependencies: externals } = require('../../app/package.json');
 
 module.exports = {
     externals: [...Object.keys(externals || {})],

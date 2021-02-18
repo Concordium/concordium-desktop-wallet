@@ -1,4 +1,5 @@
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
+import { HTMLAttributes } from 'react';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -681,3 +682,8 @@ export interface Action {
     label: string;
     location?: string;
 }
+
+export type ClassNameAndStyle = Pick<
+    HTMLAttributes<HTMLElement>,
+    'style' | 'className'
+>;

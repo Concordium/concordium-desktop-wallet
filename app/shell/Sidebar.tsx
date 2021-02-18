@@ -1,61 +1,47 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Icon, Menu } from 'semantic-ui-react';
+import Sidebar, { SidebarLink } from '../cross-app-components/Sidebar';
 import routes from '../constants/routes.json';
-import { version } from '../package.json';
 
-export default function Routes() {
-    const location = useLocation();
-    const sideBarElements = [];
-    sideBarElements.push({ route: routes.TEST, title: 'Home', icon: 'home' });
-    sideBarElements.push({
+import GtuIcon from '../../resources/svg/gtu.svg';
+import FingerprintIcon from '../../resources/svg/fingerprint.svg';
+import IdentityIcon from '../../resources/svg/identity.svg';
+import ImportExportIcon from '../../resources/svg/import-export.svg';
+import MultiSigIcon from '../../resources/svg/multisig.svg';
+import SettingsIcon from '../../resources/svg/settings.svg';
+
+const links: SidebarLink[] = [
+    {
         route: routes.ACCOUNTS,
         title: 'Accounts',
-        icon: 'user',
-    });
-    sideBarElements.push({
+        icon: <GtuIcon height="32" />,
+    },
+    {
         route: routes.IDENTITIES,
         title: 'Identities',
-        icon: 'id badge',
-    });
-    sideBarElements.push({
+        icon: <FingerprintIcon height="34" />,
+    },
+    {
         route: routes.ADDRESSBOOK,
         title: 'Address Book',
-        icon: 'book',
-    });
-    sideBarElements.push({
+        icon: <IdentityIcon height="25" />,
+    },
+    {
         route: routes.EXPORTIMPORT,
         title: 'Export/Import',
-        icon: 'share',
-    });
-    sideBarElements.push({
+        icon: <ImportExportIcon height="34" />,
+    },
+    {
         route: routes.MULTISIGTRANSACTIONS,
         title: 'Multi Signature Transactions',
-        icon: 'gavel',
-    });
-    sideBarElements.push({
+        icon: <MultiSigIcon height="32" />,
+    },
+    {
         route: routes.SETTINGS,
         title: 'Settings',
-        icon: 'settings',
-    });
+        icon: <SettingsIcon height="36" />,
+    },
+];
 
-    return (
-        <Menu icon="labeled" vertical borderless fixed="left">
-            {sideBarElements.map((member) => (
-                <Menu.Item
-                    key={member.route}
-                    as={Link}
-                    name={member.icon}
-                    to={member.route}
-                    active={member.route === location.pathname}
-                >
-                    <Icon className={member.icon} />
-                    {member.title}
-                </Menu.Item>
-            ))}
-            <div style={{ position: 'absolute', bottom: '0', width: '100%' }}>
-                <Menu.Item key="version">V{version}</Menu.Item>
-            </div>
-        </Menu>
-    );
+export default function ConnectedSidebar() {
+    return <Sidebar links={links} />;
 }
