@@ -19,6 +19,10 @@ export function partition<T>(
  * csv string, with the names first, and the values of each element per line.
  */
 export function toCSV(elements: string[][], fieldNames: string[]): string {
+    if (elements.find((element) => element.length !== fieldNames.length)) {
+        throw new Error('invalid formatted input');
+    }
+
     return `${fieldNames.join(',')}\n${elements
         .map((element) => element.join(','))
         .join('\n')}`;
