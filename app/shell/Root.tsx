@@ -8,7 +8,6 @@ import { Store } from '../store/store';
 import Routes from './Routes';
 import SideBar from './Sidebar';
 import Header from './Header';
-import ErrorModal from './ErrorModal';
 
 type Props = {
     store: Store;
@@ -17,7 +16,6 @@ type Props = {
 
 const Root = ({ store, history }: Props) => (
     <Provider store={store}>
-        <ErrorModal />
         <ConnectedRouter history={history}>
             <Grid columns="equal">
                 <Grid.Column width={3}>
