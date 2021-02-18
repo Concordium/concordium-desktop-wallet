@@ -91,8 +91,8 @@ export default function AccountCreationGenerate({
         );
 
         try {
-            saveAccount(credentialDeploymentDetails, accountNumber);
-            sendCredential(
+            await saveAccount(credentialDeploymentDetails, accountNumber);
+            await sendCredential(
                 credentialDeploymentDetails.credentialDeploymentInfoHex
             );
             confirmAccount(
