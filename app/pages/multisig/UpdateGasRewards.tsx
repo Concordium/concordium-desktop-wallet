@@ -1,22 +1,186 @@
-import React from 'react';
-import { Button, Label } from 'semantic-ui-react';
+import React, { useState } from 'react';
+import {
+    Button,
+    Divider,
+    Header,
+    Input,
+    Label,
+    List,
+    Progress,
+} from 'semantic-ui-react';
 import { UpdateProps } from '../../utils/UpdateInstructionHelper';
+import { rewardFractionResolution } from '../../constants/updateConstants.json';
+import {
+    ColorType,
+    GasRewards,
+    RewardFraction,
+    UpdateType,
+} from '../../utils/types';
+import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 
+// TODO Update the UI when the sketches are complete.
+// TODO Do input validation.
+
+/**
+ * The component used for creating an update transaction for updating the
+ * GAS rewards chain parameters.
+ */
 export default function UpdateGasRewards({
     blockSummary,
     forwardTransaction,
 }: UpdateProps) {
-    const button = <Button onClick={() => forwardTransaction({})} />;
+    const [bakerReward, setBakerReward] = useState<RewardFraction>();
+    const [
+        finalizationProofReward,
+        setFinalizationProofReward,
+    ] = useState<RewardFraction>();
+    const [
+        accountCreationReward,
+        setAccountCreationReward,
+    ] = useState<RewardFraction>();
+    const [
+        chainUpdateReward,
+        setChainUpdateReward,
+    ] = useState<RewardFraction>();
+
+    const sequenceNumber =
+        blockSummary.updates.updateQueues.gasRewards.nextSequenceNumber;
+    const { threshold } = blockSummary.updates.authorizations.paramGASRewards;
+
+    // The current chain parameters for GAS rewards.
+    const currentBakerReward =
+        blockSummary.updates.chainParameters.rewardParameters.gASRewards.baker *
+        rewardFractionResolution;
+    const currentFinalizationProofFraction =
+        blockSummary.updates.chainParameters.rewardParameters.gASRewards
+            .finalizationProof * rewardFractionResolution;
+    const currentAccountCreationFraction =
+        blockSummary.updates.chainParameters.rewardParameters.gASRewards
+            .accountCreation * rewardFractionResolution;
+    const currentChainUpdateFraction =
+        blockSummary.updates.chainParameters.rewardParameters.gASRewards
+            .chainUpdate * rewardFractionResolution;
+
+    if (
+        !bakerReward ||
+        !finalizationProofReward ||
+        !accountCreationReward ||
+        !chainUpdateReward
+    ) {
+        setBakerReward(currentBakerReward);
+        setFinalizationProofReward(currentFinalizationProofFraction);
+        setAccountCreationReward(currentAccountCreationFraction);
+        setChainUpdateReward(currentChainUpdateFraction);
+        return null;
+    }
+
+    const gasRewards: GasRewards = {
+        baker: bakerReward,
+        accountCreation: accountCreationReward,
+        chainUpdate: chainUpdateReward,
+        finalizationProof: finalizationProofReward,
+    };
+
+    const button = (
+        <Button
+            primary
+            onClick={() =>
+                forwardTransaction(
+                    createUpdateMultiSignatureTransaction(
+                        gasRewards,
+                        UpdateType.UpdateGASRewards,
+                        sequenceNumber,
+                        threshold
+                    )
+                )
+            }
+        >
+            Generate transaction
+        </Button>
+    );
 
     return (
         <>
-            <Label>
-                Update gas rewards!{' '}
-                {
-                    blockSummary.updates.updateQueues.euroPerEnergy
-                        .nextSequenceNumber
-                }
+            <Label>Sequence: {sequenceNumber}</Label>
+            <Label>Threshold: {threshold}</Label>
+            <Header>Current GAS rewards</Header>
+            <Progress
+                value={currentBakerReward}
+                total={rewardFractionResolution}
+                progress="percent"
+                label="Current baker reward"
+                color={ColorType.Pink}
+            />
+            <Header>N = 1 - (1 - F)^f · (1 - A)^a · (1 - U)^u</Header>
+            The bakers fractions of the GAS account is:
+            <Header>{currentBakerReward / 1000}% + 75% · N</Header>
+            <Label color={ColorType.Purple}>
+                F = {currentFinalizationProofFraction / 1000}%
             </Label>
+            <Label color={ColorType.Black}>
+                A = {currentAccountCreationFraction / 1000}%
+            </Label>
+            <Label color={ColorType.Green}>
+                U = {currentChainUpdateFraction / 1000}%
+            </Label>
+            <Header>New GAS rewards</Header>
+            <List>
+                <List.Item>
+                    <Input
+                        label="Baker reward"
+                        value={bakerReward}
+                        onChange={(e) => {
+                            if (e.target.value) {
+                                setBakerReward(parseInt(e.target.value, 10));
+                            }
+                        }}
+                        fluid
+                    />
+                </List.Item>
+                <List.Item>
+                    <Input
+                        label="Finalization proof reward"
+                        value={finalizationProofReward}
+                        onChange={(e) => {
+                            if (e.target.value) {
+                                setFinalizationProofReward(
+                                    parseInt(e.target.value, 10)
+                                );
+                            }
+                        }}
+                        fluid
+                    />
+                </List.Item>
+                <List.Item>
+                    <Input
+                        label="Account creation reward"
+                        value={accountCreationReward}
+                        onChange={(e) => {
+                            if (e.target.value) {
+                                setAccountCreationReward(
+                                    parseInt(e.target.value, 10)
+                                );
+                            }
+                        }}
+                        fluid
+                    />
+                </List.Item>
+                <List.Item>
+                    <Input
+                        label="Chain update reward"
+                        value={chainUpdateReward}
+                        onChange={(e) => {
+                            if (e.target.value) {
+                                setChainUpdateReward(
+                                    parseInt(e.target.value, 10)
+                                );
+                            }
+                        }}
+                        fluid
+                    />
+                </List.Item>
+            </List>
+            <Divider clearing hidden />
             {button}
         </>
     );
