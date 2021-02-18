@@ -7,6 +7,10 @@ import styles from './Input.module.scss';
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & CommonFieldProps;
 
+/**
+ * @description
+ * Use as a normal <input />. Should NOT be used for checkbox or radio.
+ */
 const Input = forwardRef<HTMLInputElement, InputProps>(
     ({ error, className, ...props }, ref) => {
         return (

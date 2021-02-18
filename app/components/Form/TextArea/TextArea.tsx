@@ -19,9 +19,18 @@ function scaleTextArea(el: HTMLTextAreaElement) {
 export interface TextAreaProps
     extends TextareaHTMLAttributes<HTMLTextAreaElement>,
         CommonFieldProps {
+    /**
+     * @description
+     * Automatically scales the textarea to the size needed to display the content.
+     * This disables resizing and setting the height of the element manually either by height or rows prop.
+     */
     autoScale?: boolean;
 }
 
+/**
+ * @description
+ * Use as a normal <textarea />.
+ */
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     (
         { error, className, autoScale = false, onChange, rows, ...props },

@@ -28,6 +28,15 @@ interface UncontrolledConnectorProps extends CommonConnectorProps {
     rules?: RegisterOptions;
 }
 
+/**
+ * @description
+ * HOC for creating form field components hooked up to the <Form /> component.
+ * Use this when hooking up a component based on an uncontrolled input (uses ref).
+ *
+ * @example
+ * const UncontrolledField = forwardRef<HTMLInputElement, CommonFieldProps>((props, ref) => <input {...props} ref={ref} />);
+ * const Connected = connectWithFormUncontrolled(UncontrolledField);
+ */
 export function connectWithFormUncontrolled<
     TProps extends UncontrolledFieldProps
 >(
@@ -65,6 +74,20 @@ interface ControlledFieldProps<TValue>
 type ControlledConnectorProps = CommonConnectorProps &
     Omit<UseControllerOptions, 'onFocus' | 'control'>;
 
+/**
+ * @description
+ * HOC for creating form field components hooked up to the <Form /> component.
+ * Use this when hooking up a component based on controlled input (value, onChange).
+ *
+ * @example
+ * interface Props {
+ *   value: string;
+ *   onChange: React.ChangeEventHandler<HTMLInputElement>;
+ * }
+ *
+ * const ControlledField = (props: Props) => <input {...props} />;
+ * const Connected = connectWithFormControlled(ControlledField);
+ */
 export function connectWithFormControlled<
     TValue,
     TProps extends ControlledFieldProps<TValue>
