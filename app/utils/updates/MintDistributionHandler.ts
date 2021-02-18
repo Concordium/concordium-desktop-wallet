@@ -1,25 +1,25 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernancePath } from '../../features/ledger/Path';
-import MicroGtuPerEuroView from '../../pages/multisig/MicroGtuPerEuroView';
+import MintDistributionView from '../../pages/multisig/MintDistributionView';
 import {
-    ExchangeRate,
-    isExchangeRate,
+    isMintDistribution,
+    MintDistribution,
     TransactionHandler,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../types';
-import { serializeExchangeRate } from '../UpdateSerialization';
+import { serializeMintDistribution } from '../UpdateSerialization';
 
-export default class MicroGtuPerEuroHandler
+export default class MintDistributionHandler
     implements
         TransactionHandler<
-            UpdateInstruction<ExchangeRate>,
+            UpdateInstruction<MintDistribution>,
             ConcordiumLedgerClient
         > {
-    transaction: UpdateInstruction<ExchangeRate>;
+    transaction: UpdateInstruction<MintDistribution>;
 
     constructor(transaction: UpdateInstruction<UpdateInstructionPayload>) {
-        if (isExchangeRate(transaction)) {
+        if (isMintDistribution(transaction)) {
             this.transaction = transaction;
         } else {
             throw Error('Invalid transaction type was given as input.');
@@ -27,12 +27,12 @@ export default class MicroGtuPerEuroHandler
     }
 
     serializePayload() {
-        return serializeExchangeRate(this.transaction.payload);
+        return serializeMintDistribution(this.transaction.payload);
     }
 
     signTransaction(ledger: ConcordiumLedgerClient) {
         const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
-        return ledger.signMicroGtuPerEuro(
+        return ledger.signMintDistribution(
             this.transaction,
             this.serializePayload(),
             path
@@ -40,6 +40,8 @@ export default class MicroGtuPerEuroHandler
     }
 
     view() {
-        return MicroGtuPerEuroView({ exchangeRate: this.transaction.payload });
+        return MintDistributionView({
+            mintDistribution: this.transaction.payload,
+        });
     }
 }

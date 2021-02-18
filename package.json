@@ -8,7 +8,9 @@
     "build-e2e": "cross-env E2E_BUILD=true yarn build",
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.js --colors",
     "build-main-dev": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.main.dev.js --colors --progress",
+    "build-proto": "sh ./internals/scripts/build_protos.sh",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.js --colors",
+    "build-renderer-dev": "cross-env NODE_ENV=development webpack --config configs/webpack.config.renderer.dev.js --colors --progress",
     "electron-rebuild": "electron-rebuild --parallel --force --types prod,dev,optional --module-dir app",
     "lint": "cross-env NODE_ENV=development eslint . --cache --ext .ts,.tsx",
     "lint-fix": "yarn --silent lint --fix; exit 0",
@@ -24,7 +26,6 @@
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{ts,tsx,js,jsx,json,html,css,less,scss,yml}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
     "preinstall": "node ./internals/scripts/CheckYarn.js",
-    "prestart": "yarn build",
     "start": "node ./internals/scripts/CheckPortInUse.js && yarn build-main-dev && cross-env START_HOT=1 yarn start-renderer-dev",
     "start:prod": "cross-env NODE_ENV=production electron ./app/main.prod.js",
     "start:dev": "cross-env START_HOT=1 NODE_ENV=development electron ./app/main.dev.js",
@@ -116,11 +117,11 @@
     "url": "https://concordium.com"
   },
   "license": "MIT",
-  "resolutions": {
-    "acorn": "npm:acorn-with-stage3"
-  },
   "devDependencies": {
     "@amilajack/testcafe-browser-provider-electron": "^0.0.15-alpha.1",
+    "@babel/core": "^7.12.16",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.12.13",
+    "@babel/plugin-proposal-optional-chaining": "^7.12.16",
     "@teamsupercell/typings-for-css-modules-loader": "^2.4.0",
     "@types/bs58check": "^2.1.0",
     "@types/enzyme": "^3.10.5",
@@ -141,6 +142,7 @@
     "@typescript-eslint/eslint-plugin": "^3.6.1",
     "@typescript-eslint/parser": "^3.6.1",
     "@wasm-tool/wasm-pack-plugin": "^1.3.1",
+    "babel-loader": "^8.2.2",
     "browserslist-config-erb": "^0.0.1",
     "chalk": "^4.1.0",
     "concurrently": "^5.3.0",
@@ -196,7 +198,7 @@
     "testcafe-react-selectors": "^4.0.0",
     "ts-jest": "^26.5.0",
     "ts-loader": "^8.0.15",
-    "typescript": "^3.9.7",
+    "typescript": "4",
     "url-loader": "^4.1.0",
     "webpack": "^4.43.0",
     "webpack-bundle-analyzer": "^3.8.0",
@@ -233,8 +235,7 @@
     "regenerator-runtime": "^0.13.5",
     "semantic-ui-react": "^2.0.2",
     "semantic-ui-sass": "^2.4.2",
-    "source-map-support": "^0.5.19",
-    "wasm-pack": "^0.9.1"
+    "source-map-support": "^0.5.19"
   },
   "devEngines": {
     "node": ">=7.x",

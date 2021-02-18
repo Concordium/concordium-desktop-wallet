@@ -1,6 +1,10 @@
+import { putBase58Check } from './serializationHelpers';
 import {
     BlockItemKind,
     ExchangeRate,
+    FoundationAccount,
+    MintDistribution,
+    TransactionFeeDistribution,
     UpdateHeader,
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -9,7 +13,7 @@ import {
 /**
  * Serializes an ExchangeRate to bytes.
  */
-export default function serializeExchangeRate(exchangeRate: ExchangeRate) {
+export function serializeExchangeRate(exchangeRate: ExchangeRate) {
     const serializedExchangeRate = Buffer.alloc(16);
     serializedExchangeRate.writeBigUInt64BE(BigInt(exchangeRate.numerator), 0);
     serializedExchangeRate.writeBigUInt64BE(
@@ -17,6 +21,57 @@ export default function serializeExchangeRate(exchangeRate: ExchangeRate) {
         8
     );
     return serializedExchangeRate;
+}
+
+/**
+ * Serializes a TransactionFeeDistribution to bytes.
+ */
+export function serializeTransactionFeeDistribution(
+    transactionFeeDistribution: TransactionFeeDistribution
+) {
+    const serializedTransactionFeeDistribution = Buffer.alloc(8);
+    serializedTransactionFeeDistribution.writeUInt32BE(
+        transactionFeeDistribution.baker,
+        0
+    );
+    serializedTransactionFeeDistribution.writeUInt32BE(
+        transactionFeeDistribution.gasAccount,
+        4
+    );
+    return serializedTransactionFeeDistribution;
+}
+
+/**
+ * Serializes a FoundationAccount to bytes.
+ */
+export function serializeFoundationAccount(
+    foundationAccount: FoundationAccount
+) {
+    const serializedFoundationAccount = Buffer.alloc(32);
+    putBase58Check(serializedFoundationAccount, 0, foundationAccount.address);
+    return serializedFoundationAccount;
+}
+
+/**
+ * Serializes a MintDistribution to bytes.
+ */
+export function serializeMintDistribution(mintDistribution: MintDistribution) {
+    const serializedMintDistribution = Buffer.alloc(13);
+    serializedMintDistribution.writeUInt32BE(
+        mintDistribution.mintPerSlot.mantissa,
+        0
+    );
+    serializedMintDistribution.writeInt8(
+        mintDistribution.mintPerSlot.exponent,
+        4
+    );
+    serializedMintDistribution.writeUInt32BE(mintDistribution.bakingReward, 5);
+    serializedMintDistribution.writeUInt32BE(
+        mintDistribution.finalizationReward,
+        9
+    );
+
+    return serializedMintDistribution;
 }
 
 /**

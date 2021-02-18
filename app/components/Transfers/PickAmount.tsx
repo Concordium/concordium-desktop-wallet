@@ -1,11 +1,12 @@
 import React from 'react';
+import { push } from 'connected-react-router';
+import { useDispatch } from 'react-redux';
 import { Card, Input, Button } from 'semantic-ui-react';
 import { AddressBookEntry } from '../../utils/types';
-import locations from '../../constants/transferLocations.json';
 import { getGTUSymbol, isValidGTUString } from '../../utils/gtu';
+import routes from '../../constants/routes.json';
 
 interface Props {
-    setLocation(location: string): void;
     recipient: AddressBookEntry | undefined;
     amount: string;
     setAmount(amount: string): void;
@@ -16,12 +17,8 @@ interface Props {
  * TODO: Rework structure to simplify this component?
  * TODO: Add an error label, describing the issue (on debounce);
  */
-export default function PickAmount({
-    setLocation,
-    recipient,
-    amount,
-    setAmount,
-}: Props) {
+export default function PickAmount({ recipient, amount, setAmount }: Props) {
+    const dispatch = useDispatch();
     const validInput = isValidGTUString(amount);
 
     function updateAmount(newAmount: string) {
@@ -44,13 +41,25 @@ export default function PickAmount({
                 />
                 <Button.Group vertical>
                     <Button
-                        onClick={() => setLocation(locations.pickRecipient)}
+                        onClick={() =>
+                            dispatch(
+                                push(
+                                    routes.ACCOUNTS_SIMPLETRANSFER_PICKRECIPIENT
+                                )
+                            )
+                        }
                     >
                         {recipient ? recipient.name : 'Select Recipient'}
                     </Button>
                     <Button
                         positive
-                        onClick={() => setLocation(locations.confirmTransfer)}
+                        onClick={() =>
+                            dispatch(
+                                push(
+                                    routes.ACCOUNTS_SIMPLETRANSFER_CONFIRMTRANSFER
+                                )
+                            )
+                        }
                         disabled={!recipient || !validInput}
                     >
                         Continue

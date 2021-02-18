@@ -7,6 +7,11 @@ import locations from '../../constants/moreActionLocations.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
 
+interface Props {
+    account: Account;
+    accountInfo: AccountInfo;
+}
+
 const items = [
     { name: 'Account Address', location: locations.accountAddress },
     { name: 'Release Schedule', location: locations.releaseSchedule },
@@ -17,10 +22,7 @@ const items = [
  * And controls the flow of those actions' pages.
  * TODO: Find a better name?
  */
-export default function MoreActions(
-    account: Account,
-    accountInfo: AccountInfo
-) {
+export default function MoreActions({ account, accountInfo }: Props) {
     const [location, setLocation] = useState(locations.list);
 
     function ChosenComponent() {

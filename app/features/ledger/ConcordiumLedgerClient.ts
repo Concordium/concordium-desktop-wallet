@@ -7,13 +7,15 @@ import signAccountChallenge from './AccountChallenge';
 import {
     AccountTransaction,
     ExchangeRate,
+    FoundationAccount,
+    MintDistribution,
     PublicInformationForIp,
+    TransactionFeeDistribution,
     UpdateInstruction,
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
-import signUpdateMicroGtuPerEuro from './MicroGtuPerEuro';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
-import signUpdateEuroPerEnergy from './EuroPerEnergy';
+import signUpdateTransaction from './SignUpdateTransaction';
 
 /**
  * Concordium Ledger API.
@@ -81,11 +83,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return signUpdateMicroGtuPerEuro(
+        return signUpdateTransaction(
             this.transport,
+            0x06,
             path,
-            serializedPayload,
-            transaction
+            transaction,
+            serializedPayload
         );
     }
 
@@ -94,8 +97,51 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return signUpdateEuroPerEnergy(
+        return signUpdateTransaction(
             this.transport,
+            0x06,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signTransactionFeeDistribution(
+        transaction: UpdateInstruction<TransactionFeeDistribution>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x22,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signFoundationAccount(
+        transaction: UpdateInstruction<FoundationAccount>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x24,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signMintDistribution(
+        transaction: UpdateInstruction<MintDistribution>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x25,
             path,
             transaction,
             serializedPayload
