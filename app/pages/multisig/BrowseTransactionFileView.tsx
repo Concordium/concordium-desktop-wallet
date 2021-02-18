@@ -24,10 +24,10 @@ export default function BrowseTransactionFileView() {
     });
     const dispatch = useDispatch();
 
-    async function loadTransactionFile(file: string) {
+    async function loadTransactionFile(file: Buffer) {
         let transactionObject;
         try {
-            transactionObject = parse(file);
+            transactionObject = parse(file.toString('utf-8'));
         } catch (e) {
             setShowError({
                 show: true,

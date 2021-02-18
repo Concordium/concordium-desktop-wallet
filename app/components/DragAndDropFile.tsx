@@ -1,12 +1,12 @@
 import React from 'react';
 import { Button, Header, Icon, Segment } from 'semantic-ui-react';
-import { openFile } from '../utils/FileHelper';
+import { openFileRaw } from '../utils/FileHelper';
 
 // TODO Add support for actual drag&drop functionality.
 
 interface Props {
     text: string;
-    fileProcessor: (fileContents: string) => void;
+    fileProcessor: (fileContents: Buffer) => void;
     disabled?: boolean;
 }
 
@@ -16,10 +16,10 @@ export default function DragAndDropFile({
     disabled,
 }: Props) {
     async function loadFile() {
-        let transactionString;
+        let file;
         try {
-            transactionString = await openFile('Open file');
-            fileProcessor(transactionString);
+            file = await openFileRaw('Open file');
+            fileProcessor(file);
         } catch (err) {
             // An error is thrown if the user cancels the open file menu, or if
             // no file was selected. Therefore this error can be ignored, as nothing
