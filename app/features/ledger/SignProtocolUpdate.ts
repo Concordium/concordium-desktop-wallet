@@ -112,6 +112,21 @@ export default async function signUpdateProtocolTransaction(
         serializedProtocolUpdate.auxiliaryData,
         255
     );
+
+    // No auxiliary data has to be sent, but we send an empty message to access
+    // the signing page.
+    if (auxiliaryDataChunks.length === 0) {
+        const result = await transport.send(
+            0xe0,
+            INS_PROTOCOL_UPDATE,
+            p1,
+            p2,
+            Buffer.alloc(0)
+        );
+        return result.slice(0, 64);
+    }
+
+    // There is auxiliary data to be sent, stream it to the Ledger.
     for (let j = 0; j < auxiliaryDataChunks.length; j += 1) {
         const result = await transport.send(
             0xe0,
