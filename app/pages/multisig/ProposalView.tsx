@@ -200,7 +200,10 @@ export default function ProposalView() {
                                     return (
                                         <Form.Field key={signature}>
                                             <Checkbox
-                                                label="Signed"
+                                                label={`Signed (${signature.substring(
+                                                    0,
+                                                    16
+                                                )}...)`}
                                                 defaultChecked
                                                 readOnly
                                             />
