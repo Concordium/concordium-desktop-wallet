@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { ChangeEventHandler, useCallback } from 'react';
 import { NavLink } from 'react-router-dom';
 import clsx from 'clsx';
 
-import { version } from '../../package.json';
 import { ClassNameAndStyle } from '../../utils/types';
 import LogoIcon from '../../../resources/svg/logo.svg';
 
 import styles from './Sidebar.module.scss';
+import Switch from '../../components/Form/Switch';
 
 export interface SidebarLink {
     route: string;
@@ -14,11 +14,35 @@ export interface SidebarLink {
     title: string;
 }
 
-export interface SidebarProps extends ClassNameAndStyle {
+export interface SidebarProps<THasSwitch extends boolean>
+    extends ClassNameAndStyle {
     links: SidebarLink[];
+    version?: string;
+    hasThemeSwitch?: THasSwitch;
+    isDark: THasSwitch extends true ? boolean : undefined;
+    onThemeChange: THasSwitch extends true
+        ? (isDark: boolean) => void
+        : undefined;
 }
 
-export default function Sidebar({ links, className, style }: SidebarProps) {
+export default function Sidebar<THasSwitch extends boolean = false>({
+    links,
+    className,
+    style,
+    version,
+    hasThemeSwitch,
+    isDark = false,
+    onThemeChange,
+}: SidebarProps<THasSwitch>) {
+    const handleSwitchToggle: ChangeEventHandler<HTMLInputElement> = useCallback(
+        (e) => {
+            if (onThemeChange) {
+                onThemeChange(e.target.checked);
+            }
+        },
+        [onThemeChange]
+    );
+
     return (
         <nav className={clsx(styles.root, className)} style={style}>
             <div className={styles.items}>
@@ -42,7 +66,12 @@ export default function Sidebar({ links, className, style }: SidebarProps) {
                     </NavLink>
                 ))}
             </div>
-            <div className={styles.bottom}>V {version}</div>
+            <section className={styles.bottom}>
+                {hasThemeSwitch && (
+                    <Switch checked={isDark} onChange={handleSwitchToggle} />
+                )}
+                {version && <div>V {version}</div>}
+            </section>
         </nav>
     );
 }

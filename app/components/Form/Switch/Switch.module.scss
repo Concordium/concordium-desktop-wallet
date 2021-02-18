@@ -11,8 +11,7 @@ $transition: linear .05s;
     align-items: center;
 
     input {
-        position: absolute;
-        opacity: 0;
+        @include hideInput;
     }
 }
 
@@ -21,7 +20,6 @@ $transition: linear .05s;
     width: $track-width;
     height: $track-height;
     border-radius: $track-height / 2;
-    margin-right: 10px;
 }
 
 .track {
@@ -50,6 +48,10 @@ $transition: linear .05s;
     input:focus + & {
         border-color: $form-color-focus;
     }
+
+    .rootInvalid & {
+        border-color: $color-error;
+    }
 }
 
 $handle-size: $track-height;
@@ -70,4 +72,8 @@ $handle-scale: scale(1.02);
     input:checked ~ & {
         transform: translate($track-width - $handle-size, 0) $handle-scale;
     }
+}
+
+.text {
+    margin-left: 10px;
 }

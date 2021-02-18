@@ -46,4 +46,8 @@ $sidebar-link-height: $page-header-height;
 .bottom {
     padding: 10px 0;
     color: $color-text-faded;
+
+    > * + * {
+        margin-top: 18px;
+    }
 }

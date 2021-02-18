@@ -3,6 +3,13 @@
 $form-color-focus: $color-pale-blue;
 $form-transition: linear .1s;
 
+@mixin hideInput() {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
 .field {
     border: none;
     border-bottom: 1px solid $color-off-black;
@@ -26,6 +33,6 @@ $form-transition: linear .1s;
     }
 
     &Invalid {
-        border-color: $color-salmon-red;
+        border-color: $color-error;
     }
 }

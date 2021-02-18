@@ -38,7 +38,7 @@ const Checkbox = forwardRef<HTMLInputElement, PropsWithChildren<CheckboxProps>>(
             >
                 <input type="checkbox" ref={ref} {...props} />
                 <div className={clsx(styles.checkbox, checkboxClassName)} />
-                <div>{children}</div>
+                {children && <div className={styles.text}>{children}</div>}
             </label>
         );
     }
