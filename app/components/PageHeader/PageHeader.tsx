@@ -3,6 +3,7 @@ import React, { ReactElement, useMemo } from 'react';
 import PageHeaderButton, { PageHeaderButtonProps } from './PageHeaderButton';
 
 import styles from './PageHeader.module.scss';
+import { WithAsProp } from '../../utils/types';
 
 export interface PageHeaderProps {
     children: ReactElement | ReactElement[];
@@ -13,8 +14,7 @@ function isPageHeaderButton(
 ): el is ReactElement<PageHeaderButtonProps> {
     return (
         el.type === PageHeaderButton ||
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (el.props as any).as === PageHeaderButton
+        (el as ReactElement<WithAsProp<unknown>>).props.as === PageHeaderButton
     );
 }
 

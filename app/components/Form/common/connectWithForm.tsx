@@ -25,7 +25,6 @@ export function connectWithFormUncontrolled<
 ): (
     props: UncontrolledConnectorProps & Omit<TProps, 'ref' | 'error'>
 ) => JSX.Element {
-    // eslint-disable-next-line react/display-name
     return ({ rules, name, ...props }) => {
         const { register, errors } = useFormContext();
 

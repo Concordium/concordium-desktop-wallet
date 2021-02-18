@@ -1,5 +1,4 @@
 import React, {
-    ComponentType,
     PropsWithChildren,
     useCallback,
     useMemo,
@@ -9,7 +8,12 @@ import { Modal } from 'semantic-ui-react';
 import { SubmitHandler } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 
-import { AddressBookEntry, EqualRecord, NotOptional } from '../../utils/types';
+import {
+    AddressBookEntry,
+    EqualRecord,
+    NotOptional,
+    WithAsPropOmit,
+} from '../../utils/types';
 import { isValidAddress } from '../../utils/accountHelpers';
 import {
     addToAddressBook,
@@ -19,8 +23,14 @@ import Form from '../Form';
 
 import styles from './UpsertAddress.module.scss';
 
-type Props<TAsProps> = Omit<TAsProps, 'onClick' | 'children'> & {
-    as: ComponentType<TAsProps>;
+interface HasOnClick {
+    onClick?(): void;
+}
+
+type Props<TAsProps extends PropsWithChildren<HasOnClick>> = WithAsPropOmit<
+    TAsProps,
+    'onClick' | 'children'
+> & {
     initialValues?: AddressBookEntryForm;
     onSubmit?(name: string, address: string, note?: string): void;
 };
