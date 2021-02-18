@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Divider, Form, Header, Segment } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
 import { UpdateType } from '../../utils/types';
 import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
@@ -44,9 +44,7 @@ export default function UpdateMicroGtuPerEuroRate({
     }
 
     return (
-        <Segment>
-            <Header>Transaction Proposal | Update MicroGTU Per Euro</Header>
-            <Divider />
+        <>
             <Form>
                 <Form.Input
                     inline
@@ -81,6 +79,6 @@ export default function UpdateMicroGtuPerEuroRate({
             >
                 Generate transaction proposal
             </Button>
-        </Segment>
+        </>
     );
 }

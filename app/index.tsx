@@ -7,7 +7,7 @@ import { updateSettings, findSetting } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
 import listenForTransactionStatus from './utils/TransactionStatusPoller';
 import { Dispatch } from './utils/types';
-import { startClient } from './utils/client';
+import { startClient } from './utils/nodeRequests';
 import listenForIdentityStatus from './utils/IdentityStatusPoller';
 import listenForAccountStatus from './utils/AccountStatusPoller';
 import { loadAddressBook } from './features/AddressBookSlice';
