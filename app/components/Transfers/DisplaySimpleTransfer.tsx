@@ -21,7 +21,7 @@ export default function DisplaySimpleTransfer({ transaction }: Props) {
     useEffect(() => {
         lookupName(transaction.payload.toAddress)
             .then((name) => setToName(name))
-            .catch(() => {});
+            .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
     });
 
     return (
