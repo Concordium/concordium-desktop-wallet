@@ -112,15 +112,13 @@ export function serializeProtocolUpdate(
     protocolUpdate: ProtocolUpdate
 ): SerializedProtocolUpdate {
     const encodedMessage = serializeUtf8String(protocolUpdate.message);
-    const encoedMessageMessage = encodedMessage.message;
-
     const encodedSpecificationUrl = serializeUtf8String(
         protocolUpdate.specificationUrl
     ).message;
 
     const payloadLength =
         8 +
-        encoedMessageMessage.length +
+        encodedMessage.message.length +
         8 +
         encodedSpecificationUrl.length +
         protocolUpdate.specificationHash.length +
@@ -130,32 +128,25 @@ export function serializeProtocolUpdate(
     serializedPayloadLength.writeBigInt64BE(BigInt(payloadLength), 0);
 
     let offset = 0;
-    const serializedProtocolUpdate = Buffer.alloc(8 + payloadLength);
-    offset += serializedProtocolUpdate.writeBigUInt64BE(
-        BigInt(payloadLength),
-        offset
-    );
-    offset += serializedProtocolUpdate.writeBigUInt64BE(
-        BigInt(encodedMessage.length),
-        offset
-    );
-    offset += serializedProtocolUpdate.write(
-        protocolUpdate.message,
-        offset,
-        'utf-8'
-    );
-    offset += serializedProtocolUpdate.writeBigUInt64BE(
+
+    let buffer = Buffer.alloc(16);
+    offset += buffer.writeBigUInt64BE(BigInt(payloadLength), offset);
+    buffer.writeBigUInt64BE(BigInt(encodedMessage.message.length), offset);
+    buffer = Buffer.concat([buffer, encodedMessage.message]);
+
+    let specificationUrlBuffer = Buffer.alloc(8);
+    specificationUrlBuffer.writeBigUInt64BE(
         BigInt(encodedSpecificationUrl.length),
-        offset
+        0
     );
-    serializedProtocolUpdate.write(
-        protocolUpdate.specificationUrl,
-        offset,
-        'utf-8'
-    );
+    specificationUrlBuffer = Buffer.concat([
+        specificationUrlBuffer,
+        encodedSpecificationUrl,
+    ]);
 
     const finalSerialization = Buffer.concat([
-        serializedProtocolUpdate,
+        buffer,
+        specificationUrlBuffer,
         protocolUpdate.specificationHash,
         protocolUpdate.specificationAuxiliaryData,
     ]);
