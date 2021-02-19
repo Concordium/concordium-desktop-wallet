@@ -7,6 +7,7 @@ type ButtonSize = 'small' | 'regular' | 'big';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     size?: ButtonSize;
+    inverted?: boolean;
 }
 
 const sizeStyleMap: Record<ButtonSize, string | undefined> = {
@@ -22,6 +23,7 @@ const sizeStyleMap: Record<ButtonSize, string | undefined> = {
 export default function Button({
     size = 'regular',
     type = 'button',
+    inverted = false,
     className,
     ...buttonProps
 }: PropsWithChildren<ButtonProps>): JSX.Element {
@@ -29,7 +31,12 @@ export default function Button({
         <button
             // eslint-disable-next-line react/button-has-type
             type={type}
-            className={clsx(styles.root, size && sizeStyleMap[size], className)}
+            className={clsx(
+                styles.root,
+                size && sizeStyleMap[size],
+                inverted && styles.rootInverted,
+                className
+            )}
             {...buttonProps}
         />
     );
