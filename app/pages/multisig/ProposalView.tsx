@@ -235,11 +235,13 @@ export default function ProposalView() {
                             currentProposal.status !==
                             MultiSignatureTransactionStatus.Open
                         }
-                        onClick={() =>
-                            saveFile(
-                                currentProposal.transaction,
-                                'Export transaction'
-                            )
+                        onClick={
+                            () =>
+                                saveFile(
+                                    currentProposal.transaction,
+                                    'Export transaction'
+                                )
+                            // TODO Handle failure
                         }
                     >
                         Export transaction proposal

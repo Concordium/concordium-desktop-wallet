@@ -1,0 +1,12 @@
+{
+    "dateTime": "dateTime",
+    "transactionHash": "transaction hash",
+    "transactionKind": "type",
+    "fromAddressName": "from name",
+    "toAddressName": "to name",
+    "fromAddress": "from address",
+    "toAddress": "to address",
+    "cost": "fee amount",
+    "subtotal": "amount",
+    "total": "balance change"
+}

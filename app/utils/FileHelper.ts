@@ -31,18 +31,19 @@ export async function openFile(title: string): Promise<string> {
  * the data to that destination.
  * @param data the string to save to a file
  * @param title the title of the save file window
+ * @return the promise resolves true when the data has been written to file. if the result is false, then the user cancelled.
  */
-export async function saveFile(data: string, title: string) {
+export async function saveFile(data: string, title: string): Promise<boolean> {
     const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke(
         ipcCommands.saveFileDialog,
         title
     );
 
     if (saveFileDialog.canceled) {
-        throw new Error('Saving file was cancelled by the user.');
+        return false;
     }
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
         if (!saveFileDialog.filePath) {
             reject(new Error('No file path was selected by the user.'));
         } else {
@@ -50,7 +51,7 @@ export async function saveFile(data: string, title: string) {
                 if (err) {
                     reject(new Error(`Unable to save file: ${err}`));
                 }
-                resolve();
+                resolve(true);
             });
         }
     });
