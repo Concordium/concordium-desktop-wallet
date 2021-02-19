@@ -31,7 +31,6 @@ async function loadSettingsIntoStore() {
 
 async function onLoad(dispatch: Dispatch) {
     await loadSettingsIntoStore();
-
     listenForAccountStatus(dispatch);
     listenForIdentityStatus(dispatch);
     listenForTransactionStatus(dispatch);

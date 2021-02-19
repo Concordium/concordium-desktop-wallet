@@ -58,7 +58,7 @@ export async function addToAddressBook(
 
 export async function removeFromAddressBook(
     dispatch: Dispatch,
-    entry: AddressBookEntry
+    entry: Partial<AddressBookEntry>
 ) {
     await removeEntry(entry);
     loadAddressBook(dispatch);
