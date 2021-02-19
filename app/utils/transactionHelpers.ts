@@ -91,16 +91,21 @@ export function createSchedule(
     interval: number
 ): SchedulePoint[] {
     // TODO what to do if releases dont divide amount.
-    const releaseAmount = (totalAmount / BigInt(releases)).toString();
+    const releaseAmount = totalAmount / BigInt(releases);
+    const restAmount = totalAmount % BigInt(releases);
     const schedule = [];
     let timestamp = starting;
-    for (let i = 0; i < releases; i += 1) {
+    for (let i = 0; i < releases - 1; i += 1) {
         schedule.push({
-            amount: releaseAmount,
+            amount: releaseAmount.toString(),
             timestamp: timestamp.toString(),
         });
         timestamp += interval;
     }
+    schedule.push({
+        amount: (releaseAmount + restAmount).toString(),
+        timestamp: timestamp.toString(),
+    });
     return schedule;
 }
 
