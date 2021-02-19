@@ -7,9 +7,10 @@ import { updateSettings, findSetting } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
 import listenForTransactionStatus from './utils/TransactionStatusPoller';
 import { Dispatch } from './utils/types';
-import { startClient } from './utils/client';
+import { startClient } from './utils/nodeRequests';
 import listenForIdentityStatus from './utils/IdentityStatusPoller';
 import listenForAccountStatus from './utils/AccountStatusPoller';
+import { loadAddressBook } from './features/AddressBookSlice';
 
 import './styles/app.global.scss';
 
@@ -30,6 +31,7 @@ async function loadSettingsIntoStore() {
 }
 
 async function onLoad(dispatch: Dispatch) {
+    loadAddressBook(dispatch);
     await loadSettingsIntoStore();
 
     listenForAccountStatus(dispatch);

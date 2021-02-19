@@ -8,8 +8,10 @@
     "build-e2e": "cross-env E2E_BUILD=true yarn build",
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.js --colors",
     "build-main-dev": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.main.dev.js --colors --progress",
+    "build-proto": "sh ./internals/scripts/build_protos.sh",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.js --colors",
     "build-renderer-dev": "cross-env NODE_ENV=development webpack --config configs/webpack.config.renderer.dev.js --colors --progress",
+    "build-storybook": "build-storybook",
     "electron-rebuild": "electron-rebuild --parallel --force --types prod,dev,optional --module-dir app",
     "lint": "cross-env NODE_ENV=development eslint . --cache --ext .ts,.tsx",
     "lint-fix": "yarn --silent lint --fix; exit 0",
@@ -30,14 +32,13 @@
     "start:dev": "cross-env START_HOT=1 NODE_ENV=development electron ./app/main.dev.js",
     "start:dev-debug": "yarn start:dev --inspect=5858 --remote-debugging-port=9223",
     "start-renderer-dev": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.renderer.dev.js --colors --progress",
+    "storybook": "start-storybook -p 6006",
     "test": "cross-env jest",
     "test-tsc": "yarn tsc --noEmit",
     "test-all": "yarn lint && yarn test-tsc && yarn build && yarn test",
     "test-e2e": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe electron:./app ./test/e2e/HomePage.e2e.ts",
     "test-e2e-live": "node ./internals/scripts/CheckBuildsExist.js && cross-env NODE_ENV=test testcafe --live electron:./app ./test/e2e/HomePage.e2e.ts",
-    "test-watch": "yarn test --watch",
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "test-watch": "yarn test --watch"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

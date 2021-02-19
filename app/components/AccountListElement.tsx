@@ -1,10 +1,10 @@
 import React from 'react';
-import { Grid, Header, Label, Image, Divider } from 'semantic-ui-react';
+import { Grid, Header, Label, Divider } from 'semantic-ui-react';
 import { displayAsGTU } from '../utils/gtu';
 import { AccountInfo, Account, AccountStatus } from '../utils/types';
 import { isInitialAccount } from '../utils/accountHelpers';
 import SidedText from './SidedText';
-import pendingImage from '../../resources/svg/pending_old.svg';
+import PendingImage from '../../resources/svg/pending_old.svg';
 
 const nop = () => {};
 
@@ -42,12 +42,7 @@ function AccountListElement({
                     <Header as="h2">
                         {account.name}
                         {account.status === AccountStatus.Pending ? (
-                            <Image
-                                src={pendingImage}
-                                alt="pending"
-                                size="mini"
-                                spaced
-                            />
+                            <PendingImage />
                         ) : undefined}
                     </Header>
                     {isInitialAccount(account) ? (

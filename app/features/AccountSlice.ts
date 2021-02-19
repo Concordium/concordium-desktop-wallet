@@ -20,7 +20,7 @@ import {
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
-import { getAccountInfos } from '../utils/clientHelpers';
+import { getAccountInfos } from '../utils/nodeHelpers';
 
 interface AccountState {
     accounts: Account[];

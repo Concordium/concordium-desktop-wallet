@@ -1,0 +1,28 @@
+@import 'config/bundle';
+
+.field {
+    border: none;
+    border-bottom: 1px solid $color-off-black;
+    text-align: center;
+    font-size: $font-size-body2;
+    font-family: $font-family;
+    transition: border-color $form-transition;
+
+    &:focus {
+        outline: none;
+        border-color: $form-color-focus;
+    }
+
+    &::placeholder {
+        color: $color-text-faded;
+        transition: color $form-transition;
+    }
+
+    &:focus::placeholder {
+        color: transparent;
+    }
+
+    &Invalid {
+        border-color: $color-error;
+    }
+}
