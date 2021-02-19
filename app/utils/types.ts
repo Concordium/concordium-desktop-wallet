@@ -445,7 +445,8 @@ export type UpdateInstructionPayload =
     | ExchangeRate
     | TransactionFeeDistribution
     | FoundationAccount
-    | MintDistribution;
+    | MintDistribution
+    | GasRewards;
 
 export type Transaction =
     | AccountTransaction
@@ -515,6 +516,12 @@ export function isMintDistribution(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<MintDistribution> {
     return UpdateType.UpdateMintDistribution === transaction.type;
+}
+
+export function isGasRewards(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<GasRewards> {
+    return UpdateType.UpdateGASRewards === transaction.type;
 }
 
 /**
@@ -598,6 +605,13 @@ export interface MintDistribution {
     mintPerSlot: MintRate;
     bakingReward: RewardFraction;
     finalizationReward: RewardFraction;
+}
+
+export interface GasRewards {
+    baker: RewardFraction;
+    finalizationProof: RewardFraction;
+    accountCreation: RewardFraction;
+    chainUpdate: RewardFraction;
 }
 
 export interface TransactionDetails {
@@ -684,6 +698,11 @@ interface EventResult {
 export interface TransactionEvent {
     result: EventResult;
     cost: string;
+}
+
+export interface Action {
+    label: string;
+    location?: string;
 }
 
 export type ClassNameAndStyle = Pick<

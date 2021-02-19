@@ -42,6 +42,11 @@ export const { updateIdentities, chooseIdentity } = identitySlice.actions;
 export const identitiesSelector = (state: RootState) =>
     state.identities.identities;
 
+export const confirmedIdentitiesSelector = (state: RootState) =>
+    state.identities.identities.filter(
+        (identity: Identity) => identity.status === IdentityStatus.Confirmed
+    );
+
 export const chosenIdentitySelector = (state: RootState) =>
     state.identities.chosenIdentity;
 
