@@ -44,20 +44,15 @@ export function getISOFormat(
     return new Date(timeStampCorrectUnit).toISOString();
 }
 
-const second = 1000;
-
-export interface Interval {
-    label: string;
-    value: number;
+export enum TimeConstants {
+    Second = 1000,
+    Minute = 60 * Second,
+    Hour = 60 * Minute,
+    Day = 24 * Hour,
+    Week = 7 * Day,
+    Month = 30 * Day,
 }
-export const intervals: Interval[] = [
-    { label: 'Minute', value: 60 * second },
-    { label: 'Hour', value: 60 * 60 * second },
-    { label: 'Day', value: 24 * 60 * 60 * second },
-    { label: 'Week', value: 7 * 24 * 60 * 60 * second },
-    { label: 'Month (30 days)', value: 30 * 7 * 24 * 60 * 60 * second },
-];
 
 export function getDefaultExpiry(): string {
-    return (new Date().getTime() + 60 * 60 * second).toString(); // 1 hour from now
+    return (new Date().getTime() + TimeConstants.Hour).toString();
 }

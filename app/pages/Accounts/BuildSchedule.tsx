@@ -6,13 +6,25 @@ import { Card, Label, List, Header, Button, Input } from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
 import routes from '../../constants/routes.json';
 import { Account, AddressBookEntry } from '../../utils/types';
-import { intervals, Interval } from '../../utils/timeHelpers';
+import { TimeConstants } from '../../utils/timeHelpers';
 import { displayAsGTU } from '../../utils/gtu';
 import {
     createSchedule,
     createScheduledTransferTransaction,
 } from '../../utils/transactionHelpers';
 import locations from '../../constants/transferLocations.json';
+
+export interface Interval {
+    label: string;
+    value: number;
+}
+export const intervals: Interval[] = [
+    { label: 'Minute', value: TimeConstants.Minute },
+    { label: 'Hour', value: TimeConstants.Hour },
+    { label: 'Day', value: TimeConstants.Day },
+    { label: 'Week', value: TimeConstants.Week },
+    { label: 'Month (30 days)', value: TimeConstants.Month },
+];
 
 interface State {
     account: Account;
