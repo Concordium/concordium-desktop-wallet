@@ -148,7 +148,9 @@ export default function UpsertAddress<TAsProps>({
                     placeholder="You can add a note here"
                     defaultValue={initialValues?.note}
                 />
-                <button type="submit">Submit</button>
+                <Form.Submit className={styles.submit}>
+                    Save recipient
+                </Form.Submit>
             </Form>
         </Modal>
     );

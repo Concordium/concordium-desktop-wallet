@@ -4,14 +4,23 @@
     color: $color-off-white;
     background-color: $color-pale-blue;
     font-size: $font-size-button1;
-    padding: 0 50px;
-    height: 58px;
-    border-radius: 10px;
-
+    padding: 0 30px;
+    height: 50px;
+    border-radius: 4px;
+    
+    &Small,
+    &Big {
+        border-radius: 10px;
+    }
+    
     &Small {
         height: 36px;
         font-size: $font-size-button2;
-        padding: 0 30px;
+        padding: 0 15px;
+    }
+    
+    &Big {
+        height: 58px;
     }
 
     &:disabled {
