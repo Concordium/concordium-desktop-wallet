@@ -1,5 +1,6 @@
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
+import { getDefaultExpiry } from './timeHelpers';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -65,7 +66,7 @@ export async function createSimpleTransferTransaction(
     fromAddress: string,
     amount: BigInt,
     toAddress: string,
-    expiry = '16446744073',
+    expiry: string = getDefaultExpiry(),
     energyAmount = '200'
 ) {
     const { nonce } = await getNextAccountNonce(fromAddress);
@@ -73,7 +74,7 @@ export async function createSimpleTransferTransaction(
         sender: fromAddress,
         nonce,
         energyAmount, // TODO: Does this need to be set by the user?
-        expiry, // TODO: Don't hardcode?
+        expiry,
         transactionKind: TransactionKindId.Simple_transfer,
         payload: {
             toAddress,
@@ -111,7 +112,7 @@ export async function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: SchedulePoint[],
-    expiry = '16446744073',
+    expiry: string = getDefaultExpiry(),
     energyAmount = '20000'
 ) {
     const { nonce } = await getNextAccountNonce(fromAddress);
@@ -119,7 +120,7 @@ export async function createScheduledTransferTransaction(
         sender: fromAddress,
         nonce,
         energyAmount, // TODO: Does this need to be set by the user?
-        expiry, // TODO: Don't hardcode?
+        expiry,
         transactionKind: TransactionKindId.Transfer_with_schedule,
         payload: {
             toAddress,

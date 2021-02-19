@@ -6,6 +6,7 @@ import { Card, Label, List, Header, Button, Input } from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
 import routes from '../../constants/routes.json';
 import { Account, AddressBookEntry } from '../../utils/types';
+import { intervals, Interval } from '../../utils/timeHelpers';
 import { displayAsGTU } from '../../utils/gtu';
 import {
     createSchedule,
@@ -23,20 +24,6 @@ interface Props {
     location: LocationDescriptorObject<State>;
 }
 
-const second = 1000;
-
-interface Interval {
-    label: string;
-    value: number;
-}
-const intervals: Interval[] = [
-    { label: 'Second', value: 1 * second },
-    { label: 'Minute', value: 60 * second },
-    { label: 'Hour', value: 60 * 60 * second },
-    { label: 'Day', value: 24 * 60 * 60 * second },
-    { label: 'Week', value: 7 * 24 * 60 * 60 * second },
-];
-
 /**
  * Allows the user to build the schedule of a scheduled transfer.
  */
@@ -47,8 +34,8 @@ export default function BuildSchedule({ location }: Props) {
         intervals[0]
     );
     const [startTime, setStartTime] = useState<number>(
-        new Date().getTime() + 5 * 60 * second
-    ); // TODO Decide appropiate default
+        new Date().getTime() + 5 * 60 * 1000 // TODO Decide appropiate default
+    );
 
     if (!location.state) {
         throw new Error('Unexpected missing state.');

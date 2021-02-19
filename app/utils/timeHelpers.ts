@@ -43,3 +43,21 @@ export function getISOFormat(
     const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
     return new Date(timeStampCorrectUnit).toISOString();
 }
+
+const second = 1000;
+
+export interface Interval {
+    label: string;
+    value: number;
+}
+export const intervals: Interval[] = [
+    { label: 'Minute', value: 60 * second },
+    { label: 'Hour', value: 60 * 60 * second },
+    { label: 'Day', value: 24 * 60 * 60 * second },
+    { label: 'Week', value: 7 * 24 * 60 * 60 * second },
+    { label: 'Month (30 days)', value: 30 * 7 * 24 * 60 * 60 * second },
+];
+
+export function getDefaultExpiry(): string {
+    return (new Date().getTime() + 60 * 60 * second).toString(); // 1 hour from now
+}
