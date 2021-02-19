@@ -5,7 +5,11 @@ import { Card } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { createCredential } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { Identity, CredentialDeploymentDetails } from '../../utils/types';
+import {
+    Identity,
+    CredentialDeploymentDetails,
+    Dispatch,
+} from '../../utils/types';
 import { sendTransaction } from '../../utils/nodeRequests';
 import {
     addPendingAccount,
@@ -27,6 +31,11 @@ interface Props {
     attributes: string[];
 }
 
+function removeFailed(dispatch: Dispatch, accountAddress: string) {
+    removeAccount(dispatch, accountAddress);
+    removeFromAddressBook(dispatch, { address: accountAddress });
+}
+
 export default function AccountCreationGenerate({
     accountName,
     attributes,
@@ -41,19 +50,18 @@ export default function AccountCreationGenerate({
         accountAddress,
     }: CredentialDeploymentDetails) {
         const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
-        let response;
         try {
-            response = await sendTransaction(payload);
+            const response = await sendTransaction(payload);
+            if (response.getValue()) {
+                return;
+            }
         } catch (e) {
+            removeFailed(dispatch, accountAddress);
             throw new Error(
                 'We were unable to deploy the credential, because the node could not be reached.'
             );
         }
-        if (response && response.getValue()) {
-            return;
-        }
-        removeAccount(dispatch, accountAddress);
-        removeFromAddressBook(dispatch, { address: accountAddress });
+        removeFailed(dispatch, accountAddress);
         throw new Error(
             'We were unable to deploy the credential, due to the node rejecting the transaction.'
         );
