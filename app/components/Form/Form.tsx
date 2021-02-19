@@ -12,6 +12,33 @@ interface FormProps<TFormValues>
     onSubmit: SubmitHandler<TFormValues>;
 }
 
+/**
+ * @description
+ * Use this to take advantage of automatic validation of form inputs based on rules supplied to individual elements.
+ * Don't use this if you simply need an input element for DOM manipulation of some sort (i.e. filtering a list).
+ *
+ * Individual inputs are available as subcomponents of this:
+ *
+ * <Form.Input />, <Form.TextArea />, <Form.Checkbox />, <Form.Switch />
+ *
+ * @example
+ * interface FormValues {
+ *   name?: string;
+ *   email: string;
+ *   phone?: string;
+ * }
+ *
+ * function handleSubmit(values: FormValues): void {
+ *   ...
+ * }
+ *
+ * <Form<FormValues> onSubmit={handleSubmit}>
+ *   <Form.Input name="name" />
+ *   <Form.Input type="email" name="email" rules={{ required: 'You must supply an e-mail address' }} />
+ *   <Form.TextArea name="comment" rules={{ maxLength: { value: 255, message: 'You cannot enter more than 255 characters' } }} />
+ *   <Form.Checkbox name="agree" rules={{ required: 'You must agree to this' }}>Agree to terms</Form.Checkbox>
+ * </Form>
+ */
 export default function Form<T extends Record<string, unknown>>({
     children,
     onSubmit,

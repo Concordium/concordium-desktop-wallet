@@ -12,7 +12,7 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & CommonFieldProps;
  * Use as a normal <input />. Should NOT be used for checkbox or radio.
  */
 const Input = forwardRef<HTMLInputElement, InputProps>(
-    ({ error, className, ...props }, ref) => {
+    ({ error, className, type = 'text', ...props }, ref) => {
         return (
             <input
                 className={clsx(
@@ -20,6 +20,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                     className,
                     error !== undefined && styles.fieldInvalid
                 )}
+                type={type}
                 ref={ref}
                 {...props}
             />
