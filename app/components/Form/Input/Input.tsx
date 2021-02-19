@@ -9,7 +9,7 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & CommonFieldProps;
 
 /**
  * @description
- * Use as a normal <input />. Should NOT be used for checkbox or radio.
+ * Use as a normal \<input /\>. Should NOT be used for checkbox or radio.
  */
 const Input = forwardRef<HTMLInputElement, InputProps>(
     ({ error, className, type = 'text', ...props }, ref) => {

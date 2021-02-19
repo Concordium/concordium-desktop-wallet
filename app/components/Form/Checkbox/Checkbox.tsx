@@ -22,7 +22,7 @@ interface CheckboxProps
 
 /**
  * @description
- * Use as a regular <input type="checkbox" />. Add label as children.
+ * Use as a regular \<input type="checkbox" /\>. Add label as children.
  *
  * @example
  * <Checkbox name="checkbox">This is a checkbox</Checkbox>
