@@ -29,7 +29,10 @@ function updateState(
     setStateFunction: React.Dispatch<React.SetStateAction<number | undefined>>,
     input: string
 ) {
-    setStateFunction(parseInt(input, 10));
+    const value = parseInt(input, 10);
+    if (!Number.isNaN(value)) {
+        setStateFunction(value);
+    }
 }
 
 /**
@@ -112,8 +115,6 @@ export default function UpdateGasRewards({
 
     return (
         <>
-            <Label>Sequence: {sequenceNumber}</Label>
-            <Label>Threshold: {threshold}</Label>
             <Header>Current GAS rewards</Header>
             <Progress
                 value={currentBakerReward}
