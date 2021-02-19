@@ -56,6 +56,7 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
                 return (
                     <PickAmount
                         recipient={recipient}
+                        header="Send funds with a release schedule"
                         amount={amount}
                         setAmount={setAmount}
                         toPickRecipient={() =>
