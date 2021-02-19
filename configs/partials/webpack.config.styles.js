@@ -78,9 +78,7 @@ module.exports = (isProd) => ({
                 test: /\.module\.(scss|sass)$/,
                 use: [
                     getOutputLoader(isProd),
-                    !isProd && {
-                        loader: TYPINGS_LOADER_NAME,
-                    },
+                    TYPINGS_LOADER_NAME,
                     {
                         loader: 'css-loader',
                         options: {
