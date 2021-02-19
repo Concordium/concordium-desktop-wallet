@@ -55,16 +55,16 @@ export default {
     ],
 } as Meta;
 
-const Template: Story<SidebarProps> = (args) => (
-    <Sidebar {...args} style={{ position: 'absolute' }} />
+const Template: Story<SidebarProps<true>> = (args) => (
+    <Sidebar
+        {...args}
+        hasThemeSwitch
+        version="1.0.0"
+        style={{ position: 'absolute' }}
+    />
 );
 
 const links: SidebarLink[] = [
-    {
-        route: '/',
-        title: 'Home',
-        icon: <i />,
-    },
     {
         route: '/1',
         title: 'Accounts',
