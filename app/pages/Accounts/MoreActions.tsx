@@ -8,6 +8,7 @@ import routes from '../../constants/routes.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
 import ScheduleTransfer from './ScheduleTransfer';
+import ExportTransactions from './ExportTransactions';
 
 interface Props {
     account: Account;
@@ -23,6 +24,10 @@ const items = [
     {
         name: 'Send funds with a release schedule',
         location: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+    },
+    {
+        name: 'Export Transactions',
+        location: routes.ACCOUNTS_MORE_EXPORT_TRANSACTIONS,
     },
 ];
 
@@ -81,6 +86,17 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 path={routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER}
                 render={() => (
                     <ScheduleTransfer
+                        account={account}
+                        returnFunction={() =>
+                            dispatch(push(routes.ACCOUNTS_MORE))
+                        }
+                    />
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_EXPORT_TRANSACTIONS}
+                render={() => (
+                    <ExportTransactions
                         account={account}
                         returnFunction={() =>
                             dispatch(push(routes.ACCOUNTS_MORE))
