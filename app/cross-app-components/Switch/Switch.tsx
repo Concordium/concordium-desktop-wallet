@@ -4,7 +4,7 @@ import React, {
     InputHTMLAttributes,
     PropsWithChildren,
 } from 'react';
-import { CommonFieldProps } from '../common';
+import { CommonFieldProps } from '../../components/Form/common';
 
 import styles from './Switch.module.scss';
 

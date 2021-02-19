@@ -6,7 +6,7 @@ import { ClassNameAndStyle } from '../../utils/types';
 import LogoIcon from '../../../resources/svg/logo.svg';
 
 import styles from './Sidebar.module.scss';
-import Switch from '../../components/Form/Switch';
+import Switch from '../Switch';
 
 export interface SidebarLink {
     route: string;

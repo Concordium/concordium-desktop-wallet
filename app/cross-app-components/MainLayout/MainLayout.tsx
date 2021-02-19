@@ -1,5 +1,6 @@
 import React, { PropsWithChildren } from 'react';
 import clsx from 'clsx';
+
 import { ClassNameAndStyle } from '../../utils/types';
 
 import styles from './MainLayout.module.scss';

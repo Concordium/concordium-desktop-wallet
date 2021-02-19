@@ -1,9 +1,9 @@
 import React, { FormHTMLAttributes, PropsWithChildren } from 'react';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 
+import Switch from '../../cross-app-components/Switch';
 import { connectWithFormUncontrolled } from './common/connectWithForm';
 import Input from './Input';
-import Switch from './Switch';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
 
