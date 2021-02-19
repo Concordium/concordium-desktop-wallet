@@ -1,0 +1,23 @@
+import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
+import Form from '../Form';
+
+import { argTypes, subcomponents, Template } from './dependencies';
+
+<Meta title="Components/Form/Form" component={Form} argTypes={argTypes} subcomponents={subcomponents} />
+
+# Form
+
+To use forms, combine the `Form` component with its sub components, displayed in the table below:
+
+<ArgsTable of={Form} />
+
+When combined, they produce a form that handles validation based on individual field rules, displaying helpful error messages to let the user know why submission isn't possible. Below is an example of a simple form.
+
+<Canvas>
+    <Story name="Form">
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Validation
+

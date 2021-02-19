@@ -1,4 +1,4 @@
-import React, { ReactElement, useMemo } from 'react';
+import React, { FC, ReactElement, useMemo } from 'react';
 
 import PageHeaderButton, { PageHeaderButtonProps } from './PageHeaderButton';
 
@@ -56,5 +56,6 @@ function PageHeader({ children }: PageHeaderProps): JSX.Element {
 }
 
 PageHeader.Button = PageHeaderButton;
+(PageHeader.Button as FC).displayName = 'PageHeader.Button';
 
 export default PageHeader;
