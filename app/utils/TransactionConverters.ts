@@ -66,7 +66,7 @@ type TypeSpecific = Pick<
 // Convert the type specific fields of a Simple transfer for an Account Transaction.
 function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
-    const estimatedTotal = amount + BigInt(transaction.energyAmount); // Fix this: convert from energy to cost
+    const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
 
     return {
         transactionKind: TransactionKindString.Transfer,
@@ -80,7 +80,7 @@ function convertScheduledTransfer(
     transaction: ScheduledTransfer
 ): TypeSpecific {
     const amount = getScheduledTransferAmount(transaction);
-    const estimatedTotal = amount + BigInt(transaction.energyAmount); // Fix this: convert from energy to cost
+    const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
 
     return {
         transactionKind: TransactionKindString.TransferWithSchedule,
