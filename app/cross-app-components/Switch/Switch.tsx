@@ -12,7 +12,7 @@ type SwitchProps = CommonFieldProps & InputHTMLAttributes<HTMLInputElement>;
 
 /**
  * @description
- * Works like a regular <input type="checkbox" />. Children supplied are rendered adjacent to the actual switch.
+ * Works like a regular \<input type="checkbox" /\>. Children supplied are rendered adjacent to the actual switch.
  *
  * @example
  * <Switch value={value} onChange={(e) => setValue(e.target.checked)}>Toggle setting</Switch>

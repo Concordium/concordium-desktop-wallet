@@ -29,7 +29,7 @@ export interface TextAreaProps
 
 /**
  * @description
- * Use as a normal <textarea />. Add "autoscale" prop to make textarea automatically size (height) itself based on value
+ * Use as a normal \<textarea /\>. Add "autoscale" prop to make textarea automatically size (height) itself based on value
  *
  * @example
  * <TextArea autoscale value={value} onChange={(e) => setValue={e.target.value}} />
