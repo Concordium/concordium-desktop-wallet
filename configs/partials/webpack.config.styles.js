@@ -2,14 +2,11 @@
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const STYLE_LOADER_NAME = 'style-loader';
-const TYPINGS_LOADER_NAME = '@teamsupercell/typings-for-css-modules-loader';
-
 const getLocalIdentName = (isProd) =>
     isProd ? '[hash:base64]' : '[name]__[local]--[hash:base64:5]';
 
 const styleLoader = {
-    loader: STYLE_LOADER_NAME,
+    loader: 'style-loader',
 };
 
 const extractLoader = {
@@ -78,7 +75,7 @@ module.exports = (isProd) => ({
                 test: /\.module\.(scss|sass)$/,
                 use: [
                     getOutputLoader(isProd),
-                    TYPINGS_LOADER_NAME,
+                    '@teamsupercell/typings-for-css-modules-loader',
                     {
                         loader: 'css-loader',
                         options: {
