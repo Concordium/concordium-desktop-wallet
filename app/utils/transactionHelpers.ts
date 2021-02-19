@@ -18,7 +18,7 @@ export function getHighestId(transactions: TransferTransaction[]) {
  * Attempts to find the address in the accounts, and then AddressBookEntries
  * If the address is found, return the name, otherwise returns undefined;
  */
-async function lookupName(address: string): Promise<string | undefined> {
+export async function lookupName(address: string): Promise<string | undefined> {
     const entries = await findEntries({ address });
     if (entries.length > 0) {
         return entries[0].name;
