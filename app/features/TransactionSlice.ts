@@ -7,7 +7,6 @@ import {
     getTransactionsOfAccount,
     insertTransactions,
     updateTransaction,
-    getMaxTransactionsIdOfAccount,
 } from '../database/TransactionDao';
 import {
     TransferTransaction,
@@ -24,6 +23,7 @@ import {
     convertIncomingTransaction,
     convertAccountTransaction,
 } from '../utils/TransactionConverters';
+import { updateAccount } from '../database/AccountDao';
 
 const transactionSlice = createSlice({
     name: 'transactions',
@@ -141,8 +141,8 @@ export async function loadTransactions(
 }
 
 // Update the transaction from remote source.
-export async function updateTransactions(account: Account) {
-    const fromId = (await getMaxTransactionsIdOfAccount(account)) || 0;
+export async function updateTransactions(dispatch: Dispatch, account: Account) {
+    const fromId = account.maxTransactionId || 0;
     const transactions = await getTransactions(account.address, fromId);
     if (transactions.length > 0) {
         await insertTransactions(
@@ -150,7 +150,17 @@ export async function updateTransactions(account: Account) {
                 convertIncomingTransaction(transaction, account.address)
             )
         );
+        updateAccount(account.name, {
+            maxTransactionId: transactions.reduce(
+                (id, t) => Math.max(id, t.id),
+                0
+            ),
+        });
+        console.log(dispatch);
     }
+    console.log(
+        `${transactions.reduce((id, t) => Math.max(id, t.id), 0)} ${fromId}`
+    );
 }
 
 // Add a pending transaction to storage

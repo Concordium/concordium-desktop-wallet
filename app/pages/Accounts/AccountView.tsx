@@ -34,9 +34,9 @@ export default function AccountView() {
 
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
-            updateTransactions(account);
+            updateTransactions(dispatch, account);
         }
-    }, [account]);
+    }, [dispatch, account]);
 
     if (account === undefined) {
         return null;

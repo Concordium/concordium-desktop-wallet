@@ -109,6 +109,7 @@ export interface Account {
     allDecrypted?: boolean;
     incomingAmounts?: string;
     selfAmounts?: string;
+    maxTransactionId: number;
 }
 
 export enum TransactionKindString {
