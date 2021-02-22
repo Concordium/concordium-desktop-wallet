@@ -89,6 +89,7 @@ export default function UpdateProtocol({
             <DragAndDropFile
                 text="Drag and drop specification auxiliary data"
                 fileProcessor={loadAuxiliaryData}
+                maxSizeKb={2048}
             />
             <Button
                 primary
