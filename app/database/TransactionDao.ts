@@ -39,9 +39,13 @@ export async function insertTransactions(transactions: TransferTransaction[]) {
             (t_) => t.transactionHash === t_.transactionHash
         )
     );
-    if (additions.length > 0) {
-        await table.insert(additions);
-    }
+
+    await Promise.all(
+        additions.map(async (transaction) => {
+            await table.insert(transaction);
+        })
+    );
+
     return Promise.all(
         updates.map(async (transaction) => {
             const { transactionHash, ...otherFields } = transaction;
@@ -51,11 +55,6 @@ export async function insertTransactions(transactions: TransferTransaction[]) {
             );
         })
     );
-}
-
-export async function resetTransactions() {
-    // TODO: used for testing, eventually should be removed
-    return (await knex())(transactionTable).del();
 }
 
 export async function getMaxTransactionsIdOfAccount(
