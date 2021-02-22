@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Menu, Card, Button } from 'semantic-ui-react';
-import {
-    loadIdentities,
-    confirmedIdentitiesSelector,
-} from '../../features/IdentitySlice';
+import { confirmedIdentitiesSelector } from '../../features/IdentitySlice';
 import routes from '../../constants/routes.json';
 import IdentityListElement from '../../components/IdentityListElement';
 import { Identity } from '../../utils/types';
@@ -20,12 +17,6 @@ export default function AccountCreationPickIdentity({
     const [chosenIndex, chooseIdentity] = useState(0);
     const dispatch = useDispatch();
     const identities = useSelector(confirmedIdentitiesSelector);
-
-    useEffect(() => {
-        if (!identities) {
-            loadIdentities(dispatch);
-        }
-    }, [dispatch, identities]);
 
     if (!identities) {
         return null;
