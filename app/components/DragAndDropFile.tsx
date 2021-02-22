@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Divider, Header, Icon, Segment } from 'semantic-ui-react';
-import { openFileRaw } from '../utils/FileHelper';
+import fs from 'fs';
+import { openFileDestination } from '../utils/FileHelper';
 import SimpleErrorModal from './SimpleErrorModal';
 
 // TODO Add support for actual drag&drop functionality.
@@ -38,13 +39,16 @@ export default function DragAndDropFile({
     }
 
     async function loadFile() {
-        let file: Buffer;
         try {
-            file = await openFileRaw('Open file');
-            if (maxSizeAsBytes && file.length > maxSizeAsBytes) {
-                setShowError(true);
-                return;
+            const fileLocation = await openFileDestination('Open file');
+            if (maxSizeAsBytes) {
+                const fileStats = fs.statSync(fileLocation);
+                if (maxSizeAsBytes && fileStats.size > maxSizeAsBytes) {
+                    setShowError(true);
+                    return;
+                }
             }
+            const file = fs.readFileSync(fileLocation);
             fileProcessor(file);
         } catch (err) {
             // An error is thrown if the user cancels the open file menu, or if
