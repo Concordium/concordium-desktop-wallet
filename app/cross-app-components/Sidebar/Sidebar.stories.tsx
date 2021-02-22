@@ -101,3 +101,14 @@ export const Light = Template.bind({});
 Light.args = {
     links,
 };
+
+export const Dark = Template.bind({});
+Dark.args = {
+    links,
+    isDark: true,
+};
+Dark.parameters = {
+    backgrounds: {
+        default: 'dark',
+    },
+};

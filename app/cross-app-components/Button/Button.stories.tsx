@@ -13,7 +13,7 @@ const Template: Story<ButtonProps> = (args) => <Button {...args} />;
 
 export const Primary = Template.bind({});
 Primary.args = {
-    inverted: true,
+    inverted: false,
     children: 'Button',
     disabled: false,
 };
