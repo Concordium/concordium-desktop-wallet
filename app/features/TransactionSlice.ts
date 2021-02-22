@@ -13,16 +13,16 @@ import {
     TransferTransaction,
     TransactionStatus,
     TransactionKindString,
-    OriginType,
     Account,
     AccountTransaction,
-    IncomingTransaction,
     Dispatch,
-    SimpleTransfer,
-    instanceOfSimpleTransfer,
     TransactionEvent,
 } from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
+import {
+    convertIncomingTransaction,
+    convertAccountTransaction,
+} from '../utils/TransactionConverters';
 
 const transactionSlice = createSlice({
     name: 'transactions',
@@ -90,51 +90,6 @@ export async function decryptTransactions(
     );
 }
 
-/*
- * Converts the given transaction into the structure, which is used in the database.
- */
-function convertIncomingTransaction(
-    transaction: IncomingTransaction
-): TransferTransaction {
-    let fromAddress = '';
-    if (transaction.details.transferSource) {
-        fromAddress = transaction.details.transferSource;
-    } else if (
-        transaction.origin.type === OriginType.Account &&
-        transaction.origin.address
-    ) {
-        fromAddress = transaction.origin.address;
-    }
-    let toAddress = '';
-    if (transaction.details.transferDestination) {
-        toAddress = transaction.details.transferDestination;
-    }
-    let encrypted;
-    if (transaction.encrypted) {
-        encrypted = JSON.stringify(transaction.encrypted);
-    }
-
-    return {
-        remote: true,
-        originType: transaction.origin.type,
-        transactionKind: transaction.details.type,
-        id: transaction.id,
-        blockHash: transaction.blockHash,
-        blockTime: transaction.blockTime,
-        total: transaction.total,
-        success: transaction.details.outcome === 'success',
-        transactionHash: transaction.transactionHash,
-        subtotal: transaction.subtotal,
-        cost: transaction.cost,
-        origin: JSON.stringify(transaction.origin),
-        details: JSON.stringify(transaction.details),
-        encrypted,
-        fromAddress,
-        toAddress,
-        status: TransactionStatus.Finalized,
-    };
-}
-
 /**
  * Determine whether the transaction affects unshielded balance.
  */
@@ -193,43 +148,12 @@ export async function updateTransactions(account: Account) {
     }
 }
 
-function convertSimpleTransfer(
-    transaction: SimpleTransfer,
-    hash: string
-): TransferTransaction {
-    const { payload } = transaction;
-    const estimatedTotal =
-        BigInt(payload.amount) + BigInt(transaction.energyAmount);
-
-    return {
-        id: -1,
-        blockHash: 'pending',
-        remote: false,
-        originType: OriginType.Self,
-        transactionKind: TransactionKindString.Transfer,
-        transactionHash: hash,
-        total: (-estimatedTotal).toString(),
-        subtotal: (-payload.amount).toString(),
-        cost: transaction.energyAmount,
-        fromAddress: transaction.sender,
-        toAddress: transaction.payload.toAddress,
-        blockTime: (Date.now() / 1000).toString(), // Temporary value, unless it fails
-        status: TransactionStatus.Pending,
-    };
-}
-
 // Add a pending transaction to storage
 export async function addPendingTransaction(
     transaction: AccountTransaction,
     hash: string
 ) {
-    let convertedTransaction: TransferTransaction;
-    if (instanceOfSimpleTransfer(transaction)) {
-        convertedTransaction = convertSimpleTransfer(transaction, hash);
-    } else {
-        throw new Error('unsupported transaction type - please implement');
-    }
-
+    const convertedTransaction = convertAccountTransaction(transaction, hash);
     return insertTransactions([convertedTransaction]);
 }
 

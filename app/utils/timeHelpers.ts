@@ -43,3 +43,16 @@ export function getISOFormat(
     const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
     return new Date(timeStampCorrectUnit).toISOString();
 }
+
+export enum TimeConstants {
+    Second = 1000,
+    Minute = 60 * Second,
+    Hour = 60 * Minute,
+    Day = 24 * Hour,
+    Week = 7 * Day,
+    Month = 30 * Day,
+}
+
+export function getDefaultExpiry(): string {
+    return (new Date().getTime() + TimeConstants.Hour).toString();
+}
