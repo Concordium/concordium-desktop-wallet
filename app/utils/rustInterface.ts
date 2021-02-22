@@ -1,5 +1,4 @@
 import PromiseWorker from 'promise-worker';
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error : has no default export.
 import RustWorker from './rust.worker';
@@ -64,11 +63,9 @@ export async function createIdentityRequestObjectLedger(
     ipInfo: IpInfo,
     arsInfos: Record<string, ArInfo>,
     global: Global,
-    displayMessage: (message: string) => void
+    displayMessage: (message: string) => void,
+    ledger: ConcordiumLedgerClient
 ) {
-    const transport = await TransportNodeHid.open('');
-    const ledger = new ConcordiumLedgerClient(transport);
-
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,

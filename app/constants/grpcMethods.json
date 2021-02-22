@@ -1,0 +1,9 @@
+{
+    "nodeInfo": "node-info",
+    "getConsensusStatus": "get-consensus-status",
+    "sendTransaction": "send-transaction",
+    "getTransactionStatus": "get-transaction-status",
+    "getNextAccountNonce": "get-next-account-nonce",
+    "getBlockSummary": "get-block-summary",
+    "getAccountInfo": "get-account-info"
+}

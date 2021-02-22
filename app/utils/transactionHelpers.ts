@@ -1,11 +1,14 @@
 import { findEntries } from '../database/AddressBookDao';
-import { getNextAccountNonce, getTransactionStatus } from './client';
+import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
+import { getDefaultExpiry } from './timeHelpers';
 import {
     TransactionKindId,
     TransferTransaction,
     SimpleTransfer,
     TransactionEvent,
     TransactionStatus,
+    ScheduledTransfer,
+    SchedulePoint,
 } from './types';
 /**
  * return highest id of given transactions
@@ -18,7 +21,7 @@ export function getHighestId(transactions: TransferTransaction[]) {
  * Attempts to find the address in the accounts, and then AddressBookEntries
  * If the address is found, return the name, otherwise returns undefined;
  */
-async function lookupName(address: string): Promise<string | undefined> {
+export async function lookupName(address: string): Promise<string | undefined> {
     const entries = await findEntries({ address });
     if (entries.length > 0) {
         return entries[0].name;
@@ -63,20 +66,69 @@ export async function createSimpleTransferTransaction(
     fromAddress: string,
     amount: BigInt,
     toAddress: string,
-    expiry = '16446744073',
+    expiry: string = getDefaultExpiry(),
     energyAmount = '200'
 ) {
-    const nonceJSON = await getNextAccountNonce(fromAddress);
-    const { nonce } = JSON.parse(nonceJSON.getValue());
+    const { nonce } = await getNextAccountNonce(fromAddress);
     const transferTransaction: SimpleTransfer = {
         sender: fromAddress,
         nonce,
         energyAmount, // TODO: Does this need to be set by the user?
-        expiry, // TODO: Don't hardcode?
+        expiry,
         transactionKind: TransactionKindId.Simple_transfer,
         payload: {
             toAddress,
             amount: amount.toString(),
+        },
+    };
+    return transferTransaction;
+}
+
+export function createRegularIntervalSchedule(
+    totalAmount: bigint,
+    releases: number,
+    starting: number,
+    interval: number
+): SchedulePoint[] {
+    const releaseAmount = totalAmount / BigInt(releases);
+    const restAmount = totalAmount % BigInt(releases);
+    const schedule = [];
+    let timestamp = starting;
+    for (let i = 0; i < releases - 1; i += 1) {
+        schedule.push({
+            amount: releaseAmount.toString(),
+            timestamp: timestamp.toString(),
+        });
+        timestamp += interval;
+    }
+    schedule.push({
+        amount: (releaseAmount + restAmount).toString(),
+        timestamp: timestamp.toString(),
+    });
+    return schedule;
+}
+
+/**
+ *  Constructs a, simple transfer, transaction object,
+ * Given the fromAddress, toAddress and the amount.
+ */
+export async function createScheduledTransferTransaction(
+    fromAddress: string,
+    toAddress: string,
+    schedule: SchedulePoint[],
+    expiry: string = getDefaultExpiry(),
+    energyAmount = '20000'
+) {
+    const { nonce } = await getNextAccountNonce(fromAddress);
+    const transferTransaction: ScheduledTransfer = {
+        sender: fromAddress,
+        nonce,
+        energyAmount, // TODO: Does this need to be set by the user?
+        expiry,
+        transactionKind: TransactionKindId.Transfer_with_schedule,
+        payload: {
+            toAddress,
+            schedule,
         },
     };
     return transferTransaction;
@@ -127,4 +179,21 @@ export async function getStatus(
             }
         }, pollingIntervalMs);
     });
+}
+
+export function getScheduledTransferAmount(
+    transaction: ScheduledTransfer
+): bigint {
+    return transaction.payload.schedule.reduce(
+        (total, point) => total + BigInt(point.amount),
+        0n
+    );
+}
+
+export function isFailed(transaction: TransferTransaction) {
+    return (
+        transaction.success === false ||
+        transaction.success === 0 ||
+        transaction.status === TransactionStatus.Rejected
+    );
 }

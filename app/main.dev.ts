@@ -17,6 +17,7 @@ import log from 'electron-log';
 import knex from './database/knex';
 import WebpackMigrationSource from './database/WebpackMigrationSource';
 import ipcCommands from './constants/ipcCommands.json';
+import { setClientLocation, grpcCall } from './main/GRPCClient';
 
 /**
  * Runs the knex migrations for the embedded sqlite database. This ensures that the
@@ -162,6 +163,27 @@ ipcMain.handle(ipcCommands.openFileDialog, async (_event, title) => {
 ipcMain.handle(ipcCommands.saveFileDialog, async (_event, title) => {
     return dialog.showSaveDialog({ title });
 });
+
+// Updates the location of the grpc endpoint.
+ipcMain.handle(
+    ipcCommands.grpcSetLocation,
+    async (_event, address: string, port: string) => {
+        return setClientLocation(address, port);
+    }
+);
+
+// Performs the given grpc command, with the given input;
+ipcMain.handle(
+    ipcCommands.grpcCall,
+    async (_event, command: string, input: Record<string, string>) => {
+        try {
+            const response = await grpcCall(command, input);
+            return { successful: true, response };
+        } catch (error) {
+            return { successful: false, error };
+        }
+    }
+);
 
 /**
  * Add event listeners...

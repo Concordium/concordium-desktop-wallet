@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Grid } from 'semantic-ui-react';
+import { Grid, Icon } from 'semantic-ui-react';
 import { parseTime } from '../../utils/timeHelpers';
 import { getGTUSymbol, displayAsGTU } from '../../utils/gtu';
 import {
@@ -9,8 +9,9 @@ import {
     OriginType,
     TransactionKindString,
 } from '../../utils/types';
-import SidedText from '../../components/SidedText';
 import { chosenAccountSelector } from '../../features/AccountSlice';
+import SidedRow from '../../components/SidedRow';
+import { isFailed } from '../../utils/transactionHelpers';
 
 function getName(
     transaction: TransferTransaction,
@@ -110,7 +111,7 @@ function parseAmount(
 function displayType(kind: TransactionKindString) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
-            return '(schedule)';
+            return ' (schedule)';
         default:
             return '';
     }
@@ -153,13 +154,18 @@ function TransactionListElement({ transaction }: Props): JSX.Element {
 
     return (
         <Grid container columns={2}>
-            <SidedText
-                left={name.concat(
-                    ` ${displayType(transaction.transactionKind)}`
-                )}
+            <SidedRow
+                left={
+                    <>
+                        {isFailed(transaction) ? (
+                            <Icon name="warning circle" color="red" />
+                        ) : null}
+                        {name.concat(displayType(transaction.transactionKind))}
+                    </>
+                }
                 right={amount}
             />
-            <SidedText
+            <SidedRow
                 left={`${time} ${statusSymbol(transaction.status)}`}
                 right={amountFormula.concat(
                     ` ${
