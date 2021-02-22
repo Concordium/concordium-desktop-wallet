@@ -41,9 +41,9 @@ export function convertIncomingTransaction(
     }
 
     let { subtotal } = transaction;
-    if (!subtotal && transaction.cost) {
+    if (!subtotal) {
         subtotal = (
-            BigInt(transaction.total) - BigInt(transaction.cost)
+            BigInt(transaction.total) - BigInt(transaction.cost || '0')
         ).toString();
     }
 

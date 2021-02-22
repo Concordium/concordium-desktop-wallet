@@ -80,10 +80,7 @@ export default function AccountView() {
                         path={routes.ACCOUNTS_SIMPLETRANSFER}
                         render={() => <SimpleTransfer account={account} />}
                     />
-                    <Route
-                        path={routes.DEFAULT}
-                        render={() => <TransferHistory account={account} />}
-                    />
+                    <Route path={routes.DEFAULT} component={TransferHistory} />
                 </Switch>
                 <DecryptComponent account={account} />
             </Card>

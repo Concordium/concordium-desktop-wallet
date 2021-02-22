@@ -9,8 +9,8 @@ import { partition } from '../utils/basicHelpers';
 
 export async function getTransactionsOfAccount(
     account: Account,
-    filter: (transaction: TransferTransaction) => boolean = () => true,
-    orderBy = 'id'
+    orderBy = 'id',
+    filter: (transaction: TransferTransaction) => boolean = () => true
 ): Promise<TransferTransaction[]> {
     const { address } = account;
     const transactions = await (await knex())
@@ -41,12 +41,10 @@ export async function insertTransactions(
             (t_) => t.transactionHash === t_.transactionHash
         )
     );
-
-    await Promise.all(
-        additions.map(async (transaction) => {
-            await table.insert(transaction);
-        })
-    );
+    for (let i = 0; i < additions.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await table.insert(additions[i]);
+    }
 
     return Promise.all(
         updates.map(async (transaction) => {

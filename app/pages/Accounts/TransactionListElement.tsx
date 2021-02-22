@@ -98,7 +98,7 @@ function parseAmount(
                     amountFormula: '',
                 };
             }
-            return buildIncomingAmountStrings(BigInt(transaction.total));
+            return buildIncomingAmountStrings(BigInt(transaction.subtotal));
 
         default:
             return {
