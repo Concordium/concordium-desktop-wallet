@@ -28,7 +28,7 @@ export async function updateEntry(
         .update(updatedValues);
 }
 
-export async function removeEntry(entry: AddressBookEntry) {
+export async function removeEntry(entry: Partial<AddressBookEntry>) {
     return (await knex())(addressBookTable).where(entry).del();
 }
 

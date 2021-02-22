@@ -5,14 +5,17 @@ $color-dusk-blue: #325d76;
 $color-wood-brown: #907d6a;
 $color-off-black: #181817;
 $color-black: #000;
+$color-light-grey: #E5E5E5;
 $color-grey: #979797;
 $color-pale-green: #4ac29e;
 $color-salmon-red: #ff8a8a;
 $color-bright-red: #f00;
 
 // Derived
+$color-background: $color-light-grey;
 $color-text: $color-off-black;
 $color-text-faded: $color-grey;
 $color-success: $color-pale-green;
 $color-error: $color-salmon-red;
 $color-danger: $color-bright-red;
+$color-lines: $color-grey;

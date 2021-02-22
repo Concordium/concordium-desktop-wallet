@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import { Container, Segment, Header, Grid } from 'semantic-ui-react';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { sendTransaction } from '../../utils/client';
+import { sendTransaction } from '../../utils/nodeRequests';
 import {
     serializeTransaction,
     getTransactionHash,

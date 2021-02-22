@@ -5,7 +5,7 @@ import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
 import UpdateMicroGtuPerEuroRate from './UpdateMicroGtuPerEuro';
 import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
-import { getBlockSummary, getConsensusStatus } from '../../utils/client';
+import { getBlockSummary, getConsensusStatus } from '../../utils/nodeRequests';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
@@ -13,6 +13,7 @@ import UpdateEuroPerEnergy from './UpdateEuroPerEnergy';
 import UpdateTransactionFeeDistribution from './UpdateTransactionFeeDistribution';
 import UpdateFoundationAccount from './UpdateFoundationAccount';
 import UpdateMintDistribution from './UpdateMintDistribution';
+import UpdateGasRewards from './UpdateGasRewards';
 
 interface Location {
     state: UpdateType;
@@ -89,6 +90,13 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
             case UpdateType.UpdateMintDistribution:
                 return (
                     <UpdateMintDistribution
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                );
+            case UpdateType.UpdateGASRewards:
+                return (
+                    <UpdateGasRewards
                         blockSummary={blockSummary}
                         forwardTransaction={forwardTransactionToSigningPage}
                     />

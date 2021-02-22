@@ -6,6 +6,7 @@ import { getGTUSymbol, isValidGTUString } from '../../utils/gtu';
 interface Props {
     recipient: AddressBookEntry | undefined;
     amount: string;
+    header: string;
     setAmount(amount: string): void;
     toPickRecipient(): void;
     toConfirmTransfer(): void;
@@ -18,6 +19,7 @@ interface Props {
  */
 export default function PickAmount({
     recipient,
+    header,
     amount,
     setAmount,
     toPickRecipient,
@@ -32,7 +34,7 @@ export default function PickAmount({
     return (
         <Card fluid centered>
             <Card.Content textAlign="center">
-                <Card.Header>Transfer Amount</Card.Header>
+                <Card.Header content={header} />
                 <Input
                     fluid
                     name="name"

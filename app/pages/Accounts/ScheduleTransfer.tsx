@@ -34,9 +34,10 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
     const dispatch = useDispatch();
     const location = useLocation<State>();
 
+    // This is a string, to allows user input in GTU
     const [amount, setAmount] = useState<string>(
         location?.state?.amount ? toGTUString(location?.state?.amount) : ''
-    ); // This is a string, to allows user input in GTU
+    );
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
         location?.state?.recipient || undefined
     );
@@ -55,6 +56,7 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
                 return (
                     <PickAmount
                         recipient={recipient}
+                        header="Send funds with a release schedule"
                         amount={amount}
                         setAmount={setAmount}
                         toPickRecipient={() =>
@@ -81,7 +83,7 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
                 return <FinalPage location={location} />;
             }
             default:
-                return <div />;
+                return null;
         }
     }
 

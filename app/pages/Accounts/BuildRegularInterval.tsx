@@ -3,19 +3,18 @@ import { Label, List, Button, Input } from 'semantic-ui-react';
 import { Schedule } from '../../utils/types';
 import { createRegularIntervalSchedule } from '../../utils/transactionHelpers';
 import InputTimeStamp from '../../components/InputTimeStamp';
+import { TimeConstants } from '../../utils/timeHelpers';
 
-const second = 1000;
-
-interface Interval {
+export interface Interval {
     label: string;
     value: number;
 }
-const intervals: Interval[] = [
-    { label: 'Second', value: 1 * second },
-    { label: 'Minute', value: 60 * second },
-    { label: 'Hour', value: 60 * 60 * second },
-    { label: 'Day', value: 24 * 60 * 60 * second },
-    { label: 'Week', value: 7 * 24 * 60 * 60 * second },
+export const intervals: Interval[] = [
+    { label: 'Minute', value: TimeConstants.Minute },
+    { label: 'Hour', value: TimeConstants.Hour },
+    { label: 'Day', value: TimeConstants.Day },
+    { label: 'Week', value: TimeConstants.Week },
+    { label: 'Month (30 days)', value: TimeConstants.Month },
 ];
 
 interface Props {
@@ -32,7 +31,7 @@ export default function RegularInterval({ submitSchedule, amount }: Props) {
         intervals[0]
     );
     const [startTime, setStartTime] = useState<number>(
-        new Date().getTime() + 5 * 60 * second
+        new Date().getTime() + 5 * TimeConstants.Minute
     ); // TODO Decide appropiate default
 
     function createSchedule() {
