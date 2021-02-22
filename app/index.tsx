@@ -10,6 +10,8 @@ import { Dispatch } from './utils/types';
 import { startClient } from './utils/nodeRequests';
 import listenForIdentityStatus from './utils/IdentityStatusPoller';
 import listenForAccountStatus from './utils/AccountStatusPoller';
+import { loadAccounts } from './features/AccountSlice';
+import { loadIdentities } from './features/IdentitySlice';
 
 import './styles/app.global.scss';
 
@@ -18,7 +20,7 @@ const store = configuredStore();
 /**
  * Loads settings from the database into the store.
  */
-async function loadSettingsIntoStore() {
+async function loadSettingsIntoStore(dispatch: Dispatch) {
     const settings = await loadAllSettings();
     const nodeLocationSetting = findSetting('Node location', settings);
     if (nodeLocationSetting) {
@@ -26,11 +28,14 @@ async function loadSettingsIntoStore() {
     } else {
         throw new Error('unable to find Node location settings.');
     }
-    return store.dispatch(updateSettings(settings));
+    return dispatch(updateSettings(settings));
 }
 
 async function onLoad(dispatch: Dispatch) {
-    await loadSettingsIntoStore();
+    await loadSettingsIntoStore(dispatch);
+    loadAccounts(dispatch);
+    loadIdentities(dispatch);
+
     listenForAccountStatus(dispatch);
     listenForIdentityStatus(dispatch);
     listenForTransactionStatus(dispatch);
