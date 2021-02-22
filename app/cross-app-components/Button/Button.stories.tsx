@@ -24,3 +24,19 @@ Inverted.args = {
     children: 'Button',
     disabled: false,
 };
+
+export const Small = Template.bind({});
+Small.args = {
+    inverted: false,
+    children: 'Button',
+    disabled: false,
+    size: 'small',
+};
+
+export const Big = Template.bind({});
+Big.args = {
+    inverted: false,
+    children: 'Button',
+    disabled: false,
+    size: 'big',
+};

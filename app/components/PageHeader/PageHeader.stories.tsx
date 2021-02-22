@@ -6,7 +6,7 @@ import PageHeaderButton from './PageHeaderButton';
 import PlusIcon from '../../../resources/svg/plus.svg';
 
 export default {
-    title: 'Components/PageHeader',
+    title: 'Components/Page Header',
     component: PageHeader,
     subcomponents: {
         'PageHeader.Button': PageHeaderButton,

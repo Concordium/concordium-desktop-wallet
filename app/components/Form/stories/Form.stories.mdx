@@ -3,7 +3,7 @@ import Form from '../Form';
 
 import { argTypes, subcomponents, Template, ValidationTemplate } from './deps';
 
-<Meta title="Components/Form" component={Form} argTypes={argTypes} subcomponents={subcomponents} />
+<Meta title="Components/Form/Form" component={Form} argTypes={argTypes} subcomponents={subcomponents} />
 
 # Form
 We use a forms library called [react-hook-forms](https://react-hook-forms.com) for handling form state and validation.
@@ -69,7 +69,7 @@ Validation rules are applied once the field has been touched, i.e. if it has bee
 As such, if submit is pressed without fillin those, they will render as invalid, and the first invalid field is focused.
 
 <Canvas>
-    <Story name="Validation">
+    <Story name="With Validation">
         {ValidationTemplate.bind({})}
     </Story>
 </Canvas>
