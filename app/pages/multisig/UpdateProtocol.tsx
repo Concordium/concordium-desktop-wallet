@@ -6,8 +6,6 @@ import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatur
 import { ProtocolUpdate, UpdateType } from '../../utils/types';
 import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 
-// TODO Update UI with new components and better validation, i.e. specification hash has to be 32 bytes exactly (64 hex chars).
-
 /**
  * Component for creating an update protocol transaction.
  */
