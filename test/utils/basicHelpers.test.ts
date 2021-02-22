@@ -82,6 +82,10 @@ test('Non-hex string does not validate as being hex', () => {
     expect(isHex('ObviouslyNotAHexString')).toBe(false);
 });
 
+test('Empty string does not validate as being hex', () => {
+    expect(isHex('')).toBe(false);
+});
+
 test('Empty array is chunked into an empty array', () => {
     expect(toChunks(new Uint8Array(0), 1)).toStrictEqual([]);
 });
