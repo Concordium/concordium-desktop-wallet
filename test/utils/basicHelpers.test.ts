@@ -114,3 +114,19 @@ test('Last chunk can be of a size less than the chunk size if array size is not 
         new Uint8Array(2),
     ]);
 });
+
+test('Array content is preserved in chunks', () => {
+    const array = new Uint8Array(5);
+    array[0] = 5;
+    array[1] = 1;
+    array[2] = 2;
+    array[3] = 3;
+    array[4] = 4;
+
+    const chunks = toChunks(array, 3);
+    expect(chunks[0][0]).toStrictEqual(5);
+    expect(chunks[0][1]).toStrictEqual(1);
+    expect(chunks[0][2]).toStrictEqual(2);
+    expect(chunks[1][0]).toStrictEqual(3);
+    expect(chunks[1][1]).toStrictEqual(4);
+});
