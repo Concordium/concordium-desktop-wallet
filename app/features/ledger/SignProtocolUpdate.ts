@@ -7,16 +7,9 @@ import {
     serializeUpdateHeader,
     serializeUpdateType,
 } from '../../utils/UpdateSerialization';
+import { toChunks } from '../../utils/basicHelpers';
 
 const INS_PROTOCOL_UPDATE = 0x21;
-
-function toChunks(array: Uint8Array, chunkSize: number) {
-    const R = [];
-    for (let i = 0; i < array.length; i += chunkSize) {
-        R.push(array.slice(i, i + chunkSize));
-    }
-    return R;
-}
 
 export default async function signUpdateProtocolTransaction(
     transport: Transport,

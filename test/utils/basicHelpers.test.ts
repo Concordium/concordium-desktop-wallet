@@ -1,4 +1,9 @@
-import { isHex, partition, toCSV } from '../../app/utils/basicHelpers';
+import {
+    isHex,
+    partition,
+    toChunks,
+    toCSV,
+} from '../../app/utils/basicHelpers';
 
 test('Partition should split booleans correctly', () => {
     const list = [true, false, false, true, true, false, false];
@@ -75,4 +80,33 @@ test('Hex string validates as being hex', () => {
 
 test('Non-hex string does not validate as being hex', () => {
     expect(isHex('ObviouslyNotAHexString')).toBe(false);
+});
+
+test('Empty array is chunked into an empty array', () => {
+    expect(toChunks(new Uint8Array(0), 1)).toStrictEqual([]);
+});
+
+test('Zero chunk size fails', () => {
+    expect(() => toChunks(new Uint8Array(0), 0)).toThrow();
+});
+
+test('Negative chunk size fails', () => {
+    expect(() => toChunks(new Uint8Array(0), -5)).toThrow();
+});
+
+test('Array is chunked into chunks of the supplied size', () => {
+    expect(toChunks(new Uint8Array(8), 2)).toStrictEqual([
+        new Uint8Array(2),
+        new Uint8Array(2),
+        new Uint8Array(2),
+        new Uint8Array(2),
+    ]);
+});
+
+test('Last chunk can be of a size less than the chunk size if array size is not divided equally', () => {
+    expect(toChunks(new Uint8Array(8), 3)).toStrictEqual([
+        new Uint8Array(3),
+        new Uint8Array(3),
+        new Uint8Array(2),
+    ]);
 });

@@ -34,3 +34,23 @@ export function toCSV(elements: string[][], fieldNames: string[]): string {
         .map((element) => element.join(','))
         .join('\n')}`;
 }
+
+/**
+ * Partitions a Uint8Array into chunks of a certain size. The last chunk
+ * may have a different size than the provided size.
+ * @param array the array to partition
+ * @param chunkSize the size of each chunk
+ */
+export function toChunks(
+    array: Uint8Array,
+    chunkSize: number
+): Array<Uint8Array> {
+    if (chunkSize <= 0) {
+        throw new Error('Chunk size must be a positive number.');
+    }
+    const R = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+        R.push(array.slice(i, i + chunkSize));
+    }
+    return R;
+}
