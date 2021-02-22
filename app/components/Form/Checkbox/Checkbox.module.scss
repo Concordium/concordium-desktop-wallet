@@ -37,12 +37,12 @@
         transform: scale(.6);
     }
 
-    input:focus + & {
-        border-color: $form-color-focus;
-    }
-
     .rootInvalid & {
         border-color: $color-error;
+    }
+
+    .root:not(.rootInvalid) input:focus + & {
+        border-color: $form-color-focus;
     }
 }
 

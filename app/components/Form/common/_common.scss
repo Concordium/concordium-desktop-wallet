@@ -8,10 +8,14 @@
     font-family: $font-family;
     transition: border-color $form-transition;
     background-color: transparent;
+    display: block;
 
     &:focus {
         outline: none;
-        border-color: $form-color-focus;
+
+        &:not(.fieldInvalid) {
+            border-color: $form-color-focus;
+        }
     }
 
     &::placeholder {

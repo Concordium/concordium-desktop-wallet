@@ -1,0 +1,76 @@
+import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
+import Form from '../Form';
+
+import { argTypes, subcomponents, Template, ValidationTemplate } from './deps';
+
+<Meta title="Components/Form" component={Form} argTypes={argTypes} subcomponents={subcomponents} />
+
+# Form
+We use a forms library called [react-hook-forms](https://react-hook-forms.com) for handling form state and validation.
+To use forms, combine the `Form` component with its sub components, displayed in the table below:
+
+<ArgsTable of={Form} />
+
+When combined, they produce a form that handles validation based on individual field rules, displaying helpful error messages to let the user know why submission isn't possible. Below is an example of a simple form.
+
+<Canvas>
+    <Story name="Form">
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Controlling style
+Styling of the individual fields is kept as minimal as possible, and allows for overriding in special cases where alterations is needed.
+To be able to change the style of a component, `className` is exposed as a prop on the individual field. This makes it possible to override styling set on component level from the outside with the scss module of the consuming component.
+
+```css
+/* Example.module.scss */
+.field {
+    display: inline-block;
+}
+.name {
+    composes: field;
+    margin-right: 10px;
+}
+
+.submit {
+    margin-top: 10px;
+}
+```
+
+```tsx
+// Example.tsx
+import styles from './Example.module.scss';
+
+<Form>
+    <Form.Input name="name" className={styles.name} />
+    <Form.Input name="lastName" className={styles.field} />
+    <Form.Submit className={styles.submit}>Submit</Form.Submit>
+</Form>
+```
+
+## Validation
+By using the `<Form />` and its sub components, validation and errors is handled automatically based on rules set on the individual field of the form. A set of validation rules can be used.
+Documentation for these can be found on the official docs of react-hook-forms: [https://react-hook-form.com/get-started#Applyvalidation](https://react-hook-form.com/get-started#Applyvalidation).
+
+### Validation rules
+
+- `required`: if the field is required
+- `maxLength`: if the field value is limited to a max of characters
+- `minLength`: if the field should contain a minimum of characters
+- `max`: if the field can have a max value (used for number fields)
+- `min`: if the field should have a min value (used for number fields)
+- `pattern`: if the field value should match a patter (RegEx)
+- `validate`: to apply custom validation.
+
+The rules and the corresponding values are specified here: [https://react-hook-form.com/api#register](https://react-hook-form.com/api#register)
+
+Validation rules are applied once the field has been touched, i.e. if it has been focused, or if an invalid form state is submitted. In the example below, the form is invalid initially, until the required fields are filled (email + terms checkbox).
+As such, if submit is pressed without fillin those, they will render as invalid, and the first invalid field is focused.
+
+<Canvas>
+    <Story name="Validation">
+        {ValidationTemplate.bind({})}
+    </Story>
+</Canvas>
+

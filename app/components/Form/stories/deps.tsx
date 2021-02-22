@@ -28,11 +28,28 @@ export const subcomponents: Meta['subcomponents'] = {
 export const Template: Story<FormProps<unknown>> = (args) => (
     <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
-        <br />
         <Form.Input type="email" name="email" placeholder="Email" />
-        <br />
         <Form.Input type="phone" name="phone" placeholder="Phone" />
         <Form.Checkbox name="terms">Agree to terms</Form.Checkbox>
+        <Form.Submit>Submit</Form.Submit>
+    </Form>
+);
+
+export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
+    <Form {...args}>
+        <Form.Input name="name" placeholder="Name" />
+        <Form.Input
+            name="email"
+            type="email"
+            placeholder="E-mail"
+            rules={{ required: 'Email is required to sign up.' }}
+        />
+        <Form.Checkbox
+            name="terms"
+            rules={{ required: 'You must agree to the terms' }}
+        >
+            Agree to terms
+        </Form.Checkbox>
         <Form.Submit>Submit</Form.Submit>
     </Form>
 );

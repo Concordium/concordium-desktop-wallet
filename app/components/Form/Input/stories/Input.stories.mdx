@@ -1,0 +1,24 @@
+import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
+import Input from '../Input';
+
+import { argTypes, Template } from './deps';
+
+<Meta title="Components/Form/Fields/Input" component={Input} argTypes={argTypes} />
+
+# Input
+
+The Input component allows the same props as a regular `<input type="text|number|email|phone|etc..." />`. DO NOT use this for checkboxes or radio buttons; use the respective components for those.
+
+<Canvas>
+    <Story name="Input" args={{
+        placeholder: 'Name',
+        name: 'name'
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+The following are the most important props to work with `Input`:
+
+<ArgsTable story="Input" />
+
