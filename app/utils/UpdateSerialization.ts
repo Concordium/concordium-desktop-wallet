@@ -3,6 +3,7 @@ import {
     BlockItemKind,
     ExchangeRate,
     FoundationAccount,
+    GasRewards,
     MintDistribution,
     ProtocolUpdate,
     TransactionFeeDistribution,
@@ -170,6 +171,18 @@ export function serializeProtocolUpdate(
         transactionHash: specificationHash,
         auxiliaryData,
     };
+}
+
+/**
+ * Serializes a GasRewards to bytes.
+ */
+export function serializeGasRewards(gasRewards: GasRewards) {
+    const serializedGasRewards = Buffer.alloc(16);
+    serializedGasRewards.writeUInt32BE(gasRewards.baker, 0);
+    serializedGasRewards.writeUInt32BE(gasRewards.finalizationProof, 4);
+    serializedGasRewards.writeUInt32BE(gasRewards.accountCreation, 8);
+    serializedGasRewards.writeUInt32BE(gasRewards.chainUpdate, 12);
+    return serializedGasRewards;
 }
 
 /**

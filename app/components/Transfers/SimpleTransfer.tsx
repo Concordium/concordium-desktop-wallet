@@ -101,8 +101,23 @@ export default function SimpleTransfer({ account }: Props) {
                     render={() => (
                         <PickAmount
                             recipient={recipient}
+                            header="Send funds"
                             amount={amount}
                             setAmount={setAmount}
+                            toPickRecipient={() =>
+                                dispatch(
+                                    push(
+                                        routes.ACCOUNTS_SIMPLETRANSFER_PICKRECIPIENT
+                                    )
+                                )
+                            }
+                            toConfirmTransfer={() =>
+                                dispatch(
+                                    push(
+                                        routes.ACCOUNTS_SIMPLETRANSFER_CONFIRMTRANSFER
+                                    )
+                                )
+                            }
                         />
                     )}
                 />

@@ -4,15 +4,53 @@ import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { displayAsGTU } from '../../utils/gtu';
-import { AddressBookEntry, SimpleTransfer } from '../../utils/types';
+import { parseTime } from '../../utils/timeHelpers';
+import { getScheduledTransferAmount } from '../../utils/transactionHelpers';
+
+import {
+    AddressBookEntry,
+    AccountTransaction,
+    instanceOfScheduledTransfer,
+    instanceOfSimpleTransfer,
+    TransactionPayload,
+    TimeStampUnit,
+} from '../../utils/types';
 
 interface State {
-    transaction: SimpleTransfer;
+    transaction: AccountTransaction;
     recipient: AddressBookEntry;
 }
 
 interface Props {
     location: LocationDescriptorObject<State>;
+}
+
+function getAmount(transaction: AccountTransaction) {
+    if (instanceOfScheduledTransfer(transaction)) {
+        return getScheduledTransferAmount(transaction);
+    }
+    if (instanceOfSimpleTransfer(transaction)) {
+        return transaction.payload.amount;
+    }
+    throw new Error('Unsupported transaction type - please implement');
+}
+
+function displayNote(transaction: AccountTransaction<TransactionPayload>) {
+    if (instanceOfScheduledTransfer(transaction)) {
+        return (
+            <Table.Row>
+                <Table.Cell textAlign="center">
+                    Split into {transaction.payload.schedule.length} releases,
+                    starting:
+                    {parseTime(
+                        transaction.payload.schedule[0].timestamp,
+                        TimeStampUnit.milliSeconds
+                    )}
+                </Table.Cell>
+            </Table.Row>
+        );
+    }
+    return null;
 }
 
 /**
@@ -36,7 +74,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
                         <Table.Row>
                             <Table.Cell>Amount:</Table.Cell>
                             <Table.Cell textAlign="right">
-                                {displayAsGTU(transaction.payload.amount)}
+                                {displayAsGTU(getAmount(transaction))}
                             </Table.Cell>
                         </Table.Row>
                         <Table.Row>
@@ -45,6 +83,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
                                 {displayAsGTU(200n)}
                             </Table.Cell>
                         </Table.Row>
+                        {displayNote(transaction)}
                         <Table.Row>
                             <Table.Cell>To:</Table.Cell>
                             <Table.Cell textAlign="right">

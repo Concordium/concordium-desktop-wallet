@@ -8,6 +8,7 @@ import {
     AccountTransaction,
     ExchangeRate,
     FoundationAccount,
+    GasRewards,
     MintDistribution,
     ProtocolUpdate,
     PublicInformationForIp,
@@ -157,6 +158,20 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         return signUpdateProtocolTransaction(
             this.transport,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signGasRewards(
+        transaction: UpdateInstruction<GasRewards>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x23,
             path,
             transaction,
             serializedPayload

@@ -1,5 +1,6 @@
 import {
     ExchangeRate,
+    GasRewards,
     RewardFraction,
     TransactionFeeDistribution,
 } from './types';
@@ -29,6 +30,7 @@ interface UpdateQueues {
     foundationAccount: UpdateQueue;
     mintDistribution: UpdateQueue;
     protocol: UpdateQueue;
+    gasRewards: UpdateQueue;
 }
 
 interface Authorization {
@@ -43,6 +45,7 @@ interface Authorizations {
     foundationAccount: Authorization;
     mintDistribution: Authorization;
     protocol: Authorization;
+    paramGASRewards: Authorization;
 }
 
 // The node returns the mint per slot value as a scientific notation String,
@@ -57,6 +60,7 @@ interface MintDistributionNode {
 interface RewardParameters {
     transactionFeeDistribution: TransactionFeeDistribution;
     mintDistribution: MintDistributionNode;
+    gASRewards: GasRewards;
 }
 
 interface ChainParameters {
@@ -82,4 +86,8 @@ interface MintEvent {
 export interface BlockSummary {
     updates: Updates;
     specialEvents: [MintEvent];
+}
+
+export interface AccountNonce {
+    nonce: string;
 }

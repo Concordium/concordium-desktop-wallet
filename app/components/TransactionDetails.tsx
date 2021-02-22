@@ -8,6 +8,7 @@ import {
     UpdateInstructionPayload,
 } from '../utils/types';
 import findHandler from '../utils/updates/HandlerFinder';
+import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
 
 // TODO Implement a proper view of the supported transaction types, including account
 // transactions.
@@ -28,13 +29,14 @@ function generateView(
         return handler.view();
     }
     if (instanceOfAccountTransaction(transaction)) {
-        throw new Error('Not yet implemented.');
+        return <AccountTransactionDetails transaction={transaction} />;
     }
     throw new Error(`Unsupported transaction type: ${transaction}`);
 }
 
 /**
  * Component that displays the details of a transaction in a human readable way.
+ * @param {Transaction} transaction: The transaction, which details is displayed.
  */
 export default function TransactionDetails({ transaction }: Props) {
     return (

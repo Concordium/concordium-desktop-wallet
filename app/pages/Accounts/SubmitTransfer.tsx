@@ -3,19 +3,14 @@ import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import { Container, Segment, Header, Grid } from 'semantic-ui-react';
-import routes from '../../constants/routes.json';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { sendTransaction } from '../../utils/client';
+import { sendTransaction } from '../../utils/nodeRequests';
 import {
     serializeTransaction,
     getTransactionHash,
 } from '../../utils/transactionSerialization';
 import { monitorTransactionStatus } from '../../utils/TransactionStatusPoller';
-import {
-    Account,
-    AccountTransaction,
-    AddressBookEntry,
-} from '../../utils/types';
+import { Account, AccountTransaction } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { addPendingTransaction } from '../../features/TransactionSlice';
 import { getAccountPath } from '../../features/ledger/Path';
@@ -24,7 +19,8 @@ import TransactionDetails from '../../components/TransactionDetails';
 interface State {
     transaction: AccountTransaction;
     account: Account;
-    recipient: AddressBookEntry;
+    returnLocation: string;
+    returnState: Record<string, unknown>;
 }
 
 interface Props {
@@ -43,7 +39,12 @@ export default function SubmitTransfer({ location }: Props) {
         throw new Error('Unexpected missing state.');
     }
 
-    const { account, transaction, recipient } = location.state;
+    const {
+        account,
+        transaction,
+        returnLocation,
+        returnState,
+    } = location.state;
 
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
@@ -69,8 +70,8 @@ export default function SubmitTransfer({ location }: Props) {
 
             dispatch(
                 push({
-                    pathname: routes.ACCOUNTS_SIMPLETRANSFER_TRANSFERSUBMITTED,
-                    state: { transaction, recipient },
+                    pathname: returnLocation,
+                    state: { account, transaction, ...returnState },
                 })
             );
         } else {

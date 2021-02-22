@@ -13,7 +13,7 @@ const walletProxy = axios.create({
  * @param {string} urlString: the url at which to perform the getRequest
  * @param params: Additional URL search parameters to add to the request.
  */
-function getPromise(
+export function getPromise(
     urlString: string,
     params: Record<string, string> = {}
 ): Promise<http.IncomingMessage> {
@@ -33,7 +33,9 @@ function getPromise(
 /**
  * Given a http response, extract its body.
  */
-function getResponseBody(response: http.IncomingMessage): Promise<string> {
+export function getResponseBody(
+    response: http.IncomingMessage
+): Promise<string> {
     return new Promise((resolve) => {
         let data = '';
         response.on('data', (chunk) => {

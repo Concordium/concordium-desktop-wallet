@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, RefObject } from 'react';
+import React, { useState, useRef, RefObject } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card } from 'semantic-ui-react';
@@ -6,18 +6,31 @@ import { addPendingIdentity } from '../../features/IdentitySlice';
 import { addPendingAccount } from '../../features/AccountSlice';
 import routes from '../../constants/routes.json';
 import styles from './IdentityIssuance.module.scss';
-import { getGlobal, performIdObjectRequest } from '../../utils/httpRequests';
+import {
+    getGlobal,
+    getPromise,
+    getResponseBody,
+    performIdObjectRequest,
+} from '../../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
 import { IdentityProvider, Dispatch } from '../../utils/types';
 import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoller';
+import LedgerComponent from '../../components/ledger/LedgerComponent';
+import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 
 const redirectUri = 'ConcordiumRedirectToken';
+
+async function getBody(url: string) {
+    const response = await getPromise(url);
+    return getResponseBody(response);
+}
 
 async function createIdentityObjectRequest(
     id: number,
     provider: IdentityProvider,
-    setText: (text: string) => void
+    setMessage: (text: string) => void,
+    ledger: ConcordiumLedgerClient
 ) {
     const global = await getGlobal();
     return createIdentityRequestObjectLedger(
@@ -25,7 +38,8 @@ async function createIdentityObjectRequest(
         provider.ipInfo,
         provider.arsInfos,
         global,
-        setText
+        setMessage,
+        ledger
     );
 }
 
@@ -40,40 +54,43 @@ async function handleIdentityProviderLocation(
         if (!iframeRef.current) {
             reject(new Error('Unexpected missing reference to webView.'));
         } else {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            iframeRef.current.addEventListener('did-navigate', (e: any) => {
-                const loc = e.url;
-                if (loc.includes(redirectUri)) {
-                    resolve(loc.substring(loc.indexOf('=') + 1));
+            iframeRef.current.addEventListener(
+                'did-navigate',
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                async (e: any) => {
+                    const loc = e.url;
+                    if (loc.includes(redirectUri)) {
+                        resolve(loc.substring(loc.indexOf('=') + 1));
+                    } else if (e.httpResponseCode !== 200) {
+                        reject(new Error(await getBody(e.url)));
+                    }
                 }
-            });
+            );
         }
     });
 }
 
 async function generateIdentity(
+    idObjectRequest: string,
+    randomness: string,
+    identityId: number,
     setLocation: (location: string) => void,
-    setText: (text: string) => void,
     dispatch: Dispatch,
     provider: IdentityProvider,
     accountName: string,
     identityName: string,
-    iframeRef: RefObject<HTMLIFrameElement>
+    iframeRef: RefObject<HTMLIFrameElement>,
+    onError: (message: string) => void
 ) {
+    let identityObjectLocation;
     try {
-        setText('Please Wait');
-        const identityId = await getNextId();
-        const {
-            idObjectRequest,
-            randomness,
-        } = await createIdentityObjectRequest(identityId, provider, setText);
         const IdentityProviderLocation = await performIdObjectRequest(
             provider.metadata.issuanceStart,
             redirectUri,
             idObjectRequest
         );
         setLocation(IdentityProviderLocation);
-        const identityObjectLocation = await handleIdentityProviderLocation(
+        identityObjectLocation = await handleIdentityProviderLocation(
             iframeRef
         );
         // TODO: Handle the case where the app closes before we are able to save pendingIdentity
@@ -85,6 +102,11 @@ async function generateIdentity(
             randomness
         );
         await addPendingAccount(dispatch, accountName, identityId, 0); // TODO: can we add the address already here?
+    } catch (e) {
+        onError(`Failed to create identity due to ${e}`);
+        return;
+    }
+    try {
         confirmIdentityAndInitialAccount(
             dispatch,
             identityName,
@@ -93,8 +115,7 @@ async function generateIdentity(
         );
         dispatch(push(routes.IDENTITYISSUANCE_FINAL));
     } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log(`unable to create identity due to ${e.stack}`); // TODO: handle
+        onError(`Failed to confirm identity`);
     }
 }
 
@@ -102,44 +123,53 @@ interface Props {
     identityName: string;
     accountName: string;
     provider: IdentityProvider;
+    onError(message: string): void;
 }
 
 export default function IdentityIssuanceGenerate({
     identityName,
     accountName,
     provider,
+    onError,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const [text, setText] = useState<string>();
     const [location, setLocation] = useState<string>();
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
-    useEffect(() => {
+    async function withLedger(
+        ledger: ConcordiumLedgerClient,
+        setMessage: (message: string) => void
+    ) {
+        const identityId = await getNextId();
+        const {
+            idObjectRequest,
+            randomness,
+        } = await createIdentityObjectRequest(
+            identityId,
+            provider,
+            setMessage,
+            ledger
+        );
         generateIdentity(
+            idObjectRequest,
+            randomness,
+            identityId,
             setLocation,
-            setText,
             dispatch,
             provider,
             accountName,
             identityName,
-            iframeRef
+            iframeRef,
+            onError
         );
-    }, [
-        provider,
-        setLocation,
-        setText,
-        dispatch,
-        accountName,
-        identityName,
-        iframeRef,
-    ]);
+    }
 
     if (!location) {
         return (
             <Card fluid centered>
                 <Card.Content textAlign="center">
                     <Card.Header>Generating the Identity</Card.Header>
-                    <Card.Description>{text}</Card.Description>
+                    <LedgerComponent ledgerCall={withLedger} />
                 </Card.Content>
             </Card>
         );
