@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, useLocation } from 'react-router-dom';
 import routes from '../../constants/routes.json';
 import PickProvider from './PickProvider';
 import PickName from './PickName';
@@ -9,6 +9,20 @@ import GeneratePage from './GeneratePage';
 import FinalPage from './FinalPage';
 import { IdentityProvider } from '../../utils/types';
 import ErrorModal from '../../components/SimpleErrorModal';
+import PageHeader from '../../components/PageHeader';
+
+function getSubtitle(location: string) {
+    switch (location) {
+        case routes.IDENTITYISSUANCE_PICKPROVIDER:
+            return 'Choose an identity provider';
+        case routes.IDENTITYISSUANCE_EXTERNAL:
+            return 'Issuance flow';
+        case routes.IDENTITYISSUANCE_FINAL:
+            return 'Your identity and initial account';
+        default:
+            return 'Choose your names';
+    }
+}
 
 /**
  * The Last route is the default (because it has no path)
@@ -30,6 +44,9 @@ export default function IdentityIssuancePage(): JSX.Element {
 
     return (
         <>
+            <PageHeader>
+                <h1>New identity | {getSubtitle(useLocation().pathname)}</h1>
+            </PageHeader>
             <ErrorModal
                 header="Unable to create identity"
                 content={modalMessage}
