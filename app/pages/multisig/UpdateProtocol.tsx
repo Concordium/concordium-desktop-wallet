@@ -6,6 +6,8 @@ import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatur
 import { ProtocolUpdate, UpdateType } from '../../utils/types';
 import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 
+const auxiliaryDataMaxSizeKb = 2048;
+
 /**
  * Component for creating an update protocol transaction.
  */
@@ -87,7 +89,7 @@ export default function UpdateProtocol({
             <DragAndDropFile
                 text="Drag and drop specification auxiliary data"
                 fileProcessor={loadAuxiliaryData}
-                maxSizeKb={2048}
+                maxSizeKb={auxiliaryDataMaxSizeKb}
             />
             <Button
                 primary
