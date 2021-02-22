@@ -4,12 +4,11 @@ import {
     AccountTransaction,
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
-    instanceOfSimpleTransfer,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../utils/types';
 import findHandler from '../utils/updates/HandlerFinder';
-import SimpleTransferDetails from './Transfers/DisplaySimpleTransfer';
+import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
 
 // TODO Implement a proper view of the supported transaction types, including account
 // transactions.
@@ -30,9 +29,7 @@ function generateView(
         return handler.view();
     }
     if (instanceOfAccountTransaction(transaction)) {
-        if (instanceOfSimpleTransfer(transaction)) {
-            return <SimpleTransferDetails transaction={transaction} />;
-        }
+        return <AccountTransactionDetails transaction={transaction} />;
     }
     throw new Error(`Unsupported transaction type: ${transaction}`);
 }
@@ -40,7 +37,6 @@ function generateView(
 /**
  * Component that displays the details of a transaction in a human readable way.
  * @param {Transaction} transaction: The transaction, which details is displayed.
- * @param {string} transaction: The transaction, which details is displayed.
  */
 export default function TransactionDetails({ transaction }: Props) {
     return (

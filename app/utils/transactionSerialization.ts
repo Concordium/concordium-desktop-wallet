@@ -26,28 +26,31 @@ function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     return serialized;
 }
 
+export function serializeScheduledTransferPayloadBase(
+    payload: ScheduledTransferPayload
+) {
+    const size = 1 + 32 + 1;
+    const initialPayload = new Uint8Array(size);
+
+    initialPayload[0] = TransactionKind.Transfer_with_schedule;
+    putBase58Check(initialPayload, 1, payload.toAddress);
+    initialPayload[33] = payload.schedule.length;
+    return initialPayload;
+}
+
+export function serializeSchedulePoint(period: SchedulePoint) {
+    return Buffer.concat([
+        encodeWord64(BigInt(period.timestamp)),
+        encodeWord64(BigInt(period.amount)),
+    ]);
+}
+
 function serializeTransferWithSchedule(payload: ScheduledTransferPayload) {
-    let index = 0;
-    const listLength = payload.schedule.length;
-
-    const size = 1 + 32 + 1 + listLength * (8 + 8);
-    const serialized = new Uint8Array(size);
-
-    function serializeSchedule(period: SchedulePoint) {
-        put(serialized, index, encodeWord64(BigInt(period.timestamp)));
-        index += 8;
-        put(serialized, index, encodeWord64(BigInt(period.amount)));
-        index += 8;
-    }
-
-    serialized[index] = TransactionKind.Transfer_with_schedule;
-    index += 1;
-    putBase58Check(serialized, index, payload.toAddress);
-    index += 32;
-    serialized[index] = listLength;
-    index += 1;
-    payload.schedule.forEach(serializeSchedule);
-    return serialized;
+    return Buffer.concat(
+        [serializeScheduledTransferPayloadBase(payload)].concat(
+            payload.schedule.map(serializeSchedulePoint)
+        )
+    );
 }
 
 export function serializeTransactionHeader(
