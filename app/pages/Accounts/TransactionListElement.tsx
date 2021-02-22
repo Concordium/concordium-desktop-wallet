@@ -8,7 +8,7 @@ import {
     OriginType,
     TransactionKindString,
 } from '../../utils/types';
-import SidedText from '../../components/SidedText';
+import SidedRow from '../../components/SidedRow';
 import { isFailed } from '../../utils/transactionHelpers';
 
 function getName(transaction: TransferTransaction) {
@@ -141,7 +141,7 @@ function TransactionListElement({ transaction }: Props): JSX.Element {
 
     return (
         <Grid container columns={2}>
-            <SidedText
+            <SidedRow
                 left={
                     <>
                         {isFailed(transaction) ? (
@@ -152,7 +152,7 @@ function TransactionListElement({ transaction }: Props): JSX.Element {
                 }
                 right={amount}
             />
-            <SidedText
+            <SidedRow
                 left={`${time} ${statusSymbol(transaction.status)}`}
                 right={amountFormula.concat(
                     ` ${
