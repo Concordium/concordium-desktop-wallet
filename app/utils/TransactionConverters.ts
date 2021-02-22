@@ -57,7 +57,7 @@ export function convertIncomingTransaction(
         total: transaction.total,
         success: transaction.details.outcome === 'success',
         transactionHash: transaction.transactionHash,
-        subtotal: transaction.subtotal,
+        subtotal,
         cost: transaction.cost,
         origin: JSON.stringify(transaction.origin),
         details: JSON.stringify(transaction.details),
