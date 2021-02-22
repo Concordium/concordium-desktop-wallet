@@ -90,15 +90,6 @@ export async function decryptTransactions(
     );
 }
 
-/**
- * We have to do it like this, because the data from the wallet proxy
- * doesn't contain the receiving address, except in the event string.
- */
-function getScheduleReceiver(transaction: IncomingTransaction) {
-    const event = transaction.details.events[0];
-    return event.slice(event.lastIndexOf(' ') + 1);
-}
-
 /*
  * Converts the given transaction into the structure, which is used in the database.
  */
@@ -121,14 +112,6 @@ function convertIncomingTransaction(
     let encrypted;
     if (transaction.encrypted) {
         encrypted = JSON.stringify(transaction.encrypted);
-    }
-
-    if (
-        transaction.details.type === TransactionKindString.TransferWithSchedule
-    ) {
-        if (transaction.origin.type === OriginType.Account) {
-            toAddress = getScheduleReceiver(transaction);
-        }
     }
 
     return {

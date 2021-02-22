@@ -1,4 +1,9 @@
-import { ExchangeRate, TransactionFeeDistribution } from './types';
+import {
+    ExchangeRate,
+    GasRewards,
+    RewardFraction,
+    TransactionFeeDistribution,
+} from './types';
 
 // This file contains interfaces that matches what is returned
 // from the Concordium Node using GRPC.
@@ -23,6 +28,8 @@ interface UpdateQueues {
     euroPerEnergy: UpdateQueue;
     transactionFeeDistribution: UpdateQueue;
     foundationAccount: UpdateQueue;
+    mintDistribution: UpdateQueue;
+    gasRewards: UpdateQueue;
 }
 
 interface Authorization {
@@ -35,10 +42,23 @@ interface Authorizations {
     euroPerEnergy: Authorization;
     transactionFeeDistribution: Authorization;
     foundationAccount: Authorization;
+    mintDistribution: Authorization;
+    paramGASRewards: Authorization;
+}
+
+// The node returns the mint per slot value as a scientific notation String,
+// which does not match the serialization format entirely. Therefore
+// this interface is required.
+interface MintDistributionNode {
+    mintPerSlot: string;
+    bakingReward: RewardFraction;
+    finalizationReward: RewardFraction;
 }
 
 interface RewardParameters {
     transactionFeeDistribution: TransactionFeeDistribution;
+    mintDistribution: MintDistributionNode;
+    gASRewards: GasRewards;
 }
 
 interface ChainParameters {
@@ -64,4 +84,8 @@ interface MintEvent {
 export interface BlockSummary {
     updates: Updates;
     specialEvents: [MintEvent];
+}
+
+export interface AccountNonce {
+    nonce: string;
 }

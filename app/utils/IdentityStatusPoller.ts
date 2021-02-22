@@ -21,28 +21,25 @@ export async function confirmIdentityAndInitialAccount(
     let token;
     try {
         token = await getIdObject(location);
-        await confirmIdentity(dispatch, identityName, token.identityObject);
-        await confirmInitialAccount(
-            dispatch,
-            accountName,
-            token.accountAddress,
-            token.credential
-        );
-        addToAddressBook(dispatch, {
-            name: accountName,
-            address: token.accountAddress,
-            note: `Initial account of ${identityName}`,
-            readOnly: true,
-        });
-    } catch (err) {
         if (!token) {
             await rejectIdentity(dispatch, identityName);
         } else {
-            // eslint-disable-next-line no-console
-            console.log(err);
-            // eslint-disable-next-line no-console
-            console.log(token); // TODO: Handle unable to save identity/account
+            await confirmIdentity(dispatch, identityName, token.identityObject);
+            await confirmInitialAccount(
+                dispatch,
+                accountName,
+                token.accountAddress,
+                token.credential
+            );
+            addToAddressBook(dispatch, {
+                name: accountName,
+                address: token.accountAddress,
+                note: `Initial account of ${identityName}`,
+                readOnly: true,
+            });
         }
+    } catch (err) {
+        await rejectIdentity(dispatch, identityName);
     }
 }
 

@@ -48,12 +48,19 @@ export default function Export() {
         const encrypted = encrypt(JSON.stringify(data), password);
 
         try {
-            await saveFile(JSON.stringify(encrypted), 'Export your data');
-            setModalMessage('Export was successful');
-            setOpenConfirmationModal(true);
+            const completed = await saveFile(
+                JSON.stringify(encrypted),
+                'Export your data'
+            );
+            if (completed) {
+                setModalMessage('Export was successful');
+                setOpenConfirmationModal(true);
+            }
         } catch (error) {
-            // Export was cancelled.
-            // TODO: inform user in the case where export was not canceled, but did indeed fail.
+            setModalMessage(
+                'Export was unsuccessful, We were unable to save to file.'
+            );
+            setOpenConfirmationModal(true);
         }
         setOpenPasswordModal(false);
     }
