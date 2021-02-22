@@ -17,7 +17,7 @@ export default function NoIdentities() {
             </Header>
             <Card.Description textAlign="center">
                 An identity and an initial account is needed before you can
-                start using the Concordium block-chain. You can either request a
+                start using the Concordium blockchain. You can either request a
                 new identity and an initial account from an identity provider,
                 or if you already have an identity and account, you can import
                 it.
