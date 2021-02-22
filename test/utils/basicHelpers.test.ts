@@ -1,4 +1,4 @@
-import { partition, toCSV } from '../../app/utils/basicHelpers';
+import { isHex, partition, toCSV } from '../../app/utils/basicHelpers';
 
 test('Partition should split booleans correctly', () => {
     const list = [true, false, false, true, true, false, false];
@@ -63,4 +63,16 @@ test('toCSV should fail on extra fields', () => {
     const fields = ['first', 'second'];
 
     expect(() => toCSV(elements, fields)).toThrow();
+});
+
+test('Hex string validates as being hex', () => {
+    expect(
+        isHex(
+            '50ad41624c25e493aa1dc7f4ab32bdc5a3b0b78ecc35b539936e3fea7c565af7'
+        )
+    ).toBe(true);
+});
+
+test('Non-hex string does not validate as being hex', () => {
+    expect(isHex('ObviouslyNotAHexString')).toBe(false);
 });
