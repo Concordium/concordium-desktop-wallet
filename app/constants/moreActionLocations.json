@@ -1,5 +1,6 @@
 {
     "accountAddress": "account-address",
     "releaseSchedule": "release-schedule",
+    "exportTransactions": "export-transactions",
     "list": "list"
 }

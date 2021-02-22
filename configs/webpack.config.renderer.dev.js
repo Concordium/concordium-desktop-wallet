@@ -12,8 +12,9 @@ const webpack = require('webpack');
 const chalk = require('chalk');
 const { merge } = require('webpack-merge');
 const { spawn, execSync } = require('child_process');
-const baseConfig = require('./webpack.config.base');
+const { baseConfig, assetsConfig, stylesConfig } = require('./partials');
 const CheckNodeEnv = require('../internals/scripts/CheckNodeEnv');
+const { fromRoot } = require('./helpers/pathHelpers');
 
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
 // at the dev webpack config is not accidentally run in a production environment
@@ -23,7 +24,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const port = process.env.PORT || 1212;
 const publicPath = `http://localhost:${port}/dist`;
-const dll = path.join(__dirname, '..', 'dll');
+const dll = fromRoot('./dll');
 const manifest = path.resolve(dll, 'renderer.json');
 const requiredByDLLConfig = module.parent.filename.includes(
     'webpack.config.renderer.dev.dll'
@@ -41,7 +42,7 @@ if (!requiredByDLLConfig && !(fs.existsSync(dll) && fs.existsSync(manifest))) {
     execSync('yarn build-dll');
 }
 
-module.exports = merge(baseConfig, {
+module.exports = merge(baseConfig, assetsConfig, stylesConfig(false), {
     devtool: 'inline-source-map',
 
     mode: 'development',
@@ -62,153 +63,6 @@ module.exports = merge(baseConfig, {
         filename: 'renderer.dev.js',
     },
 
-    module: {
-        rules: [
-            {
-                test: /\.global\.css$/,
-                use: [
-                    {
-                        loader: 'style-loader',
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            sourceMap: true,
-                        },
-                    },
-                ],
-            },
-            {
-                test: /^((?!\.global).)*\.css$/,
-                use: [
-                    {
-                        loader: 'style-loader',
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            modules: {
-                                localIdentName:
-                                    '[name]__[local]__[hash:base64:5]',
-                            },
-                            sourceMap: true,
-                            importLoaders: 1,
-                        },
-                    },
-                ],
-            },
-            // SASS support - compile all .global.scss files and pipe it to style.css
-            {
-                test: /\.global\.(scss|sass)$/,
-                use: [
-                    {
-                        loader: 'style-loader',
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            sourceMap: true,
-                        },
-                    },
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            sourceMap: true,
-                            sassOptions: {
-                                includePaths: ['node_modules', 'app/styles'],
-                            },
-                        },
-                    },
-                ],
-            },
-            // SASS support - compile all module.scss files and pipe it to style.css
-            {
-                test: /\.module\.(scss|sass)$/,
-                use: [
-                    {
-                        loader: 'style-loader',
-                    },
-                    {
-                        loader: '@teamsupercell/typings-for-css-modules-loader',
-                    },
-                    {
-                        loader: 'css-loader',
-                        options: {
-                            modules: {
-                                localIdentName:
-                                    '[name]__[local]__[hash:base64:5]',
-                            },
-                            sourceMap: true,
-                            importLoaders: 1,
-                        },
-                    },
-                    {
-                        loader: 'sass-loader',
-                        options: {
-                            sourceMap: true,
-                            sassOptions: {
-                                includePaths: ['node_modules', 'app/styles'],
-                            },
-                        },
-                    },
-                ],
-            },
-            // WOFF Font
-            {
-                test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'application/font-woff',
-                    },
-                },
-            },
-            // WOFF2 Font
-            {
-                test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'application/font-woff',
-                    },
-                },
-            },
-            // TTF Font
-            {
-                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'application/octet-stream',
-                    },
-                },
-            },
-            // EOT Font
-            {
-                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-                use: 'file-loader',
-            },
-            // SVG Font
-            {
-                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: 'url-loader',
-                    options: {
-                        limit: 10000,
-                        mimetype: 'image/svg+xml',
-                    },
-                },
-            },
-            // Common Image Formats
-            {
-                test: /\.(?:ico|gif|png|jpg|jpeg|webp)$/,
-                use: 'url-loader',
-            },
-        ],
-    },
     resolve: {
         alias: {
             'react-dom': '@hot-loader/react-dom',
@@ -218,7 +72,7 @@ module.exports = merge(baseConfig, {
         requiredByDLLConfig
             ? null
             : new webpack.DllReferencePlugin({
-                  context: path.join(__dirname, '..', 'dll'),
+                  context: dll,
                   manifest: require(manifest),
                   sourceType: 'var',
               }),

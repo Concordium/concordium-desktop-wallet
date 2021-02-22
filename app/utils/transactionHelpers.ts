@@ -1,5 +1,5 @@
 import { findEntries } from '../database/AddressBookDao';
-import { getNextAccountNonce, getTransactionStatus } from './client';
+import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -18,7 +18,7 @@ export function getHighestId(transactions: TransferTransaction[]) {
  * Attempts to find the address in the accounts, and then AddressBookEntries
  * If the address is found, return the name, otherwise returns undefined;
  */
-async function lookupName(address: string): Promise<string | undefined> {
+export async function lookupName(address: string): Promise<string | undefined> {
     const entries = await findEntries({ address });
     if (entries.length > 0) {
         return entries[0].name;
@@ -66,8 +66,7 @@ export async function createSimpleTransferTransaction(
     expiry = '16446744073',
     energyAmount = '200'
 ) {
-    const nonceJSON = await getNextAccountNonce(fromAddress);
-    const { nonce } = JSON.parse(nonceJSON.getValue());
+    const { nonce } = await getNextAccountNonce(fromAddress);
     const transferTransaction: SimpleTransfer = {
         sender: fromAddress,
         nonce,

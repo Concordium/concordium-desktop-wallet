@@ -1,0 +1,52 @@
+@import 'config/bundle';
+
+.root {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 20px;
+    padding: 0 20px;
+    height: $page-header-height;
+    border-bottom: 1px solid $color-lines;
+    position: relative;
+}
+
+.button {
+    height: 39px;
+    padding: 0 10px;
+    border-radius: 5px;
+    background-color: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover, &:focus {
+        background-color: $color-off-white;
+        outline: none;
+    }
+
+    .leftButtons & {
+        margin-left: 10px;
+    }
+
+    .rightButtons & {
+        margin-right: 10px;
+    }
+}
+
+.leftButtons,
+.rightButtons {
+    position: absolute;
+    display: flex;
+    align-items: center;
+}
+
+.leftButtons {
+    left: 10px;
+}
+
+.rightButtons {
+    right: 10px;
+    
+}

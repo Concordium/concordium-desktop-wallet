@@ -26,7 +26,7 @@ import {
 } from '../../utils/types';
 import { saveFile } from '../../utils/FileHelper';
 import DragAndDropFile from '../../components/DragAndDropFile';
-import { sendTransaction } from '../../utils/client';
+import { sendTransaction } from '../../utils/nodeRequests';
 import {
     serializeForSubmission,
     serializeUpdateInstructionHeaderAndPayload,
@@ -235,11 +235,13 @@ export default function ProposalView() {
                             currentProposal.status !==
                             MultiSignatureTransactionStatus.Open
                         }
-                        onClick={() =>
-                            saveFile(
-                                currentProposal.transaction,
-                                'Export transaction'
-                            )
+                        onClick={
+                            () =>
+                                saveFile(
+                                    currentProposal.transaction,
+                                    'Export transaction'
+                                )
+                            // TODO Handle failure
                         }
                     >
                         Export transaction proposal

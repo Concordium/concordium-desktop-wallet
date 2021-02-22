@@ -3,6 +3,8 @@ import {
     BlockItemKind,
     ExchangeRate,
     FoundationAccount,
+    GasRewards,
+    MintDistribution,
     TransactionFeeDistribution,
     UpdateHeader,
     UpdateInstruction,
@@ -49,6 +51,40 @@ export function serializeFoundationAccount(
     const serializedFoundationAccount = Buffer.alloc(32);
     putBase58Check(serializedFoundationAccount, 0, foundationAccount.address);
     return serializedFoundationAccount;
+}
+
+/**
+ * Serializes a MintDistribution to bytes.
+ */
+export function serializeMintDistribution(mintDistribution: MintDistribution) {
+    const serializedMintDistribution = Buffer.alloc(13);
+    serializedMintDistribution.writeUInt32BE(
+        mintDistribution.mintPerSlot.mantissa,
+        0
+    );
+    serializedMintDistribution.writeInt8(
+        mintDistribution.mintPerSlot.exponent,
+        4
+    );
+    serializedMintDistribution.writeUInt32BE(mintDistribution.bakingReward, 5);
+    serializedMintDistribution.writeUInt32BE(
+        mintDistribution.finalizationReward,
+        9
+    );
+
+    return serializedMintDistribution;
+}
+
+/**
+ * Serializes a GasRewards to bytes.
+ */
+export function serializeGasRewards(gasRewards: GasRewards) {
+    const serializedGasRewards = Buffer.alloc(16);
+    serializedGasRewards.writeUInt32BE(gasRewards.baker, 0);
+    serializedGasRewards.writeUInt32BE(gasRewards.finalizationProof, 4);
+    serializedGasRewards.writeUInt32BE(gasRewards.accountCreation, 8);
+    serializedGasRewards.writeUInt32BE(gasRewards.chainUpdate, 12);
+    return serializedGasRewards;
 }
 
 /**
