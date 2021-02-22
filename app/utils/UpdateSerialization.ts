@@ -13,6 +13,24 @@ import {
     UpdateType,
 } from './types';
 
+export interface SerializedString {
+    length: Buffer;
+    message: Buffer;
+}
+
+/**
+ * Interface for the serialization of a protocol update split into its
+ * different parts required to correctly stream it in parts to the Ledger.
+ */
+export interface SerializedProtocolUpdate {
+    serialization: Buffer;
+    payloadLength: Buffer;
+    message: SerializedString;
+    specificationUrl: SerializedString;
+    transactionHash: Buffer;
+    auxiliaryData: Buffer;
+}
+
 /**
  * Serializes an ExchangeRate to bytes.
  */
@@ -77,11 +95,6 @@ export function serializeMintDistribution(mintDistribution: MintDistribution) {
     return serializedMintDistribution;
 }
 
-export interface SerializedString {
-    length: Buffer;
-    message: Uint8Array;
-}
-
 /**
  * Serializes a string as its UTF-8 encoding pre-fixed with the length
  * of the encoding. We restrict the length of the input to be less than
@@ -94,19 +107,10 @@ export function serializeUtf8String(input: string): SerializedString {
         throw new Error(`The string was too long: ${input.length}`);
     }
 
-    const encoded = new TextEncoder().encode(input);
+    const encoded = Buffer.from(new TextEncoder().encode(input));
     const serializedLength = Buffer.alloc(8);
     serializedLength.writeBigInt64BE(BigInt(encoded.length), 0);
     return { length: serializedLength, message: encoded };
-}
-
-export interface SerializedProtocolUpdate {
-    serialization: Buffer;
-    payloadLength: Buffer;
-    message: SerializedString;
-    specificationUrl: SerializedString;
-    transactionHash: Buffer;
-    auxiliaryData: Buffer;
 }
 
 /**
@@ -140,31 +144,18 @@ export function serializeProtocolUpdate(
     const serializedPayloadLength = Buffer.alloc(8);
     serializedPayloadLength.writeBigInt64BE(BigInt(payloadLength), 0);
 
-    let offset = 0;
-    let buffer = Buffer.alloc(16);
-    offset += buffer.writeBigUInt64BE(BigInt(payloadLength), offset);
-    buffer.writeBigUInt64BE(BigInt(encodedMessage.message.length), offset);
-    buffer = Buffer.concat([buffer, encodedMessage.message]);
-
-    let specificationUrlBuffer = Buffer.alloc(8);
-    specificationUrlBuffer.writeBigUInt64BE(
-        BigInt(encodedSpecificationUrl.message.length),
-        0
-    );
-    specificationUrlBuffer = Buffer.concat([
-        specificationUrlBuffer,
+    const serialization = Buffer.concat([
+        serializedPayloadLength,
+        encodedMessage.length,
+        encodedMessage.message,
+        encodedSpecificationUrl.length,
         encodedSpecificationUrl.message,
-    ]);
-
-    const finalSerialization = Buffer.concat([
-        buffer,
-        specificationUrlBuffer,
         specificationHash,
         auxiliaryData,
     ]);
 
     return {
-        serialization: finalSerialization,
+        serialization,
         payloadLength: serializedPayloadLength,
         message: encodedMessage,
         specificationUrl: encodedSpecificationUrl,
