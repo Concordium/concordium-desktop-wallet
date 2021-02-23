@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Divider, Header, Icon, Segment } from 'semantic-ui-react';
 import fs from 'fs';
+import { basename } from 'path';
 import { openFileDestination } from '../utils/FileHelper';
 import SimpleErrorModal from './SimpleErrorModal';
 
@@ -8,9 +9,10 @@ import SimpleErrorModal from './SimpleErrorModal';
 
 interface Props {
     text: string;
-    fileProcessor: (fileContents: Buffer) => void;
+    fileProcessor: (fileContents: Buffer, fileName: string) => void;
     disabled?: boolean;
     maxSizeKb?: number;
+    loadedFileName?: string;
 }
 
 /**
@@ -23,6 +25,7 @@ export default function DragAndDropFile({
     fileProcessor,
     disabled,
     maxSizeKb,
+    loadedFileName,
 }: Props) {
     const [showError, setShowError] = useState(false);
 
@@ -38,6 +41,18 @@ export default function DragAndDropFile({
         );
     }
 
+    let descriptionElement;
+    if (loadedFileName) {
+        descriptionElement = (
+            <>
+                Loaded file: {loadedFileName}
+                <Divider horizontal hidden />
+            </>
+        );
+    } else {
+        descriptionElement = text;
+    }
+
     async function loadFile() {
         try {
             const fileLocation = await openFileDestination('Open file');
@@ -49,7 +64,7 @@ export default function DragAndDropFile({
                 }
             }
             const file = fs.readFileSync(fileLocation);
-            fileProcessor(file);
+            fileProcessor(file, basename(fileLocation));
         } catch (err) {
             // An error is thrown if the user cancels the open file menu, or if
             // no file was selected. Therefore this error can be ignored, as nothing
@@ -68,7 +83,7 @@ export default function DragAndDropFile({
             <Segment placeholder>
                 <Header icon>
                     <Icon name="file" />
-                    {text}
+                    {descriptionElement}
                     {maxSizeItem}
                 </Header>
                 <Button primary onClick={loadFile} disabled={disabled}>
@@ -82,4 +97,5 @@ export default function DragAndDropFile({
 DragAndDropFile.defaultProps = {
     disabled: false,
     maxSizeKb: undefined,
+    loadedFileName: undefined,
 };

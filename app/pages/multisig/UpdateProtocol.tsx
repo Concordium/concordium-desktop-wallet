@@ -16,6 +16,7 @@ export default function UpdateProtocol({
     forwardTransaction,
 }: UpdateProps): JSX.Element | null {
     const [protocolUpdate, setProtocolUpdate] = useState<ProtocolUpdate>();
+    const [loadedFileName, setLoadedFileName] = useState<string | undefined>();
 
     const { threshold } = blockSummary.updates.authorizations.protocol;
     const sequenceNumber =
@@ -32,13 +33,14 @@ export default function UpdateProtocol({
         return null;
     }
 
-    function loadAuxiliaryData(auxiliaryData: Buffer) {
+    function loadAuxiliaryData(auxiliaryData: Buffer, fileName: string) {
         if (protocolUpdate) {
             const updatedProtocolUpdate: ProtocolUpdate = {
                 ...protocolUpdate,
                 specificationAuxiliaryData: auxiliaryData.toString('base64'),
             };
             setProtocolUpdate(updatedProtocolUpdate);
+            setLoadedFileName(fileName);
         }
     }
 
@@ -90,6 +92,7 @@ export default function UpdateProtocol({
                 text="Drag and drop specification auxiliary data"
                 fileProcessor={loadAuxiliaryData}
                 maxSizeKb={auxiliaryDataMaxSizeKb}
+                loadedFileName={loadedFileName}
             />
             <Button
                 primary
