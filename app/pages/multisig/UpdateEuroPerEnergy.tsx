@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Form, Input } from 'semantic-ui-react';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
+import { UpdateProps } from '../../utils/transactionTypes';
 import { ExchangeRate, UpdateType } from '../../utils/types';
-import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 
 export default function UpdateEuroPerEnergy({
     blockSummary,

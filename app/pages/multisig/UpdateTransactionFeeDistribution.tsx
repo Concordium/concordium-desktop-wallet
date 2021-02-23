@@ -6,8 +6,8 @@ import {
     TransactionFeeDistribution,
     UpdateType,
 } from '../../utils/types';
-import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 import { rewardFractionResolution } from '../../constants/updateConstants.json';
+import { UpdateProps } from '../../utils/transactionTypes';
 
 export default function UpdateTransactionFeeDistribution({
     blockSummary,

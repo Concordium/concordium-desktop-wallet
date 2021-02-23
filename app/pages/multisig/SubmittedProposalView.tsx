@@ -57,11 +57,11 @@ export default function SubmittedProposalView({ location }: Props) {
     const updateInstruction: UpdateInstruction<UpdateInstructionPayload> = parse(
         multiSignatureTransaction.transaction
     );
-    const handler = findHandler(updateInstruction);
+    const handler = findHandler(updateInstruction.type);
     const transactionHash = hashSha256(
         serializeUpdateInstructionHeaderAndPayload(
             updateInstruction,
-            handler.serializePayload()
+            handler.serializePayload(updateInstruction)
         )
     ).toString('hex');
 

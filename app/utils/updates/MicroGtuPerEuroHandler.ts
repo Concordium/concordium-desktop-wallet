@@ -1,45 +1,48 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernancePath } from '../../features/ledger/Path';
 import MicroGtuPerEuroView from '../../pages/multisig/MicroGtuPerEuroView';
+import UpdateMicroGtuPerEuro from '../../pages/multisig/UpdateMicroGtuPerEuro';
+import { TransactionHandler } from '../transactionTypes';
 import {
     ExchangeRate,
-    isExchangeRate,
-    TransactionHandler,
     UpdateInstruction,
+    isExchangeRate,
     UpdateInstructionPayload,
 } from '../types';
 import { serializeExchangeRate } from '../UpdateSerialization';
 
+type TransactionType = UpdateInstruction<ExchangeRate>;
+
 export default class MicroGtuPerEuroHandler
-    implements
-        TransactionHandler<
-            UpdateInstruction<ExchangeRate>,
-            ConcordiumLedgerClient
-        > {
-    transaction: UpdateInstruction<ExchangeRate>;
-
-    constructor(transaction: UpdateInstruction<UpdateInstructionPayload>) {
+    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    confirmType(
+        transaction: UpdateInstruction<UpdateInstructionPayload>
+    ): TransactionType {
         if (isExchangeRate(transaction)) {
-            this.transaction = transaction;
-        } else {
-            throw Error('Invalid transaction type was given as input.');
+            return transaction;
         }
+        throw Error('Invalid transaction type was given as input.');
     }
 
-    serializePayload() {
-        return serializeExchangeRate(this.transaction.payload);
+    serializePayload(transaction: TransactionType) {
+        return serializeExchangeRate(transaction.payload);
     }
 
-    signTransaction(ledger: ConcordiumLedgerClient) {
+    signTransaction(
+        transaction: TransactionType,
+        ledger: ConcordiumLedgerClient
+    ) {
         const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
         return ledger.signMicroGtuPerEuro(
-            this.transaction,
-            this.serializePayload(),
+            transaction,
+            this.serializePayload(transaction),
             path
         );
     }
 
-    view() {
-        return MicroGtuPerEuroView({ exchangeRate: this.transaction.payload });
+    view(transaction: TransactionType) {
+        return MicroGtuPerEuroView({ exchangeRate: transaction.payload });
     }
+
+    update = UpdateMicroGtuPerEuro;
 }

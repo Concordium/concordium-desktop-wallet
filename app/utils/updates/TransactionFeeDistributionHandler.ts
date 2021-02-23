@@ -1,47 +1,50 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernancePath } from '../../features/ledger/Path';
 import TransactionFeeDistributionView from '../../pages/multisig/TransactionFeeDistributionView';
+import UpdateTransactionFeeDistribution from '../../pages/multisig/UpdateTransactionFeeDistribution';
+import { TransactionHandler } from '../transactionTypes';
 import {
     isTransactionFeeDistribution,
     TransactionFeeDistribution,
-    TransactionHandler,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../types';
 import { serializeTransactionFeeDistribution } from '../UpdateSerialization';
 
+type TransactionType = UpdateInstruction<TransactionFeeDistribution>;
+
 export default class TransactionFeeDistributionHandler
-    implements
-        TransactionHandler<
-            UpdateInstruction<TransactionFeeDistribution>,
-            ConcordiumLedgerClient
-        > {
-    transaction: UpdateInstruction<TransactionFeeDistribution>;
-
-    constructor(transaction: UpdateInstruction<UpdateInstructionPayload>) {
+    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    confirmType(
+        transaction: UpdateInstruction<UpdateInstructionPayload>
+    ): TransactionType {
         if (isTransactionFeeDistribution(transaction)) {
-            this.transaction = transaction;
-        } else {
-            throw Error('Invalid transaction type was given as input.');
+            return transaction;
         }
+        throw Error('Invalid transaction type was given as input.');
     }
 
-    serializePayload() {
-        return serializeTransactionFeeDistribution(this.transaction.payload);
+    serializePayload(transaction: TransactionType) {
+        return serializeTransactionFeeDistribution(transaction.payload);
     }
 
-    signTransaction(ledger: ConcordiumLedgerClient) {
+    signTransaction(
+        transaction: TransactionType,
+        ledger: ConcordiumLedgerClient
+    ) {
         const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
         return ledger.signTransactionFeeDistribution(
-            this.transaction,
-            this.serializePayload(),
+            transaction,
+            this.serializePayload(transaction),
             path
         );
     }
 
-    view() {
+    view(transaction: TransactionType) {
         return TransactionFeeDistributionView({
-            transactionFeeDistribution: this.transaction.payload,
+            transactionFeeDistribution: transaction.payload,
         });
     }
+
+    update = UpdateTransactionFeeDistribution;
 }

@@ -1,47 +1,48 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernancePath } from '../../features/ledger/Path';
 import GasRewardsView from '../../pages/multisig/GasRewardsView';
+import UpdateGasRewards from '../../pages/multisig/UpdateGasRewards';
+import { TransactionHandler } from '../transactionTypes';
 import {
     GasRewards,
     isGasRewards,
-    TransactionHandler,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../types';
 import { serializeGasRewards } from '../UpdateSerialization';
 
+type TransactionType = UpdateInstruction<GasRewards>;
+
 export default class GasRewardsHandler
-    implements
-        TransactionHandler<
-            UpdateInstruction<GasRewards>,
-            ConcordiumLedgerClient
-        > {
-    transaction: UpdateInstruction<GasRewards>;
-
-    constructor(transaction: UpdateInstruction<UpdateInstructionPayload>) {
+    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    confirmType(
+        transaction: UpdateInstruction<UpdateInstructionPayload>
+    ): TransactionType {
         if (isGasRewards(transaction)) {
-            this.transaction = transaction;
-        } else {
-            throw Error('Invalid transaction type was given as input.');
+            return transaction;
         }
+        throw Error('Invalid transaction type was given as input.');
     }
 
-    serializePayload() {
-        return serializeGasRewards(this.transaction.payload);
+    serializePayload(transaction: TransactionType) {
+        return serializeGasRewards(transaction.payload);
     }
 
-    signTransaction(ledger: ConcordiumLedgerClient) {
+    signTransaction(
+        transaction: TransactionType,
+        ledger: ConcordiumLedgerClient
+    ) {
         const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
         return ledger.signGasRewards(
-            this.transaction,
-            this.serializePayload(),
+            transaction,
+            this.serializePayload(transaction),
             path
         );
     }
 
-    view() {
-        return GasRewardsView({
-            gasRewards: this.transaction.payload,
-        });
+    view(transaction: TransactionType) {
+        return GasRewardsView({ gasRewards: transaction.payload });
     }
+
+    update = UpdateGasRewards;
 }

@@ -1,29 +1,9 @@
-import { parse } from 'json-bigint';
-import { BlockSummary } from './NodeApiTypes';
 import {
-    MultiSignatureTransaction,
     UpdateHeader,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
 } from './types';
-import findHandler from './updates/HandlerFinder';
-
-export interface TransactionInput {
-    transaction: string;
-    type: string;
-}
-
-/**
- * The Props interface used by components for handling parameter update
- * transactions.
- */
-export interface UpdateProps {
-    blockSummary: BlockSummary;
-    forwardTransaction: (
-        multiSignatureTransaction: Partial<MultiSignatureTransaction>
-    ) => Promise<void>;
-}
 
 // TODO Effective time should perhaps have a default, but it should also be possible to
 // provide the value as input, so that the user can decide the value.
@@ -47,22 +27,4 @@ export default function createUpdateInstruction<
     };
 
     return updateInstruction;
-}
-
-export function createTransactionHandler(state: TransactionInput | undefined) {
-    if (!state) {
-        throw new Error(
-            'No transaction handler was found. An invalid transaction has been received.'
-        );
-    }
-    const { transaction, type } = state;
-
-    const transactionObject = parse(transaction);
-    // TODO Add AccountTransactionHandler here when implemented.
-
-    if (type === 'UpdateInstruction') {
-        const handler = findHandler(transactionObject);
-        return handler;
-    }
-    throw new Error('Account transaction support not yet implemented.');
 }

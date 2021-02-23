@@ -7,15 +7,15 @@ import { hashSha256 } from '../../utils/serializationHelpers';
 import routes from '../../constants/routes.json';
 import {
     MultiSignatureTransaction,
-    TransactionHandler,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../../utils/types';
+import { TransactionHandler } from '../../utils/transactionTypes';
+import { createTransactionHandler } from '../../utils/updates/HandlerFinder';
 import { insert } from '../../database/MultiSignatureProposalDao';
 import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { createTransactionHandler } from '../../utils/UpdateInstructionHelper';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 
 interface Props {
@@ -58,15 +58,18 @@ export default function SignTransactionProposalView({ location }: Props) {
 
     useEffect(() => {
         const serialized = serializeUpdateInstructionHeaderAndPayload(
-            transactionHandler.transaction,
-            transactionHandler.serializePayload()
+            updateInstruction,
+            transactionHandler.serializePayload(updateInstruction)
         );
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
-    }, [setTransactionHash, transactionHandler]);
+    }, [setTransactionHash, transactionHandler, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const signatureBytes = await transactionHandler.signTransaction(ledger);
+        const signatureBytes = await transactionHandler.signTransaction(
+            updateInstruction,
+            ledger
+        );
         const signature = signatureBytes.toString('hex');
 
         // Add signature
