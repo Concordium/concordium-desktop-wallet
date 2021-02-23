@@ -27,3 +27,14 @@ export function toCSV(elements: string[][], fieldNames: string[]): string {
         .map((element) => element.join(','))
         .join('\n')}`;
 }
+
+/**
+ * Takes an array of elements with an arbitary type  and a function to tranform them to bigints.
+ * Return the sum as a bigint.
+ */
+export function sumToBigInt<T>(
+    members: T[],
+    transform: (member: T) => bigint
+): bigint {
+    return members.reduce((acc, member) => acc + transform(member), 0n);
+}
