@@ -28,21 +28,21 @@
         opacity: 0;
         transition: opacity $form-transition;
         
-        .checkbox:not(.checkboxLarge) & {
-            transform: scale(.6);
-        }
-
         input:checked + & {
             opacity: 1;
         }
-    }
-
-    input:focus + & {
-        border-color: $form-color-focus;
+        
+        .checkbox:not(.checkboxLarge) & {
+            transform: scale(.6);
+        }
     }
 
     .rootInvalid & {
         border-color: $color-error;
+    }
+
+    input:focus + & {
+        border-color: $form-color-focus;
     }
 }
 

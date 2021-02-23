@@ -193,6 +193,7 @@
     "stylelint": "^13.6.1",
     "stylelint-config-prettier": "^8.0.2",
     "stylelint-config-standard": "^20.0.0",
+    "stylelint-scss": "^3.19.0",
     "terser-webpack-plugin": "4",
     "testcafe": "^1.8.8",
     "testcafe-browser-provider-electron": "^0.0.15",
@@ -260,12 +261,6 @@
     ],
     "singleQuote": true,
     "tabWidth": 4
-  },
-  "stylelint": {
-    "extends": [
-      "stylelint-config-standard",
-      "stylelint-config-prettier"
-    ]
   },
   "renovate": {
     "extends": [

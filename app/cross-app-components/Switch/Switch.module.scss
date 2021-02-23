@@ -44,13 +44,15 @@ $switch-transition: linear .05s;
         }
     }
 
+    .rootInvalid & {
+        border-color: $color-error;
+    }
+
     input:focus + & {
         border-color: $form-color-focus;
     }
 
-    .rootInvalid & {
-        border-color: $color-error;
-    }
+    
 }
 
 $handle-size: $switch-height;
