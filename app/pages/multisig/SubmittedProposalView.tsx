@@ -15,6 +15,7 @@ import TransactionHashView from '../../components/TransactionHashView';
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
+import PageHeader from '../../components/PageHeader';
 
 interface Props {
     location: LocationDescriptorObject<string>;
@@ -66,31 +67,42 @@ export default function SubmittedProposalView({ location }: Props) {
     ).toString('hex');
 
     return (
-        <Segment secondary textAlign="center">
-            <Header size="large">Your transaction has been submitted</Header>
-            <Segment>
-                <Header>Transaction Proposal | Transaction Type</Header>
-                <Divider />
-                <Grid columns={2} divided textAlign="center" padded>
-                    <Grid.Column>
-                        <TransactionDetails transaction={updateInstruction} />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <TransactionHashView
-                            transactionHash={transactionHash}
-                        />
-                    </Grid.Column>
-                </Grid>
+        <>
+            <PageHeader>
+                <h1>{handler.title}</h1>
+            </PageHeader>
+            <Segment secondary textAlign="center">
+                <Header size="large">
+                    Your transaction has been submitted
+                </Header>
+                <Segment>
+                    <Header>Transaction Proposal | Transaction Type</Header>
+                    <Divider />
+                    <Grid columns={2} divided textAlign="center" padded>
+                        <Grid.Column>
+                            <TransactionDetails
+                                transaction={updateInstruction}
+                            />
+                        </Grid.Column>
+                        <Grid.Column>
+                            <TransactionHashView
+                                transactionHash={transactionHash}
+                            />
+                        </Grid.Column>
+                    </Grid>
+                </Segment>
+                <Button
+                    fluid
+                    primary
+                    onClick={() => {
+                        dispatch(
+                            push({ pathname: routes.MULTISIGTRANSACTIONS })
+                        );
+                    }}
+                >
+                    Okay, thanks!
+                </Button>
             </Segment>
-            <Button
-                fluid
-                primary
-                onClick={() => {
-                    dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
-                }}
-            >
-                Okay, thanks!
-            </Button>
-        </Segment>
+        </>
     );
 }

@@ -45,4 +45,6 @@ export default class GasRewardsHandler
     }
 
     update = UpdateGasRewards;
+
+    title = 'Foundation Transaction | Update Gas Rewards';
 }

@@ -38,6 +38,7 @@ import SimpleErrorModal, {
 } from '../../components/SimpleErrorModal';
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
+import PageHeader from '../../components/PageHeader';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -174,94 +175,99 @@ export default function ProposalView() {
         instruction.signatures.length !== currentProposal.threshold;
 
     return (
-        <Segment secondary textAlign="center">
-            <SimpleErrorModal
-                show={showError.show}
-                header={showError.header}
-                content={showError.content}
-                onClick={() => setShowError({ show: false })}
-            />
-            <Header size="large">Your transaction proposal</Header>
-            <Segment basic>
-                Your transaction proposal has been generated. An overview can be
-                seen below.
-            </Segment>
-            <Segment>
-                <Header>Transaction Proposal | Transaction Type</Header>
-                <Divider />
-                <Grid columns={3} divided textAlign="center" padded>
-                    <Grid.Column>
-                        <TransactionDetails transaction={instruction} />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <Grid.Row>
-                            <Form>
-                                {instruction.signatures.map((signature) => {
-                                    return (
-                                        <Form.Field key={signature}>
-                                            <Checkbox
-                                                label="Signed"
-                                                defaultChecked
-                                                readOnly
-                                            />
-                                        </Form.Field>
-                                    );
-                                })}
-                                {unsignedCheckboxes}
-                            </Form>
-                        </Grid.Row>
-                        <Divider />
-                        <Grid.Row>
-                            <DragAndDropFile
-                                text="Drag and drop signatures here"
-                                fileProcessor={loadSignatureFile}
-                                disabled={!missingSignatures}
+        <>
+            <PageHeader>
+                <h1>{handler.title}</h1>
+            </PageHeader>
+            <Segment secondary textAlign="center">
+                <SimpleErrorModal
+                    show={showError.show}
+                    header={showError.header}
+                    content={showError.content}
+                    onClick={() => setShowError({ show: false })}
+                />
+                <Header size="large">Your transaction proposal</Header>
+                <Segment basic>
+                    Your transaction proposal has been generated. An overview
+                    can be seen below.
+                </Segment>
+                <Segment>
+                    <Header>Transaction Proposal | Transaction Type</Header>
+                    <Divider />
+                    <Grid columns={3} divided textAlign="center" padded>
+                        <Grid.Column>
+                            <TransactionDetails transaction={instruction} />
+                        </Grid.Column>
+                        <Grid.Column>
+                            <Grid.Row>
+                                <Form>
+                                    {instruction.signatures.map((signature) => {
+                                        return (
+                                            <Form.Field key={signature}>
+                                                <Checkbox
+                                                    label="Signed"
+                                                    defaultChecked
+                                                    readOnly
+                                                />
+                                            </Form.Field>
+                                        );
+                                    })}
+                                    {unsignedCheckboxes}
+                                </Form>
+                            </Grid.Row>
+                            <Divider />
+                            <Grid.Row>
+                                <DragAndDropFile
+                                    text="Drag and drop signatures here"
+                                    fileProcessor={loadSignatureFile}
+                                    disabled={!missingSignatures}
+                                />
+                            </Grid.Row>
+                        </Grid.Column>
+                        <Grid.Column>
+                            <TransactionHashView
+                                transactionHash={transactionHash}
                             />
-                        </Grid.Row>
+                        </Grid.Column>
+                    </Grid>
+                </Segment>
+                <Grid columns="equal">
+                    <Grid.Column>
+                        <Button
+                            fluid
+                            primary
+                            disabled={
+                                currentProposal.status !==
+                                MultiSignatureTransactionStatus.Open
+                            }
+                            onClick={
+                                () =>
+                                    saveFile(
+                                        currentProposal.transaction,
+                                        'Export transaction'
+                                    )
+                                // TODO Handle failure
+                            }
+                        >
+                            Export transaction proposal
+                        </Button>
                     </Grid.Column>
                     <Grid.Column>
-                        <TransactionHashView
-                            transactionHash={transactionHash}
-                        />
+                        <Button
+                            fluid
+                            positive
+                            disabled={
+                                missingSignatures ||
+                                currentProposal.status !==
+                                    MultiSignatureTransactionStatus.Open
+                            }
+                            onClick={submitTransaction}
+                        >
+                            Submit transaction to chain
+                        </Button>
                     </Grid.Column>
                 </Grid>
             </Segment>
-            <Grid columns="equal">
-                <Grid.Column>
-                    <Button
-                        fluid
-                        primary
-                        disabled={
-                            currentProposal.status !==
-                            MultiSignatureTransactionStatus.Open
-                        }
-                        onClick={
-                            () =>
-                                saveFile(
-                                    currentProposal.transaction,
-                                    'Export transaction'
-                                )
-                            // TODO Handle failure
-                        }
-                    >
-                        Export transaction proposal
-                    </Button>
-                </Grid.Column>
-                <Grid.Column>
-                    <Button
-                        fluid
-                        positive
-                        disabled={
-                            missingSignatures ||
-                            currentProposal.status !==
-                                MultiSignatureTransactionStatus.Open
-                        }
-                        onClick={submitTransaction}
-                    >
-                        Submit transaction to chain
-                    </Button>
-                </Grid.Column>
-            </Grid>
-        </Segment>
+        </>
     );
 }

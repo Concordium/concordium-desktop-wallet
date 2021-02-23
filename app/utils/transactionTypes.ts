@@ -37,4 +37,5 @@ export interface TransactionHandler<T, S> {
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;
     update: UpdateComponent;
+    title: string;
 }

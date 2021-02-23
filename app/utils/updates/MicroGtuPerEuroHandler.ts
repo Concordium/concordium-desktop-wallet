@@ -45,4 +45,6 @@ export default class MicroGtuPerEuroHandler
     }
 
     update = UpdateMicroGtuPerEuro;
+
+    title = 'Foundation Transaction | Update Micro GTU Per Euro';
 }

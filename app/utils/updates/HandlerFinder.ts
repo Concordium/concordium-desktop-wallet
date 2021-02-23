@@ -27,9 +27,12 @@ class HandlerTypeMiddleware<T>
 
     update: UpdateComponent;
 
+    title: string;
+
     constructor(base: TransactionHandler<T, ConcordiumLedgerClient>) {
         this.base = base;
         this.update = base.update;
+        this.title = base.title;
     }
 
     confirmType(transaction: UpdateInstruction<UpdateInstructionPayload>) {
