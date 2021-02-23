@@ -116,3 +116,19 @@ test('It is possible to chunk a generic array', () => {
         [6, 7, 8, 9, 10],
     ]);
 });
+
+test('Array content is preserved in chunks', () => {
+    const array = new Uint8Array(5);
+    array[0] = 5;
+    array[1] = 1;
+    array[2] = 2;
+    array[3] = 3;
+    array[4] = 4;
+
+    const asChunks = chunks(array, 3);
+    expect(asChunks[0][0]).toStrictEqual(5);
+    expect(asChunks[0][1]).toStrictEqual(1);
+    expect(asChunks[0][2]).toStrictEqual(2);
+    expect(asChunks[1][0]).toStrictEqual(3);
+    expect(asChunks[1][1]).toStrictEqual(4);
+});
