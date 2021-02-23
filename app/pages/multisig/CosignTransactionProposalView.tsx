@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { parse } from 'json-bigint';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
@@ -6,15 +7,12 @@ import { hashSha256 } from '../../utils/serializationHelpers';
 import routes from '../../constants/routes.json';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import {
-    createTransactionHandler,
-    TransactionInput,
-} from '../../utils/UpdateInstructionHelper';
+import { createTransactionHandler } from '../../utils/transactionHelpers';
+import { UpdateInstruction, UpdateInstructionPayload } from '../../utils/types';
 import {
     TransactionHandler,
-    UpdateInstruction,
-    UpdateInstructionPayload,
-} from '../../utils/types';
+    TransactionInput,
+} from '../../utils/transactionTypes';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 
 interface Props {
@@ -43,18 +41,22 @@ export default function CosignTransactionProposalView({ location }: Props) {
     }
 
     const { transaction } = location.state;
+    const [transactionObject] = useState(parse(transaction));
 
     useEffect(() => {
         const serialized = serializeUpdateInstructionHeaderAndPayload(
-            transactionHandler.transaction,
-            transactionHandler.serializePayload()
+            transactionObject,
+            transactionHandler.serializePayload(transactionObject)
         );
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
-    }, [setTransactionHash, transactionHandler]);
+    }, [setTransactionHash, transactionHandler, transactionObject]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const signatureBytes = await transactionHandler.signTransaction(ledger);
+        const signatureBytes = await transactionHandler.signTransaction(
+            transactionObject,
+            ledger
+        );
         const signature = signatureBytes.toString('hex');
 
         // Load the page for exporting the signed transaction.

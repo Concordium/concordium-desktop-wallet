@@ -15,7 +15,7 @@ import {
     MintRate,
     UpdateType,
 } from '../../utils/types';
-import { UpdateProps } from '../../utils/UpdateInstructionHelper';
+import { UpdateProps } from '../../utils/transactionTypes';
 import { rewardFractionResolution } from '../../constants/updateConstants.json';
 
 /**

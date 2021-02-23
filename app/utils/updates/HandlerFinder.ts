@@ -1,6 +1,6 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import { UpdateProps, TransactionHandler } from '../transactionTypes';
 import {
-    TransactionHandler,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
@@ -12,28 +12,67 @@ import MicroGtuPerEuroHandler from './MicroGtuPerEuroHandler';
 import MintDistributionHandler from './MintDistributionHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 
+class HandlerTypeMiddleware<T>
+    implements
+        TransactionHandler<
+            UpdateInstruction<UpdateInstructionPayload>,
+            ConcordiumLedgerClient
+        > {
+    base: TransactionHandler<T, ConcordiumLedgerClient>;
+
+    constructor(base: TransactionHandler<T, ConcordiumLedgerClient>) {
+        this.base = base;
+    }
+
+    confirmType(transaction: UpdateInstruction<UpdateInstructionPayload>) {
+        return transaction;
+    }
+
+    serializePayload(transaction: UpdateInstruction<UpdateInstructionPayload>) {
+        return this.base.serializePayload(this.base.confirmType(transaction));
+    }
+
+    signTransaction(
+        transaction: UpdateInstruction<UpdateInstructionPayload>,
+        ledger: ConcordiumLedgerClient
+    ) {
+        return this.base.signTransaction(
+            this.base.confirmType(transaction),
+            ledger
+        );
+    }
+
+    view(transaction: UpdateInstruction<UpdateInstructionPayload>) {
+        return this.base.view(this.base.confirmType(transaction));
+    }
+
+    update(props: UpdateProps) {
+        return this.base.update(props);
+    }
+}
+
 export default function findHandler(
-    transaction: UpdateInstruction<UpdateInstructionPayload>
+    type: UpdateType
 ): TransactionHandler<
     UpdateInstruction<UpdateInstructionPayload>,
     ConcordiumLedgerClient
 > {
-    switch (transaction.type) {
+    switch (type) {
         case UpdateType.UpdateMicroGTUPerEuro:
-            return new MicroGtuPerEuroHandler(transaction);
+            return new HandlerTypeMiddleware(new MicroGtuPerEuroHandler());
         case UpdateType.UpdateEuroPerEnergy:
-            return new EuroPerEnergyHandler(transaction);
+            return new HandlerTypeMiddleware(new EuroPerEnergyHandler());
         case UpdateType.UpdateTransactionFeeDistribution:
-            return new TransactionFeeDistributionHandler(transaction);
-        case UpdateType.UpdateFoundationAccount:
-            return new FoundationAccountHandler(transaction);
-        case UpdateType.UpdateMintDistribution:
-            return new MintDistributionHandler(transaction);
-        case UpdateType.UpdateGASRewards:
-            return new GasRewardsHandler(transaction);
-        default:
-            throw new Error(
-                `Unsupported transaction type: ${transaction.type}`
+            return new HandlerTypeMiddleware(
+                new TransactionFeeDistributionHandler()
             );
+        case UpdateType.UpdateFoundationAccount:
+            return new HandlerTypeMiddleware(new FoundationAccountHandler());
+        case UpdateType.UpdateMintDistribution:
+            return new HandlerTypeMiddleware(new MintDistributionHandler());
+        case UpdateType.UpdateGASRewards:
+            return new HandlerTypeMiddleware(new GasRewardsHandler());
+        default:
+            throw new Error(`Unsupported transaction type: ${type}`);
     }
 }

@@ -1,6 +1,8 @@
+import { parse } from 'json-bigint';
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
 import { getDefaultExpiry } from './timeHelpers';
+import findHandler from './updates/HandlerFinder';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -10,6 +12,7 @@ import {
     ScheduledTransfer,
     SchedulePoint,
 } from './types';
+import { TransactionInput } from './transactionTypes';
 /**
  * return highest id of given transactions
  */
@@ -188,4 +191,22 @@ export function getScheduledTransferAmount(
         (total, point) => total + BigInt(point.amount),
         0n
     );
+}
+
+export function createTransactionHandler(state: TransactionInput | undefined) {
+    if (!state) {
+        throw new Error(
+            'No transaction handler was found. An invalid transaction has been received.'
+        );
+    }
+    const { transaction, type } = state;
+
+    const transactionObject = parse(transaction);
+    // TODO Add AccountTransactionHandler here when implemented.
+
+    if (type === 'UpdateInstruction') {
+        const handler = findHandler(transactionObject.type);
+        return handler;
+    }
+    throw new Error('Account transaction support not yet implemented.');
 }
