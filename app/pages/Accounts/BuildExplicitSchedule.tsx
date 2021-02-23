@@ -11,15 +11,13 @@ import {
 } from 'semantic-ui-react';
 import { Schedule, TimeStampUnit } from '../../utils/types';
 import { displayAsGTU, isValidGTUString, toMicroUnits } from '../../utils/gtu';
-import { parseTime } from '../../utils/timeHelpers';
+import { parseTime, getNow } from '../../utils/timeHelpers';
 import InputTimeStamp from '../../components/InputTimeStamp';
 
 interface Props {
     submitSchedule(schedule: Schedule): void;
     amount: bigint;
 }
-
-const getNow = () => new Date().getTime();
 
 /**
  * Component to build a "explicit" schedule, by adding invidual releases.
@@ -42,7 +40,11 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
         };
         setUsedAmount(usedAmount + pointAmountMicro);
         newSchedule.push(newPoint);
-        setSchedule(newSchedule);
+        setSchedule(
+            newSchedule.sort(
+                (a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10)
+            )
+        );
         setAmount('');
         setTimestamp(getNow());
     }
@@ -108,7 +110,7 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
                 <Grid textAlign="center" columns="4">
                     {schedule.map((schedulePoint, index) => (
                         <Grid.Row key={schedulePoint.timestamp}>
-                            <Grid.Column>{index}.</Grid.Column>
+                            <Grid.Column>{index + 1}.</Grid.Column>
                             <Grid.Column>
                                 {parseTime(
                                     schedulePoint.timestamp,
@@ -130,7 +132,12 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
                 </Grid>
             </List.Item>
             <List.Item>
-                <Button onClick={() => submitSchedule(schedule)}>submit</Button>
+                <Button
+                    disabled={usedAmount < amount}
+                    onClick={() => submitSchedule(schedule)}
+                >
+                    submit
+                </Button>
             </List.Item>
         </>
     );
