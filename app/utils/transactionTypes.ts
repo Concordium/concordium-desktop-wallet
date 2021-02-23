@@ -1,5 +1,9 @@
 import { BlockSummary } from './NodeApiTypes';
-import { MultiSignatureTransaction, Transaction } from './types';
+import {
+    MultiSignatureTransaction,
+    UpdateInstruction,
+    UpdateInstructionPayload,
+} from './types';
 
 export interface TransactionInput {
     transaction: string;
@@ -17,15 +21,20 @@ export interface UpdateProps {
     ) => Promise<void>;
 }
 
+export type UpdateComponent = (props: UpdateProps) => JSX.Element | null;
+
 /**
  * Interface definition for a class that handles a specific type
  * of transaction. The handler can serialize and sign the transaction,
  * and generate a view of the transaction.
+ * TODO: Decide whether this handler is only for updateInstruction, or make it support account transactions
  */
 export interface TransactionHandler<T, S> {
-    confirmType: (transaction: Transaction) => T;
+    confirmType: (
+        transaction: UpdateInstruction<UpdateInstructionPayload>
+    ) => T;
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;
-    update: (props: UpdateProps) => JSX.Element | null;
+    update: UpdateComponent;
 }

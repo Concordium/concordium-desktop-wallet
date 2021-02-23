@@ -3,17 +3,12 @@ import { Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
-import UpdateMicroGtuPerEuroRate from './UpdateMicroGtuPerEuro';
 import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
 import { getBlockSummary, getConsensusStatus } from '../../utils/nodeRequests';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
-import UpdateEuroPerEnergy from './UpdateEuroPerEnergy';
-import UpdateTransactionFeeDistribution from './UpdateTransactionFeeDistribution';
-import UpdateFoundationAccount from './UpdateFoundationAccount';
-import UpdateMintDistribution from './UpdateMintDistribution';
-import UpdateGasRewards from './UpdateGasRewards';
+import findHandler from '../../utils/updates/HandlerFinder';
 
 interface Location {
     state: UpdateType;
@@ -54,60 +49,7 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
         );
     }
 
-    function chooseProposalType(foundationType: UpdateType) {
-        if (!blockSummary) {
-            return null;
-        }
-        switch (foundationType) {
-            case UpdateType.UpdateMicroGTUPerEuro:
-                return (
-                    <UpdateMicroGtuPerEuroRate
-                        blockSummary={blockSummary}
-                        forwardTransaction={forwardTransactionToSigningPage}
-                    />
-                );
-            case UpdateType.UpdateEuroPerEnergy:
-                return (
-                    <UpdateEuroPerEnergy
-                        blockSummary={blockSummary}
-                        forwardTransaction={forwardTransactionToSigningPage}
-                    />
-                );
-            case UpdateType.UpdateTransactionFeeDistribution:
-                return (
-                    <UpdateTransactionFeeDistribution
-                        blockSummary={blockSummary}
-                        forwardTransaction={forwardTransactionToSigningPage}
-                    />
-                );
-            case UpdateType.UpdateFoundationAccount:
-                return (
-                    <UpdateFoundationAccount
-                        blockSummary={blockSummary}
-                        forwardTransaction={forwardTransactionToSigningPage}
-                    />
-                );
-            case UpdateType.UpdateMintDistribution:
-                return (
-                    <UpdateMintDistribution
-                        blockSummary={blockSummary}
-                        forwardTransaction={forwardTransactionToSigningPage}
-                    />
-                );
-            case UpdateType.UpdateGASRewards:
-                return (
-                    <UpdateGasRewards
-                        blockSummary={blockSummary}
-                        forwardTransaction={forwardTransactionToSigningPage}
-                    />
-                );
-            default:
-                return (
-                    // TODO Update when all types have been implemented.
-                    <Header>Not implemented yet</Header>
-                );
-        }
-    }
+    const UpdateComponent = findHandler(type).update;
 
     function updateBlockSummary(blockSummaryInput: BlockSummary) {
         setBlockSummary(blockSummaryInput);
@@ -133,13 +75,18 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                 onSuccess={(input: BlockSummary) => updateBlockSummary(input)}
                 title="Error communicating with node"
                 content="We were unable to retrieve the block summary from the
-                configured node. Verify your node settings, and check that
-                the node is running."
+            configured node. Verify your node settings, and check that
+            the node is running."
             />
             <Segment>
                 <Header>Transaction Proposal | {displayType}</Header>
                 <Divider />
-                {chooseProposalType(type)}
+                {blockSummary ? (
+                    <UpdateComponent
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                ) : null}
             </Segment>
         </Segment>
     );

@@ -1,5 +1,5 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { UpdateProps, TransactionHandler } from '../transactionTypes';
+import { UpdateComponent, TransactionHandler } from '../transactionTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -20,8 +20,11 @@ class HandlerTypeMiddleware<T>
         > {
     base: TransactionHandler<T, ConcordiumLedgerClient>;
 
+    update: UpdateComponent;
+
     constructor(base: TransactionHandler<T, ConcordiumLedgerClient>) {
         this.base = base;
+        this.update = base.update;
     }
 
     confirmType(transaction: UpdateInstruction<UpdateInstructionPayload>) {
@@ -44,10 +47,6 @@ class HandlerTypeMiddleware<T>
 
     view(transaction: UpdateInstruction<UpdateInstructionPayload>) {
         return this.base.view(this.base.confirmType(transaction));
-    }
-
-    update(props: UpdateProps) {
-        return this.base.update(props);
     }
 }
 
