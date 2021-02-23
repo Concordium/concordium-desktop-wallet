@@ -27,13 +27,13 @@
     svg {
         opacity: 0;
         transition: opacity $form-transition;
-        
+
         input:checked + & {
             opacity: 1;
         }
-        
+
         .checkbox:not(.checkboxLarge) & {
-            transform: scale(.6);
+            transform: scale(0.6);
         }
     }
 
