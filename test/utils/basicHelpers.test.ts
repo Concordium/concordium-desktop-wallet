@@ -1,4 +1,4 @@
-import { partition } from '../../app/utils/basicHelpers';
+import { partition, toCSV } from '../../app/utils/basicHelpers';
 
 test('Partition should split booleans correctly', () => {
     const list = [true, false, false, true, true, false, false];
@@ -25,4 +25,42 @@ test('Partition should handle all true', () => {
     const [trueList, falseList] = partition(list, (x) => x);
     expect(trueList).toHaveLength(3);
     expect(falseList).toHaveLength(0);
+});
+
+test('toCSV should put input as csv', () => {
+    const elements = [
+        ['1', '2'],
+        ['1', '3'],
+    ];
+    const fields = ['first', 'second'];
+
+    const csv = toCSV(elements, fields);
+    expect(csv).toEqual('first,second\n1,2\n1,3');
+});
+
+test('toCSV should fail on missing fieldNames', () => {
+    const elements = [
+        ['1', '2'],
+        ['1', '3'],
+    ];
+    const fields = ['first'];
+
+    expect(() => toCSV(elements, fields)).toThrow();
+});
+
+test('toCSV should fail on missing fields', () => {
+    const elements = [['1', '2'], ['1']];
+    const fields = ['first', 'second'];
+
+    expect(() => toCSV(elements, fields)).toThrow();
+});
+
+test('toCSV should fail on extra fields', () => {
+    const elements = [
+        ['1', '2'],
+        ['1', '3', '4'],
+    ];
+    const fields = ['first', 'second'];
+
+    expect(() => toCSV(elements, fields)).toThrow();
 });

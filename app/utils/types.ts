@@ -167,18 +167,20 @@ export type TransactionPayload =
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
-export interface AccountTransaction {
+export interface AccountTransaction<
+    PayloadType extends TransactionPayload = TransactionPayload
+> {
     sender: Hex;
     nonce: string;
     energyAmount: string;
     expiry: string;
     transactionKind: TransactionKindId;
-    payload: TransactionPayload;
+    payload: PayloadType;
 }
 
-export interface SimpleTransfer extends AccountTransaction {
-    payload: SimpleTransferPayload;
-}
+export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
+
+export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -443,7 +445,8 @@ export type UpdateInstructionPayload =
     | ExchangeRate
     | TransactionFeeDistribution
     | FoundationAccount
-    | MintDistribution;
+    | MintDistribution
+    | GasRewards;
 
 export type Transaction =
     | AccountTransaction
@@ -477,9 +480,15 @@ export function instanceOfUpdateInstruction(
 }
 
 export function instanceOfSimpleTransfer(
-    object: AccountTransaction
+    object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
     return object.transactionKind === TransactionKindId.Simple_transfer;
+}
+
+export function instanceOfScheduledTransfer(
+    object: AccountTransaction<TransactionPayload>
+): object is ScheduledTransfer {
+    return object.transactionKind === TransactionKindId.Transfer_with_schedule;
 }
 
 export function isExchangeRate(
@@ -507,6 +516,12 @@ export function isMintDistribution(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<MintDistribution> {
     return UpdateType.UpdateMintDistribution === transaction.type;
+}
+
+export function isGasRewards(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<GasRewards> {
+    return UpdateType.UpdateGASRewards === transaction.type;
 }
 
 /**
@@ -590,6 +605,13 @@ export interface MintDistribution {
     mintPerSlot: MintRate;
     bakingReward: RewardFraction;
     finalizationReward: RewardFraction;
+}
+
+export interface GasRewards {
+    baker: RewardFraction;
+    finalizationProof: RewardFraction;
+    accountCreation: RewardFraction;
+    chainUpdate: RewardFraction;
 }
 
 export interface TransactionDetails {
@@ -676,6 +698,11 @@ interface EventResult {
 export interface TransactionEvent {
     result: EventResult;
     cost: string;
+}
+
+export interface Action {
+    label: string;
+    location?: string;
 }
 
 export type ClassNameAndStyle = Pick<

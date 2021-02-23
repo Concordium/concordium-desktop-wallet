@@ -6,6 +6,23 @@ const microGTUPerGTU = 1000000n;
 const separator = '.';
 const gtuFormat = new RegExp('^(0|[1-9]\\d*)(\\.\\d{1,6})?$');
 
+/**
+ * Given an ambigous input, convert it into a bigint.
+ * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
+ */
+function toBigInt(input: bigint | string): bigint {
+    if (typeof input === 'string') {
+        try {
+            return BigInt(input);
+        } catch (e) {
+            throw new Error(
+                'Given string that was not a valid microGTU string.'
+            );
+        }
+    }
+    return input;
+}
+
 // Checks that the input is a valid GTU string.
 export function isValidGTUString(amount: string): boolean {
     // Only allow numerals, and only allow millionth decimals (in order to keep microGTU atomic)
@@ -20,6 +37,26 @@ function parseSubGTU(subGTU: string) {
     let result = subGTU;
     result += '0'.repeat(6 - subGTU.toString().length);
     return result;
+}
+
+/**
+ * Convert a microGTU amount to a gtu string.
+ * Should be used for user interaction.
+ * N.B. Gives the absolute value of the amount.
+ * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
+ */
+export function toGTUString(microGTUAmount: bigint | string): string {
+    const amount: bigint = toBigInt(microGTUAmount);
+    const absolute = amount < 0 ? -amount : amount;
+    const GTU = absolute / microGTUPerGTU;
+    const microGTU = absolute % microGTUPerGTU;
+    const microGTUFormatted =
+        microGTU === 0n
+            ? ''
+            : `.${'0'.repeat(
+                  6 - microGTU.toString().length
+              )}${microGTU.toString().replace(/0+$/, '')}`;
+    return `${GTU}${microGTUFormatted}`;
 }
 
 /**
@@ -45,29 +82,7 @@ export function toMicroUnits(amount: string): bigint {
  * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
  */
 export function displayAsGTU(microGTUAmount: bigint | string) {
-    let amount: bigint;
-    if (typeof microGTUAmount === 'string') {
-        try {
-            amount = BigInt(microGTUAmount);
-        } catch (e) {
-            throw new Error(
-                'Given string that was not a valid microGTU string.'
-            );
-        }
-    } else {
-        amount = microGTUAmount;
-    }
-    const isNegative = amount < 0;
-    const absolute = isNegative ? -amount : amount;
-    const GTU = absolute / microGTUPerGTU;
-    const microGTU = absolute % microGTUPerGTU;
-    const microGTUFormatted =
-        microGTU === 0n
-            ? ''
-            : `.${'0'.repeat(
-                  6 - microGTU.toString().length
-              )}${microGTU.toString().replace(/0+$/, '')}`;
-
-    const negative = isNegative ? '-' : '';
-    return `${negative}${getGTUSymbol()}${GTU}${microGTUFormatted}`;
+    const amount: bigint = toBigInt(microGTUAmount);
+    const negative = amount < 0 ? '-' : '';
+    return `${negative}${getGTUSymbol()}${toGTUString(amount)}`;
 }

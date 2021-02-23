@@ -35,3 +35,4 @@ else
          --ts_out=${PROTO_WIN_DEST} \
          -I ./${PROTO_SOURCE_DIR} ${PROTO_SOURCE_DIR}/*.proto
 fi
+
