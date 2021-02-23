@@ -11,7 +11,7 @@ import {
 } from 'semantic-ui-react';
 import { Schedule, TimeStampUnit } from '../../utils/types';
 import { displayAsGTU, isValidGTUString, toMicroUnits } from '../../utils/gtu';
-import { parseTime, getNow } from '../../utils/timeHelpers';
+import { parseTime, getNow, TimeConstants } from '../../utils/timeHelpers';
 import InputTimeStamp from '../../components/InputTimeStamp';
 
 interface Props {
@@ -29,7 +29,9 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
 
     const [adding, setAdding] = useState<boolean>(false);
 
-    const [pointTimestamp, setTimestamp] = useState<number>(getNow()); // TODO Decide appropiate default
+    const [pointTimestamp, setTimestamp] = useState<number>(
+        getNow() + 5 * TimeConstants.Minute
+    ); // TODO Decide appropiate default
 
     function addToSchedule() {
         const newSchedule = schedule;

@@ -15,7 +15,8 @@ function displayRejectReason(transaction: TransferTransaction) {
         return (
             <List.Item>
                 <Header color="red" textAlign="center">
-                    Failed: {transaction.rejectReason || 'unknown'}
+                    Failed:{' '}
+                    {transaction.rejectReason || 'Unknown reason for failure'}
                 </Header>
                 <Divider />
             </List.Item>
