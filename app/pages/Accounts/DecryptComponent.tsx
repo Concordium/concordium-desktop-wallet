@@ -8,6 +8,7 @@ import {
     transactionsSelector,
     decryptTransactions,
     loadTransactions,
+    viewingShieldedSelector,
 } from '../../features/TransactionSlice';
 import { Account } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
@@ -24,8 +25,9 @@ interface Props {
 export default function DecryptComponent({ account }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);
+    const viewingShielded = useSelector(viewingShieldedSelector);
 
-    if (account.allDecrypted) {
+    if (!viewingShielded || account.allDecrypted) {
         return null;
     }
 
