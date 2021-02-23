@@ -41,9 +41,9 @@ export function convertIncomingTransaction(
     }
 
     let { subtotal } = transaction;
-    if (!subtotal && transaction.cost) {
+    if (!subtotal) {
         subtotal = (
-            BigInt(transaction.total) - BigInt(transaction.cost)
+            BigInt(transaction.total) - BigInt(transaction.cost || '0')
         ).toString();
     }
 
@@ -120,7 +120,6 @@ export function convertAccountTransaction(
     }
 
     return {
-        id: -1,
         blockHash: 'pending',
         remote: false,
         originType: OriginType.Self,

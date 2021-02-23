@@ -7,7 +7,6 @@ import {
     getTransactionsOfAccount,
     insertTransactions,
     updateTransaction,
-    getMaxTransactionsIdOfAccount,
 } from '../database/TransactionDao';
 import {
     TransferTransaction,
@@ -24,6 +23,9 @@ import {
     convertIncomingTransaction,
     convertAccountTransaction,
 } from '../utils/TransactionConverters';
+import { updateAccount } from '../database/AccountDao';
+// eslint-disable-next-line import/no-cycle
+import { loadAccounts } from './AccountSlice';
 
 const transactionSlice = createSlice({
     name: 'transactions',
@@ -123,26 +125,15 @@ function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
 
 // Load transactions from storage.
 // Filters according to viewingShielded parameter
-export async function loadTransactions(
-    account: Account,
-    viewingShielded: boolean,
-    dispatch: Dispatch
-) {
-    const filter = viewingShielded
-        ? filterShieldedBalanceTransaction
-        : filterUnShieldedBalanceTransaction;
-    let transactions = await getTransactionsOfAccount(
-        account,
-        filter,
-        'blockTime'
-    );
+export async function loadTransactions(account: Account, dispatch: Dispatch) {
+    let transactions = await getTransactionsOfAccount(account, 'blockTime');
     transactions = await attachNames(transactions);
     dispatch(setTransactions(transactions));
 }
 
 // Update the transaction from remote source.
-export async function updateTransactions(account: Account) {
-    const fromId = (await getMaxTransactionsIdOfAccount(account)) || 0;
+export async function updateTransactions(dispatch: Dispatch, account: Account) {
+    const fromId = account.maxTransactionId || 0;
     const transactions = await getTransactions(account.address, fromId);
     if (transactions.length > 0) {
         await insertTransactions(
@@ -150,7 +141,15 @@ export async function updateTransactions(account: Account) {
                 convertIncomingTransaction(transaction, account.address)
             )
         );
+        await updateAccount(account.name, {
+            maxTransactionId: transactions.reduce(
+                (id, t) => Math.max(id, t.id),
+                0
+            ),
+        });
+        loadAccounts(dispatch);
     }
+    loadTransactions(account, dispatch);
 }
 
 // Add a pending transaction to storage
@@ -200,8 +199,12 @@ export async function rejectTransaction(transactionHash: string) {
     );
 }
 
-export const transactionsSelector = (state: RootState) =>
-    state.transactions.transactions;
+export const transactionsSelector = (state: RootState) => {
+    const filter = state.transactions.viewingShielded
+        ? filterShieldedBalanceTransaction
+        : filterUnShieldedBalanceTransaction;
+    return state.transactions.transactions.filter(filter);
+};
 
 export const viewingShieldedSelector = (state: RootState) =>
     state.transactions.viewingShielded;
