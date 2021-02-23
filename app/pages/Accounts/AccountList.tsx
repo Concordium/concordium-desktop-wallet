@@ -57,6 +57,7 @@ export default function AccountList() {
                             account={account}
                             accountInfo={accountsInfo[account.address]}
                             onClick={(shielded) => {
+                                dispatch(push(routes.ACCOUNTS));
                                 dispatch(chooseAccount(index));
                                 dispatch(setViewingShielded(shielded));
                             }}
