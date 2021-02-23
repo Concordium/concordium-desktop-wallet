@@ -11,7 +11,7 @@ import {
     UpdateInstructionPayload,
 } from '../../utils/types';
 import { TransactionHandler } from '../../utils/transactionTypes';
-import { createTransactionHandler } from '../../utils/transactionHelpers';
+import { createTransactionHandler } from '../../utils/updates/HandlerFinder';
 import { insert } from '../../database/MultiSignatureProposalDao';
 import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';

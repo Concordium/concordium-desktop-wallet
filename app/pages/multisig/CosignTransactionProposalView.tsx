@@ -7,7 +7,7 @@ import { hashSha256 } from '../../utils/serializationHelpers';
 import routes from '../../constants/routes.json';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { createTransactionHandler } from '../../utils/transactionHelpers';
+import { createTransactionHandler } from '../../utils/updates/HandlerFinder';
 import { UpdateInstruction, UpdateInstructionPayload } from '../../utils/types';
 import {
     TransactionHandler,

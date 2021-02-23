@@ -1,5 +1,10 @@
+import { parse } from 'json-bigint';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { UpdateComponent, TransactionHandler } from '../transactionTypes';
+import {
+    UpdateComponent,
+    TransactionHandler,
+    TransactionInput,
+} from '../transactionTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -74,4 +79,22 @@ export default function findHandler(
         default:
             throw new Error(`Unsupported transaction type: ${type}`);
     }
+}
+
+export function createTransactionHandler(state: TransactionInput | undefined) {
+    if (!state) {
+        throw new Error(
+            'No transaction handler was found. An invalid transaction has been received.'
+        );
+    }
+    const { transaction, type } = state;
+
+    const transactionObject = parse(transaction);
+    // TODO Add AccountTransactionHandler here when implemented.
+
+    if (type === 'UpdateInstruction') {
+        const handler = findHandler(transactionObject.type);
+        return handler;
+    }
+    throw new Error('Account transaction support not yet implemented.');
 }
