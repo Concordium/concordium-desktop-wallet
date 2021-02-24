@@ -3,7 +3,7 @@ import { Header, Grid, Button } from 'semantic-ui-react';
 import { AccountInfo, ScheduleItem, TimeStampUnit } from '../../utils/types';
 import { parseTime } from '../../utils/timeHelpers';
 import { displayAsGTU } from '../../utils/gtu';
-import SidedText from '../../components/SidedText';
+import SidedRow from '../../components/SidedRow';
 
 interface Props {
     accountInfo: AccountInfo;
@@ -23,10 +23,10 @@ export default function ShowReleaseSchedule({
             <Button onClick={returnFunction}>x</Button>
             <Header textAlign="center">Release schedule</Header>
             <Grid container columns={2} divided="vertically">
-                <SidedText left="Release Time:" right="Amount:" />
+                <SidedRow left="Release Time:" right="Amount:" />
                 {accountInfo.accountReleaseSchedule.schedule.map(
                     (item: ScheduleItem) => (
-                        <SidedText
+                        <SidedRow
                             key={item.timestamp}
                             left={parseTime(
                                 item.timestamp,
@@ -36,7 +36,7 @@ export default function ShowReleaseSchedule({
                         />
                     )
                 )}
-                <SidedText
+                <SidedRow
                     left="Total:"
                     right={displayAsGTU(
                         accountInfo.accountReleaseSchedule.total

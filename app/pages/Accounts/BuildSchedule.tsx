@@ -71,7 +71,7 @@ export default function BuildSchedule({ location }: Props) {
             >
                 {'<--'}
             </Button>
-            <Header> Send fund with a release schedule</Header>
+            <Header> Send funds with a release schedule</Header>
             <Button as={Link} to={routes.ACCOUNTS}>
                 x
             </Button>

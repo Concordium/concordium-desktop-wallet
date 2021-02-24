@@ -40,6 +40,13 @@ export function convertIncomingTransaction(
         encrypted = JSON.stringify(transaction.encrypted);
     }
 
+    let { subtotal } = transaction;
+    if (!subtotal) {
+        subtotal = (
+            BigInt(transaction.total) - BigInt(transaction.cost || '0')
+        ).toString();
+    }
+
     return {
         remote: true,
         originType: transaction.origin.type,
@@ -50,10 +57,11 @@ export function convertIncomingTransaction(
         total: transaction.total,
         success: transaction.details.outcome === 'success',
         transactionHash: transaction.transactionHash,
-        subtotal: transaction.subtotal,
+        subtotal,
         cost: transaction.cost,
         origin: JSON.stringify(transaction.origin),
         details: JSON.stringify(transaction.details),
+        rejectReason: transaction.details.rejectReason,
         encrypted,
         fromAddress,
         toAddress,
@@ -70,7 +78,7 @@ type TypeSpecific = Pick<
 // Convert the type specific fields of a Simple transfer for an Account Transaction.
 function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
-    const estimatedTotal = amount + BigInt(transaction.energyAmount); // Fix this: convert from energy to cost
+    const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
 
     return {
         transactionKind: TransactionKindString.Transfer,
@@ -84,7 +92,7 @@ function convertScheduledTransfer(
     transaction: ScheduledTransfer
 ): TypeSpecific {
     const amount = getScheduledTransferAmount(transaction);
-    const estimatedTotal = amount + BigInt(transaction.energyAmount); // Fix this: convert from energy to cost
+    const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
 
     return {
         transactionKind: TransactionKindString.TransferWithSchedule,
@@ -112,7 +120,6 @@ export function convertAccountTransaction(
     }
 
     return {
-        id: -1,
         blockHash: 'pending',
         remote: false,
         originType: OriginType.Self,

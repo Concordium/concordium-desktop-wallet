@@ -101,6 +101,7 @@ export default function SimpleTransfer({ account }: Props) {
                     render={() => (
                         <PickAmount
                             recipient={recipient}
+                            header="Send funds"
                             amount={amount}
                             setAmount={setAmount}
                             toPickRecipient={() =>

@@ -109,6 +109,7 @@ export interface Account {
     allDecrypted?: boolean;
     incomingAmounts?: string;
     selfAmounts?: string;
+    maxTransactionId: number;
 }
 
 export enum TransactionKindString {
@@ -306,7 +307,7 @@ export interface TransferTransaction {
     remote: boolean | 0 | 1; // SQlite converts booleans to 0/1
     originType: OriginType;
     transactionKind: TransactionKindString;
-    id: number;
+    id?: number; // only remote transactions have ids.
     blockHash: Hex;
     blockTime: string;
     total: string;
@@ -320,7 +321,7 @@ export interface TransferTransaction {
     fromAddress: Hex;
     toAddress: Hex;
     status: TransactionStatus;
-    rejectReason?: keyof typeof RejectReason;
+    rejectReason?: string;
     fromAddressName?: string;
     toAddressName?: string;
     decryptedAmount?: string;
@@ -485,7 +486,8 @@ export type UpdateInstructionPayload =
     | ExchangeRate
     | TransactionFeeDistribution
     | FoundationAccount
-    | MintDistribution;
+    | MintDistribution
+    | GasRewards;
 
 export type Transaction =
     | AccountTransaction
@@ -555,6 +557,12 @@ export function isMintDistribution(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<MintDistribution> {
     return UpdateType.UpdateMintDistribution === transaction.type;
+}
+
+export function isGasRewards(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<GasRewards> {
+    return UpdateType.UpdateGASRewards === transaction.type;
 }
 
 /**
@@ -640,8 +648,16 @@ export interface MintDistribution {
     finalizationReward: RewardFraction;
 }
 
+export interface GasRewards {
+    baker: RewardFraction;
+    finalizationProof: RewardFraction;
+    accountCreation: RewardFraction;
+    chainUpdate: RewardFraction;
+}
+
 export interface TransactionDetails {
     events: string[];
+    rejectReason?: string;
     transferSource?: Hex;
     transferDestination?: Hex;
     type: TransactionKindString;
@@ -724,6 +740,11 @@ interface EventResult {
 export interface TransactionEvent {
     result: EventResult;
     cost: string;
+}
+
+export interface Action {
+    label: string;
+    location?: string;
 }
 
 export type ClassNameAndStyle = Pick<

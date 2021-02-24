@@ -8,7 +8,7 @@ import {
 import { parseTime } from '../../utils/timeHelpers';
 import { getScheduledTransferAmount } from '../../utils/transactionHelpers';
 import { displayAsGTU } from '../../utils/gtu';
-import SidedText from '../SidedText';
+import SidedRow from '../SidedRow';
 
 interface Props {
     transaction: ScheduledTransfer;
@@ -33,7 +33,7 @@ export default function Display({ transaction, fromName, toName }: Props) {
             <List.Item>
                 <Grid container columns={2}>
                     {transaction.payload.schedule.map((item: SchedulePoint) => (
-                        <SidedText
+                        <SidedRow
                             key={item.timestamp}
                             left={parseTime(
                                 item.timestamp,

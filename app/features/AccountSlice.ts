@@ -6,6 +6,7 @@ import {
     insertAccount,
     updateAccount,
     getAccountsOfIdentity,
+    removeAccount as removeAccountFromDatabase,
 } from '../database/AccountDao';
 import { getGlobal } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
@@ -171,6 +172,7 @@ export async function addPendingAccount(
         address: accountAddress,
         credential: JSON.stringify(credentialDeploymentInfo),
         credentialDeploymentHash,
+        maxTransactionId: 0,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -254,6 +256,14 @@ export async function decryptAccountBalance(prfKey: string, account: Account) {
 
 export async function importAccount(account: Account | Account[]) {
     await insertAccount(account);
+}
+
+export async function removeAccount(
+    dispatch: Dispatch,
+    accountAddress: string
+) {
+    await removeAccountFromDatabase(accountAddress);
+    return loadAccounts(dispatch);
 }
 
 export default accountsSlice.reducer;
