@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, useLocation } from 'react-router-dom';
 import routes from '../../constants/routes.json';
 import PickName from './PickName';
 import PickIdentity from './PickIdentity';
@@ -8,6 +8,21 @@ import GeneratePage from './GeneratePage';
 import FinalPage from './FinalPage';
 import { Identity } from '../../utils/types';
 import PageHeader from '../../components/PageHeader';
+
+function getSubtitle(location: string) {
+    switch (location) {
+        case routes.ACCOUNTCREATION_PICKIDENTITY:
+            return 'Choose an identity';
+        case routes.ACCOUNTCREATION_GENERATE:
+            return 'Creating a new account';
+        case routes.ACCOUNTCREATION_PICKATTRIBUTES:
+            return 'Revealing Attributes';
+        case routes.ACCOUNTCREATION_FINAL:
+            return 'Your account';
+        default:
+            return 'Choose your account name';
+    }
+}
 
 // The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
 export default function AccountCreationPage(): JSX.Element {
@@ -18,7 +33,7 @@ export default function AccountCreationPage(): JSX.Element {
     return (
         <>
             <PageHeader>
-                <h1>Accounts | Creating a new account</h1>
+                <h1> New Account | {getSubtitle(useLocation().pathname)}</h1>
             </PageHeader>
             <Switch>
                 <Route
