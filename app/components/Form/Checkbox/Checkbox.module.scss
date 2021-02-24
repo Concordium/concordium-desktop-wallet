@@ -31,17 +31,17 @@
         input:checked + & {
             opacity: 1;
         }
-    }
 
-    &:not(.checkboxLarge) svg {
-        transform: scale(.6);
+        .checkbox:not(.checkboxLarge) & {
+            transform: scale(0.6);
+        }
     }
 
     .rootInvalid & {
         border-color: $color-error;
     }
 
-    .root:not(.rootInvalid) input:focus + & {
+    input:focus + & {
         border-color: $form-color-focus;
     }
 }

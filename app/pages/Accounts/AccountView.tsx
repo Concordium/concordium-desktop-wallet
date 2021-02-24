@@ -15,6 +15,7 @@ import SimpleTransfer from '../../components/Transfers/SimpleTransfer';
 import TransferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
 import DecryptComponent from './DecryptComponent';
+import { AccountStatus } from '../../utils/types';
 
 /**
  * Detailed view of the chosen account and its transactions.
@@ -32,7 +33,7 @@ export default function AccountView() {
     ];
 
     useEffect(() => {
-        if (account) {
+        if (account && account.status === AccountStatus.Confirmed) {
             updateTransactions(account);
         }
     }, [account]);

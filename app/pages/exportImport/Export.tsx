@@ -1,14 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Button, Header, Segment, Divider } from 'semantic-ui-react';
 import { encrypt } from '../../utils/encryption';
 import { validatePassword } from '../../utils/importHelpers';
 import { saveFile } from '../../utils/FileHelper';
-import {
-    loadIdentities,
-    identitiesSelector,
-} from '../../features/IdentitySlice';
-import { loadAccounts, accountsSelector } from '../../features/AccountSlice';
+import { identitiesSelector } from '../../features/IdentitySlice';
+import { accountsSelector } from '../../features/AccountSlice';
 import { addressBookSelector } from '../../features/AddressBookSlice';
 import InputModal from '../../components/InputModal';
 import MessageModal from '../../components/MessageModal';
@@ -18,18 +15,12 @@ import MessageModal from '../../components/MessageModal';
  * TODO: allow partial export
  */
 export default function Export() {
-    const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
     const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
     const [modalMessage, setModalMessage] = useState<string>('');
-
-    useEffect(() => {
-        loadAccounts(dispatch);
-        loadIdentities(dispatch);
-    }, [dispatch]);
 
     if (
         identities === undefined ||
@@ -49,12 +40,19 @@ export default function Export() {
         const encrypted = encrypt(JSON.stringify(data), password);
 
         try {
-            await saveFile(JSON.stringify(encrypted), 'Export your data');
-            setModalMessage('Export was successful');
-            setOpenConfirmationModal(true);
+            const completed = await saveFile(
+                JSON.stringify(encrypted),
+                'Export your data'
+            );
+            if (completed) {
+                setModalMessage('Export was successful');
+                setOpenConfirmationModal(true);
+            }
         } catch (error) {
-            // Export was cancelled.
-            // TODO: inform user in the case where export was not canceled, but did indeed fail.
+            setModalMessage(
+                'Export was unsuccessful, We were unable to save to file.'
+            );
+            setOpenConfirmationModal(true);
         }
         setOpenPasswordModal(false);
     }
