@@ -10,6 +10,7 @@ import { Dispatch } from './utils/types';
 import { startClient } from './utils/nodeRequests';
 import listenForIdentityStatus from './utils/IdentityStatusPoller';
 import listenForAccountStatus from './utils/AccountStatusPoller';
+import { loadAddressBook } from './features/AddressBookSlice';
 import { loadAccounts } from './features/AccountSlice';
 import { loadIdentities } from './features/IdentitySlice';
 
@@ -33,6 +34,8 @@ async function loadSettingsIntoStore(dispatch: Dispatch) {
 
 async function onLoad(dispatch: Dispatch) {
     await loadSettingsIntoStore(dispatch);
+
+    loadAddressBook(dispatch);
     loadAccounts(dispatch);
     loadIdentities(dispatch);
 

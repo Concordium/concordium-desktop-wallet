@@ -1,5 +1,5 @@
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
-import { HTMLAttributes } from 'react';
+import { HTMLAttributes, ComponentType } from 'react';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -751,3 +751,13 @@ export type ClassNameAndStyle = Pick<
     HTMLAttributes<HTMLElement>,
     'style' | 'className'
 >;
+
+export type WithAsProp<TAsProps> = TAsProps & {
+    as: ComponentType<TAsProps>;
+};
+export type WithAsPropOmit<TAsProps, TOmitKeys extends keyof TAsProps> = Omit<
+    TAsProps,
+    TOmitKeys
+> & {
+    as: ComponentType<TAsProps>;
+};
