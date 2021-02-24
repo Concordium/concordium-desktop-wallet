@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Form } from 'semantic-ui-react';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 import { FoundationAccount, UpdateType } from '../../utils/types';
-import { UpdateProps } from '../../utils/UpdateInstructionHelper';
+import { UpdateProps } from '../../utils/transactionTypes';
 
 export default function UpdateFoundationAccount({
     blockSummary,

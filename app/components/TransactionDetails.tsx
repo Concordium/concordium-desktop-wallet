@@ -25,8 +25,8 @@ function generateView(
         | AccountTransaction
 ) {
     if (instanceOfUpdateInstruction(transaction)) {
-        const handler = findHandler(transaction);
-        return handler.view();
+        const handler = findHandler(transaction.type);
+        return handler.view(transaction);
     }
     if (instanceOfAccountTransaction(transaction)) {
         return <AccountTransactionDetails transaction={transaction} />;

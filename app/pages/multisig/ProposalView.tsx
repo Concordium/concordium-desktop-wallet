@@ -180,8 +180,8 @@ export default function ProposalView() {
     const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
         currentProposal.transaction
     );
-    const handler = findHandler(instruction);
-    const serializedPayload = handler.serializePayload();
+    const handler = findHandler(instruction.type);
+    const serializedPayload = handler.serializePayload(instruction);
 
     const transactionHash = hashSha256(
         serializeUpdateInstructionHeaderAndPayload(
