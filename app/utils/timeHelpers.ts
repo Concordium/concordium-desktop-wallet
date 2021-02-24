@@ -20,8 +20,6 @@ export function parseTime(
     timeStamp: string,
     unit: TimeStampUnit = TimeStampUnit.seconds,
     formatOptions: Intl.DateTimeFormatOptions = {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error : https://github.com/microsoft/TypeScript/issues/35865
         dateStyle: 'short',
         timeStyle: 'short',
     }
