@@ -21,7 +21,8 @@
     align-items: center;
     justify-content: center;
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
         background-color: $color-off-white;
         outline: none;
     }
@@ -48,5 +49,4 @@
 
 .rightButtons {
     right: 10px;
-    
 }

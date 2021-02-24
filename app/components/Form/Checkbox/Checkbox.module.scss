@@ -1,0 +1,51 @@
+@import 'config/bundle';
+
+.root {
+    display: flex;
+    align-items: center;
+
+    input {
+        @include hideInput;
+    }
+}
+
+.checkbox {
+    width: 14px;
+    height: 14px;
+    border: 1px solid $color-grey;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color $form-transition;
+
+    &Large {
+        width: 26px;
+        height: 26px;
+    }
+
+    svg {
+        opacity: 0;
+        transition: opacity $form-transition;
+
+        input:checked + & {
+            opacity: 1;
+        }
+
+        .checkbox:not(.checkboxLarge) & {
+            transform: scale(0.6);
+        }
+    }
+
+    .rootInvalid & {
+        border-color: $color-error;
+    }
+
+    input:focus + & {
+        border-color: $form-color-focus;
+    }
+}
+
+.text {
+    margin-left: 7px;
+}

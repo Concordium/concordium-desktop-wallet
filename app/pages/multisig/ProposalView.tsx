@@ -9,8 +9,8 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
-import { parse, stringify } from 'json-bigint';
 import { push } from 'connected-react-router';
+import { parse, stringify } from 'json-bigint';
 import {
     currentProposalSelector,
     updateCurrentProposal,
@@ -58,10 +58,10 @@ export default function ProposalView() {
         );
     }
 
-    async function loadSignatureFile(file: string) {
+    async function loadSignatureFile(file: Buffer) {
         let transactionObject;
         try {
-            transactionObject = parse(file);
+            transactionObject = parse(file.toString('utf-8'));
         } catch (error) {
             setShowError({
                 show: true,
@@ -205,7 +205,10 @@ export default function ProposalView() {
                                         return (
                                             <Form.Field key={signature}>
                                                 <Checkbox
-                                                    label="Signed"
+                                                    label={`Signed (${signature.substring(
+                                                        0,
+                                                        16
+                                                    )}...)`}
                                                     defaultChecked
                                                     readOnly
                                                 />

@@ -66,11 +66,11 @@ export default function Import() {
     }
 
     // Attempts to parse/validate the given (encrypted) data.
-    async function fileProcessor(rawData: string) {
+    async function fileProcessor(rawData: Buffer) {
         if (rawData) {
             let encryptedData;
             try {
-                encryptedData = JSON.parse(rawData);
+                encryptedData = JSON.parse(rawData.toString('utf-8'));
             } catch (e) {
                 fail('This file is not a valid Export File!');
                 return;

@@ -1,19 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
 import { Button } from 'semantic-ui-react';
-import {
-    loadTransactions,
-    viewingShieldedSelector,
-} from '../../features/TransactionSlice';
 import TransactionList from './TransactionList';
 import TransactionView from './TransactionView';
 import DisplayIdentityAttributes from './DisplayIdentityAttributes';
 import locations from '../../constants/transactionLocations.json';
-import { Account, TransferTransaction } from '../../utils/types';
-
-interface Props {
-    account: Account;
-}
+import { TransferTransaction } from '../../utils/types';
 
 /**
  * Contains view of the account's transactions,
@@ -21,17 +12,11 @@ interface Props {
  * display of the account's revealedAttributes.
  * TODO Rename this.
  */
-export default function TransferHistory({ account }: Props) {
-    const dispatch = useDispatch();
+export default function TransferHistory() {
     const [location, setLocation] = useState(locations.listTransactions);
     const [chosenTransaction, setChosenTransaction] = useState<
         TransferTransaction | undefined
     >(undefined);
-    const viewingShielded = useSelector(viewingShieldedSelector);
-
-    useEffect(() => {
-        loadTransactions(account, viewingShielded, dispatch);
-    }, [dispatch, account, viewingShielded]);
 
     function Header() {
         return (

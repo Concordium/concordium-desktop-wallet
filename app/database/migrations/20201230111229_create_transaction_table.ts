@@ -26,6 +26,7 @@ export async function up(knex: Knex): Promise<void> {
             table.json('origin');
             table.json('details');
             table.json('encrypted');
+            table.json('schedule');
             // Others
             table.string('fromAddress').index();
             table.string('toAddress').index();

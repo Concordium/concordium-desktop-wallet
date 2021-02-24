@@ -17,6 +17,7 @@ const multiSigTransactionTypesMap: [UpdateType, string][] = [
     ],
     [UpdateType.UpdateFoundationAccount, 'Update foundation account address'],
     [UpdateType.UpdateMintDistribution, 'Update mint distribution'],
+    [UpdateType.UpdateProtocol, 'Update protocol'],
     [UpdateType.UpdateGASRewards, 'Update GAS rewards'],
 ];
 

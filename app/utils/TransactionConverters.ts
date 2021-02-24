@@ -16,7 +16,8 @@ import { getScheduledTransferAmount } from './transactionHelpers';
  * Converts the given transaction into the structure, which is used in the database.
  */
 export function convertIncomingTransaction(
-    transaction: IncomingTransaction
+    transaction: IncomingTransaction,
+    accountAddress: string
 ): TransferTransaction {
     let fromAddress = '';
     if (transaction.details.transferSource) {
@@ -26,7 +27,10 @@ export function convertIncomingTransaction(
         transaction.origin.address
     ) {
         fromAddress = transaction.origin.address;
+    } else if (transaction.origin.type === OriginType.Self) {
+        fromAddress = accountAddress;
     }
+
     let toAddress = '';
     if (transaction.details.transferDestination) {
         toAddress = transaction.details.transferDestination;
@@ -34,6 +38,13 @@ export function convertIncomingTransaction(
     let encrypted;
     if (transaction.encrypted) {
         encrypted = JSON.stringify(transaction.encrypted);
+    }
+
+    let { subtotal } = transaction;
+    if (!subtotal) {
+        subtotal = (
+            BigInt(transaction.total) - BigInt(transaction.cost || '0')
+        ).toString();
     }
 
     return {
@@ -46,10 +57,11 @@ export function convertIncomingTransaction(
         total: transaction.total,
         success: transaction.details.outcome === 'success',
         transactionHash: transaction.transactionHash,
-        subtotal: transaction.subtotal,
+        subtotal,
         cost: transaction.cost,
         origin: JSON.stringify(transaction.origin),
         details: JSON.stringify(transaction.details),
+        rejectReason: transaction.details.rejectReason,
         encrypted,
         fromAddress,
         toAddress,
@@ -60,7 +72,7 @@ export function convertIncomingTransaction(
 // Return type for the functions for specific transaction types
 type TypeSpecific = Pick<
     TransferTransaction,
-    'transactionKind' | 'total' | 'subtotal'
+    'transactionKind' | 'total' | 'subtotal' | 'schedule'
 >;
 
 // Convert the type specific fields of a Simple transfer for an Account Transaction.
@@ -86,6 +98,7 @@ function convertScheduledTransfer(
         transactionKind: TransactionKindString.TransferWithSchedule,
         total: (-estimatedTotal).toString(),
         subtotal: (-amount).toString(),
+        schedule: JSON.stringify(transaction.payload.schedule),
     };
 }
 
@@ -107,7 +120,6 @@ export function convertAccountTransaction(
     }
 
     return {
-        id: -1,
         blockHash: 'pending',
         remote: false,
         originType: OriginType.Self,
