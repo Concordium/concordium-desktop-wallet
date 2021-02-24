@@ -1,0 +1,40 @@
+@import 'config/bundle';
+
+.root {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    height: 100%;
+
+    &WithDivider {
+        &::before {
+            content: '';
+            display: block;
+            margin: 20px 0;
+            width: 1px;
+            order: 2;
+            background-color: $color-grey;
+        }
+
+        > *:nth-child(2) {
+            order: 1;
+        }
+        > *:last-child {
+            order: 3;
+        }
+    }
+}
+
+.column {
+    flex: 1;
+    height: calc(100% - 60px);
+    margin-top: 60px;
+
+    &:first-of-type {
+        margin-right: 80px;
+    }
+    &:last-of-type {
+        margin-left: 80px;
+    }
+}
