@@ -3,7 +3,8 @@ import { useDispatch } from 'react-redux';
 import { Form, Input, Button, Header, Label, Segment } from 'semantic-ui-react';
 import { updateSettingEntry } from '../../features/SettingsSlice';
 import { Setting } from '../../utils/types';
-import { setClientLocation, getNodeInfo } from '../../utils/nodeRequests';
+import { getNodeInfo } from '../../utils/nodeRequests';
+import startClient from '../../utils/nodeConnector';
 
 interface Props {
     setting: Setting;
@@ -45,7 +46,7 @@ export default function ConnectionSetting({ setting }: Props) {
             return;
         }
 
-        setClientLocation(newAddress, newPort); // TODO: generalize
+        startClient(dispatch, newAddress, newPort); // TODO: generalize
         updateSettingEntry(dispatch, {
             ...setting,
             value: JSON.stringify({
