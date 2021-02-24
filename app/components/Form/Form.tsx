@@ -6,6 +6,7 @@ import { connectWithFormUncontrolled } from './common/connectWithForm';
 import Input from './Input';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
+import Submit from '../../cross-app-components/Submit';
 
 interface FormProps<TFormValues>
     extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
@@ -37,6 +38,7 @@ interface FormProps<TFormValues>
  *   <Form.Input type="email" name="email" rules={{ required: 'You must supply an e-mail address' }} />
  *   <Form.TextArea name="comment" rules={{ maxLength: { value: 255, message: 'You cannot enter more than 255 characters' } }} />
  *   <Form.Checkbox name="agree" rules={{ required: 'You must agree to this' }}>Agree to terms</Form.Checkbox>
+ *   <Form.Submit>Submit</Form.Submit>
  * </Form>
  */
 export default function Form<T extends Record<string, unknown>>({
@@ -61,3 +63,4 @@ Form.Input = connectWithFormUncontrolled(Input);
 Form.TextArea = connectWithFormUncontrolled(TextArea);
 Form.Checkbox = connectWithFormUncontrolled(Checkbox);
 Form.Switch = connectWithFormUncontrolled(Switch);
+Form.Submit = Submit;

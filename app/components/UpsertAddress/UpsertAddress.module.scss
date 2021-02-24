@@ -3,6 +3,9 @@
 .content {
     max-width: 264px;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .input {
@@ -14,4 +17,8 @@
 .name {
     composes: input;
     font-size: $font-size-h2;
+}
+
+.submit {
+    min-width: 239px;
 }
