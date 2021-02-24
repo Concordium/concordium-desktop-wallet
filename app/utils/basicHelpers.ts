@@ -41,16 +41,16 @@ export function toCSV(elements: string[][], fieldNames: string[]): string {
  * @param array the array to partition
  * @param chunkSize the size of each chunk
  */
-export function chunks<S, T extends Uint8Array | Array<S>>(
+export function toChunks<S, T extends Uint8Array | Array<S>>(
     array: T,
     chunkSize: number
 ) {
     if (chunkSize <= 0) {
         throw new Error('Chunk size must be a positive number.');
     }
-    const R = [];
+    const chunks = [];
     for (let i = 0; i < array.length; i += chunkSize) {
-        R.push(array.slice(i, i + chunkSize));
+        chunks.push(array.slice(i, i + chunkSize));
     }
-    return R;
+    return chunks;
 }
