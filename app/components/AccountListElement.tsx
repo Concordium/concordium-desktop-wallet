@@ -3,7 +3,7 @@ import { Grid, Header, Label, Divider } from 'semantic-ui-react';
 import { displayAsGTU } from '../utils/gtu';
 import { AccountInfo, Account, AccountStatus } from '../utils/types';
 import { isInitialAccount } from '../utils/accountHelpers';
-import SidedText from './SidedText';
+import SidedRow from './SidedRow';
 import PendingImage from '../../resources/svg/pending_old.svg';
 
 const nop = () => {};
@@ -55,18 +55,18 @@ function AccountListElement({
                 <Grid.Column textAlign="right" content={account.identityName} />
             </Grid.Row>
 
-            <SidedText
+            <SidedRow
                 left="Account Total:"
                 right={displayAsGTU(shielded + unShielded) + hidden}
             />
             <Divider />
-            <SidedText left="Balance:" right={displayAsGTU(unShielded)} />
-            <SidedText
+            <SidedRow left="Balance:" right={displayAsGTU(unShielded)} />
+            <SidedRow
                 left=" - At Disposal:"
                 right={displayAsGTU(unShielded - scheduled)}
             />
             <Divider />
-            <SidedText
+            <SidedRow
                 left="Shielded Balance:"
                 right={displayAsGTU(shielded) + hidden}
                 onClick={(e) => {

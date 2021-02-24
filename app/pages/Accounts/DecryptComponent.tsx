@@ -41,7 +41,7 @@ export default function DecryptComponent({ account }: Props) {
         const prfKey = prfKeySeed.toString('hex');
         await decryptAccountBalance(prfKey, account);
         await decryptTransactions(transactions, prfKey, account);
-        await loadTransactions(account, viewingShielded, dispatch);
+        await loadTransactions(account, dispatch);
         await loadAccounts(dispatch);
     }
 
