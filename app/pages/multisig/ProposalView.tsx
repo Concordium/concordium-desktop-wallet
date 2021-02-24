@@ -11,6 +11,7 @@ import {
 } from 'semantic-ui-react';
 import { push } from 'connected-react-router';
 import { parse, stringify } from 'json-bigint';
+import * as ed from 'noble-ed25519';
 import {
     currentProposalSelector,
     updateCurrentProposal,
@@ -26,7 +27,11 @@ import {
 } from '../../utils/types';
 import { saveFile } from '../../utils/FileHelper';
 import DragAndDropFile from '../../components/DragAndDropFile';
-import { sendTransaction } from '../../utils/nodeRequests';
+import {
+    getBlockSummary,
+    getConsensusStatus,
+    sendTransaction,
+} from '../../utils/nodeRequests';
 import {
     serializeForSubmission,
     serializeUpdateInstructionHeaderAndPayload,
@@ -38,6 +43,44 @@ import SimpleErrorModal, {
 } from '../../components/SimpleErrorModal';
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
+import { ConsensusStatus } from '../../utils/NodeApiTypes';
+
+/**
+ * Returns whether or not the given signature is valid for the proposal. The signature is valid if
+ * one of the authorized verification keys can verify the signature successfully on the hash
+ * of the serialized transaction.
+ */
+async function isSignatureValid(
+    proposal: UpdateInstruction<UpdateInstructionPayload>,
+    signature: string
+): Promise<boolean> {
+    const handler = findHandler(proposal);
+    const transactionHash = hashSha256(
+        serializeUpdateInstructionHeaderAndPayload(
+            proposal,
+            handler.serializePayload()
+        )
+    );
+    const consensusStatus: ConsensusStatus = await getConsensusStatus();
+    const blockSummary = await getBlockSummary(
+        consensusStatus.lastFinalizedBlock
+    );
+    const authorizationKeys = blockSummary.updates.authorizations.keys;
+
+    for (let i = 0; i < authorizationKeys.length; i += 1) {
+        const key = authorizationKeys[i];
+        // eslint-disable-next-line no-await-in-loop
+        const validKey = await ed.verify(
+            signature,
+            transactionHash,
+            key.verifyKey
+        );
+        if (validKey) {
+            return true;
+        }
+    }
+    return false;
+}
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -77,23 +120,41 @@ export default function ProposalView() {
                     currentProposal.transaction
                 );
 
-                // If the loaded signature already exists on the proposal,
-                // then show a modal to the user.
-                for (
-                    let i = 0;
-                    i < transactionObject.signatures.length;
-                    i += 1
-                ) {
-                    const signature = transactionObject.signatures[i];
-                    if (proposal.signatures.includes(signature)) {
-                        setShowError({
-                            show: true,
-                            header: 'Duplicate signature',
-                            content:
-                                'The loaded signature file contains a signature that is already present on the proposal.',
-                        });
-                        return;
-                    }
+                // We currently restrict the amount of signatures imported at the same time to be 1, as it
+                // simplifies error handling and currently it is only possible to export a file signed once.
+                // This can be expanded to support multiple signatures at a later point in time if need be.
+                if (transactionObject.signatures.length !== 1) {
+                    setShowError({
+                        show: true,
+                        header: 'Invalid signature file',
+                        content:
+                            'The loaded signature file does not contain exactly one signature. Multiple signatures or zero signatures are not valid input.',
+                    });
+                    return;
+                }
+
+                const signature = transactionObject.signatures[0];
+
+                // Prevent the user from adding a signature that is already present on the proposal.
+                if (proposal.signatures.includes(signature)) {
+                    setShowError({
+                        show: true,
+                        header: 'Duplicate signature',
+                        content:
+                            'The loaded signature file contains a signature that is already present on the proposal.',
+                    });
+                    return;
+                }
+
+                // Prevent the user from adding an invalid signature.
+                if (!(await isSignatureValid(proposal, signature))) {
+                    setShowError({
+                        show: true,
+                        header: 'Invalid signature',
+                        content:
+                            'The loaded signature file contains a signature that is either not for this proposal, or was signed by an unauthorized key.',
+                    });
+                    return;
                 }
 
                 proposal.signatures = proposal.signatures.concat(

@@ -38,6 +38,11 @@ interface Authorization {
     authorizedKeys: number[];
 }
 
+export interface Key {
+    verifyKey: string;
+    schemeId: string;
+}
+
 interface Authorizations {
     microGTUPerEuro: Authorization;
     euroPerEnergy: Authorization;
@@ -46,6 +51,7 @@ interface Authorizations {
     mintDistribution: Authorization;
     protocol: Authorization;
     paramGASRewards: Authorization;
+    keys: Key[];
 }
 
 // The node returns the mint per slot value as a scientific notation String,

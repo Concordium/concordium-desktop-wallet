@@ -9964,6 +9964,11 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
+noble-ed25519@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/noble-ed25519/-/noble-ed25519-1.0.3.tgz#f34e96ce12d1ea4e5bb22f9b8c7e3c2600459d72"
+  integrity sha512-6pOngnpa/GVYURFvE7igoRKm3RrNwQykVLjSCjTvmUdAyOokes75trVDYoi+CGwF8/jh9hWl2zF4ix9OlB9OIQ==
+
 node-abi@^2.11.0:
   version "2.19.3"
   resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-2.19.3.tgz#252f5dcab12dad1b5503b2d27eddd4733930282d"
