@@ -713,9 +713,9 @@ export type ClassNameAndStyle = Pick<
 export type WithAsProp<TAsProps> = TAsProps & {
     as: ComponentType<TAsProps>;
 };
-export type WithAsPropOmit<
+export type WithAsPropOmit<TAsProps, TOmitKeys extends keyof TAsProps> = Omit<
     TAsProps,
-    TOmitKeys extends keyof TAsProps = any
-> = Omit<TAsProps, TOmitKeys> & {
+    TOmitKeys
+> & {
     as: ComponentType<TAsProps>;
 };
