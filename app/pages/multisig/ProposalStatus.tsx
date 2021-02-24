@@ -1,5 +1,6 @@
 import React from 'react';
 import { Grid, Header } from 'semantic-ui-react';
+import { parse } from 'json-bigint';
 import {
     ColorType,
     MultiSignatureTransaction,
@@ -26,7 +27,7 @@ const statusColorMap = new Map<MultiSignatureTransactionStatus, ColorType>([
  * Component that displays a status overview of a multi signature proposal.
  */
 export default function ProposalStatus({ proposal }: Props) {
-    const updateInstruction = JSON.parse(proposal.transaction);
+    const updateInstruction = parse(proposal.transaction);
 
     return (
         <Grid padded>

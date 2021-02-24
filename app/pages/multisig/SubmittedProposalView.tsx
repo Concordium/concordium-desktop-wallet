@@ -1,9 +1,9 @@
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
-import { parse } from 'json-bigint';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Divider, Grid, Header, Segment } from 'semantic-ui-react';
+import { parse } from 'json-bigint';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import {
     MultiSignatureTransaction,

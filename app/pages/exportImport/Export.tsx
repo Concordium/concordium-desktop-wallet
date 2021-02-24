@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Button, Header, Segment, Divider } from 'semantic-ui-react';
 import { encrypt } from '../../utils/encryption';
 import { validatePassword } from '../../utils/importHelpers';
 import { saveFile } from '../../utils/FileHelper';
 import { identitiesSelector } from '../../features/IdentitySlice';
 import { accountsSelector } from '../../features/AccountSlice';
-import {
-    loadAddressBook,
-    addressBookSelector,
-} from '../../features/AddressBookSlice';
+import { addressBookSelector } from '../../features/AddressBookSlice';
 import InputModal from '../../components/InputModal';
 import MessageModal from '../../components/MessageModal';
 
@@ -18,17 +15,12 @@ import MessageModal from '../../components/MessageModal';
  * TODO: allow partial export
  */
 export default function Export() {
-    const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
     const [openConfirmationModal, setOpenConfirmationModal] = useState(false);
     const [modalMessage, setModalMessage] = useState<string>('');
-
-    useEffect(() => {
-        loadAddressBook(dispatch);
-    }, [dispatch]);
 
     if (
         identities === undefined ||

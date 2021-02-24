@@ -5,15 +5,16 @@ import AddressBookElementView from './AddressBookElementView';
 import PageHeader from '../../components/PageHeader';
 
 import PlusIcon from '../../../resources/svg/plus.svg';
+import UpsertAddress from '../../components/UpsertAddress';
 
 export default function AddressBookPage() {
     return (
         <>
             <PageHeader>
                 <h1>Address Book</h1>
-                <PageHeader.Button align="right">
+                <UpsertAddress as={PageHeader.Button} align="right">
                     <PlusIcon />
-                </PageHeader.Button>
+                </UpsertAddress>
             </PageHeader>
             <Grid centered columns="equal" divided>
                 <Grid.Column>

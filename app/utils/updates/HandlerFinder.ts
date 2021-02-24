@@ -15,6 +15,7 @@ import FoundationAccountHandler from './FoundationAccountHandler';
 import GasRewardsHandler from './GasRewardsHandler';
 import MicroGtuPerEuroHandler from './MicroGtuPerEuroHandler';
 import MintDistributionHandler from './MintDistributionHandler';
+import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 
 class HandlerTypeMiddleware<T>
@@ -74,6 +75,8 @@ export default function findHandler(
             return new HandlerTypeMiddleware(new FoundationAccountHandler());
         case UpdateType.UpdateMintDistribution:
             return new HandlerTypeMiddleware(new MintDistributionHandler());
+        case UpdateType.UpdateProtocol:
+            return new HandlerTypeMiddleware(new ProtocolUpdateHandler());
         case UpdateType.UpdateGASRewards:
             return new HandlerTypeMiddleware(new GasRewardsHandler());
         default:
