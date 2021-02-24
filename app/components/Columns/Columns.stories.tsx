@@ -15,7 +15,7 @@ const Template: Story<ColumnsProps> = (args) => (
     </div>
 );
 
-const column = (
+const col = (
     <Columns.Column>
         <div style={{ height: '100%', backgroundColor: 'lightgrey' }}>
             Column
@@ -26,12 +26,27 @@ const column = (
 export const NoDivider = Template.bind({});
 NoDivider.args = {
     // eslint-disable-next-line react/jsx-key
-    children: [column, column],
+    children: [col, col],
 };
 
 export const WithDivider = Template.bind({});
 WithDivider.args = {
     // eslint-disable-next-line react/jsx-key
-    children: [column, column],
+    children: [col, col],
+    divider: true,
+};
+
+const scrollCol = (height: number) => (
+    <Columns.Column>
+        <div style={{ height: `${height}px`, backgroundColor: 'lightgrey' }}>
+            Scrollable column
+        </div>
+    </Columns.Column>
+);
+
+export const WithScrollableColumns = Template.bind({});
+WithScrollableColumns.args = {
+    // eslint-disable-next-line react/jsx-key
+    children: [scrollCol(800), col],
     divider: true,
 };

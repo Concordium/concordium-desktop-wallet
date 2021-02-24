@@ -28,13 +28,14 @@
 
 .column {
     flex: 1;
-    height: calc(100% - 60px);
-    margin-top: 60px;
+    height: 100%;
+    padding-top: 60px;
+    overflow: auto;
 
     &:first-of-type {
-        margin-right: 80px;
+        padding-right: 80px;
     }
     &:last-of-type {
-        margin-left: 80px;
+        padding-left: 80px;
     }
 }

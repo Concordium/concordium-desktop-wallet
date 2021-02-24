@@ -3,7 +3,7 @@ import React, { HTMLAttributes, PropsWithChildren } from 'react';
 
 import styles from './Columns.module.scss';
 
-export type ColumnProps = HTMLAttributes<HTMLDivElement>;
+export type ColumnProps = Pick<HTMLAttributes<HTMLDivElement>, 'className'>;
 
 /**
  * @description
