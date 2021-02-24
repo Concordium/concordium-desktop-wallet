@@ -34,9 +34,9 @@ export default function createUpdateInstruction<
     T extends UpdateInstructionPayload
 >(updatePayload: T, updateType: UpdateType, sequenceNumber: BigInt) {
     const updateHeader: UpdateHeader = {
-        effectiveTime: BigInt(Date.now()) + 864000000n,
+        effectiveTime: BigInt(Math.round(Date.now() / 1000)) + 120n,
         sequenceNumber,
-        timeout: BigInt(Date.now()) + 864000000n * 7n,
+        timeout: BigInt(Math.round(Date.now() / 1000)) + 119n,
     };
 
     const updateInstruction: UpdateInstruction<T> = {

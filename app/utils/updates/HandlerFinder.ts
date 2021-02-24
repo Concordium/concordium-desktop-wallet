@@ -10,6 +10,7 @@ import FoundationAccountHandler from './FoundationAccountHandler';
 import GasRewardsHandler from './GasRewardsHandler';
 import MicroGtuPerEuroHandler from './MicroGtuPerEuroHandler';
 import MintDistributionHandler from './MintDistributionHandler';
+import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 
 export default function findHandler(
@@ -29,6 +30,8 @@ export default function findHandler(
             return new FoundationAccountHandler(transaction);
         case UpdateType.UpdateMintDistribution:
             return new MintDistributionHandler(transaction);
+        case UpdateType.UpdateProtocol:
+            return new ProtocolUpdateHandler(transaction);
         case UpdateType.UpdateGASRewards:
             return new GasRewardsHandler(transaction);
         default:

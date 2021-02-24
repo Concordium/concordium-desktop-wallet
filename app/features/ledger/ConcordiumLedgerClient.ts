@@ -10,6 +10,7 @@ import {
     FoundationAccount,
     GasRewards,
     MintDistribution,
+    ProtocolUpdate,
     PublicInformationForIp,
     TransactionFeeDistribution,
     UpdateInstruction,
@@ -17,6 +18,7 @@ import {
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
 import signUpdateTransaction from './SignUpdateTransaction';
+import signUpdateProtocolTransaction from './SignProtocolUpdate';
 
 /**
  * Concordium Ledger API.
@@ -143,6 +145,19 @@ export default class ConcordiumLedgerClient {
         return signUpdateTransaction(
             this.transport,
             0x25,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signProtocolUpdate(
+        transaction: UpdateInstruction<ProtocolUpdate>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateProtocolTransaction(
+            this.transport,
             path,
             transaction,
             serializedPayload

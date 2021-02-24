@@ -487,6 +487,7 @@ export type UpdateInstructionPayload =
     | TransactionFeeDistribution
     | FoundationAccount
     | MintDistribution
+    | ProtocolUpdate
     | GasRewards;
 
 export type Transaction =
@@ -557,6 +558,12 @@ export function isMintDistribution(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<MintDistribution> {
     return UpdateType.UpdateMintDistribution === transaction.type;
+}
+
+export function isProtocolUpdate(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<ProtocolUpdate> {
+    return UpdateType.UpdateProtocol === transaction.type;
 }
 
 export function isGasRewards(
@@ -646,6 +653,13 @@ export interface MintDistribution {
     mintPerSlot: MintRate;
     bakingReward: RewardFraction;
     finalizationReward: RewardFraction;
+}
+
+export interface ProtocolUpdate {
+    message: string;
+    specificationUrl: string;
+    specificationHash: Hex;
+    specificationAuxiliaryData: string;
 }
 
 export interface GasRewards {

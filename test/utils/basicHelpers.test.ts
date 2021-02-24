@@ -1,4 +1,9 @@
-import { partition, toCSV } from '../../app/utils/basicHelpers';
+import {
+    isHex,
+    partition,
+    toChunks,
+    toCSV,
+} from '../../app/utils/basicHelpers';
 
 test('Partition should split booleans correctly', () => {
     const list = [true, false, false, true, true, false, false];
@@ -63,4 +68,72 @@ test('toCSV should fail on extra fields', () => {
     const fields = ['first', 'second'];
 
     expect(() => toCSV(elements, fields)).toThrow();
+});
+
+test('Hex string validates as being hex', () => {
+    expect(
+        isHex(
+            '50ad41624c25e493aa1dc7f4ab32bdc5a3b0b78ecc35b539936e3fea7c565af7'
+        )
+    ).toBe(true);
+});
+
+test('Non-hex string does not validate as being hex', () => {
+    expect(isHex('ObviouslyNotAHexString')).toBe(false);
+});
+
+test('Empty string does not validate as being hex', () => {
+    expect(isHex('')).toBe(false);
+});
+
+test('Empty array is chunked into an empty array', () => {
+    expect(toChunks(new Uint8Array(0), 1)).toStrictEqual([]);
+});
+
+test('Zero chunk size fails', () => {
+    expect(() => toChunks(new Uint8Array(0), 0)).toThrow();
+});
+
+test('Negative chunk size fails', () => {
+    expect(() => toChunks(new Uint8Array(0), -5)).toThrow();
+});
+
+test('Array is chunked into chunks of the supplied size', () => {
+    expect(toChunks(new Uint8Array(8), 2)).toStrictEqual([
+        new Uint8Array(2),
+        new Uint8Array(2),
+        new Uint8Array(2),
+        new Uint8Array(2),
+    ]);
+});
+
+test('Last chunk can be of a size less than the chunk size if array size is not divided equally', () => {
+    expect(toChunks(new Uint8Array(8), 3)).toStrictEqual([
+        new Uint8Array(3),
+        new Uint8Array(3),
+        new Uint8Array(2),
+    ]);
+});
+
+test('It is possible to chunk a generic array', () => {
+    expect(toChunks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5)).toStrictEqual([
+        [1, 2, 3, 4, 5],
+        [6, 7, 8, 9, 10],
+    ]);
+});
+
+test('Array content is preserved in chunks', () => {
+    const array = new Uint8Array(5);
+    array[0] = 5;
+    array[1] = 1;
+    array[2] = 2;
+    array[3] = 3;
+    array[4] = 4;
+
+    const asChunks = toChunks(array, 3);
+    expect(asChunks[0][0]).toStrictEqual(5);
+    expect(asChunks[0][1]).toStrictEqual(1);
+    expect(asChunks[0][2]).toStrictEqual(2);
+    expect(asChunks[1][0]).toStrictEqual(3);
+    expect(asChunks[1][1]).toStrictEqual(4);
 });

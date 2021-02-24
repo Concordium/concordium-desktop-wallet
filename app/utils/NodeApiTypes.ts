@@ -29,6 +29,7 @@ interface UpdateQueues {
     transactionFeeDistribution: UpdateQueue;
     foundationAccount: UpdateQueue;
     mintDistribution: UpdateQueue;
+    protocol: UpdateQueue;
     gasRewards: UpdateQueue;
 }
 
@@ -43,6 +44,7 @@ interface Authorizations {
     transactionFeeDistribution: Authorization;
     foundationAccount: Authorization;
     mintDistribution: Authorization;
+    protocol: Authorization;
     paramGASRewards: Authorization;
 }
 

@@ -13,6 +13,7 @@ import UpdateEuroPerEnergy from './UpdateEuroPerEnergy';
 import UpdateTransactionFeeDistribution from './UpdateTransactionFeeDistribution';
 import UpdateFoundationAccount from './UpdateFoundationAccount';
 import UpdateMintDistribution from './UpdateMintDistribution';
+import UpdateProtocol from './UpdateProtocol';
 import UpdateGasRewards from './UpdateGasRewards';
 
 interface Location {
@@ -90,6 +91,13 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
             case UpdateType.UpdateMintDistribution:
                 return (
                     <UpdateMintDistribution
+                        blockSummary={blockSummary}
+                        forwardTransaction={forwardTransactionToSigningPage}
+                    />
+                );
+            case UpdateType.UpdateProtocol:
+                return (
+                    <UpdateProtocol
                         blockSummary={blockSummary}
                         forwardTransaction={forwardTransactionToSigningPage}
                     />
