@@ -19,6 +19,10 @@ interface Props {
     amount: bigint;
 }
 
+function getDefaultTimestamp() {
+    return getNow() + 5 * TimeConstants.Minute;
+}
+
 /**
  * Component to build a "explicit" schedule, by adding invidual releases.
  */
@@ -30,7 +34,7 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
     const [adding, setAdding] = useState<boolean>(false);
 
     const [pointTimestamp, setTimestamp] = useState<number>(
-        getNow() + 5 * TimeConstants.Minute
+        getDefaultTimestamp()
     ); // TODO Decide appropiate default
 
     function addToSchedule() {
@@ -48,7 +52,7 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
             )
         );
         setAmount('');
-        setTimestamp(getNow());
+        setTimestamp(getDefaultTimestamp());
     }
 
     function removeFromSchedule(index: number) {
