@@ -44,9 +44,16 @@ const scrollCol = (height: number) => (
     </Columns.Column>
 );
 
+export const WithScrollableColumn = Template.bind({});
+WithScrollableColumn.args = {
+    // eslint-disable-next-line react/jsx-key
+    children: [scrollCol(800), col],
+    divider: true,
+};
+
 export const WithScrollableColumns = Template.bind({});
 WithScrollableColumns.args = {
     // eslint-disable-next-line react/jsx-key
-    children: [scrollCol(800), col],
+    children: [scrollCol(800), scrollCol(450)],
     divider: true,
 };
