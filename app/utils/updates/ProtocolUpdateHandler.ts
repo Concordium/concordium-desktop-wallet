@@ -1,45 +1,48 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernancePath } from '../../features/ledger/Path';
 import ProtocolUpdateView from '../../pages/multisig/ProtocolUpdateView';
+import UpdateProtocol from '../../pages/multisig/UpdateProtocol';
+import { TransactionHandler } from '../transactionTypes';
 import {
     isProtocolUpdate,
     ProtocolUpdate,
-    TransactionHandler,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../types';
 import { serializeProtocolUpdate } from '../UpdateSerialization';
 
+type TransactionType = UpdateInstruction<ProtocolUpdate>;
+
 export default class ProtocolUpdateHandler
-    implements
-        TransactionHandler<
-            UpdateInstruction<ProtocolUpdate>,
-            ConcordiumLedgerClient
-        > {
-    transaction: UpdateInstruction<ProtocolUpdate>;
-
-    constructor(transaction: UpdateInstruction<UpdateInstructionPayload>) {
+    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    confirmType(
+        transaction: UpdateInstruction<UpdateInstructionPayload>
+    ): TransactionType {
         if (isProtocolUpdate(transaction)) {
-            this.transaction = transaction;
-        } else {
-            throw Error('Invalid transaction type was given as input.');
+            return transaction;
         }
+        throw Error('Invalid transaction type was given as input.');
     }
 
-    serializePayload() {
-        return serializeProtocolUpdate(this.transaction.payload).serialization;
+    serializePayload(transaction: TransactionType) {
+        return serializeProtocolUpdate(transaction.payload).serialization;
     }
 
-    signTransaction(ledger: ConcordiumLedgerClient) {
+    signTransaction(
+        transaction: TransactionType,
+        ledger: ConcordiumLedgerClient
+    ) {
         const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
         return ledger.signProtocolUpdate(
-            this.transaction,
-            this.serializePayload(),
+            transaction,
+            this.serializePayload(transaction),
             path
         );
     }
 
-    view() {
-        return ProtocolUpdateView({ protocolUpdate: this.transaction.payload });
+    view(transaction: TransactionType) {
+        return ProtocolUpdateView({ protocolUpdate: transaction.payload });
     }
+
+    update = UpdateProtocol;
 }

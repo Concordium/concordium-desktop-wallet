@@ -28,11 +28,11 @@ export async function getMultiSignatureTransactionStatus(
     dispatch: Dispatch
 ) {
     const updateInstruction = parse(proposal.transaction);
-    const handler = findHandler(updateInstruction);
+    const handler = findHandler(updateInstruction.type);
 
     const serializedUpdateInstruction = serializeUpdateInstruction(
         updateInstruction,
-        handler.serializePayload()
+        handler.serializePayload(updateInstruction)
     );
     const transactionHash = hashSha256(serializedUpdateInstruction).toString(
         'hex'

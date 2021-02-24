@@ -8,7 +8,6 @@ import {
     List,
     Progress,
 } from 'semantic-ui-react';
-import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 import { rewardFractionResolution } from '../../constants/updateConstants.json';
 import {
     ColorType,
@@ -16,6 +15,7 @@ import {
     RewardFraction,
     UpdateType,
 } from '../../utils/types';
+import { UpdateProps } from '../../utils/transactionTypes';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 
 // TODO Update the UI when the sketches are complete.

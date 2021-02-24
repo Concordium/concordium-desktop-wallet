@@ -4,7 +4,7 @@ import DragAndDropFile from '../../components/DragAndDropFile';
 import { isHex } from '../../utils/basicHelpers';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 import { ProtocolUpdate, UpdateType } from '../../utils/types';
-import { UpdateProps } from '../../utils/UpdateInstructionHelper';
+import { UpdateProps } from '../../utils/transactionTypes';
 
 const auxiliaryDataMaxSizeKb = 2048;
 

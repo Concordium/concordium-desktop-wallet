@@ -573,18 +573,6 @@ export function isGasRewards(
 }
 
 /**
- * Interface definition for a class that handles a specific type
- * of transaction. The handler can serialize and sign the transaction,
- * and generate a view of the transaction.
- */
-export interface TransactionHandler<T, S> {
-    transaction: T;
-    serializePayload: () => Buffer;
-    signTransaction: (signer: S) => Promise<Buffer>;
-    view: () => JSX.Element;
-}
-
-/**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
  */
