@@ -5,7 +5,7 @@ import {
     NodeInfoResponse,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
-import { Setting, AccountInfo } from './types';
+import { Setting, AccountInfo, Global, Versioned } from './types';
 import grpcMethods from '../constants/grpcMethods.json';
 import ipcCommands from '../constants/ipcCommands.json';
 
@@ -115,4 +115,12 @@ export function getAccountInfo(
 export async function getNodeInfo(): Promise<NodeInfoResponse> {
     const response = await sendPromise(grpcMethods.nodeInfo);
     return NodeInfoResponse.deserializeBinary(response);
+}
+
+export async function getCryptographicParameters(
+    blockHashValue: string
+): Promise<Versioned<Global>> {
+    return sendPromiseParseResult(grpcMethods.getCryptographicParameters, {
+        blockHashValue,
+    });
 }

@@ -116,6 +116,7 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
 
     async function execution() {
         const consensusStatus: ConsensusStatus = await getConsensusStatus();
+        console.log(consensusStatus);
         return getBlockSummary(consensusStatus.lastFinalizedBlock);
     }
     return (
