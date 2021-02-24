@@ -46,3 +46,9 @@ export async function getAccountsOfIdentity(
 ): Promise<Account[]> {
     return findAccounts({ identityId });
 }
+
+export async function removeAccount(accountAddress: string) {
+    return (await knex())(accountsTable)
+        .where({ address: accountAddress })
+        .del();
+}

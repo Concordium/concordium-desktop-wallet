@@ -36,7 +36,7 @@ $sidebar-link-height: $page-header-height;
 
     &Active {
         background-color: $color-background;
-        box-shadow: 0 0 15px 0px $color-grey;
+        box-shadow: 0 0 15px 0 $color-grey;
     }
 
     &:focus,
@@ -48,7 +48,7 @@ $sidebar-link-height: $page-header-height;
 
 .itemContent {
     transform: scale(1);
-    transition: transform ease-in .1s;
+    transition: transform ease-in 0.1s;
 
     .item:not(.itemActive):hover &,
     .item:not(.itemActive):focus & {

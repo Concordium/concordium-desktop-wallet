@@ -12,7 +12,7 @@
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.js --colors",
     "build-renderer-dev": "cross-env NODE_ENV=development webpack --config configs/webpack.config.renderer.dev.js --colors --progress",
     "electron-rebuild": "electron-rebuild --parallel --force --types prod,dev,optional --module-dir app",
-    "lint": "cross-env NODE_ENV=development eslint . --cache --ext .ts,.tsx",
+    "lint": "eslint . --cache --ext .ts,.tsx",
     "lint-fix": "yarn --silent lint --fix; exit 0",
     "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
     "lint-styles-fix": "yarn --silent lint-styles --fix; exit 0",
@@ -23,7 +23,7 @@
     "package-linux": "yarn build && electron-builder build --linux",
     "package-win": "yarn build && electron-builder build --win --x64",
     "postinstall": "node internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall  && sh ./internals/scripts/build_protos.sh",
-    "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{ts,tsx,js,jsx,json,html,css,less,scss,yml}'",
+    "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{ts,tsx,js,jsx,json,html,yml}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
     "preinstall": "node ./internals/scripts/CheckYarn.js",
     "start": "node ./internals/scripts/CheckPortInUse.js && yarn build-main-dev && cross-env START_HOT=1 yarn start-renderer-dev",
@@ -40,14 +40,13 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "cross-env NODE_ENV=development eslint --cache"
+      "eslint --cache --fix"
     ],
     "{*.json,.{eslintrc,prettierrc,stylelintrc}}": [
       "prettier --ignore-path .eslintignore --parser json --write"
     ],
-    "*.{css,scss} --ignore-pattern *.module.{css,scss}": [
-      "stylelint --ignore-path .eslintignore --syntax scss --fix",
-      "prettier --ignore-path .eslintignore --single-quote --write"
+    "*.{css,scss}": [
+      "stylelint --ignore-path .eslintignore --syntax scss --fix"
     ],
     "*.{html,md,yml}": [
       "prettier --ignore-path .eslintignore --single-quote --write"
@@ -131,6 +130,7 @@
     "@types/jest": "^26.0.15",
     "@types/json-bigint": "^1.0.0",
     "@types/node": "12",
+    "@types/qrcode.react": "^1.0.1",
     "@types/react": "^16.9.44",
     "@types/react-dom": "^16.9.9",
     "@types/react-redux": "^7.1.9",
@@ -193,6 +193,8 @@
     "stylelint": "^13.6.1",
     "stylelint-config-prettier": "^8.0.2",
     "stylelint-config-standard": "^20.0.0",
+    "stylelint-prettier": "^1.1.2",
+    "stylelint-scss": "^3.19.0",
     "terser-webpack-plugin": "4",
     "testcafe": "^1.8.8",
     "testcafe-browser-provider-electron": "^0.0.15",
@@ -224,6 +226,7 @@
     "json-bigint": "^1.0.0",
     "knex": "^0.21.13",
     "promise-worker": "^2.0.1",
+    "qrcode.react": "^1.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.12.0",
     "react-hook-form": "^6.15.1",
@@ -260,12 +263,6 @@
     ],
     "singleQuote": true,
     "tabWidth": 4
-  },
-  "stylelint": {
-    "extends": [
-      "stylelint-config-standard",
-      "stylelint-config-prettier"
-    ]
   },
   "renovate": {
     "extends": [

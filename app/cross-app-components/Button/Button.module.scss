@@ -9,18 +9,18 @@
     border-radius: 4px;
     border: 1px solid $color-pale-blue;
     transition: background-color $anim-easing $anim-timing;
-    
+
     &Small,
     &Big {
         border-radius: 10px;
     }
-    
+
     &Small {
         height: 36px;
         font-size: $font-size-button2;
         padding: 0 15px;
     }
-    
+
     &Big {
         height: 58px;
     }
@@ -38,7 +38,7 @@
             background-color: darken($color-pale-blue, 3);
         }
     }
-    
+
     &Inverted {
         background-color: transparent;
         color: $color-text;

@@ -1,8 +1,9 @@
 $sidebar-width: 147px;
 $page-header-height: 94px;
 
-$anim-timing: .1s;
+$anim-timing: 0.1s;
 $anim-easing: ease-out;
 
 $form-color-focus: $color-pale-blue;
 $form-transition: $anim-easing $anim-timing;
+$form-transition: linear 0.1s;

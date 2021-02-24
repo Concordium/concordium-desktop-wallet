@@ -14,13 +14,19 @@ import {
     Account,
     Identity,
     ExportData,
+    Dispatch,
 } from '../../utils/types';
 import routes from '../../constants/routes.json';
 import {
+    loadIdentities,
     importIdentities,
     identitiesSelector,
 } from '../../features/IdentitySlice';
-import { importAccount, accountsSelector } from '../../features/AccountSlice';
+import {
+    loadAccounts,
+    importAccount,
+    accountsSelector,
+} from '../../features/AccountSlice';
 import {
     importAddressBookEntry,
     addressBookSelector,
@@ -111,18 +117,23 @@ interface SetDuplicates {
 async function performImport(
     importedData: ExportData,
     existingData: ExportData,
-    setDuplicates: SetDuplicates
+    setDuplicates: SetDuplicates,
+    dispatch: Dispatch
 ) {
     const duplicateIdentities = await importNewIdentities(
         importedData.identities,
         existingData.identities
     );
+    loadIdentities(dispatch);
     setDuplicates.identities(duplicateIdentities);
+
     const duplicateAccounts = await importAccounts(
         importedData.accounts,
         existingData.accounts
     );
+    loadAccounts(dispatch);
     setDuplicates.accounts(duplicateAccounts);
+
     const duplicateEntries = await importEntries(
         importedData.addressBook,
         existingData.addressBook
@@ -150,22 +161,27 @@ export default function PerformImport({ location }: Props) {
         AddressBookEntry[]
     >([]);
     const [open, setOpen] = useState(false);
+    const [started, setStarted] = useState(false);
 
     useEffect(() => {
-        const setters = {
-            identities: setDuplicateIdentities,
-            accounts: setDuplicateAccounts,
-            addressBook: setDuplicateEntries,
-        };
-        performImport(
-            importedData,
-            {
-                identities,
-                accounts,
-                addressBook,
-            },
-            setters
-        ).catch(() => setOpen(true));
+        if (!started) {
+            setStarted(true);
+            const setters = {
+                identities: setDuplicateIdentities,
+                accounts: setDuplicateAccounts,
+                addressBook: setDuplicateEntries,
+            };
+            performImport(
+                importedData,
+                {
+                    identities,
+                    accounts,
+                    addressBook,
+                },
+                setters,
+                dispatch
+            ).catch(() => setOpen(true));
+        }
     }, [
         importedData,
         identities,
@@ -174,6 +190,8 @@ export default function PerformImport({ location }: Props) {
         setDuplicateEntries,
         setDuplicateAccounts,
         setDuplicateIdentities,
+        dispatch,
+        started,
     ]);
 
     const accountList = (identity: Identity) => (

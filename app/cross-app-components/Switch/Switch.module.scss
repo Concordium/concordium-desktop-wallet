@@ -2,7 +2,7 @@
 
 $switch-height: 18px;
 $switch-width: 35px;
-$switch-transition: linear .05s;
+$switch-transition: linear 0.05s;
 
 .root {
     position: relative;
@@ -22,12 +22,13 @@ $switch-transition: linear .05s;
 }
 
 .track {
-    &, &::before {
+    &,
+    &::before {
         width: 100%;
         height: 100%;
         border-radius: $switch-height / 2;
     }
-    
+
     border: 1px solid $color-grey;
     overflow: hidden;
     transition: border-color $form-transition;
@@ -44,12 +45,12 @@ $switch-transition: linear .05s;
         }
     }
 
-    input:focus + & {
-        border-color: $form-color-focus;
-    }
-
     .rootInvalid & {
         border-color: $color-error;
+    }
+
+    input:focus + & {
+        border-color: $form-color-focus;
     }
 }
 
@@ -67,7 +68,7 @@ $handle-scale: scale(1.02);
     transform: translate(0, 0) $handle-scale;
     box-shadow: 0 0 4px $color-grey;
     transition: transform $switch-transition;
-    
+
     input:checked ~ & {
         transform: translate($switch-width - $handle-size, 0) $handle-scale;
     }
