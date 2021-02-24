@@ -70,7 +70,7 @@ export async function getIdentityProviders() {
     return response.data;
 }
 
-export async function getGlobal(): Promise<Global> {
+export async function fetchGlobal(): Promise<Global> {
     const response = await walletProxy.get('/v0/global');
     if (response.data.v !== 0) {
         throw new Error('unsupported Global version');

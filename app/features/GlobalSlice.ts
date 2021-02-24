@@ -1,7 +1,8 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
-import { getGlobal } from '../utils/httpRequests';
+import { fetchGlobal } from '../utils/httpRequests';
+import { getGlobal, insertGlobal } from '../database/GlobalDao';
 import { Global } from '../utils/types';
 
 interface GlobalState {
@@ -24,8 +25,15 @@ export const globalSelector = (state: RootState) => state.global.globalObject;
 const { setGlobal } = globalSlice.actions;
 
 export async function loadGlobal(dispatch: Dispatch) {
-    // TODO Cache the global object
-    const global = await getGlobal();
+    let global: Global | undefined = await getGlobal(); // load from storage
+    if (!global) {
+        try {
+            global = await fetchGlobal(); // fetch remote
+            insertGlobal(global); // store locally
+        } catch (e) {
+            global = undefined; // everything failed
+        }
+    }
     dispatch(setGlobal(global));
 }
 
