@@ -17,7 +17,12 @@ export type ColumnProps = Pick<HTMLAttributes<HTMLDivElement>, 'className'>;
  */
 export default function Column({
     className,
+    children,
     ...props
 }: PropsWithChildren<ColumnProps>): JSX.Element {
-    return <div className={clsx(styles.column, className)} {...props} />;
+    return (
+        <div className={clsx(styles.column, className)} {...props}>
+            {children}
+        </div>
+    );
 }

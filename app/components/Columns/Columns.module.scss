@@ -4,7 +4,7 @@
     position: relative;
     display: flex;
     flex-wrap: nowrap;
-    justify-content: space-between;
+    justify-content: space-around;
     height: 100%;
 
     &WithDivider {
@@ -29,14 +29,9 @@
 .column {
     flex: 1;
     height: 100%;
-    padding-top: 40px;
-    padding-bottom: 40px;
+    padding: 40px;
     overflow: auto;
-
-    &:first-of-type {
-        padding-right: 80px;
-    }
-    &:last-of-type {
-        padding-left: 80px;
-    }
+    flex-basis: auto;
+    display: flex;
+    justify-content: center;
 }

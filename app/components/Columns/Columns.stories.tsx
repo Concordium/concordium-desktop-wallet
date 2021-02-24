@@ -3,10 +3,30 @@ import React from 'react';
 import { Story, Meta } from '@storybook/react/types-6-0';
 
 import Columns, { ColumnsProps } from './Columns';
+import { ColumnProps } from './Column';
 
 export default {
     title: 'Components/Columns',
     component: Columns,
+    decorators: [
+        (story) => (
+            <>
+                <style>
+                    {`
+                        .sb-col-inner {
+                            height: 100%;
+                            background-color: lightgrey;
+                            width: 100%;
+                        }
+                        .sb-col-var-2 {
+                            flex: 0 0 400px;
+                        }
+                    `}
+                </style>
+                {story()}
+            </>
+        ),
+    ],
 } as Meta;
 
 const Template: Story<ColumnsProps> = (args) => (
@@ -15,45 +35,42 @@ const Template: Story<ColumnsProps> = (args) => (
     </div>
 );
 
-const col = (
-    <Columns.Column>
-        <div style={{ height: '100%', backgroundColor: 'lightgrey' }}>
-            Column
-        </div>
+const col = (props: ColumnProps = {}) => (
+    <Columns.Column {...props}>
+        <div className="sb-col-inner">Column</div>
     </Columns.Column>
 );
 
 export const NoDivider = Template.bind({});
 NoDivider.args = {
     // eslint-disable-next-line react/jsx-key
-    children: [col, col],
+    children: [col(), col()],
 };
 
 export const WithDivider = Template.bind({});
 WithDivider.args = {
     // eslint-disable-next-line react/jsx-key
-    children: [col, col],
+    children: [col(), col()],
     divider: true,
 };
 
-const scrollCol = (height: number) => (
-    <Columns.Column>
-        <div style={{ height: `${height}px`, backgroundColor: 'lightgrey' }}>
+const scrollCol = (height: number, props: ColumnProps = {}) => (
+    <Columns.Column {...props}>
+        <div className="sb-col-inner" style={{ height }}>
             Scrollable column
         </div>
     </Columns.Column>
 );
-
-export const WithScrollableColumn = Template.bind({});
-WithScrollableColumn.args = {
-    // eslint-disable-next-line react/jsx-key
-    children: [scrollCol(800), col],
-    divider: true,
-};
 
 export const WithScrollableColumns = Template.bind({});
 WithScrollableColumns.args = {
     // eslint-disable-next-line react/jsx-key
     children: [scrollCol(800), scrollCol(450)],
     divider: true,
+};
+
+export const VariableSize = Template.bind({});
+VariableSize.args = {
+    // eslint-disable-next-line react/jsx-key
+    children: [col(), scrollCol(450, { className: 'sb-col-var-2' })],
 };
