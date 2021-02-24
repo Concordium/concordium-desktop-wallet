@@ -54,7 +54,8 @@ export default function AccountBalanceView(): JSX.Element | null {
                 {account.allDecrypted ? null : (
                     <>
                         {' '}
-                        + <ShieldImage height="30" />
+                        +{' '}
+                        <ShieldImage className={styles.inverted} height="30" />
                     </>
                 )}
             </Header>
