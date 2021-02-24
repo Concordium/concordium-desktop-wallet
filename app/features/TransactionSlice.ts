@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
-import { getTransactions, getGlobal } from '../utils/httpRequests';
+import { getTransactions } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
     getTransactionsOfAccount,
@@ -17,6 +17,7 @@ import {
     AccountTransaction,
     Dispatch,
     TransactionEvent,
+    Global,
 } from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
 import {
@@ -50,9 +51,9 @@ const { setTransactions } = transactionSlice.actions;
 export async function decryptTransactions(
     transactions: TransferTransaction[],
     prfKey: string,
-    account: Account
+    account: Account,
+    global: Global
 ) {
-    const global = await getGlobal();
     const encryptedTransfers = transactions.filter(
         (t) =>
             t.transactionKind ===

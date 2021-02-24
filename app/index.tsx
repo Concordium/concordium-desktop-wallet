@@ -13,6 +13,7 @@ import listenForAccountStatus from './utils/AccountStatusPoller';
 import { loadAddressBook } from './features/AddressBookSlice';
 import { loadAccounts } from './features/AccountSlice';
 import { loadIdentities } from './features/IdentitySlice';
+import { loadGlobal } from './features/GlobalSlice';
 
 import './styles/app.global.scss';
 
@@ -38,6 +39,7 @@ async function onLoad(dispatch: Dispatch) {
     loadAddressBook(dispatch);
     loadAccounts(dispatch);
     loadIdentities(dispatch);
+    loadGlobal(dispatch);
 
     listenForAccountStatus(dispatch);
     listenForIdentityStatus(dispatch);
