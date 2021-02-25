@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Form } from 'semantic-ui-react';
 import { UpdateType } from '../../utils/types';
-import { UpdateProps } from '../../utils/UpdateInstructionHelper';
+import { UpdateProps } from '../../utils/transactionTypes';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 
 export default function UpdateMicroGtuPerEuroRate({

@@ -9,8 +9,8 @@ import { partition } from '../utils/basicHelpers';
 
 export async function getTransactionsOfAccount(
     account: Account,
-    filter: (transaction: TransferTransaction) => boolean = () => true,
-    orderBy = 'id'
+    orderBy = 'id',
+    filter: (transaction: TransferTransaction) => boolean = () => true
 ): Promise<TransferTransaction[]> {
     const { address } = account;
     const transactions = await (await knex())
@@ -31,7 +31,9 @@ export async function updateTransaction(
         .update(updatedValues);
 }
 
-export async function insertTransactions(transactions: TransferTransaction[]) {
+export async function insertTransactions(
+    transactions: Partial<TransferTransaction>[]
+) {
     const table = (await knex())(transactionTable);
     const existingTransactions: TransferTransaction[] = await table.select();
     const [updates, additions] = partition(transactions, (t) =>
@@ -39,9 +41,11 @@ export async function insertTransactions(transactions: TransferTransaction[]) {
             (t_) => t.transactionHash === t_.transactionHash
         )
     );
-    if (additions.length > 0) {
-        await table.insert(additions);
+    for (let i = 0; i < additions.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
+        await table.insert(additions[i]);
     }
+
     return Promise.all(
         updates.map(async (transaction) => {
             const { transactionHash, ...otherFields } = transaction;
@@ -51,11 +55,6 @@ export async function insertTransactions(transactions: TransferTransaction[]) {
             );
         })
     );
-}
-
-export async function resetTransactions() {
-    // TODO: used for testing, eventually should be removed
-    return (await knex())(transactionTable).del();
 }
 
 export async function getMaxTransactionsIdOfAccount(

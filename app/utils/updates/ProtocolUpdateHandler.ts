@@ -1,31 +1,31 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernancePath } from '../../features/ledger/Path';
-import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
-import UpdateFoundationAccount from '../../pages/multisig/UpdateFoundationAccount';
+import ProtocolUpdateView from '../../pages/multisig/ProtocolUpdateView';
+import UpdateProtocol from '../../pages/multisig/UpdateProtocol';
 import { TransactionHandler } from '../transactionTypes';
 import {
-    FoundationAccount,
-    isFoundationAccount,
+    isProtocolUpdate,
+    ProtocolUpdate,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../types';
-import { serializeFoundationAccount } from '../UpdateSerialization';
+import { serializeProtocolUpdate } from '../UpdateSerialization';
 
-type TransactionType = UpdateInstruction<FoundationAccount>;
+type TransactionType = UpdateInstruction<ProtocolUpdate>;
 
-export default class FoundationAccountHandler
+export default class ProtocolUpdateHandler
     implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isFoundationAccount(transaction)) {
+        if (isProtocolUpdate(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeFoundationAccount(transaction.payload);
+        return serializeProtocolUpdate(transaction.payload).serialization;
     }
 
     signTransaction(
@@ -33,7 +33,7 @@ export default class FoundationAccountHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
-        return ledger.signFoundationAccount(
+        return ledger.signProtocolUpdate(
             transaction,
             this.serializePayload(transaction),
             path
@@ -41,10 +41,8 @@ export default class FoundationAccountHandler
     }
 
     view(transaction: TransactionType) {
-        return FoundationAccountView({
-            foundationAccount: transaction.payload,
-        });
+        return ProtocolUpdateView({ protocolUpdate: transaction.payload });
     }
 
-    update = UpdateFoundationAccount;
+    update = UpdateProtocol;
 }

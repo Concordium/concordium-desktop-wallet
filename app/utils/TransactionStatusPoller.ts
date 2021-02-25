@@ -1,3 +1,4 @@
+import { parse } from 'json-bigint';
 import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
 import { loadProposals } from '../features/MultiSignatureSlice';
 import { hashSha256 } from './serializationHelpers';
@@ -26,12 +27,12 @@ export async function getMultiSignatureTransactionStatus(
     proposal: MultiSignatureTransaction,
     dispatch: Dispatch
 ) {
-    const updateInstruction = JSON.parse(proposal.transaction);
-    const handler = findHandler(updateInstruction);
+    const updateInstruction = parse(proposal.transaction);
+    const handler = findHandler(updateInstruction.type);
 
     const serializedUpdateInstruction = serializeUpdateInstruction(
         updateInstruction,
-        handler.serializePayload()
+        handler.serializePayload(updateInstruction)
     );
     const transactionHash = hashSha256(serializedUpdateInstruction).toString(
         'hex'

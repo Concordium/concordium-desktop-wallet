@@ -54,3 +54,7 @@ export enum TimeConstants {
 export function getDefaultExpiry(): string {
     return (new Date().getTime() + TimeConstants.Hour).toString();
 }
+
+export function getNow(): number {
+    return new Date().getTime();
+}

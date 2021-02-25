@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Grid, Header } from 'semantic-ui-react';
 import attributeNamesJson from '../../constants/attributeNames.json';
 import { chosenAccountInfoSelector } from '../../features/AccountSlice';
-import SidedText from '../../components/SidedText';
+import SidedRow from '../../components/SidedRow';
 
 const attributeNames: Record<string, string> = attributeNamesJson;
 
@@ -34,7 +34,7 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
         <Grid container columns={2} divided="vertically">
             {attributeKeys.map((attributeKey: string) => {
                 return (
-                    <SidedText
+                    <SidedRow
                         key={attributeKey}
                         left={attributeNames[attributeKey]}
                         right={attributes[attributeKey]}

@@ -3,10 +3,11 @@ import fs from 'fs';
 import ipcCommands from '../constants/ipcCommands.json';
 
 /**
- * Opens an 'open file' prompt where the user can select a file to be read.
+ * Opens an 'open file' prompt where the user can select a file to be read. The
+ * file path for the chosen file is returned.
  * @param title title of the prompt window
  */
-export async function openFile(title: string): Promise<string> {
+export async function openFileDestination(title: string): Promise<string> {
     const openDialogValue: Electron.OpenDialogReturnValue = await ipcRenderer.invoke(
         ipcCommands.openFileDialog,
         title
@@ -18,12 +19,28 @@ export async function openFile(title: string): Promise<string> {
 
     if (openDialogValue.filePaths.length === 1) {
         const fileLocation = openDialogValue.filePaths[0];
-        const fileAsString = fs.readFileSync(fileLocation, {
-            encoding: 'utf-8',
-        });
-        return fileAsString;
+        return fileLocation;
     }
     throw new Error('The user did not select a file to open.');
+}
+
+/**
+ * Opens an 'open file' prompt where the user can select a file to be read. The
+ * file data is returned as a raw Buffer.
+ * @param title title of the prompt window
+ */
+export async function openFileRaw(title: string): Promise<Buffer> {
+    const fileLocation = await openFileDestination(title);
+    return fs.readFileSync(fileLocation);
+}
+
+/**
+ * Opens an 'open file' prompt where the user can select a file to be read. The
+ * file is interpreted as an UTF-8 string.
+ * @param title title of the prompt window
+ */
+export async function openFile(title: string): Promise<string> {
+    return (await openFileRaw(title)).toString('utf-8');
 }
 
 /**
