@@ -13,12 +13,15 @@ export interface PageHeaderButtonProps
 
 /**
  * @description
- * To be used inside <PageHeader />. Is namespaced to PageHeader to communicate this (available at PageHeader.Button).
+ * To be used inside <PageLayout><PageLayout.Header /></PageLayout. Is namespaced to PageLayout to communicate this (available at PageLayout.HeaderButton).
  *
  * @example
- * <PageHeader>
- *   <PageHeader.Button>+</PageHeader.Button>
- * </PageHeader>
+ * <PageLayout>
+ *   <PageLayout.Header>
+ *     <PageLayout.HeaderButton>+</PageLayout.HeaderButton>
+ *   </PageLayout.Header>
+ *   ...
+ * </PageLayout>
  */
 export default function PageHeaderButton({
     children,

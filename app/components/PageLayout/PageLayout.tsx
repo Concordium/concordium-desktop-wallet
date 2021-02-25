@@ -9,10 +9,16 @@ function isPageHeader(el: ReactElement): el is ReactElement<PageHeaderProps> {
     return el.type === PageHeader;
 }
 
-export interface PageLayoutProps {
-    children: ReactElement | ReactElement[];
-}
-
+/**
+ * @description
+ * Used on all pages to get consistent layout.
+ *
+ * @example
+ * <PageLayout>
+ *   <PageLayout.Header>Page title</PageLayout.Header>
+ *   Page content
+ * <PageLayout>
+ */
 function PageLayout({ children }: PropsWithChildren<unknown>): JSX.Element {
     const { content, header } = useMemo(() => {
         const reactChildren = React.Children.toArray(

@@ -20,14 +20,17 @@ function isPageHeaderButton(
 
 /**
  * @description
- * Used on pages as a header element. Add buttons to the header by adding <PageHeader.Button /> as sub components.
+ * Used on pages as a header element inside <PageLayout />. Add buttons to the header by adding <PageLayout.HeaderButton /> as sub components.
  *
  * @example
- * <PageHeader>
- *   <PageHeader.Button align="left">-</PageHeader.Button>
- *   <h1>Title</h1>
- *   <ComposingComponent as={PageHeader.Button} align="left">+</ComposingComponent>
- * </PageHeader>
+ * <PageLayout>
+ *   <PageLayout.Header>
+ *     <PageLayout.HeaderButton align="left">-</PageLayout.HeaderButton>
+ *     <h1>Title</h1>
+ *     <ComposingComponent as={PageLayout.HeaderButton} align="left">+</ComposingComponent>
+ *   </PageLayout.Header>
+ *   ...
+ * </PageLayout>
  */
 export default function PageHeader({ children }: PageHeaderProps): JSX.Element {
     const { heading, rightButtons, leftButtons } = useMemo(() => {

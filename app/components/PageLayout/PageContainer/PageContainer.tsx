@@ -9,7 +9,14 @@ export interface PageContainerProps {
 
 /**
  * @description
+ * Used in <PageLayout /> to wrap content in a container with background.
  *
+ * @example
+ * <PageLayout>
+ *   <PageLayout.Container>
+ *     Content...
+ *   </PageLayout.Container>
+ * </PageLayout>
  */
 export default function PageContainer({
     children,
