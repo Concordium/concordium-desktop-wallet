@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 
 import { CommonInputProps } from '../common';
+import ErrorMessage from '../ErrorMessage';
 
 import styles from './TextArea.module.scss';
 
@@ -107,6 +108,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                     rows={interceptedRows}
                     {...props}
                 />
+                <ErrorMessage>{error}</ErrorMessage>
             </label>
         );
     }

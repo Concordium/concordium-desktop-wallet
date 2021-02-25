@@ -11,8 +11,8 @@ The TextArea component allows the same props as a regular `<textarea />`, with t
 
 <Canvas>
     <Story name="Primary" args={{
-        placeholder: 'Name',
-        name: 'name'
+        placeholder: 'Address',
+        name: 'address'
     }}>
         {Template.bind({})}
     </Story>
@@ -26,9 +26,9 @@ The following are the most important props to work with `TextArea`:
 
 <Canvas>
     <Story name="With Label" args={{
-        placeholder: 'Name',
-        name: 'name',
-        label: 'Name'
+        placeholder: 'Address',
+        name: 'address',
+        label: 'Address'
     }}>
         {Template.bind({})}
     </Story>
@@ -38,10 +38,21 @@ The following are the most important props to work with `TextArea`:
 
 <Canvas>
     <Story name="No Auto Scale" args={{
-        placeholder: 'Name',
-        name: 'name',
-        label: 'Name',
+        placeholder: 'Address',
+        name: 'address',
         autoScale: false
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Invalid
+
+<Canvas>
+    <Story name="Invalid" args={{
+        placeholder: 'Address',
+        name: 'address',
+        error: 'Address is required'
     }}>
         {Template.bind({})}
     </Story>

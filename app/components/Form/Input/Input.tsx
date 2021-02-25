@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import React, { forwardRef, InputHTMLAttributes } from 'react';
 
 import { CommonInputProps } from '../common';
+import ErrorMessage from '../ErrorMessage';
 
 import styles from './Input.module.scss';
 
@@ -26,6 +27,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                     ref={ref}
                     {...props}
                 />
+                <ErrorMessage>{error}</ErrorMessage>
             </label>
         );
     }

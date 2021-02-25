@@ -9,6 +9,7 @@ import { CommonFieldProps } from '../common';
 import Checkmark from '../../../../resources/svg/checkmark-blue.svg';
 
 import styles from './Checkbox.module.scss';
+import ErrorMessage from '../ErrorMessage';
 
 export interface CheckboxProps
     extends CommonFieldProps,
@@ -30,24 +31,27 @@ export interface CheckboxProps
 const Checkbox = forwardRef<HTMLInputElement, PropsWithChildren<CheckboxProps>>(
     ({ children, error, className, size = 'regular', ...props }, ref) => {
         return (
-            <label
-                className={clsx(
-                    styles.root,
-                    error !== undefined && styles.rootInvalid,
-                    className
-                )}
-            >
-                <input type="checkbox" ref={ref} {...props} />
-                <div
+            <div>
+                <label
                     className={clsx(
-                        styles.checkbox,
-                        size === 'large' && styles.checkboxLarge
+                        styles.root,
+                        error !== undefined && styles.rootInvalid,
+                        className
                     )}
                 >
-                    <Checkmark />
-                </div>
-                {children && <div className={styles.text}>{children}</div>}
-            </label>
+                    <input type="checkbox" ref={ref} {...props} />
+                    <div
+                        className={clsx(
+                            styles.checkbox,
+                            size === 'large' && styles.checkboxLarge
+                        )}
+                    >
+                        <Checkmark />
+                    </div>
+                    {children && <div className={styles.text}>{children}</div>}
+                </label>
+                <ErrorMessage>{error}</ErrorMessage>
+            </div>
         );
     }
 );
