@@ -1,15 +1,13 @@
 import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
-import Input from '../Input';
+import TextArea from '../TextArea';
 
 import { argTypes, Template } from './deps';
 
-<Meta title="Components/Form/Fields/Input" component={Input} argTypes={argTypes} />
+<Meta title="Components/Form/Fields/TextArea" component={TextArea} argTypes={argTypes} />
 
-# Input
+# TextArea
 
-The Input component allows the same props as a regular `<input type="text|number|email|phone|etc..." />`, with the addition of `error`.
-
-**DO NOT** use this for checkboxes or radio buttons; use the respective components for those.
+The TextArea component allows the same props as a regular `<textarea />`, with the addition of `error`.
 
 <Canvas>
     <Story name="Primary" args={{
@@ -20,7 +18,7 @@ The Input component allows the same props as a regular `<input type="text|number
     </Story>
 </Canvas>
 
-The following are the most important props to work with `Input`:
+The following are the most important props to work with `TextArea`:
 
 <ArgsTable story="Primary" />
 
@@ -35,4 +33,3 @@ The following are the most important props to work with `Input`:
         {Template.bind({})}
     </Story>
 </Canvas>
-
