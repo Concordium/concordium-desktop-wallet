@@ -1,5 +1,6 @@
 import { parse } from 'json-bigint';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import { Authorizations } from '../NodeApiTypes';
 import {
     UpdateComponent,
     TransactionHandler,
@@ -53,6 +54,10 @@ class HandlerTypeMiddleware<T>
 
     view(transaction: UpdateInstruction<UpdateInstructionPayload>) {
         return this.base.view(this.base.confirmType(transaction));
+    }
+
+    getAuthorization(authorizations: Authorizations) {
+        return this.base.getAuthorization(authorizations);
     }
 }
 

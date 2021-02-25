@@ -2,6 +2,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { getGovernancePath } from '../../features/ledger/Path';
 import MintDistributionView from '../../pages/multisig/MintDistributionView';
 import UpdateMintDistribution from '../../pages/multisig/UpdateMintDistribution';
+import { Authorizations } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     isMintDistribution,
@@ -42,6 +43,10 @@ export default class MintDistributionHandler
 
     view(transaction: TransactionType) {
         return MintDistributionView({ mintDistribution: transaction.payload });
+    }
+
+    getAuthorization(authorizations: Authorizations) {
+        return authorizations.mintDistribution;
     }
 
     update = UpdateMintDistribution;

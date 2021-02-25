@@ -2,6 +2,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { getGovernancePath } from '../../features/ledger/Path';
 import MicroGtuPerEuroView from '../../pages/multisig/MicroGtuPerEuroView';
 import UpdateMicroGtuPerEuro from '../../pages/multisig/UpdateMicroGtuPerEuro';
+import { Authorizations } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     ExchangeRate,
@@ -42,6 +43,10 @@ export default class MicroGtuPerEuroHandler
 
     view(transaction: TransactionType) {
         return MicroGtuPerEuroView({ exchangeRate: transaction.payload });
+    }
+
+    getAuthorization(authorizations: Authorizations) {
+        return authorizations.microGTUPerEuro;
     }
 
     update = UpdateMicroGtuPerEuro;

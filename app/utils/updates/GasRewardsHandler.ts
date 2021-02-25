@@ -2,6 +2,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { getGovernancePath } from '../../features/ledger/Path';
 import GasRewardsView from '../../pages/multisig/GasRewardsView';
 import UpdateGasRewards from '../../pages/multisig/UpdateGasRewards';
+import { Authorizations } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     GasRewards,
@@ -42,6 +43,10 @@ export default class GasRewardsHandler
 
     view(transaction: TransactionType) {
         return GasRewardsView({ gasRewards: transaction.payload });
+    }
+
+    getAuthorization(authorizations: Authorizations) {
+        return authorizations.paramGASRewards;
     }
 
     update = UpdateGasRewards;

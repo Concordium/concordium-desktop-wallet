@@ -2,6 +2,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { getGovernancePath } from '../../features/ledger/Path';
 import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
 import UpdateFoundationAccount from '../../pages/multisig/UpdateFoundationAccount';
+import { Authorizations } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     FoundationAccount,
@@ -44,6 +45,10 @@ export default class FoundationAccountHandler
         return FoundationAccountView({
             foundationAccount: transaction.payload,
         });
+    }
+
+    getAuthorization(authorizations: Authorizations) {
+        return authorizations.foundationAccount;
     }
 
     update = UpdateFoundationAccount;

@@ -2,6 +2,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { getGovernancePath } from '../../features/ledger/Path';
 import ProtocolUpdateView from '../../pages/multisig/ProtocolUpdateView';
 import UpdateProtocol from '../../pages/multisig/UpdateProtocol';
+import { Authorizations } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     isProtocolUpdate,
@@ -42,6 +43,10 @@ export default class ProtocolUpdateHandler
 
     view(transaction: TransactionType) {
         return ProtocolUpdateView({ protocolUpdate: transaction.payload });
+    }
+
+    getAuthorization(authorizations: Authorizations) {
+        return authorizations.protocol;
     }
 
     update = UpdateProtocol;

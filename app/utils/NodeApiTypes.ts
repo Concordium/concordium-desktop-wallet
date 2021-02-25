@@ -33,7 +33,7 @@ interface UpdateQueues {
     gasRewards: UpdateQueue;
 }
 
-interface Authorization {
+export interface Authorization {
     threshold: number;
     authorizedKeys: number[];
 }
@@ -43,7 +43,7 @@ export interface Key {
     schemeId: string;
 }
 
-interface Authorizations {
+export interface Authorizations {
     microGTUPerEuro: Authorization;
     euroPerEnergy: Authorization;
     transactionFeeDistribution: Authorization;

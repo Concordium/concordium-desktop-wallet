@@ -62,7 +62,15 @@ async function isSignatureValid(
             handler.serializePayload(proposal)
         )
     );
-    const authorizationKeys = blockSummary.updates.authorizations.keys;
+
+    const authorizedKeyIndices = handler.getAuthorization(
+        blockSummary.updates.authorizations
+    ).authorizedKeys;
+    const authorizationKeys = blockSummary.updates.authorizations.keys.filter(
+        (_key, index) => {
+            return authorizedKeyIndices.includes(index);
+        }
+    );
 
     for (let i = 0; i < authorizationKeys.length; i += 1) {
         const key = authorizationKeys[i];
