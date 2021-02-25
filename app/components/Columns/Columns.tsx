@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import React, {
     Children,
     cloneElement,
+    FC,
     ReactElement,
     useCallback,
     useMemo,
@@ -72,5 +73,6 @@ function Columns({
 }
 
 Columns.Column = Column;
+(Columns.Column as FC).displayName = 'Columns.Column';
 
 export default Columns;
