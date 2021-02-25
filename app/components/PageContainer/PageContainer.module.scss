@@ -5,7 +5,7 @@
     max-width: 1600px;
     margin: 0 auto;
     padding: 0 48px;
-    height: calc(100vh - $page-header-height);
+    height: calc(100vh - #{$page-header-height});
     overflow: auto;
 
     &Boxed {

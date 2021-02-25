@@ -3,7 +3,7 @@ import React, { PropsWithChildren } from 'react';
 
 import styles from './PageContainer.module.scss';
 
-interface PageContainerProps {
+export interface PageContainerProps {
     boxed?: boolean;
 }
 
