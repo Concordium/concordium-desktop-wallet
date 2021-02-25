@@ -12,6 +12,7 @@ import {
     AccountTransaction,
     instanceOfScheduledTransfer,
     instanceOfSimpleTransfer,
+    instanceOfTransferToEncrypted,
     TransactionPayload,
     TimeStampUnit,
 } from '../../utils/types';
@@ -29,7 +30,10 @@ function getAmount(transaction: AccountTransaction) {
     if (instanceOfScheduledTransfer(transaction)) {
         return getScheduledTransferAmount(transaction);
     }
-    if (instanceOfSimpleTransfer(transaction)) {
+    if (
+        instanceOfSimpleTransfer(transaction) ||
+        instanceOfTransferToEncrypted(transaction)
+    ) {
         return transaction.payload.amount;
     }
     throw new Error('Unsupported transaction type - please implement');
@@ -46,6 +50,20 @@ function displayNote(transaction: AccountTransaction<TransactionPayload>) {
                         transaction.payload.schedule[0].timestamp,
                         TimeStampUnit.milliSeconds
                     )}
+                </Table.Cell>
+            </Table.Row>
+        );
+    }
+    return null;
+}
+
+function displayRecipient(recipient: AddressBookEntry) {
+    if (recipient) {
+        return (
+            <Table.Row>
+                <Table.Cell>To:</Table.Cell>
+                <Table.Cell textAlign="right">
+                    {recipient.name} <Label>{recipient.address}</Label>
                 </Table.Cell>
             </Table.Row>
         );
@@ -84,13 +102,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
                             </Table.Cell>
                         </Table.Row>
                         {displayNote(transaction)}
-                        <Table.Row>
-                            <Table.Cell>To:</Table.Cell>
-                            <Table.Cell textAlign="right">
-                                {recipient.name}{' '}
-                                <Label>{recipient.address}</Label>
-                            </Table.Cell>
-                        </Table.Row>
+                        {displayRecipient(recipient)}
                     </Table.Body>
                 </Table>
                 <Link to={routes.ACCOUNTS}>

@@ -6,6 +6,7 @@ import {
     SimpleTransferPayload,
     SchedulePoint,
     TransactionPayload,
+    TransferToEncryptedPayload,
 } from './types';
 import {
     encodeWord16,
@@ -53,6 +54,15 @@ function serializeTransferWithSchedule(payload: ScheduledTransferPayload) {
     );
 }
 
+function serializeTransferToEncypted(payload: TransferToEncryptedPayload) {
+    const size = 1 + 8;
+    const serialized = new Uint8Array(size);
+
+    serialized[0] = TransactionKind.Transfer_to_encrypted;
+    put(serialized, 1, encodeWord64(BigInt(payload.amount)));
+    return serialized;
+}
+
 export function serializeTransactionHeader(
     sender: string,
     nonce: string,
@@ -82,6 +92,10 @@ export function serializeTransferPayload(
         case TransactionKind.Transfer_with_schedule:
             return serializeTransferWithSchedule(
                 payload as ScheduledTransferPayload
+            );
+        case TransactionKind.Transfer_to_encrypted:
+            return serializeTransferToEncypted(
+                payload as TransferToEncryptedPayload
             );
         default:
             throw new Error('Unsupported transactionkind');

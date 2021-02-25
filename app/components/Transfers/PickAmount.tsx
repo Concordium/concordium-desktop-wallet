@@ -4,11 +4,11 @@ import { AddressBookEntry } from '../../utils/types';
 import { getGTUSymbol, isValidGTUString } from '../../utils/gtu';
 
 interface Props {
-    recipient: AddressBookEntry | undefined;
+    recipient?: AddressBookEntry | undefined;
     amount: string;
     header: string;
     setAmount(amount: string): void;
-    toPickRecipient(): void;
+    toPickRecipient?(): void;
     toConfirmTransfer(): void;
 }
 
@@ -46,13 +46,18 @@ export default function PickAmount({
                     label={{ basic: true, content: getGTUSymbol() }}
                 />
                 <Button.Group vertical>
-                    <Button onClick={toPickRecipient}>
-                        {recipient ? recipient.name : 'Select Recipient'}
-                    </Button>
+                    {toPickRecipient ? (
+                        <Button onClick={toPickRecipient}>
+                            {recipient ? recipient.name : 'Select Recipient'}
+                        </Button>
+                    ) : null}
                     <Button
                         positive
                         onClick={toConfirmTransfer}
-                        disabled={!recipient || !validInput}
+                        disabled={
+                            (!recipient && toPickRecipient !== undefined) ||
+                            !validInput
+                        }
                     >
                         Continue
                     </Button>

@@ -9,6 +9,8 @@ import {
     instanceOfSimpleTransfer,
     ScheduledTransfer,
     instanceOfScheduledTransfer,
+    TransferToEncrypted,
+    instanceOfTransferToEncrypted,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 
@@ -72,7 +74,12 @@ export function convertIncomingTransaction(
 // Return type for the functions for specific transaction types
 type TypeSpecific = Pick<
     TransferTransaction,
-    'transactionKind' | 'total' | 'subtotal' | 'schedule'
+    | 'transactionKind'
+    | 'total'
+    | 'subtotal'
+    | 'schedule'
+    | 'toAddress'
+    | 'decryptedAmount'
 >;
 
 // Convert the type specific fields of a Simple transfer for an Account Transaction.
@@ -84,6 +91,23 @@ function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
         transactionKind: TransactionKindString.Transfer,
         total: (-estimatedTotal).toString(),
         subtotal: (-amount).toString(),
+        toAddress: transaction.payload.toAddress,
+    };
+}
+
+// Convert the type specific fields of a Simple transfer for an Account Transaction.
+function convertTransferToEncrypted(
+    transaction: TransferToEncrypted
+): TypeSpecific {
+    const amount = BigInt(transaction.payload.amount);
+    const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
+
+    return {
+        transactionKind: TransactionKindString.Transfer,
+        total: (-estimatedTotal).toString(),
+        subtotal: (-amount).toString(),
+        decryptedAmount: amount.toString(),
+        toAddress: transaction.sender,
     };
 }
 
@@ -99,6 +123,7 @@ function convertScheduledTransfer(
         total: (-estimatedTotal).toString(),
         subtotal: (-amount).toString(),
         schedule: JSON.stringify(transaction.payload.schedule),
+        toAddress: transaction.payload.toAddress,
     };
 }
 
@@ -115,6 +140,8 @@ export function convertAccountTransaction(
         typeSpecific = convertSimpleTransfer(transaction);
     } else if (instanceOfScheduledTransfer(transaction)) {
         typeSpecific = convertScheduledTransfer(transaction);
+    } else if (instanceOfTransferToEncrypted(transaction)) {
+        typeSpecific = convertTransferToEncrypted(transaction);
     } else {
         throw new Error('unsupported transaction type - please implement');
     }
@@ -126,7 +153,6 @@ export function convertAccountTransaction(
         transactionHash: hash,
         cost: transaction.energyAmount, // Fix this: convert from energy to cost
         fromAddress: transaction.sender,
-        toAddress: transaction.payload.toAddress,
         blockTime: (Date.now() / 1000).toString(), // Temporary value, unless it fails
         status: TransactionStatus.Pending,
         ...typeSpecific,

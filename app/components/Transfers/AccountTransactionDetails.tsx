@@ -3,12 +3,14 @@ import { useSelector } from 'react-redux';
 import {
     AccountTransaction,
     instanceOfSimpleTransfer,
+    instanceOfTransferToEncrypted,
     instanceOfScheduledTransfer,
 } from '../../utils/types';
 import { lookupName } from '../../utils/transactionHelpers';
 import { chosenAccountSelector } from '../../features/AccountSlice';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
 import SimpleTransferDetails from './DisplaySimpleTransfer';
+import TransferToEncryptedDetails from './ShieldTransferDetails';
 
 interface Props {
     transaction: AccountTransaction;
@@ -24,9 +26,11 @@ export default function AccountTransactionDetails({ transaction }: Props) {
     const [toName, setToName] = useState<string | undefined>();
 
     useEffect(() => {
-        lookupName(transaction.payload.toAddress)
-            .then((name) => setToName(name))
-            .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
+        if ('toAddress' in transaction.payload) {
+            lookupName(transaction.payload.toAddress)
+                .then((name) => setToName(name))
+                .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
+        }
     });
 
     if (instanceOfSimpleTransfer(transaction)) {
@@ -34,6 +38,14 @@ export default function AccountTransactionDetails({ transaction }: Props) {
             <SimpleTransferDetails
                 transaction={transaction}
                 toName={toName}
+                fromName={fromName}
+            />
+        );
+    }
+    if (instanceOfTransferToEncrypted(transaction)) {
+        return (
+            <TransferToEncryptedDetails
+                transaction={transaction}
                 fromName={fromName}
             />
         );

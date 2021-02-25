@@ -9,6 +9,7 @@ import {
     TransactionStatus,
     ScheduledTransfer,
     SchedulePoint,
+    TransferToEncrypted,
 } from './types';
 
 /**
@@ -72,6 +73,26 @@ export async function createSimpleTransferTransaction(
         transactionKind: TransactionKindId.Simple_transfer,
         payload: {
             toAddress,
+            amount: amount.toString(),
+        },
+    };
+    return transferTransaction;
+}
+
+export async function createShieldAmountTransaction(
+    address: string,
+    amount: BigInt,
+    expiry: string = getDefaultExpiry(),
+    energyAmount = '1000'
+) {
+    const { nonce } = await getNextAccountNonce(address);
+    const transferTransaction: TransferToEncrypted = {
+        sender: address,
+        nonce,
+        energyAmount, // TODO: Does this need to be set by the user?
+        expiry,
+        transactionKind: TransactionKindId.Transfer_to_encrypted,
+        payload: {
             amount: amount.toString(),
         },
     };
