@@ -24,6 +24,7 @@ import {
     MultiSignatureTransactionStatus,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateInstructionSignature,
 } from '../../utils/types';
 import { saveFile } from '../../utils/FileHelper';
 import DragAndDropFile from '../../components/DragAndDropFile';
@@ -52,7 +53,7 @@ import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
  */
 async function isSignatureValid(
     proposal: UpdateInstruction<UpdateInstructionPayload>,
-    signature: string,
+    signature: UpdateInstructionSignature,
     blockSummary: BlockSummary
 ): Promise<boolean> {
     const handler = findHandler(proposal.type);
@@ -63,28 +64,15 @@ async function isSignatureValid(
         )
     );
 
-    const authorizedKeyIndices = handler.getAuthorization(
-        blockSummary.updates.authorizations
-    ).authorizedKeys;
-    const authorizationKeys = blockSummary.updates.authorizations.keys.filter(
-        (_key, index) => {
-            return authorizedKeyIndices.includes(index);
-        }
+    const matchingKey =
+        blockSummary.updates.authorizations.keys[
+            signature.authorizationKeyIndex
+        ];
+    return ed.verify(
+        signature.signature,
+        transactionHash,
+        matchingKey.verifyKey
     );
-
-    for (let i = 0; i < authorizationKeys.length; i += 1) {
-        const key = authorizationKeys[i];
-        // eslint-disable-next-line no-await-in-loop
-        const validKey = await ed.verify(
-            signature,
-            transactionHash,
-            key.verifyKey
-        );
-        if (validKey) {
-            return true;
-        }
-    }
-    return false;
 }
 
 /**
@@ -164,7 +152,7 @@ export default function ProposalView() {
                     );
                     validSignature = await isSignatureValid(
                         proposal,
-                        signature.signature,
+                        signature,
                         blockSummary
                     );
                 } catch (error) {

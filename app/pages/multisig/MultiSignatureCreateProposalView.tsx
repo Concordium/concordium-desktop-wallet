@@ -81,19 +81,16 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                 blockSummary.updates.authorizations
             ).authorizedKeys;
 
-            const indexedAuthorizationKeys = blockSummary.updates.authorizations.keys.map(
-                (key, index) => {
+            const matchingKey = blockSummary.updates.authorizations.keys
+                .map((key, index) => {
                     return { index, key };
-                }
-            );
-
-            const authorizationKeys = indexedAuthorizationKeys.filter((key) => {
-                return authorizedKeyIndices.includes(key.index);
-            });
-
-            const matchingKey = authorizationKeys.find((indexedKey) => {
-                return indexedKey.key.verifyKey === authorizationKey;
-            });
+                })
+                .filter((key) => {
+                    return authorizedKeyIndices.includes(key.index);
+                })
+                .find((indexedKey) => {
+                    return indexedKey.key.verifyKey === authorizationKey;
+                });
 
             if (!matchingKey) {
                 throw new Error(
