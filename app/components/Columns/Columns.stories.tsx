@@ -80,10 +80,6 @@ WithScrollableColumns.args = {
 export const VariableSize = Template.bind({});
 VariableSize.args = {
     // eslint-disable-next-line react/jsx-key
-    children: [
-        col(),
-        scrollCol(450, 300, { className: 'sb-col-var-2', noResize: true }),
-    ],
+    children: [col(), scrollCol(450, 300, { noResize: true })],
     divider: true,
-    varyingColumnSize: true,
 };

@@ -21,7 +21,6 @@ export interface ColumnsProps {
      * Must be 2 <Columns.Column />
      */
     children: [ReactElement<ColumnProps>, ReactElement<ColumnProps>];
-    varyingColumnSize?: boolean;
     className?: string;
     /**
      * @description
@@ -43,20 +42,15 @@ export interface ColumnsProps {
 function Columns({
     children,
     divider = false,
-    varyingColumnSize = true,
     className,
     columnClassName,
 }: ColumnsProps): JSX.Element {
     const getColProps = useCallback(
         (col: ReactElement<ColumnProps>) => ({
             ...col.props,
-            className: clsx(
-                columnClassName,
-                varyingColumnSize && styles.columnVaryingSize,
-                col.props.className
-            ),
+            className: clsx(columnClassName, col.props.className),
         }),
-        [columnClassName, varyingColumnSize]
+        [columnClassName]
     );
 
     const enrichedChildren = useMemo(

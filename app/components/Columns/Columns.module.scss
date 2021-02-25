@@ -36,9 +36,6 @@
 
     &NoResize {
         flex-grow: 0;
-    }
-
-    &VaryingSize {
         flex-basis: auto;
     }
 }
