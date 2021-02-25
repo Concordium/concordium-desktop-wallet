@@ -112,6 +112,8 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
         setMessage(
             'Export your public-key to verify that it is an authorized key.'
         );
+        // TODO Purpose will quite likely be dynamically set based on the update type,
+        // when the update authorization transactions have been re-done.
         setPublicKey(
             (
                 await ledger.getPublicKey(
@@ -155,16 +157,20 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
             <Segment>
                 <Header>Transaction Proposal | {displayType}</Header>
                 <Divider />
-                {blockSummary ? (
+                {!publicKey && blockSummary && (
+                    <>
+                        Please export your public-key, to verify that it is
+                        authorized for this update.
+                        <LedgerComponent ledgerCall={exportPublicKey} />
+                    </>
+                )}
+                {blockSummary && publicKey ? (
                     <UpdateComponent
                         blockSummary={blockSummary}
                         forwardTransaction={forwardTransactionToSigningPage}
                     />
                 ) : null}
             </Segment>
-            {!publicKey && blockSummary && (
-                <LedgerComponent ledgerCall={exportPublicKey} />
-            )}
         </Segment>
     );
 }
