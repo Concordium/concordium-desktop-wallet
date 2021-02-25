@@ -28,6 +28,7 @@ export interface ColumnsProps {
      * Used to override column styling
      */
     columnClassName?: string;
+    columnScroll?: boolean;
 }
 
 /**
@@ -43,6 +44,7 @@ export interface ColumnsProps {
 function Columns({
     children,
     divider = false,
+    columnScroll = false,
     className,
     columnClassName,
 }: ColumnsProps): JSX.Element {
@@ -63,7 +65,8 @@ function Columns({
         <div
             className={clsx(
                 styles.root,
-                divider && styles.rootWithDivider,
+                divider && styles.rootDivider,
+                columnScroll && styles.rootColumnScroll,
                 className
             )}
         >

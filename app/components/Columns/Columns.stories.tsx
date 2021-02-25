@@ -2,6 +2,7 @@ import React from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
 
+import clsx from 'clsx';
 import Columns, { ColumnsProps } from './Columns';
 import { ColumnProps } from './Column';
 
@@ -22,12 +23,17 @@ export default {
                 <style>
                     {`
                         .sb-col-inner {
-                            height: 100%;
-                            background-color: lightgrey;
+                            height: 200px;
                             width: 100%;
+                            background-color: lightgrey;
                             display: flex;
                             justify-content: center;
                             align-items: center;
+                        }
+
+                        .sb-columns {
+                            height: 400px;
+                            background-color: white;
                         }
                     `}
                 </style>
@@ -38,9 +44,7 @@ export default {
 } as Meta;
 
 const Template: Story<ColumnsProps> = (args) => (
-    <div style={{ height: '400px', backgroundColor: 'white' }}>
-        <Columns {...args} />
-    </div>
+    <Columns {...args} className={clsx('sb-columns', args.className)} />
 );
 
 const col = (props: ColumnProps = {}) => (
@@ -75,6 +79,7 @@ WithScrollableColumns.args = {
     // eslint-disable-next-line react/jsx-key
     children: [scrollCol(800), scrollCol(450)],
     divider: true,
+    columnScroll: true,
 };
 
 export const VariableSize = Template.bind({});
@@ -82,4 +87,5 @@ VariableSize.args = {
     // eslint-disable-next-line react/jsx-key
     children: [col(), scrollCol(450, 300, { noResize: true })],
     divider: true,
+    columnScroll: true,
 };

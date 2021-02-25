@@ -5,12 +5,13 @@
     display: flex;
     flex-wrap: nowrap;
     justify-content: space-around;
-    height: 100%;
 
-    &WithDivider {
+    &Divider {
         &::before {
             content: '';
             display: block;
+            flex-basis: 1px;
+            flex-shrink: 0;
             margin: 20px 0;
             width: 1px;
             order: 2;
@@ -24,15 +25,22 @@
             order: 3;
         }
     }
+
+    &ColumnScroll {
+        height: 100%;
+    }
 }
 
 .column {
     flex: 1 0 50%;
-    height: 100%;
     padding: 40px;
-    overflow-y: auto;
     display: flex;
     justify-content: center;
+
+    .rootColumnScroll & {
+        height: 100%;
+        overflow-y: auto;
+    }
 
     &NoResize {
         flex-grow: 0;
