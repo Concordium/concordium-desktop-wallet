@@ -2,7 +2,7 @@ import React from 'react';
 import { Grid } from 'semantic-ui-react';
 import AddressBookList from './AddressBookList';
 import AddressBookElementView from './AddressBookElementView';
-import PageHeader from '../../components/PageHeader';
+import PageHeader from '../../components/PageLayout/PageHeader';
 
 import PlusIcon from '../../../resources/svg/plus.svg';
 import UpsertAddress from '../../components/UpsertAddress';

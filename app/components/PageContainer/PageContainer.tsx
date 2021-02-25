@@ -8,6 +8,10 @@ export interface PageContainerProps {
     className?: string;
 }
 
+/**
+ * @description
+ *
+ */
 export default function PageContainer({
     children,
     boxed = false,

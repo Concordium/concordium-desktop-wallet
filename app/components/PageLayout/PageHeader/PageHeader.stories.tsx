@@ -3,10 +3,10 @@ import React from 'react';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import PageHeader, { PageHeaderProps } from './PageHeader';
 import PageHeaderButton from './PageHeaderButton';
-import PlusIcon from '../../../resources/svg/plus.svg';
+import PlusIcon from '../../../../resources/svg/plus.svg';
 
 export default {
-    title: 'Components/Page Header',
+    title: 'Components/Page Layout/Page Header',
     component: PageHeader,
     subcomponents: {
         'PageHeader.Button': PageHeaderButton,

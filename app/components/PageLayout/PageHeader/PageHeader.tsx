@@ -3,7 +3,7 @@ import React, { FC, ReactElement, useMemo } from 'react';
 import PageHeaderButton, { PageHeaderButtonProps } from './PageHeaderButton';
 
 import styles from './PageHeader.module.scss';
-import { WithAsProp } from '../../utils/types';
+import { WithAsProp } from '../../../utils/types';
 
 export interface PageHeaderProps {
     children: ReactElement | ReactElement[];

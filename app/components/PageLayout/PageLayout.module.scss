@@ -1,0 +1,17 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.header {
+    flex: 0 0 auto;
+}
+
+.content {
+    flex: 1 1 100%;
+    min-width: 1000px;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 48px;
+}
