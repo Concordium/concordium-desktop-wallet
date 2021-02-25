@@ -68,7 +68,6 @@ $handle-scale: scale(1.02);
     transform: translate(0, 0) $handle-scale;
     box-shadow: 0 0 4px $color-grey;
     transition: transform $switch-transition;
-
     input:checked ~ & {
         transform: translate($switch-width - $handle-size, 0) $handle-scale;
     }

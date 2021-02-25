@@ -10,7 +10,7 @@ import Checkmark from '../../../../resources/svg/checkmark-blue.svg';
 
 import styles from './Checkbox.module.scss';
 
-interface CheckboxProps
+export interface CheckboxProps
     extends CommonFieldProps,
         Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
     /**

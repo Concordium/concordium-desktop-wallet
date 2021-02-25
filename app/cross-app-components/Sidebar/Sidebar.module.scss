@@ -54,6 +54,12 @@ $sidebar-link-height: $page-header-height;
     .item:not(.itemActive):focus & {
         transform: scale(1.1);
     }
+
+    &:focus,
+    &:hover {
+        color: inherit;
+        outline: none;
+    }
 }
 
 .title {
