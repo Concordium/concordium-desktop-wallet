@@ -16,13 +16,14 @@ import routes from '../../constants/routes.json';
 import TransactionHashView from '../../components/TransactionHashView';
 import TransactionDetails from '../../components/TransactionDetails';
 import { saveFile } from '../../utils/FileHelper';
+import { UpdateInstructionSignature } from '../../utils/types';
 
 interface Props {
     location: LocationDescriptorObject<Input>;
 }
 
 interface Input {
-    signature: string;
+    signature: UpdateInstructionSignature;
     transaction: string;
     transactionHash: string;
 }
