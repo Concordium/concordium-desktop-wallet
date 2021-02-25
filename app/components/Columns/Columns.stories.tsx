@@ -17,9 +17,13 @@ export default {
                             height: 100%;
                             background-color: lightgrey;
                             width: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
                         }
                         .sb-col-var-2 {
-                            flex: 0 0 400px;
+                            flex-grow: 0;
+                            flex-basis: 400px;
                         }
                     `}
                 </style>

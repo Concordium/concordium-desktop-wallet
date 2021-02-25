@@ -27,11 +27,11 @@
 }
 
 .column {
-    flex: 1;
+    flex-grow: 1;
+    flex-shrink: 0;
     height: 100%;
     padding: 40px;
-    overflow: auto;
-    flex-basis: auto;
+    overflow-y: auto;
     display: flex;
     justify-content: center;
 }
