@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import PageContainer, { PageContainerProps } from './PageContainer';
 
 export default {
-    title: 'Components/Page Container',
+    title: 'Components/Page Layout/Page Container',
     component: PageContainer,
     decorators: [
         (story) => (
@@ -16,7 +16,6 @@ export default {
                         .sb-page-container {
                             height: 800px;
                             min-width: 900px;
-                            border: 1px solid grey;
                         }
                     `}
                 </style>
@@ -35,15 +34,5 @@ const Template: Story<PropsWithChildren<PageContainerProps>> = (args) => (
 
 export const Primary = Template.bind({});
 Primary.args = {
-    children: (
-        <h1 style={{ marginTop: '40px', textAlign: 'center' }}>Box content</h1>
-    ),
-};
-
-export const Boxed = Template.bind({});
-Boxed.args = {
-    children: (
-        <h1 style={{ marginTop: '40px', textAlign: 'center' }}>Box content</h1>
-    ),
-    boxed: true,
+    children: <h1>Content</h1>,
 };

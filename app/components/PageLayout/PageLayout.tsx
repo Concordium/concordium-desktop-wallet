@@ -1,4 +1,5 @@
 import React, { FC, PropsWithChildren, ReactElement, useMemo } from 'react';
+import PageContainer from './PageContainer';
 
 import PageHeader, { PageHeaderProps } from './PageHeader/PageHeader';
 import styles from './PageLayout.module.scss';
@@ -34,5 +35,8 @@ function PageLayout({ children }: PropsWithChildren<unknown>): JSX.Element {
 PageLayout.Header = PageHeader;
 (PageLayout.Header as FC).displayName = 'PageLayout.Header';
 (PageLayout.Header.Button as FC).displayName = 'PageLayout.Header.Button';
+
+PageLayout.Container = PageContainer;
+(PageLayout.Container as FC).displayName = 'PageLayout.Container';
 
 export default PageLayout;
