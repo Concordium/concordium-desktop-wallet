@@ -1,20 +1,19 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { push } from 'connected-react-router';
-import { Switch, Route, useLocation } from 'react-router-dom';
-import { Card, Button } from 'semantic-ui-react';
+import { Switch, Route } from 'react-router-dom';
+import { Card } from 'semantic-ui-react';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
 } from '../../features/AccountSlice';
 import { updateTransactions } from '../../features/TransactionSlice';
-import styles from './Accounts.module.scss';
 import routes from '../../constants/routes.json';
 import MoreActions from './MoreActions';
 import SimpleTransfer from '../../components/Transfers/SimpleTransfer';
 import ShieldAmount from '../../components/Transfers/ShieldAmount';
 import TransferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
+import AccountViewActions from './AccountViewActions';
 import DecryptComponent from './DecryptComponent';
 import { AccountStatus } from '../../utils/types';
 
@@ -26,12 +25,6 @@ export default function AccountView() {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
-    const location = useLocation();
-    const buttons = [
-        { route: routes.ACCOUNTS_SIMPLETRANSFER, label: 'Send' },
-        { route: routes.ACCOUNTS_SHIELDAMOUNT, label: 'Shield' },
-        { route: routes.ACCOUNTS_MORE, label: 'More' },
-    ];
 
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
@@ -53,18 +46,7 @@ export default function AccountView() {
                 <AccountBalanceView />
             </Card>
             <Card>
-                <Button.Group>
-                    {buttons.map(({ route, label }) => (
-                        <Button
-                            key={route + label}
-                            onClick={() => dispatch(push(route))}
-                            className={styles.accountActionButton}
-                            disabled={location.pathname.startsWith(route)}
-                        >
-                            {label}
-                        </Button>
-                    ))}
-                </Button.Group>
+                <AccountViewActions />
             </Card>
             <Card>
                 <Switch>
