@@ -39,7 +39,7 @@ function AccountListElement({
             {' '}
             + <ShieldImage height="15" />
         </>
-    ); // TODO: Fix height
+    );
 
     return (
         <Grid container columns={2} onClick={() => onClick(false)}>

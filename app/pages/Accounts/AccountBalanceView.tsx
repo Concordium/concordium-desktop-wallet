@@ -16,7 +16,6 @@ import ShieldImage from '../../../resources/svg/shield.svg';
 /**
  * Displays the chosen Account's balance, and contains
  * buttons to toggle whether viewing shielded or unshielded balance/transactions.
- * TODO fix ShieldImage height/colors;
  */
 export default function AccountBalanceView(): JSX.Element | null {
     const dispatch = useDispatch();
