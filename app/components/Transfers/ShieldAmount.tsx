@@ -38,7 +38,6 @@ export default function ShieldAmount({ account }: Props) {
     );
 
     const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
-    console.log(account);
 
     function ChosenComponent() {
         switch (subLocation) {

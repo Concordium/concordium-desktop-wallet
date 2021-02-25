@@ -10,6 +10,7 @@ import {
     TransactionKindString,
 } from '../../utils/types';
 import { chosenAccountSelector } from '../../features/AccountSlice';
+import { viewingShieldedSelector } from '../../features/TransactionSlice';
 import SidedRow from '../../components/SidedRow';
 import { isFailed } from '../../utils/transactionHelpers';
 
@@ -43,11 +44,43 @@ function buildOutgoingAmountStrings(
     };
 }
 
-function buildIncomingAmountStrings(total: bigint) {
+function buildCostFreeAmountString(amount: bigint, negative = false) {
+    const modifier = negative ? -1n : 1n;
     return {
-        amount: `${displayAsGTU(total)}`,
+        amount: `${displayAsGTU(modifier * amount)}`,
         amountFormula: '',
     };
+}
+
+function parseShieldedAmount(
+    transaction: TransferTransaction,
+    isOutgoingTransaction: boolean
+) {
+    if (
+        transaction.transactionKind ===
+        TransactionKindString.TransferToEncrypted
+    ) {
+        return buildCostFreeAmountString(BigInt(transaction.decryptedAmount));
+    }
+    if (
+        transaction.transactionKind ===
+        TransactionKindString.EncryptedAmountTransfer
+    ) {
+        if (transaction.decryptedAmount) {
+            return buildCostFreeAmountString(
+                BigInt(transaction.decryptedAmount),
+                isOutgoingTransaction
+            );
+        }
+        const negative = isOutgoingTransaction ? '-' : '';
+        return {
+            amount: `${negative} ${getGTUSymbol()} ?`,
+            amountFormula: '',
+        };
+    }
+    throw new Error(
+        'Unexpected transaction type when viewing shielded balance.'
+    );
 }
 
 function parseAmount(
@@ -63,19 +96,9 @@ function parseAmount(
                     transaction.transactionKind ===
                     TransactionKindString.EncryptedAmountTransfer
                 ) {
-                    if (transaction.decryptedAmount) {
-                        const total = BigInt(transaction.decryptedAmount);
-                        return buildOutgoingAmountStrings(
-                            total,
-                            total - cost,
-                            cost
-                        );
-                    }
                     return {
-                        amount: `${getGTUSymbol()} ?`,
-                        amountFormula: `${getGTUSymbol()} ? +${displayAsGTU(
-                            cost
-                        )} Fee`,
+                        amount: `${displayAsGTU(-cost)}`,
+                        amountFormula: `${displayAsGTU(cost)} Fee`,
                     };
                 }
                 return buildOutgoingAmountStrings(
@@ -84,21 +107,8 @@ function parseAmount(
                     cost
                 );
             }
-            if (
-                transaction.transactionKind ===
-                TransactionKindString.EncryptedAmountTransfer
-            ) {
-                if (transaction.decryptedAmount) {
-                    return buildIncomingAmountStrings(
-                        BigInt(transaction.decryptedAmount)
-                    );
-                }
-                return {
-                    amount: `${getGTUSymbol()} ?`,
-                    amountFormula: '',
-                };
-            }
-            return buildIncomingAmountStrings(BigInt(transaction.subtotal));
+            // incoming transaction:
+            return buildCostFreeAmountString(BigInt(transaction.subtotal));
 
         default:
             return {
@@ -112,6 +122,8 @@ function displayType(kind: TransactionKindString) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
             return ' (schedule)';
+        case TransactionKindString.TransferToEncrypted:
+            return '(Shielded)';
         default:
             return '';
     }
@@ -141,13 +153,15 @@ interface Props {
  */
 function TransactionListElement({ transaction }: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
+    const viewingShielded = useSelector(viewingShieldedSelector);
     if (!account) {
         throw new Error('Unexpected missing chosen account');
     }
     const isOutgoingTransaction = transaction.fromAddress === account.address;
     const time = parseTime(transaction.blockTime);
     const name = getName(transaction, isOutgoingTransaction);
-    const { amount, amountFormula } = parseAmount(
+    const amountParser = viewingShielded ? parseShieldedAmount : parseAmount;
+    const { amount, amountFormula } = amountParser(
         transaction,
         isOutgoingTransaction
     );
