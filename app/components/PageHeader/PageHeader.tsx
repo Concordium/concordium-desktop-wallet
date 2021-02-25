@@ -1,4 +1,4 @@
-import React, { ReactElement, useMemo } from 'react';
+import React, { FC, ReactElement, useMemo } from 'react';
 
 import PageHeaderButton, { PageHeaderButtonProps } from './PageHeaderButton';
 
@@ -29,7 +29,7 @@ function isPageHeaderButton(
  *   <ComposingComponent as={PageHeader.Button} align="left">+</ComposingComponent>
  * </PageHeader>
  */
-export default function PageHeader({ children }: PageHeaderProps): JSX.Element {
+function PageHeader({ children }: PageHeaderProps): JSX.Element {
     const { heading, rightButtons, leftButtons } = useMemo(() => {
         const reactChildren = React.Children.toArray(
             children
@@ -56,3 +56,6 @@ export default function PageHeader({ children }: PageHeaderProps): JSX.Element {
 }
 
 PageHeader.Button = PageHeaderButton;
+(PageHeader.Button as FC).displayName = 'PageHeader.Button';
+
+export default PageHeader;

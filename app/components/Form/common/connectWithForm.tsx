@@ -42,7 +42,7 @@ export function connectWithFormUncontrolled<
 >(
     Field: ComponentType<TProps>
 ): (
-    props: UncontrolledConnectorProps & Omit<TProps, 'ref' | 'error'>
+    props: Omit<TProps, 'ref' | 'error'> & UncontrolledConnectorProps
 ) => JSX.Element {
     const Connected: ReturnType<typeof connectWithFormUncontrolled> = ({
         rules,
