@@ -2,6 +2,7 @@ import React, { FC, PropsWithChildren, ReactElement, useMemo } from 'react';
 import PageContainer from './PageContainer';
 
 import PageHeader, { PageHeaderProps } from './PageHeader/PageHeader';
+import PageHeaderButton from './PageHeader/PageHeaderButton';
 import styles from './PageLayout.module.scss';
 
 function isPageHeader(el: ReactElement): el is ReactElement<PageHeaderProps> {
@@ -34,7 +35,9 @@ function PageLayout({ children }: PropsWithChildren<unknown>): JSX.Element {
 
 PageLayout.Header = PageHeader;
 (PageLayout.Header as FC).displayName = 'PageLayout.Header';
-(PageLayout.Header.Button as FC).displayName = 'PageLayout.Header.Button';
+
+PageLayout.HeaderButton = PageHeaderButton;
+(PageLayout.HeaderButton as FC).displayName = 'PageLayout.HeaderButton';
 
 PageLayout.Container = PageContainer;
 (PageLayout.Container as FC).displayName = 'PageLayout.Container';
