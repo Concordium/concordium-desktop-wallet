@@ -1,9 +1,9 @@
 import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
 import Input from '../Input';
 
-import { argTypes, Template } from './deps';
+import { argTypes, Template, decorators } from './deps';
 
-<Meta title="Components/Form/Fields/Input" component={Input} argTypes={argTypes} />
+<Meta title="Components/Form/Fields/Input" component={Input} argTypes={argTypes} decorators={decorators} />
 
 # Input
 
@@ -27,7 +27,7 @@ The following are the most important props to work with `Input`:
 ## With label
 
 <Canvas>
-    <Story name="WithLabel" args={{
+    <Story name="With Label" args={{
         placeholder: 'Name',
         name: 'name',
         label: 'Name'

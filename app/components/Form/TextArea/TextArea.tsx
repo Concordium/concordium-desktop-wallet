@@ -36,7 +36,15 @@ export interface TextAreaProps
  */
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     (
-        { error, className, autoScale = true, onChange, rows, label, ...props },
+        {
+            error,
+            className,
+            autoScale = true,
+            onChange,
+            rows = 2,
+            label,
+            ...props
+        },
         ref
     ) => {
         const interceptedRows = useMemo(() => (autoScale ? undefined : rows), [
@@ -62,7 +70,9 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                     return;
                 }
 
-                scaleTextArea(instance);
+                if (autoScale) {
+                    scaleTextArea(instance);
+                }
 
                 if (!ref) {
                     return;
@@ -77,7 +87,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                     };
                 }
             },
-            [ref]
+            [ref, autoScale]
         );
 
         return (

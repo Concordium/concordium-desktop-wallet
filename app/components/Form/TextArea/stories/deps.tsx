@@ -18,4 +18,20 @@ export const argTypes: ArgTypes = {
     },
 };
 
+export const decorators = [
+    (story: () => JSX.Element) => (
+        <>
+            <style>
+                {`
+                    .sb-input-wrapper {
+                        max-width: 300px;
+                        margin: 0 auto;
+                    }
+                `}
+            </style>
+            <div className="sb-input-wrapper">{story()}</div>
+        </>
+    ),
+];
+
 export const Template: Story<TextAreaProps> = (args) => <TextArea {...args} />;
