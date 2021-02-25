@@ -3,7 +3,10 @@ import React, { HTMLAttributes, PropsWithChildren } from 'react';
 
 import styles from './Columns.module.scss';
 
-export type ColumnProps = Pick<HTMLAttributes<HTMLDivElement>, 'className'>;
+export interface ColumnProps
+    extends Pick<HTMLAttributes<HTMLDivElement>, 'className'> {
+    noResize?: boolean;
+}
 
 /**
  * @description
@@ -18,10 +21,18 @@ export type ColumnProps = Pick<HTMLAttributes<HTMLDivElement>, 'className'>;
 export default function Column({
     className,
     children,
+    noResize = false,
     ...props
 }: PropsWithChildren<ColumnProps>): JSX.Element {
     return (
-        <div className={clsx(styles.column, className)} {...props}>
+        <div
+            className={clsx(
+                styles.column,
+                noResize && styles.columnNoResize,
+                className
+            )}
+            {...props}
+        >
             {children}
         </div>
     );

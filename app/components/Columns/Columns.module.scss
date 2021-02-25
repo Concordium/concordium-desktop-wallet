@@ -27,11 +27,18 @@
 }
 
 .column {
-    flex-grow: 1;
-    flex-shrink: 0;
+    flex: 1 0 50%;
     height: 100%;
     padding: 40px;
     overflow-y: auto;
     display: flex;
     justify-content: center;
+
+    &NoResize {
+        flex-grow: 0;
+    }
+
+    &VaryingSize {
+        flex-basis: auto;
+    }
 }

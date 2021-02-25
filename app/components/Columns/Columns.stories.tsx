@@ -8,6 +8,14 @@ import { ColumnProps } from './Column';
 export default {
     title: 'Components/Columns',
     component: Columns,
+    subcomponents: {
+        'Columns.Column': Columns.Column,
+    },
+    argTypes: {
+        children: {
+            description: 'Takes 2 <Columns.Column /> as children',
+        },
+    },
     decorators: [
         (story) => (
             <>
@@ -20,10 +28,6 @@ export default {
                             display: flex;
                             justify-content: center;
                             align-items: center;
-                        }
-                        .sb-col-var-2 {
-                            flex-grow: 0;
-                            flex-basis: 400px;
                         }
                     `}
                 </style>
@@ -58,9 +62,9 @@ WithDivider.args = {
     divider: true,
 };
 
-const scrollCol = (height: number, props: ColumnProps = {}) => (
+const scrollCol = (height: number, width?: number, props: ColumnProps = {}) => (
     <Columns.Column {...props}>
-        <div className="sb-col-inner" style={{ height }}>
+        <div className="sb-col-inner" style={{ height, width }}>
             Scrollable column
         </div>
     </Columns.Column>
@@ -76,5 +80,10 @@ WithScrollableColumns.args = {
 export const VariableSize = Template.bind({});
 VariableSize.args = {
     // eslint-disable-next-line react/jsx-key
-    children: [col(), scrollCol(450, { className: 'sb-col-var-2' })],
+    children: [
+        col(),
+        scrollCol(450, 300, { className: 'sb-col-var-2', noResize: true }),
+    ],
+    divider: true,
+    varyingColumnSize: true,
 };
