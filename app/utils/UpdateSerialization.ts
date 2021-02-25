@@ -10,6 +10,7 @@ import {
     UpdateHeader,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateInstructionSignature,
     UpdateType,
 } from './types';
 
@@ -205,17 +206,20 @@ export function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
  *  - [signatureListLength (keyIndex signatureLength signatureBytes) * signatureListLength]
  *
  * The signatureListLength, keyIndex and signatureLength are all serialized as Word16.
- * @param signatures list of signatures as bytes
+ * @param signatures list of update instruction signatures, i.e. pairs of (key index, signature)
  */
-function serializeUpdateSignatures(signatures: Buffer[]): Buffer {
+function serializeUpdateSignatures(
+    signatures: UpdateInstructionSignature[]
+): Buffer {
     const signatureCount = Buffer.alloc(2);
     signatureCount.writeInt16BE(signatures.length, 0);
 
-    const prefixedSignatures = signatures.reduce((result, signature, index) => {
+    const prefixedSignatures = signatures.reduce((result, signature) => {
         const signaturePrefix = Buffer.alloc(2 + 2);
-        signaturePrefix.writeInt16BE(index, 0);
-        signaturePrefix.writeInt16BE(signature.length, 2);
-        return Buffer.concat([result, signaturePrefix, signature]);
+        signaturePrefix.writeInt16BE(signature.authorizationKeyIndex, 0);
+        const signatureAsBytes = Buffer.from(signature.signature, 'hex');
+        signaturePrefix.writeInt16BE(signatureAsBytes.length, 2);
+        return Buffer.concat([result, signaturePrefix, signatureAsBytes]);
     }, Buffer.alloc(0));
 
     return Buffer.concat([signatureCount, prefixedSignatures]);
@@ -269,11 +273,9 @@ export function serializeUpdateInstruction(
         updateInstruction,
         serializedPayload
     );
-
-    const signaturesAsBytes = updateInstruction.signatures.map((signature) =>
-        Buffer.from(signature, 'hex')
+    const serializedSignatures = serializeUpdateSignatures(
+        updateInstruction.signatures
     );
-    const serializedSignatures = serializeUpdateSignatures(signaturesAsBytes);
 
     const blockItemKind = Buffer.alloc(1);
     blockItemKind.writeInt8(BlockItemKind.UpdateInstructionKind, 0);

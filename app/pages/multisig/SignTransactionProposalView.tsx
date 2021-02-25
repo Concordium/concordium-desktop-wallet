@@ -9,6 +9,7 @@ import {
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateInstructionSignature,
 } from '../../utils/types';
 import { TransactionHandler } from '../../utils/transactionTypes';
 import { createTransactionHandler } from '../../utils/updates/HandlerFinder';
@@ -17,6 +18,11 @@ import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
+
+export interface SignInput {
+    multiSignatureTransaction: MultiSignatureTransaction;
+    authorizedKeyIndex: number;
+}
 
 interface Props {
     location: LocationDescriptorObject<string>;
@@ -36,9 +42,9 @@ export default function SignTransactionProposalView({ location }: Props) {
         );
     }
 
-    const multiSignatureTransaction: MultiSignatureTransaction = parse(
-        location.state
-    );
+    const parsedInput: SignInput = parse(location.state);
+    const { multiSignatureTransaction } = parsedInput;
+
     const { transaction } = multiSignatureTransaction;
     const type = 'UpdateInstruction';
 
@@ -70,9 +76,12 @@ export default function SignTransactionProposalView({ location }: Props) {
             updateInstruction,
             ledger
         );
-        const signature = signatureBytes.toString('hex');
 
-        // Add signature
+        // Set signature
+        const signature: UpdateInstructionSignature = {
+            signature: signatureBytes.toString('hex'),
+            authorizationKeyIndex: parsedInput.authorizedKeyIndex,
+        };
         updateInstruction.signatures = [signature];
 
         const updatedMultiSigTransaction = {

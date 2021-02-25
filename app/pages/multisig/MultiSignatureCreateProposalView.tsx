@@ -9,6 +9,9 @@ import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
 import findHandler from '../../utils/updates/HandlerFinder';
+import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import LedgerComponent from '../../components/ledger/LedgerComponent';
+import { getGovernancePath } from '../../features/ledger/Path';
 
 interface Location {
     state: UpdateType;
@@ -28,11 +31,19 @@ interface Props {
 export default function MultiSignatureCreateProposalView({ location }: Props) {
     const [blockSummary, setBlockSummary] = useState<BlockSummary>();
     const [loading, setLoading] = useState(true);
+    const [publicKey, setPublicKey] = useState<string>();
+    const [
+        authorizedVerifyKeyIndex,
+        setAuthorizedVerifyKeyIndex,
+    ] = useState<number>();
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
     const type: UpdateType = location.state;
     const displayType = UpdateType[type];
+
+    const handler = findHandler(type);
+    const UpdateComponent = handler.update;
 
     /**
      * Forwards the multi signature transactions to the signing page.
@@ -40,16 +51,19 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     async function forwardTransactionToSigningPage(
         multiSignatureTransaction: Partial<MultiSignatureTransaction>
     ) {
+        const signInput = {
+            multiSignatureTransaction,
+            authorizedKeyIndex: authorizedVerifyKeyIndex,
+        };
+
         // Forward the transaction under creation to the signing page.
         dispatch(
             push({
                 pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
-                state: stringify(multiSignatureTransaction),
+                state: stringify(signInput),
             })
         );
     }
-
-    const UpdateComponent = findHandler(type).update;
 
     function updateBlockSummary(blockSummaryInput: BlockSummary) {
         setBlockSummary(blockSummaryInput);
@@ -60,6 +74,53 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
         const consensusStatus: ConsensusStatus = await getConsensusStatus();
         return getBlockSummary(consensusStatus.lastFinalizedBlock);
     }
+
+    async function validateAuthorizationKey(authorizationKey?: string) {
+        if (blockSummary && authorizationKey) {
+            const authorizedKeyIndices = handler.getAuthorization(
+                blockSummary.updates.authorizations
+            ).authorizedKeys;
+
+            const indexedAuthorizationKeys = blockSummary.updates.authorizations.keys.map(
+                (key, index) => {
+                    return { index, key };
+                }
+            );
+
+            const authorizationKeys = indexedAuthorizationKeys.filter((key) => {
+                return authorizedKeyIndices.includes(key.index);
+            });
+
+            const matchingKey = authorizationKeys.find((indexedKey) => {
+                return indexedKey.key.verifyKey === authorizationKey;
+            });
+
+            if (!matchingKey) {
+                throw new Error(
+                    'The used public-key is not authorized for this update type.'
+                );
+            }
+
+            setAuthorizedVerifyKeyIndex(matchingKey.index);
+        }
+    }
+
+    async function exportPublicKey(
+        ledger: ConcordiumLedgerClient,
+        setMessage: (message: string) => void
+    ) {
+        setMessage(
+            'Export your public-key to verify that it is an authorized key.'
+        );
+        setPublicKey(
+            (
+                await ledger.getPublicKey(
+                    getGovernancePath({ purpose: 0, keyIndex: 0 })
+                )
+            ).toString('hex')
+        );
+    }
+
     return (
         <Segment textAlign="center" secondary loading={loading}>
             <Header size="large">Add the proposal details</Header>
@@ -78,6 +139,19 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
             configured node. Verify your node settings, and check that
             the node is running."
             />
+            {publicKey && (
+                <DynamicModal
+                    execution={() => validateAuthorizationKey(publicKey)}
+                    onError={() => {
+                        dispatch(
+                            push({ pathname: routes.MULTISIGTRANSACTIONS })
+                        );
+                    }}
+                    onSuccess={() => {}}
+                    title="Unauthorized key"
+                    content="The key you are using to sign with is not authorized for this type of update"
+                />
+            )}
             <Segment>
                 <Header>Transaction Proposal | {displayType}</Header>
                 <Divider />
@@ -88,6 +162,9 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                     />
                 ) : null}
             </Segment>
+            {!publicKey && blockSummary && (
+                <LedgerComponent ledgerCall={exportPublicKey} />
+            )}
         </Segment>
     );
 }

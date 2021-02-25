@@ -164,7 +164,7 @@ export default function ProposalView() {
                     );
                     validSignature = await isSignatureValid(
                         proposal,
-                        signature,
+                        signature.signature,
                         blockSummary
                     );
                 } catch (error) {
@@ -295,9 +295,9 @@ export default function ProposalView() {
                             <Form>
                                 {instruction.signatures.map((signature) => {
                                     return (
-                                        <Form.Field key={signature}>
+                                        <Form.Field key={signature.signature}>
                                             <Checkbox
-                                                label={`Signed (${signature.substring(
+                                                label={`Signed (${signature.signature.substring(
                                                     0,
                                                     16
                                                 )}...)`}
