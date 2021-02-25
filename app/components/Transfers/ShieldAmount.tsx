@@ -37,7 +37,8 @@ export default function ShieldAmount({ account }: Props) {
         location?.state?.initialPage || locations.pickAmount
     );
 
-    const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
+    // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string>(location?.state?.amount);
 
     function ChosenComponent() {
         switch (subLocation) {
@@ -58,11 +59,23 @@ export default function ShieldAmount({ account }: Props) {
                                 push({
                                     pathname: routes.SUBMITTRANSFER,
                                     state: {
-                                        returnLocation:
-                                            routes.ACCOUNTS_SHIELDAMOUNT,
-                                        returnState: {
-                                            initialPage:
-                                                locations.transferSubmitted,
+                                        confirmed: {
+                                            pathname:
+                                                routes.ACCOUNTS_SHIELDAMOUNT,
+                                            state: {
+                                                initialPage:
+                                                    locations.transferSubmitted,
+                                                transaction,
+                                            },
+                                        },
+                                        cancelled: {
+                                            pathname:
+                                                routes.ACCOUNTS_SHIELDAMOUNT,
+                                            state: {
+                                                initialPage:
+                                                    locations.pickAmount,
+                                                amount,
+                                            },
                                         },
                                         transaction,
                                         account,

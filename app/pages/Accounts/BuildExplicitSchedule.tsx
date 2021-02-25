@@ -14,9 +14,14 @@ import { displayAsGTU, isValidGTUString, toMicroUnits } from '../../utils/gtu';
 import { parseTime, getNow, TimeConstants } from '../../utils/timeHelpers';
 import InputTimeStamp from '../../components/InputTimeStamp';
 
+export interface Defaults {
+    schedule: Schedule;
+}
+
 interface Props {
-    submitSchedule(schedule: Schedule): void;
+    submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
+    defaults: Defaults;
 }
 
 function getDefaultTimestamp() {
@@ -26,13 +31,20 @@ function getDefaultTimestamp() {
 /**
  * Component to build a "explicit" schedule, by adding invidual releases.
  */
-export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
-    const [schedule, setSchedule] = useState<Schedule>([]);
-    const [pointAmount, setAmount] = useState<string>('');
-    const [usedAmount, setUsedAmount] = useState<bigint>(0n);
-
+export default function ExplicitSchedule({
+    submitSchedule,
+    amount,
+    defaults,
+}: Props) {
+    const [schedule, setSchedule] = useState<Schedule>(
+        defaults?.schedule || []
+    );
+    const [usedAmount, setUsedAmount] = useState<bigint>(
+        schedule.reduce((acc, point) => acc + BigInt(point.amount), 0n)
+    );
     const [adding, setAdding] = useState<boolean>(false);
 
+    const [pointAmount, setAmount] = useState<string>('');
     const [pointTimestamp, setTimestamp] = useState<number>(
         getDefaultTimestamp()
     ); // TODO Decide appropiate default
@@ -140,7 +152,7 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
             <List.Item>
                 <Button
                     disabled={usedAmount < amount}
-                    onClick={() => submitSchedule(schedule)}
+                    onClick={() => submitSchedule(schedule, { schedule })}
                 >
                     submit
                 </Button>

@@ -2,7 +2,7 @@ import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
-import { Container, Segment, Header, Grid } from 'semantic-ui-react';
+import { Container, Segment, Header, Grid, Button } from 'semantic-ui-react';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { sendTransaction } from '../../utils/nodeRequests';
 import {
@@ -16,11 +16,16 @@ import { addPendingTransaction } from '../../features/TransactionSlice';
 import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
 
+interface Location {
+    pathname: string;
+    state: Record<string, unknown>;
+}
+
 interface State {
     transaction: AccountTransaction;
     account: Account;
-    returnLocation: string;
-    returnState: Record<string, unknown>;
+    cancelled: Location;
+    confirmed: Location;
 }
 
 interface Props {
@@ -39,12 +44,7 @@ export default function SubmitTransfer({ location }: Props) {
         throw new Error('Unexpected missing state.');
     }
 
-    const {
-        account,
-        transaction,
-        returnLocation,
-        returnState,
-    } = location.state;
+    const { account, transaction, cancelled, confirmed } = location.state;
 
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
@@ -68,12 +68,7 @@ export default function SubmitTransfer({ location }: Props) {
             addPendingTransaction(transaction, transactionHash);
             monitorTransactionStatus(transactionHash);
 
-            dispatch(
-                push({
-                    pathname: returnLocation,
-                    state: { account, transaction, ...returnState },
-                })
-            );
+            dispatch(push(confirmed));
         } else {
             // TODO: handle rejection from node
         }
@@ -82,6 +77,9 @@ export default function SubmitTransfer({ location }: Props) {
     return (
         <Container>
             <Segment>
+                <Button onClick={() => dispatch(push(cancelled))}>
+                    {'<--'}
+                </Button>
                 <Header textAlign="center">
                     Submit the transaction with your hardware wallet
                 </Header>

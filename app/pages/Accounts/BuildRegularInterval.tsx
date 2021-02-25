@@ -17,21 +17,32 @@ export const intervals: Interval[] = [
     { label: 'Month (30 days)', value: TimeConstants.Month },
 ];
 
+export interface Defaults {
+    releases: number;
+    chosenInterval: Interval;
+    startTime: number;
+}
+
 interface Props {
-    submitSchedule(schedule: Schedule): void;
+    defaults: Defaults;
+    submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
 }
 
 /**
  * Component to build a "regular interval" schedule.
  */
-export default function RegularInterval({ submitSchedule, amount }: Props) {
-    const [releases, setReleases] = useState<number>(1);
+export default function RegularInterval({
+    submitSchedule,
+    amount,
+    defaults,
+}: Props) {
+    const [releases, setReleases] = useState<number>(defaults?.releases || 1);
     const [chosenInterval, setChosenInterval] = useState<Interval>(
-        intervals[0]
+        defaults?.chosenInterval || intervals[0]
     );
     const [startTime, setStartTime] = useState<number>(
-        getNow() + 5 * TimeConstants.Minute
+        defaults?.startTime || getNow() + 5 * TimeConstants.Minute
     ); // TODO Decide appropiate default
 
     function createSchedule() {
@@ -41,7 +52,12 @@ export default function RegularInterval({ submitSchedule, amount }: Props) {
             startTime,
             chosenInterval.value
         );
-        submitSchedule(schedule);
+        const recoverState = {
+            releases,
+            startTime,
+            chosenInterval,
+        };
+        submitSchedule(schedule, recoverState);
     }
 
     return (

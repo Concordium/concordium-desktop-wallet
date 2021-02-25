@@ -103,7 +103,7 @@ function convertTransferToEncrypted(
     const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
 
     return {
-        transactionKind: TransactionKindString.Transfer,
+        transactionKind: TransactionKindString.TransferToEncrypted,
         total: (-estimatedTotal).toString(),
         subtotal: (-amount).toString(),
         decryptedAmount: amount.toString(),

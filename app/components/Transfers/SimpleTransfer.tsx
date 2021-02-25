@@ -38,9 +38,9 @@ export default function SimpleTransfer({ account }: Props) {
         location?.state?.initialPage || locations.pickAmount
     );
 
-    const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string>(location?.state?.amount); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
-        undefined
+        location?.state?.recipient
     );
 
     function chooseRecipientOnClick(entry: AddressBookEntry) {
@@ -75,12 +75,25 @@ export default function SimpleTransfer({ account }: Props) {
                                 push({
                                     pathname: routes.SUBMITTRANSFER,
                                     state: {
-                                        returnLocation:
-                                            routes.ACCOUNTS_SIMPLETRANSFER,
-                                        returnState: {
-                                            recipient,
-                                            initialPage:
-                                                locations.transferSubmitted,
+                                        confirmed: {
+                                            pathname:
+                                                routes.ACCOUNTS_SIMPLETRANSFER,
+                                            state: {
+                                                initialPage:
+                                                    locations.transferSubmitted,
+                                                transaction,
+                                                recipient,
+                                            },
+                                        },
+                                        cancelled: {
+                                            pathname:
+                                                routes.ACCOUNTS_SIMPLETRANSFER,
+                                            state: {
+                                                initialPage:
+                                                    locations.pickAmount,
+                                                amount,
+                                                recipient,
+                                            },
                                         },
                                         transaction,
                                         account,
