@@ -4,6 +4,7 @@ import {
     loadAccounts,
     decryptAccountBalance,
 } from '../../features/AccountSlice';
+import { globalSelector } from '../../features/GlobalSlice';
 import {
     transactionsSelector,
     decryptTransactions,
@@ -26,6 +27,7 @@ export default function DecryptComponent({ account }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
+    const global = useSelector(globalSelector);
 
     if (!viewingShielded || account.allDecrypted) {
         return null;
@@ -35,13 +37,16 @@ export default function DecryptComponent({ account }: Props) {
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
+        if (!global) {
+            throw new Error('Unexpected missing global object');
+        }
         setMessage('Please confirm exporting prf key on device');
         const prfKeySeed = await ledger.getPrfKey(account.identityId);
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
-        await decryptAccountBalance(prfKey, account);
-        await decryptTransactions(transactions, prfKey, account);
-        await loadTransactions(account, dispatch);
+        await decryptAccountBalance(prfKey, account, global);
+        await decryptTransactions(transactions, prfKey, account, global);
+        await loadTransactions(account, viewingShielded, dispatch);
         await loadAccounts(dispatch);
     }
 
