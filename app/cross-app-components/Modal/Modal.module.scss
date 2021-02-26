@@ -1,16 +1,23 @@
 @import 'config/bundle';
 
-.root {
+.root,
+.bg {
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
+}
+
+.root {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba($color-off-white, 0.6);
     z-index: 1000;
+}
+
+.bg {
+    background-color: rgba($color-off-white, 0.6);
 }
 
 .modal {

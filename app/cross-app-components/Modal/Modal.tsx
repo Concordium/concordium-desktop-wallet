@@ -8,10 +8,26 @@ import React, {
     useMemo,
     useState,
 } from 'react';
+import { AnimatePresence, motion, Variants, Transition } from 'framer-motion';
 import CloseButton from '../CloseButton';
 import Portal from '../Portal';
 
 import styles from './Modal.module.scss';
+
+const transition: Transition = {
+    ease: 'easeOut',
+    duration: 0.2,
+};
+
+const bgTransitionVariants: Variants = {
+    open: { opacity: 1 },
+    closed: { opacity: 0 },
+};
+
+const modalTransitionVariants: Variants = {
+    open: { opacity: 1, translateY: 0 },
+    closed: { opacity: 0, translateY: 100 },
+};
 
 interface WithOnClick {
     onClick?: MouseEventHandler;
@@ -21,31 +37,55 @@ export interface ModalProps<TTrigger extends WithOnClick> {
     trigger: ReactElement<TTrigger>;
     closeOnEscape?: boolean;
     disableClose?: boolean;
+    isOpen?: boolean;
+    onClose?(): void;
 }
 
 export default function Modal<TTrigger extends WithOnClick>({
     trigger,
     closeOnEscape = true,
     disableClose = false,
+    isOpen: isOpenOverride,
+    onClose,
     children,
 }: PropsWithChildren<ModalProps<TTrigger>>): JSX.Element | null {
-    const [open, setOpen] = useState<boolean>(false);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isExiting, setIsExiting] = useState<boolean>(false);
 
-    const close = useCallback(() => {
-        if (!disableClose) {
-            setOpen(false);
+    const open = useCallback(() => {
+        setIsOpen(true);
+    }, []);
+
+    const close = useCallback(
+        (ignoreDisable = false) => {
+            if (!disableClose || ignoreDisable) {
+                setIsExiting(true);
+            }
+        },
+        [disableClose]
+    );
+
+    useEffect(() => {
+        if (isOpenOverride === undefined) {
+            return;
         }
-    }, [disableClose]);
+
+        if (isOpenOverride) {
+            open();
+        } else {
+            close(true);
+        }
+    }, [isOpenOverride, open, close]);
 
     const onTriggerClick: MouseEventHandler = useCallback(
         (e) => {
-            setOpen(true);
+            open();
 
             if (trigger.props.onClick !== undefined) {
                 trigger.props.onClick(e);
             }
         },
-        [trigger]
+        [trigger, open]
     );
 
     const triggerWithOpen = useMemo(() => {
@@ -68,24 +108,61 @@ export default function Modal<TTrigger extends WithOnClick>({
         if (document) {
             document.addEventListener('keyup', handleKeyUp, true);
         }
+
+        return () => {
+            document.removeEventListener('keyup', handleKeyUp);
+        };
     }, [handleKeyUp]);
 
-    if (!open) {
-        return triggerWithOpen;
-    }
+    const handleExitComplete = useCallback(() => {
+        setIsExiting(false);
+        setIsOpen(false);
+
+        if (onClose !== undefined) {
+            onClose();
+        }
+    }, [onClose]);
 
     return (
         <>
             {triggerWithOpen}
-            <Portal
-                className={styles.root}
-                root={document.getElementById('main-layout')}
-            >
-                <div className={styles.modal}>
-                    <CloseButton className={styles.close} onClick={close} />
-                    {children}
-                </div>
-            </Portal>
+            {isOpen && (
+                <Portal
+                    className={styles.root}
+                    root={document.getElementById('main-layout')}
+                >
+                    <AnimatePresence onExitComplete={handleExitComplete}>
+                        {!isExiting && (
+                            <>
+                                <motion.div
+                                    className={styles.bg}
+                                    initial="closed"
+                                    animate="open"
+                                    exit="closed"
+                                    variants={bgTransitionVariants}
+                                    transition={transition}
+                                />
+                                <motion.div
+                                    className={styles.modal}
+                                    initial="closed"
+                                    animate="open"
+                                    exit="closed"
+                                    variants={modalTransitionVariants}
+                                    transition={transition}
+                                >
+                                    {!disableClose && (
+                                        <CloseButton
+                                            className={styles.close}
+                                            onClick={close}
+                                        />
+                                    )}
+                                    {children}
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
+                </Portal>
+            )}
         </>
     );
 }
