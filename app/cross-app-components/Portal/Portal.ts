@@ -8,12 +8,24 @@ import {
 import ReactDOM from 'react-dom';
 
 interface PortalProps {
+    /**
+     * Override the root of the portal. Defaults to \<body /\>
+     */
     root?: HTMLElement | null;
     className?: string;
 }
 
 const defaultRoot = document.getElementsByTagName('body')[0];
 
+/**
+ * @description
+ * Open children in react portal. Good for spawning elements elsewhere in the DOM tree (modals, popups, etc.)
+ *
+ * @example
+ * <Portal>
+ *   Renders another place in the DOM
+ * </Portal>
+ */
 export default function Portal({
     root: r,
     children,

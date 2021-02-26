@@ -6,6 +6,11 @@ import Modal, { ModalProps } from './Modal';
 export default {
     title: 'Cross App Components/Modal',
     component: Modal,
+    argTypes: {
+        trigger: {
+            description: 'Element with onClick prop, such as "button"',
+        },
+    },
     decorators: [
         (story) => (
             <>
@@ -34,4 +39,11 @@ export const Primary = Template.bind({});
 Primary.args = {
     trigger: <button type="button">Click me</button>,
     children: 'Modal content...',
+};
+
+export const WithoutClose = Template.bind({});
+WithoutClose.args = {
+    trigger: <button type="button">Click me</button>,
+    children: 'Modal content...',
+    disableClose: true,
 };

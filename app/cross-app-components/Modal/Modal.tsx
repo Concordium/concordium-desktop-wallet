@@ -35,13 +35,34 @@ interface WithOnClick {
 }
 
 export interface ModalProps<TTrigger extends WithOnClick> {
+    /**
+     * Supply element that acts as a trigger for modal to open. Must have "onClick" as prop.
+     */
     trigger: ReactElement<TTrigger>;
+    /**
+     * defaults to true
+     */
     closeOnEscape?: boolean;
+    /**
+     * Disable close functionality within the modal. Good for user actions that must be taken.
+     */
     disableClose?: boolean;
+    /**
+     * Control whether modal is open or not from outside.
+     */
     isOpen?: boolean;
     onClose?(): void;
 }
 
+/**
+ * @description
+ * Opens content in a modal overlay on top of \<MainLayout /\>.
+ *
+ * @example
+ * <Modal trigger={<button type="button">Click me</button>}>
+ *   This content is shown in a modal!
+ * </Modal>
+ */
 export default function Modal<TTrigger extends WithOnClick>({
     trigger,
     closeOnEscape = true,
