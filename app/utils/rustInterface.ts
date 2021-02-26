@@ -253,3 +253,27 @@ export async function decryptAmounts(
     });
     return JSON.parse(decryptedAmounts);
 }
+
+export async function makeTransferToPublicData(
+    amount: string,
+    prfKey: string,
+    global: Global,
+    encryptedSelfAmount: string,
+    index: number,
+    accountNumber: number
+) {
+    const input = {
+        global,
+        amount,
+        prfKey,
+        accountNumber,
+        encryptedSelfAmount,
+        index,
+    };
+
+    const transferToPublicData = await worker.postMessage({
+        command: workerCommands.createTransferToPublicData,
+        input: JSON.stringify(input),
+    });
+    return JSON.parse(transferToPublicData);
+}

@@ -11,6 +11,8 @@ import {
     instanceOfScheduledTransfer,
     TransferToEncrypted,
     instanceOfTransferToEncrypted,
+    instanceOfTransferToPublic,
+    TransferToPublic,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 
@@ -95,7 +97,7 @@ function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     };
 }
 
-// Convert the type specific fields of a Simple transfer for an Account Transaction.
+// Convert the type specific fields of a transfer to encrypted for an Account Transaction.
 function convertTransferToEncrypted(
     transaction: TransferToEncrypted
 ): TypeSpecific {
@@ -107,6 +109,20 @@ function convertTransferToEncrypted(
         total: (-estimatedTotal).toString(),
         subtotal: (-amount).toString(),
         decryptedAmount: amount.toString(),
+        toAddress: transaction.sender,
+    };
+}
+
+// Convert the type specific fields of a transfer to public for an Account Transaction.
+function convertTransferToPublic(transaction: TransferToPublic): TypeSpecific {
+    const amount = BigInt(transaction.payload.transferAmount);
+    const estimatedTotal = amount - BigInt(transaction.energyAmount); // TODO: convert from energy to cost
+
+    return {
+        transactionKind: TransactionKindString.TransferToPublic,
+        total: estimatedTotal.toString(),
+        subtotal: amount.toString(),
+        decryptedAmount: (-amount).toString(),
         toAddress: transaction.sender,
     };
 }
@@ -142,6 +158,8 @@ export function convertAccountTransaction(
         typeSpecific = convertScheduledTransfer(transaction);
     } else if (instanceOfTransferToEncrypted(transaction)) {
         typeSpecific = convertTransferToEncrypted(transaction);
+    } else if (instanceOfTransferToPublic(transaction)) {
+        typeSpecific = convertTransferToPublic(transaction);
     } else {
         throw new Error('unsupported transaction type - please implement');
     }

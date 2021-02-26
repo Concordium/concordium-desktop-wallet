@@ -26,7 +26,7 @@ const viewingShieldedbuttons = [
     },
     {
         route: routes.ACCOUNTS_UNSHIELDAMOUNT,
-        label: 'Shield',
+        label: 'Unshield',
         Image: ShieldImage, // TODO: Replace with unshield image
         height: '30',
     },
@@ -59,7 +59,6 @@ export default function AccountViewActions() {
     } else {
         buttons = viewingUnshieldedbuttons;
     }
-    console.log(buttons);
 
     return (
         <Button.Group>

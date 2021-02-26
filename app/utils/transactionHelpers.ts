@@ -10,6 +10,8 @@ import {
     ScheduledTransfer,
     SchedulePoint,
     TransferToEncrypted,
+    AccountTransaction,
+    TransactionPayload,
 } from './types';
 
 /**
@@ -57,46 +59,83 @@ export async function attachNames(
  *  Constructs a, simple transfer, transaction object,
  * Given the fromAddress, toAddress and the amount.
  */
-export async function createSimpleTransferTransaction(
+async function createTransferTransaction<T extends TransactionPayload>(
+    fromAddress: string,
+    expiry: string = getDefaultExpiry(),
+    energyAmount: string,
+    transactionKind: number,
+    payload: T
+) {
+    const { nonce } = await getNextAccountNonce(fromAddress);
+    const transferTransaction: AccountTransaction<T> = {
+        sender: fromAddress,
+        nonce,
+        energyAmount, // TODO: Does this need to be set by the user?
+        expiry,
+        transactionKind,
+        payload,
+    };
+    return transferTransaction;
+}
+
+/**
+ *  Constructs a, simple transfer, transaction object,
+ * Given the fromAddress, toAddress and the amount.
+ */
+export function createSimpleTransferTransaction(
     fromAddress: string,
     amount: BigInt,
     toAddress: string,
     expiry: string = getDefaultExpiry(),
     energyAmount = '200'
-) {
-    const { nonce } = await getNextAccountNonce(fromAddress);
-    const transferTransaction: SimpleTransfer = {
-        sender: fromAddress,
-        nonce,
-        energyAmount, // TODO: Does this need to be set by the user?
-        expiry,
-        transactionKind: TransactionKindId.Simple_transfer,
-        payload: {
-            toAddress,
-            amount: amount.toString(),
-        },
+): Promise<SimpleTransfer> {
+    const payload = {
+        toAddress,
+        amount: amount.toString(),
     };
-    return transferTransaction;
+    return createTransferTransaction(
+        fromAddress,
+        expiry,
+        energyAmount,
+        TransactionKindId.Simple_transfer,
+        payload
+    );
 }
 
-export async function createShieldAmountTransaction(
+export function createShieldAmountTransaction(
+    address: string,
+    amount: BigInt,
+    expiry: string = getDefaultExpiry(),
+    energyAmount = '1000'
+): Promise<TransferToEncrypted> {
+    const payload = {
+        amount: amount.toString(),
+    };
+    return createTransferTransaction(
+        address,
+        expiry,
+        energyAmount,
+        TransactionKindId.Transfer_to_encrypted,
+        payload
+    );
+}
+
+export async function createUnshieldAmountTransaction(
     address: string,
     amount: BigInt,
     expiry: string = getDefaultExpiry(),
     energyAmount = '1000'
 ) {
-    const { nonce } = await getNextAccountNonce(address);
-    const transferTransaction: TransferToEncrypted = {
-        sender: address,
-        nonce,
-        energyAmount, // TODO: Does this need to be set by the user?
-        expiry,
-        transactionKind: TransactionKindId.Transfer_to_encrypted,
-        payload: {
-            amount: amount.toString(),
-        },
+    const payload = {
+        transferAmount: amount.toString(),
     };
-    return transferTransaction;
+    return createTransferTransaction(
+        address,
+        expiry,
+        energyAmount,
+        TransactionKindId.Transfer_to_public,
+        payload
+    );
 }
 
 export function createRegularIntervalSchedule(
@@ -134,19 +173,17 @@ export async function createScheduledTransferTransaction(
     expiry: string = getDefaultExpiry(),
     energyAmount = '20000'
 ) {
-    const { nonce } = await getNextAccountNonce(fromAddress);
-    const transferTransaction: ScheduledTransfer = {
-        sender: fromAddress,
-        nonce,
-        energyAmount, // TODO: Does this need to be set by the user?
-        expiry,
-        transactionKind: TransactionKindId.Transfer_with_schedule,
-        payload: {
-            toAddress,
-            schedule,
-        },
+    const payload = {
+        toAddress,
+        schedule,
     };
-    return transferTransaction;
+    return createTransferTransaction(
+        fromAddress,
+        expiry,
+        energyAmount,
+        TransactionKindId.Transfer_with_schedule,
+        payload
+    );
 }
 
 export async function getDataObject(

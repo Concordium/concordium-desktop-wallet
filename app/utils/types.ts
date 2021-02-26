@@ -159,6 +159,13 @@ export interface TransferToEncryptedPayload {
     amount: string;
 }
 
+export interface TransferToPublicPayload {
+    transferAmount: string;
+    remainingAmount?: string; // encrypted
+    index?: string;
+    proof?: string;
+}
+
 export interface SchedulePoint {
     timestamp: string;
     amount: string;
@@ -171,6 +178,7 @@ export interface ScheduledTransferPayload {
 }
 
 export type TransactionPayload =
+    | TransferToPublicPayload
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
     | SimpleTransferPayload;
@@ -192,6 +200,7 @@ export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
+export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -540,6 +549,12 @@ export function instanceOfTransferToEncrypted(
     object: AccountTransaction<TransactionPayload>
 ): object is TransferToEncrypted {
     return object.transactionKind === TransactionKindId.Transfer_to_encrypted;
+}
+
+export function instanceOfTransferToPublic(
+    object: AccountTransaction<TransactionPayload>
+): object is TransferToPublic {
+    return object.transactionKind === TransactionKindId.Transfer_to_public;
 }
 
 export function instanceOfScheduledTransfer(

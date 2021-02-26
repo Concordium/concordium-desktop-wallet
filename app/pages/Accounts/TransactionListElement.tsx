@@ -58,7 +58,8 @@ function parseShieldedAmount(
 ) {
     if (
         transaction.transactionKind ===
-        TransactionKindString.TransferToEncrypted
+            TransactionKindString.TransferToEncrypted ||
+        transaction.transactionKind === TransactionKindString.TransferToPublic
     ) {
         return buildCostFreeAmountString(BigInt(transaction.decryptedAmount));
     }
@@ -123,7 +124,9 @@ function displayType(kind: TransactionKindString) {
         case TransactionKindString.TransferWithSchedule:
             return ' (schedule)';
         case TransactionKindString.TransferToEncrypted:
-            return '(Shielded)';
+            return ' (Shielded)';
+        case TransactionKindString.TransferToPublic:
+            return ' (Unshielded)';
         default:
             return '';
     }

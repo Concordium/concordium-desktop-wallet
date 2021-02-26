@@ -7,6 +7,7 @@ import {
     SchedulePoint,
     TransactionPayload,
     TransferToEncryptedPayload,
+    TransferToPublicPayload,
 } from './types';
 import {
     encodeWord16,
@@ -63,6 +64,52 @@ function serializeTransferToEncypted(payload: TransferToEncryptedPayload) {
     return serialized;
 }
 
+export function serializeTransferToPublicData(
+    payload: TransferToPublicPayload
+) {
+    if (
+        !payload.proof ||
+        payload.index === undefined ||
+        !payload.remainingAmount
+    ) {
+        throw new Error('unexpected missing data of Transfer to Public data');
+    }
+    const remainingAmount = Buffer.from(payload.remainingAmount, 'hex');
+    const size = remainingAmount.length + 8 + 8;
+    console.log('data size:');
+    console.log(size);
+    const serialized = new Uint8Array(size);
+
+    put(serialized, 0, remainingAmount);
+    put(
+        serialized,
+        remainingAmount.length,
+        encodeWord64(BigInt(payload.transferAmount))
+    );
+    put(
+        serialized,
+        remainingAmount.length + 8,
+        encodeWord64(BigInt(payload.index))
+    );
+    return serialized;
+}
+
+function serializeTransferToPublic(payload: TransferToPublicPayload) {
+    if (!payload.proof) {
+        throw new Error('unexpected missing proof of Transfer to Public data');
+    }
+
+    const proof = Buffer.from(payload.proof, 'hex');
+    const data = serializeTransferToPublicData(payload);
+    const size = 1 + data.length + proof.length;
+    const serialized = new Uint8Array(size);
+
+    serialized[0] = TransactionKind.Transfer_to_public;
+    put(serialized, 1, data);
+    put(serialized, 1 + data.length, proof);
+    return serialized;
+}
+
 export function serializeTransactionHeader(
     sender: string,
     nonce: string,
@@ -96,6 +143,10 @@ export function serializeTransferPayload(
         case TransactionKind.Transfer_to_encrypted:
             return serializeTransferToEncypted(
                 payload as TransferToEncryptedPayload
+            );
+        case TransactionKind.Transfer_to_public:
+            return serializeTransferToPublic(
+                payload as TransferToPublicPayload
             );
         default:
             throw new Error('Unsupported transactionkind');

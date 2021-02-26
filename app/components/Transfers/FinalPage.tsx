@@ -13,6 +13,7 @@ import {
     instanceOfScheduledTransfer,
     instanceOfSimpleTransfer,
     instanceOfTransferToEncrypted,
+    instanceOfTransferToPublic,
     TransactionPayload,
     TimeStampUnit,
 } from '../../utils/types';
@@ -29,6 +30,9 @@ interface Props {
 function getAmount(transaction: AccountTransaction) {
     if (instanceOfScheduledTransfer(transaction)) {
         return getScheduledTransferAmount(transaction);
+    }
+    if (instanceOfTransferToPublic(transaction)) {
+        return transaction.payload.transferAmount;
     }
     if (
         instanceOfSimpleTransfer(transaction) ||

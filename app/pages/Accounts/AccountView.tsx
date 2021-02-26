@@ -11,6 +11,7 @@ import routes from '../../constants/routes.json';
 import MoreActions from './MoreActions';
 import SimpleTransfer from '../../components/Transfers/SimpleTransfer';
 import ShieldAmount from '../../components/Transfers/ShieldAmount';
+import UnshieldAmount from '../../components/Transfers/UnshieldAmount';
 import TransferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
 import AccountViewActions from './AccountViewActions';
@@ -66,6 +67,10 @@ export default function AccountView() {
                     <Route
                         path={routes.ACCOUNTS_SHIELDAMOUNT}
                         render={() => <ShieldAmount account={account} />}
+                    />
+                    <Route
+                        path={routes.ACCOUNTS_UNSHIELDAMOUNT}
+                        render={() => <UnshieldAmount account={account} />}
                     />
                     <Route path={routes.DEFAULT} component={TransferHistory} />
                 </Switch>
