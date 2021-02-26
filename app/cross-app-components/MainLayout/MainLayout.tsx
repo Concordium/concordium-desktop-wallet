@@ -11,7 +11,11 @@ export default function MainLayout({
     ...elProps
 }: PropsWithChildren<ClassNameAndStyle>): JSX.Element {
     return (
-        <main className={clsx(styles.root, className)} {...elProps}>
+        <main
+            id="main-layout"
+            className={clsx(styles.root, className)}
+            {...elProps}
+        >
             {children}
         </main>
     );

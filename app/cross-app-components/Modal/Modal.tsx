@@ -8,64 +8,84 @@ import React, {
     useMemo,
     useState,
 } from 'react';
+import CloseButton from '../CloseButton';
 import Portal from '../Portal';
 
 import styles from './Modal.module.scss';
 
 interface WithOnClick {
-    onClick: MouseEventHandler;
+    onClick?: MouseEventHandler;
 }
 
-interface ModalProps<TTrigger extends WithOnClick> {
+export interface ModalProps<TTrigger extends WithOnClick> {
     trigger: ReactElement<TTrigger>;
     closeOnEscape?: boolean;
+    disableClose?: boolean;
 }
 
 export default function Modal<TTrigger extends WithOnClick>({
     trigger,
-    closeOnEscape = false,
+    closeOnEscape = true,
+    disableClose = false,
     children,
 }: PropsWithChildren<ModalProps<TTrigger>>): JSX.Element | null {
     const [open, setOpen] = useState<boolean>(false);
 
-    const onClick: MouseEventHandler = useCallback(
+    const close = useCallback(() => {
+        if (!disableClose) {
+            setOpen(false);
+        }
+    }, [disableClose]);
+
+    const onTriggerClick: MouseEventHandler = useCallback(
         (e) => {
             setOpen(true);
-            trigger.props.onClick(e);
+
+            if (trigger.props.onClick !== undefined) {
+                trigger.props.onClick(e);
+            }
         },
         [trigger]
     );
 
-    const triggerWithClose = useMemo(() => {
+    const triggerWithOpen = useMemo(() => {
         return cloneElement(trigger, {
             ...trigger.props,
-            onClick,
+            onClick: onTriggerClick,
         });
-    }, [trigger, onClick]);
+    }, [trigger, onTriggerClick]);
 
     const handleKeyUp = useCallback(
         (e: KeyboardEvent) => {
-            if (closeOnEscape && e.key === 'ESCAPE') {
-                setOpen(false);
+            if (closeOnEscape && e.key === 'Escape') {
+                close();
             }
         },
-        [closeOnEscape]
+        [closeOnEscape, close]
     );
 
     useEffect(() => {
         if (document) {
-            document.addEventListener('keyup', handleKeyUp);
+            document.addEventListener('keyup', handleKeyUp, true);
         }
     }, [handleKeyUp]);
 
     if (!open) {
-        return null;
+        return triggerWithOpen;
     }
 
     return (
         <>
-            {triggerWithClose}
-            <Portal className={styles.root}>{children}</Portal>
+            {triggerWithOpen}
+            <Portal
+                className={styles.root}
+                root={document.getElementById('main-layout')}
+            >
+                <div className={styles.modal}>
+                    <CloseButton className={styles.close} onClick={close} />
+                    {children}
+                </div>
+            </Portal>
         </>
     );
 }
