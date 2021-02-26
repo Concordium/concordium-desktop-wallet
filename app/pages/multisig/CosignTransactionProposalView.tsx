@@ -69,11 +69,17 @@ export default function CosignTransactionProposalView({ location }: Props) {
             const publicKey = await ledger.getPublicKey(
                 getGovernancePath({ purpose: 0, keyIndex: 0 })
             );
-            const authorizationKeyIndex = findAuthorizationKeyIndex(
+
+            const authorization = transactionHandler.getAuthorization(
+                blockSummary.updates.authorizations
+            );
+
+            const authorizationKey = findAuthorizationKeyIndex(
                 blockSummary.updates.authorizations.keys,
+                authorization,
                 publicKey.toString('hex')
             );
-            if (authorizationKeyIndex === -1) {
+            if (!authorizationKey) {
                 setShowValidationError(true);
                 return;
             }
@@ -85,7 +91,7 @@ export default function CosignTransactionProposalView({ location }: Props) {
 
             const signature: UpdateInstructionSignature = {
                 signature: signatureBytes.toString('hex'),
-                authorizationKeyIndex,
+                authorizationKeyIndex: authorizationKey.index,
             };
 
             // Load the page for exporting the signed transaction.

@@ -1,4 +1,4 @@
-import { Key } from './NodeApiTypes';
+import { Authorization, Key } from './NodeApiTypes';
 import { getConsensusStatus, getAccountInfo } from './nodeRequests';
 import { AccountInfo, Account } from './types';
 
@@ -34,10 +34,15 @@ export async function getAccountInfos(
  */
 export function findAuthorizationKeyIndex(
     keys: Key[],
+    authorization: Authorization,
     verifyKey: string
-): number {
-    const authorizationKeyIndex = keys.findIndex((key) => {
-        return key.verifyKey === verifyKey;
-    });
-    return authorizationKeyIndex;
+) {
+    return keys
+        .map((key, index) => {
+            return { index, key };
+        })
+        .filter((key) => authorization.authorizedKeys.includes(key.index))
+        .find((indexedKey) => {
+            return indexedKey.key.verifyKey === verifyKey;
+        });
 }
