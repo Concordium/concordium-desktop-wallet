@@ -172,6 +172,7 @@ export async function addPendingAccount(
         address: accountAddress,
         credential: JSON.stringify(credentialDeploymentInfo),
         credentialDeploymentHash,
+        maxTransactionId: 0,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);

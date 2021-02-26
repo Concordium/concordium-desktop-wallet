@@ -24,10 +24,11 @@ export default function BrowseTransactionFileView() {
     });
     const dispatch = useDispatch();
 
-    async function loadTransactionFile(file: string) {
+    async function loadTransactionFile(file: Buffer) {
+        const fileString = file.toString('utf-8');
         let transactionObject;
         try {
-            transactionObject = parse(file);
+            transactionObject = parse(fileString);
         } catch (e) {
             setShowError({
                 show: true,
@@ -59,7 +60,7 @@ export default function BrowseTransactionFileView() {
         dispatch(
             push({
                 pathname: routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION,
-                state: { transaction: file, type },
+                state: { transaction: fileString, type },
             })
         );
     }

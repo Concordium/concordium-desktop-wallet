@@ -1,4 +1,4 @@
-import React, { FormHTMLAttributes, PropsWithChildren } from 'react';
+import React, { FC, FormHTMLAttributes, PropsWithChildren } from 'react';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 
 import Switch from '../../cross-app-components/Switch';
@@ -6,8 +6,9 @@ import { connectWithFormUncontrolled } from './common/connectWithForm';
 import Input from './Input';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
+import Submit from '../../cross-app-components/Submit';
 
-interface FormProps<TFormValues>
+export interface FormProps<TFormValues>
     extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
     onSubmit: SubmitHandler<TFormValues>;
 }
@@ -37,9 +38,10 @@ interface FormProps<TFormValues>
  *   <Form.Input type="email" name="email" rules={{ required: 'You must supply an e-mail address' }} />
  *   <Form.TextArea name="comment" rules={{ maxLength: { value: 255, message: 'You cannot enter more than 255 characters' } }} />
  *   <Form.Checkbox name="agree" rules={{ required: 'You must agree to this' }}>Agree to terms</Form.Checkbox>
+ *   <Form.Submit>Submit</Form.Submit>
  * </Form>
  */
-export default function Form<T extends Record<string, unknown>>({
+function Form<T extends Record<string, unknown>>({
     children,
     onSubmit,
     ...formProps
@@ -58,6 +60,18 @@ export default function Form<T extends Record<string, unknown>>({
 }
 
 Form.Input = connectWithFormUncontrolled(Input);
+(Form.Input as FC).displayName = 'Form.Input';
+
 Form.TextArea = connectWithFormUncontrolled(TextArea);
+(Form.TextArea as FC).displayName = 'Form.TextArea';
+
 Form.Checkbox = connectWithFormUncontrolled(Checkbox);
+(Form.Checkbox as FC).displayName = 'Form.Checkbox';
+
 Form.Switch = connectWithFormUncontrolled(Switch);
+(Form.Switch as FC).displayName = 'Form.Switch';
+
+Form.Submit = Submit;
+(Form.Submit as FC).displayName = 'Form.Submit';
+
+export default Form;

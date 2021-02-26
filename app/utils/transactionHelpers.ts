@@ -10,12 +10,6 @@ import {
     ScheduledTransfer,
     SchedulePoint,
 } from './types';
-/**
- * return highest id of given transactions
- */
-export function getHighestId(transactions: TransferTransaction[]) {
-    return transactions.reduce((id, t) => Math.max(id, t.id), 0);
-}
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
@@ -84,7 +78,7 @@ export async function createSimpleTransferTransaction(
     return transferTransaction;
 }
 
-export function createSchedule(
+export function createRegularIntervalSchedule(
     totalAmount: bigint,
     releases: number,
     starting: number,
@@ -187,5 +181,13 @@ export function getScheduledTransferAmount(
     return transaction.payload.schedule.reduce(
         (total, point) => total + BigInt(point.amount),
         0n
+    );
+}
+
+export function isFailed(transaction: TransferTransaction) {
+    return (
+        transaction.success === false ||
+        transaction.success === 0 ||
+        transaction.status === TransactionStatus.Rejected
     );
 }

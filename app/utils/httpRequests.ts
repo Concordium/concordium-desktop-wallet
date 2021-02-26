@@ -46,7 +46,7 @@ export function getResponseBody(
 }
 
 function getHighestId(transactions: TransferTransaction[]) {
-    return transactions.reduce((id, t) => Math.max(id, t.id), 0);
+    return transactions.reduce((id, t) => Math.max(id, t.id || 0), 0);
 }
 
 export async function getTransactions(
