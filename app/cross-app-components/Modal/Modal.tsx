@@ -11,6 +11,7 @@ import React, {
 import { AnimatePresence, motion, Variants, Transition } from 'framer-motion';
 import CloseButton from '../CloseButton';
 import Portal from '../Portal';
+import { useKeyPress, useDetectClickOutside } from '../util/eventHooks';
 
 import styles from './Modal.module.scss';
 
@@ -65,6 +66,8 @@ export default function Modal<TTrigger extends WithOnClick>({
         [disableClose]
     );
 
+    const modalRef = useDetectClickOutside<HTMLDivElement>(close);
+
     useEffect(() => {
         if (isOpenOverride === undefined) {
             return;
@@ -104,15 +107,7 @@ export default function Modal<TTrigger extends WithOnClick>({
         [closeOnEscape, close]
     );
 
-    useEffect(() => {
-        if (document) {
-            document.addEventListener('keyup', handleKeyUp, true);
-        }
-
-        return () => {
-            document.removeEventListener('keyup', handleKeyUp);
-        };
-    }, [handleKeyUp]);
+    useKeyPress(handleKeyUp);
 
     const handleExitComplete = useCallback(() => {
         setIsExiting(false);
@@ -149,6 +144,7 @@ export default function Modal<TTrigger extends WithOnClick>({
                                     exit="closed"
                                     variants={modalTransitionVariants}
                                     transition={transition}
+                                    ref={modalRef}
                                 >
                                     {!disableClose && (
                                         <CloseButton
