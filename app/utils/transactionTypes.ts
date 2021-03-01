@@ -16,7 +16,7 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
-    effectiveTime: BigInt;
+    effectiveTime: bigint;
     setProposal: React.Dispatch<
         React.SetStateAction<Partial<MultiSignatureTransaction> | undefined>
     >;

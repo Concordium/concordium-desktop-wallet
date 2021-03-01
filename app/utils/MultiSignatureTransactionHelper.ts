@@ -37,15 +37,15 @@ export default function createMultiSignatureTransaction(
 export function createUpdateMultiSignatureTransaction(
     payload: UpdateInstructionPayload,
     updateType: UpdateType,
-    sequenceNumber: BigInt,
+    sequenceNumber: bigint,
     threshold: number,
-    effectiveTime: BigInt
+    effectiveTime: bigint
 ) {
     const updateInstruction = createUpdateInstruction(
         payload,
         updateType,
         sequenceNumber,
-        BigInt(effectiveTime)
+        effectiveTime
     );
     return createMultiSignatureTransaction(
         updateInstruction,
