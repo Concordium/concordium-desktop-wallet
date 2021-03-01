@@ -28,6 +28,10 @@ export default function EffectiveTimeUpdate({
     const [effectiveTime, setEffectiveTime] = useState<number>(
         getNow() + 5 * TimeConstants.Minute
     );
+    const [
+        effectiveTimeInSeconds,
+        setEffectiveTimeInSeconds,
+    ] = useState<number>(Math.round(effectiveTime / 1000));
     const [proposal, setProposal] = useState<
         Partial<MultiSignatureTransaction>
     >();
@@ -51,7 +55,7 @@ export default function EffectiveTimeUpdate({
         <>
             <UpdateProposalComponent
                 blockSummary={blockSummary}
-                effectiveTime={BigInt(effectiveTime)}
+                effectiveTime={BigInt(effectiveTimeInSeconds)}
                 setProposal={setProposal}
                 setDisabled={setDisabled}
             />
@@ -59,7 +63,10 @@ export default function EffectiveTimeUpdate({
             <InputTimeStamp
                 placeholder="Enter effective time"
                 value={effectiveTime}
-                setValue={setEffectiveTime}
+                setValue={(timestamp: number) => {
+                    setEffectiveTime(timestamp);
+                    setEffectiveTimeInSeconds(Math.round(timestamp / 1000));
+                }}
             />
             <Divider horizontal hidden />
             <Button
