@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Divider, Header, Segment } from 'semantic-ui-react';
+import { Button, Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { UpdateType } from '../../utils/types';
+import { stringify } from 'json-bigint';
+import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
 import { getBlockSummary, getConsensusStatus } from '../../utils/nodeRequests';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
@@ -28,6 +29,10 @@ interface Props {
 export default function MultiSignatureCreateProposalView({ location }: Props) {
     const [blockSummary, setBlockSummary] = useState<BlockSummary>();
     const [loading, setLoading] = useState(true);
+    const [proposal, setProposal] = useState<
+        Partial<MultiSignatureTransaction>
+    >();
+    const [disabled, setDisabled] = useState(false);
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
@@ -45,6 +50,21 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
         const consensusStatus: ConsensusStatus = await getConsensusStatus();
         return getBlockSummary(consensusStatus.lastFinalizedBlock);
     }
+
+    /**
+     * Forwards the multi signature transactions to the signing page.
+     */
+    async function forwardTransactionToSigningPage(
+        multiSignatureTransaction: Partial<MultiSignatureTransaction>
+    ) {
+        dispatch(
+            push({
+                pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
+                state: stringify(multiSignatureTransaction),
+            })
+        );
+    }
+
     return (
         <Segment textAlign="center" secondary loading={loading}>
             <Header size="large">Add the proposal details</Header>
@@ -70,8 +90,23 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                     <EffectiveTimeUpdate
                         UpdateProposalComponent={UpdateComponent}
                         blockSummary={blockSummary}
+                        setProposal={setProposal}
+                        setDisabled={setDisabled}
                     />
                 ) : null}
+                <Divider horizontal hidden />
+                <Button
+                    size="large"
+                    primary
+                    disabled={!proposal || disabled}
+                    onClick={() => {
+                        if (proposal) {
+                            forwardTransactionToSigningPage(proposal);
+                        }
+                    }}
+                >
+                    Continue
+                </Button>
             </Segment>
         </Segment>
     );
