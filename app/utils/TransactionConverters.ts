@@ -82,7 +82,8 @@ type TypeSpecific = Pick<
     | 'decryptedAmount'
 >;
 
-// Convert the type specific fields of a Simple transfer for an Account Transaction.
+// Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a simple transfer, which cannot be converted by the generic function .
 function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
     const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
@@ -95,7 +96,8 @@ function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     };
 }
 
-// Convert the type specific fields of a Simple transfer for an Account Transaction.
+// Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a transfer to encrypted, which cannot be converted by the generic function .
 function convertTransferToEncrypted(
     transaction: TransferToEncrypted
 ): TypeSpecific {
@@ -111,7 +113,8 @@ function convertTransferToEncrypted(
     };
 }
 
-// Convert the type specific fields of a Scheduled transfer for an Account Transaction.
+// Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a scheduled transfer, which cannot be converted by the generic function .
 function convertScheduledTransfer(
     transaction: ScheduledTransfer
 ): TypeSpecific {

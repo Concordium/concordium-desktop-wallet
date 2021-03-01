@@ -45,9 +45,9 @@ function buildOutgoingAmountStrings(
 }
 
 function buildCostFreeAmountString(amount: bigint, negative = false) {
-    const modifier = negative ? -1n : 1n;
+    const sign = negative ? -1n : 1n;
     return {
-        amount: `${displayAsGTU(modifier * amount)}`,
+        amount: `${displayAsGTU(sign * amount)}`,
         amountFormula: '',
     };
 }

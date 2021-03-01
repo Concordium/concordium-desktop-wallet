@@ -9,8 +9,8 @@ import {
 import { lookupName } from '../../utils/transactionHelpers';
 import { chosenAccountSelector } from '../../features/AccountSlice';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
-import SimpleTransferDetails from './DisplaySimpleTransfer';
-import TransferToEncryptedDetails from './ShieldTransferDetails';
+import DisplaySimpleTransfer from './DisplaySimpleTransfer';
+import DisplayTransferToEncrypted from './DisplayTransferToEncrypted';
 
 interface Props {
     transaction: AccountTransaction;
@@ -35,7 +35,7 @@ export default function AccountTransactionDetails({ transaction }: Props) {
 
     if (instanceOfSimpleTransfer(transaction)) {
         return (
-            <SimpleTransferDetails
+            <DisplaySimpleTransfer
                 transaction={transaction}
                 toName={toName}
                 fromName={fromName}
@@ -44,7 +44,7 @@ export default function AccountTransactionDetails({ transaction }: Props) {
     }
     if (instanceOfTransferToEncrypted(transaction)) {
         return (
-            <TransferToEncryptedDetails
+            <DisplayTransferToEncrypted
                 transaction={transaction}
                 fromName={fromName}
             />

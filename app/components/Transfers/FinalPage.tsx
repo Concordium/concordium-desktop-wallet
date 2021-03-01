@@ -86,7 +86,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
     return (
         <Card fluid centered>
             <Card.Content textAlign="center">
-                <Card.Header>Transfer Submitted!</Card.Header>
+                <Card.Header>Transaction submitted!</Card.Header>
                 <Table>
                     <Table.Body>
                         <Table.Row>

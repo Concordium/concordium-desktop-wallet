@@ -27,7 +27,7 @@ interface State {
 }
 
 /**
- * Controls the flow of creating a simple transfer.
+ * Controls the flow of creating a transfer to encrypted.
  */
 export default function ShieldAmount({ account }: Props) {
     const dispatch = useDispatch();
@@ -44,7 +44,7 @@ export default function ShieldAmount({ account }: Props) {
             case locations.pickAmount:
                 return (
                     <PickAmount
-                        header="Send funds"
+                        header="Shield funds"
                         amount={amount}
                         setAmount={setAmount}
                         toPickRecipient={undefined}
