@@ -52,4 +52,6 @@ export default class TransactionFeeDistributionHandler
     }
 
     update = UpdateTransactionFeeDistribution;
+
+    title = 'Foundation Transaction | Update Transaction Fee Distribution';
 }

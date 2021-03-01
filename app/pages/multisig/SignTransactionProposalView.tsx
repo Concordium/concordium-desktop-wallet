@@ -106,6 +106,7 @@ export default function SignTransactionProposalView({ location }: Props) {
 
     return (
         <GenericSignTransactionProposalView
+            header={transactionHandler.title}
             transaction={transaction}
             transactionHash={transactionHash}
             signFunction={signingFunction}

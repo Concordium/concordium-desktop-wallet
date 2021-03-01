@@ -147,6 +147,7 @@ export default function CosignTransactionProposalView({ location }: Props) {
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
             <GenericSignTransactionProposalView
+                header={transactionHandler.title}
                 transaction={transaction}
                 transactionHash={transactionHash}
                 signFunction={signingFunction}

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { push } from 'connected-react-router';
-import { Menu, Button } from 'semantic-ui-react';
+import { Menu } from 'semantic-ui-react';
 import {
     loadAccounts,
     loadAccountInfos,
@@ -12,7 +11,6 @@ import {
 } from '../../features/AccountSlice';
 import { setViewingShielded } from '../../features/TransactionSlice';
 import AccountListElement from '../../components/AccountListElement';
-import routes from '../../constants/routes.json';
 import { Account, Dispatch } from '../../utils/types';
 
 async function load(dispatch: Dispatch) {
@@ -44,9 +42,6 @@ export default function AccountList() {
 
     return (
         <>
-            <Button onClick={() => dispatch(push(routes.ACCOUNTCREATION))}>
-                +
-            </Button>
             <Menu vertical fluid>
                 {accounts.map((account: Account, index: number) => (
                     <Menu.Item

@@ -50,4 +50,6 @@ export default class ProtocolUpdateHandler
     }
 
     update = UpdateProtocol;
+
+    title = 'Foundation Transaction | Update Chain Protocol';
 }

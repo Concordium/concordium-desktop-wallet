@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Divider, Header, Segment } from 'semantic-ui-react';
+import { Button, Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
@@ -12,6 +12,8 @@ import findHandler from '../../utils/updates/HandlerFinder';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { getGovernancePath } from '../../features/ledger/Path';
+import EffectiveTimeUpdate from './EffectiveTimeUpdate';
+import PageHeader from '../../components/PageHeader';
 
 interface Location {
     state: UpdateType;
@@ -36,6 +38,10 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
         authorizedVerifyKeyIndex,
         setAuthorizedVerifyKeyIndex,
     ] = useState<number>();
+    const [proposal, setProposal] = useState<
+        Partial<MultiSignatureTransaction>
+    >();
+    const [disabled, setDisabled] = useState(false);
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
@@ -44,6 +50,16 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
 
     const handler = findHandler(type);
     const UpdateComponent = handler.update;
+
+    function updateBlockSummary(blockSummaryInput: BlockSummary) {
+        setBlockSummary(blockSummaryInput);
+        setLoading(false);
+    }
+
+    async function execution() {
+        const consensusStatus: ConsensusStatus = await getConsensusStatus();
+        return getBlockSummary(consensusStatus.lastFinalizedBlock);
+    }
 
     /**
      * Forwards the multi signature transactions to the signing page.
@@ -63,16 +79,6 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                 state: stringify(signInput),
             })
         );
-    }
-
-    function updateBlockSummary(blockSummaryInput: BlockSummary) {
-        setBlockSummary(blockSummaryInput);
-        setLoading(false);
-    }
-
-    async function execution() {
-        const consensusStatus: ConsensusStatus = await getConsensusStatus();
-        return getBlockSummary(consensusStatus.lastFinalizedBlock);
     }
 
     async function validateAuthorizationKey(authorizationKey?: string) {
@@ -121,53 +127,77 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     }
 
     return (
-        <Segment textAlign="center" secondary loading={loading}>
-            <Header size="large">Add the proposal details</Header>
-            <Segment basic>
-                Add all the details for the {UpdateType[type]} proposal below,
-                and generate your transaction proposal.
-            </Segment>
-            <DynamicModal
-                execution={execution}
-                onError={() => {
-                    dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
-                }}
-                onSuccess={(input: BlockSummary) => updateBlockSummary(input)}
-                title="Error communicating with node"
-                content="We were unable to retrieve the block summary from the
-            configured node. Verify your node settings, and check that
-            the node is running."
-            />
-            {publicKey && (
+        <>
+            <PageHeader>
+                <h1>{handler.title}</h1>
+            </PageHeader>
+            <Segment textAlign="center" secondary loading={loading}>
+                <Header size="large">Add the proposal details</Header>
+                <Segment basic>
+                    Add all the details for the {UpdateType[type]} proposal
+                    below, and generate your transaction proposal.
+                </Segment>
                 <DynamicModal
-                    execution={() => validateAuthorizationKey(publicKey)}
+                    execution={execution}
                     onError={() => {
                         dispatch(
                             push({ pathname: routes.MULTISIGTRANSACTIONS })
                         );
                     }}
-                    onSuccess={() => {}}
-                    title="Unauthorized key"
-                    content="The key you are using to sign with is not authorized for this type of update"
+                    onSuccess={(input: BlockSummary) =>
+                        updateBlockSummary(input)
+                    }
+                    title="Error communicating with node"
+                    content="We were unable to retrieve the block summary from the
+            configured node. Verify your node settings, and check that
+            the node is running."
                 />
-            )}
-            <Segment>
-                <Header>Transaction Proposal | {displayType}</Header>
-                <Divider />
-                {!publicKey && blockSummary && (
-                    <>
-                        Please export your public-key, to verify that it is
-                        authorized for this update.
-                        <LedgerComponent ledgerCall={exportPublicKey} />
-                    </>
-                )}
-                {blockSummary && publicKey ? (
-                    <UpdateComponent
-                        blockSummary={blockSummary}
-                        forwardTransaction={forwardTransactionToSigningPage}
+                {publicKey && (
+                    <DynamicModal
+                        execution={() => validateAuthorizationKey(publicKey)}
+                        onError={() => {
+                            dispatch(
+                                push({ pathname: routes.MULTISIGTRANSACTIONS })
+                            );
+                        }}
+                        onSuccess={() => {}}
+                        title="Unauthorized key"
+                        content="The key you are using to sign with is not authorized for this type of update"
                     />
-                ) : null}
+                )}
+                <Segment>
+                    <Header>Transaction Proposal | {displayType}</Header>
+                    <Divider />
+                    {!publicKey && blockSummary && (
+                        <>
+                            Please export your public-key, to verify that it is
+                            authorized for this update.
+                            <LedgerComponent ledgerCall={exportPublicKey} />
+                        </>
+                    )}
+                    {blockSummary ? (
+                        <EffectiveTimeUpdate
+                            UpdateProposalComponent={UpdateComponent}
+                            blockSummary={blockSummary}
+                            setProposal={setProposal}
+                            setDisabled={setDisabled}
+                        />
+                    ) : null}
+                    <Divider horizontal hidden />
+                    <Button
+                        size="large"
+                        primary
+                        disabled={!proposal || disabled}
+                        onClick={() => {
+                            if (proposal) {
+                                forwardTransactionToSigningPage(proposal);
+                            }
+                        }}
+                    >
+                        Continue
+                    </Button>
+                </Segment>
             </Segment>
-        </Segment>
+        </>
     );
 }
