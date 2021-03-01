@@ -1,7 +1,17 @@
+@import 'config/bundle';
+
 .root {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    overflow: auto;
+}
+
+.header,
+.content {
+    min-width: 1000px;
+    width: 100%;
+    max-width: 1600px;
 }
 
 .header {
@@ -10,9 +20,9 @@
 
 .content {
     flex: 1 1 100%;
-    min-width: 1000px;
-    max-width: 1600px;
     margin: 0 auto;
-    padding: 0 48px;
-    overflow: auto;
+
+    &:not(.contentNoGutter) {
+        padding: 0 48px;
+    }
 }

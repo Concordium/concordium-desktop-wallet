@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React, { FC, PropsWithChildren, ReactElement, useMemo } from 'react';
 import PageContainer from './PageContainer';
 
@@ -7,6 +8,13 @@ import styles from './PageLayout.module.scss';
 
 function isPageHeader(el: ReactElement): el is ReactElement<PageHeaderProps> {
     return el.type === PageHeader;
+}
+
+interface PageLayoutProps {
+    /**
+     * Whether or not to include gutter for content. Useful if using in combination with \<Columns /\> to avoid double gutter. Defaults to false.
+     */
+    noGutter?: boolean;
 }
 
 /**
@@ -19,7 +27,10 @@ function isPageHeader(el: ReactElement): el is ReactElement<PageHeaderProps> {
  *   Page content
  * <PageLayout>
  */
-function PageLayout({ children }: PropsWithChildren<unknown>): JSX.Element {
+function PageLayout({
+    children,
+    noGutter = false,
+}: PropsWithChildren<PageLayoutProps>): JSX.Element {
     const { content, header } = useMemo(() => {
         const reactChildren = React.Children.toArray(
             children
@@ -34,7 +45,14 @@ function PageLayout({ children }: PropsWithChildren<unknown>): JSX.Element {
     return (
         <article className={styles.root}>
             {header && <span className={styles.header}>{header}</span>}
-            <section className={styles.content}>{content}</section>
+            <section
+                className={clsx(
+                    styles.content,
+                    noGutter && styles.contentNoGutter
+                )}
+            >
+                {content}
+            </section>
         </article>
     );
 }

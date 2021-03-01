@@ -29,6 +29,7 @@ export interface ColumnsProps {
      */
     columnClassName?: string;
     columnScroll?: boolean;
+    variableSize?: boolean;
 }
 
 /**
@@ -47,6 +48,7 @@ function Columns({
     columnScroll = false,
     className,
     columnClassName,
+    variableSize = false,
 }: ColumnsProps): JSX.Element {
     const getColProps = useCallback(
         (col: ReactElement<ColumnProps>) => ({
@@ -67,6 +69,7 @@ function Columns({
                 styles.root,
                 divider && styles.rootDivider,
                 columnScroll && styles.rootColumnScroll,
+                variableSize && styles.rootVariableSize,
                 className
             )}
         >

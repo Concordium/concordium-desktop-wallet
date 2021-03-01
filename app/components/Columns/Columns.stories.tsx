@@ -88,4 +88,5 @@ VariableSize.args = {
     children: [col(), scrollCol(450, 300, { noResize: true })],
     divider: true,
     columnScroll: true,
+    variableSize: true,
 };
