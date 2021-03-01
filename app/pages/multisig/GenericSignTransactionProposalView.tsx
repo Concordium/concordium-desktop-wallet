@@ -19,8 +19,10 @@ import {
     UpdateInstructionPayload,
 } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import PageHeader from '../../components/PageHeader';
 
 interface Props<T> {
+    header: string;
     transaction: string;
     transactionHash: string;
     signFunction: (input: T) => Promise<void>;
@@ -29,6 +31,7 @@ interface Props<T> {
 }
 
 export default function GenericSignTransactionProposalView({
+    header,
     transaction,
     transactionHash,
     signFunction,
@@ -54,63 +57,72 @@ export default function GenericSignTransactionProposalView({
     }
 
     return (
-        <Container>
-            <Segment>
-                <Header textAlign="center">
-                    Transaction signing confirmation | Transaction Type
-                </Header>
-                <Divider />
-                <Grid columns={2} divided textAlign="center" padded>
-                    <Grid.Row>
-                        <Grid.Column>
-                            <TransactionDetails
-                                transaction={transactionObject}
-                            />
-                        </Grid.Column>
-                        <Grid.Column>
-                            <TransactionHashView
-                                transactionHash={transactionHash}
-                            />
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row>
-                        <Form>
-                            {checkboxes.map((label, index) => (
-                                <Form.Field key={label}>
-                                    <Checkbox
-                                        label={label}
-                                        defaultChecked={checkboxesStatus[index]}
-                                        disabled={signing}
-                                        onChange={() => {
-                                            const updatedStatus = [
-                                                ...checkboxesStatus,
-                                            ];
-                                            updatedStatus[
-                                                index
-                                            ] = !updatedStatus[index];
-                                            setCheckBoxesStatus(updatedStatus);
-                                        }}
-                                    />
+        <>
+            <PageHeader>
+                <h1>{header}</h1>
+            </PageHeader>
+            <Container>
+                <Segment>
+                    <Header textAlign="center">
+                        Transaction signing confirmation | Transaction Type
+                    </Header>
+                    <Divider />
+                    <Grid columns={2} divided textAlign="center" padded>
+                        <Grid.Row>
+                            <Grid.Column>
+                                <TransactionDetails
+                                    transaction={transactionObject}
+                                />
+                            </Grid.Column>
+                            <Grid.Column>
+                                <TransactionHashView
+                                    transactionHash={transactionHash}
+                                />
+                            </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row>
+                            <Form>
+                                {checkboxes.map((label, index) => (
+                                    <Form.Field key={label}>
+                                        <Checkbox
+                                            label={label}
+                                            defaultChecked={
+                                                checkboxesStatus[index]
+                                            }
+                                            disabled={signing}
+                                            onChange={() => {
+                                                const updatedStatus = [
+                                                    ...checkboxesStatus,
+                                                ];
+                                                updatedStatus[
+                                                    index
+                                                ] = !updatedStatus[index];
+                                                setCheckBoxesStatus(
+                                                    updatedStatus
+                                                );
+                                            }}
+                                        />
+                                    </Form.Field>
+                                ))}
+                                <Form.Field>
+                                    <Button
+                                        positive
+                                        fluid
+                                        onClick={() => setSigning(true)}
+                                        disabled={
+                                            signing ||
+                                            !checkboxesStatus.every(Boolean)
+                                        }
+                                    >
+                                        {signText}
+                                    </Button>
                                 </Form.Field>
-                            ))}
-                            <Form.Field>
-                                <Button
-                                    positive
-                                    fluid
-                                    onClick={() => setSigning(true)}
-                                    disabled={
-                                        signing ||
-                                        !checkboxesStatus.every(Boolean)
-                                    }
-                                >
-                                    {signText}
-                                </Button>
-                            </Form.Field>
-                        </Form>
-                    </Grid.Row>
-                </Grid>
-            </Segment>
-            {ledgerComponent}
-        </Container>
+                            </Form>
+                        </Grid.Row>
+                    </Grid>
+                </Segment>
+                {ledgerComponent}
+            </Container>
+        </>
     );
 }
