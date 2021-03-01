@@ -14,6 +14,7 @@ const sizeStyleMap: Record<ButtonSize, string | undefined> = {
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     size?: ButtonSize;
     inverted?: boolean;
+    clear?: boolean;
 }
 
 /**
@@ -24,6 +25,7 @@ export default function Button({
     size = 'regular',
     type = 'button',
     inverted = false,
+    clear = false,
     className,
     ...buttonProps
 }: PropsWithChildren<ButtonProps>): JSX.Element {
@@ -35,6 +37,7 @@ export default function Button({
                 styles.root,
                 size && sizeStyleMap[size],
                 inverted && styles.rootInverted,
+                clear && styles.rootClear,
                 className
             )}
             {...buttonProps}

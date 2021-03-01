@@ -40,3 +40,9 @@ Big.args = {
     disabled: false,
     size: 'big',
 };
+
+export const Clear = Template.bind({});
+Clear.args = {
+    children: 'Button',
+    clear: true,
+};
