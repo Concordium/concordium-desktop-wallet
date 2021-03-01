@@ -13,8 +13,10 @@ import ErrorMessage from '../ErrorMessage';
 import styles from './TextArea.module.scss';
 
 function scaleTextArea(el: HTMLTextAreaElement) {
-    el.style.height = '5px';
-    el.style.height = `${el.scrollHeight}px`;
+    setTimeout(() => {
+        el.style.height = '5px';
+        el.style.height = `${el.scrollHeight}px`;
+    }, 0);
 }
 
 export interface TextAreaProps
@@ -67,16 +69,12 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 
         const setRef = useCallback(
             (instance: HTMLTextAreaElement) => {
-                if (!instance) {
+                if (!instance || !ref) {
                     return;
                 }
 
                 if (autoScale) {
                     scaleTextArea(instance);
-                }
-
-                if (!ref) {
-                    return;
                 }
 
                 if (typeof ref === 'function') {
