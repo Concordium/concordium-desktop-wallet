@@ -5,7 +5,7 @@ import {
     NodeInfoResponse,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
-import { Setting, AccountInfo } from './types';
+import { AccountInfo, Global, Versioned } from './types';
 import grpcMethods from '../constants/grpcMethods.json';
 import ipcCommands from '../constants/ipcCommands.json';
 
@@ -19,12 +19,6 @@ import ipcCommands from '../constants/ipcCommands.json';
  */
 export function setClientLocation(address: string, port: string) {
     return ipcRenderer.invoke(ipcCommands.grpcSetLocation, address, port);
-}
-
-// Extracts node location from settings, and pass them to the grpc client.
-export function startClient(nodeLocationSetting: Setting) {
-    const { address, port } = JSON.parse(nodeLocationSetting.value);
-    setClientLocation(address, port);
 }
 
 /**
@@ -115,4 +109,12 @@ export function getAccountInfo(
 export async function getNodeInfo(): Promise<NodeInfoResponse> {
     const response = await sendPromise(grpcMethods.nodeInfo);
     return NodeInfoResponse.deserializeBinary(response);
+}
+
+export async function getCryptographicParameters(
+    blockHashValue: string
+): Promise<Versioned<Global>> {
+    return sendPromiseParseResult(grpcMethods.getCryptographicParameters, {
+        blockHashValue,
+    });
 }
