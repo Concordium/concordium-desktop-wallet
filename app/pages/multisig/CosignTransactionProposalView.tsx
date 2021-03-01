@@ -144,7 +144,7 @@ export default function CosignTransactionProposalView({ location }: Props) {
                 show={showValidationError}
                 header="Unauthorized key"
                 content="Your key is not authorized to sign this update type."
-                onClick={() => setShowValidationError(false)}
+                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
             <GenericSignTransactionProposalView
                 transaction={transaction}
