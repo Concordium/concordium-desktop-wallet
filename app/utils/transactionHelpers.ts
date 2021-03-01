@@ -124,7 +124,7 @@ export async function createUnshieldAmountTransaction(
     address: string,
     amount: BigInt,
     expiry: string = getDefaultExpiry(),
-    energyAmount = '1000'
+    energyAmount = '2000000'
 ) {
     const payload = {
         transferAmount: amount.toString(),

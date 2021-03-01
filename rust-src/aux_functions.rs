@@ -307,37 +307,29 @@ pub fn create_sec_to_pub_aux(
 ) -> Fallible<String> {
     let v: SerdeValue = from_str(input)?;
 
-    log("1");
     let prf_key_string: String = try_get(&v, "prfKey")?;
-    log("2");
     let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
-    log("3");
 
     let account_number: u8 = try_get(&v, "accountNumber")?;
-    log("1");
 
     let scalar: Fr = prf_key.prf_exponent(account_number)?;
-    log("2");
 
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
-    log("3");
+
     let secret_key = elgamal::SecretKey {
         generator: *global_context.elgamal_generator(),
         scalar,
     };
-    log("1");
 
     let input_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
     let agg_index: u64 = try_get(&v, "index")?;
-    log("2");
     let to_transfer: Amount = try_get(&v, "amount")?;
-    log("3");
 
     let m = 1 << 16;
     let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
 
     let decrypted_amount =
-        encrypted_transfers::decrypt_amount::<id::constants::ArCurve>(
+        encrypted_transfers::decrypt_amount::<ExampleCurve>(
         &table,
         &secret_key,
         &input_amount,
@@ -351,7 +343,6 @@ pub fn create_sec_to_pub_aux(
 
     let mut csprng = thread_rng();
 
-    log("1");
     let payload =encrypted_transfers::make_sec_to_pub_transfer_data(
         &global_context,
         &secret_key,
@@ -359,16 +350,14 @@ pub fn create_sec_to_pub_aux(
         to_transfer,
         &mut csprng,
     );
-    log("2");
 
     let payload = match payload {
         Some(payload) => payload,
         None => bail!("Could not produce payload."),
     };
-    log("3");
 
     let decrypted_remaining =
-        encrypted_transfers::decrypt_amount::<id::constants::ArCurve>(
+        encrypted_transfers::decrypt_amount::<ExampleCurve>(
             &table,
             &secret_key,
             &payload.remaining_amount,

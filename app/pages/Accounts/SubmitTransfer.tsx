@@ -55,7 +55,7 @@ async function buildEncryptedPayload(
             prfKeySeed.toString(),
             global,
             accountInfo.accountEncryptedAmount.selfAmount,
-            1,
+            accountInfo.accountEncryptedAmount.startIndex,
             account.accountNumber
         );
         console.log(data.payload);
