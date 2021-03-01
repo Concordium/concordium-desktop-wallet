@@ -53,8 +53,11 @@ export enum TimeConstants {
     Month = 30 * Day,
 }
 
+// default expiry on transactions (1 hour from now), given in seconds.
 export function getDefaultExpiry(): string {
-    return (new Date().getTime() + TimeConstants.Hour).toString();
+    return Math.floor(
+        (new Date().getTime() + TimeConstants.Hour) / 1000
+    ).toString();
 }
 
 export function getNow(): number {
