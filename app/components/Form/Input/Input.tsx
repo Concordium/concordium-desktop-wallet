@@ -5,7 +5,8 @@ import { CommonFieldProps } from '../common';
 
 import styles from './Input.module.scss';
 
-type InputProps = InputHTMLAttributes<HTMLInputElement> & CommonFieldProps;
+export type InputProps = InputHTMLAttributes<HTMLInputElement> &
+    CommonFieldProps;
 
 /**
  * @description
