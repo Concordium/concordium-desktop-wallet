@@ -1,6 +1,10 @@
 import { Authorization, Key } from './NodeApiTypes';
-import { getConsensusStatus, getAccountInfo } from './nodeRequests';
-import { AccountInfo, Account } from './types';
+import {
+    getConsensusStatus,
+    getAccountInfo,
+    getCryptographicParameters,
+} from './nodeRequests';
+import { AccountInfo, Account, Global } from './types';
 
 export interface AccountInfoPair {
     account: Account;
@@ -45,4 +49,11 @@ export function findAuthorizationKeyIndex(
         .find((indexedKey) => {
             return indexedKey.key.verifyKey === verifyKey;
         });
+}
+
+export async function fetchGlobal(): Promise<Global> {
+    const consensusStatus = await getConsensusStatus();
+    const blockHash = consensusStatus.lastFinalizedBlock;
+    const versioned = await getCryptographicParameters(blockHash);
+    return versioned.value;
 }

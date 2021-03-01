@@ -136,6 +136,12 @@ function getNodeInfo() {
     return sendPromise(client.nodeInfo, new Empty());
 }
 
+function getCryptographicParameters(blockHashValue: string) {
+    const blockHash = new BlockHash();
+    blockHash.setBlockHash(blockHashValue);
+    return sendPromise(client.getCryptographicParameters, blockHash);
+}
+
 export function grpcCall(name: string, input: Record<string, string>) {
     switch (name) {
         case grpcMethods.nodeInfo:
@@ -160,6 +166,10 @@ export function grpcCall(name: string, input: Record<string, string>) {
         case grpcMethods.getBlockSummary: {
             const { blockHashValue } = input;
             return getBlockSummary(blockHashValue);
+        }
+        case grpcMethods.getCryptographicParameters: {
+            const { blockHashValue } = input;
+            return getCryptographicParameters(blockHashValue);
         }
         case grpcMethods.getAccountInfo: {
             const { address, blockHash } = input;
