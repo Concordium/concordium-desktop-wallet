@@ -68,7 +68,7 @@ export async function createSimpleTransferTransaction(
     const transferTransaction: SimpleTransfer = {
         sender: fromAddress,
         nonce,
-        energyAmount, // TODO: Does this need to be set by the user?
+        energyAmount,
         expiry,
         transactionKind: TransactionKindId.Simple_transfer,
         payload: {
@@ -89,7 +89,7 @@ export async function createShieldAmountTransaction(
     const transferTransaction: TransferToEncrypted = {
         sender: address,
         nonce,
-        energyAmount, // TODO: Does this need to be set by the user?
+        energyAmount,
         expiry,
         transactionKind: TransactionKindId.Transfer_to_encrypted,
         payload: {
@@ -138,7 +138,7 @@ export async function createScheduledTransferTransaction(
     const transferTransaction: ScheduledTransfer = {
         sender: fromAddress,
         nonce,
-        energyAmount, // TODO: Does this need to be set by the user?
+        energyAmount,
         expiry,
         transactionKind: TransactionKindId.Transfer_with_schedule,
         payload: {
