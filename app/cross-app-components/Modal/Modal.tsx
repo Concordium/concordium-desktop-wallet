@@ -26,8 +26,8 @@ const bgTransitionVariants: Variants = {
 };
 
 const modalTransitionVariants: Variants = {
-    open: { opacity: 1, translateY: 0 },
-    closed: { opacity: 0, translateY: 100 },
+    open: { opacity: 1, scale: 1 },
+    closed: { opacity: 0, scale: 1.1 },
 };
 
 interface WithOnClick {
