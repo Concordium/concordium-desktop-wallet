@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Button, Card, Header } from 'semantic-ui-react';
+// import { Button, Card, Header } from 'semantic-ui-react';
 import {
     addressBookSelector,
     chosenIndexSelector,
@@ -8,6 +8,8 @@ import {
 } from '../../features/AddressBookSlice';
 import DeleteAddress from './DeleteAddress';
 import UpsertAddress from '../../components/UpsertAddress';
+import Card from '../../cross-app-components/Card';
+import Button from '../../cross-app-components/Button';
 
 export default function AddressBookElementView() {
     const dispatch = useDispatch();
@@ -20,23 +22,14 @@ export default function AddressBookElementView() {
     }
 
     return (
-        <Card fluid>
-            <Card.Content>
-                <Card.Header textAlign="center">{chosenEntry.name}</Card.Header>
-                <Card.Description textAlign="center">
-                    <Header size="small">Account address</Header>
-                    {chosenEntry.address}
-                </Card.Description>
-                <Card.Description textAlign="center">
-                    <Header size="small">Notes</Header>
-                    {chosenEntry.note}
-                </Card.Description>
-            </Card.Content>
-            <Button.Group>
+        <Card>
+            <div>
+                <h2>{chosenEntry.name}</h2>
                 <UpsertAddress
                     as={Button}
                     disabled={chosenEntry.readOnly}
                     initialValues={chosenEntry}
+                    clear
                 >
                     Edit
                 </UpsertAddress>
@@ -44,7 +37,44 @@ export default function AddressBookElementView() {
                     entry={chosenEntry}
                     onRemove={(entry) => removeFromAddressBook(dispatch, entry)}
                 />
-            </Button.Group>
+            </div>
+            <div>
+                {chosenEntry.address}
+                <button type="submit">Copy</button>
+            </div>
+            <div>
+                <h3>Notes</h3>
+                {chosenEntry.note}
+            </div>
         </Card>
     );
+
+    // return (
+    //     <Card fluid>
+    //         <Card.Content>
+    //             <Card.Header textAlign="center">{chosenEntry.name}</Card.Header>
+    //             <Card.Description textAlign="center">
+    //                 <Header size="small">Account address</Header>
+    //                 {chosenEntry.address}
+    //             </Card.Description>
+    //             <Card.Description textAlign="center">
+    //                 <Header size="small">Notes</Header>
+    //                 {chosenEntry.note}
+    //             </Card.Description>
+    //         </Card.Content>
+    //         <Button.Group>
+    //             <UpsertAddress
+    //                 as={Button}
+    //                 disabled={chosenEntry.readOnly}
+    //                 initialValues={chosenEntry}
+    //             >
+    //                 Edit
+    //             </UpsertAddress>
+    //             <DeleteAddress
+    //                 entry={chosenEntry}
+    //                 onRemove={(entry) => removeFromAddressBook(dispatch, entry)}
+    //             />
+    //         </Button.Group>
+    //     </Card>
+    // );
 }
