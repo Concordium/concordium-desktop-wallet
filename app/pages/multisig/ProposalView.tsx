@@ -174,6 +174,10 @@ export default function ProposalView() {
     const missingSignatures =
         instruction.signatures.length !== currentProposal.threshold;
 
+    const readyToSubmit =
+        !missingSignatures &&
+        currentProposal.status === MultiSignatureTransactionStatus.Open;
+
     return (
         <>
             <PageHeader>
@@ -259,11 +263,7 @@ export default function ProposalView() {
                         <Button
                             fluid
                             positive
-                            disabled={
-                                missingSignatures ||
-                                currentProposal.status !==
-                                    MultiSignatureTransactionStatus.Open
-                            }
+                            disabled={!readyToSubmit}
                             onClick={submitTransaction}
                         >
                             Submit transaction to chain

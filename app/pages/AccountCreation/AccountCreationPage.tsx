@@ -30,6 +30,31 @@ export default function AccountCreationPage(): JSX.Element {
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [chosenAttributes, setChosenAttributes] = useState<string[]>([]);
 
+    function renderGeneratePage() {
+        if (identity) {
+            return (
+                <GeneratePage
+                    accountName={accountName}
+                    attributes={chosenAttributes}
+                    identity={identity}
+                />
+            );
+        }
+        throw new Error('Unexpected missing identity!');
+    }
+
+    function renderPickAttributes() {
+        if (identity) {
+            return (
+                <PickAttributes
+                    identity={identity}
+                    setChosenAttributes={setChosenAttributes}
+                />
+            );
+        }
+        throw new Error('Unexpected missing identity!');
+    }
+
     return (
         <>
             <PageHeader>
@@ -46,32 +71,11 @@ export default function AccountCreationPage(): JSX.Element {
                 />
                 <Route
                     path={routes.ACCOUNTCREATION_GENERATE}
-                    render={() => {
-                        if (identity) {
-                            return (
-                                <GeneratePage
-                                    accountName={accountName}
-                                    attributes={chosenAttributes}
-                                    identity={identity}
-                                />
-                            );
-                        }
-                        throw new Error('Unexpected missing identity!');
-                    }}
+                    render={renderGeneratePage}
                 />
                 <Route
                     path={routes.ACCOUNTCREATION_PICKATTRIBUTES}
-                    render={() => {
-                        if (identity) {
-                            return (
-                                <PickAttributes
-                                    identity={identity}
-                                    setChosenAttributes={setChosenAttributes}
-                                />
-                            );
-                        }
-                        throw new Error('Unexpected missing identity!');
-                    }}
+                    render={renderPickAttributes}
                 />
                 <Route
                     render={() => <PickName setAccountName={setAccountName} />}

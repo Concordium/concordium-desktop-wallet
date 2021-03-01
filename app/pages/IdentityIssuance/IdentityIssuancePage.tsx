@@ -42,6 +42,20 @@ export default function IdentityIssuancePage(): JSX.Element {
         setModalOpen(true);
     }
 
+    function renderGeneratePage() {
+        if (provider) {
+            return (
+                <GeneratePage
+                    identityName={identityName}
+                    accountName={initialAccountName}
+                    provider={provider}
+                    onError={activateModal}
+                />
+            );
+        }
+        throw new Error('Unexpected missing identity Provider!');
+    }
+
     return (
         <>
             <PageHeader>
@@ -65,21 +79,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                 />
                 <Route
                     path={routes.IDENTITYISSUANCE_EXTERNAL}
-                    render={() => {
-                        if (provider) {
-                            return (
-                                <GeneratePage
-                                    identityName={identityName}
-                                    accountName={initialAccountName}
-                                    provider={provider}
-                                    onError={activateModal}
-                                />
-                            );
-                        }
-                        throw new Error(
-                            'Unexpected missing identity Provider!'
-                        );
-                    }}
+                    render={renderGeneratePage}
                 />
                 <Route
                     path={routes.IDENTITYISSUANCE_FINAL}

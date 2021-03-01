@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Grid } from 'semantic-ui-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
@@ -14,11 +14,13 @@ import PlusIcon from '../../../resources/svg/plus.svg';
 export default function IdentityPage() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
-    let body;
-    if (identities.length === 0) {
-        body = <NoIdentities />;
-    } else {
-        body = (
+
+    const body = useMemo(() => {
+        if (identities.length === 0) {
+            return <NoIdentities />;
+        }
+
+        return (
             <Grid centered columns="equal" divided>
                 <Grid.Row>
                     <Grid.Column>
@@ -30,7 +32,8 @@ export default function IdentityPage() {
                 </Grid.Row>
             </Grid>
         );
-    }
+    }, [identities]);
+
     return (
         <>
             <PageHeader>
