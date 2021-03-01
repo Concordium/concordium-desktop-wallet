@@ -6,11 +6,6 @@ import Modal, { ModalProps } from './Modal';
 export default {
     title: 'Cross App Components/Modal',
     component: Modal,
-    argTypes: {
-        trigger: {
-            description: 'Element with onClick prop, such as "button"',
-        },
-    },
     decorators: [
         (story) => (
             <>
