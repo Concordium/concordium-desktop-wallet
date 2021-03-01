@@ -101,50 +101,52 @@ export default function UpsertAddress<TAsProps>({
             onOpen={() => setOpen(true)}
             open={open}
         >
-            <h2>{header}</h2>
-            <Form<AddressBookEntryForm>
-                onSubmit={handleSubmit}
-                className={styles.content}
-            >
-                <Form.Input
-                    className={styles.name}
-                    name={fieldNames.name}
-                    rules={{ required: 'Name required' }}
-                    placeholder="Recipient Name"
-                    defaultValue={initialValues?.name}
-                />
-                <Form.TextArea
-                    className={styles.input}
-                    name={fieldNames.address}
-                    rules={{
-                        required: 'Address required',
-                        minLength: {
-                            value: 50,
-                            message: 'Address should be 50 characters',
-                        },
-                        maxLength: {
-                            value: 50,
-                            message: 'Address should be 50 characters',
-                        },
-                        validate: validateAddress,
-                    }}
-                    placeholder="Paste the account address here"
-                    defaultValue={initialValues?.address}
-                    autoScale
-                />
-                <Form.Input
-                    className={styles.input}
-                    name={fieldNames.note}
-                    rules={{
-                        maxLength: {
-                            value: noteMaxLength,
-                            message:
-                                'Message cannot be longer than 255 characters',
-                        },
-                    }}
-                    placeholder="You can add a note here"
-                    defaultValue={initialValues?.note}
-                />
+            <h2 className={styles.header}>{header}</h2>
+            <Form<AddressBookEntryForm> onSubmit={handleSubmit}>
+                <div className={styles.card}>
+                    <div className={styles.content}>
+                        <Form.Input
+                            className={styles.name}
+                            name={fieldNames.name}
+                            rules={{ required: 'Name required' }}
+                            placeholder="Recipient Name"
+                            defaultValue={initialValues?.name}
+                        />
+                        <Form.TextArea
+                            className={styles.input}
+                            name={fieldNames.address}
+                            rules={{
+                                required: 'Address required',
+                                minLength: {
+                                    value: 50,
+                                    message: 'Address should be 50 characters',
+                                },
+                                maxLength: {
+                                    value: 50,
+                                    message: 'Address should be 50 characters',
+                                },
+                                validate: validateAddress,
+                            }}
+                            placeholder="Paste the account address here"
+                            defaultValue={initialValues?.address}
+                            autoScale
+                        />
+                        <Form.Input
+                            className={styles.input}
+                            name={fieldNames.note}
+                            label="Notes"
+                            rules={{
+                                maxLength: {
+                                    value: noteMaxLength,
+                                    message:
+                                        'Message cannot be longer than 255 characters',
+                                },
+                            }}
+                            placeholder="You can add a note here"
+                            defaultValue={initialValues?.note}
+                        />
+                    </div>
+                </div>
                 <Form.Submit className={styles.submit}>
                     Save recipient
                 </Form.Submit>

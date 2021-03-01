@@ -8,3 +8,8 @@ button,
 label {
     cursor: pointer;
 }
+
+.card {
+    border: 1px solid $color-grey;
+    border-radius: 10px;
+}
