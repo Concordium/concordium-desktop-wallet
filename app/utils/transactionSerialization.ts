@@ -68,7 +68,7 @@ export function serializeTransactionHeader(
     nonce: string,
     energyAmount: string,
     payloadSize: number,
-    expiry: string
+    expiry: bigint
 ) {
     const size = 32 + 8 + 8 + 4 + 8;
     const serialized = new Uint8Array(size);
@@ -77,7 +77,7 @@ export function serializeTransactionHeader(
     put(serialized, 32, encodeWord64(BigInt(nonce)));
     put(serialized, 32 + 8, encodeWord64(BigInt(energyAmount)));
     put(serialized, 32 + 8 + 8, encodeWord32(payloadSize));
-    put(serialized, 32 + 8 + 8 + 4, encodeWord64(BigInt(expiry)));
+    put(serialized, 32 + 8 + 8 + 4, encodeWord64(expiry));
 
     return serialized;
 }

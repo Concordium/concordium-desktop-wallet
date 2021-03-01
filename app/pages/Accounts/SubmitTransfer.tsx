@@ -1,5 +1,6 @@
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
+import { parse } from 'json-bigint';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import { Container, Segment, Header, Grid } from 'semantic-ui-react';
@@ -17,7 +18,7 @@ import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
 
 interface State {
-    transaction: AccountTransaction;
+    transaction: string;
     account: Account;
     returnLocation: string;
     returnState: Record<string, unknown>;
@@ -41,10 +42,12 @@ export default function SubmitTransfer({ location }: Props) {
 
     const {
         account,
-        transaction,
+        transaction: transactionJSON,
         returnLocation,
         returnState,
     } = location.state;
+
+    const transaction: AccountTransaction = parse(transactionJSON);
 
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
@@ -71,7 +74,11 @@ export default function SubmitTransfer({ location }: Props) {
             dispatch(
                 push({
                     pathname: returnLocation,
-                    state: { account, transaction, ...returnState },
+                    state: {
+                        account,
+                        transaction: transactionJSON,
+                        ...returnState,
+                    },
                 })
             );
         } else {

@@ -1,29 +1,20 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { stringify } from 'json-bigint';
 import { push } from 'connected-react-router';
 import { useLocation, Link } from 'react-router-dom';
 import { Button, Header, Grid } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import {
-    AddressBookEntry,
-    Account,
-    AccountTransaction,
-} from '../../utils/types';
+import { Account } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 import locations from '../../constants/transferLocations.json';
 import { createShieldAmountTransaction } from '../../utils/transactionHelpers';
+import { TransferState } from '../../utils/transactionTypes';
 
 interface Props {
     account: Account;
-}
-
-interface State {
-    amount: string;
-    transaction: AccountTransaction;
-    recipient: AddressBookEntry;
-    initialPage: string;
 }
 
 /**
@@ -31,7 +22,7 @@ interface State {
  */
 export default function ShieldAmount({ account }: Props) {
     const dispatch = useDispatch();
-    const location = useLocation<State>();
+    const location = useLocation<TransferState>();
 
     const [subLocation, setSubLocation] = useState<string>(
         location?.state?.initialPage || locations.pickAmount
@@ -64,7 +55,7 @@ export default function ShieldAmount({ account }: Props) {
                                             initialPage:
                                                 locations.transferSubmitted,
                                         },
-                                        transaction,
+                                        transaction: stringify(transaction),
                                         account,
                                     },
                                 })

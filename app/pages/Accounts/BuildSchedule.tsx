@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { stringify } from 'json-bigint';
 import { Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import { Card, List, Header, Button } from 'semantic-ui-react';
@@ -51,7 +52,7 @@ export default function BuildSchedule({ location }: Props) {
                         recipient,
                         initialPage: locations.transferSubmitted,
                     },
-                    transaction,
+                    transaction: stringify(transaction),
                     account,
                 },
             })

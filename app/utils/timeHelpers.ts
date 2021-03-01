@@ -20,8 +20,6 @@ export function parseTime(
     timeStamp: string,
     unit: TimeStampUnit = TimeStampUnit.seconds,
     formatOptions: Intl.DateTimeFormatOptions = {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error : https://github.com/microsoft/TypeScript/issues/35865
         dateStyle: 'short',
         timeStyle: 'short',
     }
@@ -54,10 +52,10 @@ export enum TimeConstants {
 }
 
 // default expiry on transactions (1 hour from now), given in seconds.
-export function getDefaultExpiry(): string {
-    return Math.floor(
-        (new Date().getTime() + TimeConstants.Hour) / 1000
-    ).toString();
+export function getDefaultExpiry(): bigint {
+    return BigInt(
+        Math.floor((new Date().getTime() + TimeConstants.Hour) / 1000)
+    );
 }
 
 export function getNow(): number {

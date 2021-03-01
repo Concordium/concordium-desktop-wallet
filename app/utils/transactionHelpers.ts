@@ -59,9 +59,9 @@ export async function attachNames(
  */
 export async function createSimpleTransferTransaction(
     fromAddress: string,
-    amount: BigInt,
+    amount: bigint,
     toAddress: string,
-    expiry: string = getDefaultExpiry(),
+    expiry: bigint = getDefaultExpiry(),
     energyAmount = '200'
 ) {
     const { nonce } = await getNextAccountNonce(fromAddress);
@@ -81,8 +81,8 @@ export async function createSimpleTransferTransaction(
 
 export async function createShieldAmountTransaction(
     address: string,
-    amount: BigInt,
-    expiry: string = getDefaultExpiry(),
+    amount: bigint,
+    expiry: bigint = getDefaultExpiry(),
     energyAmount = '1000'
 ) {
     const { nonce } = await getNextAccountNonce(address);
@@ -131,7 +131,7 @@ export async function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: SchedulePoint[],
-    expiry: string = getDefaultExpiry(),
+    expiry: bigint = getDefaultExpiry(),
     energyAmount = '20000'
 ) {
     const { nonce } = await getNextAccountNonce(fromAddress);
