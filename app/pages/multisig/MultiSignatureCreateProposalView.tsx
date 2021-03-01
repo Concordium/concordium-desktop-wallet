@@ -9,9 +9,6 @@ import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
 import findHandler from '../../utils/updates/HandlerFinder';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { getGovernancePath } from '../../features/ledger/Path';
 import EffectiveTimeUpdate from './EffectiveTimeUpdate';
 import PageHeader from '../../components/PageHeader';
 
@@ -33,11 +30,6 @@ interface Props {
 export default function MultiSignatureCreateProposalView({ location }: Props) {
     const [blockSummary, setBlockSummary] = useState<BlockSummary>();
     const [loading, setLoading] = useState(true);
-    const [publicKey, setPublicKey] = useState<string>();
-    const [
-        authorizedVerifyKeyIndex,
-        setAuthorizedVerifyKeyIndex,
-    ] = useState<number>();
     const [proposal, setProposal] = useState<
         Partial<MultiSignatureTransaction>
     >();
@@ -69,7 +61,7 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     ) {
         const signInput = {
             multiSignatureTransaction,
-            authorizedKeyIndex: authorizedVerifyKeyIndex,
+            blockSummary,
         };
 
         // Forward the transaction under creation to the signing page.
@@ -78,51 +70,6 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                 pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
                 state: stringify(signInput),
             })
-        );
-    }
-
-    async function validateAuthorizationKey(authorizationKey?: string) {
-        if (blockSummary && authorizationKey) {
-            const authorizedKeyIndices = handler.getAuthorization(
-                blockSummary.updates.authorizations
-            ).authorizedKeys;
-
-            const matchingKey = blockSummary.updates.authorizations.keys
-                .map((key, index) => {
-                    return { index, key };
-                })
-                .filter((key) => {
-                    return authorizedKeyIndices.includes(key.index);
-                })
-                .find((indexedKey) => {
-                    return indexedKey.key.verifyKey === authorizationKey;
-                });
-
-            if (!matchingKey) {
-                throw new Error(
-                    'The used public-key is not authorized for this update type.'
-                );
-            }
-
-            setAuthorizedVerifyKeyIndex(matchingKey.index);
-        }
-    }
-
-    async function exportPublicKey(
-        ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
-    ) {
-        setMessage(
-            'Export your public-key to verify that it is an authorized key.'
-        );
-        // TODO Purpose will quite likely be dynamically set based on the update type,
-        // when the update authorization transactions have been re-done.
-        setPublicKey(
-            (
-                await ledger.getPublicKey(
-                    getGovernancePath({ purpose: 0, keyIndex: 0 })
-                )
-            ).toString('hex')
         );
     }
 
@@ -152,29 +99,9 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
             configured node. Verify your node settings, and check that
             the node is running."
                 />
-                {publicKey && (
-                    <DynamicModal
-                        execution={() => validateAuthorizationKey(publicKey)}
-                        onError={() => {
-                            dispatch(
-                                push({ pathname: routes.MULTISIGTRANSACTIONS })
-                            );
-                        }}
-                        onSuccess={() => {}}
-                        title="Unauthorized key"
-                        content="The key you are using to sign with is not authorized for this type of update"
-                    />
-                )}
                 <Segment>
                     <Header>Transaction Proposal | {displayType}</Header>
                     <Divider />
-                    {!publicKey && blockSummary && (
-                        <>
-                            Please export your public-key, to verify that it is
-                            authorized for this update.
-                            <LedgerComponent ledgerCall={exportPublicKey} />
-                        </>
-                    )}
                     {blockSummary ? (
                         <EffectiveTimeUpdate
                             UpdateProposalComponent={UpdateComponent}

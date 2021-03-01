@@ -18,10 +18,14 @@ import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
+import { getGovernancePath } from '../../features/ledger/Path';
+import SimpleErrorModal from '../../components/SimpleErrorModal';
+import { BlockSummary } from '../../utils/NodeApiTypes';
+import { findAuthorizationKeyIndex } from '../../utils/nodeHelpers';
 
 export interface SignInput {
     multiSignatureTransaction: MultiSignatureTransaction;
-    authorizedKeyIndex: number;
+    blockSummary: BlockSummary;
 }
 
 interface Props {
@@ -34,6 +38,7 @@ interface Props {
  * to the database.
  */
 export default function SignTransactionProposalView({ location }: Props) {
+    const [showValidationError, setShowValidationError] = useState(false);
     const [transactionHash, setTransactionHash] = useState<string>();
 
     if (!location.state) {
@@ -44,6 +49,7 @@ export default function SignTransactionProposalView({ location }: Props) {
 
     const parsedInput: SignInput = parse(location.state);
     const { multiSignatureTransaction } = parsedInput;
+    const { blockSummary } = parsedInput;
 
     const { transaction } = multiSignatureTransaction;
     const type = 'UpdateInstruction';
@@ -72,6 +78,24 @@ export default function SignTransactionProposalView({ location }: Props) {
     }, [setTransactionHash, transactionHandler, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
+        const publicKey = await ledger.getPublicKey(
+            getGovernancePath({ purpose: 0, keyIndex: 0 })
+        );
+
+        const authorization = transactionHandler.getAuthorization(
+            blockSummary.updates.authorizations
+        );
+
+        const authorizationKey = findAuthorizationKeyIndex(
+            blockSummary.updates.authorizations.keys,
+            authorization,
+            publicKey.toString('hex')
+        );
+        if (!authorizationKey) {
+            setShowValidationError(true);
+            return;
+        }
+
         const signatureBytes = await transactionHandler.signTransaction(
             updateInstruction,
             ledger
@@ -80,7 +104,7 @@ export default function SignTransactionProposalView({ location }: Props) {
         // Set signature
         const signature: UpdateInstructionSignature = {
             signature: signatureBytes.toString('hex'),
-            authorizationKeyIndex: parsedInput.authorizedKeyIndex,
+            authorizationKeyIndex: authorizationKey.index,
         };
         updateInstruction.signatures = [signature];
 
@@ -105,13 +129,21 @@ export default function SignTransactionProposalView({ location }: Props) {
     }
 
     return (
-        <GenericSignTransactionProposalView
-            header={transactionHandler.title}
-            transaction={transaction}
-            transactionHash={transactionHash}
-            signFunction={signingFunction}
-            checkboxes={['The transaction details are correct']}
-            signText="Sign"
-        />
+        <>
+            <SimpleErrorModal
+                show={showValidationError}
+                header="Unauthorized key"
+                content="Your key is not authorized to sign this update type."
+                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+            />
+            <GenericSignTransactionProposalView
+                header={transactionHandler.title}
+                transaction={transaction}
+                transactionHash={transactionHash}
+                signFunction={signingFunction}
+                checkboxes={['The transaction details are correct']}
+                signText="Sign"
+            />
+        </>
     );
 }
