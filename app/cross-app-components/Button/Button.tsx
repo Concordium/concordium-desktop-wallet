@@ -5,16 +5,16 @@ import styles from './Button.module.scss';
 
 type ButtonSize = 'small' | 'regular' | 'big';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    size?: ButtonSize;
-    inverted?: boolean;
-}
-
 const sizeStyleMap: Record<ButtonSize, string | undefined> = {
     small: styles.rootSmall,
     regular: undefined,
     big: styles.rootBig,
 };
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    size?: ButtonSize;
+    inverted?: boolean;
+}
 
 /**
  * @description
