@@ -5,6 +5,7 @@
     display: flex;
     flex-wrap: nowrap;
     justify-content: space-around;
+    align-items: flex-start;
 
     &Divider {
         &::before {
@@ -16,6 +17,7 @@
             width: 1px;
             order: 2;
             background-color: $color-grey;
+            height: calc(100% - 40px); // To account for margin
         }
 
         > *:nth-child(2) {
@@ -34,8 +36,6 @@
 .column {
     flex: 0 1 100%;
     padding: $page-gutter;
-    display: flex;
-    justify-content: center;
 
     .rootColumnScroll & {
         height: 100%;
