@@ -15,9 +15,16 @@
             flex-shrink: 0;
             margin: 20px 0;
             width: 1px;
+            order: 2;
             background-color: $color-grey;
             height: calc(100% - 40px); // To account for margin
-            position: absolute;
+        }
+
+        > *:nth-child(2) {
+            order: 1;
+        }
+        > *:last-child {
+            order: 3;
         }
     }
 
