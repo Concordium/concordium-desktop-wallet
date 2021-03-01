@@ -4,7 +4,6 @@ import React, {
     useMemo,
     useState,
 } from 'react';
-import { Modal } from 'semantic-ui-react';
 import { SubmitHandler } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 
@@ -22,6 +21,7 @@ import {
 import Form from '../Form';
 
 import styles from './UpsertAddress.module.scss';
+import Modal from '../../cross-app-components/Modal';
 
 interface HasOnClick {
     onClick?(): void;
@@ -95,16 +95,13 @@ export default function UpsertAddress<TAsProps>({
 
     return (
         <Modal
-            closeIcon
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            trigger={<As {...(asProps as any)} />}
             onClose={() => setOpen(false)}
             onOpen={() => setOpen(true)}
             open={open}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            trigger={<As {...(asProps as any)} />}
-            dimmer="blurring"
-            closeOnDimmerClick={false}
         >
-            <Modal.Header>{header}</Modal.Header>
+            <h2>{header}</h2>
             <Form<AddressBookEntryForm>
                 onSubmit={handleSubmit}
                 className={styles.content}

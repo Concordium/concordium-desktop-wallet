@@ -1,7 +1,7 @@
 @import 'config/bundle';
 
 .content {
-    max-width: 264px;
+    min-width: 264px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -21,4 +21,5 @@
 
 .submit {
     min-width: 239px;
+    margin-top: 36px;
 }
