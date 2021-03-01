@@ -1,20 +1,20 @@
 import React, { useState, useRef, RefObject } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card } from 'semantic-ui-react';
+import { globalSelector } from '../../features/GlobalSlice';
 import { addPendingIdentity } from '../../features/IdentitySlice';
 import { addPendingAccount } from '../../features/AccountSlice';
 import routes from '../../constants/routes.json';
 import styles from './IdentityIssuance.module.scss';
 import {
-    getGlobal,
     getPromise,
     getResponseBody,
     performIdObjectRequest,
 } from '../../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
-import { IdentityProvider, Dispatch } from '../../utils/types';
+import { IdentityProvider, Dispatch, Global } from '../../utils/types';
 import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoller';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
@@ -30,9 +30,9 @@ async function createIdentityObjectRequest(
     id: number,
     provider: IdentityProvider,
     setMessage: (text: string) => void,
-    ledger: ConcordiumLedgerClient
+    ledger: ConcordiumLedgerClient,
+    global: Global
 ) {
-    const global = await getGlobal();
     return createIdentityRequestObjectLedger(
         id,
         provider.ipInfo,
@@ -135,11 +135,17 @@ export default function IdentityIssuanceGenerate({
     const dispatch = useDispatch();
     const [location, setLocation] = useState<string>();
     const iframeRef = useRef<HTMLIFrameElement>(null);
+    const global = useSelector(globalSelector);
 
     async function withLedger(
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
+        if (!global) {
+            onError(`Unexpected missing global object`);
+            return;
+        }
+
         const identityId = await getNextId();
         const {
             idObjectRequest,
@@ -148,7 +154,8 @@ export default function IdentityIssuanceGenerate({
             identityId,
             provider,
             setMessage,
-            ledger
+            ledger,
+            global
         );
         generateIdentity(
             idObjectRequest,
