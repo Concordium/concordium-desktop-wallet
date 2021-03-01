@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Button, Divider, Input, Segment } from 'semantic-ui-react';
+import React, { useEffect, useState } from 'react';
+import { Divider, Input, Segment } from 'semantic-ui-react';
 import DragAndDropFile from '../../components/DragAndDropFile';
-import { isHex } from '../../utils/basicHelpers';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 import { ProtocolUpdate, UpdateType } from '../../utils/types';
 import { UpdateProps } from '../../utils/transactionTypes';
@@ -13,7 +12,8 @@ const auxiliaryDataMaxSizeKb = 2048;
  */
 export default function UpdateProtocol({
     blockSummary,
-    forwardTransaction,
+    effectiveTime,
+    setProposal,
 }: UpdateProps): JSX.Element | null {
     const [protocolUpdate, setProtocolUpdate] = useState<ProtocolUpdate>();
     const [loadedFileName, setLoadedFileName] = useState<string | undefined>();
@@ -21,6 +21,20 @@ export default function UpdateProtocol({
     const { threshold } = blockSummary.updates.authorizations.protocol;
     const sequenceNumber =
         blockSummary.updates.updateQueues.protocol.nextSequenceNumber;
+
+    useEffect(() => {
+        if (protocolUpdate) {
+            setProposal(
+                createUpdateMultiSignatureTransaction(
+                    protocolUpdate,
+                    UpdateType.UpdateProtocol,
+                    sequenceNumber,
+                    threshold,
+                    effectiveTime
+                )
+            );
+        }
+    }, [protocolUpdate, sequenceNumber, threshold, setProposal, effectiveTime]);
 
     if (!protocolUpdate) {
         const initialProtocolUpdate: ProtocolUpdate = {
@@ -43,6 +57,14 @@ export default function UpdateProtocol({
             setLoadedFileName(fileName);
         }
     }
+
+    // TODO Disable continue button if:
+    //                 disabled={
+    //     protocolUpdate.specificationHash.length !== 64 ||
+    //     !isHex(protocolUpdate.specificationHash) ||
+    //     !protocolUpdate.message ||
+    //     !protocolUpdate.specificationUrl
+    // }
 
     return (
         <Segment basic textAlign="center">
@@ -94,27 +116,6 @@ export default function UpdateProtocol({
                 maxSizeKb={auxiliaryDataMaxSizeKb}
                 loadedFileName={loadedFileName}
             />
-            <Button
-                primary
-                disabled={
-                    protocolUpdate.specificationHash.length !== 64 ||
-                    !isHex(protocolUpdate.specificationHash) ||
-                    !protocolUpdate.message ||
-                    !protocolUpdate.specificationUrl
-                }
-                onClick={() =>
-                    forwardTransaction(
-                        createUpdateMultiSignatureTransaction(
-                            protocolUpdate,
-                            UpdateType.UpdateProtocol,
-                            sequenceNumber,
-                            threshold
-                        )
-                    )
-                }
-            >
-                Generate transaction proposal
-            </Button>
         </Segment>
     );
 }

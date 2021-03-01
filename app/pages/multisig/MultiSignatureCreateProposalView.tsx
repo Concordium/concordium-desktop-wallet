@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { stringify } from 'json-bigint';
-import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
+import { UpdateType } from '../../utils/types';
 import { getBlockSummary, getConsensusStatus } from '../../utils/nodeRequests';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
 import findHandler from '../../utils/updates/HandlerFinder';
+import EffectiveTimeUpdate from './EffectiveTimeUpdate';
 
 interface Location {
     state: UpdateType;
@@ -33,21 +33,6 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     // TODO Add support for account transactions.
     const type: UpdateType = location.state;
     const displayType = UpdateType[type];
-
-    /**
-     * Forwards the multi signature transactions to the signing page.
-     */
-    async function forwardTransactionToSigningPage(
-        multiSignatureTransaction: Partial<MultiSignatureTransaction>
-    ) {
-        // Forward the transaction under creation to the signing page.
-        dispatch(
-            push({
-                pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
-                state: stringify(multiSignatureTransaction),
-            })
-        );
-    }
 
     const UpdateComponent = findHandler(type).update;
 
@@ -82,9 +67,9 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                 <Header>Transaction Proposal | {displayType}</Header>
                 <Divider />
                 {blockSummary ? (
-                    <UpdateComponent
+                    <EffectiveTimeUpdate
+                        UpdateProposalComponent={UpdateComponent}
                         blockSummary={blockSummary}
-                        forwardTransaction={forwardTransactionToSigningPage}
                     />
                 ) : null}
             </Segment>

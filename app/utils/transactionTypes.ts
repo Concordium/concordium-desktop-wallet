@@ -16,9 +16,10 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
-    forwardTransaction: (
-        multiSignatureTransaction: Partial<MultiSignatureTransaction>
-    ) => Promise<void>;
+    effectiveTime: BigInt;
+    setProposal: React.Dispatch<
+        React.SetStateAction<Partial<MultiSignatureTransaction> | undefined>
+    >;
 }
 
 export type UpdateComponent = (props: UpdateProps) => JSX.Element | null;

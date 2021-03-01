@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Button,
     Form,
     Grid,
     Header,
@@ -23,7 +22,8 @@ import { rewardFractionResolution } from '../../constants/updateConstants.json';
  */
 export default function UpdateMintDistribution({
     blockSummary,
-    forwardTransaction,
+    effectiveTime,
+    setProposal,
 }: UpdateProps): JSX.Element | null {
     const [
         mintDistribution,
@@ -58,6 +58,26 @@ export default function UpdateMintDistribution({
         }
     }
 
+    useEffect(() => {
+        if (mintDistribution) {
+            setProposal(
+                createUpdateMultiSignatureTransaction(
+                    mintDistribution,
+                    UpdateType.UpdateMintDistribution,
+                    sequenceNumber,
+                    threshold,
+                    effectiveTime
+                )
+            );
+        }
+    }, [
+        mintDistribution,
+        sequenceNumber,
+        threshold,
+        setProposal,
+        effectiveTime,
+    ]);
+
     if (!mintDistribution) {
         // TODO Parse the current mint distribution value instead of hardcording this value.
         const mintRate: MintRate = {
@@ -75,28 +95,10 @@ export default function UpdateMintDistribution({
         return null;
     }
 
-    const generateTransactionButton = (
-        <Button
-            primary
-            disabled={
-                mintDistribution.bakingReward +
-                    mintDistribution.finalizationReward >
-                rewardFractionResolution
-            }
-            onClick={() =>
-                forwardTransaction(
-                    createUpdateMultiSignatureTransaction(
-                        mintDistribution,
-                        UpdateType.UpdateMintDistribution,
-                        sequenceNumber,
-                        threshold
-                    )
-                )
-            }
-        >
-            Generate transaction proposal
-        </Button>
-    );
+    // TODO Disable button if
+    //                 mintDistribution.bakingReward +
+    // mintDistribution.finalizationReward >
+    // rewardFractionResolution
 
     return (
         <>
@@ -238,7 +240,6 @@ export default function UpdateMintDistribution({
                     </Form>
                 </Grid.Column>
             </Grid>
-            {generateTransactionButton}
         </>
     );
 }

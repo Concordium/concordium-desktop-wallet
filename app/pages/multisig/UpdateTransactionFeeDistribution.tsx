@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Button, Form, Grid, Input, Progress } from 'semantic-ui-react';
+import React, { useEffect, useState } from 'react';
+import { Form, Grid, Input, Progress } from 'semantic-ui-react';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 import {
     ColorType,
@@ -11,7 +11,8 @@ import { UpdateProps } from '../../utils/transactionTypes';
 
 export default function UpdateTransactionFeeDistribution({
     blockSummary,
-    forwardTransaction,
+    effectiveTime,
+    setProposal,
 }: UpdateProps) {
     const [
         transactionFeeDistribution,
@@ -64,6 +65,26 @@ export default function UpdateTransactionFeeDistribution({
         }
     }
 
+    useEffect(() => {
+        if (transactionFeeDistribution) {
+            setProposal(
+                createUpdateMultiSignatureTransaction(
+                    transactionFeeDistribution,
+                    UpdateType.UpdateTransactionFeeDistribution,
+                    sequenceNumber,
+                    threshold,
+                    effectiveTime
+                )
+            );
+        }
+    }, [
+        transactionFeeDistribution,
+        sequenceNumber,
+        threshold,
+        setProposal,
+        effectiveTime,
+    ]);
+
     if (!transactionFeeDistribution) {
         setTransactionFeeDistribution({
             baker: currentBakerFee,
@@ -72,28 +93,10 @@ export default function UpdateTransactionFeeDistribution({
         return null;
     }
 
-    const generateTransactionButton = (
-        <Button
-            primary
-            disabled={
-                transactionFeeDistribution.baker +
-                    transactionFeeDistribution.gasAccount >
-                rewardFractionResolution
-            }
-            onClick={() =>
-                forwardTransaction(
-                    createUpdateMultiSignatureTransaction(
-                        transactionFeeDistribution,
-                        UpdateType.UpdateTransactionFeeDistribution,
-                        sequenceNumber,
-                        threshold
-                    )
-                )
-            }
-        >
-            Generate transaction proposal
-        </Button>
-    );
+    // TODO: Disable if button if:
+    //                 transactionFeeDistribution.baker +
+    // transactionFeeDistribution.gasAccount >
+    // rewardFractionResolution
 
     return (
         <>
@@ -177,7 +180,6 @@ export default function UpdateTransactionFeeDistribution({
                     </Form>
                 </Grid.Column>
             </Grid>
-            {generateTransactionButton}
         </>
     );
 }
