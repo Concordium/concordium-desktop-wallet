@@ -20,6 +20,7 @@ export interface UpdateProps {
     setProposal: React.Dispatch<
         React.SetStateAction<Partial<MultiSignatureTransaction> | undefined>
     >;
+    setDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export type UpdateComponent = (props: UpdateProps) => JSX.Element | null;

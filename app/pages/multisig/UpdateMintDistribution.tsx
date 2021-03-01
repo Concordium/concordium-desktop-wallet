@@ -24,6 +24,7 @@ export default function UpdateMintDistribution({
     blockSummary,
     effectiveTime,
     setProposal,
+    setDisabled,
 }: UpdateProps): JSX.Element | null {
     const [
         mintDistribution,
@@ -69,6 +70,11 @@ export default function UpdateMintDistribution({
                     effectiveTime
                 )
             );
+            setDisabled(
+                mintDistribution.bakingReward +
+                    mintDistribution.finalizationReward >
+                    rewardFractionResolution
+            );
         }
     }, [
         mintDistribution,
@@ -76,6 +82,7 @@ export default function UpdateMintDistribution({
         threshold,
         setProposal,
         effectiveTime,
+        setDisabled,
     ]);
 
     if (!mintDistribution) {
@@ -94,11 +101,6 @@ export default function UpdateMintDistribution({
         });
         return null;
     }
-
-    // TODO Disable button if
-    //                 mintDistribution.bakingReward +
-    // mintDistribution.finalizationReward >
-    // rewardFractionResolution
 
     return (
         <>

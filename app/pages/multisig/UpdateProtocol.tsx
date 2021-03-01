@@ -4,6 +4,7 @@ import DragAndDropFile from '../../components/DragAndDropFile';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 import { ProtocolUpdate, UpdateType } from '../../utils/types';
 import { UpdateProps } from '../../utils/transactionTypes';
+import { isHex } from '../../utils/basicHelpers';
 
 const auxiliaryDataMaxSizeKb = 2048;
 
@@ -14,6 +15,7 @@ export default function UpdateProtocol({
     blockSummary,
     effectiveTime,
     setProposal,
+    setDisabled,
 }: UpdateProps): JSX.Element | null {
     const [protocolUpdate, setProtocolUpdate] = useState<ProtocolUpdate>();
     const [loadedFileName, setLoadedFileName] = useState<string | undefined>();
@@ -33,8 +35,22 @@ export default function UpdateProtocol({
                     effectiveTime
                 )
             );
+
+            setDisabled(
+                protocolUpdate.specificationHash.length !== 64 ||
+                    !isHex(protocolUpdate.specificationHash) ||
+                    !protocolUpdate.message ||
+                    !protocolUpdate.specificationUrl
+            );
         }
-    }, [protocolUpdate, sequenceNumber, threshold, setProposal, effectiveTime]);
+    }, [
+        protocolUpdate,
+        sequenceNumber,
+        threshold,
+        setProposal,
+        effectiveTime,
+        setDisabled,
+    ]);
 
     if (!protocolUpdate) {
         const initialProtocolUpdate: ProtocolUpdate = {
@@ -57,14 +73,6 @@ export default function UpdateProtocol({
             setLoadedFileName(fileName);
         }
     }
-
-    // TODO Disable continue button if:
-    //                 disabled={
-    //     protocolUpdate.specificationHash.length !== 64 ||
-    //     !isHex(protocolUpdate.specificationHash) ||
-    //     !protocolUpdate.message ||
-    //     !protocolUpdate.specificationUrl
-    // }
 
     return (
         <Segment basic textAlign="center">

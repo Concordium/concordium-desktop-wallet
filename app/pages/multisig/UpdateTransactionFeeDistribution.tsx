@@ -13,6 +13,7 @@ export default function UpdateTransactionFeeDistribution({
     blockSummary,
     effectiveTime,
     setProposal,
+    setDisabled,
 }: UpdateProps) {
     const [
         transactionFeeDistribution,
@@ -76,6 +77,11 @@ export default function UpdateTransactionFeeDistribution({
                     effectiveTime
                 )
             );
+            setDisabled(
+                transactionFeeDistribution.baker +
+                    transactionFeeDistribution.gasAccount >
+                    rewardFractionResolution
+            );
         }
     }, [
         transactionFeeDistribution,
@@ -83,6 +89,7 @@ export default function UpdateTransactionFeeDistribution({
         threshold,
         setProposal,
         effectiveTime,
+        setDisabled,
     ]);
 
     if (!transactionFeeDistribution) {
@@ -92,11 +99,6 @@ export default function UpdateTransactionFeeDistribution({
         });
         return null;
     }
-
-    // TODO: Disable if button if:
-    //                 transactionFeeDistribution.baker +
-    // transactionFeeDistribution.gasAccount >
-    // rewardFractionResolution
 
     return (
         <>

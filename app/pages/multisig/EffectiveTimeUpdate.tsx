@@ -10,7 +10,10 @@ import { MultiSignatureTransaction } from '../../utils/types';
 import routes from '../../constants/routes.json';
 
 interface Props
-    extends Omit<Omit<UpdateProps, 'effectiveTime'>, 'setProposal'> {
+    extends Omit<
+        Omit<Omit<UpdateProps, 'effectiveTime'>, 'setProposal'>,
+        'setDisabled'
+    > {
     UpdateProposalComponent: UpdateComponent;
 }
 
@@ -27,10 +30,10 @@ export default function EffectiveTimeUpdate({
     const [effectiveTime, setEffectiveTime] = useState<number>(
         getNow() + 5 * TimeConstants.Minute
     );
-
     const [proposal, setProposal] = useState<
         Partial<MultiSignatureTransaction>
     >();
+    const [disabled, setDisabled] = useState(true);
 
     /**
      * Forwards the multi signature transactions to the signing page.
@@ -52,6 +55,7 @@ export default function EffectiveTimeUpdate({
                 blockSummary={blockSummary}
                 effectiveTime={BigInt(effectiveTime)}
                 setProposal={setProposal}
+                setDisabled={setDisabled}
             />
             <Header>Effective time</Header>
             <InputTimeStamp
@@ -63,7 +67,7 @@ export default function EffectiveTimeUpdate({
             <Button
                 size="large"
                 primary
-                disabled={!proposal}
+                disabled={!proposal || disabled}
                 onClick={() => {
                     if (proposal) {
                         forwardTransactionToSigningPage(proposal);
