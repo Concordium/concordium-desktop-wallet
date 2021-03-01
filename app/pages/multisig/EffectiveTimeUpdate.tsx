@@ -5,16 +5,14 @@ import { Button, Divider, Header } from 'semantic-ui-react';
 import { push } from 'connected-react-router';
 import InputTimeStamp from '../../components/InputTimeStamp';
 import { getNow, TimeConstants } from '../../utils/timeHelpers';
-import { UpdateComponent, UpdateProps } from '../../utils/transactionTypes';
+import { UpdateComponent } from '../../utils/transactionTypes';
 import { MultiSignatureTransaction } from '../../utils/types';
 import routes from '../../constants/routes.json';
+import { BlockSummary } from '../../utils/NodeApiTypes';
 
-interface Props
-    extends Omit<
-        Omit<Omit<UpdateProps, 'effectiveTime'>, 'setProposal'>,
-        'setDisabled'
-    > {
+interface Props {
     UpdateProposalComponent: UpdateComponent;
+    blockSummary: BlockSummary;
 }
 
 /**
@@ -33,7 +31,7 @@ export default function EffectiveTimeUpdate({
     const [proposal, setProposal] = useState<
         Partial<MultiSignatureTransaction>
     >();
-    const [disabled, setDisabled] = useState(true);
+    const [disabled, setDisabled] = useState(false);
 
     /**
      * Forwards the multi signature transactions to the signing page.
