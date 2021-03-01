@@ -38,7 +38,7 @@ export interface ModalProps<TTrigger extends WithOnClick> {
     /**
      * Supply element that acts as a trigger for modal to open. Must have "onClick" as prop.
      */
-    trigger: ReactElement<TTrigger>;
+    trigger?: ReactElement<TTrigger>;
     /**
      * defaults to true
      */
@@ -48,10 +48,11 @@ export interface ModalProps<TTrigger extends WithOnClick> {
      */
     disableClose?: boolean;
     /**
-     * Control whether modal is open or not from outside.
+     * Control whether modal is open or not.
      */
-    isOpen?: boolean;
-    onClose?(): void;
+    open: boolean;
+    onOpen(): void;
+    onClose(): void;
 }
 
 /**
@@ -59,7 +60,7 @@ export interface ModalProps<TTrigger extends WithOnClick> {
  * Opens content in a modal overlay on top of \<MainLayout /\>.
  *
  * @example
- * <Modal trigger={<button type="button">Click me</button>}>
+ * <Modal trigger={<button type="button">Click me</button>} open={isOpen} onOpen={() => setIsOpen(true)} onClose={() => setIsOpen(false)}>
  *   This content is shown in a modal!
  * </Modal>
  */
@@ -67,16 +68,18 @@ export default function Modal<TTrigger extends WithOnClick>({
     trigger,
     closeOnEscape = true,
     disableClose = false,
-    isOpen: isOpenOverride,
+    open: isOpenOverride,
+    onOpen,
     onClose,
     children,
 }: PropsWithChildren<ModalProps<TTrigger>>): JSX.Element | null {
-    const [isOpen, setIsOpen] = useState<boolean>(false);
     const [isExiting, setIsExiting] = useState<boolean>(false);
+    const [isOpen, setIsOpen] = useState<boolean>(isOpenOverride);
 
     const open = useCallback(() => {
         setIsOpen(true);
-    }, []);
+        onOpen();
+    }, [onOpen]);
 
     const close = useCallback(
         (ignoreDisable = false) => {
@@ -90,22 +93,18 @@ export default function Modal<TTrigger extends WithOnClick>({
     const modalRef = useDetectClickOutside<HTMLDivElement>(close);
 
     useEffect(() => {
-        if (isOpenOverride === undefined) {
-            return;
-        }
-
-        if (isOpenOverride) {
+        if (isOpenOverride && !isOpen) {
             open();
-        } else {
+        } else if (!isOpenOverride && isOpen) {
             close(true);
         }
-    }, [isOpenOverride, open, close]);
+    }, [isOpenOverride, open, close, isOpen]);
 
     const onTriggerClick: MouseEventHandler = useCallback(
         (e) => {
             open();
 
-            if (trigger.props.onClick !== undefined) {
+            if (trigger?.props.onClick !== undefined) {
                 trigger.props.onClick(e);
             }
         },
@@ -113,6 +112,10 @@ export default function Modal<TTrigger extends WithOnClick>({
     );
 
     const triggerWithOpen = useMemo(() => {
+        if (!trigger) {
+            return undefined;
+        }
+
         return cloneElement(trigger, {
             ...trigger.props,
             onClick: onTriggerClick,
@@ -133,10 +136,7 @@ export default function Modal<TTrigger extends WithOnClick>({
     const handleExitComplete = useCallback(() => {
         setIsExiting(false);
         setIsOpen(false);
-
-        if (onClose !== undefined) {
-            onClose();
-        }
+        onClose();
     }, [onClose]);
 
     return (

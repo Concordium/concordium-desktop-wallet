@@ -32,13 +32,20 @@ const Template: Story<Props> = (args) => <Modal {...args} />;
 
 export const Primary = Template.bind({});
 Primary.args = {
-    trigger: <button type="button">Click me</button>,
     children: 'Modal content...',
+    open: true,
+};
+
+export const WithTrigger = Template.bind({});
+WithTrigger.args = {
+    children: 'Modal content...',
+    open: true,
+    trigger: <button type="button">Click me</button>,
 };
 
 export const WithoutClose = Template.bind({});
 WithoutClose.args = {
-    trigger: <button type="button">Click me</button>,
     children: 'Modal content...',
     disableClose: true,
+    open: true,
 };
