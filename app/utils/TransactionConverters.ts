@@ -49,6 +49,15 @@ export function convertIncomingTransaction(
         ).toString();
     }
 
+    let decryptedAmount;
+    if (
+        transaction.details.type === TransactionKindString.TransferToEncrypted
+    ) {
+        let value = BigInt(subtotal);
+        value = value > 0n ? value : -value;
+        decryptedAmount = value.toString();
+    }
+
     return {
         remote: true,
         originType: transaction.origin.type,
@@ -65,6 +74,7 @@ export function convertIncomingTransaction(
         details: JSON.stringify(transaction.details),
         rejectReason: transaction.details.rejectReason,
         encrypted,
+        decryptedAmount,
         fromAddress,
         toAddress,
         status: TransactionStatus.Finalized,
