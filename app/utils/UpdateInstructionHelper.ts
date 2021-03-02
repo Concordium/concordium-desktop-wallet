@@ -5,18 +5,19 @@ import {
     UpdateType,
 } from './types';
 
-// TODO Effective time should perhaps have a default, but it should also be possible to
-// provide the value as input, so that the user can decide the value.
-// Where to get the sequence number from?
-// TODO Add other update types as they are implemented.
-
 export default function createUpdateInstruction<
     T extends UpdateInstructionPayload
->(updatePayload: T, updateType: UpdateType, sequenceNumber: BigInt) {
+>(
+    updatePayload: T,
+    updateType: UpdateType,
+    sequenceNumber: bigint,
+    effectiveTime: bigint
+) {
+    const expiry = effectiveTime - 1n;
     const updateHeader: UpdateHeader = {
-        effectiveTime: BigInt(Math.round(Date.now() / 1000)) + 120n,
+        effectiveTime,
         sequenceNumber,
-        timeout: BigInt(Math.round(Date.now() / 1000)) + 119n,
+        timeout: expiry,
     };
 
     const updateInstruction: UpdateInstruction<T> = {

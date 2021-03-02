@@ -8,7 +8,6 @@ import {
     getAccountsOfIdentity,
     removeAccount as removeAccountFromDatabase,
 } from '../database/AccountDao';
-import { getGlobal } from '../utils/httpRequests';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
     CredentialDeploymentInformation,
@@ -18,6 +17,7 @@ import {
     Account,
     AccountInfo,
     Dispatch,
+    Global,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
@@ -229,13 +229,16 @@ export async function getNextAccountNumber(identityId: number) {
 
 // Decrypts the shielded account balance of the given account, using the prfKey.
 // This function expects the prfKey to match the account's prfKey.
-export async function decryptAccountBalance(prfKey: string, account: Account) {
+export async function decryptAccountBalance(
+    prfKey: string,
+    account: Account,
+    global: Global
+) {
     if (!account.incomingAmounts) {
         throw new Error('Unexpected missing field!');
     }
     const encryptedAmounts = JSON.parse(account.incomingAmounts);
     encryptedAmounts.push(account.selfAmounts);
-    const global = await getGlobal();
 
     const decryptedAmounts = await decryptAmounts(
         encryptedAmounts,
