@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Divider, Header, Segment } from 'semantic-ui-react';
+import { Button, Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
@@ -9,6 +9,7 @@ import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
 import findHandler from '../../utils/updates/HandlerFinder';
+import EffectiveTimeUpdate from './EffectiveTimeUpdate';
 import PageHeader from '../../components/PageHeader';
 
 interface Location {
@@ -29,11 +30,25 @@ interface Props {
 export default function MultiSignatureCreateProposalView({ location }: Props) {
     const [blockSummary, setBlockSummary] = useState<BlockSummary>();
     const [loading, setLoading] = useState(true);
+    const [proposal, setProposal] = useState<
+        Partial<MultiSignatureTransaction>
+    >();
+    const [disabled, setDisabled] = useState(false);
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
     const type: UpdateType = location.state;
     const displayType = UpdateType[type];
+
+    function updateBlockSummary(blockSummaryInput: BlockSummary) {
+        setBlockSummary(blockSummaryInput);
+        setLoading(false);
+    }
+
+    async function execution() {
+        const consensusStatus: ConsensusStatus = await getConsensusStatus();
+        return getBlockSummary(consensusStatus.lastFinalizedBlock);
+    }
 
     /**
      * Forwards the multi signature transactions to the signing page.
@@ -41,7 +56,6 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     async function forwardTransactionToSigningPage(
         multiSignatureTransaction: Partial<MultiSignatureTransaction>
     ) {
-        // Forward the transaction under creation to the signing page.
         dispatch(
             push({
                 pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
@@ -53,15 +67,6 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     const handler = findHandler(type);
     const UpdateComponent = handler.update;
 
-    function updateBlockSummary(blockSummaryInput: BlockSummary) {
-        setBlockSummary(blockSummaryInput);
-        setLoading(false);
-    }
-
-    async function execution() {
-        const consensusStatus: ConsensusStatus = await getConsensusStatus();
-        return getBlockSummary(consensusStatus.lastFinalizedBlock);
-    }
     return (
         <>
             <PageHeader>
@@ -92,11 +97,26 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                     <Header>Transaction Proposal | {displayType}</Header>
                     <Divider />
                     {blockSummary ? (
-                        <UpdateComponent
+                        <EffectiveTimeUpdate
+                            UpdateProposalComponent={UpdateComponent}
                             blockSummary={blockSummary}
-                            forwardTransaction={forwardTransactionToSigningPage}
+                            setProposal={setProposal}
+                            setDisabled={setDisabled}
                         />
                     ) : null}
+                    <Divider horizontal hidden />
+                    <Button
+                        size="large"
+                        primary
+                        disabled={!proposal || disabled}
+                        onClick={() => {
+                            if (proposal) {
+                                forwardTransactionToSigningPage(proposal);
+                            }
+                        }}
+                    >
+                        Continue
+                    </Button>
                 </Segment>
             </Segment>
         </>

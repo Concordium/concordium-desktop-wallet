@@ -1,5 +1,6 @@
 import React from 'react';
 import { Container, Header } from 'semantic-ui-react';
+import { getISOFormat } from '../utils/timeHelpers';
 import {
     AccountTransaction,
     instanceOfAccountTransaction,
@@ -26,7 +27,14 @@ function generateView(
 ) {
     if (instanceOfUpdateInstruction(transaction)) {
         const handler = findHandler(transaction.type);
-        return handler.view(transaction);
+
+        return (
+            <>
+                {handler.view(transaction)}
+                <Header>Effective time</Header>
+                {getISOFormat(transaction.header.effectiveTime.toString())}
+            </>
+        );
     }
     if (instanceOfAccountTransaction(transaction)) {
         return <AccountTransactionDetails transaction={transaction} />;
