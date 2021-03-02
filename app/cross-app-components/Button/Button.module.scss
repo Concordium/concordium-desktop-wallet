@@ -15,6 +15,8 @@
 }
 
 .root {
+    position: relative;
+
     &:not(.rootClear) {
         color: $color-off-white;
         font-size: $font-size-button1;
@@ -33,7 +35,8 @@
     }
 
     &Small,
-    &Big {
+    &Big,
+    &Huge {
         &:not(.rootClear) {
             border-radius: 10px;
         }
@@ -50,6 +53,22 @@
     &Big {
         &:not(.rootClear) {
             height: 58px;
+        }
+    }
+
+    &Huge {
+        &:not(.rootClear) {
+            height: 76px;
+            font-size: $font-size-h2;
+        }
+    }
+
+    &WithIcon {
+        &:not(.rootClear) {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding-left: 50px;
         }
     }
 
@@ -71,10 +90,10 @@
 
     &Inverted {
         &:not(.rootClear) {
-            background-color: transparent;
+            background-color: $color-white;
             color: $color-text;
             border-color: $color-grey;
-            transition: border-color $anim-easing $anim-timing;
+            transition: border-color border-width $anim-easing $anim-timing;
 
             &:disabled {
                 color: $color-text-faded;
@@ -83,6 +102,7 @@
             &:hover,
             &:focus {
                 border-color: $color-pale-blue;
+                border-width: 2px;
             }
         }
 
@@ -96,4 +116,10 @@
             }
         }
     }
+}
+
+.icon {
+    display: flex;
+    position: absolute;
+    left: 20px;
 }

@@ -3,6 +3,7 @@ import React from 'react';
 import { Story, Meta } from '@storybook/react/types-6-0';
 
 import Button, { ButtonProps } from './Button';
+import PlusIcon from '../../../resources/svg/plus.svg';
 
 export default {
     title: 'Cross App Components/Button',
@@ -46,6 +47,23 @@ Big.args = {
     children: 'Button',
     disabled: false,
     size: 'big',
+};
+
+export const Huge = Template.bind({});
+Huge.args = {
+    inverted: false,
+    children: 'Button',
+    disabled: false,
+    size: 'huge',
+};
+
+export const HugeWithIcon = Template.bind({});
+HugeWithIcon.args = {
+    inverted: true,
+    children: 'Button',
+    disabled: false,
+    size: 'huge',
+    icon: <PlusIcon />,
 };
 
 export const Clear = Template.bind({});

@@ -3,12 +3,13 @@ import React, { ButtonHTMLAttributes, PropsWithChildren } from 'react';
 
 import styles from './Button.module.scss';
 
-type ButtonSize = 'small' | 'regular' | 'big';
+type ButtonSize = 'small' | 'regular' | 'big' | 'huge';
 
 const sizeStyleMap: Record<ButtonSize, string | undefined> = {
     small: styles.rootSmall,
     regular: undefined,
     big: styles.rootBig,
+    huge: styles.rootHuge,
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -16,6 +17,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     inverted?: boolean;
     clear?: boolean;
     danger?: boolean;
+    icon?: JSX.Element;
 }
 
 /**
@@ -28,7 +30,9 @@ export default function Button({
     inverted = false,
     clear = false,
     danger = false,
+    icon,
     className,
+    children,
     ...buttonProps
 }: PropsWithChildren<ButtonProps>): JSX.Element {
     return (
@@ -41,9 +45,13 @@ export default function Button({
                 inverted && styles.rootInverted,
                 clear && styles.rootClear,
                 danger && styles.rootDanger,
+                icon && styles.rootWithIcon,
                 className
             )}
             {...buttonProps}
-        />
+        >
+            {icon && <span className={styles.icon}>{icon}</span>}
+            {children}
+        </button>
     );
 }
