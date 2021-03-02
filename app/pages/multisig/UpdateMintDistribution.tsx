@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    Button,
     Form,
     Grid,
     Header,
@@ -23,7 +22,9 @@ import { rewardFractionResolution } from '../../constants/updateConstants.json';
  */
 export default function UpdateMintDistribution({
     blockSummary,
-    forwardTransaction,
+    effectiveTime,
+    setProposal,
+    setDisabled,
 }: UpdateProps): JSX.Element | null {
     const [
         mintDistribution,
@@ -58,6 +59,32 @@ export default function UpdateMintDistribution({
         }
     }
 
+    useEffect(() => {
+        if (mintDistribution) {
+            setProposal(
+                createUpdateMultiSignatureTransaction(
+                    mintDistribution,
+                    UpdateType.UpdateMintDistribution,
+                    sequenceNumber,
+                    threshold,
+                    effectiveTime
+                )
+            );
+            setDisabled(
+                mintDistribution.bakingReward +
+                    mintDistribution.finalizationReward >
+                    rewardFractionResolution
+            );
+        }
+    }, [
+        mintDistribution,
+        sequenceNumber,
+        threshold,
+        setProposal,
+        effectiveTime,
+        setDisabled,
+    ]);
+
     if (!mintDistribution) {
         // TODO Parse the current mint distribution value instead of hardcording this value.
         const mintRate: MintRate = {
@@ -74,29 +101,6 @@ export default function UpdateMintDistribution({
         });
         return null;
     }
-
-    const generateTransactionButton = (
-        <Button
-            primary
-            disabled={
-                mintDistribution.bakingReward +
-                    mintDistribution.finalizationReward >
-                rewardFractionResolution
-            }
-            onClick={() =>
-                forwardTransaction(
-                    createUpdateMultiSignatureTransaction(
-                        mintDistribution,
-                        UpdateType.UpdateMintDistribution,
-                        sequenceNumber,
-                        threshold
-                    )
-                )
-            }
-        >
-            Generate transaction proposal
-        </Button>
-    );
 
     return (
         <>
@@ -238,7 +242,6 @@ export default function UpdateMintDistribution({
                     </Form>
                 </Grid.Column>
             </Grid>
-            {generateTransactionButton}
         </>
     );
 }

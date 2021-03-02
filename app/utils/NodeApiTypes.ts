@@ -19,7 +19,7 @@ export interface ConsensusStatus {
 }
 
 interface UpdateQueue {
-    nextSequenceNumber: BigInt;
+    nextSequenceNumber: bigint;
     queue: unknown; // FIXME: add the actual type
 }
 

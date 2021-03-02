@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
@@ -17,11 +17,11 @@ import {
     getNextAccountNumber,
     removeAccount,
 } from '../../features/AccountSlice';
-import { getGlobal } from '../../utils/httpRequests';
 import {
     addToAddressBook,
     removeFromAddressBook,
 } from '../../features/AddressBookSlice';
+import { globalSelector } from '../../features/GlobalSlice';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import ErrorModal from '../../components/SimpleErrorModal';
 
@@ -42,6 +42,7 @@ export default function AccountCreationGenerate({
     identity,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
+    const global = useSelector(globalSelector);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState('');
 
@@ -101,12 +102,9 @@ export default function AccountCreationGenerate({
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
-        let global;
         let accountNumber;
-        try {
-            global = await getGlobal();
-        } catch (e) {
-            onError(`Unable to load the genesis`);
+        if (!global) {
+            onError(`Unexpected missing global object`);
             return;
         }
         try {
