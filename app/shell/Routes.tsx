@@ -8,13 +8,7 @@ import AddressBookPage from '../pages/AddressBook/AddressBookPage';
 import IssuancePage from '../pages/IdentityIssuance/IdentityIssuancePage';
 import AccountCreation from '../pages/AccountCreation/AccountCreationPage';
 import SettingsPage from '../pages/settings/SettingsPage';
-import MultiSignaturePage from '../pages/multisig/MultiSignaturePage';
-import ProposalView from '../pages/multisig/ProposalView';
-import CosignTransactionProposalView from '../pages/multisig/CosignTransactionProposalView';
-import SignTransactionProposalView from '../pages/multisig/SignTransactionProposalView';
-import ExportSignedTransactionView from '../pages/multisig/ExportSignedTransactionView';
-import MultiSignatureCreateProposalView from '../pages/multisig/MultiSignatureCreateProposalView';
-import SubmittedProposalView from '../pages/multisig/SubmittedProposalView';
+import MultiSignatureRouter from '../pages/multisig/MultiSignatureRouter';
 import ExportImport from '../pages/exportImport/ExportImportPage';
 import PerformImport from '../pages/exportImport/PerformImport';
 import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
@@ -31,32 +25,8 @@ export default function Routes(): JSX.Element {
             <Route path={routes.IMPORT} component={PerformImport} />
             <Route path={routes.EXPORTIMPORT} component={ExportImport} />
             <Route
-                path={routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION}
-                component={SubmittedProposalView}
-            />
-            <Route
-                path={routes.MULTISIGTRANSACTIONS_EXPORT_TRANSACTION}
-                component={ExportSignedTransactionView}
-            />
-            <Route
-                path={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION}
-                component={SignTransactionProposalView}
-            />
-            <Route
-                path={routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION}
-                component={CosignTransactionProposalView}
-            />
-            <Route
-                path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}
-                component={ProposalView}
-            />
-            <Route
-                path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
-                component={MultiSignatureCreateProposalView}
-            />
-            <Route
                 path={routes.MULTISIGTRANSACTIONS}
-                component={MultiSignaturePage}
+                component={MultiSignatureRouter}
             />
             <Route path={routes.SETTINGS} component={SettingsPage} />
             <Route path={routes.HOME} component={HomePage} />

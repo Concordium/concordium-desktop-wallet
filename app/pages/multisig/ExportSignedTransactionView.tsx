@@ -16,6 +16,7 @@ import routes from '../../constants/routes.json';
 import TransactionHashView from '../../components/TransactionHashView';
 import TransactionDetails from '../../components/TransactionDetails';
 import { saveFile } from '../../utils/FileHelper';
+import PageHeader from '../../components/PageHeader';
 
 interface Props {
     location: LocationDescriptorObject<Input>;
@@ -62,57 +63,64 @@ export default function ExportSignedTransactionView({ location }: Props) {
     }
 
     return (
-        <Segment>
-            <Header textAlign="center">
-                Transaction signing confirmation | Transaction Type
-            </Header>
-            <Divider />
-            <Grid columns={2} divided textAlign="center" padded>
-                <Grid.Row>
-                    <Grid.Column>
-                        <TransactionDetails transaction={transactionObject} />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <TransactionHashView
-                            transactionHash={transactionHash}
-                        />
-                    </Grid.Column>
-                </Grid.Row>
-                <Grid.Row>
-                    <Form>
-                        <Form.Field>
-                            <Checkbox
-                                label="The hash matches the one received exactly"
-                                defaultChecked
-                                readOnly
+        <>
+            <PageHeader>
+                <h1>Multi Signature Transactions</h1>
+            </PageHeader>
+            <Segment>
+                <Header textAlign="center">
+                    Transaction signing confirmation | Transaction Type
+                </Header>
+                <Divider />
+                <Grid columns={2} divided textAlign="center" padded>
+                    <Grid.Row>
+                        <Grid.Column>
+                            <TransactionDetails
+                                transaction={transactionObject}
                             />
-                        </Form.Field>
-                        <Form.Field>
-                            <Checkbox
-                                label="The picture matches the one received exactly"
-                                defaultChecked
-                                readOnly
+                        </Grid.Column>
+                        <Grid.Column>
+                            <TransactionHashView
+                                transactionHash={transactionHash}
                             />
-                        </Form.Field>
-                        <Form.Field>
-                            <Checkbox
-                                label="The transaction details are correct"
-                                defaultChecked
-                                readOnly
-                            />
-                        </Form.Field>
-                        <Form.Field>
-                            <Button
-                                primary
-                                fluid
-                                onClick={exportSignedTransaction}
-                            >
-                                Export signed transaction
-                            </Button>
-                        </Form.Field>
-                    </Form>
-                </Grid.Row>
-            </Grid>
-        </Segment>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Form>
+                            <Form.Field>
+                                <Checkbox
+                                    label="The hash matches the one received exactly"
+                                    defaultChecked
+                                    readOnly
+                                />
+                            </Form.Field>
+                            <Form.Field>
+                                <Checkbox
+                                    label="The picture matches the one received exactly"
+                                    defaultChecked
+                                    readOnly
+                                />
+                            </Form.Field>
+                            <Form.Field>
+                                <Checkbox
+                                    label="The transaction details are correct"
+                                    defaultChecked
+                                    readOnly
+                                />
+                            </Form.Field>
+                            <Form.Field>
+                                <Button
+                                    primary
+                                    fluid
+                                    onClick={exportSignedTransaction}
+                                >
+                                    Export signed transaction
+                                </Button>
+                            </Form.Field>
+                        </Form>
+                    </Grid.Row>
+                </Grid>
+            </Segment>
+        </>
     );
 }
