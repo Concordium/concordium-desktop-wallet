@@ -15,6 +15,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     size?: ButtonSize;
     inverted?: boolean;
     clear?: boolean;
+    danger?: boolean;
 }
 
 /**
@@ -26,6 +27,7 @@ export default function Button({
     type = 'button',
     inverted = false,
     clear = false,
+    danger = false,
     className,
     ...buttonProps
 }: PropsWithChildren<ButtonProps>): JSX.Element {
@@ -38,6 +40,7 @@ export default function Button({
                 size && sizeStyleMap[size],
                 inverted && styles.rootInverted,
                 clear && styles.rootClear,
+                danger && styles.rootDanger,
                 className
             )}
             {...buttonProps}

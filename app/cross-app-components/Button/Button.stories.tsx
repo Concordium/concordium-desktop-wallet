@@ -25,6 +25,13 @@ Inverted.args = {
     disabled: false,
 };
 
+export const Danger = Template.bind({});
+Danger.args = {
+    danger: true,
+    children: 'Button',
+    disabled: false,
+};
+
 export const Small = Template.bind({});
 Small.args = {
     inverted: false,
