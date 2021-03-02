@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
@@ -39,6 +39,7 @@ import SimpleErrorModal, {
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
 import PageHeader from '../../components/PageHeader';
+import expirationEffect from '../../utils/ProposalHelper';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -57,6 +58,14 @@ export default function ProposalView() {
             'The proposal page should not be loaded without a proposal in the state.'
         );
     }
+
+    const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
+        currentProposal.transaction
+    );
+
+    useEffect(() => {
+        expirationEffect(instruction.header.timeout, currentProposal, dispatch);
+    }, [currentProposal, dispatch, instruction.header.timeout]);
 
     async function loadSignatureFile(file: Buffer) {
         let transactionObject;
@@ -117,9 +126,6 @@ export default function ProposalView() {
         }
     }
 
-    const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
-        currentProposal.transaction
-    );
     const handler = findHandler(instruction.type);
     const serializedPayload = handler.serializePayload(instruction);
 

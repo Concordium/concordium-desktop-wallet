@@ -55,6 +55,8 @@ export function getDefaultExpiry(): string {
     return (new Date().getTime() + TimeConstants.Hour).toString();
 }
 
-export function getNow(): number {
-    return new Date().getTime();
+export function getNow(
+    unit: TimeStampUnit = TimeStampUnit.milliSeconds
+): number {
+    return Math.floor(new Date().getTime() / unit);
 }
