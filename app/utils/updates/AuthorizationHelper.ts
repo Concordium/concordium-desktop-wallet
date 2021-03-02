@@ -1,5 +1,5 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernancePath } from '../../features/ledger/Path';
+import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import { Authorization, Authorizations, Key } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import { UpdateInstruction, UpdateInstructionPayload } from '../types';
@@ -37,9 +37,7 @@ export default async function findAuthorizationKey(
     >,
     authorizations: Authorizations
 ) {
-    const publicKey = await ledger.getPublicKey(
-        getGovernancePath({ purpose: 0, keyIndex: 0 })
-    );
+    const publicKey = await ledger.getPublicKey(getGovernanceLevel2Path());
 
     const authorization = transactionHandler.getAuthorization(authorizations);
 

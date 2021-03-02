@@ -48,6 +48,13 @@ export function getGovernancePath(governancePath: GovernancePathInput) {
 }
 
 /**
+ * Constructs the level 2 governance key path.
+ */
+export function getGovernanceLevel2Path() {
+    return getGovernancePath({ purpose: 0, keyIndex: 0 });
+}
+
+/**
  * Constructs a Buffer containing the key derivation path in serialized form.
  * @param keyDerivationPath the key derivation path to get as bytes in a buffer.
  */
