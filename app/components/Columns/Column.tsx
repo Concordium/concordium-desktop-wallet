@@ -5,6 +5,9 @@ import styles from './Columns.module.scss';
 
 export interface ColumnProps
     extends Pick<HTMLAttributes<HTMLDivElement>, 'className'> {
+    /**
+     * Column neither shrinks nor grows when set to true. Defaults to false.
+     */
     noResize?: boolean;
 }
 

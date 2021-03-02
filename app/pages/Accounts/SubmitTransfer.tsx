@@ -15,6 +15,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { addPendingTransaction } from '../../features/TransactionSlice';
 import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
+import PageLayout from '../../components/PageLayout';
 
 interface State {
     transaction: AccountTransaction;
@@ -80,28 +81,33 @@ export default function SubmitTransfer({ location }: Props) {
     }
 
     return (
-        <Container>
-            <Segment>
-                <Header textAlign="center">
-                    Submit the transaction with your hardware wallet
-                </Header>
-                <Container text>
-                    <p>
-                        Choose your hardware wallet on the right. Be sure to
-                        verify that all the information below is exactly the
-                        same on your hardware wallet, before submitting the
-                        transaction.
-                    </p>
-                </Container>
-                <Grid columns={2} divided textAlign="center" padded>
-                    <Grid.Column>
-                        <TransactionDetails transaction={transaction} />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <LedgerComponent ledgerCall={ledgerSignTransfer} />
-                    </Grid.Column>
-                </Grid>
-            </Segment>
-        </Container>
+        <PageLayout>
+            <PageLayout.Header>
+                <h1>Accounts | Submit Transfer</h1>
+            </PageLayout.Header>
+            <Container>
+                <Segment>
+                    <Header textAlign="center">
+                        Submit the transaction with your hardware wallet
+                    </Header>
+                    <Container text>
+                        <p>
+                            Choose your hardware wallet on the right. Be sure to
+                            verify that all the information below is exactly the
+                            same on your hardware wallet, before submitting the
+                            transaction.
+                        </p>
+                    </Container>
+                    <Grid columns={2} divided textAlign="center" padded>
+                        <Grid.Column>
+                            <TransactionDetails transaction={transaction} />
+                        </Grid.Column>
+                        <Grid.Column>
+                            <LedgerComponent ledgerCall={ledgerSignTransfer} />
+                        </Grid.Column>
+                    </Grid>
+                </Segment>
+            </Container>
+        </PageLayout>
     );
 }

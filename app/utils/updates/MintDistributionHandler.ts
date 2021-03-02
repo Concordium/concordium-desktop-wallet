@@ -45,4 +45,6 @@ export default class MintDistributionHandler
     }
 
     update = UpdateMintDistribution;
+
+    title = 'Foundation Transaction | Update Mint Distribution';
 }

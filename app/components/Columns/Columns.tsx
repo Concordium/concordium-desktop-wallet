@@ -13,22 +13,25 @@ import styles from './Columns.module.scss';
 
 export interface ColumnsProps {
     /**
-     * @description
      * Controls whether or not a divider is visible between columns.
      */
     divider?: boolean;
     /**
-     * @description
      * Must be 2 <Columns.Column />
      */
     children: [ReactElement<ColumnProps>, ReactElement<ColumnProps>];
     className?: string;
     /**
-     * @description
      * Used to override column styling
      */
     columnClassName?: string;
+    /**
+     * Columns scroll individually if true. Defaults to false.
+     */
     columnScroll?: boolean;
+    /**
+     * Assumes variable size of columns if true. Defaults to false.
+     */
     variableSize?: boolean;
 }
 

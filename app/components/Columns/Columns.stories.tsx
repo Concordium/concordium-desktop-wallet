@@ -12,11 +12,6 @@ export default {
     subcomponents: {
         'Columns.Column': Columns.Column,
     },
-    argTypes: {
-        children: {
-            description: 'Takes 2 <Columns.Column /> as children',
-        },
-    },
     decorators: [
         (story) => (
             <>

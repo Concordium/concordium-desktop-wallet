@@ -47,4 +47,6 @@ export default class FoundationAccountHandler
     }
 
     update = UpdateFoundationAccount;
+
+    title = 'Foundation Transaction | Update Foundation Account';
 }
