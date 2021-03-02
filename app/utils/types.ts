@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
-import { HTMLAttributes, ComponentType } from 'react';
+import { HTMLAttributes } from 'react';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -764,7 +764,7 @@ export type PropsOf<
     C extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>
 > = JSX.LibraryManagedAttributes<C, React.ComponentPropsWithRef<C>>;
 
-type AsProp<C extends React.ElementType> = {
+export type AsProp<C extends React.ElementType> = {
     /**
      * An override of the default HTML tag.
      * Can also be another React component.

@@ -19,7 +19,6 @@ interface Props {
     clear?: boolean;
     danger?: boolean;
     icon?: JSX.Element;
-    active?: boolean;
 }
 
 export type ButtonProps<
@@ -29,6 +28,7 @@ export type ButtonProps<
 /**
  * @description
  * Use as a regular \<button /\>.
+ * Supports rendering as other component (e.g. NavLink) through 'as' prop
  */
 export default function Button<TAs extends ElementType = 'button'>({
     size = 'regular',
@@ -36,7 +36,6 @@ export default function Button<TAs extends ElementType = 'button'>({
     clear = false,
     danger = false,
     icon,
-    active = false,
     className,
     as,
     children,
@@ -54,7 +53,6 @@ export default function Button<TAs extends ElementType = 'button'>({
                 clear && styles.rootClear,
                 danger && styles.rootDanger,
                 icon && styles.rootWithIcon,
-                active && styles.rootActive,
                 className
             )}
             {...props}

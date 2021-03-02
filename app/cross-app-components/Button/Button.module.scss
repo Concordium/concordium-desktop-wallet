@@ -7,7 +7,7 @@
 
     &:hover,
     &:focus,
-    &.rootActive {
+    &:global(.active) {
         &:not(.rootInverted):not(.rootClear) {
             background-color: darken($color, 3);
         }
@@ -101,7 +101,7 @@
 
             &:hover,
             &:focus,
-            &.rootActive {
+            &:global(.active) {
                 box-shadow: 0 0 0 2px $color-pale-blue inset;
             }
         }
@@ -112,7 +112,7 @@
 
             &:hover,
             &:focus,
-            &.rootActive {
+            &:global(.active) {
                 box-shadow: 0 0 0 2px $color-danger inset;
             }
         }
