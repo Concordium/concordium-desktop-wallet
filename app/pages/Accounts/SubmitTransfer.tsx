@@ -15,7 +15,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { addPendingTransaction } from '../../features/TransactionSlice';
 import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
 
 interface State {
     transaction: AccountTransaction;
@@ -81,10 +81,10 @@ export default function SubmitTransfer({ location }: Props) {
     }
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>Accounts | Submit Transfer</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Container>
                 <Segment>
                     <Header textAlign="center">
@@ -108,6 +108,6 @@ export default function SubmitTransfer({ location }: Props) {
                     </Grid>
                 </Segment>
             </Container>
-        </>
+        </PageLayout>
     );
 }

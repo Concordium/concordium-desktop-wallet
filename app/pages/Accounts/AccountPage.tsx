@@ -10,7 +10,6 @@ import {
     accountsSelector,
     accountsInfoSelector,
 } from '../../features/AccountSlice';
-import PageHeader from '../../components/PageHeader';
 import BuildSchedule from './BuildSchedule';
 import routes from '../../constants/routes.json';
 import { Account, AccountInfo } from '../../utils/types';
@@ -18,6 +17,7 @@ import { displayAsGTU } from '../../utils/gtu';
 import { sumToBigInt } from '../../utils/basicHelpers';
 
 import PlusIcon from '../../../resources/svg/plus.svg';
+import PageLayout from '../../components/PageLayout';
 
 function getTotalAmount(accountsInfo: AccountInfo[]) {
     return sumToBigInt(accountsInfo, (accountInfo) =>
@@ -51,12 +51,12 @@ export default function AccountsPage() {
 
     if (accounts.length === 0) {
         return (
-            <>
-                <PageHeader>
+            <PageLayout>
+                <PageLayout.Header>
                     <h1>Accounts</h1>
-                </PageHeader>
+                </PageLayout.Header>
                 <NoIdentities />;
-            </>
+            </PageLayout>
         );
     }
 
@@ -67,8 +67,8 @@ export default function AccountsPage() {
     const allDecrypted = isAllDecrypted(accounts);
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout>
                 <h1>Accounts | </h1>
                 <h2>
                     Wallet Total: {displayAsGTU(totalAmount)}
@@ -76,13 +76,13 @@ export default function AccountsPage() {
                     {displayAsGTU(atDisposal)} {allDecrypted ? '' : ' + ?'} |
                     stake: {displayAsGTU(totalStaked)}
                 </h2>
-                <PageHeader.Button
+                <PageLayout.HeaderButton
                     align="right"
                     onClick={() => dispatch(push(routes.ACCOUNTCREATION))}
                 >
                     <PlusIcon />
-                </PageHeader.Button>
-            </PageHeader>
+                </PageLayout.HeaderButton>
+            </PageLayout>
             <Grid centered columns="equal" divided>
                 <Grid.Row>
                     <Grid.Column>
@@ -99,6 +99,6 @@ export default function AccountsPage() {
                     </Grid.Column>
                 </Grid.Row>
             </Grid>
-        </>
+        </PageLayout>
     );
 }

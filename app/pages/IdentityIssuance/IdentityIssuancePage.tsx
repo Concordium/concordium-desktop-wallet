@@ -9,7 +9,7 @@ import GeneratePage from './GeneratePage';
 import FinalPage from './FinalPage';
 import { IdentityProvider } from '../../utils/types';
 import ErrorModal from '../../components/SimpleErrorModal';
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
 
 function getSubtitle(location: string) {
     switch (location) {
@@ -57,10 +57,10 @@ export default function IdentityIssuancePage(): JSX.Element {
     }
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>New identity | {getSubtitle(useLocation().pathname)}</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <ErrorModal
                 header="Unable to create identity"
                 content={modalMessage}
@@ -99,6 +99,6 @@ export default function IdentityIssuancePage(): JSX.Element {
                     )}
                 />
             </Switch>
-        </>
+        </PageLayout>
     );
 }

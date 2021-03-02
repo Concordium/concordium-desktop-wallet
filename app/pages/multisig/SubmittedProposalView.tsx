@@ -15,7 +15,7 @@ import TransactionHashView from '../../components/TransactionHashView';
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
 
 interface Props {
     location: LocationDescriptorObject<string>;
@@ -67,10 +67,10 @@ export default function SubmittedProposalView({ location }: Props) {
     ).toString('hex');
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>{handler.title}</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Segment secondary textAlign="center">
                 <Header size="large">
                     Your transaction has been submitted
@@ -103,6 +103,6 @@ export default function SubmittedProposalView({ location }: Props) {
                     Okay, thanks!
                 </Button>
             </Segment>
-        </>
+        </PageLayout>
     );
 }
