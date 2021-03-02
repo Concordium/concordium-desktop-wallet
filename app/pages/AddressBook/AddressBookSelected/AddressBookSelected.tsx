@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     addressBookSelector,
@@ -12,14 +12,36 @@ import Button from '../../../cross-app-components/Button';
 
 import EditIcon from '../../../../resources/svg/edit.svg';
 import CopyIcon from '../../../../resources/svg/copy.svg';
+import CheckmarkIcon from '../../../../resources/svg/checkmark-blue.svg';
 
 import styles from './AddressBookSelected.module.scss';
 
+function copyToClipboard(text: string): Promise<void> {
+    return navigator.clipboard.writeText(text);
+}
+
 export default function AddressBookElementView() {
+    const [copied, setCopied] = useState(false);
     const dispatch = useDispatch();
+
     const chosenIndex = useSelector(chosenIndexSelector);
     const addressBook = useSelector(addressBookSelector);
     const chosenEntry = addressBook[chosenIndex];
+
+    const copyAddress = useCallback(async () => {
+        if (!chosenEntry.address) {
+            return;
+        }
+
+        try {
+            await copyToClipboard(chosenEntry.address);
+            setCopied(true);
+
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            console.error('Could not copy address');
+        }
+    }, [chosenEntry?.address]);
 
     if (chosenIndex >= addressBook.length) {
         return null;
@@ -49,8 +71,12 @@ export default function AddressBookElementView() {
                 </header>
                 <div className={styles.address}>
                     {chosenEntry.address}
-                    <Button className={styles.copy} clear>
-                        <CopyIcon width="18" className={styles.icon} />
+                    <Button className={styles.copy} clear onClick={copyAddress}>
+                        {copied ? (
+                            <CheckmarkIcon width="18" />
+                        ) : (
+                            <CopyIcon width="18" className={styles.icon} />
+                        )}
                     </Button>
                 </div>
                 <div>
