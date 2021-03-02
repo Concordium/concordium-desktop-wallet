@@ -37,7 +37,9 @@ export default async function findAuthorizationKey(
     >,
     authorizations: Authorizations
 ) {
-    const publicKey = await ledger.getPublicKey(getGovernanceLevel2Path());
+    const publicKey = await ledger.getPublicKeySilent(
+        getGovernanceLevel2Path()
+    );
 
     const authorization = transactionHandler.getAuthorization(authorizations);
 
