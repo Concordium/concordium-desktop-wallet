@@ -1,9 +1,6 @@
 import { Dispatch } from '@reduxjs/toolkit';
 import { parse } from 'json-bigint';
-import {
-    setProposals,
-    updateCurrentProposal,
-} from '../features/MultiSignatureSlice';
+import { updateCurrentProposal } from '../features/MultiSignatureSlice';
 import { getNow } from './timeHelpers';
 import {
     MultiSignatureTransaction,
@@ -35,18 +32,11 @@ export default function expirationEffect(
                     ...proposal,
                     status: MultiSignatureTransactionStatus.Failed,
                 };
-                await updateCurrentProposal(dispatch, failedProposal);
-
-                if (proposals) {
-                    const newProposals = proposals.map((prop) => {
-                        if (prop.id === failedProposal.id) {
-                            return failedProposal;
-                        }
-                        return prop;
-                    });
-                    dispatch(setProposals(newProposals));
-                }
-                // await loadProposals(dispatch);
+                await updateCurrentProposal(
+                    dispatch,
+                    failedProposal,
+                    proposals
+                );
                 clearInterval(interval);
             }
         }, 1000);

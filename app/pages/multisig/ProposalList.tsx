@@ -36,7 +36,7 @@ export default function ProposalList(): JSX.Element {
 
     return (
         <Menu vertical fluid>
-            {proposal
+            {proposals
                 .slice()
                 .sort(newestFirst)
                 .map((proposal) => {

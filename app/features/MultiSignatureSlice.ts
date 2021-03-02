@@ -54,13 +54,25 @@ export const proposalsSelector = (state: RootState) =>
 /**
  * Updates the multi signature transaction in the database, and updates the
  * state with the updated transaction.
+ * @param proposals if provided the state for the list of proposals is updated as well
  */
 export async function updateCurrentProposal(
     dispatch: Dispatch,
-    multiSignatureTransactionProposal: MultiSignatureTransaction
+    multiSignatureTransactionProposal: MultiSignatureTransaction,
+    proposals?: MultiSignatureTransaction[]
 ) {
     updateEntry(multiSignatureTransactionProposal);
     dispatch(setCurrentProposal(multiSignatureTransactionProposal));
+
+    if (proposals) {
+        const newProposals = proposals.map((prop) => {
+            if (prop.id === multiSignatureTransactionProposal.id) {
+                return multiSignatureTransactionProposal;
+            }
+            return prop;
+        });
+        dispatch(setProposals(newProposals));
+    }
 }
 
 /**
