@@ -1,4 +1,3 @@
-import { Authorization, Key } from './NodeApiTypes';
 import {
     getConsensusStatus,
     getAccountInfo,
@@ -28,27 +27,6 @@ export async function getAccountInfos(
         })
     );
     return accountInfos;
-}
-
-/**
- * Finds the authorization key index for a given verification key. If there
- * is no match, then undefined is returned.
- * @param keys the array of authorization keys from the block summary
- * @param verifyKey verification key to find the index for
- */
-export function findAuthorizationKeyIndex(
-    keys: Key[],
-    authorization: Authorization,
-    verifyKey: string
-) {
-    return keys
-        .map((key, index) => {
-            return { index, key };
-        })
-        .filter((key) => authorization.authorizedKeys.includes(key.index))
-        .find((indexedKey) => {
-            return indexedKey.key.verifyKey === verifyKey;
-        });
 }
 
 export async function fetchGlobal(): Promise<Global> {

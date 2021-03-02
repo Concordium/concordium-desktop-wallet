@@ -18,10 +18,9 @@ import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
-import { getGovernancePath } from '../../features/ledger/Path';
 import SimpleErrorModal from '../../components/SimpleErrorModal';
 import { BlockSummary } from '../../utils/NodeApiTypes';
-import { findAuthorizationKeyIndex } from '../../utils/nodeHelpers';
+import findAuthorizationKey from '../../utils/updates/AuthorizationHelper';
 
 export interface SignInput {
     multiSignatureTransaction: MultiSignatureTransaction;
@@ -78,18 +77,10 @@ export default function SignTransactionProposalView({ location }: Props) {
     }, [setTransactionHash, transactionHandler, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const publicKey = await ledger.getPublicKey(
-            getGovernancePath({ purpose: 0, keyIndex: 0 })
-        );
-
-        const authorization = transactionHandler.getAuthorization(
+        const authorizationKey = await findAuthorizationKey(
+            ledger,
+            transactionHandler,
             blockSummary.updates.authorizations
-        );
-
-        const authorizationKey = findAuthorizationKeyIndex(
-            blockSummary.updates.authorizations.keys,
-            authorization,
-            publicKey.toString('hex')
         );
         if (!authorizationKey) {
             setShowValidationError(true);

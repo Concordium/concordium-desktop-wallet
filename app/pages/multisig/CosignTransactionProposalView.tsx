@@ -21,9 +21,8 @@ import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSe
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import { getBlockSummary, getConsensusStatus } from '../../utils/nodeRequests';
 import DynamicModal from './DynamicModal';
-import { getGovernancePath } from '../../features/ledger/Path';
-import { findAuthorizationKeyIndex } from '../../utils/nodeHelpers';
 import SimpleErrorModal from '../../components/SimpleErrorModal';
+import findAuthorizationKey from '../../utils/updates/AuthorizationHelper';
 
 interface Props {
     location: LocationDescriptorObject<TransactionInput>;
@@ -66,18 +65,10 @@ export default function CosignTransactionProposalView({ location }: Props) {
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
         if (blockSummary) {
-            const publicKey = await ledger.getPublicKey(
-                getGovernancePath({ purpose: 0, keyIndex: 0 })
-            );
-
-            const authorization = transactionHandler.getAuthorization(
+            const authorizationKey = await findAuthorizationKey(
+                ledger,
+                transactionHandler,
                 blockSummary.updates.authorizations
-            );
-
-            const authorizationKey = findAuthorizationKeyIndex(
-                blockSummary.updates.authorizations.keys,
-                authorization,
-                publicKey.toString('hex')
             );
             if (!authorizationKey) {
                 setShowValidationError(true);
