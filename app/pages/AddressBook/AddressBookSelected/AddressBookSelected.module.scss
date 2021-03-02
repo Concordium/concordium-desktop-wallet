@@ -1,7 +1,24 @@
+@import 'config/bundle';
+
 .root {
     text-align: center;
     position: relative;
     height: 300px;
+}
+
+.header,
+.address {
+    display: flex;
+    justify-content: center;
+}
+
+.header {
+    align-items: flex-start;
+}
+
+.address {
+    align-items: center;
+    word-break: break-all;
 }
 
 .heading {
@@ -21,10 +38,10 @@
 .actions,
 .copy {
     position: absolute;
-    right: 20px;
 }
 
 .actions {
+    right: 20px;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
@@ -32,4 +49,16 @@
     & > * {
         display: block;
     }
+}
+
+.copy {
+    right: 23px;
+}
+
+.icon {
+    fill: $color-grey;
+}
+
+.notesHeading {
+    margin-bottom: 0.5em;
 }

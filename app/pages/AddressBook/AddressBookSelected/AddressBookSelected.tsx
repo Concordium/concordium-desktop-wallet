@@ -10,6 +10,9 @@ import UpsertAddress from '../../../components/UpsertAddress';
 import Card from '../../../cross-app-components/Card';
 import Button from '../../../cross-app-components/Button';
 
+import EditIcon from '../../../../resources/svg/edit.svg';
+import CopyIcon from '../../../../resources/svg/copy.svg';
+
 import styles from './AddressBookSelected.module.scss';
 
 export default function AddressBookElementView() {
@@ -25,7 +28,7 @@ export default function AddressBookElementView() {
     return (
         <Card className={styles.root}>
             <div className={styles.content}>
-                <div>
+                <header className={styles.header}>
                     <h2 className={styles.heading}>{chosenEntry.name}</h2>
                     <span className={styles.actions}>
                         <UpsertAddress
@@ -34,7 +37,7 @@ export default function AddressBookElementView() {
                             initialValues={chosenEntry}
                             clear
                         >
-                            Edit
+                            <EditIcon width="22" className={styles.icon} />
                         </UpsertAddress>
                         <DeleteAddress
                             entry={chosenEntry}
@@ -43,15 +46,15 @@ export default function AddressBookElementView() {
                             }
                         />
                     </span>
-                </div>
-                <div>
+                </header>
+                <div className={styles.address}>
                     {chosenEntry.address}
                     <Button className={styles.copy} clear>
-                        Copy
+                        <CopyIcon width="18" className={styles.icon} />
                     </Button>
                 </div>
                 <div>
-                    <h3>Notes</h3>
+                    <h3 className={styles.notesHeading}>Notes</h3>
                     {chosenEntry.note}
                 </div>
             </div>

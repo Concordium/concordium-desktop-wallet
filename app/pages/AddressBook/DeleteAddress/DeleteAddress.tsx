@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { Button, Icon, Modal } from 'semantic-ui-react';
-import { AddressBookEntry } from '../../utils/types';
+import { Button as SemanticButton, Icon, Modal } from 'semantic-ui-react';
+import { AddressBookEntry } from '../../../utils/types';
+
+import BinIcon from '../../../../resources/svg/bin.svg';
+import Button from '../../../cross-app-components/Button';
+
+import styles from './DeleteAddress.module.scss';
 
 interface DeleteAddressProps {
     entry: AddressBookEntry;
@@ -22,8 +27,8 @@ export default function DeleteAddress({ entry, onRemove }: DeleteAddressProps) {
             onOpen={() => setOpen(true)}
             open={open}
             trigger={
-                <Button negative disabled={entry.readOnly}>
-                    Delete
+                <Button clear className={styles.deleteButton}>
+                    <BinIcon className={styles.binIcon} />
                 </Button>
             }
             dimmer="blurring"
@@ -36,17 +41,21 @@ export default function DeleteAddress({ entry, onRemove }: DeleteAddressProps) {
                 lost.
             </Modal.Header>
             <Modal.Actions>
-                <Button
+                <SemanticButton
                     disabled={entry.readOnly}
                     onClick={() => setOpen(false)}
                 >
                     <Icon name="remove" />
                     Cancel
-                </Button>
-                <Button negative disabled={entry.readOnly} onClick={remove}>
+                </SemanticButton>
+                <SemanticButton
+                    negative
+                    disabled={entry.readOnly}
+                    onClick={remove}
+                >
                     <Icon name="checkmark" />
                     Yes, I&apos;m sure.
-                </Button>
+                </SemanticButton>
             </Modal.Actions>
         </Modal>
     );

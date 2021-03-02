@@ -1,0 +1,14 @@
+@import 'config/bundle';
+
+.deleteButton {
+    margin-top: 10px;
+    margin-right: 4px;
+}
+
+.binIcon {
+    width: 15px;
+
+    path {
+        fill: $color-danger;
+    }
+}
