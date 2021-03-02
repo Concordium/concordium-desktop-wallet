@@ -18,6 +18,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     clear?: boolean;
     danger?: boolean;
     icon?: JSX.Element;
+    active?: boolean;
 }
 
 /**
@@ -31,6 +32,7 @@ export default function Button({
     clear = false,
     danger = false,
     icon,
+    active = false,
     className,
     children,
     ...buttonProps
@@ -46,6 +48,7 @@ export default function Button({
                 clear && styles.rootClear,
                 danger && styles.rootDanger,
                 icon && styles.rootWithIcon,
+                active && styles.rootActive,
                 className
             )}
             {...buttonProps}

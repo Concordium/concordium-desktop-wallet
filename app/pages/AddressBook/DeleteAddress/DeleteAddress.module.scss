@@ -7,9 +7,18 @@
 
 .binIcon {
     width: 15px;
+    transition: transform $anim-easing $anim-timing;
 
     path {
         fill: $color-danger;
+    }
+
+    &:hover {
+        transform: scale(1.1);
+
+        path {
+            fill: darken($color-danger, 3);
+        }
     }
 }
 
