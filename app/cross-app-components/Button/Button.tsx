@@ -1,5 +1,6 @@
 import clsx from 'clsx';
-import React, { ButtonHTMLAttributes, PropsWithChildren } from 'react';
+import React, { ElementType, PropsWithChildren } from 'react';
+import { PolymorphicComponentProps } from '../../utils/types';
 
 import styles from './Button.module.scss';
 
@@ -12,7 +13,7 @@ const sizeStyleMap: Record<ButtonSize, string | undefined> = {
     huge: styles.rootHuge,
 };
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface Props {
     size?: ButtonSize;
     inverted?: boolean;
     clear?: boolean;
@@ -21,26 +22,31 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     active?: boolean;
 }
 
+export type ButtonProps<
+    TAs extends ElementType = 'button'
+> = PolymorphicComponentProps<TAs, Props>;
+
 /**
  * @description
  * Use as a regular \<button /\>.
  */
-export default function Button({
+export default function Button<TAs extends ElementType = 'button'>({
     size = 'regular',
-    type = 'button',
     inverted = false,
     clear = false,
     danger = false,
     icon,
     active = false,
     className,
+    as,
     children,
-    ...buttonProps
-}: PropsWithChildren<ButtonProps>): JSX.Element {
+    ...props
+}: PropsWithChildren<ButtonProps<TAs>>): JSX.Element {
+    const Component = as || 'button';
+
     return (
-        <button
-            // eslint-disable-next-line react/button-has-type
-            type={type}
+        <Component
+            type="button"
             className={clsx(
                 styles.root,
                 size && sizeStyleMap[size],
@@ -51,10 +57,10 @@ export default function Button({
                 active && styles.rootActive,
                 className
             )}
-            {...buttonProps}
+            {...props}
         >
             {icon && <span className={styles.icon}>{icon}</span>}
             {children}
-        </button>
+        </Component>
     );
 }

@@ -1,11 +1,9 @@
 import React, { useCallback, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { NavLink } from 'react-router-dom';
 import Button from '../../../cross-app-components/Button';
-import {
-    chooseIndex,
-    addressBookSelector,
-    chosenIndexSelector,
-} from '../../../features/AddressBookSlice';
+import routes from '../../../constants/routes.json';
+import { addressBookSelector } from '../../../features/AddressBookSlice';
 import IdentityIcon from '../../../../resources/svg/identity.svg';
 import SearchIcon from '../../../../resources/svg/search.svg';
 
@@ -14,8 +12,6 @@ import { AddressBookEntry } from '../../../utils/types';
 
 export default function AddressBookList(): JSX.Element {
     const [query, setQuery] = useState('');
-    const dispatch = useDispatch();
-    const chosenIndex = useSelector(chosenIndexSelector);
     const addressBook = useSelector(addressBookSelector);
 
     const filterByQuery = useCallback(
@@ -40,10 +36,10 @@ export default function AddressBookList(): JSX.Element {
                     className={styles.item}
                     key={e.address}
                     size="huge"
-                    onClick={() => dispatch(chooseIndex(i))}
                     inverted
-                    active={i === chosenIndex}
                     icon={<IdentityIcon className={styles.identityIcon} />}
+                    as={NavLink}
+                    to={routes.ADDRESSBOOK_SELECTED.replace(':index', `${i}`)}
                 >
                     {e.name}
                 </Button>

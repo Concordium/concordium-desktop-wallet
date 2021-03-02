@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useParams } from 'react-router';
 import {
     addressBookSelector,
-    chosenIndexSelector,
     removeFromAddressBook,
 } from '../../../features/AddressBookSlice';
 import DeleteAddress from '../DeleteAddress';
@@ -23,8 +23,10 @@ function copyToClipboard(text: string): Promise<void> {
 export default function AddressBookElementView() {
     const [copied, setCopied] = useState(false);
     const dispatch = useDispatch();
+    const { index } = useParams<{ index: string }>();
+    // eslint-disable-next-line radix
+    const chosenIndex = useMemo(() => parseInt(index), [index]);
 
-    const chosenIndex = useSelector(chosenIndexSelector);
     const addressBook = useSelector(addressBookSelector);
     const chosenEntry = addressBook[chosenIndex];
 
@@ -54,7 +56,6 @@ export default function AddressBookElementView() {
                     <h2 className={styles.heading}>{chosenEntry.name}</h2>
                     <span className={styles.actions}>
                         <UpsertAddress
-                            as={Button}
                             disabled={chosenEntry.readOnly}
                             initialValues={chosenEntry}
                             clear

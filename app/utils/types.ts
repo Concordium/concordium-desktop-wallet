@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes, ComponentType } from 'react';
 
@@ -749,32 +750,53 @@ export interface Action {
     location?: string;
 }
 
+export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;
+
 export type ClassNameAndStyle = Pick<
     HTMLAttributes<HTMLElement>,
     'style' | 'className'
 >;
 
-// WIP...
-// export type SuperAs<TAs> = (TAs extends ComponentType
-//     ? ComponentProps<TAs>
-//     : TAs extends keyof JSX.IntrinsicElements
-//     ? JSX.IntrinsicElements[TAs]
-//     : unknown) & {
-//     as?: TAs;
-// };
+// Source: https://github.com/emotion-js/emotion/blob/master/packages/styled-base/types/helper.d.ts
+// A more precise version of just React.ComponentPropsWithRef on its own
+export type PropsOf<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    C extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>
+> = JSX.LibraryManagedAttributes<C, React.ComponentPropsWithRef<C>>;
 
-// export type WithAsElement<
-//     TAs extends keyof JSX.IntrinsicElements
-// > = JSX.IntrinsicElements[TAs] & {
-//     as: TAs;
-// };
+type AsProp<C extends React.ElementType> = {
+    /**
+     * An override of the default HTML tag.
+     * Can also be another React component.
+     */
+    as?: C;
+};
 
-export type WithAsProp<TAsProps> = TAsProps & {
-    as: ComponentType<TAsProps>;
-};
-export type WithAsPropOmit<TAsProps, TOmitKeys extends keyof TAsProps> = Omit<
-    TAsProps,
-    TOmitKeys
-> & {
-    as: ComponentType<TAsProps>;
-};
+/**
+ * Allows for extending a set of props (`ExtendedProps`) by an overriding set of props
+ * (`OverrideProps`), ensuring that any duplicates are overridden by the overriding
+ * set of props.
+ */
+export type ExtendableProps<
+    ExtendedProps = {},
+    OverrideProps = {}
+> = OverrideProps & Omit<ExtendedProps, keyof OverrideProps>;
+
+/**
+ * Allows for inheriting the props from the specified element type so that
+ * props like children, className & style work, as well as element-specific
+ * attributes like aria roles. The component (`C`) must be passed in.
+ */
+export type InheritableElementProps<
+    C extends React.ElementType,
+    Props = {}
+> = ExtendableProps<PropsOf<C>, Props>;
+
+/**
+ * A more sophisticated version of `InheritableElementProps` where
+ * the passed in `as` prop will determine which props can be included
+ */
+export type PolymorphicComponentProps<
+    C extends React.ElementType,
+    Props = {}
+> = InheritableElementProps<C, Props & AsProp<C>>;

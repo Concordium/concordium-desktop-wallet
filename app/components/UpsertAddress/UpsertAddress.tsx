@@ -1,4 +1,5 @@
 import React, {
+    ElementType,
     PropsWithChildren,
     useCallback,
     useMemo,
@@ -11,7 +12,7 @@ import {
     AddressBookEntry,
     EqualRecord,
     NotOptional,
-    WithAsPropOmit,
+    PolymorphicComponentProps,
 } from '../../utils/types';
 import { isValidAddress } from '../../utils/accountHelpers';
 import {
@@ -22,16 +23,16 @@ import Form from '../Form';
 
 import styles from './UpsertAddress.module.scss';
 import Modal from '../../cross-app-components/Modal';
+import Button from '../../cross-app-components/Button';
 
-interface HasOnClick {
-    onClick?(): void;
-}
+type Props = PropsWithChildren<{
+    initialValues?: AddressBookEntryForm;
+    onSubmit?(name: string, address: string, note?: string): void;
+}>;
 
-type Props<TAsProps extends HasOnClick> = WithAsPropOmit<TAsProps, 'onClick'> &
-    PropsWithChildren<{
-        initialValues?: AddressBookEntryForm;
-        onSubmit?(name: string, address: string, note?: string): void;
-    }>;
+type UpsertAddressProps<
+    TAs extends ElementType = typeof Button
+> = PolymorphicComponentProps<TAs, Props>;
 
 type AddressBookEntryForm = Omit<AddressBookEntry, 'readOnly'>;
 
@@ -50,12 +51,12 @@ function validateAddress(v: string): string | undefined {
     return 'Address format is invalid';
 }
 
-export default function UpsertAddress<TAsProps>({
+export default function UpsertAddress<TAs extends ElementType = typeof Button>({
     onSubmit,
     initialValues,
-    as: As,
+    as,
     ...asProps
-}: Props<TAsProps>) {
+}: UpsertAddressProps<TAs>) {
     const [open, setOpen] = useState(false);
     const dispatch = useDispatch();
 
@@ -64,6 +65,8 @@ export default function UpsertAddress<TAsProps>({
         () => (isEditMode ? 'Edit recipient' : 'Add new recipient'),
         [isEditMode]
     );
+
+    const As = as || Button;
 
     const upsertAddress = useCallback(
         (values: AddressBookEntryForm) => {
@@ -95,8 +98,7 @@ export default function UpsertAddress<TAsProps>({
 
     return (
         <Modal
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            trigger={<As {...(asProps as any)} />}
+            trigger={<As {...asProps} />}
             onClose={() => setOpen(false)}
             onOpen={() => setOpen(true)}
             open={open}

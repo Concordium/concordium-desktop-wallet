@@ -34,7 +34,7 @@ interface WithOnClick {
     onClick?: MouseEventHandler;
 }
 
-export interface ModalProps<TTrigger extends WithOnClick> {
+export interface ModalProps<TTrigger extends WithOnClick = WithOnClick> {
     /**
      * Supply element that acts as a trigger for modal to open. Must have "onClick" as prop.
      */
@@ -64,7 +64,7 @@ export interface ModalProps<TTrigger extends WithOnClick> {
  *   This content is shown in a modal!
  * </Modal>
  */
-export default function Modal<TTrigger extends WithOnClick>({
+export default function Modal<TTrigger extends WithOnClick = WithOnClick>({
     trigger,
     closeOnEscape = true,
     disableClose = false,

@@ -1,9 +1,11 @@
 import React from 'react';
 
+import { Route, Switch } from 'react-router';
 import PlusIcon from '../../../resources/svg/plus.svg';
 import UpsertAddress from '../../components/UpsertAddress';
 import PageLayout from '../../components/PageLayout';
 import Columns from '../../components/Columns';
+import routes from '../../constants/routes.json';
 
 import AddressBookList from './AddressBookList';
 import AddressBookSelected from './AddressBookSelected';
@@ -29,7 +31,12 @@ export default function AddressBookPage() {
                     <AddressBookList />
                 </Columns.Column>
                 <Columns.Column>
-                    <AddressBookSelected />
+                    <Switch>
+                        <Route
+                            path={routes.ADDRESSBOOK_SELECTED}
+                            render={() => <AddressBookSelected />}
+                        />
+                    </Switch>
                 </Columns.Column>
             </Columns>
         </PageLayout>
