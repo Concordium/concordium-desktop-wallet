@@ -34,7 +34,7 @@ export async function loadGlobal(dispatch: Dispatch) {
             global = await fetchGlobal(); // fetch remote
             setGlobalInDatabase(global); // store locally
         } catch (e) {
-            global = undefined; // everything failed
+            return;
         }
     }
     dispatch(setGlobalInState(global));
