@@ -1,8 +1,8 @@
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
-import { parse } from 'json-bigint';
 import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
+import { parse } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import { displayAsGTU } from '../../utils/gtu';
 import { parseTime } from '../../utils/timeHelpers';

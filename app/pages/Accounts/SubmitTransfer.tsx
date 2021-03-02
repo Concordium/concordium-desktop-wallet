@@ -1,9 +1,9 @@
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
-import { parse } from 'json-bigint';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import { Container, Segment, Header, Grid } from 'semantic-ui-react';
+import { parse } from '../../utils/JSONHelper';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { sendTransaction } from '../../utils/nodeRequests';
 import {

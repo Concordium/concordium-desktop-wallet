@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { stringify } from 'json-bigint';
 import { push } from 'connected-react-router';
 import { useLocation, Link } from 'react-router-dom';
 import { Button, Header, Grid } from 'semantic-ui-react';
+import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';

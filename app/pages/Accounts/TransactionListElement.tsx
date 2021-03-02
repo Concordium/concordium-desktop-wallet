@@ -8,11 +8,20 @@ import {
     TransactionStatus,
     OriginType,
     TransactionKindString,
+    Account,
 } from '../../utils/types';
 import { chosenAccountSelector } from '../../features/AccountSlice';
 import { viewingShieldedSelector } from '../../features/TransactionSlice';
 import SidedRow from '../../components/SidedRow';
 import { isFailed } from '../../utils/transactionHelpers';
+
+function determineOutgoing(transaction: TransferTransaction, account: Account) {
+    const { toAddress } = transaction;
+    if (toAddress.length === 0 && transaction.success) {
+        return false;
+    }
+    return toAddress !== account.address;
+}
 
 function getName(
     transaction: TransferTransaction,
@@ -56,28 +65,32 @@ function parseShieldedAmount(
     transaction: TransferTransaction,
     isOutgoingTransaction: boolean
 ) {
-    if (
-        transaction.transactionKind ===
-        TransactionKindString.TransferToEncrypted
-    ) {
-        return buildCostFreeAmountString(BigInt(transaction.decryptedAmount));
-    }
-    if (
-        transaction.transactionKind ===
-        TransactionKindString.EncryptedAmountTransfer
-    ) {
-        if (transaction.decryptedAmount) {
+    if (transaction.decryptedAmount) {
+        if (
+            transaction.transactionKind ===
+            TransactionKindString.TransferToEncrypted
+        ) {
+            return buildCostFreeAmountString(
+                BigInt(transaction.decryptedAmount)
+            );
+        }
+        if (
+            transaction.transactionKind ===
+            TransactionKindString.EncryptedAmountTransfer
+        ) {
             return buildCostFreeAmountString(
                 BigInt(transaction.decryptedAmount),
                 isOutgoingTransaction
             );
         }
+    } else {
         const negative = isOutgoingTransaction ? '-' : '';
         return {
             amount: `${negative} ${getGTUSymbol()} ?`,
             amountFormula: '',
         };
     }
+
     throw new Error(
         'Unexpected transaction type when viewing shielded balance.'
     );
@@ -157,7 +170,7 @@ function TransactionListElement({ transaction }: Props): JSX.Element {
     if (!account) {
         throw new Error('Unexpected missing chosen account');
     }
-    const isOutgoingTransaction = transaction.fromAddress === account.address;
+    const isOutgoingTransaction = determineOutgoing(transaction, account);
     const time = parseTime(transaction.blockTime);
     const name = getName(transaction, isOutgoingTransaction);
     const amountParser = viewingShielded ? parseShieldedAmount : parseAmount;
