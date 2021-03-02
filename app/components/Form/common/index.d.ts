@@ -8,5 +8,5 @@ export interface CommonFieldProps {
 }
 
 export interface CommonInputProps extends CommonFieldProps {
-    label?: string;
+    label?: string | JSX.Element;
 }

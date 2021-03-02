@@ -134,7 +134,7 @@ export default function UpsertAddress<TAsProps>({
                         <Form.Input
                             className={styles.input}
                             name={fieldNames.note}
-                            label="Notes"
+                            label={<span className="h3">Notes</span>}
                             rules={{
                                 maxLength: {
                                     value: noteMaxLength,
