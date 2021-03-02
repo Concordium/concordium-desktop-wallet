@@ -12,3 +12,12 @@
         fill: $color-danger;
     }
 }
+
+.actions {
+    display: flex;
+    justify-content: center;
+
+    > *:first-child {
+        margin-right: 40px;
+    }
+}

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Button as SemanticButton, Icon, Modal } from 'semantic-ui-react';
 import { AddressBookEntry } from '../../../utils/types';
-
 import BinIcon from '../../../../resources/svg/bin.svg';
 import Button from '../../../cross-app-components/Button';
+import Modal from '../../../cross-app-components/Modal';
 
 import styles from './DeleteAddress.module.scss';
 
@@ -22,7 +21,6 @@ export default function DeleteAddress({ entry, onRemove }: DeleteAddressProps) {
 
     return (
         <Modal
-            closeIcon
             onClose={() => setOpen(false)}
             onOpen={() => setOpen(true)}
             open={open}
@@ -31,32 +29,17 @@ export default function DeleteAddress({ entry, onRemove }: DeleteAddressProps) {
                     <BinIcon className={styles.binIcon} />
                 </Button>
             }
-            dimmer="blurring"
-            closeOnDimmerClick={false}
-            basic
-            size="mini"
         >
-            <Modal.Header>
+            <h2>
                 Are you sure you want to delete this entry? The address will be
                 lost.
-            </Modal.Header>
-            <Modal.Actions>
-                <SemanticButton
-                    disabled={entry.readOnly}
-                    onClick={() => setOpen(false)}
-                >
-                    <Icon name="remove" />
-                    Cancel
-                </SemanticButton>
-                <SemanticButton
-                    negative
-                    disabled={entry.readOnly}
-                    onClick={remove}
-                >
-                    <Icon name="checkmark" />
-                    Yes, I&apos;m sure.
-                </SemanticButton>
-            </Modal.Actions>
+            </h2>
+            <div className={styles.actions}>
+                <Button onClick={() => setOpen(false)}>Cancel</Button>
+                <Button onClick={remove} danger>
+                    Delete
+                </Button>
+            </div>
         </Modal>
     );
 }
