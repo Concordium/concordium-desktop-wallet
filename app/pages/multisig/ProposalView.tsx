@@ -64,8 +64,8 @@ export default function ProposalView() {
     );
 
     useEffect(() => {
-        expirationEffect(instruction.header.timeout, currentProposal, dispatch);
-    }, [currentProposal, dispatch, instruction.header.timeout]);
+        expirationEffect(currentProposal, dispatch);
+    }, [currentProposal, dispatch]);
 
     async function loadSignatureFile(file: Buffer) {
         let transactionObject;
