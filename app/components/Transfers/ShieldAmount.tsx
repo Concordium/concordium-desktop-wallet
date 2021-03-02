@@ -9,7 +9,7 @@ interface Props {
 }
 
 /**
- * Controls the flow of creating a simple transfer.
+ * Controls the flow of creating a transfer to encrypted.
  */
 export default function ShieldAmount({ account }: Props) {
     const specific = {

@@ -3,6 +3,7 @@ import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Segment, Header, Grid, Button } from 'semantic-ui-react';
+import { parse } from '../../utils/JSONHelper';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { sendTransaction } from '../../utils/nodeRequests';
 import {
@@ -31,7 +32,7 @@ interface Location {
 }
 
 interface State {
-    transaction: AccountTransaction;
+    transaction: string;
     account: Account;
     cancelled: Location;
     confirmed: Location;
@@ -79,8 +80,14 @@ export default function SubmitTransfer({ location }: Props) {
         throw new Error('Unexpected missing state.');
     }
 
-    const { account, cancelled, confirmed } = location.state;
-    let { transaction } = location.state;
+    const {
+        account,
+        transaction: transactionJSON,
+        cancelled,
+        confirmed,
+    } = location.state;
+
+    let transaction: AccountTransaction = parse(transactionJSON);
 
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status

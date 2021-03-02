@@ -3,16 +3,14 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation, Link } from 'react-router-dom';
 import { Button, Header, Grid } from 'semantic-ui-react';
+import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import {
-    AddressBookEntry,
-    Account,
-    AccountTransaction,
-} from '../../utils/types';
+import { Account } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 import locations from '../../constants/transferLocations.json';
+import { TransferState } from '../../utils/transactionTypes';
 
 interface Specific<T> {
     title: string;
@@ -26,19 +24,12 @@ interface Props<T> {
     specific: Specific<T>;
 }
 
-interface State {
-    amount: string;
-    transaction: AccountTransaction;
-    recipient: AddressBookEntry;
-    initialPage: string;
-}
-
 /**
  * Controls the flow of creating a TransferToEncrypted/TransferToPublic transfer.
  */
 export default function InternalTransfer<T>({ account, specific }: Props<T>) {
     const dispatch = useDispatch();
-    const location = useLocation<State>();
+    const location = useLocation<TransferState>();
 
     const [subLocation, setSubLocation] = useState<string>(
         location?.state?.initialPage || locations.pickAmount
@@ -62,6 +53,7 @@ export default function InternalTransfer<T>({ account, specific }: Props<T>) {
                                 toMicroUnits(amount)
                             );
 
+                            const transactionJSON = stringify(transaction);
                             dispatch(
                                 push({
                                     pathname: routes.SUBMITTRANSFER,
@@ -71,7 +63,7 @@ export default function InternalTransfer<T>({ account, specific }: Props<T>) {
                                             state: {
                                                 initialPage:
                                                     locations.transferSubmitted,
-                                                transaction,
+                                                transaction: transactionJSON,
                                             },
                                         },
                                         cancelled: {
@@ -82,7 +74,7 @@ export default function InternalTransfer<T>({ account, specific }: Props<T>) {
                                                 amount,
                                             },
                                         },
-                                        transaction,
+                                        transaction: transactionJSON,
                                         account,
                                     },
                                 })

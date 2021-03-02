@@ -61,7 +61,7 @@ export async function attachNames(
  */
 async function createTransferTransaction<T extends TransactionPayload>(
     fromAddress: string,
-    expiry: string = getDefaultExpiry(),
+    expiry: bigint = getDefaultExpiry(),
     energyAmount: string,
     transactionKind: number,
     payload: T
@@ -70,7 +70,7 @@ async function createTransferTransaction<T extends TransactionPayload>(
     const transferTransaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
-        energyAmount, // TODO: Does this need to be set by the user?
+        energyAmount,
         expiry,
         transactionKind,
         payload,
@@ -86,7 +86,7 @@ export function createSimpleTransferTransaction(
     fromAddress: string,
     amount: BigInt,
     toAddress: string,
-    expiry: string = getDefaultExpiry(),
+    expiry: bigint = getDefaultExpiry(),
     energyAmount = '200'
 ): Promise<SimpleTransfer> {
     const payload = {
@@ -104,8 +104,8 @@ export function createSimpleTransferTransaction(
 
 export function createShieldAmountTransaction(
     address: string,
-    amount: BigInt,
-    expiry: string = getDefaultExpiry(),
+    amount: bigint,
+    expiry: bigint = getDefaultExpiry(),
     energyAmount = '1000'
 ): Promise<TransferToEncrypted> {
     const payload = {
@@ -123,8 +123,8 @@ export function createShieldAmountTransaction(
 export async function createUnshieldAmountTransaction(
     address: string,
     amount: BigInt,
-    expiry: string = getDefaultExpiry(),
-    energyAmount = '2000000'
+    expiry: bigint = getDefaultExpiry(),
+    energyAmount = '200000000'
 ) {
     const payload = {
         transferAmount: amount.toString(),
@@ -170,7 +170,7 @@ export async function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: SchedulePoint[],
-    expiry: string = getDefaultExpiry(),
+    expiry: bigint = getDefaultExpiry(),
     energyAmount = '20000'
 ) {
     const payload = {

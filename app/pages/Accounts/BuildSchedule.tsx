@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import { Card, List, Header, Button } from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
+import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import { Account, AddressBookEntry, Schedule } from '../../utils/types';
 import { displayAsGTU } from '../../utils/gtu';
@@ -54,6 +55,7 @@ export default function BuildSchedule({ location }: Props) {
             recipient.address,
             schedule
         );
+        const transactionJSON = stringify(transaction);
         dispatch(
             push({
                 pathname: routes.SUBMITTRANSFER,
@@ -61,7 +63,7 @@ export default function BuildSchedule({ location }: Props) {
                     confirmed: {
                         pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
                         state: {
-                            transaction,
+                            transaction: transactionJSON,
                             account,
                             recipient,
                             initialPage: locations.transferSubmitted,
@@ -72,12 +74,12 @@ export default function BuildSchedule({ location }: Props) {
                         state: {
                             account,
                             amount,
-                            recoverState,
+                            defaults: recoverState,
                             explicit,
                             recipient,
                         },
                     },
-                    transaction,
+                    transaction: transactionJSON,
                     account,
                 },
             })

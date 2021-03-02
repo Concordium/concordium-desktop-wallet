@@ -39,6 +39,8 @@ export default function ExplicitSchedule({
     const [schedule, setSchedule] = useState<Schedule>(
         defaults?.schedule || []
     );
+    console.log(schedule);
+    console.log(defaults);
     const [usedAmount, setUsedAmount] = useState<bigint>(
         schedule.reduce((acc, point) => acc + BigInt(point.amount), 0n)
     );

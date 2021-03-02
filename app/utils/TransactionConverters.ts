@@ -51,6 +51,15 @@ export function convertIncomingTransaction(
         ).toString();
     }
 
+    let decryptedAmount;
+    if (
+        transaction.details.type === TransactionKindString.TransferToEncrypted
+    ) {
+        let value = BigInt(subtotal);
+        value = value > 0n ? value : -value;
+        decryptedAmount = value.toString();
+    }
+
     return {
         remote: true,
         originType: transaction.origin.type,
@@ -67,6 +76,7 @@ export function convertIncomingTransaction(
         details: JSON.stringify(transaction.details),
         rejectReason: transaction.details.rejectReason,
         encrypted,
+        decryptedAmount,
         fromAddress,
         toAddress,
         status: TransactionStatus.Finalized,
@@ -84,7 +94,8 @@ type TypeSpecific = Pick<
     | 'decryptedAmount'
 >;
 
-// Convert the type specific fields of a Simple transfer for an Account Transaction.
+// Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a simple transfer, which cannot be converted by the generic function .
 function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
     const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
@@ -97,7 +108,8 @@ function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     };
 }
 
-// Convert the type specific fields of a transfer to encrypted for an Account Transaction.
+// Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a transfer to encrypted, which cannot be converted by the generic function .
 function convertTransferToEncrypted(
     transaction: TransferToEncrypted
 ): TypeSpecific {
@@ -113,7 +125,8 @@ function convertTransferToEncrypted(
     };
 }
 
-// Convert the type specific fields of a transfer to public for an Account Transaction.
+// Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a transfer to public, which cannot be converted by the generic function .
 function convertTransferToPublic(transaction: TransferToPublic): TypeSpecific {
     const amount = BigInt(transaction.payload.transferAmount);
     const estimatedTotal = amount - BigInt(transaction.energyAmount); // TODO: convert from energy to cost
@@ -127,7 +140,8 @@ function convertTransferToPublic(transaction: TransferToPublic): TypeSpecific {
     };
 }
 
-// Convert the type specific fields of a Scheduled transfer for an Account Transaction.
+// Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a scheduled transfer, which cannot be converted by the generic function .
 function convertScheduledTransfer(
     transaction: ScheduledTransfer
 ): TypeSpecific {

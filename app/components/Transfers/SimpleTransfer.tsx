@@ -3,28 +3,19 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation, Link } from 'react-router-dom';
 import { Button, Header, Grid } from 'semantic-ui-react';
+import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import {
-    AddressBookEntry,
-    Account,
-    AccountTransaction,
-} from '../../utils/types';
+import { AddressBookEntry, Account } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 import locations from '../../constants/transferLocations.json';
 import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
+import { TransferState } from '../../utils/transactionTypes';
 
 interface Props {
     account: Account;
-}
-
-interface State {
-    amount: string;
-    transaction: AccountTransaction;
-    recipient: AddressBookEntry;
-    initialPage: string;
 }
 
 /**
@@ -32,7 +23,7 @@ interface State {
  */
 export default function SimpleTransfer({ account }: Props) {
     const dispatch = useDispatch();
-    const location = useLocation<State>();
+    const location = useLocation<TransferState>();
 
     const [subLocation, setSubLocation] = useState<string>(
         location?.state?.initialPage || locations.pickAmount
@@ -81,7 +72,9 @@ export default function SimpleTransfer({ account }: Props) {
                                             state: {
                                                 initialPage:
                                                     locations.transferSubmitted,
-                                                transaction,
+                                                transaction: stringify(
+                                                    transaction
+                                                ),
                                                 recipient,
                                             },
                                         },
@@ -95,7 +88,7 @@ export default function SimpleTransfer({ account }: Props) {
                                                 recipient,
                                             },
                                         },
-                                        transaction,
+                                        transaction: stringify(transaction),
                                         account,
                                     },
                                 })
