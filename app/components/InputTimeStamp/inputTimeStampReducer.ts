@@ -129,6 +129,7 @@ function dateExists(date: Partial<DateParts>): date is DateParts {
 
     const test = fromDateParts(date);
 
+    // Checking this way relies on Date overflow logic, i.e. new Date(1999, 11, 32) -> 2000-00-01
     return (
         date.year === test.getFullYear() &&
         date.month === test.getMonth() + 1 &&
@@ -191,8 +192,6 @@ export const reducer: Reducer<State, Action> = (s = {}, a) => {
         ...next,
         formattedDate: a.type === ActionType.UPDATE ? a.date : formatDate(next),
     };
-
-    console.log(next);
 
     return {
         ...next,

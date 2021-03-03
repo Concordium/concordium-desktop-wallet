@@ -16,7 +16,7 @@ import {
 export interface InputTimeStampProps {
     label?: string | JSX.Element;
     value?: Date;
-    onChange(date: Date): void;
+    onChange(date?: Date): void;
 }
 
 export default function InputTimeStamp({
@@ -34,9 +34,7 @@ export default function InputTimeStamp({
     }, [value]);
 
     useEffect(() => {
-        if (formattedDate) {
-            onChange(formattedDate);
-        }
+        onChange(formattedDate);
     }, [formattedDate, onChange]);
 
     return (
