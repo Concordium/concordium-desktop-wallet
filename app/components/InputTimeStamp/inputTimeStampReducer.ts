@@ -8,6 +8,7 @@ interface DateParts {
 
 interface State extends Partial<DateParts> {
     formattedDate?: Date;
+    isValid?: boolean;
 }
 
 enum ActionType {
@@ -51,18 +52,34 @@ export function setDate(date: number): SetDate {
 
 type Action = Update | SetYear | SetMonth | SetDate;
 
-function formatDate(
-    year?: number,
-    month?: number,
-    date?: number
-): Date | undefined {
-    console.log(year, month, date);
+function hasAllParts(date: Partial<DateParts>): date is DateParts {
+    return (
+        date.year !== undefined &&
+        date.month !== undefined &&
+        date.date !== undefined
+    );
+}
 
-    if (!year || !month || !date) {
+function dateExists(date: Partial<DateParts>): date is DateParts {
+    if (!hasAllParts(date)) {
+        return false;
+    }
+
+    const test = new Date(date.year, date.month - 1, date.date);
+
+    return (
+        date.year === test.getFullYear() &&
+        date.month === test.getMonth() + 1 &&
+        date.date === test.getDate()
+    );
+}
+
+function formatDate(date: Partial<DateParts>): Date | undefined {
+    if (!dateExists(date)) {
         return undefined;
     }
 
-    return new Date(year, month - 1, date);
+    return new Date(date.year, date.month - 1, date.date);
 }
 
 function getDateParts(date?: Date): DateParts | undefined {
@@ -82,35 +99,35 @@ function getDateParts(date?: Date): DateParts | undefined {
 }
 
 export const reducer: Reducer<State, Action> = (s = {}, a) => {
-    const { year, month, date } = s;
-
-    console.log(a);
+    let next: State = s;
 
     switch (a.type) {
         case ActionType.UPDATE:
-            return {
+            next = {
+                ...s,
                 ...(getDateParts(a.date) ?? {}),
-                formattedDate: a.date,
             };
+            break;
         case ActionType.SET_YEAR:
-            return {
-                ...s,
-                year: a.year,
-                formattedDate: formatDate(a.year, month, date),
-            };
+            next = { ...s, year: a.year };
+            break;
         case ActionType.SET_MONTH:
-            return {
-                ...s,
-                month: a.month,
-                formattedDate: formatDate(year, a.month, date),
-            };
+            next = { ...s, month: a.month };
+            break;
         case ActionType.SET_DATE:
-            return {
-                ...s,
-                date: a.date,
-                formattedDate: formatDate(year, month, a.date),
-            };
+            next = { ...s, date: a.date };
+            break;
         default:
             return s;
     }
+
+    next = {
+        ...next,
+        formattedDate: a.type === ActionType.UPDATE ? a.date : formatDate(next),
+    };
+
+    return {
+        ...next,
+        isValid: hasAllParts(next) ? dateExists(next) : undefined,
+    };
 };
