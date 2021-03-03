@@ -45,4 +45,6 @@ export default class EuroPerEnergyHandler
     }
 
     update = UpdateEuroPerEnergy;
+
+    title = 'Foundation Transaction | Update Euro Per Energy';
 }

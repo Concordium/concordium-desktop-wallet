@@ -278,6 +278,5 @@ export async function makeTransferToPublicData(
         command: workerCommands.createTransferToPublicData,
         input: JSON.stringify(input),
     });
-    console.log(transferToPublicData);
     return JSON.parse(transferToPublicData);
 }

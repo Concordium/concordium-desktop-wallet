@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { Button, Form } from 'semantic-ui-react';
+import React, { useEffect, useState } from 'react';
+import { Form } from 'semantic-ui-react';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 import { FoundationAccount, UpdateType } from '../../utils/types';
 import { UpdateProps } from '../../utils/transactionTypes';
 
 export default function UpdateFoundationAccount({
     blockSummary,
-    forwardTransaction,
+    effectiveTime,
+    setProposal,
 }: UpdateProps): JSX.Element | null {
     const [
         foundationAccount,
@@ -22,6 +23,26 @@ export default function UpdateFoundationAccount({
     const sequenceNumber =
         blockSummary.updates.updateQueues.foundationAccount.nextSequenceNumber;
     const { threshold } = blockSummary.updates.authorizations.foundationAccount;
+
+    useEffect(() => {
+        if (foundationAccount) {
+            setProposal(
+                createUpdateMultiSignatureTransaction(
+                    foundationAccount,
+                    UpdateType.UpdateFoundationAccount,
+                    sequenceNumber,
+                    threshold,
+                    effectiveTime
+                )
+            );
+        }
+    }, [
+        foundationAccount,
+        sequenceNumber,
+        threshold,
+        setProposal,
+        effectiveTime,
+    ]);
 
     if (!foundationAccount) {
         setFoundationAccount(currentFoundationAccount);
@@ -53,21 +74,6 @@ export default function UpdateFoundationAccount({
                     }}
                 />
             </Form>
-            <Button
-                primary
-                onClick={() =>
-                    forwardTransaction(
-                        createUpdateMultiSignatureTransaction(
-                            foundationAccount,
-                            UpdateType.UpdateFoundationAccount,
-                            sequenceNumber,
-                            threshold
-                        )
-                    )
-                }
-            >
-                Generate transaction proposal
-            </Button>
         </>
     );
 }

@@ -26,6 +26,8 @@ import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
 import { makeTransferToPublicData } from '../../utils/rustInterface';
 
+import PageHeader from '../../components/PageHeader';
+
 interface Location {
     pathname: string;
     state: Record<string, unknown>;
@@ -125,31 +127,36 @@ export default function SubmitTransfer({ location }: Props) {
     }
 
     return (
-        <Container>
-            <Segment>
-                <Button onClick={() => dispatch(push(cancelled))}>
-                    {'<--'}
-                </Button>
-                <Header textAlign="center">
-                    Submit the transaction with your hardware wallet
-                </Header>
-                <Container text>
-                    <p>
-                        Choose your hardware wallet on the right. Be sure to
-                        verify that all the information below is exactly the
-                        same on your hardware wallet, before submitting the
-                        transaction.
-                    </p>
-                </Container>
-                <Grid columns={2} divided textAlign="center" padded>
-                    <Grid.Column>
-                        <TransactionDetails transaction={transaction} />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <LedgerComponent ledgerCall={ledgerSignTransfer} />
-                    </Grid.Column>
-                </Grid>
-            </Segment>
-        </Container>
+        <>
+            <PageHeader>
+                <h1>Accounts | Submit Transfer</h1>
+            </PageHeader>
+            <Container>
+                <Segment>
+                    <Button onClick={() => dispatch(push(cancelled))}>
+                        {'<--'}
+                    </Button>
+                    <Header textAlign="center">
+                        Submit the transaction with your hardware wallet
+                    </Header>
+                    <Container text>
+                        <p>
+                            Choose your hardware wallet on the right. Be sure to
+                            verify that all the information below is exactly the
+                            same on your hardware wallet, before submitting the
+                            transaction.
+                        </p>
+                    </Container>
+                    <Grid columns={2} divided textAlign="center" padded>
+                        <Grid.Column>
+                            <TransactionDetails transaction={transaction} />
+                        </Grid.Column>
+                        <Grid.Column>
+                            <LedgerComponent ledgerCall={ledgerSignTransfer} />
+                        </Grid.Column>
+                    </Grid>
+                </Segment>
+            </Container>
+        </>
     );
 }

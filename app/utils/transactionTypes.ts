@@ -17,9 +17,11 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
-    forwardTransaction: (
-        multiSignatureTransaction: Partial<MultiSignatureTransaction>
-    ) => Promise<void>;
+    effectiveTime: bigint;
+    setProposal: React.Dispatch<
+        React.SetStateAction<Partial<MultiSignatureTransaction> | undefined>
+    >;
+    setDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 /**
@@ -49,4 +51,5 @@ export interface TransactionHandler<T, S> {
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;
     update: UpdateComponent;
+    title: string;
 }

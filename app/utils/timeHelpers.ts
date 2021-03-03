@@ -35,10 +35,10 @@ export function parseTime(
  * Assumes the timestamp is in seconds, otherwise the unit should be specified.
  */
 export function getISOFormat(
-    timeStamp: string,
+    timeStamp: string | bigint,
     unit: TimeStampUnit = TimeStampUnit.seconds
 ) {
-    const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
+    const timeStampCorrectUnit = parseInt(timeStamp.toString(), 10) * unit;
     return new Date(timeStampCorrectUnit).toISOString();
 }
 
