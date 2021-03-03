@@ -211,10 +211,15 @@ export function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
 function serializeUpdateSignatures(
     signatures: UpdateInstructionSignature[]
 ): Buffer {
+    // To ensure a unique serialization, the signatures must be serialized in order of their index.
+    const sortedSignatures = signatures.sort((sig1, sig2) => {
+        return sig1.authorizationKeyIndex - sig2.authorizationKeyIndex;
+    });
+
     const signatureCount = Buffer.alloc(2);
     signatureCount.writeInt16BE(signatures.length, 0);
 
-    const prefixedSignatures = signatures.reduce((result, signature) => {
+    const prefixedSignatures = sortedSignatures.reduce((result, signature) => {
         const signaturePrefix = Buffer.alloc(2 + 2);
         signaturePrefix.writeInt16BE(signature.authorizationKeyIndex, 0);
         const signatureAsBytes = Buffer.from(signature.signature, 'hex');
