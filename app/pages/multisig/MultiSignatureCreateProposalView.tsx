@@ -10,7 +10,7 @@ import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
 import findHandler from '../../utils/updates/HandlerFinder';
 import EffectiveTimeUpdate from './EffectiveTimeUpdate';
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
 
 interface Location {
     state: UpdateType;
@@ -74,10 +74,10 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     }
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>{handler.title}</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Segment textAlign="center" secondary loading={loading}>
                 <Header size="large">Add the proposal details</Header>
                 <Segment basic>
@@ -125,6 +125,6 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
                     </Button>
                 </Segment>
             </Segment>
-        </>
+        </PageLayout>
     );
 }

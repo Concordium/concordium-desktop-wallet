@@ -1,5 +1,9 @@
 @import '../common/common';
 
+.field {
+    resize: vertical;
+}
+
 .autoScale {
     resize: none;
     overflow: hidden;

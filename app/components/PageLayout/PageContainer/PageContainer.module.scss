@@ -1,0 +1,12 @@
+@import 'config/bundle';
+
+.root {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    border-radius: 10px;
+    padding: 35px;
+    background-color: $color-off-white;
+    width: 100%;
+    height: calc(100% - 60px);
+    overflow: auto;
+}

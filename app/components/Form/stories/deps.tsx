@@ -25,6 +25,22 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.Submit': Submit,
 };
 
+export const decorators = [
+    (story: () => JSX.Element) => (
+        <>
+            <style>
+                {`
+                    .sb-form-wrapper {
+                        max-width: 300px;
+                        margin: 0 auto;
+                    }
+                `}
+            </style>
+            <div className="sb-form-wrapper">{story()}</div>
+        </>
+    ),
+];
+
 export const Template: Story<FormProps<unknown>> = (args) => (
     <Form {...args}>
         <Form.Input name="name" placeholder="Name" />

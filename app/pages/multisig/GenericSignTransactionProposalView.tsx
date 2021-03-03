@@ -19,7 +19,7 @@ import {
     UpdateInstructionPayload,
 } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
 
 interface Props<T> {
     header: string;
@@ -59,10 +59,10 @@ export default function GenericSignTransactionProposalView({
     }
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>{header}</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Container>
                 <Segment loading={loading}>
                     <Header textAlign="center">
@@ -125,6 +125,6 @@ export default function GenericSignTransactionProposalView({
                 </Segment>
                 {ledgerComponent}
             </Container>
-        </>
+        </PageLayout>
     );
 }

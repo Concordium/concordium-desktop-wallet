@@ -1,0 +1,43 @@
+@import 'config/bundle';
+
+.root {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: flex-start;
+
+    &ColumnScroll {
+        height: 100%;
+    }
+}
+
+.divider {
+    flex-basis: 1px;
+    flex-shrink: 0;
+    margin: 20px 0;
+    background-color: $color-grey;
+    height: calc(100% - 40px); // To account for margin
+}
+
+.column {
+    flex: 0 1 100%;
+    padding: $page-gutter;
+
+    .rootColumnScroll & {
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    &NoResize {
+        flex-shrink: 0;
+    }
+
+    .rootVariableSize & {
+        flex: 1 0 auto;
+
+        &NoResize {
+            flex-grow: 0;
+        }
+    }
+}

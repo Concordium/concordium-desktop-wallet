@@ -17,7 +17,7 @@ import TransactionHashView from '../../components/TransactionHashView';
 import TransactionDetails from '../../components/TransactionDetails';
 import { saveFile } from '../../utils/FileHelper';
 import { UpdateInstructionSignature } from '../../utils/types';
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
 
 interface Props {
     location: LocationDescriptorObject<Input>;
@@ -64,10 +64,10 @@ export default function ExportSignedTransactionView({ location }: Props) {
     }
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>Multi Signature Transactions</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Segment>
                 <Header textAlign="center">
                     Transaction signing confirmation | Transaction Type
@@ -122,6 +122,6 @@ export default function ExportSignedTransactionView({ location }: Props) {
                     </Grid.Row>
                 </Grid>
             </Segment>
-        </>
+        </PageLayout>
     );
 }

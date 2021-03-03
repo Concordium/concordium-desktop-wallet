@@ -1,0 +1,59 @@
+import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
+import TextArea from '../TextArea';
+
+import { argTypes, Template, decorators } from './deps';
+
+<Meta title="Components/Form/Fields/TextArea" component={TextArea} argTypes={argTypes} decorators={decorators} />
+
+# TextArea
+
+The TextArea component allows the same props as a regular `<textarea />`, with the addition of `error`.
+
+<Canvas>
+    <Story name="Primary" args={{
+        placeholder: 'Address',
+        name: 'address'
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+The following are the most important props to work with `TextArea`:
+
+<ArgsTable story="Primary" />
+
+## With label
+
+<Canvas>
+    <Story name="With Label" args={{
+        placeholder: 'Address',
+        name: 'address',
+        label: 'Address'
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Without auto-scale
+
+<Canvas>
+    <Story name="No Auto Scale" args={{
+        placeholder: 'Address',
+        name: 'address',
+        autoScale: false
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Invalid
+
+<Canvas>
+    <Story name="Invalid" args={{
+        placeholder: 'Address',
+        name: 'address',
+        error: 'Address is required'
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>

@@ -45,7 +45,7 @@ import SimpleErrorModal, {
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
@@ -268,10 +268,10 @@ export default function ProposalView() {
         currentProposal.status === MultiSignatureTransactionStatus.Open;
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>{handler.title}</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Segment secondary textAlign="center">
                 <SimpleErrorModal
                     show={showError.show}
@@ -365,6 +365,6 @@ export default function ProposalView() {
                     </Grid.Column>
                 </Grid>
             </Segment>
-        </>
+        </PageLayout>
     );
 }
