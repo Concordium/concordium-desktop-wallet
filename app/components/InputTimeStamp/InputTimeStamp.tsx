@@ -8,6 +8,9 @@ import {
     setYear,
     setMonth,
     setDate,
+    setHours,
+    setMinutes,
+    setSeconds,
 } from './inputTimeStampReducer';
 
 export interface InputTimeStampProps {
@@ -21,10 +24,10 @@ export default function InputTimeStamp({
     value,
     onChange,
 }: InputTimeStampProps): JSX.Element {
-    const [{ year, month, date, formattedDate }, dispatch] = useReducer(
-        reducer,
-        {}
-    );
+    const [
+        { year, month, date, hours, minutes, seconds, formattedDate },
+        dispatch,
+    ] = useReducer(reducer, {});
 
     useEffect(() => {
         dispatch(update(value));
@@ -40,7 +43,7 @@ export default function InputTimeStamp({
         <div>
             <label>{label}</label>
             <br />
-            {year}-{month}-{date}
+            {year}-{month}-{date} at {hours}:{minutes}:{seconds}
             <br />
             Formatted: {formattedDate?.toDateString()}
             <br />
@@ -50,22 +53,48 @@ export default function InputTimeStamp({
                 name="year"
                 type="string"
                 placeholder="YYYY"
-                value={`${year || ''}`}
+                value={`${year ?? ''}`}
                 onChange={(e) => dispatch(setYear(parseInt(e.target.value)))}
             />
+            -
             <input
                 name="month"
                 type="string"
                 placeholder="MM"
-                value={`${month || ''}`}
+                value={`${month ?? ''}`}
                 onChange={(e) => dispatch(setMonth(parseInt(e.target.value)))}
             />
+            -
             <input
                 name="date"
                 type="string"
                 placeholder="DD"
-                value={`${date || ''}`}
+                value={`${date ?? ''}`}
                 onChange={(e) => dispatch(setDate(parseInt(e.target.value)))}
+            />
+            at
+            <input
+                name="hours"
+                type="string"
+                placeholder="HH"
+                value={`${hours ?? ''}`}
+                onChange={(e) => dispatch(setHours(parseInt(e.target.value)))}
+            />
+            :
+            <input
+                name="minutes"
+                type="string"
+                placeholder="MM"
+                value={`${minutes ?? ''}`}
+                onChange={(e) => dispatch(setMinutes(parseInt(e.target.value)))}
+            />
+            :
+            <input
+                name="seconds"
+                type="string"
+                placeholder="SS"
+                value={`${seconds ?? ''}`}
+                onChange={(e) => dispatch(setSeconds(parseInt(e.target.value)))}
             />
         </div>
     );
