@@ -62,7 +62,7 @@ export default function BuildSchedule({ location }: Props) {
                     confirmed: {
                         pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
                         state: {
-                            transaction,
+                            transaction: stringify(transaction),
                             account,
                             recipient,
                             initialPage: locations.transferSubmitted,

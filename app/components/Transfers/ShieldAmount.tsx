@@ -56,7 +56,9 @@ export default function ShieldAmount({ account }: Props) {
                                             state: {
                                                 initialPage:
                                                     locations.transferSubmitted,
-                                                transaction,
+                                                transaction: stringify(
+                                                    transaction
+                                                ),
                                             },
                                         },
                                         cancelled: {

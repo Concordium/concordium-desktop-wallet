@@ -72,7 +72,9 @@ export default function SimpleTransfer({ account }: Props) {
                                             state: {
                                                 initialPage:
                                                     locations.transferSubmitted,
-                                                transaction,
+                                                transaction: stringify(
+                                                    transaction
+                                                ),
                                                 recipient,
                                             },
                                         },
