@@ -11,48 +11,58 @@ interface State extends Partial<DateParts> {
 }
 
 enum ActionType {
-    INIT,
+    UPDATE,
     SET_YEAR,
     SET_MONTH,
     SET_DATE,
 }
 
-interface Init extends ReduxAction<ActionType.INIT> {
+interface Update extends ReduxAction<ActionType.UPDATE> {
     date?: Date;
 }
 
-export function init(date?: Date): Init {
-    return { type: ActionType.INIT, date };
+export function update(date?: Date): Update {
+    return { type: ActionType.UPDATE, date };
 }
 
 interface SetYear extends ReduxAction<ActionType.SET_YEAR> {
     year: number;
 }
 
+export function setYear(year: number): SetYear {
+    return { type: ActionType.SET_YEAR, year };
+}
+
 interface SetMonth extends ReduxAction<ActionType.SET_MONTH> {
     month: number;
+}
+
+export function setMonth(month: number): SetMonth {
+    return { type: ActionType.SET_MONTH, month };
 }
 
 interface SetDate extends ReduxAction<ActionType.SET_DATE> {
     date: number;
 }
 
-type Action = Init | SetYear | SetMonth | SetDate;
+export function setDate(date: number): SetDate {
+    return { type: ActionType.SET_DATE, date };
+}
+
+type Action = Update | SetYear | SetMonth | SetDate;
 
 function formatDate(
     year?: number,
     month?: number,
     date?: number
 ): Date | undefined {
+    console.log(year, month, date);
+
     if (!year || !month || !date) {
         return undefined;
     }
 
-    const newDate = new Date();
-    newDate.setFullYear(year);
-    newDate.setMonth(month);
-    newDate.setDate(date);
-    return newDate;
+    return new Date(year, month - 1, date);
 }
 
 function getDateParts(date?: Date): DateParts | undefined {
@@ -61,7 +71,7 @@ function getDateParts(date?: Date): DateParts | undefined {
     }
 
     const year = date.getFullYear();
-    const month = date.getMonth();
+    const month = date.getMonth() + 1;
     const d = date.getDate();
 
     return {
@@ -72,10 +82,12 @@ function getDateParts(date?: Date): DateParts | undefined {
 }
 
 export const reducer: Reducer<State, Action> = (s = {}, a) => {
-    const { year, month, date } = getDateParts(s.formattedDate) ?? {};
+    const { year, month, date } = s;
+
+    console.log(a);
 
     switch (a.type) {
-        case ActionType.INIT:
+        case ActionType.UPDATE:
             return {
                 ...(getDateParts(a.date) ?? {}),
                 formattedDate: a.date,

@@ -1,39 +1,71 @@
+/* eslint-disable radix */
 import React, { useEffect, useReducer } from 'react';
 
-import styles from './InputTimeStamp.module.scss';
-import { reducer, init } from './inputTimeStampReducer';
+// import styles from './InputTimeStamp.module.scss';
+import {
+    reducer,
+    update,
+    setYear,
+    setMonth,
+    setDate,
+} from './inputTimeStampReducer';
 
 export interface InputTimeStampProps {
     label?: string | JSX.Element;
-    initialValue?: Date;
     value?: Date;
-    onChange(date: Date | null): void;
+    onChange(date: Date): void;
 }
 
 export default function InputTimeStamp({
     label,
-    initialValue,
     value,
     onChange,
 }: InputTimeStampProps): JSX.Element {
-    const [{ year, month, date }, dispatch] = useReducer(reducer, {});
+    const [{ year, month, date, formattedDate }, dispatch] = useReducer(
+        reducer,
+        {}
+    );
 
     useEffect(() => {
-        dispatch(init(initialValue));
-    }, [initialValue]);
+        dispatch(update(value));
+    }, [value]);
+
+    useEffect(() => {
+        if (formattedDate) {
+            onChange(formattedDate);
+        }
+    }, [formattedDate, onChange]);
 
     return (
         <div>
             <label>{label}</label>
-            {year}, {month}, {date}
-            <input name="year" type="number" placeholder="YYYY" />
-            <input name="month" type="number" placeholder="MM" />
-            <input name="date" type="number" placeholder="DD" />
+            <br />
+            {year}-{month}-{date}
+            <br />
+            Formatted: {formattedDate?.toDateString()}
+            <br />
+            Value: {value?.toDateString()}
+            <br />
             <input
-                className={styles.dateField}
-                type="date"
-                value={value?.toDateString()}
-                onChange={(e) => onChange(e.target.valueAsDate)}
+                name="year"
+                type="string"
+                placeholder="YYYY"
+                value={`${year || ''}`}
+                onChange={(e) => dispatch(setYear(parseInt(e.target.value)))}
+            />
+            <input
+                name="month"
+                type="string"
+                placeholder="MM"
+                value={`${month || ''}`}
+                onChange={(e) => dispatch(setMonth(parseInt(e.target.value)))}
+            />
+            <input
+                name="date"
+                type="string"
+                placeholder="DD"
+                value={`${date || ''}`}
+                onChange={(e) => dispatch(setDate(parseInt(e.target.value)))}
             />
         </div>
     );
