@@ -20,8 +20,7 @@ interface TransportStatusError {
 }
 
 function instanceOfTransportStatusError(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    object: any
+    object: Error
 ): object is TransportStatusError {
     return (
         'name' in object &&
