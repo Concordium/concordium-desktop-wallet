@@ -68,3 +68,14 @@ pub fn create_sec_to_pub_ext(
         Err(e) => format!("unable to create transfer to public due to: {}", e),
     }
 }
+
+#[wasm_bindgen(js_name = createEncryptedTransferData)]
+pub fn create_encrypted_transfer_ext(
+    input: &str
+) -> String {
+    match create_encrypted_transfer_aux(input) {
+        Ok(s) => s,
+        Err(e) => format!("unable to create encrypted transfer due to: {}", e),
+    }
+}
+

@@ -8,6 +8,7 @@ import {
     TransactionEvent,
     TransactionStatus,
     ScheduledTransfer,
+    EncryptedTransfer,
     SchedulePoint,
     TransferToEncrypted,
     AccountTransaction,
@@ -102,6 +103,30 @@ export function createSimpleTransferTransaction(
     );
 }
 
+/**
+ *  Constructs a, simple transfer, transaction object,
+ * Given the fromAddress, toAddress and the amount.
+ */
+export function createEncryptedTransferTransaction(
+    fromAddress: string,
+    amount: bigint,
+    toAddress: string,
+    expiry: bigint = getDefaultExpiry(),
+    energyAmount = '30000'
+): Promise<EncryptedTransfer> {
+    const payload = {
+        toAddress,
+        transferAmount: amount.toString(),
+    };
+    return createTransferTransaction(
+        fromAddress,
+        expiry,
+        energyAmount,
+        TransactionKindId.Encrypted_transfer,
+        payload
+    );
+}
+
 export function createShieldAmountTransaction(
     address: string,
     amount: bigint,
@@ -124,7 +149,7 @@ export async function createUnshieldAmountTransaction(
     address: string,
     amount: BigInt,
     expiry: bigint = getDefaultExpiry(),
-    energyAmount = '200000000'
+    energyAmount = '30000'
 ) {
     const payload = {
         transferAmount: amount.toString(),

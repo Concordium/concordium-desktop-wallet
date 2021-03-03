@@ -60,11 +60,11 @@ export async function decryptTransactions(
     const encryptedTransfers = transactions.filter(
         (t) =>
             t.transactionKind ===
-                TransactionKindString.EncryptedAmountTransfer &&
+            TransactionKindString.EncryptedAmountTransfer &&
             t.decryptedAmount === null
     );
 
-    if (encryptedTransfers.length > 0) {
+    if (encryptedTransfers.length === 0) {
         return Promise.resolve();
     }
 

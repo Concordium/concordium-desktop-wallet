@@ -155,6 +155,14 @@ export interface SimpleTransferPayload {
     toAddress: string;
 }
 
+export interface EncryptedTransferPayload {
+    transferAmount: string;
+    toAddress: string;
+    remainingAmount?: string; // encrypted
+    index?: string;
+    proof?: string;
+}
+
 export interface TransferToEncryptedPayload {
     amount: string;
 }
@@ -181,7 +189,8 @@ export type TransactionPayload =
     | TransferToPublicPayload
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
-    | SimpleTransferPayload;
+    | SimpleTransferPayload
+    | EncryptedTransferPayload;
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
@@ -199,6 +208,7 @@ export interface AccountTransaction<
 export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
+export type EncryptedTransfer = AccountTransaction<EncryptedTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 
@@ -306,7 +316,7 @@ export enum RejectReason {
     InvalidAccountKeySignThreshold = 'The requested sign threshold would exceed the number of keys on the account',
     InvalidEncryptedAmountTransferProof = 'The shielded amount transfer has an invalid proof',
     EncryptedAmountSelfTransfer = 'An shielded amount transfer from the account to itself is not allowed',
-    InvalidTransferToPublicProof = 'The shielding has an invalid proof',
+    InvalidTransferToPublicProof = 'The secret to public transfer has an invalid proof',
     InvalidIndexOnEncryptedTransfer = 'The provided shielded transfer index is out of bounds',
     ZeroScheduledAmount = 'Attempt to transfer 0 GTU with schedule',
     NonIncreasingSchedule = 'Attempt to transfer amount with non-increasing schedule',
@@ -369,6 +379,7 @@ type AccountBakerDetails = any; // TODO
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
+    accountEncryptionKey: string;
     accountReleaseSchedule: AccountReleaseSchedule;
     accountBaker: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
@@ -555,6 +566,12 @@ export function instanceOfTransferToPublic(
     object: AccountTransaction<TransactionPayload>
 ): object is TransferToPublic {
     return object.transactionKind === TransactionKindId.Transfer_to_public;
+}
+
+export function instanceOfEncryptedTransfer(
+    object: AccountTransaction<TransactionPayload>
+): object is EncryptedTransfer {
+    return object.transactionKind === TransactionKindId.Encrypted_transfer;
 }
 
 export function instanceOfScheduledTransfer(

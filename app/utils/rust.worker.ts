@@ -18,6 +18,7 @@ interface RustInterface {
     getDeploymentInfo(signature: string, unsignedInfo: string): string;
     decrypt_amounts_ext(amounts: string): string;
     createTransferToPublicData(inputblob: string): string;
+    createEncryptedTransferData(inputblob: string): string;
 }
 
 let rustReference: RustInterface;
@@ -74,6 +75,13 @@ function createTransferToPublicData(
     return rust.createTransferToPublicData(message.input);
 }
 
+function createEncryptedTransferData(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.createEncryptedTransferData(message.input);
+}
+
 function mapCommand(command: string) {
     switch (command) {
         case workerCommands.buildPublicInformationForIp:
@@ -88,6 +96,8 @@ function mapCommand(command: string) {
             return decryptAmounts;
         case workerCommands.createTransferToPublicData:
             return createTransferToPublicData;
+        case workerCommands.createEncryptedTransferData:
+            return createEncryptedTransferData;
         default:
             return () => 'unknown command';
     }

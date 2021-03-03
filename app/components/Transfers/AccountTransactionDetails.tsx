@@ -6,12 +6,14 @@ import {
     instanceOfTransferToEncrypted,
     instanceOfTransferToPublic,
     instanceOfScheduledTransfer,
+    instanceOfEncryptedTransfer,
 } from '../../utils/types';
 import { lookupName } from '../../utils/transactionHelpers';
 import { chosenAccountSelector } from '../../features/AccountSlice';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
 import DisplayInternalTransfer from './DisplayInternalTransfer';
 import DisplaySimpleTransfer from './DisplaySimpleTransfer';
+import DisplayEncryptedTransfer from './DisplayEncryptedTransfer';
 
 interface Props {
     transaction: AccountTransaction;
@@ -37,6 +39,15 @@ export default function AccountTransactionDetails({ transaction }: Props) {
     if (instanceOfSimpleTransfer(transaction)) {
         return (
             <DisplaySimpleTransfer
+                transaction={transaction}
+                toName={toName}
+                fromName={fromName}
+            />
+        );
+    }
+    if (instanceOfEncryptedTransfer(transaction)) {
+        return (
+            <DisplayEncryptedTransfer
                 transaction={transaction}
                 toName={toName}
                 fromName={fromName}

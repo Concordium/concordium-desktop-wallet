@@ -12,6 +12,12 @@ export function putBase58Check(
     }
 }
 
+export function base58ToBuffer(
+    base58Sstring: string
+) {
+    return bs58check.decode(base58Sstring);
+}
+
 type Indexable = Buffer | Uint8Array;
 
 export function put(array: Indexable, start: number, input: Indexable) {

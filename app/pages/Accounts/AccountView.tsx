@@ -10,6 +10,7 @@ import { updateTransactions } from '../../features/TransactionSlice';
 import routes from '../../constants/routes.json';
 import MoreActions from './MoreActions';
 import SimpleTransfer from '../../components/Transfers/SimpleTransfer';
+import EncryptedTransfer from '../../components/Transfers/EncryptedTransfer';
 import ShieldAmount from '../../components/Transfers/ShieldAmount';
 import UnshieldAmount from '../../components/Transfers/UnshieldAmount';
 import TransferHistory from './TransferHistory';
@@ -63,6 +64,10 @@ export default function AccountView() {
                     <Route
                         path={routes.ACCOUNTS_SIMPLETRANSFER}
                         render={() => <SimpleTransfer account={account} />}
+                    />
+                    <Route
+                        path={routes.ACCOUNTS_ENCRYPTEDTRANSFER}
+                        render={() => <EncryptedTransfer account={account} />}
                     />
                     <Route
                         path={routes.ACCOUNTS_SHIELDAMOUNT}

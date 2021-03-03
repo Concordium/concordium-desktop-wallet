@@ -246,7 +246,7 @@ export async function decryptAmounts(
         prfKey,
         encryptedAmounts,
     };
-
+    console.log(prfKey);
     const decryptedAmounts = await worker.postMessage({
         command: workerCommands.decryptAmounts,
         input: JSON.stringify(input),
@@ -257,15 +257,21 @@ export async function decryptAmounts(
 export async function makeTransferToPublicData(
     amount: string,
     prfKey: string,
+    senderPublicKey: string,
     global: Global,
     encryptedSelfAmount: string,
+    incomingAmounts: string[],
     index: number,
     accountNumber: number
 ) {
+    console.log(prfKey);
     const input = {
         global,
         amount,
         prfKey,
+        incomingAmounts
+        : incomingAmounts[0],
+        senderPublicKey,
         accountNumber,
         encryptedSelfAmount,
         index,
@@ -275,5 +281,33 @@ export async function makeTransferToPublicData(
         command: workerCommands.createTransferToPublicData,
         input: JSON.stringify(input),
     });
+    console.log(transferToPublicData);
     return JSON.parse(transferToPublicData);
 }
+
+export async function makeEncryptedTransferData(
+    amount: string,
+    receiverPublicKey: string,
+    prfKey: string,
+    global: Global,
+    encryptedSelfAmount: string,
+    index: number,
+    accountNumber: number
+) {
+    const input = {
+        global,
+        amount,
+        receiverPublicKey,
+        prfKey,
+        accountNumber,
+        encryptedSelfAmount,
+        index,
+    };
+
+    const encryptedTransferData = await worker.postMessage({
+        command: workerCommands.createEncryptedTransferData,
+        input: JSON.stringify(input),
+    });
+    return JSON.parse(encryptedTransferData);
+}
+

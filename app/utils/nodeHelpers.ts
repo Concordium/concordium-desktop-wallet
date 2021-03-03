@@ -29,6 +29,17 @@ export async function getAccountInfos(
     return accountInfos;
 }
 
+// gets the accountInfo for the given address.
+export async function getAccountInfoOfAddress(
+    address: string
+): Promise<AccountInfo> {
+    const consensusStatus = await getConsensusStatus();
+    const blockHash = consensusStatus.lastFinalizedBlock;
+    return await getAccountInfo(
+        address,
+        blockHash);
+}
+
 export async function fetchGlobal(): Promise<Global> {
     const consensusStatus = await getConsensusStatus();
     const blockHash = consensusStatus.lastFinalizedBlock;

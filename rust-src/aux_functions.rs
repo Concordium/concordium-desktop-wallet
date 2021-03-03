@@ -292,7 +292,8 @@ pub fn decrypt_amounts_aux(
     let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
 
     let amounts: Vec<Amount> = encrypted_amounts.iter().map(|encrypted_amount| {
-        encrypted_transfers::decrypt_amount::<id::constants::ArCurve>(
+        log(&json!({"sk": secret_key, "amount": encrypted_amount, "prf_key": prf_key}).to_string());
+        encrypted_transfers::decrypt_amount::<ExampleCurve>(
             &table,
             &secret_key,
             &encrypted_amount,
@@ -321,7 +322,11 @@ pub fn create_sec_to_pub_aux(
         scalar,
     };
 
+    let sender_pk = try_get(&v, "senderPublicKey")?;
+
+    let incoming_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "incomingAmounts")?;
     let input_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
+
     let agg_index: u64 = try_get(&v, "index")?;
     let to_transfer: Amount = try_get(&v, "amount")?;
 
@@ -356,6 +361,114 @@ pub fn create_sec_to_pub_aux(
         None => bail!("Could not produce payload."),
     };
 
+
+    log(&json!({"sk": secret_key, "amount": incoming_amount, "prf_key": prf_key}).to_string());
+    let decrypted_incoming =
+        encrypted_transfers::decrypt_amount::<ExampleCurve>(
+            &table,
+            &secret_key,
+            &incoming_amount,
+        );
+
+    let decrypted_remaining =
+        encrypted_transfers::decrypt_amount::<ExampleCurve>(
+            &table,
+            &secret_key,
+            &payload.remaining_amount,
+        );
+
+    let public_key = elgamal::PublicKey::<ExampleCurve>::from(&secret_key);
+
+    let input_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
+
+    let verify_own =encrypted_transfers::verify_sec_to_pub_transfer_data(
+        &global_context,
+        &public_key,
+        &input_amount,
+        &payload,
+    );
+
+    let verify_given =encrypted_transfers::verify_sec_to_pub_transfer_data(
+        &global_context,
+        &sender_pk,
+        &input_amount,
+        &payload,
+    );
+
+    let as_bytes = &to_bytes(&payload);
+
+    let response = json!({
+        "decrypted_incoming": decrypted_incoming,
+        "own" : verify_own,
+        "given" : verify_given,
+        "public_key" : public_key,
+        "payload": payload,
+        "remaining": payload.remaining_amount,
+        "decryptedInput": decrypted_remaining,
+        "decryptedRemaining": decrypted_amount,
+        "hex": hex::encode(as_bytes)
+        });
+
+    Ok(response.to_string())
+}
+
+pub fn create_encrypted_transfer_aux(
+    input: &str,
+) -> Fallible<String> {
+    let v: SerdeValue = from_str(input)?;
+
+    let prf_key_string: String = try_get(&v, "prfKey")?;
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
+
+    let account_number: u8 = try_get(&v, "accountNumber")?;
+
+    let scalar: Fr = prf_key.prf_exponent(account_number)?;
+
+    let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
+
+    let secret_key = elgamal::SecretKey {
+        generator: *global_context.elgamal_generator(),
+        scalar,
+    };
+
+    let receiver_pk = try_get(&v, "receiverPublicKey")?;
+
+    let input_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
+    let agg_index: u64 = try_get(&v, "index")?;
+    let to_transfer: Amount = try_get(&v, "amount")?;
+
+    let m = 1 << 16;
+    let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
+
+    let decrypted_amount =
+        encrypted_transfers::decrypt_amount::<ExampleCurve>(
+        &table,
+        &secret_key,
+        &input_amount,
+    );
+
+    let agg_decrypted_amount = AggregatedDecryptedAmount {
+        agg_encrypted_amount: input_amount,
+        agg_amount: decrypted_amount,
+        agg_index
+    };
+
+    let mut csprng = thread_rng();
+
+    let payload =encrypted_transfers::make_transfer_data(
+        &global_context,
+        &receiver_pk,
+        &secret_key,
+        &agg_decrypted_amount,
+        to_transfer,
+        &mut csprng,
+    );
+
+    let payload = match payload {
+        Some(payload) => payload,
+        None => bail!("Could not produce payload."),
+    };
+
     let decrypted_remaining =
         encrypted_transfers::decrypt_amount::<ExampleCurve>(
             &table,
@@ -366,7 +479,7 @@ pub fn create_sec_to_pub_aux(
     let as_bytes = &to_bytes(&payload);
 
     let response = json!({
-            "payload": payload,
+        "payload": payload,
         "remaining": payload.remaining_amount,
         "decryptedRemaining": decrypted_remaining,
         "hex": hex::encode(as_bytes)

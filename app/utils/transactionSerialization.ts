@@ -8,6 +8,7 @@ import {
     TransactionPayload,
     TransferToEncryptedPayload,
     TransferToPublicPayload,
+    EncryptedTransferPayload,
 } from './types';
 import {
     encodeWord16,
@@ -65,7 +66,7 @@ function serializeTransferToEncypted(payload: TransferToEncryptedPayload) {
 }
 
 export function serializeTransferToPublicData(
-    payload: TransferToPublicPayload
+    payload: TransferToPublicPayload | EncryptedTransferPayload
 ) {
     if (
         !payload.proof ||
@@ -110,6 +111,24 @@ function serializeTransferToPublic(payload: TransferToPublicPayload) {
     return serialized;
 }
 
+
+function serializeEncryptedTransfer(payload: EncryptedTransferPayload) {
+    if (!payload.proof) {
+        throw new Error('unexpected missing proof of Transfer to Public data');
+    }
+
+    const proof = Buffer.from(payload.proof, 'hex');
+    const data = serializeTransferToPublicData(payload);
+    const size = 1 + data.length + proof.length;
+    const serialized = new Uint8Array(size);
+
+    serialized[0] = TransactionKind.Encrypted_transfer;
+    putBase58Check(serialized, 1, payload.toAddress);
+    put(serialized, 1 + 32, data);
+    put(serialized, 1 + 32 + data.length, proof);
+    return serialized;
+}
+
 export function serializeTransactionHeader(
     sender: string,
     nonce: string,
@@ -147,6 +166,10 @@ export function serializeTransferPayload(
         case TransactionKind.Transfer_to_public:
             return serializeTransferToPublic(
                 payload as TransferToPublicPayload
+            );
+        case TransactionKind.Encrypted_transfer:
+            return serializeEncryptedTransfer(
+                payload as EncryptedTransferPayload
             );
         default:
             throw new Error('Unsupported transactionkind');

@@ -6,6 +6,7 @@ import { Container, Segment, Header, Grid, Button } from 'semantic-ui-react';
 import { parse } from '../../utils/JSONHelper';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { sendTransaction } from '../../utils/nodeRequests';
+import { getAccountInfoOfAddress } from '../../utils/nodeHelpers';
 import {
     serializeTransaction,
     getTransactionHash,
@@ -17,6 +18,7 @@ import {
     AccountTransaction,
     Global,
     instanceOfTransferToPublic,
+    instanceOfEncryptedTransfer,
 } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { addPendingTransaction } from '../../features/TransactionSlice';
@@ -24,7 +26,7 @@ import { accountsInfoSelector } from '../../features/AccountSlice';
 import { globalSelector } from '../../features/GlobalSlice';
 import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
-import { makeTransferToPublicData } from '../../utils/rustInterface';
+import { makeTransferToPublicData, makeEncryptedTransferData } from '../../utils/rustInterface';
 
 interface Location {
     pathname: string;
@@ -49,19 +51,37 @@ async function buildEncryptedPayload(
     account: Account,
     accountInfo: AccountInfo
 ) {
+    console.log(accountInfo);
+    console.log(account);
     if (instanceOfTransferToPublic(transaction)) {
         const prfKeySeed = await ledger.getPrfKey(account.identityId);
         const data = await makeTransferToPublicData(
             transaction.payload.transferAmount,
-            prfKeySeed.toString(),
+            prfKeySeed.toString('hex'),
+            accountInfo.accountEncryptionKey,
+            global,
+            accountInfo.accountEncryptedAmount.selfAmount,
+            accountInfo.accountEncryptedAmount.incomingAmounts,
+            accountInfo.accountEncryptedAmount.startIndex,
+            account.accountNumber
+        );
+        console.log(data);
+        return { ...transaction, payload: data.payload };
+    }
+    if (instanceOfEncryptedTransfer(transaction)) {
+        const prfKeySeed = await ledger.getPrfKey(account.identityId);
+        const receiverAccountInfo = await getAccountInfoOfAddress(transaction.payload.toAddress);
+        const data = await makeEncryptedTransferData(
+            transaction.payload.transferAmount,
+            receiverAccountInfo.accountEncryptionKey,
+            prfKeySeed.toString('hex'),
             global,
             accountInfo.accountEncryptedAmount.selfAmount,
             accountInfo.accountEncryptedAmount.startIndex,
             account.accountNumber
         );
-        console.log(data.payload);
-        console.log(data.hex);
-        return { ...transaction, payload: data.payload };
+        console.log(data);
+        return { ...transaction, payload: { ...data.payload, toAddress: transaction.payload.toAddress} };
     }
     return transaction;
 }
