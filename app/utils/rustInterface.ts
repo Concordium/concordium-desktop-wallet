@@ -12,6 +12,7 @@ import {
     CredentialDeploymentDetails,
     VerifyKey,
     Global,
+    AccountEncryptedAmount,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -258,8 +259,7 @@ export async function makeTransferToPublicData(
     amount: string,
     prfKey: string,
     global: Global,
-    encryptedSelfAmount: string,
-    index: number,
+    accountEncryptedAmount: AccountEncryptedAmount,
     accountNumber: number
 ) {
     const input = {
@@ -267,13 +267,17 @@ export async function makeTransferToPublicData(
         amount,
         prfKey,
         accountNumber,
-        encryptedSelfAmount,
-        index,
+        incomingAmounts: accountEncryptedAmount.incomingAmounts,
+        encryptedSelfAmount: accountEncryptedAmount.selfAmount,
+        aggIndex:
+            accountEncryptedAmount.startIndex +
+            accountEncryptedAmount.incomingAmounts.length,
     };
 
     const transferToPublicData = await worker.postMessage({
         command: workerCommands.createTransferToPublicData,
         input: JSON.stringify(input),
     });
+    console.log(transferToPublicData);
     return JSON.parse(transferToPublicData);
 }

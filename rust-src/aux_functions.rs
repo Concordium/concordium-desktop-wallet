@@ -321,10 +321,12 @@ pub fn create_sec_to_pub_aux(
         scalar,
     };
 
-    let input_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
-    let agg_index: u64 = try_get(&v, "index")?;
+    let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
+    let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
+    let agg_index: u64 = try_get(&v, "aggIndex")?;
     let to_transfer: Amount = try_get(&v, "amount")?;
 
+    let input_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));
     let m = 1 << 16;
     let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
 

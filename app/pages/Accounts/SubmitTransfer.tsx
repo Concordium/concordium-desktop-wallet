@@ -55,8 +55,7 @@ async function buildEncryptedPayload(
             transaction.payload.transferAmount,
             prfKeySeed.toString('hex'),
             global,
-            accountInfo.accountEncryptedAmount.selfAmount,
-            accountInfo.accountEncryptedAmount.startIndex,
+            accountInfo.accountEncryptedAmount,
             account.accountNumber
         );
         return { ...transaction, payload: data.payload };
