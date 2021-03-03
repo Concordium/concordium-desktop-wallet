@@ -709,10 +709,18 @@ export enum ColorType {
     Black = 'black',
 }
 
+// Makes all properties of type T non-optional.
 export type NotOptional<T> = {
     [P in keyof T]-?: T[P];
 };
 
+/**
+ * @description
+ * Object where keys and values are the same. Useful for storing names of form fields, and other things.
+ *
+ * @example
+ * const equal: EqualRecord<{ name: string, address: string }> = { name: 'name', address: 'address' };
+ */
 export type EqualRecord<T> = { [P in keyof T]: P };
 
 export interface EncryptionMetaData {
@@ -793,8 +801,18 @@ export type InheritableElementProps<
 > = ExtendableProps<PropsOf<C>, Props>;
 
 /**
+ * @description
  * A more sophisticated version of `InheritableElementProps` where
- * the passed in `as` prop will determine which props can be included
+ * the passed in `as` prop will determine which props can be included. Used for polymorphic components.
+ *
+ * @example
+ * type ButtonProps<TAs extends ElementType = 'button'> = PolymorphicComponentProps<TAs, { p1: string, p2?: number }>;
+ *
+ * function Button<TAs extends ElementType = 'button'>({ p1, p2, as, ...props }: ButtonProps<TAs>) {
+ *   const Component = as || 'button';
+ *
+ *   return <Component {...props} />;
+ * }
  */
 export type PolymorphicComponentProps<
     C extends React.ElementType,
