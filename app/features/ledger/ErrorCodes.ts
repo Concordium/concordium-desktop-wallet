@@ -1,22 +1,30 @@
-const userRejection = 0x6985;
-const invalidState = 0x6b01;
-const invalidPath = 0x6b02;
-const invalidParam = 0x6b03;
-const invalidTransaction = 0x6b04;
+enum StatusCodes {
+    UserRejection = 0x6985,
+    InvalidState = 0x6b01,
+    InvalidPath = 0x6b02,
+    InvalidParam = 0x6b03,
+    InvalidTransaction = 0x6b04,
+}
 
 const incompatibleText =
     'The desktop application is incompatible with the Ledger application.';
 
 const errorCodeMap = new Map<number, string>();
 errorCodeMap.set(
-    userRejection,
+    StatusCodes.UserRejection,
     'The transaction was declined on the Ledger device.'
 );
-errorCodeMap.set(invalidState, `Invalid state. ${incompatibleText}`);
-errorCodeMap.set(invalidPath, `Invalid path. ${incompatibleText}`);
-errorCodeMap.set(invalidParam, `Invalid parameter. ${incompatibleText}`);
 errorCodeMap.set(
-    invalidTransaction,
+    StatusCodes.InvalidState,
+    `Invalid state. ${incompatibleText}`
+);
+errorCodeMap.set(StatusCodes.InvalidPath, `Invalid path. ${incompatibleText}`);
+errorCodeMap.set(
+    StatusCodes.InvalidParam,
+    `Invalid parameter. ${incompatibleText}`
+);
+errorCodeMap.set(
+    StatusCodes.InvalidTransaction,
     `Invalid transaction. ${incompatibleText}`
 );
 
