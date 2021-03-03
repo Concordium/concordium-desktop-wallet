@@ -68,7 +68,7 @@ export default function AccountsPage() {
 
     return (
         <PageLayout>
-            <PageLayout>
+            <PageLayout.Header>
                 <h1>Accounts | </h1>
                 <h2>
                     Wallet Total: {displayAsGTU(totalAmount)}
@@ -82,7 +82,7 @@ export default function AccountsPage() {
                 >
                     <PlusIcon />
                 </PageLayout.HeaderButton>
-            </PageLayout>
+            </PageLayout.Header>
             <Grid centered columns="equal" divided>
                 <Grid.Row>
                     <Grid.Column>

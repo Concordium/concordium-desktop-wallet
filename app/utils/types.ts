@@ -754,21 +754,6 @@ export type ClassNameAndStyle = Pick<
     'style' | 'className'
 >;
 
-// WIP...
-// export type SuperAs<TAs> = (TAs extends ComponentType
-//     ? ComponentProps<TAs>
-//     : TAs extends keyof JSX.IntrinsicElements
-//     ? JSX.IntrinsicElements[TAs]
-//     : unknown) & {
-//     as?: TAs;
-// };
-
-// export type WithAsElement<
-//     TAs extends keyof JSX.IntrinsicElements
-// > = JSX.IntrinsicElements[TAs] & {
-//     as: TAs;
-// };
-
 export type WithAsProp<TAsProps> = TAsProps & {
     as: ComponentType<TAsProps>;
 };
