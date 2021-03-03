@@ -134,7 +134,11 @@ export default function ProposalView() {
                 const signature = transactionObject.signatures[0];
 
                 // Prevent the user from adding a signature that is already present on the proposal.
-                if (proposal.signatures.includes(signature)) {
+                if (
+                    proposal.signatures
+                        .map((sig) => sig.signature)
+                        .includes(signature.signature)
+                ) {
                     setShowError({
                         show: true,
                         header: 'Duplicate signature',
