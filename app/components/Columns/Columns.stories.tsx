@@ -61,6 +61,13 @@ WithDivider.args = {
     divider: true,
 };
 
+export const ThreeColumns = Template.bind({});
+ThreeColumns.args = {
+    // eslint-disable-next-line react/jsx-key
+    children: [col(), col(), col()],
+    divider: true,
+};
+
 const scrollCol = (height: number, width?: number, props: ColumnProps = {}) => (
     <Columns.Column {...props}>
         <div className="sb-col-inner" style={{ height, width }}>
@@ -81,6 +88,15 @@ export const VariableSize = Template.bind({});
 VariableSize.args = {
     // eslint-disable-next-line react/jsx-key
     children: [col(), scrollCol(450, 300, { noResize: true })],
+    divider: true,
+    columnScroll: true,
+    variableSize: true,
+};
+
+export const ThreeColumnsVariableSize = Template.bind({});
+ThreeColumnsVariableSize.args = {
+    // eslint-disable-next-line react/jsx-key
+    children: [col(), scrollCol(450, 300, { noResize: true }), col()],
     divider: true,
     columnScroll: true,
     variableSize: true,
