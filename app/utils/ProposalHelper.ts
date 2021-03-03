@@ -17,8 +17,7 @@ import {
  */
 export default function expirationEffect(
     proposal: MultiSignatureTransaction,
-    dispatch: Dispatch,
-    proposals?: MultiSignatureTransaction[]
+    dispatch: Dispatch
 ) {
     if (proposal.status === MultiSignatureTransactionStatus.Open) {
         const updateInstruction: UpdateInstruction<UpdateInstructionPayload> = parse(
@@ -32,11 +31,7 @@ export default function expirationEffect(
                     ...proposal,
                     status: MultiSignatureTransactionStatus.Failed,
                 };
-                await updateCurrentProposal(
-                    dispatch,
-                    failedProposal,
-                    proposals
-                );
+                await updateCurrentProposal(dispatch, failedProposal);
                 clearInterval(interval);
             }
         }, 1000);

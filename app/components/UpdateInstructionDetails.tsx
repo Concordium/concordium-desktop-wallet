@@ -20,13 +20,17 @@ export default function UpdateInstructionDetails({ transaction }: Props) {
     const handler = findHandler(transaction.type);
 
     let effectiveTimeComponent;
-    if (transaction.header.effectiveTime <= getNow(TimeStampUnit.seconds)) {
+    // TODO Note that it is the timeoute/expiration that we react on as that is always prior to the
+    // effective time. This makes sense currently as the expiration is always 1 second earlier than the
+    // effective time, but that might not be the case we end up with. If we change that, then this
+    // should be reconsidered.
+    if (transaction.header.timeout <= getNow(TimeStampUnit.seconds)) {
         effectiveTimeComponent = (
             <>
                 <Header color="red">Effective time</Header>
                 {getISOFormat(transaction.header.effectiveTime.toString())}
                 <Header color="red" size="small">
-                    The effective time has been exceeded
+                    The transaction has expired
                 </Header>
             </>
         );

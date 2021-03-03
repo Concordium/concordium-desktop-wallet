@@ -33,6 +33,14 @@ const multiSignatureSlice = createSlice({
         setProposals: (state, input) => {
             state.proposals = input.payload;
         },
+        updateProposals: (state, input) => {
+            state.proposals = state.proposals.map((item) => {
+                if (item.id !== input.payload.id) {
+                    return item;
+                }
+                return input.payload;
+            });
+        },
     },
 });
 
@@ -40,6 +48,7 @@ export const {
     chooseMenuItem,
     setCurrentProposal,
     setProposals,
+    updateProposals,
 } = multiSignatureSlice.actions;
 
 export const chosenMenuSelector = (state: RootState) =>
@@ -54,25 +63,14 @@ export const proposalsSelector = (state: RootState) =>
 /**
  * Updates the multi signature transaction in the database, and updates the
  * state with the updated transaction.
- * @param proposals if provided the state for the list of proposals is updated as well
  */
 export async function updateCurrentProposal(
     dispatch: Dispatch,
-    multiSignatureTransactionProposal: MultiSignatureTransaction,
-    proposals?: MultiSignatureTransaction[]
+    multiSignatureTransactionProposal: MultiSignatureTransaction
 ) {
     updateEntry(multiSignatureTransactionProposal);
     dispatch(setCurrentProposal(multiSignatureTransactionProposal));
-
-    if (proposals) {
-        const newProposals = proposals.map((prop) => {
-            if (prop.id === multiSignatureTransactionProposal.id) {
-                return multiSignatureTransactionProposal;
-            }
-            return prop;
-        });
-        dispatch(setProposals(newProposals));
-    }
+    dispatch(updateProposals(multiSignatureTransactionProposal));
 }
 
 /**

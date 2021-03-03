@@ -13,7 +13,6 @@ import { push } from 'connected-react-router';
 import { parse, stringify } from 'json-bigint';
 import {
     currentProposalSelector,
-    proposalsSelector,
     updateCurrentProposal,
 } from '../../features/MultiSignatureSlice';
 import TransactionDetails from '../../components/TransactionDetails';
@@ -54,7 +53,6 @@ export default function ProposalView() {
     });
     const dispatch = useDispatch();
     const currentProposal = useSelector(currentProposalSelector);
-    const proposals = useSelector(proposalsSelector);
 
     if (!currentProposal) {
         throw new Error(
@@ -117,7 +115,7 @@ export default function ProposalView() {
                     transaction: stringify(proposal),
                 };
 
-                updateCurrentProposal(dispatch, updatedProposal, proposals);
+                updateCurrentProposal(dispatch, updatedProposal);
             }
         } else {
             setShowError({
@@ -153,7 +151,7 @@ export default function ProposalView() {
         };
         if (submitted) {
             modifiedProposal.status = MultiSignatureTransactionStatus.Submitted;
-            updateCurrentProposal(dispatch, modifiedProposal, proposals);
+            updateCurrentProposal(dispatch, modifiedProposal);
             getMultiSignatureTransactionStatus(modifiedProposal, dispatch);
             dispatch(
                 push({
@@ -163,7 +161,7 @@ export default function ProposalView() {
             );
         } else {
             modifiedProposal.status = MultiSignatureTransactionStatus.Failed;
-            updateCurrentProposal(dispatch, modifiedProposal, proposals);
+            updateCurrentProposal(dispatch, modifiedProposal);
         }
     }
 

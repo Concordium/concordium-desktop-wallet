@@ -30,7 +30,7 @@ export default function ProposalList(): JSX.Element {
 
     useEffect(() => {
         proposals.forEach((proposal) => {
-            expirationEffect(proposal, dispatch, proposals);
+            expirationEffect(proposal, dispatch);
         });
     }, [dispatch, proposals]);
 
