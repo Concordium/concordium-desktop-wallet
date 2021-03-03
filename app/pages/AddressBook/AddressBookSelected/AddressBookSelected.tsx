@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router';
 import {
@@ -23,15 +23,13 @@ function copyToClipboard(text: string): Promise<void> {
 export default function AddressBookElementView() {
     const [copied, setCopied] = useState(false);
     const dispatch = useDispatch();
-    const { index } = useParams<{ index: string }>();
-    // eslint-disable-next-line radix
-    const chosenIndex = useMemo(() => parseInt(index), [index]);
+    const { address } = useParams<{ address: string }>();
 
     const addressBook = useSelector(addressBookSelector);
-    const chosenEntry = addressBook[chosenIndex];
+    const chosenEntry = addressBook.find((e) => e.address === address);
 
     const copyAddress = useCallback(async () => {
-        if (!chosenEntry.address) {
+        if (!chosenEntry?.address) {
             return;
         }
 
@@ -41,11 +39,12 @@ export default function AddressBookElementView() {
 
             setTimeout(() => setCopied(false), 2000);
         } catch {
+            // TODO Error notification.
             console.error('Could not copy address');
         }
     }, [chosenEntry?.address]);
 
-    if (chosenIndex >= addressBook.length) {
+    if (!chosenEntry) {
         return null;
     }
 

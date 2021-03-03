@@ -30,12 +30,15 @@ export default function AddressBookList(): JSX.Element {
                     placeholder="Search recipients"
                 />
             </div>
-            {addressBook.filter(filterByQuery).map((e, i) => (
+            {addressBook.filter(filterByQuery).map((e) => (
                 <ButtonNavLink
                     className={styles.item}
                     key={e.address}
                     icon={<IdentityIcon className={styles.identityIcon} />}
-                    to={routes.ADDRESSBOOK_SELECTED.replace(':index', `${i}`)}
+                    to={routes.ADDRESSBOOK_SELECTED.replace(
+                        ':address',
+                        e.address
+                    )}
                 >
                     {e.name}
                 </ButtonNavLink>
