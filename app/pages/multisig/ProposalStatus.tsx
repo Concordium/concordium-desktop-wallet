@@ -9,6 +9,7 @@ import {
 } from '../../utils/types';
 import TransactionDetails from '../../components/TransactionDetails';
 import StatusLabel from './StatusLabel';
+import EffectiveTimeView from './EffectiveTimeView';
 
 // TODO This component should also have support for account transactions.
 
@@ -39,8 +40,16 @@ export default function ProposalStatus({ proposal }: Props) {
                     <Header>Foundation transaction</Header>
                 </Grid.Column>
             </Grid.Row>
-            <Grid.Row centered>
-                <TransactionDetails transaction={updateInstruction} />
+            <Grid.Row columns="equal" textAlign="center">
+                <Grid.Column />
+                <Grid.Column>
+                    <TransactionDetails transaction={updateInstruction} />
+                    <EffectiveTimeView
+                        transaction={updateInstruction}
+                        proposal={proposal}
+                    />
+                </Grid.Column>
+                <Grid.Column />
             </Grid.Row>
             <Grid.Row>
                 <Grid.Column>

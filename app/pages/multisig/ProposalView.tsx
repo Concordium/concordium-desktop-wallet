@@ -40,6 +40,7 @@ import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
 import PageHeader from '../../components/PageHeader';
 import expirationEffect from '../../utils/ProposalHelper';
+import EffectiveTimeView from './EffectiveTimeView';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -208,6 +209,10 @@ export default function ProposalView() {
                     <Grid columns={3} divided textAlign="center" padded>
                         <Grid.Column>
                             <TransactionDetails transaction={instruction} />
+                            <EffectiveTimeView
+                                transaction={instruction}
+                                proposal={currentProposal}
+                            />
                         </Grid.Column>
                         <Grid.Column>
                             <Grid.Row>
