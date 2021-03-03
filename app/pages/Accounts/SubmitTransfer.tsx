@@ -53,14 +53,12 @@ async function buildEncryptedPayload(
         const prfKeySeed = await ledger.getPrfKey(account.identityId);
         const data = await makeTransferToPublicData(
             transaction.payload.transferAmount,
-            prfKeySeed.toString(),
+            prfKeySeed.toString('hex'),
             global,
             accountInfo.accountEncryptedAmount.selfAmount,
             accountInfo.accountEncryptedAmount.startIndex,
             account.accountNumber
         );
-        console.log(data.payload);
-        console.log(data.hex);
         return { ...transaction, payload: data.payload };
     }
     return transaction;

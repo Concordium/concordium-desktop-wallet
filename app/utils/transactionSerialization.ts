@@ -76,8 +76,6 @@ export function serializeTransferToPublicData(
     }
     const remainingAmount = Buffer.from(payload.remainingAmount, 'hex');
     const size = remainingAmount.length + 8 + 8;
-    console.log('data size:');
-    console.log(size);
     const serialized = new Uint8Array(size);
 
     put(serialized, 0, remainingAmount);

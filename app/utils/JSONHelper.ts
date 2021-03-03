@@ -1,4 +1,4 @@
-export function stringify(input: any) {
+export function stringify(input: unknown) {
     return JSON.stringify(input, (_, v) =>
         typeof v === 'bigint' ? { '@type': 'bigint', value: v.toString() } : v
     );

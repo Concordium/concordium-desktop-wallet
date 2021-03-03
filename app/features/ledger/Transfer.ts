@@ -107,7 +107,6 @@ async function signTransferToPublic(
         TransactionKindId.Transfer_to_public,
         transaction.payload
     );
-    console.log(payload);
 
     const header = serializeTransactionHeader(
         transaction.sender,
@@ -117,11 +116,10 @@ async function signTransferToPublic(
         transaction.expiry
     );
 
-    const data = Buffer.concat([
-        pathAsBuffer(path),
-        header,
-        encodeWord16(TransactionKindId.Transfer_to_public),
-    ]);
+    const kind = Buffer.alloc(1);
+    kind.writeInt8(TransactionKindId.Transfer_to_public, 0);
+
+    const data = Buffer.concat([pathAsBuffer(path), header, kind]);
 
     let p1 = 0x00;
     const p2 = 0x00;
@@ -161,7 +159,6 @@ async function signTransferToPublic(
         throw new Error('Unexpected missing response from ledger;');
     }
     const signature = response.slice(0, 64);
-    console.log(signature);
     return signature;
 }
 

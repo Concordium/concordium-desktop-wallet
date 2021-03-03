@@ -88,7 +88,6 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
                 await ledgerCall(ledger, setStatusMessage);
             }
         } catch (e) {
-            console.log(e);
             setStatusMessage(
                 'An error occurred while communcating with your device'
             );

@@ -363,13 +363,9 @@ pub fn create_sec_to_pub_aux(
             &payload.remaining_amount,
         );
 
-    let as_bytes = &to_bytes(&payload);
-
     let response = json!({
-            "payload": payload,
-        "remaining": payload.remaining_amount,
+        "payload": payload,
         "decryptedRemaining": decrypted_remaining,
-        "hex": hex::encode(as_bytes)
         });
 
     Ok(response.to_string())
