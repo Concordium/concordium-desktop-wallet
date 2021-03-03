@@ -41,6 +41,9 @@ const multiSignatureSlice = createSlice({
                 return input.payload;
             });
         },
+        addProposal: (state, input) => {
+            state.proposals = [...state.proposals, input.payload];
+        },
     },
 });
 
@@ -49,6 +52,7 @@ export const {
     setCurrentProposal,
     setProposals,
     updateProposals,
+    addProposal,
 } = multiSignatureSlice.actions;
 
 export const chosenMenuSelector = (state: RootState) =>

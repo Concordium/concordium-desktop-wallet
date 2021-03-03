@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { parse, stringify } from 'json-bigint';
@@ -14,9 +14,8 @@ import { TransactionHandler } from '../../utils/transactionTypes';
 import { createTransactionHandler } from '../../utils/updates/HandlerFinder';
 import { insert } from '../../database/MultiSignatureProposalDao';
 import {
-    proposalsSelector,
+    addProposal,
     setCurrentProposal,
-    setProposals,
 } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
@@ -33,7 +32,6 @@ interface Props {
  */
 export default function SignTransactionProposalView({ location }: Props) {
     const [transactionHash, setTransactionHash] = useState<string>();
-    const proposals = useSelector(proposalsSelector);
 
     if (!location.state) {
         throw new Error(
@@ -91,9 +89,7 @@ export default function SignTransactionProposalView({ location }: Props) {
 
         // Set the current proposal in the state to the one that was just generated.
         dispatch(setCurrentProposal(updatedMultiSigTransaction));
-        const newProposals = [...proposals];
-        newProposals.push(updatedMultiSigTransaction);
-        dispatch(setProposals(newProposals));
+        dispatch(addProposal(updatedMultiSigTransaction));
 
         // Navigate to the page that displays the current proposal from the state.
         dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
