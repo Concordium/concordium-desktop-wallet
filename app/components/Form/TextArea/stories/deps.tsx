@@ -2,12 +2,11 @@
 import React from 'react';
 import { ArgTypes, Story } from '@storybook/react/types-6-0';
 
-import Input, { InputProps } from '../Input';
+import TextArea, { TextAreaProps } from '../TextArea';
 
 export const argTypes: ArgTypes = {
     onChange: {
-        description:
-            'EventHandler corresponding to that of &lt;input type="Input" /&gt;',
+        description: 'EventHandler corresponding to that of &lt;textarea /&gt;',
     },
     error: {
         description:
@@ -35,4 +34,4 @@ export const decorators = [
     ),
 ];
 
-export const Template: Story<InputProps> = (args) => <Input {...args} />;
+export const Template: Story<TextAreaProps> = (args) => <TextArea {...args} />;

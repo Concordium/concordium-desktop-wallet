@@ -1,15 +1,15 @@
 import React from 'react';
 import { Grid } from 'semantic-ui-react';
+import PageLayout from '../../components/PageLayout';
 import SettingsList from './SettingsList';
 import SettingsView from './SettingsView';
-import PageHeader from '../../components/PageHeader';
 
 export default function SettingsPage() {
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>Settings</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Grid container columns={2} divided>
                 <Grid.Row>
                     <Grid.Column>
@@ -20,6 +20,6 @@ export default function SettingsPage() {
                     </Grid.Column>
                 </Grid.Row>
             </Grid>
-        </>
+        </PageLayout>
     );
 }

@@ -7,7 +7,7 @@ import PickAttributes from './PickAttributes';
 import GeneratePage from './GeneratePage';
 import FinalPage from './FinalPage';
 import { Identity } from '../../utils/types';
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
 
 function getSubtitle(location: string) {
     switch (location) {
@@ -56,10 +56,10 @@ export default function AccountCreationPage(): JSX.Element {
     }
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1> New Account | {getSubtitle(useLocation().pathname)}</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Switch>
                 <Route
                     path={routes.ACCOUNTCREATION_PICKIDENTITY}
@@ -81,6 +81,6 @@ export default function AccountCreationPage(): JSX.Element {
                     render={() => <PickName setAccountName={setAccountName} />}
                 />
             </Switch>
-        </>
+        </PageLayout>
     );
 }
