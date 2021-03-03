@@ -58,8 +58,5 @@ export function getDefaultExpiry(): string {
 export function getNow(
     unit: TimeStampUnit = TimeStampUnit.milliSeconds
 ): number {
-    if (unit === TimeStampUnit.milliSeconds) {
-        return new Date().getTime();
-    }
     return Math.floor(new Date().getTime() / unit);
 }
