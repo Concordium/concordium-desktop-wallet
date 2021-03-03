@@ -11,7 +11,7 @@ interface DateParts {
 
 interface State extends Partial<DateParts> {
     formattedDate?: Date;
-    isValid?: boolean;
+    isInvalid?: boolean;
 }
 
 enum ActionType {
@@ -195,6 +195,6 @@ export const reducer: Reducer<State, Action> = (s = {}, a) => {
 
     return {
         ...next,
-        isValid: hasAllParts(next) ? dateExists(next) : undefined,
+        isInvalid: hasAllParts(next) ? !dateExists(next) : undefined,
     };
 };

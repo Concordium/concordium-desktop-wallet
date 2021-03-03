@@ -1,3 +1,49 @@
-.dateField {
-    display: none;
+@import 'config/bundle';
+
+.root {
+    text-align: center;
+}
+
+.input {
+    margin-top: 5px;
+    border-radius: 10px;
+    box-shadow: 0 0 0 1px $color-grey inset;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $color-white;
+    transition: box-shadow $anim-easing $anim-timing;
+
+    &Invalid {
+        box-shadow: 0 0 0 2px $color-error inset;
+    }
+}
+
+.field {
+    color: $color-pale-blue;
+    -webkit-appearance: none;
+    border: none;
+    text-align: center;
+    font-size: $font-size-body3;
+    width: 50px;
+    background-color: transparent;
+
+    &::placeholder {
+        color: inherit;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.year {
+    composes: field;
+    width: 70px;
+}
+
+.divider {
+    display: inline-block;
+    margin: 0 20px;
 }
