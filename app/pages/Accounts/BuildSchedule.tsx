@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import { Card, List, Header, Button } from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
+import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import { Account, AddressBookEntry, Schedule } from '../../utils/types';
 import { displayAsGTU } from '../../utils/gtu';
@@ -72,12 +73,12 @@ export default function BuildSchedule({ location }: Props) {
                         state: {
                             account,
                             amount,
-                            recoverState,
+                            defaults: recoverState,
                             explicit,
                             recipient,
                         },
                     },
-                    transaction,
+                    transaction: stringify(transaction),
                     account,
                 },
             })

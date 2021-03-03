@@ -36,6 +36,17 @@ export function toCSV(elements: string[][], fieldNames: string[]): string {
 }
 
 /**
+ * Takes an array of elements with an arbitary type  and a function to tranform them to bigints.
+ * Return the sum as a bigint.
+ */
+export function sumToBigInt<T>(
+    members: T[],
+    transform: (member: T) => bigint
+): bigint {
+    return members.reduce((acc, member) => acc + transform(member), 0n);
+}
+
+/**
  * Partitions a Uint8Array into chunks of a certain size. The last chunk
  * may have a different size than the provided size.
  * @param array the array to partition

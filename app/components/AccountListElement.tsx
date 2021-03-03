@@ -5,6 +5,7 @@ import { AccountInfo, Account, AccountStatus } from '../utils/types';
 import { isInitialAccount } from '../utils/accountHelpers';
 import SidedRow from './SidedRow';
 import PendingImage from '../../resources/svg/pending_old.svg';
+import ShieldImage from '../../resources/svg/shield.svg';
 
 const nop = () => {};
 
@@ -33,7 +34,12 @@ function AccountListElement({
         accountInfo && accountInfo.accountReleaseSchedule
             ? BigInt(accountInfo.accountReleaseSchedule.total)
             : 0n;
-    const hidden = account.allDecrypted ? '' : ' + ?'; // TODO: Replace with locked Symbol
+    const hidden = account.allDecrypted ? null : (
+        <>
+            {' '}
+            + <ShieldImage height="15" />
+        </>
+    );
 
     return (
         <Grid container columns={2} onClick={() => onClick(false)}>
@@ -57,7 +63,12 @@ function AccountListElement({
 
             <SidedRow
                 left="Account Total:"
-                right={displayAsGTU(shielded + unShielded) + hidden}
+                right={
+                    <>
+                        {displayAsGTU(shielded + unShielded)}
+                        {hidden}
+                    </>
+                }
             />
             <Divider />
             <SidedRow left="Balance:" right={displayAsGTU(unShielded)} />
@@ -68,7 +79,12 @@ function AccountListElement({
             <Divider />
             <SidedRow
                 left="Shielded Balance:"
-                right={displayAsGTU(shielded) + hidden}
+                right={
+                    <>
+                        {displayAsGTU(shielded)}
+                        {hidden}
+                    </>
+                }
                 onClick={(e) => {
                     e.stopPropagation(); // So that we avoid triggering the parent's onClick
                     onClick(true);

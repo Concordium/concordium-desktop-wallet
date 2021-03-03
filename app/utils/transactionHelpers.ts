@@ -59,16 +59,16 @@ export async function attachNames(
  */
 export async function createSimpleTransferTransaction(
     fromAddress: string,
-    amount: BigInt,
+    amount: bigint,
     toAddress: string,
-    expiry: string = getDefaultExpiry(),
+    expiry: bigint = getDefaultExpiry(),
     energyAmount = '200'
 ) {
     const { nonce } = await getNextAccountNonce(fromAddress);
     const transferTransaction: SimpleTransfer = {
         sender: fromAddress,
         nonce,
-        energyAmount, // TODO: Does this need to be set by the user?
+        energyAmount,
         expiry,
         transactionKind: TransactionKindId.Simple_transfer,
         payload: {
@@ -81,15 +81,15 @@ export async function createSimpleTransferTransaction(
 
 export async function createShieldAmountTransaction(
     address: string,
-    amount: BigInt,
-    expiry: string = getDefaultExpiry(),
+    amount: bigint,
+    expiry: bigint = getDefaultExpiry(),
     energyAmount = '1000'
 ) {
     const { nonce } = await getNextAccountNonce(address);
     const transferTransaction: TransferToEncrypted = {
         sender: address,
         nonce,
-        energyAmount, // TODO: Does this need to be set by the user?
+        energyAmount,
         expiry,
         transactionKind: TransactionKindId.Transfer_to_encrypted,
         payload: {
@@ -131,14 +131,14 @@ export async function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: SchedulePoint[],
-    expiry: string = getDefaultExpiry(),
+    expiry: bigint = getDefaultExpiry(),
     energyAmount = '20000'
 ) {
     const { nonce } = await getNextAccountNonce(fromAddress);
     const transferTransaction: ScheduledTransfer = {
         sender: fromAddress,
         nonce,
-        energyAmount, // TODO: Does this need to be set by the user?
+        energyAmount,
         expiry,
         transactionKind: TransactionKindId.Transfer_with_schedule,
         payload: {

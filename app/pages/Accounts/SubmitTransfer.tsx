@@ -3,6 +3,7 @@ import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import { Container, Segment, Header, Grid, Button } from 'semantic-ui-react';
+import { parse } from '../../utils/JSONHelper';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { sendTransaction } from '../../utils/nodeRequests';
 import {
@@ -15,6 +16,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { addPendingTransaction } from '../../features/TransactionSlice';
 import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
+import PageHeader from '../../components/PageHeader';
 
 interface Location {
     pathname: string;
@@ -22,7 +24,7 @@ interface Location {
 }
 
 interface State {
-    transaction: AccountTransaction;
+    transaction: string;
     account: Account;
     cancelled: Location;
     confirmed: Location;
@@ -44,7 +46,14 @@ export default function SubmitTransfer({ location }: Props) {
         throw new Error('Unexpected missing state.');
     }
 
-    const { account, transaction, cancelled, confirmed } = location.state;
+    const {
+        account,
+        transaction: transactionJSON,
+        cancelled,
+        confirmed,
+    } = location.state;
+
+    const transaction: AccountTransaction = parse(transactionJSON);
 
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
@@ -75,31 +84,36 @@ export default function SubmitTransfer({ location }: Props) {
     }
 
     return (
-        <Container>
-            <Segment>
-                <Button onClick={() => dispatch(push(cancelled))}>
-                    {'<--'}
-                </Button>
-                <Header textAlign="center">
-                    Submit the transaction with your hardware wallet
-                </Header>
-                <Container text>
-                    <p>
-                        Choose your hardware wallet on the right. Be sure to
-                        verify that all the information below is exactly the
-                        same on your hardware wallet, before submitting the
-                        transaction.
-                    </p>
-                </Container>
-                <Grid columns={2} divided textAlign="center" padded>
-                    <Grid.Column>
-                        <TransactionDetails transaction={transaction} />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <LedgerComponent ledgerCall={ledgerSignTransfer} />
-                    </Grid.Column>
-                </Grid>
-            </Segment>
-        </Container>
+        <>
+            <PageHeader>
+                <h1>Accounts | Submit Transfer</h1>
+            </PageHeader>
+            <Container>
+                <Segment>
+                    <Button onClick={() => dispatch(push(cancelled))}>
+                        {'<--'}
+                    </Button>
+                    <Header textAlign="center">
+                        Submit the transaction with your hardware wallet
+                    </Header>
+                    <Container text>
+                        <p>
+                            Choose your hardware wallet on the right. Be sure to
+                            verify that all the information below is exactly the
+                            same on your hardware wallet, before submitting the
+                            transaction.
+                        </p>
+                    </Container>
+                    <Grid columns={2} divided textAlign="center" padded>
+                        <Grid.Column>
+                            <TransactionDetails transaction={transaction} />
+                        </Grid.Column>
+                        <Grid.Column>
+                            <LedgerComponent ledgerCall={ledgerSignTransfer} />
+                        </Grid.Column>
+                    </Grid>
+                </Segment>
+            </Container>
+        </>
     );
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
+import { parse } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import { displayAsGTU } from '../../utils/gtu';
 import { parseTime } from '../../utils/timeHelpers';
@@ -18,7 +19,7 @@ import {
 } from '../../utils/types';
 
 interface State {
-    transaction: AccountTransaction;
+    transaction: string;
     recipient: AddressBookEntry;
 }
 
@@ -81,12 +82,13 @@ export default function FinalPage({ location }: Props): JSX.Element {
         throw new Error('Unexpected missing state.');
     }
 
-    const { transaction, recipient } = location.state;
+    const { transaction: transactionJSON, recipient } = location.state;
+    const transaction: AccountTransaction = parse(transactionJSON);
 
     return (
         <Card fluid centered>
             <Card.Content textAlign="center">
-                <Card.Header>Transfer Submitted!</Card.Header>
+                <Card.Header>Transaction submitted!</Card.Header>
                 <Table>
                     <Table.Body>
                         <Table.Row>

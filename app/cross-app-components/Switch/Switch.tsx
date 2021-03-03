@@ -8,7 +8,8 @@ import { CommonFieldProps } from '../../components/Form/common';
 
 import styles from './Switch.module.scss';
 
-type SwitchProps = CommonFieldProps & InputHTMLAttributes<HTMLInputElement>;
+export type SwitchProps = CommonFieldProps &
+    InputHTMLAttributes<HTMLInputElement>;
 
 /**
  * @description

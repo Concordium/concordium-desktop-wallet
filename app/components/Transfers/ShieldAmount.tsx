@@ -3,35 +3,26 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation, Link } from 'react-router-dom';
 import { Button, Header, Grid } from 'semantic-ui-react';
+import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import {
-    AddressBookEntry,
-    Account,
-    AccountTransaction,
-} from '../../utils/types';
+import { Account } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 import locations from '../../constants/transferLocations.json';
 import { createShieldAmountTransaction } from '../../utils/transactionHelpers';
+import { TransferState } from '../../utils/transactionTypes';
 
 interface Props {
     account: Account;
 }
 
-interface State {
-    amount: string;
-    transaction: AccountTransaction;
-    recipient: AddressBookEntry;
-    initialPage: string;
-}
-
 /**
- * Controls the flow of creating a simple transfer.
+ * Controls the flow of creating a transfer to encrypted.
  */
 export default function ShieldAmount({ account }: Props) {
     const dispatch = useDispatch();
-    const location = useLocation<State>();
+    const location = useLocation<TransferState>();
 
     const [subLocation, setSubLocation] = useState<string>(
         location?.state?.initialPage || locations.pickAmount
@@ -45,7 +36,7 @@ export default function ShieldAmount({ account }: Props) {
             case locations.pickAmount:
                 return (
                     <PickAmount
-                        header="Send funds"
+                        header="Shield funds"
                         amount={amount}
                         setAmount={setAmount}
                         toPickRecipient={undefined}
@@ -77,7 +68,7 @@ export default function ShieldAmount({ account }: Props) {
                                                 amount,
                                             },
                                         },
-                                        transaction,
+                                        transaction: stringify(transaction),
                                         account,
                                     },
                                 })

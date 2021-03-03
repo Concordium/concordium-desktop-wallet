@@ -3,6 +3,7 @@ import {
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
+    AddressBookEntry,
 } from './types';
 
 export interface TransactionInput {
@@ -16,9 +17,22 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
-    forwardTransaction: (
-        multiSignatureTransaction: Partial<MultiSignatureTransaction>
-    ) => Promise<void>;
+    effectiveTime: bigint;
+    setProposal: React.Dispatch<
+        React.SetStateAction<Partial<MultiSignatureTransaction> | undefined>
+    >;
+    setDisabled: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+/**
+ * The interface contains the location state used by components
+ *  for handling the flows to create transfers.
+ */
+export interface TransferState {
+    amount: string;
+    transaction: string;
+    recipient: AddressBookEntry;
+    initialPage: string;
 }
 
 export type UpdateComponent = (props: UpdateProps) => JSX.Element | null;
@@ -37,4 +51,5 @@ export interface TransactionHandler<T, S> {
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;
     update: UpdateComponent;
+    title: string;
 }

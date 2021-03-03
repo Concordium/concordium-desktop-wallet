@@ -5,11 +5,9 @@ import Root from './shell/Root';
 import { history, configuredStore } from './store/store';
 import { updateSettings, findSetting } from './features/SettingsSlice';
 import { loadAllSettings } from './database/SettingsDao';
-import listenForTransactionStatus from './utils/TransactionStatusPoller';
 import { Dispatch } from './utils/types';
-import { startClient } from './utils/nodeRequests';
+import startClient from './utils/nodeConnector';
 import listenForIdentityStatus from './utils/IdentityStatusPoller';
-import listenForAccountStatus from './utils/AccountStatusPoller';
 import { loadAddressBook } from './features/AddressBookSlice';
 import { loadAccounts } from './features/AccountSlice';
 import { loadIdentities } from './features/IdentitySlice';
@@ -25,7 +23,8 @@ async function loadSettingsIntoStore(dispatch: Dispatch) {
     const settings = await loadAllSettings();
     const nodeLocationSetting = findSetting('Node location', settings);
     if (nodeLocationSetting) {
-        startClient(nodeLocationSetting);
+        const { address, port } = JSON.parse(nodeLocationSetting.value);
+        startClient(dispatch, address, port);
     } else {
         throw new Error('unable to find Node location settings.');
     }
@@ -39,9 +38,7 @@ async function onLoad(dispatch: Dispatch) {
     loadAccounts(dispatch);
     loadIdentities(dispatch);
 
-    listenForAccountStatus(dispatch);
     listenForIdentityStatus(dispatch);
-    listenForTransactionStatus(dispatch);
 }
 
 onLoad(store.dispatch);
