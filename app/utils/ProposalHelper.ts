@@ -13,7 +13,6 @@ import {
 /**
  * Effect for awaiting the expiration of a proposal. If the proposal expires, then the proposal
  * is set to failed and updated in the database and the state.
- * @param proposal if supplied the total list of proposals in the state will also be updated
  */
 export default function expirationEffect(
     proposal: MultiSignatureTransaction,
