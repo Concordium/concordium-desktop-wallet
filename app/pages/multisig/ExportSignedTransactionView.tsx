@@ -16,6 +16,7 @@ import routes from '../../constants/routes.json';
 import TransactionHashView from '../../components/TransactionHashView';
 import TransactionDetails from '../../components/TransactionDetails';
 import { saveFile } from '../../utils/FileHelper';
+import { UpdateInstructionSignature } from '../../utils/types';
 import PageLayout from '../../components/PageLayout';
 
 interface Props {
@@ -23,7 +24,7 @@ interface Props {
 }
 
 interface Input {
-    signature: string;
+    signature: UpdateInstructionSignature;
     transaction: string;
     transactionHash: string;
 }

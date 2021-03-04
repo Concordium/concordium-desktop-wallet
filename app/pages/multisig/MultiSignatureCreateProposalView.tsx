@@ -40,6 +40,9 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     const type: UpdateType = location.state;
     const displayType = UpdateType[type];
 
+    const handler = findHandler(type);
+    const UpdateComponent = handler.update;
+
     function updateBlockSummary(blockSummaryInput: BlockSummary) {
         setBlockSummary(blockSummaryInput);
         setLoading(false);
@@ -56,16 +59,19 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     async function forwardTransactionToSigningPage(
         multiSignatureTransaction: Partial<MultiSignatureTransaction>
     ) {
+        const signInput = {
+            multiSignatureTransaction,
+            blockSummary,
+        };
+
+        // Forward the transaction under creation to the signing page.
         dispatch(
             push({
                 pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
-                state: stringify(multiSignatureTransaction),
+                state: stringify(signInput),
             })
         );
     }
-
-    const handler = findHandler(type);
-    const UpdateComponent = handler.update;
 
     return (
         <PageLayout>

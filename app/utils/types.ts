@@ -484,11 +484,16 @@ export interface UpdateHeader {
     payloadSize?: Word32;
 }
 
+export interface UpdateInstructionSignature {
+    authorizationKeyIndex: number;
+    signature: string;
+}
+
 export interface UpdateInstruction<T extends UpdateInstructionPayload> {
     header: UpdateHeader;
     payload: T;
     type: UpdateType;
-    signatures: string[];
+    signatures: UpdateInstructionSignature[];
 }
 
 export type UpdateInstructionPayload =

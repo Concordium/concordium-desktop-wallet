@@ -232,6 +232,7 @@
     "history": "^4.7.2",
     "json-bigint": "^1.0.0",
     "knex": "^0.21.13",
+    "noble-ed25519": "^1.0.3",
     "promise-worker": "^2.0.1",
     "qrcode.react": "^1.0.1",
     "react": "^16.13.1",
