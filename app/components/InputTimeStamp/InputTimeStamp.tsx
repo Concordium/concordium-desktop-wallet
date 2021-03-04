@@ -25,7 +25,7 @@ export default function InputTimeStamp({
 
     //     return 'Date is invalid';
     // }, [errors, isInvalid]);
-    const { isInvalid, form, fireOnChange } = useInputTimeStamp(
+    const { isInvalid, form, fireOnChange, validateDate } = useInputTimeStamp(
         onChange,
         value
     );
@@ -43,6 +43,7 @@ export default function InputTimeStamp({
                         className={styles.year}
                         name={fieldNames.year}
                         placeholder="YYYY"
+                        triggerDateRevalidation
                         rules={{ min: 100, max: 9999 }}
                         onFieldFormatted={fireOnChange}
                     />
@@ -51,6 +52,7 @@ export default function InputTimeStamp({
                         className={styles.field}
                         name={fieldNames.month}
                         placeholder="MM"
+                        triggerDateRevalidation
                         rules={{ min: 1, max: 12 }}
                         onFieldFormatted={fireOnChange}
                     />
@@ -59,7 +61,11 @@ export default function InputTimeStamp({
                         className={styles.field}
                         name={fieldNames.date}
                         placeholder="DD"
-                        // rules={{ validate: validateDate }}
+                        triggerDateRevalidation
+                        rules={{
+                            validate: validateDate('Date is invalid'),
+                            max: 31,
+                        }}
                         onFieldFormatted={fireOnChange}
                     />
                     <span>at</span>

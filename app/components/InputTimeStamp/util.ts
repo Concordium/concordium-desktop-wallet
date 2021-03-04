@@ -96,14 +96,34 @@ const formatters: Formatters = {
     seconds: ensureNumberLength(2),
 };
 
+type PartialDateParts = Pick<DateParts, 'year' | 'month' | 'date'> &
+    Partial<Omit<DateParts, 'year' | 'month' | 'date'>>;
+const isValidDate = (parts: PartialDateParts): boolean => {
+    const t: DateParts = {
+        ...parts,
+        hours: parts.hours || '0',
+        minutes: parts.minutes || '0',
+        seconds: parts.seconds || '0',
+    };
+    const date = fromDateParts(t);
+    const test = fromDate(date);
+
+    const isValid = test !== undefined && isEqual(t, test);
+
+    console.log('isValid', isValid, t, test);
+
+    return isValid;
+};
+
 export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
     const f = useForm<Partial<DateParts>>({ mode: 'onTouched' });
     const { watch, setValue, errors } = f;
     const fields = watch();
 
     const setFormattedValue = useCallback(
-        (name: keyof DateParts, v?: string) =>
-            setValue(name, formatters[name](v)),
+        (name: keyof DateParts, v?: string) => {
+            setValue(name, formatters[name](v));
+        },
         [setValue]
     );
 
@@ -135,5 +155,22 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
     const form: typeof f = { ...f, setValue: setFormattedValue };
     const isInvalid = hasAllParts(fields) && Object.keys(errors).length > 0;
 
-    return { isInvalid, form, fireOnChange };
+    const validateDate = useCallback(
+        (message: string) => () => {
+            console.log('fields', fields);
+            if (
+                fields.year &&
+                fields.month &&
+                fields.date &&
+                !isValidDate(fields as PartialDateParts)
+            ) {
+                return message;
+            }
+
+            return undefined;
+        },
+        [fields]
+    );
+
+    return { isInvalid, form, fireOnChange, validateDate };
 }
