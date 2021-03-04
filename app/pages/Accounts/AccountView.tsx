@@ -12,6 +12,7 @@ import styles from './Accounts.module.scss';
 import routes from '../../constants/routes.json';
 import MoreActions from './MoreActions';
 import SimpleTransfer from '../../components/Transfers/SimpleTransfer';
+import ShieldAmount from '../../components/Transfers/ShieldAmount';
 import TransferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
 import DecryptComponent from './DecryptComponent';
@@ -28,7 +29,7 @@ export default function AccountView() {
     const location = useLocation();
     const buttons = [
         { route: routes.ACCOUNTS_SIMPLETRANSFER, label: 'Send' },
-        { route: routes.ACCOUNTS_SIMPLETRANSFER, label: 'Shield' },
+        { route: routes.ACCOUNTS_SHIELDAMOUNT, label: 'Shield' },
         { route: routes.ACCOUNTS_MORE, label: 'More' },
     ];
 
@@ -79,6 +80,10 @@ export default function AccountView() {
                     <Route
                         path={routes.ACCOUNTS_SIMPLETRANSFER}
                         render={() => <SimpleTransfer account={account} />}
+                    />
+                    <Route
+                        path={routes.ACCOUNTS_SHIELDAMOUNT}
+                        render={() => <ShieldAmount account={account} />}
                     />
                     <Route path={routes.DEFAULT} component={TransferHistory} />
                 </Switch>

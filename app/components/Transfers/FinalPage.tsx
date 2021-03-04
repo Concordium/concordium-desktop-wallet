@@ -2,6 +2,7 @@ import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
+import { parse } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import { displayAsGTU } from '../../utils/gtu';
 import { parseTime } from '../../utils/timeHelpers';
@@ -12,12 +13,13 @@ import {
     AccountTransaction,
     instanceOfScheduledTransfer,
     instanceOfSimpleTransfer,
+    instanceOfTransferToEncrypted,
     TransactionPayload,
     TimeStampUnit,
 } from '../../utils/types';
 
 interface State {
-    transaction: AccountTransaction;
+    transaction: string;
     recipient: AddressBookEntry;
 }
 
@@ -29,7 +31,10 @@ function getAmount(transaction: AccountTransaction) {
     if (instanceOfScheduledTransfer(transaction)) {
         return getScheduledTransferAmount(transaction);
     }
-    if (instanceOfSimpleTransfer(transaction)) {
+    if (
+        instanceOfSimpleTransfer(transaction) ||
+        instanceOfTransferToEncrypted(transaction)
+    ) {
         return transaction.payload.amount;
     }
     throw new Error('Unsupported transaction type - please implement');
@@ -53,6 +58,20 @@ function displayNote(transaction: AccountTransaction<TransactionPayload>) {
     return null;
 }
 
+function displayRecipient(recipient: AddressBookEntry) {
+    if (recipient) {
+        return (
+            <Table.Row>
+                <Table.Cell>To:</Table.Cell>
+                <Table.Cell textAlign="right">
+                    {recipient.name} <Label>{recipient.address}</Label>
+                </Table.Cell>
+            </Table.Row>
+        );
+    }
+    return null;
+}
+
 /**
  * Displays details of a completed transaction.
  * TODO: fix estimatedFee
@@ -63,12 +82,13 @@ export default function FinalPage({ location }: Props): JSX.Element {
         throw new Error('Unexpected missing state.');
     }
 
-    const { transaction, recipient } = location.state;
+    const { transaction: transactionJSON, recipient } = location.state;
+    const transaction: AccountTransaction = parse(transactionJSON);
 
     return (
         <Card fluid centered>
             <Card.Content textAlign="center">
-                <Card.Header>Transfer Submitted!</Card.Header>
+                <Card.Header>Transaction submitted!</Card.Header>
                 <Table>
                     <Table.Body>
                         <Table.Row>
@@ -84,13 +104,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
                             </Table.Cell>
                         </Table.Row>
                         {displayNote(transaction)}
-                        <Table.Row>
-                            <Table.Cell>To:</Table.Cell>
-                            <Table.Cell textAlign="right">
-                                {recipient.name}{' '}
-                                <Label>{recipient.address}</Label>
-                            </Table.Cell>
-                        </Table.Row>
+                        {displayRecipient(recipient)}
                     </Table.Body>
                 </Table>
                 <Link to={routes.ACCOUNTS}>

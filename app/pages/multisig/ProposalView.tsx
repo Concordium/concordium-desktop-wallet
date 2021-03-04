@@ -38,9 +38,9 @@ import SimpleErrorModal, {
 } from '../../components/SimpleErrorModal';
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
-import PageHeader from '../../components/PageHeader';
 import expirationEffect from '../../utils/ProposalHelper';
 import EffectiveTimeView from './EffectiveTimeView';
+import PageLayout from '../../components/PageLayout';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -187,10 +187,10 @@ export default function ProposalView() {
         currentProposal.status === MultiSignatureTransactionStatus.Open;
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>{handler.title}</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Segment secondary textAlign="center">
                 <SimpleErrorModal
                     show={showError.show}
@@ -283,6 +283,6 @@ export default function ProposalView() {
                     </Grid.Column>
                 </Grid>
             </Segment>
-        </>
+        </PageLayout>
     );
 }
