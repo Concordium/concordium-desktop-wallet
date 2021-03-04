@@ -1,4 +1,9 @@
-import React, { ButtonHTMLAttributes, PropsWithChildren } from 'react';
+import React, {
+    ButtonHTMLAttributes,
+    PropsWithChildren,
+    useEffect,
+    useState,
+} from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
 import Modal, { ModalProps } from './Modal';
@@ -28,7 +33,22 @@ export default {
 type Props = PropsWithChildren<
     ModalProps<ButtonHTMLAttributes<HTMLButtonElement>>
 >;
-const Template: Story<Props> = (args) => <Modal {...args} />;
+const Template: Story<Props> = (args) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        setIsOpen(args.open);
+    }, [args.open]);
+
+    return (
+        <Modal
+            {...args}
+            open={isOpen}
+            onOpen={() => setIsOpen(true)}
+            onClose={() => setIsOpen(false)}
+        />
+    );
+};
 
 export const Primary = Template.bind({});
 Primary.args = {
@@ -39,7 +59,7 @@ Primary.args = {
 export const WithTrigger = Template.bind({});
 WithTrigger.args = {
     children: 'Modal content...',
-    open: true,
+    open: false,
     trigger: <button type="button">Click me</button>,
 };
 
