@@ -12,7 +12,11 @@ interface Props {
 /**
  * Displays an overview of a simple transfer.
  */
-export default function Display({ transaction, fromName, toName }: Props) {
+export default function DisplaySimpleTransfer({
+    transaction,
+    fromName,
+    toName,
+}: Props) {
     return (
         <List relaxed="very">
             <List.Item>

@@ -19,7 +19,7 @@ import {
     UpdateInstructionPayload,
 } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
 
 interface Props<T> {
     header: string;
@@ -28,6 +28,7 @@ interface Props<T> {
     signFunction: (input: T) => Promise<void>;
     checkboxes: string[];
     signText: string;
+    loading?: boolean;
 }
 
 export default function GenericSignTransactionProposalView({
@@ -37,6 +38,7 @@ export default function GenericSignTransactionProposalView({
     signFunction,
     checkboxes,
     signText,
+    loading,
 }: Props<ConcordiumLedgerClient>) {
     const [signing, setSigning] = useState(false);
     const [checkboxesStatus, setCheckBoxesStatus] = useState(
@@ -57,12 +59,12 @@ export default function GenericSignTransactionProposalView({
     }
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>{header}</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Container>
-                <Segment>
+                <Segment loading={loading}>
                     <Header textAlign="center">
                         Transaction signing confirmation | Transaction Type
                     </Header>
@@ -123,6 +125,6 @@ export default function GenericSignTransactionProposalView({
                 </Segment>
                 {ledgerComponent}
             </Container>
-        </>
+        </PageLayout>
     );
 }
