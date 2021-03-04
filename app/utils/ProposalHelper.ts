@@ -26,11 +26,11 @@ export default function expirationEffect(
 
         const interval = setInterval(async () => {
             if (expiration <= BigInt(getNow(TimeStampUnit.seconds))) {
-                const failedProposal = {
+                const expiredProposal = {
                     ...proposal,
-                    status: MultiSignatureTransactionStatus.Failed,
+                    status: MultiSignatureTransactionStatus.Expired,
                 };
-                await updateCurrentProposal(dispatch, failedProposal);
+                await updateCurrentProposal(dispatch, expiredProposal);
                 clearInterval(interval);
             }
         }, 1000);

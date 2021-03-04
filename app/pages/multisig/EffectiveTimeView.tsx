@@ -21,7 +21,7 @@ export default function EffectiveTimeView({ transaction, proposal }: Props) {
     // effective time, but that might not be the case we end up with. If we change that, then this
     // should be reconsidered.
     if (
-        proposal.status === MultiSignatureTransactionStatus.Failed &&
+        proposal.status === MultiSignatureTransactionStatus.Expired &&
         transaction.header.timeout <= getNow(TimeStampUnit.seconds)
     ) {
         effectiveTimeComponent = (

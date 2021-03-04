@@ -22,6 +22,7 @@ const statusColorMap = new Map<MultiSignatureTransactionStatus, ColorType>([
     [MultiSignatureTransactionStatus.Submitted, ColorType.Olive],
     [MultiSignatureTransactionStatus.Finalized, ColorType.Green],
     [MultiSignatureTransactionStatus.Failed, ColorType.Red],
+    [MultiSignatureTransactionStatus.Expired, ColorType.Red],
 ]);
 
 /**

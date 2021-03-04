@@ -583,6 +583,7 @@ export enum MultiSignatureTransactionStatus {
     Finalized = 'finalized',
     Committed = 'committed',
     Failed = 'failed',
+    Expired = 'expired',
 }
 
 /**
