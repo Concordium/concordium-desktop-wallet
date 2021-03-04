@@ -1,7 +1,6 @@
+/* eslint-disable no-case-declarations */
 import { DeepMap, FieldError } from 'react-hook-form';
 import { Reducer, Action as ReduxAction } from 'redux';
-
-export type Strings<T> = { [P in keyof T]: string };
 
 export interface DateParts {
     year: number;
@@ -12,6 +11,8 @@ export interface DateParts {
     seconds: number;
 }
 
+export type DatePartsStrings = { [P in keyof DateParts]: string };
+
 interface State extends Partial<DateParts> {
     formattedDate?: Date;
     isInvalid?: boolean;
@@ -21,12 +22,6 @@ interface State extends Partial<DateParts> {
 enum ActionType {
     UPDATE_DATE,
     UPDATE_PARTS,
-    SET_YEAR,
-    SET_MONTH,
-    SET_DATE,
-    SET_HOURS,
-    SET_MINUTES,
-    SET_SECONDS,
 }
 
 interface UpdateDate extends ReduxAction<ActionType.UPDATE_DATE> {
@@ -38,76 +33,20 @@ export function updateDate(date?: Date): UpdateDate {
 }
 
 interface UpdateParts extends ReduxAction<ActionType.UPDATE_PARTS> {
-    parts?: Strings<Partial<DateParts>>;
-    errors?: DeepMap<DateParts, FieldError>;
+    parts?: Partial<DatePartsStrings>;
+    errors?: DeepMap<DatePartsStrings, FieldError>;
 }
 
 export function updateParts(
-    parts?: Strings<Partial<DateParts>>,
-    errors?: DeepMap<DateParts, FieldError>
+    parts?: Partial<DatePartsStrings>,
+    errors?: DeepMap<DatePartsStrings, FieldError>
 ): UpdateParts {
     return { type: ActionType.UPDATE_PARTS, parts, errors };
 }
 
-interface SetYear extends ReduxAction<ActionType.SET_YEAR> {
-    year: number;
-}
+type Action = UpdateDate | UpdateParts;
 
-export function setYear(year: number): SetYear {
-    return { type: ActionType.SET_YEAR, year };
-}
-
-interface SetMonth extends ReduxAction<ActionType.SET_MONTH> {
-    month: number;
-}
-
-export function setMonth(month: number): SetMonth {
-    return { type: ActionType.SET_MONTH, month };
-}
-
-interface SetDate extends ReduxAction<ActionType.SET_DATE> {
-    date: number;
-}
-
-export function setDate(date: number): SetDate {
-    return { type: ActionType.SET_DATE, date };
-}
-
-interface SetHours extends ReduxAction<ActionType.SET_HOURS> {
-    hours: number;
-}
-
-export function setHours(hours: number): SetHours {
-    return { type: ActionType.SET_HOURS, hours };
-}
-
-interface SetMinutes extends ReduxAction<ActionType.SET_MINUTES> {
-    minutes: number;
-}
-
-export function setMinutes(minutes: number): SetMinutes {
-    return { type: ActionType.SET_MINUTES, minutes };
-}
-
-interface SetSeconds extends ReduxAction<ActionType.SET_SECONDS> {
-    seconds: number;
-}
-
-export function setSeconds(seconds: number): SetSeconds {
-    return { type: ActionType.SET_SECONDS, seconds };
-}
-
-type Action =
-    | UpdateDate
-    | UpdateParts
-    | SetYear
-    | SetMonth
-    | SetDate
-    | SetHours
-    | SetMinutes
-    | SetSeconds;
-
-function hasAllParts(date: Partial<DateParts>): date is DateParts {
+function hasAllParts(date: Partial<DateParts> = {}): date is DateParts {
     return (
         date.year !== undefined &&
         date.month !== undefined &&
@@ -158,8 +97,8 @@ function dateExists(date: Partial<DateParts>): date is DateParts {
     );
 }
 
-function formatDate(date: Partial<DateParts>): Date | undefined {
-    if (!dateExists(date)) {
+function formatDate(date?: Partial<DateParts>): Date | undefined {
+    if (!date || !dateExists(date)) {
         return undefined;
     }
 
@@ -175,7 +114,7 @@ function getDateParts(date?: Date): DateParts | undefined {
 }
 
 function sanitizeParts(
-    parts: Strings<Partial<DateParts>> = {}
+    parts: Partial<DatePartsStrings> = {}
 ): Partial<DateParts> | undefined {
     return (Object.keys(parts) as Array<keyof DateParts>).reduce((acc, cur) => {
         // eslint-disable-next-line radix
@@ -192,53 +131,29 @@ export const reducer: Reducer<State, Action> = (
     s = { updateForm: false },
     a
 ) => {
-    let next: State = { ...s, updateForm: false };
+    const next: State = { ...s, updateForm: false };
 
     switch (a.type) {
         case ActionType.UPDATE_DATE:
-            next = {
-                ...s,
-                ...(getDateParts(a.date) ?? {}),
+            return {
+                ...next,
+                ...getDateParts(a.date),
+                formattedDate: a.date,
                 updateForm:
                     a.date?.toISOString() !== s.formattedDate?.toISOString(),
             };
-            break;
         case ActionType.UPDATE_PARTS:
-            next = {
-                ...s,
-                ...sanitizeParts(a.parts),
+            const newParts = sanitizeParts(a.parts);
+            return {
+                ...next,
+                ...newParts,
+                formattedDate: formatDate(newParts),
+                isInvalid: hasAllParts(newParts)
+                    ? Object.keys(a.errors ?? {}).length > 0 ||
+                      !dateExists(newParts)
+                    : undefined,
             };
-            break;
-        case ActionType.SET_YEAR:
-            next = { ...s, year: a.year };
-            break;
-        case ActionType.SET_MONTH:
-            next = { ...s, month: a.month };
-            break;
-        case ActionType.SET_DATE:
-            next = { ...s, date: a.date };
-            break;
-        case ActionType.SET_HOURS:
-            next = { ...s, hours: a.hours };
-            break;
-        case ActionType.SET_MINUTES:
-            next = { ...s, minutes: a.minutes };
-            break;
-        case ActionType.SET_SECONDS:
-            next = { ...s, seconds: a.seconds };
-            break;
         default:
             return s;
     }
-
-    next = {
-        ...next,
-        formattedDate:
-            a.type === ActionType.UPDATE_DATE ? a.date : formatDate(next),
-    };
-
-    return {
-        ...next,
-        isInvalid: hasAllParts(next) ? !dateExists(next) : undefined,
-    };
 };

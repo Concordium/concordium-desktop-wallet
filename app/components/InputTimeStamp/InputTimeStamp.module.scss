@@ -36,6 +36,10 @@
     &:focus {
         outline: none;
     }
+
+    &Invalid {
+        color: $color-error;
+    }
 }
 
 .year {

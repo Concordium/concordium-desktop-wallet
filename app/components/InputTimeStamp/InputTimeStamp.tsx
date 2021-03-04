@@ -13,6 +13,7 @@ import {
     useController,
     useForm,
     useFormContext,
+    Validate,
 } from 'react-hook-form';
 import { EqualRecord, NotOptional } from '../../utils/types';
 
@@ -20,7 +21,7 @@ import styles from './InputTimeStamp.module.scss';
 import {
     DateParts,
     reducer,
-    Strings,
+    DatePartsStrings,
     updateDate,
     updateParts,
 } from './inputTimeStampReducer';
@@ -31,21 +32,17 @@ export interface InputTimeStampProps {
     onChange(date?: Date): void;
 }
 
-const nan = (value?: number): boolean =>
-    Number.isNaN(value) || value === undefined;
+const sanitizeValue = (value?: string): string => (!value ? '' : value);
 
-const toNumberString = (value?: number): string =>
-    nan(value) ? '' : `${value}`;
-
-const ensureNumberLength = (length: number) => (value?: number): string => {
-    if (nan(value)) {
+const ensureNumberLength = (length: number) => (value?: string): string => {
+    if (!value) {
         return '';
     }
 
-    const valueLength = `${value}`.length;
+    const valueLength = value.length;
 
     if (valueLength >= length) {
-        return `${value}`;
+        return value;
     }
 
     const missing = length - valueLength;
@@ -69,17 +66,16 @@ function TimeStampField({
     placeholder,
     rules,
 }: TimeStampFieldProps): JSX.Element {
-    const { control, setValue } = useFormContext();
+    const { control, setValue, errors } = useFormContext();
     const {
         field: { ref, value, onChange, onBlur, ...inputProps },
     } = useController({
         name,
         rules: { required: true, min: rules?.min ?? 0, ...rules },
         control,
-        defaultValue: NaN,
+        defaultValue: '',
     });
 
-    console.log(name, value);
     const handleBlur: FocusEventHandler = useCallback(() => {
         onBlur();
         setValue(name, value);
@@ -87,10 +83,10 @@ function TimeStampField({
 
     return (
         <input
-            className={className}
+            className={clsx(className, errors[name] && styles.fieldInvalid)}
             type="string"
             placeholder={placeholder}
-            value={toNumberString(value)}
+            value={sanitizeValue(value)}
             onBlur={handleBlur}
             onChange={(e) => onChange(e.target.value)}
             {...inputProps}
@@ -107,7 +103,7 @@ const fieldNames: EqualRecord<DateParts> = {
     seconds: 'seconds',
 };
 
-type Formatters = { [key in keyof DateParts]: (v?: number) => string };
+type Formatters = { [key in keyof DateParts]: (v?: string) => string };
 
 const formatters: Formatters = {
     year: ensureNumberLength(4),
@@ -118,7 +114,7 @@ const formatters: Formatters = {
     seconds: ensureNumberLength(2),
 };
 
-type Form = Strings<DateParts>;
+type Form = DatePartsStrings;
 
 export default function InputTimeStamp({
     label,
@@ -130,15 +126,23 @@ export default function InputTimeStamp({
         dispatch,
     ] = useReducer(reducer, { updateForm: false });
 
-    const methods = useForm<Form>({ mode: 'onTouched' });
-    const { watch, errors, setValue } = methods;
+    const form = useForm<Form>({ mode: 'onTouched' });
+    const { watch, errors, setValue } = form;
     const fields = watch();
 
     const setFormattedValue = useCallback(
-        (name: keyof DateParts, v?: number) =>
+        (name: keyof DateParts, v?: string) =>
             setValue(name, formatters[name](v)),
         [setValue]
     );
+
+    const validateDate: Validate = useCallback(() => {
+        if (Object.keys(errors).length > 0 || !isInvalid) {
+            return undefined;
+        }
+
+        return 'Date is invalid';
+    }, [errors, isInvalid]);
 
     console.log(fields);
 
@@ -158,7 +162,7 @@ export default function InputTimeStamp({
         }
 
         (Object.keys(dateParts) as Array<keyof DateParts>).forEach((k) =>
-            setFormattedValue(k, dateParts[k])
+            setFormattedValue(k, `${dateParts[k]}`)
         );
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [JSON.stringify(dateParts), setFormattedValue, updateForm]);
@@ -175,7 +179,7 @@ export default function InputTimeStamp({
             <div
                 className={clsx(styles.input, isInvalid && styles.inputInvalid)}
             >
-                <FormProvider {...methods} setValue={setFormattedValue}>
+                <FormProvider {...form} setValue={setFormattedValue}>
                     <TimeStampField
                         className={styles.year}
                         name={fieldNames.year}
@@ -194,6 +198,7 @@ export default function InputTimeStamp({
                         className={styles.field}
                         name={fieldNames.date}
                         placeholder="DD"
+                        rules={{ validate: validateDate }}
                     />
                     <span>at</span>
                     <TimeStampField
