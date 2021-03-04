@@ -3,6 +3,7 @@ import React, {
     Children,
     cloneElement,
     FC,
+    Fragment,
     ReactElement,
     useCallback,
     useMemo,
@@ -17,9 +18,9 @@ export interface ColumnsProps {
      */
     divider?: boolean;
     /**
-     * Must be 2 <Columns.Column />
+     * Must be of type <Columns.Column />
      */
-    children: [ReactElement<ColumnProps>, ReactElement<ColumnProps>];
+    children: ReactElement<ColumnProps>[];
     className?: string;
     /**
      * Used to override column styling
@@ -37,7 +38,7 @@ export interface ColumnsProps {
 
 /**
  * @description
- * Used to render content in a 2-column layout.
+ * Used to render content in a column layout.
  *
  * @example
  * <Columns columnClassName={styles.columnOverride} divider>
@@ -70,13 +71,22 @@ function Columns({
         <div
             className={clsx(
                 styles.root,
-                divider && styles.rootDivider,
                 columnScroll && styles.rootColumnScroll,
                 variableSize && styles.rootVariableSize,
                 className
             )}
         >
-            {enrichedChildren}
+            {divider
+                ? enrichedChildren.map((c, i) => (
+                      // eslint-disable-next-line react/no-array-index-key
+                      <Fragment key={i}>
+                          {c}
+                          {i < enrichedChildren.length - 1 && (
+                              <div className={styles.divider} />
+                          )}
+                      </Fragment>
+                  ))
+                : enrichedChildren}
         </div>
     );
 }

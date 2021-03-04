@@ -3,24 +3,14 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
 import { Button } from 'semantic-ui-react';
-import {
-    Account,
-    AddressBookEntry,
-    AccountTransaction,
-} from '../../utils/types';
+import { Account, AddressBookEntry } from '../../utils/types';
 import locations from '../../constants/transferLocations.json';
 import PickRecipient from '../../components/Transfers/PickRecipient';
 import PickAmount from '../../components/Transfers/PickAmount';
 import FinalPage from '../../components/Transfers/FinalPage';
 import routes from '../../constants/routes.json';
 import { toMicroUnits, toGTUString } from '../../utils/gtu';
-
-interface State {
-    amount: string;
-    transaction: AccountTransaction;
-    recipient: AddressBookEntry;
-    initialPage: string;
-}
+import { TransferState } from '../../utils/transactionTypes';
 
 interface Props {
     account: Account;
@@ -32,7 +22,7 @@ interface Props {
  */
 export default function ScheduleTransfer({ account, returnFunction }: Props) {
     const dispatch = useDispatch();
-    const location = useLocation<State>();
+    const location = useLocation<TransferState>();
 
     // This is a string, to allows user input in GTU
     const [amount, setAmount] = useState<string>(

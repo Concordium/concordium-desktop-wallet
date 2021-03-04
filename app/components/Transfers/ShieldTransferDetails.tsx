@@ -1,33 +1,27 @@
 import React from 'react';
 import { List, Header } from 'semantic-ui-react';
-import { SimpleTransfer } from '../../utils/types';
+import { TransferToEncrypted } from '../../utils/types';
 import { displayAsGTU } from '../../utils/gtu';
 
 interface Props {
-    transaction: SimpleTransfer;
+    transaction: TransferToEncrypted;
     fromName?: string;
-    toName?: string;
 }
 
 /**
- * Displays an overview of a simple transfer.
+ * Displays an overview of a transfer to encrypted.
  */
-export default function DisplaySimpleTransfer({
+export default function DisplayTransferToEncrypted({
     transaction,
     fromName,
-    toName,
 }: Props) {
     return (
         <List relaxed="very">
+            <h2>Shield amount:</h2>
             <List.Item>
-                From Account:
+                On Account:
                 <Header>{fromName}</Header>
                 {transaction.sender}
-            </List.Item>
-            <List.Item>
-                To Account:
-                <Header>{toName} </Header>
-                {transaction.payload.toAddress}
             </List.Item>
             <List.Item>
                 Amount:

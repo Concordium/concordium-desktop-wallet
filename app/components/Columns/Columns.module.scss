@@ -7,30 +7,17 @@
     justify-content: space-around;
     align-items: flex-start;
 
-    &Divider {
-        &::before {
-            content: '';
-            display: block;
-            flex-basis: 1px;
-            flex-shrink: 0;
-            margin: 20px 0;
-            width: 1px;
-            order: 2;
-            background-color: $color-grey;
-            height: calc(100% - 40px); // To account for margin
-        }
-
-        > *:nth-child(2) {
-            order: 1;
-        }
-        > *:last-child {
-            order: 3;
-        }
-    }
-
     &ColumnScroll {
         height: 100%;
     }
+}
+
+.divider {
+    flex-basis: 1px;
+    flex-shrink: 0;
+    margin: 20px 0;
+    background-color: $color-grey;
+    height: calc(100% - 40px); // To account for margin
 }
 
 .column {

@@ -4,8 +4,10 @@ import {
     TransactionKindId,
     SimpleTransfer,
     ScheduledTransfer,
+    TransferToEncrypted,
     instanceOfSimpleTransfer,
     instanceOfScheduledTransfer,
+    instanceOfTransferToEncrypted,
 } from '../../utils/types';
 import {
     serializeTransactionHeader,
@@ -16,6 +18,7 @@ import {
 import pathAsBuffer from './Path';
 
 const INS_SIMPLE_TRANSFER = 0x02;
+const INS_TRANSFER_TO_ENCRYPTED = 0x11;
 const INS_TRANSFER_WITH_SCHEDULE = 0x03;
 
 async function signSimpleTransfer(
@@ -44,6 +47,40 @@ async function signSimpleTransfer(
     const response = await transport.send(
         0xe0,
         INS_SIMPLE_TRANSFER,
+        p1,
+        p2,
+        data
+    );
+    const signature = response.slice(0, 64);
+    return signature;
+}
+
+async function signTransferToEncrypted(
+    transport: Transport,
+    path: number[],
+    transaction: TransferToEncrypted
+) {
+    const payload = serializeTransferPayload(
+        TransactionKindId.Transfer_to_encrypted,
+        transaction.payload
+    );
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const data = Buffer.concat([pathAsBuffer(path), header, payload]);
+
+    const p1 = 0x00;
+    const p2 = 0x00;
+
+    const response = await transport.send(
+        0xe0,
+        INS_TRANSFER_TO_ENCRYPTED,
         p1,
         p2,
         data
@@ -123,7 +160,9 @@ export default async function signTransfer(
     if (instanceOfScheduledTransfer(transaction)) {
         return signTransferWithSchedule(transport, path, transaction);
     }
-
+    if (instanceOfTransferToEncrypted(transaction)) {
+        return signTransferToEncrypted(transport, path, transaction);
+    }
     throw new Error(
         `The received transaction was not a supported transaction type`
     );

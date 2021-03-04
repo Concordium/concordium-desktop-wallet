@@ -19,7 +19,11 @@ interface Props {
 /**
  * Displays an overview of a scheduledTransfer.
  */
-export default function Display({ transaction, fromName, toName }: Props) {
+export default function DisplayScheduledTransfer({
+    transaction,
+    fromName,
+    toName,
+}: Props) {
     const amount = getScheduledTransferAmount(transaction);
     return (
         <List>
