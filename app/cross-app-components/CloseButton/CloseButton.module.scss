@@ -1,0 +1,15 @@
+@import 'config/bundle';
+
+.root {
+    border: none;
+    background: none;
+    transition: transform $anim-easing $anim-timing;
+
+    &:focus {
+        outline: none;
+    }
+
+    &:hover {
+        transform: scale(1.1);
+    }
+}
