@@ -1,6 +1,8 @@
 import { DeepMap, FieldError } from 'react-hook-form';
 import { Reducer, Action as ReduxAction } from 'redux';
 
+export type Strings<T> = { [P in keyof T]: string };
+
 export interface DateParts {
     year: number;
     month: number;
@@ -13,6 +15,7 @@ export interface DateParts {
 interface State extends Partial<DateParts> {
     formattedDate?: Date;
     isInvalid?: boolean;
+    updateForm: boolean;
 }
 
 enum ActionType {
@@ -35,12 +38,12 @@ export function updateDate(date?: Date): UpdateDate {
 }
 
 interface UpdateParts extends ReduxAction<ActionType.UPDATE_PARTS> {
-    parts?: Partial<DateParts>;
+    parts?: Strings<Partial<DateParts>>;
     errors?: DeepMap<DateParts, FieldError>;
 }
 
 export function updateParts(
-    parts?: Partial<DateParts>,
+    parts?: Strings<Partial<DateParts>>,
     errors?: DeepMap<DateParts, FieldError>
 ): UpdateParts {
     return { type: ActionType.UPDATE_PARTS, parts, errors };
@@ -172,25 +175,32 @@ function getDateParts(date?: Date): DateParts | undefined {
 }
 
 function sanitizeParts(
-    parts: Partial<DateParts> = {}
+    parts: Strings<Partial<DateParts>> = {}
 ): Partial<DateParts> | undefined {
-    return (Object.keys(parts) as Array<keyof Partial<DateParts>>).reduce(
-        (acc, cur) => ({
+    return (Object.keys(parts) as Array<keyof DateParts>).reduce((acc, cur) => {
+        // eslint-disable-next-line radix
+        const v = parseInt(parts[cur] ?? '');
+
+        return {
             ...acc,
-            [cur]: Number.isNaN(parts[cur]) ? undefined : parts[cur],
-        }),
-        {}
-    );
+            [cur]: Number.isNaN(v) ? undefined : v,
+        };
+    }, {});
 }
 
-export const reducer: Reducer<State, Action> = (s = {}, a) => {
-    let next: State = s;
+export const reducer: Reducer<State, Action> = (
+    s = { updateForm: false },
+    a
+) => {
+    let next: State = { ...s, updateForm: false };
 
     switch (a.type) {
         case ActionType.UPDATE_DATE:
             next = {
                 ...s,
                 ...(getDateParts(a.date) ?? {}),
+                updateForm:
+                    a.date?.toISOString() !== s.formattedDate?.toISOString(),
             };
             break;
         case ActionType.UPDATE_PARTS:
