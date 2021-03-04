@@ -144,12 +144,19 @@ export enum TransactionKindId {
     Update_baker_sign_key = 7,
     Delegate_stake = 8,
     Undelegate_stake = 9,
+    Encrypted_transfer = 16,
+    Transfer_to_encrypted = 17,
+    Transfer_to_public = 18,
     Transfer_with_schedule = 19,
 } // TODO: Add all kinds (11- 18)
 
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
+}
+
+export interface TransferToEncryptedPayload {
+    amount: string;
 }
 
 export interface SchedulePoint {
@@ -164,6 +171,7 @@ export interface ScheduledTransferPayload {
 }
 
 export type TransactionPayload =
+    | TransferToEncryptedPayload
     | ScheduledTransferPayload
     | SimpleTransferPayload;
 
@@ -175,7 +183,7 @@ export interface AccountTransaction<
     sender: Hex;
     nonce: string;
     energyAmount: string;
-    expiry: string;
+    expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;
 }
@@ -183,6 +191,7 @@ export interface AccountTransaction<
 export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
+export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -527,6 +536,12 @@ export function instanceOfSimpleTransfer(
     return object.transactionKind === TransactionKindId.Simple_transfer;
 }
 
+export function instanceOfTransferToEncrypted(
+    object: AccountTransaction<TransactionPayload>
+): object is TransferToEncrypted {
+    return object.transactionKind === TransactionKindId.Transfer_to_encrypted;
+}
+
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
@@ -753,21 +768,6 @@ export type ClassNameAndStyle = Pick<
     HTMLAttributes<HTMLElement>,
     'style' | 'className'
 >;
-
-// WIP...
-// export type SuperAs<TAs> = (TAs extends ComponentType
-//     ? ComponentProps<TAs>
-//     : TAs extends keyof JSX.IntrinsicElements
-//     ? JSX.IntrinsicElements[TAs]
-//     : unknown) & {
-//     as?: TAs;
-// };
-
-// export type WithAsElement<
-//     TAs extends keyof JSX.IntrinsicElements
-// > = JSX.IntrinsicElements[TAs] & {
-//     as: TAs;
-// };
 
 export type WithAsProp<TAsProps> = TAsProps & {
     as: ComponentType<TAsProps>;
