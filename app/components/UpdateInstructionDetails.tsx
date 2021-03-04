@@ -1,3 +1,6 @@
+import React from 'react';
+import { Header } from 'semantic-ui-react';
+import { getISOFormat } from '../utils/timeHelpers';
 import { UpdateInstruction, UpdateInstructionPayload } from '../utils/types';
 import findHandler from '../utils/updates/HandlerFinder';
 
@@ -13,5 +16,11 @@ export default function UpdateInstructionDetails({
     transaction,
 }: Props): JSX.Element {
     const handler = findHandler(transaction.type);
-    return handler.view(transaction);
+    return (
+        <>
+            {handler.view(transaction)}
+            <Header>Effective time</Header>
+            {getISOFormat(transaction.header.effectiveTime.toString())}
+        </>
+    );
 }

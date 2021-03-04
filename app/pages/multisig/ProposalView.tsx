@@ -39,8 +39,8 @@ import SimpleErrorModal, {
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
 import expirationEffect from '../../utils/ProposalHelper';
-import EffectiveTimeView from './EffectiveTimeView';
 import PageLayout from '../../components/PageLayout';
+import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -209,7 +209,7 @@ export default function ProposalView() {
                     <Grid columns={3} divided textAlign="center" padded>
                         <Grid.Column>
                             <TransactionDetails transaction={instruction} />
-                            <EffectiveTimeView
+                            <ExpiredEffectiveTimeView
                                 transaction={instruction}
                                 proposal={currentProposal}
                             />

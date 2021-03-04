@@ -9,7 +9,7 @@ import {
 } from '../../utils/types';
 import TransactionDetails from '../../components/TransactionDetails';
 import StatusLabel from './StatusLabel';
-import EffectiveTimeView from './EffectiveTimeView';
+import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
 
 // TODO This component should also have support for account transactions.
 
@@ -45,7 +45,7 @@ export default function ProposalStatus({ proposal }: Props) {
                 <Grid.Column />
                 <Grid.Column>
                     <TransactionDetails transaction={updateInstruction} />
-                    <EffectiveTimeView
+                    <ExpiredEffectiveTimeView
                         transaction={updateInstruction}
                         proposal={proposal}
                     />
