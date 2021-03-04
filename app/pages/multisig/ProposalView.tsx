@@ -66,7 +66,7 @@ export default function ProposalView() {
     );
 
     useEffect(() => {
-        expirationEffect(currentProposal, dispatch);
+        return expirationEffect(currentProposal, dispatch);
     }, [currentProposal, dispatch]);
 
     async function loadSignatureFile(file: Buffer) {

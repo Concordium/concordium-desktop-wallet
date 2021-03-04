@@ -29,9 +29,13 @@ export default function ProposalList(): JSX.Element {
     const proposals = useSelector(proposalsSelector);
 
     useEffect(() => {
+        const cleanUpFunctions: (() => void)[] = [];
         proposals.forEach((proposal) => {
-            expirationEffect(proposal, dispatch);
+            cleanUpFunctions.push(expirationEffect(proposal, dispatch));
         });
+        return () => {
+            cleanUpFunctions.forEach((cleanUp) => cleanUp());
+        };
     }, [dispatch, proposals]);
 
     return (
