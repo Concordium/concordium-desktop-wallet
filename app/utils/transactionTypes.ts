@@ -1,4 +1,4 @@
-import { BlockSummary } from './NodeApiTypes';
+import { Authorization, Authorizations, BlockSummary } from './NodeApiTypes';
 import {
     MultiSignatureTransaction,
     UpdateInstruction,
@@ -50,6 +50,7 @@ export interface TransactionHandler<T, S> {
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;
+    getAuthorization: (authorizations: Authorizations) => Authorization;
     update: UpdateComponent;
     title: string;
 }

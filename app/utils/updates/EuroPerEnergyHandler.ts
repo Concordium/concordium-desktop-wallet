@@ -2,6 +2,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { getGovernancePath } from '../../features/ledger/Path';
 import EuroPerEnergyView from '../../pages/multisig/EuroPerEnergyView';
 import UpdateEuroPerEnergy from '../../pages/multisig/UpdateEuroPerEnergy';
+import { Authorizations } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     isExchangeRate,
@@ -42,6 +43,10 @@ export default class EuroPerEnergyHandler
 
     view(transaction: TransactionType) {
         return EuroPerEnergyView({ exchangeRate: transaction.payload });
+    }
+
+    getAuthorization(authorizations: Authorizations) {
+        return authorizations.euroPerEnergy;
     }
 
     update = UpdateEuroPerEnergy;
