@@ -30,6 +30,7 @@ interface Props<T> {
     signFunction: (input: T) => Promise<void>;
     checkboxes: string[];
     signText: string;
+    loading?: boolean;
 }
 
 export default function GenericSignTransactionProposalView({
@@ -39,6 +40,7 @@ export default function GenericSignTransactionProposalView({
     signFunction,
     checkboxes,
     signText,
+    loading,
 }: Props<ConcordiumLedgerClient>) {
     const [signing, setSigning] = useState(false);
     const [checkboxesStatus, setCheckBoxesStatus] = useState(
@@ -71,7 +73,7 @@ export default function GenericSignTransactionProposalView({
                 <h1>{header}</h1>
             </PageLayout.Header>
             <Container>
-                <Segment>
+                <Segment loading={loading}>
                     <Header textAlign="center">
                         Transaction signing confirmation | Transaction Type
                     </Header>
