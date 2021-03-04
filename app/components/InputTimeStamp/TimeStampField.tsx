@@ -14,8 +14,6 @@ import { DateParts } from './util';
 
 import styles from './InputTimeStamp.module.scss';
 
-const sanitizeValue = (value?: string): string => (!value ? '' : value);
-
 type InputProps = NotOptional<
     Pick<InputHTMLAttributes<HTMLInputElement>, 'className' | 'placeholder'>
 >;
@@ -23,6 +21,7 @@ type InputProps = NotOptional<
 interface TimeStampFieldProps extends InputProps {
     name: keyof DateParts;
     rules?: RegisterOptions;
+    onFieldFormatted(): void;
 }
 
 export default function TimeStampField({
@@ -30,6 +29,7 @@ export default function TimeStampField({
     className,
     placeholder,
     rules,
+    onFieldFormatted,
 }: TimeStampFieldProps): JSX.Element {
     const { control, setValue, errors } = useFormContext();
     const {
@@ -44,7 +44,8 @@ export default function TimeStampField({
     const handleBlur: FocusEventHandler = useCallback(() => {
         onBlur();
         setValue(name, value);
-    }, [value, onBlur, setValue, name]);
+        setTimeout(() => onFieldFormatted(), 0);
+    }, [value, onBlur, setValue, name, onFieldFormatted]);
 
     return (
         <input
@@ -52,7 +53,7 @@ export default function TimeStampField({
             name={n}
             type="string"
             placeholder={placeholder}
-            value={sanitizeValue(value)}
+            value={value}
             onBlur={handleBlur}
             onChange={onChange}
         />

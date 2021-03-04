@@ -110,8 +110,6 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
     const parts = useMemo(() => fromDate(value), [value?.toISOString()]);
 
     useEffect(() => {
-        console.log('parts', parts);
-
         if (!parts) {
             return;
         }
@@ -119,9 +117,9 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
         (Object.keys(parts) as Array<keyof DateParts>).forEach((k) =>
             setFormattedValue(k, parts[k])
         );
-    }, [JSON.stringify(parts), setFormattedValue]);
+    }, [parts, setFormattedValue]);
 
-    useEffect(() => {
+    const fireOnChange = useCallback(() => {
         if (!hasAllParts(fields)) {
             onChange(undefined);
         } else {
@@ -129,14 +127,13 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
             const test = fromDate(date);
 
             const isValid = test && isEqual(fields, test);
-            console.log('valid', isValid, fields, test);
 
             onChange(isValid ? date : undefined);
         }
-    }, [JSON.stringify(fields), onChange]);
+    }, [setFormattedValue, fields]);
 
     const form: typeof f = { ...f, setValue: setFormattedValue };
     const isInvalid = hasAllParts(fields) && Object.keys(errors).length > 0;
 
-    return { isInvalid, form };
+    return { isInvalid, form, fireOnChange };
 }

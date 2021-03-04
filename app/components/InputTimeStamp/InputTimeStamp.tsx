@@ -1,8 +1,7 @@
-/* eslint-disable radix */
 import clsx from 'clsx';
 import React from 'react';
-
 import { FormProvider } from 'react-hook-form';
+
 import { useInputTimeStamp, fieldNames } from './util';
 import TimeStampField from './TimeStampField';
 
@@ -26,7 +25,10 @@ export default function InputTimeStamp({
 
     //     return 'Date is invalid';
     // }, [errors, isInvalid]);
-    const { isInvalid, form } = useInputTimeStamp(onChange, value);
+    const { isInvalid, form, fireOnChange } = useInputTimeStamp(
+        onChange,
+        value
+    );
 
     return (
         <div className={styles.root}>
@@ -42,6 +44,7 @@ export default function InputTimeStamp({
                         name={fieldNames.year}
                         placeholder="YYYY"
                         rules={{ min: 100, max: 9999 }}
+                        onFieldFormatted={fireOnChange}
                     />
                     -
                     <TimeStampField
@@ -49,6 +52,7 @@ export default function InputTimeStamp({
                         name={fieldNames.month}
                         placeholder="MM"
                         rules={{ min: 1, max: 12 }}
+                        onFieldFormatted={fireOnChange}
                     />
                     -
                     <TimeStampField
@@ -56,6 +60,7 @@ export default function InputTimeStamp({
                         name={fieldNames.date}
                         placeholder="DD"
                         // rules={{ validate: validateDate }}
+                        onFieldFormatted={fireOnChange}
                     />
                     <span>at</span>
                     <TimeStampField
@@ -63,6 +68,7 @@ export default function InputTimeStamp({
                         name={fieldNames.hours}
                         placeholder="HH"
                         rules={{ max: 23 }}
+                        onFieldFormatted={fireOnChange}
                     />
                     :
                     <TimeStampField
@@ -70,6 +76,7 @@ export default function InputTimeStamp({
                         name={fieldNames.minutes}
                         placeholder="MM"
                         rules={{ max: 59 }}
+                        onFieldFormatted={fireOnChange}
                     />
                     :
                     <TimeStampField
@@ -77,6 +84,7 @@ export default function InputTimeStamp({
                         name={fieldNames.seconds}
                         placeholder="SS"
                         rules={{ max: 59 }}
+                        onFieldFormatted={fireOnChange}
                     />
                 </FormProvider>
             </div>
