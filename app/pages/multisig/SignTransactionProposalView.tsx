@@ -46,10 +46,9 @@ export default function SignTransactionProposalView({ location }: Props) {
         );
     }
 
-    const parsedInput: SignInput = parse(location.state);
-    const { multiSignatureTransaction } = parsedInput;
-    const { blockSummary } = parsedInput;
-
+    const { multiSignatureTransaction, blockSummary }: SignInput = parse(
+        location.state
+    );
     const { transaction } = multiSignatureTransaction;
     const type = 'UpdateInstruction';
 

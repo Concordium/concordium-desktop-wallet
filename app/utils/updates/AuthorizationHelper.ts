@@ -4,17 +4,23 @@ import { Authorization, Authorizations, Key } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import { UpdateInstruction, UpdateInstructionPayload } from '../types';
 
+export interface AuthorizationKey {
+    index: number;
+    key: Key;
+}
+
 /**
- * Finds the authorization key index for a given verification key. If there
+ * Finds the authorization key for a given verification key. The authorization
+ * key consists of the key and the authorization key index. If there
  * is no match, then undefined is returned.
  * @param keys the array of authorization keys from the block summary
- * @param verifyKey verification key to find the index for
+ * @param verifyKey verification key to find the key with an index for
  */
 function findAuthorizationKeyIndex(
     keys: Key[],
     authorization: Authorization,
     verifyKey: string
-) {
+): AuthorizationKey | undefined {
     return keys
         .map((key, index) => {
             return { index, key };
