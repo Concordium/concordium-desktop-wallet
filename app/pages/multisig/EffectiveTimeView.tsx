@@ -37,7 +37,7 @@ export default function EffectiveTimeView({ transaction, proposal }: Props) {
         effectiveTimeComponent = (
             <>
                 <Header>Effective time</Header>
-                {getISOFormat(transaction.header.effectiveTime.toString())}wtf
+                {getISOFormat(transaction.header.effectiveTime.toString())}
             </>
         );
     }
