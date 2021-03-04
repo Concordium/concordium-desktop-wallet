@@ -9,6 +9,27 @@ import type {
 import { Button, Card, Divider, Loader, Segment } from 'semantic-ui-react';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { AppAndVersion } from '../../features/ledger/GetAppAndVersion';
+import getErrorDescription from '../../features/ledger/ErrorCodes';
+
+interface TransportStatusError {
+    name: string;
+    message: string;
+    stack: string;
+    statusCode: number;
+    statusText: string;
+}
+
+function instanceOfTransportStatusError(
+    object: Error
+): object is TransportStatusError {
+    return (
+        'name' in object &&
+        'message' in object &&
+        'stack' in object &&
+        'statusCode' in object &&
+        'statusText' in object
+    );
+}
 
 interface Props {
     ledgerCall: (
@@ -87,10 +108,15 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
             if (ledger) {
                 await ledgerCall(ledger, setStatusMessage);
             }
-        } catch (e) {
-            setStatusMessage(
-                'An error occurred while communcating with your device'
-            );
+        } catch (error) {
+            let errorMessage;
+            if (instanceOfTransportStatusError(error)) {
+                errorMessage = getErrorDescription(error.statusCode);
+            } else {
+                errorMessage = `An error occurred: ${error}`;
+            }
+            errorMessage += ' Please try again.';
+            setStatusMessage(errorMessage);
             setReady(true);
         }
     }
