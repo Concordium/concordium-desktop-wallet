@@ -1,6 +1,7 @@
+import { DeepMap, FieldError } from 'react-hook-form';
 import { Reducer, Action as ReduxAction } from 'redux';
 
-interface DateParts {
+export interface DateParts {
     year: number;
     month: number;
     date: number;
@@ -15,7 +16,8 @@ interface State extends Partial<DateParts> {
 }
 
 enum ActionType {
-    UPDATE,
+    UPDATE_DATE,
+    UPDATE_PARTS,
     SET_YEAR,
     SET_MONTH,
     SET_DATE,
@@ -24,12 +26,24 @@ enum ActionType {
     SET_SECONDS,
 }
 
-interface Update extends ReduxAction<ActionType.UPDATE> {
+interface UpdateDate extends ReduxAction<ActionType.UPDATE_DATE> {
     date?: Date;
 }
 
-export function update(date?: Date): Update {
-    return { type: ActionType.UPDATE, date };
+export function updateDate(date?: Date): UpdateDate {
+    return { type: ActionType.UPDATE_DATE, date };
+}
+
+interface UpdateParts extends ReduxAction<ActionType.UPDATE_PARTS> {
+    parts?: Partial<DateParts>;
+    errors?: DeepMap<DateParts, FieldError>;
+}
+
+export function updateParts(
+    parts?: Partial<DateParts>,
+    errors?: DeepMap<DateParts, FieldError>
+): UpdateParts {
+    return { type: ActionType.UPDATE_PARTS, parts, errors };
 }
 
 interface SetYear extends ReduxAction<ActionType.SET_YEAR> {
@@ -81,7 +95,8 @@ export function setSeconds(seconds: number): SetSeconds {
 }
 
 type Action =
-    | Update
+    | UpdateDate
+    | UpdateParts
     | SetYear
     | SetMonth
     | SetDate
@@ -156,14 +171,32 @@ function getDateParts(date?: Date): DateParts | undefined {
     return fromDate(date);
 }
 
+function sanitizeParts(
+    parts: Partial<DateParts> = {}
+): Partial<DateParts> | undefined {
+    return (Object.keys(parts) as Array<keyof Partial<DateParts>>).reduce(
+        (acc, cur) => ({
+            ...acc,
+            [cur]: Number.isNaN(parts[cur]) ? undefined : parts[cur],
+        }),
+        {}
+    );
+}
+
 export const reducer: Reducer<State, Action> = (s = {}, a) => {
     let next: State = s;
 
     switch (a.type) {
-        case ActionType.UPDATE:
+        case ActionType.UPDATE_DATE:
             next = {
                 ...s,
                 ...(getDateParts(a.date) ?? {}),
+            };
+            break;
+        case ActionType.UPDATE_PARTS:
+            next = {
+                ...s,
+                ...sanitizeParts(a.parts),
             };
             break;
         case ActionType.SET_YEAR:
@@ -190,7 +223,8 @@ export const reducer: Reducer<State, Action> = (s = {}, a) => {
 
     next = {
         ...next,
-        formattedDate: a.type === ActionType.UPDATE ? a.date : formatDate(next),
+        formattedDate:
+            a.type === ActionType.UPDATE_DATE ? a.date : formatDate(next),
     };
 
     return {

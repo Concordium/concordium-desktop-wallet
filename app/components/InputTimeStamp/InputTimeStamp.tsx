@@ -1,17 +1,20 @@
 /* eslint-disable radix */
 import clsx from 'clsx';
-import React, { useEffect, useReducer } from 'react';
+import React, { InputHTMLAttributes, useEffect, useReducer } from 'react';
+import {
+    Control,
+    RegisterOptions,
+    useController,
+    useForm,
+} from 'react-hook-form';
+import { EqualRecord, NotOptional } from '../../utils/types';
 
 import styles from './InputTimeStamp.module.scss';
 import {
+    DateParts,
     reducer,
-    update,
-    setYear,
-    setMonth,
-    setDate,
-    setHours,
-    setMinutes,
-    setSeconds,
+    updateDate,
+    updateParts,
 } from './inputTimeStampReducer';
 
 export interface InputTimeStampProps {
@@ -20,36 +23,104 @@ export interface InputTimeStampProps {
     onChange(date?: Date): void;
 }
 
-function getFieldValue(v?: number): string {
-    if (Number.isNaN(v) || v === undefined) {
+const ensureNumberLength = (length: number) => (value?: number): string => {
+    if (Number.isNaN(value) || value === undefined) {
         return '';
     }
 
-    return `${v}`;
+    const valueLength = `${value}`.length;
+
+    if (valueLength >= length) {
+        return `${value}`;
+    }
+
+    const missing = length - valueLength;
+    const prepend = new Array(missing).fill(`0`).join('');
+
+    return `${prepend}${value}`;
+};
+
+const ensureFour = ensureNumberLength(4);
+const ensureTwo = ensureNumberLength(2);
+
+type InputProps = NotOptional<
+    Pick<
+        InputHTMLAttributes<HTMLInputElement>,
+        'name' | 'className' | 'placeholder'
+    >
+>;
+
+interface TimeStampFieldProps extends InputProps {
+    rules?: RegisterOptions;
+    control: Control;
+    formatValue(v?: number): string;
 }
+
+function TimeStampField({
+    name,
+    className,
+    placeholder,
+    rules,
+    control,
+    formatValue,
+}: TimeStampFieldProps): JSX.Element {
+    const {
+        field: { ref, value, onChange, ...inputProps },
+    } = useController({ name, rules, control, defaultValue: NaN });
+
+    console.log(name, value);
+
+    return (
+        <input
+            className={className}
+            type="string"
+            placeholder={placeholder}
+            value={formatValue(value)}
+            onChange={(e) => onChange(parseInt(e.target.value))}
+            {...inputProps}
+        />
+    );
+}
+
+const fieldNames: EqualRecord<DateParts> = {
+    year: 'year',
+    month: 'month',
+    date: 'date',
+    hours: 'hours',
+    minutes: 'minutes',
+    seconds: 'seconds',
+};
 
 export default function InputTimeStamp({
     label,
     value,
     onChange,
 }: InputTimeStampProps): JSX.Element {
-    const [
-        {
-            year,
-            month,
-            date,
-            hours,
-            minutes,
-            seconds,
-            formattedDate,
-            isInvalid,
-        },
-        dispatch,
-    ] = useReducer(reducer, {});
+    const [{ formattedDate, isInvalid, ...dateParts }, dispatch] = useReducer(
+        reducer,
+        {}
+    );
+
+    const { control, watch, errors, setValue } = useForm<DateParts>();
+    const fields = watch();
+
+    console.log(fields);
 
     useEffect(() => {
-        dispatch(update(value));
+        dispatch(updateDate(value));
     }, [value]);
+
+    useEffect(() => {
+        dispatch(updateParts(fields, errors));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(fields), errors]);
+
+    useEffect(() => {
+        (Object.keys(dateParts) as Array<keyof DateParts>).forEach((k) =>
+            setValue(k, dateParts[k])
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(dateParts), setValue]);
 
     useEffect(() => {
         onChange(formattedDate);
@@ -58,73 +129,58 @@ export default function InputTimeStamp({
     return (
         <div className={styles.root}>
             {label}
+            <br />
+            errors: {JSON.stringify(errors)}
             <div
                 className={clsx(styles.input, isInvalid && styles.inputInvalid)}
             >
-                <input
+                <TimeStampField
                     className={styles.year}
-                    name="year"
-                    type="string"
+                    name={fieldNames.year}
                     placeholder="YYYY"
-                    value={getFieldValue(year)}
-                    onChange={(e) =>
-                        dispatch(setYear(parseInt(e.target.value)))
-                    }
+                    control={control}
+                    formatValue={ensureFour}
+                    rules={{ maxLength: 4 }}
                 />
                 -
-                <input
+                <TimeStampField
                     className={styles.field}
-                    name="month"
-                    type="string"
+                    name={fieldNames.month}
                     placeholder="MM"
-                    value={getFieldValue(month)}
-                    onChange={(e) =>
-                        dispatch(setMonth(parseInt(e.target.value)))
-                    }
+                    control={control}
+                    formatValue={ensureTwo}
                 />
                 -
-                <input
+                <TimeStampField
                     className={styles.field}
-                    name="date"
-                    type="string"
+                    name={fieldNames.date}
                     placeholder="DD"
-                    value={getFieldValue(date)}
-                    onChange={(e) =>
-                        dispatch(setDate(parseInt(e.target.value)))
-                    }
+                    control={control}
+                    formatValue={ensureTwo}
                 />
                 <span>at</span>
-                <input
+                <TimeStampField
                     className={styles.field}
-                    name="hours"
-                    type="string"
+                    name={fieldNames.hours}
                     placeholder="HH"
-                    value={getFieldValue(hours)}
-                    onChange={(e) =>
-                        dispatch(setHours(parseInt(e.target.value)))
-                    }
+                    control={control}
+                    formatValue={ensureTwo}
                 />
                 :
-                <input
+                <TimeStampField
                     className={styles.field}
-                    name="minutes"
-                    type="string"
+                    name={fieldNames.minutes}
                     placeholder="MM"
-                    value={getFieldValue(minutes)}
-                    onChange={(e) =>
-                        dispatch(setMinutes(parseInt(e.target.value)))
-                    }
+                    control={control}
+                    formatValue={ensureTwo}
                 />
                 :
-                <input
+                <TimeStampField
                     className={styles.field}
-                    name="seconds"
-                    type="string"
+                    name={fieldNames.seconds}
                     placeholder="SS"
-                    value={getFieldValue(seconds)}
-                    onChange={(e) =>
-                        dispatch(setSeconds(parseInt(e.target.value)))
-                    }
+                    control={control}
+                    formatValue={ensureTwo}
                 />
             </div>
         </div>
