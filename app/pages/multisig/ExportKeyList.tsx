@@ -12,12 +12,16 @@ export enum ExportKeyType {
     Account = 'account',
 }
 
-export const exportKeyOptionMap: [ExportKeyType, string][] = [
+const exportKeyOptionMap = new Map<ExportKeyType, string>([
     [ExportKeyType.Root, 'Governance root key'],
     [ExportKeyType.Level1, 'Governance level 1 key'],
     [ExportKeyType.Level2, 'Governance level 2 key'],
     [ExportKeyType.Account, 'Account key'],
-];
+]);
+
+export function getKeyDisplay(keyType: ExportKeyType): string | undefined {
+    return exportKeyOptionMap.get(keyType);
+}
 
 /**
  * Component that displays a list of multi signature transaction proposals.
@@ -29,7 +33,7 @@ export default function ExportKeyList(): JSX.Element {
         foundationTransactionsEnabledSelector
     );
 
-    let keyTypes = exportKeyOptionMap;
+    let keyTypes = Array.from(exportKeyOptionMap);
     if (!foundationTransactionsEnabled) {
         keyTypes = keyTypes.filter(
             ([keyType]) =>

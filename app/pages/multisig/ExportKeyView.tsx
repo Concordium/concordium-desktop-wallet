@@ -12,7 +12,7 @@ import {
     getGovernanceRootPath,
 } from '../../features/ledger/Path';
 import { saveFile } from '../../utils/FileHelper';
-import { ExportKeyType } from './ExportKeyList';
+import { ExportKeyType, getKeyDisplay } from './ExportKeyList';
 
 interface ParamTypes {
     keyType: ExportKeyType;
@@ -46,6 +46,8 @@ export default function ExportKeyView(): JSX.Element {
                 path = getGovernanceLevel2Path();
                 break;
             case ExportKeyType.Account:
+                // TODO Implement support for exporting account keys. They need a separate flow, as
+                // they need to provide some input to determine the key to export.
                 throw new Error(
                     'Export of account keys is not yet implemented.'
                 );
@@ -78,7 +80,7 @@ export default function ExportKeyView(): JSX.Element {
     if (publicKey) {
         exportComponent = (
             <Segment textAlign="center">
-                <Header>New {keyType}</Header>
+                <Header>New {getKeyDisplay(keyType)}</Header>
                 {publicKey.toString('hex')}
                 <Header>Identicon</Header>
                 Click to copy
@@ -110,7 +112,9 @@ export default function ExportKeyView(): JSX.Element {
                 <h1>Multi Signature Transactions</h1>
             </PageLayout.Header>
             <PageLayout.Container>
-                <Header textAlign="center">Export your {keyType}</Header>
+                <Header textAlign="center">
+                    Export your {getKeyDisplay(keyType)}
+                </Header>
                 {exportComponent}
                 <Button
                     disabled={!publicKey}
@@ -123,7 +127,7 @@ export default function ExportKeyView(): JSX.Element {
                         }
                     }}
                 >
-                    Export public-key
+                    Export
                 </Button>
             </PageLayout.Container>
         </PageLayout>
