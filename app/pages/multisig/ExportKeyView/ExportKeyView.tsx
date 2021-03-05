@@ -2,18 +2,22 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router';
 import { Divider, Header, Segment } from 'semantic-ui-react';
 import Identicon from 'react-identicons';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
-import PageLayout from '../../components/PageLayout';
-import Button from '../../cross-app-components/Button';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import { useDispatch } from 'react-redux';
+import { push } from 'connected-react-router';
+import LedgerComponent from '../../../components/ledger/LedgerComponent';
+import PageLayout from '../../../components/PageLayout';
+import Button from '../../../cross-app-components/Button';
+import ConcordiumLedgerClient from '../../../features/ledger/ConcordiumLedgerClient';
 import {
     getGovernanceLevel1Path,
     getGovernanceLevel2Path,
     getGovernanceRootPath,
-} from '../../features/ledger/Path';
-import { saveFile } from '../../utils/FileHelper';
-import { ExportKeyType, getKeyDisplay } from './ExportKeyList';
-import { SignedPublicKey } from '../../utils/types';
+} from '../../../features/ledger/Path';
+import { saveFile } from '../../../utils/FileHelper';
+import { ExportKeyType, getKeyDisplay } from '../ExportKeyList';
+import { SignedPublicKey } from '../../../utils/types';
+import styles from './ExportKeyView.module.scss';
+import routes from '../../../constants/routes.json';
 
 interface ParamTypes {
     keyType: ExportKeyType;
@@ -29,6 +33,7 @@ interface PublicKeyExportFormat {
 export default function ExportKeyView(): JSX.Element {
     const [signedPublicKey, setSignedPublicKey] = useState<SignedPublicKey>();
     const { keyType } = useParams<ParamTypes>();
+    const dispatch = useDispatch();
 
     async function exportPublicKey(
         ledger: ConcordiumLedgerClient,
@@ -87,6 +92,19 @@ export default function ExportKeyView(): JSX.Element {
                 Click to copy
                 <Divider clearing hidden />
                 <Identicon string={signedPublicKey.key} size={128} />
+                <Divider clearing hidden />
+                <div className={styles.actions}>
+                    <Button
+                        disabled={!signedPublicKey}
+                        onClick={() => {
+                            if (signedPublicKey) {
+                                saveExportedPublicKey(signedPublicKey, keyType);
+                            }
+                        }}
+                    >
+                        Export
+                    </Button>
+                </div>
             </Segment>
         );
     } else {
@@ -94,7 +112,7 @@ export default function ExportKeyView(): JSX.Element {
             <>
                 <Segment basic textAlign="center">
                     To export your key, you must connect a secure hardware
-                    wallet. After pressing the export button, you can finish
+                    wallet. After pressing the submit button, you can finish
                     exporting the key on the hardware wallet.
                 </Segment>
                 <LedgerComponent
@@ -104,6 +122,15 @@ export default function ExportKeyView(): JSX.Element {
                     ) => exportPublicKey(ledger, setMessage, keyType)}
                 />
             </>
+        );
+    }
+
+    let finishButton;
+    if (signedPublicKey) {
+        finishButton = (
+            <Button onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}>
+                Finish
+            </Button>
         );
     }
 
@@ -117,16 +144,7 @@ export default function ExportKeyView(): JSX.Element {
                     Export your {getKeyDisplay(keyType)}
                 </Header>
                 {exportComponent}
-                <Button
-                    disabled={!signedPublicKey}
-                    onClick={() => {
-                        if (signedPublicKey) {
-                            saveExportedPublicKey(signedPublicKey, keyType);
-                        }
-                    }}
-                >
-                    Export
-                </Button>
+                <div className={styles.actions}>{finishButton}</div>
             </PageLayout.Container>
         </PageLayout>
     );
