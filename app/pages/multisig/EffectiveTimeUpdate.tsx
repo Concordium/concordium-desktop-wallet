@@ -15,8 +15,6 @@ interface Props {
     setDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const defaultTime = new Date(getNow() + 5 * TimeConstants.Minute);
-
 /**
  * Component for an update component that includes a time picker to set the
  * effective time for the update that is being created.
@@ -28,7 +26,7 @@ export default function EffectiveTimeUpdate({
     setDisabled,
 }: Props): JSX.Element {
     const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
-        defaultTime
+        new Date(getNow() + 5 * TimeConstants.Minute)
     );
     const [effectiveTimeInSeconds, setEffectiveTimeInSeconds] = useState<
         number | undefined
