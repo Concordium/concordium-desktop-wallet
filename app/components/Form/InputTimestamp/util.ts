@@ -188,7 +188,6 @@ export function useInputTimeStamp(
     }, [JSON.stringify(fields), onChange]);
 
     const form: typeof f = { ...f, setValue: setFormattedValue };
-    const isInvalid = hasAllParts(fields) && Object.keys(errors).length > 0;
 
     const triggerDateValidation = useCallback(() => {
         if (formState.touched[fieldNames.date]) {
@@ -225,7 +224,6 @@ export function useInputTimeStamp(
     }, [validateDate]);
 
     return {
-        isInvalid,
         form,
         fireOnChange,
         validateDate,

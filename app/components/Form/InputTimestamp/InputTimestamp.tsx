@@ -1,11 +1,13 @@
 import clsx from 'clsx';
 import React from 'react';
 
+import { isDefined } from '../../../utils/basicHelpers';
+import { CommonInputProps } from '../common';
+import ErrorMessage from '../ErrorMessage';
 import { useInputTimeStamp, fieldNames, TimeStampContext } from './util';
 import TimeStampField from './TimestampField';
 
 import styles from './InputTimestamp.module.scss';
-import { CommonInputProps } from '../common';
 
 export interface InputTimeStampProps extends CommonInputProps {
     /**
@@ -33,18 +35,22 @@ export interface InputTimeStampProps extends CommonInputProps {
  */
 export default function InputTimeStamp({
     label,
+    error,
     value,
     onChange,
     onBlur,
 }: InputTimeStampProps): JSX.Element {
     const {
-        isInvalid,
         form,
         fireOnChange,
         validateDate,
         isFocused,
         setIsFocused,
     } = useInputTimeStamp(value, onChange, onBlur);
+
+    const firstFormError = Object.values(form.errors).filter(isDefined)[0];
+
+    const errorMessage = error || firstFormError?.message;
 
     return (
         <div className={styles.root}>
@@ -53,7 +59,7 @@ export default function InputTimeStamp({
                 className={clsx(
                     styles.input,
                     isFocused && styles.inputFocused,
-                    isInvalid && styles.inputInvalid
+                    error !== undefined && styles.inputInvalid
                 )}
             >
                 <TimeStampContext.Provider
@@ -105,7 +111,7 @@ export default function InputTimeStamp({
                     />
                 </TimeStampContext.Provider>
             </div>
-            errors: {JSON.stringify(form.errors)}
+            <ErrorMessage>{errorMessage}</ErrorMessage>
         </div>
     );
 }
