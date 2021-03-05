@@ -2,15 +2,13 @@ import clsx from 'clsx';
 import React, {
     ChangeEventHandler,
     FocusEventHandler,
+    forwardRef,
     InputHTMLAttributes,
     useCallback,
+    useContext,
 } from 'react';
-import {
-    RegisterOptions,
-    useController,
-    useFormContext,
-} from 'react-hook-form';
-import { DateParts } from './util';
+import { RegisterOptions, useController } from 'react-hook-form';
+import { DateParts, TimeStampContext } from './util';
 
 import styles from './InputTimeStamp.module.scss';
 
@@ -28,10 +26,6 @@ interface TimeStampFieldProps extends InputProps {
      * Validation rules of field.
      */
     rules?: RegisterOptions;
-    /**
-     * Called when field has been formatted on blur.
-     */
-    onFieldFormatted(): void;
 }
 
 /**
@@ -41,49 +35,56 @@ interface TimeStampFieldProps extends InputProps {
  * @example
  * <TimeStampField className={styles.field} name={fieldNames.hours} placeholder="HH" rules={{ max: 23 }} onFieldFormatted={fireOnChange} />
  */
-export default function TimeStampField({
-    name,
-    className,
-    placeholder,
-    onChange,
-    rules,
-    onFieldFormatted,
-}: TimeStampFieldProps): JSX.Element {
-    const { control, setValue, errors } = useFormContext();
-    const {
-        field: { value, onChange: formOnChange, onBlur, name: n },
-    } = useController({
-        name,
-        rules: { required: true, min: rules?.min ?? 0, ...rules },
-        control,
-        defaultValue: '',
-    });
+const TimeStampField = forwardRef<HTMLInputElement, TimeStampFieldProps>(
+    ({ name, className, placeholder, onChange, rules }, ref) => {
+        const {
+            control,
+            setValue,
+            errors,
+            setIsFocused,
+            fireOnChange,
+        } = useContext(TimeStampContext);
+        // const { control, setValue, errors } = useFormContext();
+        const {
+            field: { value, onChange: formOnChange, onBlur, name: n },
+        } = useController({
+            name,
+            rules: { required: true, min: rules?.min ?? 0, ...rules },
+            control,
+            defaultValue: '',
+        });
 
-    const handleBlur: FocusEventHandler = useCallback(() => {
-        onBlur();
-        setValue(name, value);
-        setTimeout(() => onFieldFormatted(), 0);
-    }, [value, onBlur, setValue, name, onFieldFormatted]);
+        const handleBlur: FocusEventHandler = useCallback(() => {
+            setIsFocused(false);
+            onBlur();
+            setValue(name, value);
+            setTimeout(() => fireOnChange(), 0);
+        }, [value, onBlur, setValue, name, fireOnChange, setIsFocused]);
 
-    const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-        (e) => {
-            formOnChange(e);
-            if (onChange) {
-                onChange(e);
-            }
-        },
-        [formOnChange, onChange]
-    );
+        const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+            (e) => {
+                formOnChange(e);
+                if (onChange) {
+                    onChange(e);
+                }
+            },
+            [formOnChange, onChange]
+        );
 
-    return (
-        <input
-            className={clsx(className, errors[name] && styles.fieldInvalid)}
-            name={n}
-            type="string"
-            placeholder={placeholder}
-            value={value}
-            onBlur={handleBlur}
-            onChange={handleChange}
-        />
-    );
-}
+        return (
+            <input
+                className={clsx(className, errors[name] && styles.fieldInvalid)}
+                name={n}
+                ref={ref}
+                type="string"
+                placeholder={placeholder}
+                value={value}
+                onBlur={handleBlur}
+                onChange={handleChange}
+                onFocus={() => setIsFocused(true)}
+            />
+        );
+    }
+);
+
+export default TimeStampField;

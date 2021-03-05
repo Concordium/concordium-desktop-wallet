@@ -1,8 +1,16 @@
 /* eslint-disable radix */
-import { useCallback, useEffect, useMemo } from 'react';
+import {
+    createContext,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from 'react';
+import { debounce } from 'lodash';
 
-import { useForm, Validate } from 'react-hook-form';
+import { useForm, UseFormMethods, Validate } from 'react-hook-form';
 import { EqualRecord } from '../../utils/types';
+import { useUpdateEffect } from '../../utils/hooks';
 
 export interface DateParts {
     year: string;
@@ -119,7 +127,12 @@ const isValidDate = (parts: PartialDateParts): boolean => {
  * @param onChange Change event handler
  * @param value date value of controlled input component
  */
-export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
+export function useInputTimeStamp(
+    value: Date | undefined,
+    onChange: (v?: Date) => void,
+    onBlur?: () => void
+) {
+    const [isFocused, setIsFocused] = useState(false);
     const f = useForm<Partial<DateParts>>({ mode: 'onTouched' });
     const { watch, setValue, errors, trigger, formState } = f;
     const fields = watch();
@@ -129,6 +142,16 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
             setValue(name, formatters[name](v));
         },
         [setValue]
+    );
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const debouncedBlur = useCallback(
+        debounce((focus: boolean) => {
+            if (onBlur && !focus) {
+                onBlur();
+            }
+        }, 0),
+        [onBlur]
     );
 
     // To work around object identity comparison of "value"
@@ -146,6 +169,8 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
         // To work around object identity comparison fo "parts"
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [JSON.stringify(parts), setFormattedValue]);
+
+    useUpdateEffect(() => debouncedBlur(isFocused), [debouncedBlur, isFocused]);
 
     const fireOnChange = useCallback(() => {
         if (!hasAllParts(fields)) {
@@ -177,7 +202,11 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
                 fields.year &&
                 fields.month &&
                 date &&
-                !isValidDate({ ...fields, date } as PartialDateParts);
+                !isValidDate({
+                    year: fields.year,
+                    month: fields.month,
+                    date,
+                } as PartialDateParts);
 
             if (isDateInvalid) {
                 return message;
@@ -185,8 +214,15 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
 
             return undefined;
         },
-        [fields]
+        [fields.year, fields.month]
     );
+
+    useEffect(() => {
+        if (formState.touched[fieldNames.date]) {
+            trigger(fieldNames.date);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [validateDate]);
 
     return {
         isInvalid,
@@ -194,5 +230,16 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
         fireOnChange,
         validateDate,
         triggerDateValidation,
+        isFocused,
+        setIsFocused,
     };
 }
+
+interface TimeStampContextModel extends UseFormMethods<Partial<DateParts>> {
+    setIsFocused: (v: boolean) => void;
+    fireOnChange: () => void;
+}
+
+export const TimeStampContext = createContext<TimeStampContextModel>(
+    {} as TimeStampContextModel
+);

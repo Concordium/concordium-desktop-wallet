@@ -15,6 +15,10 @@
     background-color: $color-white;
     transition: box-shadow $anim-easing $anim-timing;
 
+    &Focused {
+        box-shadow: 0 0 0 2px $color-pale-blue inset;
+    }
+
     &Invalid {
         box-shadow: 0 0 0 2px $color-error inset;
     }

@@ -13,7 +13,7 @@ const Template: Story<InputTimeStampProps> = (args) => {
     const [value, setValue] = useState<Date>();
 
     return (
-        <div style={{ width: '500px' }}>
+        <div style={{ width: '500px', margin: '0 auto' }}>
             <div>Input Value: {`${value}`}</div>
             <InputTimeStampComponent
                 {...args}
