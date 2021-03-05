@@ -18,6 +18,11 @@ export interface VerifyKey {
     verifyKey: Hex;
 }
 
+export interface SignedPublicKey {
+    key: Hex;
+    signature: Hex;
+}
+
 export interface NewAccount {
     keys: VerifyKey[];
     threshold: number;

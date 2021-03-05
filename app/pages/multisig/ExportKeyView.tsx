@@ -13,6 +13,7 @@ import {
 } from '../../features/ledger/Path';
 import { saveFile } from '../../utils/FileHelper';
 import { ExportKeyType, getKeyDisplay } from './ExportKeyList';
+import { SignedPublicKey } from '../../utils/types';
 
 interface ParamTypes {
     keyType: ExportKeyType;
@@ -26,7 +27,7 @@ interface PublicKeyExportFormat {
 }
 
 export default function ExportKeyView(): JSX.Element {
-    const [publicKey, setPublicKey] = useState<Buffer>();
+    const [signedPublicKey, setSignedPublicKey] = useState<SignedPublicKey>();
     const { keyType } = useParams<ParamTypes>();
 
     async function exportPublicKey(
@@ -59,17 +60,17 @@ export default function ExportKeyView(): JSX.Element {
         setMessage(
             'Waiting for the user to finish the process on the hardware wallet.'
         );
-        setPublicKey(await ledger.getPublicKey(path));
+        setSignedPublicKey(await ledger.getSignedPublicKey(path));
     }
 
     async function saveExportedPublicKey(
-        verifyKey: string,
+        sPublicKey: SignedPublicKey,
         exportKeyType: ExportKeyType
     ) {
         const publicKeyExport: PublicKeyExportFormat = {
             schemeId: 'Ed25519',
-            verifyKey,
-            signature: '',
+            verifyKey: sPublicKey.key,
+            signature: sPublicKey.signature,
             type: exportKeyType,
         };
         const publicKeyExportJson = JSON.stringify(publicKeyExport);
@@ -77,15 +78,15 @@ export default function ExportKeyView(): JSX.Element {
     }
 
     let exportComponent;
-    if (publicKey) {
+    if (signedPublicKey) {
         exportComponent = (
             <Segment textAlign="center">
                 <Header>New {getKeyDisplay(keyType)}</Header>
-                {publicKey.toString('hex')}
+                {signedPublicKey.key}
                 <Header>Identicon</Header>
                 Click to copy
                 <Divider clearing hidden />
-                <Identicon string={publicKey.toString('hex')} size={128} />
+                <Identicon string={signedPublicKey.key} size={128} />
             </Segment>
         );
     } else {
@@ -117,13 +118,10 @@ export default function ExportKeyView(): JSX.Element {
                 </Header>
                 {exportComponent}
                 <Button
-                    disabled={!publicKey}
+                    disabled={!signedPublicKey}
                     onClick={() => {
-                        if (publicKey) {
-                            saveExportedPublicKey(
-                                publicKey.toString('hex'),
-                                keyType
-                            );
+                        if (signedPublicKey) {
+                            saveExportedPublicKey(signedPublicKey, keyType);
                         }
                     }}
                 >
