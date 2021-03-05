@@ -9,6 +9,11 @@ import {
     TransferToEncryptedPayload,
 } from './types';
 import {
+    TransactionAccountSignature,
+    Signature,
+    TransactionCredentialSignature,
+} from './transactionTypes';
+import {
     encodeWord32,
     encodeWord64,
     put,
@@ -102,17 +107,7 @@ export function serializeTransferPayload(
     }
 }
 
-type Signature = Buffer;
-type KeyIndex = number; // word8
-type CredentialIndex = number; // word8
-type TransactionCredentialSignatures = Record<KeyIndex, Signature>;
-type TransactionSignature = Record<
-    CredentialIndex,
-    TransactionCredentialSignatures
->;
-
-function serializeSignature(signatures: TransactionSignature) {
-    // FIXME: update to handle double-indexed signatures;
+function serializeSignature(signatures: TransactionAccountSignature) {
     // Size should be 1 for number of credentials, then for each credential:
     // 1 for the CredentialIndex, 1 for the number of signatures, then for each signature:
     // index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
@@ -123,16 +118,15 @@ function serializeSignature(signatures: TransactionSignature) {
         length.writeInt16BE(signature.length, 0);
         return Buffer.concat([length, signature]);
     };
-    const putCredentialSignatures = (
-        credSig: TransactionCredentialSignatures
-    ) => serializeMap(credSig, putInt8, putInt8, putSignature);
+    const putCredentialSignatures = (credSig: TransactionCredentialSignature) =>
+        serializeMap(credSig, putInt8, putInt8, putSignature);
     return serializeMap(signatures, putInt8, putInt8, putCredentialSignatures);
 }
 
 type SignFunction = (
     transaction: AccountTransaction,
     hash: Buffer
-) => TransactionSignature;
+) => TransactionAccountSignature;
 
 function serializeUnversionedTransaction(
     transaction: AccountTransaction,

@@ -7,7 +7,7 @@ export type Hex = string;
 type Proofs = Hex;
 type Word64 = BigInt;
 type Word32 = number;
-type Word8 = number;
+export type Word8 = number;
 
 export enum SchemeId {
     Ed25519 = 0,
@@ -23,10 +23,6 @@ export interface NewAccount {
     threshold: number;
 }
 
-// AccountAddress if deploying credentials to an existing account, and
-// NewAccount for deployment of a new account.
-// TODO: Add support for AccountAddress for updating existing account credentials.
-type CredentialAccount = NewAccount;
 export interface Versioned<T> {
     v: number;
     value: T;
@@ -232,13 +228,8 @@ export interface UnsignedCredentialDeploymentInformation
 
 // Reflects the structure of CredentialDeploymentInformation
 // from the crypto dependency.
-export interface CredentialDeploymentInformation {
-    account: CredentialAccount;
-    regId: RegId;
-    ipId: IpIdentity;
-    revocationThreshold: Threshold;
-    arData: Record<string, ArInfo>;
-    policy: Policy;
+export interface CredentialDeploymentInformation
+    extends CredentialDeploymentValues {
     proofs: Proofs;
 }
 

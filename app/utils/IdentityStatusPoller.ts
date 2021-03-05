@@ -6,6 +6,7 @@ import { confirmInitialAccount } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
 import { addToAddressBook } from '../features/AddressBookSlice';
 import { getAllIdentities } from '../database/IdentityDao';
+import { insertCredential } from '../database/CredentialDao';
 
 /**
  * Listens until, the identityProvider confirms the identity/initial account and returns the identityObject.
@@ -24,16 +25,18 @@ export async function confirmIdentityAndInitialAccount(
         if (!token) {
             await rejectIdentity(dispatch, identityName);
         } else {
+            const { accountAddress } = token;
             await confirmIdentity(dispatch, identityName, token.identityObject);
             await confirmInitialAccount(
                 dispatch,
                 accountName,
-                token.accountAddress,
+                accountAddress,
                 token.credential
             );
+            insertCredential(accountAddress, token.credential);
             addToAddressBook(dispatch, {
                 name: accountName,
-                address: token.accountAddress,
+                address: accountAddress,
                 note: `Initial account of ${identityName}`,
                 readOnly: true,
             });

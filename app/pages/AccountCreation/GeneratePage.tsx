@@ -21,6 +21,10 @@ import {
     addToAddressBook,
     removeFromAddressBook,
 } from '../../features/AddressBookSlice';
+import {
+    insertCredential,
+    removeCredentialsOfAccount,
+} from '../../database/CredentialDao';
 import { globalSelector } from '../../features/GlobalSlice';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import ErrorModal from '../../components/SimpleErrorModal';
@@ -33,6 +37,7 @@ interface Props {
 
 function removeFailed(dispatch: Dispatch, accountAddress: string) {
     removeAccount(dispatch, accountAddress);
+    removeCredentialsOfAccount(accountAddress);
     removeFromAddressBook(dispatch, { address: accountAddress });
 }
 
@@ -85,6 +90,7 @@ export default function AccountCreationGenerate({
             credentialDeploymentInfo,
             transactionId
         );
+        await insertCredential(accountAddress, credentialDeploymentInfo);
         addToAddressBook(dispatch, {
             name: accountName,
             address: accountAddress,
