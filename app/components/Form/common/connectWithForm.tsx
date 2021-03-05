@@ -71,8 +71,11 @@ interface ControlledFieldProps<TValue>
         Pick<ControllerRenderProps, 'onChange' | 'onBlur'> {
     value: TValue;
 }
-type ControlledConnectorProps = CommonConnectorProps &
-    Omit<UseControllerOptions, 'onFocus' | 'control'>;
+interface ControlledConnectorProps<TValue>
+    extends CommonConnectorProps,
+        Omit<UseControllerOptions, 'onFocus' | 'control'> {
+    defaultValue?: TValue;
+}
 
 /**
  * @description
@@ -90,10 +93,12 @@ type ControlledConnectorProps = CommonConnectorProps &
  */
 export function connectWithFormControlled<
     TValue,
-    TProps extends ControlledFieldProps<TValue>
+    TProps extends ControlledFieldProps<TValue> = ControlledFieldProps<TValue>
 >(
     Field: ComponentType<TProps>
-): (props: Omit<TProps, 'error'> & ControlledConnectorProps) => JSX.Element {
+): (
+    props: Omit<TProps, 'error'> & ControlledConnectorProps<TValue>
+) => JSX.Element {
     const Connected: ReturnType<typeof connectWithFormControlled> = ({
         name,
         rules,

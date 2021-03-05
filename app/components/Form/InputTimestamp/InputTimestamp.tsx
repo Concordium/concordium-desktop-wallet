@@ -2,15 +2,12 @@ import clsx from 'clsx';
 import React from 'react';
 
 import { useInputTimeStamp, fieldNames, TimeStampContext } from './util';
-import TimeStampField from './TimeStampField';
+import TimeStampField from './TimestampField';
 
-import styles from './InputTimeStamp.module.scss';
+import styles from './InputTimestamp.module.scss';
+import { CommonInputProps } from '../common';
 
-export interface InputTimeStampProps {
-    /**
-     * Label to be shown with input.
-     */
-    label?: string | JSX.Element;
+export interface InputTimeStampProps extends CommonInputProps {
     /**
      * Value of Input (type Date).
      */

@@ -34,7 +34,7 @@
     background-color: transparent;
 
     &::placeholder {
-        color: inherit;
+        color: $color-text-faded;
     }
 
     &:focus {

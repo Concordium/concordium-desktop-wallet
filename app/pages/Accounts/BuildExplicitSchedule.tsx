@@ -12,7 +12,7 @@ import {
 import { Schedule, TimeStampUnit } from '../../utils/types';
 import { displayAsGTU, isValidGTUString, toMicroUnits } from '../../utils/gtu';
 import { parseTime, getNow, TimeConstants } from '../../utils/timeHelpers';
-import InputTimeStamp from '../../components/InputTimeStamp';
+import InputTimeStamp from '../../components/Form/InputTimestamp';
 
 interface Props {
     submitSchedule(schedule: Schedule): void;

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Label, List, Button, Input } from 'semantic-ui-react';
 import { Schedule } from '../../utils/types';
 import { createRegularIntervalSchedule } from '../../utils/transactionHelpers';
-import InputTimeStamp from '../../components/InputTimeStamp';
+import InputTimeStamp from '../../components/Form/InputTimestamp';
 import { TimeConstants, getNow } from '../../utils/timeHelpers';
 
 export interface Interval {

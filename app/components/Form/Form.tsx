@@ -2,11 +2,15 @@ import React, { FC, FormHTMLAttributes, PropsWithChildren } from 'react';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 
 import Switch from '../../cross-app-components/Switch';
-import { connectWithFormUncontrolled } from './common/connectWithForm';
+import {
+    connectWithFormControlled,
+    connectWithFormUncontrolled,
+} from './common/connectWithForm';
 import Input from './Input';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
 import Submit from './Submit';
+import InputTimestamp from './InputTimestamp/InputTimestamp';
 
 export interface FormProps<TFormValues>
     extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
@@ -73,5 +77,8 @@ Form.Switch = connectWithFormUncontrolled(Switch);
 
 Form.Submit = Submit;
 (Form.Submit as FC).displayName = 'Form.Submit';
+
+Form.Timestamp = connectWithFormControlled<Date>(InputTimestamp);
+(Form.Timestamp as FC).displayName = 'Form.Timestamp';
 
 export default Form;

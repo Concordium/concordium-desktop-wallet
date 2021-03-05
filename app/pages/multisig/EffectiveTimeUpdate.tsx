@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Header } from 'semantic-ui-react';
-import InputTimeStamp from '../../components/InputTimeStamp';
+import InputTimeStamp from '../../components/Form/InputTimestamp';
 import { getNow, TimeConstants } from '../../utils/timeHelpers';
 import { UpdateComponent } from '../../utils/transactionTypes';
 import { MultiSignatureTransaction } from '../../utils/types';

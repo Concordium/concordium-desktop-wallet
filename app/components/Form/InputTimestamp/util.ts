@@ -9,8 +9,8 @@ import {
 import { debounce } from 'lodash';
 
 import { useForm, UseFormMethods, Validate } from 'react-hook-form';
-import { EqualRecord } from '../../utils/types';
-import { useUpdateEffect } from '../../utils/hooks';
+import { EqualRecord } from '../../../utils/types';
+import { useUpdateEffect } from '../../../utils/hooks';
 
 export interface DateParts {
     year: string;

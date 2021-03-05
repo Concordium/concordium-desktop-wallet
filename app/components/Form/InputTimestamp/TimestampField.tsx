@@ -10,7 +10,7 @@ import React, {
 import { RegisterOptions, useController } from 'react-hook-form';
 import { DateParts, TimeStampContext } from './util';
 
-import styles from './InputTimeStamp.module.scss';
+import styles from './InputTimestamp.module.scss';
 
 type InputProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
