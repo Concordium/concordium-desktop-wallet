@@ -5,7 +5,7 @@ export type Dispatch = GenericDispatch<AnyAction>;
 
 export type Hex = string;
 type Proofs = Hex;
-type Word64 = BigInt;
+type Word64 = bigint;
 type Word32 = number;
 type Word8 = number;
 
@@ -603,6 +603,7 @@ export enum MultiSignatureTransactionStatus {
     Finalized = 'finalized',
     Committed = 'committed',
     Failed = 'failed',
+    Expired = 'expired',
 }
 
 /**
