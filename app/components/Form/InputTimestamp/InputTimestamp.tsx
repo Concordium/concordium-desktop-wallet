@@ -4,10 +4,26 @@ import React from 'react';
 import { isDefined } from '../../../utils/basicHelpers';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
-import { useInputTimeStamp, fieldNames, TimeStampContext } from './util';
+import {
+    useInputTimeStamp,
+    fieldNames,
+    TimeStampContext,
+    DateParts,
+} from './util';
 import TimeStampField from './TimestampField';
 
 import styles from './InputTimestamp.module.scss';
+
+type TimestampErrorMessages = DateParts;
+
+const defaultErrorMessages: TimestampErrorMessages = {
+    year: 'Invalid year value',
+    month: 'Invalid month value',
+    date: 'Invalid date value',
+    hours: 'Invalid hours value',
+    minutes: 'Invalid minutes value',
+    seconds: 'Invalid seconds value',
+};
 
 export interface InputTimeStampProps extends CommonInputProps {
     /**
@@ -22,6 +38,7 @@ export interface InputTimeStampProps extends CommonInputProps {
      * Focus event handler.
      */
     onBlur?(): void;
+    errorMessages?: TimestampErrorMessages;
 }
 
 /**
@@ -37,6 +54,7 @@ export default function InputTimeStamp({
     label,
     error,
     value,
+    errorMessages = defaultErrorMessages,
     onChange,
     onBlur,
 }: InputTimeStampProps): JSX.Element {
@@ -49,8 +67,10 @@ export default function InputTimeStamp({
     } = useInputTimeStamp(value, onChange, onBlur);
 
     const firstFormError = Object.values(form.errors).filter(isDefined)[0];
-
-    const errorMessage = error || firstFormError?.message;
+    const errorMessage =
+        errorMessages[firstFormError?.ref?.name as keyof DateParts] || error;
+    const isInvalid =
+        !!Object.values(form.errors).filter(isDefined)[0] || !!error;
 
     return (
         <div className={styles.root}>
@@ -59,7 +79,7 @@ export default function InputTimeStamp({
                 className={clsx(
                     styles.input,
                     isFocused && styles.inputFocused,
-                    error !== undefined && styles.inputInvalid
+                    isInvalid && styles.inputInvalid
                 )}
             >
                 <TimeStampContext.Provider
@@ -84,7 +104,7 @@ export default function InputTimeStamp({
                         name={fieldNames.date}
                         placeholder="DD"
                         rules={{
-                            validate: validateDate('Date is invalid'),
+                            validate: validateDate,
                             max: 31,
                         }}
                     />

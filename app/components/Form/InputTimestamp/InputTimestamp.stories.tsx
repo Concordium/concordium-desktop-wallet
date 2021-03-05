@@ -5,12 +5,12 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import InputTimeStampComponent, { InputTimeStampProps } from './InputTimestamp';
 
 export default {
-    title: 'Components/Input Time Stamp',
+    title: 'Components/Form/Fields/Input Time Stamp',
     component: InputTimeStampComponent,
 } as Meta;
 
 const Template: Story<InputTimeStampProps> = (args) => {
-    const [value, setValue] = useState<Date>();
+    const [value, setValue] = useState<Date | undefined>(args.value);
 
     return (
         <div style={{ width: '500px', margin: '0 auto' }}>
@@ -24,7 +24,15 @@ const Template: Story<InputTimeStampProps> = (args) => {
     );
 };
 
-export const InputTimeStamp = Template.bind({});
-InputTimeStamp.args = {
+export const Primary = Template.bind({});
+Primary.args = {
     label: 'Timestamp',
+    error: '',
+};
+
+export const WithInitialValue = Template.bind({});
+WithInitialValue.args = {
+    label: 'Timestamp',
+    error: '',
+    value: new Date(),
 };

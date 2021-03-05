@@ -134,7 +134,7 @@ export function useInputTimeStamp(
 ) {
     const [isFocused, setIsFocused] = useState(false);
     const f = useForm<Partial<DateParts>>({ mode: 'onTouched' });
-    const { watch, setValue, errors, trigger, formState } = f;
+    const { watch, setValue, trigger, formState } = f;
     const fields = watch();
 
     const setFormattedValue = useCallback(
@@ -195,8 +195,8 @@ export function useInputTimeStamp(
         }
     }, [formState, trigger]);
 
-    const validateDate = useCallback(
-        (message: string): Validate => (date?: string) => {
+    const validateDate: Validate = useCallback(
+        (date?: string) => {
             const isDateInvalid =
                 fields.year &&
                 fields.month &&
@@ -208,10 +208,10 @@ export function useInputTimeStamp(
                 } as PartialDateParts);
 
             if (isDateInvalid) {
-                return message;
+                return false;
             }
 
-            return undefined;
+            return !isDateInvalid;
         },
         [fields.year, fields.month]
     );
