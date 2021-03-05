@@ -85,7 +85,7 @@ async function generateIdentity(
     let identityObjectLocation;
     try {
         const IdentityProviderLocation = await performIdObjectRequest(
-            provider.metadata.issuanceStart,
+            'http://localhost:8100/api/identity', // provider.metadata.issuanceStart,
             redirectUri,
             idObjectRequest
         );

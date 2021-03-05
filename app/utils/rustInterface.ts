@@ -6,16 +6,15 @@ import {
     PublicInformationForIp,
     Identity,
     IpInfo,
-    SchemeId,
     ArInfo,
     Account,
     CredentialDeploymentDetails,
-    VerifyKey,
     Global,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
-import { toHex } from './serializationHelpers';
+import { getDefaultExpiry } from './timeHelpers';
+import { stringify } from './JSONHelper';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
@@ -37,21 +36,6 @@ async function getSecretsFromLedger(
     const prfKey = prfKeySeed.toString('hex');
     const idCredSec = idCredSecSeed.toString('hex');
     return { prfKey, idCredSec };
-}
-
-// Given a list of Keys, for each key, attempts to prepend the schemeId
-// onto the key hex value, and returns the prepended versions.
-function prependKeyType(keys: VerifyKey[]) {
-    return keys.map((key) => {
-        const scheme = key.schemeId as keyof typeof SchemeId;
-        if (SchemeId[scheme] !== undefined) {
-            return {
-                schemeId: key.schemeId,
-                verifyKey: `${toHex(SchemeId[scheme], 2)}${key.verifyKey}`,
-            };
-        }
-        throw new Error('Unknown key type');
-    });
 }
 
 /**
@@ -105,8 +89,6 @@ export async function createIdentityRequestObjectLedger(
     });
 
     const pubInfoForIp: PublicInformationForIp = JSON.parse(pubInfoForIpString);
-
-    pubInfoForIp.publicKeys.keys = prependKeyType(pubInfoForIp.publicKeys.keys);
 
     const path = {
         identityIndex: identityNumber,
@@ -198,19 +180,24 @@ export async function createCredential(
         input: JSON.stringify(credentialInput),
     });
 
-    const unsignedCredentialDeploymentInfo = JSON.parse(
-        unsignedCredentialDeploymentInfoString
-    );
-    displayMessage(`
-Please sign challenge on device:
-Challenge: ${unsignedCredentialDeploymentInfo.accountOwnershipChallenge}
-`);
+    let unsignedCredentialDeploymentInfo;
+
+    try {
+        unsignedCredentialDeploymentInfo = JSON.parse(
+            unsignedCredentialDeploymentInfoString
+        );
+    } catch (e) {
+        throw new Error(unsignedCredentialDeploymentInfoString);
+    }
+
+    const expiry = getDefaultExpiry();
+
+    // TODO: Display the appropiate details
+    displayMessage(`Please sign details on device.`);
     const path = [0, 0, identity.id, 2, accountNumber, 0];
-    const challengeSignature = await ledger.signAccountChallenge(
-        Buffer.from(
-            unsignedCredentialDeploymentInfo.accountOwnershipChallenge,
-            'hex'
-        ),
+    const challengeSignature = await ledger.signNewCredentialDeployment(
+        unsignedCredentialDeploymentInfo,
+        expiry,
         path
     );
     displayMessage('Please wait');
@@ -219,15 +206,20 @@ Challenge: ${unsignedCredentialDeploymentInfo.accountOwnershipChallenge}
         command: workerCommands.createCredential,
         signature: challengeSignature.toString('hex'),
         unsignedInfo: unsignedCredentialDeploymentInfoString,
+        expiry: stringify(expiry),
     });
-    const output = JSON.parse(credentialDeploymentInfoString);
+    try {
+        const output = JSON.parse(credentialDeploymentInfoString);
 
-    return {
-        credentialDeploymentInfoHex: output.hex,
-        accountAddress: output.address,
-        credentialDeploymentInfo: output.credInfo,
-        transactionId: output.hash,
-    };
+        return {
+            credentialDeploymentInfoHex: output.hex,
+            accountAddress: output.address,
+            credentialDeploymentInfo: output.credInfo,
+            transactionId: output.hash,
+        };
+    } catch (e) {
+        throw new Error(credentialDeploymentInfoString);
+    }
 }
 
 /**

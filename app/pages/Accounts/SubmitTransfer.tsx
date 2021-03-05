@@ -61,12 +61,15 @@ export default function SubmitTransfer({ location }: Props) {
             signatureIndex: 0,
         });
         const signature: Buffer = await ledger.signTransfer(transaction, path);
-        const serializedTransaction = serializeTransaction(transaction, () => [
-            signature,
-        ]);
-        const transactionHash = getTransactionHash(transaction, () => [
-            signature,
-        ]).toString('hex');
+        const signatureStructured = { 0: { 0: signature } };
+        const serializedTransaction = serializeTransaction(
+            transaction,
+            () => signatureStructured
+        );
+        const transactionHash = getTransactionHash(
+            transaction,
+            () => signatureStructured
+        ).toString('hex');
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
             addPendingTransaction(transaction, transactionHash);

@@ -1,5 +1,6 @@
 import 'regenerator-runtime/runtime';
 import registerPromiseWorker from 'promise-worker/register';
+import { parse } from './JSONHelper';
 import workerCommands from '../constants/workerCommands.json';
 
 interface RustInterface {
@@ -15,7 +16,11 @@ interface RustInterface {
         prfKey: string
     ): string;
     generateUnsignedCredential(context: string): string;
-    getDeploymentInfo(signature: string, unsignedInfo: string): string;
+    getDeploymentInfo(
+        signature: string,
+        unsignedInfo: string,
+        expiry: bigint
+    ): string;
     decrypt_amounts_ext(amounts: string): string;
 }
 
@@ -58,7 +63,11 @@ function createCredential(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.getDeploymentInfo(message.signature, message.unsignedInfo);
+    return rust.getDeploymentInfo(
+        message.signature,
+        message.unsignedInfo,
+        parse(message.expiry)
+    );
 }
 
 function decryptAmounts(rust: RustInterface, message: Record<string, string>) {

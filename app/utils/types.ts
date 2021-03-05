@@ -200,6 +200,36 @@ export enum BlockItemKind {
     UpdateInstructionKind = 2,
 }
 
+export interface ChainArData {
+    encIdCredPubShare: Hex;
+}
+
+export interface CredentialDeploymentValues {
+    credentialPublicKeys: CredentialPublicKeys;
+    credId: Hex;
+    ipIdentity: IpIdentity;
+    revocationThreshold: Threshold;
+    policy: Policy;
+    arData: Record<string, ChainArData>;
+}
+
+export interface IdOwnershipProofs {
+    challenge: Hex;
+    commitments: Hex;
+    credCounterLessThanMaxAccounts: Hex;
+    proofIdCredPub: Record<string, Hex>;
+    proofIpSig: Hex;
+    proofRegId: Hex;
+    sig: Hex;
+}
+
+// Reflects the structure of UnsignedCredentialDeploymentInformation
+// from the crypto dependency.
+export interface UnsignedCredentialDeploymentInformation
+    extends CredentialDeploymentValues {
+    proofs: IdOwnershipProofs;
+}
+
 // Reflects the structure of CredentialDeploymentInformation
 // from the crypto dependency.
 export interface CredentialDeploymentInformation {
@@ -245,6 +275,11 @@ export enum AttributeTag {
     taxIdNo = 12,
 }
 
+export interface CredentialPublicKeys {
+    keys: Record<number, VerifyKey>;
+    threshold: number;
+}
+
 /**
  * This interface models the PublicInformationForIp structure, which we get from the Crypto Dependency
  * (And is used during Identity Issuance)
@@ -252,7 +287,7 @@ export enum AttributeTag {
 export interface PublicInformationForIp {
     idCredPub: Hex;
     regId: RegId;
-    publicKeys: NewAccount;
+    publicKeys: CredentialPublicKeys;
 }
 
 // Statuses that a transaction can have.
