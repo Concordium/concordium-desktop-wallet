@@ -4,13 +4,10 @@ import React from 'react';
 import { isDefined } from '../../../utils/basicHelpers';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
-import {
-    useInputTimeStamp,
-    fieldNames,
-    TimeStampContext,
-    DateParts,
-} from './util';
-import TimeStampField from './TimestampField';
+import { fieldNames, DateParts } from './util';
+import InputTimestampField from './InputTimestampField';
+import useInputTimestamp from './useInputTimestamp';
+import InputTimestampContext from './InputTimestampContext';
 
 import styles from './InputTimestamp.module.scss';
 
@@ -25,7 +22,7 @@ const defaultErrorMessages: TimestampErrorMessages = {
     seconds: 'Invalid seconds value',
 };
 
-export interface InputTimeStampProps extends CommonInputProps {
+export interface InputTimestampProps extends CommonInputProps {
     /**
      * Value of Input (type Date).
      */
@@ -51,9 +48,9 @@ export interface InputTimeStampProps extends CommonInputProps {
  * @example
  * const [date, setDate] = useState<Date | undefined>();
  * ...
- * <InputTimeStamp label="Timestamp" value={date} onChange={setDate} />
+ * <InputTimestamp label="Timestamp" value={date} onChange={setDate} />
  */
-export default function InputTimeStamp({
+export default function InputTimestamp({
     label,
     error,
     value,
@@ -61,14 +58,14 @@ export default function InputTimeStamp({
     isInvalid = false,
     onChange,
     onBlur,
-}: InputTimeStampProps): JSX.Element {
+}: InputTimestampProps): JSX.Element {
     const {
         form,
         fireOnChange,
         validateDate,
         isFocused,
         setIsFocused,
-    } = useInputTimeStamp(value, onChange, onBlur);
+    } = useInputTimestamp(value, onChange, onBlur);
 
     const firstFormError = Object.values(form.errors).filter(isDefined)[0];
     const errorMessage =
@@ -86,24 +83,24 @@ export default function InputTimeStamp({
                     invalid && styles.inputInvalid
                 )}
             >
-                <TimeStampContext.Provider
+                <InputTimestampContext.Provider
                     value={{ ...form, setIsFocused, fireOnChange }}
                 >
-                    <TimeStampField
+                    <InputTimestampField
                         className={styles.year}
                         name={fieldNames.year}
                         placeholder="YYYY"
                         rules={{ min: 100, max: 9999 }}
                     />
                     -
-                    <TimeStampField
+                    <InputTimestampField
                         className={styles.field}
                         name={fieldNames.month}
                         placeholder="MM"
                         rules={{ min: 1, max: 12 }}
                     />
                     -
-                    <TimeStampField
+                    <InputTimestampField
                         className={styles.field}
                         name={fieldNames.date}
                         placeholder="DD"
@@ -113,27 +110,27 @@ export default function InputTimeStamp({
                         }}
                     />
                     <span>at</span>
-                    <TimeStampField
+                    <InputTimestampField
                         className={styles.field}
                         name={fieldNames.hours}
                         placeholder="HH"
                         rules={{ max: 23 }}
                     />
                     :
-                    <TimeStampField
+                    <InputTimestampField
                         className={styles.field}
                         name={fieldNames.minutes}
                         placeholder="MM"
                         rules={{ max: 59 }}
                     />
                     :
-                    <TimeStampField
+                    <InputTimestampField
                         className={styles.field}
                         name={fieldNames.seconds}
                         placeholder="SS"
                         rules={{ max: 59 }}
                     />
-                </TimeStampContext.Provider>
+                </InputTimestampContext.Provider>
             </div>
             <ErrorMessage>{errorMessage}</ErrorMessage>
         </div>

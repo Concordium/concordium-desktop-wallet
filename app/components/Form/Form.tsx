@@ -75,10 +75,10 @@ Form.Checkbox = connectWithFormUncontrolled(Checkbox);
 Form.Switch = connectWithFormUncontrolled(Switch);
 (Form.Switch as FC).displayName = 'Form.Switch';
 
-Form.Submit = Submit;
-(Form.Submit as FC).displayName = 'Form.Submit';
-
 Form.Timestamp = connectWithFormControlled<Date>(InputTimestamp);
 (Form.Timestamp as FC).displayName = 'Form.Timestamp';
+
+Form.Submit = Submit;
+(Form.Submit as FC).displayName = 'Form.Submit';
 
 export default Form;

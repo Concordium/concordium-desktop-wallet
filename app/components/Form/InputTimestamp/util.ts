@@ -1,16 +1,5 @@
 /* eslint-disable radix */
-import {
-    createContext,
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-} from 'react';
-import { debounce } from 'lodash';
-
-import { useForm, UseFormMethods, Validate } from 'react-hook-form';
 import { EqualRecord } from '../../../utils/types';
-import { useUpdateEffect } from '../../../utils/hooks';
 
 export interface DateParts {
     year: string;
@@ -30,7 +19,7 @@ export const fieldNames: EqualRecord<DateParts> = {
     seconds: 'seconds',
 };
 
-function hasAllParts(parts: Partial<DateParts>): parts is DateParts {
+export function hasAllParts(parts: Partial<DateParts>): parts is DateParts {
     const values = Object.values(parts);
     return (
         values.length === Object.keys(fieldNames).length &&
@@ -38,7 +27,7 @@ function hasAllParts(parts: Partial<DateParts>): parts is DateParts {
     );
 }
 
-function fromDate(date?: Date): DateParts | undefined {
+export function fromDate(date?: Date): DateParts | undefined {
     if (!date) {
         return undefined;
     }
@@ -53,7 +42,7 @@ function fromDate(date?: Date): DateParts | undefined {
     };
 }
 
-function fromDateParts(date: DateParts): Date {
+export function fromDateParts(date: DateParts): Date {
     return new Date(
         parseInt(date.year),
         parseInt(date.month) - 1,
@@ -64,7 +53,7 @@ function fromDateParts(date: DateParts): Date {
     );
 }
 
-function isEqual(a: DateParts, b: DateParts): boolean {
+export function isEqual(a: DateParts, b: DateParts): boolean {
     return (
         parseInt(a.year) === parseInt(b.year) &&
         parseInt(a.month) === parseInt(b.month) &&
@@ -94,7 +83,7 @@ const ensureNumberLength = (length: number) => (value?: string): string => {
 
 type Formatters = { [key in keyof DateParts]: (v?: string) => string };
 
-const formatters: Formatters = {
+export const formatters: Formatters = {
     year: ensureNumberLength(4),
     month: ensureNumberLength(2),
     date: ensureNumberLength(2),
@@ -103,9 +92,9 @@ const formatters: Formatters = {
     seconds: ensureNumberLength(2),
 };
 
-type PartialDateParts = Pick<DateParts, 'year' | 'month' | 'date'> &
+export type PartialDateParts = Pick<DateParts, 'year' | 'month' | 'date'> &
     Partial<Omit<DateParts, 'year' | 'month' | 'date'>>;
-const isValidDate = (parts: PartialDateParts): boolean => {
+export const isValidDate = (parts: PartialDateParts): boolean => {
     const t: DateParts = {
         ...parts,
         hours: parts.hours || '0',
@@ -119,125 +108,3 @@ const isValidDate = (parts: PartialDateParts): boolean => {
 
     return isValid;
 };
-
-/**
- * @description
- * Only to be used with \<InputTimeStamp /\> component.
- *
- * @param onChange Change event handler
- * @param value date value of controlled input component
- */
-export function useInputTimeStamp(
-    value: Date | undefined,
-    onChange: (v?: Date) => void,
-    onBlur?: () => void
-) {
-    const [isFocused, setIsFocused] = useState(false);
-    const f = useForm<Partial<DateParts>>({ mode: 'onTouched' });
-    const { watch, setValue, trigger, formState } = f;
-    const fields = watch();
-
-    const setFormattedValue = useCallback(
-        (name: keyof DateParts, v?: string) => {
-            setValue(name, formatters[name](v));
-        },
-        [setValue]
-    );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const debouncedBlur = useCallback(
-        debounce((focus: boolean) => {
-            if (onBlur && !focus) {
-                onBlur();
-            }
-        }, 0),
-        [onBlur]
-    );
-
-    // To work around object identity comparison of "value"
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const parts = useMemo(() => fromDate(value), [value?.toISOString()]);
-
-    useEffect(() => {
-        if (!parts) {
-            return;
-        }
-
-        (Object.keys(parts) as Array<keyof DateParts>).forEach((k) =>
-            setFormattedValue(k, parts[k])
-        );
-        // To work around object identity comparison fo "parts"
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(parts), setFormattedValue]);
-
-    useUpdateEffect(() => debouncedBlur(isFocused), [debouncedBlur, isFocused]);
-
-    const fireOnChange = useCallback(() => {
-        if (!hasAllParts(fields)) {
-            onChange(undefined);
-        } else {
-            const date = fromDateParts(fields);
-            const test = fromDate(date);
-
-            const isValid = test && isEqual(fields, test);
-
-            onChange(isValid ? date : undefined);
-        }
-        // To work around object identity comparison of "fields"
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(fields), onChange]);
-
-    const form: typeof f = { ...f, setValue: setFormattedValue };
-
-    const triggerDateValidation = useCallback(() => {
-        if (formState.touched[fieldNames.date]) {
-            setTimeout(() => trigger(fieldNames.date), 0);
-        }
-    }, [formState, trigger]);
-
-    const validateDate: Validate = useCallback(
-        (date?: string) => {
-            const isDateInvalid =
-                fields.year &&
-                fields.month &&
-                date &&
-                !isValidDate({
-                    year: fields.year,
-                    month: fields.month,
-                    date,
-                } as PartialDateParts);
-
-            if (isDateInvalid) {
-                return false;
-            }
-
-            return !isDateInvalid;
-        },
-        [fields.year, fields.month]
-    );
-
-    useEffect(() => {
-        if (formState.touched[fieldNames.date]) {
-            trigger(fieldNames.date);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [validateDate]);
-
-    return {
-        form,
-        fireOnChange,
-        validateDate,
-        triggerDateValidation,
-        isFocused,
-        setIsFocused,
-    };
-}
-
-interface TimeStampContextModel extends UseFormMethods<Partial<DateParts>> {
-    setIsFocused: (v: boolean) => void;
-    fireOnChange: () => void;
-}
-
-export const TimeStampContext = createContext<TimeStampContextModel>(
-    {} as TimeStampContextModel
-);
