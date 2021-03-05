@@ -629,6 +629,7 @@ export enum MultiSignatureMenuItems {
     MakeNewProposal = 'Make new proposal',
     ProposedTransactions = 'Proposed transactions',
     SignTransaction = 'Sign transaction',
+    ExportKey = 'Export public-key',
 }
 
 export interface ExchangeRate {
