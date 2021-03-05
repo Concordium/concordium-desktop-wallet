@@ -38,6 +38,9 @@ export interface InputTimeStampProps extends CommonInputProps {
      * Focus event handler.
      */
     onBlur?(): void;
+    /**
+     * Error messages object to supply custom error messages for internal field errors.
+     */
     errorMessages?: TimestampErrorMessages;
 }
 

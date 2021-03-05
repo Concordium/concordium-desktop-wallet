@@ -28,6 +28,7 @@ export const Primary = Template.bind({});
 Primary.args = {
     label: 'Timestamp',
     error: '',
+    isInvalid: false,
 };
 
 export const WithInitialValue = Template.bind({});
@@ -35,4 +36,5 @@ WithInitialValue.args = {
     label: 'Timestamp',
     error: '',
     value: new Date(),
+    isInvalid: false,
 };
