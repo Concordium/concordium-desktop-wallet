@@ -13,16 +13,18 @@ const Template: Story<InputTimeStampProps> = (args) => {
     const [value, setValue] = useState<Date>();
 
     return (
-        <>
-            <div>Value: {`${value}`}</div>
+        <div style={{ width: '500px' }}>
+            <div>Input Value: {`${value}`}</div>
             <InputTimeStampComponent
                 {...args}
                 value={value}
                 onChange={setValue}
             />
-        </>
+        </div>
     );
 };
 
 export const InputTimeStamp = Template.bind({});
-InputTimeStamp.args = {};
+InputTimeStamp.args = {
+    label: 'Timestamp',
+};

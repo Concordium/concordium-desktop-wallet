@@ -1,8 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable radix */
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { useForm } from 'react-hook-form';
+import { useForm, Validate } from 'react-hook-form';
 import { EqualRecord } from '../../utils/types';
 
 export interface DateParts {
@@ -110,14 +109,19 @@ const isValidDate = (parts: PartialDateParts): boolean => {
 
     const isValid = test !== undefined && isEqual(t, test);
 
-    console.log('isValid', isValid, t, test);
-
     return isValid;
 };
 
+/**
+ * @description
+ * Only to be used with \<InputTimeStamp /\> component.
+ *
+ * @param onChange Change event handler
+ * @param value date value of controlled input component
+ */
 export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
     const f = useForm<Partial<DateParts>>({ mode: 'onTouched' });
-    const { watch, setValue, errors } = f;
+    const { watch, setValue, errors, trigger, formState } = f;
     const fields = watch();
 
     const setFormattedValue = useCallback(
@@ -127,6 +131,8 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
         [setValue]
     );
 
+    // To work around object identity comparison of "value"
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const parts = useMemo(() => fromDate(value), [value?.toISOString()]);
 
     useEffect(() => {
@@ -137,7 +143,9 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
         (Object.keys(parts) as Array<keyof DateParts>).forEach((k) =>
             setFormattedValue(k, parts[k])
         );
-    }, [parts, setFormattedValue]);
+        // To work around object identity comparison fo "parts"
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(parts), setFormattedValue]);
 
     const fireOnChange = useCallback(() => {
         if (!hasAllParts(fields)) {
@@ -150,20 +158,28 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
 
             onChange(isValid ? date : undefined);
         }
-    }, [setFormattedValue, fields]);
+        // To work around object identity comparison of "fields"
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(fields), onChange]);
 
     const form: typeof f = { ...f, setValue: setFormattedValue };
     const isInvalid = hasAllParts(fields) && Object.keys(errors).length > 0;
 
+    const triggerDateValidation = useCallback(() => {
+        if (formState.touched[fieldNames.date]) {
+            setTimeout(() => trigger(fieldNames.date), 0);
+        }
+    }, [formState, trigger]);
+
     const validateDate = useCallback(
-        (message: string) => () => {
-            console.log('fields', fields);
-            if (
+        (message: string): Validate => (date?: string) => {
+            const isDateInvalid =
                 fields.year &&
                 fields.month &&
-                fields.date &&
-                !isValidDate(fields as PartialDateParts)
-            ) {
+                date &&
+                !isValidDate({ ...fields, date } as PartialDateParts);
+
+            if (isDateInvalid) {
                 return message;
             }
 
@@ -172,5 +188,11 @@ export function useInputTimeStamp(onChange: (v?: Date) => void, value?: Date) {
         [fields]
     );
 
-    return { isInvalid, form, fireOnChange, validateDate };
+    return {
+        isInvalid,
+        form,
+        fireOnChange,
+        validateDate,
+        triggerDateValidation,
+    };
 }

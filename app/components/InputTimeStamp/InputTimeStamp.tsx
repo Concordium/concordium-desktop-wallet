@@ -8,33 +8,45 @@ import TimeStampField from './TimeStampField';
 import styles from './InputTimeStamp.module.scss';
 
 export interface InputTimeStampProps {
+    /**
+     * Label to be shown with input.
+     */
     label?: string | JSX.Element;
-    value?: Date;
-    onChange(date?: Date): void;
+    /**
+     * Value of Input (type Date).
+     */
+    value: Date | undefined;
+    /**
+     * Change event handler, supplies date as argument.
+     */
+    onChange(date: Date | undefined): void;
 }
 
+/**
+ * @description
+ * Controlled input (stores value externally) for setting date + time.
+ *
+ * @example
+ * const [date, setDate] = useState<Date | undefined>();
+ * ...
+ * <InputTimeStamp label="Timestamp" value={date} onChange={setDate} />
+ */
 export default function InputTimeStamp({
     label,
     value,
     onChange,
 }: InputTimeStampProps): JSX.Element {
-    // const validateDate: Validate = useCallback(() => {
-    //     if (Object.keys(errors).length > 0 || !isInvalid) {
-    //         return undefined;
-    //     }
-
-    //     return 'Date is invalid';
-    // }, [errors, isInvalid]);
-    const { isInvalid, form, fireOnChange, validateDate } = useInputTimeStamp(
-        onChange,
-        value
-    );
+    const {
+        isInvalid,
+        form,
+        fireOnChange,
+        validateDate,
+        triggerDateValidation,
+    } = useInputTimeStamp(onChange, value);
 
     return (
         <div className={styles.root}>
             {label}
-            <br />
-            errors: {JSON.stringify(form.errors)}
             <div
                 className={clsx(styles.input, isInvalid && styles.inputInvalid)}
             >
@@ -43,25 +55,24 @@ export default function InputTimeStamp({
                         className={styles.year}
                         name={fieldNames.year}
                         placeholder="YYYY"
-                        triggerDateRevalidation
                         rules={{ min: 100, max: 9999 }}
                         onFieldFormatted={fireOnChange}
+                        onChange={triggerDateValidation}
                     />
                     -
                     <TimeStampField
                         className={styles.field}
                         name={fieldNames.month}
                         placeholder="MM"
-                        triggerDateRevalidation
                         rules={{ min: 1, max: 12 }}
                         onFieldFormatted={fireOnChange}
+                        onChange={triggerDateValidation}
                     />
                     -
                     <TimeStampField
                         className={styles.field}
                         name={fieldNames.date}
                         placeholder="DD"
-                        triggerDateRevalidation
                         rules={{
                             validate: validateDate('Date is invalid'),
                             max: 31,
@@ -94,6 +105,7 @@ export default function InputTimeStamp({
                     />
                 </FormProvider>
             </div>
+            errors: {JSON.stringify(form.errors)}
         </div>
     );
 }

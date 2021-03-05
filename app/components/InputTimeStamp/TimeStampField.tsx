@@ -10,33 +10,48 @@ import {
     useController,
     useFormContext,
 } from 'react-hook-form';
-import { NotOptional } from '../../utils/types';
-import { DateParts, fieldNames } from './util';
+import { DateParts } from './util';
 
 import styles from './InputTimeStamp.module.scss';
 
-type InputProps = NotOptional<
-    Pick<InputHTMLAttributes<HTMLInputElement>, 'className' | 'placeholder'>
+type InputProps = Pick<
+    InputHTMLAttributes<HTMLInputElement>,
+    'className' | 'placeholder' | 'onChange'
 >;
 
 interface TimeStampFieldProps extends InputProps {
+    /**
+     * Name must be part of the "DateParts" interface
+     */
     name: keyof DateParts;
+    /**
+     * Validation rules of field.
+     */
     rules?: RegisterOptions;
-    triggerDateRevalidation?: boolean;
+    /**
+     * Called when field has been formatted on blur.
+     */
     onFieldFormatted(): void;
 }
 
+/**
+ * @description
+ * Used in \<InputTimeStamp /\> as part of what makes up the entire Input.
+ *
+ * @example
+ * <TimeStampField className={styles.field} name={fieldNames.hours} placeholder="HH" rules={{ max: 23 }} onFieldFormatted={fireOnChange} />
+ */
 export default function TimeStampField({
     name,
     className,
     placeholder,
+    onChange,
     rules,
-    triggerDateRevalidation = false,
     onFieldFormatted,
 }: TimeStampFieldProps): JSX.Element {
-    const { control, setValue, errors, formState, trigger } = useFormContext();
+    const { control, setValue, errors } = useFormContext();
     const {
-        field: { value, onChange, onBlur, name: n },
+        field: { value, onChange: formOnChange, onBlur, name: n },
     } = useController({
         name,
         rules: { required: true, min: rules?.min ?? 0, ...rules },
@@ -44,32 +59,20 @@ export default function TimeStampField({
         defaultValue: '',
     });
 
-    const triggerDateValidation = useCallback(() => {
-        if (triggerDateRevalidation && formState.touched[fieldNames.date]) {
-            setTimeout(() => trigger(fieldNames.date), 0);
-        }
-    }, [formState, trigger, triggerDateRevalidation]);
-
     const handleBlur: FocusEventHandler = useCallback(() => {
         onBlur();
         setValue(name, value);
-        triggerDateValidation();
         setTimeout(() => onFieldFormatted(), 0);
-    }, [
-        value,
-        onBlur,
-        setValue,
-        name,
-        onFieldFormatted,
-        triggerDateValidation,
-    ]);
+    }, [value, onBlur, setValue, name, onFieldFormatted]);
 
-    const handleChange: ChangeEventHandler = useCallback(
+    const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
         (e) => {
-            onChange(e);
-            triggerDateValidation();
+            formOnChange(e);
+            if (onChange) {
+                onChange(e);
+            }
         },
-        [onChange, triggerDateValidation]
+        [formOnChange, onChange]
     );
 
     return (
