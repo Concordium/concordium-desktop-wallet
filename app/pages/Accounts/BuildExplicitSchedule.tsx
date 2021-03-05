@@ -1,18 +1,11 @@
 import React, { useState } from 'react';
-import {
-    Grid,
-    Header,
-    Label,
-    List,
-    Button,
-    Input,
-    Card,
-    Form,
-} from 'semantic-ui-react';
-import { Schedule, TimeStampUnit } from '../../utils/types';
+import { Grid, Header, List, Card, Button } from 'semantic-ui-react';
+import { useForm } from 'react-hook-form';
+import { EqualRecord, Schedule, TimeStampUnit } from '../../utils/types';
 import { displayAsGTU, isValidGTUString, toMicroUnits } from '../../utils/gtu';
 import { parseTime, getNow, TimeConstants } from '../../utils/timeHelpers';
-import InputTimeStamp from '../../components/Form/InputTimestamp';
+import Form from '../../components/Form';
+import { futureDate } from '../../components/Form/util/validation';
 
 interface Props {
     submitSchedule(schedule: Schedule): void;
@@ -20,29 +13,38 @@ interface Props {
 }
 
 function getDefaultTimestamp() {
-    return getNow() + 5 * TimeConstants.Minute;
+    return new Date(getNow() + 5 * TimeConstants.Minute);
 }
+
+interface AddSchedulePointForm {
+    amount: string;
+    timestamp: Date;
+}
+
+const addSchedulePointFormNames: EqualRecord<AddSchedulePointForm> = {
+    amount: 'amount',
+    timestamp: 'timestamp',
+};
 
 /**
  * Component to build a "explicit" schedule, by adding invidual releases.
  */
 export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
     const [schedule, setSchedule] = useState<Schedule>([]);
-    const [pointAmount, setAmount] = useState<string>('');
     const [usedAmount, setUsedAmount] = useState<bigint>(0n);
-
     const [adding, setAdding] = useState<boolean>(false);
+    const methods = useForm<AddSchedulePointForm>({ mode: 'onTouched' });
+    const { reset } = methods;
 
-    const [pointTimestamp, setTimestamp] = useState<number>(
-        getDefaultTimestamp()
-    ); // TODO Decide appropiate default
-
-    function addToSchedule() {
+    function addToSchedule({
+        amount: pointAmount,
+        timestamp,
+    }: AddSchedulePointForm) {
         const newSchedule = schedule;
         const pointAmountMicro = toMicroUnits(pointAmount);
         const newPoint = {
             amount: pointAmountMicro.toString(),
-            timestamp: pointTimestamp.toString(),
+            timestamp: timestamp?.getTime().toString(),
         };
         setUsedAmount(usedAmount + pointAmountMicro);
         newSchedule.push(newPoint);
@@ -51,8 +53,7 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
                 (a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10)
             )
         );
-        setAmount('');
-        setTimestamp(getDefaultTimestamp());
+        reset();
     }
 
     function removeFromSchedule(index: number) {
@@ -60,7 +61,7 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
         setSchedule(schedule.slice(0, index).concat(schedule.slice(index + 1)));
     }
 
-    function validateCurrentAmount(): boolean {
+    function validateCurrentAmount(pointAmount: string): boolean {
         if (pointAmount && isValidGTUString(pointAmount)) {
             const value = toMicroUnits(pointAmount);
             return value > 0n && value + usedAmount <= amount;
@@ -69,25 +70,24 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
     }
 
     const addSchedulePointForm = (
-        <Form onSubmit={addToSchedule}>
-            <Label>Amount:</Label>
-            <Input
-                fluid
-                name="name"
+        <Form onSubmit={addToSchedule} formMethods={methods}>
+            <Form.Input
+                label="Enter amount"
+                name={addSchedulePointFormNames.amount}
                 placeholder="Enter Amount"
-                value={pointAmount}
-                onChange={(e) => setAmount(e.target.value)}
                 autoFocus
+                rules={{ validate: validateCurrentAmount, required: true }}
             />
-            <Label>Release time:</Label>
-            <InputTimeStamp
-                placeholder="Enter Release time"
-                value={pointTimestamp}
-                setValue={setTimestamp}
+            <Form.Timestamp
+                name={addSchedulePointFormNames.timestamp}
+                label="Enter Release time"
+                rules={{
+                    required: 'Timestamp required',
+                    validate: futureDate('Must be future date'),
+                }}
+                defaultValue={getDefaultTimestamp()}
             />
-            <Button disabled={!validateCurrentAmount()} type="submit">
-                Add
-            </Button>
+            <Form.Submit>Add</Form.Submit>
         </Form>
     );
 

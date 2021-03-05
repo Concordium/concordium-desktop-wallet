@@ -1,5 +1,10 @@
 import React, { FC, FormHTMLAttributes, PropsWithChildren } from 'react';
-import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import {
+    FormProvider,
+    SubmitHandler,
+    useForm,
+    UseFormMethods,
+} from 'react-hook-form';
 
 import Switch from '../../cross-app-components/Switch';
 import {
@@ -10,10 +15,13 @@ import Input from './Input';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
 import Submit from './Submit';
-import InputTimestamp from './InputTimestamp/InputTimestamp';
+import InputTimestamp, {
+    InputTimestampProps,
+} from './InputTimestamp/InputTimestamp';
 
 export interface FormProps<TFormValues>
     extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
+    formMethods?: UseFormMethods<TFormValues>;
     onSubmit: SubmitHandler<TFormValues>;
 }
 
@@ -45,17 +53,18 @@ export interface FormProps<TFormValues>
  *   <Form.Submit>Submit</Form.Submit>
  * </Form>
  */
-function Form<T extends Record<string, unknown>>({
+function Form<TFormValues>({
     children,
+    formMethods,
     onSubmit,
     ...formProps
-}: PropsWithChildren<FormProps<T>>): JSX.Element {
-    const { ...methods } = useForm<T>({
+}: PropsWithChildren<FormProps<TFormValues>>): JSX.Element {
+    const methods = useForm<TFormValues>({
         mode: 'onTouched',
     });
 
     return (
-        <FormProvider {...methods}>
+        <FormProvider {...(formMethods ?? methods)}>
             <form onSubmit={methods.handleSubmit(onSubmit)} {...formProps}>
                 {children}
             </form>
@@ -75,7 +84,9 @@ Form.Checkbox = connectWithFormUncontrolled(Checkbox);
 Form.Switch = connectWithFormUncontrolled(Switch);
 (Form.Switch as FC).displayName = 'Form.Switch';
 
-Form.Timestamp = connectWithFormControlled<Date>(InputTimestamp);
+Form.Timestamp = connectWithFormControlled<Date, InputTimestampProps>(
+    InputTimestamp
+);
 (Form.Timestamp as FC).displayName = 'Form.Timestamp';
 
 Form.Submit = Submit;

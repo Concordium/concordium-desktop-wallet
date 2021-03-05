@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Header } from 'semantic-ui-react';
-import InputTimeStamp from '../../components/Form/InputTimestamp';
+import InputTimestamp from '../../components/Form/InputTimestamp';
 import { getNow, TimeConstants } from '../../utils/timeHelpers';
 import { UpdateComponent } from '../../utils/transactionTypes';
 import { MultiSignatureTransaction } from '../../utils/types';
@@ -15,6 +15,8 @@ interface Props {
     setDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+const defaultTime = new Date(getNow() + 5 * TimeConstants.Minute);
+
 /**
  * Component for an update component that includes a time picker to set the
  * effective time for the update that is being created.
@@ -25,13 +27,20 @@ export default function EffectiveTimeUpdate({
     setProposal,
     setDisabled,
 }: Props): JSX.Element {
-    const [effectiveTime, setEffectiveTime] = useState<number>(
-        getNow() + 5 * TimeConstants.Minute
+    const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
+        defaultTime
     );
-    const [
-        effectiveTimeInSeconds,
-        setEffectiveTimeInSeconds,
-    ] = useState<number>(Math.round(effectiveTime / 1000));
+    const [effectiveTimeInSeconds, setEffectiveTimeInSeconds] = useState<
+        number | undefined
+    >();
+
+    useEffect(() => {
+        setEffectiveTimeInSeconds(
+            effectiveTime !== undefined
+                ? Math.round(effectiveTime.getTime() / 1000)
+                : undefined
+        );
+    }, [effectiveTime]);
 
     return (
         <>
@@ -42,13 +51,10 @@ export default function EffectiveTimeUpdate({
                 setDisabled={setDisabled}
             />
             <Header>Effective time</Header>
-            <InputTimeStamp
-                placeholder="Enter effective time"
+            <InputTimestamp
+                label="Enter effective time"
                 value={effectiveTime}
-                setValue={(timestamp: number) => {
-                    setEffectiveTime(timestamp);
-                    setEffectiveTimeInSeconds(Math.round(timestamp / 1000));
-                }}
+                onChange={setEffectiveTime}
             />
         </>
     );
