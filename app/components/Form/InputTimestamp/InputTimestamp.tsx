@@ -55,6 +55,7 @@ export default function InputTimeStamp({
     error,
     value,
     errorMessages = defaultErrorMessages,
+    isInvalid = false,
     onChange,
     onBlur,
 }: InputTimeStampProps): JSX.Element {
@@ -69,8 +70,8 @@ export default function InputTimeStamp({
     const firstFormError = Object.values(form.errors).filter(isDefined)[0];
     const errorMessage =
         errorMessages[firstFormError?.ref?.name as keyof DateParts] || error;
-    const isInvalid =
-        !!Object.values(form.errors).filter(isDefined)[0] || !!error;
+    const invalid =
+        !!Object.values(form.errors).filter(isDefined)[0] || isInvalid;
 
     return (
         <div className={styles.root}>
@@ -79,7 +80,7 @@ export default function InputTimeStamp({
                 className={clsx(
                     styles.input,
                     isFocused && styles.inputFocused,
-                    isInvalid && styles.inputInvalid
+                    invalid && styles.inputInvalid
                 )}
             >
                 <TimeStampContext.Provider

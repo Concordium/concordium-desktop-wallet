@@ -42,7 +42,8 @@ export function connectWithFormUncontrolled<
 >(
     Field: ComponentType<TProps>
 ): (
-    props: Omit<TProps, 'ref' | 'error'> & UncontrolledConnectorProps
+    props: Omit<TProps, 'ref' | 'error' | 'isInvalid'> &
+        UncontrolledConnectorProps
 ) => JSX.Element {
     const Connected: ReturnType<typeof connectWithFormUncontrolled> = ({
         rules,
@@ -51,10 +52,12 @@ export function connectWithFormUncontrolled<
     }) => {
         const { register, errors } = useFormContext();
 
+        const error: FieldError | undefined = errors[name];
         const fieldProps: TProps = {
             ref: register(rules),
             name,
-            error: (errors[name] as FieldError | undefined)?.message,
+            error: error?.message,
+            isInvalid: !!error,
             ...props,
         } as TProps;
 
@@ -97,7 +100,11 @@ export function connectWithFormControlled<
 >(
     Field: ComponentType<TProps>
 ): (
-    props: Omit<TProps, 'error'> & ControlledConnectorProps<TValue>
+    props: Omit<
+        TProps,
+        'error' | 'onChange' | 'onBlur' | 'value' | 'isInvalid'
+    > &
+        ControlledConnectorProps<TValue>
 ) => JSX.Element {
     const Connected: ReturnType<typeof connectWithFormControlled> = ({
         name,
@@ -110,8 +117,10 @@ export function connectWithFormControlled<
             field: { ref, ...fieldProps },
         } = useController({ name, rules, defaultValue, control });
 
+        const error: FieldError | undefined = errors[name];
         const p: TProps = {
-            error: (errors[name] as FieldError | undefined)?.message,
+            isInvalid: !!error,
+            error: error?.message,
             ...fieldProps,
             ...props,
         } as TProps;

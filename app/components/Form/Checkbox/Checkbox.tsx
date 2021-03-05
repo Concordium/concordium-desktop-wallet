@@ -29,13 +29,23 @@ export interface CheckboxProps
  * <Checkbox name="checkbox">This is a checkbox</Checkbox>
  */
 const Checkbox = forwardRef<HTMLInputElement, PropsWithChildren<CheckboxProps>>(
-    ({ children, error, className, size = 'regular', ...props }, ref) => {
+    (
+        {
+            children,
+            error,
+            isInvalid = false,
+            className,
+            size = 'regular',
+            ...props
+        },
+        ref
+    ) => {
         return (
             <div>
                 <label
                     className={clsx(
                         styles.root,
-                        error !== undefined && styles.rootInvalid,
+                        isInvalid && styles.rootInvalid,
                         className
                     )}
                 >

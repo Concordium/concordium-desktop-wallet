@@ -2,6 +2,7 @@ import React from 'react';
 import { Story, Meta } from '@storybook/react/types-6-0';
 
 import Form, { FormProps } from '../Form';
+import { futureDate } from '../util/validation';
 
 export const { Checkbox, Input, Submit, Switch, TextArea } = Form;
 
@@ -31,7 +32,7 @@ export const decorators = [
             <style>
                 {`
                     .sb-form-wrapper {
-                        max-width: 300px;
+                        max-width: 400px;
                         margin: 0 auto;
                     }
                 `}
@@ -59,6 +60,13 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
             type="email"
             placeholder="E-mail"
             rules={{ required: 'Email is required to sign up.' }}
+        />
+        <Form.Timestamp
+            name="time"
+            rules={{
+                required: 'Field is required',
+                validate: futureDate(),
+            }}
         />
         <Form.Checkbox
             name="terms"
