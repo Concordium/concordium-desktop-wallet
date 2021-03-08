@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import Identicon from 'react-identicons';
-import { Header } from 'semantic-ui-react';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { useScreenshot } from 'use-react-screenshot';
@@ -35,7 +34,7 @@ export default function CopiableIdenticon({ data }: Props) {
 
     return (
         <>
-            <Header>Identicon</Header>
+            <h2>Identicon</h2>
             <h3 className={styles.copytext}>(Click to copy)</h3>
             <button
                 ref={ref}
