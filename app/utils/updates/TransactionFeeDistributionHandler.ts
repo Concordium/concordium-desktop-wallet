@@ -2,6 +2,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { getGovernancePath } from '../../features/ledger/Path';
 import TransactionFeeDistributionView from '../../pages/multisig/TransactionFeeDistributionView';
 import UpdateTransactionFeeDistribution from '../../pages/multisig/UpdateTransactionFeeDistribution';
+import { Authorizations } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     isTransactionFeeDistribution,
@@ -44,6 +45,10 @@ export default class TransactionFeeDistributionHandler
         return TransactionFeeDistributionView({
             transactionFeeDistribution: transaction.payload,
         });
+    }
+
+    getAuthorization(authorizations: Authorizations) {
+        return authorizations.transactionFeeDistribution;
     }
 
     update = UpdateTransactionFeeDistribution;

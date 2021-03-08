@@ -18,6 +18,11 @@ export interface VerifyKey {
     verifyKey: Hex;
 }
 
+export interface SignedPublicKey {
+    key: Hex;
+    signature: Hex;
+}
+
 export interface NewAccount {
     keys: VerifyKey[];
     threshold: number;
@@ -510,11 +515,16 @@ export interface UpdateHeader {
     payloadSize?: Word32;
 }
 
+export interface UpdateInstructionSignature {
+    authorizationKeyIndex: number;
+    signature: string;
+}
+
 export interface UpdateInstruction<T extends UpdateInstructionPayload> {
     header: UpdateHeader;
     payload: T;
     type: UpdateType;
-    signatures: string[];
+    signatures: UpdateInstructionSignature[];
 }
 
 export type UpdateInstructionPayload =
@@ -650,6 +660,7 @@ export enum MultiSignatureMenuItems {
     MakeNewProposal = 'Make new proposal',
     ProposedTransactions = 'Proposed transactions',
     SignTransaction = 'Sign transaction',
+    ExportKey = 'Export public-key',
 }
 
 export interface ExchangeRate {

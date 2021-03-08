@@ -33,12 +33,17 @@ interface UpdateQueues {
     gasRewards: UpdateQueue;
 }
 
-interface Authorization {
+export interface Authorization {
     threshold: number;
     authorizedKeys: number[];
 }
 
-interface Authorizations {
+export interface Key {
+    verifyKey: string;
+    schemeId: string;
+}
+
+export interface Authorizations {
     microGTUPerEuro: Authorization;
     euroPerEnergy: Authorization;
     transactionFeeDistribution: Authorization;
@@ -46,6 +51,7 @@ interface Authorizations {
     mintDistribution: Authorization;
     protocol: Authorization;
     paramGASRewards: Authorization;
+    keys: Key[];
 }
 
 // The node returns the mint per slot value as a scientific notation String,
