@@ -4,6 +4,7 @@ import { Identity, CredentialDeploymentInformation } from '../../utils/types';
 import { createCredentialInfo } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
+import { insertCredential } from '../../database/CredentialDao';
 import { globalSelector } from '../../features/GlobalSlice';
 
 interface Props {
@@ -42,6 +43,7 @@ export default function SignCredential({
             address
         );
         setCredential(credential);
+        insertCredential(address, credential);
         setMessage('Credential generated succesfully!');
         setReady(true);
     }
