@@ -30,6 +30,10 @@ interface PublicKeyExportFormat {
     type: ExportKeyType;
 }
 
+/**
+ * Component for exporting a specific key type determined by the
+ * parameter input.
+ */
 export default function ExportKeyView(): JSX.Element {
     const [signedPublicKey, setSignedPublicKey] = useState<SignedPublicKey>();
     const { keyType } = useParams<ParamTypes>();
