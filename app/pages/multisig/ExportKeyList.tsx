@@ -10,6 +10,7 @@ export enum ExportKeyType {
     Level1 = 'level1',
     Level2 = 'level2',
     Account = 'account',
+    Credential = 'credential',
 }
 
 const exportKeyOptionMap = new Map<ExportKeyType, string>([
@@ -17,6 +18,7 @@ const exportKeyOptionMap = new Map<ExportKeyType, string>([
     [ExportKeyType.Level1, 'Governance level 1 key'],
     [ExportKeyType.Level2, 'Governance level 2 key'],
     [ExportKeyType.Account, 'Account key'],
+    [ExportKeyType.Credential, 'Account Credentials'],
 ]);
 
 export function getKeyDisplay(keyType: ExportKeyType): string | undefined {
@@ -49,16 +51,18 @@ export default function ExportKeyList(): JSX.Element {
                 return (
                     <Menu.Item
                         key={keyType}
-                        onClick={() =>
-                            dispatch(
-                                push(
-                                    routes.MULTISIGTRANSACTIONS_EXPORT_KEY.replace(
-                                        ':keyType',
-                                        keyType
-                                    )
-                                )
-                            )
-                        }
+                        onClick={() => {
+                            let route;
+                            if (keyType === ExportKeyType.Credential) {
+                                route = routes.GENERATE_CREDENTIAL;
+                            } else {
+                                route = routes.MULTISIGTRANSACTIONS_EXPORT_KEY.replace(
+                                    ':keyType',
+                                    keyType
+                                );
+                            }
+                            dispatch(push(route));
+                        }}
                     >
                         <Header>{label}</Header>
                     </Menu.Item>
