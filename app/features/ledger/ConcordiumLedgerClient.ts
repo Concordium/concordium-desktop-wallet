@@ -3,7 +3,10 @@ import getPublicKey from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
-import { signNewCredentialDeployment } from './CredentialDeployment';
+import {
+    signNewCredentialDeployment,
+    signExistingCredentialDeployment,
+} from './CredentialDeployment';
 import {
     AccountTransaction,
     ExchangeRate,
@@ -75,6 +78,19 @@ export default class ConcordiumLedgerClient {
             this.transport,
             accountPath,
             publicInfoForIp
+        );
+    }
+
+    signExistingCredentialDeployment(
+        credentialDeployment: UnsignedCredentialDeploymentInformation,
+        address: string,
+        path: number[]
+    ): Promise<Buffer> {
+        return signExistingCredentialDeployment(
+            this.transport,
+            credentialDeployment,
+            address,
+            path
         );
     }
 

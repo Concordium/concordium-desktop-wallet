@@ -2,6 +2,7 @@
     "createIdRequest": "'createIdRequest'",
     "buildPublicInformationForIp": "buildPubInfo",
     "createUnsignedCredential": "createUnsignedCredential",
-    "createCredential": "createCredential",
+    "createCredentialDetails": "createCredentialDetails",
+    "createCredentialInfo": "createCredentialInfo",
     "decryptAmounts": "decryptAmounts"
 }

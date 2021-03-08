@@ -202,6 +202,11 @@ pub fn generate_unsigned_credential_aux(
 
     let context = IPContext::new(&ip_info, &ars_infos, &global_context);
 
+    let address: Option<AccountAddress> = match try_get(&v, "address") {
+        Ok(x) => Some(x),
+        Err(_) => None
+    };
+
     let cdi = create_unsigned_credential(
         context,
         &id_object,
@@ -209,7 +214,7 @@ pub fn generate_unsigned_credential_aux(
         acc_num,
         policy,
         cred_key_info,
-        None
+        address.as_ref()
     )?;
 
     let response = json!(cdi);
@@ -218,6 +223,42 @@ pub fn generate_unsigned_credential_aux(
 }
 
 pub fn get_credential_deployment_info_aux(
+    signature: &str,
+    unsigned_info: &str,
+) -> Fallible<String> {
+    console_error_panic_hook::set_once();
+    let v: SerdeValue = from_str(unsigned_info)?;
+    let values: CredentialDeploymentValues<ExampleCurve, AttributeKind> = from_str(unsigned_info)?;
+    let proofs: IdOwnershipProofs<Bls12, ExampleCurve> = try_get(&v, "proofs")?;
+    let unsigned_credential_info = UnsignedCredentialDeploymentInfo::<Bls12, ExampleCurve, AttributeKind>{
+        values, proofs
+    };
+
+    let signature_bytes = <[u8; 64]>::from_hex(signature).expect("Decoding failed");
+
+    let mut signatures = BTreeMap::new();
+    signatures.insert(KeyIndex(0), ed25519::Signature::new(signature_bytes).into());
+
+    let proof_acc_sk = AccountOwnershipProof {
+        sigs: signatures,
+    };
+
+    let cdp = CredDeploymentProofs {
+        id_proofs: unsigned_credential_info.proofs,
+        proof_acc_sk,
+    };
+
+    let cdi = CredentialDeploymentInfo {
+        values: unsigned_credential_info.values,
+        proofs: cdp,
+    };
+
+    let cdi_json = json!(cdi);
+
+    Ok(cdi_json.to_string())
+}
+
+pub fn get_credential_deployment_details_aux(
     signature: &str,
     unsigned_info: &str,
     expiry: u64,

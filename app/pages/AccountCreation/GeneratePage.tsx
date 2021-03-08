@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
-import { createCredential } from '../../utils/rustInterface';
+import { createCredentialDetails } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import {
     Identity,
@@ -120,7 +120,7 @@ export default function AccountCreationGenerate({
             return;
         }
 
-        const credentialDeploymentDetails = await createCredential(
+        const credentialDeploymentDetails = await createCredentialDetails(
             identity,
             accountNumber,
             global,
