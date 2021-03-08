@@ -51,7 +51,7 @@ export function getGovernancePath(governancePath: GovernancePathInput) {
  * Constructs the level 2 governance key path.
  */
 export function getGovernanceLevel2Path() {
-    return getGovernancePath({ purpose: 0, keyIndex: 0 });
+    return getGovernancePath({ purpose: 2, keyIndex: 0 });
 }
 
 /**
