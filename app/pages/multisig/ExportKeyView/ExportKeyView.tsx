@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router';
 import { Divider, Header, Segment } from 'semantic-ui-react';
-import Identicon from 'react-identicons';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import LedgerComponent from '../../../components/ledger/LedgerComponent';
@@ -18,6 +17,7 @@ import { ExportKeyType, getKeyDisplay } from '../ExportKeyList';
 import { SignedPublicKey } from '../../../utils/types';
 import styles from './ExportKeyView.module.scss';
 import routes from '../../../constants/routes.json';
+import CopiableIdenticon from '../../../components/CopiableIdenticon/CopiableIdenticon';
 
 interface ParamTypes {
     keyType: ExportKeyType;
@@ -88,10 +88,7 @@ export default function ExportKeyView(): JSX.Element {
             <Segment textAlign="center">
                 <Header>New {getKeyDisplay(keyType)}</Header>
                 {signedPublicKey.key}
-                <Header>Identicon</Header>
-                Click to copy
-                <Divider clearing hidden />
-                <Identicon string={signedPublicKey.key} size={128} />
+                <CopiableIdenticon data={signedPublicKey.key} />
                 <Divider clearing hidden />
                 <div className={styles.actions}>
                     <Button
