@@ -4,7 +4,8 @@ import { credentialsTable } from '../constants/databaseNames.json';
 
 export async function insertCredential(
     accountAddress: string,
-    credential: CredentialDeploymentInformation
+    credential: CredentialDeploymentInformation,
+    credentialNumber: number
 ) {
     const parsed = {
         ...credential,
@@ -12,6 +13,7 @@ export async function insertCredential(
         credentialPublicKeys: JSON.stringify(credential.credentialPublicKeys),
         policy: JSON.stringify(credential.policy),
         accountAddress,
+        credentialNumber,
     };
     return (await knex())(credentialsTable).insert(parsed);
 }
@@ -33,4 +35,16 @@ export async function getCredentialsOfAccount(
         .select()
         .table(credentialsTable)
         .where({ accountAddress });
+}
+
+export async function getNextCredentialNumber(identityId: number) {
+    const credentials = await (await knex())
+        .select()
+        .table(credentialsTable)
+        .where({ identityId });
+    const currentNumber = credentials.reduce(
+        (num, cred) => Math.max(num, cred.credentialNumber),
+        0
+    );
+    return currentNumber + 1;
 }

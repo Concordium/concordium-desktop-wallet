@@ -130,7 +130,7 @@ Threshold: ${pubInfoForIp.publicKeys.threshold}
  */
 export async function createCredential(
     identity: Identity,
-    accountNumber: number,
+    credentialNumber: number,
     global: Global,
     attributes: string[],
     displayMessage: (message: string) => void,
@@ -149,7 +149,7 @@ export async function createCredential(
         0,
         identity.id,
         2,
-        accountNumber,
+        credentialNumber,
         0,
     ]);
     displayMessage('Please wait');
@@ -166,7 +166,7 @@ export async function createCredential(
             },
         ],
         threshold: 1,
-        accountNumber,
+        credentialNumber,
         revealedAttributes: attributes,
         randomness: {
             randomness: identity.randomness,
@@ -194,7 +194,7 @@ export async function createCredential(
 
     // TODO: Display the appropiate details
     displayMessage(`Please sign details on device.`);
-    const path = [0, 0, identity.id, 2, accountNumber, 0];
+    const path = [0, 0, identity.id, 2, credentialNumber, 0];
     const challengeSignature = await ledger.signNewCredentialDeployment(
         unsignedCredentialDeploymentInfo,
         expiry,

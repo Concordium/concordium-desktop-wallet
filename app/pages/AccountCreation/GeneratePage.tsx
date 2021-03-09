@@ -14,7 +14,6 @@ import { sendTransaction } from '../../utils/nodeRequests';
 import {
     addPendingAccount,
     confirmAccount,
-    getNextAccountNumber,
     removeAccount,
 } from '../../features/AccountSlice';
 import {
@@ -24,6 +23,7 @@ import {
 import {
     insertCredential,
     removeCredentialsOfAccount,
+    getNextCredentialNumber,
 } from '../../database/CredentialDao';
 import { globalSelector } from '../../features/GlobalSlice';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
@@ -79,22 +79,25 @@ export default function AccountCreationGenerate({
             accountAddress,
             transactionId,
         }: CredentialDeploymentDetails,
-        accountNumber: number
+        credentialNumber: number
     ) {
         await addPendingAccount(
             dispatch,
             accountName,
             identity.id,
-            accountNumber,
+            credentialNumber,
             accountAddress,
-            credentialDeploymentInfo,
             transactionId
         );
-        await insertCredential(accountAddress, credentialDeploymentInfo);
+        await insertCredential(
+            accountAddress,
+            credentialDeploymentInfo,
+            credentialNumber
+        );
         addToAddressBook(dispatch, {
             name: accountName,
             address: accountAddress,
-            note: `Account ${accountNumber} of ${identity.name}`, // TODO: have better note
+            note: `Account ${credentialNumber} of ${identity.name}`, // TODO: have better note
             readOnly: true,
         });
     }
@@ -108,13 +111,13 @@ export default function AccountCreationGenerate({
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
-        let accountNumber;
+        let credentialNumber;
         if (!global) {
             onError(`Unexpected missing global object`);
             return;
         }
         try {
-            accountNumber = await getNextAccountNumber(identity.id);
+            credentialNumber = await getNextCredentialNumber(identity.id);
         } catch (e) {
             onError(`Unable to create account due to ${e}`);
             return;
@@ -122,7 +125,7 @@ export default function AccountCreationGenerate({
 
         const credentialDeploymentDetails = await createCredential(
             identity,
-            accountNumber,
+            credentialNumber,
             global,
             attributes,
             setMessage,
@@ -130,7 +133,7 @@ export default function AccountCreationGenerate({
         );
 
         try {
-            await saveAccount(credentialDeploymentDetails, accountNumber);
+            await saveAccount(credentialDeploymentDetails, credentialNumber);
             await sendCredential(credentialDeploymentDetails);
             confirmAccount(
                 dispatch,

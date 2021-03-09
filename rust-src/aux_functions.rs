@@ -152,7 +152,7 @@ pub fn generate_unsigned_credential_aux(
 
     let tags: Vec<AttributeTag> = try_get(&v, "revealedAttributes")?;
 
-    let acc_num: u8 = try_get(&v, "accountNumber")?;
+    let cred_num: u8 = try_get(&v, "credentialNumber")?;
 
     let public_keys: Vec<VerifyKey> = try_get(&v, "publicKeys")?;
     let cred_key_info = CredentialPublicKeys { //This is assumed to be an new account TODO: handle existing account
@@ -206,7 +206,7 @@ pub fn generate_unsigned_credential_aux(
         context,
         &id_object,
         &id_use_data,
-        acc_num,
+        cred_num,
         policy,
         cred_key_info,
         None

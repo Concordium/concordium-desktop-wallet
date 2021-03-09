@@ -5,7 +5,6 @@ import {
     getAllAccounts,
     insertAccount,
     updateAccount,
-    getAccountsOfIdentity,
     removeAccount as removeAccountFromDatabase,
 } from '../database/AccountDao';
 import { decryptAmounts } from '../utils/rustInterface';
@@ -159,9 +158,6 @@ export async function addPendingAccount(
     identityId: number,
     accountNumber: number,
     accountAddress = '',
-    credentialDeploymentInfo:
-        | CredentialDeploymentInformation
-        | undefined = undefined,
     credentialDeploymentHash = ''
 ) {
     const account: Account = {
@@ -170,7 +166,6 @@ export async function addPendingAccount(
         status: AccountStatus.Pending,
         accountNumber,
         address: accountAddress,
-        credential: JSON.stringify(credentialDeploymentInfo),
         credentialDeploymentHash,
         maxTransactionId: 0,
     };
@@ -215,16 +210,6 @@ export async function confirmAccount(
             throw new Error('Unexpected status was returned by the poller!');
     }
     return loadAccounts(dispatch);
-}
-
-// Get The next unused account number of the identity with the given ID
-export async function getNextAccountNumber(identityId: number) {
-    const accounts: Account[] = await getAccountsOfIdentity(identityId);
-    const currentNumber = accounts.reduce(
-        (num, acc) => Math.max(num, acc.accountNumber),
-        0
-    );
-    return currentNumber + 1;
 }
 
 // Decrypts the shielded account balance of the given account, using the prfKey.

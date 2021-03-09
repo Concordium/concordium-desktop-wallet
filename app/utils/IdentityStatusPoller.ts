@@ -33,7 +33,7 @@ export async function confirmIdentityAndInitialAccount(
                 accountAddress,
                 token.credential
             );
-            insertCredential(accountAddress, token.credential);
+            insertCredential(accountAddress, token.credential, 0);
             addToAddressBook(dispatch, {
                 name: accountName,
                 address: accountAddress,
