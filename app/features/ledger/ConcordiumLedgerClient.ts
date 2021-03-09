@@ -188,10 +188,9 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        // TODO Fix INS.
         return signUpdateTransaction(
             this.transport,
-            0x25,
+            0x26,
             path,
             transaction,
             serializedPayload
