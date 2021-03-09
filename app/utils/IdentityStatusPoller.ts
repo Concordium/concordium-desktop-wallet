@@ -6,7 +6,7 @@ import { confirmInitialAccount } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
 import { addToAddressBook } from '../features/AddressBookSlice';
 import { getAllIdentities } from '../database/IdentityDao';
-import { insertCredential } from '../database/CredentialDao';
+import { insertNewCredential } from '../features/CredentialSlice';
 
 /**
  * Listens until, the identityProvider confirms the identity/initial account and returns the identityObject.
@@ -33,7 +33,7 @@ export async function confirmIdentityAndInitialAccount(
                 accountAddress,
                 token.credential
             );
-            insertCredential(accountAddress, token.credential, 0);
+            insertNewCredential(accountAddress, token.credential, 0);
             addToAddressBook(dispatch, {
                 name: accountName,
                 address: accountAddress,

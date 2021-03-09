@@ -21,10 +21,10 @@ import {
     removeFromAddressBook,
 } from '../../features/AddressBookSlice';
 import {
-    insertCredential,
     removeCredentialsOfAccount,
     getNextCredentialNumber,
 } from '../../database/CredentialDao';
+import { insertNewCredential } from '../../features/CredentialSlice';
 import { globalSelector } from '../../features/GlobalSlice';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import ErrorModal from '../../components/SimpleErrorModal';
@@ -89,7 +89,7 @@ export default function AccountCreationGenerate({
             accountAddress,
             transactionId
         );
-        await insertCredential(
+        await insertNewCredential(
             accountAddress,
             credentialDeploymentInfo,
             credentialNumber
