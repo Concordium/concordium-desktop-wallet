@@ -18,6 +18,11 @@ export interface VerifyKey {
     verifyKey: Hex;
 }
 
+export interface SignedPublicKey {
+    key: Hex;
+    signature: Hex;
+}
+
 export interface NewAccount {
     keys: VerifyKey[];
     threshold: number;
@@ -630,6 +635,7 @@ export enum MultiSignatureMenuItems {
     MakeNewProposal = 'Make new proposal',
     ProposedTransactions = 'Proposed transactions',
     SignTransaction = 'Sign transaction',
+    ExportKey = 'Export public-key',
 }
 
 export interface ExchangeRate {
