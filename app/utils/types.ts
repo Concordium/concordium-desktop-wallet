@@ -242,6 +242,7 @@ export interface CredentialDeploymentInformation
 export interface Credential {
     accountAddress: string;
     credentialNumber: number;
+    identityId?: number;
     credId: Hex;
     ipIdentity: IpIdentity;
     revocationThreshold: Threshold;

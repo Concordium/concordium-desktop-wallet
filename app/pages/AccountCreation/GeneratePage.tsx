@@ -91,8 +91,9 @@ export default function AccountCreationGenerate({
         );
         await insertNewCredential(
             accountAddress,
-            credentialDeploymentInfo,
-            credentialNumber
+            credentialNumber,
+            identity.id,
+            credentialDeploymentInfo
         );
         addToAddressBook(dispatch, {
             name: accountName,

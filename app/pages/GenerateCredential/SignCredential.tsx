@@ -4,7 +4,8 @@ import { Identity, CredentialDeploymentInformation } from '../../utils/types';
 import { createCredentialInfo } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { insertCredential } from '../../database/CredentialDao';
+import { getNextCredentialNumber } from '../../database/CredentialDao';
+import { insertNewCredential } from '../../features/CredentialSlice';
 import { globalSelector } from '../../features/GlobalSlice';
 
 interface Props {
@@ -33,9 +34,11 @@ export default function SignCredential({
             throw new Error('unexpected missing identity/global');
         }
 
+        const credentialNumber = await getNextCredentialNumber(identity.id);
+
         const credential = await createCredentialInfo(
             identity,
-            200, // FIXME
+            credentialNumber,
             global,
             attributes,
             setMessage,
@@ -43,7 +46,7 @@ export default function SignCredential({
             address
         );
         setCredential(credential);
-        insertCredential(address, credential);
+        insertNewCredential(address, credentialNumber, identity.id, credential);
         setMessage('Credential generated succesfully!');
         setReady(true);
     }

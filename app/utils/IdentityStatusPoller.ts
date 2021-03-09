@@ -16,6 +16,7 @@ import { insertNewCredential } from '../features/CredentialSlice';
 export async function confirmIdentityAndInitialAccount(
     dispatch: Dispatch,
     identityName: string,
+    identityId: number,
     accountName: string,
     location: string
 ) {
@@ -33,7 +34,12 @@ export async function confirmIdentityAndInitialAccount(
                 accountAddress,
                 token.credential
             );
-            insertNewCredential(accountAddress, token.credential, 0);
+            insertNewCredential(
+                accountAddress,
+                0,
+                identityId,
+                token.credential
+            );
             addToAddressBook(dispatch, {
                 name: accountName,
                 address: accountAddress,
@@ -55,7 +61,7 @@ export async function resumeIdentityStatusPolling(
     identity: Identity,
     dispatch: Dispatch
 ) {
-    const { name: identityName, codeUri: location } = identity;
+    const { name: identityName, codeUri: location, id } = identity;
     const initialAccount = await findInitialAccount(identity);
     if (!initialAccount) {
         throw new Error('Unexpected missing initial account.');
@@ -64,6 +70,7 @@ export async function resumeIdentityStatusPolling(
     return confirmIdentityAndInitialAccount(
         dispatch,
         identityName,
+        id,
         accountName,
         location
     );
