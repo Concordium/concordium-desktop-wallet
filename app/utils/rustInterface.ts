@@ -126,7 +126,7 @@ Threshold: ${pubInfoForIp.publicKeys.threshold}
 
 async function createUnsignedCredentialInfo(
     identity: Identity,
-    accountNumber: number,
+    credentialNumber: number,
     global: Global,
     attributes: string[],
     displayMessage: (message: string) => void,
@@ -144,7 +144,7 @@ async function createUnsignedCredentialInfo(
         0,
         identity.id,
         2,
-        accountNumber,
+        credentialNumber,
         0,
     ]);
     displayMessage('Please wait');
@@ -163,7 +163,7 @@ async function createUnsignedCredentialInfo(
             },
         ],
         threshold: 1,
-        accountNumber,
+        credentialNumber,
         revealedAttributes: attributes,
         randomness: {
             randomness: identity.randomness,
@@ -194,7 +194,7 @@ async function createUnsignedCredentialInfo(
  */
 export async function createCredentialInfo(
     identity: Identity,
-    accountNumber: number,
+    credentialNumber: number,
     global: Global,
     attributes: string[],
     displayMessage: (message: string) => void,
@@ -203,7 +203,7 @@ export async function createCredentialInfo(
 ): Promise<CredentialDeploymentInformation> {
     const { raw, parsed } = await createUnsignedCredentialInfo(
         identity,
-        accountNumber,
+        credentialNumber,
         global,
         attributes,
         displayMessage,
@@ -214,7 +214,7 @@ export async function createCredentialInfo(
     // TODO: Display the appropiate details
     displayMessage(`Please sign details on device.`);
     // Adding credential on an existing account
-    const path = [0, 0, identity.id, 2, accountNumber, 0]; // TODO change path
+    const path = [0, 0, identity.id, 2, credentialNumber, 0]; // TODO change path
     const signature = await ledger.signExistingCredentialDeployment(
         parsed,
         address,
@@ -239,7 +239,7 @@ export async function createCredentialInfo(
  */
 export async function createCredentialDetails(
     identity: Identity,
-    accountNumber: number,
+    credentialNumber: number,
     global: Global,
     attributes: string[],
     displayMessage: (message: string) => void,
@@ -247,7 +247,7 @@ export async function createCredentialDetails(
 ): Promise<CredentialDeploymentDetails> {
     const { raw, parsed } = await createUnsignedCredentialInfo(
         identity,
-        accountNumber,
+        credentialNumber,
         global,
         attributes,
         displayMessage,
@@ -258,7 +258,7 @@ export async function createCredentialDetails(
     displayMessage(`Please sign details on device.`);
     // Adding credential on a new account
     const expiry = getDefaultExpiry();
-    const path = [0, 0, identity.id, 2, accountNumber, 0];
+    const path = [0, 0, identity.id, 2, credentialNumber, 0];
     const signature = await ledger.signNewCredentialDeployment(
         parsed,
         expiry,

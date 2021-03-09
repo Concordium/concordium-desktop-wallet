@@ -8,6 +8,7 @@ type Proofs = Hex;
 type Word64 = BigInt;
 type Word32 = number;
 export type Word8 = number;
+type JSONString = string; // indicates that is it some object that have been stringified.
 
 export enum SchemeId {
     Ed25519 = 0,
@@ -206,10 +207,10 @@ export interface ChainArData {
 }
 
 export interface CredentialDeploymentValues {
-    credentialPublicKeys: CredentialPublicKeys;
     credId: Hex;
     ipIdentity: IpIdentity;
     revocationThreshold: Threshold;
+    credentialPublicKeys: CredentialPublicKeys;
     policy: Policy;
     arData: Record<string, ChainArData>;
 }
@@ -236,6 +237,17 @@ export interface UnsignedCredentialDeploymentInformation
 export interface CredentialDeploymentInformation
     extends CredentialDeploymentValues {
     proofs: Proofs;
+}
+
+export interface Credential {
+    accountAddress: string;
+    credentialNumber: number;
+    credId: Hex;
+    ipIdentity: IpIdentity;
+    revocationThreshold: Threshold;
+    credentialPublicKeys: JSONString;
+    policy: JSONString;
+    arData: JSONString;
 }
 
 // 48 bytes containing a group element.
@@ -785,6 +797,7 @@ export interface ExportData {
     accounts: Account[];
     identities: Identity[];
     addressBook: AddressBookEntry[];
+    credentials: Credential[];
 }
 
 interface EventResult {
