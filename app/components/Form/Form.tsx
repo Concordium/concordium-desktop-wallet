@@ -63,9 +63,11 @@ function Form<TFormValues>({
         mode: 'onTouched',
     });
 
+    const { handleSubmit } = formMethods ?? methods;
+
     return (
         <FormProvider {...(formMethods ?? methods)}>
-            <form onSubmit={methods.handleSubmit(onSubmit)} {...formProps}>
+            <form onSubmit={handleSubmit(onSubmit)} {...formProps}>
                 {children}
             </form>
         </FormProvider>
