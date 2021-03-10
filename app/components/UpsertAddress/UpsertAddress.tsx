@@ -5,8 +5,8 @@ import React, {
     useMemo,
     useState,
 } from 'react';
-import { SubmitHandler } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
+import { SubmitHandler, Validate } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
     AddressBookEntry,
@@ -16,6 +16,7 @@ import {
 } from '../../utils/types';
 import { isValidAddress } from '../../utils/accountHelpers';
 import {
+    addressBookSelector,
     addToAddressBook,
     updateAddressBookEntry,
 } from '../../features/AddressBookSlice';
@@ -24,6 +25,7 @@ import Form from '../Form';
 import styles from './UpsertAddress.module.scss';
 import Modal from '../../cross-app-components/Modal';
 import Button from '../../cross-app-components/Button';
+import Card from '../../cross-app-components/Card';
 
 type Props = PropsWithChildren<{
     initialValues?: AddressBookEntryForm;
@@ -44,8 +46,8 @@ const fieldNames: NotOptional<EqualRecord<AddressBookEntryForm>> = {
 
 const noteMaxLength = 255;
 
-function validateAddress(v: string): string | undefined {
-    if (isValidAddress(v)) {
+function validateAddressFormat(address: string): string | undefined {
+    if (isValidAddress(address)) {
         return undefined;
     }
     return 'Address format is invalid';
@@ -59,6 +61,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
 }: UpsertAddressProps<TAs>) {
     const [open, setOpen] = useState(false);
     const dispatch = useDispatch();
+    const entries = useSelector(addressBookSelector);
 
     const isEditMode = initialValues !== undefined;
     const header = useMemo(
@@ -79,6 +82,25 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
             }
         },
         [isEditMode, initialValues, dispatch]
+    );
+
+    const addressExists: Validate = useCallback(
+        (address: string) => {
+            const existing = entries.find((e) => e.address === address);
+
+            if (!existing) {
+                return false;
+            }
+
+            return `Address already exists under name: ${existing.name}`;
+        },
+        [entries]
+    );
+
+    const validateAddress: Validate = useCallback(
+        (address: string) =>
+            validateAddressFormat(address) || addressExists(address),
+        [addressExists]
     );
 
     const handleSubmit: SubmitHandler<AddressBookEntryForm> = useCallback(
@@ -105,7 +127,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
         >
             <h2 className={styles.header}>{header}</h2>
             <Form<AddressBookEntryForm> onSubmit={handleSubmit}>
-                <div className={styles.card}>
+                <Card className={styles.card}>
                     <div className={styles.content}>
                         <Form.Input
                             className={styles.name}
@@ -148,7 +170,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                             defaultValue={initialValues?.note}
                         />
                     </div>
-                </div>
+                </Card>
                 <Form.Submit className={styles.submit}>
                     Save recipient
                 </Form.Submit>

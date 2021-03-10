@@ -5,10 +5,8 @@
 }
 
 .card {
-    composes: card from global;
     width: 464px;
     margin: 0 auto;
-    background-color: $color-white;
 }
 
 .content {
