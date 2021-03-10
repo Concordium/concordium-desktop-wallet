@@ -29,13 +29,13 @@ export default function EffectiveTimeUpdate({
         new Date(getNow() + 5 * TimeConstants.Minute)
     );
     const [effectiveTimeInSeconds, setEffectiveTimeInSeconds] = useState<
-        number | undefined
+        bigint | undefined
     >();
 
     useEffect(() => {
         setEffectiveTimeInSeconds(
             effectiveTime !== undefined
-                ? Math.round(effectiveTime.getTime() / 1000)
+                ? BigInt(Math.round(effectiveTime.getTime() / 1000))
                 : undefined
         );
     }, [effectiveTime]);
@@ -44,7 +44,7 @@ export default function EffectiveTimeUpdate({
         <>
             <UpdateProposalComponent
                 blockSummary={blockSummary}
-                effectiveTime={BigInt(effectiveTimeInSeconds)}
+                effectiveTime={effectiveTimeInSeconds}
                 setProposal={setProposal}
                 setDisabled={setDisabled}
             />
