@@ -7,9 +7,14 @@ import { parseTime, getNow, TimeConstants } from '../../utils/timeHelpers';
 import Form from '../../components/Form';
 import { futureDate } from '../../components/Form/util/validation';
 
+export interface Defaults {
+    schedule: Schedule;
+}
+
 interface Props {
-    submitSchedule(schedule: Schedule): void;
+    submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
+    defaults: Defaults;
 }
 
 function getDefaultTimestamp() {
@@ -29,9 +34,17 @@ const addSchedulePointFormNames: EqualRecord<AddSchedulePointForm> = {
 /**
  * Component to build a "explicit" schedule, by adding invidual releases.
  */
-export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
-    const [schedule, setSchedule] = useState<Schedule>([]);
-    const [usedAmount, setUsedAmount] = useState<bigint>(0n);
+export default function ExplicitSchedule({
+    submitSchedule,
+    amount,
+    defaults,
+}: Props) {
+    const [schedule, setSchedule] = useState<Schedule>(
+        defaults?.schedule || []
+    );
+    const [usedAmount, setUsedAmount] = useState<bigint>(
+        schedule.reduce((acc, point) => acc + BigInt(point.amount), 0n)
+    );
     const [adding, setAdding] = useState<boolean>(false);
     const methods = useForm<AddSchedulePointForm>({ mode: 'onTouched' });
     const { reset } = methods;
@@ -140,7 +153,7 @@ export default function ExplicitSchedule({ submitSchedule, amount }: Props) {
             <List.Item>
                 <Button
                     disabled={usedAmount < amount}
-                    onClick={() => submitSchedule(schedule)}
+                    onClick={() => submitSchedule(schedule, { schedule })}
                 >
                     submit
                 </Button>

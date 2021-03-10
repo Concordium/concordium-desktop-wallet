@@ -1,1 +1,1 @@
-export { default } from './InputTimeStamp';
+export { default } from './InputTimestamp';

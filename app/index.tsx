@@ -13,6 +13,7 @@ import { loadAccounts } from './features/AccountSlice';
 import { loadIdentities } from './features/IdentitySlice';
 
 import './styles/app.global.scss';
+import { loadProposals } from './features/MultiSignatureSlice';
 
 const store = configuredStore();
 
@@ -37,6 +38,7 @@ async function onLoad(dispatch: Dispatch) {
     loadAddressBook(dispatch);
     loadAccounts(dispatch);
     loadIdentities(dispatch);
+    loadProposals(dispatch);
 
     listenForIdentityStatus(dispatch);
 }

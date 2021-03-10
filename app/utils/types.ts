@@ -5,7 +5,7 @@ export type Dispatch = GenericDispatch<AnyAction>;
 
 export type Hex = string;
 type Proofs = Hex;
-type Word64 = BigInt;
+type Word64 = bigint;
 type Word32 = number;
 type Word8 = number;
 
@@ -16,6 +16,11 @@ export enum SchemeId {
 export interface VerifyKey {
     schemeId: string;
     verifyKey: Hex;
+}
+
+export interface SignedPublicKey {
+    key: Hex;
+    signature: Hex;
 }
 
 export interface NewAccount {
@@ -603,6 +608,7 @@ export enum MultiSignatureTransactionStatus {
     Finalized = 'finalized',
     Committed = 'committed',
     Failed = 'failed',
+    Expired = 'expired',
 }
 
 /**
@@ -629,6 +635,7 @@ export enum MultiSignatureMenuItems {
     MakeNewProposal = 'Make new proposal',
     ProposedTransactions = 'Proposed transactions',
     SignTransaction = 'Sign transaction',
+    ExportKey = 'Export public-key',
 }
 
 export interface ExchangeRate {

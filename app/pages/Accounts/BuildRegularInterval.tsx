@@ -20,35 +20,51 @@ export const intervals: Interval[] = [
 
 interface FormValues {
     releases: number;
-    timestamp: Date;
+    startTime: Date;
 }
 
 const fieldNames: EqualRecord<FormValues> = {
     releases: 'releases',
-    timestamp: 'timestamp',
+    startTime: 'startTime',
 };
 
+export interface Defaults {
+    releases: number;
+    chosenInterval: Interval;
+    startTime: number;
+}
+
 interface Props {
-    submitSchedule(schedule: Schedule): void;
+    defaults: Defaults;
+    submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
 }
 
 /**
  * Component to build a "regular interval" schedule.
  */
-export default function RegularInterval({ submitSchedule, amount }: Props) {
+export default function RegularInterval({
+    submitSchedule,
+    amount,
+    defaults,
+}: Props) {
     const [chosenInterval, setChosenInterval] = useState<Interval>(
-        intervals[0]
+        defaults?.chosenInterval || intervals[0]
     );
 
-    function createSchedule({ releases, timestamp }: FormValues) {
+    function createSchedule({ releases, startTime }: FormValues) {
         const schedule = createRegularIntervalSchedule(
             amount,
             releases,
-            timestamp.getTime(),
+            startTime.getTime(),
             chosenInterval.value
         );
-        submitSchedule(schedule);
+        const recoverState = {
+            releases,
+            startTime: startTime.getTime(),
+            chosenInterval,
+        };
+        submitSchedule(schedule, recoverState);
     }
 
     return (
@@ -71,14 +87,17 @@ export default function RegularInterval({ submitSchedule, amount }: Props) {
                     placeholder="Enter releases"
                     autoFocus
                     type="number"
-                    defaultValue={1}
+                    defaultValue={defaults?.releases || 1}
                     rules={{ required: 'Releases required', min: 0 }}
                 />
                 <Form.Timestamp
-                    name={fieldNames.timestamp}
+                    name={fieldNames.startTime}
                     label="Enter starting time"
                     defaultValue={
-                        new Date(Date.now() + 5 * TimeConstants.Minute)
+                        new Date(
+                            defaults?.startTime ||
+                                Date.now() + 5 * TimeConstants.Minute
+                        )
                     }
                     rules={{
                         required: true,
