@@ -1,5 +1,9 @@
 import type Transport from '@ledgerhq/hw-transport';
-import { getPublicKey, getPublicKeySilent } from './GetPublicKey';
+import {
+    getPublicKey,
+    getPublicKeySilent,
+    getSignedPublicKey,
+} from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
@@ -12,6 +16,7 @@ import {
     MintDistribution,
     ProtocolUpdate,
     PublicInformationForIp,
+    SignedPublicKey,
     TransactionFeeDistribution,
     UpdateInstruction,
 } from '../../utils/types';
@@ -52,6 +57,10 @@ export default class ConcordiumLedgerClient {
 
     getPublicKeySilent(path: number[]): Promise<Buffer> {
         return getPublicKeySilent(this.transport, path);
+    }
+
+    getSignedPublicKey(path: number[]): Promise<SignedPublicKey> {
+        return getSignedPublicKey(this.transport, path);
     }
 
     getIdCredSec(identity: number): Promise<Buffer> {

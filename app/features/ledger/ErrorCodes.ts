@@ -12,7 +12,7 @@ const incompatibleText =
 const errorCodeMap = new Map<number, string>();
 errorCodeMap.set(
     StatusCodes.UserRejection,
-    'The transaction was declined on the Ledger device.'
+    'The action was declined on the Ledger device.'
 );
 errorCodeMap.set(
     StatusCodes.InvalidState,
