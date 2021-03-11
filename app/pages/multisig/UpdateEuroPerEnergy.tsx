@@ -17,7 +17,7 @@ export default function UpdateEuroPerEnergy({
     const { threshold } = blockSummary.updates.authorizations.euroPerEnergy;
 
     useEffect(() => {
-        if (euroPerEnergy) {
+        if (euroPerEnergy && effectiveTime) {
             setProposal(
                 createUpdateMultiSignatureTransaction(
                     euroPerEnergy,

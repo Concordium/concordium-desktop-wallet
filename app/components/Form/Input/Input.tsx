@@ -14,14 +14,17 @@ export type InputProps = InputHTMLAttributes<HTMLInputElement> &
  * Use as a normal \<input /\>. Should NOT be used for checkbox or radio.
  */
 const Input = forwardRef<HTMLInputElement, InputProps>(
-    ({ error, className, type = 'text', label, ...props }, ref) => {
+    (
+        { error, isInvalid = false, className, type = 'text', label, ...props },
+        ref
+    ) => {
         return (
             <label className={clsx(styles.root, className)}>
                 {label}
                 <input
                     className={clsx(
                         styles.field,
-                        error !== undefined && styles.fieldInvalid
+                        isInvalid && styles.fieldInvalid
                     )}
                     type={type}
                     ref={ref}

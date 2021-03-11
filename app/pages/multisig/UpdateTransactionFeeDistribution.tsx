@@ -67,7 +67,7 @@ export default function UpdateTransactionFeeDistribution({
     }
 
     useEffect(() => {
-        if (transactionFeeDistribution) {
+        if (transactionFeeDistribution && effectiveTime) {
             setProposal(
                 createUpdateMultiSignatureTransaction(
                     transactionFeeDistribution,

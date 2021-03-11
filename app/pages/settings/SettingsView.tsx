@@ -29,7 +29,7 @@ export default function SettingsView() {
     const settings = useSelector(settingsSelector);
     const chosenIndex = useSelector(chosenIndexSelector);
 
-    if (chosenIndex === undefined) {
+    if (chosenIndex === undefined || settings[chosenIndex] === undefined) {
         return null;
     }
 
