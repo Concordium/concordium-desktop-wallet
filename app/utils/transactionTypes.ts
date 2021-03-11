@@ -5,6 +5,9 @@ import {
     UpdateInstructionPayload,
     AddressBookEntry,
     Word8,
+    AccountTransaction,
+    TransactionPayload,
+    UpdateInstructionSignature,
 } from './types';
 
 export interface TransactionInput {
@@ -44,7 +47,17 @@ export type UpdateComponent = (props: UpdateProps) => JSX.Element | null;
  * and generate a view of the transaction.
  * TODO: Decide whether this handler is only for updateInstruction, or make it support account transactions
  */
-export interface TransactionHandler<T, S> {
+export type TransactionHandler<T, S> =
+    | UpdateInstructionHandler<T, S>
+    | AccountTransactionHandler<T, S>;
+
+/**
+ * Interface definition for a class that handles a specific type
+ * of transaction. The handler can serialize and sign the transaction,
+ * and generate a view of the transaction.
+ * TODO: Decide whether this handler is only for updateInstruction, or make it support account transactions
+ */
+export interface UpdateInstructionHandler<T, S> {
     confirmType: (
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ) => T;
@@ -53,6 +66,20 @@ export interface TransactionHandler<T, S> {
     view: (transaction: T) => JSX.Element;
     getAuthorization: (authorizations: Authorizations) => Authorization;
     update: UpdateComponent;
+    title: string;
+}
+
+/**
+ * Interface definition for a class that handles a specific type
+ * of transaction. The handler can serialize and sign the transaction,
+ * and generate a view of the transaction.
+ * TODO: Fix Description
+ */
+export interface AccountTransactionHandler<T, S> {
+    confirmType: (transaction: AccountTransaction<TransactionPayload>) => T;
+    serializePayload: (transaction: T) => Buffer;
+    signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
+    view: (transaction: T) => JSX.Element;
     title: string;
 }
 
@@ -69,3 +96,15 @@ export type TransactionAccountSignature = Record<
     CredentialIndex,
     TransactionCredentialSignature
 >;
+
+export function instanceOfUpdateInstructionSignature(
+    object: TransactionCredentialSignature | UpdateInstructionSignature
+): object is UpdateInstructionSignature {
+    return 'signature' in object && 'authorizationKeyIndex' in object;
+}
+
+export interface AccountTransactionWithSignature<
+    PayloadType extends TransactionPayload = TransactionPayload
+> extends AccountTransaction<PayloadType> {
+    signature: TransactionAccountSignature;
+}

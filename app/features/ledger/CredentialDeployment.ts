@@ -2,12 +2,123 @@ import type Transport from '@ledgerhq/hw-transport';
 import {
     UnsignedCredentialDeploymentInformation,
     IdOwnershipProofs,
+    CredentialDeploymentValues,
 } from '../../utils/types';
 import {
     putBase58Check,
     serializeVerifyKey,
+    serializeYearMonth,
 } from '../../utils/serializationHelpers';
 import pathAsBuffer from './Path';
+
+async function signCredentialValues(
+    pathPrefix: Uint8Array,
+    transport: Transport,
+    credentialDeployment: CredentialDeploymentValues,
+    ins: number,
+    p1Offset: number
+) {
+    let p1 = 0x00 + p1Offset;
+    const p2 = 0x00;
+
+    const publicKeys = credentialDeployment.credentialPublicKeys;
+    const verificationKeyListLength = Object.entries(publicKeys.keys).length;
+    let data = Buffer.concat([
+        pathPrefix,
+        Uint8Array.of(verificationKeyListLength),
+    ]);
+
+    await transport.send(0xe0, ins, p1, p2, data);
+
+    const keyIndices = Object.keys(publicKeys.keys)
+        .map((idx) => parseInt(idx, 10))
+        .sort();
+
+    p1 = 0x01 + p1Offset;
+    for (let i = 0; i < verificationKeyListLength; i += 1) {
+        const index = keyIndices[i];
+        const verificationKey = publicKeys.keys[index];
+        data = Buffer.concat([
+            Uint8Array.of(index),
+            serializeVerifyKey(verificationKey),
+        ]);
+
+        // eslint-disable-next-line  no-await-in-loop
+        await transport.send(0xe0, ins, p1, p2, data);
+    }
+
+    const signatureThreshold = Uint8Array.of(publicKeys.threshold);
+    const credId = Buffer.from(credentialDeployment.credId, 'hex');
+
+    const identityProviderIdentity = Buffer.alloc(4);
+    identityProviderIdentity.writeInt32BE(credentialDeployment.ipIdentity, 0);
+
+    const arThreshold = Uint8Array.of(credentialDeployment.revocationThreshold);
+    const arListLength = Object.entries(credentialDeployment.arData).length;
+    const arListLengthAsBytes = Uint8Array.of(arListLength);
+
+    data = Buffer.concat([
+        signatureThreshold,
+        credId,
+        identityProviderIdentity,
+        arThreshold,
+        arListLengthAsBytes,
+    ]);
+    p1 = 0x02 + p1Offset;
+    await transport.send(0xe0, ins, p1, p2, data);
+
+    p1 = 0x03 + p1Offset;
+
+    const arIdentities = Object.keys(credentialDeployment.arData);
+    for (let i = 0; i < arIdentities.length; i += 1) {
+        const arIdentity = arIdentities[i];
+        const encIdCredPub = Buffer.from(
+            credentialDeployment.arData[arIdentity].encIdCredPubShare,
+            'hex'
+        );
+        const arData = Buffer.alloc(4);
+        arData.writeUInt32BE(parseInt(arIdentity, 10), 0);
+        data = Buffer.concat([arData, encIdCredPub]);
+
+        // eslint-disable-next-line  no-await-in-loop
+        await transport.send(0xe0, ins, p1, p2, data);
+    }
+
+    p1 = 0x04 + p1Offset;
+    const validTo = serializeYearMonth(credentialDeployment.policy.validTo);
+    const createdAt = serializeYearMonth(credentialDeployment.policy.createdAt);
+
+    const attributeListLength = Object.entries(
+        credentialDeployment.policy.revealedAttributes
+    ).length;
+    const attributeListLengthAsBytes = Buffer.alloc(2);
+    attributeListLengthAsBytes.writeUInt16BE(attributeListLength, 0);
+
+    data = Buffer.concat([validTo, createdAt, attributeListLengthAsBytes]);
+    await transport.send(0xe0, ins, p1, p2, data);
+
+    const revealedAttributes = Object.keys(
+        credentialDeployment.policy.revealedAttributes
+    );
+    for (let i = 0; i < revealedAttributes.length; i += 1) {
+        const attributeTag = revealedAttributes[i];
+        const attributeValue =
+            credentialDeployment.policy.revealedAttributes[attributeTag];
+        data = Buffer.alloc(2);
+        data.writeUInt8(parseInt(attributeTag, 10), 0);
+        const serializedAttributeValue = Buffer.from(attributeValue, 'utf-8');
+        data.writeUInt8(serializedAttributeValue.length, 1);
+
+        p1 = 0x05 + p1Offset;
+        // eslint-disable-next-line  no-await-in-loop
+        await transport.send(0xe0, ins, p1, p2, data);
+
+        p1 = 0x06 + p1Offset;
+        data = serializedAttributeValue;
+        // eslint-disable-next-line  no-await-in-loop
+        await transport.send(0xe0, ins, p1, p2, data);
+    }
+}
 
 function serializeIdOwnerShipProofs(proofs: IdOwnershipProofs) {
     const proofIdCredPub = Buffer.alloc(4);
@@ -47,158 +158,20 @@ async function signCredentialDeployment(
 ): Promise<Buffer> {
     const pathPrefix = pathAsBuffer(path);
 
-    let p1 = 0x00;
     const p2 = 0x00;
 
-    const publicKeys = credentialDeployment.credentialPublicKeys;
-    const verificationKeyListLength = Object.entries(publicKeys.keys).length;
-    let data = Buffer.concat([
+    await signCredentialValues(
         pathPrefix,
-        Uint8Array.of(verificationKeyListLength),
-    ]);
-
-    await transport.send(0xe0, INS_SIGN_CREDENTIAL_DEPLOYMENT, p1, p2, data);
-
-    const keyIndices = Object.keys(publicKeys.keys)
-        .map((idx) => parseInt(idx, 10))
-        .sort();
-
-    p1 = 0x01;
-    for (let i = 0; i < verificationKeyListLength; i += 1) {
-        const index = keyIndices[i];
-        const verificationKey = publicKeys.keys[index];
-        data = Buffer.concat([
-            Uint8Array.of(index),
-            serializeVerifyKey(verificationKey),
-        ]);
-
-        // eslint-disable-next-line  no-await-in-loop
-        await transport.send(
-            0xe0,
-            INS_SIGN_CREDENTIAL_DEPLOYMENT,
-            p1,
-            p2,
-            data
-        );
-    }
-
-    const signatureThreshold = Uint8Array.of(publicKeys.threshold);
-    const credId = Buffer.from(credentialDeployment.credId, 'hex');
-
-    const identityProviderIdentity = Buffer.alloc(4);
-    identityProviderIdentity.writeInt32BE(credentialDeployment.ipIdentity, 0);
-
-    const arThreshold = Uint8Array.of(credentialDeployment.revocationThreshold);
-    const arListLength = Object.entries(credentialDeployment.arData).length;
-    const arListLengthAsBytes = Uint8Array.of(arListLength);
-
-    data = Buffer.concat([
-        signatureThreshold,
-        credId,
-        identityProviderIdentity,
-        arThreshold,
-        arListLengthAsBytes,
-    ]);
-    p1 = 0x02;
-    await transport.send(0xe0, INS_SIGN_CREDENTIAL_DEPLOYMENT, p1, p2, data);
-
-    p1 = 0x03;
-
-    const arIdentities = Object.keys(credentialDeployment.arData);
-    for (let i = 0; i < arIdentities.length; i += 1) {
-        const arIdentity = arIdentities[i];
-        const encIdCredPub = Buffer.from(
-            credentialDeployment.arData[arIdentity].encIdCredPubShare,
-            'hex'
-        );
-        const arData = Buffer.alloc(4);
-        arData.writeUInt32BE(parseInt(arIdentity, 10), 0);
-        data = Buffer.concat([arData, encIdCredPub]);
-
-        // eslint-disable-next-line  no-await-in-loop
-        await transport.send(
-            0xe0,
-            INS_SIGN_CREDENTIAL_DEPLOYMENT,
-            p1,
-            p2,
-            data
-        );
-    }
-
-    p1 = 0x04;
-    const validTo = Buffer.alloc(3);
-    const ValidToYear = parseInt(
-        credentialDeployment.policy.validTo.substring(0, 4),
-        10
+        transport,
+        credentialDeployment,
+        INS_SIGN_CREDENTIAL_DEPLOYMENT,
+        0
     );
-    const ValidToMonth = parseInt(
-        credentialDeployment.policy.validTo.substring(4, 6),
-        10
-    );
-
-    validTo.writeUInt16BE(ValidToYear, 0);
-    validTo.writeUInt8(ValidToMonth, 2);
-
-    const createdAt = Buffer.alloc(3);
-    const createdAtYear = parseInt(
-        credentialDeployment.policy.createdAt.substring(0, 4),
-        10
-    );
-    const createdAtMonth = parseInt(
-        credentialDeployment.policy.createdAt.substring(4, 6),
-        10
-    );
-
-    createdAt.writeUInt16BE(createdAtYear, 0);
-    createdAt.writeUInt8(createdAtMonth, 2);
-
-    const attributeListLength = Object.entries(
-        credentialDeployment.policy.revealedAttributes
-    ).length;
-    const attributeListLengthAsBytes = Buffer.alloc(2);
-    attributeListLengthAsBytes.writeUInt16BE(attributeListLength, 0);
-
-    data = Buffer.concat([validTo, createdAt, attributeListLengthAsBytes]);
-    await transport.send(0xe0, INS_SIGN_CREDENTIAL_DEPLOYMENT, p1, p2, data);
-
-    const revealedAttributes = Object.keys(
-        credentialDeployment.policy.revealedAttributes
-    );
-    for (let i = 0; i < revealedAttributes.length; i += 1) {
-        const attributeTag = revealedAttributes[i];
-        const attributeValue =
-            credentialDeployment.policy.revealedAttributes[attributeTag];
-        data = Buffer.alloc(2);
-        data.writeUInt8(parseInt(attributeTag, 10), 0);
-        const serializedAttributeValue = Buffer.from(attributeValue, 'utf-8');
-        data.writeUInt8(serializedAttributeValue.length, 1);
-
-        p1 = 0x05;
-        // eslint-disable-next-line  no-await-in-loop
-        await transport.send(
-            0xe0,
-            INS_SIGN_CREDENTIAL_DEPLOYMENT,
-            p1,
-            p2,
-            data
-        );
-
-        p1 = 0x06;
-        data = serializedAttributeValue;
-        // eslint-disable-next-line  no-await-in-loop
-        await transport.send(
-            0xe0,
-            INS_SIGN_CREDENTIAL_DEPLOYMENT,
-            p1,
-            p2,
-            data
-        );
-    }
 
     const proofs = serializeIdOwnerShipProofs(credentialDeployment.proofs);
     const proofLength = Buffer.alloc(4);
     proofLength.writeInt32BE(proofs.length, 0);
-    p1 = 0x07;
+    let p1 = 0x07;
     await transport.send(
         0xe0,
         INS_SIGN_CREDENTIAL_DEPLOYMENT,

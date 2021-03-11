@@ -2,7 +2,8 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import routes from '../../constants/routes.json';
 import MultiSignaturePage from './MultiSignaturePage';
-import ProposalView from './ProposalView';
+import AccountTransactionProposalView from './AccountTransactionProposalView';
+import UpdateInstructionProposalView from './UpdateInstructionProposalView';
 import CosignTransactionProposalView from './CosignTransactionProposalView';
 import SignTransactionProposalView from './SignTransactionProposalView';
 import ExportSignedTransactionView from './ExportSignedTransactionView';
@@ -30,8 +31,14 @@ export default function MultiSignatureRoutes(): JSX.Element {
                 component={CosignTransactionProposalView}
             />
             <Route
+                path={
+                    routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION
+                }
+                component={AccountTransactionProposalView}
+            />
+            <Route
                 path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}
-                component={ProposalView}
+                component={UpdateInstructionProposalView}
             />
             <Route
                 path={routes.MULTISIGTRANSACTIONS_PROPOSAL}

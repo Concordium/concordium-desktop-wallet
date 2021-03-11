@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import bs58check from 'bs58check';
-import { VerifyKey, SchemeId } from './types';
+import { VerifyKey, SchemeId, CredentialDeploymentInformation } from './types';
 
 export function putBase58Check(
     array: Uint8Array,
@@ -80,9 +80,9 @@ export function serializeVerifyKey(key: VerifyKey) {
 
 export function serializeMap<K extends string | number | symbol, T>(
     map: Record<K, T>,
-    putSize: (size: number) => Buffer,
-    putKey: (k: K) => Buffer,
-    putValue: (t: T) => Buffer
+    putSize: (size: number) => Buffer | Uint8Array,
+    putKey: (k: K) => Buffer | Uint8Array,
+    putValue: (t: T) => Buffer | Uint8Array
 ): Buffer {
     const keys = Object.keys(map) as K[];
     const buffers = [putSize(keys.length)];
@@ -90,5 +90,75 @@ export function serializeMap<K extends string | number | symbol, T>(
         buffers.push(putKey(key));
         buffers.push(putValue(map[key]));
     });
+    return Buffer.concat(buffers);
+}
+
+export function serializeList<T>(
+    list: T[],
+    putSize: (size: number) => Buffer,
+    putMember: (t: T) => Buffer
+): Buffer {
+    const buffers = [putSize(list.length)];
+    list.forEach((member: T) => {
+        buffers.push(putMember(member));
+    });
+    return Buffer.concat(buffers);
+}
+
+export function serializeYearMonth(yearMonth: string) {
+    const year = parseInt(yearMonth.substring(0, 4), 10);
+    const month = parseInt(yearMonth.substring(4, 6), 10);
+
+    const buffer = Buffer.alloc(3);
+    buffer.writeUInt16BE(year, 0);
+    buffer.writeUInt8(month, 2);
+    return buffer;
+}
+
+export const putInt8 = (i: number) => Buffer.from(Uint8Array.of(i));
+
+export function serializeCredentialDeploymentInformation(
+    credential: CredentialDeploymentInformation
+) {
+    const buffers = [];
+    buffers.push(
+        serializeMap(
+            credential.credentialPublicKeys.keys,
+            putInt8,
+            putInt8,
+            serializeVerifyKey
+        )
+    );
+    buffers.push(Uint8Array.of(credential.credentialPublicKeys.threshold));
+    buffers.push(Buffer.from(credential.credId, 'hex'));
+    buffers.push(encodeWord32(credential.ipIdentity));
+    buffers.push(encodeWord16(credential.revocationThreshold));
+    buffers.push(
+        serializeMap(
+            credential.arData,
+            putInt8,
+            (key) => encodeWord32(parseInt(key, 10)),
+            (arData) => Buffer.from(arData.encIdCredPubShare, 'hex')
+        )
+    );
+    buffers.push(serializeYearMonth(credential.policy.validTo));
+    buffers.push(serializeYearMonth(credential.policy.createdAt));
+    const revealedAttributes = Object.entries(
+        credential.policy.revealedAttributes
+    );
+    const attributesLength = Buffer.alloc(2);
+    attributesLength.writeUInt16BE(revealedAttributes.length, 0);
+    buffers.push(attributesLength);
+    revealedAttributes.forEach(([tag, value]) => {
+        const serializedAttributeValue = Buffer.from(value, 'utf-8');
+        const data = Buffer.alloc(2);
+        data.writeUInt8(parseInt(tag, 10), 0);
+        data.writeUInt8(serializedAttributeValue.length, 1);
+        buffers.push(data);
+        buffers.push(serializedAttributeValue);
+    });
+    const proofs = Buffer.from(credential.proofs, 'hex');
+    buffers.push(encodeWord32(proofs.length));
+    buffers.push(proofs);
     return Buffer.concat(buffers);
 }

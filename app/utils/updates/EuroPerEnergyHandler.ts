@@ -3,7 +3,7 @@ import { getGovernancePath } from '../../features/ledger/Path';
 import EuroPerEnergyView from '../../pages/multisig/EuroPerEnergyView';
 import UpdateEuroPerEnergy from '../../pages/multisig/UpdateEuroPerEnergy';
 import { Authorizations } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isExchangeRate,
     ExchangeRate,
@@ -15,7 +15,8 @@ import { serializeExchangeRate } from '../UpdateSerialization';
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
 export default class EuroPerEnergyHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

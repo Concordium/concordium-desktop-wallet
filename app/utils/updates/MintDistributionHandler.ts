@@ -3,7 +3,7 @@ import { getGovernancePath } from '../../features/ledger/Path';
 import MintDistributionView from '../../pages/multisig/MintDistributionView';
 import UpdateMintDistribution from '../../pages/multisig/UpdateMintDistribution';
 import { Authorizations } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isMintDistribution,
     MintDistribution,
@@ -15,7 +15,8 @@ import { serializeMintDistribution } from '../UpdateSerialization';
 type TransactionType = UpdateInstruction<MintDistribution>;
 
 export default class MintDistributionHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

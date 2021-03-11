@@ -8,7 +8,8 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../utils/types';
-import findHandler from '../utils/updates/HandlerFinder';
+import { AccountTransactionWithSignature } from '../utils/transactionTypes';
+import { findUpdateInstructionHandler } from '../utils/updates/HandlerFinder';
 import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
 
 // TODO Implement a proper view of the supported transaction types, including account
@@ -17,7 +18,8 @@ import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
 interface Props {
     transaction:
         | UpdateInstruction<UpdateInstructionPayload>
-        | AccountTransaction;
+        | AccountTransaction
+        | AccountTransactionWithSignature;
 }
 
 function generateView(
@@ -26,7 +28,7 @@ function generateView(
         | AccountTransaction
 ) {
     if (instanceOfUpdateInstruction(transaction)) {
-        const handler = findHandler(transaction.type);
+        const handler = findUpdateInstructionHandler(transaction.type);
 
         return (
             <>

@@ -19,6 +19,8 @@ export async function up(knex: Knex): Promise<void> {
                 .references('id')
                 .inTable(identitiesTable)
                 .index();
+            table.integer('signatureThreshold').defaultTo(1);
+            table.string('credentials').defaultTo('[]');
             table.string('incomingAmounts').defaultTo('[]');
             table.string('selfAmounts').defaultTo('');
             table.string('totalDecrypted').defaultTo('');

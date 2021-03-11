@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
     Button,
     Checkbox,
@@ -9,70 +9,70 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
-import { push } from 'connected-react-router';
-import { parse, stringify } from 'json-bigint';
-import * as ed from 'noble-ed25519';
-import {
-    currentProposalSelector,
-    updateCurrentProposal,
-} from '../../features/MultiSignatureSlice';
+import { parse } from 'json-bigint';
+import { currentProposalSelector } from '../../features/MultiSignatureSlice';
 import TransactionDetails from '../../components/TransactionDetails';
 import TransactionHashView from '../../components/TransactionHashView';
 import {
-    instanceOfUpdateInstruction,
-    MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
-    UpdateInstruction,
-    UpdateInstructionPayload,
     UpdateInstructionSignature,
+    Transaction,
 } from '../../utils/types';
 import { saveFile } from '../../utils/FileHelper';
 import DragAndDropFile from '../../components/DragAndDropFile';
-import {
-    getBlockSummary,
-    getConsensusStatus,
-    sendTransaction,
-} from '../../utils/nodeRequests';
-import {
-    serializeForSubmission,
-    serializeUpdateInstructionHeaderAndPayload,
-} from '../../utils/UpdateSerialization';
-import { hashSha256 } from '../../utils/serializationHelpers';
-import { getMultiSignatureTransactionStatus } from '../../utils/TransactionStatusPoller';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '../../components/SimpleErrorModal';
-import routes from '../../constants/routes.json';
-import findHandler from '../../utils/updates/HandlerFinder';
-import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import PageLayout from '../../components/PageLayout';
+import {
+    TransactionCredentialSignature,
+    instanceOfUpdateInstructionSignature,
+} from '../../utils/transactionTypes';
 
-/**
- * Returns whether or not the given signature is valid for the proposal. The signature is valid if
- * one of the authorized verification keys can verify the signature successfully on the hash
- * of the serialized transaction.
- */
-async function isSignatureValid(
-    proposal: UpdateInstruction<UpdateInstructionPayload>,
-    signature: UpdateInstructionSignature,
-    blockSummary: BlockSummary
-): Promise<boolean> {
-    const handler = findHandler(proposal.type);
-    const transactionHash = hashSha256(
-        serializeUpdateInstructionHeaderAndPayload(
-            proposal,
-            handler.serializePayload(proposal)
-        )
-    );
+export interface ProposalError {
+    show: boolean;
+    header: string;
+    content: string;
+}
 
-    const matchingKey =
-        blockSummary.updates.authorizations.keys[
-            signature.authorizationKeyIndex
-        ];
-    return ed.verify(
-        signature.signature,
-        transactionHash,
-        matchingKey.verifyKey
+interface Props {
+    title: string;
+    transaction: Transaction;
+    transactionHash: string;
+    signatures: TransactionCredentialSignature[] | UpdateInstructionSignature[];
+    handleSignatureFile: (
+        transactionObject: Transaction
+    ) => Promise<ModalErrorInput | undefined>;
+    submitTransaction: () => void;
+}
+
+function displaySignature(
+    signature: TransactionCredentialSignature | UpdateInstructionSignature
+) {
+    if (instanceOfUpdateInstructionSignature(signature)) {
+        return (
+            <Form.Field key={signature.signature}>
+                <Checkbox
+                    label={`Signed (${signature.signature.substring(
+                        0,
+                        16
+                    )}...)`}
+                    defaultChecked
+                    readOnly
+                />
+            </Form.Field>
+        );
+    }
+    // TODO: Remove assumption that a credential only has 1 signature
+    const sig = signature[0].toString('hex');
+    return (
+        <Form.Field key={sig}>
+            <Checkbox
+                label={`Signed (${sig.substring(0, 16)}...)`}
+                defaultChecked
+                readOnly
+            />
+        </Form.Field>
     );
 }
 
@@ -82,13 +82,20 @@ async function isSignatureValid(
  * add signatures to the proposal, and if the signature threshold has been reached,
  * then the proposal can be submitted to a node.
  */
-export default function ProposalView() {
+export default function ProposalView({
+    title,
+    transaction,
+    transactionHash,
+    signatures,
+    handleSignatureFile,
+    submitTransaction,
+}: Props) {
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
     const [currentlyLoadingFile, setCurrentlyLoadingFile] = useState(false);
-    const dispatch = useDispatch();
     const currentProposal = useSelector(currentProposalSelector);
+
     if (!currentProposal) {
         throw new Error(
             'The proposal page should not be loaded without a proposal in the state.'
@@ -111,148 +118,15 @@ export default function ProposalView() {
             return;
         }
 
-        if (instanceOfUpdateInstruction(transactionObject)) {
-            if (currentProposal) {
-                const proposal: UpdateInstruction<UpdateInstructionPayload> = parse(
-                    currentProposal.transaction
-                );
-
-                // We currently restrict the amount of signatures imported at the same time to be 1, as it
-                // simplifies error handling and currently it is only possible to export a file signed once.
-                // This can be expanded to support multiple signatures at a later point in time if need be.
-                if (transactionObject.signatures.length !== 1) {
-                    setShowError({
-                        show: true,
-                        header: 'Invalid signature file',
-                        content:
-                            'The loaded signature file does not contain exactly one signature. Multiple signatures or zero signatures are not valid input.',
-                    });
-                    setCurrentlyLoadingFile(false);
-                    return;
-                }
-
-                const signature = transactionObject.signatures[0];
-
-                // Prevent the user from adding a signature that is already present on the proposal.
-                if (
-                    proposal.signatures
-                        .map((sig) => sig.signature)
-                        .includes(signature.signature)
-                ) {
-                    setShowError({
-                        show: true,
-                        header: 'Duplicate signature',
-                        content:
-                            'The loaded signature file contains a signature that is already present on the proposal.',
-                    });
-                    setCurrentlyLoadingFile(false);
-                    return;
-                }
-
-                let validSignature = false;
-                try {
-                    const consensusStatus: ConsensusStatus = await getConsensusStatus();
-                    const blockSummary = await getBlockSummary(
-                        consensusStatus.lastFinalizedBlock
-                    );
-                    validSignature = await isSignatureValid(
-                        proposal,
-                        signature,
-                        blockSummary
-                    );
-                } catch (error) {
-                    // Can happen if the node is not reachable.
-                    setShowError({
-                        show: true,
-                        header: 'Unable to reach node',
-                        content:
-                            'It was not possible to reach the node, which is required to validate that the loaded signature verifies against an authorization key.',
-                    });
-                    setCurrentlyLoadingFile(false);
-                    return;
-                }
-
-                // Prevent the user from adding an invalid signature.
-                if (!validSignature) {
-                    setShowError({
-                        show: true,
-                        header: 'Invalid signature',
-                        content:
-                            'The loaded signature file contains a signature that is either not for this proposal, or was signed by an unauthorized key.',
-                    });
-                    setCurrentlyLoadingFile(false);
-                    return;
-                }
-
-                proposal.signatures = proposal.signatures.concat(
-                    transactionObject.signatures
-                );
-                const updatedProposal = {
-                    ...currentProposal,
-                    transaction: stringify(proposal),
-                };
-
-                updateCurrentProposal(dispatch, updatedProposal);
-                setCurrentlyLoadingFile(false);
-            }
-        } else {
-            setShowError({
-                show: true,
-                header: 'Invalid signature file',
-                content:
-                    'The loaded signature file is invalid. It should contain a signature for an account transaction or an update instruction in the exact format exported by this application.',
-            });
-            setCurrentlyLoadingFile(false);
+        const error = await handleSignatureFile(transactionObject);
+        if (error) {
+            setShowError(error);
         }
-    }
-
-    const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
-        currentProposal.transaction
-    );
-    const handler = findHandler(instruction.type);
-    const serializedPayload = handler.serializePayload(instruction);
-
-    const transactionHash = hashSha256(
-        serializeUpdateInstructionHeaderAndPayload(
-            instruction,
-            serializedPayload
-        )
-    ).toString('hex');
-
-    async function submitTransaction() {
-        if (!currentProposal) {
-            // TODO: can we remove this without getting a type error.
-            throw new Error(
-                'The proposal page should not be loaded without a proposal in the state.'
-            );
-        }
-        const payload = serializeForSubmission(instruction, serializedPayload);
-        const submitted = (await sendTransaction(payload)).getValue();
-        const modifiedProposal: MultiSignatureTransaction = {
-            ...currentProposal,
-        };
-        if (submitted) {
-            modifiedProposal.status = MultiSignatureTransactionStatus.Submitted;
-            updateCurrentProposal(dispatch, modifiedProposal);
-            getMultiSignatureTransactionStatus(modifiedProposal, dispatch);
-            dispatch(
-                push({
-                    pathname: routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION,
-                    state: stringify(modifiedProposal),
-                })
-            );
-        } else {
-            modifiedProposal.status = MultiSignatureTransactionStatus.Failed;
-            updateCurrentProposal(dispatch, modifiedProposal);
-        }
+        setCurrentlyLoadingFile(false);
     }
 
     const unsignedCheckboxes = [];
-    for (
-        let i = 0;
-        i < currentProposal.threshold - instruction.signatures.length;
-        i += 1
-    ) {
+    for (let i = 0; i < currentProposal.threshold - signatures.length; i += 1) {
         unsignedCheckboxes.push(
             <Form.Field key={i}>
                 <Checkbox label="Awaiting signature" readOnly />
@@ -260,8 +134,7 @@ export default function ProposalView() {
         );
     }
 
-    const missingSignatures =
-        instruction.signatures.length !== currentProposal.threshold;
+    const missingSignatures = signatures.length !== currentProposal.threshold;
 
     const readyToSubmit =
         !missingSignatures &&
@@ -270,7 +143,7 @@ export default function ProposalView() {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>{handler.title}</h1>
+                <h1>{title}</h1>
             </PageLayout.Header>
             <Segment secondary textAlign="center">
                 <SimpleErrorModal
@@ -289,27 +162,12 @@ export default function ProposalView() {
                     <Divider />
                     <Grid columns={3} divided textAlign="center" padded>
                         <Grid.Column>
-                            <TransactionDetails transaction={instruction} />
+                            <TransactionDetails transaction={transaction} />
                         </Grid.Column>
                         <Grid.Column>
                             <Grid.Row>
                                 <Form>
-                                    {instruction.signatures.map((signature) => {
-                                        return (
-                                            <Form.Field
-                                                key={signature.signature}
-                                            >
-                                                <Checkbox
-                                                    label={`Signed (${signature.signature.substring(
-                                                        0,
-                                                        16
-                                                    )}...)`}
-                                                    defaultChecked
-                                                    readOnly
-                                                />
-                                            </Form.Field>
-                                        );
-                                    })}
+                                    {signatures.map(displaySignature)}
                                     {unsignedCheckboxes}
                                 </Form>
                             </Grid.Row>

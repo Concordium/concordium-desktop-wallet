@@ -10,6 +10,8 @@ import {
     ScheduledTransfer,
     SchedulePoint,
     TransferToEncrypted,
+    UpdateAccountCredentials,
+    CredentialDeploymentInformation,
 } from './types';
 
 /**
@@ -147,6 +149,33 @@ export async function createScheduledTransferTransaction(
         },
     };
     return transferTransaction;
+}
+
+/**
+ *  Constructs an account credential update transaction,
+ */
+export async function createUpdateCredentialsTransaction(
+    sender: string,
+    addedCredentials: CredentialDeploymentInformation[],
+    removedCredIds: string[],
+    newThreshold: number,
+    expiry: bigint = getDefaultExpiry(),
+    energyAmount = '200'
+) {
+    const { nonce } = await getNextAccountNonce(sender);
+    const transaction: UpdateAccountCredentials = {
+        sender,
+        nonce,
+        energyAmount,
+        expiry,
+        transactionKind: TransactionKindId.Update_credentials,
+        payload: {
+            addedCredentials,
+            removedCredIds,
+            newThreshold,
+        },
+    };
+    return transaction;
 }
 
 export async function getDataObject(

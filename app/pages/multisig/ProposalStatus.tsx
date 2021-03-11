@@ -6,6 +6,9 @@ import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateType,
+    Transaction,
+    instanceOfUpdateInstruction,
+    TransactionKindId,
 } from '../../utils/types';
 import TransactionDetails from '../../components/TransactionDetails';
 import StatusLabel from './StatusLabel';
@@ -14,6 +17,20 @@ import StatusLabel from './StatusLabel';
 
 interface Props {
     proposal: MultiSignatureTransaction;
+}
+
+function getHeader(transaction: Transaction) {
+    if (instanceOfUpdateInstruction(transaction)) {
+        return UpdateType[transaction.type];
+    }
+    return TransactionKindId[transaction.transactionKind];
+}
+
+function getType(transaction: Transaction) {
+    if (instanceOfUpdateInstruction(transaction)) {
+        return 'Foundation transaction';
+    }
+    return 'Account transaction';
 }
 
 const statusColorMap = new Map<MultiSignatureTransactionStatus, ColorType>([
@@ -27,20 +44,20 @@ const statusColorMap = new Map<MultiSignatureTransactionStatus, ColorType>([
  * Component that displays a status overview of a multi signature proposal.
  */
 export default function ProposalStatus({ proposal }: Props) {
-    const updateInstruction = parse(proposal.transaction);
+    const transaction = parse(proposal.transaction);
 
     return (
         <Grid padded>
             <Grid.Row columns="equal">
                 <Grid.Column>
-                    <Header>{UpdateType[updateInstruction.type]}</Header>
+                    <Header>{getHeader(transaction)}</Header>
                 </Grid.Column>
                 <Grid.Column textAlign="right">
-                    <Header>Foundation transaction</Header>
+                    <Header>{getType(transaction)}</Header>
                 </Grid.Column>
             </Grid.Row>
             <Grid.Row centered>
-                <TransactionDetails transaction={updateInstruction} />
+                <TransactionDetails transaction={transaction} />
             </Grid.Row>
             <Grid.Row>
                 <Grid.Column>

@@ -19,6 +19,7 @@
     "SETTINGS": "/settings",
     "MULTISIGTRANSACTIONS_PROPOSAL": "/MultiSignatureTransaction/create",
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING": "/MultiSignatureTransaction/existing",
+    "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION": "/MultiSignatureTransaction/existing/account-transaction",
     "MULTISIGTRANSACTIONS_COSIGN_TRANSACTION": "/MultiSignatureTransaction/cosign",
     "MULTISIGTRANSACTIONS_SIGN_TRANSACTION": "/MultiSignatureTransaction/sign",
     "MULTISIGTRANSACTIONS_EXPORT_TRANSACTION": "/MultiSignatureTransaction/export",
@@ -40,5 +41,12 @@
     "GENERATE_CREDENTIAL_SIGN": "/generate-credential/sign",
     "GENERATE_CREDENTIAL_EXPORT": "/generate-credential/export",
     "GENERATE_CREDENTIAL_REVEALATTRIBUTES": "/generate-credential/reveal-attributes",
-    "GENERATE_CREDENTIAL_PICKACCOUNT": "/generate-credential/pick-account"
+    "GENERATE_CREDENTIAL_PICKACCOUNT": "/generate-credential/pick-account",
+    "UPDATE_ACCOUNT_CREDENTIALS": "/update_account_credentials",
+    "UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT": "/update_account_credentials/pick-account",
+    "UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY": "/update_account_credentials/pick-identity",
+    "UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL": "/update_account_credentials/add-credential",
+    "UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD": "/update_account_credentials/change-signature-threshold",
+    "UPDATE_ACCOUNT_CREDENTIALS_SIGN": "/update_account_credentials/sign",
+    "UPDATE_ACCOUNT_CREDENTIALS_SEND": "/update_account_credentials/send"
 }

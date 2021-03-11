@@ -11,8 +11,8 @@ import {
     UpdateInstructionPayload,
     UpdateInstructionSignature,
 } from '../../utils/types';
-import { TransactionHandler } from '../../utils/transactionTypes';
-import { createTransactionHandler } from '../../utils/updates/HandlerFinder';
+import { UpdateInstructionHandler } from '../../utils/transactionTypes';
+import { createUpdateInstructionHandler } from '../../utils/updates/HandlerFinder';
 import { insert } from '../../database/MultiSignatureProposalDao';
 import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
@@ -53,11 +53,11 @@ export default function SignTransactionProposalView({ location }: Props) {
     const type = 'UpdateInstruction';
 
     const [transactionHandler] = useState<
-        TransactionHandler<
+        UpdateInstructionHandler<
             UpdateInstruction<UpdateInstructionPayload>,
             ConcordiumLedgerClient
         >
-    >(() => createTransactionHandler({ transaction, type }));
+    >(() => createUpdateInstructionHandler({ transaction, type }));
 
     const dispatch = useDispatch();
 

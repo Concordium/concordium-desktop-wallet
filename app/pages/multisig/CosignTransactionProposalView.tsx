@@ -7,14 +7,14 @@ import { hashSha256 } from '../../utils/serializationHelpers';
 import routes from '../../constants/routes.json';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { createTransactionHandler } from '../../utils/updates/HandlerFinder';
+import { createUpdateInstructionHandler } from '../../utils/updates/HandlerFinder';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateInstructionSignature,
 } from '../../utils/types';
 import {
-    TransactionHandler,
+    UpdateInstructionHandler,
     TransactionInput,
 } from '../../utils/transactionTypes';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
@@ -37,11 +37,11 @@ export default function CosignTransactionProposalView({ location }: Props) {
     const [blockSummary, setBlockSummary] = useState<BlockSummary>();
     const [transactionHash, setTransactionHash] = useState<string>();
     const [transactionHandler] = useState<
-        TransactionHandler<
+        UpdateInstructionHandler<
             UpdateInstruction<UpdateInstructionPayload>,
             ConcordiumLedgerClient
         >
-    >(() => createTransactionHandler(location.state));
+    >(() => createUpdateInstructionHandler(location.state));
 
     const dispatch = useDispatch();
 

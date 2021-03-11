@@ -22,6 +22,7 @@ const credentialSlice = createSlice({
 
 export const credentialsSelector = (state: RootState) =>
     state.credentials.credentials;
+
 export const { updateCredentials } = credentialSlice.actions;
 
 export async function loadCredentials(dispatch: Dispatch) {

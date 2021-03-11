@@ -17,6 +17,7 @@ import {
     AccountInfo,
     Dispatch,
     Global,
+    Identity,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
@@ -69,6 +70,13 @@ const accountsSlice = createSlice({
 });
 
 export const accountsSelector = (state: RootState) => state.accounts.accounts;
+
+export const accountsOfIdentitySelector = (identity: Identity) => (
+    state: RootState
+) =>
+    state.accounts.accounts.filter(
+        (account) => account.identityId === identity.id
+    );
 
 export const accountsInfoSelector = (state: RootState) =>
     state.accounts.accountsInfo;
@@ -158,7 +166,7 @@ export async function addPendingAccount(
     identityId: number,
     accountNumber: number,
     accountAddress = '',
-    credentialDeploymentHash = ''
+    credentialId = ''
 ) {
     const account: Account = {
         name: accountName,
@@ -166,7 +174,7 @@ export async function addPendingAccount(
         status: AccountStatus.Pending,
         accountNumber,
         address: accountAddress,
-        credentialDeploymentHash,
+        credentials: JSON.stringify([credentialId]),
         maxTransactionId: 0,
     };
     await insertAccount(account);

@@ -13,7 +13,7 @@ import {
 import TransactionDetails from '../../components/TransactionDetails';
 import TransactionHashView from '../../components/TransactionHashView';
 import routes from '../../constants/routes.json';
-import findHandler from '../../utils/updates/HandlerFinder';
+import { findUpdateInstructionHandler } from '../../utils/updates/HandlerFinder';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 import PageLayout from '../../components/PageLayout';
 
@@ -58,7 +58,7 @@ export default function SubmittedProposalView({ location }: Props) {
     const updateInstruction: UpdateInstruction<UpdateInstructionPayload> = parse(
         multiSignatureTransaction.transaction
     );
-    const handler = findHandler(updateInstruction.type);
+    const handler = findUpdateInstructionHandler(updateInstruction.type);
     const transactionHash = hashSha256(
         serializeUpdateInstructionHeaderAndPayload(
             updateInstruction,

@@ -3,7 +3,7 @@ import { getGovernancePath } from '../../features/ledger/Path';
 import GasRewardsView from '../../pages/multisig/GasRewardsView';
 import UpdateGasRewards from '../../pages/multisig/UpdateGasRewards';
 import { Authorizations } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     GasRewards,
     isGasRewards,
@@ -15,7 +15,8 @@ import { serializeGasRewards } from '../UpdateSerialization';
 type TransactionType = UpdateInstruction<GasRewards>;
 
 export default class GasRewardsHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

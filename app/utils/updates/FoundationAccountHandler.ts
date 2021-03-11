@@ -3,7 +3,7 @@ import { getGovernancePath } from '../../features/ledger/Path';
 import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
 import UpdateFoundationAccount from '../../pages/multisig/UpdateFoundationAccount';
 import { Authorizations } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     FoundationAccount,
     isFoundationAccount,
@@ -15,7 +15,8 @@ import { serializeFoundationAccount } from '../UpdateSerialization';
 type TransactionType = UpdateInstruction<FoundationAccount>;
 
 export default class FoundationAccountHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

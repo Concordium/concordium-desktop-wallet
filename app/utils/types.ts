@@ -105,8 +105,8 @@ export interface Account {
     identityId: number;
     identityName?: string;
     status: AccountStatus;
-    credentialDeploymentHash?: string;
-    credential?: string;
+    signatureThreshold?: number;
+    credentials: string;
     totalDecrypted?: string;
     allDecrypted?: boolean;
     incomingAmounts?: string;
@@ -132,6 +132,7 @@ export enum TransactionKindString {
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
     TransferWithSchedule = 'transferWithSchedule', // TODO confirm
+    UpdateCredentials = 'updateCredentials',
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -150,6 +151,7 @@ export enum TransactionKindId {
     Transfer_to_encrypted = 17,
     Transfer_to_public = 18,
     Transfer_with_schedule = 19,
+    Update_credentials = 20,
 } // TODO: Add all kinds (11- 18)
 
 export interface SimpleTransferPayload {
@@ -172,7 +174,14 @@ export interface ScheduledTransferPayload {
     toAddress: string;
 }
 
+export interface UpdateAccountCredentialsPayload {
+    addedCredentials: Record<number, CredentialDeploymentInformation>;
+    removedCredIds: string[];
+    newThreshold: number;
+}
+
 export type TransactionPayload =
+    | UpdateAccountCredentialsPayload
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
     | SimpleTransferPayload;
@@ -194,6 +203,7 @@ export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
+export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -533,7 +543,9 @@ export interface UpdateInstructionSignature {
     signature: string;
 }
 
-export interface UpdateInstruction<T extends UpdateInstructionPayload> {
+export interface UpdateInstruction<
+    T extends UpdateInstructionPayload = UpdateInstructionPayload
+> {
     header: UpdateHeader;
     payload: T;
     type: UpdateType;
@@ -595,6 +607,12 @@ export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
     return object.transactionKind === TransactionKindId.Transfer_with_schedule;
+}
+
+export function instanceOfUpdateAccountCredentials(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateAccountCredentials {
+    return object.transactionKind === TransactionKindId.Update_credentials;
 }
 
 export function isExchangeRate(

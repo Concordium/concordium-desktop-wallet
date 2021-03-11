@@ -3,7 +3,7 @@ import { getGovernancePath } from '../../features/ledger/Path';
 import ProtocolUpdateView from '../../pages/multisig/ProtocolUpdateView';
 import UpdateProtocol from '../../pages/multisig/UpdateProtocol';
 import { Authorizations } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isProtocolUpdate,
     ProtocolUpdate,
@@ -15,7 +15,8 @@ import { serializeProtocolUpdate } from '../UpdateSerialization';
 type TransactionType = UpdateInstruction<ProtocolUpdate>;
 
 export default class ProtocolUpdateHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

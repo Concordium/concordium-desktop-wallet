@@ -3,10 +3,11 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { Authorizations } from '../NodeApiTypes';
 import {
     UpdateComponent,
-    TransactionHandler,
+    UpdateInstructionHandler,
     TransactionInput,
 } from '../transactionTypes';
 import {
+    TransactionKindId,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
@@ -18,20 +19,21 @@ import MicroGtuPerEuroHandler from './MicroGtuPerEuroHandler';
 import MintDistributionHandler from './MintDistributionHandler';
 import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
+import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
 
 class HandlerTypeMiddleware<T>
     implements
-        TransactionHandler<
+        UpdateInstructionHandler<
             UpdateInstruction<UpdateInstructionPayload>,
             ConcordiumLedgerClient
         > {
-    base: TransactionHandler<T, ConcordiumLedgerClient>;
+    base: UpdateInstructionHandler<T, ConcordiumLedgerClient>;
 
     update: UpdateComponent;
 
     title: string;
 
-    constructor(base: TransactionHandler<T, ConcordiumLedgerClient>) {
+    constructor(base: UpdateInstructionHandler<T, ConcordiumLedgerClient>) {
         this.base = base;
         this.update = base.update;
         this.title = base.title;
@@ -64,9 +66,18 @@ class HandlerTypeMiddleware<T>
     }
 }
 
-export default function findHandler(
+export function findAccountTransactionHandler(
+    transactionKind: TransactionKindId
+) {
+    if (transactionKind === TransactionKindId.Update_credentials) {
+        return new UpdateAccountCredentialsHandler();
+    }
+    throw new Error(`Unsupported transaction type: ${transactionKind}`);
+}
+
+export function findUpdateInstructionHandler(
     type: UpdateType
-): TransactionHandler<
+): UpdateInstructionHandler<
     UpdateInstruction<UpdateInstructionPayload>,
     ConcordiumLedgerClient
 > {
@@ -92,7 +103,16 @@ export default function findHandler(
     }
 }
 
-export function createTransactionHandler(state: TransactionInput | undefined) {
+export default function findHandler(type: UpdateType | TransactionKindId) {
+    if (type in UpdateType) {
+        return findUpdateInstructionHandler(type as UpdateType);
+    }
+    return findAccountTransactionHandler(type as TransactionKindId);
+}
+
+export function createUpdateInstructionHandler(
+    state: TransactionInput | undefined
+) {
     if (!state) {
         throw new Error(
             'No transaction handler was found. An invalid transaction has been received.'
@@ -104,8 +124,7 @@ export function createTransactionHandler(state: TransactionInput | undefined) {
     // TODO Add AccountTransactionHandler here when implemented.
 
     if (type === 'UpdateInstruction') {
-        const handler = findHandler(transactionObject.type);
-        return handler;
+        return findUpdateInstructionHandler(transactionObject.type);
     }
     throw new Error('Account transaction support not yet implemented.');
 }

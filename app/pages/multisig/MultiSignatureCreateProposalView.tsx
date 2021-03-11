@@ -8,7 +8,7 @@ import { getBlockSummary, getConsensusStatus } from '../../utils/nodeRequests';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import routes from '../../constants/routes.json';
 import DynamicModal from './DynamicModal';
-import findHandler from '../../utils/updates/HandlerFinder';
+import { findUpdateInstructionHandler } from '../../utils/updates/HandlerFinder';
 import EffectiveTimeUpdate from './EffectiveTimeUpdate';
 import PageLayout from '../../components/PageLayout';
 
@@ -40,7 +40,7 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     const type: UpdateType = location.state;
     const displayType = UpdateType[type];
 
-    const handler = findHandler(type);
+    const handler = findUpdateInstructionHandler(type);
     const UpdateComponent = handler.update;
 
     function updateBlockSummary(blockSummaryInput: BlockSummary) {

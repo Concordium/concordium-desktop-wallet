@@ -7,6 +7,7 @@ import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { getNextCredentialNumber } from '../../database/CredentialDao';
 import { insertNewCredential } from '../../features/CredentialSlice';
 import { globalSelector } from '../../features/GlobalSlice';
+import { serializeCredentialDeploymentInformation } from '../../utils/serializationHelpers';
 
 interface Props {
     identity: Identity | undefined;
@@ -45,6 +46,17 @@ export default function SignCredential({
             ledger,
             address
         );
+
+        try {
+            serializeCredentialDeploymentInformation(credential).toString(
+                'hex'
+            );
+            console.log('text');
+        } catch (e) {
+            console.log(e);
+            console.log('error');
+        }
+
         setCredential(credential);
         insertNewCredential(address, credentialNumber, identity.id, credential);
         setMessage('Credential generated succesfully!');

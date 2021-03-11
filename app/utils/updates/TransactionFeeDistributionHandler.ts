@@ -3,7 +3,7 @@ import { getGovernancePath } from '../../features/ledger/Path';
 import TransactionFeeDistributionView from '../../pages/multisig/TransactionFeeDistributionView';
 import UpdateTransactionFeeDistribution from '../../pages/multisig/UpdateTransactionFeeDistribution';
 import { Authorizations } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isTransactionFeeDistribution,
     TransactionFeeDistribution,
@@ -15,7 +15,8 @@ import { serializeTransactionFeeDistribution } from '../UpdateSerialization';
 type TransactionType = UpdateInstruction<TransactionFeeDistribution>;
 
 export default class TransactionFeeDistributionHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
