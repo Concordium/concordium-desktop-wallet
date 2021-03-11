@@ -25,8 +25,7 @@ import { globalSelector } from '../../features/GlobalSlice';
 import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
 import { makeTransferToPublicData } from '../../utils/rustInterface';
-
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
 
 interface Location {
     pathname: string;
@@ -127,10 +126,10 @@ export default function SubmitTransfer({ location }: Props) {
     }
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>Accounts | Submit Transfer</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Container>
                 <Segment>
                     <Button onClick={() => dispatch(push(cancelled))}>
@@ -157,6 +156,6 @@ export default function SubmitTransfer({ location }: Props) {
                     </Grid>
                 </Segment>
             </Container>
-        </>
+        </PageLayout>
     );
 }

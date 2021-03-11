@@ -25,6 +25,7 @@
     "MULTISIGTRANSACTIONS_SIGN_TRANSACTION": "/MultiSignatureTransaction/sign",
     "MULTISIGTRANSACTIONS_EXPORT_TRANSACTION": "/MultiSignatureTransaction/export",
     "MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION": "/MultiSignatureTransaction/submitted",
+    "MULTISIGTRANSACTIONS_EXPORT_KEY": "/MultiSignatureTransaction/exportkey/:keyType",
     "IDENTITYISSUANCE": "/identity/issuance",
     "IDENTITYISSUANCE_PICKPROVIDER": "/identity/issuance/pick-provider",
     "IDENTITYISSUANCE_PICKNAMES": "/identity/issuance/pick-names",

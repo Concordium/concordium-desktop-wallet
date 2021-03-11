@@ -1,15 +1,15 @@
 import React from 'react';
 import { Grid } from 'semantic-ui-react';
+import PageLayout from '../../components/PageLayout';
 import MultiSignatureMenuList from './MultiSignatureMenuList';
 import MultiSignatureMenuView from './MultiSignatureMenuView';
-import PageHeader from '../../components/PageHeader';
 
 export default function MultiSignaturePage() {
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>Multi Signature Transactions</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Grid columns="equal" divided>
                 <Grid.Column>
                     <MultiSignatureMenuList />
@@ -18,6 +18,6 @@ export default function MultiSignaturePage() {
                     <MultiSignatureMenuView />
                 </Grid.Column>
             </Grid>
-        </>
+        </PageLayout>
     );
 }

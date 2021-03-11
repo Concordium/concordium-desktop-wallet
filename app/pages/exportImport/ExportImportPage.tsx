@@ -1,15 +1,15 @@
 import React from 'react';
 import { Grid, Segment } from 'semantic-ui-react';
+import PageLayout from '../../components/PageLayout';
 import Export from './Export';
 import Import from './Import';
-import PageHeader from '../../components/PageHeader';
 
 export default function ExportImportPage() {
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>Export and Import</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Segment>
                 <Grid centered columns="equal" divided>
                     <Grid.Row>
@@ -22,6 +22,6 @@ export default function ExportImportPage() {
                     </Grid.Row>
                 </Grid>
             </Segment>
-        </>
+        </PageLayout>
     );
 }

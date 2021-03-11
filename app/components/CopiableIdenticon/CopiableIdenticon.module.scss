@@ -1,0 +1,15 @@
+@import 'config/bundle';
+
+.identicon {
+    display: flex;
+    justify-content: center;
+    margin: auto;
+    width: 128px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+}
+
+.copytext {
+    color: $color-grey;
+}

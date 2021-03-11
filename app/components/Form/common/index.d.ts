@@ -6,3 +6,7 @@ export interface CommonFieldProps {
     error?: string;
     name?: string;
 }
+
+export interface CommonInputProps extends CommonFieldProps {
+    label?: string;
+}

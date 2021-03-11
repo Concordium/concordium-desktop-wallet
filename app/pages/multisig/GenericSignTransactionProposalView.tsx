@@ -15,11 +15,13 @@ import TransactionDetails from '../../components/TransactionDetails';
 import TransactionHashView from '../../components/TransactionHashView';
 import {
     AccountTransaction,
+    instanceOfUpdateInstruction,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import PageHeader from '../../components/PageHeader';
+import PageLayout from '../../components/PageLayout';
+import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
 
 interface Props<T> {
     header: string;
@@ -28,6 +30,7 @@ interface Props<T> {
     signFunction: (input: T) => Promise<void>;
     checkboxes: string[];
     signText: string;
+    loading?: boolean;
 }
 
 export default function GenericSignTransactionProposalView({
@@ -37,6 +40,7 @@ export default function GenericSignTransactionProposalView({
     signFunction,
     checkboxes,
     signText,
+    loading,
 }: Props<ConcordiumLedgerClient>) {
     const [signing, setSigning] = useState(false);
     const [checkboxesStatus, setCheckBoxesStatus] = useState(
@@ -56,13 +60,20 @@ export default function GenericSignTransactionProposalView({
         ledgerComponent = null;
     }
 
+    let expiredEffectiveTimeComponent;
+    if (instanceOfUpdateInstruction(transactionObject)) {
+        expiredEffectiveTimeComponent = (
+            <ExpiredEffectiveTimeView transaction={transactionObject} />
+        );
+    }
+
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>{header}</h1>
-            </PageHeader>
+            </PageLayout.Header>
             <Container>
-                <Segment>
+                <Segment loading={loading}>
                     <Header textAlign="center">
                         Transaction signing confirmation | Transaction Type
                     </Header>
@@ -73,6 +84,7 @@ export default function GenericSignTransactionProposalView({
                                 <TransactionDetails
                                     transaction={transactionObject}
                                 />
+                                {expiredEffectiveTimeComponent}
                             </Grid.Column>
                             <Grid.Column>
                                 <TransactionHashView
@@ -123,6 +135,6 @@ export default function GenericSignTransactionProposalView({
                 </Segment>
                 {ledgerComponent}
             </Container>
-        </>
+        </PageLayout>
     );
 }

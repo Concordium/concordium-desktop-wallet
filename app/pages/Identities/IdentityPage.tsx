@@ -6,10 +6,10 @@ import IdentityList from './IdentityList';
 import IdentityView from './IdentityView';
 import NoIdentities from '../../components/NoIdentities';
 import { identitiesSelector } from '../../features/IdentitySlice';
-import PageHeader from '../../components/PageHeader';
 import routes from '../../constants/routes.json';
 
 import PlusIcon from '../../../resources/svg/plus.svg';
+import PageLayout from '../../components/PageLayout';
 
 export default function IdentityPage() {
     const dispatch = useDispatch();
@@ -35,17 +35,17 @@ export default function IdentityPage() {
     }, [identities]);
 
     return (
-        <>
-            <PageHeader>
+        <PageLayout>
+            <PageLayout.Header>
                 <h1>Identities</h1>
-                <PageHeader.Button
+                <PageLayout.HeaderButton
                     align="right"
                     onClick={() => dispatch(push(routes.IDENTITYISSUANCE))}
                 >
                     <PlusIcon />
-                </PageHeader.Button>
-            </PageHeader>
+                </PageLayout.HeaderButton>
+            </PageLayout.Header>
             {body}
-        </>
+        </PageLayout>
     );
 }

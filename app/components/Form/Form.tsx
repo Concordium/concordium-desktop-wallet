@@ -6,7 +6,7 @@ import { connectWithFormUncontrolled } from './common/connectWithForm';
 import Input from './Input';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
-import Submit from '../../cross-app-components/Submit';
+import Submit from './Submit';
 
 export interface FormProps<TFormValues>
     extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
