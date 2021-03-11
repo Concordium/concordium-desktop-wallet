@@ -6,15 +6,13 @@ import ProposalList from './ProposalList';
 import ExportKeyList from './ExportKeyList';
 import routes from '../../../constants/routes.json';
 
-/**
- * This switches component corresponding to the chosen multi signature menu item.
- */
 export default function MultiSignatureMenuView() {
     return (
         <Switch>
             <Route
                 path={routes.MULTISIGTRANSACTIONS}
                 component={MultiSignatureCreateProposalList}
+                exact
             />
             <Route
                 path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}

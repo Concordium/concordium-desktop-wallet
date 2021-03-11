@@ -14,6 +14,7 @@ export default function MultiSignatureMenuList() {
             <ButtonNavLink
                 to={routes.MULTISIGTRANSACTIONS}
                 className={styles.link}
+                exact
             >
                 Make new proposal
             </ButtonNavLink>

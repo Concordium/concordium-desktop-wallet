@@ -20,7 +20,7 @@
     "MULTISIGTRANSACTIONS": "/multi-signature-transaction",
     "MULTISIGTRANSACTIONS_PROPOSAL": "/multi-signature-transaction/create/:updateType",
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING": "/multi-signature-transaction/existing",
-    "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED": "/multi-signature-transaction/existing/:index",
+    "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED": "/multi-signature-transaction/existing/:id",
     "MULTISIGTRANSACTIONS_COSIGN_TRANSACTION": "/multi-signature-transaction/cosign",
     "MULTISIGTRANSACTIONS_SIGN_TRANSACTION": "/multi-signature-transaction/sign",
     "MULTISIGTRANSACTIONS_EXPORT_TRANSACTION": "/multi-signature-transaction/export",

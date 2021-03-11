@@ -30,7 +30,7 @@ export default function MultiSignatureRoutes(): JSX.Element {
                 component={CosignTransactionProposalView}
             />
             <Route
-                path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}
+                path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED}
                 component={ProposalView}
             />
             <Route

@@ -2,10 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Menu } from 'semantic-ui-react';
-import {
-    proposalsSelector,
-    setCurrentProposal,
-} from '../../../features/MultiSignatureSlice';
+import { proposalsSelector } from '../../../features/MultiSignatureSlice';
 import routes from '../../../constants/routes.json';
 import ProposalStatus from '../ProposalStatus';
 import { MultiSignatureTransaction } from '../../../utils/types';
@@ -48,13 +45,10 @@ export default function ProposalList(): JSX.Element {
                         <Menu.Item
                             key={proposal.id}
                             as={Link}
-                            to={{
-                                pathname:
-                                    routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING,
-                            }}
-                            onClick={() =>
-                                dispatch(setCurrentProposal(proposal))
-                            }
+                            to={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED.replace(
+                                ':id',
+                                `${proposal.id}`
+                            )}
                         >
                             <ProposalStatus proposal={proposal} />
                         </Menu.Item>
