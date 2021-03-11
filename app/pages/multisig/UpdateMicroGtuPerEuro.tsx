@@ -1,33 +1,57 @@
-import React, { useState } from 'react';
-import { Button, Form } from 'semantic-ui-react';
-import { UpdateType } from '../../utils/types';
-import { UpdateProps } from '../../utils/UpdateInstructionHelper';
+import React, { useEffect, useState } from 'react';
+import { Form } from 'semantic-ui-react';
+import { ExchangeRate, UpdateType } from '../../utils/types';
+import { UpdateProps } from '../../utils/transactionTypes';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 
 export default function UpdateMicroGtuPerEuroRate({
     blockSummary,
-    forwardTransaction,
+    effectiveTime,
+    setProposal,
 }: UpdateProps): JSX.Element | null {
-    const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
+    const [microGtuPerEuro, setMicroGtuPerEuro] = useState<ExchangeRate>();
     const [
         currentMicroGtuPerEuro,
         setCurrentMicroGtuPerEuro,
-    ] = useState<BigInt>();
+    ] = useState<ExchangeRate>();
 
     const sequenceNumber =
         blockSummary.updates.updateQueues.microGTUPerEuro.nextSequenceNumber;
     const { threshold } = blockSummary.updates.authorizations.microGTUPerEuro;
 
     if (!currentMicroGtuPerEuro) {
-        setCurrentMicroGtuPerEuro(
-            blockSummary.updates.chainParameters.microGTUPerEuro.numerator
-        );
-        setMicroGtuPerEuro(
-            blockSummary.updates.chainParameters.microGTUPerEuro.numerator
-        );
+        const localCurrentMicroGtuPerEuro = {
+            numerator:
+                blockSummary.updates.chainParameters.microGTUPerEuro.numerator,
+            denominator:
+                blockSummary.updates.chainParameters.microGTUPerEuro
+                    .denominator,
+        };
+        setCurrentMicroGtuPerEuro(localCurrentMicroGtuPerEuro);
+        setMicroGtuPerEuro(localCurrentMicroGtuPerEuro);
     }
 
-    if (!microGtuPerEuro) {
+    useEffect(() => {
+        if (microGtuPerEuro) {
+            setProposal(
+                createUpdateMultiSignatureTransaction(
+                    microGtuPerEuro,
+                    UpdateType.UpdateMicroGTUPerEuro,
+                    sequenceNumber,
+                    threshold,
+                    effectiveTime
+                )
+            );
+        }
+    }, [
+        microGtuPerEuro,
+        sequenceNumber,
+        threshold,
+        setProposal,
+        effectiveTime,
+    ]);
+
+    if (!microGtuPerEuro || !currentMicroGtuPerEuro) {
         return null;
     }
 
@@ -37,7 +61,7 @@ export default function UpdateMicroGtuPerEuroRate({
         }
 
         try {
-            setMicroGtuPerEuro(BigInt(v));
+            setMicroGtuPerEuro({ numerator: BigInt(v), denominator: 1n });
         } catch (error) {
             // The input was not a valid BigInt, so do no updates based on the input.
         }
@@ -52,33 +76,17 @@ export default function UpdateMicroGtuPerEuroRate({
                     label="Current micro GTU per euro rate"
                     readOnly
                     type="number"
-                    value={`${currentMicroGtuPerEuro}`}
+                    value={`${currentMicroGtuPerEuro.numerator}`}
                 />
                 <Form.Input
                     inline
                     width="5"
                     label="New micro GTU per euro rate"
-                    value={`${microGtuPerEuro}`}
+                    value={`${microGtuPerEuro.numerator}`}
                     type="number"
                     onChange={(e) => trySetMicroGtuPerEuro(e.target.value)}
                 />
             </Form>
-            <Button
-                primary
-                // TODO Validate that the input is a reduced fraction (otherwise the chain will reject it anyway.)
-                onClick={() =>
-                    forwardTransaction(
-                        createUpdateMultiSignatureTransaction(
-                            { numerator: microGtuPerEuro, denominator: 1n },
-                            UpdateType.UpdateMicroGTUPerEuro,
-                            sequenceNumber,
-                            threshold
-                        )
-                    )
-                }
-            >
-                Generate transaction proposal
-            </Button>
         </>
     );
 }

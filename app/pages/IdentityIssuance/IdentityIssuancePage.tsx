@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, useLocation } from 'react-router-dom';
 import routes from '../../constants/routes.json';
 import PickProvider from './PickProvider';
 import PickName from './PickName';
@@ -9,6 +9,20 @@ import GeneratePage from './GeneratePage';
 import FinalPage from './FinalPage';
 import { IdentityProvider } from '../../utils/types';
 import ErrorModal from '../../components/SimpleErrorModal';
+import PageLayout from '../../components/PageLayout';
+
+function getSubtitle(location: string) {
+    switch (location) {
+        case routes.IDENTITYISSUANCE_PICKPROVIDER:
+            return 'Choose an identity provider';
+        case routes.IDENTITYISSUANCE_EXTERNAL:
+            return 'Issuance flow';
+        case routes.IDENTITYISSUANCE_FINAL:
+            return 'Your identity and initial account';
+        default:
+            return 'Choose your names';
+    }
+}
 
 /**
  * The Last route is the default (because it has no path)
@@ -28,8 +42,25 @@ export default function IdentityIssuancePage(): JSX.Element {
         setModalOpen(true);
     }
 
+    function renderGeneratePage() {
+        if (provider) {
+            return (
+                <GeneratePage
+                    identityName={identityName}
+                    accountName={initialAccountName}
+                    provider={provider}
+                    onError={activateModal}
+                />
+            );
+        }
+        throw new Error('Unexpected missing identity Provider!');
+    }
+
     return (
-        <>
+        <PageLayout>
+            <PageLayout.Header>
+                <h1>New identity | {getSubtitle(useLocation().pathname)}</h1>
+            </PageLayout.Header>
             <ErrorModal
                 header="Unable to create identity"
                 content={modalMessage}
@@ -48,21 +79,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                 />
                 <Route
                     path={routes.IDENTITYISSUANCE_EXTERNAL}
-                    render={() => {
-                        if (provider) {
-                            return (
-                                <GeneratePage
-                                    identityName={identityName}
-                                    accountName={initialAccountName}
-                                    provider={provider}
-                                    onError={activateModal}
-                                />
-                            );
-                        }
-                        throw new Error(
-                            'Unexpected missing identity Provider!'
-                        );
-                    }}
+                    render={renderGeneratePage}
                 />
                 <Route
                     path={routes.IDENTITYISSUANCE_FINAL}
@@ -82,6 +99,6 @@ export default function IdentityIssuancePage(): JSX.Element {
                     )}
                 />
             </Switch>
-        </>
+        </PageLayout>
     );
 }

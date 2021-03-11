@@ -5,11 +5,32 @@ import {
     FoundationAccount,
     GasRewards,
     MintDistribution,
+    ProtocolUpdate,
     TransactionFeeDistribution,
     UpdateHeader,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateInstructionSignature,
+    UpdateType,
 } from './types';
+
+export interface SerializedString {
+    length: Buffer;
+    message: Buffer;
+}
+
+/**
+ * Interface for the serialization of a protocol update split into its
+ * different parts required to correctly stream it in parts to the Ledger.
+ */
+export interface SerializedProtocolUpdate {
+    serialization: Buffer;
+    payloadLength: Buffer;
+    message: SerializedString;
+    specificationUrl: SerializedString;
+    transactionHash: Buffer;
+    auxiliaryData: Buffer;
+}
 
 /**
  * Serializes an ExchangeRate to bytes.
@@ -76,6 +97,75 @@ export function serializeMintDistribution(mintDistribution: MintDistribution) {
 }
 
 /**
+ * Serializes a string as its UTF-8 encoding pre-fixed with the length
+ * of the encoding. We restrict the length of the input to be less than
+ * what can be handled safely in a number value.
+ * @param input the string to serialize
+ */
+export function serializeUtf8String(input: string): SerializedString {
+    // A UTF-8 character can take up to 4 bytes per character.
+    if (input.length > Number.MAX_SAFE_INTEGER / 4) {
+        throw new Error(`The string was too long: ${input.length}`);
+    }
+
+    const encoded = Buffer.from(new TextEncoder().encode(input));
+    const serializedLength = Buffer.alloc(8);
+    serializedLength.writeBigInt64BE(BigInt(encoded.length), 0);
+    return { length: serializedLength, message: encoded };
+}
+
+/**
+ * Serializes a ProtocolUpdate to bytes.
+ */
+export function serializeProtocolUpdate(
+    protocolUpdate: ProtocolUpdate
+): SerializedProtocolUpdate {
+    const encodedMessage = serializeUtf8String(protocolUpdate.message);
+    const encodedSpecificationUrl = serializeUtf8String(
+        protocolUpdate.specificationUrl
+    );
+
+    const auxiliaryData = Buffer.from(
+        protocolUpdate.specificationAuxiliaryData,
+        'base64'
+    );
+    const specificationHash = Buffer.from(
+        protocolUpdate.specificationHash,
+        'hex'
+    );
+
+    const payloadLength =
+        8 +
+        encodedMessage.message.length +
+        8 +
+        encodedSpecificationUrl.message.length +
+        specificationHash.length +
+        auxiliaryData.length;
+
+    const serializedPayloadLength = Buffer.alloc(8);
+    serializedPayloadLength.writeBigInt64BE(BigInt(payloadLength), 0);
+
+    const serialization = Buffer.concat([
+        serializedPayloadLength,
+        encodedMessage.length,
+        encodedMessage.message,
+        encodedSpecificationUrl.length,
+        encodedSpecificationUrl.message,
+        specificationHash,
+        auxiliaryData,
+    ]);
+
+    return {
+        serialization,
+        payloadLength: serializedPayloadLength,
+        message: encodedMessage,
+        specificationUrl: encodedSpecificationUrl,
+        transactionHash: specificationHash,
+        auxiliaryData,
+    };
+}
+
+/**
  * Serializes a GasRewards to bytes.
  */
 export function serializeGasRewards(gasRewards: GasRewards) {
@@ -91,7 +181,7 @@ export function serializeGasRewards(gasRewards: GasRewards) {
  * Serializes an UpdateHeader to exactly 28 bytes. See the interface
  * UpdateHeader for comments regarding the byte allocation for each field.
  */
-function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
+export function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
     const serializedUpdateHeader = Buffer.alloc(28);
     serializedUpdateHeader.writeBigUInt64BE(
         BigInt(updateHeader.sequenceNumber),
@@ -116,20 +206,37 @@ function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
  *  - [signatureListLength (keyIndex signatureLength signatureBytes) * signatureListLength]
  *
  * The signatureListLength, keyIndex and signatureLength are all serialized as Word16.
- * @param signatures list of signatures as bytes
+ * @param signatures list of update instruction signatures, i.e. pairs of (key index, signature)
  */
-function serializeUpdateSignatures(signatures: Buffer[]): Buffer {
+function serializeUpdateSignatures(
+    signatures: UpdateInstructionSignature[]
+): Buffer {
+    // To ensure a unique serialization, the signatures must be serialized in order of their index.
+    const sortedSignatures = signatures.sort((sig1, sig2) => {
+        return sig1.authorizationKeyIndex - sig2.authorizationKeyIndex;
+    });
+
     const signatureCount = Buffer.alloc(2);
     signatureCount.writeInt16BE(signatures.length, 0);
 
-    const prefixedSignatures = signatures.reduce((result, signature, index) => {
+    const prefixedSignatures = sortedSignatures.reduce((result, signature) => {
         const signaturePrefix = Buffer.alloc(2 + 2);
-        signaturePrefix.writeInt16BE(index, 0);
-        signaturePrefix.writeInt16BE(signature.length, 2);
-        return Buffer.concat([result, signaturePrefix, signature]);
+        signaturePrefix.writeInt16BE(signature.authorizationKeyIndex, 0);
+        const signatureAsBytes = Buffer.from(signature.signature, 'hex');
+        signaturePrefix.writeInt16BE(signatureAsBytes.length, 2);
+        return Buffer.concat([result, signaturePrefix, signatureAsBytes]);
     }, Buffer.alloc(0));
 
     return Buffer.concat([signatureCount, prefixedSignatures]);
+}
+
+/**
+ * Serializes an update type to its byte representation.
+ */
+export function serializeUpdateType(updateType: UpdateType) {
+    const serializedUpdateType = Buffer.alloc(1);
+    serializedUpdateType.writeInt8(updateType, 0);
+    return serializedUpdateType;
 }
 
 /**
@@ -146,9 +253,7 @@ export function serializeUpdateInstructionHeaderAndPayload(
         payloadSize: serializedPayload.length + 1,
     };
     const serializedHeader = serializeUpdateHeader(updateHeaderWithPayloadSize);
-
-    const serializedUpdateType = Buffer.alloc(1);
-    serializedUpdateType.writeInt8(updateInstruction.type, 0);
+    const serializedUpdateType = serializeUpdateType(updateInstruction.type);
 
     return Buffer.concat([
         serializedHeader,
@@ -173,11 +278,9 @@ export function serializeUpdateInstruction(
         updateInstruction,
         serializedPayload
     );
-
-    const signaturesAsBytes = updateInstruction.signatures.map((signature) =>
-        Buffer.from(signature, 'hex')
+    const serializedSignatures = serializeUpdateSignatures(
+        updateInstruction.signatures
     );
-    const serializedSignatures = serializeUpdateSignatures(signaturesAsBytes);
 
     const blockItemKind = Buffer.alloc(1);
     blockItemKind.writeInt8(BlockItemKind.UpdateInstructionKind, 0);

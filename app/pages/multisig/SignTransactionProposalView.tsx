@@ -7,16 +7,28 @@ import { hashSha256 } from '../../utils/serializationHelpers';
 import routes from '../../constants/routes.json';
 import {
     MultiSignatureTransaction,
-    TransactionHandler,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateInstructionSignature,
 } from '../../utils/types';
+import { TransactionHandler } from '../../utils/transactionTypes';
+import { createTransactionHandler } from '../../utils/updates/HandlerFinder';
 import { insert } from '../../database/MultiSignatureProposalDao';
-import { setCurrentProposal } from '../../features/MultiSignatureSlice';
+import {
+    addProposal,
+    setCurrentProposal,
+} from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { createTransactionHandler } from '../../utils/UpdateInstructionHelper';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
+import SimpleErrorModal from '../../components/SimpleErrorModal';
+import { BlockSummary } from '../../utils/NodeApiTypes';
+import findAuthorizationKey from '../../utils/updates/AuthorizationHelper';
+
+export interface SignInput {
+    multiSignatureTransaction: MultiSignatureTransaction;
+    blockSummary: BlockSummary;
+}
 
 interface Props {
     location: LocationDescriptorObject<string>;
@@ -28,6 +40,7 @@ interface Props {
  * to the database.
  */
 export default function SignTransactionProposalView({ location }: Props) {
+    const [showValidationError, setShowValidationError] = useState(false);
     const [transactionHash, setTransactionHash] = useState<string>();
 
     if (!location.state) {
@@ -36,7 +49,7 @@ export default function SignTransactionProposalView({ location }: Props) {
         );
     }
 
-    const multiSignatureTransaction: MultiSignatureTransaction = parse(
+    const { multiSignatureTransaction, blockSummary }: SignInput = parse(
         location.state
     );
     const { transaction } = multiSignatureTransaction;
@@ -58,18 +71,34 @@ export default function SignTransactionProposalView({ location }: Props) {
 
     useEffect(() => {
         const serialized = serializeUpdateInstructionHeaderAndPayload(
-            transactionHandler.transaction,
-            transactionHandler.serializePayload()
+            updateInstruction,
+            transactionHandler.serializePayload(updateInstruction)
         );
         const hashed = hashSha256(serialized).toString('hex');
         setTransactionHash(hashed);
-    }, [setTransactionHash, transactionHandler]);
+    }, [setTransactionHash, transactionHandler, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const signatureBytes = await transactionHandler.signTransaction(ledger);
-        const signature = signatureBytes.toString('hex');
+        const authorizationKey = await findAuthorizationKey(
+            ledger,
+            transactionHandler,
+            blockSummary.updates.authorizations
+        );
+        if (!authorizationKey) {
+            setShowValidationError(true);
+            return;
+        }
 
-        // Add signature
+        const signatureBytes = await transactionHandler.signTransaction(
+            updateInstruction,
+            ledger
+        );
+
+        // Set signature
+        const signature: UpdateInstructionSignature = {
+            signature: signatureBytes.toString('hex'),
+            authorizationKeyIndex: authorizationKey.index,
+        };
         updateInstruction.signatures = [signature];
 
         const updatedMultiSigTransaction = {
@@ -83,6 +112,7 @@ export default function SignTransactionProposalView({ location }: Props) {
 
         // Set the current proposal in the state to the one that was just generated.
         dispatch(setCurrentProposal(updatedMultiSigTransaction));
+        dispatch(addProposal(updatedMultiSigTransaction));
 
         // Navigate to the page that displays the current proposal from the state.
         dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
@@ -93,12 +123,21 @@ export default function SignTransactionProposalView({ location }: Props) {
     }
 
     return (
-        <GenericSignTransactionProposalView
-            transaction={transaction}
-            transactionHash={transactionHash}
-            signFunction={signingFunction}
-            checkboxes={['The transaction details are correct']}
-            signText="Sign"
-        />
+        <>
+            <SimpleErrorModal
+                show={showValidationError}
+                header="Unauthorized key"
+                content="Your key is not authorized to sign this update type."
+                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+            />
+            <GenericSignTransactionProposalView
+                header={transactionHandler.title}
+                transaction={transaction}
+                transactionHash={transactionHash}
+                signFunction={signingFunction}
+                checkboxes={['The transaction details are correct']}
+                signText="Sign"
+            />
+        </>
     );
 }

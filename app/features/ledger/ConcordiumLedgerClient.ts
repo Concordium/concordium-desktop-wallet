@@ -1,5 +1,9 @@
 import type Transport from '@ledgerhq/hw-transport';
-import getPublicKey from './GetPublicKey';
+import {
+    getPublicKey,
+    getPublicKeySilent,
+    getSignedPublicKey,
+} from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
@@ -10,13 +14,16 @@ import {
     FoundationAccount,
     GasRewards,
     MintDistribution,
+    ProtocolUpdate,
     PublicInformationForIp,
+    SignedPublicKey,
     TransactionFeeDistribution,
     UpdateInstruction,
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
 import signUpdateTransaction from './SignUpdateTransaction';
+import signUpdateProtocolTransaction from './SignProtocolUpdate';
 
 /**
  * Concordium Ledger API.
@@ -46,6 +53,14 @@ export default class ConcordiumLedgerClient {
 
     getPublicKey(path: number[]): Promise<Buffer> {
         return getPublicKey(this.transport, path);
+    }
+
+    getPublicKeySilent(path: number[]): Promise<Buffer> {
+        return getPublicKeySilent(this.transport, path);
+    }
+
+    getSignedPublicKey(path: number[]): Promise<SignedPublicKey> {
+        return getSignedPublicKey(this.transport, path);
     }
 
     getIdCredSec(identity: number): Promise<Buffer> {
@@ -143,6 +158,19 @@ export default class ConcordiumLedgerClient {
         return signUpdateTransaction(
             this.transport,
             0x25,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signProtocolUpdate(
+        transaction: UpdateInstruction<ProtocolUpdate>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateProtocolTransaction(
+            this.transport,
             path,
             transaction,
             serializedPayload

@@ -3,6 +3,7 @@ import React, { ReactElement, useMemo } from 'react';
 import PageHeaderButton, { PageHeaderButtonProps } from './PageHeaderButton';
 
 import styles from './PageHeader.module.scss';
+import { WithAsProp } from '../../../utils/types';
 
 export interface PageHeaderProps {
     children: ReactElement | ReactElement[];
@@ -11,9 +12,26 @@ export interface PageHeaderProps {
 function isPageHeaderButton(
     el: ReactElement
 ): el is ReactElement<PageHeaderButtonProps> {
-    return el.type === PageHeaderButton;
+    return (
+        el.type === PageHeaderButton ||
+        (el as ReactElement<WithAsProp<unknown>>).props.as === PageHeaderButton
+    );
 }
 
+/**
+ * @description
+ * Used on pages as a header element inside <PageLayout />. Add buttons to the header by adding <PageLayout.HeaderButton /> as sub components.
+ *
+ * @example
+ * <PageLayout>
+ *   <PageLayout.Header>
+ *     <PageLayout.HeaderButton align="left">-</PageLayout.HeaderButton>
+ *     <h1>Title</h1>
+ *     <ComposingComponent as={PageLayout.HeaderButton} align="left">+</ComposingComponent>
+ *   </PageLayout.Header>
+ *   ...
+ * </PageLayout>
+ */
 export default function PageHeader({ children }: PageHeaderProps): JSX.Element {
     const { heading, rightButtons, leftButtons } = useMemo(() => {
         const reactChildren = React.Children.toArray(
@@ -39,5 +57,3 @@ export default function PageHeader({ children }: PageHeaderProps): JSX.Element {
         </header>
     );
 }
-
-PageHeader.Button = PageHeaderButton;

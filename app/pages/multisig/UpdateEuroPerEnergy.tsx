@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { Button, Form, Input } from 'semantic-ui-react';
+import React, { useEffect, useState } from 'react';
+import { Form, Input } from 'semantic-ui-react';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
+import { UpdateProps } from '../../utils/transactionTypes';
 import { ExchangeRate, UpdateType } from '../../utils/types';
-import { UpdateProps } from '../../utils/UpdateInstructionHelper';
 
 export default function UpdateEuroPerEnergy({
     blockSummary,
-    forwardTransaction,
+    effectiveTime,
+    setProposal,
 }: UpdateProps) {
     const [euroPerEnergy, setEuroPerEnergy] = useState<ExchangeRate>();
     const currentEuroPerEnergy =
@@ -14,6 +15,20 @@ export default function UpdateEuroPerEnergy({
     const sequenceNumber =
         blockSummary.updates.updateQueues.euroPerEnergy.nextSequenceNumber;
     const { threshold } = blockSummary.updates.authorizations.euroPerEnergy;
+
+    useEffect(() => {
+        if (euroPerEnergy) {
+            setProposal(
+                createUpdateMultiSignatureTransaction(
+                    euroPerEnergy,
+                    UpdateType.UpdateEuroPerEnergy,
+                    sequenceNumber,
+                    threshold,
+                    effectiveTime
+                )
+            );
+        }
+    }, [euroPerEnergy, sequenceNumber, threshold, setProposal, effectiveTime]);
 
     if (!euroPerEnergy) {
         setEuroPerEnergy(currentEuroPerEnergy);
@@ -68,21 +83,6 @@ export default function UpdateEuroPerEnergy({
                     />
                 </Form.Group>
             </Form>
-            <Button
-                primary
-                onClick={() =>
-                    forwardTransaction(
-                        createUpdateMultiSignatureTransaction(
-                            euroPerEnergy,
-                            UpdateType.UpdateEuroPerEnergy,
-                            sequenceNumber,
-                            threshold
-                        )
-                    )
-                }
-            >
-                Generate transaction proposal
-            </Button>
         </>
     );
 }

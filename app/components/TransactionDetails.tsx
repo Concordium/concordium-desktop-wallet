@@ -7,8 +7,8 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../utils/types';
-import findHandler from '../utils/updates/HandlerFinder';
 import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
+import UpdateInstructionDetails from './UpdateInstructionDetails';
 
 // TODO Implement a proper view of the supported transaction types, including account
 // transactions.
@@ -25,8 +25,7 @@ function generateView(
         | AccountTransaction
 ) {
     if (instanceOfUpdateInstruction(transaction)) {
-        const handler = findHandler(transaction);
-        return handler.view();
+        return <UpdateInstructionDetails transaction={transaction} />;
     }
     if (instanceOfAccountTransaction(transaction)) {
         return <AccountTransactionDetails transaction={transaction} />;

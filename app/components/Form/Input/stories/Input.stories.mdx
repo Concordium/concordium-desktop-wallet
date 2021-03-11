@@ -1,0 +1,51 @@
+import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
+import Input from '../Input';
+
+import { argTypes, Template, decorators } from './deps';
+
+<Meta title="Components/Form/Fields/Input" component={Input} argTypes={argTypes} decorators={decorators} />
+
+# Input
+
+The Input component allows the same props as a regular `<input type="text|number|email|phone|etc..." />`, with the addition of `error`.
+
+**DO NOT** use this for checkboxes or radio buttons; use the respective components for those.
+
+<Canvas>
+    <Story name="Primary" args={{
+        placeholder: 'Name',
+        name: 'name'
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+The following are the most important props to work with `Input`:
+
+<ArgsTable story="Primary" />
+
+## With label
+
+<Canvas>
+    <Story name="With Label" args={{
+        placeholder: 'Name',
+        name: 'name',
+        label: 'Name'
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Invalid
+
+<Canvas>
+    <Story name="Invalid" args={{
+        placeholder: 'Name',
+        name: 'name',
+        label: 'Name',
+        error: 'Name is required'
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+

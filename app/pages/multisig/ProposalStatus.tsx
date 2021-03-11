@@ -1,5 +1,6 @@
 import React from 'react';
 import { Grid, Header } from 'semantic-ui-react';
+import { parse } from 'json-bigint';
 import {
     ColorType,
     MultiSignatureTransaction,
@@ -8,6 +9,7 @@ import {
 } from '../../utils/types';
 import TransactionDetails from '../../components/TransactionDetails';
 import StatusLabel from './StatusLabel';
+import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
 
 // TODO This component should also have support for account transactions.
 
@@ -20,13 +22,14 @@ const statusColorMap = new Map<MultiSignatureTransactionStatus, ColorType>([
     [MultiSignatureTransactionStatus.Submitted, ColorType.Olive],
     [MultiSignatureTransactionStatus.Finalized, ColorType.Green],
     [MultiSignatureTransactionStatus.Failed, ColorType.Red],
+    [MultiSignatureTransactionStatus.Expired, ColorType.Red],
 ]);
 
 /**
  * Component that displays a status overview of a multi signature proposal.
  */
 export default function ProposalStatus({ proposal }: Props) {
-    const updateInstruction = JSON.parse(proposal.transaction);
+    const updateInstruction = parse(proposal.transaction);
 
     return (
         <Grid padded>
@@ -38,8 +41,16 @@ export default function ProposalStatus({ proposal }: Props) {
                     <Header>Foundation transaction</Header>
                 </Grid.Column>
             </Grid.Row>
-            <Grid.Row centered>
-                <TransactionDetails transaction={updateInstruction} />
+            <Grid.Row columns="equal" textAlign="center">
+                <Grid.Column />
+                <Grid.Column>
+                    <TransactionDetails transaction={updateInstruction} />
+                    <ExpiredEffectiveTimeView
+                        transaction={updateInstruction}
+                        proposal={proposal}
+                    />
+                </Grid.Column>
+                <Grid.Column />
             </Grid.Row>
             <Grid.Row>
                 <Grid.Column>

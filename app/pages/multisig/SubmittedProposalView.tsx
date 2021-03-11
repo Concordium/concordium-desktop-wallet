@@ -1,9 +1,9 @@
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
-import { parse } from 'json-bigint';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Divider, Grid, Header, Segment } from 'semantic-ui-react';
+import { parse } from 'json-bigint';
 import { hashSha256 } from '../../utils/serializationHelpers';
 import {
     MultiSignatureTransaction,
@@ -15,6 +15,7 @@ import TransactionHashView from '../../components/TransactionHashView';
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
+import PageLayout from '../../components/PageLayout';
 
 interface Props {
     location: LocationDescriptorObject<string>;
@@ -57,40 +58,51 @@ export default function SubmittedProposalView({ location }: Props) {
     const updateInstruction: UpdateInstruction<UpdateInstructionPayload> = parse(
         multiSignatureTransaction.transaction
     );
-    const handler = findHandler(updateInstruction);
+    const handler = findHandler(updateInstruction.type);
     const transactionHash = hashSha256(
         serializeUpdateInstructionHeaderAndPayload(
             updateInstruction,
-            handler.serializePayload()
+            handler.serializePayload(updateInstruction)
         )
     ).toString('hex');
 
     return (
-        <Segment secondary textAlign="center">
-            <Header size="large">Your transaction has been submitted</Header>
-            <Segment>
-                <Header>Transaction Proposal | Transaction Type</Header>
-                <Divider />
-                <Grid columns={2} divided textAlign="center" padded>
-                    <Grid.Column>
-                        <TransactionDetails transaction={updateInstruction} />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <TransactionHashView
-                            transactionHash={transactionHash}
-                        />
-                    </Grid.Column>
-                </Grid>
+        <PageLayout>
+            <PageLayout.Header>
+                <h1>{handler.title}</h1>
+            </PageLayout.Header>
+            <Segment secondary textAlign="center">
+                <Header size="large">
+                    Your transaction has been submitted
+                </Header>
+                <Segment>
+                    <Header>Transaction Proposal | Transaction Type</Header>
+                    <Divider />
+                    <Grid columns={2} divided textAlign="center" padded>
+                        <Grid.Column>
+                            <TransactionDetails
+                                transaction={updateInstruction}
+                            />
+                        </Grid.Column>
+                        <Grid.Column>
+                            <TransactionHashView
+                                transactionHash={transactionHash}
+                            />
+                        </Grid.Column>
+                    </Grid>
+                </Segment>
+                <Button
+                    fluid
+                    primary
+                    onClick={() => {
+                        dispatch(
+                            push({ pathname: routes.MULTISIGTRANSACTIONS })
+                        );
+                    }}
+                >
+                    Okay, thanks!
+                </Button>
             </Segment>
-            <Button
-                fluid
-                primary
-                onClick={() => {
-                    dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
-                }}
-            >
-                Okay, thanks!
-            </Button>
-        </Segment>
+        </PageLayout>
     );
 }

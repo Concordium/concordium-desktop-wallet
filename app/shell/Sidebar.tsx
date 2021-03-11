@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Sidebar, { SidebarLink } from '../cross-app-components/Sidebar';
 import routes from '../constants/routes.json';
+import pkg from '../package.json';
 
 import GtuIcon from '../../resources/svg/gtu.svg';
 import FingerprintIcon from '../../resources/svg/fingerprint.svg';
@@ -43,5 +44,15 @@ const links: SidebarLink[] = [
 ];
 
 export default function ConnectedSidebar() {
-    return <Sidebar links={links} />;
+    const [isDark, setIsDark] = useState(false); // TODO: store in redux and DB + maybe hook up to OS level darkmode?
+
+    return (
+        <Sidebar
+            links={links}
+            version={pkg.version}
+            hasThemeSwitch
+            isDark={isDark}
+            onThemeChange={setIsDark}
+        />
+    );
 }

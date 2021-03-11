@@ -1,39 +1,12 @@
-import React, { useState } from 'react';
-import {
-    Button,
-    Divider,
-    Header,
-    Input,
-    Label,
-    List,
-    Progress,
-} from 'semantic-ui-react';
-import { UpdateProps } from '../../utils/UpdateInstructionHelper';
+import React, { useEffect, useState } from 'react';
+import { Header, Input, Label, List, Progress } from 'semantic-ui-react';
 import { rewardFractionResolution } from '../../constants/updateConstants.json';
-import {
-    ColorType,
-    GasRewards,
-    RewardFraction,
-    UpdateType,
-} from '../../utils/types';
+import { ColorType, GasRewards, UpdateType } from '../../utils/types';
+import { UpdateProps } from '../../utils/transactionTypes';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 
 // TODO Update the UI when the sketches are complete.
 // TODO Do input validation.
-
-/**
- * Update the state using the received set state function with the input received, which
- * is assumed to be an integer.
- */
-function updateState(
-    setStateFunction: React.Dispatch<React.SetStateAction<number | undefined>>,
-    input: string
-) {
-    const value = parseInt(input, 10);
-    if (!Number.isNaN(value)) {
-        setStateFunction(value);
-    }
-}
 
 /**
  * The component used for creating an update transaction for updating the
@@ -41,21 +14,10 @@ function updateState(
  */
 export default function UpdateGasRewards({
     blockSummary,
-    forwardTransaction,
+    effectiveTime,
+    setProposal,
 }: UpdateProps) {
-    const [bakerReward, setBakerReward] = useState<RewardFraction>();
-    const [
-        finalizationProofReward,
-        setFinalizationProofReward,
-    ] = useState<RewardFraction>();
-    const [
-        accountCreationReward,
-        setAccountCreationReward,
-    ] = useState<RewardFraction>();
-    const [
-        chainUpdateReward,
-        setChainUpdateReward,
-    ] = useState<RewardFraction>();
+    const [gasRewards, setGasRewards] = useState<GasRewards>();
 
     const sequenceNumber =
         blockSummary.updates.updateQueues.gasRewards.nextSequenceNumber;
@@ -75,43 +37,47 @@ export default function UpdateGasRewards({
         blockSummary.updates.chainParameters.rewardParameters.gASRewards
             .chainUpdate * rewardFractionResolution;
 
-    if (
-        !bakerReward ||
-        !finalizationProofReward ||
-        !accountCreationReward ||
-        !chainUpdateReward
-    ) {
-        setBakerReward(currentBakerReward);
-        setFinalizationProofReward(currentFinalizationProofFraction);
-        setAccountCreationReward(currentAccountCreationFraction);
-        setChainUpdateReward(currentChainUpdateFraction);
+    useEffect(() => {
+        if (gasRewards) {
+            setProposal(
+                createUpdateMultiSignatureTransaction(
+                    gasRewards,
+                    UpdateType.UpdateGASRewards,
+                    sequenceNumber,
+                    threshold,
+                    effectiveTime
+                )
+            );
+        }
+    }, [gasRewards, sequenceNumber, threshold, setProposal, effectiveTime]);
+
+    if (!gasRewards) {
+        setGasRewards({
+            baker: currentBakerReward,
+            accountCreation: currentAccountCreationFraction,
+            chainUpdate: currentChainUpdateFraction,
+            finalizationProof: currentFinalizationProofFraction,
+        });
         return null;
     }
 
-    const gasRewards: GasRewards = {
-        baker: bakerReward,
-        accountCreation: accountCreationReward,
-        chainUpdate: chainUpdateReward,
-        finalizationProof: finalizationProofReward,
-    };
-
-    const button = (
-        <Button
-            primary
-            onClick={() =>
-                forwardTransaction(
-                    createUpdateMultiSignatureTransaction(
-                        gasRewards,
-                        UpdateType.UpdateGASRewards,
-                        sequenceNumber,
-                        threshold
-                    )
-                )
-            }
-        >
-            Generate transaction
-        </Button>
-    );
+    /**
+     * Update the gas rewards state property supplied.
+     */
+    function updateState(
+        input: string,
+        property: keyof GasRewards,
+        rewards: GasRewards
+    ) {
+        const value = parseInt(input, 10);
+        if (!Number.isNaN(value)) {
+            const updatedGasRewards = {
+                ...rewards,
+            };
+            updatedGasRewards[property] = value;
+            setGasRewards(updatedGasRewards);
+        }
+    }
 
     return (
         <>
@@ -140,9 +106,9 @@ export default function UpdateGasRewards({
                 <List.Item>
                     <Input
                         label="Baker reward"
-                        value={bakerReward}
+                        value={gasRewards.baker}
                         onChange={(e) =>
-                            updateState(setBakerReward, e.target.value)
+                            updateState(e.target.value, 'baker', gasRewards)
                         }
                         fluid
                     />
@@ -150,11 +116,12 @@ export default function UpdateGasRewards({
                 <List.Item>
                     <Input
                         label="Finalization proof reward"
-                        value={finalizationProofReward}
+                        value={gasRewards.finalizationProof}
                         onChange={(e) =>
                             updateState(
-                                setFinalizationProofReward,
-                                e.target.value
+                                e.target.value,
+                                'finalizationProof',
+                                gasRewards
                             )
                         }
                         fluid
@@ -163,11 +130,12 @@ export default function UpdateGasRewards({
                 <List.Item>
                     <Input
                         label="Account creation reward"
-                        value={accountCreationReward}
+                        value={gasRewards.accountCreation}
                         onChange={(e) =>
                             updateState(
-                                setAccountCreationReward,
-                                e.target.value
+                                e.target.value,
+                                'accountCreation',
+                                gasRewards
                             )
                         }
                         fluid
@@ -176,16 +144,18 @@ export default function UpdateGasRewards({
                 <List.Item>
                     <Input
                         label="Chain update reward"
-                        value={chainUpdateReward}
+                        value={gasRewards.chainUpdate}
                         onChange={(e) =>
-                            updateState(setChainUpdateReward, e.target.value)
+                            updateState(
+                                e.target.value,
+                                'chainUpdate',
+                                gasRewards
+                            )
                         }
                         fluid
                     />
                 </List.Item>
             </List>
-            <Divider clearing hidden />
-            {button}
         </>
     );
 }

@@ -1,0 +1,36 @@
+import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
+import Checkbox from '../Checkbox';
+
+import { argTypes, Template } from './deps';
+
+<Meta title="Components/Form/Fields/Checkbox" component={Checkbox} argTypes={argTypes} />
+
+# Checkbox
+
+The `Checkbox` component allows the same props as a regular `<input type="checkbox" />`, with the addition of `error` and `size`.
+
+<Canvas>
+    <Story name="Primary" args={{
+        children: ['Agree to our terms & conditions'],
+        checked: false,
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+The following props are the most important to work with `Checkbox`:
+
+<ArgsTable story="Primary" />
+
+## Invalid
+
+<Canvas>
+    <Story name="Invalid" args={{
+        children: ['Agree to our terms & conditions'],
+        checked: false,
+        error: 'You must agree to our terms to continue.'
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+

@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Switch, Route, Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
-
+import { useLocation, Link } from 'react-router-dom';
 import { Button, Header, Grid } from 'semantic-ui-react';
+import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
-import ConfirmTransfer from './ConfirmTransfer';
 import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
 import { AddressBookEntry, Account } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
+import locations from '../../constants/transferLocations.json';
+import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
+import { TransferState } from '../../utils/transactionTypes';
 
 interface Props {
     account: Account;
@@ -21,42 +23,101 @@ interface Props {
  */
 export default function SimpleTransfer({ account }: Props) {
     const dispatch = useDispatch();
+    const location = useLocation<TransferState>();
 
-    const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
+    const [subLocation, setSubLocation] = useState<string>(
+        location?.state?.initialPage || locations.pickAmount
+    );
+
+    const [amount, setAmount] = useState<string>(location?.state?.amount); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
-        undefined
+        location?.state?.recipient
     );
 
     function chooseRecipientOnClick(entry: AddressBookEntry) {
         setRecipient(entry);
-        dispatch(push(routes.ACCOUNTS_SIMPLETRANSFER_PICKAMOUNT));
+        setSubLocation(locations.pickAmount);
+    }
+
+    function ChosenComponent() {
+        switch (subLocation) {
+            case locations.pickAmount:
+                return (
+                    <PickAmount
+                        recipient={recipient}
+                        header="Send funds"
+                        amount={amount}
+                        setAmount={setAmount}
+                        toPickRecipient={() =>
+                            setSubLocation(locations.pickRecipient)
+                        }
+                        toConfirmTransfer={async () => {
+                            if (!recipient) {
+                                throw new Error('Unexpected missing recipient');
+                            }
+
+                            const transaction = await createSimpleTransferTransaction(
+                                account.address,
+                                toMicroUnits(amount),
+                                recipient.address
+                            );
+
+                            dispatch(
+                                push({
+                                    pathname: routes.SUBMITTRANSFER,
+                                    state: {
+                                        confirmed: {
+                                            pathname:
+                                                routes.ACCOUNTS_SIMPLETRANSFER,
+                                            state: {
+                                                initialPage:
+                                                    locations.transferSubmitted,
+                                                transaction: stringify(
+                                                    transaction
+                                                ),
+                                                recipient,
+                                            },
+                                        },
+                                        cancelled: {
+                                            pathname:
+                                                routes.ACCOUNTS_SIMPLETRANSFER,
+                                            state: {
+                                                initialPage:
+                                                    locations.pickAmount,
+                                                amount,
+                                                recipient,
+                                            },
+                                        },
+                                        transaction: stringify(transaction),
+                                        account,
+                                    },
+                                })
+                            );
+                        }}
+                    />
+                );
+            case locations.pickRecipient:
+                return <PickRecipient pickRecipient={chooseRecipientOnClick} />;
+            case locations.transferSubmitted: {
+                return <FinalPage location={location} />;
+            }
+            default:
+                return null;
+        }
     }
 
     return (
         <>
             <Grid columns="3">
                 <Grid.Column>
-                    <Switch>
-                        <Route
-                            path={[
-                                routes.ACCOUNTS_SIMPLETRANSFER_PICKRECIPIENT,
-                                routes.ACCOUNTS_SIMPLETRANSFER_CONFIRMTRANSFER,
-                            ]}
-                            render={() => (
-                                <Button
-                                    onClick={() =>
-                                        dispatch(
-                                            push(
-                                                routes.ACCOUNTS_SIMPLETRANSFER_PICKAMOUNT
-                                            )
-                                        )
-                                    }
-                                >
-                                    {'<--'}
-                                </Button>
-                            )}
-                        />
-                    </Switch>
+                    {subLocation === locations.pickRecipient ||
+                    subLocation === locations.confirmTransfer ? (
+                        <Button
+                            onClick={() => setSubLocation(locations.pickAmount)}
+                        >
+                            {'<--'}
+                        </Button>
+                    ) : null}
                 </Grid.Column>
                 <Grid.Column textAlign="center">
                     <Header>Send Transfer</Header>
@@ -67,61 +128,7 @@ export default function SimpleTransfer({ account }: Props) {
                     </Link>
                 </Grid.Column>
             </Grid>
-            <Switch>
-                <Route
-                    path={routes.ACCOUNTS_SIMPLETRANSFER_PICKRECIPIENT}
-                    render={() => (
-                        <PickRecipient pickRecipient={chooseRecipientOnClick} />
-                    )}
-                />
-                <Route
-                    path={routes.ACCOUNTS_SIMPLETRANSFER_CONFIRMTRANSFER}
-                    render={() => {
-                        if (!recipient) {
-                            return null;
-                        }
-                        return (
-                            <ConfirmTransfer
-                                recipient={recipient}
-                                amount={toMicroUnits(amount)}
-                                account={account}
-                            />
-                        );
-                    }}
-                />
-                <Route
-                    path={routes.ACCOUNTS_SIMPLETRANSFER_TRANSFERSUBMITTED}
-                    component={FinalPage}
-                />
-                <Route
-                    path={[
-                        routes.ACCOUNTS_SIMPLETRANSFER_PICKAMOUNT,
-                        routes.ACCOUNTS_SIMPLETRANSFER,
-                    ]}
-                    render={() => (
-                        <PickAmount
-                            recipient={recipient}
-                            header="Send funds"
-                            amount={amount}
-                            setAmount={setAmount}
-                            toPickRecipient={() =>
-                                dispatch(
-                                    push(
-                                        routes.ACCOUNTS_SIMPLETRANSFER_PICKRECIPIENT
-                                    )
-                                )
-                            }
-                            toConfirmTransfer={() =>
-                                dispatch(
-                                    push(
-                                        routes.ACCOUNTS_SIMPLETRANSFER_CONFIRMTRANSFER
-                                    )
-                                )
-                            }
-                        />
-                    )}
-                />
-            </Switch>
+            <ChosenComponent />
         </>
     );
 }

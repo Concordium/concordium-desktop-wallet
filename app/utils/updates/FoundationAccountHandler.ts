@@ -1,47 +1,57 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernancePath } from '../../features/ledger/Path';
 import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
+import UpdateFoundationAccount from '../../pages/multisig/UpdateFoundationAccount';
+import { Authorizations } from '../NodeApiTypes';
+import { TransactionHandler } from '../transactionTypes';
 import {
     FoundationAccount,
     isFoundationAccount,
-    TransactionHandler,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../types';
 import { serializeFoundationAccount } from '../UpdateSerialization';
 
+type TransactionType = UpdateInstruction<FoundationAccount>;
+
 export default class FoundationAccountHandler
-    implements
-        TransactionHandler<
-            UpdateInstruction<FoundationAccount>,
-            ConcordiumLedgerClient
-        > {
-    transaction: UpdateInstruction<FoundationAccount>;
-
-    constructor(transaction: UpdateInstruction<UpdateInstructionPayload>) {
+    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    confirmType(
+        transaction: UpdateInstruction<UpdateInstructionPayload>
+    ): TransactionType {
         if (isFoundationAccount(transaction)) {
-            this.transaction = transaction;
-        } else {
-            throw Error('Invalid transaction type was given as input.');
+            return transaction;
         }
+        throw Error('Invalid transaction type was given as input.');
     }
 
-    serializePayload() {
-        return serializeFoundationAccount(this.transaction.payload);
+    serializePayload(transaction: TransactionType) {
+        return serializeFoundationAccount(transaction.payload);
     }
 
-    signTransaction(ledger: ConcordiumLedgerClient) {
+    signTransaction(
+        transaction: TransactionType,
+        ledger: ConcordiumLedgerClient
+    ) {
         const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
         return ledger.signFoundationAccount(
-            this.transaction,
-            this.serializePayload(),
+            transaction,
+            this.serializePayload(transaction),
             path
         );
     }
 
-    view() {
+    view(transaction: TransactionType) {
         return FoundationAccountView({
-            foundationAccount: this.transaction.payload,
+            foundationAccount: transaction.payload,
         });
     }
+
+    getAuthorization(authorizations: Authorizations) {
+        return authorizations.foundationAccount;
+    }
+
+    update = UpdateFoundationAccount;
+
+    title = 'Foundation Transaction | Update Foundation Account';
 }

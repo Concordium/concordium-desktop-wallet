@@ -1,0 +1,57 @@
+@import 'config/bundle';
+
+.root {
+    color: $color-off-white;
+    background-color: $color-pale-blue;
+    font-size: $font-size-button1;
+    padding: 0 30px;
+    height: 50px;
+    border-radius: 4px;
+    border: 1px solid $color-pale-blue;
+    transition: background-color $anim-easing $anim-timing;
+
+    &Small,
+    &Big {
+        border-radius: 10px;
+    }
+
+    &Small {
+        height: 36px;
+        font-size: $font-size-button2;
+        padding: 0 15px;
+    }
+
+    &Big {
+        height: 58px;
+    }
+
+    &:disabled:not(.rootInverted) {
+        background-color: $color-grey;
+        border-color: $color-grey;
+    }
+
+    &:hover,
+    &:focus {
+        outline: none;
+
+        &:not(.rootInverted) {
+            background-color: darken($color-pale-blue, 3);
+        }
+    }
+
+    &Inverted {
+        background-color: transparent;
+        color: $color-text;
+        border-color: $color-grey;
+        transition: border-color $anim-easing $anim-timing;
+
+        &:disabled {
+            color: $color-text-faded;
+        }
+
+        &:hover,
+        &:focus {
+            border-color: $color-pale-blue;
+        }
+    }
+}

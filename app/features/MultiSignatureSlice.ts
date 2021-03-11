@@ -33,6 +33,17 @@ const multiSignatureSlice = createSlice({
         setProposals: (state, input) => {
             state.proposals = input.payload;
         },
+        updateProposals: (state, input) => {
+            state.proposals = state.proposals.map((item) => {
+                if (item.id !== input.payload.id) {
+                    return item;
+                }
+                return input.payload;
+            });
+        },
+        addProposal: (state, input) => {
+            state.proposals = [...state.proposals, input.payload];
+        },
     },
 });
 
@@ -40,6 +51,8 @@ export const {
     chooseMenuItem,
     setCurrentProposal,
     setProposals,
+    updateProposals,
+    addProposal,
 } = multiSignatureSlice.actions;
 
 export const chosenMenuSelector = (state: RootState) =>
@@ -61,6 +74,7 @@ export async function updateCurrentProposal(
 ) {
     updateEntry(multiSignatureTransactionProposal);
     dispatch(setCurrentProposal(multiSignatureTransactionProposal));
+    dispatch(updateProposals(multiSignatureTransactionProposal));
 }
 
 /**

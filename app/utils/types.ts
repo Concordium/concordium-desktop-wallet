@@ -1,11 +1,11 @@
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
-import { HTMLAttributes } from 'react';
+import { HTMLAttributes, ComponentType } from 'react';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
 export type Hex = string;
 type Proofs = Hex;
-type Word64 = BigInt;
+type Word64 = bigint;
 type Word32 = number;
 type Word8 = number;
 
@@ -16,6 +16,11 @@ export enum SchemeId {
 export interface VerifyKey {
     schemeId: string;
     verifyKey: Hex;
+}
+
+export interface SignedPublicKey {
+    key: Hex;
+    signature: Hex;
 }
 
 export interface NewAccount {
@@ -144,12 +149,19 @@ export enum TransactionKindId {
     Update_baker_sign_key = 7,
     Delegate_stake = 8,
     Undelegate_stake = 9,
+    Encrypted_transfer = 16,
+    Transfer_to_encrypted = 17,
+    Transfer_to_public = 18,
     Transfer_with_schedule = 19,
 } // TODO: Add all kinds (11- 18)
 
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
+}
+
+export interface TransferToEncryptedPayload {
+    amount: string;
 }
 
 export interface SchedulePoint {
@@ -164,6 +176,7 @@ export interface ScheduledTransferPayload {
 }
 
 export type TransactionPayload =
+    | TransferToEncryptedPayload
     | ScheduledTransferPayload
     | SimpleTransferPayload;
 
@@ -175,7 +188,7 @@ export interface AccountTransaction<
     sender: Hex;
     nonce: string;
     energyAmount: string;
-    expiry: string;
+    expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;
 }
@@ -183,6 +196,7 @@ export interface AccountTransaction<
 export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
+export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -475,11 +489,16 @@ export interface UpdateHeader {
     payloadSize?: Word32;
 }
 
+export interface UpdateInstructionSignature {
+    authorizationKeyIndex: number;
+    signature: string;
+}
+
 export interface UpdateInstruction<T extends UpdateInstructionPayload> {
     header: UpdateHeader;
     payload: T;
     type: UpdateType;
-    signatures: string[];
+    signatures: UpdateInstructionSignature[];
 }
 
 export type UpdateInstructionPayload =
@@ -487,6 +506,7 @@ export type UpdateInstructionPayload =
     | TransactionFeeDistribution
     | FoundationAccount
     | MintDistribution
+    | ProtocolUpdate
     | GasRewards;
 
 export type Transaction =
@@ -526,6 +546,12 @@ export function instanceOfSimpleTransfer(
     return object.transactionKind === TransactionKindId.Simple_transfer;
 }
 
+export function instanceOfTransferToEncrypted(
+    object: AccountTransaction<TransactionPayload>
+): object is TransferToEncrypted {
+    return object.transactionKind === TransactionKindId.Transfer_to_encrypted;
+}
+
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
@@ -559,22 +585,16 @@ export function isMintDistribution(
     return UpdateType.UpdateMintDistribution === transaction.type;
 }
 
+export function isProtocolUpdate(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<ProtocolUpdate> {
+    return UpdateType.UpdateProtocol === transaction.type;
+}
+
 export function isGasRewards(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<GasRewards> {
     return UpdateType.UpdateGASRewards === transaction.type;
-}
-
-/**
- * Interface definition for a class that handles a specific type
- * of transaction. The handler can serialize and sign the transaction,
- * and generate a view of the transaction.
- */
-export interface TransactionHandler<T, S> {
-    transaction: T;
-    serializePayload: () => Buffer;
-    signTransaction: (signer: S) => Promise<Buffer>;
-    view: () => JSX.Element;
 }
 
 /**
@@ -588,6 +608,7 @@ export enum MultiSignatureTransactionStatus {
     Finalized = 'finalized',
     Committed = 'committed',
     Failed = 'failed',
+    Expired = 'expired',
 }
 
 /**
@@ -614,6 +635,7 @@ export enum MultiSignatureMenuItems {
     MakeNewProposal = 'Make new proposal',
     ProposedTransactions = 'Proposed transactions',
     SignTransaction = 'Sign transaction',
+    ExportKey = 'Export public-key',
 }
 
 export interface ExchangeRate {
@@ -646,6 +668,13 @@ export interface MintDistribution {
     mintPerSlot: MintRate;
     bakingReward: RewardFraction;
     finalizationReward: RewardFraction;
+}
+
+export interface ProtocolUpdate {
+    message: string;
+    specificationUrl: string;
+    specificationHash: Hex;
+    specificationAuxiliaryData: string;
 }
 
 export interface GasRewards {
@@ -751,3 +780,13 @@ export type ClassNameAndStyle = Pick<
     HTMLAttributes<HTMLElement>,
     'style' | 'className'
 >;
+
+export type WithAsProp<TAsProps> = TAsProps & {
+    as: ComponentType<TAsProps>;
+};
+export type WithAsPropOmit<TAsProps, TOmitKeys extends keyof TAsProps> = Omit<
+    TAsProps,
+    TOmitKeys
+> & {
+    as: ComponentType<TAsProps>;
+};

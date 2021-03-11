@@ -19,7 +19,7 @@ export interface ConsensusStatus {
 }
 
 interface UpdateQueue {
-    nextSequenceNumber: BigInt;
+    nextSequenceNumber: bigint;
     queue: unknown; // FIXME: add the actual type
 }
 
@@ -29,21 +29,29 @@ interface UpdateQueues {
     transactionFeeDistribution: UpdateQueue;
     foundationAccount: UpdateQueue;
     mintDistribution: UpdateQueue;
+    protocol: UpdateQueue;
     gasRewards: UpdateQueue;
 }
 
-interface Authorization {
+export interface Authorization {
     threshold: number;
     authorizedKeys: number[];
 }
 
-interface Authorizations {
+export interface Key {
+    verifyKey: string;
+    schemeId: string;
+}
+
+export interface Authorizations {
     microGTUPerEuro: Authorization;
     euroPerEnergy: Authorization;
     transactionFeeDistribution: Authorization;
     foundationAccount: Authorization;
     mintDistribution: Authorization;
+    protocol: Authorization;
     paramGASRewards: Authorization;
+    keys: Key[];
 }
 
 // The node returns the mint per slot value as a scientific notation String,

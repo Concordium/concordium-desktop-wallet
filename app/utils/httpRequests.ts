@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as http from 'http';
 import urls from '../constants/urls.json';
 import { walletProxytransactionLimit } from '../constants/externalConstants.json';
-import { Global, TransferTransaction, IncomingTransaction } from './types';
+import { TransferTransaction, IncomingTransaction } from './types';
 
 const walletProxy = axios.create({
     baseURL: urls.walletProxy,
@@ -68,14 +68,6 @@ export async function getTransactions(
 export async function getIdentityProviders() {
     const response = await walletProxy.get('/v0/ip_info');
     return response.data;
-}
-
-export async function getGlobal(): Promise<Global> {
-    const response = await walletProxy.get('/v0/global');
-    if (response.data.v !== 0) {
-        throw new Error('unsupported Global version');
-    }
-    return response.data.value;
 }
 
 /**
