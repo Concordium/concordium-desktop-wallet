@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
-import routes from '../../../constants/routes.json';
 import { addressBookSelector } from '../../../features/AddressBookSlice';
 import AddressBookEntryIcon from '../../../../resources/svg/identity.svg';
 import SearchIcon from '../../../../resources/svg/search.svg';
@@ -8,6 +7,7 @@ import SearchIcon from '../../../../resources/svg/search.svg';
 import styles from './AddressBookList.module.scss';
 import { AddressBookEntry } from '../../../utils/types';
 import ButtonNavLink from '../../../components/ButtonNavLink';
+import { selectedAddressBookEntryRoute } from '../../../utils/routerHelper';
 
 export default function AddressBookList(): JSX.Element {
     const [query, setQuery] = useState('');
@@ -37,10 +37,7 @@ export default function AddressBookList(): JSX.Element {
                     icon={
                         <AddressBookEntryIcon className={styles.identityIcon} />
                     }
-                    to={routes.ADDRESSBOOK_SELECTED.replace(
-                        ':address',
-                        e.address
-                    )}
+                    to={selectedAddressBookEntryRoute(e.address)}
                 >
                     {e.name}
                 </ButtonNavLink>

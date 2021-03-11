@@ -3,9 +3,9 @@ import { useSelector } from 'react-redux';
 import ButtonNavLink from '../../../components/ButtonNavLink';
 import { foundationTransactionsEnabledSelector } from '../../../features/SettingsSlice';
 import { UpdateType } from '../../../utils/types';
-import routes from '../../../constants/routes.json';
 
 import styles from './MultiSignatureMenu.module.scss';
+import { createProposalRoute } from '../../../utils/routerHelper';
 
 // TODO Show non-foundation transaction types.
 
@@ -46,10 +46,7 @@ export default function MultiSignatureCreateProposalView() {
                 <ButtonNavLink
                     className={styles.link}
                     key={updateType}
-                    to={routes.MULTISIGTRANSACTIONS_PROPOSAL.replace(
-                        ':updateType',
-                        `${updateType}`
-                    )}
+                    to={createProposalRoute(updateType)}
                 >
                     {label}
                 </ButtonNavLink>
