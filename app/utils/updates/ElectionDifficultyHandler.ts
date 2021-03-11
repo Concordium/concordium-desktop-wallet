@@ -46,7 +46,7 @@ export default class ElectionDifficultyHandler
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.protocol;
+        return authorizations.electionDifficulty;
     }
 
     update = UpdateElectionDifficulty;
