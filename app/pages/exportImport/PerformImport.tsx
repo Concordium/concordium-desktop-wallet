@@ -28,6 +28,7 @@ import {
     accountsSelector,
 } from '../../features/AccountSlice';
 import {
+    loadAddressBook,
     importAddressBookEntry,
     addressBookSelector,
 } from '../../features/AddressBookSlice';
@@ -138,6 +139,7 @@ async function performImport(
         importedData.addressBook,
         existingData.addressBook
     );
+    loadAddressBook(dispatch);
     setDuplicates.addressBook(duplicateEntries);
 }
 
