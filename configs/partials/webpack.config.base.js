@@ -6,8 +6,10 @@
 const path = require('path');
 const webpack = require('webpack');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
-
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const { dependencies: externals } = require('../../app/package.json');
+
+const extensions = ['.js', '.jsx', '.json', '.ts', '.tsx'];
 
 module.exports = {
     externals: [...Object.keys(externals || {})],
@@ -56,8 +58,13 @@ module.exports = {
      * Determine the array of extensions that should be used to resolve modules.
      */
     resolve: {
-        extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
+        extensions,
         modules: [path.join(__dirname, '..', 'app'), 'node_modules'],
+        plugins: [
+            new TsconfigPathsPlugin({
+                extensions,
+            }),
+        ],
     },
 
     optimization: {

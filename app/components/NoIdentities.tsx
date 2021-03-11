@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Button, Header } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import routes from '../constants/routes.json';
+import routes from '~/constants/routes.json';
 
 /**
  * Component, that will display, when there are no Identities.

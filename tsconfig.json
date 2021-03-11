@@ -19,6 +19,8 @@
         "allowJs": true,
         "skipLibCheck": true,
         "paths": {
+            "@resources/*": ["./resources/*"],
+            "@pkg/*": ["./pkg/*"],
             "~/*": ["./app/*"]
         }
     },
