@@ -19,8 +19,8 @@ export interface SidebarProps<THasSwitch extends boolean>
     links: SidebarLink[];
     version?: string;
     hasThemeSwitch?: THasSwitch;
-    isDark: THasSwitch extends true ? boolean : undefined;
-    onThemeChange: THasSwitch extends true
+    isDark?: THasSwitch extends true ? boolean : undefined;
+    onThemeChange?: THasSwitch extends true
         ? (isDark: boolean) => void
         : undefined;
 }

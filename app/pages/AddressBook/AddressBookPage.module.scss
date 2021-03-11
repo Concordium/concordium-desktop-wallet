@@ -1,0 +1,9 @@
+@import 'config/bundle';
+
+.columns {
+    height: $page-height;
+}
+
+.column {
+    flex-basis: 560px;
+}

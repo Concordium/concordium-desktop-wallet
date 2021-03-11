@@ -13,6 +13,7 @@
     "ACCOUNTS_MORE_EXPORT_TRANSACTIONS": "/accounts/more/export-transactions",
     "IDENTITIES": "/identity/listview",
     "ADDRESSBOOK": "/addressbook",
+    "ADDRESSBOOK_SELECTED": "/addressbook/:address",
     "EXPORTIMPORT": "/export_import",
     "IMPORT": "/export_import/import",
     "MULTISIGTRANSACTIONS": "/MultiSignatureTransaction",
