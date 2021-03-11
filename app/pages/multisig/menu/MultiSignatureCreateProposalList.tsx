@@ -1,9 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { Menu } from 'semantic-ui-react';
-import { foundationTransactionsEnabledSelector } from '../../features/SettingsSlice';
-import { UpdateType } from '../../utils/types';
+import ButtonNavLink from '../../../components/ButtonNavLink';
+import { foundationTransactionsEnabledSelector } from '../../../features/SettingsSlice';
+import { UpdateType } from '../../../utils/types';
+import routes from '../../../constants/routes.json';
+
+import styles from './MultiSignatureMenu.module.scss';
 
 // TODO Show non-foundation transaction types.
 
@@ -39,22 +41,19 @@ export default function MultiSignatureCreateProposalView() {
     }
 
     return (
-        <Menu vertical fluid size="massive">
-            {availableTransactionTypes.map(([updateType, label]) => {
-                return (
-                    <Menu.Item
-                        key={updateType}
-                        as={Link}
-                        // TODO Must also be able to handle account transaction types.
-                        to={{
-                            pathname: `/MultiSignatureTransaction/create`,
-                            state: updateType,
-                        }}
-                    >
-                        {label}
-                    </Menu.Item>
-                );
-            })}
-        </Menu>
+        <>
+            {availableTransactionTypes.map(([updateType, label]) => (
+                <ButtonNavLink
+                    className={styles.link}
+                    key={updateType}
+                    to={routes.MULTISIGTRANSACTIONS_PROPOSAL.replace(
+                        ':updateType',
+                        `${updateType}`
+                    )}
+                >
+                    {label}
+                </ButtonNavLink>
+            ))}
+        </>
     );
 }

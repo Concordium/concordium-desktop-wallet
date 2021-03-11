@@ -2,8 +2,8 @@ import { push } from 'connected-react-router';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Header, Menu } from 'semantic-ui-react';
-import { foundationTransactionsEnabledSelector } from '../../features/SettingsSlice';
-import routes from '../../constants/routes.json';
+import { foundationTransactionsEnabledSelector } from '../../../features/SettingsSlice';
+import routes from '../../../constants/routes.json';
 
 export enum ExportKeyType {
     Root = 'root',
