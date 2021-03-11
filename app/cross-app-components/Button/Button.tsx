@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import React, { ElementType, PropsWithChildren } from 'react';
-import { PolymorphicComponentProps } from '../../utils/types';
+
+import { PolymorphicComponentProps } from '~/utils/types';
 
 import styles from './Button.module.scss';
 
