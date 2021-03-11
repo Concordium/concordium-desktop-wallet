@@ -41,7 +41,6 @@ export default function AddressBookElementView() {
             setTimeout(() => setCopied(false), 2000);
         } catch {
             // TODO Error notification.
-            console.error('Could not copy address');
         }
     }, [chosenEntry?.address]);
 
