@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function stringify(input: any) {
     return JSON.stringify(input, (_, v) =>
         typeof v === 'bigint' ? { '@type': 'bigint', value: v.toString() } : v

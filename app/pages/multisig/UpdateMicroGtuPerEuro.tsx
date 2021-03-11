@@ -32,7 +32,7 @@ export default function UpdateMicroGtuPerEuroRate({
     }
 
     useEffect(() => {
-        if (microGtuPerEuro) {
+        if (microGtuPerEuro && effectiveTime) {
             setProposal(
                 createUpdateMultiSignatureTransaction(
                     microGtuPerEuro,
