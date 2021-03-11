@@ -28,7 +28,7 @@ export default function UpdateElectionDifficulty({
     ] = useState<string>((currentElectionDifficulty * 100000).toString());
 
     useEffect(() => {
-        if (!error) {
+        if (!error && effectiveTime) {
             setProposal(
                 createUpdateMultiSignatureTransaction(
                     {
