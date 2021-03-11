@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router';
 import clsx from 'clsx';
@@ -43,6 +43,8 @@ export default function AddressBookElementView() {
             // TODO Error notification.
         }
     }, [chosenEntry?.address]);
+
+    useEffect(() => setCopied(false), [address]);
 
     if (!chosenEntry) {
         return null;
