@@ -41,6 +41,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     (
         {
             error,
+            isInvalid = false,
             className,
             autoScale = true,
             onChange,
@@ -96,7 +97,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                     className={clsx(
                         styles.field,
                         autoScale && styles.autoScale,
-                        error !== undefined && styles.fieldInvalid
+                        isInvalid && styles.fieldInvalid
                     )}
                     ref={setRef}
                     onChange={handleChange}

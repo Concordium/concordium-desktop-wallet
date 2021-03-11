@@ -55,7 +55,7 @@ lint-job:
             - dll/
         policy: pull
     script:
-        - yarn lint
+        - yarn lint --max-warnings 0
 
 test-job:
     extends: .pre-loader
