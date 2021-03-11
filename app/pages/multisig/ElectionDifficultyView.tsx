@@ -5,7 +5,7 @@ interface Props {
 }
 
 /**
- * Displays an overview of a euro per energy transaction payload.
+ * Displays an overview of an election difficulty transaction payload.
  */
 export default function ElectionDifficultyView({ electionDifficulty }: Props) {
     return (
