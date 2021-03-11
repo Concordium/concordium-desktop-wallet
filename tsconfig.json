@@ -4,6 +4,7 @@
         "module": "ESNext",
         "lib": ["dom", "esnext", "webworker"],
         "jsx": "react",
+        "baseUrl": ".",
         "strict": true,
         "sourceMap": true,
         /* Additional Checks */
@@ -16,7 +17,10 @@
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
         "allowJs": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "paths": {
+            "~/*": ["./app/*"]
+        }
     },
     "exclude": [
         "test",
