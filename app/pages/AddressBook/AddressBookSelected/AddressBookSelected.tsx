@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from 'react-router';
+import clsx from 'clsx';
 import {
     addressBookSelector,
     removeFromAddressBook,
@@ -53,21 +54,19 @@ export default function AddressBookElementView() {
             <div className={styles.content}>
                 <header className={styles.header}>
                     <h2 className={styles.heading}>{chosenEntry.name}</h2>
-                    <span className={styles.actions}>
-                        <UpsertAddress
-                            disabled={chosenEntry.readOnly}
-                            initialValues={chosenEntry}
-                            clear
-                        >
-                            <EditIcon width="22" className={styles.icon} />
-                        </UpsertAddress>
-                        <DeleteAddress
-                            entry={chosenEntry}
-                            onRemove={(entry) =>
-                                removeFromAddressBook(dispatch, entry)
-                            }
-                        />
-                    </span>
+                    {!chosenEntry.readOnly && (
+                        <span className={styles.actions}>
+                            <UpsertAddress initialValues={chosenEntry} clear>
+                                <EditIcon width="22" className={styles.icon} />
+                            </UpsertAddress>
+                            <DeleteAddress
+                                entry={chosenEntry}
+                                onRemove={(entry) =>
+                                    removeFromAddressBook(dispatch, entry)
+                                }
+                            />
+                        </span>
+                    )}
                 </header>
                 <div className={styles.address}>
                     {chosenEntry.address}
@@ -79,7 +78,7 @@ export default function AddressBookElementView() {
                         )}
                     </Button>
                 </div>
-                <div>
+                <div className={clsx(!chosenEntry.note && styles.notesHidden)}>
                     <h3 className={styles.notesHeading}>Notes</h3>
                     {chosenEntry.note}
                 </div>

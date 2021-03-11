@@ -19,7 +19,6 @@ export function useDetectClickOutside<TElement extends HTMLElement>(
     const handleClick = useCallback(
         (e: MouseEvent) => {
             if (ref && !ref?.contains(e.target as Node)) {
-                console.log('click outside');
                 onClickOutside();
             }
         },

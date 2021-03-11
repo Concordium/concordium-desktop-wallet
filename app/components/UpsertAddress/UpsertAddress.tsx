@@ -46,12 +46,9 @@ const fieldNames: NotOptional<EqualRecord<AddressBookEntryForm>> = {
 
 const noteMaxLength = 255;
 
-function validateAddressFormat(address: string): string | undefined {
-    if (isValidAddress(address)) {
-        return undefined;
-    }
-    return 'Address format is invalid';
-}
+const validateAddressFormat: Validate = (address: string) => {
+    return isValidAddress(address) || 'Address format is invalid';
+};
 
 export default function UpsertAddress<TAs extends ElementType = typeof Button>({
     onSubmit,
@@ -84,23 +81,22 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
         [isEditMode, initialValues, dispatch]
     );
 
-    const addressExists: Validate = useCallback(
+    const validateAddressUnique: Validate = useCallback(
         (address: string) => {
             const existing = entries.find((e) => e.address === address);
 
-            if (!existing) {
-                return false;
-            }
-
-            return `Address already exists under name: ${existing.name}`;
+            return (
+                !existing ||
+                `Address already exists under name: ${existing.name}`
+            );
         },
         [entries]
     );
 
     const validateAddress: Validate = useCallback(
         (address: string) =>
-            validateAddressFormat(address) || addressExists(address),
-        [addressExists]
+            validateAddressFormat(address) || validateAddressUnique(address),
+        [validateAddressUnique]
     );
 
     const handleSubmit: SubmitHandler<AddressBookEntryForm> = useCallback(
