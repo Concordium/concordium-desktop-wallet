@@ -46,9 +46,8 @@ const fieldNames: NotOptional<EqualRecord<AddressBookEntryForm>> = {
 
 const noteMaxLength = 255;
 
-const validateAddressFormat: Validate = (address: string) => {
-    return isValidAddress(address) || 'Address format is invalid';
-};
+const addressFormat: Validate = (address: string) =>
+    isValidAddress(address) || 'Address format is invalid';
 
 export default function UpsertAddress<TAs extends ElementType = typeof Button>({
     onSubmit,
@@ -81,7 +80,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
         [isEditMode, initialValues, dispatch]
     );
 
-    const validateAddressUnique: Validate = useCallback(
+    const addressUnique: Validate = useCallback(
         (address: string) => {
             const existing = entries.find((e) => e.address === address);
 
@@ -91,12 +90,6 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
             );
         },
         [entries]
-    );
-
-    const validateAddress: Validate = useCallback(
-        (address: string) =>
-            validateAddressFormat(address) || validateAddressUnique(address),
-        [validateAddressUnique]
     );
 
     const handleSubmit: SubmitHandler<AddressBookEntryForm> = useCallback(
@@ -145,7 +138,10 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                                     value: 50,
                                     message: 'Address should be 50 characters',
                                 },
-                                validate: validateAddress,
+                                validate: {
+                                    addressFormat,
+                                    addressUnique,
+                                },
                             }}
                             placeholder="Paste the account address here"
                             defaultValue={initialValues?.address}
