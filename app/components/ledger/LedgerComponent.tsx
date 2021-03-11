@@ -127,9 +127,12 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
             if (ledgerSubscription !== undefined) {
                 ledgerSubscription.unsubscribe();
             }
-            setLedger(undefined);
+            if (ledger) {
+                ledger.closeTransport();
+                setLedger(undefined);
+            }
         };
-    }, [ledgerSubscription, listenForLedger]);
+    }, [ledgerSubscription, listenForLedger, ledger]);
 
     return (
         <Card fluid>

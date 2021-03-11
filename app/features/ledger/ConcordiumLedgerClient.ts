@@ -51,6 +51,10 @@ export default class ConcordiumLedgerClient {
         );
     }
 
+    closeTransport(): Promise<void> {
+        return this.transport.close();
+    }
+
     getPublicKey(path: number[]): Promise<Buffer> {
         return getPublicKey(this.transport, path);
     }
