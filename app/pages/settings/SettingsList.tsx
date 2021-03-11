@@ -2,6 +2,12 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Header, Menu } from 'semantic-ui-react';
 import { selectSettings, settingsSelector } from '../../features/SettingsSlice';
+import settingKeys from '../../constants/settingKeys.json';
+
+const settingsName = new Map<string, string>([
+    [settingKeys.multiSignatureSettings, 'Multi signature settings'],
+    [settingKeys.nodeSettings, 'Node settings'],
+]);
 
 export default function SettingsList() {
     const dispatch = useDispatch();
@@ -15,7 +21,7 @@ export default function SettingsList() {
                     name={setting.type}
                     onClick={() => selectSettings(dispatch, i)}
                 >
-                    <Header>{setting.type}</Header>
+                    <Header>{settingsName.get(setting.type)}</Header>
                 </Menu.Item>
             ))}
         </Menu>
