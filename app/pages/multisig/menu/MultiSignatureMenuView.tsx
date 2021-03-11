@@ -19,7 +19,7 @@ export default function MultiSignatureMenuView() {
                 component={ProposalList}
             />
             <Route
-                path={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION}
+                path={routes.MULTISIGTRANSACTIONS_BROWSE_TRANSACTION}
                 component={BrowseTransactionFileView}
             />
             <Route

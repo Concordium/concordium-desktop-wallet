@@ -38,7 +38,7 @@ export default function MultiSignatureRoutes(): JSX.Element {
                 component={MultiSignatureCreateProposalView}
             />
             <Route
-                path={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
+                path={routes.MULTISIGTRANSACTIONS_EXPORT_KEY_SELECTED}
                 component={ExportKeyView}
             />
             <Route

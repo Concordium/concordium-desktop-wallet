@@ -25,7 +25,7 @@ export default function MultiSignatureMenuList() {
                 Your proposed transactions
             </ButtonNavLink>
             <ButtonNavLink
-                to={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION}
+                to={routes.MULTISIGTRANSACTIONS_BROWSE_TRANSACTION}
                 className={styles.link}
             >
                 Sign a transaction

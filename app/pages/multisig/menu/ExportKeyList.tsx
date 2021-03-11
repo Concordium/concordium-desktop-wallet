@@ -52,7 +52,7 @@ export default function ExportKeyList(): JSX.Element {
                         onClick={() =>
                             dispatch(
                                 push(
-                                    routes.MULTISIGTRANSACTIONS_EXPORT_KEY.replace(
+                                    routes.MULTISIGTRANSACTIONS_EXPORT_KEY_SELECTED.replace(
                                         ':keyType',
                                         keyType
                                     )
