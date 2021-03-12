@@ -5,6 +5,9 @@ import { CredentialDeploymentInformation } from '../../utils/types';
 import DragAndDrop from '../../components/DragAndDropFile';
 import Button from '../../cross-app-components/Button';
 import { CredentialStatus } from './CredentialStatus';
+import SimpleErrorModal, {
+    ModalErrorInput,
+} from '../../components/SimpleErrorModal';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -24,6 +27,9 @@ export default function AddCredential({
     addCredentialId,
     setNewCredentials,
 }: Props): JSX.Element {
+    const [showError, setShowError] = useState<ModalErrorInput>({
+        show: false,
+    });
     const [currentCredential, setCurrentCredential] = useState<
         CredentialDeploymentInformation | undefined
     >();
@@ -31,16 +37,26 @@ export default function AddCredential({
     setReady(currentCredential === undefined);
 
     function loadCredential(file: Buffer) {
+        let credential;
         try {
-            const credential = JSON.parse(file.toString());
-            if (
-                !credentialIds.find(([credId]) => credId === credential.credId)
-            ) {
-                setCurrentCredential(credential);
-            }
-            // TODO: add else that informs of no duplicates.
+            credential = JSON.parse(file.toString());
         } catch (e) {
-            // TODO: Inform of a parsing error
+            setShowError({
+                show: true,
+                header: 'Invalid Credential',
+                content: 'unable to parse the file contents as a credential',
+            });
+            return;
+        }
+        if (credentialIds.find(([credId]) => credId === credential.credId)) {
+            setShowError({
+                show: true,
+                header: 'Invalid Credential',
+                content: 'No duplicate credentials allowed',
+            });
+            // TODO Add check that the credential belongs to this address.
+        } else {
+            setCurrentCredential(credential);
         }
     }
 
@@ -74,6 +90,12 @@ export default function AddCredential({
     }
     return (
         <>
+            <SimpleErrorModal
+                show={showError.show}
+                header={showError.header}
+                content={showError.content}
+                onClick={() => setShowError({ show: false })}
+            />
             <h1>Do you want to propose new credentials?</h1>
             <h3>
                 You can add new credentials to the proposal by dropping the
