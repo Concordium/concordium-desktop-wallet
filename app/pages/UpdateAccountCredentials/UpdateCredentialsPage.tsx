@@ -18,6 +18,7 @@ import ChangeSignatureThreshold from './ChangeSignatureThreshold';
 import routes from '../../constants/routes.json';
 import CreateUpdate from './CreateUpdate';
 import { CredentialStatus } from './CredentialStatus';
+import styles from './UpdateAccountCredentials.module.scss';
 
 const placeHolderText = 'To be determined';
 
@@ -105,13 +106,13 @@ function listCredentials(
                 let right = null;
                 if (status === CredentialStatus.Added) {
                     leftText = 'Remove';
-                    right = <h2 color="green">Added</h2>;
+                    right = <h2 className={styles.green}>Added</h2>;
                 } else if (status === CredentialStatus.Unchanged) {
                     leftText = 'Remove';
-                    right = <h2 color="grey">Unchanged</h2>;
+                    right = <h2 className={styles.gray}>Unchanged</h2>;
                 } else if (status === CredentialStatus.Removed) {
                     leftText = 'Revert';
-                    right = <h2 color="red">Removed</h2>;
+                    right = <h2 className={styles.red}>Removed</h2>;
                 } else if (status === CredentialStatus.Original) {
                     right = <h2>Original</h2>;
                 }
