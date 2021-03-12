@@ -11,6 +11,7 @@
         'header header header header header'
         'f1 d1 f2 d2 f3';
     place-items: stretch;
+    background-color: $color-white;
 }
 
 .header {
@@ -18,13 +19,87 @@
     display: flex;
     justify-content: flex-start;
     grid-area: header;
+    padding: 1px;
+    color: $color-white;
+    overflow: hidden;
+}
+
+.hFirst,
+.hMiddle,
+.hLast {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.hContent {
+    display: flex;
+    justify-content: space-between;
+    width: calc(100% - 20px);
+}
+
+.hLeftEdge {
+    border-top-left-radius: 8px;
+}
+
+.hRightEdge {
+    border-top-right-radius: 8px;
+}
+
+.hFirst {
+    background-color: $color-dark-blue;
+}
+
+.hMiddle {
+    background-color: $color-turquoise;
+
+    &:not(.hLeftEdge) {
+        border-left: 1px solid $color-white;
+    }
+
+    &:not(.hRightEdge):not(.hMiddleNoValue) {
+        border-right: 1px solid $color-white;
+    }
+
+    &Hidden {
+        display: none;
+    }
+}
+
+.hLast {
+    flex: 1 1 auto;
+    background-color: $color-grey;
+
+    .hContent {
+        justify-content: center;
+    }
 }
 
 .field {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    text-align: center;
+
+    &Invalid {
+        color: $color-error;
+    }
+
+    &,
+    input {
+        text-align: center;
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    input {
+        font-size: $font-size-body3;
+        border: none;
+        background: transparent;
+    }
 }
 
 .first {
@@ -39,14 +114,15 @@
     grid-area: f3;
 }
 
-.divider {
+.divider1,
+.divider2 {
     background-color: $color-grey;
+}
 
-    &1 {
-        grid-area: d1;
-    }
+.divider1 {
+    grid-area: d1;
+}
 
-    &2 {
-        grid-area: d2;
-    }
+.divider2 {
+    grid-area: d2;
 }
