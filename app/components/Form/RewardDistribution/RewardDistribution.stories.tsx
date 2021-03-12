@@ -17,16 +17,20 @@ const Template: Story = (args) => {
         second: 30,
     });
     return (
-        <RewardDistributionComponent
-            {...args}
-            value={value}
-            onChange={setValue}
-            labels={[
-                'Baking reward account',
-                'Finalization reward account',
-                'Foundation',
-            ]}
-        />
+        <>
+            Value: {JSON.stringify(value)}
+            <br />
+            <RewardDistributionComponent
+                {...args}
+                value={value}
+                onChange={setValue}
+                labels={[
+                    'Baking reward account',
+                    'Finalization reward account',
+                    'Foundation',
+                ]}
+            />
+        </>
     );
 };
 

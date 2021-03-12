@@ -14,7 +14,7 @@ function formatValue(v?: number): string {
         return '';
     }
 
-    return `${v.toFixed(3)}`;
+    return v.toFixed(3);
 }
 
 const noOp = () => null;

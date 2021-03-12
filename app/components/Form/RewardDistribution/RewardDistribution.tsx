@@ -16,6 +16,8 @@ const fieldNames: EqualRecord<RewardDistributionValue> = {
     second: 'second',
 };
 
+const sanitizeNumber = (v: number) => parseFloat(v.toFixed(3));
+
 interface RewardDistributionProps {
     labels: [string, string, string];
     value: RewardDistributionValue;
@@ -82,7 +84,7 @@ export default function RewardDistribution({
                     >
                         <div className={styles.hContent}>
                             <span>{labels[0]}</span>
-                            <span>{first}%</span>
+                            <span>{sanitizeNumber(first)}%</span>
                         </div>
                     </div>
                 )}
@@ -99,7 +101,7 @@ export default function RewardDistribution({
                 >
                     <div className={styles.hContent}>
                         <span>{labels[0]}</span>
-                        <span>{second}%</span>
+                        <span>{sanitizeNumber(second)}%</span>
                     </div>
                 </div>
                 {remaining > 0 && (
@@ -110,7 +112,9 @@ export default function RewardDistribution({
                             remaining > 0 && styles.hRightEdge
                         )}
                     >
-                        <div className={styles.hContent}>{remaining}%</div>
+                        <div className={styles.hContent}>
+                            {sanitizeNumber(remaining)}%
+                        </div>
                     </div>
                 )}
             </header>
