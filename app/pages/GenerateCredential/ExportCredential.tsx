@@ -8,6 +8,10 @@ interface Props {
     setReady: (ready: boolean) => void;
 }
 
+/**
+ * Allows the user to export the created credentialInformation.
+ * TODO: Fix this to reflect the sketches.
+ */
 export default function ExportCredential({
     credential,
     setReady,

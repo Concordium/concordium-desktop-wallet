@@ -7,6 +7,7 @@ import { getNodeInfo } from '../../utils/nodeRequests';
 import startClient from '../../utils/nodeConnector';
 
 interface Props {
+    displayText: string;
     setting: Setting;
 }
 
@@ -26,7 +27,7 @@ function validatePort(port: string) {
  * A component for connection settings that are updated automatically on changes.
  *  N.B. right now is fixed to node location setting.
  */
-export default function ConnectionSetting({ setting }: Props) {
+export default function ConnectionSetting({ displayText, setting }: Props) {
     const dispatch = useDispatch();
     const startValues = JSON.parse(setting.value);
     const [address, setAddress] = useState(startValues.address);
@@ -72,7 +73,7 @@ export default function ConnectionSetting({ setting }: Props) {
     return (
         <Segment>
             <Form.Field>
-                <Header>{setting.name}</Header>
+                <Header>{displayText}</Header>
                 <Form.Field>
                     <Input
                         label="Address"

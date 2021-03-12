@@ -1,6 +1,5 @@
 import React from 'react';
 import { Container, Header } from 'semantic-ui-react';
-import { getISOFormat } from '../utils/timeHelpers';
 import {
     AccountTransaction,
     instanceOfAccountTransaction,
@@ -9,8 +8,8 @@ import {
     UpdateInstructionPayload,
 } from '../utils/types';
 import { AccountTransactionWithSignature } from '../utils/transactionTypes';
-import { findUpdateInstructionHandler } from '../utils/updates/HandlerFinder';
 import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
+import UpdateInstructionDetails from './UpdateInstructionDetails';
 
 // TODO Implement a proper view of the supported transaction types, including account
 // transactions.
@@ -28,15 +27,7 @@ function generateView(
         | AccountTransaction
 ) {
     if (instanceOfUpdateInstruction(transaction)) {
-        const handler = findUpdateInstructionHandler(transaction.type);
-
-        return (
-            <>
-                {handler.view(transaction)}
-                <Header>Effective time</Header>
-                {getISOFormat(transaction.header.effectiveTime.toString())}
-            </>
-        );
+        return <UpdateInstructionDetails transaction={transaction} />;
     }
     if (instanceOfAccountTransaction(transaction)) {
         return <AccountTransactionDetails transaction={transaction} />;

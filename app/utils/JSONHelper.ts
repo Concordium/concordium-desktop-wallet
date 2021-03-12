@@ -3,6 +3,7 @@ const types = {
     Buffer: 'Buffer',
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function stringify(input: any) {
     return JSON.stringify(input, (_, v) => {
         if (typeof v === types.BigInt) {

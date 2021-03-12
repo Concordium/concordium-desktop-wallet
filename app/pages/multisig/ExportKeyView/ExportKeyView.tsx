@@ -129,9 +129,13 @@ export default function ExportKeyView(): JSX.Element {
     let finishButton;
     if (signedPublicKey) {
         finishButton = (
-            <Button onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}>
-                Finish
-            </Button>
+            <div className={styles.actions}>
+                <Button
+                    onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+                >
+                    Finish
+                </Button>
+            </div>
         );
     }
 
@@ -145,7 +149,7 @@ export default function ExportKeyView(): JSX.Element {
                     Export your {getKeyDisplay(keyType)}
                 </Header>
                 {exportComponent}
-                <div className={styles.actions}>{finishButton}</div>
+                {finishButton}
             </PageLayout.Container>
         </PageLayout>
     );

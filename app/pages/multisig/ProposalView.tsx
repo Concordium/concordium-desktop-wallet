@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
     Checkbox,
@@ -24,16 +24,12 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '../../components/SimpleErrorModal';
 import PageLayout from '../../components/PageLayout';
+import expirationEffect from '../../utils/ProposalHelper';
+import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
 import {
     TransactionCredentialSignature,
     instanceOfUpdateInstructionSignature,
 } from '../../utils/transactionTypes';
-
-export interface ProposalError {
-    show: boolean;
-    header: string;
-    content: string;
-}
 
 interface Props {
     title: string;
@@ -90,6 +86,7 @@ export default function ProposalView({
     handleSignatureFile,
     submitTransaction,
 }: Props) {
+    const dispatch = useDispatch();
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
@@ -101,6 +98,10 @@ export default function ProposalView({
             'The proposal page should not be loaded without a proposal in the state.'
         );
     }
+
+    useEffect(() => {
+        return expirationEffect(currentProposal, dispatch);
+    }, [currentProposal, dispatch]);
 
     async function loadSignatureFile(file: Buffer) {
         setCurrentlyLoadingFile(true);
@@ -163,6 +164,10 @@ export default function ProposalView({
                     <Grid columns={3} divided textAlign="center" padded>
                         <Grid.Column>
                             <TransactionDetails transaction={transaction} />
+                            <ExpiredEffectiveTimeView
+                                transaction={transaction}
+                                proposal={currentProposal}
+                            />
                         </Grid.Column>
                         <Grid.Column>
                             <Grid.Row>

@@ -1,29 +1,44 @@
 import React from 'react';
-import { Grid } from 'semantic-ui-react';
-import AddressBookList from './AddressBookList';
-import AddressBookElementView from './AddressBookElementView';
 
+import { Route, Switch } from 'react-router';
 import PlusIcon from '../../../resources/svg/plus.svg';
 import UpsertAddress from '../../components/UpsertAddress';
 import PageLayout from '../../components/PageLayout';
+import Columns from '../../components/Columns';
+import routes from '../../constants/routes.json';
+
+import AddressBookList from './AddressBookList';
+import AddressBookSelected from './AddressBookSelected';
+
+import styles from './AddressBookPage.module.scss';
 
 export default function AddressBookPage() {
     return (
-        <PageLayout>
+        <PageLayout noGutter>
             <PageLayout.Header>
                 <h1>Address Book</h1>
                 <UpsertAddress as={PageLayout.HeaderButton} align="right">
                     <PlusIcon />
                 </UpsertAddress>
             </PageLayout.Header>
-            <Grid centered columns="equal" divided>
-                <Grid.Column>
+            <Columns
+                divider
+                className={styles.columns}
+                columnClassName={styles.column}
+                columnScroll
+            >
+                <Columns.Column>
                     <AddressBookList />
-                </Grid.Column>
-                <Grid.Column>
-                    <AddressBookElementView />
-                </Grid.Column>
-            </Grid>
+                </Columns.Column>
+                <Columns.Column>
+                    <Switch>
+                        <Route
+                            path={routes.ADDRESSBOOK_SELECTED}
+                            render={() => <AddressBookSelected />}
+                        />
+                    </Switch>
+                </Columns.Column>
+            </Columns>
         </PageLayout>
     );
 }

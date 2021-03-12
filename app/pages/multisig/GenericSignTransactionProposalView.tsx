@@ -15,11 +15,13 @@ import TransactionDetails from '../../components/TransactionDetails';
 import TransactionHashView from '../../components/TransactionHashView';
 import {
     AccountTransaction,
+    instanceOfUpdateInstruction,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import PageLayout from '../../components/PageLayout';
+import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
 
 interface Props<T> {
     header: string;
@@ -58,6 +60,13 @@ export default function GenericSignTransactionProposalView({
         ledgerComponent = null;
     }
 
+    let expiredEffectiveTimeComponent;
+    if (instanceOfUpdateInstruction(transactionObject)) {
+        expiredEffectiveTimeComponent = (
+            <ExpiredEffectiveTimeView transaction={transactionObject} />
+        );
+    }
+
     return (
         <PageLayout>
             <PageLayout.Header>
@@ -75,6 +84,7 @@ export default function GenericSignTransactionProposalView({
                                 <TransactionDetails
                                     transaction={transactionObject}
                                 />
+                                {expiredEffectiveTimeComponent}
                             </Grid.Column>
                             <Grid.Column>
                                 <TransactionHashView

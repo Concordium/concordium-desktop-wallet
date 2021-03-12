@@ -2,7 +2,7 @@ import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
-import { Container, Segment, Header, Grid } from 'semantic-ui-react';
+import { Container, Segment, Header, Grid, Button } from 'semantic-ui-react';
 import { parse } from '../../utils/JSONHelper';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { sendTransaction } from '../../utils/nodeRequests';
@@ -18,11 +18,16 @@ import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
 import PageLayout from '../../components/PageLayout';
 
+interface Location {
+    pathname: string;
+    state: Record<string, unknown>;
+}
+
 interface State {
     transaction: string;
     account: Account;
-    returnLocation: string;
-    returnState: Record<string, unknown>;
+    cancelled: Location;
+    confirmed: Location;
 }
 
 interface Props {
@@ -44,8 +49,8 @@ export default function SubmitTransfer({ location }: Props) {
     const {
         account,
         transaction: transactionJSON,
-        returnLocation,
-        returnState,
+        cancelled,
+        confirmed,
     } = location.state;
 
     const transaction: AccountTransaction = parse(transactionJSON);
@@ -75,16 +80,7 @@ export default function SubmitTransfer({ location }: Props) {
             addPendingTransaction(transaction, transactionHash);
             monitorTransactionStatus(transactionHash);
 
-            dispatch(
-                push({
-                    pathname: returnLocation,
-                    state: {
-                        account,
-                        transaction: transactionJSON,
-                        ...returnState,
-                    },
-                })
-            );
+            dispatch(push(confirmed));
         } else {
             // TODO: handle rejection from node
         }
@@ -97,6 +93,9 @@ export default function SubmitTransfer({ location }: Props) {
             </PageLayout.Header>
             <Container>
                 <Segment>
+                    <Button onClick={() => dispatch(push(cancelled))}>
+                        {'<--'}
+                    </Button>
                     <Header textAlign="center">
                         Submit the transaction with your hardware wallet
                     </Header>

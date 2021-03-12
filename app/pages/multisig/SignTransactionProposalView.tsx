@@ -14,7 +14,10 @@ import {
 import { UpdateInstructionHandler } from '../../utils/transactionTypes';
 import { createUpdateInstructionHandler } from '../../utils/updates/HandlerFinder';
 import { insert } from '../../database/MultiSignatureProposalDao';
-import { setCurrentProposal } from '../../features/MultiSignatureSlice';
+import {
+    addProposal,
+    setCurrentProposal,
+} from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
@@ -109,6 +112,7 @@ export default function SignTransactionProposalView({ location }: Props) {
 
         // Set the current proposal in the state to the one that was just generated.
         dispatch(setCurrentProposal(updatedMultiSigTransaction));
+        dispatch(addProposal(updatedMultiSigTransaction));
 
         // Navigate to the page that displays the current proposal from the state.
         dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));

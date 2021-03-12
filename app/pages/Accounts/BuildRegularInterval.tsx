@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Label, List, Button, Input } from 'semantic-ui-react';
-import { Schedule } from '../../utils/types';
+import { Button } from 'semantic-ui-react';
+import { EqualRecord, Schedule } from '../../utils/types';
 import { createRegularIntervalSchedule } from '../../utils/transactionHelpers';
-import InputTimeStamp from '../../components/InputTimeStamp';
-import { TimeConstants, getNow } from '../../utils/timeHelpers';
+import { TimeConstants } from '../../utils/timeHelpers';
+import Form from '../../components/Form';
+import { futureDate } from '../../components/Form/util/validation';
 
 export interface Interval {
     label: string;
@@ -17,71 +18,94 @@ export const intervals: Interval[] = [
     { label: 'Month (30 days)', value: TimeConstants.Month },
 ];
 
+interface FormValues {
+    releases: number;
+    startTime: Date;
+}
+
+const fieldNames: EqualRecord<FormValues> = {
+    releases: 'releases',
+    startTime: 'startTime',
+};
+
+export interface Defaults {
+    releases: number;
+    chosenInterval: Interval;
+    startTime: number;
+}
+
 interface Props {
-    submitSchedule(schedule: Schedule): void;
+    defaults: Defaults;
+    submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
 }
 
 /**
  * Component to build a "regular interval" schedule.
  */
-export default function RegularInterval({ submitSchedule, amount }: Props) {
-    const [releases, setReleases] = useState<number>(1);
+export default function RegularInterval({
+    submitSchedule,
+    amount,
+    defaults,
+}: Props) {
     const [chosenInterval, setChosenInterval] = useState<Interval>(
-        intervals[0]
+        defaults?.chosenInterval || intervals[0]
     );
-    const [startTime, setStartTime] = useState<number>(
-        getNow() + 5 * TimeConstants.Minute
-    ); // TODO Decide appropiate default
 
-    function createSchedule() {
+    function createSchedule({ releases, startTime }: FormValues) {
         const schedule = createRegularIntervalSchedule(
             amount,
             releases,
-            startTime,
+            startTime.getTime(),
             chosenInterval.value
         );
-        submitSchedule(schedule);
+        const recoverState = {
+            releases,
+            startTime: startTime.getTime(),
+            chosenInterval,
+        };
+        submitSchedule(schedule, recoverState);
     }
 
     return (
         <>
-            <List.Item>
-                Release Every:
-                <Button.Group>
-                    {intervals.map((interval: Interval) => (
-                        <Button
-                            key={interval.label}
-                            onClick={() => setChosenInterval(interval)}
-                        >
-                            {interval.label}
-                        </Button>
-                    ))}
-                </Button.Group>
-            </List.Item>
-            <List.Item>
-                <Label>Enter amount of releases</Label>
-                <Input
-                    fluid
-                    name="name"
-                    placeholder="Enter Amount"
-                    value={releases}
-                    onChange={(e) => setReleases(parseInt(e.target.value, 10))}
+            Release Every:
+            <Button.Group>
+                {intervals.map((interval: Interval) => (
+                    <Button
+                        key={interval.label}
+                        onClick={() => setChosenInterval(interval)}
+                    >
+                        {interval.label}
+                    </Button>
+                ))}
+            </Button.Group>
+            <Form onSubmit={createSchedule}>
+                <Form.Input
+                    label="Enter amount of releases"
+                    name={fieldNames.releases}
+                    placeholder="Enter releases"
                     autoFocus
                     type="number"
+                    defaultValue={defaults?.releases || 1}
+                    rules={{ required: 'Releases required', min: 0 }}
                 />
-            </List.Item>
-            <List.Item>
-                <Label>Enter starting time:</Label>
-                <InputTimeStamp
-                    placeholder="Enter Starting time"
-                    value={startTime}
-                    setValue={setStartTime}
+                <Form.Timestamp
+                    name={fieldNames.startTime}
+                    label="Enter starting time"
+                    defaultValue={
+                        new Date(
+                            defaults?.startTime ||
+                                Date.now() + 5 * TimeConstants.Minute
+                        )
+                    }
+                    rules={{
+                        required: true,
+                        validate: futureDate('Time must be in the future'),
+                    }}
                 />
-            </List.Item>
-            <List.Item>
-                <Button onClick={createSchedule}>submit</Button>
-            </List.Item>
+                <Form.Submit>submit</Form.Submit>
+            </Form>
         </>
     );
 }

@@ -24,7 +24,10 @@ interface Props {
     identity: Identity | undefined;
 }
 
-// The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
+/**
+ * Displays the currently chosen account's information.
+ * Allows the user to reveal attributes.
+ */
 export default function PickAccount({
     isReady,
     setReady,

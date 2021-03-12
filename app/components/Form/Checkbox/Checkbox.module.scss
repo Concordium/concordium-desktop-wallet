@@ -31,10 +31,10 @@
         input:checked + & {
             opacity: 1;
         }
+    }
 
-        .checkbox:not(.checkboxLarge) & {
-            transform: scale(0.6);
-        }
+    &:not(.checkboxLarge) svg {
+        transform: scale(0.6);
     }
 
     .rootInvalid & {

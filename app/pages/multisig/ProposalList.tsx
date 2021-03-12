@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { Menu } from 'semantic-ui-react';
 import { parse } from '../../utils/JSONHelper';
 import {
-    loadProposals,
     proposalsSelector,
     setCurrentProposal,
 } from '../../features/MultiSignatureSlice';
@@ -14,6 +13,7 @@ import {
     MultiSignatureTransaction,
     instanceOfUpdateInstruction,
 } from '../../utils/types';
+import expirationEffect from '../../utils/ProposalHelper';
 
 /**
  * Sorts so that the newest multi signature transaction is first.
@@ -42,8 +42,14 @@ export default function ProposalList(): JSX.Element {
     const proposals = useSelector(proposalsSelector);
 
     useEffect(() => {
-        loadProposals(dispatch);
-    }, [dispatch]);
+        const cleanUpFunctions: (() => void)[] = [];
+        proposals.forEach((proposal) => {
+            cleanUpFunctions.push(expirationEffect(proposal, dispatch));
+        });
+        return () => {
+            cleanUpFunctions.forEach((cleanUp) => cleanUp());
+        };
+    }, [dispatch, proposals]);
 
     return (
         <Menu vertical fluid>

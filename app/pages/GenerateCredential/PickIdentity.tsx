@@ -10,7 +10,9 @@ interface Props {
     setIdentity: (identity: Identity) => void;
 }
 
-// The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
+/**
+ * Allows the user to pick an Identity
+ */
 export default function PickIdentity({
     setReady,
     setIdentity,
