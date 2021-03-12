@@ -2,9 +2,11 @@ import React, { useCallback, useEffect } from 'react';
 
 import { Controller, useForm } from 'react-hook-form';
 import clsx from 'clsx';
+
+import { EqualRecord } from '~/utils/types';
+
 import RewardDistributionField from './RewardDistributionField';
 import styles from './RewardDistribution.module.scss';
-import { EqualRecord } from '../../../utils/types';
 
 export interface RewardDistributionValue {
     first: number;
