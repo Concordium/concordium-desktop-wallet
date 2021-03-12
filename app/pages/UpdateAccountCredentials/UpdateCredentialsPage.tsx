@@ -19,6 +19,7 @@ import routes from '../../constants/routes.json';
 import CreateUpdate from './CreateUpdate';
 import { CredentialStatus } from './CredentialStatus';
 import styles from './UpdateAccountCredentials.module.scss';
+import ConfirmPage from './ConfirmPage';
 
 const placeHolderText = 'To be determined';
 
@@ -32,6 +33,8 @@ function nextLocation(currentLocation: string) {
         case routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL:
             return routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD;
         case routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD:
+            return routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM;
+        case routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM:
             return routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN;
         case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
             return routes.MULTISIGTRANSACTIONS;
@@ -205,6 +208,29 @@ export default function GenerateCredential(): JSX.Element {
         }
     }
 
+    function renderConfirmPage() {
+        if (!account?.signatureThreshold) {
+            throw new Error('Unexpected missing account/signatureThreshold');
+        }
+        if (currentCredentialCount === undefined) {
+            throw new Error('Unexpected missing credential count');
+        }
+
+        return (
+            <ConfirmPage
+                setReady={setReady}
+                currentThreshold={account.signatureThreshold}
+                currentCredentialAmount={currentCredentialCount}
+                newCredentialAmount={
+                    credentialIds.filter(
+                        ([, status]) => status !== CredentialStatus.Removed
+                    ).length
+                }
+                newThreshold={newThreshold}
+            />
+        );
+    }
+
     function renderCreateUpdate() {
         if (!newThreshold) {
             throw new Error('Unexpected missing threshold');
@@ -283,6 +309,12 @@ export default function GenerateCredential(): JSX.Element {
                                             setNewThreshold={setNewThreshold}
                                         />
                                     )}
+                                />
+                                <Route
+                                    path={
+                                        routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM
+                                    }
+                                    render={renderConfirmPage}
                                 />
                                 <Route
                                     path={
