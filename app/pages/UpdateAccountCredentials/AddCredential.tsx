@@ -35,9 +35,9 @@ export default function AddCredential({
     >();
 
     setReady(currentCredential === undefined);
-
     function loadCredential(file: Buffer) {
-        let credential;
+        let credential: CredentialDeploymentInformation;
+        // TODO Validate the structure of the file
         try {
             credential = JSON.parse(file.toString());
         } catch (e) {

@@ -54,7 +54,7 @@ function displayAccount(account: Account | undefined) {
 
 function displaySignatureThreshold(
     currentThreshold: number | undefined,
-    newThreshold: number
+    newThreshold: number | undefined
 ) {
     if (!currentThreshold) {
         return placeHolderText;
@@ -66,7 +66,7 @@ function displaySignatureThreshold(
                 Current amount of required signatures: {currentThreshold}
             </List.Item>
             <List.Item>
-                New amount of required signatures: {newThreshold}
+                New amount of required signatures: {newThreshold || '?'}
             </List.Item>
         </>
     );
@@ -150,7 +150,7 @@ export default function GenerateCredential(): JSX.Element {
         number | undefined
     >();
 
-    const [newThreshold, setNewThreshold] = useState<number>(1);
+    const [newThreshold, setNewThreshold] = useState<number | undefined>();
     const [credentialIds, setCredentialIds] = useState<
         [string, CredentialStatus][]
     >([]);
@@ -166,8 +166,11 @@ export default function GenerateCredential(): JSX.Element {
                 (previous) => account.signatureThreshold || previous
             );
             setCredentialIds(
-                currentCredentialIds.map((id: string) => {
-                    const status = CredentialStatus.Unchanged;
+                currentCredentialIds.map((id: string, index: number) => {
+                    const status =
+                        index === 0
+                            ? CredentialStatus.Original
+                            : CredentialStatus.Unchanged;
                     return [id, status];
                 })
             );
@@ -199,6 +202,23 @@ export default function GenerateCredential(): JSX.Element {
                 )
             );
         }
+    }
+
+    function renderCreateUpdate() {
+        if (!newThreshold) {
+            throw new Error('Unexpected missing threshold');
+        }
+        return (
+            <CreateUpdate
+                setReady={setReady}
+                account={account}
+                addedCredentials={newCredentials}
+                removedCredIds={credentialIds
+                    .filter(([, status]) => status === CredentialStatus.Removed)
+                    .map(([id]) => id)}
+                newThreshold={newThreshold}
+            />
+        );
     }
 
     return (
@@ -251,7 +271,14 @@ export default function GenerateCredential(): JSX.Element {
                                             currentThreshold={
                                                 account?.signatureThreshold || 1
                                             }
-                                            newThreshold={newThreshold || 1}
+                                            newCredentialAmount={
+                                                credentialIds.filter(
+                                                    ([, status]) =>
+                                                        status !==
+                                                        CredentialStatus.Removed
+                                                ).length
+                                            }
+                                            newThreshold={newThreshold}
                                             setNewThreshold={setNewThreshold}
                                         />
                                     )}
@@ -294,21 +321,7 @@ export default function GenerateCredential(): JSX.Element {
                                     path={
                                         routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN
                                     }
-                                    render={() => (
-                                        <CreateUpdate
-                                            setReady={setReady}
-                                            account={account}
-                                            addedCredentials={newCredentials}
-                                            removedCredIds={credentialIds
-                                                .filter(
-                                                    ([, status]) =>
-                                                        status ===
-                                                        CredentialStatus.Removed
-                                                )
-                                                .map(([id]) => id)}
-                                            newThreshold={newThreshold}
-                                        />
-                                    )}
+                                    render={renderCreateUpdate}
                                 />
                                 <Route
                                     path={

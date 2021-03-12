@@ -1,21 +1,40 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Form from '../../components/Form';
 
 interface Props {
     setReady: (ready: boolean) => void;
     currentThreshold: number;
-    newThreshold: number;
-    setNewThreshold: (threshold: number) => void;
+    newCredentialAmount: number;
+    newThreshold: number | undefined;
+    setNewThreshold: (threshold: number | undefined) => void;
+}
+
+function validateThreshold(threshold: number, max: number) {
+    if (!threshold) {
+        return false;
+    }
+    if (threshold < 1) {
+        return false;
+    }
+    return threshold <= max;
 }
 
 // TODO: Validate that the threshold is <= amount of credentials
 export default function ChangeThreshold({
     setReady,
     currentThreshold,
+    newCredentialAmount,
     newThreshold,
     setNewThreshold,
 }: Props): JSX.Element {
-    setReady(true);
+    useEffect(() => {
+        setReady(
+            newThreshold
+                ? validateThreshold(newThreshold, newCredentialAmount)
+                : false
+        );
+    }, [setReady, newThreshold, newCredentialAmount]);
+
     return (
         <>
             <h1>Propose new signature threshold for the account?</h1>
@@ -37,7 +56,20 @@ export default function ChangeThreshold({
                     value={newThreshold}
                     type="number"
                     onChange={(e) => {
-                        setNewThreshold(parseInt(e.target.value, 10));
+                        let proposedThreshold;
+                        try {
+                            proposedThreshold = parseInt(e.target.value, 10);
+                            setNewThreshold(proposedThreshold);
+                            setReady(
+                                validateThreshold(
+                                    proposedThreshold,
+                                    newCredentialAmount
+                                )
+                            );
+                        } catch (error) {
+                            setNewThreshold(undefined);
+                            setReady(false);
+                        }
                     }}
                 />
             </Form>
