@@ -1,0 +1,52 @@
+@import 'config/bundle';
+
+.root {
+    font-size: $font-size-body4;
+    border-radius: 10px;
+    border: 1px solid $color-grey;
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+    grid-template-rows: 34px 75px;
+    grid-template-areas:
+        'header header header header header'
+        'f1 d1 f2 d2 f3';
+    place-items: stretch;
+}
+
+.header {
+    border-bottom: 1px solid $color-grey;
+    display: flex;
+    justify-content: flex-start;
+    grid-area: header;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.first {
+    grid-area: f1;
+}
+
+.middle {
+    grid-area: f2;
+}
+
+.last {
+    grid-area: f3;
+}
+
+.divider {
+    background-color: $color-grey;
+
+    &1 {
+        grid-area: d1;
+    }
+
+    &2 {
+        grid-area: d2;
+    }
+}
