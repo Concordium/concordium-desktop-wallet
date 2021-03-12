@@ -11,22 +11,18 @@ import {
 } from '../../utils/serializationHelpers';
 import pathAsBuffer from './Path';
 
-async function signCredentialValues(
-    pathPrefix: Uint8Array,
+export async function signCredentialValues(
     transport: Transport,
     credentialDeployment: CredentialDeploymentValues,
     ins: number,
-    p1Offset: number
+    p2: number
 ) {
-    let p1 = 0x00 + p1Offset;
-    const p2 = 0x00;
+    let p1 = 0x0a;
 
     const publicKeys = credentialDeployment.credentialPublicKeys;
     const verificationKeyListLength = Object.entries(publicKeys.keys).length;
-    let data = Buffer.concat([
-        pathPrefix,
-        Uint8Array.of(verificationKeyListLength),
-    ]);
+    let data = Buffer.alloc(1);
+    data.writeUInt8(verificationKeyListLength, 0);
 
     await transport.send(0xe0, ins, p1, p2, data);
 
@@ -34,7 +30,7 @@ async function signCredentialValues(
         .map((idx) => parseInt(idx, 10))
         .sort();
 
-    p1 = 0x01 + p1Offset;
+    p1 = 0x01;
     for (let i = 0; i < verificationKeyListLength; i += 1) {
         const index = keyIndices[i];
         const verificationKey = publicKeys.keys[index];
@@ -64,10 +60,10 @@ async function signCredentialValues(
         arThreshold,
         arListLengthAsBytes,
     ]);
-    p1 = 0x02 + p1Offset;
+    p1 = 0x02;
     await transport.send(0xe0, ins, p1, p2, data);
 
-    p1 = 0x03 + p1Offset;
+    p1 = 0x03;
 
     const arIdentities = Object.keys(credentialDeployment.arData);
     for (let i = 0; i < arIdentities.length; i += 1) {
@@ -84,7 +80,7 @@ async function signCredentialValues(
         await transport.send(0xe0, ins, p1, p2, data);
     }
 
-    p1 = 0x04 + p1Offset;
+    p1 = 0x04;
     const validTo = serializeYearMonth(credentialDeployment.policy.validTo);
     const createdAt = serializeYearMonth(credentialDeployment.policy.createdAt);
 
@@ -109,14 +105,41 @@ async function signCredentialValues(
         const serializedAttributeValue = Buffer.from(attributeValue, 'utf-8');
         data.writeUInt8(serializedAttributeValue.length, 1);
 
-        p1 = 0x05 + p1Offset;
+        p1 = 0x05;
         // eslint-disable-next-line  no-await-in-loop
         await transport.send(0xe0, ins, p1, p2, data);
 
-        p1 = 0x06 + p1Offset;
+        p1 = 0x06;
         data = serializedAttributeValue;
         // eslint-disable-next-line  no-await-in-loop
         await transport.send(0xe0, ins, p1, p2, data);
+    }
+}
+
+export async function signCredentialProofs(
+    transport: Transport,
+    proofs: Buffer,
+    ins: number,
+    p2: number
+) {
+    const proofLength = Buffer.alloc(4);
+    proofLength.writeInt32BE(proofs.length, 0);
+    let p1 = 0x07;
+    await transport.send(0xe0, ins, p1, p2, proofLength);
+
+    p1 = 0x08;
+
+    let i = 0;
+    while (i < proofs.length) {
+        // eslint-disable-next-line  no-await-in-loop
+        await transport.send(
+            0xe0,
+            ins,
+            p1,
+            p2,
+            proofs.slice(i, Math.min(i + 255, proofs.length))
+        );
+        i += 255;
     }
 }
 
@@ -158,51 +181,20 @@ async function signCredentialDeployment(
 ): Promise<Buffer> {
     const pathPrefix = pathAsBuffer(path);
 
+    const ins = INS_SIGN_CREDENTIAL_DEPLOYMENT;
+    let p1 = 0x00;
     const p2 = 0x00;
 
-    await signCredentialValues(
-        pathPrefix,
-        transport,
-        credentialDeployment,
-        INS_SIGN_CREDENTIAL_DEPLOYMENT,
-        0
-    );
+    await transport.send(0xe0, ins, p1, p2, pathPrefix);
+
+    await signCredentialValues(transport, credentialDeployment, ins, p2);
 
     const proofs = serializeIdOwnerShipProofs(credentialDeployment.proofs);
-    const proofLength = Buffer.alloc(4);
-    proofLength.writeInt32BE(proofs.length, 0);
-    let p1 = 0x07;
-    await transport.send(
-        0xe0,
-        INS_SIGN_CREDENTIAL_DEPLOYMENT,
-        p1,
-        p2,
-        proofLength
-    );
 
-    p1 = 0x08;
-
-    let i = 0;
-    while (i < proofs.length) {
-        // eslint-disable-next-line  no-await-in-loop
-        await transport.send(
-            0xe0,
-            INS_SIGN_CREDENTIAL_DEPLOYMENT,
-            p1,
-            p2,
-            proofs.slice(i, Math.min(i + 255, proofs.length))
-        );
-        i += 255;
-    }
+    await signCredentialProofs(transport, proofs, ins, p2);
 
     p1 = 0x09;
-    const response = await transport.send(
-        0xe0,
-        INS_SIGN_CREDENTIAL_DEPLOYMENT,
-        p1,
-        p2,
-        newOrExisting
-    );
+    const response = await transport.send(0xe0, ins, p1, p2, newOrExisting);
 
     const signature = response.slice(0, 64);
     return signature;

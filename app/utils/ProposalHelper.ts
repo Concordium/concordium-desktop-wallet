@@ -2,12 +2,12 @@ import { Dispatch } from '@reduxjs/toolkit';
 import { parse } from 'json-bigint';
 import { updateCurrentProposal } from '../features/MultiSignatureSlice';
 import { getNow } from './timeHelpers';
+import { getTimeout } from './transactionHelpers';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     TimeStampUnit,
-    UpdateInstruction,
-    UpdateInstructionPayload,
+    Transaction,
 } from './types';
 
 /**
@@ -19,10 +19,9 @@ export default function expirationEffect(
     dispatch: Dispatch
 ) {
     if (proposal.status === MultiSignatureTransactionStatus.Open) {
-        const updateInstruction: UpdateInstruction<UpdateInstructionPayload> = parse(
-            proposal.transaction
-        );
-        const expiration = updateInstruction.header.timeout;
+        const transaction: Transaction = parse(proposal.transaction);
+
+        const expiration = getTimeout(transaction);
 
         const interval = setInterval(async () => {
             if (expiration <= BigInt(getNow(TimeStampUnit.seconds))) {

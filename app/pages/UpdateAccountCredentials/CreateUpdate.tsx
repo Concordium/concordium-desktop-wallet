@@ -55,9 +55,10 @@ export default function CreateUpdate({
             signatureIndex: 0,
         });
 
-        console.log(path);
-        console.log(ledger);
-        const signature = Buffer.alloc(1); // await ledger.signUpdateCredentialTransaction(transaction, path);
+        const signature = await ledger.signUpdateCredentialTransaction(
+            transaction,
+            path
+        );
 
         const multiSignatureTransaction: Partial<MultiSignatureTransaction> = {
             // The JSON serialization of the transaction

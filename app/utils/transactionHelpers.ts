@@ -12,6 +12,8 @@ import {
     TransferToEncrypted,
     UpdateAccountCredentials,
     CredentialDeploymentInformation,
+    instanceOfUpdateInstruction,
+    Transaction,
 } from './types';
 
 /**
@@ -240,4 +242,11 @@ export function isFailed(transaction: TransferTransaction) {
         transaction.success === 0 ||
         transaction.status === TransactionStatus.Rejected
     );
+}
+
+export function getTimeout(transaction: Transaction) {
+    if (instanceOfUpdateInstruction(transaction)) {
+        return transaction.header.timeout;
+    }
+    return transaction.expiry;
 }

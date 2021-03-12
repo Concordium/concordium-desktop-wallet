@@ -4,21 +4,14 @@ import { getNow } from '../../utils/timeHelpers';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
-    TimeStampUnit,
-    instanceOfUpdateInstruction,
     Transaction,
+    TimeStampUnit,
 } from '../../utils/types';
+import { getTimeout } from '../../utils/transactionHelpers';
 
 interface Props {
     proposal?: MultiSignatureTransaction;
     transaction: Transaction;
-}
-
-function getTimeout(transaction: Transaction) {
-    if (instanceOfUpdateInstruction(transaction)) {
-        return transaction.header.timeout;
-    }
-    return transaction.expiry;
 }
 
 export default function ExpiredEffectiveTimeView({
