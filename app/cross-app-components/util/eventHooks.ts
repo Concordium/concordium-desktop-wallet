@@ -1,4 +1,4 @@
-import { RefCallback, useCallback, useLayoutEffect, useState } from 'react';
+import { RefCallback, useCallback, useEffect, useState } from 'react';
 
 /**
  * @description
@@ -25,7 +25,7 @@ export function useDetectClickOutside<TElement extends HTMLElement>(
         [onClickOutside, ref]
     );
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         document.addEventListener('mousedown', handleClick);
         return () => {
             document.removeEventListener('mousedown', handleClick);
@@ -45,7 +45,7 @@ export function useDetectClickOutside<TElement extends HTMLElement>(
  * }
  */
 export function useKeyPress(handleKeyPress: (e: KeyboardEvent) => void) {
-    useLayoutEffect(() => {
+    useEffect(() => {
         document.addEventListener('keyup', handleKeyPress, true);
         return () => {
             document.removeEventListener('keyup', handleKeyPress);

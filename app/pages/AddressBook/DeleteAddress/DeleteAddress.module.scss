@@ -1,0 +1,32 @@
+@import 'config/bundle';
+
+.deleteButton {
+    margin-top: 10px;
+    margin-right: 4px;
+}
+
+.binIcon {
+    width: 15px;
+    transition: transform $anim-easing $anim-timing;
+
+    path {
+        fill: $color-danger;
+    }
+
+    &:hover {
+        transform: scale(1.1);
+
+        path {
+            fill: darken($color-danger, 3);
+        }
+    }
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+
+    > *:first-child {
+        margin-right: 40px;
+    }
+}

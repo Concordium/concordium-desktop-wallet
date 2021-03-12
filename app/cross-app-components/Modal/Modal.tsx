@@ -11,9 +11,10 @@ import React, {
 import { AnimatePresence, motion, Variants, Transition } from 'framer-motion';
 import CloseButton from '../CloseButton';
 import Portal from '../Portal';
-import { useKeyPress, useDetectClickOutside } from '../util/eventHooks';
 
 import styles from './Modal.module.scss';
+import DetectClickOutside from '../DetectClickOutside';
+import DetectKeyPress from '../DetectKeyPress';
 
 const transition: Transition = {
     ease: 'easeOut',
@@ -34,7 +35,7 @@ interface WithOnClick {
     onClick?: MouseEventHandler;
 }
 
-export interface ModalProps<TTrigger extends WithOnClick> {
+export interface ModalProps<TTrigger extends WithOnClick = WithOnClick> {
     /**
      * Supply element that acts as a trigger for modal to open. Must have "onClick" as prop.
      */
@@ -64,7 +65,7 @@ export interface ModalProps<TTrigger extends WithOnClick> {
  *   This content is shown in a modal!
  * </Modal>
  */
-export default function Modal<TTrigger extends WithOnClick>({
+export default function Modal<TTrigger extends WithOnClick = WithOnClick>({
     trigger,
     closeOnEscape = true,
     disableClose = false,
@@ -89,8 +90,6 @@ export default function Modal<TTrigger extends WithOnClick>({
         },
         [disableClose]
     );
-
-    const modalRef = useDetectClickOutside<HTMLDivElement>(close);
 
     useEffect(() => {
         if (isOpenOverride && !isOpen) {
@@ -131,8 +130,6 @@ export default function Modal<TTrigger extends WithOnClick>({
         [closeOnEscape, close]
     );
 
-    useKeyPress(handleKeyUp);
-
     const handleExitComplete = useCallback(() => {
         setIsExiting(false);
         setIsOpen(false);
@@ -149,7 +146,7 @@ export default function Modal<TTrigger extends WithOnClick>({
                 >
                     <AnimatePresence onExitComplete={handleExitComplete}>
                         {!isExiting && (
-                            <>
+                            <DetectKeyPress onKeyPress={handleKeyUp}>
                                 <motion.div
                                     className={styles.bg}
                                     initial="closed"
@@ -158,14 +155,15 @@ export default function Modal<TTrigger extends WithOnClick>({
                                     variants={bgTransitionVariants}
                                     transition={transition}
                                 />
-                                <motion.div
+                                <DetectClickOutside
+                                    as={motion.div}
                                     className={styles.modal}
                                     initial="closed"
                                     animate="open"
                                     exit="closed"
                                     variants={modalTransitionVariants}
                                     transition={transition}
-                                    ref={modalRef}
+                                    onClickOutside={close}
                                 >
                                     {!disableClose && (
                                         <CloseButton
@@ -174,8 +172,8 @@ export default function Modal<TTrigger extends WithOnClick>({
                                         />
                                     )}
                                     {children}
-                                </motion.div>
-                            </>
+                                </DetectClickOutside>
+                            </DetectKeyPress>
                         )}
                     </AnimatePresence>
                 </Portal>

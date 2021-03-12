@@ -58,6 +58,8 @@ export function getDefaultExpiry(): bigint {
     );
 }
 
-export function getNow(): number {
-    return new Date().getTime();
+export function getNow(
+    unit: TimeStampUnit = TimeStampUnit.milliSeconds
+): number {
+    return Math.floor(new Date().getTime() / unit);
 }

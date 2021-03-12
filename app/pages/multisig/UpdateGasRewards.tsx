@@ -38,7 +38,7 @@ export default function UpdateGasRewards({
             .chainUpdate * rewardFractionResolution;
 
     useEffect(() => {
-        if (gasRewards) {
+        if (gasRewards && effectiveTime) {
             setProposal(
                 createUpdateMultiSignatureTransaction(
                     gasRewards,

@@ -1,0 +1,6 @@
+{
+    "multiSignatureSettings": "multisig",
+    "nodeSettings": "node",
+    "foundationTransactionsEnabled": "foundationTransactionsEnabled",
+    "nodeLocation": "nodeLocation"
+}

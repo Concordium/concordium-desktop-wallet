@@ -109,7 +109,6 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
                 await ledgerCall(ledger, setStatusMessage);
             }
         } catch (error) {
-            console.log(error);
             let errorMessage;
             if (instanceOfTransportStatusError(error)) {
                 errorMessage = getErrorDescription(error.statusCode);
@@ -128,9 +127,12 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
             if (ledgerSubscription !== undefined) {
                 ledgerSubscription.unsubscribe();
             }
-            setLedger(undefined);
+            if (ledger) {
+                ledger.closeTransport();
+                setLedger(undefined);
+            }
         };
-    }, [ledgerSubscription, listenForLedger]);
+    }, [ledgerSubscription, listenForLedger, ledger]);
 
     return (
         <Card fluid>

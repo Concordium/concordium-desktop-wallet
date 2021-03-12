@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     Button,
@@ -44,8 +44,10 @@ import SimpleErrorModal, {
 } from '../../components/SimpleErrorModal';
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
+import expirationEffect from '../../utils/ProposalHelper';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import PageLayout from '../../components/PageLayout';
+import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
@@ -89,11 +91,20 @@ export default function ProposalView() {
     const [currentlyLoadingFile, setCurrentlyLoadingFile] = useState(false);
     const dispatch = useDispatch();
     const currentProposal = useSelector(currentProposalSelector);
+
     if (!currentProposal) {
         throw new Error(
             'The proposal page should not be loaded without a proposal in the state.'
         );
     }
+
+    const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
+        currentProposal.transaction
+    );
+
+    useEffect(() => {
+        return expirationEffect(currentProposal, dispatch);
+    }, [currentProposal, dispatch]);
 
     async function loadSignatureFile(file: Buffer) {
         setCurrentlyLoadingFile(true);
@@ -206,9 +217,6 @@ export default function ProposalView() {
         }
     }
 
-    const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
-        currentProposal.transaction
-    );
     const handler = findHandler(instruction.type);
     const serializedPayload = handler.serializePayload(instruction);
 
@@ -290,6 +298,10 @@ export default function ProposalView() {
                     <Grid columns={3} divided textAlign="center" padded>
                         <Grid.Column>
                             <TransactionDetails transaction={instruction} />
+                            <ExpiredEffectiveTimeView
+                                transaction={instruction}
+                                proposal={currentProposal}
+                            />
                         </Grid.Column>
                         <Grid.Column>
                             <Grid.Row>
