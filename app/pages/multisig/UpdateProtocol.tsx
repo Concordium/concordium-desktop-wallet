@@ -25,7 +25,7 @@ export default function UpdateProtocol({
         blockSummary.updates.updateQueues.protocol.nextSequenceNumber;
 
     useEffect(() => {
-        if (protocolUpdate) {
+        if (protocolUpdate && effectiveTime) {
             setProposal(
                 createUpdateMultiSignatureTransaction(
                     protocolUpdate,

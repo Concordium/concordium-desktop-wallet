@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Sidebar, { SidebarLink } from '../cross-app-components/Sidebar';
 import routes from '../constants/routes.json';
 import pkg from '../package.json';
@@ -44,15 +44,5 @@ const links: SidebarLink[] = [
 ];
 
 export default function ConnectedSidebar() {
-    const [isDark, setIsDark] = useState(false); // TODO: store in redux and DB + maybe hook up to OS level darkmode?
-
-    return (
-        <Sidebar
-            links={links}
-            version={pkg.version}
-            hasThemeSwitch
-            isDark={isDark}
-            onThemeChange={setIsDark}
-        />
-    );
+    return <Sidebar links={links} version={pkg.version} />;
 }

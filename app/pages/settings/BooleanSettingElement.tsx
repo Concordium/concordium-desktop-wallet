@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Button, Checkbox, Form, Modal } from 'semantic-ui-react';
+import { Button, Modal, Segment } from 'semantic-ui-react';
+import Switch from '../../cross-app-components/Switch';
 import { updateSettingEntry } from '../../features/SettingsSlice';
 import { Setting } from '../../utils/types';
 
 interface Props {
+    displayText: string;
     setting: Setting;
     warning?: string;
 }
@@ -13,7 +15,11 @@ interface Props {
  * A component for a boolean setting that is updated by clicking a checkbox. If a
  * warning is provided, then a warning modal will be shown if enabling the setting.
  */
-export default function BooleanSetting({ setting, warning }: Props) {
+export default function BooleanSetting({
+    displayText,
+    setting,
+    warning,
+}: Props) {
     const [open, setOpen] = useState(false);
     const dispatch = useDispatch();
 
@@ -29,12 +35,9 @@ export default function BooleanSetting({ setting, warning }: Props) {
     }
 
     const toggleCheckbox = (
-        <Checkbox
-            toggle
-            label={setting.name}
-            defaultChecked={setting.value === '1'}
-            onClick={handleClick}
-        />
+        <Switch defaultChecked={setting.value === '1'} onClick={handleClick}>
+            <h3>{displayText}</h3>
+        </Switch>
     );
 
     const enableWarningModal = (
@@ -48,10 +51,10 @@ export default function BooleanSetting({ setting, warning }: Props) {
     );
 
     return (
-        <Form.Field>
+        <Segment>
             {enableWarningModal}
             {toggleCheckbox}
-        </Form.Field>
+        </Segment>
     );
 }
 

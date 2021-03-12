@@ -5,6 +5,7 @@ import MultiSignatureCreateProposalList from './MultiSignatureCreateProposalList
 import BrowseTransactionFileView from './BrowseTransactionFileView';
 import ProposalList from './ProposalList';
 import { MultiSignatureMenuItems } from '../../utils/types';
+import ExportKeyList from './ExportKeyList';
 
 /**
  * This switches component corresponding to the chosen multi signature menu item.
@@ -23,6 +24,8 @@ export default function MultiSignatureMenuView() {
             return <ProposalList />;
         case MultiSignatureMenuItems.SignTransaction:
             return <BrowseTransactionFileView />;
+        case MultiSignatureMenuItems.ExportKey:
+            return <ExportKeyList />;
         default:
             throw new Error(
                 `An unexpected menu item was selected: ${chosenMenu}`
