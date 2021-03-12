@@ -13,7 +13,6 @@ import PageLayout from '../../components/PageLayout';
 import PickIdentity from '../GenerateCredential/PickIdentity';
 import PickAccount from './PickAccount';
 import AddCredential from './AddCredential';
-import SubmitProposal from './SubmitProposal';
 import ChangeSignatureThreshold from './ChangeSignatureThreshold';
 import routes from '../../constants/routes.json';
 import CreateUpdate from './CreateUpdate';
@@ -37,7 +36,7 @@ function nextLocation(currentLocation: string) {
         case routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM:
             return routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN;
         case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
-            return routes.MULTISIGTRANSACTIONS;
+            return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION;
         default:
             throw new Error('unknown location');
     }
@@ -143,7 +142,11 @@ function listCredentials(
     );
 }
 
-export default function GenerateCredential(): JSX.Element {
+/**
+ * This component controls the flow of creating a updateAccountCredential transaction.
+ * It contains the logic for displaying the current parameters.
+ */
+export default function UpdateCredentialPage(): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
 
@@ -355,12 +358,6 @@ export default function GenerateCredential(): JSX.Element {
                                         routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN
                                     }
                                     render={renderCreateUpdate}
-                                />
-                                <Route
-                                    path={
-                                        routes.UPDATE_ACCOUNT_CREDENTIALS_SEND
-                                    }
-                                    component={SubmitProposal}
                                 />
                                 <Route
                                     path={[

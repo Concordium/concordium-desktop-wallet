@@ -1,6 +1,5 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
 import {
     Account,
     CredentialDeploymentInformation,
@@ -13,7 +12,6 @@ import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { globalSelector } from '../../features/GlobalSlice';
 import { createUpdateCredentialsTransaction } from '../../utils/transactionHelpers';
 import { getAccountPath } from '../../features/ledger/Path';
-import routes from '../../constants/routes.json';
 import { insert } from '../../database/MultiSignatureProposalDao';
 import { setCurrentProposal } from '../../features/MultiSignatureSlice';
 
@@ -25,6 +23,9 @@ interface Props {
     newThreshold: number;
 }
 
+/**
+ * Creates the accountCredentialUpdate, and prompts the user to sign it.
+ */
 export default function CreateUpdate({
     setReady,
     account,
@@ -58,9 +59,6 @@ export default function CreateUpdate({
         console.log(ledger);
         const signature = Buffer.alloc(1); // await ledger.signUpdateCredentialTransaction(transaction, path);
 
-        setMessage('Update generated succesfully!');
-        setReady(true);
-
         const multiSignatureTransaction: Partial<MultiSignatureTransaction> = {
             // The JSON serialization of the transaction
             transaction: stringify({
@@ -81,12 +79,8 @@ export default function CreateUpdate({
         // Set the current proposal in the state to the one that was just generated.
         dispatch(setCurrentProposal(multiSignatureTransaction));
 
-        // Navigate to the page that displays the current proposal from the state.
-        dispatch(
-            push(
-                routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION
-            )
-        );
+        setMessage('Update generated succesfully!');
+        setReady(true);
     }
 
     return <LedgerComponent ledgerCall={sign} />;

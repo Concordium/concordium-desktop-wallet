@@ -24,9 +24,8 @@ import { AccountTransactionWithSignature } from '../../utils/transactionTypes';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
- * active one in the state. The component allows the user to export the proposal,
- * add signatures to the proposal, and if the signature threshold has been reached,
- * then the proposal can be submitted to a node.
+ * active one in the state.
+ * This handles the Account Transaction specific behaviour.
  */
 export default function AccountTransactionProposalView() {
     const dispatch = useDispatch();

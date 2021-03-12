@@ -64,9 +64,8 @@ async function isSignatureValid(
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
- * active one in the state. The component allows the user to export the proposal,
- * add signatures to the proposal, and if the signature threshold has been reached,
- * then the proposal can be submitted to a node.
+ * active one in the state.
+ * This handles the Update Instruction specific behaviour.
  */
 export default function UpdateInstructionProposalView() {
     const dispatch = useDispatch();

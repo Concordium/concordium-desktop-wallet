@@ -12,8 +12,11 @@ interface Props {
     newThreshold: number | undefined;
 }
 
-// TODO: Validate that the threshold is <= amount of credentials
-export default function ChangeThreshold({
+/**
+ *  Displays the changes in the signature threshold and the amount of credentials
+ *  Allows the user to go back and change these parameters.
+ */
+export default function ConfirmPage({
     setReady,
     currentCredentialAmount,
     currentThreshold,

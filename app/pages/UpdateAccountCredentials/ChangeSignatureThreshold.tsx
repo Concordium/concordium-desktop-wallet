@@ -19,7 +19,9 @@ function validateThreshold(threshold: number, max: number) {
     return threshold <= max;
 }
 
-// TODO: Validate that the threshold is <= amount of credentials
+/**
+ * Allows the user to change the signature threshold.
+ */
 export default function ChangeThreshold({
     setReady,
     currentThreshold,

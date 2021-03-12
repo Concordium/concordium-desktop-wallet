@@ -11,6 +11,9 @@ interface Props {
     setAccount: (account: Account) => void;
 }
 
+/**
+ * Allows the user to pick an account of the given identity.
+ */
 export default function PickAccount({
     setReady,
     setAccount,

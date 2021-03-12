@@ -20,7 +20,11 @@ interface Props {
     ) => void;
 }
 
-// TODO: Add a checkbox, which must be checked before the user can add the credential.
+/**
+ * Allows the user to input a credential.
+ * This component switches between 2 views: inputtting a file, and confirming the inputted credential
+ * TODO: Add a checkbox, which must be checked before the user can add the credential.
+ */
 export default function AddCredential({
     setReady,
     credentialIds,
