@@ -16,7 +16,9 @@ interface Props {
     setCredential: (cred: CredentialDeploymentInformation) => void;
 }
 
-// The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
+/**
+ * Creates the credentialInformation, and prompts the user to sign it.
+ */
 export default function SignCredential({
     identity,
     address,

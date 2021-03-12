@@ -67,7 +67,10 @@ function getDescription(currentLocation: string) {
     }
 }
 
-// The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
+/**
+ * Controls the flow of generating a credential. Contains the logic of the left
+ * column, where the parameters are displayed, and the address is entered.
+ */
 export default function GenerateCredential(): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;

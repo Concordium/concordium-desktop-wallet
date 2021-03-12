@@ -13,8 +13,11 @@ interface Attribute {
     isChecked: boolean;
 }
 
-// The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
-export default function PickAccount({
+/**
+ * Allows the user to reveal attributes.
+   // TODO: filter available attributes
+ */
+export default function RevealAttributes({
     setChosenAttributes,
     identity,
 }: Props): JSX.Element {
