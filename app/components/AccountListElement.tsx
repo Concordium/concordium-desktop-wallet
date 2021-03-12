@@ -1,11 +1,11 @@
 import React from 'react';
 import { Grid, Header, Label, Divider } from 'semantic-ui-react';
+import PendingImage from '@resources/svg/pending_old.svg';
+import ShieldImage from '@resources/svg/shield.svg';
 import { displayAsGTU } from '../utils/gtu';
 import { AccountInfo, Account, AccountStatus } from '../utils/types';
 import { isInitialAccount } from '../utils/accountHelpers';
 import SidedRow from './SidedRow';
-import PendingImage from '../../resources/svg/pending_old.svg';
-import ShieldImage from '../../resources/svg/shield.svg';
 
 const nop = () => {};
 
