@@ -8,8 +8,6 @@ import {
 } from '../utils/types';
 
 type MultiSignatureSliceState = {
-    chosenMenu: MultiSignatureMenuItems;
-    currentProposal: MultiSignatureTransaction | undefined;
     proposals: MultiSignatureTransaction[];
 };
 
@@ -21,15 +19,6 @@ const multiSignatureSlice = createSlice({
         proposals: [],
     } as MultiSignatureSliceState,
     reducers: {
-        chooseMenuItem: (state, input) => {
-            state.chosenMenu =
-                MultiSignatureMenuItems[
-                    input.payload as keyof typeof MultiSignatureMenuItems
-                ];
-        },
-        setCurrentProposal: (state, input) => {
-            state.currentProposal = input.payload;
-        },
         setProposals: (state, input) => {
             state.proposals = input.payload;
         },
@@ -48,18 +37,10 @@ const multiSignatureSlice = createSlice({
 });
 
 export const {
-    chooseMenuItem,
-    setCurrentProposal,
     setProposals,
     updateProposals,
     addProposal,
 } = multiSignatureSlice.actions;
-
-export const chosenMenuSelector = (state: RootState) =>
-    state.multisignature.chosenMenu;
-
-export const currentProposalSelector = (state: RootState) =>
-    state.multisignature.currentProposal;
 
 export const proposalsSelector = (state: RootState) =>
     state.multisignature.proposals;
@@ -73,7 +54,6 @@ export async function updateCurrentProposal(
     multiSignatureTransactionProposal: MultiSignatureTransaction
 ) {
     updateEntry(multiSignatureTransactionProposal);
-    dispatch(setCurrentProposal(multiSignatureTransactionProposal));
     dispatch(updateProposals(multiSignatureTransactionProposal));
 }
 

@@ -27,7 +27,7 @@ interface RustInterface {
 let rustReference: RustInterface;
 async function getRust(): Promise<RustInterface> {
     if (!rustReference) {
-        rustReference = await import('../../pkg');
+        rustReference = await import('@pkg/index');
     }
     return rustReference;
 }

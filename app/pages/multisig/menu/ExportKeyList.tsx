@@ -2,8 +2,8 @@ import { push } from 'connected-react-router';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Header, Menu } from 'semantic-ui-react';
-import { foundationTransactionsEnabledSelector } from '../../features/SettingsSlice';
-import routes from '../../constants/routes.json';
+import { foundationTransactionsEnabledSelector } from '../../../features/SettingsSlice';
+import { selectedExportKeyRoute } from '../../../utils/routerHelper';
 
 export enum ExportKeyType {
     Root = 'root',
@@ -50,14 +50,7 @@ export default function ExportKeyList(): JSX.Element {
                     <Menu.Item
                         key={keyType}
                         onClick={() =>
-                            dispatch(
-                                push(
-                                    routes.MULTISIGTRANSACTIONS_EXPORT_KEY.replace(
-                                        ':keyType',
-                                        keyType
-                                    )
-                                )
-                            )
+                            dispatch(push(selectedExportKeyRoute(keyType)))
                         }
                     >
                         <Header>{label}</Header>
