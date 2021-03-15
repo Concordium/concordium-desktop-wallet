@@ -603,13 +603,14 @@ export function isGasRewards(
  * can go through.
  */
 export enum MultiSignatureTransactionStatus {
-    Open = 'open',
-    Submitted = 'submitted',
-    Rejected = 'rejected',
-    Finalized = 'finalized',
+    Closed = 'closed',
     Committed = 'committed',
-    Failed = 'failed',
     Expired = 'expired',
+    Failed = 'failed',
+    Finalized = 'finalized',
+    Open = 'open',
+    Rejected = 'rejected',
+    Submitted = 'submitted',
 }
 
 /**
