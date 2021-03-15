@@ -17,7 +17,7 @@ const Template: Story = (args) => {
         second: 30000 / 100000,
     });
     return (
-        <>
+        <div style={{ width: 350, margin: '0 auto' }}>
             Value: {JSON.stringify(value)}
             <br />
             <RewardDistributionComponent
@@ -30,7 +30,7 @@ const Template: Story = (args) => {
                     'Foundation',
                 ]}
             />
-        </>
+        </div>
     );
 };
 

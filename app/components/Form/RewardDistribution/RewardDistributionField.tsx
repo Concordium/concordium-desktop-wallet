@@ -12,8 +12,6 @@ import React, {
 import styles from './RewardDistribution.module.scss';
 
 function scaleField(el: HTMLInputElement | null) {
-    console.log('scale', el);
-
     if (!el) {
         return;
     }
@@ -95,7 +93,7 @@ export default function RewardDistributionField({
                 className
             )}
         >
-            {label}
+            <span className={styles.fieldTitle}>{label}</span>
             <div className={styles.inputWrapper}>
                 <input
                     ref={ref}

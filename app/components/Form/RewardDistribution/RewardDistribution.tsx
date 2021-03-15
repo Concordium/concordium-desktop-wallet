@@ -18,7 +18,13 @@ const fieldNames: EqualRecord<RewardDistributionValue> = {
     second: 'second',
 };
 
-const sanitizeNumber = (v: number) => parseFloat(v.toFixed(3));
+const displayValue = (v: number): string => {
+    if (Number.isInteger(v)) {
+        return `${v}`;
+    }
+
+    return `~${Math.round(v)}`;
+};
 
 function formatInputValue(v: RewardDistributionValue): RewardDistributionValue {
     return {
@@ -34,6 +40,10 @@ function formatOutputValue(
         first: v.first / 100000,
         second: v.second / 100000,
     };
+}
+
+function belowTitleCutoff(width: number): boolean {
+    return width < 30;
 }
 
 interface RewardDistributionProps {
@@ -112,9 +122,17 @@ export default function RewardDistribution({
                         )}
                         style={{ width: `${firstPercentage}%` }}
                     >
-                        <div className={styles.hContent}>
-                            <span>{labels[0]}</span>
-                            <span>{sanitizeNumber(firstPercentage)}%</span>
+                        <div
+                            className={clsx(
+                                styles.hContent,
+                                belowTitleCutoff(firstPercentage) &&
+                                    styles.hContentNoTitle
+                            )}
+                        >
+                            <span className={styles.hTitle}>{labels[0]}</span>
+                            <span className={styles.hValue}>
+                                {displayValue(firstPercentage)}%
+                            </span>
                         </div>
                     </div>
                 )}
@@ -129,9 +147,17 @@ export default function RewardDistribution({
                     )}
                     style={{ width: `${secondPercentage}%` }}
                 >
-                    <div className={styles.hContent}>
-                        <span>{labels[0]}</span>
-                        <span>{sanitizeNumber(secondPercentage)}%</span>
+                    <div
+                        className={clsx(
+                            styles.hContent,
+                            belowTitleCutoff(secondPercentage) &&
+                                styles.hContentNoTitle
+                        )}
+                    >
+                        <span className={styles.hTitle}>{labels[1]}</span>
+                        <span className={styles.hValue}>
+                            {displayValue(secondPercentage)}%
+                        </span>
                     </div>
                 </div>
                 {remaining > 0 && (
@@ -142,8 +168,17 @@ export default function RewardDistribution({
                             remaining > 0 && styles.hRightEdge
                         )}
                     >
-                        <div className={styles.hContent}>
-                            {sanitizeNumber(remainingPercentage)}%
+                        <div
+                            className={clsx(
+                                styles.hContent,
+                                belowTitleCutoff(remainingPercentage) &&
+                                    styles.hContentNoTitle
+                            )}
+                        >
+                            <span className={styles.hTitle}>{labels[2]}</span>
+                            <span className={styles.hValue}>
+                                {displayValue(remainingPercentage)}%
+                            </span>
                         </div>
                     </div>
                 )}
@@ -170,7 +205,7 @@ export default function RewardDistribution({
                         value={value}
                         onBlur={handleBlur(fieldNames.second, onChange, onBlur)}
                         className={styles.middle}
-                        label={labels[0]}
+                        label={labels[1]}
                         isInvalid={invalid}
                     />
                 )}
