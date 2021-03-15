@@ -19,12 +19,12 @@ export type SwitchProps = CommonFieldProps &
  * <Switch value={value} onChange={(e) => setValue(e.target.checked)}>Toggle setting</Switch>
  */
 const Switch = forwardRef<HTMLInputElement, PropsWithChildren<SwitchProps>>(
-    ({ children, className, error, ...inputProps }, ref) => {
+    ({ children, className, error, isInvalid = false, ...inputProps }, ref) => {
         return (
             <div
                 className={clsx(
                     styles.root,
-                    error !== undefined && styles.rootInvalid,
+                    isInvalid && styles.rootInvalid,
                     className
                 )}
             >

@@ -25,7 +25,7 @@ export default function UpdateFoundationAccount({
     const { threshold } = blockSummary.updates.authorizations.foundationAccount;
 
     useEffect(() => {
-        if (foundationAccount) {
+        if (foundationAccount && effectiveTime) {
             setProposal(
                 createUpdateMultiSignatureTransaction(
                     foundationAccount,

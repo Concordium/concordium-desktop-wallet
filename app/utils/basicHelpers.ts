@@ -65,3 +65,7 @@ export function toChunks<S, T extends Uint8Array | Array<S>>(
     }
     return chunks;
 }
+
+export function isDefined<T>(v?: T): v is T {
+    return v !== undefined;
+}

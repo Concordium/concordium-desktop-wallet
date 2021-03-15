@@ -11,12 +11,10 @@ import { AddressBookEntry, Dispatch } from '../utils/types';
 
 interface AddressBookState {
     addressBook: AddressBookEntry[];
-    chosenIndex: number;
 }
 
 const initialState: AddressBookState = {
     addressBook: [],
-    chosenIndex: 0,
 };
 
 const addressBookSlice = createSlice({
@@ -26,13 +24,10 @@ const addressBookSlice = createSlice({
         updateAddressBook(state, addresses) {
             state.addressBook = addresses.payload;
         },
-        chooseIndex(state, index) {
-            state.chosenIndex = index.payload;
-        },
     },
 });
 
-export const { chooseIndex, updateAddressBook } = addressBookSlice.actions;
+export const { updateAddressBook } = addressBookSlice.actions;
 
 export async function loadAddressBook(dispatch: Dispatch) {
     const addressBook = await getAddressBook();
@@ -72,7 +67,5 @@ export async function importAddressBookEntry(
 
 export const addressBookSelector = (state: RootState) =>
     state.addressBook.addressBook;
-export const chosenIndexSelector = (state: RootState) =>
-    state.addressBook.chosenIndex;
 
 export default addressBookSlice.reducer;

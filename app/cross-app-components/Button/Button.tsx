@@ -1,43 +1,65 @@
 import clsx from 'clsx';
-import React, { ButtonHTMLAttributes, PropsWithChildren } from 'react';
+import React, { ElementType, PropsWithChildren } from 'react';
+
+import { PolymorphicComponentProps } from '~/utils/types';
 
 import styles from './Button.module.scss';
 
-type ButtonSize = 'small' | 'regular' | 'big';
+type ButtonSize = 'small' | 'regular' | 'big' | 'huge';
 
 const sizeStyleMap: Record<ButtonSize, string | undefined> = {
     small: styles.rootSmall,
     regular: undefined,
     big: styles.rootBig,
+    huge: styles.rootHuge,
 };
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface Props {
     size?: ButtonSize;
     inverted?: boolean;
+    clear?: boolean;
+    danger?: boolean;
+    icon?: JSX.Element;
 }
+
+export type ButtonProps<
+    TAs extends ElementType = 'button'
+> = PolymorphicComponentProps<TAs, Props>;
 
 /**
  * @description
  * Use as a regular \<button /\>.
+ * Supports rendering as other component (e.g. NavLink) through 'as' prop
  */
-export default function Button({
+export default function Button<TAs extends ElementType = 'button'>({
     size = 'regular',
-    type = 'button',
     inverted = false,
+    clear = false,
+    danger = false,
+    icon,
     className,
-    ...buttonProps
-}: PropsWithChildren<ButtonProps>): JSX.Element {
+    as,
+    children,
+    ...props
+}: PropsWithChildren<ButtonProps<TAs>>): JSX.Element {
+    const Component = as || 'button';
+
     return (
-        <button
-            // eslint-disable-next-line react/button-has-type
-            type={type}
+        <Component
+            type="button"
             className={clsx(
                 styles.root,
                 size && sizeStyleMap[size],
                 inverted && styles.rootInverted,
+                clear && styles.rootClear,
+                danger && styles.rootDanger,
+                icon && styles.rootWithIcon,
                 className
             )}
-            {...buttonProps}
-        />
+            {...props}
+        >
+            {icon && <span className={styles.icon}>{icon}</span>}
+            {children}
+        </Component>
     );
 }
