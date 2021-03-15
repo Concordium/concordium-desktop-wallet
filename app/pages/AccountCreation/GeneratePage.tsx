@@ -87,9 +87,11 @@ export default function AccountCreationGenerate({
             identity.id,
             credentialNumber,
             accountAddress,
+            credentialDeploymentInfo.credId,
             transactionId
         );
         await insertNewCredential(
+            dispatch,
             accountAddress,
             credentialNumber,
             identity.id,

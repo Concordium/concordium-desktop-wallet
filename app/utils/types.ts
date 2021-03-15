@@ -114,6 +114,7 @@ export interface Account {
     incomingAmounts?: string;
     selfAmounts?: string;
     maxTransactionId: number;
+    deploymentTransactionId?: string;
 }
 
 export enum TransactionKindString {
