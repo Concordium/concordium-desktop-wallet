@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { debounce } from 'lodash';
 
-import { useUpdateEffect } from '../../../utils/hooks';
+import { useUpdateEffect } from '~/utils/hooks';
 
 export default function useMultiFieldFocus(onBlur?: () => void) {
     const [isFocused, setIsFocused] = useState(false);
