@@ -21,6 +21,7 @@ interface Props {
     addedCredentials: CredentialDeploymentInformation[];
     removedCredIds: string[];
     newThreshold: number;
+    setProposalId: (id: number) => void;
 }
 
 /**
@@ -32,6 +33,7 @@ export default function CreateUpdate({
     addedCredentials,
     removedCredIds,
     newThreshold,
+    setProposalId,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
@@ -82,6 +84,7 @@ export default function CreateUpdate({
 
         setMessage('Update generated succesfully!');
         setReady(true);
+        setProposalId(entryId);
     }
 
     return <LedgerComponent ledgerCall={sign} />;

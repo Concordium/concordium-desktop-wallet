@@ -22,7 +22,7 @@ import ConfirmPage from './ConfirmPage';
 
 const placeHolderText = 'To be determined';
 
-function nextLocation(currentLocation: string) {
+function nextLocation(currentLocation: string, proposalId: number) {
     switch (currentLocation) {
         case routes.UPDATE_ACCOUNT_CREDENTIALS:
         case routes.UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY:
@@ -36,7 +36,11 @@ function nextLocation(currentLocation: string) {
         case routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM:
             return routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN;
         case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
-            return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION;
+            return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION.replace(
+                ':id',
+                `${proposalId}`
+            );
+
         default:
             throw new Error('unknown location');
     }
@@ -178,7 +182,7 @@ export default function UpdateCredentialPage(): JSX.Element {
     const [newCredentials, setNewCredentials] = useState<
         CredentialDeploymentInformation[]
     >([]);
-
+    const [proposalId, setProposalId] = useState<number>(-1);
     useEffect(() => {
         if (account) {
             const currentCredentialIds = JSON.parse(account.credentials);
@@ -261,6 +265,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                     .filter(([, status]) => status === CredentialStatus.Removed)
                     .map(([id]) => id)}
                 newThreshold={newThreshold}
+                setProposalId={setProposalId}
             />
         );
     }
@@ -390,7 +395,9 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 disabled={!isReady}
                                 onClick={() => {
                                     setReady(false);
-                                    dispatch(push(nextLocation(location)));
+                                    dispatch(
+                                        push(nextLocation(location, proposalId))
+                                    );
                                 }}
                             >
                                 Continue
