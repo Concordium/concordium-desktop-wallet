@@ -59,18 +59,25 @@ function displaySignatureThreshold(
     currentThreshold: number | undefined,
     newThreshold: number | undefined
 ) {
+    let body;
     if (!currentThreshold) {
-        return placeHolderText;
+        body = <List.Item>{placeHolderText}</List.Item>;
+    } else {
+        body = (
+            <>
+                <List.Item>
+                    Current amount of required signatures: {currentThreshold}
+                </List.Item>
+                <List.Item>
+                    New amount of required signatures: {newThreshold || '?'}
+                </List.Item>
+            </>
+        );
     }
     return (
         <>
             <List.Item>Signature Threshold:</List.Item>
-            <List.Item>
-                Current amount of required signatures: {currentThreshold}
-            </List.Item>
-            <List.Item>
-                New amount of required signatures: {newThreshold || '?'}
-            </List.Item>
+            {body}
         </>
     );
 }
@@ -79,16 +86,23 @@ function displayCredentialCount(
     currentAmount: number | undefined,
     newAmount: number
 ) {
+    let body;
     if (!currentAmount) {
-        return placeHolderText;
+        body = <List.Item>{placeHolderText}</List.Item>;
+    } else {
+        body = (
+            <>
+                <List.Item>
+                    Current amount of credentials: {currentAmount}
+                </List.Item>
+                <List.Item>New amount of credentials: {newAmount}</List.Item>
+            </>
+        );
     }
     return (
         <>
             <List.Item>Credentials:</List.Item>
-            <List.Item>
-                Current amount of credentials: {currentAmount}
-            </List.Item>
-            <List.Item>New amount of credentials: {newAmount}</List.Item>
+            {body}
         </>
     );
 }
@@ -263,7 +277,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                     <Grid.Row>
                         <Grid.Column>
                             <h2>Transaction Details</h2>
-                            <List>
+                            <List relaxed>
                                 <List.Item>Identity:</List.Item>
                                 <List.Item>
                                     <b>
