@@ -21,7 +21,7 @@ export async function up(knex: Knex): Promise<void> {
             table.json('arData');
             table.json('credentialPublicKeys');
             table.json('policy');
-            table.integer('IpIdentity');
+            table.integer('ipIdentity');
             table.integer('revocationThreshold');
             table.string('proofs');
         }

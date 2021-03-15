@@ -9,7 +9,6 @@ import {
 } from '../database/AccountDao';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
-    CredentialDeploymentInformation,
     AccountStatus,
     TransactionStatus,
     AccountEncryptedAmount,
@@ -185,12 +184,12 @@ export async function confirmInitialAccount(
     dispatch: Dispatch,
     accountName: string,
     accountAddress: string,
-    credential: CredentialDeploymentInformation
+    credentialId: string
 ) {
     await updateAccount(accountName, {
         status: AccountStatus.Confirmed,
         address: accountAddress,
-        credential,
+        credentials: JSON.stringify([credentialId]),
     });
     return loadAccounts(dispatch);
 }
