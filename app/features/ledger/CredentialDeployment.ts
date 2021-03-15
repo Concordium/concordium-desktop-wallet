@@ -51,7 +51,8 @@ export async function signCredentialValues(
 
     const arThreshold = Uint8Array.of(credentialDeployment.revocationThreshold);
     const arListLength = Object.entries(credentialDeployment.arData).length;
-    const arListLengthAsBytes = Uint8Array.of(arListLength);
+    const arListLengthAsBytes = Buffer.alloc(2);
+    arListLengthAsBytes.writeUInt16BE(arListLength, 0);
 
     data = Buffer.concat([
         signatureThreshold,

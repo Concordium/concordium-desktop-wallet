@@ -45,6 +45,7 @@ export async function confirmIdentityAndInitialAccount(
                 parsedCredential.credId
             );
             insertNewCredential(
+                dispatch,
                 accountAddress,
                 0,
                 identityId,

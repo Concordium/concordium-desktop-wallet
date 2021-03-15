@@ -1,9 +1,10 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
+import { useParams } from 'react-router';
 import { parse, stringify } from '../../utils/JSONHelper';
 import {
-    currentProposalSelector,
+    proposalsSelector,
     updateCurrentProposal,
 } from '../../features/MultiSignatureSlice';
 import {
@@ -29,7 +30,9 @@ import { ModalErrorInput } from '../../components/SimpleErrorModal';
  */
 export default function AccountTransactionProposalView() {
     const dispatch = useDispatch();
-    const currentProposal = useSelector(currentProposalSelector);
+    const { id } = useParams<{ id: string }>();
+    const proposals = useSelector(proposalsSelector);
+    const currentProposal = proposals.find((p) => p.id === parseInt(id, 10));
 
     if (!currentProposal) {
         throw new Error(
@@ -95,6 +98,7 @@ export default function AccountTransactionProposalView() {
             signatures={Object.values(transaction.signature)}
             handleSignatureFile={handleSignatureFile}
             submitTransaction={submitTransaction}
+            currentProposal={currentProposal}
         />
     );
 }

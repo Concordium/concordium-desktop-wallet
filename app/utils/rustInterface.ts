@@ -214,7 +214,7 @@ export async function createCredentialInfo(
     // TODO: Display the appropiate details
     displayMessage(`Please sign details on device.`);
     // Adding credential on an existing account
-    const path = [0, 0, identity.id, 2, credentialNumber, 0]; // TODO change path
+    const path = [0, 0, identity.id, 2, credentialNumber, 0];
     const signature = await ledger.signExistingCredentialDeployment(
         parsed,
         address,

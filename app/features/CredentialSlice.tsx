@@ -35,6 +35,7 @@ export async function importCredentials(credentials: Credential[]) {
 }
 
 export async function insertNewCredential(
+    dispatch: Dispatch,
     accountAddress: string,
     credentialNumber: number,
     identityId: number,
@@ -49,7 +50,8 @@ export async function insertNewCredential(
         credentialNumber,
         identityId,
     };
-    return insertCredential(parsed);
+    await insertCredential(parsed);
+    return loadCredentials(dispatch);
 }
 
 export default credentialSlice.reducer;

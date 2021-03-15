@@ -1,13 +1,14 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { Menu } from 'semantic-ui-react';
-import { foundationTransactionsEnabledSelector } from '../../features/SettingsSlice';
 import {
     UpdateType,
     TransactionKindString as TransactionKind,
-} from '../../utils/types';
-import routes from '../../constants/routes.json';
+} from '~/utils/types';
+import ButtonNavLink from '~/components/ButtonNavLink';
+import { foundationTransactionsEnabledSelector } from '~/features/SettingsSlice';
+
+import styles from './MultiSignatureMenu.module.scss';
+import { createProposalRoute } from '~/utils/routerHelper';
 
 // TODO Show non-foundation transaction types.
 
@@ -45,30 +46,16 @@ export default function MultiSignatureCreateProposalView() {
     }
 
     return (
-        <Menu vertical fluid size="massive">
-            {availableTransactionTypes.map(([transactionType, label]) => {
-                let to;
-                if (transactionType in UpdateType) {
-                    to = {
-                        pathname: routes.MULTISIGTRANSACTIONS_PROPOSAL,
-                    };
-                } else {
-                    to = {
-                        pathname: routes.UPDATE_ACCOUNT_CREDENTIALS,
-                        state: transactionType,
-                    };
-                }
-                return (
-                    <Menu.Item
-                        key={transactionType}
-                        as={Link}
-                        // TODO Must also be able to handle account transaction types.
-                        to={to}
-                    >
-                        {label}
-                    </Menu.Item>
-                );
-            })}
-        </Menu>
+        <>
+            {availableTransactionTypes.map(([transactionType, label]) => (
+                <ButtonNavLink
+                    className={styles.link}
+                    key={transactionType}
+                    to={createProposalRoute(transactionType)}
+                >
+                    {label}
+                </ButtonNavLink>
+            ))}
+        </>
     );
 }

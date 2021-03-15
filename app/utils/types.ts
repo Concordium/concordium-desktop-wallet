@@ -99,6 +99,7 @@ export enum AccountStatus {
 /**
  * This Interface models the structure of the accounts stored in the database
  */
+
 export interface Account {
     accountNumber: number;
     name: string;
@@ -113,6 +114,7 @@ export interface Account {
     incomingAmounts?: string;
     selfAmounts?: string;
     maxTransactionId: number;
+    deploymentTransactionId?: string;
 }
 
 export enum TransactionKindString {

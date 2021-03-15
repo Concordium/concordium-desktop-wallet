@@ -13,10 +13,7 @@ import { globalSelector } from '../../features/GlobalSlice';
 import { createUpdateCredentialsTransaction } from '../../utils/transactionHelpers';
 import { getAccountPath } from '../../features/ledger/Path';
 import { insert } from '../../database/MultiSignatureProposalDao';
-import {
-    addProposal,
-    setCurrentProposal,
-} from '../../features/MultiSignatureSlice';
+import { addProposal } from '../../features/MultiSignatureSlice';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -81,7 +78,6 @@ export default function CreateUpdate({
         multiSignatureTransaction.id = entryId;
 
         // Set the current proposal in the state to the one that was just generated.
-        dispatch(setCurrentProposal(multiSignatureTransaction));
         dispatch(addProposal(multiSignatureTransaction));
 
         setMessage('Update generated succesfully!');

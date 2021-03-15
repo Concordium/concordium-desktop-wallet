@@ -6,12 +6,12 @@ import { parse } from 'json-bigint';
 import {
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
-} from '../../utils/types';
-import routes from '../../constants/routes.json';
-import DragAndDropFile from '../../components/DragAndDropFile';
+} from '../../../utils/types';
+import routes from '../../../constants/routes.json';
+import DragAndDropFile from '../../../components/DragAndDropFile';
 import SimpleErrorModal, {
     ModalErrorInput,
-} from '../../components/SimpleErrorModal';
+} from '../../../components/SimpleErrorModal';
 
 /**
  * Component that displays a drag and drop field where transaction files can

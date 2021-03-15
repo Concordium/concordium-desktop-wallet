@@ -65,10 +65,10 @@ export default function PickAccount({
         identityName: '',
         address,
         name: 'Account',
-        credentials: '',
         accountNumber: -1,
         identityId: -1,
         maxTransactionId: -1,
+        credentials: '[]',
     };
 
     return (
