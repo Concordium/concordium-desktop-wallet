@@ -14,11 +14,17 @@ function formatValue(v?: number): string {
         return '';
     }
 
-    return v.toFixed(3);
+    return (v / 1000).toFixed(3);
+}
+
+function parseValue(v: string): number {
+    const parsed = parseFloat(v);
+
+    return Math.round(parsed * 1000);
 }
 
 function isValid(v: number): boolean {
-    return !Number.isNaN(v) && v <= 100 && v >= 0;
+    return !Number.isNaN(v) && v <= 100000 && v >= 0;
 }
 
 const noOp = () => null;
@@ -46,10 +52,10 @@ export default function RewardDistributionField({
 
     const handleBlur: FocusEventHandler<HTMLInputElement> = useCallback(
         (e) => {
-            const v = parseFloat(e.target.value);
+            const v = parseValue(e.target.value);
 
             if (isValid(v)) {
-                onBlur(parseFloat(e.target.value));
+                onBlur(v);
             } else {
                 setStringValue(formatValue(value));
             }

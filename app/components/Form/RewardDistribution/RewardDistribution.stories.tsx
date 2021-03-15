@@ -13,8 +13,8 @@ export default {
 
 const Template: Story = (args) => {
     const [value, setValue] = useState<RewardDistributionValue>({
-        first: 60,
-        second: 30,
+        first: 60000 / 100000,
+        second: 30000 / 100000,
     });
     return (
         <>

@@ -20,6 +20,22 @@ const fieldNames: EqualRecord<RewardDistributionValue> = {
 
 const sanitizeNumber = (v: number) => parseFloat(v.toFixed(3));
 
+function formatInputValue(v: RewardDistributionValue): RewardDistributionValue {
+    return {
+        first: Math.round(v.first * 100000),
+        second: Math.round(v.second * 100000),
+    };
+}
+
+function formatOutputValue(
+    v: RewardDistributionValue
+): RewardDistributionValue {
+    return {
+        first: v.first / 100000,
+        second: v.second / 100000,
+    };
+}
+
 interface RewardDistributionProps {
     labels: [string, string, string];
     value: RewardDistributionValue;
@@ -31,13 +47,19 @@ export default function RewardDistribution({
     value: fieldValue,
     onChange: fieldOnChange,
 }: RewardDistributionProps): JSX.Element {
+    const formattedValue = formatInputValue(fieldValue);
+
     const form = useForm<RewardDistributionValue>({
-        defaultValues: fieldValue,
+        defaultValues: formattedValue,
     });
-    const { first, second } = fieldValue;
+    const { first, second } = formattedValue;
     const { watch, control, setValue } = form;
     const innerValues = watch();
-    const remaining = 100 - (first + second);
+    const remaining = 100000 - (first + second);
+
+    const firstPercentage = first / 1000;
+    const secondPercentage = second / 1000;
+    const remainingPercentage = remaining / 1000;
 
     const handleBlur = useCallback(
         (
@@ -50,16 +72,22 @@ export default function RewardDistribution({
 
             const other = name === 'first' ? second : first;
 
-            if (v + other <= 100) {
-                fieldOnChange({
-                    first: name === 'first' ? v : innerValues.first,
-                    second: name === 'second' ? v : innerValues.second,
-                });
+            console.log('blur');
+
+            if (v + other <= 100000) {
+                fieldOnChange(
+                    formatOutputValue({
+                        first: name === 'first' ? v : innerValues.first,
+                        second: name === 'second' ? v : innerValues.second,
+                    })
+                );
             } else {
-                fieldOnChange({
-                    first: name === 'first' ? v : 100 - v,
-                    second: name === 'second' ? v : 100 - v,
-                });
+                fieldOnChange(
+                    formatOutputValue({
+                        first: name === 'first' ? v : 100000 - v,
+                        second: name === 'second' ? v : 100000 - v,
+                    })
+                );
             }
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,7 +98,7 @@ export default function RewardDistribution({
         setValue(fieldNames.first, first);
         setValue(fieldNames.second, second);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fieldValue]);
+    }, [first, second]);
 
     return (
         <div className={styles.root}>
@@ -82,11 +110,11 @@ export default function RewardDistribution({
                             first > 0 && styles.hLeftEdge,
                             second === 0 && remaining === 0 && styles.hRightEdge
                         )}
-                        style={{ width: `${first}%` }}
+                        style={{ width: `${firstPercentage}%` }}
                     >
                         <div className={styles.hContent}>
                             <span>{labels[0]}</span>
-                            <span>{sanitizeNumber(first)}%</span>
+                            <span>{sanitizeNumber(firstPercentage)}%</span>
                         </div>
                     </div>
                 )}
@@ -94,16 +122,16 @@ export default function RewardDistribution({
                     className={clsx(
                         styles.hMiddle,
                         second === 0 && styles.hMiddleNoValue,
-                        first === 100 ||
-                            (remaining === 100 && styles.hMiddleHidden),
+                        first === 100000 ||
+                            (remaining === 100000 && styles.hMiddleHidden),
                         second > 0 && first === 0 && styles.hLeftEdge,
                         second > 0 && remaining === 0 && styles.hRightEdge
                     )}
-                    style={{ width: `${second}%` }}
+                    style={{ width: `${secondPercentage}%` }}
                 >
                     <div className={styles.hContent}>
                         <span>{labels[0]}</span>
-                        <span>{sanitizeNumber(second)}%</span>
+                        <span>{sanitizeNumber(secondPercentage)}%</span>
                     </div>
                 </div>
                 {remaining > 0 && (
@@ -115,7 +143,7 @@ export default function RewardDistribution({
                         )}
                     >
                         <div className={styles.hContent}>
-                            {sanitizeNumber(remaining)}%
+                            {sanitizeNumber(remainingPercentage)}%
                         </div>
                     </div>
                 )}
