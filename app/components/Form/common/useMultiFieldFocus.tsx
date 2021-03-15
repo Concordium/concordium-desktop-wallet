@@ -16,7 +16,7 @@ export default function useMultiFieldFocus(onBlur?: () => void) {
         [onBlur]
     );
 
-    useUpdateEffect(() => debouncedBlur(isFocused), [debouncedBlur, isFocused]);
+    useUpdateEffect(() => debouncedBlur(isFocused), [isFocused, debouncedBlur]);
 
     return { isFocused, setIsFocused };
 }

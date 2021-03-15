@@ -71,7 +71,7 @@ function Form<TFormValues>({
 
     return (
         <FormProvider {...(formMethods ?? methods)}>
-            <form onSubmit={handleSubmit(onSubmit)} {...formProps}>
+            <form onSubmit={handleSubmit(onSubmit)} {...formProps} noValidate>
                 {children}
             </form>
         </FormProvider>
