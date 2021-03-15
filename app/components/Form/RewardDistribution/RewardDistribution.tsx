@@ -46,26 +46,45 @@ function belowTitleCutoff(width: number): boolean {
     return width < 30;
 }
 
-interface RewardDistributionProps {
+export interface RewardDistributionProps {
+    /**
+     * Labels for first, second and remaining reward party respectively.
+     */
     labels: [string, string, string];
+    /**
+     * Value of first and second reward share in fractions of 100000 (e.g. 0.67812)
+     */
     value: RewardDistributionValue;
+    /**
+     * Change handler. Ouputs reward share of first and second party in fractions of 100000  (e.g. 0.67812)
+     */
     onChange(v: RewardDistributionValue): void;
 }
 
+/**
+ * @description
+ * Component for handling reward ratio of 2 parties, with the remainder implicitly going to a third party. Works with values of fractions of 100000.
+ *
+ * @example
+ * const [value, setValue] = useState<RewardDistributionValue>({ first: 32145/100000, second: 50400/100000 });
+ *
+ * <RewardDistribution value={value} onChange={setValue} labels={['first', 'second', 'remaining']} />
+ */
 export default function RewardDistribution({
     labels,
-    value: fieldValue,
+    value: outerValue = { first: 0, second: 0 },
     onChange: fieldOnChange,
 }: RewardDistributionProps): JSX.Element {
-    const formattedValue = formatInputValue(fieldValue);
+    const formattedValue = formatInputValue(outerValue);
 
     const form = useForm<RewardDistributionValue>({
         defaultValues: formattedValue,
     });
     const { first, second } = formattedValue;
+    const remaining = 100000 - (first + second);
+
     const { watch, control, setValue } = form;
     const innerValues = watch();
-    const remaining = 100000 - (first + second);
 
     const firstLabel = labels[0];
     const secondLabel = labels[1];

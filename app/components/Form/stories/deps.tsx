@@ -4,7 +4,15 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
 
-export const { Checkbox, Input, Submit, Switch, TextArea, Timestamp } = Form;
+export const {
+    Checkbox,
+    Input,
+    Submit,
+    Switch,
+    TextArea,
+    Timestamp,
+    RewardDistribution,
+} = Form;
 
 export const argTypes: Meta['argTypes'] = {
     children: {
@@ -23,8 +31,9 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.TextArea': TextArea,
     'Form.Checkbox': Checkbox,
     'Form.Switch': Switch,
-    'Form.Submit': Submit,
     'Form.Timestamp': Timestamp,
+    'Form.RewardDistribution': RewardDistribution,
+    'Form.Submit': Submit,
 };
 
 export const decorators = [
@@ -75,6 +84,32 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
         >
             Agree to terms
         </Form.Checkbox>
+        <Form.Submit>Submit</Form.Submit>
+    </Form>
+);
+
+export const AllFieldsTemplate: Story<FormProps<unknown>> = (args) => (
+    <Form {...args}>
+        <Form.Input name="name" placeholder="Name" />
+        <Form.TextArea name="comment" placeholder="Comment" />
+        <Form.Timestamp
+            name="time"
+            rules={{
+                required: 'Field is required',
+                validate: futureDate(),
+            }}
+        />
+        <Form.RewardDistribution
+            name="rewards"
+            labels={['first', 'second', 'remaining']}
+        />
+        <Form.Checkbox
+            name="terms"
+            rules={{ required: 'You must agree to the terms' }}
+        >
+            Agree to terms
+        </Form.Checkbox>
+        <Form.Switch name="setting">Enable setting</Form.Switch>
         <Form.Submit>Submit</Form.Submit>
     </Form>
 );

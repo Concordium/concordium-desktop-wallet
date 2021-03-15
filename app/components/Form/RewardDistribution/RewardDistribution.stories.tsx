@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Story, Meta } from '@storybook/react/types-6-0';
 
 import RewardDistributionComponent, {
+    RewardDistributionProps,
     RewardDistributionValue,
 } from './RewardDistribution';
 
@@ -11,11 +12,8 @@ export default {
     component: RewardDistributionComponent,
 } as Meta;
 
-const Template: Story = (args) => {
-    const [value, setValue] = useState<RewardDistributionValue>({
-        first: 60000 / 100000,
-        second: 30000 / 100000,
-    });
+const Template: Story<RewardDistributionProps> = (args) => {
+    const [value, setValue] = useState<RewardDistributionValue>(args.value);
     return (
         <div style={{ width: 350, margin: '0 auto' }}>
             Value: {JSON.stringify(value)}
@@ -24,15 +22,20 @@ const Template: Story = (args) => {
                 {...args}
                 value={value}
                 onChange={setValue}
-                labels={[
-                    'Baking reward account',
-                    'Finalization reward account',
-                    'Foundation',
-                ]}
             />
         </div>
     );
 };
 
 export const RewardDistribution = Template.bind({});
-RewardDistribution.args = {};
+RewardDistribution.args = {
+    labels: [
+        'Baking reward account',
+        'Finalization reward account',
+        'Foundation',
+    ],
+    value: {
+        first: 61234 / 100000,
+        second: 30000 / 100000,
+    },
+};

@@ -124,6 +124,11 @@
         border: none;
         background: transparent;
         padding: 0;
+
+        &:disabled,
+        &:disabled + * {
+            color: $color-grey;
+        }
     }
 }
 

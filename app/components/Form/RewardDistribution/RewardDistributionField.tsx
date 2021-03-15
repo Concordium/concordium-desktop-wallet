@@ -103,7 +103,7 @@ export default function RewardDistributionField({
                     onChange={(e) => setInternalValue(e.target.value)}
                     onBlur={handleBlur}
                 />
-                %
+                <span>%</span>
             </div>
         </label>
     );
