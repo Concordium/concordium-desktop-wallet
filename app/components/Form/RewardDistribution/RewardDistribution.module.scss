@@ -77,6 +77,11 @@
     }
 }
 
+.inputWrapper,
+.field input {
+    font-size: $font-size-body3;
+}
+
 .field {
     display: flex;
     flex-direction: column;
@@ -96,7 +101,6 @@
     }
 
     input {
-        font-size: $font-size-body3;
         border: none;
         background: transparent;
     }

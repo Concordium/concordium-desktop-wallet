@@ -4,10 +4,25 @@ import React, {
     InputHTMLAttributes,
     useCallback,
     useEffect,
+    useLayoutEffect,
+    useRef,
     useState,
 } from 'react';
 
 import styles from './RewardDistribution.module.scss';
+
+function scaleField(el: HTMLInputElement | null) {
+    console.log('scale', el);
+
+    if (!el) {
+        return;
+    }
+
+    setTimeout(() => {
+        el.style.width = '5px';
+        el.style.width = `${el.scrollWidth}px`;
+    }, 0);
+}
 
 function formatValue(v?: number): string {
     if (v === undefined || Number.isNaN(v)) {
@@ -48,6 +63,7 @@ export default function RewardDistributionField({
     onBlur = noOp,
     ...inputProps
 }: RewardDistributionFieldProps): JSX.Element {
+    const ref = useRef<HTMLInputElement>(null);
     const [stringValue, setStringValue] = useState(formatValue(value));
 
     const handleBlur: FocusEventHandler<HTMLInputElement> = useCallback(
@@ -63,7 +79,13 @@ export default function RewardDistributionField({
         [onBlur, value]
     );
 
-    useEffect(() => setStringValue(formatValue(value)), [value]);
+    const setInternalValue = useCallback((v: string) => {
+        scaleField(ref.current);
+        setStringValue(v);
+    }, []);
+
+    useEffect(() => setInternalValue(formatValue(value)), [value]);
+    useLayoutEffect(() => scaleField(ref.current), []);
 
     return (
         <label
@@ -74,12 +96,16 @@ export default function RewardDistributionField({
             )}
         >
             {label}
-            <input
-                {...inputProps}
-                value={stringValue}
-                onChange={(e) => setStringValue(e.target.value)}
-                onBlur={handleBlur}
-            />
+            <div className={styles.inputWrapper}>
+                <input
+                    ref={ref}
+                    {...inputProps}
+                    value={stringValue}
+                    onChange={(e) => setInternalValue(e.target.value)}
+                    onBlur={handleBlur}
+                />
+                %
+            </div>
         </label>
     );
 }
