@@ -67,6 +67,10 @@ export default function RewardDistribution({
     const innerValues = watch();
     const remaining = 100000 - (first + second);
 
+    const firstLabel = labels[0];
+    const secondLabel = labels[1];
+    const remainingLabel = labels[2];
+
     const firstPercentage = first / 1000;
     const secondPercentage = second / 1000;
     const remainingPercentage = remaining / 1000;
@@ -121,6 +125,7 @@ export default function RewardDistribution({
                             second === 0 && remaining === 0 && styles.hRightEdge
                         )}
                         style={{ width: `${firstPercentage}%` }}
+                        title={firstLabel}
                     >
                         <div
                             className={clsx(
@@ -129,7 +134,7 @@ export default function RewardDistribution({
                                     styles.hContentNoTitle
                             )}
                         >
-                            <span className={styles.hTitle}>{labels[0]}</span>
+                            <span className={styles.hTitle}>{firstLabel}</span>
                             <span className={styles.hValue}>
                                 {displayValue(firstPercentage)}%
                             </span>
@@ -146,6 +151,7 @@ export default function RewardDistribution({
                         second > 0 && remaining === 0 && styles.hRightEdge
                     )}
                     style={{ width: `${secondPercentage}%` }}
+                    title={secondLabel}
                 >
                     <div
                         className={clsx(
@@ -154,7 +160,7 @@ export default function RewardDistribution({
                                 styles.hContentNoTitle
                         )}
                     >
-                        <span className={styles.hTitle}>{labels[1]}</span>
+                        <span className={styles.hTitle}>{secondLabel}</span>
                         <span className={styles.hValue}>
                             {displayValue(secondPercentage)}%
                         </span>
@@ -167,6 +173,7 @@ export default function RewardDistribution({
                             first === 0 && second === 0 && styles.hLeftEdge,
                             remaining > 0 && styles.hRightEdge
                         )}
+                        title={remainingLabel}
                     >
                         <div
                             className={clsx(
@@ -175,7 +182,9 @@ export default function RewardDistribution({
                                     styles.hContentNoTitle
                             )}
                         >
-                            <span className={styles.hTitle}>{labels[2]}</span>
+                            <span className={styles.hTitle}>
+                                {remainingLabel}
+                            </span>
                             <span className={styles.hValue}>
                                 {displayValue(remainingPercentage)}%
                             </span>
@@ -191,7 +200,7 @@ export default function RewardDistribution({
                         value={value}
                         onBlur={handleBlur(fieldNames.first, onChange, onBlur)}
                         className={styles.first}
-                        label={labels[0]}
+                        label={firstLabel}
                         isInvalid={invalid}
                     />
                 )}
@@ -205,7 +214,7 @@ export default function RewardDistribution({
                         value={value}
                         onBlur={handleBlur(fieldNames.second, onChange, onBlur)}
                         className={styles.middle}
-                        label={labels[1]}
+                        label={secondLabel}
                         isInvalid={invalid}
                     />
                 )}
@@ -214,7 +223,7 @@ export default function RewardDistribution({
             <RewardDistributionField
                 className={styles.last}
                 value={remaining}
-                label={labels[2]}
+                label={remainingLabel}
                 disabled
             />
         </div>
