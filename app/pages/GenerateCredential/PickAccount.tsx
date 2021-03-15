@@ -68,6 +68,7 @@ export default function PickAccount({
         accountNumber: -1,
         identityId: -1,
         maxTransactionId: -1,
+        credentials: '[]',
     };
 
     return (

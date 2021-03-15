@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Identity, CredentialDeploymentInformation } from '../../utils/types';
 import { createCredentialInfo } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
@@ -27,6 +27,7 @@ export default function SignCredential({
     attributes,
 }: Props): JSX.Element {
     const global = useSelector(globalSelector);
+    const dispatch = useDispatch();
 
     async function sign(
         ledger: ConcordiumLedgerClient,
@@ -48,7 +49,13 @@ export default function SignCredential({
             address
         );
         setCredential(credential);
-        insertNewCredential(address, credentialNumber, identity.id, credential);
+        insertNewCredential(
+            dispatch,
+            address,
+            credentialNumber,
+            identity.id,
+            credential
+        );
         setMessage('Credential generated succesfully!');
         setReady(true);
     }

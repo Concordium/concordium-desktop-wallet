@@ -19,11 +19,14 @@ export async function up(knex: Knex): Promise<void> {
                 .references('id')
                 .inTable(identitiesTable)
                 .index();
+            table.json('credentials');
+            table.integer('signatureThreshold');
             table.string('incomingAmounts').defaultTo('[]');
             table.string('selfAmounts').defaultTo('');
             table.string('totalDecrypted').defaultTo('');
             table.boolean('allDecrypted').defaultTo(true);
             table.integer('maxTransactionId').defaultTo(0);
+            table.string('deploymentTransactionId');
         }
     );
 }

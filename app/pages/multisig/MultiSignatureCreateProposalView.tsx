@@ -3,6 +3,7 @@ import { Button, Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
+import { useParams } from 'react-router';
 import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
 import { getBlockSummary, getConsensusStatus } from '../../utils/nodeRequests';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
@@ -12,14 +13,6 @@ import findHandler from '../../utils/updates/HandlerFinder';
 import EffectiveTimeUpdate from './EffectiveTimeUpdate';
 import PageLayout from '../../components/PageLayout';
 
-interface Location {
-    state: UpdateType;
-}
-
-interface Props {
-    location: Location;
-}
-
 /**
  * Component for displaying the UI required to create a multi signature transaction
  * proposal. It dynamically loads the correct component to show wrapped in a bit of
@@ -27,7 +20,7 @@ interface Props {
  * The component retrieves the block summary of the last finalized block, which
  * is used to get the threshold and sequence number required for update instructions.
  */
-export default function MultiSignatureCreateProposalView({ location }: Props) {
+export default function MultiSignatureCreateProposalView() {
     const [blockSummary, setBlockSummary] = useState<BlockSummary>();
     const [loading, setLoading] = useState(true);
     const [proposal, setProposal] = useState<
@@ -37,7 +30,9 @@ export default function MultiSignatureCreateProposalView({ location }: Props) {
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
-    const type: UpdateType = location.state;
+    const { updateType } = useParams<{ updateType: string }>();
+    const type = parseInt(updateType, 10);
+
     const displayType = UpdateType[type];
 
     const handler = findHandler(type);

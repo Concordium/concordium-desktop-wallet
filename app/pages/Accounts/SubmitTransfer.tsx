@@ -37,7 +37,6 @@ interface Props {
 /**
  * Receives transaction to sign, using the ledger,
  * and then submits it.
- * TODO generalize, as right now it only really works with simple transfers.
  */
 export default function SubmitTransfer({ location }: Props) {
     const dispatch = useDispatch();
@@ -66,7 +65,7 @@ export default function SubmitTransfer({ location }: Props) {
             signatureIndex: 0,
         });
         const signature: Buffer = await ledger.signTransfer(transaction, path);
-        const signatureStructured = { 0: { 0: signature } };
+        const signatureStructured = { 0: { 0: signature } }; // TODO: do we need to support other credential indices here?
         const serializedTransaction = serializeTransaction(
             transaction,
             () => signatureStructured

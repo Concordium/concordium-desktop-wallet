@@ -12,8 +12,9 @@ import {
 import { push } from 'connected-react-router';
 import { parse, stringify } from 'json-bigint';
 import * as ed from 'noble-ed25519';
+import { useParams } from 'react-router';
 import {
-    currentProposalSelector,
+    proposalsSelector,
     updateCurrentProposal,
 } from '../../features/MultiSignatureSlice';
 import TransactionDetails from '../../components/TransactionDetails';
@@ -89,8 +90,10 @@ export default function ProposalView() {
         show: false,
     });
     const [currentlyLoadingFile, setCurrentlyLoadingFile] = useState(false);
+    const { id } = useParams<{ id: string }>();
     const dispatch = useDispatch();
-    const currentProposal = useSelector(currentProposalSelector);
+    const proposals = useSelector(proposalsSelector);
+    const currentProposal = proposals.find((p) => p.id === parseInt(id, 10));
 
     if (!currentProposal) {
         throw new Error(
