@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import clsx from 'clsx';
 import React, {
     FocusEventHandler,
@@ -45,7 +46,7 @@ const noOp = () => null;
 interface RewardDistributionFieldProps
     extends Pick<
         InputHTMLAttributes<HTMLInputElement>,
-        'disabled' | 'className'
+        'disabled' | 'className' | 'onFocus'
     > {
     label: string;
     value: number;

@@ -1,5 +1,9 @@
 @import 'config/bundle';
 
+.wrapper {
+    text-align: center;
+}
+
 .root {
     font-size: $font-size-body4;
     border-radius: 10px;
@@ -12,16 +16,27 @@
         'f1 d1 f2 d2 f3';
     place-items: stretch;
     background-color: $color-white;
+    transition: border-color $anim-easing $anim-timing;
+
+    &Focused {
+        border-color: $color-pale-blue;
+    }
+
+    &Invalid {
+        border-color: $color-error;
+    }
 }
 
 .header {
     border-bottom: 1px solid $color-grey;
+    border-color: inherit;
     display: flex;
     justify-content: flex-start;
     grid-area: header;
     padding: 1px;
     color: $color-white;
     overflow: hidden;
+    transition: border-color $anim-easing $anim-timing;
 }
 
 .hFirst,
@@ -152,7 +167,9 @@
 
 .divider1,
 .divider2 {
-    background-color: $color-grey;
+    border-left: 1px solid $color-grey;
+    border-color: inherit;
+    transition: border-color $anim-easing $anim-timing;
 }
 
 .divider1 {
