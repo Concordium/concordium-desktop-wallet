@@ -8,12 +8,10 @@ import {
     TransactionPayload,
     TransferToEncryptedPayload,
     UpdateAccountCredentialsPayload,
-} from './types';
-import {
     TransactionAccountSignature,
     Signature,
     TransactionCredentialSignature,
-} from './transactionTypes';
+} from './types';
 import {
     encodeWord32,
     encodeWord64,
@@ -211,7 +209,7 @@ export function serializeTransaction(
     return serialized;
 }
 
-export function getTransactionHash(
+export function getAccountTransactionHash(
     transaction: AccountTransaction,
     signFunction: SignFunction
 ) {

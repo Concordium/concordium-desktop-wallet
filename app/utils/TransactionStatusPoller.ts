@@ -1,21 +1,19 @@
-import { parse } from 'json-bigint';
+import { parse } from './JSONHelper';
 import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
 import { loadProposals } from '../features/MultiSignatureSlice';
-import { hashSha256 } from './serializationHelpers';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     TransactionStatus,
     Dispatch,
 } from './types';
-import { serializeUpdateInstruction } from './UpdateSerialization';
 import {
     confirmTransaction,
     rejectTransaction,
 } from '../features/TransactionSlice';
 import { getPendingTransactions } from '../database/TransactionDao';
 import { getStatus, getDataObject } from './transactionHelpers';
-import findHandler from './updates/HandlerFinder';
+import getTransactionHash from './transactionHash';
 
 /**
  * Poll for the transaction status of the provided multi signature transaction proposal, and
@@ -27,16 +25,10 @@ export async function getMultiSignatureTransactionStatus(
     proposal: MultiSignatureTransaction,
     dispatch: Dispatch
 ) {
-    const updateInstruction = parse(proposal.transaction);
-    const handler = findHandler(updateInstruction.type);
+    const transaction = parse(proposal.transaction);
 
-    const serializedUpdateInstruction = serializeUpdateInstruction(
-        updateInstruction,
-        handler.serializePayload(updateInstruction)
-    );
-    const transactionHash = hashSha256(serializedUpdateInstruction).toString(
-        'hex'
-    );
+    const transactionHash = getTransactionHash(transaction);
+
     const status = await getStatus(transactionHash);
 
     const updatedProposal = {

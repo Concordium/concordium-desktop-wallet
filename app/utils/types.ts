@@ -561,9 +561,31 @@ export type UpdateInstructionPayload =
     | ProtocolUpdate
     | GasRewards;
 
+// An actual signature, which goes into an account transaction.
+export type Signature = Buffer;
+
+type KeyIndex = Word8;
+// Signatures from a single credential, for an AccountTransaction
+export type TransactionCredentialSignature = Record<KeyIndex, Signature>;
+
+type CredentialIndex = Word8;
+// The signature of an account transaction.
+export type TransactionAccountSignature = Record<
+    CredentialIndex,
+    TransactionCredentialSignature
+>;
+
+export interface AccountTransactionWithSignature<
+    PayloadType extends TransactionPayload = TransactionPayload
+> extends AccountTransaction<PayloadType> {
+    signature: TransactionAccountSignature;
+}
+
 export type Transaction =
     | AccountTransaction
-    | UpdateInstruction<UpdateInstructionPayload>;
+    | AccountTransactionWithSignature
+    | UpdateInstruction;
+
 /**
  * Update type enumeration. The numbering/order is important as that corresponds
  * to the byte written when serializing the update instruction.
@@ -590,6 +612,18 @@ export function instanceOfUpdateInstruction(
     object: Transaction
 ): object is UpdateInstruction<UpdateInstructionPayload> {
     return 'header' in object;
+}
+
+export function instanceOfUpdateInstructionSignature(
+    object: TransactionCredentialSignature | UpdateInstructionSignature
+): object is UpdateInstructionSignature {
+    return 'signature' in object && 'authorizationKeyIndex' in object;
+}
+
+export function instanceOfAccountTransactionWithSignature(
+    object: Transaction
+): object is AccountTransactionWithSignature {
+    return instanceOfAccountTransaction(object) && 'signature' in object;
 }
 
 export function instanceOfSimpleTransfer(

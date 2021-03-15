@@ -6,8 +6,8 @@ import {
     instanceOfUpdateInstruction,
     UpdateInstruction,
     UpdateInstructionPayload,
+    AccountTransactionWithSignature,
 } from '../utils/types';
-import { AccountTransactionWithSignature } from '../utils/transactionTypes';
 import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
 import UpdateInstructionDetails from './UpdateInstructionDetails';
 

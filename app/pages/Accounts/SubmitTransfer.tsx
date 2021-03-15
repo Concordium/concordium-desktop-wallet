@@ -8,7 +8,7 @@ import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { sendTransaction } from '../../utils/nodeRequests';
 import {
     serializeTransaction,
-    getTransactionHash,
+    getAccountTransactionHash,
 } from '../../utils/transactionSerialization';
 import { monitorTransactionStatus } from '../../utils/TransactionStatusPoller';
 import { Account, AccountTransaction } from '../../utils/types';
@@ -71,7 +71,7 @@ export default function SubmitTransfer({ location }: Props) {
             transaction,
             () => signatureStructured
         );
-        const transactionHash = getTransactionHash(
+        const transactionHash = getAccountTransactionHash(
             transaction,
             () => signatureStructured
         ).toString('hex');

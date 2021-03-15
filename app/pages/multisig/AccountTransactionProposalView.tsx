@@ -9,18 +9,18 @@ import {
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
+    AccountTransactionWithSignature,
 } from '../../utils/types';
 import { sendTransaction } from '../../utils/nodeRequests';
 import { getMultiSignatureTransactionStatus } from '../../utils/TransactionStatusPoller';
 import routes from '../../constants/routes.json';
 import { findAccountTransactionHandler } from '../../utils/updates/HandlerFinder';
 import {
-    getTransactionHash,
+    getAccountTransactionHash,
     serializeTransaction,
 } from '../../utils/transactionSerialization';
 import ProposalView from './ProposalView';
 import { ModalErrorInput } from '../../components/SimpleErrorModal';
-import { AccountTransactionWithSignature } from '../../utils/transactionTypes';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
@@ -42,7 +42,7 @@ export default function AccountTransactionProposalView() {
     );
 
     const handler = findAccountTransactionHandler(transaction.transactionKind);
-    const transactionHash = getTransactionHash(
+    const transactionHash = getAccountTransactionHash(
         transaction,
         () => transaction.signature
     );

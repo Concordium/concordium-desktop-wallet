@@ -17,6 +17,8 @@ import {
     MultiSignatureTransactionStatus,
     UpdateInstructionSignature,
     Transaction,
+    TransactionCredentialSignature,
+    instanceOfUpdateInstructionSignature,
 } from '../../utils/types';
 import { saveFile } from '../../utils/FileHelper';
 import DragAndDropFile from '../../components/DragAndDropFile';
@@ -26,10 +28,6 @@ import SimpleErrorModal, {
 import PageLayout from '../../components/PageLayout';
 import expirationEffect from '../../utils/ProposalHelper';
 import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
-import {
-    TransactionCredentialSignature,
-    instanceOfUpdateInstructionSignature,
-} from '../../utils/transactionTypes';
 
 interface Props {
     title: string;
