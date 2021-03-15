@@ -17,6 +17,10 @@ function formatValue(v?: number): string {
     return v.toFixed(3);
 }
 
+function isValid(v: number): boolean {
+    return !Number.isNaN(v) && v <= 100 && v >= 0;
+}
+
 const noOp = () => null;
 
 interface RewardDistributionFieldProps
@@ -42,9 +46,15 @@ export default function RewardDistributionField({
 
     const handleBlur: FocusEventHandler<HTMLInputElement> = useCallback(
         (e) => {
-            onBlur(parseFloat(e.target.value));
+            const v = parseFloat(e.target.value);
+
+            if (isValid(v)) {
+                onBlur(parseFloat(e.target.value));
+            } else {
+                setStringValue(formatValue(value));
+            }
         },
-        [onBlur]
+        [onBlur, value]
     );
 
     useEffect(() => setStringValue(formatValue(value)), [value]);
