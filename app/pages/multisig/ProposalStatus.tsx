@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Grid, Header } from 'semantic-ui-react';
 import { parse } from 'json-bigint';
 import {
@@ -8,23 +8,23 @@ import {
     UpdateType,
     Transaction,
     instanceOfUpdateInstruction,
-    TransactionKindId,
 } from '../../utils/types';
 import TransactionDetails from '../../components/TransactionDetails';
 import StatusLabel from './StatusLabel';
 import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
-
+import { lookupName } from '../../utils/transactionHelpers';
 // TODO This component should also have support for account transactions.
 
 interface Props {
     proposal: MultiSignatureTransaction;
 }
 
-function getHeader(transaction: Transaction) {
+async function getHeader(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
         return UpdateType[transaction.type];
     }
-    return TransactionKindId[transaction.transactionKind];
+    const name = await lookupName(transaction.sender);
+    return name || transaction.sender;
 }
 
 function getType(transaction: Transaction) {
@@ -47,12 +47,21 @@ const statusColorMap = new Map<MultiSignatureTransactionStatus, ColorType>([
  */
 export default function ProposalStatus({ proposal }: Props) {
     const transaction = parse(proposal.transaction);
+    const [header, setHeader] = useState('');
+
+    useEffect(() => {
+        getHeader(transaction)
+            .then((h) => setHeader(h))
+            .catch(() => {
+                throw new Error('unexpectedly failed to get Header');
+            });
+    }, [transaction, setHeader]);
 
     return (
         <Grid padded>
             <Grid.Row columns="equal">
                 <Grid.Column>
-                    <Header>{getHeader(transaction)}</Header>
+                    <Header>{header}</Header>
                 </Grid.Column>
                 <Grid.Column textAlign="right">
                     <Header>{getType(transaction)}</Header>
