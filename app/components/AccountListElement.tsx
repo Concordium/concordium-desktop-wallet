@@ -6,6 +6,7 @@ import { isInitialAccount } from '../utils/accountHelpers';
 import SidedRow from './SidedRow';
 import PendingImage from '../../resources/svg/pending_old.svg';
 import ShieldImage from '../../resources/svg/shield.svg';
+import MultiSigIcon from '../../resources/svg/multisig.svg';
 
 const nop = () => {};
 
@@ -13,6 +14,18 @@ interface Props {
     account: Account;
     accountInfo?: AccountInfo | undefined;
     onClick?(shielded: boolean): void;
+}
+
+function displayIdentity(account: Account) {
+    const credentials = JSON.parse(account.credentials);
+    if (credentials.length > 1) {
+        return (
+            <>
+                {account.identityName} + <MultiSigIcon height="15" />
+            </>
+        );
+    }
+    return account.identityName;
 }
 
 /**
@@ -58,7 +71,9 @@ function AccountListElement({
                         <Label>(baker)</Label>
                     ) : undefined}
                 </Grid.Column>
-                <Grid.Column textAlign="right" content={account.identityName} />
+                <Grid.Column textAlign="right">
+                    {displayIdentity(account)}
+                </Grid.Column>
             </Grid.Row>
 
             <SidedRow
