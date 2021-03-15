@@ -64,23 +64,24 @@ export default function RewardDistributionField({
     const ref = useRef<HTMLInputElement>(null);
     const [stringValue, setStringValue] = useState(formatValue(value));
 
+    const setInternalValue = useCallback((v: string) => {
+        scaleField(ref.current);
+        setStringValue(v);
+    }, []);
+
     const handleBlur: FocusEventHandler<HTMLInputElement> = useCallback(
         (e) => {
             const v = parseValue(e.target.value);
 
             if (isValid(v)) {
+                setInternalValue(formatValue(v));
                 onBlur(v);
             } else {
-                setStringValue(formatValue(value));
+                setInternalValue(formatValue(value));
             }
         },
-        [onBlur, value]
+        [onBlur, value, setInternalValue]
     );
-
-    const setInternalValue = useCallback((v: string) => {
-        scaleField(ref.current);
-        setStringValue(v);
-    }, []);
 
     useEffect(() => setInternalValue(formatValue(value)), [value]);
     useLayoutEffect(() => scaleField(ref.current), []);
