@@ -13,7 +13,9 @@ export default {
 } as Meta;
 
 const Template: Story<RewardDistributionProps> = (args) => {
-    const [value, setValue] = useState<RewardDistributionValue>(args.value);
+    const [value, setValue] = useState<RewardDistributionValue | undefined>(
+        args.value
+    );
     return (
         <div style={{ width: 350, margin: '0 auto' }}>
             Value: {JSON.stringify(value)}
