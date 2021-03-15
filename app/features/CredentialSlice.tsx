@@ -35,8 +35,9 @@ export async function importCredentials(credentials: Credential[]) {
 
 export async function insertNewCredential(
     accountAddress: string,
-    credential: CredentialDeploymentInformation,
-    credentialNumber: number
+    credentialNumber: number,
+    identityId: number,
+    credential: CredentialDeploymentInformation
 ) {
     const parsed = {
         ...credential,
@@ -45,6 +46,7 @@ export async function insertNewCredential(
         policy: JSON.stringify(credential.policy),
         accountAddress,
         credentialNumber,
+        identityId,
     };
     return insertCredential(parsed);
 }

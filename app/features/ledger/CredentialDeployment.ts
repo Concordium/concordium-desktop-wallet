@@ -52,11 +52,17 @@ async function signCredentialDeployment(
 
     const publicKeys = credentialDeployment.credentialPublicKeys;
     const verificationKeyListLength = Object.entries(publicKeys.keys).length;
-    let data = Buffer.concat([
-        pathPrefix,
-        Uint8Array.of(verificationKeyListLength),
-    ]);
 
+    await transport.send(
+        0xe0,
+        INS_SIGN_CREDENTIAL_DEPLOYMENT,
+        p1,
+        p2,
+        pathPrefix
+    );
+    p1 = 0x0a;
+    let data = Buffer.alloc(1);
+    data.writeUInt8(verificationKeyListLength, 0);
     await transport.send(0xe0, INS_SIGN_CREDENTIAL_DEPLOYMENT, p1, p2, data);
 
     const keyIndices = Object.keys(publicKeys.keys)

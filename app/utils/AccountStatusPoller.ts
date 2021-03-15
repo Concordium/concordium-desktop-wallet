@@ -4,11 +4,8 @@ import { isInitialAccount } from './accountHelpers';
 import { getAllAccounts } from '../database/AccountDao';
 
 function resumeAccountStatusPolling(account: Account, dispatch: Dispatch) {
-    const { name, credentialDeploymentHash } = account;
-    if (!credentialDeploymentHash) {
-        throw new Error('Unexpected missing credentialDeploymentHash.');
-    }
-    return confirmAccount(dispatch, name, credentialDeploymentHash);
+    const { name } = account;
+    return confirmAccount(dispatch, name, ''); // FIXME
 }
 
 export default async function listenForAccountStatus(dispatch: Dispatch) {

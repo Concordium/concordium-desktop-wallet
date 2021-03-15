@@ -110,6 +110,7 @@ async function generateIdentity(
         confirmIdentityAndInitialAccount(
             dispatch,
             identityName,
+            identityId,
             accountName,
             identityObjectLocation
         );

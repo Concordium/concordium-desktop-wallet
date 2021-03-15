@@ -99,6 +99,7 @@ export enum AccountStatus {
 /**
  * This Interface models the structure of the accounts stored in the database
  */
+
 export interface Account {
     accountNumber: number;
     name: string;
@@ -106,8 +107,8 @@ export interface Account {
     identityId: number;
     identityName?: string;
     status: AccountStatus;
-    credentialDeploymentHash?: string;
-    credential?: string;
+    signatureThreshold?: number;
+    credentials: string;
     totalDecrypted?: string;
     allDecrypted?: boolean;
     incomingAmounts?: string;
