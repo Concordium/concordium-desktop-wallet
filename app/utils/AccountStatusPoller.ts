@@ -6,7 +6,7 @@ import { getAllAccounts } from '../database/AccountDao';
 function resumeAccountStatusPolling(account: Account, dispatch: Dispatch) {
     const { name, deploymentTransactionId } = account;
     if (!deploymentTransactionId) {
-        throw new Error('unexpected missing deploymentTransactionId');
+        throw new Error('Unexpected missing deploymentTransactionId');
     }
     return confirmAccount(dispatch, name, deploymentTransactionId);
 }

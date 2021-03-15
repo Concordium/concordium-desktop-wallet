@@ -195,7 +195,7 @@ export async function createCredential(
     // TODO: Display the appropiate details
     displayMessage(`Please sign details on device.`);
     const path = [0, 0, identity.id, 2, credentialNumber, 0];
-    const challengeSignature = await ledger.signNewCredentialDeployment(
+    const credentialSignature = await ledger.signNewCredentialDeployment(
         unsignedCredentialDeploymentInfo,
         expiry,
         path
@@ -204,7 +204,7 @@ export async function createCredential(
 
     const credentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createCredential,
-        signature: challengeSignature.toString('hex'),
+        signature: credentialSignature.toString('hex'),
         unsignedInfo: unsignedCredentialDeploymentInfoString,
         expiry: stringify(expiry),
     });
