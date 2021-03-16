@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React, { FC, PropsWithChildren, ReactElement, useMemo } from 'react';
 import PageContainer from './PageContainer';
-import FullWidthContainerElement from './PageContainer/FullWidthContainerElement';
+import FullWidthContainerSection from './PageContainer/FullWidthContainerElement';
 
 import PageHeader, { PageHeaderProps } from './PageHeader/PageHeader';
 import PageHeaderButton from './PageHeader/PageHeaderButton';
@@ -67,8 +67,8 @@ PageLayout.HeaderButton = PageHeaderButton;
 PageLayout.Container = PageContainer;
 (PageLayout.Container as FC).displayName = 'PageLayout.Container';
 
-PageLayout.FullWidthContainerElement = FullWidthContainerElement;
-(PageLayout.FullWidthContainerElement as FC).displayName =
-    'PageLayout.FullWidthContainerElement';
+PageLayout.FullWidthContainerSection = FullWidthContainerSection;
+(PageLayout.FullWidthContainerSection as FC).displayName =
+    'PageLayout.FullWidthContainerSection';
 
 export default PageLayout;

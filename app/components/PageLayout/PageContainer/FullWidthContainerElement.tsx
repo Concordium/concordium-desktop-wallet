@@ -4,7 +4,20 @@ import { ClassName } from '~/utils/types';
 
 import styles from './PageContainer.module.scss';
 
-export default function FullWidthContainerElement({
+/**
+ * @description
+ * Used inside \<PageLayout.Container /\> to subtract the left/right padding of the container, thus making a full width element.
+ *
+ * @example
+ * <PageLayout>
+ *   <PageLayout.Container>
+ *     <PageLayout.FullWidthContainerElement>
+ *       Full width content...
+ *     </PageLayout.FullWidthContainerElement>
+ *   </PageLayout.Container>
+ * </PageLayout>
+ */
+export default function FullWidthContainerSection({
     children,
     className,
 }: PropsWithChildren<ClassName>): JSX.Element {
