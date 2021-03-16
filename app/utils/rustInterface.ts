@@ -14,7 +14,8 @@ import {
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
 import { getDefaultExpiry } from './timeHelpers';
-import { stringify } from './JSONHelper';
+import { getAccountPath } from '~/features/ledger/Path';
+import { stringify, parse } from './JSONHelper';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
@@ -137,6 +138,11 @@ export async function createCredential(
     ledger: ConcordiumLedgerClient
 ): Promise<CredentialDeploymentDetails> {
     const identityProvider = JSON.parse(identity.identityProvider);
+    const path = getAccountPath({
+        identityIndex: identity.id,
+        accountIndex: credentialNumber,
+        signatureIndex: 0,
+    });
 
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
@@ -144,14 +150,7 @@ export async function createCredential(
         identity.id
     );
     displayMessage('Please confirm exporting public key on device');
-    const publicKey = await ledger.getPublicKey([
-        0,
-        0,
-        identity.id,
-        2,
-        credentialNumber,
-        0,
-    ]);
+    const publicKey = await ledger.getPublicKey(path);
     displayMessage('Please wait');
 
     const credentialInput = {
@@ -177,7 +176,7 @@ export async function createCredential(
 
     const unsignedCredentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createUnsignedCredential,
-        input: JSON.stringify(credentialInput),
+        input: stringify(credentialInput),
     });
 
     let unsignedCredentialDeploymentInfo;
@@ -187,14 +186,15 @@ export async function createCredential(
             unsignedCredentialDeploymentInfoString
         );
     } catch (e) {
-        throw new Error(unsignedCredentialDeploymentInfoString);
+        throw new Error(
+            `Unable to create unsigned credential due to unexpected output: ${unsignedCredentialDeploymentInfoString}`
+        );
     }
 
     const expiry = getDefaultExpiry();
 
     // TODO: Display the appropiate details
     displayMessage(`Please sign details on device.`);
-    const path = [0, 0, identity.id, 2, credentialNumber, 0];
     const credentialSignature = await ledger.signNewCredentialDeployment(
         unsignedCredentialDeploymentInfo,
         expiry,
@@ -209,7 +209,7 @@ export async function createCredential(
         expiry: stringify(expiry),
     });
     try {
-        const output = JSON.parse(credentialDeploymentInfoString);
+        const output = parse(credentialDeploymentInfoString);
 
         return {
             credentialDeploymentInfoHex: output.hex,
@@ -218,7 +218,9 @@ export async function createCredential(
             transactionId: output.hash,
         };
     } catch (e) {
-        throw new Error(credentialDeploymentInfoString);
+        throw new Error(
+            `Unable to create signed credential due to unexpected output: ${credentialDeploymentInfoString}`
+        );
     }
 }
 
