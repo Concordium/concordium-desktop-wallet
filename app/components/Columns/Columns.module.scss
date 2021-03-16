@@ -15,14 +15,13 @@
 .divider {
     flex-basis: 1px;
     flex-shrink: 0;
-    margin: 20px 0;
     background-color: $color-grey;
-    height: calc(100% - 40px); // To account for margin
+    height: 100%; // To account for margin
 }
 
 .column {
     flex: 0 1 100%;
-    padding: $page-gutter;
+    padding: 0 $page-gutter;
 
     .rootColumnScroll & {
         height: 100%;
