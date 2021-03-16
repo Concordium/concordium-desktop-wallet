@@ -1,8 +1,8 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
-import { RootState } from '../store/store';
-import { insertCredential, getCredentials } from '../database/CredentialDao';
-import { Credential, CredentialDeploymentInformation } from '../utils/types';
+import { RootState } from '~/store/store';
+import { insertCredential, getCredentials } from '~/database/CredentialDao';
+import { Credential, CredentialDeploymentInformation } from '~/utils/types';
 
 interface CredentialState {
     credentials: Credential[];
@@ -38,12 +38,11 @@ export async function insertNewCredential(
     accountAddress: string,
     credentialNumber: number,
     identityId: number,
-    credential: CredentialDeploymentInformation
+    credential: Pick<CredentialDeploymentInformation, 'credId' | 'policy'>
 ) {
     const parsed = {
-        ...credential,
-        arData: JSON.stringify(credential.arData),
-        credentialPublicKeys: JSON.stringify(credential.credentialPublicKeys),
+        credId: credential.credId,
+        external: false,
         policy: JSON.stringify(credential.policy),
         accountAddress,
         credentialNumber,

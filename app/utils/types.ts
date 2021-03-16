@@ -108,7 +108,6 @@ export interface Account {
     identityName?: string;
     status: AccountStatus;
     signatureThreshold?: number;
-    credentials: string;
     totalDecrypted?: string;
     allDecrypted?: boolean;
     incomingAmounts?: string;
@@ -244,13 +243,11 @@ export interface CredentialDeploymentInformation
 
 export interface Credential {
     accountAddress: string;
-    credentialNumber: number;
+    external: boolean;
+    credentialNumber?: number;
+    identityId?: number;
     credId: Hex;
-    ipIdentity: IpIdentity;
-    revocationThreshold: Threshold;
-    credentialPublicKeys: JSONString;
     policy: JSONString;
-    arData: JSONString;
 }
 
 // 48 bytes containing a group element.
