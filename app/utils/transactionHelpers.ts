@@ -14,11 +14,9 @@ import {
     instanceOfUpdateInstruction,
     Transaction,
     AddedCredential,
-} from './types';
-import {
     TransactionAccountSignature,
     TransactionCredentialSignature,
-} from './transactionTypes';
+} from './types';
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries

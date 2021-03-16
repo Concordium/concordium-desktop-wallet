@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
+import { credentialsSelector } from '~/features/CredentialSlice';
 import { push } from 'connected-react-router';
 import { Grid, List } from 'semantic-ui-react';
 import Button from '../../cross-app-components/Button';
@@ -167,6 +168,7 @@ function listCredentials(
 export default function UpdateCredentialPage(): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
+    const credentials = useSelector(credentialsSelector);
 
     const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
@@ -184,19 +186,22 @@ export default function UpdateCredentialPage(): JSX.Element {
     >([]);
     const [proposalId, setProposalId] = useState<number>(-1);
     useEffect(() => {
+        console.log(account);
         if (account) {
-            const currentCredentialIds = JSON.parse(account.credentials);
-            setCurrentCredentialCount(currentCredentialIds.length);
+            console.log(credentials);
+            const currentCredentials = credentials.filter((cred) => cred.accountAddress === account.address && (cred.credentialIndex || cred.credentialIndex === 0) );
+            console.log(currentCredentials);
+            setCurrentCredentialCount(currentCredentials.length);
             setNewThreshold(
                 (previous) => account.signatureThreshold || previous
             );
             setCredentialIds(
-                currentCredentialIds.map((id: string, index: number) => {
+                currentCredentials.map(({credId, credentialIndex}) => {
                     const status =
-                        index === 0
-                            ? CredentialStatus.Original
-                            : CredentialStatus.Unchanged;
-                    return [id, status];
+                        credentialIndex === 0
+                        ? CredentialStatus.Original
+                        : CredentialStatus.Unchanged;
+                    return [credId, status];
                 })
             );
         }

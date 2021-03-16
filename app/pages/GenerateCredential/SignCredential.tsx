@@ -55,6 +55,7 @@ export default function SignCredential({
             address,
             credentialNumber,
             identity.id,
+            undefined, // Unknown credentialIndex
             credential
         );
         setMessage('Credential generated succesfully!');

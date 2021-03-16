@@ -42,6 +42,7 @@ export async function insertNewCredential(
     accountAddress: string,
     credentialNumber: number,
     identityId: number,
+    credentialIndex: number | undefined,
     credential: Pick<CredentialDeploymentInformation, 'credId' | 'policy'>
 ) {
     const parsed = {
@@ -51,6 +52,7 @@ export async function insertNewCredential(
         accountAddress,
         credentialNumber,
         identityId,
+        credentialIndex
     };
     await insertCredential(parsed);
     return dispatch(addCredential(parsed));

@@ -109,6 +109,7 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
                 await ledgerCall(ledger, setStatusMessage);
             }
         } catch (error) {
+            console.log(error);
             let errorMessage;
             if (instanceOfTransportStatusError(error)) {
                 errorMessage = getErrorDescription(error.statusCode);

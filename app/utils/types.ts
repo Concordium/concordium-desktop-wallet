@@ -259,6 +259,7 @@ export interface CredentialDeploymentInformation
 export interface Credential {
     accountAddress: string;
     external: boolean;
+    credentialIndex?: number;
     credentialNumber?: number;
     identityId?: number;
     credId: Hex;
