@@ -9,7 +9,7 @@ const errorText =
     'The input was invalid. Provide an integer between 0 and 18446744073709551615';
 
 /**
- * Component for creating an baker stake threshold update.
+ * Component for creating a baker stake threshold update.
  */
 export default function UpdateBakerStakeThreshold({
     blockSummary,
@@ -32,7 +32,7 @@ export default function UpdateBakerStakeThreshold({
     );
 
     /**
-     * Update the election difficulty based on the input given. If the input
+     * Update the baker stake threshoild based on the input given. If the input
      * is invalid, then set an error state with a description of the bad input.
      */
     function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
