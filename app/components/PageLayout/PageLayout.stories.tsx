@@ -3,6 +3,8 @@ import React, { PropsWithChildren } from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
 
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 import PageLayout from './PageLayout';
 import PlusIcon from '../../../resources/svg/plus.svg';
 
@@ -34,7 +36,9 @@ export default {
 } as Meta;
 
 const Template: Story<PropsWithChildren<unknown>> = (args) => (
-    <PageLayout {...args} />
+    <Provider store={createStore(() => null)}>
+        <PageLayout {...args} />
+    </Provider>
 );
 
 export const Primary = Template.bind({});
