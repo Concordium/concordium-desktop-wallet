@@ -15,6 +15,8 @@ export default {
         'PageLayout.Header': PageLayout.Header,
         'PageLayout.HeaderButton': PageLayout.HeaderButton,
         'PageLayout.Container': PageLayout.Container,
+        'PageLayout.FullWidthContainerElement':
+            PageLayout.FullWidthContainerElement,
     },
     decorators: [
         (story) => (
