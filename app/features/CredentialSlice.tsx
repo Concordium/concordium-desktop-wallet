@@ -17,16 +17,19 @@ const credentialSlice = createSlice({
         updateCredentials: (state, input) => {
             state.credentials = input.payload;
         },
+        addCredential: (state, input) => {
+            state.credentials = [...state.credentials, input.payload];
+        },
     },
 });
 
 export const credentialsSelector = (state: RootState) =>
     state.credentials.credentials;
-export const { updateCredentials } = credentialSlice.actions;
+export const { updateCredentials, addCredential } = credentialSlice.actions;
 
 export async function loadCredentials(dispatch: Dispatch) {
-    const identities: Credential[] = await getCredentials();
-    dispatch(updateCredentials(identities));
+    const credentials: Credential[] = await getCredentials();
+    dispatch(updateCredentials(credentials));
 }
 
 export async function importCredentials(credentials: Credential[]) {
@@ -49,7 +52,7 @@ export async function insertNewCredential(
         identityId,
     };
     await insertCredential(parsed);
-    return loadCredentials(dispatch);
+    return dispatch(addCredential(parsed));
 }
 
 export default credentialSlice.reducer;
