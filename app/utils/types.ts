@@ -38,18 +38,18 @@ export interface Versioned<T> {
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
 export enum ChosenAttributes {
-    countryOfResidence,
-    dob,
     firstName,
-    idDocExpiresAt,
-    idDocIsseudAt,
-    idDocIssuer,
-    idDocNo,
-    idDocType,
     lastName,
-    nationalIdNo,
-    nationality,
     sex,
+    dob,
+    countryOfResidence,
+    nationality,
+    idDocType,
+    idDocNo,
+    idDocIssuer,
+    idDocIsseudAt,
+    idDocExpiresAt,
+    nationalIdNo,
     taxIdNo,
 }
 

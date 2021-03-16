@@ -2,6 +2,7 @@ import type Transport from '@ledgerhq/hw-transport';
 import {
     UnsignedCredentialDeploymentInformation,
     IdOwnershipProofs,
+    ChosenAttributes,
 } from '../../utils/types';
 import {
     putBase58Check,
@@ -172,11 +173,13 @@ async function signCredentialDeployment(
         credentialDeployment.policy.revealedAttributes
     );
     for (let i = 0; i < revealedAttributes.length; i += 1) {
-        const attributeTag = revealedAttributes[i];
+        const attributeTag = revealedAttributes[
+            i
+        ] as keyof typeof ChosenAttributes;
         const attributeValue =
             credentialDeployment.policy.revealedAttributes[attributeTag];
         data = Buffer.alloc(2);
-        data.writeUInt8(parseInt(attributeTag, 10), 0);
+        data.writeUInt8(ChosenAttributes[attributeTag], 0);
         const serializedAttributeValue = Buffer.from(attributeValue, 'utf-8');
         data.writeUInt8(serializedAttributeValue.length, 1);
 
