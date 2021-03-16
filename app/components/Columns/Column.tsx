@@ -9,6 +9,7 @@ export interface ColumnProps
      * Column neither shrinks nor grows when set to true. Defaults to false.
      */
     noResize?: boolean;
+    header?: string;
 }
 
 /**
@@ -25,6 +26,7 @@ export default function Column({
     className,
     children,
     noResize = false,
+    header,
     ...props
 }: PropsWithChildren<ColumnProps>): JSX.Element {
     return (
@@ -36,7 +38,8 @@ export default function Column({
             )}
             {...props}
         >
-            {children}
+            {header && <h3 className={styles.header}>{header}</h3>}
+            <div className={styles.content}>{children}</div>
         </div>
     );
 }

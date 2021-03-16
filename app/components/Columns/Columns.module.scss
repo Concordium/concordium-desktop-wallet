@@ -10,6 +10,11 @@
     &ColumnScroll {
         height: 100%;
     }
+
+    &WithHeaders {
+        border-top: 1px solid $color-grey;
+        margin-top: 40px;
+    }
 }
 
 .divider {
@@ -20,12 +25,13 @@
 }
 
 .column {
+    position: relative;
     flex: 0 1 100%;
-    padding: 0 $page-gutter;
+    display: flex;
+    justify-content: center;
 
     .rootColumnScroll & {
         height: 100%;
-        overflow-y: auto;
     }
 
     &NoResize {
@@ -38,5 +44,31 @@
         &NoResize {
             flex-grow: 0;
         }
+    }
+}
+
+.header,
+.content {
+    padding: 0 $page-gutter;
+}
+
+.header {
+    position: absolute;
+    transform: translateY(-100%);
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+    padding-bottom: 10px;
+}
+
+.content {
+    width: 100%;
+
+    .rootColumnScroll & {
+        height: 100%;
+        overflow-y: auto;
     }
 }
