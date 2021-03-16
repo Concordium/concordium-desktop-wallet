@@ -31,19 +31,9 @@ export async function confirmIdentityAndInitialAccount(
             const parsedCredential = {
                 credId: credential.credId || credential.regId,
                 policy: credential.policy,
-                ipIdentity: credential.ipIdentity,
-                revocationThreshold: credential.revocationThreshold,
-                arData: credential.revocationThreshold,
-                credentialPublicKeys: credential.credentialPublicKeys,
-                proofs: credential.proofs || credential.sig,
             };
             await confirmIdentity(dispatch, identityName, token.identityObject);
-            await confirmInitialAccount(
-                dispatch,
-                accountName,
-                accountAddress,
-                parsedCredential.credId
-            );
+            await confirmInitialAccount(dispatch, accountName, accountAddress);
             insertNewCredential(
                 dispatch,
                 accountAddress,
