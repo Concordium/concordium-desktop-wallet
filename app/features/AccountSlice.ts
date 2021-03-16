@@ -157,7 +157,6 @@ export async function addPendingAccount(
     identityId: number,
     accountNumber: number,
     accountAddress = '',
-    credentialId: string | undefined = undefined,
     deploymentTransactionId: string | undefined = undefined
 ) {
     const account: Account = {
@@ -166,7 +165,7 @@ export async function addPendingAccount(
         status: AccountStatus.Pending,
         accountNumber,
         address: accountAddress,
-        credentials: JSON.stringify([credentialId]),
+        signatureThreshold: 1,
         maxTransactionId: 0,
         deploymentTransactionId,
     };
@@ -177,13 +176,11 @@ export async function addPendingAccount(
 export async function confirmInitialAccount(
     dispatch: Dispatch,
     accountName: string,
-    accountAddress: string,
-    credentialId: string
+    accountAddress: string
 ) {
     await updateAccount(accountName, {
         status: AccountStatus.Confirmed,
         address: accountAddress,
-        credentials: JSON.stringify([credentialId]),
     });
     return loadAccounts(dispatch);
 }
