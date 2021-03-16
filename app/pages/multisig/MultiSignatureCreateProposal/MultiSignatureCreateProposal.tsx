@@ -86,88 +86,46 @@ export default function MultiSignatureCreateProposalView() {
             configured node. Verify your node settings, and check that
             the node is running."
             />
-            <PageLayout.Container closeRoute={routes.MULTISIGTRANSACTIONS}>
+            <PageLayout.Container
+                closeRoute={routes.MULTISIGTRANSACTIONS}
+                className={styles.container}
+            >
                 <h2 className={styles.header}>
                     Transaction Proposal | {displayType}
                 </h2>
-                <h3>Transaction details</h3>
-                <p>
-                    Add all the details for the {displayType} transaction below.
-                </p>
-                {loading}
-                {blockSummary && (
-                    <EffectiveTimeUpdate
-                        UpdateProposalComponent={UpdateComponent}
-                        blockSummary={blockSummary}
-                        setProposal={setProposal}
-                        setDisabled={setDisabled}
-                    />
-                )}
-                <Button
-                    disabled={!proposal || disabled}
-                    onClick={() => {
-                        if (proposal) {
-                            forwardTransactionToSigningPage(proposal);
-                        }
-                    }}
+                <PageLayout.FullWidthContainerSection
+                    className={styles.content}
                 >
-                    Continue
-                </Button>
+                    <h3 className={styles.subHeader}>Transaction details</h3>
+                    <section className={styles.details}>
+                        <p>
+                            Add all the details for the {displayType}{' '}
+                            transaction below.
+                        </p>
+                        <div className={styles.fields}>
+                            {loading}
+                            {blockSummary && (
+                                <EffectiveTimeUpdate
+                                    UpdateProposalComponent={UpdateComponent}
+                                    blockSummary={blockSummary}
+                                    setProposal={setProposal}
+                                    setDisabled={setDisabled}
+                                />
+                            )}
+                        </div>
+                        <Button
+                            disabled={!proposal || disabled}
+                            onClick={() => {
+                                if (proposal) {
+                                    forwardTransactionToSigningPage(proposal);
+                                }
+                            }}
+                        >
+                            Continue
+                        </Button>
+                    </section>
+                </PageLayout.FullWidthContainerSection>
             </PageLayout.Container>
         </PageLayout>
     );
-    //     return (
-    //         <PageLayout>
-    //             <PageLayout.Header>
-    //                 <h1>{handler.title}</h1>
-    //             </PageLayout.Header>
-    //             <Segment textAlign="center" secondary loading={loading}>
-    //                 <Header size="large">Add the proposal details</Header>
-    //                 <Segment basic>
-    //                     Add all the details for the {displayType} proposal below,
-    //                     and generate your transaction proposal.
-    //                 </Segment>
-    //                 <DynamicModal
-    //                     execution={execution}
-    //                     onError={() => {
-    //                         dispatch(
-    //                             push({ pathname: routes.MULTISIGTRANSACTIONS })
-    //                         );
-    //                     }}
-    //                     onSuccess={(input: BlockSummary) =>
-    //                         updateBlockSummary(input)
-    //                     }
-    //                     title="Error communicating with node"
-    //                     content="We were unable to retrieve the block summary from the
-    //             configured node. Verify your node settings, and check that
-    //             the node is running."
-    //                 />
-    //                 <Segment>
-    //                     <Header>Transaction Proposal | {displayType}</Header>
-    //                     <Divider />
-    //                     {blockSummary ? (
-    //                         <EffectiveTimeUpdate
-    //                             UpdateProposalComponent={UpdateComponent}
-    //                             blockSummary={blockSummary}
-    //                             setProposal={setProposal}
-    //                             setDisabled={setDisabled}
-    //                         />
-    //                     ) : null}
-    //                     <Divider horizontal hidden />
-    //                     <Button
-    //                         size="large"
-    //                         primary
-    //                         disabled={!proposal || disabled}
-    //                         onClick={() => {
-    //                             if (proposal) {
-    //                                 forwardTransactionToSigningPage(proposal);
-    //                             }
-    //                         }}
-    //                     >
-    //                         Continue
-    //                     </Button>
-    //                 </Segment>
-    //             </Segment>
-    //         </PageLayout>
-    //     );
 }
