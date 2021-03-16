@@ -3,6 +3,7 @@ import {
     UnsignedCredentialDeploymentInformation,
     IdOwnershipProofs,
     CredentialDeploymentValues,
+    ChosenAttributes,
 } from '../../utils/types';
 import {
     putBase58Check,
@@ -85,24 +86,25 @@ export async function signCredentialValues(
     const validTo = serializeYearMonth(credentialDeployment.policy.validTo);
     const createdAt = serializeYearMonth(credentialDeployment.policy.createdAt);
 
-    const attributeListLength = Object.entries(
+    const revealedAttributeTags: [number, string][] = Object.entries(
         credentialDeployment.policy.revealedAttributes
-    ).length;
+    ).map(([tagName, value]) => [
+        ChosenAttributes[tagName as keyof typeof ChosenAttributes],
+        value,
+    ]);
+    revealedAttributeTags.sort((a, b) => a[0] - b[0]);
+
+    const attributeListLength = revealedAttributeTags.length;
     const attributeListLengthAsBytes = Buffer.alloc(2);
     attributeListLengthAsBytes.writeUInt16BE(attributeListLength, 0);
 
     data = Buffer.concat([validTo, createdAt, attributeListLengthAsBytes]);
     await transport.send(0xe0, ins, p1, p2, data);
 
-    const revealedAttributes = Object.keys(
-        credentialDeployment.policy.revealedAttributes
-    );
-    for (let i = 0; i < revealedAttributes.length; i += 1) {
-        const attributeTag = revealedAttributes[i];
-        const attributeValue =
-            credentialDeployment.policy.revealedAttributes[attributeTag];
+    for (let i = 0; i < attributeListLength; i += 1) {
+        const [attributeTag, attributeValue] = revealedAttributeTags[i];
         data = Buffer.alloc(2);
-        data.writeUInt8(parseInt(attributeTag, 10), 0);
+        data.writeUInt8(attributeTag, 0);
         const serializedAttributeValue = Buffer.from(attributeValue, 'utf-8');
         data.writeUInt8(serializedAttributeValue.length, 1);
 
