@@ -177,8 +177,13 @@ export interface ScheduledTransferPayload {
     toAddress: string;
 }
 
+export interface AddedCredential {
+    index: Word8;
+    value: CredentialDeploymentInformation;
+}
+
 export interface UpdateAccountCredentialsPayload {
-    addedCredentials: Record<number, CredentialDeploymentInformation>;
+    addedCredentials: AddedCredential[];
     removedCredIds: string[];
     newThreshold: number;
 }

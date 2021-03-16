@@ -10,6 +10,7 @@ export async function up(knex: Knex): Promise<void> {
         (table: Knex.TableBuilder) => {
             table.string('accountAddress');
             table.string('credId');
+            table.integer('credentialIndex');
             table.integer('credentialNumber');
             table
                 .integer('identityId')

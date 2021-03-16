@@ -11,9 +11,9 @@ import {
     SchedulePoint,
     TransferToEncrypted,
     UpdateAccountCredentials,
-    CredentialDeploymentInformation,
     instanceOfUpdateInstruction,
     Transaction,
+    AddedCredential
 } from './types';
 
 /**
@@ -158,7 +158,7 @@ export async function createScheduledTransferTransaction(
  */
 export async function createUpdateCredentialsTransaction(
     sender: string,
-    addedCredentials: CredentialDeploymentInformation[],
+    addedCredentials: AddedCredential[],
     removedCredIds: string[],
     newThreshold: number,
     expiry: bigint = getDefaultExpiry(),
