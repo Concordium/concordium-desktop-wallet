@@ -70,7 +70,7 @@ export function serializeVerifyKey(key: VerifyKey) {
     if (SchemeId[scheme] !== undefined) {
         schemeId = SchemeId[scheme];
     } else {
-        throw new Error('Unknown key type');
+        throw new Error(`Unknown key type: ${scheme}`);
     }
     const keyBuffer = Buffer.from(key.verifyKey, 'hex');
     const schemeBuffer = Buffer.alloc(1);

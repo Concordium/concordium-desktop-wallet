@@ -75,8 +75,6 @@ pub fn build_pub_info_for_ip_aux(
             None => return Err(format_err!("failed building pub_info_for_ip.")),
         };
 
-    log(&json!(pub_info_for_ip.vk_acc).to_string());
-
     let response = json!(pub_info_for_ip);
     Ok(response.to_string())
 }

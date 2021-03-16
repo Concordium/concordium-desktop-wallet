@@ -9,7 +9,7 @@ type Proofs = Hex;
 type Word64 = bigint;
 type Word32 = number;
 export type Word8 = number;
-type JSONString = string; // indicates that is it some object that have been stringified.
+type JSONString = string; // indicates that it is some object that has been stringified.
 
 export enum SchemeId {
     Ed25519 = 0,
