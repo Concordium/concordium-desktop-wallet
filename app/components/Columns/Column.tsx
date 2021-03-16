@@ -10,6 +10,10 @@ export interface ColumnProps
      */
     noResize?: boolean;
     header?: string;
+    /**
+     * Include padding on top/bottom of column
+     */
+    verticalPadding?: boolean;
 }
 
 /**
@@ -26,6 +30,7 @@ export default function Column({
     className,
     children,
     noResize = false,
+    verticalPadding = false,
     header,
     ...props
 }: PropsWithChildren<ColumnProps>): JSX.Element {
@@ -39,7 +44,14 @@ export default function Column({
             {...props}
         >
             {header && <h3 className={styles.header}>{header}</h3>}
-            <div className={styles.content}>{children}</div>
+            <div
+                className={clsx(
+                    styles.content,
+                    verticalPadding && styles.contentVertPadding
+                )}
+            >
+                {children}
+            </div>
         </div>
     );
 }

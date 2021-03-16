@@ -21,7 +21,12 @@
     flex-basis: 1px;
     flex-shrink: 0;
     background-color: $color-grey;
-    height: 100%; // To account for margin
+    height: 100%;
+
+    .root:not(.rootwithHeaders) & {
+        margin: 20px 0;
+        height: calc(100% - 40px);
+    }
 }
 
 .column {
@@ -69,6 +74,11 @@
 
     .rootColumnScroll & {
         height: 100%;
-        overflow-y: auto;
+        overflow-y: overlay;
+    }
+
+    &VertPadding {
+        padding-top: $page-gutter;
+        padding-bottom: $page-gutter;
     }
 }
