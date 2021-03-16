@@ -47,7 +47,7 @@ export enum ChosenAttributes {
     idDocType,
     idDocNo,
     idDocIssuer,
-    idDocIsseudAt,
+    idDocIssuedAt,
     idDocExpiresAt,
     nationalIdNo,
     taxIdNo,
