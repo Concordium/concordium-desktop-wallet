@@ -21,6 +21,14 @@ export function isHex(str: string): boolean {
     return /^[A-F0-9]+$/i.test(str);
 }
 
+/**
+ * Determines whether or not the input string consists of only digits,
+ * with no leading zero (except if only a single digit).
+ */
+export function onlyDigitsNoLeadingZeroes(value: string): boolean {
+    return /^(?:[1-9][0-9]*|0)$/.test(value);
+}
+
 /** Given a list of elements, a function to parse the elements to string array,
  * and the names of the elements' fields, outputs
  * csv string, with the names first, and the values of each element per line.

@@ -10,6 +10,7 @@ import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
 import signAccountChallenge from './AccountChallenge';
 import {
     AccountTransaction,
+    BakerStakeThreshold,
     ExchangeRate,
     FoundationAccount,
     GasRewards,
@@ -189,6 +190,20 @@ export default class ConcordiumLedgerClient {
         return signUpdateTransaction(
             this.transport,
             0x23,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signBakerStakeThreshold(
+        transaction: UpdateInstruction<BakerStakeThreshold>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x27,
             path,
             transaction,
             serializedPayload

@@ -31,6 +31,7 @@ interface UpdateQueues {
     mintDistribution: UpdateQueue;
     protocol: UpdateQueue;
     gasRewards: UpdateQueue;
+    bakerStakeThreshold: UpdateQueue;
 }
 
 export interface Authorization {
@@ -51,6 +52,7 @@ export interface Authorizations {
     mintDistribution: Authorization;
     protocol: Authorization;
     paramGASRewards: Authorization;
+    bakerStakeThreshold: Authorization;
     keys: Key[];
 }
 
@@ -73,6 +75,7 @@ interface ChainParameters {
     microGTUPerEuro: ExchangeRate;
     euroPerEnergy: ExchangeRate;
     rewardParameters: RewardParameters;
+    minimumThresholdForBaking: bigint;
 }
 
 interface Updates {

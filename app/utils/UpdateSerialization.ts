@@ -1,5 +1,6 @@
 import { putBase58Check } from './serializationHelpers';
 import {
+    BakerStakeThreshold,
     BlockItemKind,
     ExchangeRate,
     FoundationAccount,
@@ -30,6 +31,21 @@ export interface SerializedProtocolUpdate {
     specificationUrl: SerializedString;
     transactionHash: Buffer;
     auxiliaryData: Buffer;
+}
+
+/**
+ * Serializes a BakerStakeThreshold to the byte format expected
+ * by the chain.
+ */
+export function serializeBakerStakeThreshold(
+    bakerStakeThreshold: BakerStakeThreshold
+) {
+    const serializedBakerStakeThreshold = Buffer.alloc(8);
+    serializedBakerStakeThreshold.writeBigUInt64BE(
+        BigInt(bakerStakeThreshold.threshold),
+        0
+    );
+    return serializedBakerStakeThreshold;
 }
 
 /**

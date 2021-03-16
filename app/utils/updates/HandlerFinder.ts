@@ -11,6 +11,7 @@ import {
     UpdateInstructionPayload,
     UpdateType,
 } from '../types';
+import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
 import FoundationAccountHandler from './FoundationAccountHandler';
 import GasRewardsHandler from './GasRewardsHandler';
@@ -87,6 +88,8 @@ export default function findHandler(
             return new HandlerTypeMiddleware(new ProtocolUpdateHandler());
         case UpdateType.UpdateGASRewards:
             return new HandlerTypeMiddleware(new GasRewardsHandler());
+        case UpdateType.UpdateBakerStakeThreshold:
+            return new HandlerTypeMiddleware(new BakerStakeThresholdHandler());
         default:
             throw new Error(`Unsupported transaction type: ${type}`);
     }
