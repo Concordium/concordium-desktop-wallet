@@ -3,6 +3,7 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 
 import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
+import { RewardDistributionValue } from '../RewardDistribution/RewardDistribution';
 
 export const {
     Checkbox,
@@ -62,6 +63,10 @@ export const Template: Story<FormProps<unknown>> = (args) => (
     </Form>
 );
 
+const validateRewardDistributionFirstMin = (min: number, message?: string) => ({
+    first,
+}: RewardDistributionValue) => first > min || message;
+
 export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
     <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
@@ -76,6 +81,16 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
             rules={{
                 required: 'Field is required',
                 validate: futureDate(),
+            }}
+        />
+        <Form.RewardDistribution
+            name="rewards"
+            labels={['first', 'second', 'remaining']}
+            rules={{
+                validate: validateRewardDistributionFirstMin(
+                    0.5,
+                    'First must be > 0.5'
+                ),
             }}
         />
         <Form.Checkbox
