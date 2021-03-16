@@ -102,15 +102,12 @@ export default function RewardDistribution({
     const secondPercentage = fractionResolutionToPercentage(secondValue);
     const remainingPercentage = fractionResolutionToPercentage(remainingValue);
 
-    const handleBlur = useCallback(
+    const handleChange = useCallback(
         (
             name: keyof RewardDistributionValue,
-            changeHandler: (v: number) => void,
-            blurHandler: () => void
+            changeHandler: (v: number) => void
         ) => (v: number) => {
             changeHandler(v);
-            blurHandler();
-            setIsFocused(false);
 
             const other = name === 'first' ? secondValue : firstValue;
 
@@ -128,6 +125,14 @@ export default function RewardDistribution({
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [JSON.stringify(innerValues), fieldOnChange]
+    );
+
+    const handleBlur = useCallback(
+        (blurHandler: () => void) => () => {
+            blurHandler();
+            setIsFocused(false);
+        },
+        [setIsFocused]
     );
 
     useEffect(() => {
@@ -238,11 +243,8 @@ export default function RewardDistribution({
                     render={({ onChange, value, onBlur }, { invalid }) => (
                         <RewardDistributionField
                             value={value}
-                            onBlur={handleBlur(
-                                fieldNames.first,
-                                onChange,
-                                onBlur
-                            )}
+                            onBlur={handleBlur(onBlur)}
+                            onChange={handleChange(fieldNames.first, onChange)}
                             className={styles.first}
                             label={firstLabel}
                             isInvalid={invalid}
@@ -257,11 +259,8 @@ export default function RewardDistribution({
                     render={({ onChange, value, onBlur }, { invalid }) => (
                         <RewardDistributionField
                             value={value}
-                            onBlur={handleBlur(
-                                fieldNames.second,
-                                onChange,
-                                onBlur
-                            )}
+                            onBlur={handleBlur(onBlur)}
+                            onChange={handleChange(fieldNames.second, onChange)}
                             className={styles.middle}
                             label={secondLabel}
                             isInvalid={invalid}

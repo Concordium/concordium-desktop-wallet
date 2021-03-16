@@ -65,7 +65,7 @@ export const Template: Story<FormProps<unknown>> = (args) => (
 
 const validateRewardDistributionFirstMin = (min: number, message?: string) => ({
     first,
-}: RewardDistributionValue) => first > min || message;
+}: RewardDistributionValue) => first >= min || message;
 
 export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
     <Form {...args}>
@@ -89,7 +89,7 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
             rules={{
                 validate: validateRewardDistributionFirstMin(
                     0.5,
-                    'First must be > 0.5'
+                    'First must be at least 0.5'
                 ),
             }}
         />

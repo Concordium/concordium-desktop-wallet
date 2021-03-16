@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import clsx from 'clsx';
 import React, {
+    ChangeEventHandler,
     FocusEventHandler,
     InputHTMLAttributes,
     useCallback,
@@ -51,12 +52,12 @@ const noOp = () => null;
 interface RewardDistributionFieldProps
     extends Pick<
         InputHTMLAttributes<HTMLInputElement>,
-        'disabled' | 'className' | 'onFocus'
+        'disabled' | 'className' | 'onFocus' | 'onBlur'
     > {
     label: string;
     value: number;
     isInvalid?: boolean;
-    onBlur?(v: number): void;
+    onChange?(v: number): void;
 }
 
 export default function RewardDistributionField({
@@ -64,32 +65,69 @@ export default function RewardDistributionField({
     className,
     isInvalid = false,
     value,
+    onChange = noOp,
+    onFocus = noOp,
     onBlur = noOp,
     ...inputProps
 }: RewardDistributionFieldProps): JSX.Element {
     const ref = useRef<HTMLInputElement>(null);
     const [stringValue, setStringValue] = useState(formatValue(value));
+    const [isFocused, setIsFocused] = useState(false);
 
     const setInternalValue = useCallback((v: string) => {
         scaleField(ref.current);
         setStringValue(v);
     }, []);
 
+    const handleFocus: FocusEventHandler<HTMLInputElement> = useCallback(
+        (e) => {
+            setIsFocused(true);
+            onFocus(e);
+        },
+        [setIsFocused, onFocus]
+    );
+
     const handleBlur: FocusEventHandler<HTMLInputElement> = useCallback(
         (e) => {
-            const v = parseValue(e.target.value);
+            setIsFocused(false);
+            onBlur(e);
 
-            if (isValid(v)) {
-                setInternalValue(formatValue(v));
-                onBlur(v);
+            const parsed = parseValue(e.target.value);
+
+            if (isValid(parsed)) {
+                setInternalValue(formatValue(parsed));
+                onChange(parsed);
             } else {
                 setInternalValue(formatValue(value));
             }
         },
-        [onBlur, value, setInternalValue]
+        [onBlur, onChange, value, setInternalValue]
     );
 
-    useEffect(() => setInternalValue(formatValue(value)), [value]);
+    const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+        (e) => {
+            const v = e.target.value;
+            setInternalValue(v);
+
+            if (v.endsWith('.')) {
+                return;
+            }
+
+            const parsed = parseValue(v);
+
+            if (isValid(parsed)) {
+                onChange(parsed);
+            }
+        },
+        [onChange, setInternalValue]
+    );
+
+    useEffect(() => {
+        if (!isFocused) {
+            setInternalValue(formatValue(value));
+        }
+    }, [value]);
+
     useLayoutEffect(() => scaleField(ref.current), []);
 
     return (
@@ -106,8 +144,9 @@ export default function RewardDistributionField({
                     ref={ref}
                     {...inputProps}
                     value={stringValue}
-                    onChange={(e) => setInternalValue(e.target.value)}
+                    onChange={handleChange}
                     onBlur={handleBlur}
+                    onFocus={handleFocus}
                 />
                 <span>%</span>
             </div>
