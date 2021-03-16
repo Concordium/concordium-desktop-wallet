@@ -14,6 +14,7 @@ import Button from '~/cross-app-components/Button';
 import DynamicModal from '../DynamicModal';
 import EffectiveTimeUpdate from '../EffectiveTimeUpdate';
 import styles from './MultiSignatureCreateProposal.module.scss';
+import Loading from '~/cross-app-components/Loading';
 
 /**
  * Component for displaying the UI required to create a multi signature transaction
@@ -102,8 +103,8 @@ export default function MultiSignatureCreateProposalView() {
                             Add all the details for the {displayType}{' '}
                             transaction below.
                         </p>
-                        <div className={styles.fields}>
-                            {loading}
+                        <div className={styles.proposal}>
+                            {loading && <Loading />}
                             {blockSummary && (
                                 <EffectiveTimeUpdate
                                     UpdateProposalComponent={UpdateComponent}
