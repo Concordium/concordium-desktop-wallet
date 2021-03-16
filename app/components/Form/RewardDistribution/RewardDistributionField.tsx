@@ -11,6 +11,11 @@ import React, {
 } from 'react';
 
 import styles from './RewardDistribution.module.scss';
+import {
+    fractionResolution,
+    fractionResolutionToPercentage,
+    percentageToFractionResolution,
+} from './util';
 
 function scaleField(el: HTMLInputElement | null) {
     if (!el) {
@@ -28,17 +33,17 @@ function formatValue(v?: number): string {
         return '';
     }
 
-    return (v / 1000).toFixed(3);
+    return fractionResolutionToPercentage(v).toFixed(3);
 }
 
 function parseValue(v: string): number {
     const parsed = parseFloat(v);
 
-    return Math.round(parsed * 1000);
+    return Math.round(percentageToFractionResolution(parsed));
 }
 
 function isValid(v: number): boolean {
-    return !Number.isNaN(v) && v <= 100000 && v >= 0;
+    return !Number.isNaN(v) && v <= fractionResolution && v >= 0;
 }
 
 const noOp = () => null;

@@ -10,6 +10,7 @@ import styles from './RewardDistribution.module.scss';
 import useMultiFieldFocus from '../common/useMultiFieldFocus';
 import { CommonFieldProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
+import { fractionResolution, fractionResolutionToPercentage } from './util';
 
 export interface RewardDistributionValue {
     first: number;
@@ -31,8 +32,8 @@ const displayValue = (v: number): string => {
 
 function formatInputValue(v: RewardDistributionValue): RewardDistributionValue {
     return {
-        first: Math.round(v.first * 100000),
-        second: Math.round(v.second * 100000),
+        first: Math.round(v.first * fractionResolution),
+        second: Math.round(v.second * fractionResolution),
     };
 }
 
@@ -40,26 +41,25 @@ function formatOutputValue(
     v: RewardDistributionValue
 ): RewardDistributionValue {
     return {
-        first: v.first / 100000,
-        second: v.second / 100000,
+        first: v.first / fractionResolution,
+        second: v.second / fractionResolution,
     };
 }
 
 function belowTitleCutoff(width: number): boolean {
     return width < 30;
 }
-
 export interface RewardDistributionProps extends CommonFieldProps {
     /**
      * Labels for first, second and remaining reward party respectively.
      */
     labels: [string, string, string];
     /**
-     * Value of first and second reward share in fractions of 100000 (e.g. 0.67812)
+     * Value of first and second reward share in fractions of fractionResolution (e.g. 0.67812)
      */
     value: RewardDistributionValue | undefined;
     /**
-     * Change handler. Ouputs reward share of first and second party in fractions of 100000  (e.g. 0.67812)
+     * Change handler. Ouputs reward share of first and second party in fractions of fractionResolution  (e.g. 0.67812)
      */
     onChange(v: RewardDistributionValue): void;
     onBlur?(): void;
@@ -67,10 +67,10 @@ export interface RewardDistributionProps extends CommonFieldProps {
 
 /**
  * @description
- * Component for handling reward ratio of 2 parties, with the remainder implicitly going to a third party. Works with values of fractions of 100000.
+ * Component for handling reward ratio of 2 parties, with the remainder implicitly going to a third party. Works with values of fractions of fractionResolution.
  *
  * @example
- * const [value, setValue] = useState<RewardDistributionValue>({ first: 32145/100000, second: 50400/100000 });
+ * const [value, setValue] = useState<RewardDistributionValue>({ first: 32145/fractionResolution, second: 50400/fractionResolution });
  *
  * <RewardDistribution value={value} onChange={setValue} labels={['first', 'second', 'remaining']} />
  */
@@ -89,7 +89,7 @@ export default function RewardDistribution({
     });
     const { isFocused, setIsFocused } = useMultiFieldFocus(fieldOnBlur);
     const { first: firstValue, second: secondValue } = formattedValue;
-    const remainingValue = 100000 - (firstValue + secondValue);
+    const remainingValue = fractionResolution - (firstValue + secondValue);
 
     const { watch, control, setValue } = form;
     const innerValues = watch();
@@ -98,9 +98,9 @@ export default function RewardDistribution({
     const secondLabel = labels[1];
     const remainingLabel = labels[2];
 
-    const firstPercentage = firstValue / 1000;
-    const secondPercentage = secondValue / 1000;
-    const remainingPercentage = remainingValue / 1000;
+    const firstPercentage = fractionResolutionToPercentage(firstValue);
+    const secondPercentage = fractionResolutionToPercentage(secondValue);
+    const remainingPercentage = fractionResolutionToPercentage(remainingValue);
 
     const handleBlur = useCallback(
         (
@@ -116,12 +116,12 @@ export default function RewardDistribution({
 
             let first;
             let second;
-            if (v + other <= 100000) {
+            if (v + other <= fractionResolution) {
                 first = name === 'first' ? v : innerValues.first;
                 second = name === 'second' ? v : innerValues.second;
             } else {
-                first = name === 'first' ? v : 100000 - v;
-                second = name === 'second' ? v : 100000 - v;
+                first = name === 'first' ? v : fractionResolution - v;
+                second = name === 'second' ? v : fractionResolution - v;
             }
 
             fieldOnChange(formatOutputValue({ first, second }));
@@ -178,8 +178,8 @@ export default function RewardDistribution({
                         className={clsx(
                             styles.hMiddle,
                             secondValue === 0 && styles.hMiddleNoValue,
-                            firstValue === 100000 ||
-                                (remainingValue === 100000 &&
+                            firstValue === fractionResolution ||
+                                (remainingValue === fractionResolution &&
                                     styles.hMiddleHidden),
                             secondValue > 0 &&
                                 firstValue === 0 &&
