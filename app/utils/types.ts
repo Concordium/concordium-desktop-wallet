@@ -869,6 +869,7 @@ export interface ExportData {
 
 interface EventResult {
     outcome: string;
+    rejectReason?: string;
 }
 
 export interface TransactionEvent {

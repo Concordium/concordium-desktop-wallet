@@ -38,3 +38,12 @@ export async function getNextCredentialNumber(identityId: number) {
     );
     return currentNumber + 1;
 }
+
+export async function updateCredentialIndex(
+    credId: string,
+    credentialIndex: number | undefined
+) {
+    return (await knex())(credentialsTable)
+        .where({ credId })
+        .update({ credentialIndex });
+}

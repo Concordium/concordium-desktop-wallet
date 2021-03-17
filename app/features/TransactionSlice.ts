@@ -19,7 +19,10 @@ import {
     Global,
     RejectReason,
 } from '../utils/types';
-import { attachNames } from '../utils/transactionHelpers';
+import {
+    attachNames,
+    isSuccessfulTransaction,
+} from '../utils/transactionHelpers';
 import {
     convertIncomingTransaction,
     convertAccountTransaction,
@@ -166,20 +169,26 @@ export async function addPendingTransaction(
 // TODO: update Total to reflect change in cost.
 export async function confirmTransaction(
     transactionHash: string,
-    dataObject: Record<string, TransactionEvent>
+    outcomeRecord: Record<string, TransactionEvent>
 ) {
-    const outcomes = Object.values(dataObject.outcomes);
-    const success = outcomes.reduce(
-        (accu, event) => accu && event.result.outcome === 'success',
-        true
+    const outcomes = Object.values(outcomeRecord);
+    const success = isSuccessfulTransaction(outcomes);
+    const cost = outcomes.reduce(
+        (accu, event) => accu + parseInt(event.cost, 10),
+        0
     );
-    const cost = outcomes.reduce((accu, event) => accu + event.cost, 0);
     let rejectReason;
     if (!success) {
-        const { tag } = outcomes.find(
+        const failure = outcomes.find(
             (event) => event.result.outcome !== 'success'
-        ).result.rejectReason;
-        rejectReason = RejectReason[tag as keyof typeof RejectReason];
+        );
+        if (!failure) {
+            throw new Error('unexpected missing failure, when not successful');
+        }
+        rejectReason =
+            RejectReason[
+                failure.result.rejectReason as keyof typeof RejectReason
+            ];
     }
     return updateTransaction(
         { transactionHash },

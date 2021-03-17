@@ -6,14 +6,48 @@ import {
     MultiSignatureTransactionStatus,
     TransactionStatus,
     Dispatch,
+    instanceOfAccountTransaction,
+    instanceOfUpdateAccountCredentials,
+    Transaction,
 } from './types';
 import {
     confirmTransaction,
     rejectTransaction,
 } from '../features/TransactionSlice';
 import { getPendingTransactions } from '../database/TransactionDao';
-import { getStatus, getDataObject } from './transactionHelpers';
+import {
+    getStatus,
+    StatusResponse,
+    isSuccessfulTransaction,
+} from './transactionHelpers';
 import getTransactionHash from './transactionHash';
+import { updateSignatureThreshold } from '~/features/AccountSlice';
+import { updateCredentialIndex } from '~/features/CredentialSlice';
+
+export function transactionPerformConsequence(
+    dispatch: Dispatch,
+    transaction: Transaction,
+    response: StatusResponse
+) {
+    if (isSuccessfulTransaction(Object.values(response.outcomes))) {
+        if (instanceOfAccountTransaction(transaction)) {
+            if (instanceOfUpdateAccountCredentials(transaction)) {
+                transaction.payload.addedCredentials.forEach(
+                    ({ index, value }) =>
+                        updateCredentialIndex(dispatch, value.credId, index)
+                );
+                transaction.payload.removedCredIds.forEach((credId) =>
+                    updateCredentialIndex(dispatch, credId, undefined)
+                );
+                updateSignatureThreshold(
+                    dispatch,
+                    transaction.sender,
+                    transaction.payload.newThreshold
+                );
+            }
+        }
+    }
+}
 
 /**
  * Poll for the transaction status of the provided multi signature transaction proposal, and
@@ -29,17 +63,18 @@ export async function getMultiSignatureTransactionStatus(
 
     const transactionHash = getTransactionHash(transaction);
 
-    const status = await getStatus(transactionHash);
+    const response = await getStatus(transactionHash);
 
     const updatedProposal = {
         ...proposal,
     };
 
-    switch (status) {
+    switch (response.status) {
         case TransactionStatus.Rejected:
             updatedProposal.status = MultiSignatureTransactionStatus.Failed;
             break;
         case TransactionStatus.Finalized:
+            transactionPerformConsequence(dispatch, transaction, response);
             updatedProposal.status = MultiSignatureTransactionStatus.Finalized;
             break;
         default:
@@ -55,14 +90,13 @@ export async function getMultiSignatureTransactionStatus(
  * Wait for the transaction to be finalized (or rejected) and update accordingly
  */
 export async function monitorTransactionStatus(transactionHash: string) {
-    const status = await getStatus(transactionHash);
-    switch (status) {
+    const response = await getStatus(transactionHash);
+    switch (response.status) {
         case TransactionStatus.Rejected:
             rejectTransaction(transactionHash);
             break;
         case TransactionStatus.Finalized: {
-            const dataObject = await getDataObject(transactionHash);
-            confirmTransaction(transactionHash, dataObject);
+            confirmTransaction(transactionHash, response.outcomes);
             break;
         }
         default:

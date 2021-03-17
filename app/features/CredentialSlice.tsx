@@ -1,7 +1,11 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '~/store/store';
-import { insertCredential, getCredentials } from '~/database/CredentialDao';
+import {
+    insertCredential,
+    getCredentials,
+    updateCredentialIndex as updateCredentialIndexInDatabase,
+} from '~/database/CredentialDao';
 import { Credential, CredentialDeploymentInformation } from '~/utils/types';
 
 interface CredentialState {
@@ -20,13 +24,29 @@ const credentialSlice = createSlice({
         addCredential: (state, input) => {
             state.credentials = [...state.credentials, input.payload];
         },
+        updateCredential: (state, update) => {
+            const { credId, ...fields } = update.payload;
+            const index = state.credentials.findIndex(
+                (cred) => cred.credId === credId
+            );
+            if (index > -1) {
+                state.credentials[index] = {
+                    ...state.credentials[index],
+                    ...fields,
+                };
+            }
+        },
     },
 });
 
 export const credentialsSelector = (state: RootState) =>
     state.credentials.credentials;
 
-export const { updateCredentials, addCredential } = credentialSlice.actions;
+export const {
+    updateCredentials,
+    addCredential,
+    updateCredential,
+} = credentialSlice.actions;
 
 export async function loadCredentials(dispatch: Dispatch) {
     const credentials: Credential[] = await getCredentials();
@@ -56,6 +76,15 @@ export async function insertNewCredential(
     };
     await insertCredential(parsed);
     return dispatch(addCredential(parsed));
+}
+
+export async function updateCredentialIndex(
+    dispatch: Dispatch,
+    credId: string,
+    credentialIndex: number | undefined
+) {
+    updateCredentialIndexInDatabase(credId, credentialIndex);
+    return dispatch(updateCredential({ credId, credentialIndex }));
 }
 
 export default credentialSlice.reducer;

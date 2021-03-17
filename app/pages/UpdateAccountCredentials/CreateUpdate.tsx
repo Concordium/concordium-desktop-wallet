@@ -47,7 +47,7 @@ export default function CreateUpdate({
         }
         const transaction = await createUpdateCredentialsTransaction(
             account.address,
-            addedCredentials.map((cred, i) => ({ index: i + 2, value: cred })),
+            addedCredentials.map((cred, i) => ({ index: i + 1, value: cred })),
             removedCredIds,
             newThreshold
         );

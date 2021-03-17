@@ -182,14 +182,9 @@ export async function createUpdateCredentialsTransaction(
     return transaction;
 }
 
-export async function getDataObject(
-    transactionHash: string
-): Promise<Record<string, TransactionEvent>> {
-    const data = (await getTransactionStatus(transactionHash)).getValue();
-    if (data === 'null') {
-        throw new Error('Unexpected missing data object!');
-    }
-    return JSON.parse(data);
+export interface StatusResponse {
+    status: TransactionStatus;
+    outcomes: Record<string, TransactionEvent>;
 }
 
 /**
@@ -201,7 +196,7 @@ export async function getDataObject(
 export async function getStatus(
     transactionHash: string,
     pollingIntervalMs = 20000
-): Promise<TransactionStatus> {
+): Promise<StatusResponse> {
     return new Promise((resolve) => {
         const interval = setInterval(async () => {
             let response;
@@ -216,14 +211,14 @@ export async function getStatus(
             }
             if (response === 'null') {
                 clearInterval(interval);
-                resolve(TransactionStatus.Rejected);
+                resolve({ status: TransactionStatus.Rejected, outcomes: {} });
                 return;
             }
 
-            const { status } = JSON.parse(response);
-            if (status === 'finalized') {
+            const parsedResponse = JSON.parse(response);
+            if (parsedResponse.status === 'finalized') {
                 clearInterval(interval);
-                resolve(TransactionStatus.Finalized);
+                resolve(parsedResponse);
             }
         }, pollingIntervalMs);
     });
@@ -266,4 +261,11 @@ export function buildTransactionAccountSignature(
         credentialAccountIndex
     ] = transactionCredentialSignature;
     return transactionAccountSignature;
+}
+
+export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
+    return outcomes.reduce(
+        (accu, event) => accu && event.result.outcome === 'success',
+        true
+    );
 }
