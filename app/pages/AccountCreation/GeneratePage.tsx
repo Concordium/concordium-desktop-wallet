@@ -85,6 +85,7 @@ export default function AccountCreationGenerate({
             dispatch,
             accountName,
             identity.id,
+            false,
             accountAddress,
             transactionId
         );

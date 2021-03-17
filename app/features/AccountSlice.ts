@@ -155,6 +155,7 @@ export async function addPendingAccount(
     dispatch: Dispatch,
     accountName: string,
     identityId: number,
+    isInitial: boolean,
     accountAddress = '',
     deploymentTransactionId: string | undefined = undefined
 ) {
@@ -165,6 +166,7 @@ export async function addPendingAccount(
         address: accountAddress,
         signatureThreshold: 1,
         maxTransactionId: 0,
+        isInitial,
         deploymentTransactionId,
     };
     await insertAccount(account);

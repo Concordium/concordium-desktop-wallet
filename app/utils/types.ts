@@ -113,6 +113,7 @@ export interface Account {
     selfAmounts?: string;
     maxTransactionId: number;
     deploymentTransactionId?: string;
+    isInitial: boolean;
 }
 
 export enum TransactionKindString {
