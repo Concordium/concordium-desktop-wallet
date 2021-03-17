@@ -101,7 +101,6 @@ export enum AccountStatus {
  */
 
 export interface Account {
-    accountNumber: number;
     name: string;
     address: Hex;
     identityId: number;
@@ -244,6 +243,7 @@ export interface CredentialDeploymentInformation
 export interface Credential {
     accountAddress: string;
     external: boolean;
+    credentialIndex?: number;
     credentialNumber?: number;
     identityId?: number;
     credId: Hex;

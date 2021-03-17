@@ -5,7 +5,6 @@ export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
         accountsTable,
         (table: Knex.TableBuilder) => {
-            table.integer('accountNumber');
             table.string('name');
             table.string('status');
             table.string('address');
