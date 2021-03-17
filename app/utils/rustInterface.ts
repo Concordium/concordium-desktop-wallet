@@ -151,7 +151,7 @@ async function createUnsignedCredentialInfo(
 
     const identityProvider = JSON.parse(identity.identityProvider);
 
-    let credentialInput: Record<string,any> = {
+    const credentialInput: Record<string, unknown> = {
         ipInfo: identityProvider.ipInfo,
         arsInfos: identityProvider.arsInfos,
         global,

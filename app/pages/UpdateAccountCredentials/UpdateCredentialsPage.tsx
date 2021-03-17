@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
-import { credentialsSelector } from '~/features/CredentialSlice';
 import { push } from 'connected-react-router';
 import { Grid, List } from 'semantic-ui-react';
+import { credentialsSelector } from '~/features/CredentialSlice';
 import Button from '../../cross-app-components/Button';
 import {
     Account,
@@ -186,26 +186,27 @@ export default function UpdateCredentialPage(): JSX.Element {
     >([]);
     const [proposalId, setProposalId] = useState<number>(-1);
     useEffect(() => {
-        console.log(account);
         if (account) {
-            console.log(credentials);
-            const currentCredentials = credentials.filter((cred) => cred.accountAddress === account.address && (cred.credentialIndex || cred.credentialIndex === 0) );
-            console.log(currentCredentials);
+            const currentCredentials = credentials.filter(
+                (cred) =>
+                    cred.accountAddress === account.address &&
+                    (cred.credentialIndex || cred.credentialIndex === 0)
+            );
             setCurrentCredentialCount(currentCredentials.length);
             setNewThreshold(
                 (previous) => account.signatureThreshold || previous
             );
             setCredentialIds(
-                currentCredentials.map(({credId, credentialIndex}) => {
+                currentCredentials.map(({ credId, credentialIndex }) => {
                     const status =
                         credentialIndex === 0
-                        ? CredentialStatus.Original
-                        : CredentialStatus.Unchanged;
+                            ? CredentialStatus.Original
+                            : CredentialStatus.Unchanged;
                     return [credId, status];
                 })
             );
         }
-    }, [account]);
+    }, [account, credentials]);
 
     function updateCredentialStatus([removedId, status]: [
         string,

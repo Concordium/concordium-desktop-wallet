@@ -52,7 +52,7 @@ export async function insertNewCredential(
         accountAddress,
         credentialNumber,
         identityId,
-        credentialIndex
+        credentialIndex,
     };
     await insertCredential(parsed);
     return dispatch(addCredential(parsed));

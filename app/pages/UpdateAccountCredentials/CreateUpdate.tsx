@@ -47,7 +47,7 @@ export default function CreateUpdate({
         }
         const transaction = await createUpdateCredentialsTransaction(
             account.address,
-            addedCredentials.map((cred, i) => ({index: i + 1, value: cred})),
+            addedCredentials.map((cred, i) => ({ index: i + 2, value: cred })),
             removedCredIds,
             newThreshold
         );
@@ -62,7 +62,6 @@ export default function CreateUpdate({
             path
         );
 
-        console.log(transaction);
         const multiSignatureTransaction: Partial<MultiSignatureTransaction> = {
             // The JSON serialization of the transaction
             transaction: stringify({

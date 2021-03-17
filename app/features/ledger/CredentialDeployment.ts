@@ -48,7 +48,7 @@ export async function signCredentialValues(
     const credId = Buffer.from(credentialDeployment.credId, 'hex');
 
     const identityProviderIdentity = Buffer.alloc(4);
-    identityProviderIdentity.writeInt32BE(credentialDeployment.ipIdentity, 0);
+    identityProviderIdentity.writeUInt32BE(credentialDeployment.ipIdentity, 0);
 
     const arThreshold = Uint8Array.of(credentialDeployment.revocationThreshold);
     const arListLength = Object.entries(credentialDeployment.arData).length;
@@ -97,7 +97,6 @@ export async function signCredentialValues(
     const attributeListLength = revealedAttributeTags.length;
     const attributeListLengthAsBytes = Buffer.alloc(2);
     attributeListLengthAsBytes.writeUInt16BE(attributeListLength, 0);
-    console.log(attributeListLength);
 
     data = Buffer.concat([validTo, createdAt, attributeListLengthAsBytes]);
     await transport.send(0xe0, ins, p1, p2, data);
@@ -127,14 +126,12 @@ export async function signCredentialProofs(
     p2: number
 ) {
     const proofLength = Buffer.alloc(4);
-    proofLength.writeInt32BE(proofs.length, 0);
+    proofLength.writeUInt32BE(proofs.length, 0);
     let p1 = 0x07;
-    console.log('1');
     await transport.send(0xe0, ins, p1, p2, proofLength);
 
     p1 = 0x08;
 
-    console.log('2');
     let i = 0;
     while (i < proofs.length) {
         // eslint-disable-next-line  no-await-in-loop
@@ -147,12 +144,11 @@ export async function signCredentialProofs(
         );
         i += 255;
     }
-    console.log('3');
 }
 
 function serializeIdOwnerShipProofs(proofs: IdOwnershipProofs) {
     const proofIdCredPub = Buffer.alloc(4);
-    proofIdCredPub.writeInt32BE(
+    proofIdCredPub.writeUInt32BE(
         Object.entries(proofs.proofIdCredPub).length,
         0
     );
@@ -160,7 +156,7 @@ function serializeIdOwnerShipProofs(proofs: IdOwnershipProofs) {
     const idCredPubProofs = Buffer.concat(
         Object.entries(proofs.proofIdCredPub).map(([index, value]) => {
             const proof = Buffer.alloc(4 + 96);
-            proof.writeInt32BE(parseInt(index, 10), 0);
+            proof.writeUInt32BE(parseInt(index, 10), 0);
             proof.write(value, 4, 100, 'hex');
             return proof;
         })

@@ -28,7 +28,6 @@ import { insertNewCredential } from '../../features/CredentialSlice';
 import { globalSelector } from '../../features/GlobalSlice';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import ErrorModal from '../../components/SimpleErrorModal';
-import { serializeCredentialDeploymentInformation } from '~/utils/serializationHelpers';
 
 interface Props {
     accountName: string;
@@ -54,12 +53,9 @@ export default function AccountCreationGenerate({
 
     async function sendCredential({
         credentialDeploymentInfoHex,
-        credentialDeploymentInfo,
         accountAddress,
     }: CredentialDeploymentDetails) {
         const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
-        console.log(credentialDeploymentInfoHex);
-        console.log(serializeCredentialDeploymentInformation(credentialDeploymentInfo));
 
         try {
             const response = await sendTransaction(payload);

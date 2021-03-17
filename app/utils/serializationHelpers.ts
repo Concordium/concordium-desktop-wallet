@@ -74,7 +74,7 @@ export function serializeVerifyKey(key: VerifyKey) {
     }
     const keyBuffer = Buffer.from(key.verifyKey, 'hex');
     const schemeBuffer = Buffer.alloc(1);
-    schemeBuffer.writeInt8(schemeId, 0);
+    schemeBuffer.writeUInt8(schemeId, 0);
     return Buffer.concat([schemeBuffer, keyBuffer]);
 }
 
@@ -154,7 +154,6 @@ export function serializeCredentialDeploymentInformation(
         const data = Buffer.alloc(2);
         data.writeUInt8(parseInt(tag, 10), 0);
         data.writeUInt8(serializedAttributeValue.length, 1);
-        console.log(data);
         buffers.push(data);
         buffers.push(serializedAttributeValue);
     });

@@ -214,7 +214,6 @@ export async function getStatus(
                 // interval and try again.
                 return;
             }
-            console.log(response);
             if (response === 'null') {
                 clearInterval(interval);
                 resolve(TransactionStatus.Rejected);

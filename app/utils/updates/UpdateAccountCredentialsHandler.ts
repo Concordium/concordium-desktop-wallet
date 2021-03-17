@@ -31,7 +31,7 @@ export default class UpdateAccountCredentialsHandler
         );
     }
 
-    signTransaction(
+    async signTransaction(
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient
     ) {

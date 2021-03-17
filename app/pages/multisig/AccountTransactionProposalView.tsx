@@ -66,7 +66,6 @@ export default function AccountTransactionProposalView() {
                 'The proposal page should not be loaded without a proposal in the state.'
             );
         }
-        console.log('test');
         const payload = serializeTransaction(
             transaction,
             () => transaction.signature

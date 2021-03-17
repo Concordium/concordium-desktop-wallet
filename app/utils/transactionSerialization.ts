@@ -25,8 +25,7 @@ import {
 } from './serializationHelpers';
 
 function putString(value: string) {
-    // TODO: do we need to supply the length, encoding?
-    return Buffer.from(value);
+    return Buffer.from(value, 'hex');
 }
 
 function serializeSimpleTransfer(payload: SimpleTransferPayload) {
@@ -77,16 +76,17 @@ function serializeTransferToEncypted(payload: TransferToEncryptedPayload) {
 
 function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
     const transactionType = Buffer.alloc(1);
-    transactionType.writeInt8(TransactionKind.Update_credentials, 0);
+    transactionType.writeUInt8(TransactionKind.Update_credentials, 0);
 
-    console.log(payload.addedCredentials);
     const serializedNewCredentials = serializeList(
         payload.addedCredentials,
         putInt8,
-        ({index,value}) => Buffer.concat([putInt8(index), serializeCredentialDeploymentInformation(value)])
+        ({ index, value }) =>
+            Buffer.concat([
+                putInt8(index),
+                serializeCredentialDeploymentInformation(value),
+            ])
     );
-    console.log(serializedNewCredentials);
-    console.log('test');
 
     const serializedRemovedCredentials = serializeList(
         payload.removedCredIds,
@@ -95,7 +95,7 @@ function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
     );
 
     const newThreshold = Buffer.alloc(1);
-    newThreshold.writeInt8(payload.newThreshold, 0);
+    newThreshold.writeUInt8(payload.newThreshold, 0);
 
     return Buffer.concat([
         transactionType,
@@ -128,7 +128,6 @@ export function serializeTransferPayload(
     kind: TransactionKind,
     payload: TransactionPayload
 ): Buffer {
-    console.log(kind);
     switch (kind) {
         case TransactionKind.Simple_transfer:
             return serializeSimpleTransfer(payload as SimpleTransferPayload);
@@ -156,7 +155,7 @@ function serializeSignature(signatures: TransactionAccountSignature) {
 
     const putSignature = (signature: Signature) => {
         const length = Buffer.alloc(2);
-        length.writeInt16BE(signature.length, 0);
+        length.writeUInt16BE(signature.length, 0);
         return Buffer.concat([length, signature]);
     };
     const putCredentialSignatures = (credSig: TransactionCredentialSignature) =>
