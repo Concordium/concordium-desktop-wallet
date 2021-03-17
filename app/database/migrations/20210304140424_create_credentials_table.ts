@@ -19,6 +19,8 @@ export async function up(knex: Knex): Promise<void> {
                 .references('id')
                 .inTable(identitiesTable);
             table.json('policy');
+            table.unique(['credentialIndex', 'accountAddress']);
+            table.unique(['credentialNumber', 'identityId']);
         }
     );
 }
