@@ -331,9 +331,9 @@ pub fn decrypt_amounts_aux(
     let prf_key_string: String = try_get(&v, "prfKey")?;
     let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
 
-    let account_number: u8 = try_get(&v, "accountNumber")?;
+    let credential_number: u8 = try_get(&v, "credentialNumber")?;
 
-    let scalar: Fr = prf_key.prf_exponent(account_number)?;
+    let scalar: Fr = prf_key.prf_exponent(credential_number)?;
 
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
     let secret_key = elgamal::SecretKey {

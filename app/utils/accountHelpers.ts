@@ -16,5 +16,5 @@ export function isValidAddress(address: string): boolean {
 }
 
 export function isInitialAccount(account: Account): boolean {
-    return account.accountNumber === 0;
+    return !account.deploymentTransactionId; // TODO: use credentials
 }

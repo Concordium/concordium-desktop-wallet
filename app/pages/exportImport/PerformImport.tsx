@@ -46,12 +46,7 @@ type AddressBookEntryKey = keyof AddressBookEntry;
 type CredentialKey = keyof Credential;
 
 export const identityFields: IdentityKey[] = ['id', 'name', 'randomness']; // TODO are there any other fields we should check?
-export const accountFields: AccountKey[] = [
-    'name',
-    'address',
-    'accountNumber',
-    'identityId',
-];
+export const accountFields: AccountKey[] = ['name', 'address', 'identityId'];
 export const addressBookFields: AddressBookEntryKey[] = [
     'name',
     'address',
