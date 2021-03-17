@@ -10,7 +10,7 @@ export const useIsFirstRender = () => {
     return ref.current;
 };
 
-export const useUpdateEffect: typeof useEffect = (effect) => {
+export const useUpdateEffect: typeof useEffect = (effect, deps) => {
     const isFirstRender = useIsFirstRender();
 
     useEffect(() => {
@@ -18,5 +18,6 @@ export const useUpdateEffect: typeof useEffect = (effect) => {
             return undefined;
         }
         return effect();
-    }, [isFirstRender, effect]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, deps);
 };
