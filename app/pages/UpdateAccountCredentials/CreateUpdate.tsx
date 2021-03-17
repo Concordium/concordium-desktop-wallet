@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     Account,
-    CredentialDeploymentInformation,
+    AddedCredential,
     MultiSignatureTransactionStatus,
     MultiSignatureTransaction,
 } from '../../utils/types';
@@ -18,7 +18,7 @@ import { addProposal } from '../../features/MultiSignatureSlice';
 interface Props {
     setReady: (ready: boolean) => void;
     account: Account | undefined;
-    addedCredentials: CredentialDeploymentInformation[];
+    addedCredentials: AddedCredential[];
     removedCredIds: string[];
     newThreshold: number;
     setProposalId: (id: number) => void;
@@ -47,7 +47,7 @@ export default function CreateUpdate({
         }
         const transaction = await createUpdateCredentialsTransaction(
             account.address,
-            addedCredentials.map((cred, i) => ({ index: i + 1, value: cred })),
+            addedCredentials,
             removedCredIds,
             newThreshold
         );

@@ -6,6 +6,7 @@ import { Grid, List } from 'semantic-ui-react';
 import { credentialsSelector } from '~/features/CredentialSlice';
 import Button from '../../cross-app-components/Button';
 import {
+    Credential,
     Account,
     Identity,
     CredentialDeploymentInformation,
@@ -22,6 +23,24 @@ import styles from './UpdateAccountCredentials.module.scss';
 import ConfirmPage from './ConfirmPage';
 
 const placeHolderText = 'To be determined';
+
+function assignIndices<T>(items: T[], usedIndices: number[]) {
+    let candidate = 1;
+    let i = 0;
+    const assigned = [];
+    while (i < items.length) {
+        if (usedIndices.includes(candidate)) {
+            candidate += 1;
+        } else {
+            assigned.push({
+                index: candidate,
+                value: items[i],
+            });
+            i += 1;
+        }
+    }
+    return assigned;
+}
 
 function nextLocation(currentLocation: string, proposalId: number) {
     switch (currentLocation) {
@@ -173,9 +192,9 @@ export default function UpdateCredentialPage(): JSX.Element {
     const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
     const [identity, setIdentity] = useState<Identity | undefined>();
-    const [currentCredentialCount, setCurrentCredentialCount] = useState<
-        number | undefined
-    >();
+    const [currentCredentials, setCurrentCredentials] = useState<Credential[]>(
+        []
+    );
 
     const [newThreshold, setNewThreshold] = useState<number | undefined>();
     const [credentialIds, setCredentialIds] = useState<
@@ -187,17 +206,17 @@ export default function UpdateCredentialPage(): JSX.Element {
     const [proposalId, setProposalId] = useState<number>(-1);
     useEffect(() => {
         if (account) {
-            const currentCredentials = credentials.filter(
+            const credentialsOfAccount = credentials.filter(
                 (cred) =>
                     cred.accountAddress === account.address &&
                     (cred.credentialIndex || cred.credentialIndex === 0)
             );
-            setCurrentCredentialCount(currentCredentials.length);
+            setCurrentCredentials(credentialsOfAccount);
             setNewThreshold(
                 (previous) => account.signatureThreshold || previous
             );
             setCredentialIds(
-                currentCredentials.map(({ credId, credentialIndex }) => {
+                credentialsOfAccount.map(({ credId, credentialIndex }) => {
                     const status =
                         credentialIndex === 0
                             ? CredentialStatus.Original
@@ -216,8 +235,8 @@ export default function UpdateCredentialPage(): JSX.Element {
             setCredentialIds((currentCredentialIds) =>
                 currentCredentialIds.filter(([credId]) => credId !== removedId)
             );
-            setNewCredentials((currentCredentials) =>
-                currentCredentials.filter(({ credId }) => credId !== removedId)
+            setNewCredentials((creds) =>
+                creds.filter(({ credId }) => credId !== removedId)
             );
         } else if (
             status === CredentialStatus.Unchanged ||
@@ -239,15 +258,11 @@ export default function UpdateCredentialPage(): JSX.Element {
         if (!account?.signatureThreshold) {
             throw new Error('Unexpected missing account/signatureThreshold');
         }
-        if (currentCredentialCount === undefined) {
-            throw new Error('Unexpected missing credential count');
-        }
-
         return (
             <ConfirmPage
                 setReady={setReady}
                 currentThreshold={account.signatureThreshold}
-                currentCredentialAmount={currentCredentialCount}
+                currentCredentialAmount={currentCredentials.length}
                 newCredentialAmount={
                     credentialIds.filter(
                         ([, status]) => status !== CredentialStatus.Removed
@@ -262,11 +277,23 @@ export default function UpdateCredentialPage(): JSX.Element {
         if (!newThreshold) {
             throw new Error('Unexpected missing threshold');
         }
+        const usedIndices: number[] = currentCredentials
+            .filter(({ credId }) => {
+                const currentStatus = credentialIds.find(
+                    ([id]) => credId === id
+                );
+                return (
+                    currentStatus &&
+                    currentStatus[1] === CredentialStatus.Unchanged
+                );
+            })
+            .map(({ credentialIndex }) => credentialIndex || 0);
+
         return (
             <CreateUpdate
                 setReady={setReady}
                 account={account}
-                addedCredentials={newCredentials}
+                addedCredentials={assignIndices(newCredentials, usedIndices)}
                 removedCredIds={credentialIds
                     .filter(([, status]) => status === CredentialStatus.Removed)
                     .map(([id]) => id)}
@@ -303,7 +330,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                     newThreshold
                                 )}
                                 {displayCredentialCount(
-                                    currentCredentialCount,
+                                    currentCredentials.length,
                                     credentialIds.length
                                 )}
                             </List>
