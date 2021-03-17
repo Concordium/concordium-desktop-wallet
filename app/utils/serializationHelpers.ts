@@ -132,11 +132,11 @@ export function serializeCredentialDeploymentInformation(
     buffers.push(Uint8Array.of(credential.credentialPublicKeys.threshold));
     buffers.push(Buffer.from(credential.credId, 'hex'));
     buffers.push(encodeWord32(credential.ipIdentity));
-    buffers.push(encodeWord16(credential.revocationThreshold));
+    buffers.push(putInt8(credential.revocationThreshold));
     buffers.push(
         serializeMap(
             credential.arData,
-            putInt8,
+            encodeWord16,
             (key) => encodeWord32(parseInt(key, 10)),
             (arData) => Buffer.from(arData.encIdCredPubShare, 'hex')
         )
@@ -154,6 +154,7 @@ export function serializeCredentialDeploymentInformation(
         const data = Buffer.alloc(2);
         data.writeUInt8(parseInt(tag, 10), 0);
         data.writeUInt8(serializedAttributeValue.length, 1);
+        console.log(data);
         buffers.push(data);
         buffers.push(serializedAttributeValue);
     });

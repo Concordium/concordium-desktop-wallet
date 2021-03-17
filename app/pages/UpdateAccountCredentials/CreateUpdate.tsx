@@ -62,6 +62,7 @@ export default function CreateUpdate({
             path
         );
 
+        console.log(transaction);
         const multiSignatureTransaction: Partial<MultiSignatureTransaction> = {
             // The JSON serialization of the transaction
             transaction: stringify({

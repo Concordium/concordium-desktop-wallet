@@ -151,7 +151,7 @@ async function createUnsignedCredentialInfo(
 
     const identityProvider = JSON.parse(identity.identityProvider);
 
-    const credentialInput = {
+    let credentialInput: Record<string,any> = {
         ipInfo: identityProvider.ipInfo,
         arsInfos: identityProvider.arsInfos,
         global,
@@ -170,8 +170,10 @@ async function createUnsignedCredentialInfo(
         },
         prfKey,
         idCredSec,
-        address,
     };
+    if (address) {
+        credentialInput.address = address;
+    }
 
     const unsignedCredentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createUnsignedCredential,

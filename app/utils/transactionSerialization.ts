@@ -79,11 +79,15 @@ function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
     const transactionType = Buffer.alloc(1);
     transactionType.writeInt8(TransactionKind.Update_credentials, 0);
 
+    console.log(payload.addedCredentials);
     const serializedNewCredentials = serializeList(
         payload.addedCredentials,
         putInt8,
         ({index,value}) => Buffer.concat([putInt8(index), serializeCredentialDeploymentInformation(value)])
     );
+    console.log(serializedNewCredentials);
+    console.log('test');
+
     const serializedRemovedCredentials = serializeList(
         payload.removedCredIds,
         putInt8,
@@ -124,6 +128,7 @@ export function serializeTransferPayload(
     kind: TransactionKind,
     payload: TransactionPayload
 ): Buffer {
+    console.log(kind);
     switch (kind) {
         case TransactionKind.Simple_transfer:
             return serializeSimpleTransfer(payload as SimpleTransferPayload);

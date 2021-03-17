@@ -164,7 +164,7 @@ export async function createUpdateCredentialsTransaction(
     removedCredIds: string[],
     newThreshold: number,
     expiry: bigint = getDefaultExpiry(),
-    energyAmount = '200'
+    energyAmount = '50000'
 ) {
     const { nonce } = await getNextAccountNonce(sender);
     const transaction: UpdateAccountCredentials = {
@@ -214,6 +214,7 @@ export async function getStatus(
                 // interval and try again.
                 return;
             }
+            console.log(response);
             if (response === 'null') {
                 clearInterval(interval);
                 resolve(TransactionStatus.Rejected);

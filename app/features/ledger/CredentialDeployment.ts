@@ -97,6 +97,7 @@ export async function signCredentialValues(
     const attributeListLength = revealedAttributeTags.length;
     const attributeListLengthAsBytes = Buffer.alloc(2);
     attributeListLengthAsBytes.writeUInt16BE(attributeListLength, 0);
+    console.log(attributeListLength);
 
     data = Buffer.concat([validTo, createdAt, attributeListLengthAsBytes]);
     await transport.send(0xe0, ins, p1, p2, data);
@@ -128,10 +129,12 @@ export async function signCredentialProofs(
     const proofLength = Buffer.alloc(4);
     proofLength.writeInt32BE(proofs.length, 0);
     let p1 = 0x07;
+    console.log('1');
     await transport.send(0xe0, ins, p1, p2, proofLength);
 
     p1 = 0x08;
 
+    console.log('2');
     let i = 0;
     while (i < proofs.length) {
         // eslint-disable-next-line  no-await-in-loop
@@ -144,6 +147,7 @@ export async function signCredentialProofs(
         );
         i += 255;
     }
+    console.log('3');
 }
 
 function serializeIdOwnerShipProofs(proofs: IdOwnershipProofs) {
@@ -209,9 +213,9 @@ export async function signNewCredentialDeployment(
     expiry: bigint,
     path: number[]
 ): Promise<Buffer> {
-    const expiryBuffer = Buffer.alloc(1 + 64);
-    expiryBuffer.writeInt8(0, 0);
-    expiryBuffer.writeBigInt64BE(expiry, 1);
+    const expiryBuffer = Buffer.alloc(1 + 8);
+    expiryBuffer.writeUInt8(0, 0);
+    expiryBuffer.writeBigUInt64BE(expiry, 1);
     return signCredentialDeployment(
         transport,
         credentialDeployment,
@@ -227,7 +231,7 @@ export async function signExistingCredentialDeployment(
     path: number[]
 ): Promise<Buffer> {
     const accountBuffer = Buffer.alloc(1 + 32);
-    accountBuffer.writeInt8(1, 0);
+    accountBuffer.writeUInt8(1, 0);
     putBase58Check(accountBuffer, 1, accountAddress);
     return signCredentialDeployment(
         transport,

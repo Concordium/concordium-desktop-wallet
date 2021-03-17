@@ -55,6 +55,7 @@ export default async function signUpdateCredentials(
         const [index, credentialInformation] = addedCredentials[i];
         data = Buffer.alloc(1);
         data.writeUInt8(index, 0);
+        console.log(index);
         // eslint-disable-next-line  no-await-in-loop
         p2 = 0x01;
         await transport.send(0xe0, ins, p1, p2, data);
@@ -74,9 +75,12 @@ export default async function signUpdateCredentials(
     data = Buffer.alloc(1);
     data.writeUInt8(removedCredentialsLength, 0);
 
+    console.log('1')
     await transport.send(0xe0, ins, p1, p2, data);
+    console.log('1')
 
     p2 = 0x04;
+    console.log('1')
     for (let i = 0; i < removedCredentialsLength; i += 1) {
         const removedCredId = transaction.payload.removedCredIds[i];
         data = Buffer.from(removedCredId, 'hex');
@@ -84,12 +88,15 @@ export default async function signUpdateCredentials(
         // eslint-disable-next-line  no-await-in-loop
         await transport.send(0xe0, ins, p1, p2, data);
     }
+    console.log('1')
 
-    p2 = 0x05d;
+    p2 = 0x05;
     data = Buffer.alloc(1);
     data.writeUInt8(transaction.payload.newThreshold, 0);
 
+    console.log('1')
     const response = await transport.send(0xe0, ins, p1, p2, data);
+    console.log('1')
 
     const signature = response.slice(0, 64);
     return signature;
