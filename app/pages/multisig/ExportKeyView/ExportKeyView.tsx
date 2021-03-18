@@ -55,7 +55,7 @@ export default function ExportKeyView(): JSX.Element {
             case ExportKeyType.Level2:
                 path = getGovernanceLevel2Path();
                 break;
-            case ExportKeyType.Credential:
+            case ExportKeyType.Account:
                 // TODO Implement support for exporting account keys. They need a separate flow, as
                 // they need to provide some input to determine the key to export.
                 throw new Error(

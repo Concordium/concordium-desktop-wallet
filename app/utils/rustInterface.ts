@@ -220,7 +220,7 @@ export async function createCredentialInfo(
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
-    const signature = await ledger.signExistingCredentialDeployment(
+    const signature = await ledger.signCredentialDeploymentOnExistingAccount(
         parsed,
         address,
         path
@@ -268,7 +268,7 @@ export async function createCredentialDetails(
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
-    const signature = await ledger.signNewCredentialDeployment(
+    const signature = await ledger.signCredentialDeploymentOnNewAccount(
         parsed,
         expiry,
         path
