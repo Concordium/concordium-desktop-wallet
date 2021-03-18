@@ -18,6 +18,10 @@ import Submit from './Submit';
 import InputTimestamp, {
     InputTimestampProps,
 } from './InputTimestamp/InputTimestamp';
+import RewardDistribution, {
+    RewardDistributionProps,
+    RewardDistributionValue,
+} from './RewardDistribution/RewardDistribution';
 
 export interface FormProps<TFormValues>
     extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
@@ -67,7 +71,7 @@ function Form<TFormValues>({
 
     return (
         <FormProvider {...(formMethods ?? methods)}>
-            <form onSubmit={handleSubmit(onSubmit)} {...formProps}>
+            <form onSubmit={handleSubmit(onSubmit)} {...formProps} noValidate>
                 {children}
             </form>
         </FormProvider>
@@ -90,6 +94,11 @@ Form.Timestamp = connectWithFormControlled<Date, InputTimestampProps>(
     InputTimestamp
 );
 (Form.Timestamp as FC).displayName = 'Form.Timestamp';
+Form.RewardDistribution = connectWithFormControlled<
+    RewardDistributionValue,
+    RewardDistributionProps
+>(RewardDistribution);
+(Form.RewardDistribution as FC).displayName = 'Form.RewardDistribution';
 
 Form.Submit = Submit;
 (Form.Submit as FC).displayName = 'Form.Submit';

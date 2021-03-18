@@ -14,16 +14,14 @@ import {
 import { TransactionHandler } from '../../utils/transactionTypes';
 import { createTransactionHandler } from '../../utils/updates/HandlerFinder';
 import { insert } from '../../database/MultiSignatureProposalDao';
-import {
-    addProposal,
-    setCurrentProposal,
-} from '../../features/MultiSignatureSlice';
+import { addProposal } from '../../features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
 import SimpleErrorModal from '../../components/SimpleErrorModal';
 import { BlockSummary } from '../../utils/NodeApiTypes';
 import findAuthorizationKey from '../../utils/updates/AuthorizationHelper';
+import { selectedProposalRoute } from '../../utils/routerHelper';
 
 export interface SignInput {
     multiSignatureTransaction: MultiSignatureTransaction;
@@ -111,11 +109,10 @@ export default function SignTransactionProposalView({ location }: Props) {
         updatedMultiSigTransaction.id = entryId;
 
         // Set the current proposal in the state to the one that was just generated.
-        dispatch(setCurrentProposal(updatedMultiSigTransaction));
         dispatch(addProposal(updatedMultiSigTransaction));
 
         // Navigate to the page that displays the current proposal from the state.
-        dispatch(push(routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING));
+        dispatch(push(selectedProposalRoute(entryId)));
     }
 
     if (!transactionHash) {

@@ -9,12 +9,17 @@ import {
     TransferToEncryptedPayload,
 } from './types';
 import {
-    encodeWord16,
+    TransactionAccountSignature,
+    Signature,
+    TransactionCredentialSignature,
+} from './transactionTypes';
+import {
     encodeWord32,
     encodeWord64,
     put,
     putBase58Check,
     hashSha256,
+    serializeMap,
 } from './serializationHelpers';
 
 function serializeSimpleTransfer(payload: SimpleTransferPayload) {
@@ -102,30 +107,26 @@ export function serializeTransferPayload(
     }
 }
 
-function serializeSignature(sigs: Uint8Array[]) {
-    // Size should be 1 for number of signatures, then for each signature, index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
+function serializeSignature(signatures: TransactionAccountSignature) {
+    // Size should be 1 for number of credentials, then for each credential:
+    // 1 for the CredentialIndex, 1 for the number of signatures, then for each signature:
+    // index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
 
-    const signaturesCombinedSizes = sigs.reduce(
-        (acc, sig) => acc + sig.length,
-        0
-    );
-    const size = 1 + sigs.length * 3 + signaturesCombinedSizes;
-
-    const serialized = new Uint8Array(size);
-    serialized[0] = sigs.length; // Number of signatures (word8)
-    let index = 1;
-    for (let i = 0; i < sigs.length; i += 1) {
-        serialized[index] = i; // Key index (word8)
-        index += 1;
-        put(serialized, index, encodeWord16(sigs[i].length)); // length of signature/shortbytestring (word16)
-        index += 2;
-        put(serialized, index, sigs[i]);
-        index += sigs[i].length;
-    }
-    return serialized;
+    const putInt8 = (i: number) => Buffer.from(Uint8Array.of(i));
+    const putSignature = (signature: Signature) => {
+        const length = Buffer.alloc(2);
+        length.writeInt16BE(signature.length, 0);
+        return Buffer.concat([length, signature]);
+    };
+    const putCredentialSignatures = (credSig: TransactionCredentialSignature) =>
+        serializeMap(credSig, putInt8, putInt8, putSignature);
+    return serializeMap(signatures, putInt8, putInt8, putCredentialSignatures);
 }
 
-type SignFunction = (transaction: AccountTransaction, hash: Buffer) => [Buffer];
+type SignFunction = (
+    transaction: AccountTransaction,
+    hash: Buffer
+) => TransactionAccountSignature;
 
 function serializeUnversionedTransaction(
     transaction: AccountTransaction,

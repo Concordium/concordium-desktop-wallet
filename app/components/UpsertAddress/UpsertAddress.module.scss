@@ -1,11 +1,23 @@
 @import 'config/bundle';
 
-.content {
-    max-width: 264px;
+.header {
+    margin-top: 0;
+}
+
+.card {
+    width: 464px;
     margin: 0 auto;
+}
+
+.content {
+    width: 264px;
+    margin: 0 auto;
+    height: 300px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: space-between;
+    padding: 20px 0 40px;
 }
 
 .input {
@@ -20,5 +32,6 @@
 }
 
 .submit {
-    min-width: 239px;
+    max-width: 239px;
+    margin: 36px auto 0;
 }
