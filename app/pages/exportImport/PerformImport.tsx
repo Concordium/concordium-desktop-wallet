@@ -36,6 +36,7 @@ import {
 import {
     importCredentials,
     credentialsSelector,
+    loadCredentials,
 } from '../../features/CredentialSlice';
 import MessageModal from '../../components/MessageModal';
 import { checkDuplicates } from '../../utils/importHelpers';
@@ -165,6 +166,7 @@ async function performImport(
         importedData.credentials,
         existingData.credentials
     );
+    loadCredentials(dispatch);
 }
 
 /**
