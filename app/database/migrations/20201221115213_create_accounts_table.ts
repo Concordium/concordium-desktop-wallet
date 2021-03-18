@@ -22,6 +22,7 @@ export async function up(knex: Knex): Promise<void> {
             table.boolean('allDecrypted').defaultTo(true);
             table.integer('maxTransactionId').defaultTo(0);
             table.string('deploymentTransactionId');
+            table.boolean('isInitial').defaultTo(false);
         }
     );
 }
