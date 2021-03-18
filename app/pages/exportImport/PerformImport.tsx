@@ -29,12 +29,14 @@ import {
     accountsSelector,
 } from '../../features/AccountSlice';
 import {
+    loadAddressBook,
     importAddressBookEntry,
     addressBookSelector,
 } from '../../features/AddressBookSlice';
 import {
     importCredentials,
     credentialsSelector,
+    loadCredentials,
 } from '../../features/CredentialSlice';
 import MessageModal from '../../components/MessageModal';
 import { checkDuplicates } from '../../utils/importHelpers';
@@ -157,12 +159,14 @@ async function performImport(
         importedData.addressBook,
         existingData.addressBook
     );
+    loadAddressBook(dispatch);
     setDuplicates.addressBook(duplicateEntries);
 
     await importNewCredentials(
         importedData.credentials,
         existingData.credentials
     );
+    loadCredentials(dispatch);
 }
 
 /**
