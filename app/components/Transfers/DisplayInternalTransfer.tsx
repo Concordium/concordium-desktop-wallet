@@ -12,18 +12,17 @@ interface Props {
     fromName?: string;
 }
 
-function getTitle(transaction: TransferToEncrypted | TransferToPublic) {
+function getDetails(transaction: TransferToEncrypted | TransferToPublic) {
     if (instanceOfTransferToEncrypted(transaction)) {
-        return 'Shield amount';
+        return {
+            title: 'Shield amount',
+            amount: transaction.payload.amount,
+        };
     }
-    return 'Unshield amount';
-}
-
-function getAmount(transaction: TransferToEncrypted | TransferToPublic) {
-    if (instanceOfTransferToEncrypted(transaction)) {
-        return transaction.payload.amount;
-    }
-    return transaction.payload.transferAmount;
+    return {
+        title: 'Unshield amount',
+        amount: transaction.payload.transferAmount,
+    };
 }
 
 /**
@@ -33,9 +32,10 @@ export default function DisplayInternalTransfer({
     transaction,
     fromName,
 }: Props) {
+    const transactionDetails = getDetails(transaction);
     return (
         <List relaxed="very">
-            <h2>{getTitle(transaction)}</h2>
+            <h2>{transactionDetails.title}</h2>
             <List.Item>
                 On Account:
                 <Header>{fromName}</Header>
@@ -43,7 +43,7 @@ export default function DisplayInternalTransfer({
             </List.Item>
             <List.Item>
                 Amount:
-                <Header>{displayAsGTU(getAmount(transaction))}</Header>
+                <Header>{displayAsGTU(transactionDetails.amount)}</Header>
             </List.Item>
         </List>
     );
