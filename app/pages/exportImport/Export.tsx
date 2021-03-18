@@ -35,8 +35,9 @@ export default function Export() {
 
     async function exportData(password: string) {
         // We strip the identityName, as it is superfluous.
+        // We strip the maxTransactionId, because the transactions are not exported
         const cleanAccounts = accounts.map((acc) => {
-            const { identityName, ...other } = acc;
+            const { identityName, maxTransactionId, ...other } = acc;
             return other;
         });
         const data = {
