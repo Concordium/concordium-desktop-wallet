@@ -2,20 +2,21 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation, Link } from 'react-router-dom';
-import { Button, Header, Grid } from 'semantic-ui-react';
-import { stringify } from '../../utils/JSONHelper';
-import routes from '../../constants/routes.json';
+import { Header, Grid } from 'semantic-ui-react';
+import Button from '~/cross-app-components/Button';
+import { stringify } from '~/utils/JSONHelper';
+import routes from '~/constants/routes.json';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import { Account } from '../../utils/types';
-import { toMicroUnits } from '../../utils/gtu';
-import locations from '../../constants/transferLocations.json';
-import { TransferState } from '../../utils/transactionTypes';
+import { Account, TransferToEncrypted, TransferToPublic } from '~/utils/types';
+import { toMicroUnits } from '~/utils/gtu';
+import locations from '~/constants/transferLocations.json';
+import { TransferState } from '~/utils/transactionTypes';
 
 interface Specific<T> {
     title: string;
     amountHeader: string;
-    createTransaction: (address: string, amount: bigint) => T;
+    createTransaction: (address: string, amount: bigint) => Promise<T>;
     location: string;
 }
 
@@ -27,7 +28,9 @@ interface Props<T> {
 /**
  * Controls the flow of creating a TransferToEncrypted/TransferToPublic transfer.
  */
-export default function InternalTransfer<T>({ account, specific }: Props<T>) {
+export default function InternalTransfer<
+    T extends TransferToPublic | TransferToEncrypted
+>({ account, specific }: Props<T>) {
     const dispatch = useDispatch();
     const location = useLocation<TransferState>();
 
