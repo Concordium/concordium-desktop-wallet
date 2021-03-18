@@ -7,7 +7,7 @@ import {
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
-import signAccountChallenge from './AccountChallenge';
+import { signNewCredentialDeployment } from './CredentialDeployment';
 import {
     AccountTransaction,
     ExchangeRate,
@@ -19,6 +19,7 @@ import {
     SignedPublicKey,
     TransactionFeeDistribution,
     UpdateInstruction,
+    UnsignedCredentialDeploymentInformation,
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -94,8 +95,17 @@ export default class ConcordiumLedgerClient {
         );
     }
 
-    signAccountChallenge(challenge: Buffer, path: number[]): Promise<Buffer> {
-        return signAccountChallenge(this.transport, path, challenge);
+    signNewCredentialDeployment(
+        credentialDeployment: UnsignedCredentialDeploymentInformation,
+        expiry: bigint,
+        path: number[]
+    ): Promise<Buffer> {
+        return signNewCredentialDeployment(
+            this.transport,
+            credentialDeployment,
+            expiry,
+            path
+        );
     }
 
     signMicroGtuPerEuro(
