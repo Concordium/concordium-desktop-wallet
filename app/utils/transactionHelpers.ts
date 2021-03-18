@@ -13,6 +13,10 @@ import {
     AccountTransaction,
     TransactionPayload,
 } from './types';
+import {
+    TransactionAccountSignature,
+    TransactionCredentialSignature,
+} from './transactionTypes';
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
@@ -248,4 +252,18 @@ export function isFailed(transaction: TransferTransaction) {
         transaction.success === 0 ||
         transaction.status === TransactionStatus.Rejected
     );
+}
+/** Used to build a simple TransactionAccountSignature, with only a single signature. */
+export function buildTransactionAccountSignature(
+    credentialAccountIndex: number,
+    signatureIndex: number,
+    signature: Buffer
+): TransactionAccountSignature {
+    const transactionCredentialSignature: TransactionCredentialSignature = {};
+    transactionCredentialSignature[signatureIndex] = signature;
+    const transactionAccountSignature: TransactionAccountSignature = {};
+    transactionAccountSignature[
+        credentialAccountIndex
+    ] = transactionCredentialSignature;
+    return transactionAccountSignature;
 }

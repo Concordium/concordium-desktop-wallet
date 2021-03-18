@@ -1,8 +1,10 @@
+use crate::{
+    helpers::*,
+};
 use ps_sig::unknown_message::SigRetrievalRandomness;
-use crypto_common::*;
+use crypto_common::{types::KeyIndex, *};
 use curve_arithmetic::{Curve, Pairing};
 use std::collections::BTreeMap;
-use either::Either;
 use id::types::*;
 
 pub struct InitialAccountDataStruct {
@@ -15,8 +17,8 @@ impl PublicInitialAccountData for InitialAccountDataStruct {
         self.threshold
     }
 
-    fn get_public_keys(&self) -> Vec<VerifyKey> {
-        (&self.public_keys).to_vec()
+    fn get_public_keys(&self) -> BTreeMap<KeyIndex, VerifyKey> {
+        build_key_map(&self.public_keys)
     }
 }
 
@@ -31,8 +33,8 @@ impl PublicInitialAccountData for InitialAccountDataWithSignature {
         self.threshold
     }
 
-    fn get_public_keys(&self) -> Vec<VerifyKey> {
-        (&self.public_keys).to_vec()
+    fn get_public_keys(&self) -> BTreeMap<KeyIndex, VerifyKey> {
+        build_key_map(&self.public_keys)
     }
 }
 
@@ -66,11 +68,13 @@ pub struct AccountDataStruct {
     pub threshold: SignatureThreshold,
 }
 
-impl PublicAccountData for AccountDataStruct {
-    fn get_existing(&self) ->  Either<SignatureThreshold, AccountAddress> { Either::Left(self.threshold) }
+impl PublicCredentialData for AccountDataStruct {
+    fn get_public_keys(&self) -> BTreeMap<KeyIndex, VerifyKey> {
+        build_key_map(&self.public_keys)
+    }
 
-    fn get_public_keys(&self) -> Vec<VerifyKey> {
-        (&self.public_keys).to_vec()
+    fn get_threshold(&self) -> SignatureThreshold {
+        self.threshold
     }
 }
 
@@ -81,7 +85,7 @@ pub enum BlockItem<
     C: Curve<Scalar = P::ScalarField>,
     AttributeType: Attribute<C::Scalar>,
     > {
-    Deployment (AccountCredential<P, C, AttributeType>)
+    Deployment (AccountCredentialMessage<P, C, AttributeType>)
 }
 
 impl<

@@ -13,6 +13,8 @@ import {
 import { monitorTransactionStatus } from '../../utils/TransactionStatusPoller';
 import {
     Account,
+    LocalCredential,
+    instanceOfLocalCredential,
     AccountInfo,
     AccountTransaction,
     Global,
@@ -26,6 +28,8 @@ import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
 import { makeTransferToPublicData } from '../../utils/rustInterface';
 import PageLayout from '../../components/PageLayout';
+import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
+import { getCredentialsOfAccount } from '~/database/CredentialDao';
 
 interface Location {
     pathname: string;
@@ -47,17 +51,17 @@ async function buildEncryptedPayload(
     transaction: AccountTransaction,
     ledger: ConcordiumLedgerClient,
     global: Global,
-    account: Account,
+    credential: LocalCredential,
     accountInfo: AccountInfo
 ) {
     if (instanceOfTransferToPublic(transaction)) {
-        const prfKeySeed = await ledger.getPrfKey(account.identityId);
+        const prfKeySeed = await ledger.getPrfKey(credential.identityId);
         const data = await makeTransferToPublicData(
             transaction.payload.transferAmount,
             prfKeySeed.toString('hex'),
             global,
             accountInfo.accountEncryptedAmount,
-            account.accountNumber
+            credential.credentialNumber
         );
         return { ...transaction, payload: data.payload };
     }
@@ -67,7 +71,6 @@ async function buildEncryptedPayload(
 /**
  * Receives transaction to sign, using the ledger,
  * and then submits it.
- * TODO generalize, as right now it only really works with simple transfers.
  */
 export default function SubmitTransfer({ location }: Props) {
     const dispatch = useDispatch();
@@ -90,30 +93,56 @@ export default function SubmitTransfer({ location }: Props) {
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
     // and then redirects to final page.
-    // TODO: Break this function up
-    async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
+    async function ledgerSignTransfer(
+        ledger: ConcordiumLedgerClient,
+        setMessage: (message: string) => void
+    ) {
+        const signatureIndex = 0;
+        const credentialAccountIndex = 0; // TODO: do we need to support other credential indices here?
+
         if (!global) {
-            throw new Error('whoops');
+            setMessage('Missing global object.');
+            return;
         }
+
+        const credential = (
+            await getCredentialsOfAccount(account.address)
+        ).find((cred) => cred.credentialIndex === credentialAccountIndex);
+
+        if (!credential || !instanceOfLocalCredential(credential)) {
+            setMessage(
+                'Unable to sign transfer, because we were unable to find credential'
+            );
+            return;
+        }
+
         transaction = await buildEncryptedPayload(
             transaction,
             ledger,
             global,
-            account,
+            credential,
             accountInfoMap[account.address]
         );
+
         const path = getAccountPath({
             identityIndex: account.identityId,
-            accountIndex: account.accountNumber,
-            signatureIndex: 0,
+            accountIndex: credential.credentialNumber,
+            signatureIndex,
         });
         const signature: Buffer = await ledger.signTransfer(transaction, path);
-        const serializedTransaction = serializeTransaction(transaction, () => [
-            signature,
-        ]);
-        const transactionHash = getTransactionHash(transaction, () => [
-            signature,
-        ]).toString('hex');
+        const signatureStructured = buildTransactionAccountSignature(
+            credentialAccountIndex,
+            signatureIndex,
+            signature
+        );
+        const serializedTransaction = serializeTransaction(
+            transaction,
+            () => signatureStructured
+        );
+        const transactionHash = getTransactionHash(
+            transaction,
+            () => signatureStructured
+        ).toString('hex');
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
             addPendingTransaction(transaction, transactionHash);

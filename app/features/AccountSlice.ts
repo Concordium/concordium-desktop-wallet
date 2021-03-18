@@ -5,12 +5,10 @@ import {
     getAllAccounts,
     insertAccount,
     updateAccount,
-    getAccountsOfIdentity,
     removeAccount as removeAccountFromDatabase,
 } from '../database/AccountDao';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
-    CredentialDeploymentInformation,
     AccountStatus,
     TransactionStatus,
     AccountEncryptedAmount,
@@ -157,22 +155,19 @@ export async function addPendingAccount(
     dispatch: Dispatch,
     accountName: string,
     identityId: number,
-    accountNumber: number,
+    isInitial: boolean,
     accountAddress = '',
-    credentialDeploymentInfo:
-        | CredentialDeploymentInformation
-        | undefined = undefined,
-    credentialDeploymentHash = ''
+    deploymentTransactionId: string | undefined = undefined
 ) {
     const account: Account = {
         name: accountName,
         identityId,
         status: AccountStatus.Pending,
-        accountNumber,
         address: accountAddress,
-        credential: JSON.stringify(credentialDeploymentInfo),
-        credentialDeploymentHash,
+        signatureThreshold: 1,
         maxTransactionId: 0,
+        isInitial,
+        deploymentTransactionId,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -181,13 +176,11 @@ export async function addPendingAccount(
 export async function confirmInitialAccount(
     dispatch: Dispatch,
     accountName: string,
-    accountAddress: string,
-    credential: CredentialDeploymentInformation
+    accountAddress: string
 ) {
     await updateAccount(accountName, {
         status: AccountStatus.Confirmed,
         address: accountAddress,
-        credential,
     });
     return loadAccounts(dispatch);
 }
@@ -217,21 +210,12 @@ export async function confirmAccount(
     return loadAccounts(dispatch);
 }
 
-// Get The next unused account number of the identity with the given ID
-export async function getNextAccountNumber(identityId: number) {
-    const accounts: Account[] = await getAccountsOfIdentity(identityId);
-    const currentNumber = accounts.reduce(
-        (num, acc) => Math.max(num, acc.accountNumber),
-        0
-    );
-    return currentNumber + 1;
-}
-
 // Decrypts the shielded account balance of the given account, using the prfKey.
 // This function expects the prfKey to match the account's prfKey.
 export async function decryptAccountBalance(
     prfKey: string,
     account: Account,
+    credentialNumber: number,
     global: Global
 ) {
     if (!account.incomingAmounts) {
@@ -242,7 +226,7 @@ export async function decryptAccountBalance(
 
     const decryptedAmounts = await decryptAmounts(
         encryptedAmounts,
-        account,
+        credentialNumber,
         global,
         prfKey
     );

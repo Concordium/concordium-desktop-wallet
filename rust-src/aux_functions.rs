@@ -1,4 +1,5 @@
 use crate::{
+    helpers::*,
     types::*,
 };
 use wasm_bindgen::prelude::*;
@@ -9,7 +10,7 @@ extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
 }
-use crypto_common::{types::Amount, *};
+use crypto_common::{types::{KeyIndex, Amount, TransactionTime}, *};
 use encrypted_transfers::types::{AggregatedDecryptedAmount, EncryptedAmount};
 use elgamal::BabyStepGiantStep;
 use dodis_yampolskiy_prf::secret as prf;
@@ -151,10 +152,11 @@ pub fn generate_unsigned_credential_aux(
 
     let tags: Vec<AttributeTag> = try_get(&v, "revealedAttributes")?;
 
-    let acc_num: u8 = try_get(&v, "accountNumber")?;
+    let cred_num: u8 = try_get(&v, "credentialNumber")?;
 
-    let acc_data = AccountDataStruct { //This is assumed to be an new account TODO: handle existing account
-        public_keys: try_get(&v, "publicKeys")?,
+    let public_keys: Vec<VerifyKey> = try_get(&v, "publicKeys")?;
+    let cred_key_info = CredentialPublicKeys { //This is assumed to be an new account TODO: handle existing account
+        keys: build_key_map(&public_keys),
         threshold: try_get(&v, "threshold")?,
     };
 
@@ -204,9 +206,10 @@ pub fn generate_unsigned_credential_aux(
         context,
         &id_object,
         &id_use_data,
-        acc_num,
+        cred_num,
         policy,
-        &acc_data,
+        cred_key_info,
+        None
     )?;
 
     let response = json!(cdi);
@@ -217,10 +220,15 @@ pub fn generate_unsigned_credential_aux(
 pub fn get_credential_deployment_info_aux(
     signature: &str,
     unsigned_info: &str,
+    expiry: u64,
 ) -> Fallible<String> {
     console_error_panic_hook::set_once();
-
-    let unsigned_credential_info: UnsignedCredentialDeploymentInfo<Bls12, ExampleCurve, AttributeKind>  = from_str(unsigned_info)?;
+    let v: SerdeValue = from_str(unsigned_info)?;
+    let values: CredentialDeploymentValues<ExampleCurve, AttributeKind> = from_str(unsigned_info)?;
+    let proofs: IdOwnershipProofs<Bls12, ExampleCurve> = try_get(&v, "proofs")?;
+    let unsigned_credential_info = UnsignedCredentialDeploymentInfo::<Bls12, ExampleCurve, AttributeKind>{
+        values, proofs
+    };
 
     let signature_bytes = <[u8; 64]>::from_hex(signature).expect("Decoding failed");
 
@@ -243,10 +251,16 @@ pub fn get_credential_deployment_info_aux(
 
     let cdi_json = json!(cdi);
 
-    let address = AccountAddress::new(&cdi.values.reg_id);
+    let address = AccountAddress::new(&cdi.values.cred_id);
 
     let acc_cred = AccountCredential::Normal{cdi};
-    let block_item = BlockItem::Deployment(acc_cred);
+
+    let credential_message = AccountCredentialMessage {
+        credential: acc_cred,
+        message_expiry: TransactionTime{ seconds: expiry }
+    };
+
+    let block_item = BlockItem::Deployment(credential_message);
 
     let hash = {
         let info_as_bytes = &to_bytes(&block_item);
@@ -278,9 +292,9 @@ pub fn decrypt_amounts_aux(
     let prf_key_string: String = try_get(&v, "prfKey")?;
     let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
 
-    let account_number: u8 = try_get(&v, "accountNumber")?;
+    let credential_number: u8 = try_get(&v, "credentialNumber")?;
 
-    let scalar: Fr = prf_key.prf_exponent(account_number)?;
+    let scalar: Fr = prf_key.prf_exponent(credential_number)?;
 
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
     let secret_key = elgamal::SecretKey {
