@@ -11,9 +11,11 @@ import listenForIdentityStatus from './utils/IdentityStatusPoller';
 import { loadAddressBook } from './features/AddressBookSlice';
 import { loadAccounts } from './features/AccountSlice';
 import { loadIdentities } from './features/IdentitySlice';
+import { loadCredentials } from './features/CredentialSlice';
 
 import './styles/app.global.scss';
 import { loadProposals } from './features/MultiSignatureSlice';
+import settingKeys from './constants/settingKeys.json';
 
 const store = configuredStore();
 
@@ -22,12 +24,12 @@ const store = configuredStore();
  */
 async function loadSettingsIntoStore(dispatch: Dispatch) {
     const settings = await loadAllSettings();
-    const nodeLocationSetting = findSetting('Node location', settings);
+    const nodeLocationSetting = findSetting(settingKeys.nodeLocation, settings);
     if (nodeLocationSetting) {
         const { address, port } = JSON.parse(nodeLocationSetting.value);
         startClient(dispatch, address, port);
     } else {
-        throw new Error('unable to find Node location settings.');
+        throw new Error('Unable to find node location setting.');
     }
     return dispatch(updateSettings(settings));
 }
@@ -39,6 +41,7 @@ async function onLoad(dispatch: Dispatch) {
     loadAccounts(dispatch);
     loadIdentities(dispatch);
     loadProposals(dispatch);
+    loadCredentials(dispatch);
 
     listenForIdentityStatus(dispatch);
 }

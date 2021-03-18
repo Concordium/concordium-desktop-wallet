@@ -54,7 +54,7 @@ const { setTransactions } = transactionSlice.actions;
 export async function decryptTransactions(
     transactions: TransferTransaction[],
     prfKey: string,
-    account: Account,
+    credentialNumber: number,
     global: Global
 ) {
     const encryptedTransfers = transactions.filter(
@@ -77,7 +77,7 @@ export async function decryptTransactions(
 
     const decryptedAmounts = await decryptAmounts(
         encryptedAmounts,
-        account,
+        credentialNumber,
         global,
         prfKey
     );

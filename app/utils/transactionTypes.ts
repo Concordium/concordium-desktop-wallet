@@ -4,6 +4,7 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
     AddressBookEntry,
+    Word8,
 } from './types';
 
 export interface TransactionInput {
@@ -17,7 +18,7 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
-    effectiveTime: bigint;
+    effectiveTime: bigint | undefined;
     setProposal: React.Dispatch<
         React.SetStateAction<Partial<MultiSignatureTransaction> | undefined>
     >;
@@ -54,3 +55,17 @@ export interface TransactionHandler<T, S> {
     update: UpdateComponent;
     title: string;
 }
+
+// An actual signature, which goes into an account transaction.
+export type Signature = Buffer;
+
+type KeyIndex = Word8;
+// Signatures from a single credential, for an AccountTransaction
+export type TransactionCredentialSignature = Record<KeyIndex, Signature>;
+
+type CredentialIndex = Word8;
+// The signature of an account transaction.
+export type TransactionAccountSignature = Record<
+    CredentialIndex,
+    TransactionCredentialSignature
+>;

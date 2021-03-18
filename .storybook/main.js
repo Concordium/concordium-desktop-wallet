@@ -1,5 +1,8 @@
+const { default: TsconfigPathsPlugin } = require('tsconfig-paths-webpack-plugin');
 const { baseConfig, assetsConfig, stylesConfig } = require('../configs/partials');
 const { pathToSvgAssets } = require('../configs/partials/webpack.config.assets');
+
+const extensions = ['.js', '.jsx', '.json', '.ts', '.tsx'];
 
 module.exports = {
   "stories": [
@@ -15,6 +18,8 @@ module.exports = {
     // 'PRODUCTION' is used when building the static version of storybook.
     const fileLoaderRule = config.module.rules.find(rule => rule.test.test('.svg'));
     fileLoaderRule.exclude = pathToSvgAssets;
+
+    config.resolve.plugins = [...(config.resolve.plugins || []), new TsconfigPathsPlugin({ extensions })]
 
     config.module.rules = [
       ...(config.module.rules || []),

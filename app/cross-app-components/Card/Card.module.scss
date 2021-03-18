@@ -1,0 +1,8 @@
+@import 'config/bundle';
+
+.root {
+    border: 1px solid $color-grey;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: $color-white;
+}

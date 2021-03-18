@@ -13,7 +13,7 @@ import {
     getGovernanceRootPath,
 } from '../../../features/ledger/Path';
 import { saveFile } from '../../../utils/FileHelper';
-import { ExportKeyType, getKeyDisplay } from '../ExportKeyList';
+import { ExportKeyType, getKeyDisplay } from '../menu/ExportKeyList';
 import { SignedPublicKey } from '../../../utils/types';
 import styles from './ExportKeyView.module.scss';
 import routes from '../../../constants/routes.json';

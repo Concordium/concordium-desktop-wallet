@@ -60,7 +60,7 @@ export default function UpdateMintDistribution({
     }
 
     useEffect(() => {
-        if (mintDistribution) {
+        if (mintDistribution && effectiveTime) {
             setProposal(
                 createUpdateMultiSignatureTransaction(
                     mintDistribution,
