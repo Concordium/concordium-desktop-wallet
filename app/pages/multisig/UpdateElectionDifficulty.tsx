@@ -22,6 +22,7 @@ export default function UpdateElectionDifficulty({
     blockSummary,
     effectiveTime,
     setProposal,
+    setDisabled,
 }: UpdateProps): JSX.Element | null {
     const [error, setError] = useState<string | undefined>();
 
@@ -60,7 +61,12 @@ export default function UpdateElectionDifficulty({
     }
 
     useEffect(() => {
+        if (error) {
+            setDisabled(true);
+        }
+
         if (!error && effectiveTime) {
+            setDisabled(false);
             setProposal(
                 createUpdateMultiSignatureTransaction(
                     {
