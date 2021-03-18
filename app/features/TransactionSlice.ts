@@ -131,10 +131,6 @@ export async function loadTransactions(account: Account, dispatch: Dispatch) {
     transactions = await attachNames(transactions);
     dispatch(setTransactions(transactions));
 }
-// Reset the transactions in memory.
-export async function resetTransactions(dispatch: Dispatch) {
-    dispatch(setTransactions([]));
-}
 
 // Update the transaction from remote source.
 export async function updateTransactions(dispatch: Dispatch, account: Account) {
