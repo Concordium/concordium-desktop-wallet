@@ -2,17 +2,16 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
-import { Grid, Card, List } from 'semantic-ui-react';
-import Identicon from 'react-identicons';
-import Button from '../../cross-app-components/Button';
-import { Identity, CredentialDeploymentInformation } from '../../utils/types';
-import Form from '../../components/Form';
-import PageLayout from '../../components/PageLayout';
+import { Grid, List } from 'semantic-ui-react';
+import Button from '~/cross-app-components/Button';
+import { Identity, CredentialDeploymentInformation } from '~/utils/types';
+import PageLayout from '~/components/PageLayout';
 import PickIdentity from './PickIdentity';
 import ExportCredential from './ExportCredential';
 import PickAccount from './PickAccount';
 import SignCredential from './SignCredential';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
+import AccountCredentialSummary from './AccountCredentialSummary';
 
 function nextLocation(currentLocation: string) {
     switch (currentLocation) {
@@ -95,122 +94,119 @@ export default function GenerateCredential(): JSX.Element {
                     </Grid.Row>
                     <Grid.Row>{getDescription(location)}</Grid.Row>
                     <Grid.Row>
-                        <Grid.Column>
-                            <Card>
-                                <Card.Header>
-                                    Account Credential Summary
-                                </Card.Header>
-                                <Card.Content textAlign="center">
+                        <Switch>
+                            <Route
+                                path={routes.GENERATE_CREDENTIAL_EXPORT}
+                                render={() => (
                                     <List>
-                                        <List.Item>Identity:</List.Item>
-                                        <List.Item>
-                                            <b>
-                                                {identity
-                                                    ? identity.name
-                                                    : 'Choose an ID on the right'}
-                                            </b>
-                                        </List.Item>
-                                        <List.Item>Account:</List.Item>
-                                        <List.Item>
-                                            {location ===
-                                            routes.GENERATE_CREDENTIAL_PICKACCOUNT ? (
-                                                <Form onSubmit={() => {}}>
-                                                    <Form.TextArea
-                                                        name="address"
-                                                        placeholder="Paste the account address here"
-                                                        value={address}
-                                                        onChange={(e) => {
-                                                            const newAddress =
-                                                                e.target.value;
-                                                            setAddress(
-                                                                newAddress
-                                                            );
-                                                        }}
-                                                    />
-                                                </Form>
-                                            ) : (
-                                                <b>
-                                                    {' '}
-                                                    {address ||
-                                                        'To be determined'}{' '}
-                                                </b>
-                                            )}
-                                        </List.Item>
-                                        <List.Item>Identicon:</List.Item>
-                                        <List.Item>
-                                            {credential ? (
-                                                <Identicon
-                                                    string={JSON.stringify(
-                                                        credential
-                                                    )}
-                                                    size={64}
-                                                />
-                                            ) : (
-                                                <b>To be generated</b>
-                                            )}
-                                        </List.Item>
-                                    </List>
-                                </Card.Content>
-                            </Card>
-                            <Button
-                                disabled={!isReady}
-                                onClick={() => {
-                                    setReady(false);
-                                    dispatch(push(nextLocation(location)));
-                                }}
-                            >
-                                Continue
-                            </Button>
-                        </Grid.Column>
-                        <Grid.Column>
-                            <Switch>
-                                <Route
-                                    path={routes.GENERATE_CREDENTIAL_SIGN}
-                                    render={() => (
-                                        <SignCredential
-                                            setReady={setReady}
+                                        <AccountCredentialSummary
                                             identity={identity}
                                             address={address}
-                                            setCredential={setCredential}
-                                            attributes={attributes}
-                                        />
-                                    )}
-                                />
-                                <Route
-                                    path={[
-                                        routes.GENERATE_CREDENTIAL_PICKACCOUNT,
-                                        routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES,
-                                    ]}
-                                    render={() => (
-                                        <PickAccount
-                                            isReady={isReady}
-                                            setReady={setReady}
-                                            address={address}
-                                            setChosenAttributes={setAttributes}
-                                            identity={identity}
-                                        />
-                                    )}
-                                />
-                                <Route
-                                    path={routes.GENERATE_CREDENTIAL_EXPORT}
-                                    render={() => (
-                                        <ExportCredential
-                                            setReady={setReady}
+                                            setAddress={setAddress}
                                             credential={credential}
+                                            Button={() => (
+                                                <ExportCredential
+                                                    credential={credential}
+                                                    setReady={setReady}
+                                                />
+                                            )}
                                         />
-                                    )}
-                                />
-                                <Route
-                                    path={routes.GENERATE_CREDENTIAL}
-                                    render={() => (
-                                        <PickIdentity
-                                            setReady={setReady}
-                                            setIdentity={setIdentity}
-                                        />
-                                    )}
-                                />
-                            </Switch>
-                        </Grid.Column>
+                                        <Button
+                                            disabled={!isReady}
+                                            onClick={() => {
+                                                setReady(false);
+                                                dispatch(
+                                                    push(nextLocation(location))
+                                                );
+                                            }}
+                                        >
+                                            Continue
+                                        </Button>
+                                    </List>
+                                )}
+                            />
+                            <Route
+                                render={() => (
+                                    <>
+                                        <Grid.Column>
+                                            <AccountCredentialSummary
+                                                identity={identity}
+                                                address={address}
+                                                setAddress={setAddress}
+                                                credential={credential}
+                                            />
+                                            <Button
+                                                disabled={!isReady}
+                                                onClick={() => {
+                                                    setReady(false);
+                                                    dispatch(
+                                                        push(
+                                                            nextLocation(
+                                                                location
+                                                            )
+                                                        )
+                                                    );
+                                                }}
+                                            >
+                                                Continue
+                                            </Button>
+                                        </Grid.Column>
+                                        <Grid.Column>
+                                            <Switch>
+                                                <Route
+                                                    path={
+                                                        routes.GENERATE_CREDENTIAL_SIGN
+                                                    }
+                                                    render={() => (
+                                                        <SignCredential
+                                                            setReady={setReady}
+                                                            identity={identity}
+                                                            address={address}
+                                                            setCredential={
+                                                                setCredential
+                                                            }
+                                                            attributes={
+                                                                attributes
+                                                            }
+                                                        />
+                                                    )}
+                                                />
+                                                <Route
+                                                    path={[
+                                                        routes.GENERATE_CREDENTIAL_PICKACCOUNT,
+                                                        routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES,
+                                                    ]}
+                                                    render={() => (
+                                                        <PickAccount
+                                                            isReady={isReady}
+                                                            setReady={setReady}
+                                                            address={address}
+                                                            setChosenAttributes={
+                                                                setAttributes
+                                                            }
+                                                            identity={identity}
+                                                        />
+                                                    )}
+                                                />
+                                                <Route
+                                                    path={
+                                                        routes.GENERATE_CREDENTIAL
+                                                    }
+                                                    render={() => (
+                                                        <PickIdentity
+                                                            setReady={setReady}
+                                                            setIdentity={
+                                                                setIdentity
+                                                            }
+                                                        />
+                                                    )}
+                                                />
+                                            </Switch>
+                                        </Grid.Column>
+                                    </>
+                                )}
+                            />
+                        </Switch>
                     </Grid.Row>
                 </Grid>
             </PageLayout.Container>

@@ -65,9 +65,9 @@ export default function PickAccount({
         identityName: '',
         address,
         name: 'Account',
-        accountNumber: -1,
         identityId: -1,
         maxTransactionId: -1,
+        isInitial: false,
     };
 
     return (
