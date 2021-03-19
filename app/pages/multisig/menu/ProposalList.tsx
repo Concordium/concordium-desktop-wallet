@@ -5,7 +5,7 @@ import { Menu } from 'semantic-ui-react';
 import { proposalsSelector } from '../../../features/MultiSignatureSlice';
 import ProposalStatus from '../ProposalStatus';
 import { MultiSignatureTransaction } from '../../../utils/types';
-import expirationEffect from '../../../utils/ProposalHelper';
+import { expireProposals } from '../../../utils/ProposalHelper';
 import { selectedProposalRoute } from '../../../utils/routerHelper';
 
 /**
@@ -26,13 +26,7 @@ export default function ProposalList(): JSX.Element {
     const proposals = useSelector(proposalsSelector);
 
     useEffect(() => {
-        const cleanUpFunctions: (() => void)[] = [];
-        proposals.forEach((proposal) => {
-            cleanUpFunctions.push(expirationEffect(proposal, dispatch));
-        });
-        return () => {
-            cleanUpFunctions.forEach((cleanUp) => cleanUp());
-        };
+        return expireProposals(proposals, dispatch);
     }, [dispatch, proposals]);
 
     return (
