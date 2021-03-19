@@ -11,7 +11,6 @@ export async function up(knex: Knex): Promise<void> {
             table.string('accountAddress');
             table.string('credId').primary();
             table.boolean('external');
-            table.integer('credentialIndex');
             table.integer('credentialNumber');
             table.integer('credentialIndex');
             table
