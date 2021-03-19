@@ -269,7 +269,7 @@ export interface LocalCredential extends Credential {
 export function instanceOfLocalCredential(
     object: Credential
 ): object is LocalCredential {
-    return object.external === 0 || object.external === false;
+    return !object.external;
 }
 
 // 48 bytes containing a group element.
