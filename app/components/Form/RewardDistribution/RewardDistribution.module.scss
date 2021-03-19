@@ -1,0 +1,181 @@
+@import 'config/bundle';
+
+.wrapper {
+    text-align: center;
+}
+
+.root {
+    font-size: $font-size-body4;
+    border-radius: 10px;
+    border: 1px solid $color-grey;
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr 1px 1fr;
+    grid-template-rows: 34px 75px;
+    grid-template-areas:
+        'header header header header header'
+        'f1 d1 f2 d2 f3';
+    place-items: stretch;
+    background-color: $color-white;
+    transition: border-color $anim-easing $anim-timing;
+
+    &Focused {
+        border-color: $color-pale-blue;
+    }
+
+    &Invalid {
+        border-color: $color-error;
+    }
+}
+
+.header {
+    border-bottom: 1px solid $color-grey;
+    border-color: inherit;
+    display: flex;
+    justify-content: flex-start;
+    grid-area: header;
+    padding: 1px;
+    color: $color-white;
+    overflow: hidden;
+    transition: border-color $anim-easing $anim-timing;
+}
+
+.hFirst,
+.hMiddle,
+.hLast {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.hContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: calc(100% - 20px);
+
+    &NoTitle {
+        justify-content: center;
+    }
+}
+
+.hTitle {
+    flex: 0 1 auto;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    hyphens: auto;
+    line-height: 1.4;
+
+    .hContentNoTitle & {
+        display: none;
+    }
+}
+
+.hValue {
+    flex: 0 0 auto;
+}
+
+.hLeftEdge {
+    border-top-left-radius: 8px;
+}
+
+.hRightEdge {
+    border-top-right-radius: 8px;
+}
+
+.hFirst {
+    background-color: $color-dark-blue;
+}
+
+.hMiddle {
+    background-color: $color-turquoise;
+
+    &:not(.hLeftEdge) {
+        border-left: 1px solid $color-white;
+    }
+
+    &:not(.hRightEdge):not(.hMiddleNoValue) {
+        border-right: 1px solid $color-white;
+    }
+
+    &Hidden {
+        display: none;
+    }
+}
+
+.hLast {
+    flex: 1 1 auto;
+    background-color: $color-grey;
+}
+
+.inputWrapper,
+.field input {
+    font-size: $font-size-body3;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    line-height: 12px;
+    padding: 5px 20px 15px;
+
+    &Invalid {
+        color: $color-error;
+    }
+
+    &,
+    input {
+        text-align: center;
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    input {
+        border: none;
+        background: transparent;
+        padding: 0;
+
+        &:disabled,
+        &:disabled + * {
+            color: $color-grey;
+        }
+    }
+}
+
+.fieldTitle {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.first {
+    grid-area: f1;
+}
+
+.middle {
+    grid-area: f2;
+}
+
+.last {
+    grid-area: f3;
+}
+
+.divider1,
+.divider2 {
+    border-left: 1px solid $color-grey;
+    border-color: inherit;
+    transition: border-color $anim-easing $anim-timing;
+}
+
+.divider1 {
+    grid-area: d1;
+}
+
+.divider2 {
+    grid-area: d2;
+}

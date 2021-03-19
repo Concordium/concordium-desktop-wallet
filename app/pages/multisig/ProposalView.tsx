@@ -44,7 +44,7 @@ import SimpleErrorModal, {
 } from '../../components/SimpleErrorModal';
 import routes from '../../constants/routes.json';
 import findHandler from '../../utils/updates/HandlerFinder';
-import expirationEffect from '../../utils/ProposalHelper';
+import { expirationEffect } from '../../utils/ProposalHelper';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import PageLayout from '../../components/PageLayout';
 import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';

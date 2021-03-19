@@ -11,6 +11,7 @@ import listenForIdentityStatus from './utils/IdentityStatusPoller';
 import { loadAddressBook } from './features/AddressBookSlice';
 import { loadAccounts } from './features/AccountSlice';
 import { loadIdentities } from './features/IdentitySlice';
+import { loadCredentials } from './features/CredentialSlice';
 
 import './styles/app.global.scss';
 import { loadProposals } from './features/MultiSignatureSlice';
@@ -40,6 +41,7 @@ async function onLoad(dispatch: Dispatch) {
     loadAccounts(dispatch);
     loadIdentities(dispatch);
     loadProposals(dispatch);
+    loadCredentials(dispatch);
 
     listenForIdentityStatus(dispatch);
 }

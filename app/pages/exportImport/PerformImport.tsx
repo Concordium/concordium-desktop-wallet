@@ -13,6 +13,7 @@ import {
     AddressBookEntry,
     Account,
     Identity,
+    Credential,
     ExportData,
     Dispatch,
 } from '../../utils/types';
@@ -28,9 +29,15 @@ import {
     accountsSelector,
 } from '../../features/AccountSlice';
 import {
+    loadAddressBook,
     importAddressBookEntry,
     addressBookSelector,
 } from '../../features/AddressBookSlice';
+import {
+    importCredentials,
+    credentialsSelector,
+    loadCredentials,
+} from '../../features/CredentialSlice';
 import MessageModal from '../../components/MessageModal';
 import { checkDuplicates } from '../../utils/importHelpers';
 import { partition } from '../../utils/basicHelpers';
@@ -38,19 +45,19 @@ import { partition } from '../../utils/basicHelpers';
 type IdentityKey = keyof Identity;
 type AccountKey = keyof Account;
 type AddressBookEntryKey = keyof AddressBookEntry;
+type CredentialKey = keyof Credential;
 
 export const identityFields: IdentityKey[] = ['id', 'name', 'randomness']; // TODO are there any other fields we should check?
-export const accountFields: AccountKey[] = [
-    'name',
-    'address',
-    'accountNumber',
-    'identityId',
-    'credential',
-];
+export const accountFields: AccountKey[] = ['name', 'address', 'identityId'];
 export const addressBookFields: AddressBookEntryKey[] = [
     'name',
     'address',
     'note',
+];
+export const credentialFields: CredentialKey[] = [
+    'accountAddress',
+    'credentialNumber',
+    'credId',
 ];
 
 export async function importNewIdentities(
@@ -94,14 +101,28 @@ export async function importEntries(
     return duplicates;
 }
 
-interface State {
-    accounts: Account[];
-    identities: Identity[];
-    addressBook: AddressBookEntry[];
+export async function importNewCredentials(
+    newCredentials: Credential[],
+    existingCredentials: Credential[]
+): Promise<Credential[]> {
+    const [nonDuplicates, duplicates] = partition(
+        newCredentials,
+        (newCredential) =>
+            checkDuplicates(
+                newCredential,
+                existingCredentials,
+                credentialFields,
+                []
+            )
+    );
+    if (nonDuplicates.length > 0) {
+        await importCredentials(nonDuplicates);
+    }
+    return duplicates;
 }
 
 interface Location {
-    state: State;
+    state: ExportData;
 }
 
 interface Props {
@@ -138,7 +159,14 @@ async function performImport(
         importedData.addressBook,
         existingData.addressBook
     );
+    loadAddressBook(dispatch);
     setDuplicates.addressBook(duplicateEntries);
+
+    await importNewCredentials(
+        importedData.credentials,
+        existingData.credentials
+    );
+    loadCredentials(dispatch);
 }
 
 /**
@@ -153,6 +181,7 @@ export default function PerformImport({ location }: Props) {
     const accounts = useSelector(accountsSelector);
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
+    const credentials = useSelector(credentialsSelector);
     const [duplicateIdentities, setDuplicateIdentities] = useState<Identity[]>(
         []
     );
@@ -177,6 +206,7 @@ export default function PerformImport({ location }: Props) {
                     identities,
                     accounts,
                     addressBook,
+                    credentials,
                 },
                 setters,
                 dispatch
@@ -186,6 +216,7 @@ export default function PerformImport({ location }: Props) {
         importedData,
         identities,
         accounts,
+        credentials,
         addressBook,
         setDuplicateEntries,
         setDuplicateAccounts,

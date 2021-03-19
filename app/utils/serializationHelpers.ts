@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import bs58check from 'bs58check';
+import { VerifyKey, SchemeId } from './types';
 
 export function putBase58Check(
     array: Uint8Array,
@@ -61,4 +62,33 @@ export function toHex(value: number, minLength = 2) {
         hex = `0${hex}`;
     }
     return hex;
+}
+
+export function serializeVerifyKey(key: VerifyKey) {
+    const scheme = key.schemeId as keyof typeof SchemeId;
+    let schemeId;
+    if (SchemeId[scheme] !== undefined) {
+        schemeId = SchemeId[scheme];
+    } else {
+        throw new Error(`Unknown key type: ${scheme}`);
+    }
+    const keyBuffer = Buffer.from(key.verifyKey, 'hex');
+    const schemeBuffer = Buffer.alloc(1);
+    schemeBuffer.writeInt8(schemeId, 0);
+    return Buffer.concat([schemeBuffer, keyBuffer]);
+}
+
+export function serializeMap<K extends string | number | symbol, T>(
+    map: Record<K, T>,
+    putSize: (size: number) => Buffer,
+    putKey: (k: K) => Buffer,
+    putValue: (t: T) => Buffer
+): Buffer {
+    const keys = Object.keys(map) as K[];
+    const buffers = [putSize(keys.length)];
+    keys.forEach((key: K) => {
+        buffers.push(putKey(key));
+        buffers.push(putValue(map[key]));
+    });
+    return Buffer.concat(buffers);
 }
