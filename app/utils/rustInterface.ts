@@ -7,7 +7,6 @@ import {
     Identity,
     IpInfo,
     ArInfo,
-    Account,
     CredentialDeploymentDetails,
     CredentialDeploymentInformation,
     Global,
@@ -223,7 +222,7 @@ export async function createCredentialInfo(
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
-    const signature = await ledger.signExistingCredentialDeployment(
+    const signature = await ledger.signCredentialDeploymentOnExistingAccount(
         parsed,
         address,
         path
@@ -271,7 +270,7 @@ export async function createCredentialDetails(
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
-    const signature = await ledger.signNewCredentialDeployment(
+    const signature = await ledger.signCredentialDeploymentOnNewAccount(
         parsed,
         expiry,
         path
@@ -301,18 +300,19 @@ export async function createCredentialDetails(
 }
 
 /**
- * Given a list of encrypted Amounts, and the associated account, and nesessary details
+ * Given a list of encrypted Amounts, and the original credential's number, and nesessary details
  * returns a list of the given amount, decrypted.
+
  */
 export async function decryptAmounts(
     encryptedAmounts: string[],
-    account: Account,
+    credentialNumber: number,
     global: Global,
     prfKey: string
 ): Promise<string[]> {
     const input = {
         global,
-        accountNumber: account.accountNumber,
+        credentialNumber,
         prfKey,
         encryptedAmounts,
     };

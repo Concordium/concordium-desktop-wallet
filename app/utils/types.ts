@@ -101,7 +101,6 @@ export enum AccountStatus {
  */
 
 export interface Account {
-    accountNumber: number;
     name: string;
     address: Hex;
     identityId: number;
@@ -114,6 +113,7 @@ export interface Account {
     selfAmounts?: string;
     maxTransactionId: number;
     deploymentTransactionId?: string;
+    isInitial: boolean;
 }
 
 export enum TransactionKindString {

@@ -13,12 +13,15 @@ export async function up(knex: Knex): Promise<void> {
             table.boolean('external');
             table.integer('credentialIndex');
             table.integer('credentialNumber');
+            table.integer('credentialIndex');
             table
                 .integer('identityId')
                 .unsigned()
                 .references('id')
                 .inTable(identitiesTable);
             table.json('policy');
+            table.unique(['credentialIndex', 'accountAddress']);
+            table.unique(['credentialNumber', 'identityId']);
         }
     );
 }

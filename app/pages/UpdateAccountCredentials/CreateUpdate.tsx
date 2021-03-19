@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     Account,
+    Credential,
     AddedCredential,
     MultiSignatureTransactionStatus,
     MultiSignatureTransaction,
@@ -18,6 +19,7 @@ import { addProposal } from '../../features/MultiSignatureSlice';
 interface Props {
     setReady: (ready: boolean) => void;
     account: Account | undefined;
+    primaryCredential: Credential;
     addedCredentials: AddedCredential[];
     removedCredIds: string[];
     newThreshold: number;
@@ -30,6 +32,7 @@ interface Props {
 export default function CreateUpdate({
     setReady,
     account,
+    primaryCredential,
     addedCredentials,
     removedCredIds,
     newThreshold,
@@ -42,7 +45,12 @@ export default function CreateUpdate({
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
-        if (!account || !global) {
+        if (
+            !account ||
+            !global ||
+            primaryCredential.identityId === undefined ||
+            primaryCredential.credentialNumber === undefined
+        ) {
             throw new Error('unexpected missing global/account');
         }
         const transaction = await createUpdateCredentialsTransaction(
@@ -52,8 +60,8 @@ export default function CreateUpdate({
             newThreshold
         );
         const path = getAccountPath({
-            identityIndex: account.identityId,
-            accountIndex: account.accountNumber,
+            identityIndex: primaryCredential.identityId,
+            accountIndex: primaryCredential.credentialNumber,
             signatureIndex: 0,
         });
 

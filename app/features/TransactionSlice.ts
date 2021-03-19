@@ -57,7 +57,7 @@ const { setTransactions } = transactionSlice.actions;
 export async function decryptTransactions(
     transactions: TransferTransaction[],
     prfKey: string,
-    account: Account,
+    credentialNumber: number,
     global: Global
 ) {
     const encryptedTransfers = transactions.filter(
@@ -80,7 +80,7 @@ export async function decryptTransactions(
 
     const decryptedAmounts = await decryptAmounts(
         encryptedAmounts,
-        account,
+        credentialNumber,
         global,
         prfKey
     );
@@ -137,6 +137,7 @@ export async function loadTransactions(account: Account, dispatch: Dispatch) {
 
 // Update the transaction from remote source.
 export async function updateTransactions(dispatch: Dispatch, account: Account) {
+    await loadTransactions(account, dispatch);
     const fromId = account.maxTransactionId || 0;
     const transactions = await getTransactions(account.address, fromId);
     if (transactions.length > 0) {
@@ -152,8 +153,8 @@ export async function updateTransactions(dispatch: Dispatch, account: Account) {
             ),
         });
         loadAccounts(dispatch);
+        loadTransactions(account, dispatch);
     }
-    loadTransactions(account, dispatch);
 }
 
 // Add a pending transaction to storage
