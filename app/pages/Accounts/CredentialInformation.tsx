@@ -30,7 +30,8 @@ export default function CredentialInformation({
                 {credentials
                     .filter(
                         (credential: Credential) =>
-                            credential.accountAddress === account.address
+                            credential.accountAddress === account.address &&
+                            credential.credentialIndex !== undefined
                     )
                     .map((credential: Credential) => {
                         const policy = JSON.parse(credential.policy);

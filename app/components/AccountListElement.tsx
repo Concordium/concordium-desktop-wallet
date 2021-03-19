@@ -16,9 +16,11 @@ interface Props {
     onClick?(shielded: boolean): void;
 }
 
-function displayIdentity(account: Account) {
-    const credentials = JSON.parse(account.credentials);
-    if (credentials.length > 1) {
+function displayIdentity(
+    account: Account,
+    accountInfo: AccountInfo | undefined
+) {
+    if (accountInfo && accountInfo.accountCredentials.length > 1) {
         return (
             <>
                 {account.identityName} + <MultiSigIcon height="15" />
@@ -72,7 +74,7 @@ function AccountListElement({
                     ) : undefined}
                 </Grid.Column>
                 <Grid.Column textAlign="right">
-                    {displayIdentity(account)}
+                    {displayIdentity(account, accountInfo)}
                 </Grid.Column>
             </Grid.Row>
 
