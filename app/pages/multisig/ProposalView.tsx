@@ -49,8 +49,6 @@ import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import PageLayout from '../../components/PageLayout';
 import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
 import Button from '~/cross-app-components/Button';
-
-import styles from './ProposalView.module.scss';
 import Modal from '~/cross-app-components/Modal';
 import Columns from '~/components/Columns';
 import Column from '~/components/Columns/Column';
@@ -391,7 +389,7 @@ export default function ProposalView() {
                                 />
                             </Grid.Row>
                         </Grid.Column>
-                        <Grid.Column className={styles.center}>
+                        <Grid.Column>
                             <TransactionHashView
                                 transactionHash={transactionHash}
                             />
