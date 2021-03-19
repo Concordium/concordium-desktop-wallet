@@ -1,10 +1,12 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card, List } from 'semantic-ui-react';
+import { Validate } from 'react-hook-form';
 import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import { Identity, CredentialDeploymentInformation } from '~/utils/types';
 import Form from '~/components/Form';
 import routes from '~/constants/routes.json';
+import { isValidAddress } from '~/utils/accountHelpers';
 
 interface Props {
     identity: Identity | undefined;
@@ -12,9 +14,13 @@ interface Props {
     setAddress: (address: string) => void;
     credential: CredentialDeploymentInformation | undefined;
     Button?: () => JSX.Element | null;
+    isReady: boolean;
 }
 
+// TODO: fix input field behaviour, which is that it sometimes ignores the input when changing errors.
+
 export default function AccountCredentialSummary({
+    isReady,
     identity,
     address,
     setAddress,
@@ -22,6 +28,16 @@ export default function AccountCredentialSummary({
     Button = () => null,
 }: Props) {
     const location = useLocation().pathname;
+
+    const validate: Validate = (newAddress: string) => {
+        if (!isValidAddress(newAddress)) {
+            return 'Address format is invalid';
+        }
+        if (!isReady) {
+            return 'Address must belong to an deployed account';
+        }
+        return true;
+    };
 
     return (
         <Card>
@@ -44,9 +60,26 @@ export default function AccountCredentialSummary({
                                     name="address"
                                     placeholder="Paste the account address here"
                                     value={address}
+                                    rules={{
+                                        required: 'Address required',
+                                        minLength: {
+                                            value: 50,
+                                            message:
+                                                'Address should be 50 characters',
+                                        },
+                                        maxLength: {
+                                            value: 50,
+                                            message:
+                                                'Address should be 50 characters',
+                                        },
+                                        validate: {
+                                            validate,
+                                        },
+                                    }}
+                                    autoScale
                                     onChange={(e) => {
                                         const newAddress = e.target.value;
-                                        setAddress(newAddress);
+                                        setAddress(newAddress || '');
                                     }}
                                 />
                             </Form>

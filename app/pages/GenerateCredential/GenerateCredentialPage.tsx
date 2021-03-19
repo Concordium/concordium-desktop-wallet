@@ -115,6 +115,7 @@ export default function GenerateCredential(): JSX.Element {
                                                     setReady={setReady}
                                                 />
                                             )}
+                                            isReady={isReady}
                                         />
                                         <Button
                                             disabled={!isReady}
@@ -141,6 +142,7 @@ export default function GenerateCredential(): JSX.Element {
                                                 credential={
                                                     credentialBlob?.credential
                                                 }
+                                                isReady={isReady}
                                             />
                                             <Button
                                                 disabled={!isReady}

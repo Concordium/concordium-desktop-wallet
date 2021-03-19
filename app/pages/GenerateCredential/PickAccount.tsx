@@ -46,7 +46,7 @@ export default function PickAccount({
             getAccountInfoOfAddress(address)
                 .then((loadedAccountInfo) => {
                     setAccountInfo(loadedAccountInfo);
-                    return setReady(true);
+                    return setReady(Boolean(loadedAccountInfo));
                 })
                 .catch(() => setReady(false));
         } else {
