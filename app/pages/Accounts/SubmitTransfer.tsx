@@ -3,14 +3,14 @@ import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Segment, Header, Grid, Button } from 'semantic-ui-react';
-import { parse } from '../../utils/JSONHelper';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { sendTransaction } from '../../utils/nodeRequests';
+import { parse } from '~/utils/JSONHelper';
+import LedgerComponent from '~/components/ledger/LedgerComponent';
+import { sendTransaction } from '~/utils/nodeRequests';
 import {
     serializeTransaction,
     getTransactionHash,
-} from '../../utils/transactionSerialization';
-import { monitorTransactionStatus } from '../../utils/TransactionStatusPoller';
+} from '~/utils/transactionSerialization';
+import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
 import {
     Account,
     LocalCredential,
@@ -19,15 +19,15 @@ import {
     AccountTransaction,
     Global,
     instanceOfTransferToPublic,
-} from '../../utils/types';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { addPendingTransaction } from '../../features/TransactionSlice';
-import { accountsInfoSelector } from '../../features/AccountSlice';
-import { globalSelector } from '../../features/GlobalSlice';
-import { getAccountPath } from '../../features/ledger/Path';
-import TransactionDetails from '../../components/TransactionDetails';
-import { makeTransferToPublicData } from '../../utils/rustInterface';
-import PageLayout from '../../components/PageLayout';
+} from '~/utils/types';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { addPendingTransaction } from '~/features/TransactionSlice';
+import { accountsInfoSelector } from '~/features/AccountSlice';
+import { globalSelector } from '~/features/GlobalSlice';
+import { getAccountPath } from '~/features/ledger/Path';
+import TransactionDetails from '~/components/TransactionDetails';
+import { makeTransferToPublicData } from '~/utils/rustInterface';
+import PageLayout from '~/components/PageLayout';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 
@@ -109,9 +109,15 @@ export default function SubmitTransfer({ location }: Props) {
             await getCredentialsOfAccount(account.address)
         ).find((cred) => cred.credentialIndex === credentialAccountIndex);
 
-        if (!credential || !instanceOfLocalCredential(credential)) {
+        if (!credential) {
             setMessage(
-                'Unable to sign transfer, because we were unable to find credential'
+                'Unable to sign transfer, because we were unable to find a credential'
+            );
+            return;
+        }
+        if (!instanceOfLocalCredential(credential)) {
+            setMessage(
+                'Unable to sign transfer, because we got an external credential'
             );
             return;
         }
