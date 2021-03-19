@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import Form from '../../components/Form';
+import Form from '~/components/Form';
 
 interface Props {
     setReady: (ready: boolean) => void;

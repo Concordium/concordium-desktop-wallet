@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Menu } from 'semantic-ui-react';
-import { Identity, Account } from '../../utils/types';
-import AccountListElement from '../../components/AccountListElement';
+import { Identity, Account } from '~/utils/types';
+import AccountListElement from '~/components/AccountListElement';
 import {
     accountsOfIdentitySelector,
     accountsInfoSelector,
     loadAccountInfos,
-} from '../../features/AccountSlice';
+} from '~/features/AccountSlice';
 
 interface Props {
     identity: Identity | undefined;

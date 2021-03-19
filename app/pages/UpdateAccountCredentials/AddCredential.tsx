@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Card } from 'semantic-ui-react';
 import Identicon from 'react-identicons';
-import { CredentialDeploymentInformation } from '../../utils/types';
-import DragAndDrop from '../../components/DragAndDropFile';
-import Button from '../../cross-app-components/Button';
+import { CredentialDeploymentInformation } from '~/utils/types';
+import DragAndDrop from '~/components/DragAndDropFile';
+import Button from '~/cross-app-components/Button';
 import { CredentialStatus } from './CredentialStatus';
 import SimpleErrorModal, {
     ModalErrorInput,
-} from '../../components/SimpleErrorModal';
+} from '~/components/SimpleErrorModal';
 
 interface Props {
     setReady: (ready: boolean) => void;

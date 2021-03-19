@@ -6,15 +6,15 @@ import {
     AddedCredential,
     MultiSignatureTransactionStatus,
     MultiSignatureTransaction,
-} from '../../utils/types';
-import { stringify } from '../../utils/JSONHelper';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { globalSelector } from '../../features/GlobalSlice';
-import { createUpdateCredentialsTransaction } from '../../utils/transactionHelpers';
-import { getAccountPath } from '../../features/ledger/Path';
-import { insert } from '../../database/MultiSignatureProposalDao';
-import { addProposal } from '../../features/MultiSignatureSlice';
+} from '~/utils/types';
+import { stringify } from '~/utils/JSONHelper';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import LedgerComponent from '~/components/ledger/LedgerComponent';
+import { globalSelector } from '~/features/GlobalSlice';
+import { createUpdateCredentialsTransaction } from '~/utils/transactionHelpers';
+import { getAccountPath } from '~/features/ledger/Path';
+import { insert } from '~/database/MultiSignatureProposalDao';
+import { addProposal } from '~/features/MultiSignatureSlice';
 
 interface Props {
     setReady: (ready: boolean) => void;

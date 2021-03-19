@@ -4,19 +4,19 @@ import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import { Grid, List } from 'semantic-ui-react';
 import { credentialsSelector } from '~/features/CredentialSlice';
-import Button from '../../cross-app-components/Button';
+import Button from '~/cross-app-components/Button';
 import {
     Credential,
     Account,
     Identity,
     CredentialDeploymentInformation,
-} from '../../utils/types';
-import PageLayout from '../../components/PageLayout';
+} from '~/utils/types';
+import PageLayout from '~/components/PageLayout';
 import PickIdentity from '../GenerateCredential/PickIdentity';
 import PickAccount from './PickAccount';
 import AddCredential from './AddCredential';
 import ChangeSignatureThreshold from './ChangeSignatureThreshold';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
 import CreateUpdate from './CreateUpdate';
 import { CredentialStatus } from './CredentialStatus';
 import styles from './UpdateAccountCredentials.module.scss';
