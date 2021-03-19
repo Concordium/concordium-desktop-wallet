@@ -1,11 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Header, Grid, Button } from 'semantic-ui-react';
-import { credentialsSelector } from '../../features/CredentialSlice';
-import { Credential, Account } from '../../utils/types';
-import { formatDate } from '../../utils/timeHelpers';
-import SidedRow from '../../components/SidedRow';
-import CopiableListElement from '../../components/CopiableListElement';
+import { Header, Grid, Divider } from 'semantic-ui-react';
+import Button from '~/cross-app-components/Button';
+import { credentialsSelector } from '~/features/CredentialSlice';
+import { Credential, Account } from '~/utils/types';
+import { formatDate } from '~/utils/timeHelpers';
+import SidedRow from '~/components/SidedRow';
+import CopyButton from '~/components/CopyButton';
 
 interface Props {
     account: Account;
@@ -21,38 +22,48 @@ export default function CredentialInformation({
     returnFunction,
 }: Props) {
     const credentials = useSelector(credentialsSelector);
+    const credentialsOfAccount = credentials.filter(
+        (credential: Credential) =>
+            credential.accountAddress === account.address &&
+            credential.credentialIndex !== undefined
+    );
 
     return (
         <>
             <Button onClick={returnFunction}>x</Button>
-            <Header textAlign="center">Release schedule</Header>
-            <Grid container columns={2} divided="vertically">
-                {credentials
-                    .filter(
-                        (credential: Credential) =>
-                            credential.accountAddress === account.address &&
-                            credential.credentialIndex !== undefined
-                    )
-                    .map((credential: Credential) => {
-                        const policy = JSON.parse(credential.policy);
-                        return (
-                            <>
-                                <CopiableListElement
-                                    key={credential.credId}
-                                    title="credential ID:"
-                                    value={credential.credId}
-                                />
-                                <SidedRow
-                                    left="Date of Creation:"
-                                    right={formatDate(policy.createdAt)}
-                                />
-                                <SidedRow
-                                    left="Valid to:"
-                                    right={formatDate(policy.validTo)}
-                                />
-                            </>
-                        );
-                    })}
+            <Header textAlign="center">
+                Credentials on this account: {credentialsOfAccount.length}
+            </Header>
+            <Header textAlign="center">
+                Signature threshold: {account.signatureThreshold}
+            </Header>
+            <Grid container columns={2}>
+                {credentialsOfAccount.map((credential: Credential) => {
+                    const policy = JSON.parse(credential.policy);
+                    return (
+                        <>
+                            <SidedRow
+                                left="Credential ID:"
+                                key={credential.credId}
+                                right={
+                                    <>
+                                        <CopyButton value={credential.credId} />
+                                        {credential.credId.substring(0, 8)}
+                                    </>
+                                }
+                            />
+                            <SidedRow
+                                left="Date of Creation:"
+                                right={formatDate(policy.createdAt)}
+                            />
+                            <SidedRow
+                                left="Valid to:"
+                                right={formatDate(policy.validTo)}
+                            />
+                            <Divider />
+                        </>
+                    );
+                })}
             </Grid>
         </>
     );
