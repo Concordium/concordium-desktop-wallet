@@ -165,7 +165,7 @@ export interface TransferToEncryptedPayload {
 
 export interface TransferToPublicPayload {
     transferAmount: string;
-    remainingEncryptedAmount?: string;
+    remainingEncryptedAmount?: EncryptedAmount;
     index?: string;
     proof?: string;
 }
@@ -765,8 +765,8 @@ export interface TransactionOrigin {
 }
 
 export interface EncryptedInfo {
-    encryptedAmount: string;
-    incomingAmounts: string[];
+    encryptedAmount: EncryptedAmount;
+    incomingAmounts: EncryptedAmount[];
 }
 
 export interface IncomingTransaction {
