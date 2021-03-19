@@ -3,13 +3,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import { Button } from 'semantic-ui-react';
-import { viewingShieldedSelector } from '../../features/TransactionSlice';
-import routes from '../../constants/routes.json';
+import SendImage from '@resources/svg/paperplane.svg';
+import MoreImage from '@resources/svg/more.svg';
+import ShieldImage from '@resources/svg/shield.svg';
+import SendEncryptedImage from '@resources/svg/shielded-paperplane.svg';
 import styles from './Accounts.module.scss';
-import SendImage from '../../../resources/svg/paperplane.svg';
-import MoreImage from '../../../resources/svg/more.svg';
-import ShieldImage from '../../../resources/svg/shield.svg';
-import SendEncryptedImage from '../../../resources/svg/shielded-paperplane.svg';
+import routes from '~/constants/routes.json';
+import { viewingShieldedSelector } from '~/features/TransactionSlice';
 
 const more = {
     route: routes.ACCOUNTS_MORE,
