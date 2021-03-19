@@ -42,6 +42,7 @@ export default function MultiSignatureCreateProposalView() {
 
     let availableTransactionTypes: [UpdateType | TransactionKind, string][] = [
         [TransactionKind.UpdateCredentials, 'Update Account Credentials'],
+        [TransactionKind.Transfer, 'Simple Transfer'],
     ];
     if (foundationTransactionsEnabled) {
         availableTransactionTypes = availableTransactionTypes.concat(

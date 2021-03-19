@@ -42,8 +42,14 @@ export function createProposalRoute(
             `${transactionType}`
         );
     }
+    if (transactionType === TransactionKindString.UpdateCredentials) {
+        return {
+            pathname: routes.UPDATE_ACCOUNT_CREDENTIALS,
+            state: transactionType,
+        };
+    }
     return {
-        pathname: routes.UPDATE_ACCOUNT_CREDENTIALS,
+        pathname: routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION,
         state: transactionType,
     };
 }
