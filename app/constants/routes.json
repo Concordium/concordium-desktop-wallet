@@ -23,6 +23,7 @@
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED": "/multi-signature-transaction/existing/:id",
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION": "/multi-signature-transaction/existing/account-transaction/:id",
     "MULTISIGTRANSACTIONS_COSIGN_TRANSACTION": "/multi-signature-transaction/cosign",
+    "MULTISIGTRANSACTIONS_COSIGN_ACCOUNT_TRANSACTION": "/multi-signature-transaction/account-transaction/cosign",
     "MULTISIGTRANSACTIONS_BROWSE_TRANSACTION": "/multi-signature-transaction/browse-transaction",
     "MULTISIGTRANSACTIONS_SIGN_TRANSACTION": "/multi-signature-transaction/sign",
     "MULTISIGTRANSACTIONS_EXPORT_TRANSACTION": "/multi-signature-transaction/export",

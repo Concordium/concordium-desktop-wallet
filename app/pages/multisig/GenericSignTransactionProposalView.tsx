@@ -27,7 +27,10 @@ interface Props<T> {
     header: string;
     transaction: string;
     transactionHash: string;
-    signFunction: (input: T) => Promise<void>;
+    signFunction: (
+        input: T,
+        setMessage: (message: string) => void
+    ) => Promise<void>;
     checkboxes: string[];
     signText: string;
     loading?: boolean;

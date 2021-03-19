@@ -39,7 +39,7 @@ export default function PickAccount({
             setLoaded(true);
             loadAccountInfos(accounts, dispatch);
         }
-    }, [accounts, dispatch]);
+    }, [accounts, dispatch, loaded]);
 
     return (
         <Menu vertical fluid>

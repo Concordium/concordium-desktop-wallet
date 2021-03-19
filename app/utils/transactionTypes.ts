@@ -1,3 +1,4 @@
+import { AccountPathInput } from '~/features/ledger/Path';
 import { Authorization, Authorizations, BlockSummary } from './NodeApiTypes';
 import {
     MultiSignatureTransaction,
@@ -76,7 +77,11 @@ export interface UpdateInstructionHandler<T, S> {
 export interface AccountTransactionHandler<T, S> {
     confirmType: (transaction: AccountTransaction<TransactionPayload>) => T;
     serializePayload: (transaction: T) => Buffer;
-    signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
+    signTransaction: (
+        transaction: T,
+        signer: S,
+        path: AccountPathInput
+    ) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;
     title: string;
 }

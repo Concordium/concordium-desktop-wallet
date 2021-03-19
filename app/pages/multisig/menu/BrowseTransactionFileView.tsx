@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card, Header } from 'semantic-ui-react';
-import { parse } from 'json-bigint';
+import { parse } from '~/utils/JSONHelper';
 import {
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
@@ -41,11 +41,13 @@ export default function BrowseTransactionFileView() {
 
         // TODO Type should be defined in an ENUM instead of a string.
         let type;
+        let pathname;
         if (instanceOfUpdateInstruction(transactionObject)) {
             type = 'UpdateInstruction';
+            pathname = routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION;
         } else if (instanceOfAccountTransaction(transactionObject)) {
-            // TODO Implement account transaction handler and set it here.
-            throw new Error('Not implemented yet.');
+            type = 'AccountTransaction';
+            pathname = routes.MULTISIGTRANSACTIONS_COSIGN_ACCOUNT_TRANSACTION;
         } else {
             setShowError({
                 show: true,
@@ -59,7 +61,7 @@ export default function BrowseTransactionFileView() {
         // The loaded file was valid, so proceed by loading the signing page for multi signature transactions.
         dispatch(
             push({
-                pathname: routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION,
+                pathname,
                 state: { transaction: fileString, type },
             })
         );

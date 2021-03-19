@@ -1,6 +1,6 @@
 import AccountTransactionDetails from '../../components/Transfers/AccountTransactionDetails';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernancePath } from '../../features/ledger/Path';
+import { AccountPathInput, getAccountPath } from '../../features/ledger/Path';
 import { AccountTransactionHandler } from '../transactionTypes';
 import {
     UpdateAccountCredentials,
@@ -33,10 +33,13 @@ export default class UpdateAccountCredentialsHandler
 
     async signTransaction(
         transaction: TransactionType,
-        ledger: ConcordiumLedgerClient
+        ledger: ConcordiumLedgerClient,
+        path: AccountPathInput
     ) {
-        const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
-        return ledger.signUpdateCredentialTransaction(transaction, path);
+        return ledger.signUpdateCredentialTransaction(
+            transaction,
+            getAccountPath(path)
+        );
     }
 
     view(transaction: TransactionType) {
