@@ -47,7 +47,7 @@ interface Props {
     location: LocationDescriptorObject<State>;
 }
 
-async function buildEncryptedPayload(
+async function attachCompletedPayload(
     transaction: AccountTransaction,
     ledger: ConcordiumLedgerClient,
     global: Global,
@@ -122,7 +122,7 @@ export default function SubmitTransfer({ location }: Props) {
             return;
         }
 
-        transaction = await buildEncryptedPayload(
+        transaction = await attachCompletedPayload(
             transaction,
             ledger,
             global,
