@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Menu } from 'semantic-ui-react';
 import { Identity, Account } from '../../utils/types';
 import AccountListElement from '../../components/AccountListElement';
-import { accountsOfIdentitySelector } from '../../features/AccountSlice';
+import {
+    accountsOfIdentitySelector,
+    accountsInfoSelector,
+    loadAccountInfos,
+} from '../../features/AccountSlice';
 
 interface Props {
     identity: Identity | undefined;
@@ -19,12 +23,23 @@ export default function PickAccount({
     setAccount,
     identity,
 }: Props): JSX.Element {
+    const dispatch = useDispatch();
+
     if (!identity) {
         throw new Error('unexpected missing identity');
     }
 
     const accounts = useSelector(accountsOfIdentitySelector(identity));
+    const accountsInfo = useSelector(accountsInfoSelector);
     const [chosenIndex, setChosenIndex] = useState(-1);
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        if (accounts && !loaded) {
+            setLoaded(true);
+            loadAccountInfos(accounts, dispatch);
+        }
+    }, [accounts, dispatch]);
 
     return (
         <Menu vertical fluid>
@@ -38,7 +53,10 @@ export default function PickAccount({
                     }}
                     active={chosenIndex === i}
                 >
-                    <AccountListElement account={account} />
+                    <AccountListElement
+                        account={account}
+                        accountInfo={accountsInfo[account.address]}
+                    />
                 </Menu.Item>
             ))}
         </Menu>

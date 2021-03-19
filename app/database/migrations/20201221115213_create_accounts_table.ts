@@ -1,8 +1,5 @@
 import * as Knex from 'knex';
-import {
-    accountsTable,
-    identitiesTable,
-} from '../../constants/databaseNames.json';
+import { accountsTable, identitiesTable } from '~/constants/databaseNames.json';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
@@ -19,13 +16,13 @@ export async function up(knex: Knex): Promise<void> {
                 .references('id')
                 .inTable(identitiesTable)
                 .index();
-            table.integer('signatureThreshold').defaultTo(1);
-            table.string('credentials').defaultTo('[]');
+            table.integer('signatureThreshold');
             table.string('incomingAmounts').defaultTo('[]');
             table.string('selfAmounts').defaultTo('');
             table.string('totalDecrypted').defaultTo('');
             table.boolean('allDecrypted').defaultTo(true);
             table.integer('maxTransactionId').defaultTo(0);
+            table.string('deploymentTransactionId');
         }
     );
 }

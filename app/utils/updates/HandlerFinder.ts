@@ -7,10 +7,12 @@ import {
     TransactionInput,
 } from '../transactionTypes';
 import {
+    instanceOfUpdateInstruction,
     TransactionKindId,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
+    Transaction,
 } from '../types';
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
 import FoundationAccountHandler from './FoundationAccountHandler';
@@ -103,11 +105,11 @@ export function findUpdateInstructionHandler(
     }
 }
 
-export default function findHandler(type: UpdateType | TransactionKindId) {
-    if (type in UpdateType) {
-        return findUpdateInstructionHandler(type as UpdateType);
+export default function findHandler(transaction: Transaction) {
+    if (instanceOfUpdateInstruction(transaction)) {
+        return findUpdateInstructionHandler(transaction.type);
     }
-    return findAccountTransactionHandler(type as TransactionKindId);
+    return findAccountTransactionHandler(transaction.transactionKind);
 }
 
 export function createUpdateInstructionHandler(

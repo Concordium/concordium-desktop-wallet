@@ -9,7 +9,7 @@ type Proofs = Hex;
 type Word64 = bigint;
 type Word32 = number;
 export type Word8 = number;
-type JSONString = string; // indicates that is it some object that have been stringified.
+type JSONString = string; // indicates that it is some object that has been stringified.
 
 export enum SchemeId {
     Ed25519 = 0,
@@ -38,18 +38,18 @@ export interface Versioned<T> {
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
 export enum ChosenAttributes {
-    countryOfResidence,
-    dob,
     firstName,
-    idDocExpiresAt,
-    idDocIsseudAt,
-    idDocIssuer,
-    idDocNo,
-    idDocType,
     lastName,
-    nationalIdNo,
-    nationality,
     sex,
+    dob,
+    countryOfResidence,
+    nationality,
+    idDocType,
+    idDocNo,
+    idDocIssuer,
+    idDocIssuedAt,
+    idDocExpiresAt,
+    nationalIdNo,
     taxIdNo,
 }
 
@@ -99,6 +99,7 @@ export enum AccountStatus {
 /**
  * This Interface models the structure of the accounts stored in the database
  */
+
 export interface Account {
     accountNumber: number;
     name: string;
@@ -107,12 +108,12 @@ export interface Account {
     identityName?: string;
     status: AccountStatus;
     signatureThreshold?: number;
-    credentials: string;
     totalDecrypted?: string;
     allDecrypted?: boolean;
     incomingAmounts?: string;
     selfAmounts?: string;
     maxTransactionId: number;
+    deploymentTransactionId?: string;
 }
 
 export enum TransactionKindString {
@@ -175,8 +176,13 @@ export interface ScheduledTransferPayload {
     toAddress: string;
 }
 
+export interface AddedCredential {
+    index: Word8;
+    value: CredentialDeploymentInformation;
+}
+
 export interface UpdateAccountCredentialsPayload {
-    addedCredentials: Record<number, CredentialDeploymentInformation>;
+    addedCredentials: AddedCredential[];
     removedCredIds: string[];
     newThreshold: number;
 }
@@ -252,14 +258,12 @@ export interface CredentialDeploymentInformation
 
 export interface Credential {
     accountAddress: string;
-    credentialNumber: number;
+    external: boolean;
+    credentialIndex?: number;
+    credentialNumber?: number;
     identityId?: number;
     credId: Hex;
-    ipIdentity: IpIdentity;
-    revocationThreshold: Threshold;
-    credentialPublicKeys: JSONString;
     policy: JSONString;
-    arData: JSONString;
 }
 
 // 48 bytes containing a group element.
@@ -865,6 +869,7 @@ export interface ExportData {
 
 interface EventResult {
     outcome: string;
+    rejectReason?: string;
 }
 
 export interface TransactionEvent {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Grid, Header } from 'semantic-ui-react';
-import { parse } from 'json-bigint';
+import { parse } from '~/utils/JSONHelper';
 import {
     ColorType,
     MultiSignatureTransaction,

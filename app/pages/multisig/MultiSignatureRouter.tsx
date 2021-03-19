@@ -37,15 +37,15 @@ export default function MultiSignatureRoutes(): JSX.Element {
                 component={AccountTransactionProposalView}
             />
             <Route
-                path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING}
                 component={UpdateInstructionProposalView}
+                path={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED}
             />
             <Route
                 path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
                 component={MultiSignatureCreateProposalView}
             />
             <Route
-                path={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
+                path={routes.MULTISIGTRANSACTIONS_EXPORT_KEY_SELECTED}
                 component={ExportKeyView}
             />
             <Route

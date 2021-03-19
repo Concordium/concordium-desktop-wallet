@@ -15,7 +15,8 @@ import {
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
 import { getDefaultExpiry } from './timeHelpers';
-import { stringify } from './JSONHelper';
+import { getAccountPath } from '~/features/ledger/Path';
+import { stringify, parse } from './JSONHelper';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
@@ -133,25 +134,24 @@ async function createUnsignedCredentialInfo(
     ledger: ConcordiumLedgerClient,
     address?: string
 ) {
+    const path = getAccountPath({
+        identityIndex: identity.id,
+        accountIndex: credentialNumber,
+        signatureIndex: 0,
+    });
+
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
         identity.id
     );
     displayMessage('Please confirm exporting public key on device');
-    const publicKey = await ledger.getPublicKey([
-        0,
-        0,
-        identity.id,
-        2,
-        credentialNumber,
-        0,
-    ]);
+    const publicKey = await ledger.getPublicKey(path);
     displayMessage('Please wait');
 
     const identityProvider = JSON.parse(identity.identityProvider);
 
-    const credentialInput = {
+    const credentialInput: Record<string, unknown> = {
         ipInfo: identityProvider.ipInfo,
         arsInfos: identityProvider.arsInfos,
         global,
@@ -170,12 +170,14 @@ async function createUnsignedCredentialInfo(
         },
         prfKey,
         idCredSec,
-        address,
     };
+    if (address) {
+        credentialInput.address = address;
+    }
 
     const unsignedCredentialDeploymentInfoString = await worker.postMessage({
         command: workerCommands.createUnsignedCredential,
-        input: JSON.stringify(credentialInput),
+        input: stringify(credentialInput),
     });
 
     try {
@@ -184,7 +186,9 @@ async function createUnsignedCredentialInfo(
             parsed: JSON.parse(unsignedCredentialDeploymentInfoString),
         };
     } catch (e) {
-        throw new Error(unsignedCredentialDeploymentInfoString);
+        throw new Error(
+            `Unable to create unsigned credential due to unexpected output: ${unsignedCredentialDeploymentInfoString}`
+        );
     }
 }
 
@@ -214,7 +218,11 @@ export async function createCredentialInfo(
     // TODO: Display the appropiate details
     displayMessage(`Please sign details on device.`);
     // Adding credential on an existing account
-    const path = [0, 0, identity.id, 2, credentialNumber, 0]; // TODO change path
+    const path = getAccountPath({
+        identityIndex: identity.id,
+        accountIndex: credentialNumber,
+        signatureIndex: 0,
+    });
     const signature = await ledger.signExistingCredentialDeployment(
         parsed,
         address,
@@ -258,7 +266,11 @@ export async function createCredentialDetails(
     displayMessage(`Please sign details on device.`);
     // Adding credential on a new account
     const expiry = getDefaultExpiry();
-    const path = [0, 0, identity.id, 2, credentialNumber, 0];
+    const path = getAccountPath({
+        identityIndex: identity.id,
+        accountIndex: credentialNumber,
+        signatureIndex: 0,
+    });
     const signature = await ledger.signNewCredentialDeployment(
         parsed,
         expiry,
@@ -273,7 +285,7 @@ export async function createCredentialDetails(
     displayMessage('Please wait');
 
     try {
-        const output = JSON.parse(credentialDeploymentInfoString);
+        const output = parse(credentialDeploymentInfoString);
 
         return {
             credentialDeploymentInfoHex: output.hex,
@@ -282,7 +294,9 @@ export async function createCredentialDetails(
             transactionId: output.hash,
         };
     } catch (e) {
-        throw new Error(credentialDeploymentInfoString);
+        throw new Error(
+            `Unable to create signed credential due to unexpected output: ${credentialDeploymentInfoString}`
+        );
     }
 }
 

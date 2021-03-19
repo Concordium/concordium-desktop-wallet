@@ -75,8 +75,6 @@ pub fn build_pub_info_for_ip_aux(
             None => return Err(format_err!("failed building pub_info_for_ip.")),
         };
 
-    log(&json!(pub_info_for_ip.vk_acc).to_string());
-
     let response = json!(pub_info_for_ip);
     Ok(response.to_string())
 }
@@ -160,8 +158,8 @@ pub fn generate_unsigned_credential_aux(
         threshold: try_get(&v, "threshold")?,
     };
 
-    let id_string: String = try_get(&v, "idCredSec")?; let id_cred_sec =
-    Value::new(generate_bls(&id_string)?);
+    let id_string: String = try_get(&v, "idCredSec")?;
+    let id_cred_sec = Value::new(generate_bls(&id_string)?);
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
     let prf_key = prf::SecretKey::new(generate_bls(&prf_key_string)?);

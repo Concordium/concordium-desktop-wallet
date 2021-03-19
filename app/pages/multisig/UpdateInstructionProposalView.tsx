@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { parse, stringify } from 'json-bigint';
 import * as ed from 'noble-ed25519';
+import { useParams } from 'react-router';
 import {
-    currentProposalSelector,
+    proposalsSelector,
     updateCurrentProposal,
 } from '../../features/MultiSignatureSlice';
 import {
@@ -69,7 +70,9 @@ async function isSignatureValid(
  */
 export default function UpdateInstructionProposalView() {
     const dispatch = useDispatch();
-    const currentProposal = useSelector(currentProposalSelector);
+    const { id } = useParams<{ id: string }>();
+    const proposals = useSelector(proposalsSelector);
+    const currentProposal = proposals.find((p) => p.id === parseInt(id, 10));
 
     if (!currentProposal) {
         throw new Error(
@@ -217,6 +220,7 @@ export default function UpdateInstructionProposalView() {
             signatures={instruction.signatures}
             handleSignatureFile={handleSignatureFile}
             submitTransaction={submitTransaction}
+            currentProposal={currentProposal}
         />
     );
 }

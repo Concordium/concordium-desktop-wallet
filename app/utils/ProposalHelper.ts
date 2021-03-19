@@ -1,5 +1,5 @@
 import { Dispatch } from '@reduxjs/toolkit';
-import { parse } from 'json-bigint';
+import { parse } from './JSONHelper';
 import { updateCurrentProposal } from '../features/MultiSignatureSlice';
 import { getNow } from './timeHelpers';
 import { getTimeout } from './transactionHelpers';

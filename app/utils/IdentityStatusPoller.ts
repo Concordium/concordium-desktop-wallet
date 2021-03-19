@@ -27,18 +27,20 @@ export async function confirmIdentityAndInitialAccount(
             await rejectIdentity(dispatch, identityName);
         } else {
             const { accountAddress } = token;
+            const credential = token.credential.value.contents;
+            const parsedCredential = {
+                credId: credential.credId || credential.regId,
+                policy: credential.policy,
+            };
             await confirmIdentity(dispatch, identityName, token.identityObject);
-            await confirmInitialAccount(
-                dispatch,
-                accountName,
-                accountAddress,
-                token.credential
-            );
+            await confirmInitialAccount(dispatch, accountName, accountAddress);
             insertNewCredential(
+                dispatch,
                 accountAddress,
                 0,
                 identityId,
-                token.credential
+                0, // credentialIndex = 0 on original
+                parsedCredential
             );
             addToAddressBook(dispatch, {
                 name: accountName,

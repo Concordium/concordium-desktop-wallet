@@ -2,18 +2,11 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Menu } from 'semantic-ui-react';
-import { parse } from '../../utils/JSONHelper';
-import {
-    proposalsSelector,
-    setCurrentProposal,
-} from '../../features/MultiSignatureSlice';
-import routes from '../../constants/routes.json';
-import ProposalStatus from './ProposalStatus';
-import {
-    MultiSignatureTransaction,
-    instanceOfUpdateInstruction,
-} from '../../utils/types';
-import expirationEffect from '../../utils/ProposalHelper';
+import { proposalsSelector } from '../../../features/MultiSignatureSlice';
+import ProposalStatus from '../ProposalStatus';
+import { MultiSignatureTransaction } from '../../../utils/types';
+import expirationEffect from '../../../utils/ProposalHelper';
+import { selectedProposalRoute } from '../../../utils/routerHelper';
 
 /**
  * Sorts so that the newest multi signature transaction is first.
@@ -23,15 +16,6 @@ function newestFirst(
     o2: MultiSignatureTransaction
 ) {
     return o2.id - o1.id;
-}
-
-function getProposalPath(proposal: MultiSignatureTransaction) {
-    const transaction = parse(proposal.transaction);
-    if (instanceOfUpdateInstruction(transaction)) {
-        return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING;
-    }
-
-    return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION;
 }
 
 /**
@@ -61,10 +45,7 @@ export default function ProposalList(): JSX.Element {
                         <Menu.Item
                             key={proposal.id}
                             as={Link}
-                            to={getProposalPath(proposal)}
-                            onClick={() =>
-                                dispatch(setCurrentProposal(proposal))
-                            }
+                            to={selectedProposalRoute(proposal)}
                         >
                             <ProposalStatus proposal={proposal} />
                         </Menu.Item>

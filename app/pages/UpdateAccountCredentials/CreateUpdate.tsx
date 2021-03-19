@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     Account,
-    CredentialDeploymentInformation,
+    AddedCredential,
     MultiSignatureTransactionStatus,
     MultiSignatureTransaction,
 } from '../../utils/types';
@@ -13,17 +13,15 @@ import { globalSelector } from '../../features/GlobalSlice';
 import { createUpdateCredentialsTransaction } from '../../utils/transactionHelpers';
 import { getAccountPath } from '../../features/ledger/Path';
 import { insert } from '../../database/MultiSignatureProposalDao';
-import {
-    addProposal,
-    setCurrentProposal,
-} from '../../features/MultiSignatureSlice';
+import { addProposal } from '../../features/MultiSignatureSlice';
 
 interface Props {
     setReady: (ready: boolean) => void;
     account: Account | undefined;
-    addedCredentials: CredentialDeploymentInformation[];
+    addedCredentials: AddedCredential[];
     removedCredIds: string[];
     newThreshold: number;
+    setProposalId: (id: number) => void;
 }
 
 /**
@@ -35,6 +33,7 @@ export default function CreateUpdate({
     addedCredentials,
     removedCredIds,
     newThreshold,
+    setProposalId,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
@@ -81,11 +80,11 @@ export default function CreateUpdate({
         multiSignatureTransaction.id = entryId;
 
         // Set the current proposal in the state to the one that was just generated.
-        dispatch(setCurrentProposal(multiSignatureTransaction));
         dispatch(addProposal(multiSignatureTransaction));
 
         setMessage('Update generated succesfully!');
         setReady(true);
+        setProposalId(entryId);
     }
 
     return <LedgerComponent ledgerCall={sign} />;

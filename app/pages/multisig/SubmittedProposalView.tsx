@@ -3,18 +3,13 @@ import { LocationDescriptorObject } from 'history';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Divider, Grid, Header, Segment } from 'semantic-ui-react';
-import { parse } from 'json-bigint';
-import { hashSha256 } from '../../utils/serializationHelpers';
-import {
-    MultiSignatureTransaction,
-    UpdateInstruction,
-    UpdateInstructionPayload,
-} from '../../utils/types';
+import { parse } from '~/utils/JSONHelper';
+import { MultiSignatureTransaction, Transaction } from '../../utils/types';
 import TransactionDetails from '../../components/TransactionDetails';
 import TransactionHashView from '../../components/TransactionHashView';
 import routes from '../../constants/routes.json';
-import { findUpdateInstructionHandler } from '../../utils/updates/HandlerFinder';
-import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
+import findHandler from '../../utils/updates/HandlerFinder';
+import getTransactionHash from '../../utils/transactionHash';
 import PageLayout from '../../components/PageLayout';
 
 interface Props {
@@ -55,16 +50,11 @@ export default function SubmittedProposalView({ location }: Props) {
     );
 
     // TODO Support account transactions.
-    const updateInstruction: UpdateInstruction<UpdateInstructionPayload> = parse(
+    const transaction: Transaction = parse(
         multiSignatureTransaction.transaction
     );
-    const handler = findUpdateInstructionHandler(updateInstruction.type);
-    const transactionHash = hashSha256(
-        serializeUpdateInstructionHeaderAndPayload(
-            updateInstruction,
-            handler.serializePayload(updateInstruction)
-        )
-    ).toString('hex');
+    const handler = findHandler(transaction);
+    const transactionHash = getTransactionHash(transaction);
 
     return (
         <PageLayout>
@@ -80,9 +70,7 @@ export default function SubmittedProposalView({ location }: Props) {
                     <Divider />
                     <Grid columns={2} divided textAlign="center" padded>
                         <Grid.Column>
-                            <TransactionDetails
-                                transaction={updateInstruction}
-                            />
+                            <TransactionDetails transaction={transaction} />
                         </Grid.Column>
                         <Grid.Column>
                             <TransactionHashView

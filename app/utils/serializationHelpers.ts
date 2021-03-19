@@ -70,11 +70,11 @@ export function serializeVerifyKey(key: VerifyKey) {
     if (SchemeId[scheme] !== undefined) {
         schemeId = SchemeId[scheme];
     } else {
-        throw new Error('Unknown key type');
+        throw new Error(`Unknown key type: ${scheme}`);
     }
     const keyBuffer = Buffer.from(key.verifyKey, 'hex');
     const schemeBuffer = Buffer.alloc(1);
-    schemeBuffer.writeInt8(schemeId, 0);
+    schemeBuffer.writeUInt8(schemeId, 0);
     return Buffer.concat([schemeBuffer, keyBuffer]);
 }
 
@@ -132,11 +132,11 @@ export function serializeCredentialDeploymentInformation(
     buffers.push(Uint8Array.of(credential.credentialPublicKeys.threshold));
     buffers.push(Buffer.from(credential.credId, 'hex'));
     buffers.push(encodeWord32(credential.ipIdentity));
-    buffers.push(encodeWord16(credential.revocationThreshold));
+    buffers.push(putInt8(credential.revocationThreshold));
     buffers.push(
         serializeMap(
             credential.arData,
-            putInt8,
+            encodeWord16,
             (key) => encodeWord32(parseInt(key, 10)),
             (arData) => Buffer.from(arData.encIdCredPubShare, 'hex')
         )

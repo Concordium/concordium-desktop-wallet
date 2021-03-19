@@ -91,15 +91,17 @@ export default function AccountCreationGenerate({
             transactionId
         );
         await insertNewCredential(
+            dispatch,
             accountAddress,
             credentialNumber,
             identity.id,
+            0, // credentialIndex = 0 on original
             credentialDeploymentInfo
         );
         addToAddressBook(dispatch, {
             name: accountName,
             address: accountAddress,
-            note: `Account ${credentialNumber} of ${identity.name}`, // TODO: have better note
+            note: `Account for credential ${credentialNumber} of ${identity.name}`, // TODO: have better note
             readOnly: true,
         });
     }

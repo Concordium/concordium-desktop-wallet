@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {
     Button,
     Checkbox,
@@ -9,11 +9,11 @@ import {
     Header,
     Segment,
 } from 'semantic-ui-react';
-import { parse } from 'json-bigint';
-import { currentProposalSelector } from '../../features/MultiSignatureSlice';
+import { parse } from '~/utils/JSONHelper';
 import TransactionDetails from '../../components/TransactionDetails';
 import TransactionHashView from '../../components/TransactionHashView';
 import {
+    MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateInstructionSignature,
     Transaction,
@@ -38,6 +38,7 @@ interface Props {
         transactionObject: Transaction
     ) => Promise<ModalErrorInput | undefined>;
     submitTransaction: () => void;
+    currentProposal: MultiSignatureTransaction;
 }
 
 function displaySignature(
@@ -83,13 +84,13 @@ export default function ProposalView({
     signatures,
     handleSignatureFile,
     submitTransaction,
+    currentProposal,
 }: Props) {
     const dispatch = useDispatch();
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
     const [currentlyLoadingFile, setCurrentlyLoadingFile] = useState(false);
-    const currentProposal = useSelector(currentProposalSelector);
 
     if (!currentProposal) {
         throw new Error(

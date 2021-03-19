@@ -3,6 +3,7 @@ import {
     UnsignedCredentialDeploymentInformation,
     IdOwnershipProofs,
     CredentialDeploymentValues,
+    ChosenAttributes,
 } from '../../utils/types';
 import {
     putBase58Check,
@@ -47,11 +48,12 @@ export async function signCredentialValues(
     const credId = Buffer.from(credentialDeployment.credId, 'hex');
 
     const identityProviderIdentity = Buffer.alloc(4);
-    identityProviderIdentity.writeInt32BE(credentialDeployment.ipIdentity, 0);
+    identityProviderIdentity.writeUInt32BE(credentialDeployment.ipIdentity, 0);
 
     const arThreshold = Uint8Array.of(credentialDeployment.revocationThreshold);
     const arListLength = Object.entries(credentialDeployment.arData).length;
-    const arListLengthAsBytes = Uint8Array.of(arListLength);
+    const arListLengthAsBytes = Buffer.alloc(2);
+    arListLengthAsBytes.writeUInt16BE(arListLength, 0);
 
     data = Buffer.concat([
         signatureThreshold,
@@ -84,24 +86,25 @@ export async function signCredentialValues(
     const validTo = serializeYearMonth(credentialDeployment.policy.validTo);
     const createdAt = serializeYearMonth(credentialDeployment.policy.createdAt);
 
-    const attributeListLength = Object.entries(
+    const revealedAttributeTags: [number, string][] = Object.entries(
         credentialDeployment.policy.revealedAttributes
-    ).length;
+    ).map(([tagName, value]) => [
+        ChosenAttributes[tagName as keyof typeof ChosenAttributes],
+        value,
+    ]);
+    revealedAttributeTags.sort((a, b) => a[0] - b[0]);
+
+    const attributeListLength = revealedAttributeTags.length;
     const attributeListLengthAsBytes = Buffer.alloc(2);
     attributeListLengthAsBytes.writeUInt16BE(attributeListLength, 0);
 
     data = Buffer.concat([validTo, createdAt, attributeListLengthAsBytes]);
     await transport.send(0xe0, ins, p1, p2, data);
 
-    const revealedAttributes = Object.keys(
-        credentialDeployment.policy.revealedAttributes
-    );
-    for (let i = 0; i < revealedAttributes.length; i += 1) {
-        const attributeTag = revealedAttributes[i];
-        const attributeValue =
-            credentialDeployment.policy.revealedAttributes[attributeTag];
+    for (let i = 0; i < attributeListLength; i += 1) {
+        const [attributeTag, attributeValue] = revealedAttributeTags[i];
         data = Buffer.alloc(2);
-        data.writeUInt8(parseInt(attributeTag, 10), 0);
+        data.writeUInt8(attributeTag, 0);
         const serializedAttributeValue = Buffer.from(attributeValue, 'utf-8');
         data.writeUInt8(serializedAttributeValue.length, 1);
 
@@ -123,7 +126,7 @@ export async function signCredentialProofs(
     p2: number
 ) {
     const proofLength = Buffer.alloc(4);
-    proofLength.writeInt32BE(proofs.length, 0);
+    proofLength.writeUInt32BE(proofs.length, 0);
     let p1 = 0x07;
     await transport.send(0xe0, ins, p1, p2, proofLength);
 
@@ -145,7 +148,7 @@ export async function signCredentialProofs(
 
 function serializeIdOwnerShipProofs(proofs: IdOwnershipProofs) {
     const proofIdCredPub = Buffer.alloc(4);
-    proofIdCredPub.writeInt32BE(
+    proofIdCredPub.writeUInt32BE(
         Object.entries(proofs.proofIdCredPub).length,
         0
     );
@@ -153,7 +156,7 @@ function serializeIdOwnerShipProofs(proofs: IdOwnershipProofs) {
     const idCredPubProofs = Buffer.concat(
         Object.entries(proofs.proofIdCredPub).map(([index, value]) => {
             const proof = Buffer.alloc(4 + 96);
-            proof.writeInt32BE(parseInt(index, 10), 0);
+            proof.writeUInt32BE(parseInt(index, 10), 0);
             proof.write(value, 4, 100, 'hex');
             return proof;
         })
@@ -206,9 +209,9 @@ export async function signNewCredentialDeployment(
     expiry: bigint,
     path: number[]
 ): Promise<Buffer> {
-    const expiryBuffer = Buffer.alloc(1 + 64);
-    expiryBuffer.writeInt8(0, 0);
-    expiryBuffer.writeBigInt64BE(expiry, 1);
+    const expiryBuffer = Buffer.alloc(1 + 8);
+    expiryBuffer.writeUInt8(0, 0);
+    expiryBuffer.writeBigUInt64BE(expiry, 1);
     return signCredentialDeployment(
         transport,
         credentialDeployment,
@@ -224,7 +227,7 @@ export async function signExistingCredentialDeployment(
     path: number[]
 ): Promise<Buffer> {
     const accountBuffer = Buffer.alloc(1 + 32);
-    accountBuffer.writeInt8(1, 0);
+    accountBuffer.writeUInt8(1, 0);
     putBase58Check(accountBuffer, 1, accountAddress);
     return signCredentialDeployment(
         transport,

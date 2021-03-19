@@ -17,6 +17,7 @@ import { addPendingTransaction } from '../../features/TransactionSlice';
 import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
 import PageLayout from '../../components/PageLayout';
+import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 
 interface Location {
     pathname: string;
@@ -37,7 +38,6 @@ interface Props {
 /**
  * Receives transaction to sign, using the ledger,
  * and then submits it.
- * TODO generalize, as right now it only really works with simple transfers.
  */
 export default function SubmitTransfer({ location }: Props) {
     const dispatch = useDispatch();
@@ -60,13 +60,20 @@ export default function SubmitTransfer({ location }: Props) {
     // and then redirects to final page.
     // TODO: Break this function up
     async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
+        const signatureIndex = 0;
+        const credentialAccountIndex = 0; // TODO: do we need to support other credential indices here?
+
         const path = getAccountPath({
             identityIndex: account.identityId,
             accountIndex: account.accountNumber,
-            signatureIndex: 0,
+            signatureIndex,
         });
         const signature: Buffer = await ledger.signTransfer(transaction, path);
-        const signatureStructured = { 0: { 0: signature } };
+        const signatureStructured = buildTransactionAccountSignature(
+            credentialAccountIndex,
+            signatureIndex,
+            signature
+        );
         const serializedTransaction = serializeTransaction(
             transaction,
             () => signatureStructured
