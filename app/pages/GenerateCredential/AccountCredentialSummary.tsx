@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card, List } from 'semantic-ui-react';
-import Identicon from 'react-identicons';
+import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import { Identity, CredentialDeploymentInformation } from '~/utils/types';
 import Form from '~/components/Form';
 import routes from '~/constants/routes.json';
@@ -57,10 +57,7 @@ export default function AccountCredentialSummary({
                     <List.Item>Identicon:</List.Item>
                     <List.Item>
                         {credential ? (
-                            <Identicon
-                                string={JSON.stringify(credential)}
-                                size={64}
-                            />
+                            <Identicon data={JSON.stringify(credential)} />
                         ) : (
                             <b>To be generated</b>
                         )}
