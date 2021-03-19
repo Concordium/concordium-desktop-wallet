@@ -29,12 +29,14 @@ import {
     accountsSelector,
 } from '../../features/AccountSlice';
 import {
+    loadAddressBook,
     importAddressBookEntry,
     addressBookSelector,
 } from '../../features/AddressBookSlice';
 import {
     importCredentials,
     credentialsSelector,
+    loadCredentials,
 } from '../../features/CredentialSlice';
 import MessageModal from '../../components/MessageModal';
 import { checkDuplicates } from '../../utils/importHelpers';
@@ -46,12 +48,7 @@ type AddressBookEntryKey = keyof AddressBookEntry;
 type CredentialKey = keyof Credential;
 
 export const identityFields: IdentityKey[] = ['id', 'name', 'randomness']; // TODO are there any other fields we should check?
-export const accountFields: AccountKey[] = [
-    'name',
-    'address',
-    'accountNumber',
-    'identityId',
-];
+export const accountFields: AccountKey[] = ['name', 'address', 'identityId'];
 export const addressBookFields: AddressBookEntryKey[] = [
     'name',
     'address',
@@ -162,12 +159,14 @@ async function performImport(
         importedData.addressBook,
         existingData.addressBook
     );
+    loadAddressBook(dispatch);
     setDuplicates.addressBook(duplicateEntries);
 
     await importNewCredentials(
         importedData.credentials,
         existingData.credentials
     );
+    loadCredentials(dispatch);
 }
 
 /**

@@ -101,7 +101,7 @@ async function generateIdentity(
             provider,
             randomness
         );
-        await addPendingAccount(dispatch, accountName, identityId, 0); // TODO: can we add the address already here?
+        await addPendingAccount(dispatch, accountName, identityId, true); // TODO: can we add the address already here?
     } catch (e) {
         onError(`Failed to create identity due to ${e}`);
         return;

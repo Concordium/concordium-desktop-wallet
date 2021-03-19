@@ -203,7 +203,7 @@ async function signCredentialDeployment(
     return signature;
 }
 
-export async function signNewCredentialDeployment(
+export async function signCredentialDeploymentOnNewAccount(
     transport: Transport,
     credentialDeployment: UnsignedCredentialDeploymentInformation,
     expiry: bigint,
@@ -220,7 +220,7 @@ export async function signNewCredentialDeployment(
     );
 }
 
-export async function signExistingCredentialDeployment(
+export async function signCredentialDeploymentOnExistingAccount(
     transport: Transport,
     credentialDeployment: UnsignedCredentialDeploymentInformation,
     accountAddress: string,

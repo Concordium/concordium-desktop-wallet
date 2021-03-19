@@ -1,7 +1,5 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import { useForm, Validate } from 'react-hook-form';
-import { debounce } from 'lodash';
-import { useUpdateEffect } from '../../../utils/hooks';
 import {
     DateParts,
     formatters,
@@ -23,10 +21,8 @@ import {
  */
 export default function useInputTimestamp(
     value: Date | undefined,
-    onChange: (v?: Date) => void,
-    onBlur?: () => void
+    onChange: (v?: Date) => void
 ) {
-    const [isFocused, setIsFocused] = useState(false);
     const f = useForm<Partial<DateParts>>({ mode: 'onTouched' });
     const { watch, setValue, trigger, formState } = f;
     const fields = watch();
@@ -36,16 +32,6 @@ export default function useInputTimestamp(
             setValue(name, formatters[name](v));
         },
         [setValue]
-    );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const debouncedBlur = useCallback(
-        debounce((focus: boolean) => {
-            if (onBlur && !focus) {
-                onBlur();
-            }
-        }, 0),
-        [onBlur]
     );
 
     // To work around object identity comparison of "value"
@@ -63,8 +49,6 @@ export default function useInputTimestamp(
         // To work around object identity comparison fo "parts"
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [JSON.stringify(parts), setFormattedValue]);
-
-    useUpdateEffect(() => debouncedBlur(isFocused), [debouncedBlur, isFocused]);
 
     const fireOnChange = useCallback(() => {
         if (!hasAllParts(fields)) {
@@ -122,7 +106,5 @@ export default function useInputTimestamp(
         fireOnChange,
         validateDate,
         triggerDateValidation,
-        isFocused,
-        setIsFocused,
     };
 }

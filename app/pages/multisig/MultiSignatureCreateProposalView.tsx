@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
 import { Button, Divider, Header, Segment } from 'semantic-ui-react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
 import { useParams } from 'react-router';
-import { MultiSignatureTransaction, UpdateType } from '../../utils/types';
-import { getBlockSummary, getConsensusStatus } from '../../utils/nodeRequests';
-import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
-import routes from '../../constants/routes.json';
+import {
+    instanceOfUpdateInstruction,
+    MultiSignatureTransaction,
+    MultiSignatureTransactionStatus,
+    UpdateType,
+} from '~/utils/types';
+import { getBlockSummary, getConsensusStatus } from '~/utils/nodeRequests';
+import { BlockSummary, ConsensusStatus } from '~/utils/NodeApiTypes';
+import routes from '~/constants/routes.json';
 import DynamicModal from './DynamicModal';
 import { findUpdateInstructionHandler } from '../../utils/updates/HandlerFinder';
 import EffectiveTimeUpdate from './EffectiveTimeUpdate';
-import PageLayout from '../../components/PageLayout';
+import PageLayout from '~/components/PageLayout';
+import { proposalsSelector } from '~/features/MultiSignatureSlice';
+import { parse } from '~/utils/JSONHelper';
+import Modal from '~/cross-app-components/Modal';
 
 /**
  * Component for displaying the UI required to create a multi signature transaction
@@ -26,13 +34,14 @@ export default function MultiSignatureCreateProposalView() {
     const [proposal, setProposal] = useState<
         Partial<MultiSignatureTransaction>
     >();
+    const proposals = useSelector(proposalsSelector);
     const [disabled, setDisabled] = useState(false);
+    const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
     const { updateType } = useParams<{ updateType: string }>();
     const type = parseInt(updateType, 10);
-
     const displayType = UpdateType[type];
 
     const handler = findUpdateInstructionHandler(type);
@@ -68,8 +77,38 @@ export default function MultiSignatureCreateProposalView() {
         );
     }
 
+    function openDuplicateTypeExists(): boolean {
+        return proposals.some((existingProposal) => {
+            const existingUpdateInstruction = parse(
+                existingProposal.transaction
+            );
+            return (
+                instanceOfUpdateInstruction(existingUpdateInstruction) &&
+                existingProposal.status ===
+                    MultiSignatureTransactionStatus.Open &&
+                existingUpdateInstruction.type === type
+            );
+        });
+    }
+
+    const RestrictionModal = (
+        <Modal
+            open={restrictionModalOpen}
+            onOpen={() => {}}
+            onClose={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+        >
+            An update of this type is already open, and must be submitted or
+            closed, before opening a new update of the same kind.
+        </Modal>
+    );
+
+    if (!restrictionModalOpen && openDuplicateTypeExists()) {
+        setRestrictionModalOpen(true);
+    }
+
     return (
         <PageLayout>
+            {RestrictionModal}
             <PageLayout.Header>
                 <h1>{handler.title}</h1>
             </PageLayout.Header>

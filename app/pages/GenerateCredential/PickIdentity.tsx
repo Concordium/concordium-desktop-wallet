@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Menu } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
-import { Identity } from '../../utils/types';
-import { confirmedIdentitiesSelector } from '../../features/IdentitySlice';
-import IdentityListElement from '../../components/IdentityListElement';
+import { Identity } from '~/utils/types';
+import { confirmedIdentitiesSelector } from '~/features/IdentitySlice';
+import IdentityListElement from '~/components/IdentityListElement';
 
 interface Props {
     setReady: (ready: boolean) => void;

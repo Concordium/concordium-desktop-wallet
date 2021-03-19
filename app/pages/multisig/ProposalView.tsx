@@ -26,7 +26,7 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '../../components/SimpleErrorModal';
 import PageLayout from '../../components/PageLayout';
-import expirationEffect from '../../utils/ProposalHelper';
+import { expirationEffect } from '../../utils/ProposalHelper';
 import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
 
 interface Props {

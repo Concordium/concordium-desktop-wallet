@@ -174,7 +174,7 @@ export async function addPendingAccount(
     dispatch: Dispatch,
     accountName: string,
     identityId: number,
-    accountNumber: number,
+    isInitial: boolean,
     accountAddress = '',
     deploymentTransactionId: string | undefined = undefined
 ) {
@@ -182,10 +182,10 @@ export async function addPendingAccount(
         name: accountName,
         identityId,
         status: AccountStatus.Pending,
-        accountNumber,
         address: accountAddress,
         signatureThreshold: 1,
         maxTransactionId: 0,
+        isInitial,
         deploymentTransactionId,
     };
     await insertAccount(account);
@@ -234,6 +234,7 @@ export async function confirmAccount(
 export async function decryptAccountBalance(
     prfKey: string,
     account: Account,
+    credentialNumber: number,
     global: Global
 ) {
     if (!account.incomingAmounts) {
@@ -244,7 +245,7 @@ export async function decryptAccountBalance(
 
     const decryptedAmounts = await decryptAmounts(
         encryptedAmounts,
-        account,
+        credentialNumber,
         global,
         prfKey
     );
