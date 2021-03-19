@@ -1,11 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Identity } from '../../utils/types';
-import { createCredentialInfo } from '../../utils/rustInterface';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { getNextCredentialNumber } from '../../database/CredentialDao';
-import { globalSelector } from '../../features/GlobalSlice';
+import { Identity } from '~/utils/types';
+import { createCredentialInfo } from '~/utils/rustInterface';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import LedgerComponent from '~/components/ledger/LedgerComponent';
+import { getNextCredentialNumber } from '~/database/CredentialDao';
+import { globalSelector } from '~/features/GlobalSlice';
 import { CredentialBlob } from './types';
 
 interface Props {

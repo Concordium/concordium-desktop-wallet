@@ -3,18 +3,13 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
 import { Segment } from 'semantic-ui-react';
-import {
-    Account,
-    AccountInfo,
-    AccountStatus,
-    Identity,
-} from '../../utils/types';
-import AccountListElement from '../../components/AccountListElement';
-import { isValidAddress } from '../../utils/accountHelpers';
-import { getAccountInfoOfAddress } from '../../utils/nodeHelpers';
-import Button from '../../cross-app-components/Button';
+import { Account, AccountInfo, AccountStatus, Identity } from '~/utils/types';
+import AccountListElement from '~/components/AccountListElement';
+import { isValidAddress } from '~/utils/accountHelpers';
+import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
+import Button from '~/cross-app-components/Button';
 import RevealAttributes from './RevealAttributes';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
 
 interface Props {
     setReady: (ready: boolean) => void;

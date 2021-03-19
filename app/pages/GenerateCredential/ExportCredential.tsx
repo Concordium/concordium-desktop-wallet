@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { saveFile } from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
 import { CredentialBlob } from './types';
-import { insertNewCredential } from '../../features/CredentialSlice';
+import { insertNewCredential } from '~/features/CredentialSlice';
 
 interface Props {
     credentialBlob: CredentialBlob | undefined;
