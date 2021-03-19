@@ -89,6 +89,7 @@ export default function UpdateElectionDifficulty({
         setProposal,
         effectiveTime,
         error,
+        setDisabled,
     ]);
 
     return (
