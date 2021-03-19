@@ -8,8 +8,8 @@ import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
 import {
-    signNewCredentialDeployment,
-    signExistingCredentialDeployment,
+    signCredentialDeploymentOnNewAccount,
+    signCredentialDeploymentOnExistingAccount,
 } from './CredentialDeployment';
 import {
     AccountTransaction,
@@ -110,12 +110,12 @@ export default class ConcordiumLedgerClient {
         );
     }
 
-    signExistingCredentialDeployment(
+    signCredentialDeploymentOnExistingAccount(
         credentialDeployment: UnsignedCredentialDeploymentInformation,
         address: string,
         path: number[]
     ): Promise<Buffer> {
-        return signExistingCredentialDeployment(
+        return signCredentialDeploymentOnExistingAccount(
             this.transport,
             credentialDeployment,
             address,
@@ -123,12 +123,12 @@ export default class ConcordiumLedgerClient {
         );
     }
 
-    signNewCredentialDeployment(
+    signCredentialDeploymentOnNewAccount(
         credentialDeployment: UnsignedCredentialDeploymentInformation,
         expiry: bigint,
         path: number[]
     ): Promise<Buffer> {
-        return signNewCredentialDeployment(
+        return signCredentialDeploymentOnNewAccount(
             this.transport,
             credentialDeployment,
             expiry,

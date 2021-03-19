@@ -142,7 +142,7 @@ export default function Modal<TTrigger extends WithOnClick = WithOnClick>({
             {isOpen && (
                 <Portal
                     className={styles.root}
-                    root={document.getElementById('main-layout')}
+                    root={document.getElementsByTagName('body')[0]}
                 >
                     <AnimatePresence onExitComplete={handleExitComplete}>
                         {!isExiting && (

@@ -3,18 +3,13 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
 import { Segment } from 'semantic-ui-react';
-import {
-    Account,
-    AccountInfo,
-    AccountStatus,
-    Identity,
-} from '../../utils/types';
-import AccountListElement from '../../components/AccountListElement';
-import { isValidAddress } from '../../utils/accountHelpers';
-import { getAccountInfoOfAddress } from '../../utils/nodeHelpers';
-import Button from '../../cross-app-components/Button';
+import { Account, AccountInfo, AccountStatus, Identity } from '~/utils/types';
+import AccountListElement from '~/components/AccountListElement';
+import { isValidAddress } from '~/utils/accountHelpers';
+import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
+import Button from '~/cross-app-components/Button';
 import RevealAttributes from './RevealAttributes';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -51,7 +46,7 @@ export default function PickAccount({
             getAccountInfoOfAddress(address)
                 .then((loadedAccountInfo) => {
                     setAccountInfo(loadedAccountInfo);
-                    return setReady(true);
+                    return setReady(Boolean(loadedAccountInfo));
                 })
                 .catch(() => setReady(false));
         } else {
@@ -65,9 +60,9 @@ export default function PickAccount({
         identityName: '',
         address,
         name: 'Account',
-        accountNumber: -1,
         identityId: -1,
         maxTransactionId: -1,
+        isInitial: false,
     };
 
     return (

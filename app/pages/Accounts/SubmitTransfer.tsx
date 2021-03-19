@@ -18,6 +18,7 @@ import { getAccountPath } from '../../features/ledger/Path';
 import TransactionDetails from '../../components/TransactionDetails';
 import PageLayout from '../../components/PageLayout';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
+import { getCredentialsOfAccount } from '~/database/CredentialDao';
 
 interface Location {
     pathname: string;
@@ -59,13 +60,28 @@ export default function SubmitTransfer({ location }: Props) {
     // send the transaction, saves it, begins monitoring it's status
     // and then redirects to final page.
     // TODO: Break this function up
-    async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
+    async function ledgerSignTransfer(
+        ledger: ConcordiumLedgerClient,
+        setMessage: (message: string) => void
+    ) {
         const signatureIndex = 0;
         const credentialAccountIndex = 0; // TODO: do we need to support other credential indices here?
 
+        const credentialNumber = (
+            await getCredentialsOfAccount(account.address)
+        ).find((cred) => cred.credentialIndex === credentialAccountIndex)
+            ?.credentialNumber;
+
+        if (!credentialNumber) {
+            setMessage(
+                'Unable to sign transfer, because we were unable to find credential'
+            );
+            return;
+        }
+
         const path = getAccountPath({
             identityIndex: account.identityId,
-            accountIndex: account.accountNumber,
+            accountIndex: credentialNumber,
             signatureIndex,
         });
         const signature: Buffer = await ledger.signTransfer(transaction, path);

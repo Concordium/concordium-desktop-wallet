@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Checkbox } from 'semantic-ui-react';
-import { Identity, IdentityObject } from '../../utils/types';
+import { Identity, IdentityObject } from '~/utils/types';
 
 interface Props {
     setChosenAttributes: (attributes: string[]) => void;
