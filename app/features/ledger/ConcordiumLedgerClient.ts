@@ -10,6 +10,7 @@ import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
 import { signNewCredentialDeployment } from './CredentialDeployment';
 import {
     AccountTransaction,
+    ElectionDifficulty,
     ExchangeRate,
     FoundationAccount,
     GasRewards,
@@ -199,6 +200,20 @@ export default class ConcordiumLedgerClient {
         return signUpdateTransaction(
             this.transport,
             0x23,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signElectionDifficulty(
+        transaction: UpdateInstruction<ElectionDifficulty>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x26,
             path,
             transaction,
             serializedPayload

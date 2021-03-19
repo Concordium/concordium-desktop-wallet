@@ -546,7 +546,8 @@ export type UpdateInstructionPayload =
     | FoundationAccount
     | MintDistribution
     | ProtocolUpdate
-    | GasRewards;
+    | GasRewards
+    | ElectionDifficulty;
 
 export type Transaction =
     | AccountTransaction
@@ -636,6 +637,12 @@ export function isGasRewards(
     return UpdateType.UpdateGASRewards === transaction.type;
 }
 
+export function isElectionDifficulty(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<ElectionDifficulty> {
+    return UpdateType.UpdateElectionDifficulty === transaction.type;
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
@@ -721,6 +728,10 @@ export interface GasRewards {
     finalizationProof: RewardFraction;
     accountCreation: RewardFraction;
     chainUpdate: RewardFraction;
+}
+
+export interface ElectionDifficulty {
+    electionDifficulty: Word32;
 }
 
 export interface TransactionDetails {
