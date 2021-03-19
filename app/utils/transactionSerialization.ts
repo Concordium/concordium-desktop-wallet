@@ -75,26 +75,20 @@ export function serializeTransferToPublicData(
     if (
         !payload.proof ||
         payload.index === undefined ||
-        !payload.remainingAmount
+        !payload.remainingEncryptedAmount
     ) {
         throw new Error('unexpected missing data of Transfer to Public data');
     }
-    const remainingAmount = Buffer.from(payload.remainingAmount, 'hex');
-    const size = remainingAmount.length + 8 + 8;
-    const serialized = new Uint8Array(size);
+    const remainingEncryptedAmount = Buffer.from(
+        payload.remainingEncryptedAmount,
+        'hex'
+    );
 
-    put(serialized, 0, remainingAmount);
-    put(
-        serialized,
-        remainingAmount.length,
-        encodeWord64(BigInt(payload.transferAmount))
-    );
-    put(
-        serialized,
-        remainingAmount.length + 8,
-        encodeWord64(BigInt(payload.index))
-    );
-    return serialized;
+    return Buffer.concat([
+        remainingEncryptedAmount,
+        encodeWord64(BigInt(payload.transferAmount)),
+        encodeWord64(BigInt(payload.index)),
+    ]);
 }
 
 function serializeTransferToPublic(payload: TransferToPublicPayload) {
