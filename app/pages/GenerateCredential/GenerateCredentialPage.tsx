@@ -4,7 +4,7 @@ import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import { Grid, List } from 'semantic-ui-react';
 import Button from '~/cross-app-components/Button';
-import { Identity, CredentialDeploymentInformation } from '~/utils/types';
+import { Identity } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
 import PickIdentity from './PickIdentity';
 import ExportCredential from './ExportCredential';
@@ -12,6 +12,7 @@ import PickAccount from './PickAccount';
 import SignCredential from './SignCredential';
 import routes from '~/constants/routes.json';
 import AccountCredentialSummary from './AccountCredentialSummary';
+import { CredentialBlob } from './types';
 
 function nextLocation(currentLocation: string) {
     switch (currentLocation) {
@@ -74,8 +75,8 @@ export default function GenerateCredential(): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
 
-    const [credential, setCredential] = useState<
-        CredentialDeploymentInformation | undefined
+    const [credentialBlob, setCredential] = useState<
+        CredentialBlob | undefined
     >();
     const [isReady, setReady] = useState(false);
     const [address, setAddress] = useState('');
@@ -103,10 +104,14 @@ export default function GenerateCredential(): JSX.Element {
                                             identity={identity}
                                             address={address}
                                             setAddress={setAddress}
-                                            credential={credential}
+                                            credential={
+                                                credentialBlob?.credential
+                                            }
                                             Button={() => (
                                                 <ExportCredential
-                                                    credential={credential}
+                                                    credentialBlob={
+                                                        credentialBlob
+                                                    }
                                                     setReady={setReady}
                                                 />
                                             )}
@@ -133,7 +138,9 @@ export default function GenerateCredential(): JSX.Element {
                                                 identity={identity}
                                                 address={address}
                                                 setAddress={setAddress}
-                                                credential={credential}
+                                                credential={
+                                                    credentialBlob?.credential
+                                                }
                                             />
                                             <Button
                                                 disabled={!isReady}

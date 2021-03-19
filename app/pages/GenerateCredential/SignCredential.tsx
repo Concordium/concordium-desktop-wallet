@@ -1,19 +1,19 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Identity, CredentialDeploymentInformation } from '../../utils/types';
+import { useSelector } from 'react-redux';
+import { Identity } from '../../utils/types';
 import { createCredentialInfo } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import LedgerComponent from '../../components/ledger/LedgerComponent';
 import { getNextCredentialNumber } from '../../database/CredentialDao';
-import { insertNewCredential } from '../../features/CredentialSlice';
 import { globalSelector } from '../../features/GlobalSlice';
+import { CredentialBlob } from './types';
 
 interface Props {
     identity: Identity | undefined;
     address: string;
     attributes: string[];
     setReady: (ready: boolean) => void;
-    setCredential: (cred: CredentialDeploymentInformation) => void;
+    setCredential: (cred: CredentialBlob) => void;
 }
 
 /**
@@ -27,7 +27,6 @@ export default function SignCredential({
     attributes,
 }: Props): JSX.Element {
     const global = useSelector(globalSelector);
-    const dispatch = useDispatch();
 
     async function sign(
         ledger: ConcordiumLedgerClient,
@@ -48,14 +47,12 @@ export default function SignCredential({
             ledger,
             address
         );
-        setCredential(credential);
-        insertNewCredential(
-            dispatch,
+        setCredential({
+            credential,
             address,
             credentialNumber,
-            identity.id,
-            credential
-        );
+            identityId: identity.id,
+        });
         setMessage('Credential generated succesfully!');
         setReady(true);
     }
