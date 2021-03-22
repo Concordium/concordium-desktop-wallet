@@ -1,32 +1,32 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
-import UpdateFoundationAccount from '../../pages/multisig/UpdateFoundationAccount';
+import ElectionDifficultyView from '../../pages/multisig/ElectionDifficultyView';
+import UpdateElectionDifficulty from '../../pages/multisig/UpdateElectionDifficulty';
 import { Authorizations } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
-    FoundationAccount,
-    isFoundationAccount,
+    ElectionDifficulty,
+    isElectionDifficulty,
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '../types';
-import { serializeFoundationAccount } from '../UpdateSerialization';
+import { serializeElectionDifficulty } from '../UpdateSerialization';
 
-type TransactionType = UpdateInstruction<FoundationAccount>;
+type TransactionType = UpdateInstruction<ElectionDifficulty>;
 
-export default class FoundationAccountHandler
+export default class ElectionDifficultyHandler
     implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isFoundationAccount(transaction)) {
+        if (isElectionDifficulty(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeFoundationAccount(transaction.payload);
+        return serializeElectionDifficulty(transaction.payload);
     }
 
     signTransaction(
@@ -34,7 +34,7 @@ export default class FoundationAccountHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signFoundationAccount(
+        return ledger.signElectionDifficulty(
             transaction,
             this.serializePayload(transaction),
             path
@@ -42,16 +42,14 @@ export default class FoundationAccountHandler
     }
 
     view(transaction: TransactionType) {
-        return FoundationAccountView({
-            foundationAccount: transaction.payload,
-        });
+        return ElectionDifficultyView(transaction.payload);
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.foundationAccount;
+        return authorizations.electionDifficulty;
     }
 
-    update = UpdateFoundationAccount;
+    update = UpdateElectionDifficulty;
 
-    title = 'Foundation Transaction | Update Foundation Account';
+    title = 'Foundation Transaction | Update Election Difficulty';
 }

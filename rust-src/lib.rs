@@ -1,3 +1,4 @@
+mod helpers;
 pub mod external_functions;
 pub mod types;
 pub mod aux_functions;

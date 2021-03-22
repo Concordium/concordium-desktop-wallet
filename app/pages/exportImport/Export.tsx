@@ -7,6 +7,7 @@ import { saveFile } from '../../utils/FileHelper';
 import { identitiesSelector } from '../../features/IdentitySlice';
 import { accountsSelector } from '../../features/AccountSlice';
 import { addressBookSelector } from '../../features/AddressBookSlice';
+import { credentialsSelector } from '../../features/CredentialSlice';
 import InputModal from '../../components/InputModal';
 import MessageModal from '../../components/MessageModal';
 
@@ -16,6 +17,7 @@ import MessageModal from '../../components/MessageModal';
  */
 export default function Export() {
     const accounts = useSelector(accountsSelector);
+    const credentials = useSelector(credentialsSelector);
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
@@ -25,18 +27,25 @@ export default function Export() {
     if (
         identities === undefined ||
         accounts === undefined ||
-        addressBook === undefined
+        addressBook === undefined ||
+        credentials === undefined
     ) {
         return null;
     }
 
     async function exportData(password: string) {
         // We strip the identityName, as it is superfluous.
+        // We strip the maxTransactionId, because the transactions are not exported
         const cleanAccounts = accounts.map((acc) => {
-            const { identityName, ...other } = acc;
+            const { identityName, maxTransactionId, ...other } = acc;
             return other;
         });
-        const data = { accounts: cleanAccounts, identities, addressBook };
+        const data = {
+            accounts: cleanAccounts,
+            identities,
+            addressBook,
+            credentials,
+        };
         const encrypted = encrypt(JSON.stringify(data), password);
 
         try {
