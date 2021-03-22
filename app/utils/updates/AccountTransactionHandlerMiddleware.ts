@@ -1,7 +1,7 @@
 import { AccountPathInput } from '~/features/ledger/Path';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { AccountTransactionHandler } from '../transactionTypes';
-import { AccountTransaction } from '../types';
+import { AccountTransactionHandler } from '~/utils/transactionTypes';
+import { AccountTransaction } from '~/utils/types';
 
 export default class AccountHandlerTypeMiddleware<T>
     implements

@@ -1,7 +1,7 @@
-import AccountTransactionDetails from '../../components/Transfers/AccountTransactionDetails';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { AccountPathInput, getAccountPath } from '../../features/ledger/Path';
-import { AccountTransactionHandler } from '../transactionTypes';
+import AccountTransactionDetails from '~/components/Transfers/AccountTransactionDetails';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
+import { AccountTransactionHandler } from '~/utils/transactionTypes';
 import {
     SimpleTransfer,
     AccountTransaction,

@@ -1,7 +1,10 @@
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { Authorizations } from '../NodeApiTypes';
-import { UpdateComponent, UpdateInstructionHandler } from '../transactionTypes';
-import { UpdateInstruction, UpdateInstructionPayload } from '../types';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { Authorizations } from '~/utils/NodeApiTypes';
+import {
+    UpdateComponent,
+    UpdateInstructionHandler,
+} from '~/utils/transactionTypes';
+import { UpdateInstruction, UpdateInstructionPayload } from '~/utils/types';
 
 export default class UpdateHandlerTypeMiddleware<T>
     implements

@@ -1,9 +1,9 @@
 import { parse } from 'json-bigint';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     UpdateInstructionHandler,
     TransactionInput,
-} from '../transactionTypes';
+} from '~/utils/transactionTypes';
 import {
     instanceOfUpdateInstruction,
     TransactionKindId,
@@ -11,7 +11,7 @@ import {
     UpdateInstructionPayload,
     UpdateType,
     Transaction,
-} from '../types';
+} from '~/utils/types';
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
 import FoundationAccountHandler from './FoundationAccountHandler';
 import GasRewardsHandler from './GasRewardsHandler';
