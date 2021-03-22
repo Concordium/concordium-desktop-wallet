@@ -4,6 +4,7 @@ import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
 import { useParams } from 'react-router';
 
+import { FieldValues } from 'react-hook-form';
 import {
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
@@ -25,6 +26,10 @@ import { futureDate } from '~/components/Form/util/validation';
 
 import DynamicModal from '../DynamicModal';
 import styles from './MultiSignatureCreateProposal.module.scss';
+
+interface MultiSignatureCreateProposalForm {
+    effectiveTime: Date;
+}
 
 /**
  * Component for displaying the UI required to create a multi signature transaction
@@ -93,6 +98,29 @@ export default function MultiSignatureCreateProposalView() {
         });
     }
 
+    function handleSubmit(
+        fields: FieldValues & MultiSignatureCreateProposalForm
+    ): void {
+        if (!blockSummary) {
+            return;
+        }
+
+        const { effectiveTime, ...dynamicFields } = fields;
+        const timeInSeconds = BigInt(
+            Math.round(effectiveTime.getTime() / 1000)
+        );
+
+        const proposal = handler.createTransaction(
+            blockSummary,
+            dynamicFields,
+            timeInSeconds
+        );
+
+        if (proposal) {
+            forwardTransactionToSigningPage(proposal);
+        }
+    }
+
     const RestrictionModal = (
         <Modal
             open={restrictionModalOpen}
@@ -136,9 +164,9 @@ export default function MultiSignatureCreateProposalView() {
                     className={styles.content}
                 >
                     <h3 className={styles.subHeader}>Transaction details</h3>
-                    <Form<Partial<MultiSignatureTransaction>>
+                    <Form<FieldValues & MultiSignatureCreateProposalForm>
                         className={styles.details}
-                        onSubmit={forwardTransactionToSigningPage}
+                        onSubmit={handleSubmit}
                     >
                         <p>
                             Add all the details for the {displayType}{' '}
@@ -170,7 +198,9 @@ export default function MultiSignatureCreateProposalView() {
                                 </>
                             )}
                         </div>
-                        <Form.Submit>Continue</Form.Submit>
+                        <Form.Submit disabled={!blockSummary}>
+                            Continue
+                        </Form.Submit>
                     </Form>
                 </PageLayout.FullWidthContainerSection>
             </PageLayout.Container>

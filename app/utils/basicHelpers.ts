@@ -69,3 +69,7 @@ export function toChunks<S, T extends Uint8Array | Array<S>>(
 export function isDefined<T>(v?: T): v is T {
     return v !== undefined;
 }
+
+export function noOp(): void {
+    return undefined;
+}
