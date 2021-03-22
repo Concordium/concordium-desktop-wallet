@@ -10,6 +10,7 @@ import useInputTimestamp from './useInputTimestamp';
 import InputTimestampContext from './InputTimestampContext';
 
 import styles from './InputTimestamp.module.scss';
+import useMultiFieldFocus from '../common/useMultiFieldFocus';
 
 type TimestampErrorMessages = DateParts;
 
@@ -59,13 +60,11 @@ export default function InputTimestamp({
     onChange,
     onBlur,
 }: InputTimestampProps): JSX.Element {
-    const {
-        form,
-        fireOnChange,
-        validateDate,
-        isFocused,
-        setIsFocused,
-    } = useInputTimestamp(value, onChange, onBlur);
+    const { form, fireOnChange, validateDate } = useInputTimestamp(
+        value,
+        onChange
+    );
+    const { isFocused, setIsFocused } = useMultiFieldFocus(onBlur);
 
     const firstFormError = Object.values(form.errors).filter(isDefined)[0];
     const errorMessage =

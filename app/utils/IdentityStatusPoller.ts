@@ -6,6 +6,7 @@ import { confirmInitialAccount } from '../features/AccountSlice';
 import { isInitialAccount } from './accountHelpers';
 import { addToAddressBook } from '../features/AddressBookSlice';
 import { getAllIdentities } from '../database/IdentityDao';
+import { insertNewCredential } from '../features/CredentialSlice';
 
 /**
  * Listens until, the identityProvider confirms the identity/initial account and returns the identityObject.
@@ -15,6 +16,7 @@ import { getAllIdentities } from '../database/IdentityDao';
 export async function confirmIdentityAndInitialAccount(
     dispatch: Dispatch,
     identityName: string,
+    identityId: number,
     accountName: string,
     location: string
 ) {
@@ -24,16 +26,24 @@ export async function confirmIdentityAndInitialAccount(
         if (!token) {
             await rejectIdentity(dispatch, identityName);
         } else {
+            const { accountAddress } = token;
+            const credential = token.credential.value.contents;
+            const parsedCredential = {
+                credId: credential.credId || credential.regId,
+                policy: credential.policy,
+            };
             await confirmIdentity(dispatch, identityName, token.identityObject);
-            await confirmInitialAccount(
+            await confirmInitialAccount(dispatch, accountName, accountAddress);
+            insertNewCredential(
                 dispatch,
-                accountName,
-                token.accountAddress,
-                token.credential
+                accountAddress,
+                0,
+                identityId,
+                parsedCredential
             );
             addToAddressBook(dispatch, {
                 name: accountName,
-                address: token.accountAddress,
+                address: accountAddress,
                 note: `Initial account of ${identityName}`,
                 readOnly: true,
             });
@@ -52,7 +62,7 @@ export async function resumeIdentityStatusPolling(
     identity: Identity,
     dispatch: Dispatch
 ) {
-    const { name: identityName, codeUri: location } = identity;
+    const { name: identityName, codeUri: location, id } = identity;
     const initialAccount = await findInitialAccount(identity);
     if (!initialAccount) {
         throw new Error('Unexpected missing initial account.');
@@ -61,6 +71,7 @@ export async function resumeIdentityStatusPolling(
     return confirmIdentityAndInitialAccount(
         dispatch,
         identityName,
+        id,
         accountName,
         location
     );

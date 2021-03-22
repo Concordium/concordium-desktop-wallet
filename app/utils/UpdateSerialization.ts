@@ -2,6 +2,7 @@ import { putBase58Check } from './serializationHelpers';
 import {
     BakerStakeThreshold,
     BlockItemKind,
+    ElectionDifficulty,
     ExchangeRate,
     FoundationAccount,
     GasRewards,
@@ -46,6 +47,20 @@ export function serializeBakerStakeThreshold(
         0
     );
     return serializedBakerStakeThreshold;
+}
+
+/**
+ * Serializes an ElectionDifficulty to bytes.
+ */
+export function serializeElectionDifficulty(
+    electionDifficulty: ElectionDifficulty
+) {
+    const serializedElectionDifficulty = Buffer.alloc(4);
+    serializedElectionDifficulty.writeUInt32BE(
+        electionDifficulty.electionDifficulty,
+        0
+    );
+    return serializedElectionDifficulty;
 }
 
 /**

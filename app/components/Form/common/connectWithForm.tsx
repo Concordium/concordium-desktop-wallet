@@ -116,11 +116,12 @@ export function connectWithFormControlled<
         const { control, errors } = useFormContext();
         const {
             field: { ref, ...fieldProps },
+            meta: { invalid },
         } = useController({ name, rules, defaultValue, control });
 
         const error: FieldError | undefined = errors[name];
         const p: TProps = {
-            isInvalid: !!error,
+            isInvalid: invalid,
             error: error?.message,
             ...fieldProps,
             ...props,

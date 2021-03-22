@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Menu } from 'semantic-ui-react';
 import {
@@ -12,6 +13,7 @@ import {
 import { setViewingShielded } from '../../features/TransactionSlice';
 import AccountListElement from '../../components/AccountListElement';
 import { Account, Dispatch } from '../../utils/types';
+import routes from '../../constants/routes.json';
 
 async function load(dispatch: Dispatch) {
     const accounts = await loadAccounts(dispatch);
@@ -52,6 +54,7 @@ export default function AccountList() {
                             account={account}
                             accountInfo={accountsInfo[account.address]}
                             onClick={(shielded) => {
+                                dispatch(push(routes.ACCOUNTS));
                                 dispatch(chooseAccount(index));
                                 dispatch(setViewingShielded(shielded));
                             }}

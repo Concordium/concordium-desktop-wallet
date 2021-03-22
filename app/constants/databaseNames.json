@@ -4,5 +4,6 @@
     "addressBookTable": "addressBook",
     "multiSignatureProposalTable": "multi_signature_proposal",
     "transactionTable": "transactions",
-    "globalTable": "global"
+    "globalTable": "global",
+    "credentialsTable": "credentials"
 }
