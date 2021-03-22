@@ -29,7 +29,7 @@ interface Props {
 }
 
 /**
- * Component that displays an overview of an imported multi signature transaction proposal
+ * Component that displays an overview of an imported multi signature update instruction proposal
  * that is to be signed.
  */
 export default function CosignTransactionProposalView({ location }: Props) {

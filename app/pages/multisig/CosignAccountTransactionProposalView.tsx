@@ -3,12 +3,12 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { parse } from '~/utils/JSONHelper';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { findAccountTransactionHandler } from '../../utils/updates/HandlerFinder';
-import { UpdateAccountCredentials } from '../../utils/types';
-import { TransactionInput } from '../../utils/transactionTypes';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
+import { UpdateAccountCredentials } from '~/utils/types';
+import { TransactionInput } from '~/utils/transactionTypes';
 import getTransactionHash from '~/utils/transactionHash';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
@@ -18,7 +18,7 @@ interface Props {
 }
 
 /**
- * Component that displays an overview of an imported multi signature transaction proposal
+ * Component that displays an overview of an imported multi signature account transaction proposal
  * that is to be signed.
  */
 export default function CosignTransactionProposalView({ location }: Props) {
@@ -52,15 +52,23 @@ export default function CosignTransactionProposalView({ location }: Props) {
 
         const credential = (
             await getCredentialsOfAccount(transactionObject.sender)
-        )[2];
-        console.log(credential);
+        ).find(
+            (cred) =>
+                // TODO: Use LocalCredential
+                !(
+                    cred.identityId === undefined ||
+                    cred.credentialNumber === undefined ||
+                    cred.credentialIndex === undefined ||
+                    cred.credentialIndex === null
+                )
+        );
 
         if (
+            !credential ||
+            credential.credentialIndex === undefined ||
             credential.identityId === undefined ||
-            credential.credentialNumber === undefined ||
-            credential.credentialIndex === undefined
+            credential.credentialNumber === undefined
         ) {
-            // TODO: Use LocalCredential
             setMessage(
                 'Unable to sign transfer, because we were unable to find local and deployed credential'
             );
