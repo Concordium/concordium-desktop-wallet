@@ -109,7 +109,7 @@ export const AllFieldsTemplate: Story<FormProps<unknown>> = (args) => (
     <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
         <Form.TextArea name="comment" placeholder="Comment" />
-        <Form.RelativeRateField name="rate" relativeTo="1 NRG" unit="€" />
+        <Form.RelativeRateField name="rate" denominatorUnit="NRG" unit="€" />
         <Form.Timestamp
             name="time"
             rules={{

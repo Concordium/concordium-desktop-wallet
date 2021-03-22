@@ -1,1 +1,1 @@
-export { default } from './RelativeRateField';
+export { default, RelativeRateFieldProps } from './RelativeRateField';

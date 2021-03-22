@@ -1,5 +1,6 @@
 import clsx from 'clsx';
-import React, { forwardRef, InputHTMLAttributes } from 'react';
+import React, { InputHTMLAttributes, useEffect, useState } from 'react';
+import { ExchangeRate } from '~/utils/types';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
 
@@ -7,24 +8,25 @@ import styles from './RelativeRateField.module.scss';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
-    | 'name'
-    | 'value'
-    | 'onChange'
-    | 'onBlur'
-    | 'disabled'
-    | 'className'
-    | 'defaultValue'
+    'name' | 'disabled' | 'className'
 >;
 
-export interface RelativeFieldProps extends CommonInputProps, InputFieldProps {
+const bigIntToString = (v?: bigint) => `${v || ''}`;
+
+export interface RelativeRateFieldProps
+    extends CommonInputProps,
+        InputFieldProps {
     /**
-     * Text showed on left side of field.
+     * Unit of denominator
      */
-    relativeTo: string;
+    denominatorUnit: string;
     /**
      * Unit of value in the field.
      */
     unit: string;
+    value: Partial<ExchangeRate>;
+    onChange(v: Partial<ExchangeRate>): void;
+    onBlur(): void;
 }
 
 /**
@@ -34,52 +36,78 @@ export interface RelativeFieldProps extends CommonInputProps, InputFieldProps {
  * @example
  * <RelativeRateField value={value} onChange={(e) => setValue(e.target.value)} unit="€" relativeTo="1 NRG" />
  */
-const RelativeRateField = forwardRef<HTMLInputElement, RelativeFieldProps>(
-    (
-        {
-            relativeTo,
-            unit,
-            label,
-            isInvalid,
-            error,
-            disabled,
-            className,
-            ...props
-        },
-        ref
-    ) => {
-        return (
-            <div
-                className={clsx(
-                    styles.root,
-                    disabled && styles.rootDisabled,
-                    isInvalid && styles.rootInvalid,
-                    className
-                )}
-            >
-                <label>
-                    <span className={styles.label}>{label}</span>
-                    <div className={styles.container}>
-                        <div className={styles.relativeTo}>{relativeTo}</div>
-                        <div>&nbsp;=&nbsp;</div>
-                        <div className={styles.fieldWrapper}>
-                            <div className={styles.unit}>{unit}</div>
-                            <input
-                                ref={ref}
-                                type="number"
-                                className={styles.field}
-                                disabled={disabled}
-                                {...props}
-                            />
-                        </div>
-                    </div>
-                    <ErrorMessage>{error}</ErrorMessage>
-                </label>
-            </div>
-        );
-    }
-);
+function RelativeRateField({
+    denominatorUnit,
+    unit,
+    label,
+    isInvalid,
+    error,
+    disabled,
+    className,
+    value,
+    onChange,
+    ...props
+}: RelativeRateFieldProps) {
+    const [innerValue, setInnerValue] = useState<string>(
+        bigIntToString(value.numerator)
+    );
 
-RelativeRateField.displayName = 'RelativeRateField';
+    let invalid = isInvalid;
+    let errorMessage = error;
+    let parsedValue: bigint | undefined;
+
+    try {
+        parsedValue = BigInt(innerValue);
+    } catch {
+        invalid = true;
+        errorMessage = 'Value must be a valid number';
+    }
+
+    useEffect(
+        () =>
+            onChange({
+                denominator: value.denominator,
+                numerator: parsedValue,
+            }),
+        [parsedValue, value.denominator, onChange]
+    );
+
+    useEffect(() => setInnerValue(bigIntToString(value.numerator)), [
+        value.numerator,
+    ]);
+
+    return (
+        <div
+            className={clsx(
+                styles.root,
+                disabled && styles.rootDisabled,
+                invalid && styles.rootInvalid,
+                className
+            )}
+        >
+            <label>
+                <span className={styles.label}>{label}</span>
+                <div className={styles.container}>
+                    <div className={styles.relativeTo}>
+                        {`${denominatorUnit} ${value.denominator}`}
+                    </div>
+                    <div>&nbsp;=&nbsp;</div>
+                    <div className={styles.fieldWrapper}>
+                        <div className={styles.unit}>{unit}&nbsp;</div>
+                        <input
+                            type="number"
+                            className={styles.field}
+                            disabled={disabled}
+                            onChange={(e) => setInnerValue(e.target.value)}
+                            value={innerValue}
+                            {...props}
+                        />
+                    </div>
+                </div>
+                <ErrorMessage>{errorMessage}</ErrorMessage>
+            </label>
+        </div>
+    );
+}
 
 export default RelativeRateField;

@@ -18,11 +18,12 @@ import Submit from './Submit';
 import InputTimestamp, {
     InputTimestampProps,
 } from './InputTimestamp/InputTimestamp';
-import RelativeRateField from './RelativeRateField';
+import RelativeRateField, { RelativeRateFieldProps } from './RelativeRateField';
 import RewardDistribution, {
     RewardDistributionProps,
     RewardDistributionValue,
 } from './RewardDistribution/RewardDistribution';
+import { ExchangeRate } from '~/utils/types';
 
 export interface FormProps<TFormValues>
     extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
@@ -101,7 +102,10 @@ Form.RewardDistribution = connectWithFormControlled<
 >(RewardDistribution);
 (Form.RewardDistribution as FC).displayName = 'Form.RewardDistribution';
 
-Form.RelativeRateField = connectWithFormUncontrolled(RelativeRateField);
+Form.RelativeRateField = connectWithFormControlled<
+    Partial<ExchangeRate>,
+    RelativeRateFieldProps
+>(RelativeRateField);
 (Form.RelativeRateField as FC).displayName = 'Form.RelativeRateField';
 
 Form.Submit = Submit;
