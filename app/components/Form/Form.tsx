@@ -18,6 +18,7 @@ import Submit from './Submit';
 import InputTimestamp, {
     InputTimestampProps,
 } from './InputTimestamp/InputTimestamp';
+import RelativeRateField from './RelativeRateField';
 
 export interface FormProps<TFormValues>
     extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
@@ -90,6 +91,9 @@ Form.Timestamp = connectWithFormControlled<Date, InputTimestampProps>(
     InputTimestamp
 );
 (Form.Timestamp as FC).displayName = 'Form.Timestamp';
+
+Form.RelativeRateField = connectWithFormUncontrolled(RelativeRateField);
+(Form.RelativeRateField as FC).displayName = 'Form.RelativeRateField';
 
 Form.Submit = Submit;
 (Form.Submit as FC).displayName = 'Form.Submit';

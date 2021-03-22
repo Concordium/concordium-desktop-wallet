@@ -4,7 +4,15 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
 
-export const { Checkbox, Input, Submit, Switch, TextArea, Timestamp } = Form;
+export const {
+    Checkbox,
+    Input,
+    Submit,
+    Switch,
+    TextArea,
+    Timestamp,
+    RelativeRateField,
+} = Form;
 
 export const argTypes: Meta['argTypes'] = {
     children: {
@@ -23,8 +31,9 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.TextArea': TextArea,
     'Form.Checkbox': Checkbox,
     'Form.Switch': Switch,
-    'Form.Submit': Submit,
     'Form.Timestamp': Timestamp,
+    'Form.RelativeRateField': RelativeRateField,
+    'Form.Submit': Submit,
 };
 
 export const decorators = [
