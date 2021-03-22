@@ -11,10 +11,23 @@ type InputFieldProps = Pick<
 >;
 
 export interface RelativeFieldProps extends CommonInputProps, InputFieldProps {
+    /**
+     * Text showed on left side of field.
+     */
     relativeTo: string;
+    /**
+     * Unit of value in the field.
+     */
     unit: string;
 }
 
+/**
+ * @description
+ * Used to for number values of a unit relative to a value of another unit.
+ *
+ * @example
+ * <RelativeRateField value={value} onChange={(e) => setValue(e.target.value)} unit="€" relativeTo="1 NRG" />
+ */
 const RelativeRateField = forwardRef<HTMLInputElement, RelativeFieldProps>(
     (
         {
