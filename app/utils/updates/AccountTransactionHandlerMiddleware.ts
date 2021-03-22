@@ -1,9 +1,12 @@
 import { AccountPathInput } from '~/features/ledger/Path';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { AccountTransactionHandler } from '../transactionTypes';
+import {
+    AccountTransactionHandler,
+    CreateTransactionInput,
+} from '../transactionTypes';
 import { AccountTransaction } from '../types';
 
-export default class AccountHandlerTypeMiddleware<T>
+export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
     implements
         AccountTransactionHandler<AccountTransaction, ConcordiumLedgerClient> {
     base: AccountTransactionHandler<T, ConcordiumLedgerClient>;
@@ -39,6 +42,10 @@ export default class AccountHandlerTypeMiddleware<T>
             ledger,
             path
         );
+    }
+
+    createTransaction(input: Partial<CreateTransactionInput>) {
+        return this.base.createTransaction(input);
     }
 
     view(transaction: AccountTransaction) {

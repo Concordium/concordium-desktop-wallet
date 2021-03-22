@@ -2,10 +2,11 @@ import routes from '../constants/routes.json';
 // eslint-disable-next-line import/no-cycle
 import { ExportKeyType } from '~/pages/multisig/menu/ExportKeyList';
 import {
+    TransactionTypes,
     MultiSignatureTransaction,
     instanceOfUpdateInstruction,
     UpdateType,
-    TransactionKindString,
+    TransactionKindId,
 } from './types';
 import { parse } from './JSONHelper';
 
@@ -34,16 +35,17 @@ export function selectedExportKeyRoute(keyType: string) {
 }
 
 export function createProposalRoute(
-    transactionType: UpdateType | TransactionKindString
+    transactionType: TransactionTypes,
+    specificType: UpdateType | TransactionKindId
 ) {
-    if (transactionType in UpdateType) {
+    if (transactionType === TransactionTypes.UpdateInstruction) {
         return routes.MULTISIGTRANSACTIONS_PROPOSAL.replace(
             ':updateType',
-            `${transactionType}`
+            `${specificType}`
         );
     }
     return {
         pathname: routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION,
-        state: transactionType,
+        state: specificType,
     };
 }

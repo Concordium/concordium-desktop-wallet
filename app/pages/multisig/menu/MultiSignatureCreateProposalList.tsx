@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import ButtonNavLink from '../../../components/ButtonNavLink';
 import { foundationTransactionsEnabledSelector } from '../../../features/SettingsSlice';
 import {
+    TransactionTypes,
     UpdateType,
-    TransactionKindString as TransactionKind,
+    TransactionKindId as TransactionKind,
 } from '~/utils/types';
 
 import styles from './MultiSignatureMenu.module.scss';
@@ -15,17 +16,42 @@ import { expireProposals } from '~/utils/ProposalHelper';
 // TODO Show non-foundation transaction types.
 
 // Defines the list of options for creating multi signature transactions.
-const multiSigTransactionTypesMap: [UpdateType, string][] = [
-    [UpdateType.UpdateMicroGTUPerEuro, 'Update µGTU per Euro'],
-    [UpdateType.UpdateEuroPerEnergy, 'Update Euro per energy'],
+const multiSigTransactionTypesMap: [TransactionTypes, UpdateType, string][] = [
     [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.UpdateMicroGTUPerEuro,
+        'Update µGTU per Euro',
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.UpdateEuroPerEnergy,
+        'Update Euro per energy',
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
         UpdateType.UpdateTransactionFeeDistribution,
         'Update transaction fee distribution',
     ],
-    [UpdateType.UpdateFoundationAccount, 'Update foundation account address'],
-    [UpdateType.UpdateMintDistribution, 'Update mint distribution'],
-    [UpdateType.UpdateProtocol, 'Update protocol'],
-    [UpdateType.UpdateGASRewards, 'Update GAS rewards'],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.UpdateFoundationAccount,
+        'Update foundation account address',
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.UpdateMintDistribution,
+        'Update mint distribution',
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.UpdateProtocol,
+        'Update protocol',
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.UpdateGASRewards,
+        'Update GAS rewards',
+    ],
 ];
 
 /**
@@ -40,9 +66,26 @@ export default function MultiSignatureCreateProposalView() {
     );
     const dispatch = useDispatch();
 
-    let availableTransactionTypes: [UpdateType | TransactionKind, string][] = [
-        [TransactionKind.UpdateCredentials, 'Update Account Credentials'],
-        [TransactionKind.Transfer, 'Simple Transfer'],
+    let availableTransactionTypes: [
+        TransactionTypes,
+        UpdateType | TransactionKind,
+        string
+    ][] = [
+        [
+            TransactionTypes.AccountTransaction,
+            TransactionKind.Update_credentials,
+            'Update Account Credentials',
+        ],
+        [
+            TransactionTypes.AccountTransaction,
+            TransactionKind.Simple_transfer,
+            'Simple Transfer',
+        ],
+        [
+            TransactionTypes.AccountTransaction,
+            TransactionKind.Transfer_with_schedule,
+            'Scheduled Transfer',
+        ],
     ];
     if (foundationTransactionsEnabled) {
         availableTransactionTypes = availableTransactionTypes.concat(
@@ -56,15 +99,17 @@ export default function MultiSignatureCreateProposalView() {
 
     return (
         <>
-            {availableTransactionTypes.map(([transactionType, label]) => (
-                <ButtonNavLink
-                    className={styles.link}
-                    key={transactionType}
-                    to={createProposalRoute(transactionType)}
-                >
-                    {label}
-                </ButtonNavLink>
-            ))}
+            {availableTransactionTypes.map(
+                ([transactionType, specificType, label]) => (
+                    <ButtonNavLink
+                        className={styles.link}
+                        key={transactionType}
+                        to={createProposalRoute(transactionType, specificType)}
+                    >
+                        {label}
+                    </ButtonNavLink>
+                )
+            )}
         </>
     );
 }

@@ -14,7 +14,7 @@ export interface Defaults {
 interface Props {
     submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
-    defaults: Defaults;
+    defaults?: Defaults;
 }
 
 function getDefaultTimestamp() {

@@ -7,6 +7,7 @@ import {
     AddressBookEntry,
     AccountTransaction,
     TransactionPayload,
+    Schedule,
 } from './types';
 
 export interface TransactionInput {
@@ -68,6 +69,13 @@ export interface UpdateInstructionHandler<T, S> {
     title: string;
 }
 
+export interface CreateTransactionInput {
+    sender: string;
+    recipient: string;
+    amount: bigint;
+    schedule: Schedule;
+}
+
 /**
  * Interface definition for a class that handles a specific type
  * of transaction. The handler can serialize and sign the transaction,
@@ -83,6 +91,9 @@ export interface AccountTransactionHandler<T, S> {
         path: AccountPathInput
     ) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;
+    createTransaction: (
+        informationBlob: Partial<CreateTransactionInput>
+    ) => Promise<T>;
     creationLocationHandler: (
         currentLocation: string,
         proposalId: number

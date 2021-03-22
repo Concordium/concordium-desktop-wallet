@@ -35,7 +35,7 @@ export interface Defaults {
 }
 
 interface Props {
-    defaults: Defaults;
+    defaults?: Defaults;
     submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
 }

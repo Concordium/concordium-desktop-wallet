@@ -24,7 +24,7 @@ interface State {
     amount: string;
     recipient: AddressBookEntry;
     explicit: boolean;
-    defaults: Defaults;
+    defaults?: Defaults;
 }
 
 interface Props {

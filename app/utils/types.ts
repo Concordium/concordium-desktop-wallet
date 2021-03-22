@@ -942,3 +942,8 @@ export type PolymorphicComponentProps<
     C extends React.ElementType,
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
+
+export enum TransactionTypes {
+    UpdateInstruction,
+    AccountTransaction,
+}

@@ -1,8 +1,8 @@
 import {
-    SimpleTransfer,
+    ScheduledTransfer,
     AccountTransaction,
     TransactionPayload,
-    instanceOfSimpleTransfer,
+    instanceOfScheduledTransfer,
 } from '../types';
 import routes from '~/constants/routes.json';
 import TransferHandler from './TransferHandler';
@@ -11,18 +11,18 @@ import {
     CreateTransactionInput,
 } from '../transactionTypes';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { createSimpleTransferTransaction } from '../transactionHelpers';
+import { createScheduledTransferTransaction } from '../transactionHelpers';
 
-type TransactionType = SimpleTransfer;
+type TransactionType = ScheduledTransfer;
 
-export default class SimpleTransferHandler
+export default class ScheduledTransferHandler
     extends TransferHandler<TransactionType>
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: AccountTransaction<TransactionPayload>
     ): TransactionType {
-        if (instanceOfSimpleTransfer(transaction)) {
+        if (instanceOfScheduledTransfer(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -37,6 +37,8 @@ export default class SimpleTransferHandler
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
+                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
                 return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION.replace(
@@ -50,16 +52,16 @@ export default class SimpleTransferHandler
 
     createTransaction({
         sender,
-        amount,
+        schedule,
         recipient,
     }: Partial<CreateTransactionInput>) {
-        if (!sender || !recipient || amount === undefined) {
+        if (!sender || !recipient || !schedule) {
             throw new Error(
-                `Unexpected Missing input: ${{ sender, amount, recipient }}`
+                `Unexpected Missing input: ${{ sender, schedule, recipient }}`
             );
         }
-        return createSimpleTransferTransaction(sender, amount, recipient);
+        return createScheduledTransferTransaction(sender, recipient, schedule);
     }
 
-    title = 'Account Transaction | Simple Transfer';
+    title = 'Account Transaction | Scheduled Transfer';
 }

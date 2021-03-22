@@ -1,23 +1,33 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { toMicroUnits } from '~/utils/gtu';
-import { createSimpleTransferTransaction } from '~/utils/transactionHelpers';
-import { Account, AddressBookEntry, AccountTransaction } from '~/utils/types';
+import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
+import {
+    Account,
+    AddressBookEntry,
+    AccountTransaction,
+    Schedule,
+    TransactionKindId,
+} from '~/utils/types';
 import { credentialsSelector } from '~/features/CredentialSlice';
 import SignTransaction from './SignTransaction';
 
 interface Props {
+    transactionKind: TransactionKindId;
     account: Account;
     recipient: AddressBookEntry;
     amount: string;
+    schedule?: Schedule;
     setReady: (ready: boolean) => void;
     setProposalId: (id: number) => void;
 }
 
 export default function CreateTransaction({
+    transactionKind,
     account,
     recipient,
     amount,
+    schedule,
     setProposalId,
     setReady,
 }: Props) {
@@ -27,14 +37,17 @@ export default function CreateTransaction({
     const credentials = useSelector(credentialsSelector);
 
     useEffect(() => {
-        createSimpleTransferTransaction(
-            account.address,
-            toMicroUnits(amount),
-            recipient.address
-        )
+        const handler = findAccountTransactionHandler(transactionKind);
+        handler
+            .createTransaction({
+                sender: account.address,
+                amount: toMicroUnits(amount),
+                recipient: recipient.address,
+                schedule,
+            })
             .then(setTransaction)
             .catch(() => {});
-    }, [setTransaction, account, amount, recipient]);
+    }, [setTransaction, account, amount, recipient, schedule, transactionKind]);
 
     const credential = useMemo(
         () =>

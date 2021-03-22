@@ -21,6 +21,7 @@ import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
 import SimpleTransferHandler from './SimpleTransferHandler';
+import ScheduledTransferHandler from './ScheduledTransferHandler';
 import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
 import UpdateHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
 
@@ -34,6 +35,9 @@ export function findAccountTransactionHandler(
     }
     if (transactionKind === TransactionKindId.Simple_transfer) {
         return new AccountHandlerTypeMiddleware(new SimpleTransferHandler());
+    }
+    if (transactionKind === TransactionKindId.Transfer_with_schedule) {
+        return new AccountHandlerTypeMiddleware(new ScheduledTransferHandler());
     }
     throw new Error(`Unsupported transaction type: ${transactionKind}`);
 }

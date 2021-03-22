@@ -54,6 +54,14 @@ export default class UpdateAccountCredentialsHandler
         }
     }
 
+    createTransaction() {
+        return Promise.reject(
+            new Error(
+                'Not Implemented: Create UpdateCredentials transaction in Handler'
+            )
+        );
+    }
+
     async signTransaction(
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient,

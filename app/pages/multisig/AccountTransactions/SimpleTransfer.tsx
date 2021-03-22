@@ -5,8 +5,9 @@ import { push } from 'connected-react-router';
 import {
     Account,
     Identity,
-    TransactionKindString,
+    TransactionKindId,
     AddressBookEntry,
+    Schedule,
 } from '~/utils/types';
 import PickAmount from '~/components/Transfers/PickAmount';
 import PickRecipient from '~/components/Transfers/PickRecipient';
@@ -19,36 +20,23 @@ import Button from '~/cross-app-components/Button';
 import TransactionProposalDetails from './TransactionProposalDetails';
 import { isValidGTUString } from '~/utils/gtu';
 import CreateTransaction from './CreateTransaction';
+import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
+import BuildSchedule from './BuildSchedule';
 
-function nextLocation(currentLocation: string, proposalId: number) {
-    switch (currentLocation) {
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-            return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
-            return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
-            return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
-            return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-            return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION.replace(
-                ':id',
-                `${proposalId}`
-            );
-        default:
-            throw new Error('unknown location');
-    }
+interface Props {
+    transactionKind: TransactionKindId;
 }
 /**
  * This component controls the flow of creating a multisignature account transaction.
  * It contains the logic for displaying the current parameters.
  */
-export default function SimpleTransfer(): JSX.Element {
+export default function SimpleTransfer({
+    transactionKind,
+}: Props): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
 
-    const transactionKind = TransactionKindString.Transfer;
-    const locationHandler = nextLocation;
+    const handler = findAccountTransactionHandler(transactionKind);
 
     const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
@@ -56,6 +44,7 @@ export default function SimpleTransfer(): JSX.Element {
     const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
     const [proposalId, setProposalId] = useState<number>(-1);
+    const [schedule, setSchedule] = useState<Schedule>();
 
     function updateAmount(newAmount: string) {
         if (isValidGTUString(newAmount)) {
@@ -70,22 +59,34 @@ export default function SimpleTransfer(): JSX.Element {
         }
         return (
             <CreateTransaction
+                transactionKind={transactionKind}
                 setReady={setReady}
                 recipient={recipient}
                 amount={amount}
                 account={account}
+                schedule={schedule}
                 setProposalId={setProposalId}
             />
+        );
+    }
+
+    function continueAction() {
+        setReady(false);
+        dispatch(
+            push({
+                pathname: handler.creationLocationHandler(location, proposalId),
+                state: transactionKind,
+            })
         );
     }
 
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Multi Signature Transactions | {transactionKind}</h1>
+                <h1>Multi Signature Transactions | {handler.title}</h1>
             </PageLayout.Header>
             <PageLayout.Container>
-                <Columns>
+                <Columns columnScroll divider>
                     <Columns.Column>
                         <TransactionProposalDetails
                             transactionType={transactionKind}
@@ -93,22 +94,9 @@ export default function SimpleTransfer(): JSX.Element {
                             identity={identity}
                             amount={amount}
                             recipient={recipient}
+                            schedule={schedule}
                         />
-                        <Button
-                            disabled={!isReady}
-                            onClick={() => {
-                                setReady(false);
-                                dispatch(
-                                    push({
-                                        pathname: locationHandler(
-                                            location,
-                                            proposalId
-                                        ),
-                                        state: transactionKind,
-                                    })
-                                );
-                            }}
-                        >
+                        <Button disabled={!isReady} onClick={continueAction}>
                             Continue
                         </Button>
                     </Columns.Column>
@@ -148,6 +136,25 @@ export default function SimpleTransfer(): JSX.Element {
                                             amount={amount}
                                             setAmount={updateAmount}
                                             header="amount"
+                                        />
+                                    );
+                                }}
+                            />
+                            <Route
+                                path={
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE
+                                }
+                                render={() => {
+                                    if (!account || !recipient) {
+                                        throw new Error('fuck3');
+                                    }
+                                    return (
+                                        <BuildSchedule
+                                            submitSchedule={(newSchedule) => {
+                                                setSchedule(newSchedule);
+                                                continueAction();
+                                            }}
+                                            amount={amount}
                                         />
                                     );
                                 }}
