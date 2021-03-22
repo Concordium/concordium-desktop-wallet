@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { onlyDigitsNoLeadingZeroes } from '~/utils/basicHelpers';
 import Input from '../../components/Form/Input';
 import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
 import { UpdateProps } from '../../utils/transactionTypes';
@@ -6,14 +7,6 @@ import { UpdateType } from '../../utils/types';
 
 const errorText =
     'The input was invalid. Provide an integer between 0 and 100000';
-
-/**
- * Determines whether or not the input string consists of only digits,
- * with no leading zero (except if only a single digit).
- */
-function onlyDigitsNoLeadingZeroes(value: string): boolean {
-    return /^(?:[1-9][0-9]*|0)$/.test(value);
-}
 
 /**
  * Component for creating an election difficulty update.
