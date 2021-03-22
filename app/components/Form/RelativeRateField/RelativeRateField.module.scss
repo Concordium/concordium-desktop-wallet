@@ -1,0 +1,53 @@
+@import '../common/common';
+
+.root {
+    color: $color-grey;
+}
+
+.container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font-size: $font-size-body2;
+    border-bottom: 1px solid $color-off-black;
+
+    .rootDisabled & {
+        border-color: transparent;
+    }
+
+    .rootInvalid & {
+        border-color: $color-error;
+    }
+}
+
+.relativeTo,
+.fieldWrapper {
+    flex: 1 1 50%;
+}
+
+.fieldWrapper {
+    display: flex;
+    align-items: center;
+}
+
+.relativeTo {
+    text-align: right;
+}
+
+.unit,
+.field {
+    color: $color-pale-blue;
+
+    .rootDisabled & {
+        color: inherit;
+    }
+}
+
+.field {
+    text-align: left;
+    border: none;
+    padding: 0;
+    height: 100%;
+}
