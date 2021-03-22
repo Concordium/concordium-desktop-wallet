@@ -74,7 +74,7 @@ export default function CreateUpdate({
             // The JSON serialization of the transaction
             transaction: stringify({
                 ...transaction,
-                signature: { 0: { 0: signature } },
+                signatures: { 0: { 0: signature } },
             }),
             // The minimum required signatures for the transaction
             // to be accepted on chain.

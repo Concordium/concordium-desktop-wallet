@@ -24,7 +24,7 @@ interface Props {
 }
 
 interface Input {
-    signature: UpdateInstructionSignature;
+    signatures: UpdateInstructionSignature;
     transaction: string;
     transactionHash: string;
 }
@@ -42,7 +42,7 @@ export default function ExportSignedTransactionView({ location }: Props) {
         );
     }
 
-    const { signature } = location.state;
+    const { signatures } = location.state;
     const { transaction } = location.state;
     const { transactionHash } = location.state;
 
@@ -51,7 +51,7 @@ export default function ExportSignedTransactionView({ location }: Props) {
     async function exportSignedTransaction() {
         const signedTransaction = {
             ...transactionObject,
-            signatures: [signature],
+            signatures,
         };
         const signedTransactionJson = JSON.stringify(signedTransaction);
 
