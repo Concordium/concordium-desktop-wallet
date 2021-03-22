@@ -27,10 +27,12 @@ interface Props {
     transactionKind: TransactionKindId;
 }
 /**
- * This component controls the flow of creating a multisignature transfer.
+ * This component controls the flow of creating a multisignature account transaction.
  * It contains the logic for displaying the current parameters.
  */
-export default function Transfers({ transactionKind }: Props): JSX.Element {
+export default function SimpleTransfer({
+    transactionKind,
+}: Props): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
 
