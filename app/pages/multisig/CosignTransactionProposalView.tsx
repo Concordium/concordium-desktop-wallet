@@ -92,7 +92,7 @@ export default function CosignTransactionProposalView({ location }: Props) {
                     state: {
                         transaction,
                         transactionHash,
-                        signature,
+                        signatures: [signature],
                     },
                 })
             );

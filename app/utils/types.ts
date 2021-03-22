@@ -582,7 +582,7 @@ export type TransactionAccountSignature = Record<
 export interface AccountTransactionWithSignature<
     PayloadType extends TransactionPayload = TransactionPayload
 > extends AccountTransaction<PayloadType> {
-    signature: TransactionAccountSignature;
+    signatures: TransactionAccountSignature;
 }
 
 export type Transaction =
@@ -627,7 +627,7 @@ export function instanceOfUpdateInstructionSignature(
 export function instanceOfAccountTransactionWithSignature(
     object: Transaction
 ): object is AccountTransactionWithSignature {
-    return instanceOfAccountTransaction(object) && 'signature' in object;
+    return instanceOfAccountTransaction(object) && 'signatures' in object;
 }
 
 export function instanceOfSimpleTransfer(

@@ -8,6 +8,8 @@ import {
     updateCurrentProposal,
 } from '../../features/MultiSignatureSlice';
 import {
+    Transaction,
+    instanceOfAccountTransactionWithSignature,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     AccountTransactionWithSignature,
@@ -47,16 +49,67 @@ export default function AccountTransactionProposalView() {
     const handler = findAccountTransactionHandler(transaction.transactionKind);
     const transactionHash = getAccountTransactionHash(
         transaction,
-        () => transaction.signature
+        () => transaction.signatures
     );
 
-    async function handleSignatureFile(): Promise<ModalErrorInput | undefined> {
-        return {
-            show: true,
-            header: 'Not Implemented',
-            content:
-                'Importing credential signatures have not been implemented yet',
+    async function handleSignatureFile(
+        transactionObject: Transaction
+    ): Promise<ModalErrorInput | undefined> {
+        if (!instanceOfAccountTransactionWithSignature(transactionObject)) {
+            return {
+                show: true,
+                header: 'Invalid signature file',
+                content:
+                    'The loaded signature file is invalid. It should contain a signature for an account transaction or an update instruction in the exact format exported by this application.',
+            };
+        }
+
+        if (!currentProposal) {
+            return {
+                show: true,
+                header: 'Unexpected missing current proposal',
+            };
+        }
+        const proposal: AccountTransactionWithSignature = parse(
+            currentProposal.transaction
+        );
+
+        const credentialIndexList = Object.keys(transactionObject.signatures);
+        // We currently restrict the amount of credential signatures imported at the same time to be 1, as it
+        // simplifies error handling and currently it is only possible to export a file signed once.
+        // This can be expanded to support multiple signatures at a later point in time if need be.
+        if (credentialIndexList.length !== 1) {
+            return {
+                show: true,
+                header: 'Invalid signature file',
+                content:
+                    'The loaded signature file does not contain exactly one credential signature. Multiple signatures or zero signatures are not valid input.',
+            };
+        }
+
+        const credentialIndex = parseInt(credentialIndexList[0], 10);
+        const signature = transactionObject.signatures[credentialIndex];
+
+        console.log(transactionObject);
+        console.log(proposal);
+        // Prevent the user from adding a signature from a credential that is already present on the proposal.
+        if (proposal.signatures[credentialIndex] !== undefined) {
+            return {
+                show: true,
+                header: 'Duplicate Credential',
+                content:
+                    'The loaded signature file contains a signature, from a credential, which is already has a signature on the proposal.',
+            };
+        }
+
+        proposal.signatures[credentialIndex] = signature;
+        const updatedProposal = {
+            ...currentProposal,
+            transaction: stringify(proposal),
         };
+
+        updateCurrentProposal(dispatch, updatedProposal);
+        return undefined;
     }
 
     async function submitTransaction() {
@@ -68,7 +121,7 @@ export default function AccountTransactionProposalView() {
         }
         const payload = serializeTransaction(
             transaction,
-            () => transaction.signature
+            () => transaction.signatures
         );
         const submitted = (await sendTransaction(payload)).getValue();
         const modifiedProposal: MultiSignatureTransaction = {
@@ -95,7 +148,7 @@ export default function AccountTransactionProposalView() {
             title={handler.title}
             transaction={transaction}
             transactionHash={transactionHash.toString('hex')}
-            signatures={Object.values(transaction.signature)}
+            signatures={Object.values(transaction.signatures)}
             handleSignatureFile={handleSignatureFile}
             submitTransaction={submitTransaction}
             currentProposal={currentProposal}

@@ -49,19 +49,20 @@ export default function CosignTransactionProposalView({ location }: Props) {
         setMessage: (message: string) => void
     ) {
         const signatureIndex = 0;
-        const credentialAccountIndex = 0; // TODO: We need to support other credential indices here?
 
         const credential = (
             await getCredentialsOfAccount(transactionObject.sender)
-        )[0];
+        )[2];
+        console.log(credential);
 
         if (
             credential.identityId === undefined ||
-            credential.credentialNumber === undefined
+            credential.credentialNumber === undefined ||
+            credential.credentialIndex === undefined
         ) {
             // TODO: Use LocalCredential
             setMessage(
-                'Unable to sign transfer, because we were unable to find deployed credential'
+                'Unable to sign transfer, because we were unable to find local and deployed credential'
             );
             return;
         }
@@ -78,8 +79,8 @@ export default function CosignTransactionProposalView({ location }: Props) {
             path
         );
 
-        const signature = buildTransactionAccountSignature(
-            credentialAccountIndex,
+        const signatures = buildTransactionAccountSignature(
+            credential.credentialIndex,
             signatureIndex,
             signatureBytes
         );
@@ -90,7 +91,7 @@ export default function CosignTransactionProposalView({ location }: Props) {
                 state: {
                     transaction,
                     transactionHash,
-                    signature,
+                    signatures,
                 },
             })
         );

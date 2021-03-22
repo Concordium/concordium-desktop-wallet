@@ -27,7 +27,7 @@ export default function getTransactionHash(transaction: Transaction) {
     if (instanceOfAccountTransactionWithSignature(transaction)) {
         return getAccountTransactionHash(
             transaction,
-            () => transaction.signature
+            () => transaction.signatures
         ).toString('hex');
     }
     throw new Error(
