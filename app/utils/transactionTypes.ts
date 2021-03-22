@@ -18,11 +18,6 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
-    effectiveTime: bigint | undefined;
-    setProposal: React.Dispatch<
-        React.SetStateAction<Partial<MultiSignatureTransaction> | undefined>
-    >;
-    setDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 /**
@@ -48,6 +43,12 @@ export interface TransactionHandler<T, S> {
     confirmType: (
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ) => T;
+    createTransaction: (
+        blockSummary: BlockSummary,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fields: any,
+        effectiveTime: bigint
+    ) => Partial<MultiSignatureTransaction> | undefined;
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;

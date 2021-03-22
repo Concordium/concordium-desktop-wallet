@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
 import { useParams } from 'react-router';
+
 import {
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
@@ -14,14 +15,15 @@ import { BlockSummary, ConsensusStatus } from '~/utils/NodeApiTypes';
 import routes from '~/constants/routes.json';
 import findHandler from '~/utils/updates/HandlerFinder';
 import PageLayout from '~/components/PageLayout';
-import Button from '~/cross-app-components/Button';
 import Loading from '~/cross-app-components/Loading';
 import Modal from '~/cross-app-components/Modal';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { parse } from '~/utils/JSONHelper';
+import Form from '~/components/Form';
+import { getNow, TimeConstants } from '~/utils/timeHelpers';
+import { futureDate } from '~/components/Form/util/validation';
 
 import DynamicModal from '../DynamicModal';
-import EffectiveTimeUpdate from '../EffectiveTimeUpdate';
 import styles from './MultiSignatureCreateProposal.module.scss';
 
 /**
@@ -34,12 +36,8 @@ import styles from './MultiSignatureCreateProposal.module.scss';
 export default function MultiSignatureCreateProposalView() {
     const [blockSummary, setBlockSummary] = useState<BlockSummary>();
     const [loading, setLoading] = useState(true);
-    const [proposal, setProposal] = useState<
-        Partial<MultiSignatureTransaction>
-    >();
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
-    const [disabled, setDisabled] = useState(false);
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
@@ -138,7 +136,10 @@ export default function MultiSignatureCreateProposalView() {
                     className={styles.content}
                 >
                     <h3 className={styles.subHeader}>Transaction details</h3>
-                    <section className={styles.details}>
+                    <Form<Partial<MultiSignatureTransaction>>
+                        className={styles.details}
+                        onSubmit={forwardTransactionToSigningPage}
+                    >
                         <p>
                             Add all the details for the {displayType}{' '}
                             transaction below.
@@ -146,25 +147,31 @@ export default function MultiSignatureCreateProposalView() {
                         <div className={styles.proposal}>
                             {loading && <Loading />}
                             {blockSummary && (
-                                <EffectiveTimeUpdate
-                                    UpdateProposalComponent={UpdateComponent}
-                                    blockSummary={blockSummary}
-                                    setProposal={setProposal}
-                                    setDisabled={setDisabled}
-                                />
+                                <>
+                                    <UpdateComponent
+                                        blockSummary={blockSummary}
+                                    />
+                                    <Form.Timestamp
+                                        name="effectiveTime"
+                                        defaultValue={
+                                            new Date(
+                                                getNow() +
+                                                    5 * TimeConstants.Minute
+                                            )
+                                        }
+                                        rules={{
+                                            required:
+                                                'Effective time is required',
+                                            validate: futureDate(
+                                                'Effective time must be in the future'
+                                            ),
+                                        }}
+                                    />
+                                </>
                             )}
                         </div>
-                        <Button
-                            disabled={!proposal || disabled}
-                            onClick={() => {
-                                if (proposal) {
-                                    forwardTransactionToSigningPage(proposal);
-                                }
-                            }}
-                        >
-                            Continue
-                        </Button>
-                    </section>
+                        <Form.Submit>Continue</Form.Submit>
+                    </Form>
                 </PageLayout.FullWidthContainerSection>
             </PageLayout.Container>
         </PageLayout>
