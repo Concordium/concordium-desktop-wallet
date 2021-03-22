@@ -1,7 +1,7 @@
 import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
 import Form from '../Form';
 
-import { argTypes, subcomponents, Template, ValidationTemplate, decorators } from './deps';
+import { argTypes, subcomponents, Template, ValidationTemplate, AllFieldsTemplate, decorators } from './deps';
 
 <Meta title="Components/Form/Form" component={Form} argTypes={argTypes} subcomponents={subcomponents} decorators={decorators} />
 
@@ -76,6 +76,16 @@ As such, if submit is pressed without fillin those, they will render as invalid,
 <Canvas>
     <Story name="With Validation">
         {ValidationTemplate.bind({})}
+    </Story>
+</Canvas>
+
+### Form elements
+
+The form elements displayed in the sub components list (at the top of the page), are shown below:
+
+<Canvas>
+    <Story name="All available fields">
+        {AllFieldsTemplate.bind({})}
     </Story>
 </Canvas>
 

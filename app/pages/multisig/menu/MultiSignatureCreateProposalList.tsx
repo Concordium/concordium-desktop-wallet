@@ -1,11 +1,13 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import ButtonNavLink from '../../../components/ButtonNavLink';
 import { foundationTransactionsEnabledSelector } from '../../../features/SettingsSlice';
 import { UpdateType } from '../../../utils/types';
 
 import styles from './MultiSignatureMenu.module.scss';
 import { createProposalRoute } from '../../../utils/routerHelper';
+import { proposalsSelector } from '~/features/MultiSignatureSlice';
+import { expireProposals } from '~/utils/ProposalHelper';
 
 // TODO Show non-foundation transaction types.
 
@@ -21,6 +23,7 @@ const multiSigTransactionTypesMap: [UpdateType, string][] = [
     [UpdateType.UpdateMintDistribution, 'Update mint distribution'],
     [UpdateType.UpdateProtocol, 'Update protocol'],
     [UpdateType.UpdateGASRewards, 'Update GAS rewards'],
+    [UpdateType.UpdateElectionDifficulty, 'Update election difficulty'],
 ];
 
 /**
@@ -29,9 +32,11 @@ const multiSigTransactionTypesMap: [UpdateType, string][] = [
  * then these are also listed here.
  */
 export default function MultiSignatureCreateProposalView() {
+    const proposals = useSelector(proposalsSelector);
     const foundationTransactionsEnabled: boolean = useSelector(
         foundationTransactionsEnabledSelector
     );
+    const dispatch = useDispatch();
 
     let availableTransactionTypes: [UpdateType, string][] = [];
     if (foundationTransactionsEnabled) {
@@ -39,6 +44,10 @@ export default function MultiSignatureCreateProposalView() {
             multiSigTransactionTypesMap
         );
     }
+
+    useEffect(() => {
+        return expireProposals(proposals, dispatch);
+    }, [dispatch, proposals]);
 
     return (
         <>
