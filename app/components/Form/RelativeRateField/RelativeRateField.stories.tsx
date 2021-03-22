@@ -19,6 +19,7 @@ Primary.args = {
     relativeTo: '1 NRG',
     label: 'New euro pr. energy rate',
     unit: '€',
+    defaultValue: '1.234',
 };
 
 export const Invalid = Template.bind({});

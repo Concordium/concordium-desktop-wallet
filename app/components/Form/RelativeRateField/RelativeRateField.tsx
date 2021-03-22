@@ -7,7 +7,13 @@ import styles from './RelativeRateField.module.scss';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
-    'name' | 'value' | 'onChange' | 'onBlur' | 'disabled' | 'className'
+    | 'name'
+    | 'value'
+    | 'onChange'
+    | 'onBlur'
+    | 'disabled'
+    | 'className'
+    | 'defaultValue'
 >;
 
 export interface RelativeFieldProps extends CommonInputProps, InputFieldProps {
