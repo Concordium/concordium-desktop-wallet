@@ -4,7 +4,7 @@ import { ConnectedRouter } from 'connected-react-router';
 import { hot } from 'react-hot-loader/root';
 import { History } from 'history';
 
-import BgImage from '@resources/images/background.png';
+import BgImage from '@resources/images/background.jpeg';
 import { Store } from '~/store/store';
 import MainLayout from '~/cross-app-components/MainLayout';
 
