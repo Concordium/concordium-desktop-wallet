@@ -252,7 +252,7 @@ export interface CredentialDeploymentInformation
 
 export interface Credential {
     accountAddress: string;
-    external: boolean | 0 | 1; // SQlite converts booleans to 0/1
+    external: boolean;
     credentialIndex?: number;
     credentialNumber?: number;
     identityId?: number;
@@ -261,7 +261,7 @@ export interface Credential {
 }
 
 export interface LocalCredential extends Credential {
-    external: 0 | false;
+    external: false;
     identityId: number;
     credentialNumber: number;
 }
@@ -378,14 +378,14 @@ export enum RejectReason {
  * This Interface models the structure of the transfer transactions stored in the database
  */
 export interface TransferTransaction {
-    remote: boolean | 0 | 1; // SQlite converts booleans to 0/1
+    remote: boolean;
     originType: OriginType;
     transactionKind: TransactionKindString;
     id?: number; // only remote transactions have ids.
     blockHash: Hex;
     blockTime: string;
     total: string;
-    success?: boolean | 0 | 1; // SQlite converts booleans to 0/1
+    success?: boolean;
     transactionHash: Hex;
     subtotal?: string;
     cost?: string;
