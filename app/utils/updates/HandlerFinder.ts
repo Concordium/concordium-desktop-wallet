@@ -1,8 +1,6 @@
 import { parse } from 'json-bigint';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { Authorizations } from '../NodeApiTypes';
 import {
-    UpdateComponent,
     UpdateInstructionHandler,
     TransactionInput,
 } from '../transactionTypes';
@@ -22,57 +20,20 @@ import MintDistributionHandler from './MintDistributionHandler';
 import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
-
-class HandlerTypeMiddleware<T>
-    implements
-        UpdateInstructionHandler<
-            UpdateInstruction<UpdateInstructionPayload>,
-            ConcordiumLedgerClient
-        > {
-    base: UpdateInstructionHandler<T, ConcordiumLedgerClient>;
-
-    update: UpdateComponent;
-
-    title: string;
-
-    constructor(base: UpdateInstructionHandler<T, ConcordiumLedgerClient>) {
-        this.base = base;
-        this.update = base.update;
-        this.title = base.title;
-    }
-
-    confirmType(transaction: UpdateInstruction<UpdateInstructionPayload>) {
-        return transaction;
-    }
-
-    serializePayload(transaction: UpdateInstruction<UpdateInstructionPayload>) {
-        return this.base.serializePayload(this.base.confirmType(transaction));
-    }
-
-    signTransaction(
-        transaction: UpdateInstruction<UpdateInstructionPayload>,
-        ledger: ConcordiumLedgerClient
-    ) {
-        return this.base.signTransaction(
-            this.base.confirmType(transaction),
-            ledger
-        );
-    }
-
-    view(transaction: UpdateInstruction<UpdateInstructionPayload>) {
-        return this.base.view(this.base.confirmType(transaction));
-    }
-
-    getAuthorization(authorizations: Authorizations) {
-        return this.base.getAuthorization(authorizations);
-    }
-}
+import SimpleTransferHandler from './SimpleTransferHandler';
+import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
+import UpdateHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
 ) {
     if (transactionKind === TransactionKindId.Update_credentials) {
-        return new UpdateAccountCredentialsHandler();
+        return new AccountHandlerTypeMiddleware(
+            new UpdateAccountCredentialsHandler()
+        );
+    }
+    if (transactionKind === TransactionKindId.Simple_transfer) {
+        return new AccountHandlerTypeMiddleware(new SimpleTransferHandler());
     }
     throw new Error(`Unsupported transaction type: ${transactionKind}`);
 }
@@ -85,21 +46,27 @@ export function findUpdateInstructionHandler(
 > {
     switch (type) {
         case UpdateType.UpdateMicroGTUPerEuro:
-            return new HandlerTypeMiddleware(new MicroGtuPerEuroHandler());
+            return new UpdateHandlerTypeMiddleware(
+                new MicroGtuPerEuroHandler()
+            );
         case UpdateType.UpdateEuroPerEnergy:
-            return new HandlerTypeMiddleware(new EuroPerEnergyHandler());
+            return new UpdateHandlerTypeMiddleware(new EuroPerEnergyHandler());
         case UpdateType.UpdateTransactionFeeDistribution:
-            return new HandlerTypeMiddleware(
+            return new UpdateHandlerTypeMiddleware(
                 new TransactionFeeDistributionHandler()
             );
         case UpdateType.UpdateFoundationAccount:
-            return new HandlerTypeMiddleware(new FoundationAccountHandler());
+            return new UpdateHandlerTypeMiddleware(
+                new FoundationAccountHandler()
+            );
         case UpdateType.UpdateMintDistribution:
-            return new HandlerTypeMiddleware(new MintDistributionHandler());
+            return new UpdateHandlerTypeMiddleware(
+                new MintDistributionHandler()
+            );
         case UpdateType.UpdateProtocol:
-            return new HandlerTypeMiddleware(new ProtocolUpdateHandler());
+            return new UpdateHandlerTypeMiddleware(new ProtocolUpdateHandler());
         case UpdateType.UpdateGASRewards:
-            return new HandlerTypeMiddleware(new GasRewardsHandler());
+            return new UpdateHandlerTypeMiddleware(new GasRewardsHandler());
         default:
             throw new Error(`Unsupported transaction type: ${type}`);
     }

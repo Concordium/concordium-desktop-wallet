@@ -41,7 +41,9 @@ export default function ConfirmPage({
             <Button
                 onClick={() =>
                     dispatch(
-                        push(routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL)
+                        push(
+                            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
+                        )
                     )
                 }
             >
@@ -56,7 +58,7 @@ export default function ConfirmPage({
                 onClick={() =>
                     dispatch(
                         push(
-                            routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD
+                            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD
                         )
                     )
                 }

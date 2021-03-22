@@ -3,15 +3,15 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { AccountPathInput, getAccountPath } from '../../features/ledger/Path';
 import { AccountTransactionHandler } from '../transactionTypes';
 import {
-    UpdateAccountCredentials,
+    SimpleTransfer,
     AccountTransaction,
     TransactionPayload,
-    instanceOfUpdateAccountCredentials,
+    instanceOfSimpleTransfer,
 } from '../types';
-import { serializeTransferPayload } from '../transactionSerialization';
 import routes from '~/constants/routes.json';
+import { serializeTransferPayload } from '../transactionSerialization';
 
-type TransactionType = UpdateAccountCredentials;
+type TransactionType = SimpleTransfer;
 
 export default class UpdateAccountCredentialsHandler
     implements
@@ -19,7 +19,7 @@ export default class UpdateAccountCredentialsHandler
     confirmType(
         transaction: AccountTransaction<TransactionPayload>
     ): TransactionType {
-        if (instanceOfUpdateAccountCredentials(transaction)) {
+        if (instanceOfSimpleTransfer(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -37,12 +37,10 @@ export default class UpdateAccountCredentialsHandler
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CONFIRM;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CONFIRM:
+                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
+                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
                 return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION.replace(
@@ -59,10 +57,7 @@ export default class UpdateAccountCredentialsHandler
         ledger: ConcordiumLedgerClient,
         path: AccountPathInput
     ) {
-        return ledger.signUpdateCredentialTransaction(
-            transaction,
-            getAccountPath(path)
-        );
+        return ledger.signTransfer(transaction, getAccountPath(path));
     }
 
     view(transaction: TransactionType) {

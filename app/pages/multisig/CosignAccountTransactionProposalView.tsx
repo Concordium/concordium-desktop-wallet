@@ -52,8 +52,7 @@ export default function CosignTransactionProposalView({ location }: Props) {
 
         const credential = (
             await getCredentialsOfAccount(transactionObject.sender)
-        )[2];
-        console.log(credential);
+        ).filter((cred) => cred.credentialIndex)[0]; // TODO: filters out the 0'th, which is nice for testing, but not for production
 
         if (
             credential.identityId === undefined ||

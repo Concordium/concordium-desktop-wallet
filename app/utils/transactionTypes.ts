@@ -83,5 +83,9 @@ export interface AccountTransactionHandler<T, S> {
         path: AccountPathInput
     ) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;
+    creationLocationHandler: (
+        currentLocation: string,
+        proposalId: number
+    ) => string;
     title: string;
 }

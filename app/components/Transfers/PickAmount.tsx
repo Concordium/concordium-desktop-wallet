@@ -9,7 +9,7 @@ interface Props {
     header: string;
     setAmount(amount: string): void;
     toPickRecipient?(): void;
-    toConfirmTransfer(): void;
+    toConfirmTransfer?(): void;
 }
 
 /**
@@ -51,16 +51,18 @@ export default function PickAmount({
                             {recipient ? recipient.name : 'Select Recipient'}
                         </Button>
                     ) : null}
-                    <Button
-                        positive
-                        onClick={toConfirmTransfer}
-                        disabled={
-                            (!recipient && toPickRecipient !== undefined) ||
-                            !validInput
-                        }
-                    >
-                        Continue
-                    </Button>
+                    {toConfirmTransfer ? (
+                        <Button
+                            positive
+                            onClick={toConfirmTransfer}
+                            disabled={
+                                (!recipient && toPickRecipient !== undefined) ||
+                                !validInput
+                            }
+                        >
+                            Continue
+                        </Button>
+                    ) : null}
                 </Button.Group>
             </Card.Content>
         </Card>

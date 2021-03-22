@@ -50,13 +50,11 @@
     "GENERATE_CREDENTIAL_PICKACCOUNT": "/generate-credential/pick-account",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION": "/multi-signature-transaction/simple-transfer",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT": "/multi-signature-transaction/simple-transfer/pick-account",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT": "/multi-signature-transaction/simple-transfer/credentials/pick_amount",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT": "/multi-signature-transaction/simple-transfer/credentials/pick_recipient",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION": "/multi-signature-transaction/simple-transfer/credentials/sign_transaction",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_MAKETRANSFER": "/multi-signature-transaction/simple-transfer/credentials/make-transfer",
-    "UPDATE_ACCOUNT_CREDENTIALS": "/update_account_credentials",
-    "UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT": "/update_account_credentials/pick-account",
-    "UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY": "/update_account_credentials/pick-identity",
-    "UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL": "/update_account_credentials/add-credential",
-    "UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD": "/update_account_credentials/change-signature-threshold",
-    "UPDATE_ACCOUNT_CREDENTIALS_SIGN": "/update_account_credentials/sign",
-    "UPDATE_ACCOUNT_CREDENTIALS_SEND": "/update_account_credentials/send",
-    "UPDATE_ACCOUNT_CREDENTIALS_CONFIRM": "/update_account_credentials/confirm"
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL": "/multi-signature-transaction/simple-transfer/add-credential",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD": "/multi-signature-transaction/simple-transfer/change-signature-threshold",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CONFIRM": "/multi-signature-transaction/simple-transfer/confirm"
 }
