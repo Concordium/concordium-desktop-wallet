@@ -6,6 +6,7 @@ import {
     Account,
     Identity,
     TransactionKindString,
+    TransactionKindId,
     AddressBookEntry,
 } from '~/utils/types';
 import PickAmount from '~/components/Transfers/PickAmount';
@@ -19,26 +20,8 @@ import Button from '~/cross-app-components/Button';
 import TransactionProposalDetails from './TransactionProposalDetails';
 import { isValidGTUString } from '~/utils/gtu';
 import CreateTransaction from './CreateTransaction';
+import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
 
-function nextLocation(currentLocation: string, proposalId: number) {
-    switch (currentLocation) {
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-            return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
-            return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
-            return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
-            return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-            return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION.replace(
-                ':id',
-                `${proposalId}`
-            );
-        default:
-            throw new Error('unknown location');
-    }
-}
 /**
  * This component controls the flow of creating a multisignature account transaction.
  * It contains the logic for displaying the current parameters.
@@ -48,7 +31,9 @@ export default function SimpleTransfer(): JSX.Element {
     const location = useLocation().pathname;
 
     const transactionKind = TransactionKindString.Transfer;
-    const locationHandler = nextLocation;
+    const handler = findAccountTransactionHandler(
+        TransactionKindId.Simple_transfer
+    );
 
     const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
@@ -85,7 +70,7 @@ export default function SimpleTransfer(): JSX.Element {
                 <h1>Multi Signature Transactions | {transactionKind}</h1>
             </PageLayout.Header>
             <PageLayout.Container>
-                <Columns>
+                <Columns divider columnScroll>
                     <Columns.Column>
                         <TransactionProposalDetails
                             transactionType={transactionKind}
@@ -100,7 +85,7 @@ export default function SimpleTransfer(): JSX.Element {
                                 setReady(false);
                                 dispatch(
                                     push({
-                                        pathname: locationHandler(
+                                        pathname: handler.creationLocationHandler(
                                             location,
                                             proposalId
                                         ),
