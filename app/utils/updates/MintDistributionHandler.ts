@@ -1,5 +1,5 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernancePath } from '../../features/ledger/Path';
+import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import MintDistributionView from '../../pages/multisig/MintDistributionView';
 import UpdateMintDistribution from '../../pages/multisig/UpdateMintDistribution';
 import { Authorizations } from '../NodeApiTypes';
@@ -34,7 +34,7 @@ export default class MintDistributionHandler
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient
     ) {
-        const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
+        const path: number[] = getGovernanceLevel2Path();
         return ledger.signMintDistribution(
             transaction,
             this.serializePayload(transaction),

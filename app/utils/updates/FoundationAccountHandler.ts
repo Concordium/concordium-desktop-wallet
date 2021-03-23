@@ -1,5 +1,5 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernancePath } from '../../features/ledger/Path';
+import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
 import UpdateFoundationAccount from '../../pages/multisig/UpdateFoundationAccount';
 import { Authorizations } from '../NodeApiTypes';
@@ -34,7 +34,7 @@ export default class FoundationAccountHandler
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient
     ) {
-        const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
+        const path: number[] = getGovernanceLevel2Path();
         return ledger.signFoundationAccount(
             transaction,
             this.serializePayload(transaction),
