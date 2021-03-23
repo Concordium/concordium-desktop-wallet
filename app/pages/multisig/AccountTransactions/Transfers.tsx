@@ -29,6 +29,7 @@ interface Props {
 /**
  * This component controls the flow of creating a multisignature account transaction.
  * It contains the logic for displaying the current parameters.
+ * TODO center continue button
  */
 export default function SimpleTransfer({
     transactionKind,

@@ -11,6 +11,7 @@ import {
 } from '~/utils/types';
 import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import { parseTime } from '~/utils/timeHelpers';
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 import SidedRow from '~/components/SidedRow';
 
@@ -23,6 +24,20 @@ interface Props {
     recipient: AddressBookEntry | undefined;
 }
 
+const placeholderText = 'To be determined';
+
+function getScheduledTransferCost(schedule: Schedule) {
+    return 364n * BigInt(schedule.length);
+}
+
+// TODO make an actual function for this;
+function getTransactionCost(type: TransactionKindId) {
+    if (type) {
+        return 100n;
+    }
+    return 200n;
+}
+
 export default function TransactionProposalDetails({
     identity,
     account,
@@ -31,24 +46,33 @@ export default function TransactionProposalDetails({
     schedule,
     transactionType,
 }: Props) {
+    const isScheduledTransfer =
+        transactionType === TransactionKindId.Transfer_with_schedule;
+    let fee;
+    if (isScheduledTransfer) {
+        fee = schedule ? getScheduledTransferCost(schedule) : null;
+    } else {
+        fee = getTransactionCost(transactionType);
+    }
     return (
-        <>
-            <h2>{TransactionKindId[transactionType]}</h2>
-            <h2>Identity:</h2>
-            <b>{identity ? identity.name : 'Choose an ID on the right'}</b>
-            <h2>Account:</h2>
-            <b>{account ? account.name : 'Choose an account on the right'}</b>
-            <h2>Amount:</h2>
-            <b>{amount ? `${getGTUSymbol()} ${amount}` : 'To be determined'}</b>
-            <h2>Fee:</h2>
-            <b>big dollar</b>
-            <h2>Recipient:</h2>
-            <b>{recipient ? recipient.name : 'To be determined'}</b>
+        <div className={styles.details}>
+            <b>Identity:</b>
+            <h2>{identity ? identity.name : placeholderText}</h2>
+            <b>Account:</b>
+            <h2>{account ? account.name : placeholderText}</h2>
+            <b>Amount:</b>
+            <h2>{amount ? `${getGTUSymbol()} ${amount}` : placeholderText}</h2>
+            <b>Estimated Fee: {fee ? displayAsGTU(fee) : null}</b>
             <br />
-            {recipient ? recipient.note : null}
-            {transactionType === TransactionKindId.Transfer_with_schedule ? (
+            <br />
+            <b>Recipient:</b>
+            <h2>{recipient ? recipient.name : 'To be determined'}</h2>
+            {recipient ? `Note: ${recipient.note}` : null}
+            <br />
+            <br />
+            {isScheduledTransfer ? (
                 <>
-                    <h2>Release Schedule:</h2>
+                    <b>Release Schedule:</b>
                     {schedule ? (
                         <>
                             <Grid container columns={2}>
@@ -70,6 +94,6 @@ export default function TransactionProposalDetails({
                 </>
             ) : null}
             <br />
-        </>
+        </div>
     );
 }
