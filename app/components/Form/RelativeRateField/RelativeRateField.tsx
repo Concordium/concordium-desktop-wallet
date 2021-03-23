@@ -24,8 +24,8 @@ export interface RelativeRateFieldProps
      * Unit of value in the field.
      */
     unit: string;
-    value: Partial<ExchangeRate>;
-    onChange(v: Partial<ExchangeRate>): void;
+    value: Partial<ExchangeRate> | undefined;
+    onChange(v: Partial<ExchangeRate> | undefined): void;
     onBlur(): void;
 }
 
@@ -49,8 +49,9 @@ function RelativeRateField({
     ...props
 }: RelativeRateFieldProps) {
     const [innerValue, setInnerValue] = useState<string>(
-        bigIntToString(value.numerator)
+        bigIntToString(value?.numerator)
     );
+    const denominator = value?.denominator || 1n; // TODO default?
 
     let invalid = isInvalid;
     let errorMessage = error;
@@ -66,14 +67,14 @@ function RelativeRateField({
     useEffect(
         () =>
             onChange({
-                denominator: value.denominator,
+                denominator,
                 numerator: parsedValue,
             }),
-        [parsedValue, value.denominator, onChange]
+        [parsedValue, denominator, onChange]
     );
 
-    useEffect(() => setInnerValue(bigIntToString(value.numerator)), [
-        value.numerator,
+    useEffect(() => setInnerValue(bigIntToString(value?.numerator)), [
+        value?.numerator,
     ]);
 
     return (
@@ -89,7 +90,7 @@ function RelativeRateField({
                 <span className={styles.label}>{label}</span>
                 <div className={styles.container}>
                     <div className={styles.relativeTo}>
-                        {`${denominatorUnit} ${value.denominator}`}
+                        {`${denominatorUnit} ${denominator}`}
                     </div>
                     <div>&nbsp;=&nbsp;</div>
                     <div className={styles.fieldWrapper}>
