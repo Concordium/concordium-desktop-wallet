@@ -90,8 +90,6 @@ export default function AccountTransactionProposalView() {
         const credentialIndex = parseInt(credentialIndexList[0], 10);
         const signature = transactionObject.signatures[credentialIndex];
 
-        console.log(transactionObject);
-        console.log(proposal);
         // Prevent the user from adding a signature from a credential that is already present on the proposal.
         if (proposal.signatures[credentialIndex] !== undefined) {
             return {
