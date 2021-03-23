@@ -31,5 +31,13 @@
 }
 
 .proposal {
-    padding: 0 20px;
+    margin: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 40%;
+
+    > *:not(:last-child) {
+        margin-bottom: 60px;
+    }
 }

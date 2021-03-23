@@ -47,8 +47,12 @@ export function GasRewardFractionField({
 }: GasRewardFractionFieldProps): JSX.Element {
     const [innerValue, setInnerValue] = useState<string>(formatValue(value));
 
-    useUpdateEffect(() => onChange(parseValue(innerValue)), [innerValue]);
-    useUpdateEffect(() => setInnerValue(formatValue(value)), [value]);
+    useUpdateEffect(() => {
+        onChange(parseValue(innerValue));
+    }, [innerValue]);
+    useUpdateEffect(() => {
+        setInnerValue(formatValue(value));
+    }, [value]);
 
     return (
         <label>

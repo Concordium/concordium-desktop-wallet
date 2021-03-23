@@ -1,11 +1,12 @@
 import clsx from 'clsx';
-import React, { InputHTMLAttributes, useEffect, useState } from 'react';
+import React, { InputHTMLAttributes, useState } from 'react';
 import { ExchangeRate } from '~/utils/types';
 import { CommonInputProps } from '~/components/Form/common';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 
 import styles from './RelativeRateField.module.scss';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
+import { useUpdateEffect } from '~/utils/hooks';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
@@ -65,18 +66,16 @@ export function RelativeRateField({
         errorMessage = 'Value must be a valid number';
     }
 
-    useEffect(
-        () =>
-            onChange({
-                denominator,
-                numerator: parsedValue,
-            }),
-        [parsedValue, denominator, onChange]
-    );
+    useUpdateEffect(() => {
+        onChange({
+            denominator,
+            numerator: parsedValue,
+        });
+    }, [parsedValue, denominator, onChange]);
 
-    useEffect(() => setInnerValue(bigIntToString(value?.numerator)), [
-        value?.numerator,
-    ]);
+    useUpdateEffect(() => {
+        setInnerValue(bigIntToString(value?.numerator));
+    }, [value?.numerator]);
 
     return (
         <div

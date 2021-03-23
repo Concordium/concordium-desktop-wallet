@@ -168,11 +168,11 @@ export default function MultiSignatureCreateProposalView() {
                         className={styles.details}
                         onSubmit={handleSubmit}
                     >
-                        <p>
-                            Add all the details for the {displayType}{' '}
-                            transaction below.
-                        </p>
                         <div className={styles.proposal}>
+                            <p>
+                                Add all the details for the {displayType}{' '}
+                                transaction below.
+                            </p>
                             {loading && <Loading />}
                             {blockSummary && (
                                 <>
