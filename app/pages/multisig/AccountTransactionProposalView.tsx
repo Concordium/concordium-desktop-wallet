@@ -2,28 +2,28 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useParams } from 'react-router';
-import { parse, stringify } from '../../utils/JSONHelper';
+import { parse, stringify } from '~/utils/JSONHelper';
 import {
     proposalsSelector,
     updateCurrentProposal,
-} from '../../features/MultiSignatureSlice';
+} from '~/features/MultiSignatureSlice';
 import {
     Transaction,
     instanceOfAccountTransactionWithSignature,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     AccountTransactionWithSignature,
-} from '../../utils/types';
-import { sendTransaction } from '../../utils/nodeRequests';
-import { getMultiSignatureTransactionStatus } from '../../utils/TransactionStatusPoller';
-import routes from '../../constants/routes.json';
-import { findAccountTransactionHandler } from '../../utils/updates/HandlerFinder';
+} from '~/utils/types';
+import { sendTransaction } from '~/utils/nodeRequests';
+import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
+import routes from '~/constants/routes.json';
+import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
 import {
     getAccountTransactionHash,
     serializeTransaction,
-} from '../../utils/transactionSerialization';
+} from '~/utils/transactionSerialization';
 import ProposalView from './ProposalView';
-import { ModalErrorInput } from '../../components/SimpleErrorModal';
+import { ModalErrorInput } from '~/components/SimpleErrorModal';
 
 /**
  * Component that displays the multi signature transaction proposal that is currently the
