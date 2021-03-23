@@ -1,14 +1,19 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import ProtocolUpdateView from '../../pages/multisig/ProtocolUpdateView';
-import UpdateProtocol from '../../pages/multisig/UpdateProtocol';
-import { Authorizations } from '../NodeApiTypes';
+import UpdateProtocol, {
+    UpdateProtocolFields,
+} from '../../pages/multisig/UpdateProtocol';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     isProtocolUpdate,
+    MultiSignatureTransaction,
     ProtocolUpdate,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateType,
 } from '../types';
 import { serializeProtocolUpdate } from '../UpdateSerialization';
 
@@ -23,6 +28,28 @@ export default class ProtocolUpdateHandler
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    createTransaction(
+        blockSummary: BlockSummary,
+        protocolUpdate: UpdateProtocolFields,
+        effectiveTime: bigint
+    ): Partial<MultiSignatureTransaction> | undefined {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const { threshold } = blockSummary.updates.authorizations.protocol;
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.protocol.nextSequenceNumber;
+
+        return createUpdateMultiSignatureTransaction(
+            protocolUpdate,
+            UpdateType.UpdateProtocol,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
     }
 
     serializePayload(transaction: TransactionType) {
