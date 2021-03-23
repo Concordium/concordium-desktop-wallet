@@ -4,13 +4,13 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Button, Divider, Grid, Header, Segment } from 'semantic-ui-react';
 import { parse } from '~/utils/JSONHelper';
-import { MultiSignatureTransaction, Transaction } from '../../utils/types';
-import TransactionDetails from '../../components/TransactionDetails';
-import TransactionHashView from '../../components/TransactionHashView';
-import routes from '../../constants/routes.json';
-import findHandler from '../../utils/updates/HandlerFinder';
-import getTransactionHash from '../../utils/transactionHash';
-import PageLayout from '../../components/PageLayout';
+import { MultiSignatureTransaction, Transaction } from '~/utils/types';
+import TransactionDetails from '~/components/TransactionDetails';
+import TransactionHashView from '~/components/TransactionHashView';
+import routes from '~/constants/routes.json';
+import findHandler from '~/utils/updates/HandlerFinder';
+import getTransactionHash from '~/utils/transactionHash';
+import PageLayout from '~/components/PageLayout';
 
 interface Props {
     location: LocationDescriptorObject<string>;

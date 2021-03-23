@@ -14,7 +14,7 @@ import { getBlockSummary, getConsensusStatus } from '~/utils/nodeRequests';
 import { BlockSummary, ConsensusStatus } from '~/utils/NodeApiTypes';
 import routes from '~/constants/routes.json';
 import DynamicModal from './DynamicModal';
-import { findUpdateInstructionHandler } from '../../utils/updates/HandlerFinder';
+import { findUpdateInstructionHandler } from '~/utils/updates/HandlerFinder';
 import EffectiveTimeUpdate from './EffectiveTimeUpdate';
 import PageLayout from '~/components/PageLayout';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';

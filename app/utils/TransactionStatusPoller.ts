@@ -1,6 +1,6 @@
 import { parse } from './JSONHelper';
-import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
-import { loadProposals } from '../features/MultiSignatureSlice';
+import { getAll, updateEntry } from '~/database/MultiSignatureProposalDao';
+import { loadProposals } from '~/features/MultiSignatureSlice';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
@@ -13,8 +13,8 @@ import {
 import {
     confirmTransaction,
     rejectTransaction,
-} from '../features/TransactionSlice';
-import { getPendingTransactions } from '../database/TransactionDao';
+} from '~/features/TransactionSlice';
+import { getPendingTransactions } from '~/database/TransactionDao';
 import {
     getStatus,
     StatusResponse,
