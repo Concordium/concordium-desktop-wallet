@@ -1,14 +1,19 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import TransactionFeeDistributionView from '../../pages/multisig/TransactionFeeDistributionView';
-import UpdateTransactionFeeDistribution from '../../pages/multisig/UpdateTransactionFeeDistribution';
-import { Authorizations } from '../NodeApiTypes';
+import UpdateTransactionFeeDistribution, {
+    UpdateTransactionFeeDistributionFields,
+} from '../../pages/multisig/UpdateTransactionFeeDistribution';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     isTransactionFeeDistribution,
+    MultiSignatureTransaction,
     TransactionFeeDistribution,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateType,
 } from '../types';
 import { serializeTransactionFeeDistribution } from '../UpdateSerialization';
 
@@ -23,6 +28,36 @@ export default class TransactionFeeDistributionHandler
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    createTransaction(
+        blockSummary: BlockSummary,
+        { rewardDistribution }: UpdateTransactionFeeDistributionFields,
+        effectiveTime: bigint
+    ): Partial<MultiSignatureTransaction> | undefined {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.transactionFeeDistribution
+                .nextSequenceNumber;
+        const {
+            threshold,
+        } = blockSummary.updates.authorizations.transactionFeeDistribution;
+
+        const transactionFeeDistribution: TransactionFeeDistribution = {
+            baker: rewardDistribution.first,
+            gasAccount: rewardDistribution.second,
+        };
+
+        return createUpdateMultiSignatureTransaction(
+            transactionFeeDistribution,
+            UpdateType.UpdateTransactionFeeDistribution,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
     }
 
     serializePayload(transaction: TransactionType) {
