@@ -14,6 +14,7 @@ export default function DisplayAccountCredentialUpdate({
     transaction,
     fromName,
 }: Props) {
+    const { addedCredentials, removedCredIds } = transaction.payload;
     return (
         <List relaxed="very">
             <List.Item>
@@ -25,7 +26,28 @@ export default function DisplayAccountCredentialUpdate({
                 New Threshold:
                 {transaction.payload.newThreshold}
             </List.Item>
-            <List.Item />
+            {removedCredIds.length > 0 ? (
+                <List.Item>
+                    Removed Credentials:
+                    {removedCredIds.map((removedId) => (
+                        <>
+                            <br />
+                            <p>{removedId}</p>
+                        </>
+                    ))}
+                </List.Item>
+            ) : null}
+            {addedCredentials.length > 0 ? (
+                <List.Item>
+                    Added Credentials:
+                    {addedCredentials.map((addedCredential) => (
+                        <>
+                            <br />
+                            <p>{addedCredential.value.credId}</p>
+                        </>
+                    ))}
+                </List.Item>
+            ) : null}
         </List>
     );
 }

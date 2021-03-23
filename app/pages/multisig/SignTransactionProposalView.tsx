@@ -3,25 +3,25 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { parse, stringify } from 'json-bigint';
-import { hashSha256 } from '../../utils/serializationHelpers';
-import routes from '../../constants/routes.json';
+import { hashSha256 } from '~/utils/serializationHelpers';
+import routes from '~/constants/routes.json';
 import {
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateInstructionSignature,
-} from '../../utils/types';
-import { UpdateInstructionHandler } from '../../utils/transactionTypes';
-import { createUpdateInstructionHandler } from '../../utils/updates/HandlerFinder';
-import { insert } from '../../database/MultiSignatureProposalDao';
-import { addProposal } from '../../features/MultiSignatureSlice';
+} from '~/utils/types';
+import { UpdateInstructionHandler } from '~/utils/transactionTypes';
+import { createUpdateInstructionHandler } from '~/utils/updates/HandlerFinder';
+import { insert } from '~/database/MultiSignatureProposalDao';
+import { addProposal } from '~/features/MultiSignatureSlice';
 import GenericSignTransactionProposalView from './GenericSignTransactionProposalView';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';
-import SimpleErrorModal from '../../components/SimpleErrorModal';
-import { BlockSummary } from '../../utils/NodeApiTypes';
-import findAuthorizationKey from '../../utils/updates/AuthorizationHelper';
-import { selectedProposalRoute } from '../../utils/routerHelper';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { serializeUpdateInstructionHeaderAndPayload } from '~/utils/UpdateSerialization';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+import { BlockSummary } from '~/utils/NodeApiTypes';
+import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
+import { selectedProposalRoute } from '~/utils/routerHelper';
 
 export interface SignInput {
     multiSignatureTransaction: MultiSignatureTransaction;

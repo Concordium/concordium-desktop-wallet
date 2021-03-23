@@ -10,8 +10,8 @@ import {
     Segment,
 } from 'semantic-ui-react';
 import { parse } from '~/utils/JSONHelper';
-import TransactionDetails from '../../components/TransactionDetails';
-import TransactionHashView from '../../components/TransactionHashView';
+import TransactionDetails from '~/components/TransactionDetails';
+import TransactionHashView from '~/components/TransactionHashView';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
@@ -19,14 +19,14 @@ import {
     Transaction,
     TransactionCredentialSignature,
     instanceOfUpdateInstructionSignature,
-} from '../../utils/types';
-import { saveFile } from '../../utils/FileHelper';
-import DragAndDropFile from '../../components/DragAndDropFile';
+} from '~/utils/types';
+import { saveFile } from '~/utils/FileHelper';
+import DragAndDropFile from '~/components/DragAndDropFile';
 import SimpleErrorModal, {
     ModalErrorInput,
-} from '../../components/SimpleErrorModal';
-import PageLayout from '../../components/PageLayout';
-import { expirationEffect } from '../../utils/ProposalHelper';
+} from '~/components/SimpleErrorModal';
+import PageLayout from '~/components/PageLayout';
+import { expirationEffect } from '~/utils/ProposalHelper';
 import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
 
 interface Props {
