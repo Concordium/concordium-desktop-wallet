@@ -5,11 +5,12 @@ import { Validate } from 'react-hook-form';
 import { ColorType, EqualRecord, MintRate } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
+import Form from '~/components/Form';
+
 import {
     RewardDistributionValue,
     FormRewardDistribution,
 } from './common/RewardDistribution';
-import Form from '~/components/Form';
 
 export interface UpdateMintDistributionFields {
     mantissa: string;
@@ -25,7 +26,7 @@ const fieldNames: EqualRecord<UpdateMintDistributionFields> = {
 
 const isValidNumber = (parseFun: (v: string) => number): Validate => (
     v: string
-) => Number.isNaN(parseFun(v)) || 'Value must be a valid number';
+) => !Number.isNaN(parseFun(v)) || 'Value must be a valid number';
 
 const isValidFloat = isValidNumber(parseFloat);
 const isValidInteger = isValidNumber((v) => parseInt(v, 10));
@@ -49,6 +50,11 @@ export default function UpdateMintDistribution({
     const mintRate: MintRate = {
         mantissa: 7555999,
         exponent: 16,
+    };
+
+    const initialValue: RewardDistributionValue = {
+        first: currentMintDistribution.bakingReward,
+        second: currentMintDistribution.finalizationReward,
     };
 
     return (
@@ -116,6 +122,7 @@ export default function UpdateMintDistribution({
                     />
                     <FormRewardDistribution
                         name={fieldNames.rewardDistribution}
+                        defaultValue={initialValue}
                         labels={rewardDistributionLabels}
                         rules={{ required: 'Reward distribution is required' }}
                     />

@@ -181,6 +181,7 @@ export default function MultiSignatureCreateProposalView() {
                                     />
                                     <Form.Timestamp
                                         name="effectiveTime"
+                                        label="Effective Time"
                                         defaultValue={
                                             new Date(
                                                 getNow() +
