@@ -1,9 +1,11 @@
 import React from 'react';
-import Form from '~/components/Form';
-import RelativeRateField from '~/components/Form/RelativeRateField';
 import { noOp } from '~/utils/basicHelpers';
-import { UpdateProps } from '../../utils/transactionTypes';
-import { EqualRecord, ExchangeRate } from '../../utils/types';
+import { UpdateProps } from '~/utils/transactionTypes';
+import { EqualRecord, ExchangeRate } from '~/utils/types';
+import {
+    RelativeRateField,
+    FormRelativeRateField,
+} from './common/RelativeRateField';
 
 export interface UpdateEuroPerEnergyFields {
     euroPerEnergy: ExchangeRate;
@@ -27,7 +29,7 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 onBlur={noOp}
                 disabled
             />
-            <Form.RelativeRateField
+            <FormRelativeRateField
                 name={fieldNames.euroPerEnergy}
                 label="New euro per energy"
                 unit="€"

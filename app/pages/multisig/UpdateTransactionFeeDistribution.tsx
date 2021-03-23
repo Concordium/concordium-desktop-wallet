@@ -4,8 +4,10 @@ import { Grid, Progress } from 'semantic-ui-react';
 import { ColorType, EqualRecord } from '~/utils/types';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 import { UpdateProps } from '~/utils/transactionTypes';
-import { RewardDistributionValue } from '~/components/Form/RewardDistribution/RewardDistribution';
-import Form from '~/components/Form';
+import {
+    RewardDistributionValue,
+    FormRewardDistribution,
+} from './common/RewardDistribution';
 
 export interface UpdateTransactionFeeDistributionFields {
     rewardDistribution: RewardDistributionValue;
@@ -110,7 +112,7 @@ export default function UpdateTransactionFeeDistribution({
                 </Grid.Column>
                 <Grid.Column>
                     <h3>New Transaction Fee Distribuition</h3>
-                    <Form.RewardDistribution
+                    <FormRewardDistribution
                         name={fieldNames.rewardDistribution}
                         defaultValue={initialValue}
                         labels={rewardDistributionLabels}

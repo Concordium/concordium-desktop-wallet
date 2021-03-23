@@ -5,7 +5,10 @@ import { Validate } from 'react-hook-form';
 import { ColorType, EqualRecord, MintRate } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
-import { RewardDistributionValue } from '~/components/Form/RewardDistribution/RewardDistribution';
+import {
+    RewardDistributionValue,
+    FormRewardDistribution,
+} from './common/RewardDistribution';
 import Form from '~/components/Form';
 
 export interface UpdateMintDistributionFields {
@@ -111,7 +114,7 @@ export default function UpdateMintDistribution({
                             min: 0,
                         }}
                     />
-                    <Form.RewardDistribution
+                    <FormRewardDistribution
                         name={fieldNames.rewardDistribution}
                         labels={rewardDistributionLabels}
                         rules={{ required: 'Reward distribution is required' }}

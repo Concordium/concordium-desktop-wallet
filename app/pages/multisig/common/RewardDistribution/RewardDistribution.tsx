@@ -4,16 +4,17 @@ import { Controller, useForm } from 'react-hook-form';
 import clsx from 'clsx';
 
 import { EqualRecord } from '~/utils/types';
-
-import RewardDistributionField from './RewardDistributionField';
-import styles from './RewardDistribution.module.scss';
-import useMultiFieldFocus from '../common/useMultiFieldFocus';
-import { CommonFieldProps } from '../common';
-import ErrorMessage from '../ErrorMessage';
 import {
     fractionResolution,
     fractionResolutionToPercentage,
 } from '~/utils/rewardFractionHelpers';
+import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
+import { CommonFieldProps } from '~/components/Form/common';
+import useMultiFieldFocus from '~/components/Form/common/useMultiFieldFocus';
+import ErrorMessage from '~/components/Form/ErrorMessage';
+
+import RewardDistributionField from './RewardDistributionField';
+import styles from './RewardDistribution.module.scss';
 
 export interface RewardDistributionValue {
     first: number;
@@ -77,7 +78,7 @@ export interface RewardDistributionProps extends CommonFieldProps {
  *
  * <RewardDistribution value={value} onChange={setValue} labels={['first', 'second', 'remaining']} />
  */
-export default function RewardDistribution({
+export function RewardDistribution({
     labels,
     value: outerValue = { first: 0, second: 0 },
     onChange: fieldOnChange,
@@ -283,3 +284,8 @@ export default function RewardDistribution({
         </div>
     );
 }
+
+export const FormRewardDistribution = connectWithFormControlled<
+    RewardDistributionValue,
+    RewardDistributionProps
+>(RewardDistribution);

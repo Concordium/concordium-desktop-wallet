@@ -1,10 +1,11 @@
 import clsx from 'clsx';
 import React, { InputHTMLAttributes, useEffect, useState } from 'react';
 import { ExchangeRate } from '~/utils/types';
-import { CommonInputProps } from '../common';
-import ErrorMessage from '../ErrorMessage';
+import { CommonInputProps } from '~/components/Form/common';
+import ErrorMessage from '~/components/Form/ErrorMessage';
 
 import styles from './RelativeRateField.module.scss';
+import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
@@ -36,7 +37,7 @@ export interface RelativeRateFieldProps
  * @example
  * <RelativeRateField value={value} onChange={(e) => setValue(e.target.value)} unit="€" relativeTo="1 NRG" />
  */
-function RelativeRateField({
+export function RelativeRateField({
     denominatorUnit,
     unit,
     label,
@@ -111,4 +112,7 @@ function RelativeRateField({
     );
 }
 
-export default RelativeRateField;
+export const FormRelativeRateField = connectWithFormControlled<
+    Partial<ExchangeRate>,
+    RelativeRateFieldProps
+>(RelativeRateField);

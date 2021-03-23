@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
-import RelativeRateField, { RelativeRateFieldProps } from './RelativeRateField';
 import { ExchangeRate } from '~/utils/types';
+import { RelativeRateField, RelativeRateFieldProps } from './RelativeRateField';
 
 export default {
-    title: 'Components/Form/Fields/Relative Rate Field',
+    title: 'Multi Signature/Common/Relative Rate Field',
     component: RelativeRateField,
 } as Meta;
 

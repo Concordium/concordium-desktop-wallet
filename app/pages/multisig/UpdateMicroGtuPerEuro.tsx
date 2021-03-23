@@ -2,8 +2,10 @@ import React, { useMemo } from 'react';
 
 import { EqualRecord, ExchangeRate } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
-import RelativeRateField from '~/components/Form/RelativeRateField';
-import Form from '~/components/Form';
+import {
+    RelativeRateField,
+    FormRelativeRateField,
+} from './common/RelativeRateField';
 
 const noOp = () => null;
 
@@ -44,7 +46,7 @@ export default function UpdateMicroGtuPerEuroRate({
                 onBlur={noOp}
                 disabled
             />
-            <Form.RelativeRateField
+            <FormRelativeRateField
                 name={fieldNames.microGtuPerEuro}
                 label="Current micro GTU per euro rate"
                 unit="µǤ"
