@@ -17,6 +17,10 @@ import {
     TransactionAccountSignature,
     TransactionCredentialSignature,
 } from './transactionTypes';
+import {
+    energyConstants,
+    getScheduledTransferEnergyCost,
+} from './transactionCosts';
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
@@ -66,7 +70,7 @@ export async function attachNames(
 async function createTransferTransaction<T extends TransactionPayload>(
     fromAddress: string,
     expiry: bigint = getDefaultExpiry(),
-    energyAmount: string,
+    energyAmount: bigint,
     transactionKind: number,
     payload: T
 ) {
@@ -74,7 +78,7 @@ async function createTransferTransaction<T extends TransactionPayload>(
     const transferTransaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
-        energyAmount,
+        energyAmount: energyAmount.toString(),
         expiry,
         transactionKind,
         payload,
@@ -91,7 +95,7 @@ export function createSimpleTransferTransaction(
     amount: BigInt,
     toAddress: string,
     expiry: bigint = getDefaultExpiry(),
-    energyAmount = '200'
+    energyAmount = energyConstants.SimpleTransferCost
 ): Promise<SimpleTransfer> {
     const payload = {
         toAddress,
@@ -110,7 +114,7 @@ export function createShieldAmountTransaction(
     address: string,
     amount: bigint,
     expiry: bigint = getDefaultExpiry(),
-    energyAmount = '1000'
+    energyAmount = energyConstants.TransferToEncryptedCost
 ): Promise<TransferToEncrypted> {
     const payload = {
         amount: amount.toString(),
@@ -128,7 +132,7 @@ export async function createUnshieldAmountTransaction(
     address: string,
     amount: BigInt,
     expiry: bigint = getDefaultExpiry(),
-    energyAmount = '30000'
+    energyAmount = energyConstants.TransferToPublicCost
 ) {
     const payload = {
         transferAmount: amount.toString(),
@@ -175,7 +179,7 @@ export async function createScheduledTransferTransaction(
     toAddress: string,
     schedule: SchedulePoint[],
     expiry: bigint = getDefaultExpiry(),
-    energyAmount = '20000'
+    energyAmount = getScheduledTransferEnergyCost(schedule)
 ) {
     const payload = {
         toAddress,

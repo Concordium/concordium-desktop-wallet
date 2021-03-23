@@ -1,31 +1,50 @@
-import { AccountTransaction, TransactionKindId } from './types';
+import {
+    AccountTransaction,
+    instanceOfScheduledTransfer,
+    Schedule,
+    TransactionKindId,
+} from './types';
 
-const constants = {
-    SimpleTransferCost: 300,
-    EncryptedTransferCost: 2700,
-    TransferToEncryptedCost: 600,
-    TransferToPublicCost: 14850,
-    ScheduledTransferPerRelease: 300 + 64,
+export const energyConstants = {
+    SimpleTransferCost: 300n,
+    EncryptedTransferCost: 2700n,
+    TransferToEncryptedCost: 600n,
+    TransferToPublicCost: 14850n,
+    ScheduledTransferPerRelease: 300n + 64n,
 };
 
-export default function getTransactionCost(transaction: AccountTransaction) {
+export function getTransactionEnergyCost(transaction: AccountTransaction) {
+    if (instanceOfScheduledTransfer(transaction)) {
+        return (
+            energyConstants.ScheduledTransferPerRelease *
+            BigInt(transaction.payload.schedule.length)
+        );
+    }
     switch (transaction.transactionKind) {
         case TransactionKindId.Simple_transfer:
-            return constants.SimpleTransferCost;
+            return energyConstants.SimpleTransferCost;
         case TransactionKindId.Encrypted_transfer:
-            return constants.EncryptedTransferCost;
+            return energyConstants.EncryptedTransferCost;
         case TransactionKindId.Transfer_to_encrypted:
-            return constants.TransferToEncryptedCost;
+            return energyConstants.TransferToEncryptedCost;
         case TransactionKindId.Transfer_to_public:
-            return constants.TransferToPublicCost;
-        case TransactionKindId.Transfer_with_schedule:
-            return (
-                constants.ScheduledTransferPerRelease *
-                transaction.payload.schedule.length
-            );
+            return energyConstants.TransferToPublicCost;
         default:
             throw new Error(
                 `Unsupported transaction type: ${transaction.transactionKind}`
             );
     }
+}
+
+export default function getTransactionCost(
+    transaction: AccountTransaction,
+    energyToMicroGtu = 10000n
+) {
+    return getTransactionEnergyCost(transaction) * energyToMicroGtu;
+}
+
+export function getScheduledTransferEnergyCost(schedule: Schedule) {
+    return (
+        energyConstants.ScheduledTransferPerRelease * BigInt(schedule.length)
+    );
 }
