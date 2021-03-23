@@ -3,16 +3,27 @@ import {
     Account,
     Identity,
     AddressBookEntry,
-    TransactionKindString,
+    TransactionKindId,
 } from '~/utils/types';
-import { getGTUSymbol } from '~/utils/gtu';
+import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface Props {
-    transactionType: TransactionKindString;
+    transactionType: TransactionKindId;
     account: Account | undefined;
     identity: Identity | undefined;
     amount: string | undefined;
     recipient: AddressBookEntry | undefined;
+}
+
+const placeholderText = 'To be determined';
+
+// TODO make an actual function for this;
+function getTransactionCost(type: TransactionKindId) {
+    if (type) {
+        return 100n;
+    }
+    return 200n;
 }
 
 export default function TransactionProposalDetails({
@@ -22,22 +33,22 @@ export default function TransactionProposalDetails({
     recipient,
     transactionType,
 }: Props) {
+    const fee = getTransactionCost(transactionType);
     return (
-        <>
-            <h2>{transactionType}</h2>
-            <h2>Identity:</h2>
-            <b>{identity ? identity.name : 'Choose an ID on the right'}</b>
-            <h2>Account:</h2>
-            <b>{account ? account.name : 'Choose an account on the right'}</b>
-            <h2>Amount:</h2>
-            <b>{amount ? `${getGTUSymbol()} ${amount}` : 'To be determined'}</b>
-            <h2>Fee:</h2>
-            <b>big dollar</b>
-            <h2>Recipient:</h2>
-            <b>{recipient ? recipient.name : 'To be determined'}</b>
+        <div className={styles.details}>
+            <b>Identity:</b>
+            <h2>{identity ? identity.name : placeholderText}</h2>
+            <b>Account:</b>
+            <h2>{account ? account.name : placeholderText}</h2>
+            <b>Amount:</b>
+            <h2>{amount ? `${getGTUSymbol()} ${amount}` : placeholderText}</h2>
+            <b>Estimated Fee: {displayAsGTU(fee)}</b>
             <br />
-            {recipient ? recipient.note : null}
             <br />
-        </>
+            <b>Recipient:</b>
+            <h2>{recipient ? recipient.name : 'To be determined'}</h2>
+            {recipient ? `Note: ${recipient.note}` : null}
+            <br />
+        </div>
     );
 }

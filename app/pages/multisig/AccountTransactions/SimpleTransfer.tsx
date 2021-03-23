@@ -25,15 +25,14 @@ import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
 /**
  * This component controls the flow of creating a multisignature account transaction.
  * It contains the logic for displaying the current parameters.
+ * TODO center continue button
  */
 export default function SimpleTransfer(): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
 
-    const transactionKind = TransactionKindString.Transfer;
-    const handler = findAccountTransactionHandler(
-        TransactionKindId.Simple_transfer
-    );
+    const transactionKind = TransactionKindId.Simple_transfer;
+    const handler = findAccountTransactionHandler(transactionKind);
 
     const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
@@ -89,7 +88,7 @@ export default function SimpleTransfer(): JSX.Element {
                                             location,
                                             proposalId
                                         ),
-                                        state: transactionKind,
+                                        state: TransactionKindString.Transfer,
                                     })
                                 );
                             }}
