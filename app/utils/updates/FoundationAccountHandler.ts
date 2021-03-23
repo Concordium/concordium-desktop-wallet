@@ -1,14 +1,19 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
-import UpdateFoundationAccount from '../../pages/multisig/UpdateFoundationAccount';
-import { Authorizations } from '../NodeApiTypes';
+import UpdateFoundationAccount, {
+    UpdateFoundationAccountFields,
+} from '../../pages/multisig/UpdateFoundationAccount';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     FoundationAccount,
     isFoundationAccount,
+    MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateType,
 } from '../types';
 import { serializeFoundationAccount } from '../UpdateSerialization';
 
@@ -23,6 +28,31 @@ export default class FoundationAccountHandler
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    createTransaction(
+        blockSummary: BlockSummary,
+        { foundationAccount }: UpdateFoundationAccountFields,
+        effectiveTime: bigint
+    ): Partial<MultiSignatureTransaction> | undefined {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.foundationAccount
+                .nextSequenceNumber;
+        const {
+            threshold,
+        } = blockSummary.updates.authorizations.foundationAccount;
+
+        return createUpdateMultiSignatureTransaction(
+            { address: foundationAccount },
+            UpdateType.UpdateFoundationAccount,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
     }
 
     serializePayload(transaction: TransactionType) {
