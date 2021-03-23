@@ -1,106 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import {
-    Form,
-    Grid,
-    Header,
-    Input,
-    Progress,
-    Segment,
-} from 'semantic-ui-react';
-import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
-import {
-    ColorType,
-    MintDistribution,
-    MintRate,
-    UpdateType,
-} from '../../utils/types';
-import { UpdateProps } from '../../utils/transactionTypes';
-import { rewardFractionResolution } from '../../constants/updateConstants.json';
+import React from 'react';
+import { Grid, Header, Progress, Segment } from 'semantic-ui-react';
+import { Validate } from 'react-hook-form';
+
+import { ColorType, EqualRecord, MintRate } from '~/utils/types';
+import { UpdateProps } from '~/utils/transactionTypes';
+import { rewardFractionResolution } from '~/constants/updateConstants.json';
+import { RewardDistributionValue } from '~/components/Form/RewardDistribution/RewardDistribution';
+import Form from '~/components/Form';
+
+export interface UpdateMintDistributionFields {
+    mantissa: string;
+    exponent: string;
+    rewardDistribution: RewardDistributionValue;
+}
+
+const fieldNames: EqualRecord<UpdateMintDistributionFields> = {
+    mantissa: 'mantissa',
+    exponent: 'exponent',
+    rewardDistribution: 'rewardDistribution',
+};
+
+const isValidNumber = (parseFun: (v: string) => number): Validate => (
+    v: string
+) => Number.isNaN(parseFun(v)) || 'Value must be a valid number';
+
+const isValidFloat = isValidNumber(parseFloat);
+const isValidInteger = isValidNumber((v) => parseInt(v, 10));
+
+const rewardDistributionLabels: [string, string, string] = [
+    'Baking Reward Account',
+    'Finalization Account Reward',
+    'Foundation',
+];
 
 /**
  * Component for creating an update mint distribution transaction.
  */
 export default function UpdateMintDistribution({
     blockSummary,
-    effectiveTime,
-    setProposal,
-    setDisabled,
 }: UpdateProps): JSX.Element | null {
-    const [
-        mintDistribution,
-        setMintDistribution,
-    ] = useState<MintDistribution>();
-
-    const sequenceNumber =
-        blockSummary.updates.updateQueues.mintDistribution.nextSequenceNumber;
-    const { threshold } = blockSummary.updates.authorizations.mintDistribution;
     const currentMintDistribution =
         blockSummary.updates.chainParameters.rewardParameters.mintDistribution;
 
-    function updateMintDistribution(
-        inputValue: string,
-        property: keyof Omit<MintDistribution, 'mintPerSlot'>,
-        distribution: MintDistribution
-    ) {
-        if (inputValue) {
-            let value;
-            try {
-                value = parseInt(inputValue, 10);
-            } catch (error) {
-                // Input not a valid integer. Do nothing.
-                return;
-            }
-
-            const updatedMintDistribution = {
-                ...distribution,
-            };
-            updatedMintDistribution[property] = value;
-            setMintDistribution(updatedMintDistribution);
-        }
-    }
-
-    useEffect(() => {
-        if (mintDistribution && effectiveTime) {
-            setProposal(
-                createUpdateMultiSignatureTransaction(
-                    mintDistribution,
-                    UpdateType.UpdateMintDistribution,
-                    sequenceNumber,
-                    threshold,
-                    effectiveTime
-                )
-            );
-            setDisabled(
-                mintDistribution.bakingReward +
-                    mintDistribution.finalizationReward >
-                    rewardFractionResolution
-            );
-        }
-    }, [
-        mintDistribution,
-        sequenceNumber,
-        threshold,
-        setProposal,
-        effectiveTime,
-        setDisabled,
-    ]);
-
-    if (!mintDistribution) {
-        // TODO Parse the current mint distribution value instead of hardcording this value.
-        const mintRate: MintRate = {
-            mantissa: 7555999,
-            exponent: 16,
-        };
-        setMintDistribution({
-            bakingReward:
-                currentMintDistribution.bakingReward * rewardFractionResolution,
-            finalizationReward:
-                currentMintDistribution.finalizationReward *
-                rewardFractionResolution,
-            mintPerSlot: mintRate,
-        });
-        return null;
-    }
+    // TODO Parse the current mint distribution value instead of hardcording this value.
+    const mintRate: MintRate = {
+        mantissa: 7555999,
+        exponent: 16,
+    };
 
     return (
         <>
@@ -144,102 +90,32 @@ export default function UpdateMintDistribution({
                     </Segment>
                 </Grid.Column>
                 <Grid.Column>
-                    <Header size="small">New mint rate</Header>
-                    <Input
+                    <h3>New Mint Distribution</h3>
+                    <Form.Input
+                        name={fieldNames.mantissa}
                         label="Mantissa"
-                        value={mintDistribution.mintPerSlot.mantissa}
-                        onChange={(e) => {
-                            let mintPerSlot;
-                            try {
-                                mintPerSlot = {
-                                    ...mintDistribution.mintPerSlot,
-                                    mantissa: parseInt(e.target.value, 10),
-                                };
-                            } catch (error) {
-                                return;
-                            }
-                            setMintDistribution({
-                                ...mintDistribution,
-                                mintPerSlot,
-                            });
+                        defaultValue={mintRate.mantissa}
+                        rules={{
+                            required: true,
+                            validate: isValidFloat,
+                            min: 0,
                         }}
                     />
-                    <Input
-                        label="Negative exponent"
-                        value={mintDistribution.mintPerSlot.exponent}
-                        onChange={(e) => {
-                            let mintPerSlot;
-                            try {
-                                mintPerSlot = {
-                                    ...mintDistribution.mintPerSlot,
-                                    exponent: parseInt(e.target.value, 10),
-                                };
-                            } catch (error) {
-                                return;
-                            }
-                            setMintDistribution({
-                                ...mintDistribution,
-                                mintPerSlot,
-                            });
+                    <Form.Input
+                        name={fieldNames.exponent}
+                        label="Exponent"
+                        defaultValue={mintRate.exponent}
+                        rules={{
+                            required: true,
+                            validate: isValidInteger,
+                            min: 0,
                         }}
                     />
-                    <Progress
-                        value={mintDistribution.bakingReward}
-                        total={rewardFractionResolution}
-                        progress="percent"
-                        label="New baking reward fraction"
-                        color={ColorType.Blue}
+                    <Form.RewardDistribution
+                        name={fieldNames.rewardDistribution}
+                        labels={rewardDistributionLabels}
+                        rules={{ required: 'Reward distribution is required' }}
                     />
-                    <Progress
-                        value={mintDistribution.finalizationReward}
-                        total={rewardFractionResolution}
-                        progress="percent"
-                        label="New finalization reward fraction"
-                        color={ColorType.Teal}
-                    />
-                    <Progress
-                        value={
-                            rewardFractionResolution -
-                            (mintDistribution.bakingReward +
-                                mintDistribution.finalizationReward)
-                        }
-                        total={rewardFractionResolution}
-                        progress="percent"
-                        label="New foundation reward fraction"
-                        color={ColorType.Grey}
-                    />
-                    <Form>
-                        <Form.Group widths="equal">
-                            <Form.Field
-                                label="New baking reward fraction (/100000)"
-                                control={Input}
-                                value={mintDistribution.bakingReward.toString()}
-                                onChange={(
-                                    e: React.ChangeEvent<HTMLInputElement>
-                                ) => {
-                                    updateMintDistribution(
-                                        e.target.value,
-                                        'bakingReward',
-                                        mintDistribution
-                                    );
-                                }}
-                            />
-                            <Form.Field
-                                label="New finalization reward fraction (/100000)"
-                                control={Input}
-                                value={mintDistribution.finalizationReward.toString()}
-                                onChange={(
-                                    e: React.ChangeEvent<HTMLInputElement>
-                                ) => {
-                                    updateMintDistribution(
-                                        e.target.value,
-                                        'finalizationReward',
-                                        mintDistribution
-                                    );
-                                }}
-                            />
-                        </Form.Group>
-                    </Form>
                 </Grid.Column>
             </Grid>
         </>

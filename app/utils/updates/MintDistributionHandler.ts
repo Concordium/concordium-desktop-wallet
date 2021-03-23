@@ -1,14 +1,19 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import MintDistributionView from '../../pages/multisig/MintDistributionView';
-import UpdateMintDistribution from '../../pages/multisig/UpdateMintDistribution';
-import { Authorizations } from '../NodeApiTypes';
+import UpdateMintDistribution, {
+    UpdateMintDistributionFields,
+} from '../../pages/multisig/UpdateMintDistribution';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     isMintDistribution,
     MintDistribution,
+    MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateType,
 } from '../types';
 import { serializeMintDistribution } from '../UpdateSerialization';
 
@@ -23,6 +28,44 @@ export default class MintDistributionHandler
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    createTransaction(
+        blockSummary: BlockSummary,
+        {
+            exponent,
+            mantissa,
+            rewardDistribution,
+        }: UpdateMintDistributionFields,
+        effectiveTime: bigint
+    ): Partial<MultiSignatureTransaction> | undefined {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.mintDistribution
+                .nextSequenceNumber;
+        const {
+            threshold,
+        } = blockSummary.updates.authorizations.mintDistribution;
+
+        const mintDistribution: MintDistribution = {
+            mintPerSlot: {
+                mantissa: parseInt(mantissa, 10),
+                exponent: parseInt(exponent, 10),
+            },
+            bakingReward: rewardDistribution.first,
+            finalizationReward: rewardDistribution.second,
+        };
+
+        return createUpdateMultiSignatureTransaction(
+            mintDistribution,
+            UpdateType.UpdateMintDistribution,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
     }
 
     serializePayload(transaction: TransactionType) {
