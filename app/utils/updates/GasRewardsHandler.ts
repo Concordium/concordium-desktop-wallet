@@ -1,14 +1,19 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import GasRewardsView from '../../pages/multisig/GasRewardsView';
-import UpdateGasRewards from '../../pages/multisig/UpdateGasRewards';
-import { Authorizations } from '../NodeApiTypes';
+import UpdateGasRewards, {
+    UpdateGasRewardsFields,
+} from '../../pages/multisig/UpdateGasRewards/UpdateGasRewards';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     GasRewards,
     isGasRewards,
+    MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateType,
 } from '../types';
 import { serializeGasRewards } from '../UpdateSerialization';
 
@@ -23,6 +28,30 @@ export default class GasRewardsHandler
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    createTransaction(
+        blockSummary: BlockSummary,
+        gasRewards: UpdateGasRewardsFields,
+        effectiveTime: bigint
+    ): Partial<MultiSignatureTransaction> | undefined {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.gasRewards.nextSequenceNumber;
+        const {
+            threshold,
+        } = blockSummary.updates.authorizations.paramGASRewards;
+
+        return createUpdateMultiSignatureTransaction(
+            gasRewards,
+            UpdateType.UpdateGASRewards,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
     }
 
     serializePayload(transaction: TransactionType) {

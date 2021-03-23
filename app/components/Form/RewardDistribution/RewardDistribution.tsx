@@ -10,7 +10,10 @@ import styles from './RewardDistribution.module.scss';
 import useMultiFieldFocus from '../common/useMultiFieldFocus';
 import { CommonFieldProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
-import { fractionResolution, fractionResolutionToPercentage } from './util';
+import {
+    fractionResolution,
+    fractionResolutionToPercentage,
+} from '~/utils/rewardFractionHelpers';
 
 export interface RewardDistributionValue {
     first: number;

@@ -16,7 +16,7 @@ import {
     fractionResolution,
     fractionResolutionToPercentage,
     percentageToFractionResolution,
-} from './util';
+} from '~/utils/rewardFractionHelpers';
 
 function scaleField(el: HTMLInputElement | null) {
     if (!el) {
