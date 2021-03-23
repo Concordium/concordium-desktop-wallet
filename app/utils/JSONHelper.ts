@@ -9,7 +9,7 @@ export function stringify(input: any) {
         if (typeof v === types.BigInt) {
             return { '@type': types.BigInt, value: v.toString() };
         }
-        if (v.type === types.Buffer) {
+        if (v && v.type === types.Buffer) {
             return {
                 '@type': types.Buffer,
                 value: Buffer.from(v).toString('hex'),
@@ -21,13 +21,16 @@ export function stringify(input: any) {
 
 export function parse(input: string) {
     return JSON.parse(input, (_, v) => {
-        switch (v['@type']) {
-            case types.BigInt:
-                return BigInt(v.value);
-            case types.Buffer:
-                return Buffer.from(v.value, 'hex');
-            default:
-                return v;
+        if (v) {
+            switch (v['@type']) {
+                case types.BigInt:
+                    return BigInt(v.value);
+                case types.Buffer:
+                    return Buffer.from(v.value, 'hex');
+                default:
+                    return v;
+            }
         }
+        return v;
     });
 }
