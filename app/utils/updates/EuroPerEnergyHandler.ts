@@ -1,5 +1,5 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernancePath } from '../../features/ledger/Path';
+import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import EuroPerEnergyView from '../../pages/multisig/EuroPerEnergyView';
 import UpdateEuroPerEnergy from '../../pages/multisig/UpdateEuroPerEnergy';
 import { Authorizations } from '../NodeApiTypes';
@@ -34,7 +34,7 @@ export default class EuroPerEnergyHandler
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient
     ) {
-        const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
+        const path: number[] = getGovernanceLevel2Path();
         return ledger.signEuroPerEnergy(
             transaction,
             this.serializePayload(transaction),

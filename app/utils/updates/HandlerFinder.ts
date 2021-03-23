@@ -12,6 +12,7 @@ import {
     UpdateType,
     Transaction,
 } from '~/utils/types';
+import ElectionDifficultyHandler from './ElectionDifficultyHandler';
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
 import FoundationAccountHandler from './FoundationAccountHandler';
 import GasRewardsHandler from './GasRewardsHandler';
@@ -67,6 +68,10 @@ export function findUpdateInstructionHandler(
             return new UpdateHandlerTypeMiddleware(new ProtocolUpdateHandler());
         case UpdateType.UpdateGASRewards:
             return new UpdateHandlerTypeMiddleware(new GasRewardsHandler());
+        case UpdateType.UpdateElectionDifficulty:
+            return new UpdateHandlerTypeMiddleware(
+                new ElectionDifficultyHandler()
+            );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);
     }

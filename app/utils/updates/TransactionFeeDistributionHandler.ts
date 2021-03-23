@@ -1,5 +1,5 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernancePath } from '../../features/ledger/Path';
+import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import TransactionFeeDistributionView from '../../pages/multisig/TransactionFeeDistributionView';
 import UpdateTransactionFeeDistribution from '../../pages/multisig/UpdateTransactionFeeDistribution';
 import { Authorizations } from '../NodeApiTypes';
@@ -34,7 +34,7 @@ export default class TransactionFeeDistributionHandler
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient
     ) {
-        const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
+        const path: number[] = getGovernanceLevel2Path();
         return ledger.signTransactionFeeDistribution(
             transaction,
             this.serializePayload(transaction),

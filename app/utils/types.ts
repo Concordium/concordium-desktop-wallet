@@ -563,7 +563,8 @@ export type UpdateInstructionPayload =
     | FoundationAccount
     | MintDistribution
     | ProtocolUpdate
-    | GasRewards;
+    | GasRewards
+    | ElectionDifficulty;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Buffer;
@@ -693,18 +694,25 @@ export function isGasRewards(
     return UpdateType.UpdateGASRewards === transaction.type;
 }
 
+export function isElectionDifficulty(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<ElectionDifficulty> {
+    return UpdateType.UpdateElectionDifficulty === transaction.type;
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
  */
 export enum MultiSignatureTransactionStatus {
-    Open = 'open',
-    Submitted = 'submitted',
-    Rejected = 'rejected',
-    Finalized = 'finalized',
+    Closed = 'closed',
     Committed = 'committed',
-    Failed = 'failed',
     Expired = 'expired',
+    Failed = 'failed',
+    Finalized = 'finalized',
+    Open = 'open',
+    Rejected = 'rejected',
+    Submitted = 'submitted',
 }
 
 /**
@@ -778,6 +786,10 @@ export interface GasRewards {
     finalizationProof: RewardFraction;
     accountCreation: RewardFraction;
     chainUpdate: RewardFraction;
+}
+
+export interface ElectionDifficulty {
+    electionDifficulty: Word32;
 }
 
 export interface TransactionDetails {

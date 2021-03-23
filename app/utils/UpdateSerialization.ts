@@ -1,6 +1,7 @@
 import { putBase58Check } from './serializationHelpers';
 import {
     BlockItemKind,
+    ElectionDifficulty,
     ExchangeRate,
     FoundationAccount,
     GasRewards,
@@ -30,6 +31,20 @@ export interface SerializedProtocolUpdate {
     specificationUrl: SerializedString;
     transactionHash: Buffer;
     auxiliaryData: Buffer;
+}
+
+/**
+ * Serializes an ElectionDifficulty to bytes.
+ */
+export function serializeElectionDifficulty(
+    electionDifficulty: ElectionDifficulty
+) {
+    const serializedElectionDifficulty = Buffer.alloc(4);
+    serializedElectionDifficulty.writeUInt32BE(
+        electionDifficulty.electionDifficulty,
+        0
+    );
+    return serializedElectionDifficulty;
 }
 
 /**
