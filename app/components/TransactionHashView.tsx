@@ -1,5 +1,4 @@
 import React from 'react';
-import { Container, Header } from 'semantic-ui-react';
 import CopiableIdenticon from './CopiableIdenticon/CopiableIdenticon';
 
 interface Props {
@@ -12,11 +11,11 @@ interface Props {
  */
 export default function TransactionHashView({ transactionHash }: Props) {
     return (
-        <Container>
-            <Header>Transaction identicon</Header>
+        <>
+            <h3>Transaction identicon</h3>
             <CopiableIdenticon data={transactionHash} />
-            <Header>Transaction hash</Header>
+            <h3>Transaction hash</h3>
             {transactionHash}
-        </Container>
+        </>
     );
 }

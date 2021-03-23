@@ -1,27 +1,21 @@
 import React, { useState } from 'react';
-import {
-    Button,
-    Checkbox,
-    Container,
-    Divider,
-    Form,
-    Grid,
-    Header,
-    Segment,
-} from 'semantic-ui-react';
 import { parse } from 'json-bigint';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
-import TransactionDetails from '../../components/TransactionDetails';
-import TransactionHashView from '../../components/TransactionHashView';
+import LedgerComponent from '~/components/ledger/LedgerComponent';
+import TransactionDetails from '~/components/TransactionDetails';
+import TransactionHashView from '~/components/TransactionHashView';
 import {
     AccountTransaction,
     instanceOfUpdateInstruction,
     UpdateInstruction,
     UpdateInstructionPayload,
-} from '../../utils/types';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import PageLayout from '../../components/PageLayout';
+} from '~/utils/types';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import PageLayout from '~/components/PageLayout';
+import routes from '~/constants/routes.json';
 import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
+import Columns from '~/components/Columns';
+import Loading from '~/cross-app-components/Loading';
+import Form from '~/components/Form';
 
 interface Props<T> {
     header: string;
@@ -43,9 +37,6 @@ export default function GenericSignTransactionProposalView({
     loading,
 }: Props<ConcordiumLedgerClient>) {
     const [signing, setSigning] = useState(false);
-    const [checkboxesStatus, setCheckBoxesStatus] = useState(
-        new Array(checkboxes.length).fill(false)
-    );
 
     const transactionObject:
         | UpdateInstruction<UpdateInstructionPayload>
@@ -72,69 +63,41 @@ export default function GenericSignTransactionProposalView({
             <PageLayout.Header>
                 <h1>{header}</h1>
             </PageLayout.Header>
-            <Container>
-                <Segment loading={loading}>
-                    <Header textAlign="center">
-                        Transaction signing confirmation | Transaction Type
-                    </Header>
-                    <Divider />
-                    <Grid columns={2} divided textAlign="center" padded>
-                        <Grid.Row>
-                            <Grid.Column>
-                                <TransactionDetails
-                                    transaction={transactionObject}
-                                />
-                                {expiredEffectiveTimeComponent}
-                            </Grid.Column>
-                            <Grid.Column>
-                                <TransactionHashView
-                                    transactionHash={transactionHash}
-                                />
-                            </Grid.Column>
-                        </Grid.Row>
-                        <Grid.Row>
-                            <Form>
+            <PageLayout.Container closeRoute={routes.MULTISIGTRANSACTIONS}>
+                <h2>Transaction signing confirmation | Transaction Type</h2>
+                <PageLayout.FullWidthContainerSection>
+                    {loading && <Loading />}
+                    <Columns divider>
+                        <Columns.Column header="Transaction Details">
+                            <TransactionDetails
+                                transaction={transactionObject}
+                            />
+                            {expiredEffectiveTimeComponent}
+                        </Columns.Column>
+                        <Columns.Column header="Signature and Hardware Wallet">
+                            <TransactionHashView
+                                transactionHash={transactionHash}
+                            />
+                            <Form onSubmit={() => setSigning(true)}>
                                 {checkboxes.map((label, index) => (
-                                    <Form.Field key={label}>
-                                        <Checkbox
-                                            label={label}
-                                            defaultChecked={
-                                                checkboxesStatus[index]
-                                            }
-                                            disabled={signing}
-                                            onChange={() => {
-                                                const updatedStatus = [
-                                                    ...checkboxesStatus,
-                                                ];
-                                                updatedStatus[
-                                                    index
-                                                ] = !updatedStatus[index];
-                                                setCheckBoxesStatus(
-                                                    updatedStatus
-                                                );
-                                            }}
-                                        />
-                                    </Form.Field>
-                                ))}
-                                <Form.Field>
-                                    <Button
-                                        positive
-                                        fluid
-                                        onClick={() => setSigning(true)}
-                                        disabled={
-                                            signing ||
-                                            !checkboxesStatus.every(Boolean)
-                                        }
+                                    <Form.Checkbox
+                                        name={`${index}`}
+                                        key={label}
+                                        rules={{ required: true }}
+                                        disabled={signing}
                                     >
-                                        {signText}
-                                    </Button>
-                                </Form.Field>
+                                        {label}
+                                    </Form.Checkbox>
+                                ))}
+                                <Form.Submit disabled={signing}>
+                                    {signText}
+                                </Form.Submit>
                             </Form>
-                        </Grid.Row>
-                    </Grid>
-                </Segment>
-                {ledgerComponent}
-            </Container>
+                            {ledgerComponent}
+                        </Columns.Column>
+                    </Columns>
+                </PageLayout.FullWidthContainerSection>
+            </PageLayout.Container>
         </PageLayout>
     );
 }
