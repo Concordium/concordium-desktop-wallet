@@ -4,14 +4,14 @@ import routes from '../../constants/routes.json';
 import MultiSignaturePage from './MultiSignaturePage';
 import AccountTransactionProposalView from './AccountTransactionProposalView';
 import UpdateInstructionProposalView from './UpdateInstructionProposalView';
-import CosignTransactionProposalView from './CosignTransactionProposalView';
+import CosignUpdateInstructionProposalView from './CosignUpdateInstructionProposalView';
+import CosignAccountTransactionProposalView from './CosignAccountTransactionProposalView';
 import SignTransactionProposalView from './SignTransactionProposalView';
 import ExportSignedTransactionView from './ExportSignedTransactionView';
 import MultiSignatureCreateProposalView from './MultiSignatureCreateProposalView';
 import SubmittedProposalView from './SubmittedProposalView';
 import ExportKeyView from './ExportKeyView/ExportKeyView';
 import CreateAccountTransactionView from './AccountTransactions/CreateAccountTransactionView';
-import CosignAccountTransactionProposalView from './CosignAccountTransactionProposalView';
 
 export default function MultiSignatureRoutes(): JSX.Element {
     return (
@@ -38,7 +38,7 @@ export default function MultiSignatureRoutes(): JSX.Element {
             />
             <Route
                 path={routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION}
-                component={CosignTransactionProposalView}
+                component={CosignUpdateInstructionProposalView}
             />
             <Route
                 path={

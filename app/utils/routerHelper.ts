@@ -15,16 +15,14 @@ export const selectedAddressBookEntryRoute = (address: string) =>
 
 export const selectedProposalRoute = (proposal: MultiSignatureTransaction) => {
     const transaction = parse(proposal.transaction);
+    let route;
     if (instanceOfUpdateInstruction(transaction)) {
-        return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED.replace(
-            ':id',
-            `${proposal.id}`
-        );
+        route = routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED;
+    } else {
+        route =
+            routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION;
     }
-    return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION.replace(
-        ':id',
-        `${proposal.id}`
-    );
+    return route.replace(':id', `${proposal.id}`);
 };
 
 export function selectedExportKeyRoute(keyType: string) {

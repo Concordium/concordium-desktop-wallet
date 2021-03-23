@@ -7,7 +7,7 @@ import { useParams } from 'react-router';
 import {
     proposalsSelector,
     updateCurrentProposal,
-} from '../../features/MultiSignatureSlice';
+} from '~/features/MultiSignatureSlice';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
@@ -16,23 +16,23 @@ import {
     UpdateInstructionSignature,
     instanceOfUpdateInstruction,
     Transaction,
-} from '../../utils/types';
+} from '~/utils/types';
 import {
     getBlockSummary,
     getConsensusStatus,
     sendTransaction,
-} from '../../utils/nodeRequests';
+} from '~/utils/nodeRequests';
 import {
     serializeForSubmission,
     serializeUpdateInstructionHeaderAndPayload,
-} from '../../utils/UpdateSerialization';
-import { hashSha256 } from '../../utils/serializationHelpers';
-import { getMultiSignatureTransactionStatus } from '../../utils/TransactionStatusPoller';
-import routes from '../../constants/routes.json';
-import { findUpdateInstructionHandler } from '../../utils/updates/HandlerFinder';
-import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
+} from '~/utils/UpdateSerialization';
+import { hashSha256 } from '~/utils/serializationHelpers';
+import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
+import routes from '~/constants/routes.json';
+import { findUpdateInstructionHandler } from '~/utils/updates/HandlerFinder';
+import { BlockSummary, ConsensusStatus } from '~/utils/NodeApiTypes';
 import ProposalView from './ProposalView';
-import { ModalErrorInput } from '../../components/SimpleErrorModal';
+import { ModalErrorInput } from '~/components/SimpleErrorModal';
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
