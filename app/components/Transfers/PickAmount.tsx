@@ -1,7 +1,11 @@
 import React from 'react';
-import { Card, Input, Button } from 'semantic-ui-react';
-import { AddressBookEntry } from '../../utils/types';
-import { getGTUSymbol, isValidGTUString } from '../../utils/gtu';
+import { useSelector } from 'react-redux';
+import { chosenAccountInfoSelector } from '~/features/AccountSlice';
+import { AddressBookEntry, AccountInfo } from '~/utils/types';
+import { toMicroUnits, getGTUSymbol, isValidGTUString } from '~/utils/gtu';
+import AddressBookEntryButton from '~/components/AddressBookEntryButton';
+import Button from '~/cross-app-components/Button';
+import Form from '~/components/Form';
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
@@ -12,10 +16,18 @@ interface Props {
     toConfirmTransfer(): void;
 }
 
+// TODO: Take staked amount into consideration
+function atDisposal(accountInfo: AccountInfo): bigint {
+    const unShielded = BigInt(accountInfo.accountAmount);
+    const scheduled = accountInfo.accountReleaseSchedule
+        ? BigInt(accountInfo.accountReleaseSchedule.total)
+        : 0n;
+    return unShielded - scheduled;
+}
+
 /**
  * Allows the user to enter an amount, and redirects to picking a recipient.
- * TODO: Rework structure to simplify this component?
- * TODO: Add an error label, describing the issue (on debounce);
+ * TODO: Find a way to display the recipient check, without showing a dummy checkbox;
  */
 export default function PickAmount({
     recipient,
@@ -25,44 +37,62 @@ export default function PickAmount({
     toPickRecipient,
     toConfirmTransfer,
 }: Props) {
-    const validInput = isValidGTUString(amount);
+    const accountInfo = useSelector(chosenAccountInfoSelector);
+    const fee = 5900n; // TODO: Add cost calculator
 
-    function updateAmount(newAmount: string) {
-        setAmount(newAmount);
+    function validateAmount(amountToValidate: string): string | undefined {
+        if (!isValidGTUString(amountToValidate)) {
+            return 'Invalid input';
+        }
+        if (
+            accountInfo &&
+            atDisposal(accountInfo) < toMicroUnits(amountToValidate) + fee
+        ) {
+            return 'Insufficient funds';
+        }
+        return undefined;
     }
 
     return (
-        <Card fluid centered>
-            <Card.Content textAlign="center">
-                <Card.Header content={header} />
-                <Input
-                    fluid
+        <>
+            <h2>{header}</h2>
+            <Form onSubmit={toConfirmTransfer}>
+                <Form.Input
                     name="name"
                     placeholder="Enter Amount"
-                    error={!validInput}
+                    label={getGTUSymbol()}
                     value={amount}
-                    onChange={(e) => updateAmount(e.target.value)}
-                    autoFocus
-                    label={{ basic: true, content: getGTUSymbol() }}
+                    rules={{
+                        required: 'Amount Required',
+                        validate: {
+                            validateAmount,
+                        },
+                    }}
+                    onChange={(e) => {
+                        const newAmount = e.target.value;
+                        setAmount(newAmount);
+                    }}
                 />
-                <Button.Group vertical>
-                    {toPickRecipient ? (
-                        <Button onClick={toPickRecipient}>
+                {toPickRecipient ? (
+                    <>
+                        <div style={{ display: 'none' }}>
+                            <Form.Checkbox
+                                name="recipient"
+                                rules={{
+                                    required: 'Recipient Required',
+                                }}
+                                checked={Boolean(recipient?.address)}
+                            />
+                        </div>
+                        <AddressBookEntryButton onClick={toPickRecipient}>
                             {recipient ? recipient.name : 'Select Recipient'}
-                        </Button>
-                    ) : null}
-                    <Button
-                        positive
-                        onClick={toConfirmTransfer}
-                        disabled={
-                            (!recipient && toPickRecipient !== undefined) ||
-                            !validInput
-                        }
-                    >
-                        Continue
-                    </Button>
-                </Button.Group>
-            </Card.Content>
-        </Card>
+                        </AddressBookEntryButton>
+                    </>
+                ) : null}
+                <Form.Submit as={Button} size="huge">
+                    Continue
+                </Form.Submit>
+            </Form>
+        </>
     );
 }
