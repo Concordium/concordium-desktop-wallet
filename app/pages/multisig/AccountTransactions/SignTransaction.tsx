@@ -14,6 +14,7 @@ import { globalSelector } from '~/features/GlobalSlice';
 import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
+import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -40,13 +41,17 @@ export default function SignTransaction({
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
-        if (
-            !account ||
-            !global ||
-            primaryCredential.identityId === undefined ||
-            primaryCredential.credentialNumber === undefined
-        ) {
+        if (!account || !global) {
             throw new Error('unexpected missing global/account');
+        }
+        if (
+            primaryCredential.identityId === undefined ||
+            primaryCredential.credentialNumber === undefined ||
+            primaryCredential.credentialIndex === undefined
+        ) {
+            throw new Error(
+                'Unable to sign transaction, because given credential was not local and deployed.'
+            );
         }
         const path = {
             identityIndex: primaryCredential.identityId,
@@ -63,11 +68,16 @@ export default function SignTransaction({
             path
         );
 
+        const signatureIndex = 0;
         const multiSignatureTransaction: Partial<MultiSignatureTransaction> = {
             // The JSON serialization of the transaction
             transaction: stringify({
                 ...transaction,
-                signatures: { 0: { 0: signature } },
+                signatures: buildTransactionAccountSignature(
+                    primaryCredential.credentialIndex,
+                    signatureIndex,
+                    signature
+                ),
             }),
             // The minimum required signatures for the transaction
             // to be accepted on chain.
