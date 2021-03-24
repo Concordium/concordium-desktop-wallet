@@ -26,13 +26,15 @@ import findAuthorizationKey from '../../../utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '../../../utils/routerHelper';
 import Columns from '~/components/Columns';
 import Form from '~/components/Form';
-import SimpleLedger from '~/components/ledger/SimpleLedger';
 import PageLayout from '~/components/PageLayout';
 import TransactionDetails from '~/components/TransactionDetails';
 import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
 import { ensureProps } from '~/utils/componentHelpers';
 
 import styles from './SignTransactionProposal.module.scss';
+import Ledger from '~/components/ledger/Ledger';
+import { asyncNoOp } from '~/utils/basicHelpers';
+import { LedgerStatusType } from '~/components/ledger/util';
 
 export interface SignInput {
     multiSignatureTransaction: MultiSignatureTransaction;
@@ -174,26 +176,41 @@ function ConfirmProposalDetailsView({ location }: Props) {
                             </section>
                         </Columns.Column>
                         <Columns.Column header="Signature and Hardware Wallet">
-                            <section className={styles.signColumnContent}>
-                                <h5>Hardware wallet status</h5>
-                                <SimpleLedger ledgerCall={signingFunction} />
-                                <Form onSubmit={() => setSigning(true)}>
-                                    <Form.Checkbox
-                                        name="check"
-                                        rules={{ required: true }}
-                                        disabled={signing}
+                            <Ledger ledgerCallback={signingFunction}>
+                                {(status, statusView, submit = asyncNoOp) => (
+                                    <section
+                                        className={styles.signColumnContent}
                                     >
-                                        I am sure that the propsed changes are
-                                        correct
-                                    </Form.Checkbox>
-                                    <Form.Submit
-                                        disabled={signing}
-                                        className={styles.submit}
-                                    >
-                                        Generate Transaction
-                                    </Form.Submit>
-                                </Form>
-                            </section>
+                                        <h5>Hardware wallet status</h5>
+                                        {statusView}
+                                        <Form
+                                            onSubmit={() => {
+                                                setSigning(true);
+                                                submit();
+                                            }}
+                                        >
+                                            <Form.Checkbox
+                                                name="check"
+                                                rules={{ required: true }}
+                                                disabled={signing}
+                                            >
+                                                I am sure that the propsed
+                                                changes are correct
+                                            </Form.Checkbox>
+                                            <Form.Submit
+                                                disabled={
+                                                    signing ||
+                                                    status !==
+                                                        LedgerStatusType.CONNECTED
+                                                }
+                                                className={styles.submit}
+                                            >
+                                                Generate Transaction
+                                            </Form.Submit>
+                                        </Form>
+                                    </section>
+                                )}
+                            </Ledger>
                         </Columns.Column>
                     </Columns>
                 </div>
