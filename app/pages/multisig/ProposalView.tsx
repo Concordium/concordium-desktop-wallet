@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-    Button,
     Checkbox,
     Divider,
     Form,
@@ -49,6 +48,11 @@ import { expirationEffect } from '../../utils/ProposalHelper';
 import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
 import PageLayout from '../../components/PageLayout';
 import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
+import Button from '~/cross-app-components/Button';
+import Modal from '~/cross-app-components/Modal';
+import Columns from '~/components/Columns';
+import Column from '~/components/Columns/Column';
+import ProposalStatus from './ProposalStatus';
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
@@ -86,6 +90,7 @@ async function isSignatureValid(
  * then the proposal can be submitted to a node.
  */
 export default function ProposalView() {
+    const [showCloseModal, setShowCloseModal] = useState(false);
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
@@ -258,6 +263,16 @@ export default function ProposalView() {
         }
     }
 
+    async function closeProposal() {
+        if (currentProposal) {
+            const closedProposal: MultiSignatureTransaction = {
+                ...currentProposal,
+                status: MultiSignatureTransactionStatus.Closed,
+            };
+            updateCurrentProposal(dispatch, closedProposal);
+        }
+    }
+
     const unsignedCheckboxes = [];
     for (
         let i = 0;
@@ -278,8 +293,42 @@ export default function ProposalView() {
         !missingSignatures &&
         currentProposal.status === MultiSignatureTransactionStatus.Open;
 
+    const closeModal = (
+        <Modal
+            open={showCloseModal}
+            onOpen={() => {}}
+            onClose={() => setShowCloseModal(false)}
+        >
+            <h2>Are you sure that you want to close this proposal?</h2>
+            <ProposalStatus proposal={currentProposal} />
+            <Columns>
+                <Column>
+                    <Button onClick={() => setShowCloseModal(false)}>
+                        No, cancel
+                    </Button>
+                </Column>
+                <Column>
+                    <Button
+                        onClick={async () => {
+                            await closeProposal();
+                            dispatch(
+                                push(
+                                    routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING
+                                )
+                            );
+                        }}
+                        danger
+                    >
+                        Yes, close
+                    </Button>
+                </Column>
+            </Columns>
+        </Modal>
+    );
+
     return (
         <PageLayout>
+            {closeModal}
             <PageLayout.Header>
                 <h1>{handler.title}</h1>
             </PageLayout.Header>
@@ -344,41 +393,44 @@ export default function ProposalView() {
                             <TransactionHashView
                                 transactionHash={transactionHash}
                             />
+                            <Divider hidden horizontal />
+                            <Button
+                                size="small"
+                                onClick={() => setShowCloseModal(true)}
+                                disabled={
+                                    currentProposal.status !==
+                                    MultiSignatureTransactionStatus.Open
+                                }
+                            >
+                                Close proposal
+                            </Button>
+                            <Divider hidden horizontal />
+                            <Button
+                                disabled={
+                                    currentProposal.status !==
+                                    MultiSignatureTransactionStatus.Open
+                                }
+                                onClick={
+                                    () =>
+                                        saveFile(
+                                            currentProposal.transaction,
+                                            'Export transaction'
+                                        )
+                                    // TODO Handle failure
+                                }
+                            >
+                                Export transaction proposal
+                            </Button>
+                            <Divider hidden horizontal />
+                            <Button
+                                disabled={!readyToSubmit}
+                                onClick={submitTransaction}
+                            >
+                                Submit transaction to chain
+                            </Button>
                         </Grid.Column>
                     </Grid>
                 </Segment>
-                <Grid columns="equal">
-                    <Grid.Column>
-                        <Button
-                            fluid
-                            primary
-                            disabled={
-                                currentProposal.status !==
-                                MultiSignatureTransactionStatus.Open
-                            }
-                            onClick={
-                                () =>
-                                    saveFile(
-                                        currentProposal.transaction,
-                                        'Export transaction'
-                                    )
-                                // TODO Handle failure
-                            }
-                        >
-                            Export transaction proposal
-                        </Button>
-                    </Grid.Column>
-                    <Grid.Column>
-                        <Button
-                            fluid
-                            positive
-                            disabled={!readyToSubmit}
-                            onClick={submitTransaction}
-                        >
-                            Submit transaction to chain
-                        </Button>
-                    </Grid.Column>
-                </Grid>
             </Segment>
         </PageLayout>
     );
