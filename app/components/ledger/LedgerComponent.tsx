@@ -1,35 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
-
-import type {
-    Observer,
-    DescriptorEvent,
-    Subscription,
-} from '@ledgerhq/hw-transport';
+import React, { useState, useEffect } from 'react';
 import { Button, Card, Divider, Loader, Segment } from 'semantic-ui-react';
+
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { AppAndVersion } from '../../features/ledger/GetAppAndVersion';
-import getErrorDescription from '../../features/ledger/ErrorCodes';
-
-interface TransportStatusError {
-    name: string;
-    message: string;
-    stack: string;
-    statusCode: number;
-    statusText: string;
-}
-
-function instanceOfTransportStatusError(
-    object: Error
-): object is TransportStatusError {
-    return (
-        'name' in object &&
-        'message' in object &&
-        'stack' in object &&
-        'statusCode' in object &&
-        'statusText' in object
-    );
-}
+import useLedger, { LedgerStatus } from './useLedger';
 
 interface Props {
     ledgerCall: (
@@ -38,101 +11,37 @@ interface Props {
     ) => Promise<void>;
 }
 
-function isConcordiumApp({ name }: AppAndVersion) {
-    return name === 'Concordium';
+function getStatusMessage(
+    status: LedgerStatus,
+    deviceName: string | undefined
+): string {
+    switch (status) {
+        case 'LOADING':
+            return 'Waiting for device';
+        case 'ERROR':
+            return 'Unable to connect to device';
+        case 'CONNECTED':
+            return `${deviceName} is ready!`;
+        case 'OPEN_APP':
+            return `Please open the Concordium application on your ${deviceName}`;
+        default:
+            throw new Error('Unsupported status');
+    }
 }
 
 export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
-    const [ledger, setLedger] = useState<ConcordiumLedgerClient | undefined>(
-        undefined
+    const { deviceName, status, submitHandler } = useLedger();
+    const [statusMessage, setStatusMessage] = useState(
+        getStatusMessage(status, deviceName)
     );
-    const [statusMessage, setStatusMessage] = useState('Waiting for device');
-    const [ready, setReady] = useState(false);
-    const [ledgerSubscription, setLedgerSubscription] = useState<
-        Subscription | undefined
-    >(undefined);
-    const [waitingForDevice, setWaitingForDevice] = useState<boolean>(true);
-
-    const ledgerObserver: Observer<DescriptorEvent<string>> = useMemo(() => {
-        return {
-            complete: () => {
-                // This is expected to never trigger.
-            },
-            error: () => {
-                setStatusMessage('Unable to connect to device');
-                setReady(false);
-            },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            next: async (event: any) => {
-                if (event.type === 'add') {
-                    const transport = await TransportNodeHid.open(event.path);
-                    const concordiumClient = new ConcordiumLedgerClient(
-                        transport
-                    );
-                    const appAndVersion = await concordiumClient.getAppAndVersion();
-
-                    if (isConcordiumApp(appAndVersion)) {
-                        setStatusMessage(
-                            `${event.deviceModel.productName} is ready!`
-                        );
-                        setLedger(concordiumClient);
-                        setReady(true);
-                        setWaitingForDevice(false);
-                    } else {
-                        // The device has been connected, but the Concordium application has not
-                        // been opened yet.
-                        setStatusMessage(
-                            `Please open the Concordium application on your ${event.deviceModel.productName}`
-                        );
-                    }
-                } else {
-                    setStatusMessage('Waiting for device');
-                    setWaitingForDevice(true);
-                    setLedger(undefined);
-                    setReady(false);
-                }
-            },
-        };
-    }, []);
-
-    const listenForLedger = useCallback(() => {
-        if (!ledgerSubscription) {
-            const subscription = TransportNodeHid.listen(ledgerObserver);
-            setLedgerSubscription(subscription);
-        }
-    }, [ledgerSubscription, ledgerObserver]);
-
-    async function submit() {
-        setReady(false);
-        try {
-            if (ledger) {
-                await ledgerCall(ledger, setStatusMessage);
-            }
-        } catch (error) {
-            let errorMessage;
-            if (instanceOfTransportStatusError(error)) {
-                errorMessage = getErrorDescription(error.statusCode);
-            } else {
-                errorMessage = `An error occurred: ${error}`;
-            }
-            errorMessage += ' Please try again.';
-            setStatusMessage(errorMessage);
-            setReady(true);
-        }
-    }
 
     useEffect(() => {
-        listenForLedger();
-        return function cleanup() {
-            if (ledgerSubscription !== undefined) {
-                ledgerSubscription.unsubscribe();
-            }
-            if (ledger) {
-                ledger.closeTransport();
-                setLedger(undefined);
-            }
-        };
-    }, [ledgerSubscription, listenForLedger, ledger]);
+        setStatusMessage(getStatusMessage(status, deviceName));
+    }, [status, deviceName]);
+
+    async function submit() {
+        submitHandler((client) => ledgerCall(client, setStatusMessage));
+    }
 
     return (
         <Card fluid>
@@ -143,7 +52,7 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
                 <Card.Description>
                     <Segment basic>
                         <Loader
-                            active={waitingForDevice}
+                            active={status === 'LOADING'}
                             inline
                             indeterminate
                             size="large"
@@ -152,7 +61,11 @@ export default function LedgerComponent({ ledgerCall }: Props): JSX.Element {
                 </Card.Description>
             </Card.Content>
             <Card.Content extra textAlign="center">
-                <Button primary onClick={submit} disabled={!ready}>
+                <Button
+                    primary
+                    onClick={submit}
+                    disabled={status !== 'CONNECTED'}
+                >
                     Submit
                 </Button>
             </Card.Content>
