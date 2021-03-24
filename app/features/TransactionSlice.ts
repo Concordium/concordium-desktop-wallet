@@ -16,8 +16,8 @@ import {
     AccountTransaction,
     Dispatch,
     TransactionEvent,
-    Global,
     RejectReason,
+    Global,
 } from '../utils/types';
 import { attachNames } from '../utils/transactionHelpers';
 import {

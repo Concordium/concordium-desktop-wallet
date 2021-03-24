@@ -163,6 +163,13 @@ export interface TransferToEncryptedPayload {
     amount: string;
 }
 
+export interface TransferToPublicPayload {
+    transferAmount: string;
+    remainingEncryptedAmount?: EncryptedAmount;
+    index?: string;
+    proof?: string;
+}
+
 export interface SchedulePoint {
     timestamp: string;
     amount: string;
@@ -175,6 +182,7 @@ export interface ScheduledTransferPayload {
 }
 
 export type TransactionPayload =
+    | TransferToPublicPayload
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
     | SimpleTransferPayload;
@@ -196,6 +204,7 @@ export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
+export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -249,6 +258,18 @@ export interface Credential {
     identityId?: number;
     credId: Hex;
     policy: JSONString;
+}
+
+export interface LocalCredential extends Credential {
+    external: false;
+    identityId: number;
+    credentialNumber: number;
+}
+
+export function instanceOfLocalCredential(
+    object: Credential
+): object is LocalCredential {
+    return !object.external;
 }
 
 // 48 bytes containing a group element.
@@ -357,14 +378,14 @@ export enum RejectReason {
  * This Interface models the structure of the transfer transactions stored in the database
  */
 export interface TransferTransaction {
-    remote: boolean | 0 | 1; // SQlite converts booleans to 0/1
+    remote: boolean;
     originType: OriginType;
     transactionKind: TransactionKindString;
     id?: number; // only remote transactions have ids.
     blockHash: Hex;
     blockTime: string;
     total: string;
-    success?: boolean | 0 | 1; // SQlite converts booleans to 0/1
+    success?: boolean;
     transactionHash: Hex;
     subtotal?: string;
     cost?: string;
@@ -592,6 +613,12 @@ export function instanceOfTransferToEncrypted(
     return object.transactionKind === TransactionKindId.Transfer_to_encrypted;
 }
 
+export function instanceOfTransferToPublic(
+    object: AccountTransaction<TransactionPayload>
+): object is TransferToPublic {
+    return object.transactionKind === TransactionKindId.Transfer_to_public;
+}
+
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
@@ -750,8 +777,8 @@ export interface TransactionOrigin {
 }
 
 export interface EncryptedInfo {
-    encryptedAmount: string;
-    incomingAmounts: string[];
+    encryptedAmount: EncryptedAmount;
+    incomingAmounts: EncryptedAmount[];
 }
 
 export interface IncomingTransaction {
