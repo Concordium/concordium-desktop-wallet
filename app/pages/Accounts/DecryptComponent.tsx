@@ -13,7 +13,7 @@ import {
 } from '../../features/TransactionSlice';
 import { Account } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
+import SimpleLedger from '../../components/ledger/SimpleLedger';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 
 interface Props {
@@ -66,5 +66,5 @@ export default function DecryptComponent({ account }: Props) {
         await loadAccounts(dispatch);
     }
 
-    return <LedgerComponent ledgerCall={ledgerCall} />;
+    return <SimpleLedger ledgerCall={ledgerCall} />;
 }

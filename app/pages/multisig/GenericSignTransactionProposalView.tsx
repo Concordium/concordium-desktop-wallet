@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { parse } from 'json-bigint';
-import LedgerComponent from '~/components/ledger/LedgerComponent';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
 import TransactionDetails from '~/components/TransactionDetails';
 import TransactionHashView from '~/components/TransactionHashView';
 import {
@@ -47,7 +47,7 @@ export default function GenericSignTransactionProposalView({
     // to sign the transaction.
     let ledgerComponent;
     if (signing) {
-        ledgerComponent = <LedgerComponent ledgerCall={signFunction} />;
+        ledgerComponent = <SimpleLedger ledgerCall={signFunction} />;
     } else {
         ledgerComponent = null;
     }

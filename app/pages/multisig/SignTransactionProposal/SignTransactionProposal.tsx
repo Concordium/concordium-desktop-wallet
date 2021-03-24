@@ -26,7 +26,7 @@ import findAuthorizationKey from '../../../utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '../../../utils/routerHelper';
 import Columns from '~/components/Columns';
 import Form from '~/components/Form';
-import LedgerComponent from '~/components/ledger/LedgerComponent';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
 import PageLayout from '~/components/PageLayout';
 import TransactionDetails from '~/components/TransactionDetails';
 import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
@@ -176,7 +176,7 @@ function ConfirmProposalDetailsView({ location }: Props) {
                         <Columns.Column header="Signature and Hardware Wallet">
                             <section className={styles.signColumnContent}>
                                 <h5>Hardware wallet status</h5>
-                                <LedgerComponent ledgerCall={signingFunction} />
+                                <SimpleLedger ledgerCall={signingFunction} />
                                 <Form onSubmit={() => setSigning(true)}>
                                     <Form.Checkbox
                                         name="check"
