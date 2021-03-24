@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
-import { Menu } from 'semantic-ui-react';
 import {
     loadAccounts,
     loadAccountInfos,
@@ -44,24 +43,19 @@ export default function AccountList() {
 
     return (
         <>
-            <Menu vertical fluid>
-                {accounts.map((account: Account, index: number) => (
-                    <Menu.Item
-                        key={account.address}
-                        active={index === chosenIndex}
-                    >
-                        <AccountListElement
-                            account={account}
-                            accountInfo={accountsInfo[account.address]}
-                            onClick={(shielded) => {
-                                dispatch(push(routes.ACCOUNTS));
-                                dispatch(chooseAccount(index));
-                                dispatch(setViewingShielded(shielded));
-                            }}
-                        />
-                    </Menu.Item>
-                ))}
-            </Menu>
+            {accounts.map((account: Account, index: number) => (
+                <AccountListElement
+                    key={account.address}
+                    active={index === chosenIndex}
+                    account={account}
+                    accountInfo={accountsInfo[account.address]}
+                    onClick={(shielded) => {
+                        dispatch(push(routes.ACCOUNTS));
+                        dispatch(chooseAccount(index));
+                        dispatch(setViewingShielded(shielded));
+                    }}
+                />
+            ))}
         </>
     );
 }
