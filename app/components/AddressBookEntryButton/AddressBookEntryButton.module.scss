@@ -1,5 +1,12 @@
+@import 'config/bundle';
+
 .item {
     width: 80%;
     margin-bottom: 14px;
     margin-left: 10%;
+}
+
+.error {
+    box-shadow: 0 0 0 2px $color-error inset;
+    outline: none;
 }

@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
 import { AddressBookEntry, AccountInfo } from '~/utils/types';
 import { toMicroUnits, getGTUSymbol, isValidGTUString } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
+import styles from './Transfers.module.scss';
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
@@ -25,9 +27,13 @@ function atDisposal(accountInfo: AccountInfo): bigint {
     return unShielded - scheduled;
 }
 
+interface PickAmountForm {
+    amount: string;
+    recipient: string;
+}
+
 /**
  * Allows the user to enter an amount, and redirects to picking a recipient.
- * TODO: Find a way to display the recipient check, without showing a dummy checkbox;
  */
 export default function PickAmount({
     recipient,
@@ -39,6 +45,7 @@ export default function PickAmount({
 }: Props) {
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const fee = 5900n; // TODO: Add cost calculator
+    const form = useForm<PickAmountForm>({ mode: 'onTouched' });
 
     function validateAmount(amountToValidate: string): string | undefined {
         if (!isValidGTUString(amountToValidate)) {
@@ -53,26 +60,33 @@ export default function PickAmount({
         return undefined;
     }
 
+    const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
+        (values) => {
+            const { amount: currentAmount } = values;
+            setAmount(currentAmount);
+            toConfirmTransfer();
+        },
+        [setAmount, toConfirmTransfer]
+    );
+
     return (
         <>
             <h2>{header}</h2>
-            <Form onSubmit={toConfirmTransfer}>
-                <Form.Input
-                    name="name"
-                    placeholder="Enter Amount"
-                    label={getGTUSymbol()}
-                    value={amount}
-                    rules={{
-                        required: 'Amount Required',
-                        validate: {
-                            validateAmount,
-                        },
-                    }}
-                    onChange={(e) => {
-                        const newAmount = e.target.value;
-                        setAmount(newAmount);
-                    }}
-                />
+            <Form formMethods={form} onSubmit={handleSubmit}>
+                <div className={styles.pickAmount}>
+                    <p>{getGTUSymbol()}</p>
+                    <Form.Input
+                        name="amount"
+                        placeholder="Enter Amount"
+                        defaultValue={amount}
+                        rules={{
+                            required: 'Amount Required',
+                            validate: {
+                                validateAmount,
+                            },
+                        }}
+                    />
+                </div>
                 {toPickRecipient ? (
                     <>
                         <div style={{ display: 'none' }}>
@@ -84,9 +98,19 @@ export default function PickAmount({
                                 checked={Boolean(recipient?.address)}
                             />
                         </div>
-                        <AddressBookEntryButton onClick={toPickRecipient}>
+                        <AddressBookEntryButton
+                            error={Boolean(form.errors?.recipient)}
+                            onClick={() => {
+                                setAmount(form.getValues('amount'));
+                                toPickRecipient();
+                            }}
+                        >
                             {recipient ? recipient.name : 'Select Recipient'}
+                            <br />
                         </AddressBookEntryButton>
+                        <p className={styles.errorLabel}>
+                            {form.errors?.recipient?.message}
+                        </p>
                     </>
                 ) : null}
                 <Form.Submit as={Button} size="huge">

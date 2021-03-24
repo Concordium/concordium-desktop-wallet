@@ -1,0 +1,18 @@
+@import 'config/bundle';
+
+.errorLabel {
+    text-align: center;
+    color: $color-error;
+}
+
+.pickAmount {
+    display: flex;
+    margin-bottom: 30px;
+    margin-left: 10%;
+    align-content: center;
+    width: 100%;
+
+    label {
+        width: 75%;
+    }
+}
