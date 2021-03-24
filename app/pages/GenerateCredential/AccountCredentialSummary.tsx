@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card, List } from 'semantic-ui-react';
-import { Validate } from 'react-hook-form';
+import { Validate, FormProvider, useForm } from 'react-hook-form';
 import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import { Identity, CredentialDeploymentInformation } from '~/utils/types';
 import Form from '~/components/Form';
@@ -17,8 +17,6 @@ interface Props {
     isReady: boolean;
 }
 
-// TODO: fix input field behaviour, which is that it sometimes ignores the input when changing errors.
-
 export default function AccountCredentialSummary({
     isReady,
     identity,
@@ -28,6 +26,8 @@ export default function AccountCredentialSummary({
     Button = () => null,
 }: Props) {
     const location = useLocation().pathname;
+    const form = useForm({ mode: 'onTouched' });
+    const addressWatcher = form.watch('address');
 
     const validate: Validate = (newAddress: string) => {
         if (!isValidAddress(newAddress)) {
@@ -38,6 +38,12 @@ export default function AccountCredentialSummary({
         }
         return true;
     };
+
+    useEffect(() => {
+        if (location === routes.GENERATE_CREDENTIAL_PICKACCOUNT) {
+            setAddress(addressWatcher);
+        }
+    }, [setAddress, addressWatcher, location]);
 
     return (
         <Card>
@@ -55,11 +61,10 @@ export default function AccountCredentialSummary({
                     <List.Item>Account:</List.Item>
                     <List.Item>
                         {location === routes.GENERATE_CREDENTIAL_PICKACCOUNT ? (
-                            <Form onSubmit={() => {}}>
+                            <FormProvider {...form}>
                                 <Form.TextArea
                                     name="address"
                                     placeholder="Paste the account address here"
-                                    value={address}
                                     rules={{
                                         required: 'Address required',
                                         minLength: {
@@ -77,12 +82,8 @@ export default function AccountCredentialSummary({
                                         },
                                     }}
                                     autoScale
-                                    onChange={(e) => {
-                                        const newAddress = e.target.value;
-                                        setAddress(newAddress || '');
-                                    }}
                                 />
-                            </Form>
+                            </FormProvider>
                         ) : (
                             <b> {address || 'To be determined'} </b>
                         )}
