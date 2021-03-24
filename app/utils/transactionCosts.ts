@@ -38,7 +38,7 @@ export function getTransactionEnergyCost(transaction: AccountTransaction) {
 
 export default function getTransactionCost(
     transaction: AccountTransaction,
-    energyToMicroGtu = 10000n
+    energyToMicroGtu = 100n
 ) {
     return getTransactionEnergyCost(transaction) * energyToMicroGtu;
 }

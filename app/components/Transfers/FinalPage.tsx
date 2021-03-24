@@ -2,11 +2,12 @@ import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
-import { parse } from '../../utils/JSONHelper';
-import routes from '../../constants/routes.json';
-import { displayAsGTU } from '../../utils/gtu';
-import { parseTime } from '../../utils/timeHelpers';
-import { getScheduledTransferAmount } from '../../utils/transactionHelpers';
+import { parse } from '~/utils/JSONHelper';
+import routes from '~/constants/routes.json';
+import { displayAsGTU } from '~/utils/gtu';
+import { parseTime } from '~/utils/timeHelpers';
+import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
+import getTransactionCost from '~/utils/transactionCosts';
 
 import {
     AddressBookEntry,
@@ -17,7 +18,7 @@ import {
     instanceOfTransferToPublic,
     TransactionPayload,
     TimeStampUnit,
-} from '../../utils/types';
+} from '~/utils/types';
 
 interface State {
     transaction: string;
@@ -77,9 +78,7 @@ function displayRecipient(recipient: AddressBookEntry) {
 }
 
 /**
- * Displays details of a completed transaction.
- * TODO: fix estimatedFee
- * TODO: generalize (right now expects simple transfer)
+ * Displays details of a submitted transaction.
  */
 export default function FinalPage({ location }: Props): JSX.Element {
     if (!location.state) {
@@ -104,7 +103,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
                         <Table.Row>
                             <Table.Cell>Estimated fee:</Table.Cell>
                             <Table.Cell textAlign="right">
-                                {displayAsGTU(200n)}
+                                {displayAsGTU(getTransactionCost(transaction))}
                             </Table.Cell>
                         </Table.Row>
                         {displayNote(transaction)}
