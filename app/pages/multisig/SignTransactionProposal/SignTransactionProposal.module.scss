@@ -1,0 +1,6 @@
+@import 'config/bundle';
+@import '../common/multiSignatureFlowPage';
+
+.body {
+    margin-bottom: -$page-container-padding-vertical;
+}

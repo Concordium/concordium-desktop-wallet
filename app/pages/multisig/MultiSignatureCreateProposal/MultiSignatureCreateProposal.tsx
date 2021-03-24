@@ -156,13 +156,12 @@ export default function MultiSignatureCreateProposalView() {
             <PageLayout.Container
                 closeRoute={routes.MULTISIGTRANSACTIONS}
                 className={styles.container}
+                padding="vertical"
             >
                 <h2 className={styles.header}>
                     Transaction Proposal | {displayType}
                 </h2>
-                <PageLayout.FullWidthContainerSection
-                    className={styles.content}
-                >
+                <div className={styles.content}>
                     <h3 className={styles.subHeader}>Transaction details</h3>
                     <Form<FieldValues & MultiSignatureCreateProposalForm>
                         className={styles.details}
@@ -203,7 +202,7 @@ export default function MultiSignatureCreateProposalView() {
                             Continue
                         </Form.Submit>
                     </Form>
-                </PageLayout.FullWidthContainerSection>
+                </div>
             </PageLayout.Container>
         </PageLayout>
     );

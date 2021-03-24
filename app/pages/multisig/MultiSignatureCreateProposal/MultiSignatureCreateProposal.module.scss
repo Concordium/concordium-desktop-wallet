@@ -1,33 +1,18 @@
 @import 'config/bundle';
-
-.header {
-    margin-top: 0;
-}
+@import '../common/multiSignatureFlowPage';
 
 .subHeader {
     border-bottom: 1px solid $color-grey;
     padding-bottom: 10px;
 }
 
-.container {
-    display: flex;
-    flex-direction: column;
-}
-
-.content {
-    margin-top: 10px;
-    flex: 1 1 100%;
-    display: flex;
-    flex-direction: column;
-}
-
 .details {
+    composes: body;
     width: 450px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex: 1 1 100%;
 }
 
 .proposal {

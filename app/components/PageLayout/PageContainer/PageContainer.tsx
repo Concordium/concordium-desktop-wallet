@@ -14,6 +14,7 @@ export interface PageContainerProps {
     className?: string;
     disableBack?: boolean;
     closeRoute?: string;
+    padding?: 'vertical' | 'horizontal' | 'both';
 }
 
 /**
@@ -31,11 +32,20 @@ export default function PageContainer({
     children,
     disableBack = false,
     closeRoute,
+    padding,
     className,
 }: PropsWithChildren<PageContainerProps>): JSX.Element {
     const dispatch = useDispatch();
     return (
-        <section className={clsx(styles.root, className)}>
+        <section
+            className={clsx(
+                styles.root,
+                padding === 'horizontal' && styles.paddingHorizontal,
+                padding === 'vertical' && styles.paddingVertical,
+                padding === 'both' && styles.paddingBoth,
+                className
+            )}
+        >
             {!disableBack && (
                 <Button
                     className={styles.back}

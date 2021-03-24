@@ -27,6 +27,7 @@ interface Props<T> {
     loading?: boolean;
 }
 
+// TODO move to only place this is used.
 export default function GenericSignTransactionProposalView({
     header,
     transaction,
@@ -65,7 +66,7 @@ export default function GenericSignTransactionProposalView({
             </PageLayout.Header>
             <PageLayout.Container closeRoute={routes.MULTISIGTRANSACTIONS}>
                 <h2>Transaction signing confirmation | Transaction Type</h2>
-                <PageLayout.FullWidthContainerSection>
+                <div>
                     {loading && <Loading />}
                     <Columns divider>
                         <Columns.Column header="Transaction Details">
@@ -96,7 +97,7 @@ export default function GenericSignTransactionProposalView({
                             {ledgerComponent}
                         </Columns.Column>
                     </Columns>
-                </PageLayout.FullWidthContainerSection>
+                </div>
             </PageLayout.Container>
         </PageLayout>
     );
