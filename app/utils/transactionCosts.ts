@@ -4,6 +4,7 @@ import {
     Schedule,
     TransactionKindId,
 } from './types';
+import { getEnergyToMicroGtuRate } from './nodeHelpers';
 
 export const energyConstants = {
     SimpleTransferCost: 300n,
@@ -36,10 +37,10 @@ export function getTransactionEnergyCost(transaction: AccountTransaction) {
     }
 }
 
-export default function getTransactionCost(
-    transaction: AccountTransaction,
-    energyToMicroGtu = 100n
+export default async function getTransactionCost(
+    transaction: AccountTransaction
 ) {
+    const energyToMicroGtu = await getEnergyToMicroGtuRate();
     return getTransactionEnergyCost(transaction) * energyToMicroGtu;
 }
 

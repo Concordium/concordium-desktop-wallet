@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { LocationDescriptorObject } from 'history';
 import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
@@ -88,6 +88,18 @@ export default function FinalPage({ location }: Props): JSX.Element {
     const { transaction: transactionJSON, recipient } = location.state;
     const transaction: AccountTransaction = parse(transactionJSON);
 
+    const [cost, setCost] = useState<bigint>(0n);
+
+    useEffect(() => {
+        getTransactionCost(transaction)
+            .then((transactionCost) => setCost(transactionCost))
+            .catch((e) => {
+                throw new Error(
+                    `Unable to calculate transactionCost, due to: ${e}`
+                );
+            });
+    }, [transaction, setCost]);
+
     return (
         <Card fluid centered>
             <Card.Content textAlign="center">
@@ -103,7 +115,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
                         <Table.Row>
                             <Table.Cell>Estimated fee:</Table.Cell>
                             <Table.Cell textAlign="right">
-                                {displayAsGTU(getTransactionCost(transaction))}
+                                {displayAsGTU(cost)}
                             </Table.Cell>
                         </Table.Row>
                         {displayNote(transaction)}

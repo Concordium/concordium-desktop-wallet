@@ -2,6 +2,7 @@ import {
     getConsensusStatus,
     getAccountInfo,
     getCryptographicParameters,
+    getBlockSummary,
 } from './nodeRequests';
 import { AccountInfo, Account, Global } from './types';
 
@@ -34,4 +35,16 @@ export async function fetchGlobal(): Promise<Global> {
     const blockHash = consensusStatus.lastFinalizedBlock;
     const versioned = await getCryptographicParameters(blockHash);
     return versioned.value;
+}
+
+export async function getEnergyToMicroGtuRate(): Promise<bigint> {
+    const consensusStatus = await getConsensusStatus();
+    const blockSummary = await getBlockSummary(
+        consensusStatus.lastFinalizedBlock
+    );
+    const { euroPerEnergy } = blockSummary.updates.chainParameters;
+    const { microGTUPerEuro } = blockSummary.updates.chainParameters;
+    const denominator = euroPerEnergy.denominator * microGTUPerEuro.denominator;
+    const numerator = euroPerEnergy.numerator * microGTUPerEuro.numerator;
+    return BigInt(numerator / denominator);
 }

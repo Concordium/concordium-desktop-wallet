@@ -170,11 +170,11 @@ function convertScheduledTransfer(
  * Converts an Account Transaction, so that it fits local Transfer Transaction model and
  * can be entered into the local database.
  */
-export function convertAccountTransaction(
+export async function convertAccountTransaction(
     transaction: AccountTransaction,
     hash: string
-): TransferTransaction {
-    const cost = getTransactionCost(transaction);
+): Promise<TransferTransaction> {
+    const cost = await getTransactionCost(transaction);
 
     let typeSpecific;
     if (instanceOfSimpleTransfer(transaction)) {
