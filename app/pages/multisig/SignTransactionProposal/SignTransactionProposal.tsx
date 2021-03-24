@@ -154,32 +154,46 @@ function ConfirmProposalDetailsView({ location }: Props) {
                     Transaction signing confirmation | Transaction Type
                 </h2>
                 <div className={styles.content}>
-                    <Columns className={styles.body} divider>
+                    <Columns
+                        className={styles.body}
+                        divider
+                        columnClassName={styles.column}
+                    >
                         <Columns.Column header="Transaction Details">
-                            <TransactionDetails
-                                transaction={transactionObject}
-                            />
-                            {instanceOfUpdateInstruction(transactionObject) && (
-                                <ExpiredEffectiveTimeView
+                            <section className={styles.columnContent}>
+                                <TransactionDetails
                                     transaction={transactionObject}
                                 />
-                            )}
+                                {instanceOfUpdateInstruction(
+                                    transactionObject
+                                ) && (
+                                    <ExpiredEffectiveTimeView
+                                        transaction={transactionObject}
+                                    />
+                                )}
+                            </section>
                         </Columns.Column>
                         <Columns.Column header="Signature and Hardware Wallet">
-                            <LedgerComponent ledgerCall={signingFunction} />
-                            <Form onSubmit={() => setSigning(true)}>
-                                <Form.Checkbox
-                                    name="check"
-                                    rules={{ required: true }}
-                                    disabled={signing}
-                                >
-                                    I am sure that the propsed changes are
-                                    correct
-                                </Form.Checkbox>
-                                <Form.Submit disabled={signing}>
-                                    Generate Transaction
-                                </Form.Submit>
-                            </Form>
+                            <section className={styles.signColumnContent}>
+                                <h5>Hardware wallet status</h5>
+                                <LedgerComponent ledgerCall={signingFunction} />
+                                <Form onSubmit={() => setSigning(true)}>
+                                    <Form.Checkbox
+                                        name="check"
+                                        rules={{ required: true }}
+                                        disabled={signing}
+                                    >
+                                        I am sure that the propsed changes are
+                                        correct
+                                    </Form.Checkbox>
+                                    <Form.Submit
+                                        disabled={signing}
+                                        className={styles.submit}
+                                    >
+                                        Generate Transaction
+                                    </Form.Submit>
+                                </Form>
+                            </section>
                         </Columns.Column>
                     </Columns>
                 </div>
