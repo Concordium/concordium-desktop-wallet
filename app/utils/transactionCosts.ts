@@ -7,7 +7,7 @@ import {
 
 export const energyConstants = {
     SimpleTransferCost: 300n,
-    EncryptedTransferCost: 2700n,
+    EncryptedTransferCost: 27000n,
     TransferToEncryptedCost: 600n,
     TransferToPublicCost: 14850n,
     ScheduledTransferPerRelease: 300n + 64n,
