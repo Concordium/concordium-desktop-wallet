@@ -17,13 +17,13 @@ export default function LedgerStatus({
 }: LedgerStatusProps): JSX.Element {
     const statusIcon = useMemo(() => {
         switch (status) {
-            case 'LOADING':
-            case 'AWAITING_USER_INPUT':
-            case 'OPEN_APP':
+            case LedgerStatusType.LOADING:
+            case LedgerStatusType.AWAITING_USER_INPUT:
+            case LedgerStatusType.OPEN_APP:
                 return <Loading inline className={styles.icon} />;
-            case 'ERROR':
+            case LedgerStatusType.ERROR:
                 return <ErrorIcon className={styles.icon} />;
-            case 'CONNECTED':
+            case LedgerStatusType.CONNECTED:
                 return <CheckmarkIcon className={styles.icon} />;
             default:
                 return null;

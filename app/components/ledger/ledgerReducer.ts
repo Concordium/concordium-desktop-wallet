@@ -76,13 +76,13 @@ function getStatusMessage(
     deviceName?: string
 ): string {
     switch (status) {
-        case 'LOADING':
+        case LedgerStatusType.LOADING:
             return 'Waiting for device';
-        case 'ERROR':
+        case LedgerStatusType.ERROR:
             return 'Unable to connect to device';
-        case 'CONNECTED':
+        case LedgerStatusType.CONNECTED:
             return `${deviceName} is ready!`;
-        case 'OPEN_APP':
+        case LedgerStatusType.OPEN_APP:
             return `Please open the Concordium application on your ${deviceName}`;
         default:
             throw new Error('Unsupported status');
@@ -90,8 +90,8 @@ function getStatusMessage(
 }
 
 export const getInitialState = (): LedgerReducerState => ({
-    status: 'LOADING',
-    text: getStatusMessage('LOADING'),
+    status: LedgerStatusType.LOADING,
+    text: getStatusMessage(LedgerStatusType.LOADING),
 });
 
 const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
@@ -107,18 +107,21 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
             };
         case LedgerActionType.CONNECTED:
             return {
-                status: 'CONNECTED',
+                status: LedgerStatusType.CONNECTED,
                 deviceName: a.deviceName,
                 client: a.client,
-                text: getStatusMessage('CONNECTED', a.deviceName),
+                text: getStatusMessage(
+                    LedgerStatusType.CONNECTED,
+                    a.deviceName
+                ),
             };
         case LedgerActionType.RESET:
             return getInitialState();
         case LedgerActionType.ERROR:
             return {
                 ...s,
-                status: 'ERROR',
-                text: a.message || getStatusMessage('ERROR'),
+                status: LedgerStatusType.ERROR,
+                text: a.message || getStatusMessage(LedgerStatusType.ERROR),
             };
         default:
             return s;

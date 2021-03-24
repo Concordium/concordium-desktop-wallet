@@ -5,6 +5,7 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import Button from '~/cross-app-components/Button';
 import LedgerView, { LedgerViewProps } from './LedgerView';
+import { LedgerStatusType } from '../util';
 
 export default {
     title: 'Components/Ledger/Ledger',
@@ -19,31 +20,35 @@ export default {
 
 const Template: Story<LedgerViewProps> = (args) => (
     <LedgerView {...args}>
-        {(status, submit = asyncNoOp) => (
-            <Button
-                onClick={() => submit(asyncNoOp)}
-                disabled={status !== 'CONNECTED'}
-            >
-                Submit
-            </Button>
+        {(status, statusView, submit = asyncNoOp) => (
+            <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
+                {statusView}
+                <Button
+                    onClick={submit}
+                    disabled={status !== LedgerStatusType.CONNECTED}
+                    style={{ marginTop: 40 }}
+                >
+                    Submit
+                </Button>
+            </div>
         )}
     </LedgerView>
 );
 
 export const Loading = Template.bind({});
 Loading.args = {
-    status: 'LOADING',
+    status: LedgerStatusType.LOADING,
     statusText: 'Waiting for ledger connection',
 };
 
 export const Connected = Template.bind({});
 Connected.args = {
-    status: 'CONNECTED',
+    status: LedgerStatusType.CONNECTED,
     statusText: 'Ledger connected',
 };
 
 export const Error = Template.bind({});
 Error.args = {
-    status: 'ERROR',
+    status: LedgerStatusType.ERROR,
     statusText: 'Some error happended on the ledger. Please try again.',
 };

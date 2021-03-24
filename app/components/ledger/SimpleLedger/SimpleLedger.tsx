@@ -4,7 +4,10 @@ import Button from '~/cross-app-components/Button';
 
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { asyncNoOp } from '~/utils/basicHelpers';
-import Ledger from './Ledger';
+import Ledger from '../Ledger';
+import { LedgerStatusType } from '../util';
+
+import styles from './SimpleLedger.module.scss';
 
 interface Props {
     ledgerCall: (
@@ -19,14 +22,18 @@ export default function SimpleLedger({ ledgerCall }: Props): JSX.Element {
             <Card.Content textAlign="center">
                 <Card.Header>Device connection</Card.Header>
                 <Divider />
-                <Ledger>
-                    {(_, submit = asyncNoOp) => (
-                        <Button
-                            onClick={() => submit(ledgerCall)}
-                            disabled={submit === asyncNoOp}
-                        >
-                            Submit
-                        </Button>
+                <Ledger ledgerCallback={ledgerCall}>
+                    {(status, statusView, submit = asyncNoOp) => (
+                        <div className={styles.content}>
+                            {statusView}
+                            <Button
+                                className={styles.submit}
+                                onClick={submit}
+                                disabled={status !== LedgerStatusType.CONNECTED}
+                            >
+                                Submit
+                            </Button>
+                        </div>
                     )}
                 </Ledger>
             </Card.Content>

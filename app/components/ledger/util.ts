@@ -1,19 +1,20 @@
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AppAndVersion } from '~/features/ledger/GetAppAndVersion';
 
-export type LedgerStatusType =
-    | 'LOADING'
-    | 'ERROR'
-    | 'CONNECTED'
-    | 'OPEN_APP'
-    | 'AWAITING_USER_INPUT';
+export enum LedgerStatusType {
+    LOADING,
+    ERROR,
+    CONNECTED,
+    OPEN_APP,
+    AWAITING_USER_INPUT,
+}
 
-export type LedgerSubmitHandler = (
-    cb: (
-        client: ConcordiumLedgerClient,
-        setStatusText: (text: string) => void
-    ) => Promise<void>
+export type LedgerCallback = (
+    client: ConcordiumLedgerClient,
+    setStatusText: (message: string) => void
 ) => Promise<void>;
+
+export type LedgerSubmitHandler = () => Promise<void>;
 
 export function isConcordiumApp({ name }: AppAndVersion) {
     return name === 'Concordium';

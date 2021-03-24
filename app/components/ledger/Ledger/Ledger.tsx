@@ -1,11 +1,31 @@
 import React from 'react';
 import useLedger from '../useLedger';
+import { LedgerCallback } from '../util';
 import LedgerView, { LedgerViewProps } from './LedgerView';
 
-type LedgerProps = Pick<LedgerViewProps, 'children' | 'className'>;
+interface LedgerProps extends Pick<LedgerViewProps, 'children'> {
+    ledgerCallback: LedgerCallback;
+}
 
-export default function Ledger({ ...props }: LedgerProps): JSX.Element {
-    const { status, submitHandler, statusText } = useLedger();
+/**
+ * @description
+ * Component for interacting with the Concordium app on ledger devices.
+ *
+ * @example
+ * <Ledger>
+ *   {(status, statusView, submit) => (
+ *     <div>
+ *       {statusView}
+ *       <Button onClick={submit} disabled={status !== 'CONNECTED'}>Submit</Button>
+ *     </div>
+ *   )}
+ * </Ledger>
+ */
+export default function Ledger({
+    ledgerCallback,
+    ...props
+}: LedgerProps): JSX.Element {
+    const { status, submitHandler, statusText } = useLedger(ledgerCallback);
 
     return (
         <LedgerView

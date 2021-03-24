@@ -21,9 +21,12 @@ import {
     isConcordiumApp,
     instanceOfTransportStatusError,
     LedgerSubmitHandler,
+    LedgerCallback,
 } from './util';
 
-export default function useLedger(): {
+export default function useLedger(
+    ledgerCallback: LedgerCallback
+): {
     status: LedgerStatusType;
     statusText: string;
     submitHandler: LedgerSubmitHandler;
@@ -67,7 +70,7 @@ export default function useLedger(): {
                     } else {
                         // The device has been connected, but the Concordium application has not
                         // been opened yet.
-                        dispatch(pendingAction('OPEN_APP'));
+                        dispatch(pendingAction(LedgerStatusType.OPEN_APP));
                     }
                 } else {
                     dispatch(resetAction());
@@ -83,26 +86,26 @@ export default function useLedger(): {
         }
     }, [ledgerSubscription, ledgerObserver]);
 
-    const submitHandler: LedgerSubmitHandler = useCallback(
-        async (cb) => {
-            dispatch(pendingAction('AWAITING_USER_INPUT'));
-            try {
-                if (client) {
-                    await cb(client, (t) => dispatch(setStatusTextAction(t)));
-                }
-            } catch (e) {
-                let errorMessage;
-                if (instanceOfTransportStatusError(e)) {
-                    errorMessage = getErrorDescription(e.statusCode);
-                } else {
-                    errorMessage = `An error occurred: ${e}`;
-                }
-                errorMessage += ' Please try again.';
-                dispatch(errorAction(errorMessage));
+    const submitHandler: LedgerSubmitHandler = useCallback(async () => {
+        dispatch(pendingAction(LedgerStatusType.AWAITING_USER_INPUT));
+
+        try {
+            if (client) {
+                await ledgerCallback(client, (t) =>
+                    dispatch(setStatusTextAction(t))
+                );
             }
-        },
-        [client]
-    );
+        } catch (e) {
+            let errorMessage;
+            if (instanceOfTransportStatusError(e)) {
+                errorMessage = getErrorDescription(e.statusCode);
+            } else {
+                errorMessage = `An error occurred: ${e}`;
+            }
+            errorMessage += ' Please try again.';
+            dispatch(errorAction(errorMessage));
+        }
+    }, [client, ledgerCallback]);
 
     useEffect(() => {
         listenForLedger();
