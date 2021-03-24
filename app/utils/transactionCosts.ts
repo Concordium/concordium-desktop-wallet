@@ -14,14 +14,10 @@ export const energyConstants = {
     ScheduledTransferPerRelease: 300n + 64n,
 };
 
-export function getTransactionEnergyCost(transaction: AccountTransaction) {
-    if (instanceOfScheduledTransfer(transaction)) {
-        return (
-            energyConstants.ScheduledTransferPerRelease *
-            BigInt(transaction.payload.schedule.length)
-        );
-    }
-    switch (transaction.transactionKind) {
+export function getEnergyCostOfType(transactionKind: TransactionKindId) {
+    switch (transactionKind) {
+        case TransactionKindId.Transfer_with_schedule:
+            return energyConstants.ScheduledTransferPerRelease * 255n;
         case TransactionKindId.Simple_transfer:
             return energyConstants.SimpleTransferCost;
         case TransactionKindId.Encrypted_transfer:
@@ -31,10 +27,25 @@ export function getTransactionEnergyCost(transaction: AccountTransaction) {
         case TransactionKindId.Transfer_to_public:
             return energyConstants.TransferToPublicCost;
         default:
-            throw new Error(
-                `Unsupported transaction type: ${transaction.transactionKind}`
-            );
+            throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
+}
+
+export function getTransactionEnergyCost(transaction: AccountTransaction) {
+    if (instanceOfScheduledTransfer(transaction)) {
+        return (
+            energyConstants.ScheduledTransferPerRelease *
+            BigInt(transaction.payload.schedule.length)
+        );
+    }
+    return getEnergyCostOfType(transaction.transactionKind);
+}
+
+export async function getTransactionKindCost(
+    transactionKind: TransactionKindId
+) {
+    const energyToMicroGtu = await getEnergyToMicroGtuRate();
+    return getEnergyCostOfType(transactionKind) * energyToMicroGtu;
 }
 
 export default async function getTransactionCost(

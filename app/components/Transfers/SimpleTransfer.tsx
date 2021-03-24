@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation, Link } from 'react-router-dom';
@@ -8,11 +8,16 @@ import routes from '../../constants/routes.json';
 import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import { AddressBookEntry, Account } from '../../utils/types';
+import {
+    AddressBookEntry,
+    Account,
+    TransactionKindId,
+} from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 import locations from '../../constants/transferLocations.json';
 import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
 import { TransferState } from '../../utils/transactionTypes';
+import { getTransactionKindCost } from '~/utils/transactionCosts';
 
 interface Props {
     account: Account;
@@ -24,6 +29,14 @@ interface Props {
 export default function SimpleTransfer({ account }: Props) {
     const dispatch = useDispatch();
     const location = useLocation<TransferState>();
+
+    const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
+
+    useEffect(() => {
+        return getTransactionKindCost(
+            TransactionKindId.Simple_transfer
+        ).then((transferCost) => setEstimatedFee(transferCost));
+    }, [setEstimatedFee]);
 
     const [subLocation, setSubLocation] = useState<string>(
         location?.state?.initialPage || locations.pickAmount
@@ -48,6 +61,7 @@ export default function SimpleTransfer({ account }: Props) {
                         header="Send funds"
                         amount={amount}
                         setAmount={setAmount}
+                        estimatedFee={estimatedFee}
                         toPickRecipient={() =>
                             setSubLocation(locations.pickRecipient)
                         }
@@ -99,7 +113,12 @@ export default function SimpleTransfer({ account }: Props) {
             case locations.pickRecipient:
                 return <PickRecipient pickRecipient={chooseRecipientOnClick} />;
             case locations.transferSubmitted: {
-                return <FinalPage location={location} />;
+                return (
+                    <FinalPage
+                        location={location}
+                        estimatedFee={estimatedFee}
+                    />
+                );
             }
             default:
                 return null;

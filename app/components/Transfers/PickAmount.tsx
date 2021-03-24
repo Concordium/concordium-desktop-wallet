@@ -1,13 +1,14 @@
 import React from 'react';
 import { Card, Input, Button } from 'semantic-ui-react';
 import { AddressBookEntry } from '../../utils/types';
-import { getGTUSymbol, isValidGTUString } from '../../utils/gtu';
+import { getGTUSymbol, isValidGTUString, displayAsGTU } from '../../utils/gtu';
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
     amount: string;
     header: string;
     setAmount(amount: string): void;
+    estimatedFee?: bigint | undefined;
     toPickRecipient?(): void;
     toConfirmTransfer(): void;
 }
@@ -21,6 +22,7 @@ export default function PickAmount({
     recipient,
     header,
     amount,
+    estimatedFee,
     setAmount,
     toPickRecipient,
     toConfirmTransfer,
@@ -45,6 +47,12 @@ export default function PickAmount({
                     autoFocus
                     label={{ basic: true, content: getGTUSymbol() }}
                 />
+                <p>
+                    Estimated fee:{' '}
+                    {estimatedFee
+                        ? displayAsGTU(estimatedFee)
+                        : 'To be determined'}
+                </p>
                 <Button.Group vertical>
                     {toPickRecipient ? (
                         <Button onClick={toPickRecipient}>

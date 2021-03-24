@@ -2,7 +2,7 @@ import React from 'react';
 import routes from '../../constants/routes.json';
 import { createShieldAmountTransaction } from '../../utils/transactionHelpers';
 import InternalTransfer from './InternalTransfer';
-import { Account } from '../../utils/types';
+import { Account, TransactionKindId } from '../../utils/types';
 
 interface Props {
     account: Account;
@@ -17,6 +17,7 @@ export default function ShieldAmount({ account }: Props) {
         amountHeader: '',
         createTransaction: createShieldAmountTransaction,
         location: routes.ACCOUNTS_SHIELDAMOUNT,
+        transactionKind: TransactionKindId.Transfer_to_encrypted,
     };
 
     return <InternalTransfer account={account} specific={specific} />;

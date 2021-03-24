@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
@@ -7,7 +7,6 @@ import routes from '~/constants/routes.json';
 import { displayAsGTU } from '~/utils/gtu';
 import { parseTime } from '~/utils/timeHelpers';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
-import getTransactionCost from '~/utils/transactionCosts';
 
 import {
     AddressBookEntry,
@@ -26,6 +25,7 @@ interface State {
 }
 
 interface Props {
+    estimatedFee: bigint;
     location: LocationDescriptorObject<State>;
 }
 
@@ -80,25 +80,16 @@ function displayRecipient(recipient: AddressBookEntry) {
 /**
  * Displays details of a submitted transaction.
  */
-export default function FinalPage({ location }: Props): JSX.Element {
+export default function FinalPage({
+    location,
+    estimatedFee,
+}: Props): JSX.Element {
     if (!location.state) {
         throw new Error('Unexpected missing state.');
     }
 
     const { transaction: transactionJSON, recipient } = location.state;
     const transaction: AccountTransaction = parse(transactionJSON);
-
-    const [cost, setCost] = useState<bigint>(0n);
-
-    useEffect(() => {
-        getTransactionCost(transaction)
-            .then((transactionCost) => setCost(transactionCost))
-            .catch((e) => {
-                throw new Error(
-                    `Unable to calculate transactionCost, due to: ${e}`
-                );
-            });
-    }, [transaction, setCost]);
 
     return (
         <Card fluid centered>
@@ -115,7 +106,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
                         <Table.Row>
                             <Table.Cell>Estimated fee:</Table.Cell>
                             <Table.Cell textAlign="right">
-                                {displayAsGTU(cost)}
+                                {displayAsGTU(estimatedFee)}
                             </Table.Cell>
                         </Table.Row>
                         {displayNote(transaction)}
