@@ -11,6 +11,7 @@ import {
     UpdateInstructionPayload,
     UpdateType,
 } from '../types';
+import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
 import ElectionDifficultyHandler from './ElectionDifficultyHandler';
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
 import FoundationAccountHandler from './FoundationAccountHandler';
@@ -88,6 +89,8 @@ export default function findHandler(
             return new HandlerTypeMiddleware(new ProtocolUpdateHandler());
         case UpdateType.UpdateGASRewards:
             return new HandlerTypeMiddleware(new GasRewardsHandler());
+        case UpdateType.UpdateBakerStakeThreshold:
+            return new HandlerTypeMiddleware(new BakerStakeThresholdHandler());
         case UpdateType.UpdateElectionDifficulty:
             return new HandlerTypeMiddleware(new ElectionDifficultyHandler());
         default:
