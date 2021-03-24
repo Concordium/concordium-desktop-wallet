@@ -60,4 +60,12 @@ pub fn decrypt_amounts_ext(
     }
 }
 
-
+#[wasm_bindgen(js_name = createTransferToPublicData)]
+pub fn create_sec_to_pub_ext(
+    input: &str
+) -> String {
+    match create_sec_to_pub_aux(input) {
+        Ok(s) => s,
+        Err(e) => format!("unable to create transfer to public due to: {}", e),
+    }
+}
