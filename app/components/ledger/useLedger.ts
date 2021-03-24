@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useReducer } from 'react';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
 import type {
     Observer,
@@ -6,54 +6,35 @@ import type {
     Subscription,
 } from '@ledgerhq/hw-transport';
 
-import { AppAndVersion } from '~/features/ledger/GetAppAndVersion';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import getErrorDescription from '~/features/ledger/ErrorCodes';
-
-function isConcordiumApp({ name }: AppAndVersion) {
-    return name === 'Concordium';
-}
-
-interface TransportStatusError {
-    name: string;
-    message: string;
-    stack: string;
-    statusCode: number;
-    statusText: string;
-}
-
-function instanceOfTransportStatusError(
-    object: Error
-): object is TransportStatusError {
-    return (
-        'name' in object &&
-        'message' in object &&
-        'stack' in object &&
-        'statusCode' in object &&
-        'statusText' in object
-    );
-}
-
-export type LedgerStatus =
-    | 'LOADING'
-    | 'ERROR'
-    | 'CONNECTED'
-    | 'OPEN_APP'
-    | 'AWAITING_USER_INPUT';
+import ledgerReducer, {
+    connectedAction,
+    errorAction,
+    getInitialState,
+    pendingAction,
+    resetAction,
+    setStatusTextAction,
+} from './ledgerReducer';
+import {
+    LedgerStatusType,
+    isConcordiumApp,
+    instanceOfTransportStatusError,
+    LedgerSubmitHandler,
+} from './util';
 
 export default function useLedger(): {
-    client: ConcordiumLedgerClient | undefined;
-    deviceName: string | undefined;
-    status: LedgerStatus;
-    submitHandler: (
-        cb: (client: ConcordiumLedgerClient) => Promise<void>
-    ) => Promise<void>;
+    status: LedgerStatusType;
+    statusText: string;
+    submitHandler: LedgerSubmitHandler;
 } {
+    const [{ status, text }, dispatch] = useReducer(
+        ledgerReducer,
+        getInitialState()
+    );
     const [client, setClient] = useState<ConcordiumLedgerClient | undefined>(
         undefined
     );
-    const [status, setStatus] = useState<LedgerStatus>('LOADING');
-    const [deviceName, setDeviceName] = useState<string | undefined>();
 
     const [ledgerSubscription, setLedgerSubscription] = useState<
         Subscription | undefined
@@ -65,7 +46,7 @@ export default function useLedger(): {
                 // This is expected to never trigger.
             },
             error: () => {
-                setStatus('ERROR');
+                dispatch(errorAction());
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             next: async (event: any) => {
@@ -77,17 +58,19 @@ export default function useLedger(): {
                     const appAndVersion = await concordiumClient.getAppAndVersion();
 
                     if (isConcordiumApp(appAndVersion)) {
-                        setDeviceName(event.deviceModel.productName);
-                        setStatus('CONNECTED');
-                        setClient(concordiumClient);
+                        dispatch(
+                            connectedAction(
+                                event.deviceModel.productName,
+                                concordiumClient
+                            )
+                        );
                     } else {
                         // The device has been connected, but the Concordium application has not
                         // been opened yet.
-                        setStatus('OPEN_APP');
+                        dispatch(pendingAction('OPEN_APP'));
                     }
                 } else {
-                    setStatus('LOADING');
-                    setClient(undefined);
+                    dispatch(resetAction());
                 }
             },
         };
@@ -100,23 +83,22 @@ export default function useLedger(): {
         }
     }, [ledgerSubscription, ledgerObserver]);
 
-    const submitHandler = useCallback(
-        async (cb: (client: ConcordiumLedgerClient) => Promise<void>) => {
-            setStatus('AWAITING_USER_INPUT');
+    const submitHandler: LedgerSubmitHandler = useCallback(
+        async (cb) => {
+            dispatch(pendingAction('AWAITING_USER_INPUT'));
             try {
                 if (client) {
-                    await cb(client);
+                    await cb(client, (t) => dispatch(setStatusTextAction(t)));
                 }
-            } catch (error) {
+            } catch (e) {
                 let errorMessage;
-                if (instanceOfTransportStatusError(error)) {
-                    errorMessage = getErrorDescription(error.statusCode);
+                if (instanceOfTransportStatusError(e)) {
+                    errorMessage = getErrorDescription(e.statusCode);
                 } else {
-                    errorMessage = `An error occurred: ${error}`;
+                    errorMessage = `An error occurred: ${e}`;
                 }
                 errorMessage += ' Please try again.';
-                console.error(errorMessage);
-                setStatus('ERROR');
+                dispatch(errorAction(errorMessage));
             }
         },
         [client]
@@ -136,9 +118,8 @@ export default function useLedger(): {
     }, [ledgerSubscription, listenForLedger, client]);
 
     return {
-        client,
-        deviceName,
         status,
+        statusText: text,
         submitHandler,
     };
 }

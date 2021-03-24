@@ -73,3 +73,7 @@ export function isDefined<T>(v?: T): v is T {
 export function noOp(): void {
     return undefined;
 }
+
+export async function asyncNoOp(): Promise<void> {
+    return new Promise((resolve) => resolve());
+}
