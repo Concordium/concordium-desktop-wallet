@@ -30,11 +30,11 @@ export default class FoundationAccountHandler
         throw Error('Invalid transaction type was given as input.');
     }
 
-    createTransaction(
+    async createTransaction(
         blockSummary: BlockSummary,
         { foundationAccount }: UpdateFoundationAccountFields,
         effectiveTime: bigint
-    ): Partial<MultiSignatureTransaction> | undefined {
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

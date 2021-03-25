@@ -49,7 +49,7 @@ class HandlerTypeMiddleware<T>
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: any,
         effectiveTime: bigint
-    ): Partial<MultiSignatureTransaction> | undefined {
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         return this.base.createTransaction(blockSummary, fields, effectiveTime);
     }
 

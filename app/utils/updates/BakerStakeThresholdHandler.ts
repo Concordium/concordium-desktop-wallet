@@ -1,14 +1,19 @@
 import BakerStakeThresholdView from '~/pages/multisig/BakerStakeThresholdView';
-import UpdateBakerStakeThreshold from '~/pages/multisig/UpdateBakerStakeThreshold';
+import UpdateBakerStakeThreshold, {
+    UpdateBakerStakeThresholdFields,
+} from '~/pages/multisig/UpdateBakerStakeThreshold';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import { Authorizations } from '../NodeApiTypes';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
     isBakerStakeThreshold,
     BakerStakeThreshold,
+    MultiSignatureTransaction,
+    UpdateType,
 } from '../types';
 import { serializeBakerStakeThreshold } from '../UpdateSerialization';
 
@@ -23,6 +28,31 @@ export default class EuroPerEnergyHandler
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    async createTransaction(
+        blockSummary: BlockSummary,
+        { threshold: bakerStakeThreshold }: UpdateBakerStakeThresholdFields,
+        effectiveTime: bigint
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.bakerStakeThreshold
+                .nextSequenceNumber;
+        const {
+            threshold,
+        } = blockSummary.updates.authorizations.bakerStakeThreshold;
+
+        return createUpdateMultiSignatureTransaction(
+            { threshold: BigInt(bakerStakeThreshold) },
+            UpdateType.UpdateBakerStakeThreshold,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
     }
 
     serializePayload(transaction: TransactionType) {

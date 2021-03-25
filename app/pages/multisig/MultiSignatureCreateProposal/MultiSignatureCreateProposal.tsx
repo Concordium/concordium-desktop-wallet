@@ -98,9 +98,9 @@ export default function MultiSignatureCreateProposalView() {
         });
     }
 
-    function handleSubmit(
+    async function handleSubmit(
         fields: FieldValues & MultiSignatureCreateProposalForm
-    ): void {
+    ): Promise<void> {
         if (!blockSummary) {
             return;
         }
@@ -110,7 +110,7 @@ export default function MultiSignatureCreateProposalView() {
             Math.round(effectiveTime.getTime() / 1000)
         );
 
-        const proposal = handler.createTransaction(
+        const proposal = await handler.createTransaction(
             blockSummary,
             dynamicFields,
             timeInSeconds

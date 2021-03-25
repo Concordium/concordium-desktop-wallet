@@ -30,11 +30,11 @@ export default class ElectionDifficultyHandler
         throw Error('Invalid transaction type was given as input.');
     }
 
-    createTransaction(
+    async createTransaction(
         blockSummary: BlockSummary,
         { electionDifficulty }: UpdateElectionDifficultyFields,
         effectiveTime: bigint
-    ): Partial<MultiSignatureTransaction> | undefined {
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

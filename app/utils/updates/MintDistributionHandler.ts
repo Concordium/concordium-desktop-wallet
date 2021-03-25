@@ -30,7 +30,7 @@ export default class MintDistributionHandler
         throw Error('Invalid transaction type was given as input.');
     }
 
-    createTransaction(
+    async createTransaction(
         blockSummary: BlockSummary,
         {
             exponent,
@@ -38,7 +38,7 @@ export default class MintDistributionHandler
             rewardDistribution,
         }: UpdateMintDistributionFields,
         effectiveTime: bigint
-    ): Partial<MultiSignatureTransaction> | undefined {
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

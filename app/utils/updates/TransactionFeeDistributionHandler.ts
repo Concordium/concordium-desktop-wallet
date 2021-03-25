@@ -30,11 +30,11 @@ export default class TransactionFeeDistributionHandler
         throw Error('Invalid transaction type was given as input.');
     }
 
-    createTransaction(
+    async createTransaction(
         blockSummary: BlockSummary,
         { rewardDistribution }: UpdateTransactionFeeDistributionFields,
         effectiveTime: bigint
-    ): Partial<MultiSignatureTransaction> | undefined {
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
         }

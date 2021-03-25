@@ -3,10 +3,14 @@ import { Validate, ValidationRule } from 'react-hook-form';
 import { EqualRecord, ProtocolUpdate } from '../../utils/types';
 import { isHex } from '../../utils/basicHelpers';
 import Form from '~/components/Form';
+import { maxFileSizeKb } from '~/components/Form/FileInput/validation';
 
-// const auxiliaryDataMaxSizeKb = 2048;
+const auxiliaryDataMaxSizeKb = 2048;
 
-export type UpdateProtocolFields = ProtocolUpdate;
+export interface UpdateProtocolFields
+    extends Omit<ProtocolUpdate, 'specificationAuxiliaryData'> {
+    specificationAuxiliaryData: FileList;
+}
 
 const fieldNames: EqualRecord<UpdateProtocolFields> = {
     message: 'message',
@@ -65,13 +69,18 @@ export default function UpdateProtocol(): JSX.Element | null {
                     validate: validateHex,
                 }}
             />
-            <Form.Input
+            <Form.File
                 name={fieldNames.specificationAuxiliaryData}
                 label="Specification Auxiliary Data:"
-                placeholder="Drag file here"
-                rules={{ required: 'Specification Auxiliary Data is required' }}
+                placeholder="No file chosen"
+                rules={{
+                    required: 'Specification Auxiliary Data is required',
+                    validate: maxFileSizeKb(
+                        auxiliaryDataMaxSizeKb,
+                        `File size too big (max: ${auxiliaryDataMaxSizeKb}kb)`
+                    ),
+                }}
             />
-            {/* TODO drag/drop file component */}
         </>
     );
 

@@ -30,11 +30,11 @@ export default class ProtocolUpdateHandler
         throw Error('Invalid transaction type was given as input.');
     }
 
-    createTransaction(
+    async createTransaction(
         blockSummary: BlockSummary,
-        protocolUpdate: UpdateProtocolFields,
+        { specificationAuxiliaryData: files, ...fields }: UpdateProtocolFields,
         effectiveTime: bigint
-    ): Partial<MultiSignatureTransaction> | undefined {
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
         }
@@ -42,6 +42,19 @@ export default class ProtocolUpdateHandler
         const { threshold } = blockSummary.updates.authorizations.protocol;
         const sequenceNumber =
             blockSummary.updates.updateQueues.protocol.nextSequenceNumber;
+
+        const file = files.item(0);
+
+        if (!file) {
+            throw new Error('No auxiliary data file in update transaction');
+        }
+
+        const specificationAuxiliaryData = await file.text();
+
+        const protocolUpdate: ProtocolUpdate = {
+            ...fields,
+            specificationAuxiliaryData,
+        };
 
         return createUpdateMultiSignatureTransaction(
             protocolUpdate,

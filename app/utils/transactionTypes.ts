@@ -48,7 +48,7 @@ export interface TransactionHandler<T, S> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: any,
         effectiveTime: bigint
-    ) => Partial<MultiSignatureTransaction> | undefined;
+    ) => Promise<Partial<MultiSignatureTransaction> | undefined>;
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;
