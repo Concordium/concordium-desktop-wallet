@@ -11,6 +11,8 @@ import {
     instanceOfScheduledTransfer,
     TransferToEncrypted,
     instanceOfTransferToEncrypted,
+    instanceOfTransferToPublic,
+    TransferToPublic,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 
@@ -124,6 +126,21 @@ function convertTransferToEncrypted(
 }
 
 // Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a transfer to public, which cannot be converted by the generic function .
+function convertTransferToPublic(transaction: TransferToPublic): TypeSpecific {
+    const amount = BigInt(transaction.payload.transferAmount);
+    const estimatedTotal = amount - BigInt(transaction.energyAmount); // TODO: convert from energy to cost
+
+    return {
+        transactionKind: TransactionKindString.TransferToPublic,
+        total: estimatedTotal.toString(),
+        subtotal: amount.toString(),
+        decryptedAmount: (-amount).toString(),
+        toAddress: transaction.sender,
+    };
+}
+
+// Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a scheduled transfer, which cannot be converted by the generic function .
 function convertScheduledTransfer(
     transaction: ScheduledTransfer
@@ -155,6 +172,8 @@ export function convertAccountTransaction(
         typeSpecific = convertScheduledTransfer(transaction);
     } else if (instanceOfTransferToEncrypted(transaction)) {
         typeSpecific = convertTransferToEncrypted(transaction);
+    } else if (instanceOfTransferToPublic(transaction)) {
+        typeSpecific = convertTransferToPublic(transaction);
     } else {
         throw new Error('unsupported transaction type - please implement');
     }

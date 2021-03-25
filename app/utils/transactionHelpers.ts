@@ -10,6 +10,8 @@ import {
     ScheduledTransfer,
     SchedulePoint,
     TransferToEncrypted,
+    AccountTransaction,
+    TransactionPayload,
 } from './types';
 import {
     TransactionAccountSignature,
@@ -61,46 +63,83 @@ export async function attachNames(
  *  Constructs a, simple transfer, transaction object,
  * Given the fromAddress, toAddress and the amount.
  */
-export async function createSimpleTransferTransaction(
+async function createTransferTransaction<T extends TransactionPayload>(
     fromAddress: string,
-    amount: bigint,
-    toAddress: string,
     expiry: bigint = getDefaultExpiry(),
-    energyAmount = '200'
+    energyAmount: string,
+    transactionKind: number,
+    payload: T
 ) {
     const { nonce } = await getNextAccountNonce(fromAddress);
-    const transferTransaction: SimpleTransfer = {
+    const transferTransaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
         energyAmount,
         expiry,
-        transactionKind: TransactionKindId.Simple_transfer,
-        payload: {
-            toAddress,
-            amount: amount.toString(),
-        },
+        transactionKind,
+        payload,
     };
     return transferTransaction;
 }
 
-export async function createShieldAmountTransaction(
+/**
+ *  Constructs a, simple transfer, transaction object,
+ * Given the fromAddress, toAddress and the amount.
+ */
+export function createSimpleTransferTransaction(
+    fromAddress: string,
+    amount: BigInt,
+    toAddress: string,
+    expiry: bigint = getDefaultExpiry(),
+    energyAmount = '200'
+): Promise<SimpleTransfer> {
+    const payload = {
+        toAddress,
+        amount: amount.toString(),
+    };
+    return createTransferTransaction(
+        fromAddress,
+        expiry,
+        energyAmount,
+        TransactionKindId.Simple_transfer,
+        payload
+    );
+}
+
+export function createShieldAmountTransaction(
     address: string,
     amount: bigint,
     expiry: bigint = getDefaultExpiry(),
     energyAmount = '1000'
-) {
-    const { nonce } = await getNextAccountNonce(address);
-    const transferTransaction: TransferToEncrypted = {
-        sender: address,
-        nonce,
-        energyAmount,
-        expiry,
-        transactionKind: TransactionKindId.Transfer_to_encrypted,
-        payload: {
-            amount: amount.toString(),
-        },
+): Promise<TransferToEncrypted> {
+    const payload = {
+        amount: amount.toString(),
     };
-    return transferTransaction;
+    return createTransferTransaction(
+        address,
+        expiry,
+        energyAmount,
+        TransactionKindId.Transfer_to_encrypted,
+        payload
+    );
+}
+
+export async function createUnshieldAmountTransaction(
+    address: string,
+    amount: BigInt,
+    expiry: bigint = getDefaultExpiry(),
+    energyAmount = '30000'
+) {
+    const payload = {
+        transferAmount: amount.toString(),
+    };
+    return createTransferTransaction(
+        address,
+        expiry,
+        energyAmount,
+        TransactionKindId.Transfer_to_public,
+        payload
+    );
 }
 
 export function createRegularIntervalSchedule(
@@ -138,19 +177,17 @@ export async function createScheduledTransferTransaction(
     expiry: bigint = getDefaultExpiry(),
     energyAmount = '20000'
 ) {
-    const { nonce } = await getNextAccountNonce(fromAddress);
-    const transferTransaction: ScheduledTransfer = {
-        sender: fromAddress,
-        nonce,
-        energyAmount,
-        expiry,
-        transactionKind: TransactionKindId.Transfer_with_schedule,
-        payload: {
-            toAddress,
-            schedule,
-        },
+    const payload = {
+        toAddress,
+        schedule,
     };
-    return transferTransaction;
+    return createTransferTransaction(
+        fromAddress,
+        expiry,
+        energyAmount,
+        TransactionKindId.Transfer_with_schedule,
+        payload
+    );
 }
 
 export async function getDataObject(
@@ -212,7 +249,6 @@ export function getScheduledTransferAmount(
 export function isFailed(transaction: TransferTransaction) {
     return (
         transaction.success === false ||
-        transaction.success === 0 ||
         transaction.status === TransactionStatus.Rejected
     );
 }

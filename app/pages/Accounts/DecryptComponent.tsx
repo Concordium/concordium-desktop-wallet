@@ -50,7 +50,7 @@ export default function DecryptComponent({ account }: Props) {
             await getCredentialsOfAccount(account.address)
         ).find((cred) => cred.credentialIndex === 0)?.credentialNumber;
 
-        if (!credentialNumber) {
+        if (credentialNumber === undefined) {
             throw new Error(
                 'Unable to decrypt amounts, because we were unable to find original credential'
             );

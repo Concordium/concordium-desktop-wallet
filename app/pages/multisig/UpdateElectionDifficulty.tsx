@@ -1,6 +1,7 @@
 import React from 'react';
-import { ValidateResult } from 'react-hook-form';
+import { Validate } from 'react-hook-form';
 import Form from '~/components/Form';
+import { onlyDigitsNoLeadingZeroes } from '~/utils/basicHelpers';
 import { UpdateProps } from '../../utils/transactionTypes';
 import { EqualRecord } from '../../utils/types';
 
@@ -12,13 +13,8 @@ const fieldNames: EqualRecord<UpdateElectionDifficultyFields> = {
     electionDifficulty: 'electionDifficulty',
 };
 
-/**
- * Determines whether or not the input string consists of only digits,
- * with no leading zero (except if only a single digit).
- */
-function onlyDigitsNoLeadingZeroes(value: string): ValidateResult {
-    return /^(?:[1-9][0-9]*|0)$/.test(value) || 'Value must be an integer';
-}
+const validateOnlyDigits: Validate = (value: string) =>
+    onlyDigitsNoLeadingZeroes(value) || 'Value must be an integer';
 
 const resolution = 100000;
 
@@ -47,9 +43,7 @@ export default function UpdateElectionDifficulty({
                         message: `Value must be below ${resolution}`,
                     },
                     required: 'Value must be provided',
-                    validate: {
-                        onlyDigitsNoLeadingZeroes,
-                    },
+                    validate: validateOnlyDigits,
                 }}
             />
         </>

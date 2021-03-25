@@ -22,6 +22,7 @@ interface RustInterface {
         expiry: bigint
     ): string;
     decrypt_amounts_ext(amounts: string): string;
+    createTransferToPublicData(inputblob: string): string;
 }
 
 let rustReference: RustInterface;
@@ -75,6 +76,13 @@ function decryptAmounts(rust: RustInterface, message: Record<string, string>) {
     return decryptedAmounts;
 }
 
+function createTransferToPublicData(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.createTransferToPublicData(message.input);
+}
+
 function mapCommand(command: string) {
     switch (command) {
         case workerCommands.buildPublicInformationForIp:
@@ -87,6 +95,8 @@ function mapCommand(command: string) {
             return createCredential;
         case workerCommands.decryptAmounts:
             return decryptAmounts;
+        case workerCommands.createTransferToPublicData:
+            return createTransferToPublicData;
         default:
             return () => 'unknown command';
     }

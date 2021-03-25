@@ -55,6 +55,7 @@ export default function BuildSchedule({ location }: Props) {
             recipient.address,
             schedule
         );
+        const transactionJSON = stringify(transaction);
         dispatch(
             push({
                 pathname: routes.SUBMITTRANSFER,
@@ -62,7 +63,7 @@ export default function BuildSchedule({ location }: Props) {
                     confirmed: {
                         pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
                         state: {
-                            transaction: stringify(transaction),
+                            transaction: transactionJSON,
                             account,
                             recipient,
                             initialPage: locations.transferSubmitted,
@@ -78,7 +79,7 @@ export default function BuildSchedule({ location }: Props) {
                             recipient,
                         },
                     },
-                    transaction: stringify(transaction),
+                    transaction: transactionJSON,
                     account,
                 },
             })

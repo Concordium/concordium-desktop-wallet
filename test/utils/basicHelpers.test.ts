@@ -1,5 +1,6 @@
 import {
     isHex,
+    onlyDigitsNoLeadingZeroes,
     partition,
     toChunks,
     toCSV,
@@ -84,6 +85,22 @@ test('Non-hex string does not validate as being hex', () => {
 
 test('Empty string does not validate as being hex', () => {
     expect(isHex('')).toBe(false);
+});
+
+test('A string containing only digits validates as being digits', () => {
+    expect(onlyDigitsNoLeadingZeroes('63161367813539032')).toBe(true);
+});
+
+test('A string containing only digits, but with a leading zero, does not validate', () => {
+    expect(onlyDigitsNoLeadingZeroes('063161367813539032')).toBe(false);
+});
+
+test('A string containing a non-digit character does not validate', () => {
+    expect(onlyDigitsNoLeadingZeroes('063161367f813539032')).toBe(false);
+});
+
+test('An empty string does not validate', () => {
+    expect(onlyDigitsNoLeadingZeroes('')).toBe(false);
 });
 
 test('Empty array is chunked into an empty array', () => {

@@ -9,6 +9,7 @@ import {
     ArInfo,
     CredentialDeploymentDetails,
     Global,
+    AccountEncryptedAmount,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -246,4 +247,30 @@ export async function decryptAmounts(
         input: JSON.stringify(input),
     });
     return JSON.parse(decryptedAmounts);
+}
+
+export async function makeTransferToPublicData(
+    amount: string,
+    prfKey: string,
+    global: Global,
+    accountEncryptedAmount: AccountEncryptedAmount,
+    accountNumber: number
+) {
+    const input = {
+        global,
+        amount,
+        prfKey,
+        accountNumber,
+        incomingAmounts: accountEncryptedAmount.incomingAmounts,
+        encryptedSelfAmount: accountEncryptedAmount.selfAmount,
+        aggIndex:
+            accountEncryptedAmount.startIndex +
+            accountEncryptedAmount.incomingAmounts.length,
+    };
+
+    const transferToPublicData = await worker.postMessage({
+        command: workerCommands.createTransferToPublicData,
+        input: JSON.stringify(input),
+    });
+    return JSON.parse(transferToPublicData);
 }
