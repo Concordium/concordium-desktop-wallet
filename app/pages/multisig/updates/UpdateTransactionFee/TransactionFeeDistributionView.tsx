@@ -21,10 +21,13 @@ export default function SignTransactionFeeDistribution({
         second: gasAccount,
     };
     return (
-        <RewardDistribution
-            value={value}
-            labels={rewardDistributionLabels}
-            disabled
-        />
+        <>
+            <h5>New Transaction Fee Distribution</h5>
+            <RewardDistribution
+                value={value}
+                labels={rewardDistributionLabels}
+                disabled
+            />
+        </>
     );
 }

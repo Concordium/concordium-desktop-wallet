@@ -35,14 +35,14 @@ export default function UpdateTransactionFeeDistribution({
     return (
         <>
             <div>
-                <h3>Current Transaction Fee Distribuition</h3>
+                <h5>Current Transaction Fee Distribuition</h5>
                 <RewardDistribution
                     value={currentValue}
                     labels={rewardDistributionLabels}
                 />
             </div>
             <div>
-                <h3>New Transaction Fee Distribuition</h3>
+                <h5>New Transaction Fee Distribuition</h5>
                 <FormRewardDistribution
                     name={fieldNames.rewardDistribution}
                     defaultValue={currentValue}

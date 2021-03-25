@@ -74,7 +74,7 @@ export default function InputTimestamp({
 
     return (
         <div className={styles.root}>
-            {label}
+            <span className={styles.label}>{label}</span>
             <div
                 className={clsx(
                     styles.input,
