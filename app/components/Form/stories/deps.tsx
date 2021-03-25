@@ -13,6 +13,7 @@ export const {
     Switch,
     TextArea,
     Timestamp,
+    File,
     RewardDistribution,
 } = Form;
 
@@ -34,6 +35,7 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.Checkbox': Checkbox,
     'Form.Switch': Switch,
     'Form.Timestamp': Timestamp,
+    'Form.File': File,
     'Form.RewardDistribution': RewardDistribution,
     'Form.Submit': Submit,
 };
