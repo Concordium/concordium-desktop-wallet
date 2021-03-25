@@ -108,7 +108,7 @@ export default function RegularInterval({
                     placeholder="Enter releases"
                     autoFocus
                     type="number"
-                    defaultValue={defaults?.releases || 0}
+                    defaultValue={defaults?.releases || 1}
                     rules={{ required: 'Releases required', min: 1 }}
                 />
                 <DisplayEstimatedFee estimatedFee={estimatedFee} />
