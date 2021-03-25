@@ -11,8 +11,6 @@ import {
     MultiSignatureTransactionStatus,
     UpdateType,
 } from '~/utils/types';
-import { getBlockSummary, getConsensusStatus } from '~/utils/nodeRequests';
-import { BlockSummary, ConsensusStatus } from '~/utils/NodeApiTypes';
 import routes from '~/constants/routes.json';
 import findHandler from '~/utils/updates/HandlerFinder';
 import PageLayout from '~/components/PageLayout';
@@ -24,8 +22,8 @@ import Form from '~/components/Form';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
 import { futureDate } from '~/components/Form/util/validation';
 
-import DynamicModal from '../DynamicModal';
 import styles from './MultiSignatureCreateProposal.module.scss';
+import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 
 interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -38,9 +36,8 @@ interface MultiSignatureCreateProposalForm {
  * The component retrieves the block summary of the last finalized block, which
  * is used to get the threshold and sequence number required for update instructions.
  */
-export default function MultiSignatureCreateProposalView() {
-    const [blockSummary, setBlockSummary] = useState<BlockSummary>();
-    const [loading, setLoading] = useState(true);
+function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
+    const loading = !blockSummary;
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const dispatch = useDispatch();
@@ -53,16 +50,6 @@ export default function MultiSignatureCreateProposalView() {
 
     const handler = findHandler(type);
     const UpdateComponent = handler.update;
-
-    function updateBlockSummary(blockSummaryInput: BlockSummary) {
-        setBlockSummary(blockSummaryInput);
-        setLoading(false);
-    }
-
-    async function execution() {
-        const consensusStatus: ConsensusStatus = await getConsensusStatus();
-        return getBlockSummary(consensusStatus.lastFinalizedBlock);
-    }
 
     /**
      * Forwards the multi signature transactions to the signing page.
@@ -142,17 +129,6 @@ export default function MultiSignatureCreateProposalView() {
             <PageLayout.Header>
                 <h1>{handler.title}</h1>
             </PageLayout.Header>
-            <DynamicModal
-                execution={execution}
-                onError={() => {
-                    dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
-                }}
-                onSuccess={(input: BlockSummary) => updateBlockSummary(input)}
-                title="Error communicating with node"
-                content="We were unable to retrieve the block summary from the
-            configured node. Verify your node settings, and check that
-            the node is running."
-            />
             <PageLayout.Container
                 closeRoute={routes.MULTISIGTRANSACTIONS}
                 className={styles.container}
@@ -207,3 +183,5 @@ export default function MultiSignatureCreateProposalView() {
         </PageLayout>
     );
 }
+
+export default withBlockSummary(MultiSignatureCreateProposal);

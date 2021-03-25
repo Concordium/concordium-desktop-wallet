@@ -2,13 +2,12 @@ import React from 'react';
 
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
-import { rewardFractionResolution } from '~/constants/updateConstants.json';
 import {
     RewardDistributionValue,
     FormRewardDistribution,
     RewardDistribution,
 } from '../../common/RewardDistribution';
-import { rewardDistributionLabels } from './util';
+import { getCurrentValue, rewardDistributionLabels } from './util';
 
 export interface UpdateTransactionFeeDistributionFields {
     rewardDistribution: RewardDistributionValue;
@@ -21,16 +20,7 @@ const fieldNames: EqualRecord<UpdateTransactionFeeDistributionFields> = {
 export default function UpdateTransactionFeeDistribution({
     blockSummary,
 }: UpdateProps) {
-    const currentBakerFee =
-        blockSummary.updates.chainParameters.rewardParameters
-            .transactionFeeDistribution.baker * rewardFractionResolution;
-    const currentGasAccountFee =
-        blockSummary.updates.chainParameters.rewardParameters
-            .transactionFeeDistribution.gasAccount * rewardFractionResolution;
-    const currentValue: RewardDistributionValue = {
-        first: currentBakerFee,
-        second: currentGasAccountFee,
-    };
+    const currentValue: RewardDistributionValue = getCurrentValue(blockSummary);
 
     return (
         <>
@@ -39,6 +29,7 @@ export default function UpdateTransactionFeeDistribution({
                 <RewardDistribution
                     value={currentValue}
                     labels={rewardDistributionLabels}
+                    disabled
                 />
             </div>
             <div>

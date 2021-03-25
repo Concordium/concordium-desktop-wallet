@@ -1,3 +1,4 @@
+import React from 'react';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import TransactionFeeDistributionView from '../../pages/multisig/updates/UpdateTransactionFee/TransactionFeeDistributionView';
@@ -77,9 +78,11 @@ export default class TransactionFeeDistributionHandler
     }
 
     view(transaction: TransactionType) {
-        return TransactionFeeDistributionView({
-            transactionFeeDistribution: transaction.payload,
-        });
+        return (
+            <TransactionFeeDistributionView
+                transactionFeeDistribution={transaction.payload}
+            />
+        );
     }
 
     getAuthorization(authorizations: Authorizations) {
