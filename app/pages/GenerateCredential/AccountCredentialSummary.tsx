@@ -17,6 +17,8 @@ interface Props {
     isReady: boolean;
 }
 
+const mustBeDeployedMessage = 'Address must belong to an deployed account';
+
 export default function AccountCredentialSummary({
     isReady,
     identity,
@@ -27,17 +29,30 @@ export default function AccountCredentialSummary({
 }: Props) {
     const location = useLocation().pathname;
     const form = useForm({ mode: 'onTouched' });
-    const addressWatcher = form.watch('address');
+    const { watch, setError, clearErrors } = form;
+    const addressWatcher = watch('address');
 
     const validate: Validate = (newAddress: string) => {
         if (!isValidAddress(newAddress)) {
             return 'Address format is invalid';
         }
         if (!isReady) {
-            return 'Address must belong to an deployed account';
+            return mustBeDeployedMessage;
         }
         return true;
     };
+
+    useEffect(() => {
+        if (address && !isReady) {
+            setError('address', {
+                type: 'manual',
+                message: mustBeDeployedMessage,
+            });
+        }
+        if (isReady) {
+            clearErrors();
+        }
+    }, [setError, isReady]);
 
     useEffect(() => {
         if (location === routes.GENERATE_CREDENTIAL_PICKACCOUNT) {
