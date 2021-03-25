@@ -174,7 +174,8 @@ export async function convertAccountTransaction(
     transaction: AccountTransaction,
     hash: string
 ): Promise<TransferTransaction> {
-    const cost = await getTransactionCost(transaction);
+    const cost =
+        transaction.estimatedFee || (await getTransactionCost(transaction));
 
     let typeSpecific;
     if (instanceOfSimpleTransfer(transaction)) {
