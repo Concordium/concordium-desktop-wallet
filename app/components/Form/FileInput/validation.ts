@@ -13,10 +13,5 @@ export const maxFileSizeKb = (maxKb: number, message?: string): Validate => (
     const files = fileListToFileArray(value);
     const maxBytes = bytesFromKb(maxKb);
 
-    console.log(
-        maxBytes,
-        files.map((f) => f.size)
-    );
-
     return !files.some((f) => f.size > maxBytes) || message || false;
 };

@@ -15,6 +15,13 @@ export interface FileInputProps
     onChange(files: FileInputValue): void;
 }
 
+/**
+ * @description
+ * Component for handling file input. Parsing of file should be done externally. Supports drag and drop + click to browse.
+ *
+ * @example
+ * <FileInput value={files} onChange={setFiles} />
+ */
 export default function FileInput({
     value,
     onChange,
