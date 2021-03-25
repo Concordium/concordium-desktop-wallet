@@ -5,7 +5,15 @@ import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
 import { maxFileSizeKb } from '../FileInput/validation';
 
-export const { Checkbox, Input, Submit, Switch, TextArea, Timestamp } = Form;
+export const {
+    Checkbox,
+    Input,
+    Submit,
+    Switch,
+    TextArea,
+    Timestamp,
+    File,
+} = Form;
 
 export const argTypes: Meta['argTypes'] = {
     children: {
@@ -25,6 +33,7 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.Checkbox': Checkbox,
     'Form.Switch': Switch,
     'Form.Timestamp': Timestamp,
+    'Form.File': File,
     'Form.Submit': Submit,
 };
 
