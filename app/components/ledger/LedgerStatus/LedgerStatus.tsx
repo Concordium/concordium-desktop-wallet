@@ -8,12 +8,12 @@ import styles from './LedgerStatus.module.scss';
 
 export interface LedgerStatusProps {
     status: LedgerStatusType;
-    text: string;
+    statusText: string;
 }
 
 export default function LedgerStatus({
     status,
-    text,
+    statusText,
 }: LedgerStatusProps): JSX.Element {
     const statusIcon = useMemo(() => {
         switch (status) {
@@ -33,7 +33,7 @@ export default function LedgerStatus({
     return (
         <div className={styles.root}>
             {statusIcon}
-            <span className={styles.message}>{text}</span>
+            <span className={styles.message}>{statusText}</span>
         </div>
     );
 }

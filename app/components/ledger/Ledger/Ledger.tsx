@@ -4,6 +4,9 @@ import { LedgerCallback } from '../util';
 import LedgerView, { LedgerViewProps } from './LedgerView';
 
 interface LedgerProps extends Pick<LedgerViewProps, 'children'> {
+    /**
+     * Callback for interacting with the ledger concordium app client. This is called when the submithandler is invoked.
+     */
     ledgerCallback: LedgerCallback;
 }
 
@@ -12,7 +15,7 @@ interface LedgerProps extends Pick<LedgerViewProps, 'children'> {
  * Component for interacting with the Concordium app on ledger devices.
  *
  * @example
- * <Ledger>
+ * <Ledger ledgerCallback={(client, setStatusText) => ...}>
  *   {(status, statusView, submit) => (
  *     <div>
  *       {statusView}

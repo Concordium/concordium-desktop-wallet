@@ -1,1 +1,1 @@
-export { default } from './LedgerStatus';
+export { default, LedgerStatusProps } from './LedgerStatus';

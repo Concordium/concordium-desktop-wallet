@@ -14,17 +14,17 @@ const Template: Story<LedgerStatusProps> = (args) => <LedgerStatus {...args} />;
 export const Loading = Template.bind({});
 Loading.args = {
     status: LedgerStatusType.LOADING,
-    text: 'Waiting for ledger connection',
+    statusText: 'Waiting for ledger connection',
 };
 
 export const Connected = Template.bind({});
 Connected.args = {
     status: LedgerStatusType.CONNECTED,
-    text: 'Ledger connected',
+    statusText: 'Ledger connected',
 };
 
 export const Error = Template.bind({});
 Error.args = {
     status: LedgerStatusType.ERROR,
-    text: 'Some error happended on the ledger. Please try again.',
+    statusText: 'Some error happended on the ledger. Please try again.',
 };
