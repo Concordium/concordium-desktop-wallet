@@ -64,7 +64,7 @@ export const Template: Story<FormProps<unknown>> = (args) => (
 );
 
 export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
-    <Form {...args} onSubmit={console.log}>
+    <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
         <Form.Input
             name="email"
