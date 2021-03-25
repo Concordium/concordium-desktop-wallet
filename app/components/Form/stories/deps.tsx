@@ -71,7 +71,7 @@ const validateRewardDistributionFirstMin = (min: number, message?: string) => (
 ) => (value?.first || 0) >= min || message;
 
 export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
-    <Form {...args} onSubmit={console.log}>
+    <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
         <Form.Input
             name="email"
