@@ -48,8 +48,8 @@ export default class ProtocolUpdateHandler
         if (!file) {
             throw new Error('No auxiliary data file in update transaction');
         }
-
-        const specificationAuxiliaryData = await file.text();
+        const ab = await file.arrayBuffer();
+        const specificationAuxiliaryData = Buffer.from(ab).toString('base64');
 
         const protocolUpdate: ProtocolUpdate = {
             ...fields,
