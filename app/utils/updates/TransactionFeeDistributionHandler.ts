@@ -1,9 +1,9 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import TransactionFeeDistributionView from '../../pages/multisig/TransactionFeeDistributionView';
+import TransactionFeeDistributionView from '../../pages/multisig/updates/UpdateTransactionFee/TransactionFeeDistributionView';
 import UpdateTransactionFeeDistribution, {
     UpdateTransactionFeeDistributionFields,
-} from '../../pages/multisig/UpdateTransactionFeeDistribution';
+} from '../../pages/multisig/updates/UpdateTransactionFee/UpdateTransactionFeeDistribution';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';

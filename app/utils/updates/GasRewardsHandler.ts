@@ -1,9 +1,9 @@
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import GasRewardsView from '../../pages/multisig/GasRewardsView';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { getGovernanceLevel2Path } from '~/features/ledger/Path';
+import GasRewardsView from '~/pages/multisig/updates/UpdateGasRewards/GasRewardsView';
 import UpdateGasRewards, {
     UpdateGasRewardsFields,
-} from '../../pages/multisig/UpdateGasRewards/UpdateGasRewards';
+} from '~/pages/multisig/updates/UpdateGasRewards/UpdateGasRewards';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';

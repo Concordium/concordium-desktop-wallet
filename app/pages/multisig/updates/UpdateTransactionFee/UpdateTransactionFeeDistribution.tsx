@@ -2,13 +2,13 @@ import React from 'react';
 
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
-import { noOp } from '~/utils/basicHelpers';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 import {
     RewardDistributionValue,
     FormRewardDistribution,
     RewardDistribution,
-} from './common/RewardDistribution';
+} from '../../common/RewardDistribution';
+import { rewardDistributionLabels } from './util';
 
 export interface UpdateTransactionFeeDistributionFields {
     rewardDistribution: RewardDistributionValue;
@@ -17,12 +17,6 @@ export interface UpdateTransactionFeeDistributionFields {
 const fieldNames: EqualRecord<UpdateTransactionFeeDistributionFields> = {
     rewardDistribution: 'rewardDistribution',
 };
-
-const rewardDistributionLabels: [string, string, string] = [
-    'Baker Reward',
-    'Next Gas Account',
-    'Foundation',
-];
 
 export default function UpdateTransactionFeeDistribution({
     blockSummary,
@@ -44,7 +38,6 @@ export default function UpdateTransactionFeeDistribution({
                 <h3>Current Transaction Fee Distribuition</h3>
                 <RewardDistribution
                     value={currentValue}
-                    onChange={noOp}
                     labels={rewardDistributionLabels}
                 />
             </div>

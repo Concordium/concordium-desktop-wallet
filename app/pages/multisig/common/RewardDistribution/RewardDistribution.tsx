@@ -15,6 +15,7 @@ import ErrorMessage from '~/components/Form/ErrorMessage';
 
 import RewardDistributionField from './RewardDistributionField';
 import styles from './RewardDistribution.module.scss';
+import { noOp } from '~/utils/basicHelpers';
 
 export interface RewardDistributionValue {
     first: RewardFraction;
@@ -49,7 +50,7 @@ export interface RewardDistributionProps extends CommonFieldProps {
     /**
      * Change handler. Ouputs reward share of first and second party in fractions of fractionResolution  (e.g. 67812)
      */
-    onChange(v: RewardDistributionValue): void;
+    onChange?(v: RewardDistributionValue): void;
     onBlur?(): void;
     disabled?: boolean;
 }
@@ -66,7 +67,7 @@ export interface RewardDistributionProps extends CommonFieldProps {
 export function RewardDistribution({
     labels,
     value: outerValue = { first: 0, second: 0 },
-    onChange: fieldOnChange,
+    onChange: fieldOnChange = noOp,
     onBlur: fieldOnBlur,
     isInvalid,
     error,

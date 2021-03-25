@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { RegisterOptions } from 'react-hook-form';
-import { rewardFractionResolution } from '../../../constants/updateConstants.json';
-import { EqualRecord, GasRewards } from '../../../utils/types';
-import { UpdateProps } from '../../../utils/transactionTypes';
+import { rewardFractionResolution } from '~/constants/updateConstants.json';
+import { EqualRecord, GasRewards } from '~/utils/types';
+import { UpdateProps } from '~/utils/transactionTypes';
 import {
     GasRewardFractionField,
     FormGasRewardFractionField,
