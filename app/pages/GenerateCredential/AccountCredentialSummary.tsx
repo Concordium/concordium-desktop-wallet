@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Card, List } from 'semantic-ui-react';
+import { List } from 'semantic-ui-react';
 import { Validate, FormProvider, useForm } from 'react-hook-form';
 import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import { Identity, CredentialDeploymentInformation } from '~/utils/types';
 import Form from '~/components/Form';
 import routes from '~/constants/routes.json';
 import { isValidAddress } from '~/utils/accountHelpers';
+import styles from './GenerateCredential.module.scss';
 
 interface Props {
     identity: Identity | undefined;
@@ -61,59 +62,47 @@ export default function AccountCredentialSummary({
     }, [setAddress, addressWatcher, location]);
 
     return (
-        <Card>
-            <Card.Header>Account Credential Summary</Card.Header>
-            <Card.Content textAlign="center">
-                <List>
-                    <List.Item>Identity:</List.Item>
-                    <List.Item>
-                        <b>
-                            {identity
-                                ? identity.name
-                                : 'Choose an ID on the right'}
-                        </b>
-                    </List.Item>
-                    <List.Item>Account:</List.Item>
-                    <List.Item>
-                        {location === routes.GENERATE_CREDENTIAL_PICKACCOUNT ? (
-                            <FormProvider {...form}>
-                                <Form.TextArea
-                                    name="address"
-                                    placeholder="Paste the account address here"
-                                    rules={{
-                                        required: 'Address required',
-                                        minLength: {
-                                            value: 50,
-                                            message:
-                                                'Address should be 50 characters',
-                                        },
-                                        maxLength: {
-                                            value: 50,
-                                            message:
-                                                'Address should be 50 characters',
-                                        },
-                                        validate: {
-                                            validate,
-                                        },
-                                    }}
-                                    autoScale
-                                />
-                            </FormProvider>
-                        ) : (
-                            <b> {address || 'To be determined'} </b>
-                        )}
-                    </List.Item>
-                    <List.Item>Identicon:</List.Item>
-                    <List.Item>
-                        {credential ? (
-                            <Identicon data={JSON.stringify(credential)} />
-                        ) : (
-                            <b>To be generated</b>
-                        )}
-                    </List.Item>
-                </List>
-                <Button />
-            </Card.Content>
-        </Card>
+        <div className={styles.accountCredentialSummary}>
+            <h2>Account Credential Summary</h2>
+            <b>Identity:</b>
+            {identity ? (
+                <h2>{identity.name}</h2>
+            ) : (
+                <h2 className={styles.blueText}>Choose an ID on the right</h2>
+            )}
+            <List.Item>Account:</List.Item>
+            {location === routes.GENERATE_CREDENTIAL_PICKACCOUNT ? (
+                <FormProvider {...form}>
+                    <Form.TextArea
+                        name="address"
+                        placeholder="Paste the account address here"
+                        rules={{
+                            required: 'Address required',
+                            minLength: {
+                                value: 50,
+                                message: 'Address should be 50 characters',
+                            },
+                            maxLength: {
+                                value: 50,
+                                message: 'Address should be 50 characters',
+                            },
+                            validate: {
+                                validate,
+                            },
+                        }}
+                        autoScale
+                    />
+                </FormProvider>
+            ) : (
+                <h2> {address || 'To be determined'} </h2>
+            )}
+            <b>Identicon:</b>
+            {credential ? (
+                <Identicon data={JSON.stringify(credential)} />
+            ) : (
+                <h2>To be generated</h2>
+            )}
+            <Button />
+        </div>
     );
 }
