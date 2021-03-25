@@ -24,7 +24,7 @@
     border: 2px dashed $color-grey;
     border-radius: 10px;
 
-    &:hover {
+    .hovering & {
         border-color: $color-pale-blue;
     }
 
