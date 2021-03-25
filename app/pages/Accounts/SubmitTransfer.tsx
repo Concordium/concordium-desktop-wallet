@@ -63,7 +63,14 @@ async function attachCompletedPayload(
             accountInfo.accountEncryptedAmount,
             credential.credentialNumber
         );
-        return { ...transaction, payload: data.payload };
+        const payload = {
+            ...transaction.payload,
+            proof: data.payload.proof,
+            index: data.payload.index,
+            remainingEncryptedAmount: data.payload.remainingAmount,
+        };
+
+        return { ...transaction, payload };
     }
     return transaction;
 }

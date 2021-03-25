@@ -18,9 +18,10 @@ import {
     TransactionCredentialSignature,
 } from './transactionTypes';
 import {
-    energyConstants,
-    getScheduledTransferEnergyCost,
+    getScheduledTransferEnergy,
+    getTransactionKindEnergy,
 } from './transactionCosts';
+import { serializeTransferPayload } from './transactionSerialization';
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
@@ -70,10 +71,18 @@ export async function attachNames(
 async function createTransferTransaction<T extends TransactionPayload>(
     fromAddress: string,
     expiry: bigint = getDefaultExpiry(),
-    energyAmount: bigint,
     transactionKind: number,
-    payload: T
+    payload: T,
+    preComputedEnergyAmount?: bigint
 ) {
+    let energyAmount;
+    if (!preComputedEnergyAmount) {
+        const payloadSize = serializeTransferPayload(transactionKind, payload)
+            .length;
+        energyAmount = getTransactionKindEnergy(transactionKind, payloadSize);
+    } else {
+        energyAmount = preComputedEnergyAmount;
+    }
     const { nonce } = await getNextAccountNonce(fromAddress);
     const transferTransaction: AccountTransaction<T> = {
         sender: fromAddress,
@@ -94,8 +103,7 @@ export function createSimpleTransferTransaction(
     fromAddress: string,
     amount: BigInt,
     toAddress: string,
-    expiry: bigint = getDefaultExpiry(),
-    energyAmount = energyConstants.SimpleTransferCost
+    expiry: bigint = getDefaultExpiry()
 ): Promise<SimpleTransfer> {
     const payload = {
         toAddress,
@@ -104,7 +112,6 @@ export function createSimpleTransferTransaction(
     return createTransferTransaction(
         fromAddress,
         expiry,
-        energyAmount,
         TransactionKindId.Simple_transfer,
         payload
     );
@@ -113,8 +120,7 @@ export function createSimpleTransferTransaction(
 export function createShieldAmountTransaction(
     address: string,
     amount: bigint,
-    expiry: bigint = getDefaultExpiry(),
-    energyAmount = energyConstants.TransferToEncryptedCost
+    expiry: bigint = getDefaultExpiry()
 ): Promise<TransferToEncrypted> {
     const payload = {
         amount: amount.toString(),
@@ -122,7 +128,6 @@ export function createShieldAmountTransaction(
     return createTransferTransaction(
         address,
         expiry,
-        energyAmount,
         TransactionKindId.Transfer_to_encrypted,
         payload
     );
@@ -131,8 +136,7 @@ export function createShieldAmountTransaction(
 export async function createUnshieldAmountTransaction(
     address: string,
     amount: BigInt,
-    expiry: bigint = getDefaultExpiry(),
-    energyAmount = energyConstants.TransferToPublicCost
+    expiry: bigint = getDefaultExpiry()
 ) {
     const payload = {
         transferAmount: amount.toString(),
@@ -140,9 +144,9 @@ export async function createUnshieldAmountTransaction(
     return createTransferTransaction(
         address,
         expiry,
-        energyAmount,
         TransactionKindId.Transfer_to_public,
-        payload
+        payload,
+        getTransactionKindEnergy(TransactionKindId.Transfer_to_public)
     );
 }
 
@@ -178,19 +182,19 @@ export async function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: SchedulePoint[],
-    expiry: bigint = getDefaultExpiry(),
-    energyAmount = getScheduledTransferEnergyCost(schedule.length)
+    expiry: bigint = getDefaultExpiry()
 ) {
     const payload = {
         toAddress,
         schedule,
     };
+
     return createTransferTransaction(
         fromAddress,
         expiry,
-        energyAmount,
         TransactionKindId.Transfer_with_schedule,
-        payload
+        payload,
+        getScheduledTransferEnergy(schedule.length)
     );
 }
 

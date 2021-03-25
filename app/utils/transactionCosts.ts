@@ -4,6 +4,7 @@ import {
     TransactionKindId,
 } from './types';
 import { getEnergyToMicroGtuRate } from './nodeHelpers';
+import { serializeTransferPayload } from './transactionSerialization';
 
 export const energyConstants = {
     SimpleTransferCost: 300n,
@@ -13,10 +14,52 @@ export const energyConstants = {
     ScheduledTransferPerRelease: 300n + 64n,
 };
 
-export function getEnergyCostOfType(transactionKind: TransactionKindId) {
+export const payloadSizeEstimate = {
+    SimpleTransfer: 41,
+    EncryptedTransfer: 2617,
+    TransferToEncrypted: 9,
+    TransferToPublic: 1405,
+};
+
+const constantA = 100n;
+const constantB = 1n;
+const transactionHeaderSize = BigInt(
+    32 + // AccountAddress (FBS 32)
+        8 + // Nonce (Word64)
+        8 + // Energy (Word64)
+        4 + // PayloadSize (Word32)
+        8
+); // TransactionExpiryTime (Word64)
+
+function calculateCost(
+    signatureAmount: bigint,
+    payloadSize: bigint,
+    transactionTypeCost: bigint
+) {
+    return (
+        constantA * signatureAmount +
+        constantB * (transactionHeaderSize + payloadSize) +
+        transactionTypeCost
+    );
+}
+
+function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
     switch (transactionKind) {
-        case TransactionKindId.Transfer_with_schedule:
-            return energyConstants.ScheduledTransferPerRelease * 255n;
+        case TransactionKindId.Simple_transfer:
+            return payloadSizeEstimate.SimpleTransfer;
+        case TransactionKindId.Encrypted_transfer:
+            return payloadSizeEstimate.EncryptedTransfer;
+        case TransactionKindId.Transfer_to_encrypted:
+            return payloadSizeEstimate.TransferToEncrypted;
+        case TransactionKindId.Transfer_to_public:
+            return payloadSizeEstimate.TransferToPublic;
+        default:
+            throw new Error(`Unsupported transaction type: ${transactionKind}`);
+    }
+}
+
+function getEnergyCostOfType(transactionKind: TransactionKindId) {
+    switch (transactionKind) {
         case TransactionKindId.Simple_transfer:
             return energyConstants.SimpleTransferCost;
         case TransactionKindId.Encrypted_transfer:
@@ -30,38 +73,88 @@ export function getEnergyCostOfType(transactionKind: TransactionKindId) {
     }
 }
 
-export function getTransactionEnergyCost(transaction: AccountTransaction) {
+export function getScheduledTransferEnergy(
+    scheduleLength: number,
+    signatureAmount = 1
+) {
+    const payloadSize = 32 + 1 + 1 + scheduleLength * 16;
+    return calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        energyConstants.ScheduledTransferPerRelease * BigInt(scheduleLength)
+    );
+}
+
+export function getTransactionEnergyCost(
+    transaction: AccountTransaction,
+    signatureAmount: number
+) {
+    const payloadSize = serializeTransferPayload(
+        transaction.transactionKind,
+        transaction.payload
+    ).length;
+    let transactionTypeCost;
     if (instanceOfScheduledTransfer(transaction)) {
-        return (
+        transactionTypeCost =
             energyConstants.ScheduledTransferPerRelease *
-            BigInt(transaction.payload.schedule.length)
-        );
+            BigInt(transaction.payload.schedule.length);
+    } else {
+        transactionTypeCost = getEnergyCostOfType(transaction.transactionKind);
     }
-    return getEnergyCostOfType(transaction.transactionKind);
+    return calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        transactionTypeCost
+    );
+}
+
+export function getTransactionKindEnergy(
+    transactionKind: TransactionKindId,
+    payloadSize: number = getPayloadSizeEstimate(transactionKind),
+    signatureAmount = 1
+) {
+    const transactionTypeCost = getEnergyCostOfType(transactionKind);
+    return calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        transactionTypeCost
+    );
 }
 
 export async function getTransactionKindCost(
-    transactionKind: TransactionKindId
+    transactionKind: TransactionKindId,
+    payloadSize: number = getPayloadSizeEstimate(transactionKind),
+    signatureAmount = 1
 ) {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
-    return getEnergyCostOfType(transactionKind) * energyToMicroGtu;
+    return (
+        getTransactionKindEnergy(
+            transactionKind,
+            payloadSize,
+            signatureAmount
+        ) * energyToMicroGtu
+    );
 }
 
 export default async function getTransactionCost(
-    transaction: AccountTransaction
+    transaction: AccountTransaction,
+    signatureAmount = 1
 ) {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
-    return getTransactionEnergyCost(transaction) * energyToMicroGtu;
+    return (
+        getTransactionEnergyCost(transaction, signatureAmount) *
+        energyToMicroGtu
+    );
 }
 
-export function getScheduledTransferEnergyCost(scheduleLength: number) {
-    return energyConstants.ScheduledTransferPerRelease * BigInt(scheduleLength);
-}
-
-export async function scheduledTransferCost(): Promise<
-    (scheduleLength: number) => bigint
-> {
+export async function scheduledTransferCost(
+    signatureAmount = 1
+): Promise<(scheduleLength: number) => bigint> {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
-    return (scheduleLength) =>
-        getScheduledTransferEnergyCost(scheduleLength) * energyToMicroGtu;
+    return (scheduleLength: number) => {
+        return (
+            getScheduledTransferEnergy(scheduleLength, signatureAmount) *
+            energyToMicroGtu
+        );
+    };
 }
