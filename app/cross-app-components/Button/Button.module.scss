@@ -42,6 +42,14 @@
         }
     }
 
+    &Tiny {
+        &:not(.rootClear) {
+            height: 28px;
+            font-size: $font-size-button2;
+            padding: 0 15px;
+        }
+    }
+
     &Small {
         &:not(.rootClear) {
             height: 36px;
