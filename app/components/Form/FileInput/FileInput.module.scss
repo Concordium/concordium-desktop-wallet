@@ -54,6 +54,9 @@
 }
 
 .button {
-    margin-top: 30px;
     pointer-events: none;
+
+    * + & {
+        margin-top: 30px;
+    }
 }

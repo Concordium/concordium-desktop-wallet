@@ -10,7 +10,10 @@ export type FileInputValue = FileList | null;
 
 export interface FileInputProps
     extends CommonInputProps,
-        Pick<InputHTMLAttributes<HTMLInputElement>, 'accept' | 'multiple'> {
+        Pick<
+            InputHTMLAttributes<HTMLInputElement>,
+            'accept' | 'multiple' | 'placeholder'
+        > {
     value: FileInputValue;
     onChange(files: FileInputValue): void;
 }
@@ -28,6 +31,7 @@ export default function FileInput({
     label,
     isInvalid,
     error,
+    placeholder,
     ...inputProps
 }: FileInputProps): JSX.Element {
     const files = useMemo(
@@ -40,16 +44,16 @@ export default function FileInput({
         <label className={clsx(styles.root, isInvalid && styles.invalid)}>
             {label && <span className={styles.label}>{label}</span>}
             <div className={styles.wrapper}>
-                {files.length === 0 ? (
-                    <div className={styles.empty}>No file in field</div>
-                ) : (
-                    files.map((f, i) => (
-                        // eslint-disable-next-line react/no-array-index-key
-                        <div key={i} className={styles.fileName}>
-                            {f?.name}
-                        </div>
-                    ))
-                )}
+                {files.length === 0
+                    ? placeholder && (
+                          <div className={styles.empty}>{placeholder}</div>
+                      )
+                    : files.map((f, i) => (
+                          // eslint-disable-next-line react/no-array-index-key
+                          <div key={i} className={styles.fileName}>
+                              {f?.name}
+                          </div>
+                      ))}
                 <Button className={styles.button} size="tiny">
                     Browse to file, or drop it here
                 </Button>
