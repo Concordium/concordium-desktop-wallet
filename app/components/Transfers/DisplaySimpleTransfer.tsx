@@ -1,7 +1,7 @@
 import React from 'react';
 import { List, Header } from 'semantic-ui-react';
-import { SimpleTransfer } from '../../utils/types';
-import { displayAsGTU } from '../../utils/gtu';
+import { SimpleTransfer } from '~/utils/types';
+import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {

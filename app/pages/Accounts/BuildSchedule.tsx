@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import { Card, List, Header, Button } from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
-import { stringify } from '../../utils/JSONHelper';
-import routes from '../../constants/routes.json';
-import { Account, AddressBookEntry, Schedule } from '../../utils/types';
-import { displayAsGTU } from '../../utils/gtu';
-import { createScheduledTransferTransaction } from '../../utils/transactionHelpers';
-import locations from '../../constants/transferLocations.json';
+import { stringify } from '~/utils/JSONHelper';
+import routes from '~/constants/routes.json';
+import { Account, AddressBookEntry, Schedule } from '~/utils/types';
+import { displayAsGTU } from '~/utils/gtu';
+import { createScheduledTransferTransaction } from '~/utils/transactionHelpers';
+import locations from '~/constants/transferLocations.json';
 import RegularInterval, {
     Defaults as RegularIntervalDefaults,
 } from './BuildRegularInterval';

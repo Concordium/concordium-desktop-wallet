@@ -1,7 +1,7 @@
 import React from 'react';
-import routes from '../../constants/routes.json';
-import { createUnshieldAmountTransaction } from '../../utils/transactionHelpers';
-import { Account, TransactionKindId } from '../../utils/types';
+import routes from '~/constants/routes.json';
+import { createUnshieldAmountTransaction } from '~/utils/transactionHelpers';
+import { Account, TransactionKindId } from '~/utils/types';
 import InternalTransfer from './InternalTransfer';
 
 interface Props {

@@ -4,8 +4,8 @@ import {
     TransferToEncrypted,
     TransferToPublic,
     instanceOfTransferToEncrypted,
-} from '../../utils/types';
-import { displayAsGTU } from '../../utils/gtu';
+} from '~/utils/types';
+import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {

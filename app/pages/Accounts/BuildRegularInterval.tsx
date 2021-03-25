@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'semantic-ui-react';
 import { useForm } from 'react-hook-form';
-import { EqualRecord, Schedule } from '../../utils/types';
-import { createRegularIntervalSchedule } from '../../utils/transactionHelpers';
-import { TimeConstants } from '../../utils/timeHelpers';
-import Form from '../../components/Form';
-import { futureDate } from '../../components/Form/util/validation';
+import { EqualRecord, Schedule } from '~/utils/types';
+import { createRegularIntervalSchedule } from '~/utils/transactionHelpers';
+import { TimeConstants } from '~/utils/timeHelpers';
+import Form from '~/components/Form';
+import { futureDate } from '~/components/Form/util/validation';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 export interface Interval {

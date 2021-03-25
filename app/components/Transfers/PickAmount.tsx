@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Input, Button } from 'semantic-ui-react';
-import { AddressBookEntry } from '../../utils/types';
-import { getGTUSymbol, isValidGTUString } from '../../utils/gtu';
+import { AddressBookEntry } from '~/utils/types';
+import { getGTUSymbol, isValidGTUString } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {

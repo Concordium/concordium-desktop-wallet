@@ -1,8 +1,8 @@
 import React from 'react';
-import routes from '../../constants/routes.json';
-import { createShieldAmountTransaction } from '../../utils/transactionHelpers';
+import routes from '~/constants/routes.json';
+import { createShieldAmountTransaction } from '~/utils/transactionHelpers';
 import InternalTransfer from './InternalTransfer';
-import { Account, TransactionKindId } from '../../utils/types';
+import { Account, TransactionKindId } from '~/utils/types';
 
 interface Props {
     account: Account;

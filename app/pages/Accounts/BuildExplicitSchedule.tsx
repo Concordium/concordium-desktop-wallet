@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, Header, List, Card, Button } from 'semantic-ui-react';
 import { useForm } from 'react-hook-form';
-import { EqualRecord, Schedule, TimeStampUnit } from '../../utils/types';
-import { displayAsGTU, isValidGTUString, toMicroUnits } from '../../utils/gtu';
-import { parseTime, getNow, TimeConstants } from '../../utils/timeHelpers';
-import Form from '../../components/Form';
-import { futureDate } from '../../components/Form/util/validation';
+import { EqualRecord, Schedule, TimeStampUnit } from '~/utils/types';
+import { displayAsGTU, isValidGTUString, toMicroUnits } from '~/utils/gtu';
+import { parseTime, getNow, TimeConstants } from '~/utils/timeHelpers';
+import Form from '~/components/Form';
+import { futureDate } from '~/components/Form/util/validation';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 export interface Defaults {

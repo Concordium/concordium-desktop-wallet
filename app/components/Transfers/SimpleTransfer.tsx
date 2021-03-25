@@ -3,20 +3,16 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation, Link } from 'react-router-dom';
 import { Button, Header, Grid } from 'semantic-ui-react';
-import { stringify } from '../../utils/JSONHelper';
-import routes from '../../constants/routes.json';
+import { stringify } from '~/utils/JSONHelper';
+import routes from '~/constants/routes.json';
 import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import {
-    AddressBookEntry,
-    Account,
-    TransactionKindId,
-} from '../../utils/types';
-import { toMicroUnits } from '../../utils/gtu';
-import locations from '../../constants/transferLocations.json';
-import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
-import { TransferState } from '../../utils/transactionTypes';
+import { AddressBookEntry, Account, TransactionKindId } from '~/utils/types';
+import { toMicroUnits } from '~/utils/gtu';
+import locations from '~/constants/transferLocations.json';
+import { createSimpleTransferTransaction } from '~/utils/transactionHelpers';
+import { TransferState } from '~/utils/transactionTypes';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 
