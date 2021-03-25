@@ -4,7 +4,7 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import FileInput, { FileInputProps } from './FileInput';
 
 export default {
-    title: 'Components/Form/Fields/FileInput',
+    title: 'Components/Form/Fields/File Input',
     component: FileInput,
 } as Meta;
 

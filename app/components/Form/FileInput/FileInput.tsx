@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { InputHTMLAttributes, useMemo } from 'react';
+import React, { InputHTMLAttributes, useMemo, useState } from 'react';
 import Button from '~/cross-app-components/Button';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
@@ -34,6 +34,7 @@ export default function FileInput({
     placeholder,
     ...inputProps
 }: FileInputProps): JSX.Element {
+    const [dragOver, setDragOver] = useState<boolean>(false);
     const files = useMemo(
         () =>
             new Array(value?.length ?? 0).fill(0).map((_, i) => value?.item(i)),
@@ -41,7 +42,15 @@ export default function FileInput({
     );
 
     return (
-        <label className={clsx(styles.root, isInvalid && styles.invalid)}>
+        <label
+            className={clsx(
+                styles.root,
+                isInvalid && styles.invalid,
+                dragOver && styles.hovering
+            )}
+            onDragOver={() => setDragOver(true)}
+            onDragLeave={() => setDragOver(false)}
+        >
             {label && <span className={styles.label}>{label}</span>}
             <div className={styles.wrapper}>
                 {files.length === 0
