@@ -4,6 +4,7 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
 import { RewardDistributionValue } from '../RewardDistribution/RewardDistribution';
+import { maxFileSizeKb } from '../FileInput/validation';
 
 export const {
     Checkbox,
@@ -63,18 +64,25 @@ export const Template: Story<FormProps<unknown>> = (args) => (
     </Form>
 );
 
-const validateRewardDistributionFirstMin = (min: number, message?: string) => ({
-    first,
-}: RewardDistributionValue) => first >= min || message;
+const validateRewardDistributionFirstMin = (min: number, message?: string) => (
+    value: RewardDistributionValue
+) => (value?.first || 0) >= min || message;
 
 export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
-    <Form {...args}>
+    <Form {...args} onSubmit={console.log}>
         <Form.Input name="name" placeholder="Name" />
         <Form.Input
             name="email"
             type="email"
             placeholder="E-mail"
             rules={{ required: 'Email is required to sign up.' }}
+        />
+        <Form.File
+            name="file"
+            rules={{
+                required: 'File is required',
+                validate: maxFileSizeKb(1, 'File size too big (1kb allowed)'),
+            }}
         />
         <Form.Timestamp
             name="time"
@@ -87,6 +95,7 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
             name="rewards"
             labels={['first', 'second', 'remaining']}
             rules={{
+                required: true,
                 validate: validateRewardDistributionFirstMin(
                     0.5,
                     'First must be at least 0.5'
