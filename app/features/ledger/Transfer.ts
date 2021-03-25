@@ -193,20 +193,28 @@ async function signTransferWithSchedule(
 
     const { schedule } = transaction.payload;
 
+    const scheduleLength = schedule.length;
+
     p1 = 0x01;
 
+    let i = 0;
     let response;
-    const chunks = toChunks(schedule.map(serializeSchedulePoint), 15); // 15 is the maximum amount we can fit
-    for (let i = 0; i < chunks.length; i += 1) {
+    while (i < scheduleLength) {
         // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
             INS_TRANSFER_WITH_SCHEDULE,
             p1,
             p2,
-            Buffer.from(chunks[i])
+            Buffer.concat(
+                schedule
+                    .slice(i, Math.min(i + 15, scheduleLength))
+                    .map(serializeSchedulePoint)
+            )
         );
+        i += 15;
     }
+
     if (!response) {
         throw new Error('Unexpected missing response from ledger;');
     }
