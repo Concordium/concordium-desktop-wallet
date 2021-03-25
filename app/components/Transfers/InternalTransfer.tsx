@@ -18,6 +18,7 @@ import { toMicroUnits } from '~/utils/gtu';
 import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 interface Specific<T> {
     title: string;
@@ -41,12 +42,15 @@ export default function InternalTransfer<
     const dispatch = useDispatch();
     const location = useLocation<TransferState>();
 
+    const [error, setError] = useState<string | undefined>();
     const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
 
     useEffect(() => {
-        return getTransactionKindCost(
-            specific.transactionKind
-        ).then((transferCost) => setEstimatedFee(transferCost));
+        getTransactionKindCost(specific.transactionKind)
+            .then((transferCost) => setEstimatedFee(transferCost))
+            .catch((e) =>
+                setError(`Unable to get transaction cost due to: ${e}`)
+            );
     }, [specific.transactionKind, setEstimatedFee]);
 
     const [subLocation, setSubLocation] = useState<string>(
@@ -71,6 +75,7 @@ export default function InternalTransfer<
                                 account.address,
                                 toMicroUnits(amount)
                             );
+                            transaction.estimatedFee = estimatedFee;
 
                             const transactionJSON = stringify(transaction);
                             dispatch(
@@ -102,12 +107,7 @@ export default function InternalTransfer<
                     />
                 );
             case locations.transferSubmitted: {
-                return (
-                    <FinalPage
-                        location={location}
-                        estimatedFee={estimatedFee}
-                    />
-                );
+                return <FinalPage location={location} />;
             }
             default:
                 return null;
@@ -116,6 +116,11 @@ export default function InternalTransfer<
 
     return (
         <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                content={error}
+                onClick={() => dispatch(push(routes.ACCOUNTS))}
+            />
             <Grid columns="3">
                 <Grid.Column>
                     {subLocation === locations.confirmTransfer ? (

@@ -195,6 +195,7 @@ export interface AccountTransaction<
     sender: Hex;
     nonce: string;
     energyAmount: string;
+    estimatedFee?: bigint;
     expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;

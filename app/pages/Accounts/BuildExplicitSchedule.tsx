@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, Header, List, Card, Button } from 'semantic-ui-react';
 import { useForm } from 'react-hook-form';
 import { EqualRecord, Schedule, TimeStampUnit } from '../../utils/types';
@@ -6,15 +6,21 @@ import { displayAsGTU, isValidGTUString, toMicroUnits } from '../../utils/gtu';
 import { parseTime, getNow, TimeConstants } from '../../utils/timeHelpers';
 import Form from '../../components/Form';
 import { futureDate } from '../../components/Form/util/validation';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 export interface Defaults {
     schedule: Schedule;
 }
 
 interface Props {
-    submitSchedule(schedule: Schedule, recoverState: Defaults): void;
+    submitSchedule(
+        schedule: Schedule,
+        estimatedFee: bigint,
+        recoverState: Defaults
+    ): void;
     amount: bigint;
     defaults: Defaults;
+    feeCalculator: (scheduleLength: number) => bigint;
 }
 
 function getDefaultTimestamp() {
@@ -38,6 +44,7 @@ export default function ExplicitSchedule({
     submitSchedule,
     amount,
     defaults,
+    feeCalculator,
 }: Props) {
     const [schedule, setSchedule] = useState<Schedule>(
         defaults?.schedule || []
@@ -49,23 +56,23 @@ export default function ExplicitSchedule({
     const methods = useForm<AddSchedulePointForm>({ mode: 'onTouched' });
     const { reset } = methods;
 
+    const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
+
     function addToSchedule({
         amount: pointAmount,
         timestamp,
     }: AddSchedulePointForm) {
-        const newSchedule = schedule;
         const pointAmountMicro = toMicroUnits(pointAmount);
         const newPoint = {
             amount: pointAmountMicro.toString(),
             timestamp: timestamp?.getTime().toString(),
         };
         setUsedAmount(usedAmount + pointAmountMicro);
-        newSchedule.push(newPoint);
-        setSchedule(
-            newSchedule.sort(
-                (a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10)
-            )
+        const newSchedule = [...schedule, newPoint];
+        newSchedule.sort(
+            (a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10)
         );
+        setSchedule(newSchedule);
         reset();
     }
 
@@ -81,6 +88,10 @@ export default function ExplicitSchedule({
         }
         return false;
     }
+
+    useEffect(() => {
+        setEstimatedFee(feeCalculator(schedule.length));
+    }, [schedule.length, setEstimatedFee, feeCalculator]);
 
     const addSchedulePointForm = (
         <Form onSubmit={addToSchedule} formMethods={methods}>
@@ -110,6 +121,7 @@ export default function ExplicitSchedule({
             <List.Item>
                 ({displayAsGTU(usedAmount)} of {displayAsGTU(amount)} in
                 schedule)
+                <DisplayEstimatedFee estimatedFee={estimatedFee} />
             </List.Item>
             <List.Item>
                 <Card centered>
@@ -153,7 +165,9 @@ export default function ExplicitSchedule({
             <List.Item>
                 <Button
                     disabled={usedAmount < amount}
-                    onClick={() => submitSchedule(schedule, { schedule })}
+                    onClick={() =>
+                        submitSchedule(schedule, estimatedFee, { schedule })
+                    }
                 >
                     submit
                 </Button>

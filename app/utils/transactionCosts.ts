@@ -1,7 +1,6 @@
 import {
     AccountTransaction,
     instanceOfScheduledTransfer,
-    Schedule,
     TransactionKindId,
 } from './types';
 import { getEnergyToMicroGtuRate } from './nodeHelpers';
@@ -55,8 +54,14 @@ export default async function getTransactionCost(
     return getTransactionEnergyCost(transaction) * energyToMicroGtu;
 }
 
-export function getScheduledTransferEnergyCost(schedule: Schedule) {
-    return (
-        energyConstants.ScheduledTransferPerRelease * BigInt(schedule.length)
-    );
+export function getScheduledTransferEnergyCost(scheduleLength: number) {
+    return energyConstants.ScheduledTransferPerRelease * BigInt(scheduleLength);
+}
+
+export async function scheduledTransferCost(): Promise<
+    (scheduleLength: number) => bigint
+> {
+    const energyToMicroGtu = await getEnergyToMicroGtuRate();
+    return (scheduleLength) =>
+        getScheduledTransferEnergyCost(scheduleLength) * energyToMicroGtu;
 }

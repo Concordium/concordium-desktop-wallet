@@ -19,7 +19,6 @@ interface Props {
 
 /**
  * Controls the flow of creating a scheduled transfer.
- * TODO: display transactionCost while building schedule + in FinalPage
  */
 export default function ScheduleTransfer({ account, returnFunction }: Props) {
     const dispatch = useDispatch();
@@ -71,7 +70,7 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
             case locations.pickRecipient:
                 return <PickRecipient pickRecipient={chooseRecipientOnClick} />;
             case locations.transferSubmitted: {
-                return <FinalPage location={location} estimatedFee={0n} />;
+                return <FinalPage location={location} />;
             }
             default:
                 return null;

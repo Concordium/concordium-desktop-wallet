@@ -7,6 +7,7 @@ import routes from '~/constants/routes.json';
 import { displayAsGTU } from '~/utils/gtu';
 import { parseTime } from '~/utils/timeHelpers';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 import {
     AddressBookEntry,
@@ -25,7 +26,6 @@ interface State {
 }
 
 interface Props {
-    estimatedFee: bigint;
     location: LocationDescriptorObject<State>;
 }
 
@@ -80,10 +80,7 @@ function displayRecipient(recipient: AddressBookEntry) {
 /**
  * Displays details of a submitted transaction.
  */
-export default function FinalPage({
-    location,
-    estimatedFee,
-}: Props): JSX.Element {
+export default function FinalPage({ location }: Props): JSX.Element {
     if (!location.state) {
         throw new Error('Unexpected missing state.');
     }
@@ -106,7 +103,9 @@ export default function FinalPage({
                         <Table.Row>
                             <Table.Cell>Estimated fee:</Table.Cell>
                             <Table.Cell textAlign="right">
-                                {displayAsGTU(estimatedFee)}
+                                <DisplayEstimatedFee
+                                    estimatedFee={transaction.estimatedFee}
+                                />
                             </Table.Cell>
                         </Table.Row>
                         {displayNote(transaction)}

@@ -18,6 +18,7 @@ import locations from '../../constants/transferLocations.json';
 import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
 import { TransferState } from '../../utils/transactionTypes';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 interface Props {
     account: Account;
@@ -30,12 +31,15 @@ export default function SimpleTransfer({ account }: Props) {
     const dispatch = useDispatch();
     const location = useLocation<TransferState>();
 
+    const [error, setError] = useState<string | undefined>();
     const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
 
     useEffect(() => {
-        return getTransactionKindCost(
-            TransactionKindId.Simple_transfer
-        ).then((transferCost) => setEstimatedFee(transferCost));
+        getTransactionKindCost(TransactionKindId.Simple_transfer)
+            .then((transferCost) => setEstimatedFee(transferCost))
+            .catch((e) =>
+                setError(`Unable to get transaction cost due to: ${e}`)
+            );
     }, [setEstimatedFee]);
 
     const [subLocation, setSubLocation] = useState<string>(
@@ -75,6 +79,7 @@ export default function SimpleTransfer({ account }: Props) {
                                 toMicroUnits(amount),
                                 recipient.address
                             );
+                            transaction.estimatedFee = estimatedFee;
 
                             dispatch(
                                 push({
@@ -113,12 +118,7 @@ export default function SimpleTransfer({ account }: Props) {
             case locations.pickRecipient:
                 return <PickRecipient pickRecipient={chooseRecipientOnClick} />;
             case locations.transferSubmitted: {
-                return (
-                    <FinalPage
-                        location={location}
-                        estimatedFee={estimatedFee}
-                    />
-                );
+                return <FinalPage location={location} />;
             }
             default:
                 return null;
@@ -127,6 +127,11 @@ export default function SimpleTransfer({ account }: Props) {
 
     return (
         <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                content={error}
+                onClick={() => dispatch(push(routes.ACCOUNTS))}
+            />
             <Grid columns="3">
                 <Grid.Column>
                     {subLocation === locations.pickRecipient ||

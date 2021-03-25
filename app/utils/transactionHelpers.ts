@@ -179,7 +179,7 @@ export async function createScheduledTransferTransaction(
     toAddress: string,
     schedule: SchedulePoint[],
     expiry: bigint = getDefaultExpiry(),
-    energyAmount = getScheduledTransferEnergyCost(schedule)
+    energyAmount = getScheduledTransferEnergyCost(schedule.length)
 ) {
     const payload = {
         toAddress,

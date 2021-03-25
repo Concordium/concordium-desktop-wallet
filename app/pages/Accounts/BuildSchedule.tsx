@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -16,6 +16,8 @@ import RegularInterval, {
 import ExplicitSchedule, {
     Defaults as ExplicitScheduleDefaults,
 } from './BuildExplicitSchedule';
+import { scheduledTransferCost } from '~/utils/transactionCosts';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 interface Defaults extends ExplicitScheduleDefaults, RegularIntervalDefaults {}
 
@@ -44,10 +46,22 @@ export default function BuildSchedule({ location }: Props) {
         throw new Error('Unexpected missing state.');
     }
 
+    const [error, setError] = useState<string | undefined>();
+    const [feeCalculator, setFeeCalculator] = useState<
+        ((scheduleLength: number) => bigint) | undefined
+    >();
+    useEffect(() => {
+        scheduledTransferCost()
+            .then((calculator) => setFeeCalculator(() => calculator))
+            .catch((e) =>
+                setError(`Unable to get transaction cost due to: ${e}`)
+            );
+    });
     const { account, amount, recipient, defaults } = location.state;
 
     async function createTransaction(
         schedule: Schedule,
+        estimatedFee: bigint,
         recoverState: unknown
     ) {
         const transaction = await createScheduledTransferTransaction(
@@ -55,6 +69,7 @@ export default function BuildSchedule({ location }: Props) {
             recipient.address,
             schedule
         );
+        transaction.estimatedFee = estimatedFee;
         const transactionJSON = stringify(transaction);
         dispatch(
             push({
@@ -87,6 +102,18 @@ export default function BuildSchedule({ location }: Props) {
     }
 
     const BuildComponent = explicit ? ExplicitSchedule : RegularInterval;
+
+    if (!feeCalculator) {
+        return (
+            <>
+                <SimpleErrorModal
+                    show={Boolean(error)}
+                    content={error}
+                    onClick={() => dispatch(push(routes.ACCOUNTS))}
+                />
+            </>
+        );
+    }
 
     return (
         <Card fluid>
@@ -129,6 +156,7 @@ export default function BuildSchedule({ location }: Props) {
                     defaults={defaults}
                     submitSchedule={createTransaction}
                     amount={BigInt(amount)}
+                    feeCalculator={feeCalculator}
                 />
             </List>
         </Card>
