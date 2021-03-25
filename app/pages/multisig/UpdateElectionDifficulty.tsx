@@ -2,8 +2,8 @@ import React from 'react';
 import { Validate } from 'react-hook-form';
 import Form from '~/components/Form';
 import { onlyDigitsNoLeadingZeroes } from '~/utils/basicHelpers';
-import { UpdateProps } from '../../utils/transactionTypes';
-import { EqualRecord } from '../../utils/types';
+import { UpdateProps } from '~/utils/transactionTypes';
+import { EqualRecord } from '~/utils/types';
 
 export interface UpdateElectionDifficultyFields {
     electionDifficulty: string;
