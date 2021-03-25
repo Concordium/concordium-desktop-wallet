@@ -3,6 +3,7 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 
 import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
+import { maxFileSizeKb } from '../FileInput/validation';
 
 export const { Checkbox, Input, Submit, Switch, TextArea, Timestamp } = Form;
 
@@ -54,13 +55,20 @@ export const Template: Story<FormProps<unknown>> = (args) => (
 );
 
 export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
-    <Form {...args}>
+    <Form {...args} onSubmit={console.log}>
         <Form.Input name="name" placeholder="Name" />
         <Form.Input
             name="email"
             type="email"
             placeholder="E-mail"
             rules={{ required: 'Email is required to sign up.' }}
+        />
+        <Form.File
+            name="file"
+            rules={{
+                required: 'File is required',
+                validate: maxFileSizeKb(1, 'File size too big (1kb allowed)'),
+            }}
         />
         <Form.Timestamp
             name="time"

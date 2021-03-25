@@ -55,9 +55,9 @@ const ValidationTemplate: Story<PropsOf<typeof FormRewardDistribution>> = (
     );
 };
 
-const validateRewardDistributionFirstMin = (min: number, message?: string) => ({
-    first,
-}: RewardDistributionValue) => first >= min || message;
+const validateRewardDistributionFirstMin = (min: number, message?: string) => (
+    value: RewardDistributionValue
+) => (value?.first || 0) >= min || message;
 
 export const WithValidation = ValidationTemplate.bind({});
 WithValidation.args = {

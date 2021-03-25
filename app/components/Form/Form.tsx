@@ -18,6 +18,8 @@ import Submit from './Submit';
 import InputTimestamp, {
     InputTimestampProps,
 } from './InputTimestamp/InputTimestamp';
+import FileInput from './FileInput';
+import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 
 export interface FormProps<TFormValues>
     extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
@@ -85,6 +87,11 @@ Form.Checkbox = connectWithFormUncontrolled(Checkbox);
 
 Form.Switch = connectWithFormUncontrolled(Switch);
 (Form.Switch as FC).displayName = 'Form.Switch';
+
+Form.File = connectWithFormControlled<FileInputValue, FileInputProps>(
+    FileInput
+);
+(Form.File as FC).displayName = 'Form.File';
 
 Form.Timestamp = connectWithFormControlled<Date, InputTimestampProps>(
     InputTimestamp
