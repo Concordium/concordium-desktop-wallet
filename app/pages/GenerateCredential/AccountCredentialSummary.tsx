@@ -53,7 +53,7 @@ export default function AccountCredentialSummary({
         if (isReady) {
             clearErrors();
         }
-    }, [setError, isReady]);
+    }, [setError, clearErrors, address, isReady]);
 
     useEffect(() => {
         if (location === routes.GENERATE_CREDENTIAL_PICKACCOUNT) {
