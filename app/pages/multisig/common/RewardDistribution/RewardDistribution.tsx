@@ -3,7 +3,7 @@ import React, { useCallback, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import clsx from 'clsx';
 
-import { EqualRecord } from '~/utils/types';
+import { EqualRecord, RewardFraction } from '~/utils/types';
 import {
     fractionResolution,
     fractionResolutionToPercentage,
@@ -17,8 +17,8 @@ import RewardDistributionField from './RewardDistributionField';
 import styles from './RewardDistribution.module.scss';
 
 export interface RewardDistributionValue {
-    first: number;
-    second: number;
+    first: RewardFraction;
+    second: RewardFraction;
 }
 
 const fieldNames: EqualRecord<RewardDistributionValue> = {
@@ -34,22 +34,6 @@ const displayValue = (v: number): string => {
     return `~${Math.round(v)}`;
 };
 
-function formatInputValue(v: RewardDistributionValue): RewardDistributionValue {
-    return {
-        first: Math.round(v.first * fractionResolution),
-        second: Math.round(v.second * fractionResolution),
-    };
-}
-
-function formatOutputValue(
-    v: RewardDistributionValue
-): RewardDistributionValue {
-    return {
-        first: v.first / fractionResolution,
-        second: v.second / fractionResolution,
-    };
-}
-
 function belowTitleCutoff(width: number): boolean {
     return width < 30;
 }
@@ -59,22 +43,23 @@ export interface RewardDistributionProps extends CommonFieldProps {
      */
     labels: [string, string, string];
     /**
-     * Value of first and second reward share in fractions of fractionResolution (e.g. 0.67812)
+     * Value of first and second reward share in fractions of fractionResolution (e.g. 67812)
      */
     value: RewardDistributionValue | undefined;
     /**
-     * Change handler. Ouputs reward share of first and second party in fractions of fractionResolution  (e.g. 0.67812)
+     * Change handler. Ouputs reward share of first and second party in fractions of fractionResolution  (e.g. 67812)
      */
     onChange(v: RewardDistributionValue): void;
     onBlur?(): void;
+    disabled?: boolean;
 }
 
 /**
  * @description
- * Component for handling reward ratio of 2 parties, with the remainder implicitly going to a third party. Works with values of fractions of fractionResolution.
+ * Component for handling reward ratio of 2 parties, with the remainder implicitly going to a third party. Works with whole numbers representing fractions of fractionResolution.
  *
  * @example
- * const [value, setValue] = useState<RewardDistributionValue>({ first: 32145/fractionResolution, second: 50400/fractionResolution });
+ * const [value, setValue] = useState<RewardDistributionValue>({ first: 32145, second: 50400 });
  *
  * <RewardDistribution value={value} onChange={setValue} labels={['first', 'second', 'remaining']} />
  */
@@ -85,14 +70,13 @@ export function RewardDistribution({
     onBlur: fieldOnBlur,
     isInvalid,
     error,
+    disabled = false,
 }: RewardDistributionProps): JSX.Element {
-    const formattedValue = formatInputValue(outerValue);
-
     const form = useForm<RewardDistributionValue>({
-        defaultValues: formattedValue,
+        defaultValues: outerValue,
     });
     const { isFocused, setIsFocused } = useMultiFieldFocus(fieldOnBlur);
-    const { first: firstValue, second: secondValue } = formattedValue;
+    const { first: firstValue, second: secondValue } = outerValue;
     const remainingValue = fractionResolution - (firstValue + secondValue);
 
     const { watch, control, setValue } = form;
@@ -125,7 +109,7 @@ export function RewardDistribution({
                 second = name === 'second' ? v : fractionResolution - v;
             }
 
-            fieldOnChange(formatOutputValue({ first, second }));
+            fieldOnChange({ first, second });
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [JSON.stringify(innerValues), fieldOnChange]
@@ -253,6 +237,7 @@ export function RewardDistribution({
                             label={firstLabel}
                             isInvalid={invalid}
                             onFocus={() => setIsFocused(true)}
+                            disabled={disabled}
                         />
                     )}
                 />
@@ -269,6 +254,7 @@ export function RewardDistribution({
                             label={secondLabel}
                             isInvalid={invalid}
                             onFocus={() => setIsFocused(true)}
+                            disabled={disabled}
                         />
                     )}
                 />

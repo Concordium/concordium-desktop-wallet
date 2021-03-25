@@ -1,8 +1,7 @@
 import React from 'react';
-import { Grid, Header, Progress, Segment } from 'semantic-ui-react';
 import { Validate } from 'react-hook-form';
 
-import { ColorType, EqualRecord, MintRate } from '~/utils/types';
+import { EqualRecord, MintRate } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 import Form from '~/components/Form';
@@ -10,7 +9,9 @@ import Form from '~/components/Form';
 import {
     RewardDistributionValue,
     FormRewardDistribution,
+    RewardDistribution,
 } from './common/RewardDistribution';
+import { noOp } from '~/utils/basicHelpers';
 
 export interface UpdateMintDistributionFields {
     mantissa: string;
@@ -52,82 +53,54 @@ export default function UpdateMintDistribution({
         exponent: 16,
     };
 
-    const initialValue: RewardDistributionValue = {
-        first: currentMintDistribution.bakingReward,
-        second: currentMintDistribution.finalizationReward,
+    const currentValue: RewardDistributionValue = {
+        first: currentMintDistribution.bakingReward * rewardFractionResolution,
+        second:
+            currentMintDistribution.finalizationReward *
+            rewardFractionResolution,
     };
 
     return (
         <>
-            <Grid columns="equal">
-                <Grid.Column>
-                    <Segment basic textAlign="center">
-                        <Header size="small">Current mint rate</Header>
-                        {currentMintDistribution.mintPerSlot}
-                        <Progress
-                            value={
-                                currentMintDistribution.bakingReward *
-                                rewardFractionResolution
-                            }
-                            total={rewardFractionResolution}
-                            progress="percent"
-                            label="Current baking reward fraction"
-                            color={ColorType.Blue}
-                        />
-                        <Progress
-                            value={
-                                currentMintDistribution.finalizationReward *
-                                rewardFractionResolution
-                            }
-                            total={rewardFractionResolution}
-                            progress="percent"
-                            label="Current finalization reward fraction"
-                            color={ColorType.Teal}
-                        />
-                        <Progress
-                            value={
-                                rewardFractionResolution -
-                                (currentMintDistribution.bakingReward +
-                                    currentMintDistribution.finalizationReward) *
-                                    rewardFractionResolution
-                            }
-                            total={rewardFractionResolution}
-                            progress="percent"
-                            label="Current foundation reward fraction"
-                            color={ColorType.Grey}
-                        />
-                    </Segment>
-                </Grid.Column>
-                <Grid.Column>
-                    <h3>New Mint Distribution</h3>
-                    <Form.Input
-                        name={fieldNames.mantissa}
-                        label="Mantissa"
-                        defaultValue={mintRate.mantissa}
-                        rules={{
-                            required: true,
-                            validate: isValidFloat,
-                            min: 0,
-                        }}
-                    />
-                    <Form.Input
-                        name={fieldNames.exponent}
-                        label="Exponent"
-                        defaultValue={mintRate.exponent}
-                        rules={{
-                            required: true,
-                            validate: isValidInteger,
-                            min: 0,
-                        }}
-                    />
-                    <FormRewardDistribution
-                        name={fieldNames.rewardDistribution}
-                        defaultValue={initialValue}
-                        labels={rewardDistributionLabels}
-                        rules={{ required: 'Reward distribution is required' }}
-                    />
-                </Grid.Column>
-            </Grid>
+            <div>
+                <h3>Current mint rate</h3>
+                {currentMintDistribution.mintPerSlot}
+                <RewardDistribution
+                    labels={rewardDistributionLabels}
+                    value={currentValue}
+                    onChange={noOp}
+                    disabled
+                />
+            </div>
+            <div>
+                <h3>New Mint Distribution</h3>
+                <Form.Input
+                    name={fieldNames.mantissa}
+                    label="Mantissa"
+                    defaultValue={mintRate.mantissa}
+                    rules={{
+                        required: true,
+                        validate: isValidFloat,
+                        min: 0,
+                    }}
+                />
+                <Form.Input
+                    name={fieldNames.exponent}
+                    label="Exponent"
+                    defaultValue={mintRate.exponent}
+                    rules={{
+                        required: true,
+                        validate: isValidInteger,
+                        min: 0,
+                    }}
+                />
+                <FormRewardDistribution
+                    name={fieldNames.rewardDistribution}
+                    defaultValue={currentValue}
+                    labels={rewardDistributionLabels}
+                    rules={{ required: 'Reward distribution is required' }}
+                />
+            </div>
         </>
     );
 }

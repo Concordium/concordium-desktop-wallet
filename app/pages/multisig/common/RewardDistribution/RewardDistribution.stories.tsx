@@ -38,9 +38,23 @@ Primary.args = {
         'Foundation',
     ],
     value: {
-        first: 61234 / 100000,
-        second: 30000 / 100000,
+        first: 61234,
+        second: 30000,
     },
+};
+
+export const Disabled = Template.bind({});
+Disabled.args = {
+    labels: [
+        'Baking reward account',
+        'Finalization reward account',
+        'Foundation',
+    ],
+    value: {
+        first: 61234,
+        second: 30000,
+    },
+    disabled: true,
 };
 
 const ValidationTemplate: Story<PropsOf<typeof FormRewardDistribution>> = (
@@ -63,8 +77,8 @@ export const WithValidation = ValidationTemplate.bind({});
 WithValidation.args = {
     name: 'rewardDistribution',
     defaultValue: {
-        first: 61234 / 100000,
-        second: 30000 / 100000,
+        first: 61234,
+        second: 30000,
     },
     labels: [
         'Baking reward account',
