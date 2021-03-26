@@ -122,6 +122,13 @@ test('It is possible to chunk a generic array', () => {
     ]);
 });
 
+test('It is possible to chunk a buffer array', () => {
+    const buffers = [Buffer.of(1), Buffer.of(2), Buffer.of(3)];
+    const chunkedBuffers = toChunks<Buffer, Buffer[]>(buffers, 2);
+    expect(Buffer.concat(chunkedBuffers[0])).toHaveLength(2);
+    expect(Buffer.concat(chunkedBuffers[1])).toHaveLength(1);
+});
+
 test('Array content is preserved in chunks', () => {
     const array = new Uint8Array(5);
     array[0] = 5;
