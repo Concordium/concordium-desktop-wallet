@@ -3,5 +3,6 @@
     "buildPublicInformationForIp": "buildPubInfo",
     "createUnsignedCredential": "createUnsignedCredential",
     "createCredential": "createCredential",
-    "decryptAmounts": "decryptAmounts"
+    "decryptAmounts": "decryptAmounts",
+    "createTransferToPublicData": "createTransferToPublicData"
 }

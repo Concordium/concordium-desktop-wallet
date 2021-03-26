@@ -7,6 +7,7 @@ import {
     SchedulePoint,
     TransactionPayload,
     TransferToEncryptedPayload,
+    TransferToPublicPayload,
 } from './types';
 import {
     TransactionAccountSignature,
@@ -68,6 +69,44 @@ function serializeTransferToEncypted(payload: TransferToEncryptedPayload) {
     return serialized;
 }
 
+export function serializeTransferToPublicData(
+    payload: TransferToPublicPayload
+) {
+    if (
+        !payload.proof ||
+        payload.index === undefined ||
+        !payload.remainingEncryptedAmount
+    ) {
+        throw new Error('unexpected missing data of Transfer to Public data');
+    }
+    const remainingEncryptedAmount = Buffer.from(
+        payload.remainingEncryptedAmount,
+        'hex'
+    );
+
+    return Buffer.concat([
+        remainingEncryptedAmount,
+        encodeWord64(BigInt(payload.transferAmount)),
+        encodeWord64(BigInt(payload.index)),
+    ]);
+}
+
+function serializeTransferToPublic(payload: TransferToPublicPayload) {
+    if (!payload.proof) {
+        throw new Error('unexpected missing proof of Transfer to Public data');
+    }
+
+    const proof = Buffer.from(payload.proof, 'hex');
+    const data = serializeTransferToPublicData(payload);
+    const size = 1 + data.length + proof.length;
+    const serialized = new Uint8Array(size);
+
+    serialized[0] = TransactionKind.Transfer_to_public;
+    put(serialized, 1, data);
+    put(serialized, 1 + data.length, proof);
+    return serialized;
+}
+
 export function serializeTransactionHeader(
     sender: string,
     nonce: string,
@@ -101,6 +140,10 @@ export function serializeTransferPayload(
         case TransactionKind.Transfer_to_encrypted:
             return serializeTransferToEncypted(
                 payload as TransferToEncryptedPayload
+            );
+        case TransactionKind.Transfer_to_public:
+            return serializeTransferToPublic(
+                payload as TransferToPublicPayload
             );
         default:
             throw new Error('Unsupported transactionkind');

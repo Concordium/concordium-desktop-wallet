@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Container, Header } from 'semantic-ui-react';
+import ShieldImage from '@resources/svg/shield.svg';
 import styles from './Accounts.module.scss';
 import { displayAsGTU } from '../../utils/gtu';
 import {
@@ -11,7 +12,6 @@ import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
 } from '../../features/AccountSlice';
-import ShieldImage from '../../../resources/svg/shield.svg';
 
 /**
  * Displays the chosen Account's balance, and contains
