@@ -1,21 +1,12 @@
-@import 'config/bundle';
 @import '../common/multiSignatureFlowPage';
 
-.column {
-    flex-basis: 560px;
-}
-
-.signColumnContent {
+.signaturesColumnContent {
     composes: columnContent;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
-    h5 {
-        margin-top: 0;
-    }
 }
 
-.submit {
-    margin-top: 10px;
+.fileInput {
+    height: 200px;
 }

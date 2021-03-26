@@ -7,11 +7,13 @@ import styles from './MultiSignatureLayout.module.scss';
 interface MultiSignatureLayoutProps {
     pageTitle: string;
     stepTitle: string;
+    closeRoute?: string;
 }
 
 export default function MultiSignatureLayout({
     pageTitle,
     stepTitle,
+    closeRoute = routes.MULTISIGTRANSACTIONS,
     children,
 }: PropsWithChildren<MultiSignatureLayoutProps>): JSX.Element {
     return (
@@ -21,7 +23,7 @@ export default function MultiSignatureLayout({
             </PageLayout.Header>
             <PageLayout.Container
                 className={styles.container}
-                closeRoute={routes.MULTISIGTRANSACTIONS}
+                closeRoute={closeRoute}
                 padding="vertical"
             >
                 <h2 className={styles.header}>{stepTitle}</h2>

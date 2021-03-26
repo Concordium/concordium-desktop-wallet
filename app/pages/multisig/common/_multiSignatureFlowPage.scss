@@ -1,5 +1,11 @@
+@import 'config/bundle';
+
 .body {
     flex: 1 1 100%;
+
+    &SubtractPadding {
+        margin-bottom: -$page-container-padding-vertical;
+    }
 }
 
 .column,
@@ -11,4 +17,5 @@
     padding-top: 30px;
     padding-bottom: 30px;
     height: 100%;
+    word-break: break-all;
 }

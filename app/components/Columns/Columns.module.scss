@@ -1,5 +1,7 @@
 @import 'config/bundle';
 
+$columns-headers-inset: 31px;
+
 .root {
     position: relative;
     display: flex;
@@ -7,13 +9,17 @@
     justify-content: space-around;
     align-items: flex-start;
 
-    &ColumnScroll {
-        height: 100%;
-    }
-
     &WithHeaders {
         border-top: 1px solid $color-grey;
-        margin-top: 31px;
+        margin-top: $columns-headers-inset;
+    }
+
+    &ColumnScroll {
+        height: 100%;
+
+        &.rootWithHeaders {
+            height: calc(100% - #{$columns-headers-inset});
+        }
     }
 }
 

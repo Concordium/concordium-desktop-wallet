@@ -3,8 +3,8 @@ import { notNull } from '~/utils/basicHelpers';
 
 export const bytesFromKb = (kb: number): number => kb * 1024;
 
-export const fileListToFileArray = (files: FileList): File[] =>
-    new Array(files.length ?? 0)
+export const fileListToFileArray = (files: FileList | null): File[] =>
+    new Array(files?.length ?? 0)
         .fill(0)
-        .map((_, i) => files.item(i))
+        .map((_, i) => files?.item(i))
         .filter(notNull);

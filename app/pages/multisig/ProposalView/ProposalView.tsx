@@ -1,23 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    Checkbox,
-    Divider,
-    Form,
-    Grid,
-    Header,
-    Segment,
-} from 'semantic-ui-react';
 import { push } from 'connected-react-router';
 import { parse, stringify } from 'json-bigint';
 import * as ed from 'noble-ed25519';
-import { useParams } from 'react-router';
+import { Redirect, useParams } from 'react-router';
+import clsx from 'clsx';
 import {
     proposalsSelector,
     updateCurrentProposal,
-} from '../../features/MultiSignatureSlice';
-import TransactionDetails from '../../components/TransactionDetails';
-import TransactionHashView from '../../components/TransactionHashView';
+} from '~/features/MultiSignatureSlice';
+import TransactionDetails from '~/components/TransactionDetails';
+import TransactionHashView from '~/components/TransactionHashView';
 import {
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
@@ -25,34 +18,37 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateInstructionSignature,
-} from '../../utils/types';
-import { saveFile } from '../../utils/FileHelper';
-import DragAndDropFile from '../../components/DragAndDropFile';
+} from '~/utils/types';
+import { saveFile } from '~/utils/FileHelper';
 import {
     getBlockSummary,
     getConsensusStatus,
     sendTransaction,
-} from '../../utils/nodeRequests';
+} from '~/utils/nodeRequests';
 import {
     serializeForSubmission,
     serializeUpdateInstructionHeaderAndPayload,
-} from '../../utils/UpdateSerialization';
-import { hashSha256 } from '../../utils/serializationHelpers';
-import { getMultiSignatureTransactionStatus } from '../../utils/TransactionStatusPoller';
+} from '~/utils/UpdateSerialization';
+import { hashSha256 } from '~/utils/serializationHelpers';
+import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
 import SimpleErrorModal, {
     ModalErrorInput,
-} from '../../components/SimpleErrorModal';
-import routes from '../../constants/routes.json';
-import findHandler from '../../utils/updates/HandlerFinder';
-import { expirationEffect } from '../../utils/ProposalHelper';
-import { BlockSummary, ConsensusStatus } from '../../utils/NodeApiTypes';
-import PageLayout from '../../components/PageLayout';
-import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
+} from '~/components/SimpleErrorModal';
+import routes from '~/constants/routes.json';
+import findHandler from '~/utils/updates/HandlerFinder';
+import { expirationEffect } from '~/utils/ProposalHelper';
+import { BlockSummary, ConsensusStatus } from '~/utils/NodeApiTypes';
+import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
 import Button from '~/cross-app-components/Button';
-import Modal from '~/cross-app-components/Modal';
 import Columns from '~/components/Columns';
-import Column from '~/components/Columns/Column';
-import ProposalStatus from './ProposalStatus';
+import MultiSignatureLayout from '../MultiSignatureLayout';
+
+import styles from './ProposalView.module.scss';
+import Form from '~/components/Form';
+import FileInput from '~/components/Form/FileInput';
+import { FileInputValue } from '~/components/Form/FileInput/FileInput';
+import CloseProposalModal from './CloseProposalModal';
+import { fileListToFileArray } from '~/components/Form/FileInput/util';
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
@@ -83,36 +79,34 @@ async function isSignatureValid(
     );
 }
 
+const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING;
+
+interface ProposalViewProps {
+    proposal: MultiSignatureTransaction;
+}
+
 /**
  * Component that displays the multi signature transaction proposal that is currently the
  * active one in the state. The component allows the user to export the proposal,
  * add signatures to the proposal, and if the signature threshold has been reached,
  * then the proposal can be submitted to a node.
  */
-export default function ProposalView() {
+function ProposalView({ proposal }: ProposalViewProps) {
     const [showCloseModal, setShowCloseModal] = useState(false);
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
     const [currentlyLoadingFile, setCurrentlyLoadingFile] = useState(false);
-    const { id } = useParams<{ id: string }>();
+    const [files, setFiles] = useState<FileInputValue>(null);
     const dispatch = useDispatch();
-    const proposals = useSelector(proposalsSelector);
-    const currentProposal = proposals.find((p) => p.id === parseInt(id, 10));
-
-    if (!currentProposal) {
-        throw new Error(
-            'The proposal page should not be loaded without a proposal in the state.'
-        );
-    }
 
     const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
-        currentProposal.transaction
+        proposal.transaction
     );
 
     useEffect(() => {
-        return expirationEffect(currentProposal, dispatch);
-    }, [currentProposal, dispatch]);
+        return expirationEffect(proposal, dispatch);
+    }, [proposal, dispatch]);
 
     async function loadSignatureFile(file: Buffer) {
         setCurrentlyLoadingFile(true);
@@ -131,9 +125,9 @@ export default function ProposalView() {
         }
 
         if (instanceOfUpdateInstruction(transactionObject)) {
-            if (currentProposal) {
-                const proposal: UpdateInstruction<UpdateInstructionPayload> = parse(
-                    currentProposal.transaction
+            if (proposal) {
+                const update: UpdateInstruction<UpdateInstructionPayload> = parse(
+                    proposal.transaction
                 );
 
                 // We currently restrict the amount of signatures imported at the same time to be 1, as it
@@ -154,7 +148,7 @@ export default function ProposalView() {
 
                 // Prevent the user from adding a signature that is already present on the proposal.
                 if (
-                    proposal.signatures
+                    update.signatures
                         .map((sig) => sig.signature)
                         .includes(signature.signature)
                 ) {
@@ -175,7 +169,7 @@ export default function ProposalView() {
                         consensusStatus.lastFinalizedBlock
                     );
                     validSignature = await isSignatureValid(
-                        proposal,
+                        update,
                         signature,
                         blockSummary
                     );
@@ -203,12 +197,12 @@ export default function ProposalView() {
                     return;
                 }
 
-                proposal.signatures = proposal.signatures.concat(
+                update.signatures = update.signatures.concat(
                     transactionObject.signatures
                 );
                 const updatedProposal = {
-                    ...currentProposal,
-                    transaction: stringify(proposal),
+                    ...proposal,
+                    transaction: stringify(update),
                 };
 
                 updateCurrentProposal(dispatch, updatedProposal);
@@ -225,6 +219,17 @@ export default function ProposalView() {
         }
     }
 
+    useEffect(() => {
+        fileListToFileArray(files)
+            .filter((_, i) => i >= instruction.signatures.length - 1) // subtract 1 from signatures as first signature is the proposer.
+            .map(async (f) => Buffer.from(await f.arrayBuffer()))
+            .forEach(async (p) => {
+                const buffer = await p;
+                loadSignatureFile(buffer);
+            });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [files]);
+
     const handler = findHandler(instruction.type);
     const serializedPayload = handler.serializePayload(instruction);
 
@@ -236,7 +241,7 @@ export default function ProposalView() {
     ).toString('hex');
 
     async function submitTransaction() {
-        if (!currentProposal) {
+        if (!proposal) {
             // TODO: can we remove this without getting a type error.
             throw new Error(
                 'The proposal page should not be loaded without a proposal in the state.'
@@ -245,7 +250,7 @@ export default function ProposalView() {
         const payload = serializeForSubmission(instruction, serializedPayload);
         const submitted = (await sendTransaction(payload)).getValue();
         const modifiedProposal: MultiSignatureTransaction = {
-            ...currentProposal,
+            ...proposal,
         };
         if (submitted) {
             modifiedProposal.status = MultiSignatureTransactionStatus.Submitted;
@@ -264,156 +269,168 @@ export default function ProposalView() {
     }
 
     async function closeProposal() {
-        if (currentProposal) {
+        if (proposal) {
             const closedProposal: MultiSignatureTransaction = {
-                ...currentProposal,
+                ...proposal,
                 status: MultiSignatureTransactionStatus.Closed,
             };
             updateCurrentProposal(dispatch, closedProposal);
         }
     }
 
-    const unsignedCheckboxes = [];
-    for (
-        let i = 0;
-        i < currentProposal.threshold - instruction.signatures.length;
-        i += 1
-    ) {
-        unsignedCheckboxes.push(
-            <Form.Field key={i}>
-                <Checkbox label="Awaiting signature" readOnly />
-            </Form.Field>
-        );
-    }
+    // const unsignedCheckboxes = [];
+    // for (
+    //     let i = 0;
+    //     i < proposal.threshold - instruction.signatures.length;
+    //     i += 1
+    // ) {
+    //     unsignedCheckboxes.push(
+    //         <Form.Checkbox
+    //             name={`unsigned${i}`}
+    //             key={i}
+    //             disabled
+    //             rules={{ required: true }}
+    //             size="large"
+    //         >
+    //             Awaiting signature
+    //         </Form.Checkbox>
+    //     );
+    // }
 
     const missingSignatures =
-        instruction.signatures.length !== currentProposal.threshold;
+        instruction.signatures.length !== proposal.threshold;
 
     const readyToSubmit =
         !missingSignatures &&
-        currentProposal.status === MultiSignatureTransactionStatus.Open;
-
-    const closeModal = (
-        <Modal
-            open={showCloseModal}
-            onOpen={() => {}}
-            onClose={() => setShowCloseModal(false)}
-        >
-            <h2>Are you sure that you want to close this proposal?</h2>
-            <ProposalStatus proposal={currentProposal} />
-            <Columns>
-                <Column>
-                    <Button onClick={() => setShowCloseModal(false)}>
-                        No, cancel
-                    </Button>
-                </Column>
-                <Column>
-                    <Button
-                        onClick={async () => {
-                            await closeProposal();
-                            dispatch(
-                                push(
-                                    routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING
-                                )
-                            );
-                        }}
-                        danger
-                    >
-                        Yes, close
-                    </Button>
-                </Column>
-            </Columns>
-        </Modal>
-    );
+        proposal.status === MultiSignatureTransactionStatus.Open;
 
     return (
-        <PageLayout>
-            {closeModal}
-            <PageLayout.Header>
-                <h1>{handler.title}</h1>
-            </PageLayout.Header>
-            <Segment secondary textAlign="center">
-                <SimpleErrorModal
-                    show={showError.show}
-                    header={showError.header}
-                    content={showError.content}
-                    onClick={() => setShowError({ show: false })}
-                />
-                <Header size="large">Your transaction proposal</Header>
-                <Segment basic>
-                    Your transaction proposal has been generated. An overview
-                    can be seen below.
-                </Segment>
-                <Segment>
-                    <Header>Transaction Proposal | Transaction Type</Header>
-                    <Divider />
-                    <Grid columns={3} divided textAlign="center" padded>
-                        <Grid.Column>
+        <MultiSignatureLayout
+            pageTitle={handler.title}
+            stepTitle="Transaction Proposal | Transaction Type"
+            closeRoute={CLOSE_ROUTE}
+        >
+            <CloseProposalModal
+                open={showCloseModal}
+                onClose={() => setShowCloseModal(false)}
+                proposal={proposal}
+                onConfirm={async () => {
+                    await closeProposal();
+                    dispatch(push(CLOSE_ROUTE));
+                }}
+            />
+            <SimpleErrorModal
+                show={showError.show}
+                header={showError.header}
+                content={showError.content}
+                onClick={() => setShowError({ show: false })}
+            />
+            <Form
+                onSubmit={submitTransaction}
+                className={clsx(styles.body, styles.bodySubtractPadding)}
+            >
+                <Columns divider columnScroll columnClassName={styles.column}>
+                    <Columns.Column header="Transaction Details">
+                        <div className={styles.columnContent}>
                             <TransactionDetails transaction={instruction} />
                             <ExpiredEffectiveTimeView
                                 transaction={instruction}
-                                proposal={currentProposal}
+                                proposal={proposal}
                             />
-                        </Grid.Column>
-                        <Grid.Column>
-                            <Grid.Row>
-                                <Form>
-                                    {instruction.signatures.map((signature) => {
+                        </div>
+                    </Columns.Column>
+                    <Columns.Column header="Signatures">
+                        <div className={styles.signaturesColumnContent}>
+                            <div>
+                                {new Array(proposal.threshold)
+                                    .fill(0)
+                                    .map((_, i) => {
+                                        const sig =
+                                            instruction.signatures.length - 1 <=
+                                            i
+                                                ? instruction.signatures[i]
+                                                : undefined;
+                                        const label = sig
+                                            ? `Signed (${sig.signature.substring(
+                                                  0,
+                                                  16
+                                              )}...)`
+                                            : 'Awaiting signature';
+                                        const name = `signature${i}`;
+
                                         return (
-                                            <Form.Field
-                                                key={signature.signature}
+                                            <Form.Checkbox
+                                                name={name}
+                                                key={name}
+                                                disabled
+                                                defaultChecked={!!sig}
+                                                size="large"
+                                                rules={{ required: true }}
                                             >
-                                                <Checkbox
-                                                    label={`Signed (${signature.signature.substring(
-                                                        0,
-                                                        16
-                                                    )}...)`}
-                                                    defaultChecked
-                                                    readOnly
-                                                />
-                                            </Form.Field>
+                                                {label}
+                                            </Form.Checkbox>
                                         );
                                     })}
-                                    {unsignedCheckboxes}
-                                </Form>
-                            </Grid.Row>
-                            <Divider />
-                            <Grid.Row>
-                                <DragAndDropFile
-                                    text="Drag and drop signatures here"
-                                    fileProcessor={loadSignatureFile}
-                                    disabled={
-                                        !missingSignatures ||
-                                        currentlyLoadingFile
-                                    }
-                                />
-                            </Grid.Row>
-                        </Grid.Column>
-                        <Grid.Column>
+                            </div>
+                            {/* {instruction.signatures.map(({ signature }) => (
+                                <Form.Checkbox
+                                    name={signature}
+                                    key={signature}
+                                    disabled
+                                    defaultChecked
+                                    rules={{ required: true }}
+                                    size="large"
+                                >
+                                    {`Signed (${signature.substring(
+                                        0,
+                                        16
+                                    )}...)`}
+                                </Form.Checkbox>
+                            ))}
+                            {unsignedCheckboxes} */}
+                            <FileInput
+                                placeholder="Drag and drop signatures here"
+                                value={files}
+                                onChange={setFiles}
+                                multiple
+                                className={styles.fileInput}
+                                disabled={
+                                    !missingSignatures || currentlyLoadingFile
+                                }
+                            />
+                            {/* <DragAndDropFile
+                                text="Drag and drop signatures here"
+                                fileProcessor={loadSignatureFile}
+                                disabled={
+                                    !missingSignatures || currentlyLoadingFile
+                                }
+                            /> */}
+                        </div>
+                    </Columns.Column>
+                    <Columns.Column header="Security & Submission Details">
+                        <div className={styles.columnContent}>
                             <TransactionHashView
                                 transactionHash={transactionHash}
                             />
-                            <Divider hidden horizontal />
                             <Button
                                 size="small"
                                 onClick={() => setShowCloseModal(true)}
                                 disabled={
-                                    currentProposal.status !==
+                                    proposal.status !==
                                     MultiSignatureTransactionStatus.Open
                                 }
                             >
                                 Close proposal
                             </Button>
-                            <Divider hidden horizontal />
                             <Button
                                 disabled={
-                                    currentProposal.status !==
+                                    proposal.status !==
                                     MultiSignatureTransactionStatus.Open
                                 }
                                 onClick={
                                     () =>
                                         saveFile(
-                                            currentProposal.transaction,
+                                            proposal.transaction,
                                             'Export transaction'
                                         )
                                     // TODO Handle failure
@@ -421,17 +438,25 @@ export default function ProposalView() {
                             >
                                 Export transaction proposal
                             </Button>
-                            <Divider hidden horizontal />
-                            <Button
-                                disabled={!readyToSubmit}
-                                onClick={submitTransaction}
-                            >
+                            <Form.Submit disabled={!readyToSubmit}>
                                 Submit transaction to chain
-                            </Button>
-                        </Grid.Column>
-                    </Grid>
-                </Segment>
-            </Segment>
-        </PageLayout>
+                            </Form.Submit>
+                        </div>
+                    </Columns.Column>
+                </Columns>
+            </Form>
+        </MultiSignatureLayout>
     );
+}
+
+export default function ProposalViewContainer(): JSX.Element {
+    const { id } = useParams<{ id: string }>();
+    const proposals = useSelector(proposalsSelector);
+    const proposal = proposals.find((p) => p.id === parseInt(id, 10));
+
+    if (!proposal) {
+        return <Redirect to={routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING} />;
+    }
+
+    return <ProposalView proposal={proposal} />;
 }

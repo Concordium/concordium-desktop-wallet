@@ -4,6 +4,7 @@ import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { parse, stringify } from 'json-bigint';
 import { Redirect } from 'react-router';
+import clsx from 'clsx';
 import { hashSha256 } from '../../../utils/serializationHelpers';
 import routes from '../../../constants/routes.json';
 import {
@@ -149,7 +150,7 @@ function SignTransactionProposalView({ location }: Props) {
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
             <Columns
-                className={styles.body}
+                className={clsx(styles.body, styles.bodySubtractPadding)}
                 divider
                 columnClassName={styles.column}
             >
