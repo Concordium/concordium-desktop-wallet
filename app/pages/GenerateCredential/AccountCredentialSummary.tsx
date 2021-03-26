@@ -44,7 +44,7 @@ export default function AccountCredentialSummary({
     };
 
     useEffect(() => {
-        if (address && !isReady) {
+        if (isValidAddress(address) && !isReady) {
             setError('address', {
                 type: 'manual',
                 message: mustBeDeployedMessage,
