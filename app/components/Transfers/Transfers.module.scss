@@ -7,12 +7,44 @@
 
 .pickAmount {
     display: flex;
-    margin-bottom: 30px;
-    margin-left: 10%;
+    margin: 50px 10%;
     align-content: center;
     width: 100%;
 
     label {
         width: 75%;
     }
+}
+
+.header {
+    text-align: center;
+}
+
+.button {
+    width: 90%;
+    margin-bottom: 14px;
+    margin-left: 5%;
+}
+
+.pickRecipient {
+    display: flex;
+    flex-direction: column;
+}
+
+.transferView {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 40px;
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.backButton {
+    position: absolute;
+    top: 10px;
+    left: 10px;
 }

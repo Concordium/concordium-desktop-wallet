@@ -6,7 +6,8 @@ import { addressBookSelector } from '~/features/AddressBookSlice';
 import UpsertAddress from '../UpsertAddress';
 import { AddressBookEntry } from '~/utils/types';
 import Button from '~/cross-app-components/Button';
-import styles from '~/pages/AddressBook/AddressBookList/AddressBookList.module.scss';
+import styles from './Transfers.module.scss';
+import searchStyles from '~/pages/AddressBook/AddressBookList/AddressBookList.module.scss';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 
 interface Props {
@@ -29,15 +30,20 @@ export default function PickRecipient({ pickRecipient }: Props) {
     }
 
     return (
-        <>
-            <div className={styles.search}>
-                <SearchIcon className={styles.searchIcon} />
+        <div className={styles.pickRecipient}>
+            <div className={searchStyles.search}>
+                <SearchIcon className={searchStyles.searchIcon} />
                 <input
                     type="search"
                     onChange={(e) => setFilter(e.target.value)}
                     placeholder="Search recipients"
                 />
-                <UpsertAddress as={Button} clear onSubmit={onSubmit}>
+                <UpsertAddress
+                    as={Button}
+                    size="small"
+                    clear
+                    onSubmit={onSubmit}
+                >
                     <PlusIcon />
                 </UpsertAddress>
             </div>
@@ -55,6 +61,6 @@ export default function PickRecipient({ pickRecipient }: Props) {
                         {e.note}
                     </AddressBookEntryButton>
                 ))}
-        </>
+        </div>
     );
 }

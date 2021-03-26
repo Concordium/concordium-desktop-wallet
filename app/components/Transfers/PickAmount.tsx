@@ -11,11 +11,10 @@ import styles from './Transfers.module.scss';
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
-    amount: string;
+    defaultAmount: string;
     header: string;
-    setAmount(amount: string): void;
-    toPickRecipient?(): void;
-    toConfirmTransfer(): void;
+    toPickRecipient?(currentAmount: string): void;
+    toConfirmTransfer(amount: string): void;
 }
 
 // TODO: Take staked amount into consideration
@@ -38,8 +37,7 @@ interface PickAmountForm {
 export default function PickAmount({
     recipient,
     header,
-    amount,
-    setAmount,
+    defaultAmount,
     toPickRecipient,
     toConfirmTransfer,
 }: Props) {
@@ -62,23 +60,22 @@ export default function PickAmount({
 
     const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
         (values) => {
-            const { amount: currentAmount } = values;
-            setAmount(currentAmount);
-            toConfirmTransfer();
+            const { amount } = values;
+            toConfirmTransfer(amount);
         },
-        [setAmount, toConfirmTransfer]
+        [toConfirmTransfer]
     );
 
     return (
         <>
-            <h2>{header}</h2>
+            <h2 className={styles.header}>{header}</h2>
             <Form formMethods={form} onSubmit={handleSubmit}>
                 <div className={styles.pickAmount}>
                     <p>{getGTUSymbol()}</p>
                     <Form.Input
                         name="amount"
                         placeholder="Enter Amount"
-                        defaultValue={amount}
+                        defaultValue={defaultAmount}
                         rules={{
                             required: 'Amount Required',
                             validate: {
@@ -99,10 +96,10 @@ export default function PickAmount({
                             />
                         </div>
                         <AddressBookEntryButton
+                            className={styles.button}
                             error={Boolean(form.errors?.recipient)}
                             onClick={() => {
-                                setAmount(form.getValues('amount'));
-                                toPickRecipient();
+                                toPickRecipient(form.getValues('amount'));
                             }}
                         >
                             {recipient ? recipient.name : 'Select Recipient'}
@@ -113,7 +110,7 @@ export default function PickAmount({
                         </p>
                     </>
                 ) : null}
-                <Form.Submit as={Button} size="huge">
+                <Form.Submit as={Button} className={styles.button} size="huge">
                     Continue
                 </Form.Submit>
             </Form>

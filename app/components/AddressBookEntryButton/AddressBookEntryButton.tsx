@@ -2,23 +2,29 @@ import clsx from 'clsx';
 import React, { PropsWithChildren } from 'react';
 import AddressBookEntryIcon from '@resources/svg/identity.svg';
 import Button from '~/cross-app-components/Button';
-import styles from '~/pages/AddressBook/AddressBookList/AddressBookList.module.scss';
-import itemStyles from './AddressBookEntryButton.module.scss';
+import iconStyle from '~/pages/AddressBook/AddressBookList/AddressBookList.module.scss';
+import itemStyle from './AddressBookEntryButton.module.scss';
 
 interface Props {
     onClick: () => void;
     error?: boolean;
+    className?: string;
 }
 
 export default function AddressBookEntryButton({
     children,
     onClick,
     error,
+    className,
 }: PropsWithChildren<Props>) {
     return (
         <Button
-            className={clsx(itemStyles.item, error && itemStyles.error)}
-            icon={<AddressBookEntryIcon className={styles.identityIcon} />}
+            className={clsx(
+                itemStyle.button,
+                error && itemStyle.error,
+                className
+            )}
+            icon={<AddressBookEntryIcon className={iconStyle.identityIcon} />}
             tabIndex={0}
             inverted
             size="huge"
