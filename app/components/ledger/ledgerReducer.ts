@@ -19,11 +19,16 @@ enum LedgerActionType {
 
 interface PendingAction extends Action<LedgerActionType.PENDING> {
     status: LedgerStatusType;
+    deviceName?: string;
 }
 
-export const pendingAction = (status: LedgerStatusType): PendingAction => ({
+export const pendingAction = (
+    status: LedgerStatusType,
+    deviceName?: string
+): PendingAction => ({
     type: LedgerActionType.PENDING,
     status,
+    deviceName,
 });
 
 interface ConnectedAction extends Action<LedgerActionType.CONNECTED> {
@@ -100,22 +105,24 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
     s = getInitialState(),
     a
 ) => {
+    console.log('reducer', s, a);
+    const deviceName =
+        (a as PendingAction | ConnectedAction).deviceName || s.deviceName;
+
     switch (a.type) {
         case LedgerActionType.PENDING:
             return {
                 ...s,
                 status: a.status,
-                text: getStatusMessage(a.status),
+                text: getStatusMessage(a.status, deviceName),
+                deviceName,
             };
         case LedgerActionType.CONNECTED:
             return {
                 status: LedgerStatusType.CONNECTED,
-                deviceName: a.deviceName,
+                deviceName,
                 client: a.client,
-                text: getStatusMessage(
-                    LedgerStatusType.CONNECTED,
-                    a.deviceName
-                ),
+                text: getStatusMessage(LedgerStatusType.CONNECTED, deviceName),
             };
         case LedgerActionType.RESET:
             return getInitialState();

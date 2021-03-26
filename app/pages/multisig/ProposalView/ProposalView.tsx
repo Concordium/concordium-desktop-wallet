@@ -349,6 +349,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                         size="small"
                                         className={styles.closeProposalButton}
                                         onClick={() => setShowCloseModal(true)}
+                                        danger
                                     >
                                         Close proposal
                                     </Button>

@@ -56,18 +56,16 @@ export default function useLedger(
                         transport
                     );
                     const appAndVersion = await concordiumClient.getAppAndVersion();
+                    const deviceName = event.deviceModel.productName;
 
                     if (isConcordiumApp(appAndVersion)) {
-                        dispatch(
-                            connectedAction(
-                                event.deviceModel.productName,
-                                concordiumClient
-                            )
-                        );
+                        dispatch(connectedAction(deviceName, concordiumClient));
                     } else {
                         // The device has been connected, but the Concordium application has not
                         // been opened yet.
-                        dispatch(pendingAction(LedgerStatusType.OPEN_APP));
+                        dispatch(
+                            pendingAction(LedgerStatusType.OPEN_APP, deviceName)
+                        );
                     }
                 } else {
                     dispatch(resetAction());
