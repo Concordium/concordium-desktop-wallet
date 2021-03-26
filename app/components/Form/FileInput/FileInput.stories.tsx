@@ -19,6 +19,13 @@ Primary.args = {
     label: 'File Input',
 };
 
+export const Multiple = Template.bind({});
+Multiple.args = {
+    label: 'Files Input',
+    placeholder: 'No files in field yet...',
+    multiple: true,
+};
+
 export const Placeholder = Template.bind({});
 Placeholder.args = {
     label: 'File Input',

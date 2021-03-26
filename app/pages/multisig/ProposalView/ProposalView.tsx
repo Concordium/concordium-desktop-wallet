@@ -223,7 +223,6 @@ function ProposalView({ proposal }: ProposalViewProps) {
     // Every time a signature file is dropped, try loading as signature.
     useEffect(() => {
         fileListToFileArray(files)
-            .filter((_, i) => i >= instruction.signatures.length - 1) // subtract 1 from signatures as first signature is the proposer.
             .map(async (f) => Buffer.from(await f.arrayBuffer()))
             .forEach((p) => p.then(loadSignatureFile));
         // eslint-disable-next-line react-hooks/exhaustive-deps
