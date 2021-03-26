@@ -84,9 +84,8 @@ export default function GenerateCredential(): JSX.Element {
     const [attributes, setAttributes] = useState<string[]>([]);
     const [identity, setIdentity] = useState<Identity | undefined>();
 
-    const continueButton = (
+    const continueButton = (text: string) => (
         <Button
-            size="huge"
             className={styles.continueButton}
             disabled={!isReady}
             onClick={() => {
@@ -94,7 +93,7 @@ export default function GenerateCredential(): JSX.Element {
                 dispatch(push(nextLocation(location)));
             }}
         >
-            Continue
+            {text}
         </Button>
     );
 
@@ -132,7 +131,7 @@ export default function GenerateCredential(): JSX.Element {
                                             )}
                                             isReady={isReady}
                                         />
-                                        {continueButton}
+                                        {continueButton('Finish')}
                                     </List>
                                 )}
                             />
@@ -149,7 +148,7 @@ export default function GenerateCredential(): JSX.Element {
                                                 }
                                                 isReady={isReady}
                                             />
-                                            {continueButton}
+                                            {continueButton('Continue')}
                                         </Grid.Column>
                                         <Grid.Column>
                                             <Switch>
