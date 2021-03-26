@@ -342,6 +342,10 @@ function ProposalView({ proposal }: ProposalViewProps) {
                     <Columns.Column header="Signatures">
                         <div className={styles.signaturesColumnContent}>
                             <div>
+                                <h5>
+                                    {instruction.signatures.length} of{' '}
+                                    {proposal.threshold} signatures.
+                                </h5>
                                 {new Array(proposal.threshold)
                                     .fill(0)
                                     .map((_, i) => {
@@ -350,17 +354,32 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                             i
                                                 ? instruction.signatures[i]
                                                 : undefined;
-                                        const label = sig
-                                            ? `Signed (${sig.signature.substring(
-                                                  0,
-                                                  16
-                                              )}...)`
-                                            : 'Awaiting signature';
+                                        const label = sig ? (
+                                            <div
+                                                className={
+                                                    styles.signedCheckoxLabel
+                                                }
+                                            >
+                                                Signed
+                                                <div>
+                                                    {sig.signature.substring(
+                                                        0,
+                                                        16
+                                                    )}
+                                                    ...
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            'Awaiting signature'
+                                        );
                                         const name = `signature${i}`;
 
                                         return (
                                             <Form.Checkbox
                                                 name={name}
+                                                className={
+                                                    styles.signatureCheckbox
+                                                }
                                                 key={name}
                                                 disabled
                                                 defaultChecked={!!sig}
