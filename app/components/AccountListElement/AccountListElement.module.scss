@@ -7,9 +7,9 @@
     background-color: $color-white;
     color: $color-text;
     box-shadow: 0 0 0 1px $color-text inset;
-    transition: box-shadow $anim-easing $anim-timing;
     padding: 15px 30px;
     width: 70%;
+    margin-left: 15%;
     margin-bottom: 20px;
 
     &:first-of-type {

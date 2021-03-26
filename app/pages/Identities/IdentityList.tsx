@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Menu } from 'semantic-ui-react';
 import IdentityListElement from '../../components/IdentityListElement';
+// import Button from '~/cross-app-components/Button';
 import {
     chooseIdentity,
     identitiesSelector,
@@ -15,19 +15,19 @@ import { Identity } from '../../utils/types';
 export default function IdentityList() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
-    const chosenIdentity = useSelector(chosenIdentitySelector);
+    // const chosenIdentity =
+    useSelector(chosenIdentitySelector);
+    //                     active={chosenIdentity === identity}
 
     return (
-        <Menu vertical fluid>
+        <>
             {identities.map((identity: Identity) => (
-                <Menu.Item
+                <IdentityListElement
+                    identity={identity}
                     key={identity.id}
                     onClick={() => dispatch(chooseIdentity(identity))}
-                    active={chosenIdentity === identity}
-                >
-                    <IdentityListElement identity={identity} />
-                </Menu.Item>
+                />
             ))}
-        </Menu>
+        </>
     );
 }
