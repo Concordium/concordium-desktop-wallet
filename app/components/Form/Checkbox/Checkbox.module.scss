@@ -16,14 +16,14 @@
 }
 
 .checkbox {
-    width: 14px;
-    height: 14px;
-    border: 1px solid $color-grey;
+    width: 18px;
+    height: 18px;
     border-radius: 5px;
+    box-shadow: 0 0 0 1px $color-grey inset;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border-color $form-transition;
+    transition: box-shadow $form-transition;
     flex: 0 0 auto;
 
     &Large {
@@ -42,11 +42,11 @@
     }
 
     input:focus + & {
-        border-color: $form-color-focus;
+        box-shadow: 0 0 0 2px $form-color-focus inset;
     }
 
     .rootInvalid & {
-        border-color: $color-error !important;
+        box-shadow: 0 0 0 2px $color-error inset !important;
     }
 }
 

@@ -220,14 +220,12 @@ function ProposalView({ proposal }: ProposalViewProps) {
         }
     }
 
+    // Every time a signature file is dropped, try loading as signature.
     useEffect(() => {
         fileListToFileArray(files)
             .filter((_, i) => i >= instruction.signatures.length - 1) // subtract 1 from signatures as first signature is the proposer.
             .map(async (f) => Buffer.from(await f.arrayBuffer()))
-            .forEach(async (p) => {
-                const buffer = await p;
-                loadSignatureFile(buffer);
-            });
+            .forEach((p) => p.then(loadSignatureFile));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [files]);
 
@@ -274,9 +272,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
     const missingSignatures =
         instruction.signatures.length !== proposal.threshold;
 
-    const readyToSubmit =
-        !missingSignatures &&
-        proposal.status === MultiSignatureTransactionStatus.Open;
+    const isOpen = proposal.status === MultiSignatureTransactionStatus.Open;
 
     return (
         <MultiSignatureLayout
@@ -359,10 +355,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                 )}
                                 <Button
                                     className={styles.exportButton}
-                                    disabled={
-                                        proposal.status !==
-                                        MultiSignatureTransactionStatus.Open
-                                    }
+                                    disabled={!isOpen}
                                     onClick={
                                         () =>
                                             saveFile(
@@ -377,12 +370,13 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                 <Form.Checkbox
                                     className={styles.finalCheckbox}
                                     name="finalCheck"
-                                    disabled={!readyToSubmit}
+                                    rules={{ required: true }}
+                                    disabled={!isOpen}
                                 >
                                     I understand this is the final submission
                                     and cannot be reverted
                                 </Form.Checkbox>
-                                <Form.Submit disabled={!readyToSubmit}>
+                                <Form.Submit disabled={!isOpen}>
                                     Submit transaction to chain
                                 </Form.Submit>
                             </div>
