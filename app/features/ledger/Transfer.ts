@@ -10,17 +10,17 @@ import {
     instanceOfTransferToEncrypted,
     TransferToPublic,
     instanceOfTransferToPublic,
-} from '../../utils/types';
+} from '~/utils/types';
 import {
     serializeTransactionHeader,
     serializeTransferPayload,
     serializeSchedulePoint,
     serializeScheduledTransferPayloadBase,
     serializeTransferToPublicData,
-} from '../../utils/transactionSerialization';
+} from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
-import { encodeWord16 } from '../../utils/serializationHelpers';
-import { chunkBuffer } from '../../utils/basicHelpers';
+import { encodeWord16 } from '~/utils/serializationHelpers';
+import { chunkBuffer, chunkArray } from '~/utils/basicHelpers';
 
 const INS_SIMPLE_TRANSFER = 0x02;
 const INS_TRANSFER_TO_ENCRYPTED = 0x11;
@@ -193,26 +193,19 @@ async function signTransferWithSchedule(
 
     const { schedule } = transaction.payload;
 
-    const scheduleLength = schedule.length;
-
     p1 = 0x01;
 
-    let i = 0;
     let response;
-    while (i < scheduleLength) {
+    const chunks = chunkArray(schedule.map(serializeSchedulePoint), 15); // 15 is the maximum amount we can fit
+    for (let i = 0; i < chunks.length; i += 1) {
         // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
             INS_TRANSFER_WITH_SCHEDULE,
             p1,
             p2,
-            Buffer.concat(
-                schedule
-                    .slice(i, Math.min(i + 15, scheduleLength))
-                    .map(serializeSchedulePoint)
-            )
+            Buffer.concat(chunks[i])
         );
-        i += 15;
     }
 
     if (!response) {
