@@ -1,12 +1,15 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useMemo, useEffect } from 'react';
 import { useForm, Validate } from 'react-hook-form';
 import {
+    dateFromDateParts,
+    datePartFormatters,
     DateParts,
-    formatters,
+    datePartsFromDate,
+} from '~/utils/timeHelpers';
+import {
     fieldNames,
     isValidDate,
-    fromDate,
-    fromDateParts,
     hasAllParts,
     isEqual,
     PartialDateParts,
@@ -29,14 +32,15 @@ export default function useInputTimestamp(
 
     const setFormattedValue = useCallback(
         (name: keyof DateParts, v?: string) => {
-            setValue(name, formatters[name](v));
+            setValue(name, datePartFormatters[name](v));
         },
         [setValue]
     );
 
     // To work around object identity comparison of "value"
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const parts = useMemo(() => fromDate(value), [value?.toISOString()]);
+    const parts = useMemo(() => datePartsFromDate(value), [
+        value?.toISOString(),
+    ]);
 
     useEffect(() => {
         if (!parts) {
@@ -47,22 +51,20 @@ export default function useInputTimestamp(
             setFormattedValue(k, parts[k])
         );
         // To work around object identity comparison fo "parts"
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [JSON.stringify(parts), setFormattedValue]);
 
     const fireOnChange = useCallback(() => {
         if (!hasAllParts(fields)) {
             onChange(undefined);
         } else {
-            const date = fromDateParts(fields);
-            const test = fromDate(date);
+            const date = dateFromDateParts(fields);
+            const test = datePartsFromDate(date);
 
             const isValid = test && isEqual(fields, test);
 
             onChange(isValid ? date : undefined);
         }
         // To work around object identity comparison of "fields"
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [JSON.stringify(fields), onChange]);
 
     const form: typeof f = { ...f, setValue: setFormattedValue };
@@ -98,7 +100,6 @@ export default function useInputTimestamp(
         if (formState.touched[fieldNames.date]) {
             trigger(fieldNames.date);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [validateDate]);
 
     return {

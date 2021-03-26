@@ -4,13 +4,14 @@ import React from 'react';
 import { isDefined } from '../../../utils/basicHelpers';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
-import { fieldNames, DateParts } from './util';
+import { fieldNames } from './util';
 import InputTimestampField from './InputTimestampField';
 import useInputTimestamp from './useInputTimestamp';
 import InputTimestampContext from './InputTimestampContext';
 
 import styles from './InputTimestamp.module.scss';
 import useMultiFieldFocus from '../common/useMultiFieldFocus';
+import { DateParts } from '~/utils/timeHelpers';
 
 type TimestampErrorMessages = DateParts;
 

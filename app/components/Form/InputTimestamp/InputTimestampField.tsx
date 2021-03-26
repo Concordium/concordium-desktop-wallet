@@ -8,7 +8,7 @@ import React, {
     useContext,
 } from 'react';
 import { RegisterOptions, useController } from 'react-hook-form';
-import { DateParts } from './util';
+import { DateParts } from '~/utils/timeHelpers';
 
 import styles from './InputTimestamp.module.scss';
 import InputTimeStampContext from './InputTimestampContext';

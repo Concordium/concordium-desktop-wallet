@@ -87,3 +87,22 @@ export function noOp(): void {
 export async function asyncNoOp(): Promise<void> {
     return new Promise((resolve) => resolve());
 }
+
+export const ensureNumberLength = (length: number) => (
+    value?: string
+): string => {
+    if (!value) {
+        return '';
+    }
+
+    const valueLength = value.length;
+
+    if (valueLength >= length) {
+        return value;
+    }
+
+    const missing = length - valueLength;
+    const prepend = new Array(missing).fill(`0`).join('');
+
+    return `${prepend}${value}`;
+};
