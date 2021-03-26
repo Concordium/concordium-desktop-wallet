@@ -28,6 +28,7 @@
 
 .row {
     display: flex;
+    margin-top: 10px;
 
     .left,
     .right {
@@ -36,6 +37,9 @@
 
     &:not(:last-of-type) {
         margin-bottom: 10px;
+    }
+    &:first-of-type {
+        margin: 0;
     }
 }
 
@@ -50,4 +54,13 @@
 .inline {
     display: inline;
     padding-right: 10px;
+}
+
+.dividingLine {
+    content: '';
+    background: $color-grey;
+    width: calc(100% + 20px);
+    height: 1px;
+    display: block;
+    margin-left: -10px;
 }

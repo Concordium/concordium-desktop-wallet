@@ -1,6 +1,5 @@
 import React, { MouseEvent } from 'react';
 import clsx from 'clsx';
-import { Divider } from 'semantic-ui-react';
 import PendingImage from '@resources/svg/pending_old.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import { displayAsGTU } from '~/utils/gtu';
@@ -72,12 +71,12 @@ function AccountListElement({
             <SidedRow
                 left={
                     <>
-                        <h2 className={styles.inline}>
+                        <b className={styles.inline}>
                             {account.name}
                             {account.status === AccountStatus.Pending ? (
                                 <PendingImage />
                             ) : undefined}
-                        </h2>
+                        </b>
                         {isInitialAccount(account) ? <>(Initial)</> : undefined}
                         {accountInfo && accountInfo.accountBaker ? (
                             <>(baker)</>
@@ -95,23 +94,27 @@ function AccountListElement({
                     </>
                 }
             />
-            <Divider />
+            <div className={styles.dividingLine} />
             <SidedRow
                 left={<h3>Balance:</h3>}
-                right={displayAsGTU(unShielded)}
+                right={<h3>{displayAsGTU(unShielded)}</h3>}
             />
             <SidedRow
                 left="- At Disposal:"
                 right={displayAsGTU(unShielded - scheduled)}
             />
-            <Divider />
             <SidedRow
-                left="Shielded Balance:"
+                left="- Staked:"
+                right={displayAsGTU(unShielded - scheduled)}
+            />
+            <div className={styles.dividingLine} />
+            <SidedRow
+                left={<h3>Shielded Balance:</h3>}
                 right={
-                    <>
+                    <h3>
                         {displayAsGTU(shielded)}
                         {hidden}
-                    </>
+                    </h3>
                 }
                 onClick={(e) => {
                     e.stopPropagation(); // So that we avoid triggering the parent's onClick
