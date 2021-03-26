@@ -15,7 +15,7 @@ interface Props {
 }
 
 /**
- * Controls the flow of creating a simple transfer.
+ * Controls the flow of creating an external transfer.
  */
 export default function ExternalTransfer({
     toConfirmTransfer,

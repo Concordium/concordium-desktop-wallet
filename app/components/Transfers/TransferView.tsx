@@ -11,7 +11,7 @@ interface Props {
 }
 
 /**
- * Controls the flow of creating a transfer to encrypted.
+ * Container for the components when creating a transfer.
  */
 export default function TransferView({
     showBack,
