@@ -26,7 +26,6 @@ import findAuthorizationKey from '../../../utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '../../../utils/routerHelper';
 import Columns from '~/components/Columns';
 import Form from '~/components/Form';
-import PageLayout from '~/components/PageLayout';
 import TransactionDetails from '~/components/TransactionDetails';
 import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
 import { ensureProps } from '~/utils/componentHelpers';
@@ -35,6 +34,7 @@ import styles from './SignTransactionProposal.module.scss';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import { LedgerStatusType } from '~/components/ledger/util';
+import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface SignInput {
     multiSignatureTransaction: MultiSignatureTransaction;
@@ -50,7 +50,7 @@ interface Props {
  * proposal that is to be signed before being generated and persisted
  * to the database.
  */
-function ConfirmProposalDetailsView({ location }: Props) {
+function SignTransactionProposalView({ location }: Props) {
     const [showValidationError, setShowValidationError] = useState(false);
     const [transactionHash, setTransactionHash] = useState<string>();
     const [signing, setSigning] = useState(false);
@@ -138,92 +138,75 @@ function ConfirmProposalDetailsView({ location }: Props) {
         | AccountTransaction = parse(transaction);
 
     return (
-        <PageLayout>
-            <PageLayout.Header>
-                <h1>{transactionHandler.title}</h1>
-            </PageLayout.Header>
+        <MultiSignatureLayout
+            pageTitle={transactionHandler.title}
+            stepTitle="Transaction signing confirmation | Transaction Type"
+        >
             <SimpleErrorModal
                 show={showValidationError}
                 header="Unauthorized key"
                 content="Your key is not authorized to sign this update type."
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
-            <PageLayout.Container
-                className={styles.container}
-                closeRoute={routes.MULTISIGTRANSACTIONS}
-                padding="vertical"
+            <Columns
+                className={styles.body}
+                divider
+                columnClassName={styles.column}
             >
-                <h2 className={styles.header}>
-                    Transaction signing confirmation | Transaction Type
-                </h2>
-                <div className={styles.content}>
-                    <Columns
-                        className={styles.body}
-                        divider
-                        columnClassName={styles.column}
-                    >
-                        <Columns.Column header="Transaction Details">
-                            <section className={styles.columnContent}>
-                                <TransactionDetails
-                                    transaction={transactionObject}
-                                />
-                                {instanceOfUpdateInstruction(
-                                    transactionObject
-                                ) && (
-                                    <ExpiredEffectiveTimeView
-                                        transaction={transactionObject}
-                                    />
-                                )}
-                            </section>
-                        </Columns.Column>
-                        <Columns.Column header="Signature and Hardware Wallet">
-                            <Ledger ledgerCallback={signingFunction}>
-                                {(status, statusView, submit = asyncNoOp) => (
-                                    <section
-                                        className={styles.signColumnContent}
+                <Columns.Column header="Transaction Details">
+                    <section className={styles.columnContent}>
+                        <TransactionDetails transaction={transactionObject} />
+                        {instanceOfUpdateInstruction(transactionObject) && (
+                            <ExpiredEffectiveTimeView
+                                transaction={transactionObject}
+                            />
+                        )}
+                    </section>
+                </Columns.Column>
+                <Columns.Column header="Signature and Hardware Wallet">
+                    <Ledger ledgerCallback={signingFunction}>
+                        {(status, statusView, submit = asyncNoOp) => (
+                            <section className={styles.signColumnContent}>
+                                <h5>Hardware wallet status</h5>
+                                {statusView}
+                                <Form
+                                    onSubmit={() => {
+                                        setSigning(true);
+                                        submit();
+                                    }}
+                                >
+                                    <Form.Checkbox
+                                        name="check"
+                                        rules={{ required: true }}
+                                        disabled={signing}
                                     >
-                                        <h5>Hardware wallet status</h5>
-                                        {statusView}
-                                        <Form
-                                            onSubmit={() => {
-                                                setSigning(true);
-                                                submit();
-                                            }}
-                                        >
-                                            <Form.Checkbox
-                                                name="check"
-                                                rules={{ required: true }}
-                                                disabled={signing}
-                                            >
-                                                I am sure that the propsed
-                                                changes are correct
-                                            </Form.Checkbox>
-                                            <Form.Submit
-                                                disabled={
-                                                    signing ||
-                                                    status !==
-                                                        LedgerStatusType.CONNECTED
-                                                }
-                                                className={styles.submit}
-                                            >
-                                                Generate Transaction
-                                            </Form.Submit>
-                                        </Form>
-                                    </section>
-                                )}
-                            </Ledger>
-                        </Columns.Column>
-                    </Columns>
-                </div>
-            </PageLayout.Container>
-        </PageLayout>
+                                        I am sure that the propsed changes are
+                                        correct
+                                    </Form.Checkbox>
+                                    <Form.Submit
+                                        disabled={
+                                            signing ||
+                                            status !==
+                                                LedgerStatusType.CONNECTED
+                                        }
+                                        className={styles.submit}
+                                    >
+                                        Generate Transaction
+                                    </Form.Submit>
+                                </Form>
+                            </section>
+                        )}
+                    </Ledger>
+                </Columns.Column>
+            </Columns>
+        </MultiSignatureLayout>
     );
 }
 
-const ConfirmProposalDetails = ensureProps(
+const SignTransactionProposal = ensureProps(
     ({ location }) => !!location.state,
     <Redirect to={routes.MULTISIGTRANSACTIONS} />,
-    ConfirmProposalDetailsView
+    SignTransactionProposalView
 );
 
-export default ConfirmProposalDetails;
+export default SignTransactionProposal;

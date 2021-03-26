@@ -13,7 +13,6 @@ import {
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import findHandler from '~/utils/updates/HandlerFinder';
-import PageLayout from '~/components/PageLayout';
 import Loading from '~/cross-app-components/Loading';
 import Modal from '~/cross-app-components/Modal';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
@@ -24,6 +23,7 @@ import { futureDate } from '~/components/Form/util/validation';
 
 import styles from './MultiSignatureCreateProposal.module.scss';
 import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
+import MultiSignatureLayout from '../MultiSignatureLayout';
 
 interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -124,63 +124,46 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
     }
 
     return (
-        <PageLayout>
+        <MultiSignatureLayout
+            pageTitle={handler.title}
+            stepTitle={`Transaction Proposal | ${displayType}`}
+        >
             {RestrictionModal}
-            <PageLayout.Header>
-                <h1>{handler.title}</h1>
-            </PageLayout.Header>
-            <PageLayout.Container
-                closeRoute={routes.MULTISIGTRANSACTIONS}
-                className={styles.container}
-                padding="vertical"
+            <h3 className={styles.subHeader}>Transaction details</h3>
+            <Form<FieldValues & MultiSignatureCreateProposalForm>
+                className={styles.details}
+                onSubmit={handleSubmit}
             >
-                <h2 className={styles.header}>
-                    Transaction Proposal | {displayType}
-                </h2>
-                <div className={styles.content}>
-                    <h3 className={styles.subHeader}>Transaction details</h3>
-                    <Form<FieldValues & MultiSignatureCreateProposalForm>
-                        className={styles.details}
-                        onSubmit={handleSubmit}
-                    >
-                        <div className={styles.proposal}>
-                            <p>
-                                Add all the details for the {displayType}{' '}
-                                transaction below.
-                            </p>
-                            {loading && <Loading />}
-                            {blockSummary && (
-                                <>
-                                    <UpdateComponent
-                                        blockSummary={blockSummary}
-                                    />
-                                    <Form.Timestamp
-                                        name="effectiveTime"
-                                        label="Effective Time"
-                                        defaultValue={
-                                            new Date(
-                                                getNow() +
-                                                    5 * TimeConstants.Minute
-                                            )
-                                        }
-                                        rules={{
-                                            required:
-                                                'Effective time is required',
-                                            validate: futureDate(
-                                                'Effective time must be in the future'
-                                            ),
-                                        }}
-                                    />
-                                </>
-                            )}
-                        </div>
-                        <Form.Submit disabled={!blockSummary}>
-                            Continue
-                        </Form.Submit>
-                    </Form>
+                <div className={styles.proposal}>
+                    <p>
+                        Add all the details for the {displayType} transaction
+                        below.
+                    </p>
+                    {loading && <Loading />}
+                    {blockSummary && (
+                        <>
+                            <UpdateComponent blockSummary={blockSummary} />
+                            <Form.Timestamp
+                                name="effectiveTime"
+                                label="Effective Time"
+                                defaultValue={
+                                    new Date(
+                                        getNow() + 5 * TimeConstants.Minute
+                                    )
+                                }
+                                rules={{
+                                    required: 'Effective time is required',
+                                    validate: futureDate(
+                                        'Effective time must be in the future'
+                                    ),
+                                }}
+                            />
+                        </>
+                    )}
                 </div>
-            </PageLayout.Container>
-        </PageLayout>
+                <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
+            </Form>
+        </MultiSignatureLayout>
     );
 }
 
