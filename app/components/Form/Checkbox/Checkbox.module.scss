@@ -34,12 +34,12 @@
         }
     }
 
-    .rootInvalid & {
-        border-color: $color-error;
-    }
-
     input:focus + & {
         border-color: $form-color-focus;
+    }
+
+    .rootInvalid & {
+        border-color: $color-error !important;
     }
 }
 
