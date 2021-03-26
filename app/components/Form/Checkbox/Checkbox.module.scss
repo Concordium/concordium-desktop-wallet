@@ -3,6 +3,8 @@
 .root {
     display: flex;
     align-items: center;
+    text-align: left;
+    word-break: normal;
 
     input {
         @include hideInput;
@@ -18,6 +20,7 @@
     align-items: center;
     justify-content: center;
     transition: border-color $form-transition;
+    flex: 0 0 auto;
 
     &Large {
         width: 26px;

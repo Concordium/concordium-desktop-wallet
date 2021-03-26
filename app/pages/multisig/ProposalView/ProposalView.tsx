@@ -427,39 +427,52 @@ function ProposalView({ proposal }: ProposalViewProps) {
                         </div>
                     </Columns.Column>
                     <Columns.Column header="Security & Submission Details">
-                        <div className={styles.columnContent}>
-                            <TransactionHashView
-                                transactionHash={transactionHash}
-                            />
-                            <Button
-                                size="small"
-                                onClick={() => setShowCloseModal(true)}
-                                disabled={
-                                    proposal.status !==
-                                    MultiSignatureTransactionStatus.Open
-                                }
-                            >
-                                Close proposal
-                            </Button>
-                            <Button
-                                disabled={
-                                    proposal.status !==
-                                    MultiSignatureTransactionStatus.Open
-                                }
-                                onClick={
-                                    () =>
-                                        saveFile(
-                                            proposal.transaction,
-                                            'Export transaction'
-                                        )
-                                    // TODO Handle failure
-                                }
-                            >
-                                Export transaction proposal
-                            </Button>
-                            <Form.Submit disabled={!readyToSubmit}>
-                                Submit transaction to chain
-                            </Form.Submit>
+                        <div className={styles.actionsColumnContent}>
+                            <div>
+                                <TransactionHashView
+                                    transactionHash={transactionHash}
+                                />
+                            </div>
+                            <div className={styles.actions}>
+                                {proposal.status ===
+                                    MultiSignatureTransactionStatus.Open && (
+                                    <Button
+                                        size="small"
+                                        className={styles.closeProposalButton}
+                                        onClick={() => setShowCloseModal(true)}
+                                    >
+                                        Close proposal
+                                    </Button>
+                                )}
+                                <Button
+                                    className={styles.exportButton}
+                                    disabled={
+                                        proposal.status !==
+                                        MultiSignatureTransactionStatus.Open
+                                    }
+                                    onClick={
+                                        () =>
+                                            saveFile(
+                                                proposal.transaction,
+                                                'Export transaction'
+                                            )
+                                        // TODO Handle failure
+                                    }
+                                >
+                                    Export transaction proposal
+                                </Button>
+                                <Form.Checkbox
+                                    className={styles.finalCheckbox}
+                                    name="finalCheck"
+                                    disabled={!readyToSubmit}
+                                >
+                                    I understand this is the final submission
+                                    and cannot be reverted
+                                </Form.Checkbox>
+                                <Form.Submit disabled={!readyToSubmit}>
+                                    Submit transaction to chain
+                                </Form.Submit>
+                            </div>
                         </div>
                     </Columns.Column>
                 </Columns>

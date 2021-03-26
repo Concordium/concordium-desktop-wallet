@@ -12,9 +12,8 @@ interface Props {
 export default function TransactionHashView({ transactionHash }: Props) {
     return (
         <>
-            <h3>Transaction identicon</h3>
             <CopiableIdenticon data={transactionHash} />
-            <h3>Transaction hash</h3>
+            <h5>Transaction hash</h5>
             {transactionHash}
         </>
     );
