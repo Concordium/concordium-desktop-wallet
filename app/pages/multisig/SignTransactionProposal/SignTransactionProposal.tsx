@@ -87,6 +87,7 @@ function ConfirmProposalDetailsView({ location }: Props) {
     }, [setTransactionHash, transactionHandler, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
+        console.log(ledger);
         const authorizationKey = await findAuthorizationKey(
             ledger,
             transactionHandler,

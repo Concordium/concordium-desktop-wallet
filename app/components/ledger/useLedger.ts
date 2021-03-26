@@ -31,12 +31,9 @@ export default function useLedger(
     statusText: string;
     submitHandler: LedgerSubmitHandler;
 } {
-    const [{ status, text }, dispatch] = useReducer(
+    const [{ status, text, client }, dispatch] = useReducer(
         ledgerReducer,
         getInitialState()
-    );
-    const [client, setClient] = useState<ConcordiumLedgerClient | undefined>(
-        undefined
     );
 
     const [ledgerSubscription, setLedgerSubscription] = useState<
@@ -115,7 +112,8 @@ export default function useLedger(
             }
             if (client) {
                 client.closeTransport();
-                setClient(undefined);
+
+                dispatch(resetAction());
             }
         };
     }, [ledgerSubscription, listenForLedger, client]);

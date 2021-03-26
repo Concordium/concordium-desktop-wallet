@@ -78,6 +78,8 @@ function getStatusMessage(
     switch (status) {
         case LedgerStatusType.LOADING:
             return 'Waiting for device';
+        case LedgerStatusType.AWAITING_USER_INPUT:
+            return 'Waiting for user to finish the process on device';
         case LedgerStatusType.ERROR:
             return 'Unable to connect to device';
         case LedgerStatusType.CONNECTED:
@@ -101,8 +103,8 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
     switch (a.type) {
         case LedgerActionType.PENDING:
             return {
+                ...s,
                 status: a.status,
-                deviceName: s.deviceName,
                 text: getStatusMessage(a.status),
             };
         case LedgerActionType.CONNECTED:
@@ -117,6 +119,8 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
             };
         case LedgerActionType.RESET:
             return getInitialState();
+        case LedgerActionType.SET_STATUS_TEXT:
+            return { ...s, text: a.text };
         case LedgerActionType.ERROR:
             return {
                 ...s,
