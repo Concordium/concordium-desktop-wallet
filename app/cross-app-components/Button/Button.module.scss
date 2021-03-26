@@ -18,6 +18,10 @@
     position: relative;
     border: none;
 
+    &:disabled {
+        cursor: default;
+    }
+
     &Clear {
         background: transparent;
         padding: 0;

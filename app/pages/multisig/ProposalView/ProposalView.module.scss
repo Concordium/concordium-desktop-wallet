@@ -9,23 +9,6 @@
     justify-content: space-between;
 }
 
-.signatureCheckbox {
-    margin-bottom: 15px;
-    font-size: $font-size-body2;
-    position: relative;
-}
-
-.signedCheckoxLabel {
-    position: absolute;
-    top: -5px;
-    text-align: left;
-
-    > * {
-        font-size: $font-size-body3;
-        color: $color-text-faded;
-    }
-}
-
 .fileInput {
     height: 200px;
 }

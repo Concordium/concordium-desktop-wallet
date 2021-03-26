@@ -9,6 +9,10 @@
     input {
         @include hideInput;
     }
+
+    &Disabled {
+        cursor: default;
+    }
 }
 
 .checkbox {

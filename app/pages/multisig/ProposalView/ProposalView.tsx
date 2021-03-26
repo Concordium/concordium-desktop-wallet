@@ -49,6 +49,7 @@ import FileInput from '~/components/Form/FileInput';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import CloseProposalModal from './CloseProposalModal';
 import { fileListToFileArray } from '~/components/Form/FileInput/util';
+import SignatureCheckboxes from './SignatureCheckboxes';
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
@@ -241,12 +242,6 @@ function ProposalView({ proposal }: ProposalViewProps) {
     ).toString('hex');
 
     async function submitTransaction() {
-        if (!proposal) {
-            // TODO: can we remove this without getting a type error.
-            throw new Error(
-                'The proposal page should not be loaded without a proposal in the state.'
-            );
-        }
         const payload = serializeForSubmission(instruction, serializedPayload);
         const submitted = (await sendTransaction(payload)).getValue();
         const modifiedProposal: MultiSignatureTransaction = {
@@ -269,33 +264,12 @@ function ProposalView({ proposal }: ProposalViewProps) {
     }
 
     async function closeProposal() {
-        if (proposal) {
-            const closedProposal: MultiSignatureTransaction = {
-                ...proposal,
-                status: MultiSignatureTransactionStatus.Closed,
-            };
-            updateCurrentProposal(dispatch, closedProposal);
-        }
+        const closedProposal: MultiSignatureTransaction = {
+            ...proposal,
+            status: MultiSignatureTransactionStatus.Closed,
+        };
+        updateCurrentProposal(dispatch, closedProposal);
     }
-
-    // const unsignedCheckboxes = [];
-    // for (
-    //     let i = 0;
-    //     i < proposal.threshold - instruction.signatures.length;
-    //     i += 1
-    // ) {
-    //     unsignedCheckboxes.push(
-    //         <Form.Checkbox
-    //             name={`unsigned${i}`}
-    //             key={i}
-    //             disabled
-    //             rules={{ required: true }}
-    //             size="large"
-    //         >
-    //             Awaiting signature
-    //         </Form.Checkbox>
-    //     );
-    // }
 
     const missingSignatures =
         instruction.signatures.length !== proposal.threshold;
@@ -346,67 +320,13 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     {instruction.signatures.length} of{' '}
                                     {proposal.threshold} signatures.
                                 </h5>
-                                {new Array(proposal.threshold)
-                                    .fill(0)
-                                    .map((_, i) => {
-                                        const sig =
-                                            instruction.signatures.length - 1 <=
-                                            i
-                                                ? instruction.signatures[i]
-                                                : undefined;
-                                        const label = sig ? (
-                                            <div
-                                                className={
-                                                    styles.signedCheckoxLabel
-                                                }
-                                            >
-                                                Signed
-                                                <div>
-                                                    {sig.signature.substring(
-                                                        0,
-                                                        16
-                                                    )}
-                                                    ...
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            'Awaiting signature'
-                                        );
-                                        const name = `signature${i}`;
-
-                                        return (
-                                            <Form.Checkbox
-                                                name={name}
-                                                className={
-                                                    styles.signatureCheckbox
-                                                }
-                                                key={name}
-                                                disabled
-                                                defaultChecked={!!sig}
-                                                size="large"
-                                                rules={{ required: true }}
-                                            >
-                                                {label}
-                                            </Form.Checkbox>
-                                        );
-                                    })}
+                                <SignatureCheckboxes
+                                    threshold={proposal.threshold}
+                                    signatures={instruction.signatures.map(
+                                        (s) => s.signature
+                                    )}
+                                />
                             </div>
-                            {/* {instruction.signatures.map(({ signature }) => (
-                                <Form.Checkbox
-                                    name={signature}
-                                    key={signature}
-                                    disabled
-                                    defaultChecked
-                                    rules={{ required: true }}
-                                    size="large"
-                                >
-                                    {`Signed (${signature.substring(
-                                        0,
-                                        16
-                                    )}...)`}
-                                </Form.Checkbox>
-                            ))}
-                            {unsignedCheckboxes} */}
                             <FileInput
                                 placeholder="Drag and drop signatures here"
                                 value={files}
@@ -417,13 +337,6 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     !missingSignatures || currentlyLoadingFile
                                 }
                             />
-                            {/* <DragAndDropFile
-                                text="Drag and drop signatures here"
-                                fileProcessor={loadSignatureFile}
-                                disabled={
-                                    !missingSignatures || currentlyLoadingFile
-                                }
-                            /> */}
                         </div>
                     </Columns.Column>
                     <Columns.Column header="Security & Submission Details">
