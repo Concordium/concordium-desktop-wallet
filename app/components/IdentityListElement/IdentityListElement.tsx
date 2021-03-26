@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 import { Image } from 'semantic-ui-react';
 import PendingImage from '@resources/svg/pending_old.svg';
 import SuccessImage from '@resources/svg/success_old.svg';
@@ -10,6 +11,7 @@ import styles from './IdentityListElement.module.scss';
 interface Props {
     identity: Identity;
     onClick?: () => void;
+    active?: boolean;
 }
 
 // Returns the image corresponding to the given status.
@@ -30,12 +32,19 @@ function statusImage(status: IdentityStatus) {
  * Displays the information of the Identity.
  * TODO: Simplify structure
  */
-function IdentityListElement({ identity, onClick }: Props): JSX.Element {
+function IdentityListElement({
+    identity,
+    onClick,
+    active = false,
+}: Props): JSX.Element {
     const identityProvider = JSON.parse(identity.identityProvider);
     const identityObject = JSON.parse(identity.identityObject);
     return (
         <div
-            className={styles.identityListElement}
+            className={clsx(
+                styles.identityListElement,
+                active && styles.active
+            )}
             onClick={onClick}
             onKeyPress={onClick}
             tabIndex={0}

@@ -15,9 +15,7 @@ import { Identity } from '../../utils/types';
 export default function IdentityList() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
-    // const chosenIdentity =
-    useSelector(chosenIdentitySelector);
-    //                     active={chosenIdentity === identity}
+    const chosenIdentity = useSelector(chosenIdentitySelector);
 
     return (
         <>
@@ -25,6 +23,7 @@ export default function IdentityList() {
                 <IdentityListElement
                     identity={identity}
                     key={identity.id}
+                    active={chosenIdentity === identity}
                     onClick={() => dispatch(chooseIdentity(identity))}
                 />
             ))}

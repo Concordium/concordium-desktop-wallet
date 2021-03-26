@@ -19,6 +19,15 @@
     &:focus {
         box-shadow: 0 0 0 2px $color-pale-blue inset;
     }
+
+    &:focus {
+        box-shadow: 0 0 0 2px $color-pale-blue inset;
+        outline: none;
+    }
+}
+
+.active {
+    box-shadow: 0 0 0 2px $color-pale-blue inset;
 }
 
 .topRow {
