@@ -47,21 +47,35 @@ export function sumToBigInt<T>(
 }
 
 /**
- * Partitions a Uint8Array into chunks of a certain size. The last chunk
- * may have a different size than the provided size.
- * @param array the array to partition
+ * Partitions a generic array into chunks of a certain size. The final
+ * chunk may have a different size less than the provided size.
+ * @param array the array to chunk
  * @param chunkSize the size of each chunk
  */
-export function toChunks<S, T extends Uint8Array | Array<S>>(
-    array: T,
-    chunkSize: number
-) {
+export function chunkArray<T>(array: T[], chunkSize: number): T[][] {
     if (chunkSize <= 0) {
-        throw new Error('Chunk size must be a positive number.');
+        throw new Error('Chunk size has to be a positive number.');
     }
-    const chunks = [];
+    const chunks: T[][] = [];
     for (let i = 0; i < array.length; i += chunkSize) {
         chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
+}
+
+/**
+ * Partitions a Buffer into chunks of a certain size. The final chunk
+ * may have a different size than the provided size.
+ * @param array the Buffer to chunk
+ * @param chunkSize the size of each chunk
+ */
+export function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[] {
+    if (chunkSize <= 0) {
+        throw new Error('Chunk size has to be a positive number.');
+    }
+    const chunks: Buffer[] = [];
+    for (let i = 0; i < buffer.length; i += chunkSize) {
+        chunks.push(buffer.slice(i, i + chunkSize));
     }
     return chunks;
 }

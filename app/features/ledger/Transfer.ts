@@ -20,7 +20,7 @@ import {
 } from '../../utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import { encodeWord16 } from '../../utils/serializationHelpers';
-import { toChunks } from '../../utils/basicHelpers';
+import { chunkBuffer } from '../../utils/basicHelpers';
 
 const INS_SIMPLE_TRANSFER = 0x02;
 const INS_TRANSFER_TO_ENCRYPTED = 0x11;
@@ -144,7 +144,7 @@ async function signTransferToPublic(
     p1 = 0x02;
 
     let response;
-    const chunks = toChunks(proof, 255);
+    const chunks = chunkBuffer(proof, 255);
     for (let i = 0; i < chunks.length; i += 1) {
         // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
