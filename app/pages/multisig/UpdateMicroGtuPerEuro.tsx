@@ -6,8 +6,7 @@ import {
     RelativeRateField,
     FormRelativeRateField,
 } from './common/RelativeRateField';
-
-const noOp = () => null;
+import { noOp } from '~/utils/basicHelpers';
 
 export interface UpdateMicroGtuPerEuroRateFields {
     microGtuPerEuro: ExchangeRate;

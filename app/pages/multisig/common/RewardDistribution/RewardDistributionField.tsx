@@ -17,6 +17,7 @@ import {
     fractionResolutionToPercentage,
     percentageToFractionResolution,
 } from '~/utils/rewardFractionHelpers';
+import { noOp } from '~/utils/basicHelpers';
 
 function scaleField(el: HTMLInputElement | null) {
     if (!el) {
@@ -46,8 +47,6 @@ function parseValue(v: string): number {
 function isValid(v: number): boolean {
     return !Number.isNaN(v) && v <= fractionResolution && v >= 0;
 }
-
-const noOp = () => null;
 
 interface RewardDistributionFieldProps
     extends Pick<
