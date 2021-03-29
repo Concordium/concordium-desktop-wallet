@@ -74,6 +74,8 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
         />
         <Form.File
             name="file"
+            placeholder="Drag and drop file here"
+            buttonTitle="or browse to file"
             rules={{
                 required: 'File is required',
                 validate: maxFileSizeKb(1, 'File size too big (1kb allowed)'),

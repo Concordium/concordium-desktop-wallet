@@ -14,6 +14,7 @@ export interface FileInputProps
             InputHTMLAttributes<HTMLInputElement>,
             'accept' | 'multiple' | 'placeholder' | 'disabled' | 'className'
         > {
+    buttonTitle: string;
     value: FileInputValue;
     onChange(files: FileInputValue): void;
 }
@@ -33,6 +34,7 @@ export default function FileInput({
     error,
     placeholder,
     className,
+    buttonTitle,
     ...inputProps
 }: FileInputProps): JSX.Element {
     const [dragOver, setDragOver] = useState<boolean>(false);
@@ -72,7 +74,7 @@ export default function FileInput({
                     size="tiny"
                     disabled={disabled}
                 >
-                    Browse to file, or drop it here
+                    {buttonTitle}
                 </Button>
                 <input
                     className={styles.input}

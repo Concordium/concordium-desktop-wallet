@@ -59,7 +59,8 @@ export default function UpdateProtocol(): JSX.Element | null {
             <Form.File
                 name={fieldNames.specificationAuxiliaryData}
                 label="Specification Auxiliary Data:"
-                placeholder="No file chosen"
+                placeholder="Drag and drop file here"
+                buttonTitle="or browse to file"
                 rules={{
                     required: 'Specification Auxiliary Data is required',
                     validate: maxFileSizeKb(

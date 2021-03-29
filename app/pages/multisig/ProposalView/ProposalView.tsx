@@ -341,6 +341,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                             </div>
                             <FileInput
                                 placeholder="Drag and drop signatures here"
+                                buttonTitle="or browse to file"
                                 value={files}
                                 onChange={setFiles}
                                 multiple
