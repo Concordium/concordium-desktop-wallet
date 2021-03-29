@@ -17,6 +17,8 @@ import {
 } from '../types';
 import { serializeElectionDifficulty } from '../UpdateSerialization';
 
+const TYPE = 'Update Election Difficulty';
+
 type TransactionType = UpdateInstruction<ElectionDifficulty>;
 
 export default class ElectionDifficultyHandler
@@ -83,5 +85,7 @@ export default class ElectionDifficultyHandler
 
     update = UpdateElectionDifficulty;
 
-    title = 'Foundation Transaction | Update Election Difficulty';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

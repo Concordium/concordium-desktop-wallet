@@ -1,4 +1,5 @@
 import React from 'react';
+import { getFoundationTransactionPageTitle } from '~/pages/multisig/util';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import TransactionFeeDistributionView from '../../pages/multisig/updates/UpdateTransactionFee/TransactionFeeDistributionView';
@@ -17,6 +18,8 @@ import {
     UpdateType,
 } from '../types';
 import { serializeTransactionFeeDistribution } from '../UpdateSerialization';
+
+const TYPE = 'Update Transaction Fee Distribution';
 
 type TransactionType = UpdateInstruction<TransactionFeeDistribution>;
 
@@ -91,5 +94,7 @@ export default class TransactionFeeDistributionHandler
 
     update = UpdateTransactionFeeDistribution;
 
-    title = 'Foundation Transaction | Update Transaction Fee Distribution';
+    title = getFoundationTransactionPageTitle(TYPE);
+
+    type = TYPE;
 }

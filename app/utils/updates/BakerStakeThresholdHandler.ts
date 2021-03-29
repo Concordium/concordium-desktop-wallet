@@ -17,6 +17,8 @@ import {
 } from '../types';
 import { serializeBakerStakeThreshold } from '../UpdateSerialization';
 
+const TYPE = 'Update Baker Stake Threshold';
+
 type TransactionType = UpdateInstruction<BakerStakeThreshold>;
 
 export default class EuroPerEnergyHandler
@@ -83,5 +85,7 @@ export default class EuroPerEnergyHandler
 
     update = UpdateBakerStakeThreshold;
 
-    title = 'Foundation Transaction | Update baker stake threshold';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

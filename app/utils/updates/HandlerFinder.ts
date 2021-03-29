@@ -34,10 +34,13 @@ class HandlerTypeMiddleware<T>
 
     title: string;
 
+    type: string;
+
     constructor(base: TransactionHandler<T, ConcordiumLedgerClient>) {
         this.base = base;
         this.update = base.update;
         this.title = base.title;
+        this.type = base.type;
     }
 
     confirmType(transaction: UpdateInstruction<UpdateInstructionPayload>) {

@@ -17,6 +17,8 @@ import {
 } from '../types';
 import { serializeExchangeRate } from '../UpdateSerialization';
 
+const TYPE = 'Update Micro GTU Per Euro';
+
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
 export default class MicroGtuPerEuroHandler
@@ -81,5 +83,7 @@ export default class MicroGtuPerEuroHandler
 
     update = UpdateMicroGtuPerEuro;
 
-    title = 'Foundation Transaction | Update Micro GTU Per Euro';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

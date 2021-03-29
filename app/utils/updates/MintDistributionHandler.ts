@@ -17,6 +17,8 @@ import {
 } from '../types';
 import { serializeMintDistribution } from '../UpdateSerialization';
 
+const TYPE = 'Update Mint Distribution';
+
 type TransactionType = UpdateInstruction<MintDistribution>;
 
 export default class MintDistributionHandler
@@ -94,5 +96,7 @@ export default class MintDistributionHandler
 
     update = UpdateMintDistribution;
 
-    title = 'Foundation Transaction | Update Mint Distribution';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

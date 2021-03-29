@@ -17,6 +17,8 @@ import {
 } from '../types';
 import { serializeProtocolUpdate } from '../UpdateSerialization';
 
+const TYPE = 'Update Chain Protocol';
+
 type TransactionType = UpdateInstruction<ProtocolUpdate>;
 
 export default class ProtocolUpdateHandler
@@ -91,5 +93,7 @@ export default class ProtocolUpdateHandler
 
     update = UpdateProtocol;
 
-    title = 'Foundation Transaction | Update Chain Protocol';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

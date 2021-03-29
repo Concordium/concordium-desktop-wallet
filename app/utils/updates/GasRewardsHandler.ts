@@ -17,6 +17,8 @@ import {
 } from '../types';
 import { serializeGasRewards } from '../UpdateSerialization';
 
+const TYPE = 'Update Gas Rewards';
+
 type TransactionType = UpdateInstruction<GasRewards>;
 
 export default class GasRewardsHandler
@@ -80,5 +82,7 @@ export default class GasRewardsHandler
 
     update = UpdateGasRewards;
 
-    title = 'Foundation Transaction | Update Gas Rewards';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

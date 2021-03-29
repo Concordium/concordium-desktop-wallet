@@ -54,6 +54,7 @@ export interface TransactionHandler<T, S> {
     view: (transaction: T) => JSX.Element;
     getAuthorization: (authorizations: Authorizations) => Authorization;
     update: UpdateComponent;
+    type: string;
     title: string;
 }
 

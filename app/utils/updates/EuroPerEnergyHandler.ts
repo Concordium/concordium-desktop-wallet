@@ -17,6 +17,8 @@ import {
 } from '../types';
 import { serializeExchangeRate } from '../UpdateSerialization';
 
+const TYPE = 'Update Euro Per Energy';
+
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
 export default class EuroPerEnergyHandler
@@ -78,5 +80,7 @@ export default class EuroPerEnergyHandler
 
     update = UpdateEuroPerEnergy;
 
-    title = 'Foundation Transaction | Update Euro Per Energy';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

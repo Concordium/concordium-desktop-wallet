@@ -17,6 +17,8 @@ import {
 } from '../types';
 import { serializeFoundationAccount } from '../UpdateSerialization';
 
+const TYPE = 'Update Foundation Account';
+
 type TransactionType = UpdateInstruction<FoundationAccount>;
 
 export default class FoundationAccountHandler
@@ -83,5 +85,7 @@ export default class FoundationAccountHandler
 
     update = UpdateFoundationAccount;
 
-    title = 'Foundation Transaction | Update Foundation Account';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }
