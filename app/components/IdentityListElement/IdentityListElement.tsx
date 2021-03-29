@@ -1,6 +1,5 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Image } from 'semantic-ui-react';
 import PendingImage from '@resources/svg/pending_old.svg';
 import SuccessImage from '@resources/svg/success_old.svg';
 import RejectedImage from '@resources/svg/warning_old.svg';
@@ -51,11 +50,10 @@ function IdentityListElement({
             role="button"
         >
             <div className={styles.topRow}>
-                <Image
+                <img
+                    className={styles.statusImage}
                     src={`data:image/png;base64, ${identityProvider.metadata.icon}`}
                     alt={identity.status}
-                    size="mini"
-                    spaced
                 />
                 {statusImage(identity.status)}
                 <h3 className={styles.rightAligned}>Identity</h3>
