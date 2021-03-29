@@ -17,6 +17,7 @@ export interface FileInputProps
     buttonTitle: string;
     value: FileInputValue;
     onChange(files: FileInputValue): void;
+    disableFileNames?: boolean;
 }
 
 /**
@@ -35,6 +36,7 @@ export default function FileInput({
     placeholder,
     className,
     buttonTitle,
+    disableFileNames = false,
     ...inputProps
 }: FileInputProps): JSX.Element {
     const [dragOver, setDragOver] = useState<boolean>(false);
@@ -59,7 +61,7 @@ export default function FileInput({
         >
             {label && <span className={styles.label}>{label}</span>}
             <div className={styles.wrapper}>
-                {files.length === 0
+                {files.length === 0 || disableFileNames
                     ? placeholder && (
                           <div className={styles.empty}>{placeholder}</div>
                       )

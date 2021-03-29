@@ -12,13 +12,14 @@ import SimpleErrorModal, {
 } from '~/components/SimpleErrorModal';
 import FileInput from '~/components/Form/FileInput';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
+import styles from './BrowseTransactionFile.module.scss';
 
 /**
  * Component that displays a drag and drop field where transaction files can
  * be dropped to initiate signing the transaction. A button can also be used
  * over the drag and drop field.
  */
-export default function BrowseTransactionFileView() {
+export default function BrowseTransactionFile() {
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
@@ -86,10 +87,12 @@ export default function BrowseTransactionFileView() {
                 onClick={() => setShowError({ show: false })}
             />
             <FileInput
+                className={styles.input}
                 placeholder="Drag and drop file here"
                 buttonTitle="Or browse to file"
                 value={files}
                 onChange={setFiles}
+                disableFileNames
             />
         </>
     );

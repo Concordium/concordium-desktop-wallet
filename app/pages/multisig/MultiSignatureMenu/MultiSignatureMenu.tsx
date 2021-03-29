@@ -4,7 +4,7 @@ import ButtonNavLink from '~/components/ButtonNavLink';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
 
-import BrowseTransactionFileView from './BrowseTransactionFileView';
+import BrowseTransactionFile from './BrowseTransactionFile/BrowseTransactionFile';
 import ExportKeyList from './ExportKeyList';
 import MultiSignatureCreateProposalList from './MultiSignatureCreateProposalList';
 import ProposalList from './ProposalList';
@@ -53,7 +53,7 @@ export default function MultiSignatureMenu(): JSX.Element {
                     />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS_BROWSE_TRANSACTION}
-                        component={BrowseTransactionFileView}
+                        component={BrowseTransactionFile}
                     />
                     <Route
                         path={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}

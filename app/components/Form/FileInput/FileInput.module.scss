@@ -6,6 +6,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    border-radius: 10px;
 }
 
 .label {
@@ -23,7 +24,6 @@
     padding: 20px 30px;
     position: relative;
     border: 2px dashed $color-grey;
-    border-radius: 10px;
 
     .hovering & {
         border-color: $color-pale-blue;
