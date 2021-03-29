@@ -8,6 +8,7 @@ import {
     chosenIdentitySelector,
 } from '../../features/IdentitySlice';
 import { Identity } from '../../utils/types';
+import styles from './Identities.module.scss';
 
 /**
  * Displays the List of local identities, And allows picking the chosen identity.
@@ -23,6 +24,7 @@ export default function IdentityList() {
                 <IdentityListElement
                     identity={identity}
                     key={identity.id}
+                    className={styles.listElement}
                     active={chosenIdentity === identity}
                     onClick={() => dispatch(chooseIdentity(identity))}
                 />

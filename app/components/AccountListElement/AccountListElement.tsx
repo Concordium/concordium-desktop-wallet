@@ -8,15 +8,13 @@ import { isInitialAccount } from '~/utils/accountHelpers';
 // import SidedRow from '~/components/SidedRow';
 import styles from './AccountListElement.module.scss';
 
-const nop = () => {};
-
 interface RowProps {
     left: string | JSX.Element;
     right: string | JSX.Element;
     onClick?(e: MouseEvent): void;
 }
 
-function SidedRow({ left, right, onClick = nop }: RowProps): JSX.Element {
+function SidedRow({ left, right, onClick }: RowProps): JSX.Element {
     return (
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div className={styles.row} onClick={onClick}>
@@ -28,9 +26,10 @@ function SidedRow({ left, right, onClick = nop }: RowProps): JSX.Element {
 
 interface Props {
     account: Account;
-    accountInfo?: AccountInfo | undefined;
+    accountInfo?: AccountInfo;
     onClick?(shielded: boolean): void;
     active?: boolean;
+    className?: string;
 }
 
 /**
@@ -39,10 +38,11 @@ interface Props {
  * the shielded balance (with argument true)
  * or the public balances (with argument false)
  */
-function AccountListElement({
+export default function AccountListElement({
     account,
     accountInfo,
-    onClick = nop,
+    onClick,
+    className,
     active = false,
 }: Props): JSX.Element {
     const shielded = account.totalDecrypted
@@ -62,9 +62,14 @@ function AccountListElement({
 
     return (
         <div
-            className={clsx(styles.accountListElement, active && styles.active)}
-            onClick={() => onClick(false)}
-            onKeyPress={() => onClick(false)}
+            className={clsx(
+                styles.accountListElement,
+                className,
+                active && styles.active,
+                Boolean(onClick) && styles.clickable
+            )}
+            onClick={() => onClick && onClick(false)}
+            onKeyPress={() => onClick && onClick(false)}
             tabIndex={0}
             role="button"
         >
@@ -118,16 +123,9 @@ function AccountListElement({
                 }
                 onClick={(e) => {
                     e.stopPropagation(); // So that we avoid triggering the parent's onClick
-                    onClick(true);
+                    return onClick && onClick(true);
                 }}
             />
         </div>
     );
 }
-
-AccountListElement.defaultProps = {
-    accountInfo: undefined,
-    onClick: nop,
-};
-
-export default AccountListElement;

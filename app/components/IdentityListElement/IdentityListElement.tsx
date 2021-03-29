@@ -9,6 +9,7 @@ import styles from './IdentityListElement.module.scss';
 
 interface Props {
     identity: Identity;
+    className?: string;
     onClick?: () => void;
     active?: boolean;
 }
@@ -34,6 +35,7 @@ function statusImage(status: IdentityStatus) {
 function IdentityListElement({
     identity,
     onClick,
+    className,
     active = false,
 }: Props): JSX.Element {
     const identityProvider = JSON.parse(identity.identityProvider);
@@ -42,7 +44,9 @@ function IdentityListElement({
         <div
             className={clsx(
                 styles.identityListElement,
-                active && styles.active
+                active && styles.active,
+                onClick && styles.clickable,
+                className
             )}
             onClick={onClick}
             onKeyPress={onClick}
