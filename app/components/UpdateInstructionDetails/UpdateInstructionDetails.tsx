@@ -1,6 +1,15 @@
+import clsx from 'clsx';
 import React from 'react';
-import { dateFromTimeStamp, getFormattedDateString } from '~/utils/timeHelpers';
-import { UpdateInstruction, UpdateInstructionPayload } from '~/utils/types';
+import {
+    dateFromTimeStamp,
+    getFormattedDateString,
+    getNow,
+} from '~/utils/timeHelpers';
+import {
+    TimeStampUnit,
+    UpdateInstruction,
+    UpdateInstructionPayload,
+} from '~/utils/types';
 import findHandler from '~/utils/updates/HandlerFinder';
 
 import styles from './UpdateInstructionDetails.module.scss';
@@ -18,6 +27,7 @@ export default function UpdateInstructionDetails({
 }: Props): JSX.Element {
     const handler = findHandler(transaction.type);
     const date = dateFromTimeStamp(transaction.header.effectiveTime);
+    const isExpired = date.getDate() < getNow(TimeStampUnit.milliSeconds);
 
     return (
         <div className={styles.root}>
@@ -25,7 +35,12 @@ export default function UpdateInstructionDetails({
             {date && (
                 <div>
                     <h5>Effective time:</h5>
-                    <span className={styles.timestamp}>
+                    <span
+                        className={clsx(
+                            styles.timestamp,
+                            isExpired && 'textError'
+                        )}
+                    >
                         {getFormattedDateString(date)}
                     </span>
                 </div>
