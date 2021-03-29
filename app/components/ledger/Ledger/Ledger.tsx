@@ -19,7 +19,7 @@ interface LedgerProps extends Pick<LedgerViewProps, 'children'> {
  *   {(status, statusView, submit) => (
  *     <div>
  *       {statusView}
- *       <Button onClick={submit} disabled={status !== 'CONNECTED'}>Submit</Button>
+ *       <Button onClick={submit} disabled={status !== LedgerStatusType.CONNECTED}>Submit</Button>
  *     </div>
  *   )}
  * </Ledger>

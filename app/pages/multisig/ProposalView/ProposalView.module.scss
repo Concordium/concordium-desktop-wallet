@@ -1,13 +1,5 @@
 @import 'config/bundle';
-@import '../common/multiSignatureFlowPage';
-
-.signaturesColumnContent,
-.actionsColumnContent {
-    composes: columnContent;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
+@import '../common/MultiSignatureFlowPage.module';
 
 .fileInput {
     height: 200px;

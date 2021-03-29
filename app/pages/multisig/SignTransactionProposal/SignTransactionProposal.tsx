@@ -205,9 +205,9 @@ function SignTransactionProposalView({ location }: Props) {
 }
 
 const SignTransactionProposal = ensureProps(
+    SignTransactionProposalView,
     ({ location }) => !!location.state,
-    <Redirect to={routes.MULTISIGTRANSACTIONS} />,
-    SignTransactionProposalView
+    <Redirect to={routes.MULTISIGTRANSACTIONS} />
 );
 
 export default SignTransactionProposal;

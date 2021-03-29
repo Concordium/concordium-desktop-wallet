@@ -1,12 +1,11 @@
 import React from 'react';
 import { Header } from 'semantic-ui-react';
-import { getNow } from '../../utils/timeHelpers';
+import { isExpired } from '~/utils/transactionHelpers';
 import {
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     MultiSignatureTransactionStatus,
-    TimeStampUnit,
 } from '../../utils/types';
 
 interface Props {
@@ -25,7 +24,7 @@ export default function ExpiredEffectiveTimeView({
     if (
         (!proposal ||
             proposal.status === MultiSignatureTransactionStatus.Expired) &&
-        transaction.header.timeout <= getNow(TimeStampUnit.seconds)
+        isExpired(transaction)
     ) {
         return (
             <Header color="red" size="small">

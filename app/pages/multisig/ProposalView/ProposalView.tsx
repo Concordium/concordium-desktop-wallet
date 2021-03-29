@@ -271,7 +271,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
     const missingSignatures =
         instruction.signatures.length !== proposal.threshold;
 
-    const isOpen = proposal.status === MultiSignatureTransactionStatus.Open;
+    // const isOpen = proposal.status === MultiSignatureTransactionStatus.Open;
 
     return (
         <MultiSignatureLayout
@@ -308,8 +308,11 @@ function ProposalView({ proposal }: ProposalViewProps) {
                             />
                         </div>
                     </Columns.Column>
-                    <Columns.Column header="Signatures">
-                        <div className={styles.signaturesColumnContent}>
+                    <Columns.Column
+                        header="Signatures"
+                        className={styles.stretchColumn}
+                    >
+                        <div className={styles.columnContent}>
                             <div>
                                 <h5>
                                     {instruction.signatures.length} of{' '}
@@ -334,8 +337,11 @@ function ProposalView({ proposal }: ProposalViewProps) {
                             />
                         </div>
                     </Columns.Column>
-                    <Columns.Column header="Security & Submission Details">
-                        <div className={styles.actionsColumnContent}>
+                    <Columns.Column
+                        header="Security & Submission Details"
+                        className={styles.stretchColumn}
+                    >
+                        <div className={styles.columnContent}>
                             <div>
                                 <TransactionHashView
                                     transactionHash={transactionHash}
@@ -355,7 +361,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                 )}
                                 <Button
                                     className={styles.exportButton}
-                                    disabled={!isOpen}
+                                    // disabled={!isOpen}
                                     onClick={
                                         () =>
                                             saveFile(
@@ -371,12 +377,13 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     className={styles.finalCheckbox}
                                     name="finalCheck"
                                     rules={{ required: true }}
-                                    disabled={!isOpen}
+                                    // disabled={!isOpen}
                                 >
                                     I understand this is the final submission
                                     and cannot be reverted
                                 </Form.Checkbox>
-                                <Form.Submit disabled={!isOpen}>
+                                {/* <Form.Submit disabled={!isOpen}> */}
+                                <Form.Submit>
                                     Submit transaction to chain
                                 </Form.Submit>
                             </div>

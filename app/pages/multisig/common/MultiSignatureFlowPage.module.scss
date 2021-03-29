@@ -18,4 +18,10 @@
     padding-bottom: 30px;
     height: 100%;
     word-break: break-word;
+
+    .stretchColumn & {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
 }
