@@ -1,3 +1,5 @@
+@import 'config/bundle';
+
 .accountActionButton {
     height: 100px;
     width: 30%;
@@ -39,4 +41,87 @@
 
 .inverted {
     filter: invert(100%);
+}
+
+.buildSchedule {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-radius: 10px;
+    background-color: $color-white;
+    padding: 15px 50px;
+    min-height: 50vh;
+    text-align: center;
+
+    * {
+        flex-grow: 1;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+}
+
+.buttonGroup {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+
+    h3 {
+        width: 100%;
+        margin: 0;
+        margin-bottom: 10px;
+        flex-grow: 0;
+    }
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    border-radius: 2%/20%;
+    box-shadow: 0 0 0 1px $color-grey inset;
+    padding: 2px;
+    flex-grow: 0;
+
+    button:first-child {
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+    button:not(:first-child) {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    button:last-child {
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+    }
+
+    button:not(:last-child) {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+}
+
+.regularInterval {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    flex-grow: 1000;
+
+    * {
+        flex-grow: 0;
+    }
+}
+
+.buildComponent {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex-grow: 6;
+}
+
+.submitButton {
+    flex-grow: 0;
 }
