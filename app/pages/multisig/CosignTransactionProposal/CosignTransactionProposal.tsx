@@ -37,6 +37,8 @@ import MultiSignatureLayout from '../MultiSignatureLayout';
 
 import styles from './CosignTransactionProposal.module.scss';
 import { isExpired } from '~/utils/transactionHelpers';
+import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
+import { dateFromSeconds } from '~/utils/timeHelpers';
 
 interface CosignTransactionProposalForm {
     transactionDetailsMatch: boolean;
@@ -159,6 +161,17 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                     transactionHash
                                                 }
                                             />
+                                            {instanceOfUpdateInstruction(
+                                                transactionObject
+                                            ) && (
+                                                <TransactionExpirationDetails
+                                                    title="Transaction must be submitted to the chain by the  proposer before:"
+                                                    expirationDate={dateFromSeconds(
+                                                        transactionObject.header
+                                                            .timeout
+                                                    )}
+                                                />
+                                            )}
                                         </div>
                                     </Columns.Column>
                                     <Columns.Column header="Transaction Details">

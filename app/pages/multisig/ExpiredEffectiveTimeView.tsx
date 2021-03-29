@@ -1,5 +1,4 @@
 import React from 'react';
-import { Header } from 'semantic-ui-react';
 import { isExpired } from '~/utils/transactionHelpers';
 import {
     MultiSignatureTransaction,
@@ -27,9 +26,9 @@ export default function ExpiredEffectiveTimeView({
         isExpired(transaction)
     ) {
         return (
-            <Header color="red" size="small">
-                The transaction has expired
-            </Header>
+            <span className="textError">
+                The effective time has been exceeded
+            </span>
         );
     }
     return null;

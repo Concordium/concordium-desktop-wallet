@@ -50,6 +50,8 @@ import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import CloseProposalModal from './CloseProposalModal';
 import { fileListToFileArray } from '~/components/Form/FileInput/util';
 import SignatureCheckboxes from './SignatureCheckboxes';
+import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
+import { dateFromSeconds } from '~/utils/timeHelpers';
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
@@ -345,6 +347,12 @@ function ProposalView({ proposal }: ProposalViewProps) {
                             <div>
                                 <TransactionHashView
                                     transactionHash={transactionHash}
+                                />
+                                <TransactionExpirationDetails
+                                    title="Transaction must be submitted before:"
+                                    expirationDate={dateFromSeconds(
+                                        instruction.header.timeout
+                                    )}
                                 />
                             </div>
                             <div className={styles.actions}>

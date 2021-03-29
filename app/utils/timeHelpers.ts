@@ -134,3 +134,12 @@ export const getFormattedDateString = (date: Date): string => {
 
     return `${year}-${month}-${d} at ${hours}:${minutes}:${seconds}`;
 };
+
+export const dateFromSeconds = (dateInSeconds: bigint): Date | undefined => {
+    try {
+        const seconds = parseInt(dateInSeconds.toString(), 10);
+        return new Date(seconds * TimeStampUnit.seconds);
+    } catch {
+        return undefined;
+    }
+};
