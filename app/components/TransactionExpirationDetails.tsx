@@ -17,7 +17,7 @@ export default function TransactionExpirationDetails({
     }
 
     const hasExpired =
-        expirationDate.getDate() < getNow(TimeStampUnit.milliSeconds);
+        expirationDate.getDate() > getNow(TimeStampUnit.milliSeconds);
 
     return (
         <>

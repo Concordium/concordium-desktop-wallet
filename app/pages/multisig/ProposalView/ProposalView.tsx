@@ -289,7 +289,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
-            stepTitle="Transaction Proposal | Transaction Type"
+            stepTitle={`Transaction Proposal - ${handler.type}`}
             closeRoute={CLOSE_ROUTE}
         >
             <CloseProposalModal

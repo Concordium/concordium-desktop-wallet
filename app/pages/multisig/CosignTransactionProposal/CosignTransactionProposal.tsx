@@ -5,40 +5,38 @@ import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
-import { hashSha256 } from '../../../utils/serializationHelpers';
-import routes from '../../../constants/routes.json';
-import ConcordiumLedgerClient from '../../../features/ledger/ConcordiumLedgerClient';
-import { createTransactionHandler } from '../../../utils/updates/HandlerFinder';
+
+import { hashSha256 } from '~/utils/serializationHelpers';
+import routes from '~/constants/routes.json';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { createTransactionHandler } from '~/utils/updates/HandlerFinder';
 import {
     EqualRecord,
     instanceOfUpdateInstruction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateInstructionSignature,
-} from '../../../utils/types';
-import {
-    TransactionHandler,
-    TransactionInput,
-} from '../../../utils/transactionTypes';
-import { serializeUpdateInstructionHeaderAndPayload } from '../../../utils/UpdateSerialization';
-import SimpleErrorModal from '../../../components/SimpleErrorModal';
-import findAuthorizationKey from '../../../utils/updates/AuthorizationHelper';
+} from '~/utils/types';
+import { TransactionHandler, TransactionInput } from '~/utils/transactionTypes';
+import { serializeUpdateInstructionHeaderAndPayload } from '~/utils/UpdateSerialization';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
 import { ensureProps } from '~/utils/componentHelpers';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
 import TransactionHashView from '~/components/TransactionHashView';
 import Form from '~/components/Form';
-import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import { LedgerStatusType } from '~/components/ledger/util';
-import MultiSignatureLayout from '../MultiSignatureLayout';
-
-import styles from './CosignTransactionProposal.module.scss';
 import { isExpired } from '~/utils/transactionHelpers';
 import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+
+import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
+import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
+import MultiSignatureLayout from '../MultiSignatureLayout';
+import styles from './CosignTransactionProposal.module.scss';
 
 interface CosignTransactionProposalForm {
     transactionDetailsMatch: boolean;
@@ -93,7 +91,6 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                     blockSummary.updates.authorizations
                 );
                 if (!authorizationKey) {
-                    // if (authorizationKey) {
                     setShowValidationError(true);
                     return;
                 }
@@ -106,7 +103,6 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                 const signature: UpdateInstructionSignature = {
                     signature: signatureBytes.toString('hex'),
                     authorizationKeyIndex: authorizationKey.index,
-                    // authorizationKeyIndex: 0,
                 };
 
                 // Load the page for exporting the signed transaction.
@@ -140,7 +136,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                 />
                 <MultiSignatureLayout
                     pageTitle={transactionHandler.title}
-                    stepTitle="Transaction signing confirmation | Transaction Type"
+                    stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
                 >
                     <Ledger ledgerCallback={signingFunction}>
                         {(status, statusView, submitHandler = asyncNoOp) => (

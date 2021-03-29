@@ -5,8 +5,8 @@ import { LocationDescriptorObject } from 'history';
 import { parse, stringify } from 'json-bigint';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
-import { hashSha256 } from '../../../utils/serializationHelpers';
-import routes from '../../../constants/routes.json';
+import { hashSha256 } from '~/utils/serializationHelpers';
+import routes from '~/constants/routes.json';
 import {
     AccountTransaction,
     instanceOfUpdateInstruction,
@@ -14,17 +14,17 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateInstructionSignature,
-} from '../../../utils/types';
-import { TransactionHandler } from '../../../utils/transactionTypes';
-import { createTransactionHandler } from '../../../utils/updates/HandlerFinder';
-import { insert } from '../../../database/MultiSignatureProposalDao';
-import { addProposal } from '../../../features/MultiSignatureSlice';
-import ConcordiumLedgerClient from '../../../features/ledger/ConcordiumLedgerClient';
-import { serializeUpdateInstructionHeaderAndPayload } from '../../../utils/UpdateSerialization';
-import SimpleErrorModal from '../../../components/SimpleErrorModal';
-import { BlockSummary } from '../../../utils/NodeApiTypes';
-import findAuthorizationKey from '../../../utils/updates/AuthorizationHelper';
-import { selectedProposalRoute } from '../../../utils/routerHelper';
+} from '~/utils/types';
+import { TransactionHandler } from '~/utils/transactionTypes';
+import { createTransactionHandler } from '~/utils/updates/HandlerFinder';
+import { insert } from '~/database/MultiSignatureProposalDao';
+import { addProposal } from '~/features/MultiSignatureSlice';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { serializeUpdateInstructionHeaderAndPayload } from '~/utils/UpdateSerialization';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+import { BlockSummary } from '~/utils/NodeApiTypes';
+import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
+import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import Form from '~/components/Form';
 import TransactionDetails from '~/components/TransactionDetails';
@@ -88,15 +88,12 @@ function SignTransactionProposalView({ location }: Props) {
     }, [setTransactionHash, transactionHandler, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        console.log(ledger);
         const authorizationKey = await findAuthorizationKey(
             ledger,
             transactionHandler,
             blockSummary.updates.authorizations
         );
-        // if (!authorizationKey) {
-        // TODO temporary - revert to above
-        if (authorizationKey) {
+        if (!authorizationKey) {
             setShowValidationError(true);
             return;
         }
@@ -109,8 +106,7 @@ function SignTransactionProposalView({ location }: Props) {
         // Set signature
         const signature: UpdateInstructionSignature = {
             signature: signatureBytes.toString('hex'),
-            // authorizationKeyIndex: authorizationKey.index,
-            authorizationKeyIndex: 0, // TODO temporary - revert to above!
+            authorizationKeyIndex: authorizationKey.index,
         };
         updateInstruction.signatures = [signature];
 
@@ -141,7 +137,7 @@ function SignTransactionProposalView({ location }: Props) {
     return (
         <MultiSignatureLayout
             pageTitle={transactionHandler.title}
-            stepTitle="Transaction signing confirmation | Transaction Type"
+            stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
         >
             <SimpleErrorModal
                 show={showValidationError}

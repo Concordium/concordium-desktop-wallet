@@ -126,7 +126,7 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
-            stepTitle={`Transaction Proposal | ${displayType}`}
+            stepTitle={`Transaction Proposal - ${handler.type}`}
         >
             {RestrictionModal}
             <h3 className={styles.subHeader}>Transaction details</h3>
