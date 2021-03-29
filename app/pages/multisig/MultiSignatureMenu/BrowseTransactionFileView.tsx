@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Card, Header } from 'semantic-ui-react';
 import { parse } from 'json-bigint';
 import {
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
-} from '../../../utils/types';
-import routes from '../../../constants/routes.json';
-import DragAndDropFile from '../../../components/DragAndDropFile';
+} from '~/utils/types';
+import routes from '~/constants/routes.json';
 import SimpleErrorModal, {
     ModalErrorInput,
-} from '../../../components/SimpleErrorModal';
+} from '~/components/SimpleErrorModal';
+import FileInput from '~/components/Form/FileInput';
+import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 
 /**
  * Component that displays a drag and drop field where transaction files can
@@ -23,6 +23,7 @@ export default function BrowseTransactionFileView() {
         show: false,
     });
     const dispatch = useDispatch();
+    const [files, setFiles] = useState<FileInputValue>(null);
 
     async function loadTransactionFile(file: Buffer) {
         const fileString = file.toString('utf-8');
@@ -65,6 +66,17 @@ export default function BrowseTransactionFileView() {
         );
     }
 
+    useEffect(() => {
+        if (!files) return;
+
+        files
+            .item(0)
+            ?.arrayBuffer()
+            .then((ab) => Buffer.from(ab))
+            .then(loadTransactionFile);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [files]);
+
     return (
         <>
             <SimpleErrorModal
@@ -73,17 +85,12 @@ export default function BrowseTransactionFileView() {
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
-            <Card fluid>
-                <Card.Content>
-                    <Card.Header textAlign="center">
-                        <Header>Sign a transaction</Header>
-                    </Card.Header>
-                    <DragAndDropFile
-                        text="Drag and drop proposed multi signature transaction here"
-                        fileProcessor={loadTransactionFile}
-                    />
-                </Card.Content>
-            </Card>
+            <FileInput
+                placeholder="Drag and drop file here"
+                buttonTitle="Or browse to file"
+                value={files}
+                onChange={setFiles}
+            />
         </>
     );
 }
