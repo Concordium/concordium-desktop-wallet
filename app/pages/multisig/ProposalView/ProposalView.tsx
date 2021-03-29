@@ -5,6 +5,7 @@ import { parse, stringify } from 'json-bigint';
 import * as ed from 'noble-ed25519';
 import { Redirect, useParams } from 'react-router';
 import clsx from 'clsx';
+import { useForm } from 'react-hook-form';
 import {
     proposalsSelector,
     updateCurrentProposal,
@@ -52,6 +53,7 @@ import { fileListToFileArray } from '~/components/Form/FileInput/util';
 import SignatureCheckboxes from './SignatureCheckboxes';
 import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import { getCheckboxName } from './SignatureCheckboxes/SignatureCheckboxes';
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
@@ -102,6 +104,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
     const [currentlyLoadingFile, setCurrentlyLoadingFile] = useState(false);
     const [files, setFiles] = useState<FileInputValue>(null);
     const dispatch = useDispatch();
+    const form = useForm();
 
     const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
         proposal.transaction
@@ -230,6 +233,14 @@ function ProposalView({ proposal }: ProposalViewProps) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [files]);
 
+    // Update form based on signatures on proposal.
+    useEffect(() => {
+        instruction.signatures.forEach((_, i) =>
+            form.setValue(getCheckboxName(i), true)
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [instruction.signatures]);
+
     const handler = findHandler(instruction.type);
     const serializedPayload = handler.serializePayload(instruction);
 
@@ -273,7 +284,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
     const missingSignatures =
         instruction.signatures.length !== proposal.threshold;
 
-    // const isOpen = proposal.status === MultiSignatureTransactionStatus.Open;
+    const isOpen = proposal.status === MultiSignatureTransactionStatus.Open;
 
     return (
         <MultiSignatureLayout
@@ -297,6 +308,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                 onClick={() => setShowError({ show: false })}
             />
             <Form
+                formMethods={form}
                 onSubmit={submitTransaction}
                 className={clsx(styles.body, styles.bodySubtractPadding)}
             >
@@ -369,7 +381,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                 )}
                                 <Button
                                     className={styles.exportButton}
-                                    // disabled={!isOpen}
+                                    disabled={!isOpen}
                                     onClick={
                                         () =>
                                             saveFile(
@@ -385,13 +397,12 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     className={styles.finalCheckbox}
                                     name="finalCheck"
                                     rules={{ required: true }}
-                                    // disabled={!isOpen}
+                                    disabled={!isOpen}
                                 >
                                     I understand this is the final submission
                                     and cannot be reverted
                                 </Form.Checkbox>
-                                {/* <Form.Submit disabled={!isOpen}> */}
-                                <Form.Submit>
+                                <Form.Submit disabled={!isOpen}>
                                     Submit transaction to chain
                                 </Form.Submit>
                             </div>

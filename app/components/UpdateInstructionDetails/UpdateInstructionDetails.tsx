@@ -27,7 +27,7 @@ export default function UpdateInstructionDetails({
 }: Props): JSX.Element {
     const handler = findHandler(transaction.type);
     const date = dateFromTimeStamp(transaction.header.effectiveTime);
-    const isExpired = date.getDate() < getNow(TimeStampUnit.milliSeconds);
+    const isExpired = date.getDate() > getNow(TimeStampUnit.milliSeconds);
 
     return (
         <div className={styles.root}>

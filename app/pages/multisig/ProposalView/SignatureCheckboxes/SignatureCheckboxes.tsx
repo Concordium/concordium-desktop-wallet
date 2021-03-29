@@ -3,6 +3,8 @@ import Form from '~/components/Form';
 
 import styles from './SignatureCheckboxes.module.scss';
 
+export const getCheckboxName = (i: number) => `${i}`;
+
 interface SignatureCheckboxProps {
     signature: string | undefined;
     name: string;
@@ -54,7 +56,7 @@ export default function SignatureCheckboxes({
             {thresholdArray.map((_, i) => (
                 <SignatureCheckbox
                     signature={signatures[i]}
-                    name={`signature${i}`}
+                    name={getCheckboxName(i)}
                     // eslint-disable-next-line react/no-array-index-key
                     key={i}
                 />

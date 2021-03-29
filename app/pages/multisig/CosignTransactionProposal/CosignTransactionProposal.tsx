@@ -93,6 +93,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                     blockSummary.updates.authorizations
                 );
                 if (!authorizationKey) {
+                    // if (authorizationKey) {
                     setShowValidationError(true);
                     return;
                 }
@@ -105,6 +106,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                 const signature: UpdateInstructionSignature = {
                     signature: signatureBytes.toString('hex'),
                     authorizationKeyIndex: authorizationKey.index,
+                    // authorizationKeyIndex: 0,
                 };
 
                 // Load the page for exporting the signed transaction.
@@ -126,7 +128,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
             return null;
         }
 
-        // const isProposalOpen = proposal.
+        const isTransactionExpired = isExpired(transactionObject);
 
         return (
             <>
@@ -242,9 +244,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                     disabled={
                                                         status !==
                                                             LedgerStatusType.CONNECTED ||
-                                                        isExpired(
-                                                            transactionObject
-                                                        )
+                                                        isTransactionExpired
                                                     }
                                                 >
                                                     Sign Proposal
