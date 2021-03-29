@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Grid, Header, List, Card, Button } from 'semantic-ui-react';
 import { useForm } from 'react-hook-form';
-import { EqualRecord, Schedule, TimeStampUnit } from '../../utils/types';
-import { displayAsGTU, isValidGTUString, toMicroUnits } from '../../utils/gtu';
-import { parseTime, getNow, TimeConstants } from '../../utils/timeHelpers';
-import Form from '../../components/Form';
-import { futureDate } from '../../components/Form/util/validation';
+import { EqualRecord, Schedule, TimeStampUnit } from '~/utils/types';
+import { displayAsGTU, isValidGTUString, toMicroUnits } from '~/utils/gtu';
+import { parseTime, getNow, TimeConstants } from '~/utils/timeHelpers';
+import Form from '~/components/Form';
+import { futureDate } from '~/components/Form/util/validation';
+import Button from '~/cross-app-components/Button';
+import Card from '~/cross-app-components/Card';
+import styles from './Accounts.module.scss';
 
 export interface Defaults {
     schedule: Schedule;
@@ -66,6 +68,7 @@ export default function ExplicitSchedule({
                 (a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10)
             )
         );
+        setAdding(false);
         reset();
     }
 
@@ -85,7 +88,7 @@ export default function ExplicitSchedule({
     const addSchedulePointForm = (
         <Form onSubmit={addToSchedule} formMethods={methods}>
             <Form.Input
-                label="Enter amount"
+                label="Amount:"
                 name={addSchedulePointFormNames.amount}
                 placeholder="Enter Amount"
                 autoFocus
@@ -93,7 +96,7 @@ export default function ExplicitSchedule({
             />
             <Form.Timestamp
                 name={addSchedulePointFormNames.timestamp}
-                label="Enter Release time"
+                label="Release time:"
                 rules={{
                     required: 'Timestamp required',
                     validate: futureDate('Must be future date'),
@@ -104,60 +107,59 @@ export default function ExplicitSchedule({
         </Form>
     );
 
+    const showSchedules = (
+        <div className={styles.scheduleList}>
+            {schedule.map((schedulePoint, index) => (
+                <div
+                    key={schedulePoint.timestamp + schedulePoint.amount}
+                    className={styles.scheduleListRow}
+                >
+                    <div>{index + 1}.</div>
+                    <div>
+                        {parseTime(
+                            schedulePoint.timestamp,
+                            TimeStampUnit.milliSeconds
+                        )}
+                    </div>
+                    <div>{displayAsGTU(schedulePoint.amount)}</div>
+                    <div>
+                        <Button clear onClick={() => removeFromSchedule(index)}>
+                            x
+                        </Button>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
     return (
         <>
-            <List.Item>Releases:</List.Item>
-            <List.Item>
-                ({displayAsGTU(usedAmount)} of {displayAsGTU(amount)} in
-                schedule)
-            </List.Item>
-            <List.Item>
-                <Card centered>
-                    <Header>
-                        Add release to schedule
-                        <Button
-                            floated="right"
-                            compact
-                            content={adding ? 'x' : '+'}
-                            onClick={() => setAdding(!adding)}
-                        />
-                    </Header>
+            <div className={styles.explicitSchedule}>
+                <h3>Releases:</h3>
+                <h2 color="grey">
+                    ({displayAsGTU(usedAmount)} of {displayAsGTU(amount)} in
+                    schedule)
+                </h2>
+                <Card className={styles.addScheduleCard}>
+                    <Button
+                        clear
+                        className={styles.addScheduleCardCloseButton}
+                        onClick={() => setAdding(!adding)}
+                    >
+                        <h2>{adding ? 'x' : '+'}</h2>
+                    </Button>
+                    <h2>Add release to schedule</h2>
                     {adding ? addSchedulePointForm : null}
                 </Card>
-            </List.Item>
-            <List.Item>
-                <Grid textAlign="center" columns="4">
-                    {schedule.map((schedulePoint, index) => (
-                        <Grid.Row key={schedulePoint.timestamp}>
-                            <Grid.Column>{index + 1}.</Grid.Column>
-                            <Grid.Column>
-                                {parseTime(
-                                    schedulePoint.timestamp,
-                                    TimeStampUnit.milliSeconds
-                                )}{' '}
-                            </Grid.Column>
-                            <Grid.Column>
-                                {displayAsGTU(schedulePoint.amount)}
-                            </Grid.Column>
-                            <Grid.Column>
-                                <Button
-                                    onClick={() => removeFromSchedule(index)}
-                                >
-                                    x
-                                </Button>
-                            </Grid.Column>
-                        </Grid.Row>
-                    ))}
-                </Grid>
-            </List.Item>
-            <List.Item>
-                <Button
-                    disabled={usedAmount < amount}
-                    onClick={() => submitSchedule(schedule, { schedule })}
-                >
-                    submit
-                </Button>
-            </List.Item>
+                {!adding ? showSchedules : null}
+            </div>
+            <Button
+                size="huge"
+                disabled={usedAmount < amount}
+                onClick={() => submitSchedule(schedule, { schedule })}
+            >
+                Continue
+            </Button>
         </>
     );
 }

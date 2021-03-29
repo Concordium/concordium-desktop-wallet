@@ -43,23 +43,46 @@
     filter: invert(100%);
 }
 
-.buildSchedule {
+.flexBetween {
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
-    border-radius: 10px;
-    background-color: $color-white;
-    padding: 15px 50px;
-    min-height: 50vh;
-    text-align: center;
+    flex-direction: column;
+}
 
-    * {
-        flex-grow: 1;
-    }
+.buildSchedule {
+    @extend .flexBetween;
+
+    border-radius: 10px;
+    background-color: $color-off-white;
+    padding: 15px 50px;
+    height: 70vh;
+    text-align: center;
 
     h2 {
         margin-top: 0;
     }
+}
+
+.buildScheduleCommon {
+    height: 20%;
+    @extend .flexBetween;
+}
+
+.buildComponent {
+    height: 70%;
+    @extend .flexBetween;
+}
+
+.regularInterval {
+    @extend .flexBetween;
+
+    flex-grow: 1;
+    * {
+        flex-grow: 0;
+    }
+}
+.regularInterval::before {
+    content: '';
 }
 
 .buttonGroup {
@@ -68,10 +91,7 @@
     justify-content: flex-start;
 
     h3 {
-        width: 100%;
-        margin: 0;
         margin-bottom: 10px;
-        flex-grow: 0;
     }
 }
 
@@ -81,7 +101,11 @@
     border-radius: 2%/20%;
     box-shadow: 0 0 0 1px $color-grey inset;
     padding: 2px;
-    flex-grow: 0;
+
+    button {
+        flex-grow: 1;
+        box-shadow: none !important;
+    }
 
     button:first-child {
         border-top-left-radius: 10px;
@@ -104,24 +128,57 @@
     }
 }
 
-.regularInterval {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    flex-grow: 1000;
+.explicitSchedule {
+    height: 80%;
+}
 
-    * {
-        flex-grow: 0;
+.addScheduleCard {
+    position: relative;
+    padding-top: 0;
+    margin-bottom: 20px;
+
+    form {
+        @extend .flexBetween;
+
+        min-height: 10vh;
+    }
+
+    h2 {
+        margin-top: 10px;
     }
 }
 
-.buildComponent {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    flex-grow: 6;
+.addScheduleCardCloseButton {
+    position: absolute;
+    top: 10px;
+    right: 15px;
 }
 
-.submitButton {
-    flex-grow: 0;
+.scheduleList {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    max-height: 80%;
+    overflow: auto;
+}
+
+.scheduleListRow {
+    margin-left: 10%;
+    width: 85%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    :nth-child(-n + 2) {
+        text-align: left;
+    }
+
+    :nth-last-child(-n + 2) {
+        text-align: right;
+    }
+
+    * {
+        flex-grow: 1;
+    }
 }
