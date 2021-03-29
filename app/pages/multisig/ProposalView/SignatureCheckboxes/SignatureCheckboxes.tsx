@@ -33,7 +33,7 @@ function SignatureCheckbox({
             disabled
             defaultChecked={!!signature}
             size="large"
-            rules={{ required: true }}
+            rules={{ required: 'Missing signature' }}
         >
             {label}
         </Form.Checkbox>

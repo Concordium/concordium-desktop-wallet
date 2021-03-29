@@ -206,7 +206,8 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                             fieldNames.transactionDetailsMatch
                                                         }
                                                         rules={{
-                                                            required: true,
+                                                            required:
+                                                                'Please review transaction details',
                                                         }}
                                                     >
                                                         The transaction details
@@ -217,7 +218,8 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                             fieldNames.identiconMatch
                                                         }
                                                         rules={{
-                                                            required: true,
+                                                            required:
+                                                                'Make sure identicons match.',
                                                         }}
                                                     >
                                                         The identicon matches
@@ -228,7 +230,8 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                             fieldNames.hashMatch
                                                         }
                                                         rules={{
-                                                            required: true,
+                                                            required:
+                                                                'Make sure hashes match',
                                                         }}
                                                     >
                                                         The hash matches the one

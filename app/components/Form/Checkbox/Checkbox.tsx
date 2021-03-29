@@ -42,15 +42,15 @@ const Checkbox = forwardRef<HTMLInputElement, PropsWithChildren<CheckboxProps>>(
     ) => {
         const { disabled } = props;
         return (
-            <div>
-                <label
-                    className={clsx(
-                        styles.root,
-                        isInvalid && styles.rootInvalid,
-                        disabled && styles.rootDisabled,
-                        className
-                    )}
-                >
+            <div
+                className={clsx(
+                    styles.root,
+                    isInvalid && styles.rootInvalid,
+                    disabled && styles.rootDisabled,
+                    className
+                )}
+            >
+                <label className={styles.wrapper}>
                     <input type="checkbox" ref={ref} {...props} />
                     <div
                         className={clsx(

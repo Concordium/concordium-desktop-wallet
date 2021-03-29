@@ -174,7 +174,10 @@ function SignTransactionProposalView({ location }: Props) {
                                 >
                                     <Form.Checkbox
                                         name="check"
-                                        rules={{ required: true }}
+                                        rules={{
+                                            required:
+                                                'Make sure the proposed changes are correct',
+                                        }}
                                         disabled={signing}
                                     >
                                         I am sure that the propsed changes are

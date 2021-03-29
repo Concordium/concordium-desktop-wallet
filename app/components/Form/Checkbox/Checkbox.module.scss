@@ -1,16 +1,19 @@
 @import 'config/bundle';
 
 .root {
-    display: flex;
-    align-items: center;
     text-align: left;
     word-break: normal;
+}
+
+.wrapper {
+    display: flex;
+    align-items: center;
 
     input {
         @include hideInput;
     }
 
-    &Disabled {
+    .rootDisabled & {
         cursor: default;
     }
 }
