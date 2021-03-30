@@ -1,75 +1,23 @@
-import clsx from 'clsx';
-import React, { PropsWithChildren, useMemo } from 'react';
-import Card from '~/cross-app-components/Card';
-import { getFormattedDateString } from '~/utils/timeHelpers';
-import { MultiSignatureTransactionStatus } from '~/utils/types';
-import styles from './ProposalStatus.module.scss';
-
-const {
-    Submitted,
-    Expired,
-    Finalized,
-    Rejected,
-    Failed,
-} = MultiSignatureTransactionStatus;
-
-function getStatusClassName(
-    status: MultiSignatureTransactionStatus
-): string | undefined {
-    if (status === Submitted) return styles.rootPending;
-    if ([Expired, Rejected, Failed].some((s) => s === status))
-        return styles.rootFailed;
-    if (status === Finalized) return styles.rootSuccess;
-    return undefined;
-}
-
-function getStatusText(status: MultiSignatureTransactionStatus): string {
-    if (status === Submitted) return 'Submitted - Pending';
-    return status;
-}
-
-export type ProposalStatusProps = PropsWithChildren<{
-    title: string;
-    status: MultiSignatureTransactionStatus;
-    submittedOn?: Date;
-    headerLeft: string;
-    headerRight: string;
-}>;
+import { parse } from 'json-bigint';
+import React, { useMemo } from 'react';
+import {
+    instanceOfUpdateInstruction,
+    MultiSignatureTransaction,
+} from '~/utils/types';
+import ChainUpdateProposalStatus from './ChainUpdateProposalStatus';
 
 export default function ProposalStatus({
-    title,
     status,
-    submittedOn,
-    headerLeft,
-    headerRight,
-    children,
-}: ProposalStatusProps): JSX.Element {
-    const submittedOnText = useMemo(
-        () =>
-            submittedOn ? getFormattedDateString(submittedOn) : 'Unsubmitted',
-        [submittedOn]
-    );
+    transaction,
+}: MultiSignatureTransaction): JSX.Element | null {
+    const parsed = useMemo(() => parse(transaction), [transaction]);
 
-    return (
-        <Card className={clsx(styles.root, getStatusClassName(status))}>
-            <header className={styles.header}>
-                <span>{headerLeft}</span>
-                <span>{headerRight}</span>
-            </header>
-            <div>
-                <h2>{title}</h2>
-                <h3>
-                    Status:{' '}
-                    <span className={styles.statusText}>
-                        {getStatusText(status)}
-                    </span>
-                </h3>
-            </div>
-            <div className={styles.content}>{children}</div>
-            <footer className={styles.footer}>
-                <span />
-                <span>Submitted on: {submittedOnText}</span>
-            </footer>
-        </Card>
-    );
+    // TODO handle other transaction types...
+    if (instanceOfUpdateInstruction(parsed)) {
+        return (
+            <ChainUpdateProposalStatus status={status} transaction={parsed} />
+        );
+    }
+
+    return <>Transaction type unsupported...</>;
 }

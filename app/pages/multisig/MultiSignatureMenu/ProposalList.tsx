@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Menu } from 'semantic-ui-react';
 import { proposalsSelector } from '../../../features/MultiSignatureSlice';
-import ProposalStatus from '../ProposalStatus';
 import { MultiSignatureTransaction } from '../../../utils/types';
 import { expireProposals } from '../../../utils/ProposalHelper';
 import { selectedProposalRoute } from '../../../utils/routerHelper';
+import ProposalStatus from '../ProposalStatus';
 
 /**
  * Sorts so that the newest multi signature transaction is first.
@@ -30,21 +29,15 @@ export default function ProposalList(): JSX.Element {
     }, [dispatch, proposals]);
 
     return (
-        <Menu vertical fluid>
+        <>
             {proposals
                 .slice()
                 .sort(newestFirst)
-                .map((proposal) => {
-                    return (
-                        <Menu.Item
-                            key={proposal.id}
-                            as={Link}
-                            to={selectedProposalRoute(proposal.id)}
-                        >
-                            <ProposalStatus proposal={proposal} />
-                        </Menu.Item>
-                    );
-                })}
-        </Menu>
+                .map((p) => (
+                    <Link key={p.id} to={selectedProposalRoute(p.id)}>
+                        <ProposalStatus {...p} />
+                    </Link>
+                ))}
+        </>
     );
 }

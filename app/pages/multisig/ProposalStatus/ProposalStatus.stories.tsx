@@ -1,17 +1,19 @@
 import React from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
-import ProposalStatus, { ProposalStatusProps } from './ProposalStatus';
+import ProposalStatusView, {
+    ProposalStatusViewProps,
+} from './ProposalStatusView';
 import { MultiSignatureTransactionStatus } from '~/utils/types';
 
 export default {
     title: 'Multi Signature/Proposal Status',
-    component: ProposalStatus,
+    component: ProposalStatusView,
 } as Meta;
 
-const Template: Story<ProposalStatusProps> = (args) => (
+const Template: Story<ProposalStatusViewProps> = (args) => (
     <div style={{ width: 400 }}>
-        <ProposalStatus {...args} />
+        <ProposalStatusView {...args} />
     </div>
 );
 

@@ -1,1 +1,1 @@
-// export { default } from './ProposalStatus';
+export { default } from './ProposalStatus';
