@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Button from '~/cross-app-components/Button';
 import styles from './Transfers.module.scss';
@@ -7,18 +7,18 @@ interface Props {
     showBack: boolean;
     backOnClick?: () => void;
     exitOnClick: () => void;
-    CurrentView: () => JSX.Element;
 }
 
 /**
  * Container for the components when creating a transfer.
+ * Contains the CurrentView
  */
 export default function TransferView({
     showBack,
     exitOnClick,
     backOnClick,
-    CurrentView,
-}: Props) {
+    children,
+}: PropsWithChildren<Props>) {
     return (
         <div className={styles.transferView}>
             {showBack ? (
@@ -30,7 +30,7 @@ export default function TransferView({
                     <h1>{'<'}</h1>
                 </Button>
             ) : null}
-            <CurrentView />
+            {children}
             <CloseButton className={styles.closeButton} onClick={exitOnClick} />
         </div>
     );

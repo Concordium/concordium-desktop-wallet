@@ -76,7 +76,8 @@ export default function ExternalTransfer({
             }
             exitOnClick={exitFunction}
             backOnClick={() => setSubLocation(locations.pickAmount)}
-            CurrentView={ChosenComponent}
-        />
+        >
+            <ChosenComponent />
+        </TransferView>
     );
 }

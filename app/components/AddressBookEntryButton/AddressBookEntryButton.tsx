@@ -11,6 +11,10 @@ interface Props {
     className?: string;
 }
 
+/**
+ * A button with a AddressBookEntryIcon.
+ * Can display an errornous state.
+ */
 export default function AddressBookEntryButton({
     children,
     onClick,
