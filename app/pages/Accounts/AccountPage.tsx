@@ -16,7 +16,7 @@ import routes from '~/constants/routes.json';
 import { Account, AccountInfo } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import { sumToBigInt } from '~/utils/basicHelpers';
-
+import styles from './Accounts.module.scss';
 import PageLayout from '~/components/PageLayout';
 
 function getTotalAmount(accountsInfo: AccountInfo[]) {
@@ -83,7 +83,7 @@ export default function AccountsPage() {
                     <PlusIcon />
                 </PageLayout.HeaderButton>
             </PageLayout.Header>
-            <Columns divider columnScroll>
+            <Columns divider columnScroll columnClassName={styles.column}>
                 <Columns.Column>
                     <AccountList />
                 </Columns.Column>

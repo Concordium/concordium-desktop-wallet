@@ -7,6 +7,7 @@ import IdentityView from './IdentityView';
 import NoIdentities from '~/components/NoIdentities';
 import { identitiesSelector } from '~/features/IdentitySlice';
 import routes from '~/constants/routes.json';
+import styles from './Identities.module.scss';
 
 import PageLayout from '~/components/PageLayout';
 import Columns from '~/components/Columns';
@@ -21,7 +22,7 @@ export default function IdentityPage() {
         }
 
         return (
-            <Columns divider columnScroll>
+            <Columns divider columnScroll columnClassName={styles.column}>
                 <Columns.Column>
                     <IdentityList />
                 </Columns.Column>
