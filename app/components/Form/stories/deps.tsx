@@ -3,7 +3,6 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 
 import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
-import { RewardDistributionValue } from '../RewardDistribution/RewardDistribution';
 import { maxFileSizeKb } from '../FileInput/validation';
 
 export const {
@@ -14,7 +13,6 @@ export const {
     TextArea,
     Timestamp,
     File,
-    RewardDistribution,
 } = Form;
 
 export const argTypes: Meta['argTypes'] = {
@@ -36,7 +34,6 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.Switch': Switch,
     'Form.Timestamp': Timestamp,
     'Form.File': File,
-    'Form.RewardDistribution': RewardDistribution,
     'Form.Submit': Submit,
 };
 
@@ -66,10 +63,6 @@ export const Template: Story<FormProps<unknown>> = (args) => (
     </Form>
 );
 
-const validateRewardDistributionFirstMin = (min: number, message?: string) => (
-    value: RewardDistributionValue
-) => (value?.first || 0) >= min || message;
-
 export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
     <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
@@ -81,6 +74,8 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
         />
         <Form.File
             name="file"
+            placeholder="Drag and drop file here"
+            buttonTitle="or browse to file"
             rules={{
                 required: 'File is required',
                 validate: maxFileSizeKb(1, 'File size too big (1kb allowed)'),
@@ -91,17 +86,6 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
             rules={{
                 required: 'Field is required',
                 validate: futureDate(),
-            }}
-        />
-        <Form.RewardDistribution
-            name="rewards"
-            labels={['first', 'second', 'remaining']}
-            rules={{
-                required: true,
-                validate: validateRewardDistributionFirstMin(
-                    0.5,
-                    'First must be at least 0.5'
-                ),
             }}
         />
         <Form.Checkbox
@@ -124,10 +108,6 @@ export const AllFieldsTemplate: Story<FormProps<unknown>> = (args) => (
                 required: 'Field is required',
                 validate: futureDate(),
             }}
-        />
-        <Form.RewardDistribution
-            name="rewards"
-            labels={['first', 'second', 'remaining']}
         />
         <Form.Checkbox
             name="terms"

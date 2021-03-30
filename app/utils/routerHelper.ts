@@ -9,6 +9,9 @@ export const selectedProposalRoute = (id: number) =>
         `${id}`
     );
 
+export const submittedProposalRoute = (id: number) =>
+    routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION.replace(':id', `${id}`);
+
 export const selectedExportKeyRoute = (keyType: string) =>
     routes.MULTISIGTRANSACTIONS_EXPORT_KEY_SELECTED.replace(
         ':keyType',

@@ -1,0 +1,11 @@
+.column {
+    flex-basis: 560px;
+}
+
+.link {
+    display: flex;
+
+    &:not(:last-of-type) {
+        margin-bottom: 20px;
+    }
+}

@@ -17,6 +17,11 @@ h5,
 h6,
 .h6 {
     line-height: 1.2;
+    margin: calc(2rem - 0.14285714em) 0 1rem;
+
+    &:first-child {
+        margin-top: 0;
+    }
 }
 
 h1,
@@ -83,4 +88,8 @@ h6,
 
 .textFaded {
     color: $color-text-faded;
+}
+
+.textError {
+    color: $color-error;
 }

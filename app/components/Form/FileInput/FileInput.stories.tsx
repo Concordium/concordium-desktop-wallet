@@ -17,17 +17,28 @@ const Template: Story<FileInputProps> = (args) => {
 export const Primary = Template.bind({});
 Primary.args = {
     label: 'File Input',
+    buttonTitle: 'Browse to file',
+};
+
+export const Multiple = Template.bind({});
+Multiple.args = {
+    label: 'Files Input',
+    placeholder: 'No files in field yet...',
+    buttonTitle: 'Browse to file',
+    multiple: true,
 };
 
 export const Placeholder = Template.bind({});
 Placeholder.args = {
     label: 'File Input',
     placeholder: 'No files in field yet...',
+    buttonTitle: 'Browse to file',
 };
 
 export const Invalid = Template.bind({});
 Invalid.args = {
     label: 'File Input',
+    buttonTitle: 'Browse to file',
     isInvalid: true,
     error: 'File is required',
 };
