@@ -16,7 +16,7 @@ export const intervals: Interval[] = [
     { label: 'Hour', value: TimeConstants.Hour },
     { label: 'Day', value: TimeConstants.Day },
     { label: 'Week', value: TimeConstants.Week },
-    { label: 'Month (30 days)', value: TimeConstants.Month },
+    { label: 'Month', value: TimeConstants.Month },
 ];
 
 interface FormValues {
