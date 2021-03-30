@@ -54,6 +54,7 @@ import SignatureCheckboxes from './SignatureCheckboxes';
 import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import { getCheckboxName } from './SignatureCheckboxes/SignatureCheckboxes';
+import { submittedProposalRoute } from '~/utils/routerHelper';
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
@@ -251,26 +252,43 @@ function ProposalView({ proposal }: ProposalViewProps) {
         )
     ).toString('hex');
 
-    async function submitTransaction() {
+    // async function submitTransaction() {
+    //     const payload = serializeForSubmission(instruction, serializedPayload);
+    //     const submitted = (await sendTransaction(payload)).getValue();
+    //     const modifiedProposal: MultiSignatureTransaction = {
+    //         ...proposal,
+    //     };
+    //     if (submitted) {
+    //         modifiedProposal.status = MultiSignatureTransactionStatus.Submitted;
+    //         updateCurrentProposal(dispatch, modifiedProposal);
+    //         getMultiSignatureTransactionStatus(modifiedProposal, dispatch);
+    //         dispatch(
+    //             push({
+    //                 pathname: routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION,
+    //                 state: stringify(modifiedProposal),
+    //             })
+    //         );
+    //     } else {
+    //         modifiedProposal.status = MultiSignatureTransactionStatus.Failed;
+    //         updateCurrentProposal(dispatch, modifiedProposal);
+    //     }
+    // }
+
+    function submitTransaction() {
         const payload = serializeForSubmission(instruction, serializedPayload);
-        const submitted = (await sendTransaction(payload)).getValue();
-        const modifiedProposal: MultiSignatureTransaction = {
-            ...proposal,
+        const submitPromise = sendTransaction(payload);
+
+        const state = {
+            submitPromise,
+            handler,
         };
-        if (submitted) {
-            modifiedProposal.status = MultiSignatureTransactionStatus.Submitted;
-            updateCurrentProposal(dispatch, modifiedProposal);
-            getMultiSignatureTransactionStatus(modifiedProposal, dispatch);
-            dispatch(
-                push({
-                    pathname: routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION,
-                    state: stringify(modifiedProposal),
-                })
-            );
-        } else {
-            modifiedProposal.status = MultiSignatureTransactionStatus.Failed;
-            updateCurrentProposal(dispatch, modifiedProposal);
-        }
+
+        dispatch(
+            push({
+                pathname: submittedProposalRoute(proposal.id),
+                state,
+            })
+        );
     }
 
     async function closeProposal() {

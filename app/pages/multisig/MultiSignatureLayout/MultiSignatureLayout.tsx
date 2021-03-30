@@ -1,13 +1,14 @@
 import React, { PropsWithChildren } from 'react';
 import PageLayout from '~/components/PageLayout';
+import { PageContainerProps } from '~/components/PageLayout/PageContainer/PageContainer';
 import routes from '~/constants/routes.json';
 
 import styles from './MultiSignatureLayout.module.scss';
 
-interface MultiSignatureLayoutProps {
+interface MultiSignatureLayoutProps
+    extends Pick<PageContainerProps, 'closeRoute' | 'disableBack'> {
     pageTitle: string;
     stepTitle: string;
-    closeRoute?: string;
 }
 
 export default function MultiSignatureLayout({
