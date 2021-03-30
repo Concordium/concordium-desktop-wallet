@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from 'semantic-ui-react';
 import { useForm } from 'react-hook-form';
 import { EqualRecord, Schedule } from '~/utils/types';
 import { createRegularIntervalSchedule } from '~/utils/transactionHelpers';
 import { TimeConstants } from '~/utils/timeHelpers';
 import Form from '~/components/Form';
 import { futureDate } from '~/components/Form/util/validation';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import Group from './ButtonGroup';
+import styles from './Accounts.module.scss';
 
 export interface Interval {
     label: string;
@@ -18,7 +18,7 @@ export const intervals: Interval[] = [
     { label: 'Hour', value: TimeConstants.Hour },
     { label: 'Day', value: TimeConstants.Day },
     { label: 'Week', value: TimeConstants.Week },
-    { label: 'Month (30 days)', value: TimeConstants.Month },
+    { label: 'Month', value: TimeConstants.Month },
 ];
 
 interface FormValues {
@@ -39,13 +39,9 @@ export interface Defaults {
 
 interface Props {
     defaults: Defaults;
-    submitSchedule(
-        schedule: Schedule,
-        estimatedFee: bigint,
-        recoverState: Defaults
-    ): void;
+    submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
-    feeCalculator: (scheduleLength: number) => bigint;
+    setScheduleLength: (scheduleLength: number) => void;
 }
 
 /**
@@ -55,7 +51,7 @@ export default function RegularInterval({
     submitSchedule,
     amount,
     defaults,
-    feeCalculator,
+    setScheduleLength,
 }: Props) {
     const [chosenInterval, setChosenInterval] = useState<Interval>(
         defaults?.chosenInterval || intervals[0]
@@ -63,15 +59,9 @@ export default function RegularInterval({
     const form = useForm<FormValues>({ mode: 'onTouched' });
     const releases = form.watch(fieldNames.releases);
 
-    const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
-
     useEffect(() => {
-        if (releases) {
-            setEstimatedFee(feeCalculator(releases));
-        } else {
-            setEstimatedFee(0n);
-        }
-    }, [setEstimatedFee, feeCalculator, releases]);
+        setScheduleLength(releases);
+    }, [setScheduleLength, releases]);
 
     function createSchedule({ startTime }: FormValues) {
         const schedule = createRegularIntervalSchedule(
@@ -85,25 +75,25 @@ export default function RegularInterval({
             startTime: startTime.getTime(),
             chosenInterval,
         };
-        submitSchedule(schedule, estimatedFee, recoverState);
+        submitSchedule(schedule, recoverState);
     }
 
     return (
         <>
-            Release Every:
-            <Button.Group>
-                {intervals.map((interval: Interval) => (
-                    <Button
-                        key={interval.label}
-                        onClick={() => setChosenInterval(interval)}
-                    >
-                        {interval.label}
-                    </Button>
-                ))}
-            </Button.Group>
-            <Form formMethods={form} onSubmit={createSchedule}>
+            <Group
+                buttons={intervals}
+                isSelected={(interval) => interval === chosenInterval}
+                onClick={setChosenInterval}
+                name="interval"
+                title="Release Every:"
+            />
+            <Form
+                onSubmit={createSchedule}
+                formMethods={form}
+                className={styles.regularInterval}
+            >
                 <Form.Input
-                    label="Enter amount of releases"
+                    label="Split transfer in:"
                     name={fieldNames.releases}
                     placeholder="Enter releases"
                     autoFocus
@@ -111,10 +101,9 @@ export default function RegularInterval({
                     defaultValue={defaults?.releases || 1}
                     rules={{ required: 'Releases required', min: 1 }}
                 />
-                <DisplayEstimatedFee estimatedFee={estimatedFee} />
                 <Form.Timestamp
                     name={fieldNames.startTime}
-                    label="Enter starting time"
+                    label="Starting:"
                     defaultValue={
                         new Date(
                             defaults?.startTime ||
@@ -126,7 +115,7 @@ export default function RegularInterval({
                         validate: futureDate('Time must be in the future'),
                     }}
                 />
-                <Form.Submit>submit</Form.Submit>
+                <Form.Submit size="huge">Continue</Form.Submit>
             </Form>
         </>
     );

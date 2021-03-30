@@ -1,0 +1,6 @@
+@import 'config/bundle';
+
+.error {
+    box-shadow: 0 0 0 2px $color-error inset;
+    outline: none;
+}

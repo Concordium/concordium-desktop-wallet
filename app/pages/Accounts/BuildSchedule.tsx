@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
 import { push } from 'connected-react-router';
-import { Card, List, Header, Button } from 'semantic-ui-react';
 import { LocationDescriptorObject } from 'history';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { Account, AddressBookEntry, Schedule } from '~/utils/types';
-import { displayAsGTU } from '~/utils/gtu';
+import { displayAsGTU, toGTUString } from '~/utils/gtu';
 import { createScheduledTransferTransaction } from '~/utils/transactionHelpers';
 import locations from '~/constants/transferLocations.json';
 import RegularInterval, {
@@ -18,6 +16,10 @@ import ExplicitSchedule, {
 } from './BuildExplicitSchedule';
 import { scheduledTransferCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
+import TransferView from '~/components/Transfers/TransferView';
+import styles from './Accounts.module.scss';
+import Group from './ButtonGroup';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Defaults extends ExplicitScheduleDefaults, RegularIntervalDefaults {}
 
@@ -47,6 +49,8 @@ export default function BuildSchedule({ location }: Props) {
     }
 
     const [error, setError] = useState<string | undefined>();
+    const [scheduleLength, setScheduleLength] = useState<number>(0);
+    const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
     const [feeCalculator, setFeeCalculator] = useState<
         ((scheduleLength: number) => bigint) | undefined
     >();
@@ -57,11 +61,19 @@ export default function BuildSchedule({ location }: Props) {
                 setError(`Unable to get transaction cost due to: ${e}`)
             );
     });
+
+    useEffect(() => {
+        if (feeCalculator && scheduleLength) {
+            setEstimatedFee(feeCalculator(scheduleLength));
+        } else {
+            setEstimatedFee(0n);
+        }
+    }, [scheduleLength, setEstimatedFee, feeCalculator]);
+
     const { account, amount, recipient, defaults } = location.state;
 
     async function createTransaction(
         schedule: Schedule,
-        estimatedFee: bigint,
         recoverState: unknown
     ) {
         const transaction = await createScheduledTransferTransaction(
@@ -116,49 +128,44 @@ export default function BuildSchedule({ location }: Props) {
     }
 
     return (
-        <Card fluid>
-            <Button
-                as={Link}
-                to={{
-                    pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
-                    state: { amount, recipient },
-                }}
-            >
-                {'<--'}
-            </Button>
-            <Header> Send funds with a release schedule</Header>
-            <Button as={Link} to={routes.ACCOUNTS}>
-                x
-            </Button>
-
-            <List>
-                <List.Item>
-                    <Header textAlign="center">
-                        Send funds {displayAsGTU(amount)} to {recipient.name}
-                    </Header>
-                </List.Item>
-                <List.Item>
-                    <Button
-                        onClick={() => setExplicit(false)}
-                        disabled={!explicit}
-                    >
-                        Regular Interval
-                    </Button>
-                    <Button
-                        onClick={() => setExplicit(true)}
-                        disabled={explicit}
-                    >
-                        Explicit schedule
-                    </Button>
-                </List.Item>
-
+        <TransferView
+            className={styles.buildSchedule}
+            showBack
+            exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
+            backOnClick={() =>
+                dispatch(
+                    push({
+                        pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+                        state: { amount: toGTUString(amount), recipient },
+                    })
+                )
+            }
+        >
+            <div className={styles.buildScheduleCommon}>
+                <h2> Send fund with a release schedule </h2>
+                <h2>
+                    {displayAsGTU(amount)} to {recipient.name}
+                </h2>
+                <DisplayEstimatedFee estimatedFee={estimatedFee} />
+                <Group
+                    buttons={[
+                        { label: 'Regular Interval', value: false },
+                        { label: 'Explicit Schedule', value: true },
+                    ]}
+                    isSelected={({ value }) => value === explicit}
+                    onClick={({ value }) => setExplicit(value)}
+                    name="scheduleType"
+                    title="Schedule type:"
+                />
+            </div>
+            <div className={styles.buildComponent}>
                 <BuildComponent
                     defaults={defaults}
                     submitSchedule={createTransaction}
+                    setScheduleLength={setScheduleLength}
                     amount={BigInt(amount)}
-                    feeCalculator={feeCalculator}
                 />
-            </List>
-        </Card>
+            </div>
+        </TransferView>
     );
 }

@@ -569,6 +569,7 @@ export type UpdateInstructionPayload =
     | MintDistribution
     | ProtocolUpdate
     | GasRewards
+    | BakerStakeThreshold
     | ElectionDifficulty;
 
 export type Transaction =
@@ -588,6 +589,7 @@ export enum UpdateType {
     UpdateMintDistribution = 6,
     UpdateTransactionFeeDistribution = 7,
     UpdateGASRewards = 8,
+    UpdateBakerStakeThreshold = 9,
 }
 
 export function instanceOfAccountTransaction(
@@ -663,6 +665,12 @@ export function isGasRewards(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<GasRewards> {
     return UpdateType.UpdateGASRewards === transaction.type;
+}
+
+export function isBakerStakeThreshold(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<BakerStakeThreshold> {
+    return UpdateType.UpdateBakerStakeThreshold === transaction.type;
 }
 
 export function isElectionDifficulty(
@@ -757,6 +765,10 @@ export interface GasRewards {
     finalizationProof: RewardFraction;
     accountCreation: RewardFraction;
     chainUpdate: RewardFraction;
+}
+
+export interface BakerStakeThreshold {
+    threshold: Word64;
 }
 
 export interface ElectionDifficulty {

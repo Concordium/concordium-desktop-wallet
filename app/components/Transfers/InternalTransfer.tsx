@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { useLocation, Link } from 'react-router-dom';
-import { Header, Grid } from 'semantic-ui-react';
-import Button from '~/cross-app-components/Button';
+import { useLocation } from 'react-router-dom';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import PickAmount from './PickAmount';
@@ -19,9 +17,9 @@ import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
+import TransferView from './TransferView';
 
 interface Specific<T> {
-    title: string;
     amountHeader: string;
     createTransaction: (address: string, amount: bigint) => Promise<T>;
     location: string;
@@ -57,20 +55,16 @@ export default function InternalTransfer<
         location?.state?.initialPage || locations.pickAmount
     );
 
-    // This is a string, to allows user input in GTU
-    const [amount, setAmount] = useState<string>(location?.state?.amount);
-
     function ChosenComponent() {
         switch (subLocation) {
             case locations.pickAmount:
                 return (
                     <PickAmount
                         header={specific.amountHeader}
-                        amount={amount}
-                        setAmount={setAmount}
                         estimatedFee={estimatedFee}
+                        defaultAmount={location?.state?.amount}
                         toPickRecipient={undefined}
-                        toConfirmTransfer={async () => {
+                        toConfirmTransfer={async (amount: string) => {
                             const transaction = await specific.createTransaction(
                                 account.address,
                                 toMicroUnits(amount)
@@ -110,7 +104,7 @@ export default function InternalTransfer<
                 return <FinalPage location={location} />;
             }
             default:
-                return null;
+                throw new Error('Unexpected location');
         }
     }
 
@@ -121,26 +115,13 @@ export default function InternalTransfer<
                 content={error}
                 onClick={() => dispatch(push(routes.ACCOUNTS))}
             />
-            <Grid columns="3">
-                <Grid.Column>
-                    {subLocation === locations.confirmTransfer ? (
-                        <Button
-                            onClick={() => setSubLocation(locations.pickAmount)}
-                        >
-                            {'<--'}
-                        </Button>
-                    ) : null}
-                </Grid.Column>
-                <Grid.Column textAlign="center">
-                    <Header>{specific.title}</Header>
-                </Grid.Column>
-                <Grid.Column textAlign="right">
-                    <Link to={routes.ACCOUNTS}>
-                        <Button>x</Button>
-                    </Link>
-                </Grid.Column>
-            </Grid>
-            <ChosenComponent />
+            <TransferView
+                showBack={subLocation === locations.confirmTransfer}
+                exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
+                backOnClick={() => setSubLocation(locations.pickAmount)}
+            >
+                <ChosenComponent />
+            </TransferView>
         </>
     );
 }

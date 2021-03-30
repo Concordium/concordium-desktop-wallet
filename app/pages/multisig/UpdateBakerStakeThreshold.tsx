@@ -6,47 +6,46 @@ import { UpdateProps } from '../../utils/transactionTypes';
 import { UpdateType } from '../../utils/types';
 
 const errorText =
-    'The input was invalid. Provide an integer between 0 and 100000';
+    'The input was invalid. Provide an integer between 0 and 18446744073709551615';
 
 /**
- * Component for creating an election difficulty update.
+ * Component for creating a baker stake threshold update.
  */
-export default function UpdateElectionDifficulty({
+export default function UpdateBakerStakeThreshold({
     blockSummary,
     effectiveTime,
     setProposal,
-    setDisabled,
 }: UpdateProps): JSX.Element | null {
     const [error, setError] = useState<string | undefined>();
 
-    const currentElectionDifficulty =
-        blockSummary.updates.chainParameters.electionDifficulty;
+    const currentBakerStakeThreshold =
+        blockSummary.updates.chainParameters.minimumThresholdForBaking;
     const sequenceNumber =
-        blockSummary.updates.updateQueues.foundationAccount.nextSequenceNumber;
+        blockSummary.updates.updateQueues.bakerStakeThreshold
+            .nextSequenceNumber;
     const {
         threshold,
-    } = blockSummary.updates.authorizations.electionDifficulty;
+    } = blockSummary.updates.authorizations.bakerStakeThreshold;
 
-    const [
-        electionDifficultyInput,
-        setElectionDifficultyInput,
-    ] = useState<string>((currentElectionDifficulty * 100000).toString());
+    const [bakerStakeThreshold, setBakerStakeThreshold] = useState(
+        currentBakerStakeThreshold.toString()
+    );
 
     /**
-     * Update the election difficulty based on the input given. If the input
+     * Update the baker stake threshoild based on the input given. If the input
      * is invalid, then set an error state with a description of the bad input.
      */
     function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
         const input = e.target.value;
-        setElectionDifficultyInput(input);
+        setBakerStakeThreshold(input);
 
         if (!onlyDigitsNoLeadingZeroes(input)) {
             setError(errorText);
             return;
         }
 
-        const electionDifficulty = parseInt(input, 10);
-        if (electionDifficulty > 100000 || electionDifficulty < 0) {
+        const bigintThreshold = BigInt(input);
+        if (bigintThreshold > 18446744073709551615n || bigintThreshold < 0) {
             setError(errorText);
         } else {
             setError(undefined);
@@ -54,44 +53,35 @@ export default function UpdateElectionDifficulty({
     }
 
     useEffect(() => {
-        if (error) {
-            setDisabled(true);
-        }
-
         if (!error && effectiveTime) {
-            setDisabled(false);
             setProposal(
                 createUpdateMultiSignatureTransaction(
-                    {
-                        electionDifficulty: parseInt(
-                            electionDifficultyInput,
-                            10
-                        ),
-                    },
-                    UpdateType.UpdateElectionDifficulty,
+                    { threshold: BigInt(bakerStakeThreshold) },
+                    UpdateType.UpdateBakerStakeThreshold,
                     sequenceNumber,
                     threshold,
                     effectiveTime
                 )
             );
+        } else {
+            setProposal(undefined);
         }
     }, [
-        electionDifficultyInput,
+        bakerStakeThreshold,
         sequenceNumber,
         threshold,
         setProposal,
         effectiveTime,
         error,
-        setDisabled,
     ]);
 
     return (
         <>
-            <h3>Current election difficulty</h3>
-            <Input readOnly value={currentElectionDifficulty} />
-            <h3>New election difficulty (/100000)</h3>
+            <h3>Current baker stake threshold (µGTU)</h3>
+            <Input readOnly value={currentBakerStakeThreshold.toString()} />
+            <h3>New baker stake threshold (µGTU)</h3>
             <Input
-                value={electionDifficultyInput}
+                value={bakerStakeThreshold}
                 onChange={onInputChange}
                 error={error}
             />
