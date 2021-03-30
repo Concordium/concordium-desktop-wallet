@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
-import { AddressBookEntry, Account } from '../../utils/types';
+import {
+    AddressBookEntry,
+    Account,
+    TransactionKindId,
+} from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 import locations from '../../constants/transferLocations.json';
 import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
+
+import { getTransactionKindCost } from '~/utils/transactionCosts';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 interface Props {
     account: Account;
@@ -19,50 +26,71 @@ interface Props {
 export default function SimpleTransfer({ account }: Props) {
     const dispatch = useDispatch();
 
+    const [error, setError] = useState<string | undefined>();
+    const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
+
+    useEffect(() => {
+        getTransactionKindCost(TransactionKindId.Simple_transfer)
+            .then((transferCost) => setEstimatedFee(transferCost))
+            .catch((e) =>
+                setError(`Unable to get transaction cost due to: ${e}`)
+            );
+    }, [setEstimatedFee]);
+
     return (
-        <ExternalTransfer
-            toConfirmTransfer={async (
-                amount: string,
-                recipient: AddressBookEntry
-            ) => {
-                if (!recipient) {
-                    throw new Error('Unexpected missing recipient');
-                }
+        <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                content={error}
+                onClick={() => dispatch(push(routes.ACCOUNTS))}
+            />
+            <ExternalTransfer
+                estimatedFee={estimatedFee}
+                toConfirmTransfer={async (
+                    amount: string,
+                    recipient: AddressBookEntry
+                ) => {
+                    if (!recipient) {
+                        throw new Error('Unexpected missing recipient');
+                    }
 
-                const transaction = await createSimpleTransferTransaction(
-                    account.address,
-                    toMicroUnits(amount),
-                    recipient.address
-                );
+                    const transaction = await createSimpleTransferTransaction(
+                        account.address,
+                        toMicroUnits(amount),
+                        recipient.address
+                    );
+                    transaction.estimatedFee = estimatedFee;
 
-                dispatch(
-                    push({
-                        pathname: routes.SUBMITTRANSFER,
-                        state: {
-                            confirmed: {
-                                pathname: routes.ACCOUNTS_SIMPLETRANSFER,
-                                state: {
-                                    initialPage: locations.transferSubmitted,
-                                    transaction: stringify(transaction),
-                                    recipient,
+                    dispatch(
+                        push({
+                            pathname: routes.SUBMITTRANSFER,
+                            state: {
+                                confirmed: {
+                                    pathname: routes.ACCOUNTS_SIMPLETRANSFER,
+                                    state: {
+                                        initialPage:
+                                            locations.transferSubmitted,
+                                        transaction: stringify(transaction),
+                                        recipient,
+                                    },
                                 },
-                            },
-                            cancelled: {
-                                pathname: routes.ACCOUNTS_SIMPLETRANSFER,
-                                state: {
-                                    initialPage: locations.pickAmount,
-                                    amount,
-                                    recipient,
+                                cancelled: {
+                                    pathname: routes.ACCOUNTS_SIMPLETRANSFER,
+                                    state: {
+                                        initialPage: locations.pickAmount,
+                                        amount,
+                                        recipient,
+                                    },
                                 },
+                                transaction: stringify(transaction),
+                                account,
                             },
-                            transaction: stringify(transaction),
-                            account,
-                        },
-                    })
-                );
-            }}
-            exitFunction={() => dispatch(push(routes.ACCOUNTS))}
-            amountHeader="Send funds"
-        />
+                        })
+                    );
+                }}
+                exitFunction={() => dispatch(push(routes.ACCOUNTS))}
+                amountHeader="Send funds"
+            />
+        </>
     );
 }

@@ -11,6 +11,7 @@ import TransferView from './TransferView';
 interface Props {
     toConfirmTransfer(amount: string, recipient: AddressBookEntry): void;
     exitFunction(): void;
+    estimatedFee?: bigint;
     amountHeader: string;
 }
 
@@ -20,6 +21,7 @@ interface Props {
 export default function ExternalTransfer({
     toConfirmTransfer,
     amountHeader,
+    estimatedFee,
     exitFunction,
 }: Props) {
     const location = useLocation<TransferState>();
@@ -46,6 +48,7 @@ export default function ExternalTransfer({
                         recipient={recipient}
                         header={amountHeader}
                         defaultAmount={amount}
+                        estimatedFee={estimatedFee}
                         toPickRecipient={(currentAmount: string) => {
                             setAmount(currentAmount);
                             setSubLocation(locations.pickRecipient);
