@@ -143,10 +143,12 @@ export default function BuildSchedule({ location }: Props) {
         >
             <div className={styles.buildScheduleCommon}>
                 <h2> Send fund with a release schedule </h2>
-                <h2>
-                    {displayAsGTU(amount)} to {recipient.name}
-                </h2>
-                <DisplayEstimatedFee estimatedFee={estimatedFee} />
+                <div className={styles.scheduleAmount}>
+                    <h2>
+                        {displayAsGTU(amount)} to {recipient.name}
+                    </h2>
+                    <DisplayEstimatedFee estimatedFee={estimatedFee} />
+                </div>
                 <Group
                     buttons={[
                         { label: 'Regular Interval', value: false },
