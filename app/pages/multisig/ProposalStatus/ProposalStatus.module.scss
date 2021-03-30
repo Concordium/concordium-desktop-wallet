@@ -1,0 +1,65 @@
+@import 'config/bundle';
+
+$proposal-status-color-pending: $color-dark-blue;
+
+.root {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 210px;
+    text-align: center;
+
+    h2,
+    h3 {
+        margin: 0;
+    }
+
+    &Pending {
+        border-color: $proposal-status-color-pending;
+    }
+
+    &Failed {
+        border-color: $color-error;
+    }
+
+    &Success {
+        border-color: $color-success;
+    }
+}
+
+.statusText {
+    text-transform: capitalize;
+    .rootPending & {
+        color: $proposal-status-color-pending;
+    }
+
+    .rootFailed & {
+        color: $color-error;
+    }
+
+    .rootSuccess & {
+        color: $color-success;
+    }
+}
+
+.content {
+    color: $color-text-faded;
+}
+
+.header,
+.footer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.header {
+    font-size: $font-size-body2;
+    font-weight: $font-weight-light;
+}
+
+.footer {
+    color: $color-text-faded;
+    font-size: $font-size-body4;
+}
