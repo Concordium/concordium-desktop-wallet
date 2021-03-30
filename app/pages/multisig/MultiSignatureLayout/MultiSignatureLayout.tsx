@@ -16,6 +16,7 @@ export default function MultiSignatureLayout({
     stepTitle,
     closeRoute = routes.MULTISIGTRANSACTIONS,
     children,
+    disableBack,
 }: PropsWithChildren<MultiSignatureLayoutProps>): JSX.Element {
     return (
         <PageLayout>
@@ -26,6 +27,7 @@ export default function MultiSignatureLayout({
                 className={styles.container}
                 closeRoute={closeRoute}
                 padding="vertical"
+                disableBack={disableBack}
             >
                 <h2 className={styles.header}>{stepTitle}</h2>
                 <div className={styles.content}>{children}</div>

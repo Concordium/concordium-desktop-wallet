@@ -1,36 +1,33 @@
 import { push } from 'connected-react-router';
-import { LocationDescriptorObject } from 'history';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, useParams } from 'react-router';
 import ErrorIcon from '@resources/svg/logo-error.svg';
 import CheckmarkIcon from '@resources/svg/logo-checkmark.svg';
+import { parse } from 'json-bigint';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
+    UpdateInstruction,
+    UpdateInstructionPayload,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import Loading from '~/cross-app-components/Loading';
 import Button from '~/cross-app-components/Button';
-import { BoolResponse } from '~/proto/concordium_p2p_rpc_pb';
-import { TransactionHandler } from '~/utils/transactionTypes';
 import {
     proposalsSelector,
     updateCurrentProposal,
 } from '~/features/MultiSignatureSlice';
 import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
 import styles from './SubmittedProposal.module.scss';
+import { sendTransaction } from '~/utils/nodeRequests';
+import findHandler from '~/utils/updates/HandlerFinder';
+import { serializeForSubmission } from '~/utils/UpdateSerialization';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS;
 
-interface LocationState {
-    submitPromise: Promise<BoolResponse>;
-    handler: TransactionHandler<unknown, unknown>;
-}
-
 interface Props {
-    location: LocationDescriptorObject<LocationState>;
     proposal: MultiSignatureTransaction;
 }
 
@@ -43,7 +40,7 @@ const SUCCESS_STATUSES = [MultiSignatureTransactionStatus.Finalized];
 function getStatusIcon(status: MultiSignatureTransactionStatus): JSX.Element {
     if (ERROR_STATUSES.some((s) => s === status))
         return <ErrorIcon className={styles.icon} />;
-    if (ERROR_STATUSES.some((s) => s === status))
+    if (SUCCESS_STATUSES.some((s) => s === status))
         return <CheckmarkIcon className={styles.icon} />;
     return <Loading inline className={styles.icon} />;
 }
@@ -51,7 +48,7 @@ function getStatusIcon(status: MultiSignatureTransactionStatus): JSX.Element {
 function getStatusText(status: MultiSignatureTransactionStatus): string {
     if (ERROR_STATUSES.some((s) => s === status))
         return 'Transaction unsuccesful. Please try again.';
-    if (ERROR_STATUSES.some((s) => s === status))
+    if (SUCCESS_STATUSES.some((s) => s === status))
         return 'Transaction succesful!';
     return 'Waiting for the transaction to finalize.';
 }
@@ -60,17 +57,22 @@ function getStatusText(status: MultiSignatureTransactionStatus): string {
  * Component that displays a multi signature transaction that has been submitted
  * to a node.
  */
-function SubmittedProposalView({ location, proposal }: Props) {
+function SubmittedProposalView({ proposal }: Props) {
     const dispatch = useDispatch();
-    const { status } = proposal;
-    const isPending = ![...ERROR_STATUSES, ...SUCCESS_STATUSES].some(
-        (s) => s === status
+    const { status, transaction } = proposal;
+    const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
+        transaction
+    );
+    const handler = findHandler(instruction.type);
+    const serializedPayload = handler.serializePayload(instruction);
+
+    const isPending = [...ERROR_STATUSES, ...SUCCESS_STATUSES].every(
+        (s) => s !== status
     );
 
-    const { submitPromise, handler } = location.state as LocationState;
-
     const init = useCallback(async () => {
-        const submitted = (await submitPromise).getValue();
+        const payload = serializeForSubmission(instruction, serializedPayload);
+        const submitted = (await sendTransaction(payload)).getValue();
 
         const modifiedProposal: MultiSignatureTransaction = {
             ...proposal,
@@ -94,7 +96,6 @@ function SubmittedProposalView({ location, proposal }: Props) {
         <MultiSignatureLayout
             pageTitle={handler.title}
             stepTitle={`Transaction Proposal - ${handler.type}`}
-            disableBack
         >
             <div className={styles.body}>
                 <div />
@@ -103,6 +104,7 @@ function SubmittedProposalView({ location, proposal }: Props) {
                     {getStatusText(status)}
                 </div>
                 <Button
+                    className={styles.button}
                     disabled={isPending}
                     onClick={() => {
                         dispatch(push({ pathname: CLOSE_ROUTE }));
@@ -122,8 +124,7 @@ export default function SubmittedProposal(
     const proposals = useSelector(proposalsSelector);
     const proposal = proposals.find((p) => p.id === parseInt(id, 10));
 
-    // eslint-disable-next-line react/destructuring-assignment
-    if (!proposal || !props.location.state) {
+    if (!proposal) {
         return <Redirect to={CLOSE_ROUTE} />;
     }
 
