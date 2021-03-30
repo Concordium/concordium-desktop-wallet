@@ -9,12 +9,14 @@ import {
     UpdateInstructionPayload,
 } from '~/utils/types';
 import findHandler from '~/utils/updates/HandlerFinder';
-import ProposalStatusView from '../ProposalStatusView';
+import ProposalStatusView, {
+    ProposalStatusViewProps,
+} from '../ProposalStatusView';
 import styles from './ChainUpdateProposalStatus.module.scss';
 
 interface ChainUpdateProposalStatusProps<
     TUpdate extends UpdateInstructionPayload
-> {
+> extends Pick<ProposalStatusViewProps, 'className'> {
     status: MultiSignatureTransactionStatus;
     transaction: UpdateInstruction<TUpdate>;
 }
@@ -24,6 +26,7 @@ export default function ChainUpdateProposalStatus<
 >({
     status,
     transaction,
+    ...proposalStatusProps
 }: ChainUpdateProposalStatusProps<TUpdate>): JSX.Element {
     const handler = findHandler(transaction.type);
     const expired = status === MultiSignatureTransactionStatus.Expired;
@@ -37,6 +40,7 @@ export default function ChainUpdateProposalStatus<
 
     return (
         <ProposalStatusView
+            {...proposalStatusProps}
             headerLeft="Foundation"
             headerRight="Chain Update"
             title={handler.type}

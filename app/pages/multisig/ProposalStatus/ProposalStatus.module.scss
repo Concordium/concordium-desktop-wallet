@@ -7,7 +7,7 @@ $proposal-status-color-pending: $color-dark-blue;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    height: 210px;
+    min-height: 210px;
     text-align: center;
 
     h2,
@@ -30,6 +30,7 @@ $proposal-status-color-pending: $color-dark-blue;
 
 .statusText {
     text-transform: capitalize;
+
     .rootPending & {
         color: $proposal-status-color-pending;
     }

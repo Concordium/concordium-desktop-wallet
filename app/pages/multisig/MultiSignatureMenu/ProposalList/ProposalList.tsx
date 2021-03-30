@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { proposalsSelector } from '../../../features/MultiSignatureSlice';
-import { MultiSignatureTransaction } from '../../../utils/types';
-import { expireProposals } from '../../../utils/ProposalHelper';
-import { selectedProposalRoute } from '../../../utils/routerHelper';
-import ProposalStatus from '../ProposalStatus';
+import { proposalsSelector } from '~/features/MultiSignatureSlice';
+import { MultiSignatureTransaction } from '~/utils/types';
+import { expireProposals } from '~/utils/ProposalHelper';
+import { selectedProposalRoute } from '~/utils/routerHelper';
+import ProposalStatus from '../../ProposalStatus';
+import styles from './ProposalList.module.scss';
 
 /**
  * Sorts so that the newest multi signature transaction is first.
@@ -34,8 +35,12 @@ export default function ProposalList(): JSX.Element {
                 .slice()
                 .sort(newestFirst)
                 .map((p) => (
-                    <Link key={p.id} to={selectedProposalRoute(p.id)}>
-                        <ProposalStatus {...p} />
+                    <Link
+                        className={styles.link}
+                        key={p.id}
+                        to={selectedProposalRoute(p.id)}
+                    >
+                        <ProposalStatus className={styles.item} proposal={p} />
                     </Link>
                 ))}
         </>

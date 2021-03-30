@@ -5,17 +5,28 @@ import {
     MultiSignatureTransaction,
 } from '~/utils/types';
 import ChainUpdateProposalStatus from './ChainUpdateProposalStatus';
+import { ProposalStatusViewProps } from './ProposalStatusView';
+
+interface ProposalStatusProps
+    extends Pick<ProposalStatusViewProps, 'className'> {
+    proposal: MultiSignatureTransaction;
+}
 
 export default function ProposalStatus({
-    status,
-    transaction,
-}: MultiSignatureTransaction): JSX.Element | null {
+    proposal,
+    ...proposalStatusProps
+}: ProposalStatusProps): JSX.Element | null {
+    const { status, transaction } = proposal;
     const parsed = useMemo(() => parse(transaction), [transaction]);
 
     // TODO handle other transaction types...
     if (instanceOfUpdateInstruction(parsed)) {
         return (
-            <ChainUpdateProposalStatus status={status} transaction={parsed} />
+            <ChainUpdateProposalStatus
+                {...proposalStatusProps}
+                status={status}
+                transaction={parsed}
+            />
         );
     }
 

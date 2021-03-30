@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import React, { PropsWithChildren, useMemo } from 'react';
 import Card from '~/cross-app-components/Card';
 import { getFormattedDateString } from '~/utils/timeHelpers';
-import { MultiSignatureTransactionStatus } from '~/utils/types';
+import { ClassName, MultiSignatureTransactionStatus } from '~/utils/types';
 import styles from './ProposalStatus.module.scss';
 
 const {
@@ -34,7 +34,8 @@ export type ProposalStatusViewProps = PropsWithChildren<{
     submittedOn?: Date;
     headerLeft: string;
     headerRight: string;
-}>;
+}> &
+    ClassName;
 
 export default function ProposalStatusView({
     title,
@@ -43,6 +44,7 @@ export default function ProposalStatusView({
     headerLeft,
     headerRight,
     children,
+    className,
 }: ProposalStatusViewProps): JSX.Element {
     const submittedOnText = useMemo(
         () =>
@@ -51,7 +53,9 @@ export default function ProposalStatusView({
     );
 
     return (
-        <Card className={clsx(styles.root, getStatusClassName(status))}>
+        <Card
+            className={clsx(styles.root, getStatusClassName(status), className)}
+        >
             <header className={styles.header}>
                 <span>{headerLeft}</span>
                 <span>{headerRight}</span>
