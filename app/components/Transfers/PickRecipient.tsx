@@ -53,6 +53,7 @@ export default function PickRecipient({ pickRecipient }: Props) {
                 )
                 .map((e: AddressBookEntry) => (
                     <AddressBookEntryButton
+                        className={styles.button}
                         key={e.address}
                         onClick={() => pickRecipient(e)}
                     >

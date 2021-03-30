@@ -19,11 +19,7 @@ export default function AddressBookEntryButton({
 }: PropsWithChildren<Props>) {
     return (
         <Button
-            className={clsx(
-                itemStyle.button,
-                error && itemStyle.error,
-                className
-            )}
+            className={clsx(error && itemStyle.error, className)}
             icon={<AddressBookEntryIcon className={iconStyle.identityIcon} />}
             tabIndex={0}
             inverted
