@@ -59,7 +59,9 @@ export default function PickRecipient({ pickRecipient }: Props) {
                     >
                         {e.name}
                         <br />
-                        {e.note}
+                        <div className={styles.addressBookComment}>
+                            {e.note}
+                        </div>
                     </AddressBookEntryButton>
                 ))}
         </div>
