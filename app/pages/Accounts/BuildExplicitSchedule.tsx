@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import BinIcon from '@resources/svg/bin.svg';
+import PlusIcon from '@resources/svg/plus.svg';
+import CloseIcon from '@resources/svg/cross.svg';
 import { EqualRecord, Schedule, TimeStampUnit } from '~/utils/types';
 import { displayAsGTU, isValidGTUString, toMicroUnits } from '~/utils/gtu';
 import { parseTime, getNow, TimeConstants } from '~/utils/timeHelpers';
@@ -103,7 +106,7 @@ export default function ExplicitSchedule({
                 }}
                 defaultValue={getDefaultTimestamp()}
             />
-            <Form.Submit>Add</Form.Submit>
+            <Form.Submit size="small">Add</Form.Submit>
         </Form>
     );
 
@@ -124,7 +127,7 @@ export default function ExplicitSchedule({
                     <div>{displayAsGTU(schedulePoint.amount)}</div>
                     <div>
                         <Button clear onClick={() => removeFromSchedule(index)}>
-                            x
+                            <BinIcon className={styles.binIcon} />
                         </Button>
                     </div>
                 </div>
@@ -135,20 +138,18 @@ export default function ExplicitSchedule({
     return (
         <>
             <div className={styles.explicitSchedule}>
-                <h3>Releases:</h3>
-                <h2 color="grey">
+                <h3 className={styles.releases}>Releases:</h3>
+                <h2 className={styles.amountUsed}>
                     ({displayAsGTU(usedAmount)} of {displayAsGTU(amount)} in
                     schedule)
                 </h2>
                 <Card className={styles.addScheduleCard}>
-                    <Button
-                        clear
-                        className={styles.addScheduleCardCloseButton}
-                        onClick={() => setAdding(!adding)}
-                    >
-                        <h2>{adding ? 'x' : '+'}</h2>
-                    </Button>
-                    <h2>Add release to schedule</h2>
+                    <div className={styles.addScheduleCardHeader}>
+                        <h2>Add release to schedule</h2>
+                        <Button clear onClick={() => setAdding(!adding)}>
+                            {adding ? <CloseIcon /> : <PlusIcon />}
+                        </Button>
+                    </div>
                     {adding ? addSchedulePointForm : null}
                 </Card>
                 {!adding ? showSchedules : null}
