@@ -105,7 +105,6 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
     s = getInitialState(),
     a
 ) => {
-    console.log('reducer', s, a);
     const deviceName =
         (a as PendingAction | ConnectedAction).deviceName || s.deviceName;
 
