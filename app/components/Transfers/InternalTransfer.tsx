@@ -92,7 +92,8 @@ export default function InternalTransfer<
             showBack={subLocation === locations.confirmTransfer}
             exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
             backOnClick={() => setSubLocation(locations.pickAmount)}
-            CurrentView={ChosenComponent}
-        />
+        >
+            <ChosenComponent />
+        </TransferView>
     );
 }

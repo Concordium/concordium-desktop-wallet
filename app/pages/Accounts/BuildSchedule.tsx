@@ -102,33 +102,30 @@ export default function BuildSchedule({ location }: Props) {
                     })
                 )
             }
-            CurrentView={() => (
-                <>
-                    <div className={styles.buildScheduleCommon}>
-                        <h2> Send fund with a release schedule </h2>
-                        <h2>
-                            {displayAsGTU(amount)} to {recipient.name}
-                        </h2>
-                        <Group
-                            buttons={[
-                                { label: 'Regular Interval', value: false },
-                                { label: 'Explicit Schedule', value: true },
-                            ]}
-                            isSelected={({ value }) => value === explicit}
-                            onClick={({ value }) => setExplicit(value)}
-                            name="scheduleType"
-                            title="Schedule type:"
-                        />
-                    </div>
-                    <div className={styles.buildComponent}>
-                        <BuildComponent
-                            defaults={defaults}
-                            submitSchedule={createTransaction}
-                            amount={BigInt(amount)}
-                        />
-                    </div>
-                </>
-            )}
-        />
+        >
+            <div className={styles.buildScheduleCommon}>
+                <h2> Send fund with a release schedule </h2>
+                <h2>
+                    {displayAsGTU(amount)} to {recipient.name}
+                </h2>
+                <Group
+                    buttons={[
+                        { label: 'Regular Interval', value: false },
+                        { label: 'Explicit Schedule', value: true },
+                    ]}
+                    isSelected={({ value }) => value === explicit}
+                    onClick={({ value }) => setExplicit(value)}
+                    name="scheduleType"
+                    title="Schedule type:"
+                />
+            </div>
+            <div className={styles.buildComponent}>
+                <BuildComponent
+                    defaults={defaults}
+                    submitSchedule={createTransaction}
+                    amount={BigInt(amount)}
+                />
+            </div>
+        </TransferView>
     );
 }

@@ -1,13 +1,14 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Menu } from 'semantic-ui-react';
 import IdentityListElement from '../../components/IdentityListElement';
+// import Button from '~/cross-app-components/Button';
 import {
     chooseIdentity,
     identitiesSelector,
     chosenIdentitySelector,
 } from '../../features/IdentitySlice';
 import { Identity } from '../../utils/types';
+import styles from './Identities.module.scss';
 
 /**
  * Displays the List of local identities, And allows picking the chosen identity.
@@ -18,16 +19,16 @@ export default function IdentityList() {
     const chosenIdentity = useSelector(chosenIdentitySelector);
 
     return (
-        <Menu vertical fluid>
+        <>
             {identities.map((identity: Identity) => (
-                <Menu.Item
+                <IdentityListElement
+                    identity={identity}
                     key={identity.id}
-                    onClick={() => dispatch(chooseIdentity(identity))}
+                    className={styles.listElement}
                     active={chosenIdentity === identity}
-                >
-                    <IdentityListElement identity={identity} />
-                </Menu.Item>
+                    onClick={() => dispatch(chooseIdentity(identity))}
+                />
             ))}
-        </Menu>
+        </>
     );
 }
