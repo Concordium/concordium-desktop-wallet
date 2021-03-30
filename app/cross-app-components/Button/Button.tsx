@@ -5,9 +5,10 @@ import { PolymorphicComponentProps } from '~/utils/types';
 
 import styles from './Button.module.scss';
 
-type ButtonSize = 'small' | 'regular' | 'big' | 'huge';
+type ButtonSize = 'tiny' | 'small' | 'regular' | 'big' | 'huge';
 
 const sizeStyleMap: Record<ButtonSize, string | undefined> = {
+    tiny: styles.rootTiny,
     small: styles.rootSmall,
     regular: undefined,
     big: styles.rootBig,
