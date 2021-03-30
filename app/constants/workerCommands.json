@@ -4,5 +4,7 @@
     "createUnsignedCredential": "createUnsignedCredential",
     "createCredentialDetails": "createCredentialDetails",
     "createCredentialInfo": "createCredentialInfo",
-    "decryptAmounts": "decryptAmounts"
+    "createCredential": "createCredential",
+    "decryptAmounts": "decryptAmounts",
+    "createTransferToPublicData": "createTransferToPublicData"
 }

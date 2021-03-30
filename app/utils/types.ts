@@ -165,6 +165,13 @@ export interface TransferToEncryptedPayload {
     amount: string;
 }
 
+export interface TransferToPublicPayload {
+    transferAmount: string;
+    remainingEncryptedAmount?: EncryptedAmount;
+    index?: string;
+    proof?: string;
+}
+
 export interface SchedulePoint {
     timestamp: string;
     amount: string;
@@ -189,6 +196,7 @@ export interface UpdateAccountCredentialsPayload {
 
 export type TransactionPayload =
     | UpdateAccountCredentialsPayload
+    | TransferToPublicPayload
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
     | SimpleTransferPayload;
@@ -201,6 +209,7 @@ export interface AccountTransaction<
     sender: Hex;
     nonce: string;
     energyAmount: string;
+    estimatedFee?: bigint;
     expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;
@@ -211,6 +220,7 @@ export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
+export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -264,6 +274,18 @@ export interface Credential {
     identityId?: number;
     credId: Hex;
     policy: JSONString;
+}
+
+export interface LocalCredential extends Credential {
+    external: false;
+    identityId: number;
+    credentialNumber: number;
+}
+
+export function instanceOfLocalCredential(
+    object: Credential
+): object is LocalCredential {
+    return !object.external;
 }
 
 // 48 bytes containing a group element.
@@ -372,14 +394,14 @@ export enum RejectReason {
  * This Interface models the structure of the transfer transactions stored in the database
  */
 export interface TransferTransaction {
-    remote: boolean | 0 | 1; // SQlite converts booleans to 0/1
+    remote: boolean;
     originType: OriginType;
     transactionKind: TransactionKindString;
     id?: number; // only remote transactions have ids.
     blockHash: Hex;
     blockTime: string;
     total: string;
-    success?: boolean | 0 | 1; // SQlite converts booleans to 0/1
+    success?: boolean;
     transactionHash: Hex;
     subtotal?: string;
     cost?: string;
@@ -564,6 +586,7 @@ export type UpdateInstructionPayload =
     | MintDistribution
     | ProtocolUpdate
     | GasRewards
+    | BakerStakeThreshold
     | ElectionDifficulty;
 
 // An actual signature, which goes into an account transaction.
@@ -605,6 +628,7 @@ export enum UpdateType {
     UpdateMintDistribution = 6,
     UpdateTransactionFeeDistribution = 7,
     UpdateGASRewards = 8,
+    UpdateBakerStakeThreshold = 9,
 }
 
 export function instanceOfAccountTransaction(
@@ -641,6 +665,12 @@ export function instanceOfTransferToEncrypted(
     object: AccountTransaction<TransactionPayload>
 ): object is TransferToEncrypted {
     return object.transactionKind === TransactionKindId.Transfer_to_encrypted;
+}
+
+export function instanceOfTransferToPublic(
+    object: AccountTransaction<TransactionPayload>
+): object is TransferToPublic {
+    return object.transactionKind === TransactionKindId.Transfer_to_public;
 }
 
 export function instanceOfScheduledTransfer(
@@ -692,6 +722,12 @@ export function isGasRewards(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<GasRewards> {
     return UpdateType.UpdateGASRewards === transaction.type;
+}
+
+export function isBakerStakeThreshold(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<BakerStakeThreshold> {
+    return UpdateType.UpdateBakerStakeThreshold === transaction.type;
 }
 
 export function isElectionDifficulty(
@@ -788,6 +824,10 @@ export interface GasRewards {
     chainUpdate: RewardFraction;
 }
 
+export interface BakerStakeThreshold {
+    threshold: Word64;
+}
+
 export interface ElectionDifficulty {
     electionDifficulty: Word32;
 }
@@ -807,8 +847,8 @@ export interface TransactionOrigin {
 }
 
 export interface EncryptedInfo {
-    encryptedAmount: string;
-    incomingAmounts: string[];
+    encryptedAmount: EncryptedAmount;
+    incomingAmounts: EncryptedAmount[];
 }
 
 export interface IncomingTransaction {

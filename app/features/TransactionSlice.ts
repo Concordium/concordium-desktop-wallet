@@ -16,8 +16,8 @@ import {
     AccountTransaction,
     Dispatch,
     TransactionEvent,
-    Global,
     RejectReason,
+    Global,
 } from '../utils/types';
 import {
     attachNames,
@@ -162,7 +162,10 @@ export async function addPendingTransaction(
     transaction: AccountTransaction,
     hash: string
 ) {
-    const convertedTransaction = convertAccountTransaction(transaction, hash);
+    const convertedTransaction = await convertAccountTransaction(
+        transaction,
+        hash
+    );
     return insertTransactions([convertedTransaction]);
 }
 

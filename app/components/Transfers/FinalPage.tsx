@@ -2,11 +2,12 @@ import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { Link } from 'react-router-dom';
 import { Card, Button, Table, Label } from 'semantic-ui-react';
-import { parse } from '../../utils/JSONHelper';
-import routes from '../../constants/routes.json';
-import { displayAsGTU } from '../../utils/gtu';
-import { parseTime } from '../../utils/timeHelpers';
-import { getScheduledTransferAmount } from '../../utils/transactionHelpers';
+import { parse } from '~/utils/JSONHelper';
+import routes from '~/constants/routes.json';
+import { displayAsGTU } from '~/utils/gtu';
+import { parseTime } from '~/utils/timeHelpers';
+import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 import {
     AddressBookEntry,
@@ -14,9 +15,10 @@ import {
     instanceOfScheduledTransfer,
     instanceOfSimpleTransfer,
     instanceOfTransferToEncrypted,
+    instanceOfTransferToPublic,
     TransactionPayload,
     TimeStampUnit,
-} from '../../utils/types';
+} from '~/utils/types';
 
 interface State {
     transaction: string;
@@ -30,6 +32,9 @@ interface Props {
 function getAmount(transaction: AccountTransaction) {
     if (instanceOfScheduledTransfer(transaction)) {
         return getScheduledTransferAmount(transaction);
+    }
+    if (instanceOfTransferToPublic(transaction)) {
+        return transaction.payload.transferAmount;
     }
     if (
         instanceOfSimpleTransfer(transaction) ||
@@ -73,9 +78,7 @@ function displayRecipient(recipient: AddressBookEntry) {
 }
 
 /**
- * Displays details of a completed transaction.
- * TODO: fix estimatedFee
- * TODO: generalize (right now expects simple transfer)
+ * Displays details of a submitted transaction.
  */
 export default function FinalPage({ location }: Props): JSX.Element {
     if (!location.state) {
@@ -100,7 +103,9 @@ export default function FinalPage({ location }: Props): JSX.Element {
                         <Table.Row>
                             <Table.Cell>Estimated fee:</Table.Cell>
                             <Table.Cell textAlign="right">
-                                {displayAsGTU(200n)}
+                                <DisplayEstimatedFee
+                                    estimatedFee={transaction.estimatedFee}
+                                />
                             </Table.Cell>
                         </Table.Row>
                         {displayNote(transaction)}
