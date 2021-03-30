@@ -91,3 +91,5 @@ export function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[] {
 export function isDefined<T>(v?: T): v is T {
     return v !== undefined;
 }
+
+export const notNull = <T>(v: T | null | undefined): v is T => v != null;
