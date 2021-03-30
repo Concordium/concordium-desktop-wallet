@@ -86,8 +86,11 @@ export default function PickAmount({
                             },
                         }}
                     />
+                    <DisplayEstimatedFee
+                        className={styles.estimatedFee}
+                        estimatedFee={estimatedFee}
+                    />
                 </div>
-                <DisplayEstimatedFee estimatedFee={estimatedFee} />
                 {toPickRecipient ? (
                     <>
                         <div style={{ display: 'none' }}>

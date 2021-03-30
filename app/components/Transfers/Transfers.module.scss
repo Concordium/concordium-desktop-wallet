@@ -8,13 +8,19 @@
 
 .pickAmount {
     display: flex;
-    margin: 50px 10%;
+    margin: 40px 0;
     align-content: center;
+    justify-content: center;
+    flex-wrap: wrap;
     width: 100%;
 
     label {
         width: 75%;
     }
+}
+
+.estimatedFee {
+    text-align: center;
 }
 
 .header {
