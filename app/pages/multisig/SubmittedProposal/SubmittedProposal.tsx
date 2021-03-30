@@ -10,7 +10,7 @@ import {
     MultiSignatureTransactionStatus,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
-import MultiSignatureLayout from './MultiSignatureLayout';
+import MultiSignatureLayout from '../MultiSignatureLayout';
 import Loading from '~/cross-app-components/Loading';
 import Button from '~/cross-app-components/Button';
 import { BoolResponse } from '~/proto/concordium_p2p_rpc_pb';
@@ -20,6 +20,7 @@ import {
     updateCurrentProposal,
 } from '~/features/MultiSignatureSlice';
 import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
+import styles from './SubmittedProposal.module.scss';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS;
 
@@ -40,9 +41,11 @@ const ERROR_STATUSES = [
 const SUCCESS_STATUSES = [MultiSignatureTransactionStatus.Finalized];
 
 function getStatusIcon(status: MultiSignatureTransactionStatus): JSX.Element {
-    if (ERROR_STATUSES.some((s) => s === status)) return <ErrorIcon />;
-    if (ERROR_STATUSES.some((s) => s === status)) return <CheckmarkIcon />;
-    return <Loading inline />;
+    if (ERROR_STATUSES.some((s) => s === status))
+        return <ErrorIcon className={styles.icon} />;
+    if (ERROR_STATUSES.some((s) => s === status))
+        return <CheckmarkIcon className={styles.icon} />;
+    return <Loading inline className={styles.icon} />;
 }
 
 function getStatusText(status: MultiSignatureTransactionStatus): string {
@@ -93,18 +96,21 @@ function SubmittedProposalView({ location, proposal }: Props) {
             stepTitle={`Transaction Proposal - ${handler.type}`}
             disableBack
         >
-            <div>
-                {getStatusIcon(status)}
-                {getStatusText(status)}
+            <div className={styles.body}>
+                <div />
+                <div className={styles.status}>
+                    {getStatusIcon(status)}
+                    {getStatusText(status)}
+                </div>
+                <Button
+                    disabled={isPending}
+                    onClick={() => {
+                        dispatch(push({ pathname: CLOSE_ROUTE }));
+                    }}
+                >
+                    Finish
+                </Button>
             </div>
-            <Button
-                disabled={isPending}
-                onClick={() => {
-                    dispatch(push({ pathname: CLOSE_ROUTE }));
-                }}
-            >
-                Finish
-            </Button>
         </MultiSignatureLayout>
     );
 }

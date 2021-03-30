@@ -31,7 +31,6 @@ import {
     serializeUpdateInstructionHeaderAndPayload,
 } from '~/utils/UpdateSerialization';
 import { hashSha256 } from '~/utils/serializationHelpers';
-import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
@@ -251,28 +250,6 @@ function ProposalView({ proposal }: ProposalViewProps) {
             serializedPayload
         )
     ).toString('hex');
-
-    // async function submitTransaction() {
-    //     const payload = serializeForSubmission(instruction, serializedPayload);
-    //     const submitted = (await sendTransaction(payload)).getValue();
-    //     const modifiedProposal: MultiSignatureTransaction = {
-    //         ...proposal,
-    //     };
-    //     if (submitted) {
-    //         modifiedProposal.status = MultiSignatureTransactionStatus.Submitted;
-    //         updateCurrentProposal(dispatch, modifiedProposal);
-    //         getMultiSignatureTransactionStatus(modifiedProposal, dispatch);
-    //         dispatch(
-    //             push({
-    //                 pathname: routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION,
-    //                 state: stringify(modifiedProposal),
-    //             })
-    //         );
-    //     } else {
-    //         modifiedProposal.status = MultiSignatureTransactionStatus.Failed;
-    //         updateCurrentProposal(dispatch, modifiedProposal);
-    //     }
-    // }
 
     function submitTransaction() {
         const payload = serializeForSubmission(instruction, serializedPayload);
