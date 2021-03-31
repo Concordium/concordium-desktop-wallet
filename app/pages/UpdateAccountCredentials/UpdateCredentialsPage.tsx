@@ -11,7 +11,6 @@ import {
     Identity,
     CredentialDeploymentInformation,
 } from '~/utils/types';
-import PageLayout from '~/components/PageLayout';
 import PickIdentity from '../GenerateCredential/PickIdentity';
 import PickAccount from './PickAccount';
 import AddCredential from './AddCredential';
@@ -22,6 +21,8 @@ import { CredentialStatus } from './CredentialStatus';
 import styles from './UpdateAccountCredentials.module.scss';
 import ConfirmPage from './ConfirmPage';
 import Columns from '~/components/Columns';
+import { selectedProposalRoute } from '~/utils/routerHelper';
+import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 
 const placeHolderText = 'To be determined';
 
@@ -43,6 +44,26 @@ function assignIndices<T>(items: T[], usedIndices: number[]) {
     return assigned;
 }
 
+function subTitle(currentLocation: string) {
+    switch (currentLocation) {
+        case routes.UPDATE_ACCOUNT_CREDENTIALS:
+        case routes.UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY:
+            return 'Identities';
+        case routes.UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT:
+            return 'Accounts';
+        case routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL:
+            return 'New Credentials';
+        case routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD:
+            return '';
+        case routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM:
+            return '';
+        case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
+            return 'Signature and Hardware Wallet';
+        default:
+            throw new Error('unknown location');
+    }
+}
+
 function nextLocation(currentLocation: string, proposalId: number) {
     switch (currentLocation) {
         case routes.UPDATE_ACCOUNT_CREDENTIALS:
@@ -57,11 +78,7 @@ function nextLocation(currentLocation: string, proposalId: number) {
         case routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM:
             return routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN;
         case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
-            return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION.replace(
-                ':id',
-                `${proposalId}`
-            );
-
+            return selectedProposalRoute(proposalId);
         default:
             throw new Error('unknown location');
     }
@@ -306,133 +323,125 @@ export default function UpdateCredentialPage(): JSX.Element {
     }
 
     return (
-        <PageLayout>
-            <PageLayout.Header>
-                <h1>
-                    Multi Signature Transactions | Update Account Credentials
-                </h1>
-            </PageLayout.Header>
-            <PageLayout.Container>
-                <Columns columnClassName={styles.columns} divider>
-                    <Columns.Column>
-                        <h2>Transaction Details</h2>
-                        <List relaxed>
-                            <List.Item>Identity:</List.Item>
-                            <List.Item>
-                                <b>
-                                    {identity
-                                        ? identity.name
-                                        : 'Choose an ID on the right'}
-                                </b>
-                            </List.Item>
-                            {displayAccount(account)}
-                            {displaySignatureThreshold(
-                                account?.signatureThreshold,
-                                newThreshold
-                            )}
-                            {displayCredentialCount(
-                                currentCredentials.length,
-                                credentialIds.length
-                            )}
-                        </List>
-                        {listCredentials(
-                            credentialIds,
-                            updateCredentialStatus,
-                            location ===
-                                routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL
+        <MultiSignatureLayout
+            pageTitle="Multi Signature Transactions | Update Account Credentials"
+            stepTitle="Transaction Proposal - Update Account Credentials"
+        >
+            <Columns columnClassName={styles.columns} divider>
+                <Columns.Column header="Transaction Details">
+                    <List relaxed>
+                        <List.Item>Identity:</List.Item>
+                        <List.Item>
+                            <b>
+                                {identity
+                                    ? identity.name
+                                    : 'Choose an ID on the right'}
+                            </b>
+                        </List.Item>
+                        {displayAccount(account)}
+                        {displaySignatureThreshold(
+                            account?.signatureThreshold,
+                            newThreshold
                         )}
-                    </Columns.Column>
-                    <Columns.Column>
-                        <Switch>
-                            <Route
-                                path={
-                                    routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD
-                                }
-                                render={() => (
-                                    <ChangeSignatureThreshold
-                                        setReady={setReady}
-                                        currentThreshold={
-                                            account?.signatureThreshold || 1
-                                        }
-                                        newCredentialAmount={
-                                            credentialIds.filter(
-                                                ([, status]) =>
-                                                    status !==
-                                                    CredentialStatus.Removed
-                                            ).length
-                                        }
-                                        newThreshold={newThreshold}
-                                        setNewThreshold={setNewThreshold}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path={routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM}
-                                render={renderConfirmPage}
-                            />
-                            <Route
-                                path={
-                                    routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL
-                                }
-                                render={() => (
-                                    <AddCredential
-                                        setReady={setReady}
-                                        credentialIds={credentialIds}
-                                        addCredentialId={(newId) =>
-                                            setCredentialIds(
-                                                (currentCredentialIds) => [
-                                                    ...currentCredentialIds,
-                                                    newId,
-                                                ]
-                                            )
-                                        }
-                                        setNewCredentials={setNewCredentials}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path={
-                                    routes.UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT
-                                }
-                                render={() => (
-                                    <PickAccount
-                                        setReady={setReady}
-                                        setAccount={setAccount}
-                                        identity={identity}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path={routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN}
-                                render={renderCreateUpdate}
-                            />
-                            <Route
-                                path={[
-                                    routes.UPDATE_ACCOUNT_CREDENTIALS,
-                                    routes.UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY,
-                                ]}
-                                render={() => (
-                                    <PickIdentity
-                                        setReady={setReady}
-                                        setIdentity={setIdentity}
-                                    />
-                                )}
-                            />
-                        </Switch>
-                        <Button
-                            disabled={!isReady}
-                            onClick={() => {
-                                setReady(false);
-                                dispatch(
-                                    push(nextLocation(location, proposalId))
-                                );
-                            }}
-                        >
-                            Continue
-                        </Button>
-                    </Columns.Column>
-                </Columns>
-            </PageLayout.Container>
-        </PageLayout>
+                        {displayCredentialCount(
+                            currentCredentials.length,
+                            credentialIds.length
+                        )}
+                    </List>
+                    {listCredentials(
+                        credentialIds,
+                        updateCredentialStatus,
+                        location ===
+                            routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL
+                    )}
+                </Columns.Column>
+                <Columns.Column header={subTitle(location)}>
+                    <Switch>
+                        <Route
+                            path={
+                                routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD
+                            }
+                            render={() => (
+                                <ChangeSignatureThreshold
+                                    setReady={setReady}
+                                    currentThreshold={
+                                        account?.signatureThreshold || 1
+                                    }
+                                    newCredentialAmount={
+                                        credentialIds.filter(
+                                            ([, status]) =>
+                                                status !==
+                                                CredentialStatus.Removed
+                                        ).length
+                                    }
+                                    newThreshold={newThreshold}
+                                    setNewThreshold={setNewThreshold}
+                                />
+                            )}
+                        />
+                        <Route
+                            path={routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM}
+                            render={renderConfirmPage}
+                        />
+                        <Route
+                            path={
+                                routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL
+                            }
+                            render={() => (
+                                <AddCredential
+                                    setReady={setReady}
+                                    credentialIds={credentialIds}
+                                    addCredentialId={(newId) =>
+                                        setCredentialIds(
+                                            (currentCredentialIds) => [
+                                                ...currentCredentialIds,
+                                                newId,
+                                            ]
+                                        )
+                                    }
+                                    setNewCredentials={setNewCredentials}
+                                />
+                            )}
+                        />
+                        <Route
+                            path={routes.UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT}
+                            render={() => (
+                                <PickAccount
+                                    setReady={setReady}
+                                    setAccount={setAccount}
+                                    identity={identity}
+                                />
+                            )}
+                        />
+                        <Route
+                            path={routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN}
+                            render={renderCreateUpdate}
+                        />
+                        <Route
+                            path={[
+                                routes.UPDATE_ACCOUNT_CREDENTIALS,
+                                routes.UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY,
+                            ]}
+                            render={() => (
+                                <PickIdentity
+                                    setReady={setReady}
+                                    setIdentity={setIdentity}
+                                />
+                            )}
+                        />
+                    </Switch>
+                    <Button
+                        disabled={!isReady}
+                        className={styles.continueButton}
+                        onClick={() => {
+                            setReady(false);
+                            dispatch(push(nextLocation(location, proposalId)));
+                        }}
+                    >
+                        Continue
+                    </Button>
+                </Columns.Column>
+            </Columns>
+        </MultiSignatureLayout>
     );
 }
