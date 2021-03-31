@@ -65,7 +65,9 @@ export default function CreateUpdate({
             account.address,
             addedCredentials,
             removedCredIds,
-            newThreshold
+            newThreshold,
+            1, // TODO: FIXME: Get the number of credentials on the account.
+            1 // TODO: FIXME: Get current threshold on the account.
         );
 
         const signatureIndex = 0;

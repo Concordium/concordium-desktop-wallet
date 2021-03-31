@@ -10,7 +10,6 @@ import {
     ScheduledTransfer,
     SchedulePoint,
     TransferToEncrypted,
-    UpdateAccountCredentials,
     instanceOfUpdateInstruction,
     Transaction,
     AddedCredential,
@@ -23,6 +22,7 @@ import {
 import {
     getScheduledTransferEnergy,
     getTransactionKindEnergy,
+    getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
 import { serializeTransferPayload } from './transactionSerialization';
 
@@ -209,23 +209,27 @@ export async function createUpdateCredentialsTransaction(
     addedCredentials: AddedCredential[],
     removedCredIds: string[],
     newThreshold: number,
-    expiry: bigint = getDefaultExpiry(),
-    energyAmount = '50000'
+    currentCredentialAmount: number,
+    signatureAmount = 1,
+    expiry: bigint = getDefaultExpiry()
 ) {
-    const { nonce } = await getNextAccountNonce(sender);
-    const transaction: UpdateAccountCredentials = {
-        sender,
-        nonce,
-        energyAmount,
-        expiry,
-        transactionKind: TransactionKindId.Update_credentials,
-        payload: {
-            addedCredentials,
-            removedCredIds,
-            newThreshold,
-        },
+    const payload = {
+        addedCredentials,
+        removedCredIds,
+        newThreshold,
     };
-    return transaction;
+
+    return createTransferTransaction(
+        sender,
+        expiry,
+        TransactionKindId.Update_credentials,
+        payload,
+        getUpdateAccountCredentialEnergy(
+            payload,
+            currentCredentialAmount,
+            signatureAmount
+        )
+    );
 }
 
 export interface StatusResponse {

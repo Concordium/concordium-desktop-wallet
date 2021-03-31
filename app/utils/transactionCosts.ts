@@ -2,6 +2,7 @@ import {
     AccountTransaction,
     instanceOfScheduledTransfer,
     TransactionKindId,
+    UpdateAccountCredentialsPayload,
 } from './types';
 import { getEnergyToMicroGtuRate } from './nodeHelpers';
 import { serializeTransferPayload } from './transactionSerialization';
@@ -12,6 +13,8 @@ export const energyConstants = {
     TransferToEncryptedCost: 600n,
     TransferToPublicCost: 14850n,
     ScheduledTransferPerRelease: 300n + 64n,
+    UpdateCredentialsBaseCost: 500n,
+    UpdateCredentialsPerCredentialCost: 500n,
 };
 
 export const payloadSizeEstimate = {
@@ -118,6 +121,26 @@ export function getTransactionKindEnergy(
         BigInt(signatureAmount),
         BigInt(payloadSize),
         transactionTypeCost
+    );
+}
+
+export function getUpdateAccountCredentialEnergy(
+    payload: UpdateAccountCredentialsPayload,
+    currentCredentialAmount: number,
+    signatureAmount = 1
+) {
+    const payloadSize = serializeTransferPayload(
+        TransactionKindId.Update_credentials,
+        payload
+    ).length;
+    return calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        energyConstants.UpdateCredentialsBaseCost +
+            energyConstants.UpdateCredentialsPerCredentialCost *
+                BigInt(
+                    currentCredentialAmount + payload.addedCredentials.length
+                )
     );
 }
 
