@@ -1,0 +1,15 @@
+@import 'config/bundle';
+@import 'elements/bundle';
+
+.regularInterval {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    flex-grow: 1;
+    * {
+        flex-grow: 0;
+    }
+}
+.regularInterval::before {
+    content: '';
+}

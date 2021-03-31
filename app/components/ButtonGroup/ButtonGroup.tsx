@@ -1,6 +1,6 @@
 import React from 'react';
 import Button, { ButtonProps } from '~/cross-app-components/Button';
-import styles from './Accounts.module.scss';
+import styles from './ButtonGroup.module.scss';
 
 interface Element {
     label: string;

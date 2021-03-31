@@ -16,7 +16,7 @@ import ExplicitSchedule, {
 } from './BuildExplicitSchedule';
 import TransferView from '~/components/Transfers/TransferView';
 import styles from './Accounts.module.scss';
-import Group from './ButtonGroup';
+import ButtonGroup from '~/components/ButtonGroup';
 
 interface Defaults extends ExplicitScheduleDefaults, RegularIntervalDefaults {}
 
@@ -108,7 +108,7 @@ export default function BuildSchedule({ location }: Props) {
                 <h2>
                     {displayAsGTU(amount)} to {recipient.name}
                 </h2>
-                <Group
+                <ButtonGroup
                     buttons={[
                         { label: 'Regular Interval', value: false },
                         { label: 'Explicit Schedule', value: true },

@@ -10,7 +10,7 @@ import Form from '~/components/Form';
 import { futureDate } from '~/components/Form/util/validation';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
-import styles from './Accounts.module.scss';
+import styles from './BuildExplicitSchedule.module.scss';
 
 export interface Defaults {
     schedule: Schedule;
@@ -39,7 +39,7 @@ const addSchedulePointFormNames: EqualRecord<AddSchedulePointForm> = {
 /**
  * Component to build a "explicit" schedule, by adding invidual releases.
  */
-export default function ExplicitSchedule({
+export default function BuildExplicitSchedule({
     submitSchedule,
     amount,
     defaults,
