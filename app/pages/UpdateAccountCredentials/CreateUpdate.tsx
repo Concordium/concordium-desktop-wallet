@@ -9,7 +9,7 @@ import {
 } from '~/utils/types';
 import { stringify } from '~/utils/JSONHelper';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import LedgerComponent from '~/components/ledger/LedgerComponent';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { globalSelector } from '~/features/GlobalSlice';
 import {
     createUpdateCredentialsTransaction,
@@ -110,5 +110,5 @@ export default function CreateUpdate({
         setProposalId(entryId);
     }
 
-    return <LedgerComponent ledgerCall={sign} />;
+    return <SimpleLedger ledgerCall={sign} />;
 }

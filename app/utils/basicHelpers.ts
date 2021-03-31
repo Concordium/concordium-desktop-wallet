@@ -93,3 +93,30 @@ export function isDefined<T>(v?: T): v is T {
 }
 
 export const notNull = <T>(v: T | null | undefined): v is T => v != null;
+
+export function noOp(): void {
+    return undefined;
+}
+
+export async function asyncNoOp(): Promise<void> {
+    return new Promise((resolve) => resolve());
+}
+
+export const ensureNumberLength = (length: number) => (
+    value?: string
+): string => {
+    if (!value) {
+        return '';
+    }
+
+    const valueLength = value.length;
+
+    if (valueLength >= length) {
+        return value;
+    }
+
+    const missing = length - valueLength;
+    const prepend = new Array(missing).fill(`0`).join('');
+
+    return `${prepend}${value}`;
+};

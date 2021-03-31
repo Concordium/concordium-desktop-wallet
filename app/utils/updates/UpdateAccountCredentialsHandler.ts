@@ -10,6 +10,8 @@ import {
 } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
 
+const TYPE = 'Update Account Credentials';
+
 type TransactionType = UpdateAccountCredentials;
 
 export default class UpdateAccountCredentialsHandler
@@ -46,5 +48,7 @@ export default class UpdateAccountCredentialsHandler
         return AccountTransactionDetails({ transaction });
     }
 
-    title = 'Account Transaction | Update Account Credentials';
+    title = `Account Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

@@ -1,18 +1,21 @@
 import { parse } from 'json-bigint';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { Authorizations } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import {
     UpdateComponent,
     UpdateInstructionHandler,
     TransactionInput,
+    AccountTransactionHandler,
 } from '../transactionTypes';
 import {
     instanceOfUpdateInstruction,
     TransactionKindId,
+    MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
     Transaction,
+    AccountTransaction,
 } from '../types';
 import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
 import ElectionDifficultyHandler from './ElectionDifficultyHandler';
@@ -24,6 +27,7 @@ import MintDistributionHandler from './MintDistributionHandler';
 import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
+import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
 
 class HandlerTypeMiddleware<T>
     implements
@@ -37,14 +41,26 @@ class HandlerTypeMiddleware<T>
 
     title: string;
 
+    type: string;
+
     constructor(base: UpdateInstructionHandler<T, ConcordiumLedgerClient>) {
         this.base = base;
         this.update = base.update;
         this.title = base.title;
+        this.type = base.type;
     }
 
     confirmType(transaction: UpdateInstruction<UpdateInstructionPayload>) {
         return transaction;
+    }
+
+    createTransaction(
+        blockSummary: BlockSummary,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fields: any,
+        effectiveTime: bigint
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+        return this.base.createTransaction(blockSummary, fields, effectiveTime);
     }
 
     serializePayload(transaction: UpdateInstruction<UpdateInstructionPayload>) {
@@ -72,9 +88,11 @@ class HandlerTypeMiddleware<T>
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
-) {
+): AccountTransactionHandler<AccountTransaction, ConcordiumLedgerClient> {
     if (transactionKind === TransactionKindId.Update_credentials) {
-        return new UpdateAccountCredentialsHandler();
+        return new AccountHandlerTypeMiddleware(
+            new UpdateAccountCredentialsHandler()
+        );
     }
     throw new Error(`Unsupported transaction type: ${transactionKind}`);
 }

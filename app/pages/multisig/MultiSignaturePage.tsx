@@ -1,8 +1,6 @@
 import React from 'react';
-import Columns from '../../components/Columns';
-import PageLayout from '../../components/PageLayout';
-import MultiSignatureMenuList from './menu/MultiSignatureMenuList';
-import MultiSignatureMenuView from './menu/MultiSignatureMenuView';
+import PageLayout from '~/components/PageLayout';
+import MultiSignatureMenu from './MultiSignatureMenu';
 
 export default function MultiSignaturePage() {
     return (
@@ -10,14 +8,7 @@ export default function MultiSignaturePage() {
             <PageLayout.Header>
                 <h1>Multi Signature Transactions</h1>
             </PageLayout.Header>
-            <Columns columnScroll divider>
-                <Columns.Column>
-                    <MultiSignatureMenuList />
-                </Columns.Column>
-                <Columns.Column>
-                    <MultiSignatureMenuView />
-                </Columns.Column>
-            </Columns>
+            <MultiSignatureMenu />
         </PageLayout>
     );
 }

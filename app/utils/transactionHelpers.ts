@@ -1,6 +1,6 @@
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
-import { getDefaultExpiry } from './timeHelpers';
+import { getDefaultExpiry, getNow } from './timeHelpers';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -16,6 +16,7 @@ import {
     AddedCredential,
     AccountTransaction,
     TransactionPayload,
+    TimeStampUnit,
     TransactionAccountSignature,
     TransactionCredentialSignature,
 } from './types';
@@ -313,3 +314,6 @@ export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
         true
     );
 }
+
+export const isExpired = (transaction: Transaction) =>
+    getTimeout(transaction) <= getNow(TimeStampUnit.seconds);

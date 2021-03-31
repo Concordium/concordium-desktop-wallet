@@ -1,16 +1,23 @@
 import BakerStakeThresholdView from '~/pages/multisig/BakerStakeThresholdView';
-import UpdateBakerStakeThreshold from '~/pages/multisig/UpdateBakerStakeThreshold';
+import UpdateBakerStakeThreshold, {
+    UpdateBakerStakeThresholdFields,
+} from '~/pages/multisig/UpdateBakerStakeThreshold';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import { Authorizations } from '../NodeApiTypes';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
     isBakerStakeThreshold,
     BakerStakeThreshold,
+    MultiSignatureTransaction,
+    UpdateType,
 } from '../types';
 import { serializeBakerStakeThreshold } from '../UpdateSerialization';
+
+const TYPE = 'Update Baker Stake Threshold';
 
 type TransactionType = UpdateInstruction<BakerStakeThreshold>;
 
@@ -24,6 +31,31 @@ export default class EuroPerEnergyHandler
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    async createTransaction(
+        blockSummary: BlockSummary,
+        { threshold: bakerStakeThreshold }: UpdateBakerStakeThresholdFields,
+        effectiveTime: bigint
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.bakerStakeThreshold
+                .nextSequenceNumber;
+        const {
+            threshold,
+        } = blockSummary.updates.authorizations.bakerStakeThreshold;
+
+        return createUpdateMultiSignatureTransaction(
+            { threshold: BigInt(bakerStakeThreshold) },
+            UpdateType.UpdateBakerStakeThreshold,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
     }
 
     serializePayload(transaction: TransactionType) {
@@ -54,5 +86,7 @@ export default class EuroPerEnergyHandler
 
     update = UpdateBakerStakeThreshold;
 
-    title = 'Foundation Transaction | Update baker stake threshold';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }
