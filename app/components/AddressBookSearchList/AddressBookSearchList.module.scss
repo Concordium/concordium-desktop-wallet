@@ -7,6 +7,7 @@
     align-items: center;
     margin-bottom: 30px;
     height: 78px;
+    font-size: $font-size-h2;
 
     &,
     input {
@@ -18,7 +19,7 @@
         border: none;
         border-radius: 10px;
         height: 100%;
-        font-size: $font-size-h2;
+        font-size: inherit;
         padding: 0 20px 0 50px;
         text-align: center;
         box-shadow: 0 0 0 1px $color-grey inset;

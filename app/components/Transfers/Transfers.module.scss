@@ -6,30 +6,8 @@
     color: $color-error;
 }
 
-.pickAmount {
-    display: flex;
-    margin: 50px 10%;
-    align-content: center;
-    width: 100%;
-
-    label {
-        width: 75%;
-    }
-}
-
 .header {
     text-align: center;
-}
-
-.button {
-    width: 90%;
-    margin-bottom: 14px;
-    margin-left: 5%;
-}
-
-.pickRecipient {
-    display: flex;
-    flex-direction: column;
 }
 
 .transferView {
