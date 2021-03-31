@@ -311,12 +311,14 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     {instruction.signatures.length} of{' '}
                                     {proposal.threshold} signatures.
                                 </h5>
-                                <SignatureCheckboxes
-                                    threshold={proposal.threshold}
-                                    signatures={instruction.signatures.map(
-                                        (s) => s.signature
-                                    )}
-                                />
+                                <div className={styles.signatureCheckboxes}>
+                                    <SignatureCheckboxes
+                                        threshold={proposal.threshold}
+                                        signatures={instruction.signatures.map(
+                                            (s) => s.signature
+                                        )}
+                                    />
+                                </div>
                             </div>
                             <FileInput
                                 placeholder="Drag and drop signatures here"
