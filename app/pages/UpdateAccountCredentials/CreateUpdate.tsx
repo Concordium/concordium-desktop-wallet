@@ -25,6 +25,7 @@ interface Props {
     primaryCredential: Credential;
     addedCredentials: AddedCredential[];
     removedCredIds: string[];
+    currentCredentialAmount: number;
     newThreshold: number;
     setProposalId: (id: number) => void;
 }
@@ -38,6 +39,7 @@ export default function CreateUpdate({
     primaryCredential,
     addedCredentials,
     removedCredIds,
+    currentCredentialAmount,
     newThreshold,
     setProposalId,
 }: Props): JSX.Element {
@@ -66,8 +68,8 @@ export default function CreateUpdate({
             addedCredentials,
             removedCredIds,
             newThreshold,
-            1, // TODO: FIXME: Get the number of credentials on the account.
-            1 // TODO: FIXME: Get current threshold on the account.
+            currentCredentialAmount,
+            account.signatureThreshold
         );
 
         const signatureIndex = 0;

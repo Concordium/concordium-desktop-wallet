@@ -317,6 +317,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                     .map(([id]) => id)}
                 newThreshold={newThreshold}
                 setProposalId={setProposalId}
+                currentCredentialAmount={currentCredentials.length}
                 primaryCredential={currentCredentials[0]}
             />
         );
