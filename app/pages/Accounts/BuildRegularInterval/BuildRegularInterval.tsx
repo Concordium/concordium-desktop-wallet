@@ -101,7 +101,7 @@ export default function RegularInterval({
                         validate: futureDate('Time must be in the future'),
                     }}
                 />
-                <Form.Submit size="huge">Continue</Form.Submit>
+                <Form.Submit size="big">Continue</Form.Submit>
             </Form>
         </>
     );

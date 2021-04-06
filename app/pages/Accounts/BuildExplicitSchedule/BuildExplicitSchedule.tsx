@@ -117,15 +117,15 @@ export default function BuildExplicitSchedule({
                     key={schedulePoint.timestamp + schedulePoint.amount}
                     className={styles.scheduleListRow}
                 >
-                    <div>{index + 1}.</div>
                     <div>
+                        {index + 1}.{' '}
                         {parseTime(
                             schedulePoint.timestamp,
                             TimeStampUnit.milliSeconds
                         )}
                     </div>
-                    <div>{displayAsGTU(schedulePoint.amount)}</div>
                     <div>
+                        {displayAsGTU(schedulePoint.amount)}{' '}
                         <Button clear onClick={() => removeFromSchedule(index)}>
                             <BinIcon className={styles.binIcon} />
                         </Button>
@@ -135,27 +135,31 @@ export default function BuildExplicitSchedule({
         </div>
     );
 
+    const HeaderIcon = adding ? CloseIcon : PlusIcon;
+
     return (
         <>
             <div className={styles.explicitSchedule}>
-                <h3 className={styles.releases}>Releases:</h3>
-                <h2 className={styles.amountUsed}>
+                <p className={styles.releases}>Releases:</p>
+                <p className={styles.amountUsed}>
                     ({displayAsGTU(usedAmount)} of {displayAsGTU(amount)} in
                     schedule)
-                </h2>
+                </p>
                 <Card className={styles.addScheduleCard}>
-                    <div className={styles.addScheduleCardHeader}>
-                        <h2>Add release to schedule</h2>
-                        <Button clear onClick={() => setAdding(!adding)}>
-                            {adding ? <CloseIcon /> : <PlusIcon />}
-                        </Button>
-                    </div>
+                    <Button
+                        clear
+                        className={styles.addScheduleCardHeader}
+                        onClick={() => setAdding(!adding)}
+                    >
+                        <p>Add release to schedule</p>
+                        <HeaderIcon />
+                    </Button>
                     {adding ? addSchedulePointForm : null}
                 </Card>
                 {!adding ? showSchedules : null}
             </div>
             <Button
-                size="huge"
+                size="big"
                 disabled={usedAmount < amount}
                 onClick={() => submitSchedule(schedule, { schedule })}
             >

@@ -52,11 +52,11 @@ WithHeaderButtons.args = {
     children: [
         <PageLayout.Header>
             <PageLayout.HeaderButton align="left">
-                <PlusIcon />
+                <PlusIcon height="20" />
             </PageLayout.HeaderButton>
             <h1>Page Title</h1>
             <PageLayout.HeaderButton align="right">
-                <PlusIcon />
+                <PlusIcon height="20" />
             </PageLayout.HeaderButton>
         </PageLayout.Header>,
         <h3>Content</h3>,

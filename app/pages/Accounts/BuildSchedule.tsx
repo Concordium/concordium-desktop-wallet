@@ -104,7 +104,10 @@ export default function BuildSchedule({ location }: Props) {
             }
         >
             <div className={styles.buildScheduleCommon}>
-                <h2> Send fund with a release schedule </h2>
+                <h3 className={styles.title}>
+                    {' '}
+                    Send fund with a release schedule{' '}
+                </h3>
                 <h2>
                     {displayAsGTU(amount)} to {recipient.name}
                 </h2>

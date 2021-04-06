@@ -1,16 +1,17 @@
 @import 'config/bundle';
-@import 'elements/bundle';
 
 .explicitSchedule {
     height: 80%;
+}
 
-    .releases {
-        margin-bottom: 0;
-    }
+.releases,
+.amountUsed {
+    margin: 0;
+    font-size: $font-size-body3;
 }
 
 .amountUsed {
-    composes: textFaded;
+    composes: textfaded from global;
 }
 
 .addScheduleCard {
@@ -34,9 +35,12 @@
         display: flex;
         justify-content: center;
         align-items: baseline;
+        width: 100%;
 
-        :not(:last-child) {
+        p {
+            font-size: $font-size-body3;
             padding-left: 20px;
+            margin-bottom: 0;
         }
 
         * {
@@ -44,8 +48,7 @@
         }
 
         svg {
-            height: 20px;
-            width: 20px;
+            height: $font-size-body3;
         }
     }
 }
@@ -59,18 +62,17 @@
 }
 
 .scheduleListRow {
-    margin-left: 10%;
-    width: 85%;
+    width: 100%;
     flex-grow: 1;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
 
-    :nth-child(-n + 2) {
+    :first-child {
         text-align: left;
     }
 
-    :nth-last-child(-n + 2) {
+    :last-child {
         text-align: right;
     }
 
@@ -80,7 +82,7 @@
 }
 
 .binIcon {
-    width: 15px;
+    height: $font-size-body3;
     transition: transform $anim-easing $anim-timing;
     &:hover {
         transform: scale(1.1);

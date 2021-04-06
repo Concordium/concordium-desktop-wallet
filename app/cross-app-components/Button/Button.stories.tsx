@@ -71,7 +71,7 @@ HugeWithIcon.args = {
     children: 'Button',
     disabled: false,
     size: 'huge',
-    icon: <PlusIcon />,
+    icon: <PlusIcon height="20" />,
 };
 
 export const Clear = Template.bind({});
