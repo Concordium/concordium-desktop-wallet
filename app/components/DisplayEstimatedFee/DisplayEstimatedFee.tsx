@@ -1,4 +1,6 @@
 import React from 'react';
+import clsx from 'clsx';
+import styles from './DisplayEstimatedFee.module.scss';
 import { displayAsGTU } from '~/utils/gtu';
 
 interface Props {
@@ -18,5 +20,5 @@ export default function DisplayEstimatedFee({
     } else {
         fee = 'To be determined';
     }
-    return <p className={className}>Estimated fee: {fee}</p>;
+    return <p className={clsx(className, styles.root)}>Estimated fee: {fee}</p>;
 }

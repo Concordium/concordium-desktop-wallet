@@ -7,8 +7,9 @@ import { toMicroUnits, getGTUSymbol, isValidGTUString } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
-import styles from './Transfers.module.scss';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import transferStyles from '../Transfers.module.scss';
+import styles from './PickAmount.module.scss';
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
@@ -71,9 +72,9 @@ export default function PickAmount({
 
     return (
         <>
-            <h2 className={styles.header}>{header}</h2>
+            <h2 className={transferStyles.header}>{header}</h2>
             <Form formMethods={form} onSubmit={handleSubmit}>
-                <div className={styles.pickAmount}>
+                <div className={styles.amountInputWrapper}>
                     <p>{getGTUSymbol()}</p>
                     <Form.Input
                         name="amount"
@@ -86,11 +87,11 @@ export default function PickAmount({
                             },
                         }}
                     />
-                    <DisplayEstimatedFee
-                        className={styles.estimatedFee}
-                        estimatedFee={estimatedFee}
-                    />
                 </div>
+                <DisplayEstimatedFee
+                    className={styles.estimatedFee}
+                    estimatedFee={estimatedFee}
+                />
                 {toPickRecipient ? (
                     <>
                         <div style={{ display: 'none' }}>
@@ -100,24 +101,26 @@ export default function PickAmount({
                                     required: 'Recipient Required',
                                 }}
                                 checked={Boolean(recipient?.address)}
+                                readOnly
                             />
                         </div>
                         <AddressBookEntryButton
-                            className={styles.button}
+                            className={styles.pickRecipient}
                             error={Boolean(form.errors?.recipient)}
                             onClick={() => {
                                 toPickRecipient(form.getValues('amount'));
                             }}
-                        >
-                            {recipient ? recipient.name : 'Select Recipient'}
-                            <br />
-                        </AddressBookEntryButton>
-                        <p className={styles.errorLabel}>
+                            title={
+                                recipient ? recipient.name : 'Select Recipient'
+                            }
+                            comment={recipient?.note}
+                        />
+                        <p className={transferStyles.errorLabel}>
                             {form.errors?.recipient?.message}
                         </p>
                     </>
                 ) : null}
-                <Form.Submit as={Button} className={styles.button} size="huge">
+                <Form.Submit as={Button} size="big">
                     Continue
                 </Form.Submit>
             </Form>

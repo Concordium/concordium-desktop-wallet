@@ -7,7 +7,10 @@ import {
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
-import { signNewCredentialDeployment } from './CredentialDeployment';
+import {
+    signCredentialDeploymentOnNewAccount,
+    signCredentialDeploymentOnExistingAccount,
+} from './CredentialDeployment';
 import {
     AccountTransaction,
     BakerStakeThreshold,
@@ -97,12 +100,25 @@ export default class ConcordiumLedgerClient {
         );
     }
 
-    signNewCredentialDeployment(
+    signCredentialDeploymentOnExistingAccount(
+        credentialDeployment: UnsignedCredentialDeploymentInformation,
+        address: string,
+        path: number[]
+    ): Promise<Buffer> {
+        return signCredentialDeploymentOnExistingAccount(
+            this.transport,
+            credentialDeployment,
+            address,
+            path
+        );
+    }
+
+    signCredentialDeploymentOnNewAccount(
         credentialDeployment: UnsignedCredentialDeploymentInformation,
         expiry: bigint,
         path: number[]
     ): Promise<Buffer> {
-        return signNewCredentialDeployment(
+        return signCredentialDeploymentOnNewAccount(
             this.transport,
             credentialDeployment,
             expiry,
