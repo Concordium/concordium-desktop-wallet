@@ -11,7 +11,6 @@ import {
 } from '~/utils/types';
 import Input from '~/components/Form/Input';
 import PickRecipient from '~/components/Transfers/PickRecipient';
-import PageLayout from '~/components/PageLayout';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
 import PickIdentity from '~/pages/GenerateCredential/PickIdentity';
@@ -21,6 +20,24 @@ import TransactionProposalDetails from './TransactionProposalDetails';
 import { isValidGTUString } from '~/utils/gtu';
 import CreateTransaction from './CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
+import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
+
+function subTitle(currentLocation: string) {
+    switch (currentLocation) {
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
+            return 'Select a proposer';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
+            return 'Select sender account';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
+            return 'Input amount';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
+            return 'Select recipient';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
+            return 'Signature and Hardware Wallet';
+        default:
+            throw new Error('unknown location');
+    }
+}
 
 /**
  * This component controls the flow of creating a multisignature account transaction.
@@ -64,109 +81,107 @@ export default function SimpleTransfer(): JSX.Element {
     }
 
     return (
-        <PageLayout>
-            <PageLayout.Header>
-                <h1>Multi Signature Transactions | {transactionKind}</h1>
-            </PageLayout.Header>
-            <PageLayout.Container>
-                <Columns divider columnScroll>
-                    <Columns.Column>
-                        <TransactionProposalDetails
-                            transactionType={transactionKind}
-                            account={account}
-                            identity={identity}
-                            amount={amount}
-                            recipient={recipient}
+        <MultiSignatureLayout
+            pageTitle={handler.title}
+            stepTitle="Transaction Proposal - Send GTU"
+        >
+            <Columns divider columnScroll>
+                <Columns.Column header="Transaction Details">
+                    <TransactionProposalDetails
+                        transactionType={transactionKind}
+                        account={account}
+                        identity={identity}
+                        amount={amount}
+                        recipient={recipient}
+                    />
+                    <Button
+                        disabled={!isReady}
+                        onClick={() => {
+                            setReady(false);
+                            dispatch(
+                                push({
+                                    pathname: handler.creationLocationHandler(
+                                        location,
+                                        proposalId
+                                    ),
+                                    state: TransactionKindString.Transfer,
+                                })
+                            );
+                        }}
+                    >
+                        Continue
+                    </Button>
+                </Columns.Column>
+                <Columns.Column header={subTitle(location)}>
+                    <Switch>
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
+                            }
+                            render={() => (
+                                <PickAccount
+                                    setReady={setReady}
+                                    setAccount={setAccount}
+                                    identity={identity}
+                                />
+                            )}
                         />
-                        <Button
-                            disabled={!isReady}
-                            onClick={() => {
-                                setReady(false);
-                                dispatch(
-                                    push({
-                                        pathname: handler.creationLocationHandler(
-                                            location,
-                                            proposalId
-                                        ),
-                                        state: TransactionKindString.Transfer,
-                                    })
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION
+                            }
+                            render={renderSignTransaction}
+                        />
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT
+                            }
+                            render={() => {
+                                if (!account) {
+                                    throw new Error(
+                                        'Unexpected missing account'
+                                    );
+                                }
+
+                                return (
+                                    <Input
+                                        name="amount"
+                                        placeholder="Enter Amount"
+                                        value={amount}
+                                        onChange={(e) =>
+                                            updateAmount(e.target.value)
+                                        }
+                                    />
                                 );
                             }}
-                        >
-                            Continue
-                        </Button>
-                    </Columns.Column>
-                    <Columns.Column>
-                        <Switch>
-                            <Route
-                                path={
-                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
-                                }
-                                render={() => (
-                                    <PickAccount
-                                        setReady={setReady}
-                                        setAccount={setAccount}
-                                        identity={identity}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path={
-                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION
-                                }
-                                render={renderSignTransaction}
-                            />
-                            <Route
-                                path={
-                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT
-                                }
-                                render={() => {
-                                    if (!account) {
-                                        throw new Error(
-                                            'Unexpected missing account'
-                                        );
-                                    }
-
-                                    return (
-                                        <Input
-                                            name="amount"
-                                            placeholder="Enter Amount"
-                                            value={amount}
-                                            onChange={(e) =>
-                                                updateAmount(e.target.value)
-                                            }
-                                        />
-                                    );
-                                }}
-                            />
-                            <Route
-                                path={
-                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT
-                                }
-                                render={() => (
-                                    <PickRecipient
-                                        pickRecipient={(newRecipient) => {
-                                            setReady(true);
-                                            setRecipient(newRecipient);
-                                        }}
-                                    />
-                                )}
-                            />
-                            <Route
-                                path={
-                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
-                                }
-                                render={() => (
-                                    <PickIdentity
-                                        setReady={setReady}
-                                        setIdentity={setIdentity}
-                                    />
-                                )}
-                            />
-                        </Switch>
-                    </Columns.Column>
-                </Columns>
-            </PageLayout.Container>
-        </PageLayout>
+                        />
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT
+                            }
+                            render={() => (
+                                <PickRecipient
+                                    pickRecipient={(newRecipient) => {
+                                        setReady(true);
+                                        setRecipient(newRecipient);
+                                    }}
+                                />
+                            )}
+                        />
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
+                            }
+                            render={() => (
+                                <PickIdentity
+                                    setReady={setReady}
+                                    setIdentity={setIdentity}
+                                />
+                            )}
+                        />
+                    </Switch>
+                </Columns.Column>
+            </Columns>
+        </MultiSignatureLayout>
     );
 }
