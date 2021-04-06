@@ -88,7 +88,7 @@ export default function InternalTransfer<
                 })
             );
         },
-        [specific, account, dispatch]
+        [specific, account, estimatedFee, dispatch]
     );
 
     function ChosenComponent() {
