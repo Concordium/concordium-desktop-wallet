@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { useLocation, Link } from 'react-router-dom';
-import { Header, Grid } from 'semantic-ui-react';
-import Button from '~/cross-app-components/Button';
+import { useLocation } from 'react-router-dom';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import PickAmount from './PickAmount';
@@ -12,9 +10,9 @@ import { Account, TransferToEncrypted, TransferToPublic } from '~/utils/types';
 import { toMicroUnits } from '~/utils/gtu';
 import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
+import TransferView from './TransferView';
 
 interface Specific<T> {
-    title: string;
     amountHeader: string;
     createTransaction: (address: string, amount: bigint) => Promise<T>;
     location: string;
@@ -38,8 +36,40 @@ export default function InternalTransfer<
         location?.state?.initialPage || locations.pickAmount
     );
 
-    // This is a string, to allows user input in GTU
-    const [amount, setAmount] = useState<string>(location?.state?.amount);
+    const toConfirmTransfer = useCallback(
+        async (amount: string) => {
+            const transaction = await specific.createTransaction(
+                account.address,
+                toMicroUnits(amount)
+            );
+
+            const transactionJSON = stringify(transaction);
+            dispatch(
+                push({
+                    pathname: routes.SUBMITTRANSFER,
+                    state: {
+                        confirmed: {
+                            pathname: specific.location,
+                            state: {
+                                initialPage: locations.transferSubmitted,
+                                transaction: transactionJSON,
+                            },
+                        },
+                        cancelled: {
+                            pathname: specific.location,
+                            state: {
+                                initialPage: locations.pickAmount,
+                                amount,
+                            },
+                        },
+                        transaction: transactionJSON,
+                        account,
+                    },
+                })
+            );
+        },
+        [specific, account, dispatch]
+    );
 
     function ChosenComponent() {
         switch (subLocation) {
@@ -47,74 +77,26 @@ export default function InternalTransfer<
                 return (
                     <PickAmount
                         header={specific.amountHeader}
-                        amount={amount}
-                        setAmount={setAmount}
+                        defaultAmount={location?.state?.amount}
                         toPickRecipient={undefined}
-                        toConfirmTransfer={async () => {
-                            const transaction = await specific.createTransaction(
-                                account.address,
-                                toMicroUnits(amount)
-                            );
-
-                            const transactionJSON = stringify(transaction);
-                            dispatch(
-                                push({
-                                    pathname: routes.SUBMITTRANSFER,
-                                    state: {
-                                        confirmed: {
-                                            pathname: specific.location,
-                                            state: {
-                                                initialPage:
-                                                    locations.transferSubmitted,
-                                                transaction: transactionJSON,
-                                            },
-                                        },
-                                        cancelled: {
-                                            pathname: specific.location,
-                                            state: {
-                                                initialPage:
-                                                    locations.pickAmount,
-                                                amount,
-                                            },
-                                        },
-                                        transaction: transactionJSON,
-                                        account,
-                                    },
-                                })
-                            );
-                        }}
+                        toConfirmTransfer={toConfirmTransfer}
                     />
                 );
             case locations.transferSubmitted: {
                 return <FinalPage location={location} />;
             }
             default:
-                return null;
+                throw new Error('Unexpected location');
         }
     }
 
     return (
-        <>
-            <Grid columns="3">
-                <Grid.Column>
-                    {subLocation === locations.confirmTransfer ? (
-                        <Button
-                            onClick={() => setSubLocation(locations.pickAmount)}
-                        >
-                            {'<--'}
-                        </Button>
-                    ) : null}
-                </Grid.Column>
-                <Grid.Column textAlign="center">
-                    <Header>{specific.title}</Header>
-                </Grid.Column>
-                <Grid.Column textAlign="right">
-                    <Link to={routes.ACCOUNTS}>
-                        <Button>x</Button>
-                    </Link>
-                </Grid.Column>
-            </Grid>
+        <TransferView
+            showBack={subLocation === locations.confirmTransfer}
+            exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
+            backOnClick={() => setSubLocation(locations.pickAmount)}
+        >
             <ChosenComponent />
-        </>
+        </TransferView>
     );
 }

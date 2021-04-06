@@ -7,7 +7,7 @@ import { LocationDescriptorObject } from 'history';
 import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
 import { Account, AddressBookEntry, Schedule } from '../../utils/types';
-import { displayAsGTU } from '../../utils/gtu';
+import { toGTUString, displayAsGTU } from '../../utils/gtu';
 import { createScheduledTransferTransaction } from '../../utils/transactionHelpers';
 import locations from '../../constants/transferLocations.json';
 import RegularInterval, {
@@ -94,7 +94,7 @@ export default function BuildSchedule({ location }: Props) {
                 as={Link}
                 to={{
                     pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
-                    state: { amount, recipient },
+                    state: { amount: toGTUString(amount), recipient },
                 }}
             >
                 {'<--'}
