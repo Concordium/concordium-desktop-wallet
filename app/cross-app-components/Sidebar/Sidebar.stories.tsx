@@ -6,50 +6,26 @@ import { BrowserRouter } from 'react-router-dom';
 import Sidebar, { SidebarLink, SidebarProps } from './Sidebar';
 import MainLayout from '../MainLayout';
 
-enum Backgrounds {
-    LIGHT = '#fbfbf9',
-    DARK = '#000',
-}
-
 export default {
     title: 'Cross App Components/Sidebar',
     component: Sidebar,
-    parameters: {
-        backgrounds: {
-            default: 'light',
-            values: [
-                {
-                    name: 'light',
-                    value: Backgrounds.LIGHT,
-                },
-                {
-                    name: 'dark',
-                    value: Backgrounds.DARK,
-                },
-            ],
-        },
-    },
     decorators: [
-        (StoryComponent, { globals }) => {
-            const isDarkBg = globals?.backgrounds?.value === Backgrounds.DARK;
-
+        (StoryComponent) => {
             return (
-                <div className={isDarkBg ? 'theme-dark' : 'theme-light'}>
-                    <BrowserRouter>
-                        {StoryComponent()}
-                        <MainLayout>
-                            <h1
-                                style={{
-                                    textAlign: 'center',
-                                    margin: 0,
-                                    paddingTop: '1em',
-                                }}
-                            >
-                                Page content
-                            </h1>
-                        </MainLayout>
-                    </BrowserRouter>
-                </div>
+                <BrowserRouter>
+                    {StoryComponent()}
+                    <MainLayout>
+                        <h1
+                            style={{
+                                textAlign: 'center',
+                                margin: 0,
+                                paddingTop: '1em',
+                            }}
+                        >
+                            Page content
+                        </h1>
+                    </MainLayout>
+                </BrowserRouter>
             );
         },
     ],

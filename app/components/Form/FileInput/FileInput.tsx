@@ -12,10 +12,12 @@ export interface FileInputProps
     extends CommonInputProps,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            'accept' | 'multiple' | 'placeholder'
+            'accept' | 'multiple' | 'placeholder' | 'disabled' | 'className'
         > {
+    buttonTitle: string;
     value: FileInputValue;
     onChange(files: FileInputValue): void;
+    disableFileNames?: boolean;
 }
 
 /**
@@ -32,6 +34,9 @@ export default function FileInput({
     isInvalid,
     error,
     placeholder,
+    className,
+    buttonTitle,
+    disableFileNames = false,
     ...inputProps
 }: FileInputProps): JSX.Element {
     const [dragOver, setDragOver] = useState<boolean>(false);
@@ -41,19 +46,22 @@ export default function FileInput({
         [value]
     );
 
+    const { disabled } = inputProps;
+
     return (
         <label
             className={clsx(
                 styles.root,
                 isInvalid && styles.invalid,
-                dragOver && styles.hovering
+                dragOver && styles.hovering,
+                className
             )}
             onDragOver={() => setDragOver(true)}
             onDragLeave={() => setDragOver(false)}
         >
             {label && <span className={styles.label}>{label}</span>}
             <div className={styles.wrapper}>
-                {files.length === 0
+                {files.length === 0 || disableFileNames
                     ? placeholder && (
                           <div className={styles.empty}>{placeholder}</div>
                       )
@@ -63,8 +71,12 @@ export default function FileInput({
                               {f?.name}
                           </div>
                       ))}
-                <Button className={styles.button} size="tiny">
-                    Browse to file, or drop it here
+                <Button
+                    className={styles.button}
+                    size="tiny"
+                    disabled={disabled}
+                >
+                    {buttonTitle}
                 </Button>
                 <input
                     className={styles.input}

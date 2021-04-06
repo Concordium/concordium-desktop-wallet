@@ -1,23 +1,33 @@
 @import 'config/bundle';
 
 .root {
+    text-align: left;
+    word-break: normal;
+}
+
+.wrapper {
     display: flex;
     align-items: center;
 
     input {
         @include hideInput;
     }
+
+    .rootDisabled & {
+        cursor: default;
+    }
 }
 
 .checkbox {
-    width: 14px;
-    height: 14px;
-    border: 1px solid $color-grey;
+    width: 18px;
+    height: 18px;
     border-radius: 5px;
+    box-shadow: 0 0 0 1px $color-grey inset;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border-color $form-transition;
+    transition: box-shadow $form-transition;
+    flex: 0 0 auto;
 
     &Large {
         width: 26px;
@@ -27,22 +37,19 @@
     svg {
         opacity: 0;
         transition: opacity $form-transition;
+        width: 60%;
 
         input:checked + & {
             opacity: 1;
         }
     }
 
-    &:not(.checkboxLarge) svg {
-        transform: scale(0.6);
+    input:focus + & {
+        box-shadow: 0 0 0 2px $form-color-focus inset;
     }
 
     .rootInvalid & {
-        border-color: $color-error;
-    }
-
-    input:focus + & {
-        border-color: $form-color-focus;
+        box-shadow: 0 0 0 2px $color-error inset !important;
     }
 }
 

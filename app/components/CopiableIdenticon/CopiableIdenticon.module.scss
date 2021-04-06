@@ -4,10 +4,11 @@
     display: flex;
     justify-content: center;
     margin: auto;
-    width: 128px;
+    width: 168px;
     cursor: pointer;
     border: none;
-    background: transparent;
+    background: $color-white;
+    padding: 20px;
 }
 
 .copytext {

@@ -71,8 +71,7 @@ export function connectWithFormUncontrolled<
 
 interface ControlledFieldProps<TValue>
     extends CommonFieldProps,
-        Pick<ControllerRenderProps, 'onChange'>,
-        Partial<Pick<ControllerRenderProps, 'onBlur'>> {
+        Partial<Pick<ControllerRenderProps, 'onBlur' | 'onChange'>> {
     value: TValue | undefined;
 }
 interface ControlledConnectorProps<TValue>
