@@ -1,0 +1,11 @@
+@import 'config/bundle';
+
+.root {
+    > *:not(:last-child) {
+        margin-bottom: 60px;
+    }
+}
+
+.timestamp {
+    font-size: $font-size-body1;
+}

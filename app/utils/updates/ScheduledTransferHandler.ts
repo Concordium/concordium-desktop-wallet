@@ -15,6 +15,8 @@ import { createScheduledTransferTransaction } from '../transactionHelpers';
 
 type TransactionType = ScheduledTransfer;
 
+const TYPE = 'Scheduled Transfer';
+
 export default class ScheduledTransferHandler
     extends TransferHandler<TransactionType>
     implements
@@ -63,5 +65,7 @@ export default class ScheduledTransferHandler
         return createScheduledTransferTransaction(sender, recipient, schedule);
     }
 
-    title = 'Account Transaction | Scheduled Transfer';
+    title = `Account Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

@@ -12,7 +12,6 @@ import {
     CredentialDeploymentInformation,
     TransactionKindString,
 } from '~/utils/types';
-import PageLayout from '~/components/PageLayout';
 import PickIdentity from '~/pages/GenerateCredential/PickIdentity';
 import PickAccount from './PickAccount';
 import AddCredential from './AddCredential';
@@ -23,6 +22,8 @@ import { CredentialStatus } from './CredentialStatus';
 import styles from './UpdateAccountCredentials.module.scss';
 import ConfirmPage from './ConfirmPage';
 import UpdateAccountCredentialsHandler from '~/utils/updates/UpdateAccountCredentialsHandler';
+import Columns from '~/components/Columns';
+import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 
 const placeHolderText = 'To be determined';
 
@@ -42,6 +43,25 @@ function assignIndices<T>(items: T[], usedIndices: number[]) {
         }
     }
     return assigned;
+}
+
+function subTitle(currentLocation: string) {
+    switch (currentLocation) {
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
+            return 'Identities';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
+            return 'Accounts';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
+            return 'New Credentials';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
+            return '';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CONFIRM:
+            return '';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
+            return 'Signature and Hardware Wallet';
+        default:
+            throw new Error('unknown location');
+    }
 }
 
 function displayAccount(account: Account | undefined) {
@@ -279,154 +299,147 @@ export default function UpdateCredentialPage(): JSX.Element {
                     .map(([id]) => id)}
                 newThreshold={newThreshold}
                 setProposalId={setProposalId}
+                currentCredentialAmount={currentCredentials.length}
                 primaryCredential={currentCredentials[0]}
             />
         );
     }
 
     return (
-        <PageLayout>
-            <PageLayout.Header>
-                <h1>
-                    Multi Signature Transactions | Update Account Credentials
-                </h1>
-            </PageLayout.Header>
-            <PageLayout.Container>
-                <Grid columns="equal" centered>
-                    <Grid.Row>
-                        <Grid.Column>
-                            <h2>Transaction Details</h2>
-                            <List relaxed>
-                                <List.Item>Identity:</List.Item>
-                                <List.Item>
-                                    <b>
-                                        {identity
-                                            ? identity.name
-                                            : 'Choose an ID on the right'}
-                                    </b>
-                                </List.Item>
-                                {displayAccount(account)}
-                                {displaySignatureThreshold(
-                                    account?.signatureThreshold,
-                                    newThreshold
-                                )}
-                                {displayCredentialCount(
-                                    currentCredentials.length,
-                                    credentialIds.length
-                                )}
-                            </List>
-                            {listCredentials(
-                                credentialIds,
-                                updateCredentialStatus,
-                                location ===
-                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
+        <MultiSignatureLayout
+            pageTitle="Multi Signature Transactions | Update Account Credentials"
+            stepTitle="Transaction Proposal - Update Account Credentials"
+        >
+            <Columns columnClassName={styles.columns} divider>
+                <Columns.Column header="Transaction Details">
+                    <List relaxed>
+                        <List.Item>Identity:</List.Item>
+                        <List.Item>
+                            <b>
+                                {identity
+                                    ? identity.name
+                                    : 'Choose an ID on the right'}
+                            </b>
+                        </List.Item>
+                        {displayAccount(account)}
+                        {displaySignatureThreshold(
+                            account?.signatureThreshold,
+                            newThreshold
+                        )}
+                        {displayCredentialCount(
+                            currentCredentials.length,
+                            credentialIds.length
+                        )}
+                    </List>
+                    {listCredentials(
+                        credentialIds,
+                        updateCredentialStatus,
+                        location ===
+                            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
+                    )}
+                </Columns.Column>
+                <Columns.Column header={subTitle(location)}>
+                    <Switch>
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD
+                            }
+                            render={() => (
+                                <ChangeSignatureThreshold
+                                    setReady={setReady}
+                                    currentThreshold={
+                                        account?.signatureThreshold || 1
+                                    }
+                                    newCredentialAmount={
+                                        credentialIds.filter(
+                                            ([, status]) =>
+                                                status !==
+                                                CredentialStatus.Removed
+                                        ).length
+                                    }
+                                    newThreshold={newThreshold}
+                                    setNewThreshold={setNewThreshold}
+                                />
                             )}
-                        </Grid.Column>
-                        <Grid.Column>
-                            <Switch>
-                                <Route
-                                    path={
-                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD
+                        />
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CONFIRM
+                            }
+                            render={renderConfirmPage}
+                        />
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
+                            }
+                            render={() => (
+                                <AddCredential
+                                    setReady={setReady}
+                                    credentialIds={credentialIds}
+                                    addCredentialId={(newId) =>
+                                        setCredentialIds(
+                                            (currentCredentialIds) => [
+                                                ...currentCredentialIds,
+                                                newId,
+                                            ]
+                                        )
                                     }
-                                    render={() => (
-                                        <ChangeSignatureThreshold
-                                            setReady={setReady}
-                                            currentThreshold={
-                                                account?.signatureThreshold || 1
-                                            }
-                                            newCredentialAmount={
-                                                credentialIds.filter(
-                                                    ([, status]) =>
-                                                        status !==
-                                                        CredentialStatus.Removed
-                                                ).length
-                                            }
-                                            newThreshold={newThreshold}
-                                            setNewThreshold={setNewThreshold}
-                                        />
-                                    )}
+                                    setNewCredentials={setNewCredentials}
                                 />
-                                <Route
-                                    path={
-                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CONFIRM
-                                    }
-                                    render={renderConfirmPage}
+                            )}
+                        />
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
+                            }
+                            render={() => (
+                                <PickAccount
+                                    setReady={setReady}
+                                    setAccount={setAccount}
+                                    identity={identity}
                                 />
-                                <Route
-                                    path={
-                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
-                                    }
-                                    render={() => (
-                                        <AddCredential
-                                            setReady={setReady}
-                                            credentialIds={credentialIds}
-                                            addCredentialId={(newId) =>
-                                                setCredentialIds(
-                                                    (currentCredentialIds) => [
-                                                        ...currentCredentialIds,
-                                                        newId,
-                                                    ]
-                                                )
-                                            }
-                                            setNewCredentials={
-                                                setNewCredentials
-                                            }
-                                        />
-                                    )}
+                            )}
+                        />
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION
+                            }
+                            render={renderCreateUpdate}
+                        />
+                        <Route
+                            path={[
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION,
+                            ]}
+                            render={() => (
+                                <PickIdentity
+                                    setReady={setReady}
+                                    setIdentity={setIdentity}
                                 />
-                                <Route
-                                    path={
-                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
-                                    }
-                                    render={() => (
-                                        <PickAccount
-                                            setReady={setReady}
-                                            setAccount={setAccount}
-                                            identity={identity}
-                                        />
-                                    )}
-                                />
-                                <Route
-                                    path={
-                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION
-                                    }
-                                    render={renderCreateUpdate}
-                                />
-                                <Route
-                                    path={
-                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
-                                    }
-                                    render={() => (
-                                        <PickIdentity
-                                            setReady={setReady}
-                                            setIdentity={setIdentity}
-                                        />
-                                    )}
-                                />
-                            </Switch>
-                            <Button
-                                disabled={!isReady}
-                                onClick={() => {
-                                    setReady(false);
+                            )}
+                        />
+                    </Switch>
+                    <Button
+                        disabled={!isReady}
+                        className={styles.continueButton}
+                        onClick={() => {
+                            setReady(false);
 
-                                    dispatch(
-                                        push({
-                                            pathname: handler.creationLocationHandler(
-                                                location,
-                                                proposalId
-                                            ),
-                                            state:
-                                                TransactionKindString.UpdateCredentials,
-                                        })
-                                    );
-                                }}
-                            >
-                                Continue
-                            </Button>
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-            </PageLayout.Container>
-        </PageLayout>
+                            dispatch(
+                                push({
+                                    pathname: handler.creationLocationHandler(
+                                        location,
+                                        proposalId
+                                    ),
+                                    state:
+                                        TransactionKindString.UpdateCredentials,
+                                })
+                            );
+                        }}
+                    >
+                        Continue
+                    </Button>
+                </Columns.Column>
+            </Columns>
+        </MultiSignatureLayout>
     );
 }

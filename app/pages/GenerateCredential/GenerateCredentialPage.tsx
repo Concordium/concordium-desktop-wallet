@@ -13,6 +13,7 @@ import SignCredential from './SignCredential';
 import routes from '~/constants/routes.json';
 import AccountCredentialSummary from './AccountCredentialSummary';
 import { CredentialBlob } from './types';
+import styles from './GenerateCredential.module.scss';
 
 function nextLocation(currentLocation: string) {
     switch (currentLocation) {
@@ -83,6 +84,19 @@ export default function GenerateCredential(): JSX.Element {
     const [attributes, setAttributes] = useState<string[]>([]);
     const [identity, setIdentity] = useState<Identity | undefined>();
 
+    const continueButton = (text: string) => (
+        <Button
+            className={styles.continueButton}
+            disabled={!isReady}
+            onClick={() => {
+                setReady(false);
+                dispatch(push(nextLocation(location)));
+            }}
+        >
+            {text}
+        </Button>
+    );
+
     return (
         <PageLayout>
             <PageLayout.Header>
@@ -117,17 +131,7 @@ export default function GenerateCredential(): JSX.Element {
                                             )}
                                             isReady={isReady}
                                         />
-                                        <Button
-                                            disabled={!isReady}
-                                            onClick={() => {
-                                                setReady(false);
-                                                dispatch(
-                                                    push(nextLocation(location))
-                                                );
-                                            }}
-                                        >
-                                            Continue
-                                        </Button>
+                                        {continueButton('Finish')}
                                     </List>
                                 )}
                             />
@@ -144,21 +148,7 @@ export default function GenerateCredential(): JSX.Element {
                                                 }
                                                 isReady={isReady}
                                             />
-                                            <Button
-                                                disabled={!isReady}
-                                                onClick={() => {
-                                                    setReady(false);
-                                                    dispatch(
-                                                        push(
-                                                            nextLocation(
-                                                                location
-                                                            )
-                                                        )
-                                                    );
-                                                }}
-                                            >
-                                                Continue
-                                            </Button>
+                                            {continueButton('Continue')}
                                         </Grid.Column>
                                         <Grid.Column>
                                             <Switch>

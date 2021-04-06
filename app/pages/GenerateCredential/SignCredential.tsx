@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Identity } from '~/utils/types';
 import { createCredentialInfo } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import LedgerComponent from '~/components/ledger/LedgerComponent';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { globalSelector } from '~/features/GlobalSlice';
 import { CredentialBlob } from './types';
@@ -57,5 +57,5 @@ export default function SignCredential({
         setReady(true);
     }
 
-    return <LedgerComponent ledgerCall={sign} />;
+    return <SimpleLedger ledgerCall={sign} />;
 }

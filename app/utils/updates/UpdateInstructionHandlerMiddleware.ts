@@ -1,10 +1,14 @@
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { Authorizations } from '~/utils/NodeApiTypes';
+import { Authorizations, BlockSummary } from '~/utils/NodeApiTypes';
 import {
     UpdateComponent,
     UpdateInstructionHandler,
 } from '~/utils/transactionTypes';
-import { UpdateInstruction, UpdateInstructionPayload } from '~/utils/types';
+import {
+    UpdateInstruction,
+    UpdateInstructionPayload,
+    MultiSignatureTransaction,
+} from '~/utils/types';
 
 export default class UpdateHandlerTypeMiddleware<T>
     implements
@@ -18,14 +22,26 @@ export default class UpdateHandlerTypeMiddleware<T>
 
     title: string;
 
+    type: string;
+
     constructor(base: UpdateInstructionHandler<T, ConcordiumLedgerClient>) {
         this.base = base;
         this.update = base.update;
         this.title = base.title;
+        this.type = base.type;
     }
 
     confirmType(transaction: UpdateInstruction<UpdateInstructionPayload>) {
         return transaction;
+    }
+
+    createTransaction(
+        blockSummary: BlockSummary,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fields: any,
+        effectiveTime: bigint
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+        return this.base.createTransaction(blockSummary, fields, effectiveTime);
     }
 
     serializePayload(transaction: UpdateInstruction<UpdateInstructionPayload>) {

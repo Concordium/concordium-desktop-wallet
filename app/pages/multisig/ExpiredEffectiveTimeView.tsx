@@ -1,13 +1,10 @@
 import React from 'react';
-import { Header } from 'semantic-ui-react';
-import { getNow } from '../../utils/timeHelpers';
+import { isExpired } from '~/utils/transactionHelpers';
 import {
+    Transaction,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
-    Transaction,
-    TimeStampUnit,
-} from '../../utils/types';
-import { getTimeout } from '../../utils/transactionHelpers';
+} from '~/utils/types';
 
 interface Props {
     proposal?: MultiSignatureTransaction;
@@ -25,12 +22,12 @@ export default function ExpiredEffectiveTimeView({
     if (
         (!proposal ||
             proposal.status === MultiSignatureTransactionStatus.Expired) &&
-        getTimeout(transaction) <= getNow(TimeStampUnit.seconds)
+        isExpired(transaction)
     ) {
         return (
-            <Header color="red" size="small">
-                The transaction has expired
-            </Header>
+            <span className="textError">
+                The effective time has been exceeded
+            </span>
         );
     }
     return null;

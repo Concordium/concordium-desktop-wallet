@@ -1,17 +1,20 @@
 import { parse } from 'json-bigint';
-import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import {
     UpdateInstructionHandler,
+    AccountTransactionHandler,
     TransactionInput,
 } from '~/utils/transactionTypes';
 import {
     instanceOfUpdateInstruction,
     TransactionKindId,
+    AccountTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
     Transaction,
 } from '~/utils/types';
+import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
 import ElectionDifficultyHandler from './ElectionDifficultyHandler';
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
 import FoundationAccountHandler from './FoundationAccountHandler';
@@ -28,7 +31,7 @@ import UpdateHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
-) {
+): AccountTransactionHandler<AccountTransaction, ConcordiumLedgerClient> {
     if (transactionKind === TransactionKindId.Update_credentials) {
         return new AccountHandlerTypeMiddleware(
             new UpdateAccountCredentialsHandler()
@@ -72,6 +75,10 @@ export function findUpdateInstructionHandler(
             return new UpdateHandlerTypeMiddleware(new ProtocolUpdateHandler());
         case UpdateType.UpdateGASRewards:
             return new UpdateHandlerTypeMiddleware(new GasRewardsHandler());
+        case UpdateType.UpdateBakerStakeThreshold:
+            return new UpdateHandlerTypeMiddleware(
+                new BakerStakeThresholdHandler()
+            );
         case UpdateType.UpdateElectionDifficulty:
             return new UpdateHandlerTypeMiddleware(
                 new ElectionDifficultyHandler()

@@ -18,6 +18,10 @@
     position: relative;
     border: none;
 
+    &:disabled {
+        cursor: default;
+    }
+
     &Clear {
         background: transparent;
         padding: 0;
@@ -27,7 +31,7 @@
         color: $color-off-white;
         font-size: $font-size-button1;
         padding: 0 30px;
-        height: 50px;
+        min-height: 50px;
         border-radius: 4px;
         transition: background-color $anim-easing $anim-timing;
     }
@@ -42,9 +46,17 @@
         }
     }
 
+    &Tiny {
+        &:not(.rootClear) {
+            min-height: 28px;
+            font-size: $font-size-button2;
+            padding: 0 15px;
+        }
+    }
+
     &Small {
         &:not(.rootClear) {
-            height: 36px;
+            min-height: 36px;
             font-size: $font-size-button2;
             padding: 0 15px;
         }
@@ -52,13 +64,13 @@
 
     &Big {
         &:not(.rootClear) {
-            height: 58px;
+            min-height: 58px;
         }
     }
 
     &Huge {
         &:not(.rootClear) {
-            height: 76px;
+            min-height: 76px;
             font-size: $font-size-h2;
         }
     }

@@ -7,6 +7,21 @@ import knex from './knex';
 import { transactionTable } from '../constants/databaseNames.json';
 import { partition } from '../utils/basicHelpers';
 
+function convertBooleans(transactions: TransferTransaction[]) {
+    return transactions.map((transaction) => {
+        const remote = Boolean(transaction.remote);
+        const success =
+            transaction.success === null
+                ? transaction.success
+                : Boolean(transaction.success);
+        return {
+            ...transaction,
+            remote,
+            success,
+        };
+    });
+}
+
 export async function getTransactionsOfAccount(
     account: Account,
     orderBy = 'id',
@@ -19,7 +34,7 @@ export async function getTransactionsOfAccount(
         .where({ toAddress: address })
         .orWhere({ fromAddress: address })
         .orderBy(orderBy);
-    return transactions.filter(filter);
+    return convertBooleans(transactions).filter(filter);
 }
 
 export async function updateTransaction(
@@ -79,5 +94,5 @@ export async function getPendingTransactions(
         .table(transactionTable)
         .where({ status: TransactionStatus.Pending })
         .orderBy(orderBy);
-    return transactions;
+    return convertBooleans(transactions);
 }

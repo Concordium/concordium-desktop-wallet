@@ -8,11 +8,11 @@ export const parameters = {
     values: [
       {
         name: 'light',
-        value: '#E5E5E5'
+        value: '#fff'
       },
       {
         name: 'dark',
-        value: '#181817'
+        value: '#000'
       }
     ]
   }

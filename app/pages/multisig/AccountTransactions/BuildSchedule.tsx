@@ -13,6 +13,7 @@ interface Props {
 
 /**
  * Allows the user to build the schedule of a scheduled transfer.
+   TODO: Add Estimated Fee connection
  */
 export default function BuildSchedule({ amount, submitSchedule }: Props) {
     const [explicit, setExplicit] = useState<boolean>(false);
@@ -33,6 +34,7 @@ export default function BuildSchedule({ amount, submitSchedule }: Props) {
 
             <BuildComponent
                 submitSchedule={submitSchedule}
+                setScheduleLength={() => {}}
                 amount={toMicroUnits(amount)}
             />
         </List>

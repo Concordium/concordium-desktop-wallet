@@ -15,6 +15,8 @@ import { createSimpleTransferTransaction } from '../transactionHelpers';
 
 type TransactionType = SimpleTransfer;
 
+const TYPE = 'Simple Transfer';
+
 export default class SimpleTransferHandler
     extends TransferHandler<TransactionType>
     implements
@@ -61,5 +63,7 @@ export default class SimpleTransferHandler
         return createSimpleTransferTransaction(sender, amount, recipient);
     }
 
-    title = 'Account Transaction | Simple Transfer';
+    title = `Account Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

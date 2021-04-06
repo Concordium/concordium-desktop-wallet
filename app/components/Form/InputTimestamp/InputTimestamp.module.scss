@@ -4,8 +4,12 @@
     text-align: center;
 }
 
+.label {
+    composes: h5 from global;
+    display: inline-block;
+}
+
 .input {
-    margin-top: 5px;
     border-radius: 10px;
     box-shadow: 0 0 0 1px $color-grey inset;
     padding: 10px;
