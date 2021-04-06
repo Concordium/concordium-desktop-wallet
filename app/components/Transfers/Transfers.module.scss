@@ -27,10 +27,3 @@
     top: 20px;
     left: 20px;
 }
-
-.addressBookComment {
-    @extend h5;
-    @extend .textFaded;
-
-    display: contents;
-}
