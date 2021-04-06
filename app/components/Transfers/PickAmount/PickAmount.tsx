@@ -94,6 +94,7 @@ export default function PickAmount({
                                     required: 'Recipient Required',
                                 }}
                                 checked={Boolean(recipient?.address)}
+                                readOnly
                             />
                         </div>
                         <AddressBookEntryButton
