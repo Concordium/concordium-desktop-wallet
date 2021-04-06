@@ -1,23 +1,23 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { Grid } from 'semantic-ui-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import PlusIcon from '@resources/svg/plus.svg';
+import Columns from '~/components/Columns';
 import AccountList from './AccountList';
 import AccountView from './AccountView';
-import NoIdentities from '../../components/NoIdentities';
+import NoIdentities from '~/components/NoIdentities';
 import {
     accountsSelector,
     accountsInfoSelector,
-} from '../../features/AccountSlice';
+} from '~/features/AccountSlice';
 import BuildSchedule from './BuildSchedule';
-import routes from '../../constants/routes.json';
-import { Account, AccountInfo } from '../../utils/types';
-import { displayAsGTU } from '../../utils/gtu';
-import { sumToBigInt } from '../../utils/basicHelpers';
-
-import PlusIcon from '../../../resources/svg/plus.svg';
-import PageLayout from '../../components/PageLayout';
+import routes from '~/constants/routes.json';
+import { Account, AccountInfo } from '~/utils/types';
+import { displayAsGTU } from '~/utils/gtu';
+import { sumToBigInt } from '~/utils/basicHelpers';
+import styles from './Accounts.module.scss';
+import PageLayout from '~/components/PageLayout';
 
 function getTotalAmount(accountsInfo: AccountInfo[]) {
     return sumToBigInt(accountsInfo, (accountInfo) =>
@@ -83,22 +83,20 @@ export default function AccountsPage() {
                     <PlusIcon />
                 </PageLayout.HeaderButton>
             </PageLayout.Header>
-            <Grid centered columns="equal" divided>
-                <Grid.Row>
-                    <Grid.Column>
-                        <AccountList />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <Switch>
-                            <Route
-                                path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
-                                component={BuildSchedule}
-                            />
-                            <Route component={AccountView} />
-                        </Switch>
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
+            <Columns divider columnScroll columnClassName={styles.column}>
+                <Columns.Column>
+                    <AccountList />
+                </Columns.Column>
+                <Columns.Column>
+                    <Switch>
+                        <Route
+                            path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
+                            component={BuildSchedule}
+                        />
+                        <Route component={AccountView} />
+                    </Switch>
+                </Columns.Column>
+            </Columns>
         </PageLayout>
     );
 }
