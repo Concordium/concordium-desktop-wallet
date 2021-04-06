@@ -41,7 +41,7 @@
 }
 
 .buildSchedule {
-    composes: flexbetween;
+    composes: flexBetween;
     border-radius: 10px;
     background-color: $color-off-white;
     padding: 15px 50px;
@@ -55,11 +55,11 @@
 }
 
 .buildScheduleCommon {
-    composes: flexbetween;
+    composes: flexBetween;
     height: 20%;
 }
 
 .buildComponent {
-    composes: flexbetween;
+    composes: flexBetween;
     height: 70%;
 }
