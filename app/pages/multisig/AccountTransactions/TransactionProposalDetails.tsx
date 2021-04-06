@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Account,
     Identity,
     AddressBookEntry,
     TransactionKindId,
 } from '~/utils/types';
-import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
+import { getGTUSymbol } from '~/utils/gtu';
 import styles from './MultisignatureAccountTransactions.module.scss';
+import { getTransactionKindCost } from '~/utils/transactionCosts';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {
     transactionType: TransactionKindId;
@@ -18,14 +20,6 @@ interface Props {
 
 const placeholderText = 'To be determined';
 
-// TODO make an actual function for this;
-function getTransactionCost(type: TransactionKindId) {
-    if (type) {
-        return 100n;
-    }
-    return 200n;
-}
-
 export default function TransactionProposalDetails({
     identity,
     account,
@@ -33,7 +27,16 @@ export default function TransactionProposalDetails({
     recipient,
     transactionType,
 }: Props) {
-    const fee = getTransactionCost(transactionType);
+    const [estimatedFee, setFee] = useState<bigint | undefined>();
+
+    useEffect(() => {
+        if (account) {
+            getTransactionKindCost(transactionType, account.signatureThreshold)
+                .then((fee) => setFee(fee))
+                .catch(() => {});
+        }
+    }, [account, transactionType, setFee]);
+
     return (
         <div className={styles.details}>
             <b>Identity:</b>
@@ -42,9 +45,7 @@ export default function TransactionProposalDetails({
             <h2>{account ? account.name : placeholderText}</h2>
             <b>Amount:</b>
             <h2>{amount ? `${getGTUSymbol()} ${amount}` : placeholderText}</h2>
-            <b>Estimated Fee: {displayAsGTU(fee)}</b>
-            <br />
-            <br />
+            <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <b>Recipient:</b>
             <h2>{recipient ? recipient.name : 'To be determined'}</h2>
             {recipient ? `Note: ${recipient.note}` : null}

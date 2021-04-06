@@ -149,8 +149,8 @@ export function getUpdateAccountCredentialEnergy(
 
 export async function getTransactionKindCost(
     transactionKind: TransactionKindId,
-    payloadSize: number = getPayloadSizeEstimate(transactionKind),
-    signatureAmount = 1
+    signatureAmount = 1,
+    payloadSize: number = getPayloadSizeEstimate(transactionKind)
 ) {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
     return (

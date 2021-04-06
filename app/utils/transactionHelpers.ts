@@ -18,6 +18,7 @@ import {
     TimeStampUnit,
     TransactionAccountSignature,
     TransactionCredentialSignature,
+    AccountInfo,
 } from './types';
 import {
     getScheduledTransferEnergy,
@@ -25,6 +26,7 @@ import {
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
 import { serializeTransferPayload } from './transactionSerialization';
+import { toMicroUnits, isValidGTUString } from '~/utils/gtu';
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
@@ -321,3 +323,30 @@ export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
 
 export const isExpired = (transaction: Transaction) =>
     getTimeout(transaction) <= getNow(TimeStampUnit.seconds);
+
+// TODO: Take staked amount into consideration
+function atDisposal(accountInfo: AccountInfo): bigint {
+    const unShielded = BigInt(accountInfo.accountAmount);
+    const scheduled = accountInfo.accountReleaseSchedule
+        ? BigInt(accountInfo.accountReleaseSchedule.total)
+        : 0n;
+    return unShielded - scheduled;
+}
+
+export function validateAmount(
+    amountToValidate: string,
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (!isValidGTUString(amountToValidate)) {
+        return 'Invalid input';
+    }
+    if (
+        accountInfo &&
+        atDisposal(accountInfo) <
+            toMicroUnits(amountToValidate) + (estimatedFee || 0n)
+    ) {
+        return 'Insufficient funds';
+    }
+    return undefined;
+}

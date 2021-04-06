@@ -10,6 +10,7 @@ import {
 } from '../types';
 import routes from '~/constants/routes.json';
 import { serializeTransferPayload } from '../transactionSerialization';
+import { selectedProposalRoute } from '~/utils/routerHelper';
 
 type TransactionType = SimpleTransfer;
 
@@ -45,10 +46,7 @@ export default class UpdateAccountCredentialsHandler
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-                return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION.replace(
-                    ':id',
-                    `${proposalId}`
-                );
+                return selectedProposalRoute(proposalId);
             default:
                 throw new Error('unknown location');
         }

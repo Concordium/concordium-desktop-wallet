@@ -9,7 +9,7 @@ import {
     TransactionKindId,
     AddressBookEntry,
 } from '~/utils/types';
-import Input from '~/components/Form/Input';
+import PickAmount from './PickAmount';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
@@ -136,24 +136,14 @@ export default function SimpleTransfer(): JSX.Element {
                             path={
                                 routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT
                             }
-                            render={() => {
-                                if (!account) {
-                                    throw new Error(
-                                        'Unexpected missing account'
-                                    );
-                                }
-
-                                return (
-                                    <Input
-                                        name="amount"
-                                        placeholder="Enter Amount"
-                                        value={amount}
-                                        onChange={(e) =>
-                                            updateAmount(e.target.value)
-                                        }
-                                    />
-                                );
-                            }}
+                            render={() => (
+                                <PickAmount
+                                    setReady={setReady}
+                                    account={account}
+                                    amount={amount}
+                                    setAmount={updateAmount}
+                                />
+                            )}
                         />
                         <Route
                             path={
