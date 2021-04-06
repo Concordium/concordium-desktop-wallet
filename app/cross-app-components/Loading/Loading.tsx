@@ -6,9 +6,10 @@ import { ClassName } from '~/utils/types';
 
 import styles from './Loading.module.scss';
 
-interface LoadingProps extends ClassName {
+export interface LoadingProps extends ClassName {
     // Position inline instead of center of parent element. Defaults to false.
     inline?: boolean;
+    text?: string;
 }
 
 /**
@@ -22,10 +23,12 @@ interface LoadingProps extends ClassName {
 export default function Loading({
     className,
     inline = false,
+    text,
 }: LoadingProps): JSX.Element {
     return (
-        <LoadingIcon
-            className={clsx(styles.root, inline && styles.inline, className)}
-        />
+        <span className={clsx(styles.root, inline && styles.inline, className)}>
+            <LoadingIcon className={styles.icon} />
+            {text && <div className={styles.text}>{text}</div>}
+        </span>
     );
 }

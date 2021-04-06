@@ -139,7 +139,9 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                         Add all the details for the {displayType} transaction
                         below.
                     </p>
-                    {loading && <Loading />}
+                    {loading && (
+                        <Loading text="Getting current settings from chain" />
+                    )}
                     {blockSummary && (
                         <>
                             <UpdateComponent blockSummary={blockSummary} />
