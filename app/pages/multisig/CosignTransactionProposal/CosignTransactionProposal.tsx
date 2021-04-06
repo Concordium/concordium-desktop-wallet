@@ -101,8 +101,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                 transactionHandler,
                 blockSummary.updates.authorizations
             );
-            // if (!authorizationKey) {
-            if (authorizationKey) {
+            if (!authorizationKey) {
                 setShowValidationError(true);
                 return;
             }
@@ -114,8 +113,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
 
             const sig: UpdateInstructionSignature = {
                 signature: signatureBytes.toString('hex'),
-                // authorizationKeyIndex: authorizationKey.index,
-                authorizationKeyIndex: 0,
+                authorizationKeyIndex: authorizationKey.index,
             };
 
             setSignature(sig);
