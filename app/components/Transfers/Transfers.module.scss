@@ -1,0 +1,29 @@
+@import 'config/bundle';
+@import 'elements/bundle';
+
+.errorLabel {
+    text-align: center;
+    color: $color-error;
+}
+
+.header {
+    text-align: center;
+}
+
+.transferView {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 60px;
+}
+
+.closeButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.backButton {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}

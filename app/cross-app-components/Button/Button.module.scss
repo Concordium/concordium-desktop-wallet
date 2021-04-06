@@ -1,94 +1,76 @@
 @import 'config/bundle';
 
 @mixin button($color) {
-    &:not(.rootClear) {
-        background-color: $color;
-    }
+    background-color: $color;
 
     &:hover,
     &:focus,
     &:global(.active) {
-        &:not(.rootInverted):not(.rootClear) {
+        &:not(.rootInverted) {
             background-color: darken($color, 3);
         }
     }
 }
 
-.root {
+.root,
+.clear {
     position: relative;
     border: none;
 
     &:disabled {
         cursor: default;
     }
+}
 
-    &Clear {
-        background: transparent;
-        padding: 0;
-    }
+.clear {
+    background: transparent;
+    padding: 0;
+}
 
-    &:not(.rootClear) {
-        color: $color-off-white;
-        font-size: $font-size-button1;
-        padding: 0 30px;
-        min-height: 50px;
-        border-radius: 4px;
-        transition: background-color $anim-easing $anim-timing;
-    }
+.root {
+    color: $color-off-white;
+    font-size: $font-size-button1;
+    padding: 0 30px;
+    height: 50px;
+    border-radius: 4px;
+    transition: background-color $anim-easing $anim-timing;
 
     @include button($color-pale-blue);
 
     &Small,
     &Big,
     &Huge {
-        &:not(.rootClear) {
-            border-radius: 10px;
-        }
+        border-radius: 10px;
     }
 
     &Tiny {
-        &:not(.rootClear) {
-            min-height: 28px;
-            font-size: $font-size-button2;
-            padding: 0 15px;
-        }
+        height: 28px;
+        font-size: $font-size-button2;
+        padding: 0 15px;
     }
 
     &Small {
-        &:not(.rootClear) {
-            min-height: 36px;
-            font-size: $font-size-button2;
-            padding: 0 15px;
-        }
+        height: 36px;
+        font-size: $font-size-button2;
+        padding: 0 15px;
     }
 
     &Big {
-        &:not(.rootClear) {
-            min-height: 58px;
-        }
+        height: 58px;
     }
 
     &Huge {
-        &:not(.rootClear) {
-            min-height: 76px;
-            font-size: $font-size-h2;
-        }
+        height: 76px;
+        font-size: $font-size-h2;
     }
 
     &WithIcon {
-        &:not(.rootClear) {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding-left: 50px;
-        }
+        padding-left: 50px;
     }
 
     &:disabled:not(.rootInverted) {
-        &:not(.rootClear) {
-            background-color: $color-grey;
-            border-color: $color-grey;
-        }
+        background-color: $color-grey;
+        border-color: $color-grey;
     }
 
     &:hover,
@@ -101,24 +83,22 @@
     }
 
     &Inverted {
-        &:not(.rootClear) {
-            background-color: $color-white;
-            color: $color-text;
-            box-shadow: 0 0 0 1px $color-text inset;
-            transition: box-shadow $anim-easing $anim-timing;
+        background-color: $color-white;
+        color: $color-text;
+        box-shadow: 0 0 0 1px $color-text inset;
+        transition: box-shadow $anim-easing $anim-timing;
 
-            &:disabled {
-                color: $color-text-faded;
-            }
-
-            &:hover,
-            &:focus,
-            &:global(.active) {
-                box-shadow: 0 0 0 2px $color-pale-blue inset;
-            }
+        &:disabled {
+            color: $color-text-faded;
         }
 
-        &.rootDanger:not(.rootClear):not(:disabled) {
+        &:hover,
+        &:focus,
+        &:global(.active) {
+            box-shadow: 0 0 0 2px $color-pale-blue inset;
+        }
+
+        &.rootDanger:not(:disabled) {
             color: $color-danger;
             box-shadow: 0 0 0 1px $color-danger inset;
 
@@ -135,4 +115,6 @@
     display: flex;
     position: absolute;
     left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
 }
