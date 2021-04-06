@@ -40,5 +40,11 @@
     "ACCOUNTCREATION_PICKIDENTITY": "/account/create/chooseIdentity",
     "ACCOUNTCREATION_PICKATTRIBUTES": "/account/create/PickAttributes",
     "ACCOUNTCREATION_GENERATE": "/account/create/generate",
-    "ACCOUNTCREATION_FINAL": "/account/create/final"
+    "ACCOUNTCREATION_FINAL": "/account/create/final",
+    "GENERATE_CREDENTIAL": "/generate-credential",
+    "GENERATE_CREDENTIAL_PICKIDENTITY": "/generate-credential/pick-identity",
+    "GENERATE_CREDENTIAL_SIGN": "/generate-credential/sign",
+    "GENERATE_CREDENTIAL_EXPORT": "/generate-credential/export",
+    "GENERATE_CREDENTIAL_REVEALATTRIBUTES": "/generate-credential/reveal-attributes",
+    "GENERATE_CREDENTIAL_PICKACCOUNT": "/generate-credential/pick-account"
 }

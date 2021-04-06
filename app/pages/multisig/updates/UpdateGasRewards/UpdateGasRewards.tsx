@@ -102,60 +102,6 @@ export default function UpdateGasRewards({ blockSummary }: UpdateProps) {
                 defaultValue={currentRewards.chainUpdate}
                 rules={validationRules}
             />
-            {/* <List>
-                <List.Item>
-                    <Input
-                        label="Baker reward"
-                        value={gasRewards.baker}
-                        onChange={(e) =>
-                            updateState(e.target.value, 'baker', gasRewards)
-                        }
-                        fluid
-                    />
-                </List.Item>
-                <List.Item>
-                    <Input
-                        label="Finalization proof reward"
-                        value={gasRewards.finalizationProof}
-                        onChange={(e) =>
-                            updateState(
-                                e.target.value,
-                                'finalizationProof',
-                                gasRewards
-                            )
-                        }
-                        fluid
-                    />
-                </List.Item>
-                <List.Item>
-                    <Input
-                        label="Account creation reward"
-                        value={gasRewards.accountCreation}
-                        onChange={(e) =>
-                            updateState(
-                                e.target.value,
-                                'accountCreation',
-                                gasRewards
-                            )
-                        }
-                        fluid
-                    />
-                </List.Item>
-                <List.Item>
-                    <Input
-                        label="Chain update reward"
-                        value={gasRewards.chainUpdate}
-                        onChange={(e) =>
-                            updateState(
-                                e.target.value,
-                                'chainUpdate',
-                                gasRewards
-                            )
-                        }
-                        fluid
-                    />
-                </List.Item>
-            </List> */}
         </>
     );
 }

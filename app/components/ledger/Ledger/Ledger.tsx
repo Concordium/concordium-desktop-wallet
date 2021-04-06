@@ -1,4 +1,5 @@
 import React from 'react';
+import { noOp } from '~/utils/basicHelpers';
 import useLedger from '../useLedger';
 import { LedgerCallback } from '../util';
 import LedgerView, { LedgerViewProps } from './LedgerView';
@@ -8,6 +9,7 @@ interface LedgerProps extends Pick<LedgerViewProps, 'children'> {
      * Callback for interacting with the ledger concordium app client. This is called when the submithandler is invoked.
      */
     ledgerCallback: LedgerCallback;
+    onSignError?: (e: unknown) => void;
 }
 
 /**
@@ -26,9 +28,13 @@ interface LedgerProps extends Pick<LedgerViewProps, 'children'> {
  */
 export default function Ledger({
     ledgerCallback,
+    onSignError = noOp,
     ...props
 }: LedgerProps): JSX.Element {
-    const { status, submitHandler, statusText } = useLedger(ledgerCallback);
+    const { status, submitHandler, statusText, isReady } = useLedger(
+        ledgerCallback,
+        onSignError
+    );
 
     return (
         <LedgerView
@@ -36,6 +42,7 @@ export default function Ledger({
             status={status}
             statusText={statusText}
             submitHandler={submitHandler}
+            isReady={isReady}
         />
     );
 }

@@ -21,15 +21,8 @@ import {
     UpdateInstructionSignature,
 } from '~/utils/types';
 import { saveFile } from '~/utils/FileHelper';
-import {
-    getBlockSummary,
-    getConsensusStatus,
-    sendTransaction,
-} from '~/utils/nodeRequests';
-import {
-    serializeForSubmission,
-    serializeUpdateInstructionHeaderAndPayload,
-} from '~/utils/UpdateSerialization';
+import { getBlockSummary, getConsensusStatus } from '~/utils/nodeRequests';
+import { serializeUpdateInstructionHeaderAndPayload } from '~/utils/UpdateSerialization';
 import { hashSha256 } from '~/utils/serializationHelpers';
 import SimpleErrorModal, {
     ModalErrorInput,
@@ -252,18 +245,9 @@ function ProposalView({ proposal }: ProposalViewProps) {
     ).toString('hex');
 
     function submitTransaction() {
-        const payload = serializeForSubmission(instruction, serializedPayload);
-        const submitPromise = sendTransaction(payload);
-
-        const state = {
-            submitPromise,
-            handler,
-        };
-
         dispatch(
             push({
                 pathname: submittedProposalRoute(proposal.id),
-                state,
             })
         );
     }
@@ -327,12 +311,14 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     {instruction.signatures.length} of{' '}
                                     {proposal.threshold} signatures.
                                 </h5>
-                                <SignatureCheckboxes
-                                    threshold={proposal.threshold}
-                                    signatures={instruction.signatures.map(
-                                        (s) => s.signature
-                                    )}
-                                />
+                                <div className={styles.signatureCheckboxes}>
+                                    <SignatureCheckboxes
+                                        threshold={proposal.threshold}
+                                        signatures={instruction.signatures.map(
+                                            (s) => s.signature
+                                        )}
+                                    />
+                                </div>
                             </div>
                             <FileInput
                                 placeholder="Drag and drop signatures here"
@@ -393,12 +379,13 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     className={styles.finalCheckbox}
                                     name="finalCheck"
                                     rules={{ required: true }}
-                                    disabled={!isOpen}
+                                    // disabled={!isOpen}
                                 >
                                     I understand this is the final submission
                                     and cannot be reverted
                                 </Form.Checkbox>
-                                <Form.Submit disabled={!isOpen}>
+                                {/* <Form.Submit disabled={!isOpen}> */}
+                                <Form.Submit>
                                     Submit transaction to chain
                                 </Form.Submit>
                             </div>
