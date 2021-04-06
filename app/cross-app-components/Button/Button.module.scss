@@ -12,15 +12,18 @@
     }
 }
 
-.root {
+.root,
+.clear {
     position: relative;
     border: none;
+}
 
-    &Clear {
-        background: transparent;
-        padding: 0;
-    }
+.clear {
+    background: transparent;
+    padding: 0;
+}
 
+.root {
     color: $color-off-white;
     font-size: $font-size-button1;
     padding: 0 30px;
