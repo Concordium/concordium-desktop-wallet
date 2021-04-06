@@ -29,7 +29,7 @@ export default function Group<T extends Element>({
 }: Omit<ButtonProps, 'as' | 'onClick'> & Props<T>): JSX.Element {
     return (
         <div className={styles.buttonGroup}>
-            <h3>{title}</h3>
+            <p className={styles.title}>{title}</p>
             <div className={styles.buttons}>
                 {buttons.map((button) => (
                     <Button
