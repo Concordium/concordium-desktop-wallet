@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import { Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import LedgerComponent from '../../../components/ledger/LedgerComponent';
+import SimpleLedger from '../../../components/ledger/SimpleLedger';
 import PageLayout from '../../../components/PageLayout';
 import Button from '../../../cross-app-components/Button';
 import ConcordiumLedgerClient from '../../../features/ledger/ConcordiumLedgerClient';
@@ -13,7 +13,10 @@ import {
     getGovernanceRootPath,
 } from '../../../features/ledger/Path';
 import { saveFile } from '../../../utils/FileHelper';
-import { ExportKeyType, getKeyDisplay } from '../menu/ExportKeyList';
+import {
+    ExportKeyType,
+    getKeyDisplay,
+} from '../MultiSignatureMenu/ExportKeyList';
 import { SignedPublicKey } from '../../../utils/types';
 import styles from './ExportKeyView.module.scss';
 import routes from '../../../constants/routes.json';
@@ -110,7 +113,7 @@ export default function ExportKeyView(): JSX.Element {
                     wallet. After pressing the submit button, you can finish
                     exporting the key on the hardware wallet.
                 </Segment>
-                <LedgerComponent
+                <SimpleLedger
                     ledgerCall={(
                         ledger: ConcordiumLedgerClient,
                         setMessage: (message: string) => void

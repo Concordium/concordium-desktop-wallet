@@ -1,0 +1,28 @@
+@import 'config/bundle';
+
+.body {
+    flex: 1 1 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-body2;
+}
+
+.icon {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 50px;
+}
+
+.button {
+    width: 400px;
+}

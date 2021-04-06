@@ -1,16 +1,23 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import MicroGtuPerEuroView from '../../pages/multisig/MicroGtuPerEuroView';
-import UpdateMicroGtuPerEuro from '../../pages/multisig/UpdateMicroGtuPerEuro';
-import { Authorizations } from '../NodeApiTypes';
+import UpdateMicroGtuPerEuro, {
+    UpdateMicroGtuPerEuroRateFields,
+} from '../../pages/multisig/UpdateMicroGtuPerEuro';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     ExchangeRate,
     UpdateInstruction,
     isExchangeRate,
     UpdateInstructionPayload,
+    UpdateType,
+    MultiSignatureTransaction,
 } from '../types';
 import { serializeExchangeRate } from '../UpdateSerialization';
+
+const TYPE = 'Update Micro GTU Per Euro';
 
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
@@ -23,6 +30,31 @@ export default class MicroGtuPerEuroHandler
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    async createTransaction(
+        blockSummary: BlockSummary,
+        { microGtuPerEuro }: UpdateMicroGtuPerEuroRateFields,
+        effectiveTime: bigint
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.microGTUPerEuro
+                .nextSequenceNumber;
+        const {
+            threshold,
+        } = blockSummary.updates.authorizations.microGTUPerEuro;
+
+        return createUpdateMultiSignatureTransaction(
+            microGtuPerEuro,
+            UpdateType.UpdateMicroGTUPerEuro,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
     }
 
     serializePayload(transaction: TransactionType) {
@@ -51,5 +83,7 @@ export default class MicroGtuPerEuroHandler
 
     update = UpdateMicroGtuPerEuro;
 
-    title = 'Foundation Transaction | Update Micro GTU Per Euro';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

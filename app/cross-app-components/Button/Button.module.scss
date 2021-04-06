@@ -16,6 +16,10 @@
 .clear {
     position: relative;
     border: none;
+
+    &:disabled {
+        cursor: default;
+    }
 }
 
 .clear {

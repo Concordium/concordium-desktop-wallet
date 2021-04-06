@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Segment, Header, Grid, Button } from 'semantic-ui-react';
 import { parse } from '~/utils/JSONHelper';
-import LedgerComponent from '~/components/ledger/LedgerComponent';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { sendTransaction } from '~/utils/nodeRequests';
 import {
     serializeTransaction,
@@ -186,7 +186,7 @@ export default function SubmitTransfer({ location }: Props) {
                             <TransactionDetails transaction={transaction} />
                         </Grid.Column>
                         <Grid.Column>
-                            <LedgerComponent ledgerCall={ledgerSignTransfer} />
+                            <SimpleLedger ledgerCall={ledgerSignTransfer} />
                         </Grid.Column>
                     </Grid>
                 </Segment>

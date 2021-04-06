@@ -26,7 +26,7 @@ import {
 } from '../../database/CredentialDao';
 import { insertNewCredential } from '../../features/CredentialSlice';
 import { globalSelector } from '../../features/GlobalSlice';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
+import SimpleLedger from '../../components/ledger/SimpleLedger';
 import ErrorModal from '../../components/SimpleErrorModal';
 
 interface Props {
@@ -159,7 +159,7 @@ export default function AccountCreationGenerate({
             <Card.Content textAlign="center">
                 <Card.Header>Generating the Account Credentials</Card.Header>
                 <Card.Content textAlign="center">
-                    <LedgerComponent ledgerCall={createAccount} />
+                    <SimpleLedger ledgerCall={createAccount} />
                 </Card.Content>
             </Card.Content>
         </Card>

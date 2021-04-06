@@ -28,7 +28,6 @@ export default {
 
                         .sb-columns {
                             height: 400px;
-                            background-color: white;
                         }
                     `}
                 </style>
@@ -48,10 +47,10 @@ const col = (props: ColumnProps = {}) => (
     </Columns.Column>
 );
 
-export const NoDivider = Template.bind({});
-NoDivider.args = {
+export const WithHeaders = Template.bind({});
+WithHeaders.args = {
     // eslint-disable-next-line react/jsx-key
-    children: [col(), col()],
+    children: [col({ header: 'col1' }), col({ header: 'col2' })],
 };
 
 export const WithDivider = Template.bind({});
@@ -64,7 +63,11 @@ WithDivider.args = {
 export const ThreeColumns = Template.bind({});
 ThreeColumns.args = {
     // eslint-disable-next-line react/jsx-key
-    children: [col(), col(), col()],
+    children: [
+        col({ header: 'col1' }),
+        col({ header: 'col2' }),
+        col({ header: 'col3' }),
+    ],
     divider: true,
 };
 
@@ -96,7 +99,11 @@ VariableSize.args = {
 export const ThreeColumnsVariableSize = Template.bind({});
 ThreeColumnsVariableSize.args = {
     // eslint-disable-next-line react/jsx-key
-    children: [col(), scrollCol(450, 300, { noResize: true }), col()],
+    children: [
+        col({ header: 'col1' }),
+        scrollCol(450, 300, { noResize: true, header: 'col2' }),
+        col({ header: 'col3' }),
+    ],
     divider: true,
     columnScroll: true,
     variableSize: true,

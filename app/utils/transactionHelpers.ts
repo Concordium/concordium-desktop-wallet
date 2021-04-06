@@ -1,6 +1,6 @@
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
-import { getDefaultExpiry } from './timeHelpers';
+import { getDefaultExpiry, getNow } from './timeHelpers';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -12,6 +12,9 @@ import {
     TransferToEncrypted,
     AccountTransaction,
     TransactionPayload,
+    UpdateInstruction,
+    UpdateInstructionPayload,
+    TimeStampUnit,
 } from './types';
 import {
     TransactionAccountSignature,
@@ -266,3 +269,7 @@ export function buildTransactionAccountSignature(
     ] = transactionCredentialSignature;
     return transactionAccountSignature;
 }
+
+export const isExpired = (
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+) => transaction.header.timeout <= getNow(TimeStampUnit.seconds);
