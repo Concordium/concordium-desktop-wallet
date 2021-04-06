@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { List } from 'semantic-ui-react';
 import { toMicroUnits } from '~/utils/gtu';
 import { Schedule } from '~/utils/types';
 import RegularInterval from '~/pages/Accounts/BuildRegularInterval';
 import ExplicitSchedule from '~/pages/Accounts/BuildExplicitSchedule';
-import Button from '~/cross-app-components/Button';
+import ButtonGroup from '~/pages/Accounts/ButtonGroup';
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface Props {
     submitSchedule: (schedule: Schedule) => void;
@@ -21,22 +21,24 @@ export default function BuildSchedule({ amount, submitSchedule }: Props) {
     const BuildComponent = explicit ? ExplicitSchedule : RegularInterval;
 
     return (
-        <List>
-            <List.Item />
-            <List.Item>
-                <Button onClick={() => setExplicit(false)} disabled={!explicit}>
-                    Regular Interval
-                </Button>
-                <Button onClick={() => setExplicit(true)} disabled={explicit}>
-                    Explicit schedule
-                </Button>
-            </List.Item>
-
-            <BuildComponent
-                submitSchedule={submitSchedule}
-                setScheduleLength={() => {}}
-                amount={toMicroUnits(amount)}
+        <>
+            <ButtonGroup
+                buttons={[
+                    { label: 'Regular Interval', value: false },
+                    { label: 'Explicit Schedule', value: true },
+                ]}
+                isSelected={({ value }) => value === explicit}
+                onClick={({ value }) => setExplicit(value)}
+                name="scheduleType"
+                title="Schedule type:"
             />
-        </List>
+            <div className={styles.buildComponent}>
+                <BuildComponent
+                    submitSchedule={submitSchedule}
+                    setScheduleLength={() => {}}
+                    amount={toMicroUnits(amount)}
+                />
+            </div>
+        </>
     );
 }

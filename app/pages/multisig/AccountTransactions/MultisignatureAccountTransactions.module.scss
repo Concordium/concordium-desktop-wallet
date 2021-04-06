@@ -9,3 +9,19 @@
 .details h2 {
     margin-top: 0;
 }
+
+.flexBetween {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.buildScheduleCommon {
+    composes: flexBetween;
+    height: 20%;
+}
+
+.buildComponent {
+    composes: flexBetween;
+    height: 70%;
+}
