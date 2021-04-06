@@ -8,6 +8,7 @@ import {
     IpInfo,
     ArInfo,
     CredentialDeploymentDetails,
+    CredentialDeploymentInformation,
     Global,
     AccountEncryptedAmount,
 } from './types';
@@ -124,20 +125,15 @@ Threshold: ${pubInfoForIp.publicKeys.threshold}
     };
 }
 
-/**
- *  This function creates a CredentialDeploymentInfo using the ledger, given the nesessary information and the account number.
- *  Returns a CredentialDeploymentDetails object, which contains the CredentialDeploymentInfo,
- *  and it's hex, and it's hash (transactionId), and the account address.
- */
-export async function createCredential(
+async function createUnsignedCredentialInfo(
     identity: Identity,
     credentialNumber: number,
     global: Global,
     attributes: string[],
     displayMessage: (message: string) => void,
-    ledger: ConcordiumLedgerClient
-): Promise<CredentialDeploymentDetails> {
-    const identityProvider = JSON.parse(identity.identityProvider);
+    ledger: ConcordiumLedgerClient,
+    address?: string
+) {
     const path = getAccountPath({
         identityIndex: identity.id,
         accountIndex: credentialNumber,
@@ -152,6 +148,8 @@ export async function createCredential(
     displayMessage('Please confirm exporting public key on device');
     const publicKey = await ledger.getPublicKey(path);
     displayMessage('Please wait');
+
+    const identityProvider = JSON.parse(identity.identityProvider);
 
     const credentialInput = {
         ipInfo: identityProvider.ipInfo,
@@ -172,6 +170,7 @@ export async function createCredential(
         },
         prfKey,
         idCredSec,
+        address,
     };
 
     const unsignedCredentialDeploymentInfoString = await worker.postMessage({
@@ -179,35 +178,110 @@ export async function createCredential(
         input: stringify(credentialInput),
     });
 
-    let unsignedCredentialDeploymentInfo;
-
     try {
-        unsignedCredentialDeploymentInfo = JSON.parse(
-            unsignedCredentialDeploymentInfoString
-        );
+        return {
+            raw: unsignedCredentialDeploymentInfoString,
+            parsed: JSON.parse(unsignedCredentialDeploymentInfoString),
+        };
     } catch (e) {
         throw new Error(
             `Unable to create unsigned credential due to unexpected output: ${unsignedCredentialDeploymentInfoString}`
         );
     }
+}
 
-    const expiry = getDefaultExpiry();
+/**
+ *  This function creates a CredentialDeploymentInfo using the ledger, given the nesessary information and the account number.
+ * N.B. This function is to construct a credential for an existing account.
+ */
+export async function createCredentialInfo(
+    identity: Identity,
+    credentialNumber: number,
+    global: Global,
+    attributes: string[],
+    displayMessage: (message: string) => void,
+    ledger: ConcordiumLedgerClient,
+    address: string
+): Promise<CredentialDeploymentInformation> {
+    const { raw, parsed } = await createUnsignedCredentialInfo(
+        identity,
+        credentialNumber,
+        global,
+        attributes,
+        displayMessage,
+        ledger,
+        address
+    );
 
     // TODO: Display the appropiate details
     displayMessage(`Please sign details on device.`);
-    const credentialSignature = await ledger.signNewCredentialDeployment(
-        unsignedCredentialDeploymentInfo,
+    // Adding credential on an existing account
+    const path = getAccountPath({
+        identityIndex: identity.id,
+        accountIndex: credentialNumber,
+        signatureIndex: 0,
+    });
+    const signature = await ledger.signCredentialDeploymentOnExistingAccount(
+        parsed,
+        address,
+        path
+    );
+
+    const credentialDeploymentInfoString = await worker.postMessage({
+        command: workerCommands.createCredentialInfo,
+        signature: signature.toString('hex'),
+        unsignedInfo: raw,
+    });
+
+    displayMessage('Please wait');
+    return JSON.parse(credentialDeploymentInfoString);
+}
+
+/**
+ *  This function creates a CredentialDeploymentInfo using the ledger, given the nesessary information and the account number.
+ *  Returns a CredentialDeploymentDetails object, which contains the CredentialDeploymentInfo,
+ *  and it's hex, and it's hash (transactionId), and the account address.
+ * N.B. This function is to construct a credential for a new account.
+ */
+export async function createCredentialDetails(
+    identity: Identity,
+    credentialNumber: number,
+    global: Global,
+    attributes: string[],
+    displayMessage: (message: string) => void,
+    ledger: ConcordiumLedgerClient
+): Promise<CredentialDeploymentDetails> {
+    const { raw, parsed } = await createUnsignedCredentialInfo(
+        identity,
+        credentialNumber,
+        global,
+        attributes,
+        displayMessage,
+        ledger
+    );
+
+    // TODO: Display the appropiate details
+    displayMessage(`Please sign details on device.`);
+    // Adding credential on a new account
+    const expiry = getDefaultExpiry();
+    const path = getAccountPath({
+        identityIndex: identity.id,
+        accountIndex: credentialNumber,
+        signatureIndex: 0,
+    });
+    const signature = await ledger.signCredentialDeploymentOnNewAccount(
+        parsed,
         expiry,
         path
     );
-    displayMessage('Please wait');
-
     const credentialDeploymentInfoString = await worker.postMessage({
-        command: workerCommands.createCredential,
-        signature: credentialSignature.toString('hex'),
-        unsignedInfo: unsignedCredentialDeploymentInfoString,
+        command: workerCommands.createCredentialDetails,
+        signature: signature.toString('hex'),
+        unsignedInfo: raw,
         expiry: stringify(expiry),
     });
+    displayMessage('Please wait');
+
     try {
         const output = parse(credentialDeploymentInfoString);
 
