@@ -49,13 +49,11 @@ export default function useLedger(
             complete: () => {
                 // This is expected to never trigger.
             },
-            error: (e) => {
-                console.log('error', e);
+            error: () => {
                 dispatch(errorAction());
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             next: async (event: any) => {
-                console.log('next', event);
                 if (event.type === 'add') {
                     const transport = await TransportNodeHid.open(event.path);
                     const concordiumClient = new ConcordiumLedgerClient(
