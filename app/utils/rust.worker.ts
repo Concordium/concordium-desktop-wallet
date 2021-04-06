@@ -16,7 +16,8 @@ interface RustInterface {
         prfKey: string
     ): string;
     generateUnsignedCredential(context: string): string;
-    getDeploymentInfo(
+    getDeploymentInfo(signature: string, unsignedInfo: string): string;
+    getDeploymentDetails(
         signature: string,
         unsignedInfo: string,
         expiry: bigint
@@ -60,11 +61,18 @@ function createUnsignedCredential(
     return rust.generateUnsignedCredential(message.input);
 }
 
-function createCredential(
+function createCredentialInfo(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.getDeploymentInfo(
+    return rust.getDeploymentInfo(message.signature, message.unsignedInfo);
+}
+
+function createCredentialDetails(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.getDeploymentDetails(
         message.signature,
         message.unsignedInfo,
         parse(message.expiry)
@@ -91,8 +99,10 @@ function mapCommand(command: string) {
             return createIdRequest;
         case workerCommands.createUnsignedCredential:
             return createUnsignedCredential;
-        case workerCommands.createCredential:
-            return createCredential;
+        case workerCommands.createCredentialInfo:
+            return createCredentialInfo;
+        case workerCommands.createCredentialDetails:
+            return createCredentialDetails;
         case workerCommands.decryptAmounts:
             return decryptAmounts;
         case workerCommands.createTransferToPublicData:
