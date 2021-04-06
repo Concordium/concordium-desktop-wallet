@@ -24,9 +24,13 @@ import {
     LedgerCallback,
 } from './util';
 
+const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
+
 export default function useLedger(
-    ledgerCallback: LedgerCallback
+    ledgerCallback: LedgerCallback,
+    onSignError: (e: unknown) => void
 ): {
+    isReady: boolean;
     status: LedgerStatusType;
     statusText: string;
     submitHandler: LedgerSubmitHandler;
@@ -63,9 +67,7 @@ export default function useLedger(
                     } else {
                         // The device has been connected, but the Concordium application has not
                         // been opened yet.
-                        dispatch(
-                            pendingAction(LedgerStatusType.OPEN_APP, deviceName)
-                        );
+                        dispatch(pendingAction(OPEN_APP, deviceName));
                     }
                 } else {
                     dispatch(resetAction());
@@ -82,7 +84,7 @@ export default function useLedger(
     }, [ledgerSubscription, ledgerObserver]);
 
     const submitHandler: LedgerSubmitHandler = useCallback(async () => {
-        dispatch(pendingAction(LedgerStatusType.AWAITING_USER_INPUT));
+        dispatch(pendingAction(AWAITING_USER_INPUT));
 
         try {
             if (client) {
@@ -99,8 +101,10 @@ export default function useLedger(
             }
             errorMessage += ' Please try again.';
             dispatch(errorAction(errorMessage));
+
+            onSignError(e);
         }
-    }, [client, ledgerCallback]);
+    }, [client, ledgerCallback, onSignError]);
 
     useEffect(() => {
         listenForLedger();
@@ -117,6 +121,7 @@ export default function useLedger(
     }, [ledgerSubscription, listenForLedger, client]);
 
     return {
+        isReady: (status === CONNECTED || status === ERROR) && Boolean(client),
         status,
         statusText: text,
         submitHandler,

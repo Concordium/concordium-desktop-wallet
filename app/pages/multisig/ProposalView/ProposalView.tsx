@@ -172,10 +172,12 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     {signatures.length} of {proposal.threshold}{' '}
                                     signatures.
                                 </h5>
-                                <SignatureCheckboxes
-                                    threshold={proposal.threshold}
-                                    signatures={signatures}
-                                />
+                                <div className={styles.signatureCheckboxes}>
+                                    <SignatureCheckboxes
+                                        threshold={proposal.threshold}
+                                        signatures={signatures}
+                                    />
+                                </div>
                             </div>
                             <FileInput
                                 placeholder="Drag and drop signatures here"
@@ -236,13 +238,12 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     className={styles.finalCheckbox}
                                     name="finalCheck"
                                     rules={{ required: true }}
-                                    // disabled={!isOpen}
+                                    disabled={!isOpen}
                                 >
                                     I understand this is the final submission
                                     and cannot be reverted
                                 </Form.Checkbox>
-                                {/* <Form.Submit disabled={!isOpen}> */}
-                                <Form.Submit>
+                                <Form.Submit disabled={!isOpen}>
                                     Submit transaction to chain
                                 </Form.Submit>
                             </div>

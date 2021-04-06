@@ -72,6 +72,7 @@ export default function RewardDistributionField({
     const ref = useRef<HTMLInputElement>(null);
     const [stringValue, setStringValue] = useState(formatValue(value));
     const [isFocused, setIsFocused] = useState(false);
+    const { disabled } = inputProps;
 
     const setInternalValue = useCallback((v: string) => {
         scaleField(ref.current);
@@ -134,6 +135,7 @@ export default function RewardDistributionField({
             className={clsx(
                 styles.field,
                 isInvalid && styles.fieldInvalid,
+                disabled && styles.fieldDisabled,
                 className
             )}
         >

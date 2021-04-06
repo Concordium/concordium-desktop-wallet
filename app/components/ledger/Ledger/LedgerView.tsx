@@ -4,6 +4,10 @@ import { LedgerStatusType, LedgerSubmitHandler } from '../util';
 
 export interface LedgerViewProps extends LedgerStatusProps {
     /**
+     * If ledger is ready to sign.
+     */
+    isReady: boolean;
+    /**
      * Invokes the passed callback function with the ledger app client and a function for setting status messages custom to the individual flow.
      */
     submitHandler: LedgerSubmitHandler;
@@ -14,11 +18,12 @@ export interface LedgerViewProps extends LedgerStatusProps {
      * @param statusView View containing the status icon and status text.
      * @param submitHandler Function for starting the ledger signing flow. Available when this is LedgerStatusType.CONNECTED.
      */
-    children(
-        status: LedgerStatusType,
-        statusView: JSX.Element,
-        submitHandler?: LedgerSubmitHandler
-    ): JSX.Element;
+    children(ledger: {
+        isReady: boolean;
+        status: LedgerStatusType;
+        statusView: JSX.Element;
+        submitHandler?: LedgerSubmitHandler;
+    }): JSX.Element;
 }
 
 /**
@@ -29,11 +34,13 @@ export interface LedgerViewProps extends LedgerStatusProps {
 export default function LedgerView({
     submitHandler,
     children,
+    isReady,
     ...statusProps
 }: LedgerViewProps): JSX.Element {
-    return children(
-        statusProps.status,
-        <LedgerStatus {...statusProps} />,
-        submitHandler
-    );
+    return children({
+        isReady,
+        status: statusProps.status,
+        statusView: <LedgerStatus {...statusProps} />,
+        submitHandler,
+    });
 }

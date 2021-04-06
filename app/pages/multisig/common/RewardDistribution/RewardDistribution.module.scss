@@ -122,6 +122,10 @@
     line-height: 12px;
     padding: 5px 20px 15px;
 
+    &Disabled {
+        cursor: default;
+    }
+
     &Invalid {
         color: $color-error;
     }
