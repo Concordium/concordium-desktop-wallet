@@ -11,6 +11,7 @@ import getErrorDescription from '~/features/ledger/ErrorCodes';
 import ledgerReducer, {
     connectedAction,
     errorAction,
+    finishedAction,
     getInitialState,
     pendingAction,
     resetAction,
@@ -93,6 +94,8 @@ export default function useLedger(
                 await ledgerCallback(client, (t) =>
                     dispatch(setStatusTextAction(t))
                 );
+
+                dispatch(finishedAction());
             }
         } catch (e) {
             let errorMessage;

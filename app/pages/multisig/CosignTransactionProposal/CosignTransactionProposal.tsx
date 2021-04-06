@@ -36,6 +36,9 @@ import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
 import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import styles from './CosignTransactionProposal.module.scss';
+import { saveFile } from '~/utils/FileHelper';
+import Button from '~/cross-app-components/Button';
+import { LedgerCallback } from '~/components/ledger/util';
 
 interface CosignTransactionProposalForm {
     transactionDetailsMatch: boolean;
@@ -60,6 +63,9 @@ interface CosignTransactionProposalProps extends WithBlockSummary {
 const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProps>(
     ({ location, blockSummary }) => {
         const [showValidationError, setShowValidationError] = useState(false);
+        const [signature, setSignature] = useState<
+            UpdateInstructionSignature | undefined
+        >();
         const [transactionHash, setTransactionHash] = useState<string>();
         const [transactionHandler] = useState<
             TransactionHandler<
@@ -82,40 +88,58 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
             setTransactionHash(hashed);
         }, [setTransactionHash, transactionHandler, transactionObject]);
 
-        async function signingFunction(ledger: ConcordiumLedgerClient) {
-            if (blockSummary) {
-                const authorizationKey = await findAuthorizationKey(
-                    ledger,
-                    transactionHandler,
-                    blockSummary.updates.authorizations
+        const signingFunction: LedgerCallback = async (
+            ledger: ConcordiumLedgerClient,
+            setStatusText
+        ) => {
+            if (!blockSummary) {
+                return;
+            }
+
+            const authorizationKey = await findAuthorizationKey(
+                ledger,
+                transactionHandler,
+                blockSummary.updates.authorizations
+            );
+            // if (!authorizationKey) {
+            if (authorizationKey) {
+                setShowValidationError(true);
+                return;
+            }
+
+            const signatureBytes = await transactionHandler.signTransaction(
+                transactionObject,
+                ledger
+            );
+
+            const sig: UpdateInstructionSignature = {
+                signature: signatureBytes.toString('hex'),
+                // authorizationKeyIndex: authorizationKey.index,
+                authorizationKeyIndex: 0,
+            };
+
+            setSignature(sig);
+            setStatusText('Proposal signed successfully');
+        };
+
+        async function exportSignedTransaction() {
+            const signedTransaction = {
+                ...transactionObject,
+                signatures: [signature],
+            };
+            const signedTransactionJson = JSON.stringify(signedTransaction);
+
+            try {
+                const fileSaved = await saveFile(
+                    signedTransactionJson,
+                    'Export signed transaction'
                 );
-                if (!authorizationKey) {
-                    setShowValidationError(true);
-                    return;
+
+                if (fileSaved) {
+                    dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
                 }
-
-                const signatureBytes = await transactionHandler.signTransaction(
-                    transactionObject,
-                    ledger
-                );
-
-                const signature: UpdateInstructionSignature = {
-                    signature: signatureBytes.toString('hex'),
-                    authorizationKeyIndex: authorizationKey.index,
-                };
-
-                // Load the page for exporting the signed transaction.
-                dispatch(
-                    push({
-                        pathname:
-                            routes.MULTISIGTRANSACTIONS_EXPORT_TRANSACTION,
-                        state: {
-                            transaction,
-                            transactionHash,
-                            signature,
-                        },
-                    })
-                );
+            } catch (err) {
+                // TODO Handle error by showing it to the user.
             }
         }
 
@@ -212,6 +236,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                             required:
                                                                 'Please review transaction details',
                                                         }}
+                                                        disabled={!!signature}
                                                     >
                                                         The transaction details
                                                         are correct
@@ -224,6 +249,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                             required:
                                                                 'Make sure identicons match.',
                                                         }}
+                                                        disabled={!!signature}
                                                     >
                                                         The identicon matches
                                                         the one received exactly
@@ -236,20 +262,36 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                             required:
                                                                 'Make sure hashes match',
                                                         }}
+                                                        disabled={!!signature}
                                                     >
                                                         The hash matches the one
                                                         received exactly
                                                     </Form.Checkbox>
                                                 </div>
-                                                <Form.Submit
-                                                    className={styles.submit}
-                                                    disabled={
-                                                        !isReady ||
-                                                        isTransactionExpired
-                                                    }
-                                                >
-                                                    Sign Proposal
-                                                </Form.Submit>
+                                                {signature ? (
+                                                    <Button
+                                                        className={
+                                                            styles.submit
+                                                        }
+                                                        onClick={
+                                                            exportSignedTransaction
+                                                        }
+                                                    >
+                                                        Export Signature
+                                                    </Button>
+                                                ) : (
+                                                    <Form.Submit
+                                                        className={
+                                                            styles.submit
+                                                        }
+                                                        disabled={
+                                                            !isReady ||
+                                                            isTransactionExpired
+                                                        }
+                                                    >
+                                                        Sign Proposal
+                                                    </Form.Submit>
+                                                )}
                                             </div>
                                         </div>
                                     </Columns.Column>

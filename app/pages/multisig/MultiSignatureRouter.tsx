@@ -5,7 +5,6 @@ import MultiSignaturePage from './MultiSignaturePage';
 import ProposalView from './ProposalView';
 import CosignTransactionProposal from './CosignTransactionProposal';
 import SignTransactionProposal from './SignTransactionProposal';
-import ExportSignedTransactionView from './ExportSignedTransactionView';
 import MultiSignatureCreateProposal from './MultiSignatureCreateProposal';
 import SubmittedProposal from './SubmittedProposal';
 import ExportKeyView from './ExportKeyView/ExportKeyView';
@@ -16,10 +15,6 @@ export default function MultiSignatureRoutes(): JSX.Element {
             <Route
                 path={routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION}
                 component={SubmittedProposal}
-            />
-            <Route
-                path={routes.MULTISIGTRANSACTIONS_EXPORT_TRANSACTION}
-                component={ExportSignedTransactionView}
             />
             <Route
                 path={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION}
