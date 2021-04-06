@@ -1,14 +1,10 @@
 /* eslint-disable radix */
+import {
+    dateFromDateParts,
+    DateParts,
+    datePartsFromDate,
+} from '~/utils/timeHelpers';
 import { EqualRecord } from '../../../utils/types';
-
-export interface DateParts {
-    year: string;
-    month: string;
-    date: string;
-    hours: string;
-    minutes: string;
-    seconds: string;
-}
 
 export const fieldNames: EqualRecord<DateParts> = {
     year: 'year',
@@ -27,32 +23,6 @@ export function hasAllParts(parts: Partial<DateParts>): parts is DateParts {
     );
 }
 
-export function fromDate(date?: Date): DateParts | undefined {
-    if (!date) {
-        return undefined;
-    }
-
-    return {
-        year: `${date.getFullYear()}`,
-        month: `${date.getMonth() + 1}`,
-        date: `${date.getDate()}`,
-        hours: `${date.getHours()}`,
-        minutes: `${date.getMinutes()}`,
-        seconds: `${date.getSeconds()}`,
-    };
-}
-
-export function fromDateParts(date: DateParts): Date {
-    return new Date(
-        parseInt(date.year),
-        parseInt(date.month) - 1,
-        parseInt(date.date),
-        parseInt(date.hours),
-        parseInt(date.minutes),
-        parseInt(date.seconds)
-    );
-}
-
 export function isEqual(a: DateParts, b: DateParts): boolean {
     return (
         parseInt(a.year) === parseInt(b.year) &&
@@ -64,36 +34,9 @@ export function isEqual(a: DateParts, b: DateParts): boolean {
     );
 }
 
-const ensureNumberLength = (length: number) => (value?: string): string => {
-    if (!value) {
-        return '';
-    }
-
-    const valueLength = value.length;
-
-    if (valueLength >= length) {
-        return value;
-    }
-
-    const missing = length - valueLength;
-    const prepend = new Array(missing).fill(`0`).join('');
-
-    return `${prepend}${value}`;
-};
-
-type Formatters = { [key in keyof DateParts]: (v?: string) => string };
-
-export const formatters: Formatters = {
-    year: ensureNumberLength(4),
-    month: ensureNumberLength(2),
-    date: ensureNumberLength(2),
-    hours: ensureNumberLength(2),
-    minutes: ensureNumberLength(2),
-    seconds: ensureNumberLength(2),
-};
-
 export type PartialDateParts = Pick<DateParts, 'year' | 'month' | 'date'> &
     Partial<Omit<DateParts, 'year' | 'month' | 'date'>>;
+
 export const isValidDate = (parts: PartialDateParts): boolean => {
     const t: DateParts = {
         ...parts,
@@ -101,8 +44,8 @@ export const isValidDate = (parts: PartialDateParts): boolean => {
         minutes: parts.minutes || '0',
         seconds: parts.seconds || '0',
     };
-    const date = fromDateParts(t);
-    const test = fromDate(date);
+    const date = dateFromDateParts(t);
+    const test = datePartsFromDate(date);
 
     const isValid = test !== undefined && isEqual(t, test);
 

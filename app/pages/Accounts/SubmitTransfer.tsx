@@ -1,22 +1,33 @@
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Container, Segment, Header, Grid, Button } from 'semantic-ui-react';
-import { parse } from '../../utils/JSONHelper';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { sendTransaction } from '../../utils/nodeRequests';
+import { parse } from '~/utils/JSONHelper';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
+import { sendTransaction } from '~/utils/nodeRequests';
 import {
     serializeTransaction,
     getAccountTransactionHash,
-} from '../../utils/transactionSerialization';
-import { monitorTransactionStatus } from '../../utils/TransactionStatusPoller';
-import { Account, AccountTransaction } from '../../utils/types';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { addPendingTransaction } from '../../features/TransactionSlice';
-import { getAccountPath } from '../../features/ledger/Path';
-import TransactionDetails from '../../components/TransactionDetails';
-import PageLayout from '../../components/PageLayout';
+} from '~/utils/transactionSerialization';
+import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
+import {
+    Account,
+    LocalCredential,
+    instanceOfLocalCredential,
+    AccountInfo,
+    AccountTransaction,
+    Global,
+    instanceOfTransferToPublic,
+} from '~/utils/types';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { addPendingTransaction } from '~/features/TransactionSlice';
+import { accountsInfoSelector } from '~/features/AccountSlice';
+import { globalSelector } from '~/features/GlobalSlice';
+import { getAccountPath } from '~/features/ledger/Path';
+import TransactionDetails from '~/components/TransactionDetails';
+import { makeTransferToPublicData } from '~/utils/rustInterface';
+import PageLayout from '~/components/PageLayout';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 
@@ -36,12 +47,42 @@ interface Props {
     location: LocationDescriptorObject<State>;
 }
 
+async function attachCompletedPayload(
+    transaction: AccountTransaction,
+    ledger: ConcordiumLedgerClient,
+    global: Global,
+    credential: LocalCredential,
+    accountInfo: AccountInfo
+) {
+    if (instanceOfTransferToPublic(transaction)) {
+        const prfKeySeed = await ledger.getPrfKey(credential.identityId);
+        const data = await makeTransferToPublicData(
+            transaction.payload.transferAmount,
+            prfKeySeed.toString('hex'),
+            global,
+            accountInfo.accountEncryptedAmount,
+            credential.credentialNumber
+        );
+        const payload = {
+            ...transaction.payload,
+            proof: data.payload.proof,
+            index: data.payload.index,
+            remainingEncryptedAmount: data.payload.remainingAmount,
+        };
+
+        return { ...transaction, payload };
+    }
+    return transaction;
+}
+
 /**
  * Receives transaction to sign, using the ledger,
  * and then submits it.
  */
 export default function SubmitTransfer({ location }: Props) {
     const dispatch = useDispatch();
+    const global = useSelector(globalSelector);
+    const accountInfoMap = useSelector(accountsInfoSelector);
 
     if (!location.state) {
         throw new Error('Unexpected missing state.');
@@ -54,12 +95,11 @@ export default function SubmitTransfer({ location }: Props) {
         confirmed,
     } = location.state;
 
-    const transaction: AccountTransaction = parse(transactionJSON);
+    let transaction: AccountTransaction = parse(transactionJSON);
 
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
     // and then redirects to final page.
-    // TODO: Break this function up
     async function ledgerSignTransfer(
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
@@ -67,21 +107,39 @@ export default function SubmitTransfer({ location }: Props) {
         const signatureIndex = 0;
         const credentialAccountIndex = 0; // TODO: do we need to support other credential indices here?
 
-        const credentialNumber = (
-            await getCredentialsOfAccount(account.address)
-        ).find((cred) => cred.credentialIndex === credentialAccountIndex)
-            ?.credentialNumber;
+        if (!global) {
+            setMessage('Missing global object.');
+            return;
+        }
 
-        if (!credentialNumber) {
+        const credential = (
+            await getCredentialsOfAccount(account.address)
+        ).find((cred) => cred.credentialIndex === credentialAccountIndex);
+
+        if (!credential) {
             setMessage(
-                'Unable to sign transfer, because we were unable to find credential'
+                'Unable to sign transfer, because we were unable to find a credential'
+            );
+            return;
+        }
+        if (!instanceOfLocalCredential(credential)) {
+            setMessage(
+                'Unable to sign transfer, because we got an external credential'
             );
             return;
         }
 
+        transaction = await attachCompletedPayload(
+            transaction,
+            ledger,
+            global,
+            credential,
+            accountInfoMap[account.address]
+        );
+
         const path = getAccountPath({
             identityIndex: account.identityId,
-            accountIndex: credentialNumber,
+            accountIndex: credential.credentialNumber,
             signatureIndex,
         });
         const signature: Buffer = await ledger.signTransfer(transaction, path);
@@ -135,7 +193,7 @@ export default function SubmitTransfer({ location }: Props) {
                             <TransactionDetails transaction={transaction} />
                         </Grid.Column>
                         <Grid.Column>
-                            <LedgerComponent ledgerCall={ledgerSignTransfer} />
+                            <SimpleLedger ledgerCall={ledgerSignTransfer} />
                         </Grid.Column>
                     </Grid>
                 </Segment>

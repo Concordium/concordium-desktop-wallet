@@ -1,16 +1,23 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import ElectionDifficultyView from '../../pages/multisig/ElectionDifficultyView';
-import UpdateElectionDifficulty from '../../pages/multisig/UpdateElectionDifficulty';
-import { Authorizations } from '../NodeApiTypes';
+import UpdateElectionDifficulty, {
+    UpdateElectionDifficultyFields,
+} from '../../pages/multisig/UpdateElectionDifficulty';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     ElectionDifficulty,
     isElectionDifficulty,
+    MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateType,
 } from '../types';
 import { serializeElectionDifficulty } from '../UpdateSerialization';
+
+const TYPE = 'Update Election Difficulty';
 
 type TransactionType = UpdateInstruction<ElectionDifficulty>;
 
@@ -24,6 +31,33 @@ export default class ElectionDifficultyHandler
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    async createTransaction(
+        blockSummary: BlockSummary,
+        { electionDifficulty }: UpdateElectionDifficultyFields,
+        effectiveTime: bigint
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.foundationAccount
+                .nextSequenceNumber;
+        const {
+            threshold,
+        } = blockSummary.updates.authorizations.electionDifficulty;
+
+        return createUpdateMultiSignatureTransaction(
+            {
+                electionDifficulty: parseInt(electionDifficulty, 10),
+            },
+            UpdateType.UpdateElectionDifficulty,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
     }
 
     serializePayload(transaction: TransactionType) {
@@ -52,5 +86,7 @@ export default class ElectionDifficultyHandler
 
     update = UpdateElectionDifficulty;
 
-    title = 'Foundation Transaction | Update Election Difficulty';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

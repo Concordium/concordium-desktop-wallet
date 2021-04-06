@@ -15,10 +15,13 @@ export default class AccountHandlerTypeMiddleware<T>
 
     title: string;
 
+    type: string;
+
     constructor(base: AccountTransactionHandler<T, ConcordiumLedgerClient>) {
         this.base = base;
         this.title = base.title;
         this.creationLocationHandler = base.creationLocationHandler;
+        this.type = base.type;
     }
 
     confirmType(transaction: AccountTransaction) {

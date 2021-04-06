@@ -1,21 +1,24 @@
-import React, { useState } from 'react';
-import { Button } from 'semantic-ui-react';
-import { EqualRecord, Schedule } from '../../utils/types';
-import { createRegularIntervalSchedule } from '../../utils/transactionHelpers';
-import { TimeConstants } from '../../utils/timeHelpers';
-import Form from '../../components/Form';
-import { futureDate } from '../../components/Form/util/validation';
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { EqualRecord, Schedule } from '~/utils/types';
+import { createRegularIntervalSchedule } from '~/utils/transactionHelpers';
+import { TimeConstants } from '~/utils/timeHelpers';
+import Form from '~/components/Form';
+import { futureDate } from '~/components/Form/util/validation';
+import Group from './ButtonGroup';
+import styles from './Accounts.module.scss';
 
 export interface Interval {
     label: string;
     value: number;
 }
+
 export const intervals: Interval[] = [
     { label: 'Minute', value: TimeConstants.Minute },
     { label: 'Hour', value: TimeConstants.Hour },
     { label: 'Day', value: TimeConstants.Day },
     { label: 'Week', value: TimeConstants.Week },
-    { label: 'Month (30 days)', value: TimeConstants.Month },
+    { label: 'Month', value: TimeConstants.Month },
 ];
 
 interface FormValues {
@@ -38,6 +41,7 @@ interface Props {
     defaults: Defaults;
     submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
+    setScheduleLength: (scheduleLength: number) => void;
 }
 
 /**
@@ -47,12 +51,19 @@ export default function RegularInterval({
     submitSchedule,
     amount,
     defaults,
+    setScheduleLength,
 }: Props) {
     const [chosenInterval, setChosenInterval] = useState<Interval>(
         defaults?.chosenInterval || intervals[0]
     );
+    const form = useForm<FormValues>({ mode: 'onTouched' });
+    const releases = form.watch(fieldNames.releases);
 
-    function createSchedule({ releases, startTime }: FormValues) {
+    useEffect(() => {
+        setScheduleLength(releases);
+    }, [setScheduleLength, releases]);
+
+    function createSchedule({ startTime }: FormValues) {
         const schedule = createRegularIntervalSchedule(
             amount,
             releases,
@@ -69,30 +80,30 @@ export default function RegularInterval({
 
     return (
         <>
-            Release Every:
-            <Button.Group>
-                {intervals.map((interval: Interval) => (
-                    <Button
-                        key={interval.label}
-                        onClick={() => setChosenInterval(interval)}
-                    >
-                        {interval.label}
-                    </Button>
-                ))}
-            </Button.Group>
-            <Form onSubmit={createSchedule}>
+            <Group
+                buttons={intervals}
+                isSelected={(interval) => interval === chosenInterval}
+                onClick={setChosenInterval}
+                name="interval"
+                title="Release Every:"
+            />
+            <Form
+                onSubmit={createSchedule}
+                formMethods={form}
+                className={styles.regularInterval}
+            >
                 <Form.Input
-                    label="Enter amount of releases"
+                    label="Split transfer in:"
                     name={fieldNames.releases}
                     placeholder="Enter releases"
                     autoFocus
                     type="number"
                     defaultValue={defaults?.releases || 1}
-                    rules={{ required: 'Releases required', min: 0 }}
+                    rules={{ required: 'Releases required', min: 1 }}
                 />
                 <Form.Timestamp
                     name={fieldNames.startTime}
-                    label="Enter starting time"
+                    label="Starting:"
                     defaultValue={
                         new Date(
                             defaults?.startTime ||
@@ -104,7 +115,7 @@ export default function RegularInterval({
                         validate: futureDate('Time must be in the future'),
                     }}
                 />
-                <Form.Submit>submit</Form.Submit>
+                <Form.Submit size="huge">Continue</Form.Submit>
             </Form>
         </>
     );

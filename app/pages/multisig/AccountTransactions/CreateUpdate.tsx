@@ -14,6 +14,7 @@ interface Props {
     primaryCredential: Credential;
     addedCredentials: AddedCredential[];
     removedCredIds: string[];
+    currentCredentialAmount: number;
     newThreshold: number;
     setProposalId: (id: number) => void;
 }
@@ -27,6 +28,7 @@ export default function CreateUpdate({
     primaryCredential,
     addedCredentials,
     removedCredIds,
+    currentCredentialAmount,
     newThreshold,
     setProposalId,
 }: Props): JSX.Element | null {
@@ -43,7 +45,9 @@ export default function CreateUpdate({
             account.address,
             addedCredentials,
             removedCredIds,
-            newThreshold
+            newThreshold,
+            currentCredentialAmount,
+            account.signatureThreshold
         )
             .then(setTransaction)
             .catch(() => {});

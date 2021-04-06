@@ -13,7 +13,7 @@ import {
 } from '../../features/TransactionSlice';
 import { Account } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
+import SimpleLedger from '../../components/ledger/SimpleLedger';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 
 interface Props {
@@ -50,7 +50,7 @@ export default function DecryptComponent({ account }: Props) {
             await getCredentialsOfAccount(account.address)
         ).find((cred) => cred.credentialIndex === 0)?.credentialNumber;
 
-        if (!credentialNumber) {
+        if (credentialNumber === undefined) {
             throw new Error(
                 'Unable to decrypt amounts, because we were unable to find original credential'
             );
@@ -66,5 +66,5 @@ export default function DecryptComponent({ account }: Props) {
         await loadAccounts(dispatch);
     }
 
-    return <LedgerComponent ledgerCall={ledgerCall} />;
+    return <SimpleLedger ledgerCall={ledgerCall} />;
 }

@@ -1,0 +1,13 @@
+@import '../common/MultiSignatureFlowPage.module';
+
+.checkboxes {
+    margin: 0 20px;
+
+    > *:not(:last-child) {
+        margin-bottom: 10px;
+    }
+}
+
+.submit {
+    margin-top: 20px;
+}

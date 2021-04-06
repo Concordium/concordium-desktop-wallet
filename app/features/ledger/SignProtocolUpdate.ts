@@ -7,7 +7,7 @@ import {
     serializeUpdateHeader,
     serializeUpdateType,
 } from '../../utils/UpdateSerialization';
-import { toChunks } from '../../utils/basicHelpers';
+import { chunkBuffer } from '../../utils/basicHelpers';
 
 const INS_PROTOCOL_UPDATE = 0x21;
 
@@ -47,7 +47,7 @@ export default async function signUpdateProtocolTransaction(
 
     // Stream the message bytes (maximum of 255 bytes per packet)
     p1 = 0x02;
-    const messageChunks = toChunks(
+    const messageChunks = chunkBuffer(
         serializedProtocolUpdate.message.message,
         255
     );
@@ -75,7 +75,7 @@ export default async function signUpdateProtocolTransaction(
 
     // Stream the specification URL bytes (maximum of 255 bytes per packet)
     p1 = 0x02;
-    const urlChunks = toChunks(
+    const urlChunks = chunkBuffer(
         serializedProtocolUpdate.specificationUrl.message,
         255
     );
@@ -101,7 +101,7 @@ export default async function signUpdateProtocolTransaction(
 
     // Send auxiliary data in 255 byte chunks.
     p1 = 0x04;
-    const auxiliaryDataChunks = toChunks(
+    const auxiliaryDataChunks = chunkBuffer(
         serializedProtocolUpdate.auxiliaryData,
         255
     );

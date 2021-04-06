@@ -16,7 +16,7 @@ import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
 import { IdentityProvider, Dispatch, Global } from '../../utils/types';
 import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoller';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
+import SimpleLedger from '../../components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 
 const redirectUri = 'ConcordiumRedirectToken';
@@ -177,7 +177,7 @@ export default function IdentityIssuanceGenerate({
             <Card fluid centered>
                 <Card.Content textAlign="center">
                     <Card.Header>Generating the Identity</Card.Header>
-                    <LedgerComponent ledgerCall={withLedger} />
+                    <SimpleLedger ledgerCall={withLedger} />
                 </Card.Content>
             </Card>
         );

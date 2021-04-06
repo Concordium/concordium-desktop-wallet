@@ -1,16 +1,23 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import ProtocolUpdateView from '../../pages/multisig/ProtocolUpdateView';
-import UpdateProtocol from '../../pages/multisig/UpdateProtocol';
-import { Authorizations } from '../NodeApiTypes';
+import UpdateProtocol, {
+    UpdateProtocolFields,
+} from '../../pages/multisig/UpdateProtocol';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isProtocolUpdate,
+    MultiSignatureTransaction,
     ProtocolUpdate,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateType,
 } from '../types';
 import { serializeProtocolUpdate } from '../UpdateSerialization';
+
+const TYPE = 'Update Chain Protocol';
 
 type TransactionType = UpdateInstruction<ProtocolUpdate>;
 
@@ -24,6 +31,41 @@ export default class ProtocolUpdateHandler
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    async createTransaction(
+        blockSummary: BlockSummary,
+        { specificationAuxiliaryData: files, ...fields }: UpdateProtocolFields,
+        effectiveTime: bigint
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const { threshold } = blockSummary.updates.authorizations.protocol;
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.protocol.nextSequenceNumber;
+
+        const file = files.item(0);
+
+        if (!file) {
+            throw new Error('No auxiliary data file in update transaction');
+        }
+        const ab = await file.arrayBuffer();
+        const specificationAuxiliaryData = Buffer.from(ab).toString('base64');
+
+        const protocolUpdate: ProtocolUpdate = {
+            ...fields,
+            specificationAuxiliaryData,
+        };
+
+        return createUpdateMultiSignatureTransaction(
+            protocolUpdate,
+            UpdateType.UpdateProtocol,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
     }
 
     serializePayload(transaction: TransactionType) {
@@ -52,5 +94,7 @@ export default class ProtocolUpdateHandler
 
     update = UpdateProtocol;
 
-    title = 'Foundation Transaction | Update Chain Protocol';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

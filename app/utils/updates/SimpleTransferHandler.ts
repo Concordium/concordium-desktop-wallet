@@ -13,6 +13,8 @@ import { serializeTransferPayload } from '../transactionSerialization';
 
 type TransactionType = SimpleTransfer;
 
+const TYPE = 'Simple Transfer';
+
 export default class UpdateAccountCredentialsHandler
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
@@ -64,5 +66,7 @@ export default class UpdateAccountCredentialsHandler
         return AccountTransactionDetails({ transaction });
     }
 
-    title = 'Account Transaction | Update Account Credentials';
+    title = `Account Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

@@ -9,7 +9,7 @@ import {
     TransactionKindId,
     AddressBookEntry,
 } from '~/utils/types';
-import PickAmount from '~/components/Transfers/PickAmount';
+import Input from '~/components/Form/Input';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import PageLayout from '~/components/PageLayout';
 import Columns from '~/components/Columns';
@@ -128,10 +128,13 @@ export default function SimpleTransfer(): JSX.Element {
                                     }
 
                                     return (
-                                        <PickAmount
-                                            amount={amount}
-                                            setAmount={updateAmount}
-                                            header="amount"
+                                        <Input
+                                            name="amount"
+                                            placeholder="Enter Amount"
+                                            value={amount}
+                                            onChange={(e) =>
+                                                updateAmount(e.target.value)
+                                            }
                                         />
                                     );
                                 }}

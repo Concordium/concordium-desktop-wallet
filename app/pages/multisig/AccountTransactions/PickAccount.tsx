@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Menu } from 'semantic-ui-react';
 import { Identity, Account } from '~/utils/types';
 import AccountListElement from '~/components/AccountListElement';
 import {
@@ -8,6 +7,7 @@ import {
     accountsInfoSelector,
     loadAccountInfos,
 } from '~/features/AccountSlice';
+import styles from './UpdateAccountCredentials.module.scss';
 
 interface Props {
     identity: Identity | undefined;
@@ -42,23 +42,21 @@ export default function PickAccount({
     }, [accounts, dispatch, loaded]);
 
     return (
-        <Menu vertical fluid>
-            {accounts.map((account: Account, i: number) => (
-                <Menu.Item
+        <>
+            {accounts.map((account: Account, index: number) => (
+                <AccountListElement
                     key={account.address}
+                    className={styles.listElement}
+                    active={index === chosenIndex}
+                    account={account}
+                    accountInfo={accountsInfo[account.address]}
                     onClick={() => {
                         setReady(true);
-                        setChosenIndex(i);
+                        setChosenIndex(index);
                         setAccount(account);
                     }}
-                    active={chosenIndex === i}
-                >
-                    <AccountListElement
-                        account={account}
-                        accountInfo={accountsInfo[account.address]}
-                    />
-                </Menu.Item>
+                />
             ))}
-        </Menu>
+        </>
     );
 }

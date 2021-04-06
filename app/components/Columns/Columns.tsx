@@ -61,6 +61,7 @@ function Columns({
         }),
         [columnClassName]
     );
+    const headers = Children.map(children, (c) => c.props.header);
 
     const enrichedChildren = useMemo(
         () => Children.map(children, (c) => cloneElement(c, getColProps(c))),
@@ -73,6 +74,7 @@ function Columns({
                 styles.root,
                 columnScroll && styles.rootColumnScroll,
                 variableSize && styles.rootVariableSize,
+                headers.length > 0 && styles.rootWithHeaders,
                 className
             )}
         >

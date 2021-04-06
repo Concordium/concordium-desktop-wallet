@@ -13,6 +13,7 @@ import {
 } from './CredentialDeployment';
 import {
     AccountTransaction,
+    BakerStakeThreshold,
     ElectionDifficulty,
     ExchangeRate,
     FoundationAccount,
@@ -228,6 +229,20 @@ export default class ConcordiumLedgerClient {
         return signUpdateTransaction(
             this.transport,
             0x23,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signBakerStakeThreshold(
+        transaction: UpdateInstruction<BakerStakeThreshold>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x27,
             path,
             transaction,
             serializedPayload
