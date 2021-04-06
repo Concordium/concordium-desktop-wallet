@@ -12,7 +12,7 @@ export async function up(knex: Knex): Promise<void> {
             table.string('credId').primary();
             table.boolean('external');
             table.integer('credentialNumber');
-            table.integer('credentialIndex').defaultTo(0);
+            table.integer('credentialIndex');
             table
                 .integer('identityId')
                 .unsigned()
