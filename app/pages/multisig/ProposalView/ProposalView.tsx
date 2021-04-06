@@ -379,13 +379,12 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     className={styles.finalCheckbox}
                                     name="finalCheck"
                                     rules={{ required: true }}
-                                    // disabled={!isOpen}
+                                    disabled={!isOpen}
                                 >
                                     I understand this is the final submission
                                     and cannot be reverted
                                 </Form.Checkbox>
-                                {/* <Form.Submit disabled={!isOpen}> */}
-                                <Form.Submit>
+                                <Form.Submit disabled={!isOpen}>
                                     Submit transaction to chain
                                 </Form.Submit>
                             </div>
