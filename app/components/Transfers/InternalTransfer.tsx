@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
@@ -55,6 +55,42 @@ export default function InternalTransfer<
         location?.state?.initialPage || locations.pickAmount
     );
 
+    const toConfirmTransfer = useCallback(
+        async (amount: string) => {
+            const transaction = await specific.createTransaction(
+                account.address,
+                toMicroUnits(amount)
+            );
+            transaction.estimatedFee = estimatedFee;
+
+            const transactionJSON = stringify(transaction);
+            dispatch(
+                push({
+                    pathname: routes.SUBMITTRANSFER,
+                    state: {
+                        confirmed: {
+                            pathname: specific.location,
+                            state: {
+                                initialPage: locations.transferSubmitted,
+                                transaction: transactionJSON,
+                            },
+                        },
+                        cancelled: {
+                            pathname: specific.location,
+                            state: {
+                                initialPage: locations.pickAmount,
+                                amount,
+                            },
+                        },
+                        transaction: transactionJSON,
+                        account,
+                    },
+                })
+            );
+        },
+        [specific, account, dispatch]
+    );
+
     function ChosenComponent() {
         switch (subLocation) {
             case locations.pickAmount:
@@ -64,40 +100,7 @@ export default function InternalTransfer<
                         estimatedFee={estimatedFee}
                         defaultAmount={location?.state?.amount}
                         toPickRecipient={undefined}
-                        toConfirmTransfer={async (amount: string) => {
-                            const transaction = await specific.createTransaction(
-                                account.address,
-                                toMicroUnits(amount)
-                            );
-                            transaction.estimatedFee = estimatedFee;
-
-                            const transactionJSON = stringify(transaction);
-                            dispatch(
-                                push({
-                                    pathname: routes.SUBMITTRANSFER,
-                                    state: {
-                                        confirmed: {
-                                            pathname: specific.location,
-                                            state: {
-                                                initialPage:
-                                                    locations.transferSubmitted,
-                                                transaction: transactionJSON,
-                                            },
-                                        },
-                                        cancelled: {
-                                            pathname: specific.location,
-                                            state: {
-                                                initialPage:
-                                                    locations.pickAmount,
-                                                amount,
-                                            },
-                                        },
-                                        transaction: transactionJSON,
-                                        account,
-                                    },
-                                })
-                            );
-                        }}
+                        toConfirmTransfer={toConfirmTransfer}
                     />
                 );
             case locations.transferSubmitted: {

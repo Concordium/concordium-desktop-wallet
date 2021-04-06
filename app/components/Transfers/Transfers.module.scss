@@ -6,59 +6,24 @@
     color: $color-error;
 }
 
-.pickAmount {
-    display: flex;
-    margin: 40px 0;
-    align-content: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    width: 100%;
-
-    label {
-        width: 75%;
-    }
-}
-
-.estimatedFee {
-    text-align: center;
-}
-
 .header {
     text-align: center;
-}
-
-.button {
-    width: 90%;
-    margin-bottom: 14px;
-    margin-left: 5%;
-}
-
-.pickRecipient {
-    display: flex;
-    flex-direction: column;
 }
 
 .transferView {
     display: flex;
     flex-direction: column;
-    padding: 5px 40px;
+    padding: 5px 60px;
 }
 
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 20px;
+    right: 20px;
 }
 
 .backButton {
     position: absolute;
-    top: 10px;
-    left: 10px;
-}
-
-.addressBookComment {
-    @extend h5;
-    @extend .textFaded;
-
-    display: contents;
+    top: 20px;
+    left: 20px;
 }

@@ -1,14 +1,15 @@
 import clsx from 'clsx';
-import React, { PropsWithChildren } from 'react';
+import React from 'react';
 import AddressBookEntryIcon from '@resources/svg/identity.svg';
 import Button from '~/cross-app-components/Button';
-import iconStyle from '~/pages/AddressBook/AddressBookList/AddressBookList.module.scss';
-import itemStyle from './AddressBookEntryButton.module.scss';
+import styles from './AddressBookEntryButton.module.scss';
 
 interface Props {
     onClick: () => void;
     error?: boolean;
     className?: string;
+    title: string;
+    comment?: string;
 }
 
 /**
@@ -16,22 +17,24 @@ interface Props {
  * Can display an errornous state.
  */
 export default function AddressBookEntryButton({
-    children,
     onClick,
     error,
     className,
-}: PropsWithChildren<Props>) {
+    title,
+    comment,
+}: Props) {
     return (
         <Button
-            className={clsx(error && itemStyle.error, className)}
-            icon={<AddressBookEntryIcon className={iconStyle.identityIcon} />}
+            className={clsx(styles.root, error && styles.error, className)}
+            icon={<AddressBookEntryIcon className={styles.icon} />}
             tabIndex={0}
             inverted
-            size="huge"
+            size="big"
             onKeyPress={onClick}
             onClick={onClick}
         >
-            {children}
+            <div className={styles.title}>{title}</div>
+            {comment && <div className={styles.comment}>{comment}</div>}
         </Button>
     );
 }
