@@ -276,10 +276,22 @@ export interface Credential {
     policy: JSONString;
 }
 
+export interface DeployedCredential extends Credential {
+    credentialIndex: number;
+}
+
 export interface LocalCredential extends Credential {
     external: false;
     identityId: number;
     credentialNumber: number;
+}
+
+export function instanceOfDeployedCredential(
+    object: Credential
+): object is DeployedCredential {
+    return !(
+        object.credentialIndex === undefined || object.credentialIndex === null
+    );
 }
 
 export function instanceOfLocalCredential(

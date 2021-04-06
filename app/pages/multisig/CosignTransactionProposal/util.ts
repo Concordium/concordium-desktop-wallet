@@ -3,6 +3,8 @@ import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
 import { BlockSummary } from '~/utils/NodeApiTypes';
 import {
     AccountTransaction,
+    instanceOfLocalCredential,
+    instanceOfDeployedCredential,
     UpdateInstruction,
     UpdateInstructionSignature,
 } from '~/utils/types';
@@ -49,20 +51,15 @@ export async function signAccountTransaction(
 
     const credential = (await getCredentialsOfAccount(transaction.sender)).find(
         (cred) =>
-            // TODO: Use LocalCredential
-            !(
-                cred.identityId === undefined ||
-                cred.credentialNumber === undefined ||
-                cred.credentialIndex === undefined ||
-                cred.credentialIndex === null
-            )
+            instanceOfLocalCredential(cred) &&
+            instanceOfDeployedCredential(cred)
     );
 
+    // TODO: can we avoid checking instances twice?
     if (
         !credential ||
-        credential.credentialIndex === undefined ||
-        credential.identityId === undefined ||
-        credential.credentialNumber === undefined
+        !instanceOfLocalCredential(credential) ||
+        !instanceOfDeployedCredential(credential)
     ) {
         throw new Error(
             'Unable to sign transfer, because we were unable to find local and deployed credential'
