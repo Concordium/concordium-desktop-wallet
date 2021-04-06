@@ -33,7 +33,6 @@ import getTransactionHash from '~/utils/transactionHash';
 import styles from './SignTransactionProposal.module.scss';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
-import { LedgerStatusType } from '~/components/ledger/util';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface SignInput {
@@ -152,15 +151,22 @@ function SignTransactionProposalView({ location }: Props) {
                     </section>
                 </Columns.Column>
                 <Columns.Column header="Signature and Hardware Wallet">
-                    <Ledger ledgerCallback={signingFunction}>
-                        {(status, statusView, submit = asyncNoOp) => (
+                    <Ledger
+                        ledgerCallback={signingFunction}
+                        onSignError={() => setSigning(false)}
+                    >
+                        {({
+                            isReady,
+                            statusView,
+                            submitHandler = asyncNoOp,
+                        }) => (
                             <section className={styles.signColumnContent}>
                                 <h5>Hardware wallet status</h5>
                                 {statusView}
                                 <Form
                                     onSubmit={() => {
                                         setSigning(true);
-                                        submit();
+                                        submitHandler();
                                     }}
                                 >
                                     <Form.Checkbox
@@ -175,11 +181,7 @@ function SignTransactionProposalView({ location }: Props) {
                                         correct
                                     </Form.Checkbox>
                                     <Form.Submit
-                                        disabled={
-                                            signing ||
-                                            status !==
-                                                LedgerStatusType.CONNECTED
-                                        }
+                                        disabled={signing || !isReady}
                                         className={styles.submit}
                                     >
                                         Generate Transaction

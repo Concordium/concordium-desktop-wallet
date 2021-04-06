@@ -111,6 +111,7 @@ function SubmittedProposalView({ proposal }: Props) {
         <MultiSignatureLayout
             pageTitle={handler.title}
             stepTitle={`Transaction Proposal - ${handler.type}`}
+            disableBack
         >
             <div className={styles.body}>
                 <div />

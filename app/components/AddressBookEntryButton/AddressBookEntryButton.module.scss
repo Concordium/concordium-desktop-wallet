@@ -1,5 +1,27 @@
 @import 'config/bundle';
 
+.root {
+    box-shadow: 0 0 0 1px $color-grey inset;
+}
+
+.title,
+.comment {
+    @include overflowEllipsis;
+
+    max-width: 95%;
+    margin: 0 auto;
+}
+
+.comment {
+    font-size: $font-size-body4;
+    color: $color-text-faded;
+}
+
+.icon {
+    width: 31px;
+    fill: $color-grey;
+}
+
 .error {
     box-shadow: 0 0 0 2px $color-error inset;
     outline: none;

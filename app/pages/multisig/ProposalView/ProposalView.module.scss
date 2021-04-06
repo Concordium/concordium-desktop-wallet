@@ -17,6 +17,10 @@
     }
 }
 
+.signatureCheckboxes {
+    padding: 0 30px;
+}
+
 .finalCheckbox {
     input:disabled ~ * {
         color: $color-text-faded;

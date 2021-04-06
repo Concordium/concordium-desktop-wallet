@@ -1,3 +1,5 @@
+@import 'config/bundle';
+
 @keyframes inner-spin {
     from {
         transform: rotate(0deg);
@@ -17,8 +19,10 @@
 }
 
 .root {
-    width: 100px;
-    height: 100px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: $font-size-body2;
 
     &:not(.inline) {
         position: absolute;
@@ -26,6 +30,11 @@
         left: 50%;
         transform: translate(-50%, -50%);
     }
+}
+
+.icon {
+    width: 100px;
+    height: 100px;
 
     :global(.logo-pending_svg__c) {
         transform-origin: center;
@@ -38,4 +47,8 @@
         animation: inner-spin 1s;
         animation-iteration-count: infinite;
     }
+}
+
+.text {
+    margin-top: 15px;
 }

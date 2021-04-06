@@ -45,20 +45,19 @@ export default function Button<TAs extends ElementType = 'button'>({
 }: PropsWithChildren<ButtonProps<TAs>>): JSX.Element {
     const Component = as || 'button';
 
+    const classNames = clear
+        ? clsx(styles.clear, className)
+        : clsx(
+              styles.root,
+              size && sizeStyleMap[size],
+              inverted && styles.rootInverted,
+              danger && styles.rootDanger,
+              icon && styles.rootWithIcon,
+              className
+          );
+
     return (
-        <Component
-            type="button"
-            className={clsx(
-                styles.root,
-                size && sizeStyleMap[size],
-                inverted && styles.rootInverted,
-                clear && styles.rootClear,
-                danger && styles.rootDanger,
-                icon && styles.rootWithIcon,
-                className
-            )}
-            {...props}
-        >
+        <Component type="button" className={classNames} {...props}>
             {icon && <span className={styles.icon}>{icon}</span>}
             {children}
         </Component>
