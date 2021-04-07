@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import BinIcon from '@resources/svg/bin.svg';
 import PlusIcon from '@resources/svg/plus.svg';
 import CloseIcon from '@resources/svg/cross.svg';
-import { EqualRecord, Schedule, TimeStampUnit } from '~/utils/types';
+import { EqualRecord, Schedule } from '~/utils/types';
 import { displayAsGTU, isValidGTUString, toMicroUnits } from '~/utils/gtu';
-import { parseTime, getNow, TimeConstants } from '~/utils/timeHelpers';
+import { getNow, TimeConstants } from '~/utils/timeHelpers';
 import Form from '~/components/Form';
 import { futureDate } from '~/components/Form/util/validation';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import styles from './BuildExplicitSchedule.module.scss';
+import ScheduleList from '~/components/ScheduleList';
 
 export interface Defaults {
     schedule: Schedule;
@@ -114,31 +114,6 @@ export default function BuildExplicitSchedule({
         </Form>
     );
 
-    const showSchedules = (
-        <div className={styles.scheduleList}>
-            {schedule.map((schedulePoint, index) => (
-                <div
-                    key={schedulePoint.timestamp + schedulePoint.amount}
-                    className={styles.scheduleListRow}
-                >
-                    <div>
-                        {index + 1}.{' '}
-                        {parseTime(
-                            schedulePoint.timestamp,
-                            TimeStampUnit.milliSeconds
-                        )}
-                    </div>
-                    <div>
-                        {displayAsGTU(schedulePoint.amount)}{' '}
-                        <Button clear onClick={() => removeFromSchedule(index)}>
-                            <BinIcon className={styles.binIcon} />
-                        </Button>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-
     const HeaderIcon = adding ? CloseIcon : PlusIcon;
 
     return (
@@ -160,7 +135,12 @@ export default function BuildExplicitSchedule({
                     </Button>
                     {adding ? addSchedulePointForm : null}
                 </Card>
-                {!adding ? showSchedules : null}
+                {!adding ? (
+                    <ScheduleList
+                        schedule={schedule}
+                        removeFromSchedule={removeFromSchedule}
+                    />
+                ) : null}
             </div>
             <Button
                 size="big"

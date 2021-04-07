@@ -1,24 +1,19 @@
-import { Grid } from 'semantic-ui-react';
 import React, { useState, useEffect } from 'react';
 import {
     Account,
     Identity,
     AddressBookEntry,
     TransactionKindId,
-    SchedulePoint,
-    TimeStampUnit,
     Schedule,
 } from '~/utils/types';
-import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
-import { parseTime } from '~/utils/timeHelpers';
+import { getGTUSymbol } from '~/utils/gtu';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import {
     getTransactionKindCost,
     scheduledTransferCost,
 } from '~/utils/transactionCosts';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-
-import SidedRow from '~/components/SidedRow';
+import ScheduleList from '~/components/ScheduleList';
 
 interface Props {
     transactionType: TransactionKindId;
@@ -81,20 +76,7 @@ export default function TransactionProposalDetails({
                 <>
                     <b>Release Schedule:</b>
                     {schedule ? (
-                        <>
-                            <Grid container columns={2}>
-                                {schedule.map((item: SchedulePoint) => (
-                                    <SidedRow
-                                        key={item.timestamp}
-                                        left={parseTime(
-                                            item.timestamp,
-                                            TimeStampUnit.milliSeconds
-                                        )}
-                                        right={displayAsGTU(item.amount)}
-                                    />
-                                ))}
-                            </Grid>
-                        </>
+                        <ScheduleList schedule={schedule} />
                     ) : (
                         'To be determined'
                     )}
