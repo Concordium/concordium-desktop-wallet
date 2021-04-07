@@ -1,0 +1,31 @@
+import React, { useState } from 'react';
+// also exported from '@storybook/react' if you can deal with breaking changes in 6.1
+import { Story, Meta } from '@storybook/react/types-6-0';
+import InlineNumber, { InlineNumberProps } from './InlineNumber';
+
+export default {
+    title: 'Components/Form/Fields/Inline Number',
+    component: InlineNumber,
+} as Meta;
+
+const Template: Story<InlineNumberProps> = (args) => {
+    const [value, setValue] = useState<number | undefined>(args.value);
+
+    return (
+        <div style={{ width: '500px', margin: '0 auto' }}>
+            <div>Input Value: {`${value}`}</div>
+            <InlineNumber {...args} value={value} onChange={setValue} />{' '}
+            Releases
+        </div>
+    );
+};
+
+export const OnlyIntegers = Template.bind({});
+OnlyIntegers.args = {};
+
+export const EnsureTwoDigits = Template.bind({});
+EnsureTwoDigits.args = {
+    allowFractions: true,
+    ensureDigits: 2,
+    defaultValue: 0,
+};

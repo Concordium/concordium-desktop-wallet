@@ -18,17 +18,7 @@ import {
     percentageToFractionResolution,
 } from '~/utils/rewardFractionHelpers';
 import { noOp } from '~/utils/basicHelpers';
-
-function scaleField(el: HTMLInputElement | null) {
-    if (!el) {
-        return;
-    }
-
-    setTimeout(() => {
-        el.style.width = '5px';
-        el.style.width = `${el.scrollWidth}px`;
-    }, 0);
-}
+import { scaleFieldWidth } from '~/utils/htmlHelpers';
 
 function formatValue(v?: number): string {
     if (v === undefined || Number.isNaN(v)) {
@@ -75,7 +65,7 @@ export default function RewardDistributionField({
     const { disabled } = inputProps;
 
     const setInternalValue = useCallback((v: string) => {
-        scaleField(ref.current);
+        scaleFieldWidth(ref.current);
         setStringValue(v);
     }, []);
 
@@ -128,7 +118,7 @@ export default function RewardDistributionField({
         }
     }, [value]);
 
-    useLayoutEffect(() => scaleField(ref.current), []);
+    useLayoutEffect(() => scaleFieldWidth(ref.current), []);
 
     return (
         <label
