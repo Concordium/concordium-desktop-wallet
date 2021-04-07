@@ -41,7 +41,6 @@
 }
 
 .buildSchedule {
-    composes: flexBetween;
     border-radius: 10px;
     background-color: $color-off-white;
     padding: 15px 50px;
@@ -49,21 +48,22 @@
     text-align: center;
     position: relative;
 
+    > div {
+        margin-bottom: 40px;
+    }
+
     h2 {
         margin-top: 0;
     }
 }
 
 .buildScheduleCommon {
-    composes: flexBetween;
-    height: 20%;
-
     .title {
         margin-top: 20px;
+        margin-bottom: 50px;
     }
-}
 
-.buildComponent {
-    composes: flexBetween;
-    height: 70%;
+    > * {
+        margin-bottom: 40px;
+    }
 }

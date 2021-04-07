@@ -122,13 +122,11 @@ export default function BuildSchedule({ location }: Props) {
                     title="Schedule type:"
                 />
             </div>
-            <div className={styles.buildComponent}>
-                <BuildComponent
-                    defaults={defaults}
-                    submitSchedule={createTransaction}
-                    amount={BigInt(amount)}
-                />
-            </div>
+            <BuildComponent
+                defaults={defaults}
+                submitSchedule={createTransaction}
+                amount={BigInt(amount)}
+            />
         </TransferView>
     );
 }

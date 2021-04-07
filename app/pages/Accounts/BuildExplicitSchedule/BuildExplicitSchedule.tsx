@@ -160,6 +160,7 @@ export default function BuildExplicitSchedule({
             </div>
             <Button
                 size="big"
+                className={styles.submitButton}
                 disabled={usedAmount < amount}
                 onClick={() => submitSchedule(schedule, { schedule })}
             >
