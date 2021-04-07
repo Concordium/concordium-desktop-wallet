@@ -53,6 +53,7 @@ export default function FileInput({
             className={clsx(
                 styles.root,
                 isInvalid && styles.invalid,
+                disabled && styles.disabled,
                 dragOver && styles.hovering,
                 className
             )}

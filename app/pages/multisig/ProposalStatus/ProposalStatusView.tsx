@@ -3,6 +3,7 @@ import React, { PropsWithChildren, useMemo } from 'react';
 import Card from '~/cross-app-components/Card';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import { ClassName, MultiSignatureTransactionStatus } from '~/utils/types';
+import { getStatusText } from './util';
 import styles from './ProposalStatus.module.scss';
 
 const {
@@ -21,11 +22,6 @@ function getStatusClassName(
         return styles.rootFailed;
     if (status === Finalized) return styles.rootSuccess;
     return undefined;
-}
-
-function getStatusText(status: MultiSignatureTransactionStatus): string {
-    if (status === Submitted) return 'Submitted - Pending';
-    return status;
 }
 
 export type ProposalStatusViewProps = PropsWithChildren<{

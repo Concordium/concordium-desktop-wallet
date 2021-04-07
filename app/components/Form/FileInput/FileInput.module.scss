@@ -18,6 +18,10 @@
     font-size: $font-size-body2;
 }
 
+.disabled {
+    cursor: default;
+}
+
 .wrapper {
     width: 100%;
     height: 100%;
