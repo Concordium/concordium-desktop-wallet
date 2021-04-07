@@ -15,6 +15,7 @@ enum LedgerActionType {
     ERROR,
     RESET,
     SET_STATUS_TEXT,
+    FINISHED,
 }
 
 interface PendingAction extends Action<LedgerActionType.PENDING> {
@@ -69,12 +70,19 @@ export const setStatusTextAction = (text: string): SetStatusTextAction => ({
     text,
 });
 
+type FinishedAction = Action<LedgerActionType.FINISHED>;
+
+export const finishedAction = (): FinishedAction => ({
+    type: LedgerActionType.FINISHED,
+});
+
 type LedgerAction =
     | PendingAction
     | ConnectedAction
     | ResetAction
     | ErrorAction
-    | SetStatusTextAction;
+    | SetStatusTextAction
+    | FinishedAction;
 
 function getStatusMessage(
     status: LedgerStatusType,
@@ -133,6 +141,8 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
                 status: LedgerStatusType.ERROR,
                 text: a.message || getStatusMessage(LedgerStatusType.ERROR),
             };
+        case LedgerActionType.FINISHED:
+            return { ...s, status: LedgerStatusType.CONNECTED };
         default:
             return s;
     }

@@ -1,5 +1,12 @@
+@import 'config/bundle';
+@import 'elements/bundle';
+
 .listElement {
     margin-bottom: 20px;
+}
+
+.column {
+    flex-basis: 560px;
 }
 
 .accountActionButton {
@@ -27,6 +34,33 @@
     filter: invert(100%);
 }
 
-.column {
-    flex-basis: 560px;
+.flexBetween {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.buildSchedule {
+    min-height: 850px;
+    text-align: center;
+    position: relative;
+
+    > div {
+        margin-bottom: 40px;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+}
+
+.buildScheduleCommon {
+    .title {
+        margin-top: 20px;
+        margin-bottom: 50px;
+    }
+
+    > * {
+        margin-bottom: 40px;
+    }
 }

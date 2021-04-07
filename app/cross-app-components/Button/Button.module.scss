@@ -17,6 +17,11 @@
     position: relative;
     border: none;
 
+    &:hover,
+    &:focus {
+        outline: none;
+    }
+
     &:disabled {
         cursor: default;
     }
@@ -71,11 +76,6 @@
     &:disabled:not(.rootInverted) {
         background-color: $color-grey;
         border-color: $color-grey;
-    }
-
-    &:hover,
-    &:focus {
-        outline: none;
     }
 
     &Danger {
