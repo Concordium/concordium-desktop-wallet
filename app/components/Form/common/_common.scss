@@ -25,10 +25,7 @@
 
     &:focus {
         outline: none;
-
-        &:not(.fieldInvalid) {
-            border-color: $form-color-focus;
-        }
+        border-color: $form-color-focus;
     }
 
     &::placeholder {
@@ -41,6 +38,6 @@
     }
 
     &Invalid {
-        border-color: $color-error;
+        border-color: $color-error !important;
     }
 }

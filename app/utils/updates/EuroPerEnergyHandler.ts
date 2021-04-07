@@ -1,16 +1,23 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernancePath } from '../../features/ledger/Path';
+import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import EuroPerEnergyView from '../../pages/multisig/EuroPerEnergyView';
-import UpdateEuroPerEnergy from '../../pages/multisig/UpdateEuroPerEnergy';
-import { Authorizations } from '../NodeApiTypes';
+import UpdateEuroPerEnergy, {
+    UpdateEuroPerEnergyFields,
+} from '../../pages/multisig/UpdateEuroPerEnergy';
+import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isExchangeRate,
     ExchangeRate,
     UpdateInstruction,
     UpdateInstructionPayload,
+    MultiSignatureTransaction,
+    UpdateType,
 } from '../types';
 import { serializeExchangeRate } from '../UpdateSerialization';
+
+const TYPE = 'Update Euro Per Energy';
 
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
@@ -26,6 +33,28 @@ export default class EuroPerEnergyHandler
         throw Error('Invalid transaction type was given as input.');
     }
 
+    async createTransaction(
+        blockSummary: BlockSummary,
+        { euroPerEnergy }: UpdateEuroPerEnergyFields,
+        effectiveTime: bigint
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+        if (!blockSummary) {
+            return undefined;
+        }
+
+        const sequenceNumber =
+            blockSummary.updates.updateQueues.euroPerEnergy.nextSequenceNumber;
+        const { threshold } = blockSummary.updates.authorizations.euroPerEnergy;
+
+        return createUpdateMultiSignatureTransaction(
+            euroPerEnergy,
+            UpdateType.UpdateEuroPerEnergy,
+            sequenceNumber,
+            threshold,
+            effectiveTime
+        );
+    }
+
     serializePayload(transaction: TransactionType) {
         return serializeExchangeRate(transaction.payload);
     }
@@ -34,7 +63,7 @@ export default class EuroPerEnergyHandler
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient
     ) {
-        const path: number[] = getGovernancePath({ keyIndex: 0, purpose: 0 });
+        const path: number[] = getGovernanceLevel2Path();
         return ledger.signEuroPerEnergy(
             transaction,
             this.serializePayload(transaction),
@@ -52,5 +81,7 @@ export default class EuroPerEnergyHandler
 
     update = UpdateEuroPerEnergy;
 
-    title = 'Foundation Transaction | Update Euro Per Energy';
+    title = `Foundation Transaction | ${TYPE}`;
+
+    type = TYPE;
 }

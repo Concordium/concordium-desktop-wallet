@@ -6,15 +6,18 @@ import {
     AddedCredential,
     MultiSignatureTransactionStatus,
     MultiSignatureTransaction,
-} from '../../utils/types';
-import { stringify } from '../../utils/JSONHelper';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { globalSelector } from '../../features/GlobalSlice';
-import { createUpdateCredentialsTransaction } from '../../utils/transactionHelpers';
-import { getAccountPath } from '../../features/ledger/Path';
-import { insert } from '../../database/MultiSignatureProposalDao';
-import { addProposal } from '../../features/MultiSignatureSlice';
+} from '~/utils/types';
+import { stringify } from '~/utils/JSONHelper';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
+import { globalSelector } from '~/features/GlobalSlice';
+import {
+    createUpdateCredentialsTransaction,
+    buildTransactionAccountSignature,
+} from '~/utils/transactionHelpers';
+import { getAccountPath } from '~/features/ledger/Path';
+import { insert } from '~/database/MultiSignatureProposalDao';
+import { addProposal } from '~/features/MultiSignatureSlice';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -22,6 +25,7 @@ interface Props {
     primaryCredential: Credential;
     addedCredentials: AddedCredential[];
     removedCredIds: string[];
+    currentCredentialAmount: number;
     newThreshold: number;
     setProposalId: (id: number) => void;
 }
@@ -35,6 +39,7 @@ export default function CreateUpdate({
     primaryCredential,
     addedCredentials,
     removedCredIds,
+    currentCredentialAmount,
     newThreshold,
     setProposalId,
 }: Props): JSX.Element {
@@ -45,24 +50,34 @@ export default function CreateUpdate({
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
-        if (
-            !account ||
-            !global ||
-            primaryCredential.identityId === undefined ||
-            primaryCredential.credentialNumber === undefined
-        ) {
+        if (!account || !global) {
             throw new Error('unexpected missing global/account');
         }
+        if (
+            primaryCredential.identityId === undefined ||
+            primaryCredential.credentialNumber === undefined ||
+            primaryCredential.credentialIndex === undefined
+        ) {
+            throw new Error(
+                'Unable to sign transaction, because given credential was not local and deployed.'
+            );
+        }
+
         const transaction = await createUpdateCredentialsTransaction(
             account.address,
             addedCredentials,
             removedCredIds,
-            newThreshold
+            newThreshold,
+            currentCredentialAmount,
+            account.signatureThreshold
         );
+
+        const signatureIndex = 0;
+
         const path = getAccountPath({
             identityIndex: primaryCredential.identityId,
             accountIndex: primaryCredential.credentialNumber,
-            signatureIndex: 0,
+            signatureIndex,
         });
 
         const signature = await ledger.signUpdateCredentialTransaction(
@@ -74,7 +89,11 @@ export default function CreateUpdate({
             // The JSON serialization of the transaction
             transaction: stringify({
                 ...transaction,
-                signature: { 0: { 0: signature } },
+                signatures: buildTransactionAccountSignature(
+                    primaryCredential.credentialIndex,
+                    signatureIndex,
+                    signature
+                ),
             }),
             // The minimum required signatures for the transaction
             // to be accepted on chain.
@@ -95,5 +114,5 @@ export default function CreateUpdate({
         setProposalId(entryId);
     }
 
-    return <LedgerComponent ledgerCall={sign} />;
+    return <SimpleLedger ledgerCall={sign} />;
 }

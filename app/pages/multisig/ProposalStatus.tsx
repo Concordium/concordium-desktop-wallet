@@ -8,12 +8,11 @@ import {
     UpdateType,
     Transaction,
     instanceOfUpdateInstruction,
-} from '../../utils/types';
-import TransactionDetails from '../../components/TransactionDetails';
+} from '~/utils/types';
+import TransactionDetails from '~/components/TransactionDetails';
 import StatusLabel from './StatusLabel';
 import ExpiredEffectiveTimeView from './ExpiredEffectiveTimeView';
-import { lookupName } from '../../utils/transactionHelpers';
-// TODO This component should also have support for account transactions.
+import { lookupName } from '~/utils/transactionHelpers';
 
 interface Props {
     proposal: MultiSignatureTransaction;

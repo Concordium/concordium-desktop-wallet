@@ -50,3 +50,13 @@ test('parse/stringify handles a Buffer and preserves the values', () => {
     expect(y.readUInt8(1)).toBe(0);
     expect(y.readUInt8(2)).toBe(5);
 });
+
+test('parse/stringify handles null', () => {
+    const x = null;
+    expect(parse(stringify(x))).toBeNull();
+});
+
+test('parse/stringify handles undefined fields', () => {
+    const x = { a: undefined };
+    expect(parse(stringify(x)).a).toBeUndefined();
+});

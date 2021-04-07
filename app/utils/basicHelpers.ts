@@ -21,6 +21,14 @@ export function isHex(str: string): boolean {
     return /^[A-F0-9]+$/i.test(str);
 }
 
+/**
+ * Determines whether or not the input string consists of only digits,
+ * with no leading zero (except if only a single digit).
+ */
+export function onlyDigitsNoLeadingZeroes(value: string): boolean {
+    return /^(?:[1-9][0-9]*|0)$/.test(value);
+}
+
 /** Given a list of elements, a function to parse the elements to string array,
  * and the names of the elements' fields, outputs
  * csv string, with the names first, and the values of each element per line.
@@ -47,21 +55,35 @@ export function sumToBigInt<T>(
 }
 
 /**
- * Partitions a Uint8Array into chunks of a certain size. The last chunk
- * may have a different size than the provided size.
- * @param array the array to partition
+ * Partitions a generic array into chunks of a certain size. The final
+ * chunk may have a different size less than the provided size.
+ * @param array the array to chunk
  * @param chunkSize the size of each chunk
  */
-export function toChunks<S, T extends Uint8Array | Array<S>>(
-    array: T,
-    chunkSize: number
-) {
+export function chunkArray<T>(array: T[], chunkSize: number): T[][] {
     if (chunkSize <= 0) {
-        throw new Error('Chunk size must be a positive number.');
+        throw new Error('Chunk size has to be a positive number.');
     }
-    const chunks = [];
+    const chunks: T[][] = [];
     for (let i = 0; i < array.length; i += chunkSize) {
         chunks.push(array.slice(i, i + chunkSize));
+    }
+    return chunks;
+}
+
+/**
+ * Partitions a Buffer into chunks of a certain size. The final chunk
+ * may have a different size than the provided size.
+ * @param array the Buffer to chunk
+ * @param chunkSize the size of each chunk
+ */
+export function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[] {
+    if (chunkSize <= 0) {
+        throw new Error('Chunk size has to be a positive number.');
+    }
+    const chunks: Buffer[] = [];
+    for (let i = 0; i < buffer.length; i += chunkSize) {
+        chunks.push(buffer.slice(i, i + chunkSize));
     }
     return chunks;
 }
@@ -69,3 +91,32 @@ export function toChunks<S, T extends Uint8Array | Array<S>>(
 export function isDefined<T>(v?: T): v is T {
     return v !== undefined;
 }
+
+export const notNull = <T>(v: T | null | undefined): v is T => v != null;
+
+export function noOp(): void {
+    return undefined;
+}
+
+export async function asyncNoOp(): Promise<void> {
+    return new Promise((resolve) => resolve());
+}
+
+export const ensureNumberLength = (length: number) => (
+    value?: string
+): string => {
+    if (!value) {
+        return '';
+    }
+
+    const valueLength = value.length;
+
+    if (valueLength >= length) {
+        return value;
+    }
+
+    const missing = length - valueLength;
+    const prepend = new Array(missing).fill(`0`).join('');
+
+    return `${prepend}${value}`;
+};

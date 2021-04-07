@@ -1,8 +1,8 @@
 import React from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
-import Button from '../../cross-app-components/Button';
-import routes from '../../constants/routes.json';
+import Button from '~/cross-app-components/Button';
+import routes from '~/constants/routes.json';
 
 interface Props {
     setReady: (ready: boolean) => void;

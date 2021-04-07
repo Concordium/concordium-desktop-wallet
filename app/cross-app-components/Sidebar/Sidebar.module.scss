@@ -21,12 +21,12 @@ $sidebar-link-height: $page-header-height;
 .bottom,
 .item,
 .itemContent {
-    composes: h6 from global;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
+    font-size: $font-size-h6;
 }
 
 .item {

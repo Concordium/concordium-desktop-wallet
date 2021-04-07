@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from 'semantic-ui-react';
 import Identicon from 'react-identicons';
-import { CredentialDeploymentInformation } from '../../utils/types';
-import DragAndDrop from '../../components/DragAndDropFile';
-import Button from '../../cross-app-components/Button';
+import { CredentialDeploymentInformation } from '~/utils/types';
+import DragAndDrop from '~/components/DragAndDropFile';
+import Button from '~/cross-app-components/Button';
 import { CredentialStatus } from './CredentialStatus';
 import SimpleErrorModal, {
     ModalErrorInput,
-} from '../../components/SimpleErrorModal';
+} from '~/components/SimpleErrorModal';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -38,7 +38,10 @@ export default function AddCredential({
         CredentialDeploymentInformation | undefined
     >();
 
-    setReady(currentCredential === undefined);
+    useEffect(() => {
+        setReady(currentCredential === undefined);
+    }, [setReady, currentCredential]);
+
     function loadCredential(file: Buffer) {
         let credential: CredentialDeploymentInformation;
         // TODO Validate the structure of the file

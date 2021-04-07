@@ -33,6 +33,14 @@ Danger.args = {
     disabled: false,
 };
 
+export const Tiny = Template.bind({});
+Tiny.args = {
+    inverted: false,
+    children: 'Button',
+    disabled: false,
+    size: 'tiny',
+};
+
 export const Small = Template.bind({});
 Small.args = {
     inverted: false,
@@ -63,7 +71,7 @@ HugeWithIcon.args = {
     children: 'Button',
     disabled: false,
     size: 'huge',
-    icon: <PlusIcon />,
+    icon: <PlusIcon height="20" />,
 };
 
 export const Clear = Template.bind({});

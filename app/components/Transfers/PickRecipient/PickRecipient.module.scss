@@ -1,0 +1,17 @@
+@import 'config/bundle';
+
+.root {
+    display: flex;
+    flex-direction: column;
+}
+
+.search {
+    height: 58px;
+    font-size: $font-size-h3;
+}
+
+.item {
+    &:not(:last-child) {
+        margin-bottom: 10px;
+    }
+}
