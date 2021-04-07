@@ -2,11 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import { displayAsGTU } from '~/utils/gtu';
 
-import { lookupName } from '~/utils/transactionHelpers';
+import {
+    getScheduledTransferAmount,
+    lookupName,
+} from '~/utils/transactionHelpers';
 import {
     AccountTransaction,
     instanceOfSimpleTransfer,
     MultiSignatureTransactionStatus,
+    ScheduledTransfer,
     ScheduledTransferPayload,
     SimpleTransferPayload,
 } from '~/utils/types';
@@ -18,15 +22,12 @@ type GtuTransferTransaction = AccountTransaction<
     SimpleTransferPayload | ScheduledTransferPayload
 >;
 
-function getAmount(transaction: GtuTransferTransaction): number {
+function getAmount(transaction: GtuTransferTransaction): bigint {
     if (instanceOfSimpleTransfer(transaction)) {
-        return parseInt(transaction.payload.amount, 10);
+        return BigInt(transaction.payload.amount);
     }
 
-    return (transaction.payload as ScheduledTransferPayload).schedule.reduce(
-        (acc, s) => acc + parseInt(s.amount, 10),
-        0
-    );
+    return getScheduledTransferAmount(transaction as ScheduledTransfer);
 }
 
 interface GtuTransferProposalStatusProps
@@ -65,7 +66,7 @@ export default function GtuTransferProposalStatus({
             title={title}
         >
             <span className="textFaded">
-                {displayAsGTU(amount.toString())} to{' '}
+                {displayAsGTU(amount)} to{' '}
                 {receiverName ? `${receiverName} ` : ''}(
                 {transaction.payload.toAddress.substr(0, 8)}...)
             </span>
