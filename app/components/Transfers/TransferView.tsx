@@ -4,6 +4,7 @@ import BackIcon from '@resources/svg/back-arrow.svg';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Button from '~/cross-app-components/Button';
 import styles from './Transfers.module.scss';
+import Card from '~/cross-app-components/Card';
 
 interface Props {
     showBack: boolean;
@@ -24,7 +25,7 @@ export default function TransferView({
     children,
 }: PropsWithChildren<Props>) {
     return (
-        <div className={clsx(styles.transferView, className)}>
+        <Card className={clsx(styles.transferView, className)}>
             {showBack ? (
                 <Button
                     clear
@@ -36,6 +37,6 @@ export default function TransferView({
             ) : null}
             {children}
             <CloseButton className={styles.closeButton} onClick={exitOnClick} />
-        </div>
+        </Card>
     );
 }
