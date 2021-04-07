@@ -1,0 +1,26 @@
+@import 'config/bundle';
+
+.details {
+    text-align: center;
+    margin: 40px;
+    padding: 0 40px;
+}
+
+.title {
+    display: block;
+    margin-bottom: 0;
+    margin-top: 40px;
+    font-size: $font-size-body3;
+    font-weight: $font-weight-bold;
+}
+
+.value,
+.placeholder {
+    font-size: $font-size-body1;
+    margin: 0;
+}
+
+.note,
+.placeholder {
+    composes: textFaded from global;
+}

@@ -7,7 +7,7 @@ import {
     Schedule,
 } from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
-import styles from './MultisignatureAccountTransactions.module.scss';
+import styles from './TransactionProposalDetails.module.scss';
 import {
     getTransactionKindCost,
     scheduledTransferCost,
@@ -24,7 +24,9 @@ interface Props {
     recipient: AddressBookEntry | undefined;
 }
 
-const placeholderText = 'To be determined';
+const placeholder = <p className={styles.placeholder}>To be determined</p>;
+const title = (text: string) => <p className={styles.title}>{text}</p>;
+const value = (text: string) => <p className={styles.value}>{text}</p>;
 
 export default function TransactionProposalDetails({
     identity,
@@ -60,25 +62,25 @@ export default function TransactionProposalDetails({
 
     return (
         <div className={styles.details}>
-            <b>Identity:</b>
-            <h2>{identity ? identity.name : placeholderText}</h2>
-            <b>Account:</b>
-            <h2>{account ? account.name : placeholderText}</h2>
-            <b>Amount:</b>
-            <h2>{amount ? `${getGTUSymbol()} ${amount}` : placeholderText}</h2>
+            {title('Identity:')}
+            {identity ? value(identity.name) : placeholder}
+            {title('Account:')}
+            {account ? value(account.name) : placeholder}
+            {title('Amount:')}
+            {amount ? value(`${getGTUSymbol()} ${amount}`) : placeholder}
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
-            <b>Recipient:</b>
-            <h2>{recipient ? recipient.name : 'To be determined'}</h2>
-            {recipient ? `Note: ${recipient.note}` : null}
-            <br />
-            <br />
+            {title('Recipient:')}
+            {recipient ? value(recipient.name) : placeholder}
+            {recipient ? (
+                <p className={styles.note}>Note: {recipient.note}</p>
+            ) : null}
             {isScheduledTransfer ? (
                 <>
-                    <b>Release Schedule:</b>
+                    {title('Release Schedule:')}
                     {schedule ? (
                         <ScheduleList schedule={schedule} />
                     ) : (
-                        'To be determined'
+                        placeholder
                     )}
                 </>
             ) : null}
