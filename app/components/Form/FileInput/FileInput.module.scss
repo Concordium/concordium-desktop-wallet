@@ -56,6 +56,10 @@
     opacity: 0;
     width: 100%;
     cursor: pointer;
+
+    .disabled & {
+        cursor: default;
+    }
 }
 
 .button {
