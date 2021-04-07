@@ -19,7 +19,6 @@ import TransactionHashView from '~/components/TransactionHashView';
 import Form from '~/components/Form';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
-import { LedgerStatusType } from '~/components/ledger/util';
 import { isExpired } from '~/utils/transactionHelpers';
 import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
@@ -132,7 +131,11 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                     stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
                 >
                     <Ledger ledgerCallback={signingFunction}>
-                        {(status, statusView, submitHandler = asyncNoOp) => (
+                        {({
+                            isReady,
+                            statusView,
+                            submitHandler = asyncNoOp,
+                        }) => (
                             <Form<CosignTransactionProposalForm>
                                 className={clsx(
                                     styles.body,
@@ -234,8 +237,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                 <Form.Submit
                                                     className={styles.submit}
                                                     disabled={
-                                                        status !==
-                                                            LedgerStatusType.CONNECTED ||
+                                                        !isReady ||
                                                         isTransactionExpired
                                                     }
                                                 >

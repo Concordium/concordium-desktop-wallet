@@ -39,5 +39,5 @@ function generateView(
  * @param {Transaction} transaction: The transaction, which details is displayed.
  */
 export default function TransactionDetails({ transaction }: Props) {
-    return <>{generateView(transaction)}</>;
+    return generateView(transaction);
 }

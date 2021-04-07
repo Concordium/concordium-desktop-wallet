@@ -1,5 +1,5 @@
-import React from 'react';
 import { Grid } from 'semantic-ui-react';
+import React, { useState, useEffect } from 'react';
 import {
     Account,
     Identity,
@@ -12,6 +12,11 @@ import {
 import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import { parseTime } from '~/utils/timeHelpers';
 import styles from './MultisignatureAccountTransactions.module.scss';
+import {
+    getTransactionKindCost,
+    scheduledTransferCost,
+} from '~/utils/transactionCosts';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 import SidedRow from '~/components/SidedRow';
 
@@ -26,18 +31,6 @@ interface Props {
 
 const placeholderText = 'To be determined';
 
-function getScheduledTransferCost(schedule: Schedule) {
-    return 364n * BigInt(schedule.length);
-}
-
-// TODO make an actual function for this;
-function getTransactionCost(type: TransactionKindId) {
-    if (type) {
-        return 100n;
-    }
-    return 200n;
-}
-
 export default function TransactionProposalDetails({
     identity,
     account,
@@ -46,14 +39,30 @@ export default function TransactionProposalDetails({
     schedule,
     transactionType,
 }: Props) {
+    const [estimatedFee, setFee] = useState<bigint | undefined>();
+
     const isScheduledTransfer =
         transactionType === TransactionKindId.Transfer_with_schedule;
-    let fee;
-    if (isScheduledTransfer) {
-        fee = schedule ? getScheduledTransferCost(schedule) : null;
-    } else {
-        fee = getTransactionCost(transactionType);
-    }
+
+    useEffect(() => {
+        if (account) {
+            if (isScheduledTransfer && schedule) {
+                scheduledTransferCost(account.signatureThreshold)
+                    .then((feeCalculator) =>
+                        setFee(feeCalculator(schedule.length))
+                    )
+                    .catch(() => {});
+            } else {
+                getTransactionKindCost(
+                    transactionType,
+                    account.signatureThreshold
+                )
+                    .then((fee) => setFee(fee))
+                    .catch(() => {});
+            }
+        }
+    }, [account, transactionType, setFee, schedule, isScheduledTransfer]);
+
     return (
         <div className={styles.details}>
             <b>Identity:</b>
@@ -62,9 +71,7 @@ export default function TransactionProposalDetails({
             <h2>{account ? account.name : placeholderText}</h2>
             <b>Amount:</b>
             <h2>{amount ? `${getGTUSymbol()} ${amount}` : placeholderText}</h2>
-            <b>Estimated Fee: {fee ? displayAsGTU(fee) : null}</b>
-            <br />
-            <br />
+            <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <b>Recipient:</b>
             <h2>{recipient ? recipient.name : 'To be determined'}</h2>
             {recipient ? `Note: ${recipient.note}` : null}

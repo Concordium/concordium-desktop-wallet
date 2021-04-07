@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     Account,
@@ -9,12 +9,15 @@ import {
 } from '~/utils/types';
 import { stringify } from '~/utils/JSONHelper';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import SimpleLedger from '~/components/ledger/SimpleLedger';
+import Ledger from '~/components/ledger/Ledger';
+import { asyncNoOp } from '~/utils/basicHelpers';
 import { globalSelector } from '~/features/GlobalSlice';
 import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
+import Form from '~/components/Form';
+import styles from '~/pages/multisig/SignTransactionProposal/SignTransactionProposal.module.scss';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -97,6 +100,39 @@ export default function SignTransaction({
         setReady(true);
         setProposalId(entryId);
     }
+    const [signing, setSigning] = useState(false);
 
-    return <SimpleLedger ledgerCall={sign} />;
+    return (
+        <Ledger ledgerCallback={sign} onSignError={() => setSigning(false)}>
+            {({ isReady, statusView, submitHandler = asyncNoOp }) => (
+                <section className={styles.signColumnContent}>
+                    <h5>Hardware wallet status</h5>
+                    {statusView}
+                    <Form
+                        onSubmit={() => {
+                            setSigning(true);
+                            submitHandler();
+                        }}
+                    >
+                        <Form.Checkbox
+                            name="check"
+                            rules={{
+                                required:
+                                    'Make sure the proposed changes are correct',
+                            }}
+                            disabled={signing}
+                        >
+                            I am sure that the propsed changes are correct
+                        </Form.Checkbox>
+                        <Form.Submit
+                            disabled={signing || !isReady}
+                            className={styles.submit}
+                        >
+                            Generate Transaction
+                        </Form.Submit>
+                    </Form>
+                </section>
+            )}
+        </Ledger>
+    );
 }
