@@ -64,7 +64,6 @@ export default function SimpleTransfer({
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
-    const [proposalId, setProposalId] = useState<number>(-1);
     const [schedule, setSchedule] = useState<Schedule>();
 
     function updateAmount(newAmount: string) {
@@ -81,12 +80,10 @@ export default function SimpleTransfer({
         return (
             <CreateTransaction
                 transactionKind={transactionKind}
-                setReady={setReady}
                 recipient={recipient}
                 amount={amount}
                 account={account}
                 schedule={schedule}
-                setProposalId={setProposalId}
             />
         );
     }
@@ -95,7 +92,7 @@ export default function SimpleTransfer({
         setReady(false);
         dispatch(
             push({
-                pathname: handler.creationLocationHandler(location, proposalId),
+                pathname: handler.creationLocationHandler(location),
                 state: transactionKind,
             })
         );
@@ -150,8 +147,7 @@ export default function SimpleTransfer({
                                 dispatch(
                                     push({
                                         pathname: handler.creationLocationHandler(
-                                            location,
-                                            proposalId
+                                            location
                                         ),
                                         state: transactionKind,
                                     })

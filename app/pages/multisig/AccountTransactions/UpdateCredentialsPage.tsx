@@ -203,7 +203,6 @@ export default function UpdateCredentialPage(): JSX.Element {
     const [newCredentials, setNewCredentials] = useState<
         CredentialDeploymentInformation[]
     >([]);
-    const [proposalId, setProposalId] = useState<number>(-1);
     useEffect(() => {
         if (account) {
             const credentialsOfAccount = credentials.filter(
@@ -291,14 +290,12 @@ export default function UpdateCredentialPage(): JSX.Element {
 
         return (
             <CreateUpdate
-                setReady={setReady}
                 account={account}
                 addedCredentials={assignIndices(newCredentials, usedIndices)}
                 removedCredIds={credentialIds
                     .filter(([, status]) => status === CredentialStatus.Removed)
                     .map(([id]) => id)}
                 newThreshold={newThreshold}
-                setProposalId={setProposalId}
                 currentCredentialAmount={currentCredentials.length}
                 primaryCredential={currentCredentials[0]}
             />
@@ -427,8 +424,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                             dispatch(
                                 push({
                                     pathname: handler.creationLocationHandler(
-                                        location,
-                                        proposalId
+                                        location
                                     ),
                                     state:
                                         TransactionKindString.UpdateCredentials,
