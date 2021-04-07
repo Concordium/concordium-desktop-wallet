@@ -113,7 +113,7 @@ export default function MultiSignatureCreateProposalView() {
                 ([transactionType, specificType, label]) => (
                     <ButtonNavLink
                         className={styles.link}
-                        key={transactionType}
+                        key={`${transactionType}${specificType}`}
                         to={createProposalRoute(transactionType, specificType)}
                     >
                         {label}

@@ -1,6 +1,8 @@
 import { parse } from 'json-bigint';
 import React, { useMemo } from 'react';
 import {
+    instanceOfScheduledTransfer,
+    instanceOfSimpleTransfer,
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
 } from '~/utils/types';
@@ -31,11 +33,18 @@ export default function ProposalStatus({
         );
     }
 
-    return (
-        <GtuTransferProposalStatus
-            {...proposalStatusProps}
-            transaction={parsed}
-            status={status}
-        />
-    );
+    if (
+        instanceOfSimpleTransfer(parsed) ||
+        instanceOfScheduledTransfer(parsed)
+    ) {
+        return (
+            <GtuTransferProposalStatus
+                {...proposalStatusProps}
+                transaction={parsed}
+                status={status}
+            />
+        );
+    }
+
+    return <>Not supported yet...</>;
 }
