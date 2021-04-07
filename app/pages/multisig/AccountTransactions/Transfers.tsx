@@ -101,10 +101,32 @@ export default function SimpleTransfer({
         );
     }
 
+    function renderBuildSchedule() {
+        if (!account || !recipient) {
+            throw new Error('Unexpected missing account and/or recipient');
+        }
+        return (
+            <BuildSchedule
+                submitSchedule={(newSchedule) => {
+                    setSchedule(newSchedule);
+                    continueAction();
+                }}
+                amount={amount}
+            />
+        );
+    }
+
+    const showButton = !(
+        location ===
+            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION ||
+        location ===
+            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE
+    );
+
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
-            stepTitle="Transaction Proposal - Send GTU"
+            stepTitle={`Transaction Proposal - ${handler.type}`}
         >
             <Columns divider columnScroll>
                 <Columns.Column
@@ -119,24 +141,26 @@ export default function SimpleTransfer({
                         recipient={recipient}
                         schedule={schedule}
                     />
-                    <Button
-                        disabled={!isReady}
-                        className={styles.submitButton}
-                        onClick={() => {
-                            setReady(false);
-                            dispatch(
-                                push({
-                                    pathname: handler.creationLocationHandler(
-                                        location,
-                                        proposalId
-                                    ),
-                                    state: transactionKind,
-                                })
-                            );
-                        }}
-                    >
-                        Continue
-                    </Button>
+                    {showButton ? (
+                        <Button
+                            disabled={!isReady}
+                            className={styles.submitButton}
+                            onClick={() => {
+                                setReady(false);
+                                dispatch(
+                                    push({
+                                        pathname: handler.creationLocationHandler(
+                                            location,
+                                            proposalId
+                                        ),
+                                        state: transactionKind,
+                                    })
+                                );
+                            }}
+                        >
+                            Continue
+                        </Button>
+                    ) : null}
                 </Columns.Column>
                 <Columns.Column
                     className={styles.rightColumn}
@@ -147,20 +171,7 @@ export default function SimpleTransfer({
                             path={
                                 routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE
                             }
-                            render={() => {
-                                if (!account || !recipient) {
-                                    throw new Error('fuck3');
-                                }
-                                return (
-                                    <BuildSchedule
-                                        submitSchedule={(newSchedule) => {
-                                            setSchedule(newSchedule);
-                                            continueAction();
-                                        }}
-                                        amount={amount}
-                                    />
-                                );
-                            }}
+                            render={renderBuildSchedule}
                         />
                         <Route
                             path={
