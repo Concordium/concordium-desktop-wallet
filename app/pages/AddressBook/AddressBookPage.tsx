@@ -18,7 +18,7 @@ export default function AddressBookPage() {
             <PageLayout.Header>
                 <h1>Address Book</h1>
                 <UpsertAddress as={PageLayout.HeaderButton} align="right">
-                    <PlusIcon />
+                    <PlusIcon height="20" />
                 </UpsertAddress>
             </PageLayout.Header>
             <Columns
