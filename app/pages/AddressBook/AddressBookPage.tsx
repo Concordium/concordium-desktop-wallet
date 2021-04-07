@@ -27,10 +27,10 @@ export default function AddressBookPage() {
                 columnClassName={styles.column}
                 columnScroll
             >
-                <Columns.Column>
+                <Columns.Column verticalPadding>
                     <AddressBookList />
                 </Columns.Column>
-                <Columns.Column>
+                <Columns.Column verticalPadding>
                     <Switch>
                         <Route
                             path={routes.ADDRESSBOOK_SELECTED}

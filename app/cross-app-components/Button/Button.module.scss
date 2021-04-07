@@ -21,6 +21,10 @@
     &:focus {
         outline: none;
     }
+
+    &:disabled {
+        cursor: default;
+    }
 }
 
 .clear {

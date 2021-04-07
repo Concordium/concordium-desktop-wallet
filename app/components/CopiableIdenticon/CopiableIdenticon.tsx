@@ -34,8 +34,10 @@ export default function CopiableIdenticon({ data }: Props) {
 
     return (
         <>
-            <h2>Identicon</h2>
-            <h3 className={styles.copytext}>(Click to copy)</h3>
+            <h5>
+                Identicon
+                <div className={styles.copytext}>(Click to export)</div>
+            </h5>
             <button
                 ref={ref}
                 className={styles.identicon}

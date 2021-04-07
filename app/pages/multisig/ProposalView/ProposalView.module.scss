@@ -1,0 +1,36 @@
+@import 'config/bundle';
+@import '../common/MultiSignatureFlowPage.module';
+
+.fileInput {
+    height: 200px;
+}
+
+.actionsColumnContent {
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+.actions {
+    > * {
+        width: 100%;
+        display: block;
+    }
+}
+
+.signatureCheckboxes {
+    padding: 0 30px;
+}
+
+.finalCheckbox {
+    input:disabled ~ * {
+        color: $color-text-faded;
+    }
+}
+
+.closeProposalButton {
+    margin-bottom: 20px;
+}
+
+.exportButton {
+    margin-bottom: 20px;
+}

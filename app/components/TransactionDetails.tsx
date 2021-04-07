@@ -1,5 +1,4 @@
 import React from 'react';
-import { Container, Header } from 'semantic-ui-react';
 import {
     AccountTransaction,
     instanceOfAccountTransaction,
@@ -38,10 +37,5 @@ function generateView(
  * @param {Transaction} transaction: The transaction, which details is displayed.
  */
 export default function TransactionDetails({ transaction }: Props) {
-    return (
-        <Container>
-            <Header>Transaction overview</Header>
-            {generateView(transaction)}
-        </Container>
-    );
+    return generateView(transaction);
 }
