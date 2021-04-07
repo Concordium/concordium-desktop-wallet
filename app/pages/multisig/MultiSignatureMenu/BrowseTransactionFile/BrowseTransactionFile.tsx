@@ -43,13 +43,10 @@ export default function BrowseTransactionFile() {
 
         // TODO Type should be defined in an ENUM instead of a string.
         let type;
-        let pathname;
         if (instanceOfUpdateInstruction(transactionObject)) {
             type = 'UpdateInstruction';
-            pathname = routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION;
         } else if (instanceOfAccountTransaction(transactionObject)) {
             type = 'AccountTransaction';
-            pathname = routes.MULTISIGTRANSACTIONS_COSIGN_ACCOUNT_TRANSACTION;
         } else {
             setShowError({
                 show: true,
@@ -63,7 +60,7 @@ export default function BrowseTransactionFile() {
         // The loaded file was valid, so proceed by loading the signing page for multi signature transactions.
         dispatch(
             push({
-                pathname,
+                pathname: routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION,
                 state: { transaction: fileString, type },
             })
         );

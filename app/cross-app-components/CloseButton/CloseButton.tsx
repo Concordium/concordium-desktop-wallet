@@ -20,7 +20,7 @@ export default function CloseButton({
             className={clsx(styles.root, className)}
             {...props}
         >
-            <CloseIcon />
+            <CloseIcon height="20" />
         </button>
     );
 }

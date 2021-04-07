@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { parse } from 'json-bigint';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
+import { parse, stringify } from '~/utils/JSONHelper';
 
 import routes from '~/constants/routes.json';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import findHandler from '~/utils/updates/HandlerFinder';
-import { EqualRecord, instanceOfUpdateInstruction } from '~/utils/types';
+import {
+    EqualRecord,
+    instanceOfUpdateInstruction,
+    UpdateInstructionSignature,
+    TransactionAccountSignature,
+} from '~/utils/types';
 import { TransactionInput } from '~/utils/transactionTypes';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { ensureProps } from '~/utils/componentHelpers';
@@ -29,6 +34,9 @@ import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import styles from './CosignTransactionProposal.module.scss';
 import { signUpdateInstruction, signAccountTransaction } from './util';
+import { saveFile } from '~/utils/FileHelper';
+import Button from '~/cross-app-components/Button';
+import { LedgerCallback } from '~/components/ledger/util';
 
 interface CosignTransactionProposalForm {
     transactionDetailsMatch: boolean;
@@ -53,6 +61,9 @@ interface CosignTransactionProposalProps extends WithBlockSummary {
 const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProps>(
     ({ location, blockSummary }) => {
         const [showValidationError, setShowValidationError] = useState(false);
+        const [signature, setSignature] = useState<
+            UpdateInstructionSignature | TransactionAccountSignature | undefined
+        >();
         const [transactionHash, setTransactionHash] = useState<string>();
 
         const dispatch = useDispatch();
@@ -68,15 +79,15 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
             setTransactionHash(getTransactionHash(transactionObject));
         }, [setTransactionHash, transactionObject]);
 
-        async function signingFunction(
+        const signingFunction: LedgerCallback = async (
             ledger: ConcordiumLedgerClient,
-            setMessage: (message: string) => void
-        ) {
-            let signature;
+            setStatusText
+        ) => {
+            let sig;
             if (instanceOfUpdateInstruction(transactionObject)) {
                 if (blockSummary) {
                     try {
-                        signature = await signUpdateInstruction(
+                        sig = await signUpdateInstruction(
                             transactionObject,
                             ledger,
                             blockSummary
@@ -90,26 +101,38 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                 }
             } else {
                 try {
-                    signature = await signAccountTransaction(
+                    sig = await signAccountTransaction(
                         transactionObject,
                         ledger
                     );
                 } catch (e) {
-                    setMessage(e);
+                    setStatusText(e);
                     return;
                 }
             }
-            // Load the page for exporting the signed transaction.
-            dispatch(
-                push({
-                    pathname: routes.MULTISIGTRANSACTIONS_EXPORT_TRANSACTION,
-                    state: {
-                        transaction,
-                        transactionHash,
-                        signature,
-                    },
-                })
-            );
+            setSignature(sig);
+            setStatusText('Proposal signed successfully');
+        };
+
+        async function exportSignedTransaction() {
+            const signedTransaction = {
+                ...transactionObject,
+                signatures: [signature],
+            };
+            const signedTransactionJson = stringify(signedTransaction);
+
+            try {
+                const fileSaved = await saveFile(
+                    signedTransactionJson,
+                    'Export signed transaction'
+                );
+
+                if (fileSaved) {
+                    dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
+                }
+            } catch (err) {
+                // TODO Handle error by showing it to the user.
+            }
         }
 
         if (!transactionHash) {
@@ -205,6 +228,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                             required:
                                                                 'Please review transaction details',
                                                         }}
+                                                        disabled={!!signature}
                                                     >
                                                         The transaction details
                                                         are correct
@@ -217,6 +241,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                             required:
                                                                 'Make sure identicons match.',
                                                         }}
+                                                        disabled={!!signature}
                                                     >
                                                         The identicon matches
                                                         the one received exactly
@@ -229,20 +254,36 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                             required:
                                                                 'Make sure hashes match',
                                                         }}
+                                                        disabled={!!signature}
                                                     >
                                                         The hash matches the one
                                                         received exactly
                                                     </Form.Checkbox>
                                                 </div>
-                                                <Form.Submit
-                                                    className={styles.submit}
-                                                    disabled={
-                                                        !isReady ||
-                                                        isTransactionExpired
-                                                    }
-                                                >
-                                                    Sign Proposal
-                                                </Form.Submit>
+                                                {signature ? (
+                                                    <Button
+                                                        className={
+                                                            styles.submit
+                                                        }
+                                                        onClick={
+                                                            exportSignedTransaction
+                                                        }
+                                                    >
+                                                        Export Signature
+                                                    </Button>
+                                                ) : (
+                                                    <Form.Submit
+                                                        className={
+                                                            styles.submit
+                                                        }
+                                                        disabled={
+                                                            !isReady ||
+                                                            isTransactionExpired
+                                                        }
+                                                    >
+                                                        Sign Proposal
+                                                    </Form.Submit>
+                                                )}
                                             </div>
                                         </div>
                                     </Columns.Column>
