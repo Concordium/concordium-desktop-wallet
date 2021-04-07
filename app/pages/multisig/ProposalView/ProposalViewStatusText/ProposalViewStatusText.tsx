@@ -20,10 +20,15 @@ type ProposalViewStatusTextProps = MultiSignatureTransaction;
 function getStatusClassName(
     status: MultiSignatureTransactionStatus
 ): string | undefined {
-    if (status === Submitted) return styles.pending;
-    if ([Expired, Rejected, Failed].some((s) => s === status))
+    if (status === Submitted) {
+        return styles.pending;
+    }
+    if ([Expired, Rejected, Failed].includes(status)) {
         return styles.error;
-    if (status === Finalized) return styles.success;
+    }
+    if (status === Finalized) {
+        return styles.success;
+    }
     return undefined;
 }
 
