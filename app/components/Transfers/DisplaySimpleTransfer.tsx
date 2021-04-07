@@ -1,8 +1,8 @@
 import React from 'react';
-import { List, Header } from 'semantic-ui-react';
 import { SimpleTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import styles from './transferDetails.module.scss';
 
 interface Props {
     transaction: SimpleTransfer;
@@ -19,22 +19,18 @@ export default function DisplaySimpleTransfer({
     toName,
 }: Props) {
     return (
-        <List relaxed="very">
-            <List.Item>
-                From Account:
-                <Header>{fromName}</Header>
-                {transaction.sender}
-            </List.Item>
-            <List.Item>
-                To Account:
-                <Header>{toName} </Header>
-                {transaction.payload.toAddress}
-            </List.Item>
-            <List.Item>
-                Amount:
-                <Header>{displayAsGTU(transaction.payload.amount)}</Header>
-                <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
-            </List.Item>
-        </List>
+        <>
+            <p className={styles.title}>From Account:</p>
+            <p className={styles.name}>{fromName}</p>
+            <p className={styles.address}>{transaction.sender}</p>
+            <p className={styles.title}>To Account:</p>
+            <p className={styles.name}>{toName}</p>
+            <p className={styles.address}>{transaction.payload.toAddress}</p>
+            <p className={styles.title}>Amount:</p>
+            <p className={styles.amount}>
+                {displayAsGTU(transaction.payload.amount)}
+            </p>
+            <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+        </>
     );
 }
