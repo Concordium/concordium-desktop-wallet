@@ -16,10 +16,15 @@ const {
 function getStatusClassName(
     status: MultiSignatureTransactionStatus
 ): string | undefined {
-    if (status === Submitted) return styles.rootPending;
-    if ([Expired, Rejected, Failed].some((s) => s === status))
+    if (status === Submitted) {
+        return styles.rootPending;
+    }
+    if ([Expired, Rejected, Failed].includes(status)) {
         return styles.rootFailed;
-    if (status === Finalized) return styles.rootSuccess;
+    }
+    if (status === Finalized) {
+        return styles.rootSuccess;
+    }
     return undefined;
 }
 
