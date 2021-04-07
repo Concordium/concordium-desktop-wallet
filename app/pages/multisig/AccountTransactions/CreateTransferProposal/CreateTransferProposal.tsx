@@ -9,20 +9,20 @@ import {
     AddressBookEntry,
     Schedule,
 } from '~/utils/types';
-import PickAmount from './PickAmount';
+import PickAmount from '../PickAmount';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
 import PickIdentity from '~/pages/GenerateCredential/PickIdentity';
-import PickAccount from './PickAccount';
+import PickAccount from '../PickAccount';
 import Button from '~/cross-app-components/Button';
-import TransactionProposalDetails from './TransactionProposalDetails';
+import TransactionProposalDetails from '../TransactionProposalDetails';
 import { isValidGTUString } from '~/utils/gtu';
-import CreateTransaction from './CreateTransaction';
+import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
-import BuildSchedule from './BuildSchedule';
+import BuildSchedule from '../BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import styles from './MultisignatureAccountTransactions.module.scss';
+import styles from '../MultisignatureAccountTransactions.module.scss';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -51,7 +51,9 @@ interface Props {
  * It contains the logic for displaying the current parameters.
  * TODO center continue button
  */
-export default function Transfers({ transactionKind }: Props): JSX.Element {
+export default function CreateTransferProposal({
+    transactionKind,
+}: Props): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
 
@@ -137,7 +139,7 @@ export default function Transfers({ transactionKind }: Props): JSX.Element {
                         recipient={recipient}
                         schedule={schedule}
                     />
-                    {showButton ? (
+                    {showButton && (
                         <Button
                             disabled={!isReady}
                             className={styles.submitButton}
@@ -155,7 +157,7 @@ export default function Transfers({ transactionKind }: Props): JSX.Element {
                         >
                             Continue
                         </Button>
-                    ) : null}
+                    )}
                 </Columns.Column>
                 <Columns.Column
                     className={styles.rightColumn}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { TransactionKindId } from '~/utils/types';
-import Transfers from './Transfers';
+import CreateTransferProposal from './CreateTransferProposal';
 import UpdateCredentialPage from './UpdateCredentialsPage';
 
 interface Props {
@@ -17,7 +17,7 @@ export default function MultiSignatureRoutes({ location }: Props): JSX.Element {
         type === TransactionKindId.Simple_transfer ||
         type === TransactionKindId.Transfer_with_schedule
     ) {
-        return <Transfers transactionKind={type} />;
+        return <CreateTransferProposal transactionKind={type} />;
     }
     throw new Error(`unsupported transaction type: ${type}`);
 }
