@@ -25,6 +25,13 @@ interface Props {
 }
 
 const placeholder = <p className={styles.placeholder}>To be determined</p>;
+const showAccount = (account: Account | AddressBookEntry) => (
+    <>
+        <p className={styles.value}>{account.name}</p>
+        <p className={styles.note}>{account.address}</p>
+    </>
+);
+
 const title = (text: string) => <p className={styles.title}>{text}</p>;
 const value = (text: string) => <p className={styles.value}>{text}</p>;
 
@@ -65,12 +72,12 @@ export default function TransactionProposalDetails({
             {title('Identity:')}
             {identity ? value(identity.name) : placeholder}
             {title('Account:')}
-            {account ? value(account.name) : placeholder}
+            {account ? showAccount(account) : placeholder}
             {title('Amount:')}
             {amount ? value(`${getGTUSymbol()} ${amount}`) : placeholder}
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             {title('Recipient:')}
-            {recipient ? value(recipient.name) : placeholder}
+            {recipient ? showAccount(recipient) : placeholder}
             {recipient ? (
                 <p className={styles.note}>Note: {recipient.note}</p>
             ) : null}
