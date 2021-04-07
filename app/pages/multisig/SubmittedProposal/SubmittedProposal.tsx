@@ -43,18 +43,22 @@ const ERROR_STATUSES = [
 const SUCCESS_STATUSES = [MultiSignatureTransactionStatus.Finalized];
 
 function getStatusIcon(status: MultiSignatureTransactionStatus): JSX.Element {
-    if (ERROR_STATUSES.some((s) => s === status))
+    if (ERROR_STATUSES.includes(status)) {
         return <ErrorIcon className={styles.icon} />;
-    if (SUCCESS_STATUSES.some((s) => s === status))
+    }
+    if (SUCCESS_STATUSES.includes(status)) {
         return <CheckmarkIcon className={styles.icon} />;
+    }
     return <Loading inline className={styles.icon} />;
 }
 
 function getStatusText(status: MultiSignatureTransactionStatus): string {
-    if (ERROR_STATUSES.some((s) => s === status))
+    if (ERROR_STATUSES.includes(status)) {
         return 'Transaction unsuccesful. Please try again.';
-    if (SUCCESS_STATUSES.some((s) => s === status))
+    }
+    if (SUCCESS_STATUSES.includes(status)) {
         return 'Transaction succesful!';
+    }
     return 'Waiting for the transaction to finalize.';
 }
 

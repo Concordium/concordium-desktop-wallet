@@ -7,7 +7,7 @@ import routes from '~/constants/routes.json';
 import BrowseTransactionFile from './BrowseTransactionFile/BrowseTransactionFile';
 import ExportKeyList from './ExportKeyList';
 import MultiSignatureCreateProposalList from './MultiSignatureCreateProposalList';
-import ProposalList from './ProposalList';
+import ProposalList from './ProposalList/ProposalList';
 import styles from './MultiSignatureMenu.module.scss';
 
 export default function MultiSignatureMenu(): JSX.Element {
