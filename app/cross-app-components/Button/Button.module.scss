@@ -16,6 +16,11 @@
 .clear {
     position: relative;
     border: none;
+
+    &:hover,
+    &:focus {
+        outline: none;
+    }
 }
 
 .clear {
@@ -67,11 +72,6 @@
     &:disabled:not(.rootInverted) {
         background-color: $color-grey;
         border-color: $color-grey;
-    }
-
-    &:hover,
-    &:focus {
-        outline: none;
     }
 
     &Danger {
