@@ -1,29 +1,12 @@
 import { parse } from 'json-bigint';
 import React, { useMemo } from 'react';
-// import { lookupName } from '~/utils/transactionHelpers';
 import {
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
-    // Transaction,
-    // UpdateType,
 } from '~/utils/types';
 import ChainUpdateProposalStatus from './ChainUpdateProposalStatus';
+import GtuTransferProposalStatus from './GtuTransferProposalStatus';
 import { ProposalStatusViewProps } from './ProposalStatusView';
-
-// async function getHeader(transaction: Transaction) {
-//     if (instanceOfUpdateInstruction(transaction)) {
-//         return UpdateType[transaction.type];
-//     }
-//     const name = await lookupName(transaction.sender);
-//     return name || transaction.sender;
-// }
-
-// function getType(transaction: Transaction) {
-//     if (instanceOfUpdateInstruction(transaction)) {
-//         return 'Foundation transaction';
-//     }
-//     return 'Account transaction';
-// }
 
 interface ProposalStatusProps
     extends Pick<ProposalStatusViewProps, 'className'> {
@@ -48,5 +31,11 @@ export default function ProposalStatus({
         );
     }
 
-    return <div />;
+    return (
+        <GtuTransferProposalStatus
+            {...proposalStatusProps}
+            transaction={parsed}
+            status={status}
+        />
+    );
 }
