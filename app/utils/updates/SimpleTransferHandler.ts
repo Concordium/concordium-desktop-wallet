@@ -12,7 +12,6 @@ import {
 } from '../transactionTypes';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { createSimpleTransferTransaction } from '../transactionHelpers';
-import { selectedProposalRoute } from '~/utils/routerHelper';
 
 type TransactionType = SimpleTransfer;
 
@@ -31,7 +30,7 @@ export default class SimpleTransferHandler
         throw Error('Invalid transaction type was given as input.');
     }
 
-    creationLocationHandler(currentLocation: string, proposalId: number) {
+    creationLocationHandler(currentLocation: string) {
         switch (currentLocation) {
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
@@ -41,8 +40,6 @@ export default class SimpleTransferHandler
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-                return selectedProposalRoute(proposalId);
             default:
                 throw new Error('unknown location');
         }

@@ -23,15 +23,13 @@ import { BlockSummary } from '~/utils/NodeApiTypes';
 import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
-import Form from '~/components/Form';
 import TransactionDetails from '~/components/TransactionDetails';
 import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
 import { ensureProps } from '~/utils/componentHelpers';
 import getTransactionHash from '~/utils/transactionHash';
+import SignTransaction from './SignTransaction';
 
 import styles from './SignTransactionProposal.module.scss';
-import Ledger from '~/components/ledger/Ledger';
-import { asyncNoOp } from '~/utils/basicHelpers';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface SignInput {
@@ -51,7 +49,6 @@ interface Props {
 function SignTransactionProposalView({ location }: Props) {
     const [showValidationError, setShowValidationError] = useState(false);
     const [transactionHash, setTransactionHash] = useState<string>();
-    const [signing, setSigning] = useState(false);
     const dispatch = useDispatch();
 
     const { multiSignatureTransaction, blockSummary }: SignInput = parse(
@@ -148,45 +145,7 @@ function SignTransactionProposalView({ location }: Props) {
                     </section>
                 </Columns.Column>
                 <Columns.Column header="Signature and Hardware Wallet">
-                    <Ledger
-                        ledgerCallback={signingFunction}
-                        onSignError={() => setSigning(false)}
-                    >
-                        {({
-                            isReady,
-                            statusView,
-                            submitHandler = asyncNoOp,
-                        }) => (
-                            <section className={styles.signColumnContent}>
-                                <h5>Hardware wallet status</h5>
-                                {statusView}
-                                <Form
-                                    onSubmit={() => {
-                                        setSigning(true);
-                                        submitHandler();
-                                    }}
-                                >
-                                    <Form.Checkbox
-                                        name="check"
-                                        rules={{
-                                            required:
-                                                'Make sure the proposed changes are correct',
-                                        }}
-                                        disabled={signing}
-                                    >
-                                        I am sure that the propsed changes are
-                                        correct
-                                    </Form.Checkbox>
-                                    <Form.Submit
-                                        disabled={signing || !isReady}
-                                        className={styles.submit}
-                                    >
-                                        Generate Transaction
-                                    </Form.Submit>
-                                </Form>
-                            </section>
-                        )}
-                    </Ledger>
+                    <SignTransaction signingFunction={signingFunction} />
                 </Columns.Column>
             </Columns>
         </MultiSignatureLayout>

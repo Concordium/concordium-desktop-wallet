@@ -1,11 +1,10 @@
 import React from 'react';
-import { List, Grid } from 'semantic-ui-react';
-import { ScheduledTransfer, SchedulePoint, TimeStampUnit } from '~/utils/types';
-import { parseTime } from '~/utils/timeHelpers';
+import { ScheduledTransfer } from '~/utils/types';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import { displayAsGTU } from '~/utils/gtu';
-import SidedRow from '~/components/SidedRow';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import styles from './transferDetails.module.scss';
+import ScheduleList from '~/components/ScheduleList';
 
 interface Props {
     transaction: ScheduledTransfer;
@@ -23,31 +22,18 @@ export default function DisplayScheduledTransfer({
 }: Props) {
     const amount = getScheduledTransferAmount(transaction);
     return (
-        <List>
-            <List.Item>
-                From Account: {fromName} {transaction.sender}
-            </List.Item>
-            <List.Item>
-                To Account: {toName} {transaction.payload.toAddress}
-            </List.Item>
-            <List.Item>Total Amount: {displayAsGTU(amount)}</List.Item>
-            <List.Item>
-                <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
-            </List.Item>
-            <List.Item>
-                <Grid container columns={2}>
-                    {transaction.payload.schedule.map((item: SchedulePoint) => (
-                        <SidedRow
-                            key={item.timestamp}
-                            left={parseTime(
-                                item.timestamp,
-                                TimeStampUnit.milliSeconds
-                            )}
-                            right={displayAsGTU(item.amount)}
-                        />
-                    ))}
-                </Grid>
-            </List.Item>
-        </List>
+        <>
+            <p className={styles.title}>From Account:</p>
+            <p className={styles.name}>{fromName}</p>
+            <p className={styles.address}>{transaction.sender}</p>
+            <p className={styles.title}>To Account:</p>
+            <p className={styles.name}>{toName}</p>
+            <p className={styles.address}>{transaction.payload.toAddress}</p>
+            <p className={styles.title}>Amount:</p>
+            <p className={styles.amount}>{displayAsGTU(amount)}</p>
+            <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            <p className={styles.title}>Individual Releases:</p>
+            <ScheduleList schedule={transaction.payload.schedule} />
+        </>
     );
 }

@@ -18,8 +18,6 @@ interface Props {
     recipient: AddressBookEntry;
     amount: string;
     schedule?: Schedule;
-    setReady: (ready: boolean) => void;
-    setProposalId: (id: number) => void;
 }
 
 export default function CreateTransaction({
@@ -28,8 +26,6 @@ export default function CreateTransaction({
     recipient,
     amount,
     schedule,
-    setProposalId,
-    setReady,
 }: Props) {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
@@ -66,10 +62,8 @@ export default function CreateTransaction({
     return (
         <SignTransaction
             transaction={transaction}
-            setReady={setReady}
             account={account}
             primaryCredential={credential}
-            setProposalId={setProposalId}
         />
     );
 }

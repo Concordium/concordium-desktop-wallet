@@ -96,10 +96,7 @@ export interface AccountTransactionHandler<T, S> {
     createTransaction: (
         informationBlob: Partial<CreateTransactionInput>
     ) => Promise<T>;
-    creationLocationHandler: (
-        currentLocation: string,
-        proposalId: number
-    ) => string;
+    creationLocationHandler: (currentLocation: string) => string;
     type: string;
     title: string;
 }

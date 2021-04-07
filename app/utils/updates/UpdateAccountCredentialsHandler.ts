@@ -10,7 +10,6 @@ import {
 } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
 import routes from '~/constants/routes.json';
-import { selectedProposalRoute } from '~/utils/routerHelper';
 
 const TYPE = 'Update Account Credentials';
 
@@ -35,7 +34,7 @@ export default class UpdateAccountCredentialsHandler
         );
     }
 
-    creationLocationHandler(currentLocation: string, proposalId: number) {
+    creationLocationHandler(currentLocation: string) {
         switch (currentLocation) {
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
@@ -47,8 +46,6 @@ export default class UpdateAccountCredentialsHandler
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CONFIRM;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CONFIRM:
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-                return selectedProposalRoute(proposalId);
             default:
                 throw new Error('unknown location');
         }

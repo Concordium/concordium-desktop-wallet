@@ -11,10 +11,7 @@ export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
         AccountTransactionHandler<AccountTransaction, ConcordiumLedgerClient> {
     base: AccountTransactionHandler<T, ConcordiumLedgerClient>;
 
-    creationLocationHandler: (
-        currentLocation: string,
-        proposalId: number
-    ) => string;
+    creationLocationHandler: (currentLocation: string) => string;
 
     title: string;
 
