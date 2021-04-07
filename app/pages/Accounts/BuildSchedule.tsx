@@ -18,8 +18,8 @@ import { scheduledTransferCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import TransferView from '~/components/Transfers/TransferView';
 import styles from './Accounts.module.scss';
-import Group from './ButtonGroup';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import ButtonGroup from '~/components/ButtonGroup';
 
 interface Defaults extends ExplicitScheduleDefaults, RegularIntervalDefaults {}
 
@@ -142,14 +142,17 @@ export default function BuildSchedule({ location }: Props) {
             }
         >
             <div className={styles.buildScheduleCommon}>
-                <h2> Send fund with a release schedule </h2>
+                <h3 className={styles.title}>
+                    {' '}
+                    Send fund with a release schedule{' '}
+                </h3>
                 <div className={styles.scheduleAmount}>
                     <h2>
                         {displayAsGTU(amount)} to {recipient.name}
                     </h2>
                     <DisplayEstimatedFee estimatedFee={estimatedFee} />
                 </div>
-                <Group
+                <ButtonGroup
                     buttons={[
                         { label: 'Regular Interval', value: false },
                         { label: 'Explicit Schedule', value: true },
@@ -160,14 +163,12 @@ export default function BuildSchedule({ location }: Props) {
                     title="Schedule type:"
                 />
             </div>
-            <div className={styles.buildComponent}>
-                <BuildComponent
-                    defaults={defaults}
-                    submitSchedule={createTransaction}
-                    setScheduleLength={setScheduleLength}
-                    amount={BigInt(amount)}
-                />
-            </div>
+            <BuildComponent
+                defaults={defaults}
+                setScheduleLength={setScheduleLength}
+                submitSchedule={createTransaction}
+                amount={BigInt(amount)}
+            />
         </TransferView>
     );
 }

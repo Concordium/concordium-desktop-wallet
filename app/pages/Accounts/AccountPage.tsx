@@ -80,7 +80,7 @@ export default function AccountsPage() {
                     align="right"
                     onClick={() => dispatch(push(routes.ACCOUNTCREATION))}
                 >
-                    <PlusIcon />
+                    <PlusIcon height="20" />
                 </PageLayout.HeaderButton>
             </PageLayout.Header>
             <Columns divider columnScroll columnClassName={styles.column}>

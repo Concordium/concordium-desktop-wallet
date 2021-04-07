@@ -41,7 +41,7 @@ export default function IdentityPage() {
                     align="right"
                     onClick={() => dispatch(push(routes.IDENTITYISSUANCE))}
                 >
-                    <PlusIcon />
+                    <PlusIcon height="20" />
                 </PageLayout.HeaderButton>
             </PageLayout.Header>
             {body}

@@ -5,8 +5,8 @@ import { createRegularIntervalSchedule } from '~/utils/transactionHelpers';
 import { TimeConstants } from '~/utils/timeHelpers';
 import Form from '~/components/Form';
 import { futureDate } from '~/components/Form/util/validation';
-import Group from './ButtonGroup';
-import styles from './Accounts.module.scss';
+import ButtonGroup from '~/components/ButtonGroup';
+import styles from './BuildRegularInterval.module.scss';
 
 export interface Interval {
     label: string;
@@ -80,7 +80,7 @@ export default function RegularInterval({
 
     return (
         <>
-            <Group
+            <ButtonGroup
                 buttons={intervals}
                 isSelected={(interval) => interval === chosenInterval}
                 onClick={setChosenInterval}
@@ -115,7 +115,9 @@ export default function RegularInterval({
                         validate: futureDate('Time must be in the future'),
                     }}
                 />
-                <Form.Submit size="huge">Continue</Form.Submit>
+                <Form.Submit className={styles.submitButton} size="big">
+                    Continue
+                </Form.Submit>
             </Form>
         </>
     );
