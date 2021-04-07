@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Button } from 'semantic-ui-react';
-import { EqualRecord, Schedule } from '../../utils/types';
-import { createRegularIntervalSchedule } from '../../utils/transactionHelpers';
-import { TimeConstants } from '../../utils/timeHelpers';
-import Form from '../../components/Form';
-import { futureDate } from '../../components/Form/util/validation';
+import { EqualRecord, Schedule } from '~/utils/types';
+import { createRegularIntervalSchedule } from '~/utils/transactionHelpers';
+import { TimeConstants } from '~/utils/timeHelpers';
+import Form from '~/components/Form';
+import { futureDate } from '~/components/Form/util/validation';
+import ButtonGroup from '~/components/ButtonGroup';
+import styles from './BuildRegularInterval.module.scss';
 
 export interface Interval {
     label: string;
@@ -15,7 +16,7 @@ export const intervals: Interval[] = [
     { label: 'Hour', value: TimeConstants.Hour },
     { label: 'Day', value: TimeConstants.Day },
     { label: 'Week', value: TimeConstants.Week },
-    { label: 'Month (30 days)', value: TimeConstants.Month },
+    { label: 'Month', value: TimeConstants.Month },
 ];
 
 interface FormValues {
@@ -69,20 +70,16 @@ export default function RegularInterval({
 
     return (
         <>
-            Release Every:
-            <Button.Group>
-                {intervals.map((interval: Interval) => (
-                    <Button
-                        key={interval.label}
-                        onClick={() => setChosenInterval(interval)}
-                    >
-                        {interval.label}
-                    </Button>
-                ))}
-            </Button.Group>
-            <Form onSubmit={createSchedule}>
+            <ButtonGroup
+                buttons={intervals}
+                isSelected={(interval) => interval === chosenInterval}
+                onClick={setChosenInterval}
+                name="interval"
+                title="Release Every:"
+            />
+            <Form onSubmit={createSchedule} className={styles.regularInterval}>
                 <Form.Input
-                    label="Enter amount of releases"
+                    label="Split transfer in:"
                     name={fieldNames.releases}
                     placeholder="Enter releases"
                     autoFocus
@@ -92,7 +89,7 @@ export default function RegularInterval({
                 />
                 <Form.Timestamp
                     name={fieldNames.startTime}
-                    label="Enter starting time"
+                    label="Starting:"
                     defaultValue={
                         new Date(
                             defaults?.startTime ||
@@ -104,7 +101,9 @@ export default function RegularInterval({
                         validate: futureDate('Time must be in the future'),
                     }}
                 />
-                <Form.Submit>submit</Form.Submit>
+                <Form.Submit className={styles.submitButton} size="big">
+                    Continue
+                </Form.Submit>
             </Form>
         </>
     );
