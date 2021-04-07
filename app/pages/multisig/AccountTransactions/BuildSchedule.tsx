@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import clsx from 'clsx';
 import { toMicroUnits } from '~/utils/gtu';
 import { Schedule } from '~/utils/types';
 import RegularInterval from '~/pages/Accounts/BuildRegularInterval';
 import ExplicitSchedule from '~/pages/Accounts/BuildExplicitSchedule';
-import ButtonGroup from '~/pages/Accounts/ButtonGroup';
+import ButtonGroup from '~/components/ButtonGroup';
+import accountStyles from '~/pages/Accounts/Accounts.module.scss';
 import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface Props {
@@ -21,7 +23,9 @@ export default function BuildSchedule({ amount, submitSchedule }: Props) {
     const BuildComponent = explicit ? ExplicitSchedule : RegularInterval;
 
     return (
-        <>
+        <div
+            className={clsx(accountStyles.buildSchedule, styles.buildSchedule)}
+        >
             <ButtonGroup
                 buttons={[
                     { label: 'Regular Interval', value: false },
@@ -32,13 +36,11 @@ export default function BuildSchedule({ amount, submitSchedule }: Props) {
                 name="scheduleType"
                 title="Schedule type:"
             />
-            <div className={styles.buildComponent}>
-                <BuildComponent
-                    submitSchedule={submitSchedule}
-                    setScheduleLength={() => {}}
-                    amount={toMicroUnits(amount)}
-                />
-            </div>
-        </>
+            <BuildComponent
+                submitSchedule={submitSchedule}
+                setScheduleLength={() => {}}
+                amount={toMicroUnits(amount)}
+            />
+        </div>
     );
 }

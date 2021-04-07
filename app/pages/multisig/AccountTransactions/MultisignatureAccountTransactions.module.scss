@@ -31,18 +31,7 @@
     }
 }
 
-.flexBetween {
+.buildSchedule {
     display: flex;
-    justify-content: space-between;
     flex-direction: column;
-}
-
-.buildScheduleCommon {
-    composes: flexBetween;
-    height: 20%;
-}
-
-.buildComponent {
-    composes: flexBetween;
-    height: 70%;
 }
