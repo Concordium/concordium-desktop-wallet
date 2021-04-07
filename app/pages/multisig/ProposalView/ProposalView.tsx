@@ -47,6 +47,7 @@ import TransactionExpirationDetails from '~/components/TransactionExpirationDeta
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import { getCheckboxName } from './SignatureCheckboxes/SignatureCheckboxes';
 import { submittedProposalRoute } from '~/utils/routerHelper';
+import ProposalViewStatusText from './ProposalViewStatusText';
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
@@ -339,6 +340,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                     >
                         <div className={styles.columnContent}>
                             <div>
+                                <ProposalViewStatusText {...proposal} />
                                 <TransactionHashView
                                     transactionHash={transactionHash}
                                 />
@@ -348,19 +350,17 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                         instruction.header.timeout
                                     )}
                                 />
+                                <br />
+                                <Button
+                                    size="small"
+                                    className={styles.closeProposalButton}
+                                    onClick={() => setShowCloseModal(true)}
+                                    disabled={!isOpen}
+                                >
+                                    Close proposal
+                                </Button>
                             </div>
                             <div className={styles.actions}>
-                                {proposal.status ===
-                                    MultiSignatureTransactionStatus.Open && (
-                                    <Button
-                                        size="small"
-                                        className={styles.closeProposalButton}
-                                        onClick={() => setShowCloseModal(true)}
-                                        danger
-                                    >
-                                        Close proposal
-                                    </Button>
-                                )}
                                 <Button
                                     className={styles.exportButton}
                                     disabled={!isOpen}
