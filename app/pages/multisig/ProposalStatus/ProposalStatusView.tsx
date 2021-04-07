@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { PropsWithChildren, useMemo } from 'react';
+import React, { PropsWithChildren } from 'react';
 import Card from '~/cross-app-components/Card';
 import { getFormattedDateString } from '~/utils/timeHelpers';
 import { ClassName, MultiSignatureTransactionStatus } from '~/utils/types';
@@ -42,12 +42,6 @@ export default function ProposalStatusView({
     children,
     className,
 }: ProposalStatusViewProps): JSX.Element {
-    const submittedOnText = useMemo(
-        () =>
-            submittedOn ? getFormattedDateString(submittedOn) : 'Unsubmitted',
-        [submittedOn]
-    );
-
     return (
         <Card
             className={clsx(styles.root, getStatusClassName(status), className)}
@@ -68,7 +62,9 @@ export default function ProposalStatusView({
             <div className={styles.content}>{children}</div>
             <footer className={styles.footer}>
                 <span />
-                <span>Submitted on: {submittedOnText}</span>
+                <span>
+                    {submittedOn && getFormattedDateString(submittedOn)}
+                </span>
             </footer>
         </Card>
     );
