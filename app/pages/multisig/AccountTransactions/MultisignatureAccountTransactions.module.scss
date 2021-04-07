@@ -22,3 +22,21 @@
     flex-direction: column;
     margin-top: 40px;
 }
+
+.submitButton {
+    margin-top: auto;
+}
+
+.transactionDetailsColumn {
+    > div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+}
+
+.rightColumn {
+    > div {
+        padding: 40px 20%;
+    }
+}

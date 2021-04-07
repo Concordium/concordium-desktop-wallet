@@ -12,6 +12,7 @@ import {
 } from '../transactionTypes';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { createScheduledTransferTransaction } from '../transactionHelpers';
+import { selectedProposalRoute } from '~/utils/routerHelper';
 
 type TransactionType = ScheduledTransfer;
 
@@ -43,10 +44,7 @@ export default class ScheduledTransferHandler
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
                 return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-                return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_ACCOUNT_TRANSACTION.replace(
-                    ':id',
-                    `${proposalId}`
-                );
+                return selectedProposalRoute(proposalId);
             default:
                 throw new Error('unknown location');
         }

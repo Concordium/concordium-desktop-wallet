@@ -22,6 +22,7 @@ import CreateTransaction from './CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
 import BuildSchedule from './BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -75,7 +76,7 @@ export default function SimpleTransfer({
 
     function renderSignTransaction() {
         if (!account || !recipient) {
-            throw new Error('fuck');
+            throw new Error('Unexpected missing account and/or recipient');
         }
         return (
             <CreateTransaction
@@ -106,7 +107,10 @@ export default function SimpleTransfer({
             stepTitle="Transaction Proposal - Send GTU"
         >
             <Columns divider columnScroll>
-                <Columns.Column header="Transaction Details">
+                <Columns.Column
+                    className={styles.transactionDetailsColumn}
+                    header="Transaction Details"
+                >
                     <TransactionProposalDetails
                         transactionType={transactionKind}
                         account={account}
@@ -117,6 +121,7 @@ export default function SimpleTransfer({
                     />
                     <Button
                         disabled={!isReady}
+                        className={styles.submitButton}
                         onClick={() => {
                             setReady(false);
                             dispatch(
@@ -133,7 +138,10 @@ export default function SimpleTransfer({
                         Continue
                     </Button>
                 </Columns.Column>
-                <Columns.Column header={subTitle(location)}>
+                <Columns.Column
+                    className={styles.rightColumn}
+                    header={subTitle(location)}
+                >
                     <Switch>
                         <Route
                             path={
