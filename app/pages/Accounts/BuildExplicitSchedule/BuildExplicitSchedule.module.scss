@@ -1,0 +1,107 @@
+@import 'config/bundle';
+
+.explicitSchedule {
+    height: 80%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.releases,
+.amountUsed {
+    margin: 0;
+    font-size: $font-size-body3;
+}
+
+.releases {
+    font-weight: $font-weight-bold;
+}
+
+.amountUsed {
+    composes: textfaded from global;
+}
+
+.addScheduleCard {
+    position: relative;
+    padding: 10px;
+    margin: 10px 0;
+
+    form {
+        padding-top: 10px;
+
+        > * {
+            margin-bottom: 40px;
+        }
+
+        button {
+            margin-bottom: 0;
+        }
+    }
+
+    h2 {
+        margin: 0;
+    }
+
+    .addScheduleCardHeader {
+        display: flex;
+        justify-content: center;
+        align-items: baseline;
+        width: 100%;
+        margin-bottom: 0;
+
+        p {
+            font-size: $font-size-body3;
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
+        * {
+            margin-left: auto;
+        }
+
+        svg {
+            height: $font-size-body3;
+        }
+    }
+}
+
+.scheduleList {
+    margin-top: 10px;
+
+    > * {
+        margin-bottom: 10px;
+    }
+}
+
+.scheduleListRow {
+    width: 100%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+
+    :first-child {
+        text-align: left;
+    }
+
+    :last-child {
+        text-align: right;
+    }
+
+    * {
+        flex-grow: 1;
+    }
+}
+
+.binIcon {
+    height: $font-size-body3;
+    transition: transform $anim-easing $anim-timing;
+    &:hover {
+        transform: scale(1.1);
+    }
+}
+
+.submitButton {
+    flex-shrink: 0;
+    margin-bottom: 20px;
+    margin-top: auto;
+}
