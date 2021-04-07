@@ -51,9 +51,7 @@ interface Props {
  * It contains the logic for displaying the current parameters.
  * TODO center continue button
  */
-export default function SimpleTransfer({
-    transactionKind,
-}: Props): JSX.Element {
+export default function Transfers({ transactionKind }: Props): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
 
@@ -124,6 +122,7 @@ export default function SimpleTransfer({
         <MultiSignatureLayout
             pageTitle={handler.title}
             stepTitle={`Transaction Proposal - ${handler.type}`}
+            delegateScroll
         >
             <Columns divider columnScroll>
                 <Columns.Column
