@@ -1,0 +1,22 @@
+@import 'config/bundle';
+
+.link {
+    display: block;
+
+    &:not(:last-child) {
+        margin-bottom: 20px;
+    }
+
+    &,
+    &:hover,
+    &:visited {
+        color: unset;
+    }
+}
+
+.item {
+    .link:hover & {
+        border-color: $color-pale-blue;
+        box-shadow: 0 0 0 1px $color-pale-blue inset;
+    }
+}
