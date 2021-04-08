@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
+import clsx from 'clsx';
 import {
     Account,
     Identity,
@@ -22,7 +23,7 @@ import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import styles from '../MultisignatureAccountTransactions.module.scss';
+import styles from './CreateTransferProposal.module.scss';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -126,108 +127,114 @@ export default function CreateTransferProposal({
             stepTitle={`Transaction Proposal - ${handler.type}`}
             delegateScroll
         >
-            <Columns divider columnScroll>
-                <Columns.Column
-                    className={styles.transactionDetailsColumn}
-                    header="Transaction Details"
-                >
-                    <TransactionProposalDetails
-                        transactionType={transactionKind}
-                        account={account}
-                        identity={identity}
-                        amount={amount}
-                        recipient={recipient}
-                        schedule={schedule}
-                    />
-                    {showButton && (
-                        <Button
-                            disabled={!isReady}
-                            className={styles.submitButton}
-                            onClick={() => {
-                                setReady(false);
-                                dispatch(
-                                    push({
-                                        pathname: handler.creationLocationHandler(
-                                            location
-                                        ),
-                                        state: transactionKind,
-                                    })
-                                );
-                            }}
-                        >
-                            Continue
-                        </Button>
-                    )}
-                </Columns.Column>
-                <Columns.Column
-                    className={styles.rightColumn}
-                    header={subTitle(location)}
-                >
-                    <Switch>
-                        <Route
-                            path={
-                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE
-                            }
-                            render={renderBuildSchedule}
-                        />
-                        <Route
-                            path={
-                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
-                            }
-                            render={() => (
-                                <PickAccount
-                                    setReady={setReady}
-                                    setAccount={setAccount}
-                                    identity={identity}
-                                />
-                            )}
-                        />
-                        <Route
-                            path={
-                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION
-                            }
-                            render={renderSignTransaction}
-                        />
-                        <Route
-                            path={
-                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT
-                            }
-                            render={() => (
-                                <PickAmount
-                                    setReady={setReady}
-                                    account={account}
-                                    amount={amount}
-                                    setAmount={updateAmount}
-                                />
-                            )}
-                        />
-                        <Route
-                            path={
-                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT
-                            }
-                            render={() => (
-                                <PickRecipient
-                                    pickRecipient={(newRecipient) => {
-                                        setReady(true);
-                                        setRecipient(newRecipient);
+            <div className={styles.subtractContainerPadding}>
+                <Columns divider columnScroll columnClassName={styles.column}>
+                    <Columns.Column
+                        className={clsx(
+                            styles.transactionDetailsColumn,
+                            styles.stretchColumn
+                        )}
+                        header="Transaction Details"
+                    >
+                        <div className={styles.columnContent}>
+                            <TransactionProposalDetails
+                                transactionType={transactionKind}
+                                account={account}
+                                identity={identity}
+                                amount={amount}
+                                recipient={recipient}
+                                schedule={schedule}
+                            />
+                            {showButton && (
+                                <Button
+                                    disabled={!isReady}
+                                    className={styles.submitButton}
+                                    onClick={() => {
+                                        setReady(false);
+                                        dispatch(
+                                            push({
+                                                pathname: handler.creationLocationHandler(
+                                                    location
+                                                ),
+                                                state: transactionKind,
+                                            })
+                                        );
                                     }}
-                                />
+                                >
+                                    Continue
+                                </Button>
                             )}
-                        />
-                        <Route
-                            path={
-                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
-                            }
-                            render={() => (
-                                <PickIdentity
-                                    setReady={setReady}
-                                    setIdentity={setIdentity}
+                        </div>
+                    </Columns.Column>
+                    <Columns.Column header={subTitle(location)}>
+                        <div className={styles.columnContent}>
+                            <Switch>
+                                <Route
+                                    path={
+                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE
+                                    }
+                                    render={renderBuildSchedule}
                                 />
-                            )}
-                        />
-                    </Switch>
-                </Columns.Column>
-            </Columns>
+                                <Route
+                                    path={
+                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
+                                    }
+                                    render={() => (
+                                        <PickAccount
+                                            setReady={setReady}
+                                            setAccount={setAccount}
+                                            identity={identity}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path={
+                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION
+                                    }
+                                    render={renderSignTransaction}
+                                />
+                                <Route
+                                    path={
+                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT
+                                    }
+                                    render={() => (
+                                        <PickAmount
+                                            setReady={setReady}
+                                            account={account}
+                                            amount={amount}
+                                            setAmount={updateAmount}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path={
+                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT
+                                    }
+                                    render={() => (
+                                        <PickRecipient
+                                            pickRecipient={(newRecipient) => {
+                                                setReady(true);
+                                                setRecipient(newRecipient);
+                                            }}
+                                        />
+                                    )}
+                                />
+                                <Route
+                                    path={
+                                        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
+                                    }
+                                    render={() => (
+                                        <PickIdentity
+                                            setReady={setReady}
+                                            setIdentity={setIdentity}
+                                        />
+                                    )}
+                                />
+                            </Switch>
+                        </div>
+                    </Columns.Column>
+                </Columns>
+            </div>
         </MultiSignatureLayout>
     );
 }

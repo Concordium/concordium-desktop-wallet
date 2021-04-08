@@ -28,7 +28,7 @@ function SignTransactionFeeDistribution({
 
     return (
         <>
-            <div>
+            <div className="mB50">
                 <h5>Current Transaction Fee Distribution</h5>
                 {blockSummary ? (
                     <RewardDistribution
@@ -40,7 +40,7 @@ function SignTransactionFeeDistribution({
                     <Loading inline />
                 )}
             </div>
-            <div>
+            <div className="mB50">
                 <h5>New Transaction Fee Distribution</h5>
                 <RewardDistribution
                     value={value}

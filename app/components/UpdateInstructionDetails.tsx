@@ -1,6 +1,5 @@
 import React from 'react';
-import { Header } from 'semantic-ui-react';
-import { getISOFormat } from '../utils/timeHelpers';
+import { dateFromTimeStamp, getFormattedDateString } from '~/utils/timeHelpers';
 import { UpdateInstruction, UpdateInstructionPayload } from '../utils/types';
 import { findUpdateInstructionHandler } from '../utils/updates/HandlerFinder';
 
@@ -19,8 +18,12 @@ export default function UpdateInstructionDetails({
     return (
         <>
             {handler.view(transaction)}
-            <Header>Effective time</Header>
-            {getISOFormat(transaction.header.effectiveTime.toString())}
+            <h5>Effective time</h5>
+            <span className="h3">
+                {getFormattedDateString(
+                    dateFromTimeStamp(transaction.header.effectiveTime)
+                )}
+            </span>
         </>
     );
 }

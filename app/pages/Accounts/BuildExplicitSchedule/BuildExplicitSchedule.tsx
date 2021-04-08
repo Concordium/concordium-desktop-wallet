@@ -9,8 +9,9 @@ import Form from '~/components/Form';
 import { futureDate } from '~/components/Form/util/validation';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
-import styles from './BuildExplicitSchedule.module.scss';
 import ScheduleList from '~/components/ScheduleList';
+
+import styles from './BuildExplicitSchedule.module.scss';
 
 export interface Defaults {
     schedule: Schedule;

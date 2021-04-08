@@ -4,7 +4,6 @@ import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { parse, stringify } from 'json-bigint';
 import { Redirect } from 'react-router';
-import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import {
     AccountTransaction,
@@ -124,6 +123,7 @@ function SignTransactionProposalView({ location }: Props) {
         <MultiSignatureLayout
             pageTitle={transactionHandler.title}
             stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+            delegateScroll
         >
             <SimpleErrorModal
                 show={showValidationError}
@@ -132,7 +132,7 @@ function SignTransactionProposalView({ location }: Props) {
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
             <Columns
-                className={clsx(styles.body, styles.bodySubtractPadding)}
+                className={styles.subtractContainerPadding}
                 divider
                 columnClassName={styles.column}
             >
@@ -144,7 +144,10 @@ function SignTransactionProposalView({ location }: Props) {
                         />
                     </section>
                 </Columns.Column>
-                <Columns.Column header="Signature and Hardware Wallet">
+                <Columns.Column
+                    header="Signature and Hardware Wallet"
+                    className={styles.stretchColumn}
+                >
                     <SignTransaction signingFunction={signingFunction} />
                 </Columns.Column>
             </Columns>

@@ -7,9 +7,6 @@
 
 .signColumnContent {
     composes: columnContent;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
 
     h5 {
         margin-top: 0;
