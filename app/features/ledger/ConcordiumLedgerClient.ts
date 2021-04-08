@@ -25,6 +25,7 @@ import {
     TransactionFeeDistribution,
     UpdateInstruction,
     UnsignedCredentialDeploymentInformation,
+    HigherLevelKeyUpdate,
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -239,6 +240,20 @@ export default class ConcordiumLedgerClient {
 
     signElectionDifficulty(
         transaction: UpdateInstruction<ElectionDifficulty>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x26,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signHigherLevelKeysUpdate(
+        transaction: UpdateInstruction<HigherLevelKeyUpdate>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
