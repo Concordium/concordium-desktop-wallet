@@ -1,4 +1,9 @@
-import React, { FC, FormHTMLAttributes, PropsWithChildren } from 'react';
+import React, {
+    DetailedHTMLProps,
+    FC,
+    FormHTMLAttributes,
+    PropsWithChildren,
+} from 'react';
 import {
     FormProvider,
     SubmitHandler,
@@ -21,11 +26,13 @@ import InputTimestamp, {
 import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 
-export interface FormProps<TFormValues>
-    extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
+export type FormProps<TFormValues> = Omit<
+    DetailedHTMLProps<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>,
+    'onSubmit'
+> & {
     formMethods?: UseFormMethods<TFormValues>;
     onSubmit: SubmitHandler<TFormValues>;
-}
+};
 
 /**
  * @description

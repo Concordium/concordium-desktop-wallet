@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -24,6 +24,7 @@ import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 import styles from './CreateTransferProposal.module.scss';
+import { ScheduledTransferBuilderRef } from '~/components/BuildSchedule/util';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -57,6 +58,7 @@ export default function CreateTransferProposal({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
+    const scheduleBuilderRef = useRef<ScheduledTransferBuilderRef>(null);
 
     const handler = findAccountTransactionHandler(transactionKind);
 
@@ -99,6 +101,10 @@ export default function CreateTransferProposal({
         );
     }
 
+    function submitSchedule() {
+        scheduleBuilderRef?.current?.submitSchedule();
+    }
+
     function renderBuildSchedule() {
         if (!account || !recipient) {
             throw new Error('Unexpected missing account and/or recipient');
@@ -110,6 +116,7 @@ export default function CreateTransferProposal({
                     continueAction();
                 }}
                 amount={amount}
+                ref={scheduleBuilderRef}
             />
         );
     }
@@ -121,7 +128,9 @@ export default function CreateTransferProposal({
         location ===
         routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
 
-    const showButton = !(isSignPage || isBuildSchedulePage);
+    const showButton = !isSignPage;
+    const canSubmitScheduleBuilder =
+        scheduleBuilderRef?.current?.canSubmit ?? true;
 
     return (
         <MultiSignatureLayout
@@ -149,19 +158,15 @@ export default function CreateTransferProposal({
                             />
                             {showButton && (
                                 <Button
-                                    disabled={!isReady}
+                                    disabled={
+                                        !isReady || !canSubmitScheduleBuilder
+                                    }
                                     className={styles.submitButton}
-                                    onClick={() => {
-                                        setReady(false);
-                                        dispatch(
-                                            push({
-                                                pathname: handler.creationLocationHandler(
-                                                    location
-                                                ),
-                                                state: transactionKind,
-                                            })
-                                        );
-                                    }}
+                                    onClick={
+                                        isBuildSchedulePage
+                                            ? submitSchedule
+                                            : continueAction
+                                    }
                                 >
                                     Continue
                                 </Button>

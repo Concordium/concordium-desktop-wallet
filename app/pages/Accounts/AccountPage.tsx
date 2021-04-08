@@ -16,8 +16,8 @@ import routes from '~/constants/routes.json';
 import { Account, AccountInfo } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import { sumToBigInt } from '~/utils/basicHelpers';
-import styles from './Accounts.module.scss';
 import PageLayout from '~/components/PageLayout';
+import styles from './Accounts.module.scss';
 
 function getTotalAmount(accountsInfo: AccountInfo[]) {
     return sumToBigInt(accountsInfo, (accountInfo) =>

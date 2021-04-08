@@ -10,10 +10,10 @@ import { createScheduledTransferTransaction } from '~/utils/transactionHelpers';
 import locations from '~/constants/transferLocations.json';
 import RegularInterval, {
     Defaults as RegularIntervalDefaults,
-} from './BuildRegularInterval';
+} from '~/components/BuildSchedule/BuildRegularInterval';
 import ExplicitSchedule, {
     Defaults as ExplicitScheduleDefaults,
-} from './BuildExplicitSchedule';
+} from '~/components/BuildSchedule/BuildExplicitSchedule';
 import { scheduledTransferCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import TransferView from '~/components/Transfers/TransferView';
