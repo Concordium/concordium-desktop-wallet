@@ -9,7 +9,7 @@ import ExportKeyList from '../menu/ExportKeyList';
 import MultiSignatureCreateProposalList from '../menu/MultiSignatureCreateProposalList';
 import ProposalList from '../menu/ProposalList';
 
-import styles from './MultiSignaturePage.modulde.scss';
+import styles from './MultiSignaturePage.module.scss';
 
 export default function MultiSignaturePage() {
     return (
