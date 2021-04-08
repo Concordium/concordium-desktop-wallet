@@ -11,13 +11,15 @@ import ProposalList from '../menu/ProposalList';
 
 import styles from './MultiSignaturePage.module.scss';
 
+const { Header, Master, Detail } = MasterDetailPageLayout;
+
 export default function MultiSignaturePage() {
     return (
         <MasterDetailPageLayout>
-            <MasterDetailPageLayout.Header>
+            <Header>
                 <h1>Multi Signature Transactions</h1>
-            </MasterDetailPageLayout.Header>
-            <MasterDetailPageLayout.Master>
+            </Header>
+            <Master>
                 <ButtonNavLink
                     to={routes.MULTISIGTRANSACTIONS}
                     className={styles.link}
@@ -43,8 +45,8 @@ export default function MultiSignaturePage() {
                 >
                     Export public-key
                 </ButtonNavLink>
-            </MasterDetailPageLayout.Master>
-            <MasterDetailPageLayout.Detail>
+            </Master>
+            <Detail>
                 <Switch>
                     <Route
                         path={routes.MULTISIGTRANSACTIONS}
@@ -64,7 +66,7 @@ export default function MultiSignaturePage() {
                         component={ExportKeyList}
                     />
                 </Switch>
-            </MasterDetailPageLayout.Detail>
+            </Detail>
         </MasterDetailPageLayout>
     );
 }

@@ -11,12 +11,14 @@ import routes from '~/constants/routes.json';
 import PageLayout from '~/components/PageLayout';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
 
+const { Header, Master, Detail } = MasterDetailPageLayout;
+
 export default function IdentityPage() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
 
     const header = (
-        <MasterDetailPageLayout.Header>
+        <Header>
             <h1>Identities</h1>
             <PageLayout.HeaderButton
                 align="right"
@@ -24,7 +26,7 @@ export default function IdentityPage() {
             >
                 <PlusIcon height="20" />
             </PageLayout.HeaderButton>
-        </MasterDetailPageLayout.Header>
+        </Header>
     );
 
     if (identities.length === 0) {
@@ -39,12 +41,12 @@ export default function IdentityPage() {
     return (
         <MasterDetailPageLayout>
             {header}
-            <MasterDetailPageLayout.Master>
+            <Master>
                 <IdentityList />
-            </MasterDetailPageLayout.Master>
-            <MasterDetailPageLayout.Detail>
+            </Master>
+            <Detail>
                 <IdentityView />
-            </MasterDetailPageLayout.Detail>
+            </Detail>
         </MasterDetailPageLayout>
     );
 }

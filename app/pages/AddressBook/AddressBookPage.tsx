@@ -10,26 +10,28 @@ import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDe
 import AddressBookList from './AddressBookList';
 import AddressBookSelected from './AddressBookSelected';
 
+const { Header, Master, Detail } = MasterDetailPageLayout;
+
 export default function AddressBookPage() {
     return (
         <MasterDetailPageLayout>
-            <MasterDetailPageLayout.Header>
+            <Header>
                 <h1>Address Book</h1>
                 <UpsertAddress as={PageLayout.HeaderButton} align="right">
                     <PlusIcon height="20" />
                 </UpsertAddress>
-            </MasterDetailPageLayout.Header>
-            <MasterDetailPageLayout.Master>
+            </Header>
+            <Master>
                 <AddressBookList />
-            </MasterDetailPageLayout.Master>
-            <MasterDetailPageLayout.Detail>
+            </Master>
+            <Detail>
                 <Switch>
                     <Route
                         path={routes.ADDRESSBOOK_SELECTED}
                         render={() => <AddressBookSelected />}
                     />
                 </Switch>
-            </MasterDetailPageLayout.Detail>
+            </Detail>
         </MasterDetailPageLayout>
     );
 }

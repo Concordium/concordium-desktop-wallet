@@ -40,7 +40,8 @@ export default function MasterDetailPageLayout({
         };
     }, [children]);
 
-    const isColumnsContent = content.every((c) => c.type === Column);
+    const isColumnsContent =
+        content.every((c) => c.type === Column) && content.length === 2;
 
     return (
         <PageLayout noGutter>
