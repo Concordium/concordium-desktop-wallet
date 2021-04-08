@@ -122,6 +122,7 @@ export default function AccountListElement({
             />
             <div className={styles.dividingLine} />
             <SidedRow
+                className={styles.row}
                 left={<h3>Shielded Balance:</h3>}
                 right={
                     <h3>

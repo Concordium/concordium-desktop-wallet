@@ -34,12 +34,9 @@ export default function CredentialInformation({
         <Card>
             <div className={styles.header}>
                 <p>
-                    {' '}
-                    Credentials on this account: {
-                        credentialsOfAccount.length
-                    }{' '}
+                    Credentials on this account: {credentialsOfAccount.length}
                 </p>
-                <p> Signature threshold: {account.signatureThreshold} </p>
+                <p>Signature threshold: {account.signatureThreshold}</p>
                 <CloseButton onClick={returnFunction} />
             </div>
             {credentialsOfAccount.map((credential: Credential) => {
