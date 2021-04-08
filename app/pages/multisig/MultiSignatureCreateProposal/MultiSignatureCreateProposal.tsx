@@ -135,7 +135,7 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                 onSubmit={handleSubmit}
             >
                 <div className={styles.proposal}>
-                    <p>
+                    <p className="mB50">
                         Add all the details for the {displayType} transaction
                         below.
                     </p>
@@ -146,6 +146,7 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                         <>
                             <UpdateComponent blockSummary={blockSummary} />
                             <Form.Timestamp
+                                className="mT50"
                                 name="effectiveTime"
                                 label="Effective Time"
                                 defaultValue={

@@ -12,6 +12,7 @@ import InputTimestampContext from './InputTimestampContext';
 import styles from './InputTimestamp.module.scss';
 import useMultiFieldFocus from '../common/useMultiFieldFocus';
 import { DateParts } from '~/utils/timeHelpers';
+import { ClassName } from '~/utils/types';
 
 type TimestampErrorMessages = DateParts;
 
@@ -24,7 +25,7 @@ const defaultErrorMessages: TimestampErrorMessages = {
     seconds: 'Invalid seconds value',
 };
 
-export interface InputTimestampProps extends CommonInputProps {
+export interface InputTimestampProps extends CommonInputProps, ClassName {
     /**
      * Value of Input (type Date).
      */
@@ -60,6 +61,7 @@ export default function InputTimestamp({
     isInvalid = false,
     onChange,
     onBlur,
+    className,
 }: InputTimestampProps): JSX.Element {
     const { form, fireOnChange, validateDate } = useInputTimestamp(
         value,
@@ -74,7 +76,7 @@ export default function InputTimestamp({
         !!Object.values(form.errors).filter(isDefined)[0] || isInvalid;
 
     return (
-        <div className={styles.root}>
+        <div className={clsx(styles.root, className)}>
             <span className={styles.label}>{label}</span>
             <div
                 className={clsx(
