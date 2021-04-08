@@ -5,23 +5,10 @@ import { credentialsSelector } from '~/features/CredentialSlice';
 import { Credential, Account } from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
 import CopyButton from '~/components/CopyButton';
-import styles from './CredentialInformation.module.scss';
 import Card from '~/cross-app-components/Card';
+import SidedRow from '~/components/SidedRow';
 
-interface RowProps {
-    left: string | JSX.Element;
-    right: string | JSX.Element;
-}
-
-function SidedRow({ left, right }: RowProps): JSX.Element {
-    return (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-        <div className={styles.row}>
-            <div className={styles.left}>{left}</div>
-            <div className={styles.right}>{right}</div>
-        </div>
-    );
-}
+import styles from './CredentialInformation.module.scss';
 
 interface Props {
     account: Account;

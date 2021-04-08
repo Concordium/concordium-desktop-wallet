@@ -12,7 +12,7 @@ import {
 } from '../../utils/types';
 import { chosenAccountSelector } from '../../features/AccountSlice';
 import { viewingShieldedSelector } from '../../features/TransactionSlice';
-import SidedRow from '../../components/SidedRow';
+import SidedRow from '~/components/SemanticSidedRow';
 import { isFailed } from '../../utils/transactionHelpers';
 
 function determineOutgoing(transaction: TransferTransaction, account: Account) {

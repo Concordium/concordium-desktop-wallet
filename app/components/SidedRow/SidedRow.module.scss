@@ -1,0 +1,17 @@
+.row {
+    display: flex;
+    margin-top: 10px;
+
+    .left,
+    .right {
+        width: 50%;
+    }
+}
+
+.left {
+    text-align: left;
+}
+
+.right {
+    text-align: right;
+}
