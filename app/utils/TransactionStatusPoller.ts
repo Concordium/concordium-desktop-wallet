@@ -20,7 +20,7 @@ import {
     StatusResponse,
     isSuccessfulTransaction,
 } from './transactionHelpers';
-import getTransactionHash from './transactionHash';
+import { getTransactionSubmissionId } from './transactionHash';
 import { updateSignatureThreshold } from '~/features/AccountSlice';
 import { updateCredentialIndex } from '~/features/CredentialSlice';
 
@@ -61,7 +61,7 @@ export async function getMultiSignatureTransactionStatus(
 ) {
     const transaction = parse(proposal.transaction);
 
-    const transactionHash = getTransactionHash(transaction);
+    const transactionHash = getTransactionSubmissionId(transaction);
 
     const response = await getStatus(transactionHash);
 

@@ -9,6 +9,7 @@ import {
 } from '~/utils/types';
 import ChainUpdateProposalStatus from './ChainUpdateProposalStatus';
 import GtuTransferProposalStatus from './GtuTransferProposalStatus';
+import UpdateAccountCredentialsProposalStatus from './UpdateAccountCredentialStatus';
 import { ProposalStatusViewProps } from './ProposalStatusView';
 
 interface ProposalStatusProps
@@ -48,7 +49,13 @@ export default function ProposalStatus({
     }
 
     if (instanceOfUpdateAccountCredentials(parsed)) {
-        return <p>UpdateAccountCredential</p>;
+        return (
+            <UpdateAccountCredentialsProposalStatus
+                {...proposalStatusProps}
+                transaction={parsed}
+                status={status}
+            />
+        );
     }
 
     return <>Not supported yet...</>;

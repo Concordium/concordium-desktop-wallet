@@ -10,7 +10,7 @@ import {
     Account,
     Identity,
     CredentialDeploymentInformation,
-    TransactionKindString,
+    TransactionKindId,
 } from '~/utils/types';
 import PickIdentity from '~/pages/GenerateCredential/PickIdentity';
 import PickAccount from './PickAccount';
@@ -426,8 +426,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                     pathname: handler.creationLocationHandler(
                                         location
                                     ),
-                                    state:
-                                        TransactionKindString.UpdateCredentials,
+                                    state: TransactionKindId.Update_credentials,
                                 })
                             );
                         }}
