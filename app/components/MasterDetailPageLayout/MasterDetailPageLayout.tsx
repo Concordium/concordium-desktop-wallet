@@ -28,6 +28,19 @@ interface MasterDetailPageLayoutProps {
         | [ReactElement, ReactElement, ReactElement];
 }
 
+/**
+ * @description
+ * To be used on all master/detail pages.
+ *
+ * @example
+ * const { Header, Master, Detail } = MasterDetailPageLayout;
+ *
+ * <MasterDetailPageLayout>
+ *   <Header><h1>Page heading</h1></Header>
+ *   <Master>{links.map(Component)}</Master>
+ *   <Detail><DetailView /></Detail> // Typically <DetailView /> would be a Router of some sort...
+ * </MasterDetailPageLayout>
+ */
 export default function MasterDetailPageLayout({
     children,
 }: MasterDetailPageLayoutProps): JSX.Element {
