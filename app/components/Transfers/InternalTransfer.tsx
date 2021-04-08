@@ -11,6 +11,7 @@ import {
     TransferToEncrypted,
     TransferToPublic,
     TransactionKindId,
+    Fraction,
 } from '~/utils/types';
 import { toMicroUnits } from '~/utils/gtu';
 import locations from '~/constants/transferLocations.json';
@@ -41,7 +42,7 @@ export default function InternalTransfer<
     const location = useLocation<TransferState>();
 
     const [error, setError] = useState<string | undefined>();
-    const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
+    const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
 
     useEffect(() => {
         getTransactionKindCost(specific.transactionKind)
