@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
+import clsx from 'clsx';
 import Form from '~/components/Form';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import styles from './SignTransactionProposal.module.scss';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { ClassName } from '~/utils/types';
 
-interface Props {
+interface Props extends ClassName {
     signingFunction: (
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) => Promise<void>;
 }
 
-export default function SignTransaction({ signingFunction }: Props) {
+export default function SignTransaction({ signingFunction, className }: Props) {
     const [signing, setSigning] = useState(false);
     return (
         <Ledger
@@ -20,7 +22,7 @@ export default function SignTransaction({ signingFunction }: Props) {
             onSignError={() => setSigning(false)}
         >
             {({ isReady, statusView, submitHandler = asyncNoOp }) => (
-                <section className={styles.signColumnContent}>
+                <section className={clsx(styles.signColumnContent, className)}>
                     <h5>Hardware wallet status</h5>
                     {statusView}
                     <Form
@@ -41,7 +43,7 @@ export default function SignTransaction({ signingFunction }: Props) {
                         </Form.Checkbox>
                         <Form.Submit
                             disabled={signing || !isReady}
-                            className={styles.submit}
+                            className="mT10"
                         >
                             Generate Transaction
                         </Form.Submit>

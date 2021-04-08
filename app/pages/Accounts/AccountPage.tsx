@@ -84,10 +84,10 @@ export default function AccountsPage() {
                 </PageLayout.HeaderButton>
             </PageLayout.Header>
             <Columns divider columnScroll columnClassName={styles.column}>
-                <Columns.Column>
+                <Columns.Column verticalPadding>
                     <AccountList />
                 </Columns.Column>
-                <Columns.Column>
+                <Columns.Column verticalPadding>
                     <Switch>
                         <Route
                             path={routes.ACCOUNTS_SCHEDULED_TRANSFER}

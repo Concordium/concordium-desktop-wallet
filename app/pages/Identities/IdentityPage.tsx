@@ -23,10 +23,10 @@ export default function IdentityPage() {
 
         return (
             <Columns divider columnScroll columnClassName={styles.column}>
-                <Columns.Column>
+                <Columns.Column verticalPadding>
                     <IdentityList />
                 </Columns.Column>
-                <Columns.Column>
+                <Columns.Column verticalPadding>
                     <IdentityView />
                 </Columns.Column>
             </Columns>
