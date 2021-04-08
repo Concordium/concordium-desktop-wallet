@@ -29,7 +29,10 @@ function displayIdentity(
     account: Account,
     accountInfo: AccountInfo | undefined
 ) {
-    if (accountInfo && accountInfo.accountCredentials.length > 1) {
+    if (
+        accountInfo &&
+        Object.values(accountInfo.accountCredentials).length > 1
+    ) {
         return (
             <>
                 {account.identityName} + <MultiSigIcon height="15" />
