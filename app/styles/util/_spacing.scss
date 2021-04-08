@@ -1,0 +1,52 @@
+$spacings: (0, 10, 20, 30, 40, 50);
+$sides: (top, bottom, left, right, vertical, horizontal, all);
+
+/*
+Generates spacing utility classes based on tuples above:
+
+m0 = margin: 0;
+p0 = padding: 0;
+
+mB10 = margin-bottom: 10px;
+pT10 = padding-top: 10px;
+
+mV30 = margin-top: 30px; margin-bottom: 30px;
+pH50 = padding-left: 50px; padding-right: 50px;
+*/
+@each $space in $spacings {
+    @each $side in $sides {
+        @if $side == all {
+            .m#{$space} {
+                margin: #{$space}px;
+            }
+            .p#{$space} {
+                padding: #{$space}px;
+            }
+        } @else if side == vertical {
+            .mV#{$space} {
+                margin-top: #{$space}px;
+                margin-bottom: #{$space}px;
+            }
+            .pV#{$space} {
+                padding-top: #{$space}px;
+                padding-bottom: #{$space}px;
+            }
+        } @else if side == horizontal {
+            .mH#{$space} {
+                margin-left: #{$space}px;
+                margin-right: #{$space}px;
+            }
+            .pH#{$space} {
+                padding-left: #{$space}px;
+                padding-right: #{$space}px;
+            }
+        } @else {
+            .m#{to-upper-case(str-slice($side, 0, 1))}#{$space} {
+                margin-#{$side}: #{$space}px;
+            }
+            .p#{to-upper-case(str-slice($side, 0, 1))}#{$space} {
+                padding-#{$side}: #{$space}px;
+            }
+        }
+    }
+}

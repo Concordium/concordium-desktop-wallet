@@ -4,6 +4,7 @@ import {
     Identity,
     AddressBookEntry,
     TransactionKindId,
+    Fraction,
 } from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
 import styles from './MultisignatureAccountTransactions.module.scss';
@@ -27,7 +28,7 @@ export default function TransactionProposalDetails({
     recipient,
     transactionType,
 }: Props) {
-    const [estimatedFee, setFee] = useState<bigint | undefined>();
+    const [estimatedFee, setFee] = useState<Fraction | undefined>();
 
     useEffect(() => {
         if (account) {

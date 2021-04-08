@@ -1,0 +1,18 @@
+@import 'config/bundle';
+
+.statusText {
+    font-size: $font-size-body2;
+    text-transform: capitalize;
+}
+
+.error {
+    color: $color-error;
+}
+
+.success {
+    color: $color-success;
+}
+
+.pending {
+    color: $color-dark-blue;
+}
