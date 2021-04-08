@@ -1,5 +1,6 @@
 import {
     AccountTransaction,
+    Fraction,
     instanceOfScheduledTransfer,
     TransactionKindId,
 } from './types';
@@ -159,6 +160,13 @@ export function getTransactionKindEnergy(
     );
 }
 
+function energyToCost(energy: bigint, exchangeRate: Fraction): Fraction {
+    return {
+        numerator: energy * exchangeRate.numerator,
+        denominator: exchangeRate.denominator,
+    };
+}
+
 /**
  *  Given the signatureAmount and payloadSize, returns the estimated MicroGTU cost of the transaction type.
  */
@@ -166,15 +174,14 @@ export async function getTransactionKindCost(
     transactionKind: TransactionKindId,
     payloadSize: number = getPayloadSizeEstimate(transactionKind),
     signatureAmount = 1
-): Promise<bigint> {
+): Promise<Fraction> {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
-    return (
-        getTransactionKindEnergy(
-            transactionKind,
-            payloadSize,
-            signatureAmount
-        ) * energyToMicroGtu
+    const energy = getTransactionKindEnergy(
+        transactionKind,
+        payloadSize,
+        signatureAmount
     );
+    return energyToCost(energy, energyToMicroGtu);
 }
 
 /**
@@ -184,12 +191,10 @@ export async function getTransactionKindCost(
 export default async function getTransactionCost(
     transaction: AccountTransaction,
     signatureAmount = 1
-): Promise<bigint> {
+): Promise<Fraction> {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
-    return (
-        getTransactionEnergyCost(transaction, signatureAmount) *
-        energyToMicroGtu
-    );
+    const energy = getTransactionEnergyCost(transaction, signatureAmount);
+    return energyToCost(energy, energyToMicroGtu);
 }
 
 /**
@@ -198,12 +203,13 @@ export default async function getTransactionCost(
  */
 export async function scheduledTransferCost(
     signatureAmount = 1
-): Promise<(scheduleLength: number) => bigint> {
+): Promise<(scheduleLength: number) => Fraction> {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
     return (scheduleLength: number) => {
-        return (
-            getScheduledTransferEnergy(scheduleLength, signatureAmount) *
-            energyToMicroGtu
+        const energy = getScheduledTransferEnergy(
+            scheduleLength,
+            signatureAmount
         );
+        return energyToCost(energy, energyToMicroGtu);
     };
 }
