@@ -131,8 +131,6 @@ export default function CreateTransferProposal({
 
     const showButton = !isSignPage;
 
-    console.log(isReady);
-
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
