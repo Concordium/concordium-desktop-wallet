@@ -22,6 +22,8 @@
 }
 
 .finalCheckbox {
+    composes: mB10 from global;
+
     input:disabled ~ * {
         color: $color-text-faded;
     }
