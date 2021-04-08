@@ -5,7 +5,10 @@ import {
     Transaction,
 } from './types';
 import { findUpdateInstructionHandler } from './updates/HandlerFinder';
-import { serializeUpdateInstruction } from './UpdateSerialization';
+import {
+    serializeUpdateInstruction,
+    serializeUpdateInstructionHeaderAndPayload,
+} from './UpdateSerialization';
 import { getAccountTransactionHash } from './transactionSerialization';
 import { hashSha256 } from './serializationHelpers';
 
@@ -22,7 +25,27 @@ export function getUpdateInstructionHash(updateInstruction: UpdateInstruction) {
 
 export default function getTransactionHash(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
-        return getUpdateInstructionHash(transaction);
+        const handler = findUpdateInstructionHandler(transaction.type);
+        return hashSha256(
+            serializeUpdateInstructionHeaderAndPayload(
+                transaction,
+                handler.serializePayload(transaction)
+            )
+        ).toString('hex');
+    }
+    return getAccountTransactionHash(transaction, () => []).toString('hex');
+}
+
+export function getTransactionSubmissionId(transaction: Transaction) {
+    if (instanceOfUpdateInstruction(transaction)) {
+        const handler = findUpdateInstructionHandler(transaction.type);
+
+        const serializedUpdateInstruction = serializeUpdateInstruction(
+            transaction,
+            handler.serializePayload(transaction)
+        );
+
+        return hashSha256(serializedUpdateInstruction).toString('hex');
     }
     if (instanceOfAccountTransactionWithSignature(transaction)) {
         return getAccountTransactionHash(
