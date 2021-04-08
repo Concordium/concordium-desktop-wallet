@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
-import { Account, AddressBookEntry, Schedule } from '~/utils/types';
+import { Account, AddressBookEntry, Schedule, Fraction } from '~/utils/types';
 import { displayAsGTU, toGTUString } from '~/utils/gtu';
 import { createScheduledTransferTransaction } from '~/utils/transactionHelpers';
 import locations from '~/constants/transferLocations.json';
@@ -50,9 +50,9 @@ export default function BuildSchedule({ location }: Props) {
 
     const [error, setError] = useState<string | undefined>();
     const [scheduleLength, setScheduleLength] = useState<number>(0);
-    const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
+    const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
     const [feeCalculator, setFeeCalculator] = useState<
-        ((scheduleLength: number) => bigint) | undefined
+        ((scheduleLength: number) => Fraction) | undefined
     >();
     useEffect(() => {
         scheduledTransferCost()
@@ -66,7 +66,7 @@ export default function BuildSchedule({ location }: Props) {
         if (feeCalculator && scheduleLength) {
             setEstimatedFee(feeCalculator(scheduleLength));
         } else {
-            setEstimatedFee(0n);
+            setEstimatedFee(undefined);
         }
     }, [scheduleLength, setEstimatedFee, feeCalculator]);
 

@@ -1,3 +1,5 @@
+import { Fraction } from './types';
+
 /**
  * Partitions the array according to the given criteria
  * function.
@@ -120,3 +122,15 @@ export const ensureNumberLength = (length: number) => (
 
     return `${prepend}${value}`;
 };
+
+/**
+ * Collapses the Fraction into a single number.
+ * If the denominator does not divide the numerator, the function rounds up;
+ */
+export function collapseFraction({ numerator, denominator }: Fraction): bigint {
+    const quotient = numerator / denominator;
+    if (numerator % denominator === 0n) {
+        return quotient;
+    }
+    return 1n + quotient;
+}

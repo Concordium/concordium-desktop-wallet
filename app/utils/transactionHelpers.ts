@@ -72,21 +72,23 @@ export async function attachNames(
 /**
  *  Constructs a, simple transfer, transaction object,
  * Given the fromAddress, toAddress and the amount.
+ * The optional parameter estimatedEnergyAmount should be used when the energyAmount cannot be calculated
+ * from the payload and transactionKind alone.
  */
 async function createTransferTransaction<T extends TransactionPayload>(
     fromAddress: string,
     expiry: bigint = getDefaultExpiry(),
     transactionKind: number,
     payload: T,
-    preComputedEnergyAmount?: bigint
+    estimatedEnergyAmount?: bigint
 ) {
     let energyAmount;
-    if (!preComputedEnergyAmount) {
+    if (!estimatedEnergyAmount) {
         const payloadSize = serializeTransferPayload(transactionKind, payload)
             .length;
         energyAmount = getTransactionKindEnergy(transactionKind, payloadSize);
     } else {
-        energyAmount = preComputedEnergyAmount;
+        energyAmount = estimatedEnergyAmount;
     }
     const { nonce } = await getNextAccountNonce(fromAddress);
     const transferTransaction: AccountTransaction<T> = {
@@ -151,7 +153,7 @@ export async function createUnshieldAmountTransaction(
         expiry,
         TransactionKindId.Transfer_to_public,
         payload,
-        getTransactionKindEnergy(TransactionKindId.Transfer_to_public)
+        getTransactionKindEnergy(TransactionKindId.Transfer_to_public) // Supply the energy, so that the cost is not computed using the incomplete payload.
     );
 }
 
