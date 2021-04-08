@@ -25,9 +25,9 @@ export default function ExpiredEffectiveTimeView({
         isExpired(transaction)
     ) {
         return (
-            <span className="textError">
+            <div className="textError mT10">
                 The effective time has been exceeded
-            </span>
+            </div>
         );
     }
     return null;
