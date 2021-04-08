@@ -31,13 +31,13 @@ export const payloadSizeEstimate = {
 };
 
 /**
- * These constants should be kept consistent with:
+ * These constants should be kept consistent with constA and constB in:
  * https://github.com/Concordium/concordium-base/blob/main/haskell-src/Concordium/Cost.hs
  */
-const constantA = 100n;
-const constantB = 1n;
+export const constantA = 100n;
+export const constantB = 1n;
 
-const transactionHeaderSize = BigInt(
+export const transactionHeaderSize = BigInt(
     32 + // AccountAddress (FBS 32)
         8 + // Nonce (Word64)
         8 + // Energy (Word64)
@@ -49,7 +49,7 @@ const transactionHeaderSize = BigInt(
  * This function should be kept consistent with baseCost in:
  * https://github.com/Concordium/concordium-base/blob/main/haskell-src/Concordium/Cost.hs
  */
-function calculateCost(
+export function calculateCost(
     signatureAmount: bigint,
     payloadSize: bigint,
     transactionTypeCost: bigint
@@ -90,6 +90,16 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
 }
+
+export function getScheduledTransferPayloadSize(scheduleLength: number) {
+    return (
+        1 + // TransactionKind (Word8)
+        32 + // Receiver Address (FBS 32)
+        1 + // ScheduleLength (Word8)
+        scheduleLength * 16
+    ); // Amount (Word64) + Expiry (Word64)
+}
+
 /**
  *  Given the signatureAmount and schedule length,
  * returns the energy cost of a scheduled transfer.
@@ -98,11 +108,7 @@ export function getScheduledTransferEnergy(
     scheduleLength: number,
     signatureAmount = 1
 ): bigint {
-    const payloadSize =
-        1 + // TransactionKind (Word8)
-        32 + // Receiver Address (FBS 32)
-        1 + // ScheduleLength (Word8)
-        scheduleLength * 16; // Amount (Word64) + Expiry (Word64)
+    const payloadSize = getScheduledTransferPayloadSize(scheduleLength);
     return calculateCost(
         BigInt(signatureAmount),
         BigInt(payloadSize),
