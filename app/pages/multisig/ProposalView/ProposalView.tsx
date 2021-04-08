@@ -329,7 +329,9 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                 multiple
                                 className={styles.fileInput}
                                 disabled={
-                                    !missingSignatures || currentlyLoadingFile
+                                    !missingSignatures ||
+                                    currentlyLoadingFile ||
+                                    !isOpen
                                 }
                             />
                         </div>
