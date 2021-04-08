@@ -5,6 +5,7 @@ import {
     AddressBookEntry,
     TransactionKindId,
     Schedule,
+    Fraction,
 } from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
 import styles from './TransactionProposalDetails.module.scss';
@@ -43,7 +44,7 @@ export default function TransactionProposalDetails({
     schedule,
     transactionType,
 }: Props) {
-    const [estimatedFee, setFee] = useState<bigint | undefined>();
+    const [estimatedFee, setFee] = useState<Fraction | undefined>();
 
     const isScheduledTransfer =
         transactionType === TransactionKindId.Transfer_with_schedule;

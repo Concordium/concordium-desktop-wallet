@@ -11,6 +11,15 @@ type Word32 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 
+export interface Fraction {
+    numerator: Word64;
+    denominator: Word64;
+}
+
+export function instanceOfFraction(object: any): object is Fraction {
+    return object.numerator !== undefined && object.denominator !== undefined;
+}
+
 export enum SchemeId {
     Ed25519 = 0,
 }
@@ -209,7 +218,7 @@ export interface AccountTransaction<
     sender: Hex;
     nonce: string;
     energyAmount: string;
-    estimatedFee?: bigint;
+    estimatedFee?: Fraction;
     expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;
@@ -790,10 +799,7 @@ export enum MultiSignatureMenuItems {
     ExportKey = 'Export public-key',
 }
 
-export interface ExchangeRate {
-    numerator: Word64;
-    denominator: Word64;
-}
+export type ExchangeRate = Fraction;
 
 /**
  * A reward fraction with a resolution of 1/100000, i.e. the

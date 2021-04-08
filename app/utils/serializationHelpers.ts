@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import bs58check from 'bs58check';
+import * as bs58check from 'bs58check';
 import { VerifyKey, SchemeId, CredentialDeploymentInformation } from './types';
 
 export function putBase58Check(

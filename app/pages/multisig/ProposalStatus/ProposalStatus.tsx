@@ -4,6 +4,7 @@ import {
     instanceOfScheduledTransfer,
     instanceOfSimpleTransfer,
     instanceOfUpdateInstruction,
+    instanceOfUpdateAccountCredentials,
     MultiSignatureTransaction,
 } from '~/utils/types';
 import ChainUpdateProposalStatus from './ChainUpdateProposalStatus';
@@ -44,6 +45,10 @@ export default function ProposalStatus({
                 status={status}
             />
         );
+    }
+
+    if (instanceOfUpdateAccountCredentials(parsed)) {
+        return <p>UpdateAccountCredential</p>;
     }
 
     return <>Not supported yet...</>;

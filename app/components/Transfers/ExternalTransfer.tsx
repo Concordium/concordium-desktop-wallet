@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import { AddressBookEntry } from '~/utils/types';
+import { AddressBookEntry, Fraction } from '~/utils/types';
 import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
 import TransferView from './TransferView';
@@ -11,7 +11,7 @@ import TransferView from './TransferView';
 interface Props {
     toConfirmTransfer(amount: string, recipient: AddressBookEntry): void;
     exitFunction(): void;
-    estimatedFee?: bigint;
+    estimatedFee?: Fraction;
     amountHeader: string;
 }
 

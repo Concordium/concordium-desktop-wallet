@@ -7,6 +7,7 @@ import {
     AddressBookEntry,
     Account,
     TransactionKindId,
+    Fraction,
 } from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 import locations from '../../constants/transferLocations.json';
@@ -27,7 +28,7 @@ export default function SimpleTransfer({ account }: Props) {
     const dispatch = useDispatch();
 
     const [error, setError] = useState<string | undefined>();
-    const [estimatedFee, setEstimatedFee] = useState<bigint>(0n);
+    const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
 
     useEffect(() => {
         getTransactionKindCost(TransactionKindId.Simple_transfer)

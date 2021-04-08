@@ -2,13 +2,14 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
-import { AddressBookEntry } from '~/utils/types';
+import { AddressBookEntry, Fraction } from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { validateAmount } from '~/utils/transactionHelpers';
+import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
 
@@ -16,7 +17,7 @@ interface Props {
     recipient?: AddressBookEntry | undefined;
     defaultAmount: string;
     header: string;
-    estimatedFee?: bigint | undefined;
+    estimatedFee?: Fraction | undefined;
     toPickRecipient?(currentAmount: string): void;
     toConfirmTransfer(amount: string): void;
 }
@@ -49,7 +50,11 @@ export default function PickAmount({
     );
 
     function validate(amount: string) {
-        return validateAmount(amount, accountInfo, estimatedFee);
+        return validateAmount(
+            amount,
+            accountInfo,
+            estimatedFee && collapseFraction(estimatedFee)
+        );
     }
 
     return (
