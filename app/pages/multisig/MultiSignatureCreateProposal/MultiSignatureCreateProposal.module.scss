@@ -21,4 +21,8 @@
     flex-direction: column;
     justify-content: space-between;
     min-height: 40%;
+
+    > *:not(:last-child) {
+        margin-bottom: 50px;
+    }
 }
