@@ -6,6 +6,10 @@ import {
 import { getEnergyToMicroGtuRate } from './nodeHelpers';
 import { serializeTransferPayload } from './transactionSerialization';
 
+/**
+ * These constants should be kept consistent with:
+ * https://github.com/Concordium/concordium-base/blob/main/haskell-src/Concordium/Cost.hs
+ */
 export const energyConstants = {
     SimpleTransferCost: 300n,
     EncryptedTransferCost: 27000n,
@@ -14,23 +18,37 @@ export const energyConstants = {
     ScheduledTransferPerRelease: 300n + 64n,
 };
 
+/**
+ * Payload sizes of different transaction types.
+ * Should be updated in case the transactions'
+ * format changes.
+ */
 export const payloadSizeEstimate = {
-    SimpleTransfer: 41,
-    EncryptedTransfer: 2617,
-    TransferToEncrypted: 9,
-    TransferToPublic: 1405,
+    SimpleTransfer: 41, // AccountAddress (FBS 32) + Amount (Word64) + TransactionKind (Word8)
+    EncryptedTransfer: 2617, // AccountAddress (FBS 32) + Amount (Word64) + TransactionKind (Word8) + EncryptedAmount (192 bytes) + index (Word64) + Proofs (Assumed 2369 bytes)
+    TransferToEncrypted: 9, // Amount (Word64) + TransactionKind (Word8)
+    TransferToPublic: 1405, // Amount (Word64) + TransactionKind (Word8) + EncryptedAmount (192 bytes) + index (Word64) + Proofs (Assumed 1189 bytes)
 };
 
+/**
+ * These constants should be kept consistent with:
+ * https://github.com/Concordium/concordium-base/blob/main/haskell-src/Concordium/Cost.hs
+ */
 const constantA = 100n;
 const constantB = 1n;
+
 const transactionHeaderSize = BigInt(
     32 + // AccountAddress (FBS 32)
         8 + // Nonce (Word64)
         8 + // Energy (Word64)
         4 + // PayloadSize (Word32)
-        8
-); // TransactionExpiryTime (Word64)
+        8 // TransactionExpiryTime (Word64)
+);
 
+/**
+ * This function should be kept consistent with baseCost in:
+ * https://github.com/Concordium/concordium-base/blob/main/haskell-src/Concordium/Cost.hs
+ */
 function calculateCost(
     signatureAmount: bigint,
     payloadSize: bigint,
@@ -72,12 +90,19 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
 }
-
+/**
+ *  Given the signatureAmount and schedule length,
+ * returns the energy cost of a scheduled transfer.
+ */
 export function getScheduledTransferEnergy(
     scheduleLength: number,
     signatureAmount = 1
-) {
-    const payloadSize = 32 + 1 + 1 + scheduleLength * 16;
+): bigint {
+    const payloadSize =
+        1 + // TransactionKind (Word8)
+        32 + // Receiver Address (FBS 32)
+        1 + // ScheduleLength (Word8)
+        scheduleLength * 16; // Amount (Word64) + Expiry (Word64)
     return calculateCost(
         BigInt(signatureAmount),
         BigInt(payloadSize),
@@ -85,10 +110,14 @@ export function getScheduledTransferEnergy(
     );
 }
 
+/**
+ *  Given the signatureAmount and a transaction returns
+ * the energy cost of the transaction.
+ */
 export function getTransactionEnergyCost(
     transaction: AccountTransaction,
     signatureAmount: number
-) {
+): bigint {
     const payloadSize = serializeTransferPayload(
         transaction.transactionKind,
         transaction.payload
@@ -108,11 +137,14 @@ export function getTransactionEnergyCost(
     );
 }
 
+/**
+ *  Given the signatureAmount and payloadSize, returns the energy cost of the transaction type.
+ */
 export function getTransactionKindEnergy(
     transactionKind: TransactionKindId,
     payloadSize: number = getPayloadSizeEstimate(transactionKind),
     signatureAmount = 1
-) {
+): bigint {
     const transactionTypeCost = getEnergyCostOfType(transactionKind);
     return calculateCost(
         BigInt(signatureAmount),
@@ -121,11 +153,14 @@ export function getTransactionKindEnergy(
     );
 }
 
+/**
+ *  Given the signatureAmount and payloadSize, returns the estimated MicroGTU cost of the transaction type.
+ */
 export async function getTransactionKindCost(
     transactionKind: TransactionKindId,
     payloadSize: number = getPayloadSizeEstimate(transactionKind),
     signatureAmount = 1
-) {
+): Promise<bigint> {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
     return (
         getTransactionKindEnergy(
@@ -136,10 +171,14 @@ export async function getTransactionKindCost(
     );
 }
 
+/**
+ *  Given the signatureAmount and a transaction returns
+ * the estimated MicroGTU cost of the transaction.
+ */
 export default async function getTransactionCost(
     transaction: AccountTransaction,
     signatureAmount = 1
-) {
+): Promise<bigint> {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
     return (
         getTransactionEnergyCost(transaction, signatureAmount) *
@@ -147,6 +186,10 @@ export default async function getTransactionCost(
     );
 }
 
+/**
+ *  Given the signatureAmount returns a function, which given the current schedule length,
+ * will return the estimated MicroGTU cost of a scheduled transfer.
+ */
 export async function scheduledTransferCost(
     signatureAmount = 1
 ): Promise<(scheduleLength: number) => bigint> {

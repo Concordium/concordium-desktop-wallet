@@ -4,7 +4,7 @@ import styles from './DisplayEstimatedFee.module.scss';
 import { displayAsGTU } from '~/utils/gtu';
 
 interface Props {
-    estimatedFee: bigint | string | undefined;
+    estimatedFee: bigint | undefined;
     className?: string;
 }
 /**
