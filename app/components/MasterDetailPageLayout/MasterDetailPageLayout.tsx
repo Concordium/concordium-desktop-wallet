@@ -21,34 +21,42 @@ function isPageHeader(el: ReactElement): boolean {
 
 interface MasterDetailPageLayoutProps {
     /**
-     * MasterDetailPageLayout.Header, MasterDetailPageLayout.Master, MasterDetailPageLayout.Detail
+     * <MasterDetailPageLayout.Header />, (<MasterDetailPageLayout.Master />, <MasterDetailPageLayout.Detail />) | </>
      */
-    children: [ReactElement, ReactElement, ReactElement];
+    children:
+        | [ReactElement, ReactElement]
+        | [ReactElement, ReactElement, ReactElement];
 }
 
 export default function MasterDetailPageLayout({
     children,
 }: MasterDetailPageLayoutProps): JSX.Element {
-    const { columns, header } = useMemo(() => {
+    const { content, header } = useMemo(() => {
         const reactChildren = Children.toArray(children) as ReactElement[];
 
         return {
-            columns: reactChildren.filter((c) => !isPageHeader(c)),
+            content: reactChildren.filter((c) => !isPageHeader(c)),
             header: reactChildren.find((c) => isPageHeader(c)),
         };
     }, [children]);
 
+    const isColumnsContent = content.every((c) => c.type === Column);
+
     return (
         <PageLayout noGutter>
             {header}
-            <Columns
-                divider
-                className={styles.columns}
-                columnClassName={styles.column}
-                columnScroll
-            >
-                {columns}
-            </Columns>
+            {isColumnsContent ? (
+                <Columns
+                    divider
+                    className={styles.columns}
+                    columnClassName={styles.column}
+                    columnScroll
+                >
+                    {content}
+                </Columns>
+            ) : (
+                { content }
+            )}
         </PageLayout>
     );
 }
