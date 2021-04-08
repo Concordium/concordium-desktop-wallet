@@ -569,7 +569,8 @@ export type UpdateInstructionPayload =
     | ProtocolUpdate
     | GasRewards
     | BakerStakeThreshold
-    | ElectionDifficulty;
+    | ElectionDifficulty
+    | HigherLevelKeyUpdate;
 
 export type Transaction =
     | AccountTransaction
@@ -579,7 +580,6 @@ export type Transaction =
  * to the byte written when serializing the update instruction.
  */
 export enum UpdateType {
-    UpdateAuthorization = 0,
     UpdateProtocol = 1,
     UpdateElectionDifficulty = 2,
     UpdateEuroPerEnergy = 3,
@@ -589,6 +589,11 @@ export enum UpdateType {
     UpdateTransactionFeeDistribution = 7,
     UpdateGASRewards = 8,
     UpdateBakerStakeThreshold = 9,
+    UpdateRootKeysWithRootKeys = 10,
+    UpdateLevel1KeysWithRootKeys = 11,
+    UpdateLevel2KeysWithRootKeys = 12,
+    UpdateLevel1KeysWithLevel1Keys = 13,
+    UpdateLevel2KeysWithLevel1Keys = 14,
 }
 
 export function instanceOfAccountTransaction(
@@ -676,6 +681,12 @@ export function isElectionDifficulty(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<ElectionDifficulty> {
     return UpdateType.UpdateElectionDifficulty === transaction.type;
+}
+
+export function isUpdateRootKeysWithRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateRootKeysWithRootKeys === transaction.type;
 }
 
 /**
@@ -772,6 +783,22 @@ export interface BakerStakeThreshold {
 
 export interface ElectionDifficulty {
     electionDifficulty: Word32;
+}
+
+type HigherLevelKeyUpdateType = 0 | 1;
+/**
+ * The higher level key update covers three transaction types:
+ *  - Updating root keys with root keys
+ *  - Updating level 1 keys with root keys
+ *  - Updating level 1 keys with level 1 keys
+ */
+export interface HigherLevelKeyUpdate {
+    // Has to be 0 when updating root keys with root keys,
+    // 1 when updating level 1 keys with root keys, and
+    // 0 when updating level 1 keys with level 1 keys.
+    keyUpdateType: HigherLevelKeyUpdateType;
+    updateKeys: VerifyKey[];
+    threshold: number;
 }
 
 export interface TransactionDetails {

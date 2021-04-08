@@ -1,4 +1,4 @@
-import { putBase58Check } from './serializationHelpers';
+import { putBase58Check, serializeVerifyKey } from './serializationHelpers';
 import {
     BakerStakeThreshold,
     BlockItemKind,
@@ -6,6 +6,7 @@ import {
     ExchangeRate,
     FoundationAccount,
     GasRewards,
+    HigherLevelKeyUpdate,
     MintDistribution,
     ProtocolUpdate,
     TransactionFeeDistribution,
@@ -32,6 +33,37 @@ export interface SerializedProtocolUpdate {
     specificationUrl: SerializedString;
     transactionHash: Buffer;
     auxiliaryData: Buffer;
+}
+
+/**
+ * Serializes a HigherLevelKeyUpdate to the byte format
+ * expected by the chain.
+ */
+export function serializeHigherLevelKeyUpdate(
+    higherLevelKeyUpdate: HigherLevelKeyUpdate
+) {
+    let serializedHigherLevelKeyUpdate = Buffer.alloc(3);
+    serializedHigherLevelKeyUpdate.writeInt8(
+        higherLevelKeyUpdate.keyUpdateType,
+        0
+    );
+    serializedHigherLevelKeyUpdate.writeUInt16BE(
+        higherLevelKeyUpdate.updateKeys.length,
+        1
+    );
+
+    higherLevelKeyUpdate.updateKeys.forEach((updateKey) => {
+        const serializedUpdateKey = serializeVerifyKey(updateKey);
+        serializedHigherLevelKeyUpdate = Buffer.concat([
+            serializedHigherLevelKeyUpdate,
+            serializedUpdateKey,
+        ]);
+    });
+
+    const threshold = Buffer.alloc(2);
+    threshold.writeUInt16BE(higherLevelKeyUpdate.threshold, 0);
+
+    return Buffer.concat([serializedHigherLevelKeyUpdate, threshold]);
 }
 
 /**
