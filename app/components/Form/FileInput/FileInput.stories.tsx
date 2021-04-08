@@ -35,6 +35,14 @@ Placeholder.args = {
     buttonTitle: 'Browse to file',
 };
 
+export const Disabled = Template.bind({});
+Disabled.args = {
+    label: 'File Input',
+    placeholder: 'No files in field yet...',
+    buttonTitle: 'Browse to file',
+    disabled: true,
+};
+
 export const Invalid = Template.bind({});
 Invalid.args = {
     label: 'File Input',
