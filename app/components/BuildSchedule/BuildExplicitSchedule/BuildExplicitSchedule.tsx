@@ -22,6 +22,7 @@ import {
     ScheduledTransferBuilderBaseProps,
     ScheduledTransferBuilderRef,
 } from '../util';
+import { noOp } from '~/utils/basicHelpers';
 
 export interface Defaults {
     schedule: Schedule;
@@ -60,6 +61,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             defaults,
             setScheduleLength,
             hideSubmitButton = false,
+            onValidChange = noOp,
         },
         ref
     ) => {
@@ -72,7 +74,10 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
         const [adding, setAdding] = useState<boolean>(false);
         const methods = useForm<AddSchedulePointForm>({ mode: 'onTouched' });
         const { reset } = methods;
-        const canSubmit = usedAmount < amount;
+
+        const canSubmit = usedAmount === amount;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        useEffect(() => onValidChange(canSubmit), [canSubmit]);
 
         const submit = useCallback(
             () => submitSchedule(schedule, { schedule }),
@@ -83,9 +88,8 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             ref,
             () => ({
                 submitSchedule: submit,
-                canSubmit,
             }),
-            [submit, canSubmit]
+            [submit]
         );
 
         function addToSchedule({

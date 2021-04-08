@@ -117,6 +117,7 @@ export default function CreateTransferProposal({
                 }}
                 amount={amount}
                 ref={scheduleBuilderRef}
+                setReady={setReady}
             />
         );
     }
@@ -129,8 +130,8 @@ export default function CreateTransferProposal({
         routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
 
     const showButton = !isSignPage;
-    const canSubmitScheduleBuilder =
-        scheduleBuilderRef?.current?.canSubmit ?? true;
+
+    console.log(isReady);
 
     return (
         <MultiSignatureLayout
@@ -158,9 +159,7 @@ export default function CreateTransferProposal({
                             />
                             {showButton && (
                                 <Button
-                                    disabled={
-                                        !isReady || !canSubmitScheduleBuilder
-                                    }
+                                    disabled={!isReady}
                                     className={styles.submitButton}
                                     onClick={
                                         isBuildSchedulePage

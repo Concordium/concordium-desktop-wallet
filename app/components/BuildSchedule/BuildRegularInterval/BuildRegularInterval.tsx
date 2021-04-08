@@ -1,7 +1,6 @@
 import React, {
     useState,
     useEffect,
-    useRef,
     forwardRef,
     useImperativeHandle,
 } from 'react';
@@ -17,6 +16,7 @@ import {
     ScheduledTransferBuilderBaseProps,
     ScheduledTransferBuilderRef,
 } from '../util';
+import { noOp } from '~/utils/basicHelpers';
 
 export interface Interval {
     label: string;
@@ -65,6 +65,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
             defaults,
             setScheduleLength,
             hideSubmitButton = false,
+            onValidChange = noOp,
         },
         ref
     ) => {
@@ -73,22 +74,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         );
         const form = useForm<FormValues>({ mode: 'onTouched' });
         const releases = form.watch(fieldNames.releases);
-        const formRef = useRef<HTMLFormElement>(null);
-
-        const canSubmit = true;
-
-        useImperativeHandle(
-            ref,
-            () => ({
-                submitSchedule: () => formRef?.current?.submit(),
-                canSubmit,
-            }),
-            [canSubmit]
-        );
-
-        useEffect(() => {
-            setScheduleLength(releases);
-        }, [setScheduleLength, releases]);
+        const { handleSubmit } = form;
 
         function createSchedule({ startTime }: FormValues) {
             const schedule = createRegularIntervalSchedule(
@@ -104,6 +90,23 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
             };
             submitSchedule(schedule, recoverState);
         }
+        const formSubmit = handleSubmit(createSchedule);
+        const canSubmit = true;
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        useEffect(() => onValidChange(canSubmit), [canSubmit]);
+
+        useImperativeHandle(
+            ref,
+            () => ({
+                submitSchedule: formSubmit,
+            }),
+            [formSubmit]
+        );
+
+        useEffect(() => {
+            setScheduleLength(releases);
+        }, [setScheduleLength, releases]);
 
         return (
             <>
@@ -118,7 +121,6 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                     onSubmit={createSchedule}
                     formMethods={form}
                     className={styles.regularInterval}
-                    ref={formRef}
                 >
                     <Form.Input
                         label="Split transfer in:"

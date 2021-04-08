@@ -12,6 +12,7 @@ import styles from './MultisignatureAccountTransactions.module.scss';
 interface Props {
     submitSchedule: (schedule: Schedule) => void;
     amount: string;
+    setReady(isReady: boolean): void;
 }
 
 /**
@@ -19,7 +20,7 @@ interface Props {
    TODO: Add Estimated Fee connection
  */
 const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
-    ({ amount, submitSchedule }, ref) => {
+    ({ amount, submitSchedule, setReady }, ref) => {
         const [explicit, setExplicit] = useState<boolean>(false);
 
         const BuildComponent = explicit ? ExplicitSchedule : RegularInterval;
@@ -47,6 +48,7 @@ const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                     amount={toMicroUnits(amount)}
                     hideSubmitButton
                     ref={ref}
+                    onValidChange={setReady}
                 />
             </div>
         );

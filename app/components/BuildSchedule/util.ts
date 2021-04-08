@@ -1,5 +1,4 @@
 export interface ScheduledTransferBuilderRef {
-    canSubmit: boolean;
     /**
      * Trigger submit of builder component.
      */
@@ -11,4 +10,5 @@ export interface ScheduledTransferBuilderBaseProps {
      * Defaults to false.
      */
     hideSubmitButton?: boolean;
+    onValidChange?(isValid: boolean): void;
 }
