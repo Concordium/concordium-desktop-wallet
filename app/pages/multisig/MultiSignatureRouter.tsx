@@ -1,13 +1,13 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
 import MultiSignaturePage from './MultiSignaturePage';
 import ProposalView from './ProposalView';
 import CosignTransactionProposal from './CosignTransactionProposal';
 import SignTransactionProposal from './SignTransactionProposal';
 import MultiSignatureCreateProposal from './MultiSignatureCreateProposal';
 import SubmittedProposal from './SubmittedProposal';
-import ExportKeyView from './ExportKeyView/ExportKeyView';
+import ExportKeyView from './ExportKeyView';
 
 export default function MultiSignatureRoutes(): JSX.Element {
     return (

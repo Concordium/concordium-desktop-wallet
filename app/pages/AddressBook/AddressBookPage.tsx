@@ -1,44 +1,35 @@
 import React from 'react';
 
 import { Route, Switch } from 'react-router';
-import PlusIcon from '../../../resources/svg/plus.svg';
-import UpsertAddress from '../../components/UpsertAddress';
-import PageLayout from '../../components/PageLayout';
-import Columns from '../../components/Columns';
-import routes from '../../constants/routes.json';
+import PlusIcon from '@resources/svg/plus.svg';
+import UpsertAddress from '~/components/UpsertAddress';
+import PageLayout from '~/components/PageLayout';
+import routes from '~/constants/routes.json';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
 
 import AddressBookList from './AddressBookList';
 import AddressBookSelected from './AddressBookSelected';
 
-import styles from './AddressBookPage.module.scss';
-
 export default function AddressBookPage() {
     return (
-        <PageLayout noGutter>
-            <PageLayout.Header>
+        <MasterDetailPageLayout>
+            <MasterDetailPageLayout.Header>
                 <h1>Address Book</h1>
                 <UpsertAddress as={PageLayout.HeaderButton} align="right">
                     <PlusIcon height="20" />
                 </UpsertAddress>
-            </PageLayout.Header>
-            <Columns
-                divider
-                className={styles.columns}
-                columnClassName={styles.column}
-                columnScroll
-            >
-                <Columns.Column verticalPadding>
-                    <AddressBookList />
-                </Columns.Column>
-                <Columns.Column verticalPadding>
-                    <Switch>
-                        <Route
-                            path={routes.ADDRESSBOOK_SELECTED}
-                            render={() => <AddressBookSelected />}
-                        />
-                    </Switch>
-                </Columns.Column>
-            </Columns>
-        </PageLayout>
+            </MasterDetailPageLayout.Header>
+            <MasterDetailPageLayout.Master>
+                <AddressBookList />
+            </MasterDetailPageLayout.Master>
+            <MasterDetailPageLayout.Detail>
+                <Switch>
+                    <Route
+                        path={routes.ADDRESSBOOK_SELECTED}
+                        render={() => <AddressBookSelected />}
+                    />
+                </Switch>
+            </MasterDetailPageLayout.Detail>
+        </MasterDetailPageLayout>
     );
 }
