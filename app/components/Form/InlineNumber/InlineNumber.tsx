@@ -94,6 +94,7 @@ export default function InlineNumber({
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
     const ref = useRef<HTMLInputElement>(null);
+    useLayoutEffect(() => scaleFieldWidth(ref.current), [innerValue]);
 
     const handleBlur: FocusEventHandler<HTMLInputElement> = useCallback(() => {
         if (!innerValue) {
@@ -129,8 +130,6 @@ export default function InlineNumber({
         }
         skipUpdate.current = false;
     }, [value]);
-
-    useLayoutEffect(() => scaleFieldWidth(ref.current), [innerValue]);
 
     return (
         <input
