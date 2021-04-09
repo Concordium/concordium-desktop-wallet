@@ -5,12 +5,12 @@ import {
     SimpleTransfer,
     ScheduledTransfer,
     TransferToEncrypted,
+    EncryptedTransfer,
     instanceOfSimpleTransfer,
     instanceOfScheduledTransfer,
     instanceOfTransferToEncrypted,
     TransferToPublic,
     instanceOfTransferToPublic,
-    EncryptedTransfer,
     instanceOfEncryptedTransfer,
 } from '../../utils/types';
 import {
@@ -29,10 +29,10 @@ import {
 import { toChunks } from '../../utils/basicHelpers';
 
 const INS_SIMPLE_TRANSFER = 0x02;
-const INS_TRANSFER_WITH_SCHEDULE = 0x03;
-const INS_ENCRYPTED_TRANSFER = 0x10;
 const INS_TRANSFER_TO_ENCRYPTED = 0x11;
 const INS_TRANSFER_TO_PUBLIC = 0x12;
+const INS_TRANSFER_WITH_SCHEDULE = 0x03;
+const INS_ENCRYPTED_TRANSFER = 0x13;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -194,10 +194,13 @@ async function signEncryptedTransfer(
         transaction.expiry
     );
 
+    const kind = Buffer.alloc(1);
+    kind.writeInt8(TransactionKindId.Encrypted_transfer, 0);
+
     const data = Buffer.concat([
         pathAsBuffer(path),
         header,
-        encodeWord16(TransactionKindId.Encrypted_transfer),
+        kind,
         base58ToBuffer(transaction.payload.toAddress),
     ]);
 
@@ -234,18 +237,17 @@ async function signEncryptedTransfer(
 
     p1 = 0x03;
 
-    let i = 0;
     let response;
-    while (i < proof.length) {
+    const chunks = toChunks(proof, 255);
+    for (let i = 0; i < chunks.length; i += 1) {
         // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
             INS_ENCRYPTED_TRANSFER,
             p1,
             p2,
-            proof.slice(i, Math.min(i + 255, proof.length))
+            Buffer.from(chunks[i])
         );
-        i += 255;
     }
     if (!response) {
         throw new Error('Unexpected missing response from ledger;');

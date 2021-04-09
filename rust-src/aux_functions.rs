@@ -501,5 +501,6 @@ pub fn create_encrypted_transfer_aux(
         "decryptedRemaining": decrypted_remaining,
         });
 
-    Ok(response.to_string())
+        Ok(response.to_string())
 }
+
