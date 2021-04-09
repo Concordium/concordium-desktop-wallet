@@ -145,11 +145,13 @@ export function RewardDistribution({
                             className={clsx(
                                 styles.hFirst,
                                 firstValue > 0 && styles.hLeftEdge,
-                                secondValue === 0 &&
-                                    remainingValue === 0 &&
+                                secondValue <= 0 &&
+                                    remainingValue <= 0 &&
                                     styles.hRightEdge
                             )}
-                            style={{ width: `${firstPercentage}%` }}
+                            style={{
+                                width: `${Math.min(100, firstPercentage)}%`,
+                            }}
                             title={firstLabel}
                         >
                             <div
@@ -171,18 +173,18 @@ export function RewardDistribution({
                     <div
                         className={clsx(
                             styles.hMiddle,
-                            secondValue === 0 && styles.hMiddleNoValue,
-                            firstValue === fractionResolution ||
-                                (remainingValue === fractionResolution &&
+                            secondValue <= 0 && styles.hMiddleNoValue,
+                            firstValue >= fractionResolution ||
+                                (remainingValue >= fractionResolution &&
                                     styles.hMiddleHidden),
                             secondValue > 0 &&
-                                firstValue === 0 &&
+                                firstValue <= 0 &&
                                 styles.hLeftEdge,
                             secondValue > 0 &&
-                                remainingValue === 0 &&
+                                remainingValue <= 0 &&
                                 styles.hRightEdge
                         )}
-                        style={{ width: `${secondPercentage}%` }}
+                        style={{ width: `${Math.min(100, secondPercentage)}%` }}
                         title={secondLabel}
                     >
                         <div
@@ -202,8 +204,8 @@ export function RewardDistribution({
                         <div
                             className={clsx(
                                 styles.hLast,
-                                firstValue === 0 &&
-                                    secondValue === 0 &&
+                                firstValue <= 0 &&
+                                    secondValue <= 0 &&
                                     styles.hLeftEdge,
                                 remainingValue > 0 && styles.hRightEdge
                             )}

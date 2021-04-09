@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import clsx from 'clsx';
 import React, {
-    FocusEventHandler,
     InputHTMLAttributes,
     useCallback,
     useEffect,
@@ -54,10 +53,14 @@ export interface InlineNumberProps
     /**
      * Defaults to 0. This is the value used if field is unfocused without a value.
      */
-    defaultValue?: number;
+    fallbackValue?: number;
+    /**
+     * If true, falls back to fallbackValue when field is invalid on blur. Defaults to false.
+     */
+    fallbackOnInvalid?: boolean;
     onChange(v?: number): void;
-    onBlur(): void;
-    onFocus(): void;
+    onBlur?(): void;
+    onFocus?(): void;
 }
 
 /**
@@ -68,7 +71,8 @@ export interface InlineNumberProps
  */
 export default function InlineNumber({
     ensureDigits = 0,
-    defaultValue = 0,
+    fallbackValue = 0,
+    fallbackOnInvalid = false,
     value,
     onChange,
     onBlur = noOp,
@@ -89,34 +93,43 @@ export default function InlineNumber({
     );
 
     const [innerValue, setInnerValue] = useState<string>(
-        format(value ?? defaultValue)
+        format(value ?? fallbackValue)
     );
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
     const ref = useRef<HTMLInputElement>(null);
     useLayoutEffect(() => scaleFieldWidth(ref.current), [innerValue]);
 
-    const handleBlur: FocusEventHandler<HTMLInputElement> = useCallback(() => {
-        if (!innerValue) {
-            setInnerValue(format(defaultValue));
+    const handleBlur = useCallback(() => {
+        // Basically ensure correct formatting of field and that field has a value (otherwise it'll be invisible on screen)
+        if (!innerValue || (fallbackOnInvalid && isInvalid)) {
+            setInnerValue(format(fallbackValue));
         } else {
             setInnerValue(format(value));
         }
 
         setIsFocused(false);
         onBlur();
-    }, [format, onBlur, innerValue, defaultValue, value]);
+    }, [
+        format,
+        onBlur,
+        innerValue,
+        fallbackValue,
+        value,
+        fallbackOnInvalid,
+        isInvalid,
+    ]);
 
-    const handleFocus: FocusEventHandler<HTMLInputElement> = useCallback(() => {
+    const handleFocus = useCallback(() => {
         setIsFocused(true);
         onFocus();
     }, [onFocus]);
 
     // Ensure value and defaultValue match on init
     useEffect(() => {
-        if (defaultValue !== undefined && value === undefined) {
+        if (fallbackValue !== undefined && value === undefined) {
             skipUpdate.current = true;
-            onChange(defaultValue);
+            onChange(fallbackValue);
         }
     }, []);
 
