@@ -11,6 +11,8 @@
 }
 
 .actions {
+    composes: mT20 from global;
+
     > * {
         width: 100%;
         display: block;
