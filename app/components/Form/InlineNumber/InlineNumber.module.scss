@@ -20,4 +20,12 @@
     &:focus {
         outline: none;
     }
+
+    &:disabled {
+        color: $color-grey;
+    }
+}
+
+.invalid {
+    color: $color-error;
 }

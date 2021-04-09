@@ -15,7 +15,11 @@ const Template: Story<InlineNumberProps> = (args) => {
     return (
         <div style={{ width: '500px', margin: '0 auto' }}>
             <div>Input Value: {`${value}`}</div>
-            <InlineNumber {...args} value={value} onChange={setValue} />{' '}
+            <div>
+                Specify amount:{' '}
+                <InlineNumber {...args} value={value} onChange={setValue} />,
+                Please
+            </div>
         </div>
     );
 };
@@ -47,4 +51,27 @@ PrefixLabel.args = {
     step: 0.01,
     label: getGTUSymbol(),
     labelPosition: 'prefix',
+};
+
+export const Disabled = Template.bind({});
+Disabled.args = {
+    allowFractions: true,
+    ensureDigits: 2,
+    defaultValue: 0,
+    step: 0.01,
+    label: getGTUSymbol(),
+    labelPosition: 'prefix',
+    disabled: true,
+};
+
+export const Invalid = Template.bind({});
+Invalid.args = {
+    allowFractions: true,
+    ensureDigits: 2,
+    defaultValue: 0,
+    step: 0.01,
+    label: getGTUSymbol(),
+    labelPosition: 'prefix',
+    isInvalid: true,
+    value: -100,
 };

@@ -4,6 +4,7 @@ import { Story, Meta } from '@storybook/react/types-6-0';
 import Form, { FormProps } from '../Form';
 import { futureDate } from '../util/validation';
 import { maxFileSizeKb } from '../FileInput/validation';
+import { getGTUSymbol } from '~/utils/gtu';
 
 export const {
     Checkbox,
@@ -13,6 +14,7 @@ export const {
     TextArea,
     Timestamp,
     File,
+    InlineNumber,
 } = Form;
 
 export const argTypes: Meta['argTypes'] = {
@@ -32,6 +34,7 @@ export const subcomponents: Meta['subcomponents'] = {
     'Form.TextArea': TextArea,
     'Form.Checkbox': Checkbox,
     'Form.Switch': Switch,
+    'Form.InlineNumber': InlineNumber,
     'Form.Timestamp': Timestamp,
     'Form.File': File,
     'Form.Submit': Submit,
@@ -88,6 +91,16 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
                 validate: futureDate(),
             }}
         />
+        <div>
+            Please send{' '}
+            <Form.InlineNumber
+                name="gtuAmount"
+                label={getGTUSymbol()}
+                labelPosition="prefix"
+                rules={{ required: true, min: 0 }}
+            />{' '}
+            to John.
+        </div>
         <Form.Checkbox
             name="terms"
             rules={{ required: 'You must agree to the terms' }}
@@ -116,6 +129,15 @@ export const AllFieldsTemplate: Story<FormProps<unknown>> = (args) => (
             Agree to terms
         </Form.Checkbox>
         <Form.Switch name="setting">Enable setting</Form.Switch>
+        <div>
+            Please send{' '}
+            <Form.InlineNumber
+                name="gtuAmount"
+                label={getGTUSymbol()}
+                labelPosition="prefix"
+            />{' '}
+            to John.
+        </div>
         <Form.Submit>Submit</Form.Submit>
     </Form>
 );

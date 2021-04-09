@@ -13,6 +13,7 @@ import { noOp } from '~/utils/basicHelpers';
 import { useUpdateEffect } from '~/utils/hooks';
 import { scaleFieldWidth } from '~/utils/htmlHelpers';
 import { ClassName } from '~/utils/types';
+import { CommonFieldProps } from '../common';
 
 import styles from './InlineNumber.module.scss';
 
@@ -41,16 +42,20 @@ export interface InlineNumberProps
     extends ClassName,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            'onBlur' | 'step' | 'min' | 'max'
-        > {
+            'step' | 'min' | 'max' | 'disabled'
+        >,
+        Pick<CommonFieldProps, 'isInvalid'> {
     /**
      * Defaults to 0.
      */
     ensureDigits?: number;
+    /**
+     * Whether to work with floats or integers. Defaults to false.
+     */
     allowFractions?: boolean;
     label?: string;
     /**
-     * Default is postfix.
+     * Display label before or after input. Default is postfix.
      */
     labelPosition?: 'prefix' | 'postfix';
     value: number | undefined;
@@ -59,8 +64,15 @@ export interface InlineNumberProps
      */
     defaultValue?: number;
     onChange(v?: number): void;
+    onBlur(): void;
 }
 
+/**
+ * Number input that aligns with surrouding content in an inline fashion. Is also available as sub-component on \<Form /\>
+ *
+ * @example
+ * I would like to submit the transaction in <InlineNumber value={value} onChange={setValue} label=" Releases" />.
+ */
 export default function InlineNumber({
     ensureDigits = 0,
     defaultValue = 0,
@@ -71,6 +83,7 @@ export default function InlineNumber({
     className,
     label,
     labelPosition = 'postfix',
+    isInvalid = false,
     ...inputProps
 }: InlineNumberProps): JSX.Element {
     const skipUpdate = useRef(false);
@@ -89,18 +102,15 @@ export default function InlineNumber({
 
     const ref = useRef<HTMLInputElement>(null);
 
-    const handleBlur: FocusEventHandler<HTMLInputElement> = useCallback(
-        (e) => {
-            if (!innerValue) {
-                setInnerValue(format(defaultValue));
-            } else {
-                setInnerValue(format(value));
-            }
+    const handleBlur: FocusEventHandler<HTMLInputElement> = useCallback(() => {
+        if (!innerValue) {
+            setInnerValue(format(defaultValue));
+        } else {
+            setInnerValue(format(value));
+        }
 
-            onBlur(e);
-        },
-        [format, onBlur, innerValue, defaultValue, value]
-    );
+        onBlur();
+    }, [format, onBlur, innerValue, defaultValue, value]);
 
     // Ensure value and defaultValue match on init
     useEffect(() => {
@@ -127,7 +137,7 @@ export default function InlineNumber({
         <label className={clsx(styles.root, className)}>
             {labelPosition === 'prefix' && label}
             <input
-                className={styles.input}
+                className={clsx(styles.input, isInvalid && styles.invalid)}
                 type="number"
                 value={innerValue}
                 onChange={(e) => setInnerValue(e.target.value)}
