@@ -1,6 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
+// eslint-disable-next-line import/no-cycle
+import { updateCredentialsStatus } from './CredentialSlice';
 import {
     getAllAccounts,
     insertAccount,
@@ -152,6 +154,8 @@ export async function loadAccountInfos(
     const updateEncryptedAmountsPromises = accountInfos.map(
         ({ account, accountInfo }) => {
             map[account.address] = accountInfo;
+
+            updateCredentialsStatus(dispatch, account.address, accountInfo);
             return updateAccountEncryptedAmount(
                 account,
                 accountInfo.accountEncryptedAmount
@@ -258,6 +262,26 @@ export async function decryptAccountBalance(
         totalDecrypted,
         allDecrypted: true,
     });
+}
+
+// Add an account with pending status.
+export async function addExternalAccount(
+    dispatch: Dispatch,
+    accountAddress: string,
+    identityId: number,
+    signatureThreshold: number
+) {
+    const account: Account = {
+        name: accountAddress.substring(0, 8),
+        identityId,
+        status: AccountStatus.Confirmed,
+        address: accountAddress,
+        signatureThreshold,
+        maxTransactionId: 0,
+        isInitial: false,
+    };
+    await insertAccount(account);
+    return loadAccounts(dispatch);
 }
 
 export async function importAccount(account: Account | Account[]) {
