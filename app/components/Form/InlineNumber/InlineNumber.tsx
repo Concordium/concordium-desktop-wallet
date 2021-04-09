@@ -59,6 +59,9 @@ export interface InlineNumberProps
      */
     fallbackOnInvalid?: boolean;
     onChange(v?: number): void;
+    /**
+     * As internal formatting functionality is triggered on blur, settings value on blur externally is prone to trigger an infinite loop. Please take caution!
+     */
     onBlur?(): void;
     onFocus?(): void;
 }
