@@ -21,7 +21,11 @@ import {
     serializeTransferToPublicData,
 } from '../../utils/transactionSerialization';
 import pathAsBuffer from './Path';
-import { encodeWord16, base58ToBuffer } from '../../utils/serializationHelpers';
+import {
+    encodeWord16,
+    encodeWord64,
+    base58ToBuffer,
+} from '../../utils/serializationHelpers';
 import { toChunks } from '../../utils/basicHelpers';
 
 const INS_SIMPLE_TRANSFER = 0x02;
@@ -173,12 +177,14 @@ async function signEncryptedTransfer(
     if (!transaction.payload.proof) {
         throw new Error('Unexpected missing proof');
     }
+    if (!transaction.payload.remainingEncryptedAmount) {
+        throw new Error('Unexpected missing payload data');
+    }
 
     const payload = serializeTransferPayload(
         TransactionKindId.Encrypted_transfer,
         transaction.payload
     );
-    console.log(payload);
 
     const header = serializeTransactionHeader(
         transaction.sender,
@@ -201,6 +207,17 @@ async function signEncryptedTransfer(
     await transport.send(0xe0, INS_ENCRYPTED_TRANSFER, p1, p2, data);
 
     p1 = 0x01;
+    await transport.send(
+        0xe0,
+        INS_ENCRYPTED_TRANSFER,
+        p1,
+        p2,
+        Buffer.concat([
+            Buffer.from(transaction.payload.remainingEncryptedAmount, 'hex'),
+        ])
+    );
+
+    p1 = 0x02;
     const proof = Buffer.from(transaction.payload.proof, 'hex');
 
     await transport.send(
@@ -209,12 +226,13 @@ async function signEncryptedTransfer(
         p1,
         p2,
         Buffer.concat([
-            Buffer.from(serializeTransferToPublicData(transaction.payload)),
+            Buffer.from(transaction.payload.transferAmount, 'hex'),
+            encodeWord64(BigInt(transaction.payload.index)),
             encodeWord16(proof.length),
         ])
     );
 
-    p1 = 0x02;
+    p1 = 0x03;
 
     let i = 0;
     let response;
@@ -233,7 +251,6 @@ async function signEncryptedTransfer(
         throw new Error('Unexpected missing response from ledger;');
     }
     const signature = response.slice(0, 64);
-    console.log(signature);
     return signature;
 }
 

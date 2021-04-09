@@ -97,7 +97,6 @@ export default function useLedger(
             }
         } catch (e) {
             let errorMessage;
-            console.log(e);
             if (instanceOfTransportStatusError(e)) {
                 errorMessage = getErrorDescription(e.statusCode);
             } else {

@@ -91,8 +91,6 @@ async function attachCompletedPayload(
             remainingEncryptedAmount: data.payload.remainingAmount,
             toAddress: transaction.payload.toAddress,
         };
-
-        console.log(data);
         return { ...transaction, payload };
     }
     return transaction;
