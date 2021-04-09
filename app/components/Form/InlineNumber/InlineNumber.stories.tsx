@@ -15,11 +15,7 @@ const Template: Story<InlineNumberProps> = (args) => {
     return (
         <div style={{ width: '500px', margin: '0 auto' }}>
             <div>Input Value: {`${value}`}</div>
-            <div>
-                Specify amount:{' '}
-                <InlineNumber {...args} value={value} onChange={setValue} />,
-                Please
-            </div>
+            <InlineNumber {...args} value={value} onChange={setValue} />
         </div>
     );
 };
@@ -35,43 +31,42 @@ EnsureTwoDigits.args = {
     step: 0.01,
 };
 
-export const Label = Template.bind({});
+const LabelTemplate: Story<InlineNumberProps> = (args) => {
+    const [value, setValue] = useState<number | undefined>(args.value);
+
+    return (
+        <div style={{ width: '500px', margin: '0 auto' }}>
+            <div>Input Value: {`${value}`}</div>
+            <label>
+                Specify amount: {getGTUSymbol()}
+                <InlineNumber {...args} value={value} onChange={setValue} />
+            </label>
+        </div>
+    );
+};
+
+export const Label = LabelTemplate.bind({});
 Label.args = {
     allowFractions: true,
     defaultValue: 0,
-    step: 5,
-    label: ' Releases',
-};
-
-export const PrefixLabel = Template.bind({});
-PrefixLabel.args = {
-    allowFractions: true,
-    ensureDigits: 2,
-    defaultValue: 0,
     step: 0.01,
-    label: getGTUSymbol(),
-    labelPosition: 'prefix',
 };
 
-export const Disabled = Template.bind({});
+export const Disabled = LabelTemplate.bind({});
 Disabled.args = {
     allowFractions: true,
     ensureDigits: 2,
     defaultValue: 0,
     step: 0.01,
-    label: getGTUSymbol(),
-    labelPosition: 'prefix',
     disabled: true,
 };
 
-export const Invalid = Template.bind({});
+export const Invalid = LabelTemplate.bind({});
 Invalid.args = {
     allowFractions: true,
     ensureDigits: 2,
     defaultValue: 0,
     step: 0.01,
-    label: getGTUSymbol(),
-    labelPosition: 'prefix',
     isInvalid: true,
     value: -100,
 };

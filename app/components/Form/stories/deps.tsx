@@ -92,11 +92,9 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
             }}
         />
         <div>
-            Please send{' '}
+            Please send {getGTUSymbol()}
             <Form.InlineNumber
                 name="gtuAmount"
-                label={getGTUSymbol()}
-                labelPosition="prefix"
                 rules={{ required: true, min: 0 }}
             />{' '}
             to John.
@@ -130,13 +128,8 @@ export const AllFieldsTemplate: Story<FormProps<unknown>> = (args) => (
         </Form.Checkbox>
         <Form.Switch name="setting">Enable setting</Form.Switch>
         <div>
-            Please send{' '}
-            <Form.InlineNumber
-                name="gtuAmount"
-                label={getGTUSymbol()}
-                labelPosition="prefix"
-            />{' '}
-            to John.
+            Please send {getGTUSymbol()}
+            <Form.InlineNumber name="gtuAmount" /> to John.
         </div>
         <Form.Submit>Submit</Form.Submit>
     </Form>

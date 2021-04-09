@@ -53,11 +53,6 @@ export interface InlineNumberProps
      * Whether to work with floats or integers. Defaults to false.
      */
     allowFractions?: boolean;
-    label?: string;
-    /**
-     * Display label before or after input. Default is postfix.
-     */
-    labelPosition?: 'prefix' | 'postfix';
     value: number | undefined;
     /**
      * Defaults to 0. This is the value used if field is unfocused without a value.
@@ -81,8 +76,6 @@ export default function InlineNumber({
     onBlur = noOp,
     allowFractions = false,
     className,
-    label,
-    labelPosition = 'postfix',
     isInvalid = false,
     ...inputProps
 }: InlineNumberProps): JSX.Element {
@@ -134,18 +127,18 @@ export default function InlineNumber({
     useLayoutEffect(() => scaleFieldWidth(ref.current), [innerValue]);
 
     return (
-        <label className={clsx(styles.root, className)}>
-            {labelPosition === 'prefix' && label}
-            <input
-                className={clsx(styles.input, isInvalid && styles.invalid)}
-                type="number"
-                value={innerValue}
-                onChange={(e) => setInnerValue(e.target.value)}
-                onBlur={handleBlur}
-                ref={ref}
-                {...inputProps}
-            />
-            {labelPosition === 'postfix' && label}
-        </label>
+        <input
+            className={clsx(
+                styles.input,
+                isInvalid && styles.invalid,
+                className
+            )}
+            type="number"
+            value={innerValue}
+            onChange={(e) => setInnerValue(e.target.value)}
+            onBlur={handleBlur}
+            ref={ref}
+            {...inputProps}
+        />
     );
 }
