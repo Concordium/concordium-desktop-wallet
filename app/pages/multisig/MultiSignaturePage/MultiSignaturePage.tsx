@@ -1,19 +1,25 @@
 import React from 'react';
 import { Route, Switch } from 'react-router';
 import ButtonNavLink from '~/components/ButtonNavLink';
-import Columns from '~/components/Columns';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
 import routes from '~/constants/routes.json';
 
-import BrowseTransactionFile from './BrowseTransactionFile/BrowseTransactionFile';
-import ExportKeyList from './ExportKeyList';
-import MultiSignatureCreateProposalList from './MultiSignatureCreateProposalList';
-import ProposalList from './ProposalList/ProposalList';
-import styles from './MultiSignatureMenu.module.scss';
+import BrowseTransactionFile from '../menu/BrowseTransactionFile';
+import ExportKeyList from '../menu/ExportKeyList';
+import MultiSignatureCreateProposalList from '../menu/MultiSignatureCreateProposalList';
+import ProposalList from '../menu/ProposalList';
 
-export default function MultiSignatureMenu(): JSX.Element {
+import styles from './MultiSignaturePage.module.scss';
+
+const { Header, Master, Detail } = MasterDetailPageLayout;
+
+export default function MultiSignaturePage() {
     return (
-        <Columns columnScroll divider columnClassName={styles.column}>
-            <Columns.Column verticalPadding>
+        <MasterDetailPageLayout>
+            <Header>
+                <h1>Multi Signature Transactions</h1>
+            </Header>
+            <Master>
                 <ButtonNavLink
                     to={routes.MULTISIGTRANSACTIONS}
                     className={styles.link}
@@ -39,8 +45,8 @@ export default function MultiSignatureMenu(): JSX.Element {
                 >
                     Export public-key
                 </ButtonNavLink>
-            </Columns.Column>
-            <Columns.Column verticalPadding>
+            </Master>
+            <Detail>
                 <Switch>
                     <Route
                         path={routes.MULTISIGTRANSACTIONS}
@@ -60,7 +66,7 @@ export default function MultiSignatureMenu(): JSX.Element {
                         component={ExportKeyList}
                     />
                 </Switch>
-            </Columns.Column>
-        </Columns>
+            </Detail>
+        </MasterDetailPageLayout>
     );
 }
