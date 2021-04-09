@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Header, Segment } from 'semantic-ui-react';
 import { decrypt } from '../../utils/encryption';
 import routes from '../../constants/routes.json';
 import InputModal from '../../components/InputModal';
@@ -13,6 +12,7 @@ import {
     validateEncryptedStructure,
 } from '../../utils/importHelpers';
 import { EncryptedData } from '../../utils/types';
+import styles from './Export.module.scss';
 
 /**
  * Component to start importing identities/account/addressBook.
@@ -103,13 +103,13 @@ export default function Import() {
                 onClose={() => setMessageModalOpen(false)}
                 open={messageModalOpen}
             />
-            <Segment basic textAlign="center">
-                <Header size="large">Import</Header>
+            <div className={styles.import}>
+                <h2 className={styles.title}>Import</h2>
                 <DragAndDropFile
                     text="Drag and drop your file here"
                     fileProcessor={fileProcessor}
                 />
-            </Segment>
+            </div>
         </>
     );
 }
