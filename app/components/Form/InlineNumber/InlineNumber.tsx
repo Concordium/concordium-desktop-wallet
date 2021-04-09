@@ -60,6 +60,7 @@ export interface InlineNumberProps
     defaultValue?: number;
     onChange(v?: number): void;
     onBlur(): void;
+    onFocus(): void;
 }
 
 /**
@@ -139,6 +140,7 @@ export default function InlineNumber({
             onBlur={handleBlur}
             ref={ref}
             {...inputProps}
+            style={{ width: 0 }} // To prevent initial UI jitter.
         />
     );
 }
