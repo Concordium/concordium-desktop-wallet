@@ -69,7 +69,7 @@ export default function MasterDetailPageLayout({
                     {content}
                 </Columns>
             ) : (
-                { content }
+                content
             )}
         </PageLayout>
     );
