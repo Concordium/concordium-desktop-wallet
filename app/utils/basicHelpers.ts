@@ -21,6 +21,14 @@ export function isHex(str: string): boolean {
     return /^[A-F0-9]+$/i.test(str);
 }
 
+/**
+ * Determines whether or not the input string consists of only digits,
+ * with no leading zero (except if only a single digit).
+ */
+export function onlyDigitsNoLeadingZeroes(value: string): boolean {
+    return /^(?:[1-9][0-9]*|0)$/.test(value);
+}
+
 /** Given a list of elements, a function to parse the elements to string array,
  * and the names of the elements' fields, outputs
  * csv string, with the names first, and the values of each element per line.
@@ -33,6 +41,17 @@ export function toCSV(elements: string[][], fieldNames: string[]): string {
     return `${fieldNames.join(',')}\n${elements
         .map((element) => element.join(','))
         .join('\n')}`;
+}
+
+/**
+ * Takes an array of elements with an arbitary type  and a function to tranform them to bigints.
+ * Return the sum as a bigint.
+ */
+export function sumToBigInt<T>(
+    members: T[],
+    transform: (member: T) => bigint
+): bigint {
+    return members.reduce((acc, member) => acc + transform(member), 0n);
 }
 
 /**
@@ -54,3 +73,36 @@ export function toChunks<S, T extends Uint8Array | Array<S>>(
     }
     return chunks;
 }
+
+export function isDefined<T>(v?: T): v is T {
+    return v !== undefined;
+}
+
+export const notNull = <T>(v: T | null | undefined): v is T => v != null;
+
+export function noOp(): void {
+    return undefined;
+}
+
+export async function asyncNoOp(): Promise<void> {
+    return new Promise((resolve) => resolve());
+}
+
+export const ensureNumberLength = (length: number) => (
+    value?: string
+): string => {
+    if (!value) {
+        return '';
+    }
+
+    const valueLength = value.length;
+
+    if (valueLength >= length) {
+        return value;
+    }
+
+    const missing = length - valueLength;
+    const prepend = new Array(missing).fill(`0`).join('');
+
+    return `${prepend}${value}`;
+};

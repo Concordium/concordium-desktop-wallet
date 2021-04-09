@@ -44,6 +44,7 @@ app/style.css.map
 dist
 dll
 out
+storybook-static
 
 .idea
 npm-debug.log.*

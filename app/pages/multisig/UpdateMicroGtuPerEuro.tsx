@@ -1,84 +1,60 @@
-import React, { useState } from 'react';
-import { Button, Form } from 'semantic-ui-react';
-import { UpdateType } from '../../utils/types';
-import { UpdateProps } from '../../utils/transactionTypes';
-import { createUpdateMultiSignatureTransaction } from '../../utils/MultiSignatureTransactionHelper';
+import React, { useMemo } from 'react';
+
+import { EqualRecord, ExchangeRate } from '~/utils/types';
+import { UpdateProps } from '~/utils/transactionTypes';
+import {
+    RelativeRateField,
+    FormRelativeRateField,
+} from './common/RelativeRateField';
+import { noOp } from '~/utils/basicHelpers';
+
+export interface UpdateMicroGtuPerEuroRateFields {
+    microGtuPerEuro: ExchangeRate;
+}
+
+const fieldNames: EqualRecord<UpdateMicroGtuPerEuroRateFields> = {
+    microGtuPerEuro: 'microGtuPerEuro',
+};
 
 export default function UpdateMicroGtuPerEuroRate({
     blockSummary,
-    forwardTransaction,
 }: UpdateProps): JSX.Element | null {
-    const [microGtuPerEuro, setMicroGtuPerEuro] = useState<BigInt>();
-    const [
-        currentMicroGtuPerEuro,
-        setCurrentMicroGtuPerEuro,
-    ] = useState<BigInt>();
+    const initialValue: ExchangeRate = useMemo(
+        () => ({
+            numerator:
+                blockSummary.updates.chainParameters.microGTUPerEuro.numerator,
+            denominator:
+                blockSummary.updates.chainParameters.microGTUPerEuro
+                    .denominator,
+        }),
+        [blockSummary]
+    );
 
-    const sequenceNumber =
-        blockSummary.updates.updateQueues.microGTUPerEuro.nextSequenceNumber;
-    const { threshold } = blockSummary.updates.authorizations.microGTUPerEuro;
-
-    if (!currentMicroGtuPerEuro) {
-        setCurrentMicroGtuPerEuro(
-            blockSummary.updates.chainParameters.microGTUPerEuro.numerator
-        );
-        setMicroGtuPerEuro(
-            blockSummary.updates.chainParameters.microGTUPerEuro.numerator
-        );
-    }
-
-    if (!microGtuPerEuro) {
+    if (!initialValue) {
         return null;
-    }
-
-    function trySetMicroGtuPerEuro(v: string): void {
-        if (!v) {
-            return;
-        }
-
-        try {
-            setMicroGtuPerEuro(BigInt(v));
-        } catch (error) {
-            // The input was not a valid BigInt, so do no updates based on the input.
-        }
     }
 
     return (
         <>
-            <Form>
-                <Form.Input
-                    inline
-                    width="5"
-                    label="Current micro GTU per euro rate"
-                    readOnly
-                    type="number"
-                    value={`${currentMicroGtuPerEuro}`}
-                />
-                <Form.Input
-                    inline
-                    width="5"
-                    label="New micro GTU per euro rate"
-                    value={`${microGtuPerEuro}`}
-                    type="number"
-                    onChange={(e) => trySetMicroGtuPerEuro(e.target.value)}
-                />
-            </Form>
-            <Button
-                primary
-                // TODO Validate that the input is a reduced fraction (otherwise the chain will reject it anyway.)
-                onClick={() =>
-                    forwardTransaction(
-                        createUpdateMultiSignatureTransaction(
-                            { numerator: microGtuPerEuro, denominator: 1n },
-                            UpdateType.UpdateMicroGTUPerEuro,
-                            sequenceNumber,
-                            threshold
-                        )
-                    )
-                }
-            >
-                Generate transaction proposal
-            </Button>
+            <RelativeRateField
+                label="Current micro GTU per euro rate"
+                unit="µǤ"
+                denominatorUnit="€"
+                value={initialValue}
+                onChange={noOp}
+                onBlur={noOp}
+                disabled
+            />
+            <FormRelativeRateField
+                name={fieldNames.microGtuPerEuro}
+                label="Current micro GTU per euro rate"
+                unit="µǤ"
+                denominatorUnit="€"
+                defaultValue={initialValue}
+                rules={{
+                    required: 'Value must be specified',
+                }}
+            />
         </>
     );
 }

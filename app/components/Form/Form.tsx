@@ -1,15 +1,29 @@
 import React, { FC, FormHTMLAttributes, PropsWithChildren } from 'react';
-import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import {
+    FormProvider,
+    SubmitHandler,
+    useForm,
+    UseFormMethods,
+} from 'react-hook-form';
 
 import Switch from '../../cross-app-components/Switch';
-import { connectWithFormUncontrolled } from './common/connectWithForm';
+import {
+    connectWithFormControlled,
+    connectWithFormUncontrolled,
+} from './common/connectWithForm';
 import Input from './Input';
 import Checkbox from './Checkbox';
 import TextArea from './TextArea';
-import Submit from '../../cross-app-components/Submit';
+import Submit from './Submit';
+import InputTimestamp, {
+    InputTimestampProps,
+} from './InputTimestamp/InputTimestamp';
+import FileInput from './FileInput';
+import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 
 export interface FormProps<TFormValues>
     extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onSubmit'> {
+    formMethods?: UseFormMethods<TFormValues>;
     onSubmit: SubmitHandler<TFormValues>;
 }
 
@@ -41,18 +55,21 @@ export interface FormProps<TFormValues>
  *   <Form.Submit>Submit</Form.Submit>
  * </Form>
  */
-function Form<T extends Record<string, unknown>>({
+function Form<TFormValues>({
     children,
+    formMethods,
     onSubmit,
     ...formProps
-}: PropsWithChildren<FormProps<T>>): JSX.Element {
-    const { ...methods } = useForm<T>({
+}: PropsWithChildren<FormProps<TFormValues>>): JSX.Element {
+    const methods = useForm<TFormValues>({
         mode: 'onTouched',
     });
 
+    const { handleSubmit } = formMethods ?? methods;
+
     return (
-        <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(onSubmit)} {...formProps}>
+        <FormProvider {...(formMethods ?? methods)}>
+            <form onSubmit={handleSubmit(onSubmit)} {...formProps} noValidate>
                 {children}
             </form>
         </FormProvider>
@@ -70,6 +87,16 @@ Form.Checkbox = connectWithFormUncontrolled(Checkbox);
 
 Form.Switch = connectWithFormUncontrolled(Switch);
 (Form.Switch as FC).displayName = 'Form.Switch';
+
+Form.File = connectWithFormControlled<FileInputValue, FileInputProps>(
+    FileInput
+);
+(Form.File as FC).displayName = 'Form.File';
+
+Form.Timestamp = connectWithFormControlled<Date, InputTimestampProps>(
+    InputTimestamp
+);
+(Form.Timestamp as FC).displayName = 'Form.Timestamp';
 
 Form.Submit = Submit;
 (Form.Submit as FC).displayName = 'Form.Submit';

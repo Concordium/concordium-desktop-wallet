@@ -1,5 +1,6 @@
 import 'regenerator-runtime/runtime';
 import registerPromiseWorker from 'promise-worker/register';
+import { parse } from './JSONHelper';
 import workerCommands from '../constants/workerCommands.json';
 
 interface RustInterface {
@@ -16,6 +17,11 @@ interface RustInterface {
     ): string;
     generateUnsignedCredential(context: string): string;
     getDeploymentInfo(signature: string, unsignedInfo: string): string;
+    getDeploymentDetails(
+        signature: string,
+        unsignedInfo: string,
+        expiry: bigint
+    ): string;
     decrypt_amounts_ext(amounts: string): string;
     createTransferToPublicData(inputblob: string): string;
     createEncryptedTransferData(inputblob: string): string;
@@ -24,7 +30,7 @@ interface RustInterface {
 let rustReference: RustInterface;
 async function getRust(): Promise<RustInterface> {
     if (!rustReference) {
-        rustReference = await import('../../pkg');
+        rustReference = await import('@pkg/index');
     }
     return rustReference;
 }
@@ -56,11 +62,22 @@ function createUnsignedCredential(
     return rust.generateUnsignedCredential(message.input);
 }
 
-function createCredential(
+function createCredentialInfo(
     rust: RustInterface,
     message: Record<string, string>
 ) {
     return rust.getDeploymentInfo(message.signature, message.unsignedInfo);
+}
+
+function createCredentialDetails(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.getDeploymentDetails(
+        message.signature,
+        message.unsignedInfo,
+        parse(message.expiry)
+    );
 }
 
 function decryptAmounts(rust: RustInterface, message: Record<string, string>) {
@@ -90,8 +107,10 @@ function mapCommand(command: string) {
             return createIdRequest;
         case workerCommands.createUnsignedCredential:
             return createUnsignedCredential;
-        case workerCommands.createCredential:
-            return createCredential;
+        case workerCommands.createCredentialInfo:
+            return createCredentialInfo;
+        case workerCommands.createCredentialDetails:
+            return createCredentialDetails;
         case workerCommands.decryptAmounts:
             return decryptAmounts;
         case workerCommands.createTransferToPublicData:

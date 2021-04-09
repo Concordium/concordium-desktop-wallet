@@ -16,7 +16,7 @@ import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
 import { IdentityProvider, Dispatch, Global } from '../../utils/types';
 import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoller';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
+import SimpleLedger from '../../components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 
 const redirectUri = 'ConcordiumRedirectToken';
@@ -101,7 +101,7 @@ async function generateIdentity(
             provider,
             randomness
         );
-        await addPendingAccount(dispatch, accountName, identityId, 0); // TODO: can we add the address already here?
+        await addPendingAccount(dispatch, accountName, identityId, true); // TODO: can we add the address already here?
     } catch (e) {
         onError(`Failed to create identity due to ${e}`);
         return;
@@ -110,6 +110,7 @@ async function generateIdentity(
         confirmIdentityAndInitialAccount(
             dispatch,
             identityName,
+            identityId,
             accountName,
             identityObjectLocation
         );
@@ -176,7 +177,7 @@ export default function IdentityIssuanceGenerate({
             <Card fluid centered>
                 <Card.Content textAlign="center">
                     <Card.Header>Generating the Identity</Card.Header>
-                    <LedgerComponent ledgerCall={withLedger} />
+                    <SimpleLedger ledgerCall={withLedger} />
                 </Card.Content>
             </Card>
         );

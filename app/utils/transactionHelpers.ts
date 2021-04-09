@@ -1,6 +1,6 @@
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
-import { getDefaultExpiry } from './timeHelpers';
+import { getDefaultExpiry, getNow } from './timeHelpers';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -13,7 +13,14 @@ import {
     TransferToEncrypted,
     AccountTransaction,
     TransactionPayload,
+    UpdateInstruction,
+    UpdateInstructionPayload,
+    TimeStampUnit,
 } from './types';
+import {
+    TransactionAccountSignature,
+    TransactionCredentialSignature,
+} from './transactionTypes';
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
@@ -270,7 +277,24 @@ export function getScheduledTransferAmount(
 export function isFailed(transaction: TransferTransaction) {
     return (
         transaction.success === false ||
-        transaction.success === 0 ||
         transaction.status === TransactionStatus.Rejected
     );
 }
+/** Used to build a simple TransactionAccountSignature, with only a single signature. */
+export function buildTransactionAccountSignature(
+    credentialAccountIndex: number,
+    signatureIndex: number,
+    signature: Buffer
+): TransactionAccountSignature {
+    const transactionCredentialSignature: TransactionCredentialSignature = {};
+    transactionCredentialSignature[signatureIndex] = signature;
+    const transactionAccountSignature: TransactionAccountSignature = {};
+    transactionAccountSignature[
+        credentialAccountIndex
+    ] = transactionCredentialSignature;
+    return transactionAccountSignature;
+}
+
+export const isExpired = (
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+) => transaction.header.timeout <= getNow(TimeStampUnit.seconds);

@@ -1,4 +1,5 @@
 use crate::{
+    helpers::*,
     types::*,
 };
 use wasm_bindgen::prelude::*;
@@ -9,7 +10,7 @@ extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
 }
-use crypto_common::{types::Amount, *};
+use crypto_common::{types::{KeyIndex, Amount, TransactionTime}, *};
 use encrypted_transfers::types::{AggregatedDecryptedAmount, EncryptedAmount};
 use elgamal::BabyStepGiantStep;
 use dodis_yampolskiy_prf::secret as prf;
@@ -151,10 +152,11 @@ pub fn generate_unsigned_credential_aux(
 
     let tags: Vec<AttributeTag> = try_get(&v, "revealedAttributes")?;
 
-    let acc_num: u8 = try_get(&v, "accountNumber")?;
+    let cred_num: u8 = try_get(&v, "credentialNumber")?;
 
-    let acc_data = AccountDataStruct { //This is assumed to be an new account TODO: handle existing account
-        public_keys: try_get(&v, "publicKeys")?,
+    let public_keys: Vec<VerifyKey> = try_get(&v, "publicKeys")?;
+    let cred_key_info = CredentialPublicKeys { //This is assumed to be an new account TODO: handle existing account
+        keys: build_key_map(&public_keys),
         threshold: try_get(&v, "threshold")?,
     };
 
@@ -200,13 +202,19 @@ pub fn generate_unsigned_credential_aux(
 
     let context = IPContext::new(&ip_info, &ars_infos, &global_context);
 
+    let address: Option<AccountAddress> = match try_get(&v, "address") {
+        Ok(x) => Some(x),
+        Err(_) => None
+    };
+
     let cdi = create_unsigned_credential(
         context,
         &id_object,
         &id_use_data,
-        acc_num,
+        cred_num,
         policy,
-        &acc_data,
+        cred_key_info,
+        address.as_ref()
     )?;
 
     let response = json!(cdi);
@@ -219,8 +227,12 @@ pub fn get_credential_deployment_info_aux(
     unsigned_info: &str,
 ) -> Fallible<String> {
     console_error_panic_hook::set_once();
-
-    let unsigned_credential_info: UnsignedCredentialDeploymentInfo<Bls12, ExampleCurve, AttributeKind>  = from_str(unsigned_info)?;
+    let v: SerdeValue = from_str(unsigned_info)?;
+    let values: CredentialDeploymentValues<ExampleCurve, AttributeKind> = from_str(unsigned_info)?;
+    let proofs: IdOwnershipProofs<Bls12, ExampleCurve> = try_get(&v, "proofs")?;
+    let unsigned_credential_info = UnsignedCredentialDeploymentInfo::<Bls12, ExampleCurve, AttributeKind>{
+        values, proofs
+    };
 
     let signature_bytes = <[u8; 64]>::from_hex(signature).expect("Decoding failed");
 
@@ -243,10 +255,53 @@ pub fn get_credential_deployment_info_aux(
 
     let cdi_json = json!(cdi);
 
-    let address = AccountAddress::new(&cdi.values.reg_id);
+    Ok(cdi_json.to_string())
+}
+
+pub fn get_credential_deployment_details_aux(
+    signature: &str,
+    unsigned_info: &str,
+    expiry: u64,
+) -> Fallible<String> {
+    console_error_panic_hook::set_once();
+    let v: SerdeValue = from_str(unsigned_info)?;
+    let values: CredentialDeploymentValues<ExampleCurve, AttributeKind> = from_str(unsigned_info)?;
+    let proofs: IdOwnershipProofs<Bls12, ExampleCurve> = try_get(&v, "proofs")?;
+    let unsigned_credential_info = UnsignedCredentialDeploymentInfo::<Bls12, ExampleCurve, AttributeKind>{
+        values, proofs
+    };
+
+    let signature_bytes = <[u8; 64]>::from_hex(signature).expect("Decoding failed");
+
+    let mut signatures = BTreeMap::new();
+    signatures.insert(KeyIndex(0), ed25519::Signature::new(signature_bytes).into());
+
+    let proof_acc_sk = AccountOwnershipProof {
+        sigs: signatures,
+    };
+
+    let cdp = CredDeploymentProofs {
+        id_proofs: unsigned_credential_info.proofs,
+        proof_acc_sk,
+    };
+
+    let cdi = CredentialDeploymentInfo {
+        values: unsigned_credential_info.values,
+        proofs: cdp,
+    };
+
+    let cdi_json = json!(cdi);
+
+    let address = AccountAddress::new(&cdi.values.cred_id);
 
     let acc_cred = AccountCredential::Normal{cdi};
-    let block_item = BlockItem::Deployment(acc_cred);
+
+    let credential_message = AccountCredentialMessage {
+        credential: acc_cred,
+        message_expiry: TransactionTime{ seconds: expiry }
+    };
+
+    let block_item = BlockItem::Deployment(credential_message);
 
     let hash = {
         let info_as_bytes = &to_bytes(&block_item);
@@ -278,9 +333,9 @@ pub fn decrypt_amounts_aux(
     let prf_key_string: String = try_get(&v, "prfKey")?;
     let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
 
-    let account_number: u8 = try_get(&v, "accountNumber")?;
+    let credential_number: u8 = try_get(&v, "credentialNumber")?;
 
-    let scalar: Fr = prf_key.prf_exponent(account_number)?;
+    let scalar: Fr = prf_key.prf_exponent(credential_number)?;
 
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
     let secret_key = elgamal::SecretKey {
@@ -322,14 +377,12 @@ pub fn create_sec_to_pub_aux(
         scalar,
     };
 
-    let sender_pk = try_get(&v, "senderPublicKey")?;
-
-    let incoming_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "incomingAmounts")?;
-    let input_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
-
-    let agg_index: u64 = try_get(&v, "index")?;
+    let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
+    let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
+    let agg_index: u64 = try_get(&v, "aggIndex")?;
     let to_transfer: Amount = try_get(&v, "amount")?;
 
+    let input_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));
     let m = 1 << 16;
     let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
 
@@ -361,15 +414,6 @@ pub fn create_sec_to_pub_aux(
         None => bail!("Could not produce payload."),
     };
 
-
-    log(&json!({"sk": secret_key, "amount": incoming_amount, "prf_key": prf_key}).to_string());
-    let decrypted_incoming =
-        encrypted_transfers::decrypt_amount::<ExampleCurve>(
-            &table,
-            &secret_key,
-            &incoming_amount,
-        );
-
     let decrypted_remaining =
         encrypted_transfers::decrypt_amount::<ExampleCurve>(
             &table,
@@ -377,36 +421,9 @@ pub fn create_sec_to_pub_aux(
             &payload.remaining_amount,
         );
 
-    let public_key = elgamal::PublicKey::<ExampleCurve>::from(&secret_key);
-
-    let input_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
-
-    let verify_own =encrypted_transfers::verify_sec_to_pub_transfer_data(
-        &global_context,
-        &public_key,
-        &input_amount,
-        &payload,
-    );
-
-    let verify_given =encrypted_transfers::verify_sec_to_pub_transfer_data(
-        &global_context,
-        &sender_pk,
-        &input_amount,
-        &payload,
-    );
-
-    let as_bytes = &to_bytes(&payload);
-
     let response = json!({
-        "decrypted_incoming": decrypted_incoming,
-        "own" : verify_own,
-        "given" : verify_given,
-        "public_key" : public_key,
         "payload": payload,
-        "remaining": payload.remaining_amount,
-        "decryptedInput": decrypted_remaining,
-        "decryptedRemaining": decrypted_amount,
-        "hex": hex::encode(as_bytes)
+        "decryptedRemaining": decrypted_remaining,
         });
 
     Ok(response.to_string())
@@ -433,19 +450,21 @@ pub fn create_encrypted_transfer_aux(
 
     let receiver_pk = try_get(&v, "receiverPublicKey")?;
 
-    let input_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
-    let agg_index: u64 = try_get(&v, "index")?;
+    let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
+    let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
+    let agg_index: u64 = try_get(&v, "aggIndex")?;
     let to_transfer: Amount = try_get(&v, "amount")?;
 
+    let input_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));
     let m = 1 << 16;
     let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
 
     let decrypted_amount =
         encrypted_transfers::decrypt_amount::<ExampleCurve>(
-        &table,
-        &secret_key,
-        &input_amount,
-    );
+            &table,
+            &secret_key,
+            &input_amount,
+        );
 
     let agg_decrypted_amount = AggregatedDecryptedAmount {
         agg_encrypted_amount: input_amount,
@@ -476,13 +495,10 @@ pub fn create_encrypted_transfer_aux(
             &payload.remaining_amount,
         );
 
-    let as_bytes = &to_bytes(&payload);
-
     let response = json!({
         "payload": payload,
         "remaining": payload.remaining_amount,
         "decryptedRemaining": decrypted_remaining,
-        "hex": hex::encode(as_bytes)
         });
 
     Ok(response.to_string())

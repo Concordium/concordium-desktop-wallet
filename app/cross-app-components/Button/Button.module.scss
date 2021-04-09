@@ -1,18 +1,57 @@
 @import 'config/bundle';
 
+@mixin button($color) {
+    background-color: $color;
+
+    &:hover,
+    &:focus,
+    &:global(.active) {
+        &:not(.rootInverted) {
+            background-color: darken($color, 3);
+        }
+    }
+}
+
+.root,
+.clear {
+    position: relative;
+    border: none;
+
+    &:hover,
+    &:focus {
+        outline: none;
+    }
+
+    &:disabled {
+        cursor: default;
+    }
+}
+
+.clear {
+    background: transparent;
+    padding: 0;
+}
+
 .root {
     color: $color-off-white;
-    background-color: $color-pale-blue;
     font-size: $font-size-button1;
     padding: 0 30px;
     height: 50px;
     border-radius: 4px;
-    border: 1px solid $color-pale-blue;
     transition: background-color $anim-easing $anim-timing;
 
+    @include button($color-pale-blue);
+
     &Small,
-    &Big {
+    &Big,
+    &Huge {
         border-radius: 10px;
+    }
+
+    &Tiny {
+        height: 28px;
+        font-size: $font-size-button2;
+        padding: 0 15px;
     }
 
     &Small {
@@ -25,33 +64,57 @@
         height: 58px;
     }
 
+    &Huge {
+        height: 76px;
+        font-size: $font-size-h2;
+    }
+
+    &WithIcon {
+        padding-left: 50px;
+    }
+
     &:disabled:not(.rootInverted) {
         background-color: $color-grey;
         border-color: $color-grey;
     }
 
-    &:hover,
-    &:focus {
-        outline: none;
-
-        &:not(.rootInverted) {
-            background-color: darken($color-pale-blue, 3);
-        }
+    &Danger {
+        @include button($color-danger);
     }
 
     &Inverted {
-        background-color: transparent;
+        background-color: $color-white;
         color: $color-text;
-        border-color: $color-grey;
-        transition: border-color $anim-easing $anim-timing;
+        box-shadow: 0 0 0 1px $color-text inset;
+        transition: box-shadow $anim-easing $anim-timing;
 
         &:disabled {
             color: $color-text-faded;
         }
 
         &:hover,
-        &:focus {
-            border-color: $color-pale-blue;
+        &:focus,
+        &:global(.active) {
+            box-shadow: 0 0 0 2px $color-pale-blue inset;
+        }
+
+        &.rootDanger:not(:disabled) {
+            color: $color-danger;
+            box-shadow: 0 0 0 1px $color-danger inset;
+
+            &:hover,
+            &:focus,
+            &:global(.active) {
+                box-shadow: 0 0 0 2px $color-danger inset;
+            }
         }
     }
+}
+
+.icon {
+    display: flex;
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
 }

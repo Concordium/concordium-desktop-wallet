@@ -9,6 +9,7 @@ import { CommonFieldProps } from '../common';
 import Checkmark from '../../../../resources/svg/checkmark-blue.svg';
 
 import styles from './Checkbox.module.scss';
+import ErrorMessage from '../ErrorMessage';
 
 export interface CheckboxProps
     extends CommonFieldProps,
@@ -28,26 +29,41 @@ export interface CheckboxProps
  * <Checkbox name="checkbox">This is a checkbox</Checkbox>
  */
 const Checkbox = forwardRef<HTMLInputElement, PropsWithChildren<CheckboxProps>>(
-    ({ children, error, className, size = 'regular', ...props }, ref) => {
+    (
+        {
+            children,
+            error,
+            isInvalid = false,
+            className,
+            size = 'regular',
+            ...props
+        },
+        ref
+    ) => {
+        const { disabled } = props;
         return (
-            <label
+            <div
                 className={clsx(
                     styles.root,
-                    error !== undefined && styles.rootInvalid,
+                    isInvalid && styles.rootInvalid,
+                    disabled && styles.rootDisabled,
                     className
                 )}
             >
-                <input type="checkbox" ref={ref} {...props} />
-                <div
-                    className={clsx(
-                        styles.checkbox,
-                        size === 'large' && styles.checkboxLarge
-                    )}
-                >
-                    <Checkmark />
-                </div>
-                {children && <div className={styles.text}>{children}</div>}
-            </label>
+                <label className={styles.wrapper}>
+                    <input type="checkbox" ref={ref} {...props} />
+                    <div
+                        className={clsx(
+                            styles.checkbox,
+                            size === 'large' && styles.checkboxLarge
+                        )}
+                    >
+                        <Checkmark />
+                    </div>
+                    {children && <div className={styles.text}>{children}</div>}
+                </label>
+                <ErrorMessage>{error}</ErrorMessage>
+            </div>
         );
     }
 );

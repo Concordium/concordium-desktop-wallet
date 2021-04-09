@@ -10,7 +10,7 @@ import { argTypes, Template } from './deps';
 The `Checkbox` component allows the same props as a regular `<input type="checkbox" />`, with the addition of `error` and `size`.
 
 <Canvas>
-    <Story name="Checkbox" args={{
+    <Story name="Primary" args={{
         children: ['Agree to our terms & conditions'],
         checked: false,
     }}>
@@ -20,5 +20,18 @@ The `Checkbox` component allows the same props as a regular `<input type="checkb
 
 The following props are the most important to work with `Checkbox`:
 
-<ArgsTable story="Checkbox" />
+<ArgsTable story="Primary" />
+
+## Invalid
+
+<Canvas>
+    <Story name="Invalid" args={{
+        children: ['Agree to our terms & conditions'],
+        checked: false,
+        error: 'You must agree to our terms to continue.',
+        isInvalid: true
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
 

@@ -19,7 +19,7 @@ export interface ConsensusStatus {
 }
 
 interface UpdateQueue {
-    nextSequenceNumber: BigInt;
+    nextSequenceNumber: bigint;
     queue: unknown; // FIXME: add the actual type
 }
 
@@ -28,17 +28,24 @@ interface UpdateQueues {
     euroPerEnergy: UpdateQueue;
     transactionFeeDistribution: UpdateQueue;
     foundationAccount: UpdateQueue;
+    electionDifficulty: UpdateQueue;
     mintDistribution: UpdateQueue;
     protocol: UpdateQueue;
     gasRewards: UpdateQueue;
+    bakerStakeThreshold: UpdateQueue;
 }
 
-interface Authorization {
+export interface Authorization {
     threshold: number;
     authorizedKeys: number[];
 }
 
-interface Authorizations {
+export interface Key {
+    verifyKey: string;
+    schemeId: string;
+}
+
+export interface Authorizations {
     microGTUPerEuro: Authorization;
     euroPerEnergy: Authorization;
     transactionFeeDistribution: Authorization;
@@ -46,6 +53,9 @@ interface Authorizations {
     mintDistribution: Authorization;
     protocol: Authorization;
     paramGASRewards: Authorization;
+    bakerStakeThreshold: Authorization;
+    electionDifficulty: Authorization;
+    keys: Key[];
 }
 
 // The node returns the mint per slot value as a scientific notation String,
@@ -67,6 +77,8 @@ interface ChainParameters {
     microGTUPerEuro: ExchangeRate;
     euroPerEnergy: ExchangeRate;
     rewardParameters: RewardParameters;
+    minimumThresholdForBaking: bigint;
+    electionDifficulty: number;
 }
 
 interface Updates {

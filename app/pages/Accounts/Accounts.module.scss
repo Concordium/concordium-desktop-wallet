@@ -1,24 +1,17 @@
+@import 'config/bundle';
+@import 'elements/bundle';
+
+.listElement {
+    margin-bottom: 20px;
+}
+
+.column {
+    flex-basis: 560px;
+}
+
 .accountActionButton {
     height: 100px;
     width: 30%;
-}
-
-.accountListElement {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    width: 80%;
-    text-align: center;
-    background-color: white;
-    border-style: solid;
-    border-color: black;
-    color: black;
-    border-radius: 10px;
-    margin-bottom: 15px;
-}
-
-.chosenAccountListElement {
-    font-weight: bold;
-    border-color: blue;
 }
 
 .accountBalanceView {
@@ -39,4 +32,35 @@
 
 .inverted {
     filter: invert(100%);
+}
+
+.flexBetween {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.buildSchedule {
+    min-height: 850px;
+    text-align: center;
+    position: relative;
+
+    > div {
+        margin-bottom: 40px;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+}
+
+.buildScheduleCommon {
+    .title {
+        margin-top: 20px;
+        margin-bottom: 50px;
+    }
+
+    > * {
+        margin-bottom: 40px;
+    }
 }

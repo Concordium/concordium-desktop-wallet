@@ -1,19 +1,30 @@
 import type Transport from '@ledgerhq/hw-transport';
-import getPublicKey from './GetPublicKey';
+import {
+    getPublicKey,
+    getPublicKeySilent,
+    getSignedPublicKey,
+} from './GetPublicKey';
 import signTransfer from './Transfer';
 import signPublicInformationForIp from './PublicInformationForIp';
 import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
-import signAccountChallenge from './AccountChallenge';
+import {
+    signCredentialDeploymentOnNewAccount,
+    signCredentialDeploymentOnExistingAccount,
+} from './CredentialDeployment';
 import {
     AccountTransaction,
+    BakerStakeThreshold,
+    ElectionDifficulty,
     ExchangeRate,
     FoundationAccount,
     GasRewards,
     MintDistribution,
     ProtocolUpdate,
     PublicInformationForIp,
+    SignedPublicKey,
     TransactionFeeDistribution,
     UpdateInstruction,
+    UnsignedCredentialDeploymentInformation,
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -46,8 +57,20 @@ export default class ConcordiumLedgerClient {
         );
     }
 
+    closeTransport(): Promise<void> {
+        return this.transport.close();
+    }
+
     getPublicKey(path: number[]): Promise<Buffer> {
         return getPublicKey(this.transport, path);
+    }
+
+    getPublicKeySilent(path: number[]): Promise<Buffer> {
+        return getPublicKeySilent(this.transport, path);
+    }
+
+    getSignedPublicKey(path: number[]): Promise<SignedPublicKey> {
+        return getSignedPublicKey(this.transport, path);
     }
 
     getIdCredSec(identity: number): Promise<Buffer> {
@@ -77,8 +100,30 @@ export default class ConcordiumLedgerClient {
         );
     }
 
-    signAccountChallenge(challenge: Buffer, path: number[]): Promise<Buffer> {
-        return signAccountChallenge(this.transport, path, challenge);
+    signCredentialDeploymentOnExistingAccount(
+        credentialDeployment: UnsignedCredentialDeploymentInformation,
+        address: string,
+        path: number[]
+    ): Promise<Buffer> {
+        return signCredentialDeploymentOnExistingAccount(
+            this.transport,
+            credentialDeployment,
+            address,
+            path
+        );
+    }
+
+    signCredentialDeploymentOnNewAccount(
+        credentialDeployment: UnsignedCredentialDeploymentInformation,
+        expiry: bigint,
+        path: number[]
+    ): Promise<Buffer> {
+        return signCredentialDeploymentOnNewAccount(
+            this.transport,
+            credentialDeployment,
+            expiry,
+            path
+        );
     }
 
     signMicroGtuPerEuro(
@@ -172,6 +217,34 @@ export default class ConcordiumLedgerClient {
         return signUpdateTransaction(
             this.transport,
             0x23,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signBakerStakeThreshold(
+        transaction: UpdateInstruction<BakerStakeThreshold>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x27,
+            path,
+            transaction,
+            serializedPayload
+        );
+    }
+
+    signElectionDifficulty(
+        transaction: UpdateInstruction<ElectionDifficulty>,
+        serializedPayload: Buffer,
+        path: number[]
+    ): Promise<Buffer> {
+        return signUpdateTransaction(
+            this.transport,
+            0x26,
             path,
             transaction,
             serializedPayload

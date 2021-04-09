@@ -1,9 +1,9 @@
 import { Meta, Story, Canvas, ArgsTable } from '@storybook/addon-docs/blocks';
 import Form from '../Form';
 
-import { argTypes, subcomponents, Template, ValidationTemplate } from './deps';
+import { argTypes, subcomponents, Template, ValidationTemplate, AllFieldsTemplate, decorators } from './deps';
 
-<Meta title="Components/Form/Form" component={Form} argTypes={argTypes} subcomponents={subcomponents} />
+<Meta title="Components/Form/Form" component={Form} argTypes={argTypes} subcomponents={subcomponents} decorators={decorators} />
 
 # Form
 We use a forms library called [react-hook-forms](https://react-hook-forms.com) for handling form state and validation.
@@ -20,11 +20,16 @@ When combined, they produce a form that handles validation based on individual f
 </Canvas>
 
 ## Controlling style
-Styling of the individual fields is kept as minimal as possible, and allows for overriding in special cases where alterations is needed.
+Styling of the individual fields is kept as minimal as possible, and allows for overriding in special cases where alterations is needed. Fields fill out the entire width of the surrounding container.
 To be able to change the style of a component, `className` is exposed as a prop on the individual field. This makes it possible to override styling set on component level from the outside with the scss module of the consuming component.
 
 ```css
 /* Example.module.scss */
+.form {
+    max-width: 400px;
+    margin: 0 auto; /* center */
+}
+
 .field {
     display: inline-block;
 }
@@ -42,7 +47,7 @@ To be able to change the style of a component, `className` is exposed as a prop 
 // Example.tsx
 import styles from './Example.module.scss';
 
-<Form>
+<Form className={styles.form}>
     <Form.Input name="name" className={styles.name} />
     <Form.Input name="lastName" className={styles.field} />
     <Form.Submit className={styles.submit}>Submit</Form.Submit>
@@ -71,6 +76,16 @@ As such, if submit is pressed without fillin those, they will render as invalid,
 <Canvas>
     <Story name="With Validation">
         {ValidationTemplate.bind({})}
+    </Story>
+</Canvas>
+
+### Form elements
+
+The form elements displayed in the sub components list (at the top of the page), are shown below:
+
+<Canvas>
+    <Story name="All available fields">
+        {AllFieldsTemplate.bind({})}
     </Story>
 </Canvas>
 

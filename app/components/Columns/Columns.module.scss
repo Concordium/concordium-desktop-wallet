@@ -1,0 +1,90 @@
+@import 'config/bundle';
+
+$columns-headers-inset: 31px;
+
+.root {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: flex-start;
+
+    &WithHeaders {
+        border-top: 1px solid $color-grey;
+        margin-top: $columns-headers-inset;
+    }
+
+    &ColumnScroll {
+        height: 100%;
+
+        &.rootWithHeaders {
+            height: calc(100% - #{$columns-headers-inset});
+        }
+    }
+}
+
+.divider {
+    flex-basis: 1px;
+    flex-shrink: 0;
+    background-color: $color-grey;
+    height: 100%;
+
+    .root:not(.rootWithHeaders) & {
+        margin: 20px 0;
+        height: calc(100% - 40px);
+    }
+}
+
+.column {
+    position: relative;
+    flex: 0 1 100%;
+    display: flex;
+    justify-content: center;
+
+    .rootColumnScroll & {
+        height: 100%;
+    }
+
+    &NoResize {
+        flex-shrink: 0;
+    }
+
+    .rootVariableSize & {
+        flex: 1 0 auto;
+
+        &NoResize {
+            flex-grow: 0;
+        }
+    }
+}
+
+.header,
+.content {
+    padding: 0 $page-gutter;
+}
+
+.header {
+    position: absolute;
+    transform: translateY(-100%);
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+    padding-bottom: 10px;
+}
+
+.content {
+    width: 100%;
+
+    .rootColumnScroll & {
+        height: 100%;
+        overflow-y: overlay;
+    }
+
+    &VertPadding {
+        padding-top: $page-gutter;
+        padding-bottom: $page-gutter;
+    }
+}

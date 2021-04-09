@@ -22,6 +22,7 @@ import {
 } from '../../utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import { encodeWord16, base58ToBuffer } from '../../utils/serializationHelpers';
+import { toChunks } from '../../utils/basicHelpers';
 
 const INS_SIMPLE_TRANSFER = 0x02;
 const INS_TRANSFER_WITH_SCHEDULE = 0x03;
@@ -110,7 +111,6 @@ async function signTransferToPublic(
         TransactionKindId.Transfer_to_public,
         transaction.payload
     );
-    console.log(payload);
 
     const header = serializeTransactionHeader(
         transaction.sender,
@@ -123,11 +123,7 @@ async function signTransferToPublic(
     const kind = Buffer.alloc(1);
     kind.writeInt8(TransactionKindId.Transfer_to_public, 0);
 
-    const data = Buffer.concat([
-        pathAsBuffer(path),
-        header,
-        kind,
-    ]);
+    const data = Buffer.concat([pathAsBuffer(path), header, kind]);
 
     let p1 = 0x00;
     const p2 = 0x00;
@@ -135,7 +131,7 @@ async function signTransferToPublic(
     await transport.send(0xe0, INS_TRANSFER_TO_PUBLIC, p1, p2, data);
 
     p1 = 0x01;
-    const proof = Buffer.from(transaction.payload.proof, 'hex');
+    const proof: Buffer = Buffer.from(transaction.payload.proof, 'hex');
 
     await transport.send(
         0xe0,
@@ -150,31 +146,24 @@ async function signTransferToPublic(
 
     p1 = 0x02;
 
-    let i = 0;
     let response;
-    while (i < proof.length) {
+    const chunks = toChunks(proof, 255);
+    for (let i = 0; i < chunks.length; i += 1) {
         // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
             INS_TRANSFER_TO_PUBLIC,
             p1,
             p2,
-            proof.slice(i, Math.min(i + 255, proof.length))
+            Buffer.from(chunks[i])
         );
-        i += 255;
     }
     if (!response) {
         throw new Error('Unexpected missing response from ledger;');
     }
     const signature = response.slice(0, 64);
-    console.log(signature);
     return signature;
 }
-
-
-
-
-
 
 async function signEncryptedTransfer(
     transport: Transport,
@@ -248,25 +237,11 @@ async function signEncryptedTransfer(
     return signature;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 async function signTransferWithSchedule(
     transport: Transport,
     path: number[],
     transaction: ScheduledTransfer
 ): Promise<Buffer> {
-    const scheduleLength = transaction.payload.schedule.length;
-
     const payload = serializeTransferPayload(
         TransactionKindId.Transfer_with_schedule,
         transaction.payload
@@ -295,22 +270,17 @@ async function signTransferWithSchedule(
 
     p1 = 0x01;
 
-    let i = 0;
     let response;
-    while (i < scheduleLength) {
+    const chunks = toChunks(schedule.map(serializeSchedulePoint), 15); // 15 is the maximum amount we can fit
+    for (let i = 0; i < chunks.length; i += 1) {
         // eslint-disable-next-line  no-await-in-loop
         response = await transport.send(
             0xe0,
             INS_TRANSFER_WITH_SCHEDULE,
             p1,
             p2,
-            Buffer.concat(
-                schedule
-                    .slice(i, Math.min(i + 15, scheduleLength))
-                    .map(serializeSchedulePoint)
-            )
+            Buffer.from(chunks[i])
         );
-        i += 15;
     }
     if (!response) {
         throw new Error('Unexpected missing response from ledger;');

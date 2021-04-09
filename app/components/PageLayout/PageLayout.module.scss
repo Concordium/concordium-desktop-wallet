@@ -1,0 +1,29 @@
+@import 'config/bundle';
+
+.root {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: auto;
+}
+
+.header,
+.content {
+    min-width: 1000px;
+    width: 100%;
+}
+
+.header {
+    flex: 0 0 auto;
+}
+
+.content {
+    max-width: 1600px;
+    flex: 1 1 100%;
+    max-height: calc(100% - #{$page-header-height});
+    margin: 0 auto;
+
+    &:not(.contentNoGutter) {
+        padding: 0 48px;
+    }
+}

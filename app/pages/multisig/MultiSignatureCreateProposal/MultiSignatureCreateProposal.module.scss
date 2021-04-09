@@ -1,0 +1,28 @@
+@import 'config/bundle';
+@import '../common/MultiSignatureFlowPage.module';
+
+.subHeader {
+    border-bottom: 1px solid $color-grey;
+    padding-bottom: 10px;
+}
+
+.details {
+    composes: body;
+    width: 450px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.proposal {
+    margin: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 40%;
+
+    > *:not(:last-child) {
+        margin-bottom: 60px;
+    }
+}

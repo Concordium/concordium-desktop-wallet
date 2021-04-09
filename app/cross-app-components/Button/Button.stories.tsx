@@ -3,6 +3,7 @@ import React from 'react';
 import { Story, Meta } from '@storybook/react/types-6-0';
 
 import Button, { ButtonProps } from './Button';
+import PlusIcon from '../../../resources/svg/plus.svg';
 
 export default {
     title: 'Cross App Components/Button',
@@ -25,6 +26,21 @@ Inverted.args = {
     disabled: false,
 };
 
+export const Danger = Template.bind({});
+Danger.args = {
+    danger: true,
+    children: 'Button',
+    disabled: false,
+};
+
+export const Tiny = Template.bind({});
+Tiny.args = {
+    inverted: false,
+    children: 'Button',
+    disabled: false,
+    size: 'tiny',
+};
+
 export const Small = Template.bind({});
 Small.args = {
     inverted: false,
@@ -39,4 +55,27 @@ Big.args = {
     children: 'Button',
     disabled: false,
     size: 'big',
+};
+
+export const Huge = Template.bind({});
+Huge.args = {
+    inverted: false,
+    children: 'Button',
+    disabled: false,
+    size: 'huge',
+};
+
+export const HugeWithIcon = Template.bind({});
+HugeWithIcon.args = {
+    inverted: true,
+    children: 'Button',
+    disabled: false,
+    size: 'huge',
+    icon: <PlusIcon height="20" />,
+};
+
+export const Clear = Template.bind({});
+Clear.args = {
+    children: 'Button',
+    clear: true,
 };

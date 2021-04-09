@@ -1,3 +1,4 @@
+import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth } from './types';
 
 // given a YearMonth string (YYYYMM), returns
@@ -30,17 +31,19 @@ export function parseTime(
     return dtFormat.format(new Date(timeStampCorrectUnit));
 }
 
+export const dateFromTimeStamp = (
+    timeStamp: string | bigint,
+    unit: TimeStampUnit = TimeStampUnit.seconds
+): Date => new Date(parseInt(timeStamp.toString(), 10) * unit);
+
 /**
  * Given a unix timeStamp, return the date in ISO formatted string.
  * Assumes the timestamp is in seconds, otherwise the unit should be specified.
  */
-export function getISOFormat(
-    timeStamp: string,
+export const getISOFormat = (
+    timeStamp: string | bigint,
     unit: TimeStampUnit = TimeStampUnit.seconds
-) {
-    const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
-    return new Date(timeStampCorrectUnit).toISOString();
-}
+) => dateFromTimeStamp(timeStamp, unit).toISOString();
 
 export enum TimeConstants {
     Second = 1000,
@@ -58,6 +61,76 @@ export function getDefaultExpiry(): bigint {
     );
 }
 
-export function getNow(): number {
-    return new Date().getTime();
+export function getNow(
+    unit: TimeStampUnit = TimeStampUnit.milliSeconds
+): number {
+    return Math.floor(new Date().getTime() / unit);
 }
+
+export interface DateParts {
+    year: string;
+    month: string;
+    date: string;
+    hours: string;
+    minutes: string;
+    seconds: string;
+}
+
+export function datePartsFromDate(date?: Date): DateParts | undefined {
+    if (!date) {
+        return undefined;
+    }
+
+    return {
+        year: `${date.getFullYear()}`,
+        month: `${date.getMonth() + 1}`,
+        date: `${date.getDate()}`,
+        hours: `${date.getHours()}`,
+        minutes: `${date.getMinutes()}`,
+        seconds: `${date.getSeconds()}`,
+    };
+}
+
+export function dateFromDateParts(date: DateParts): Date {
+    return new Date(
+        parseInt(date.year, 10),
+        parseInt(date.month, 10) - 1,
+        parseInt(date.date, 10),
+        parseInt(date.hours, 10),
+        parseInt(date.minutes, 10),
+        parseInt(date.seconds, 10)
+    );
+}
+
+type DatePartFormatters = { [key in keyof DateParts]: (v?: string) => string };
+
+export const datePartFormatters: DatePartFormatters = {
+    year: ensureNumberLength(4),
+    month: ensureNumberLength(2),
+    date: ensureNumberLength(2),
+    hours: ensureNumberLength(2),
+    minutes: ensureNumberLength(2),
+    seconds: ensureNumberLength(2),
+};
+
+export const getFormattedDateString = (date: Date): string => {
+    const parts = datePartsFromDate(date);
+
+    if (!parts) {
+        return '';
+    }
+
+    const p: DateParts = (Object.keys(parts) as Array<
+        keyof DateParts
+    >).reduce<DateParts>(
+        (acc, k) => ({
+            ...acc,
+            [k]: datePartFormatters[k](parts[k]),
+        }),
+        {} as DateParts
+    );
+
+    const { year, month, date: d, hours, minutes, seconds } = p;
+
+    return `${year}-${month}-${d} at ${hours}:${minutes}:${seconds}`;
+};

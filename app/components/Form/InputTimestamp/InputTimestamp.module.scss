@@ -1,0 +1,61 @@
+@import 'config/bundle';
+
+.root {
+    text-align: center;
+}
+
+.label {
+    composes: h5 from global;
+    display: inline-block;
+}
+
+.input {
+    border-radius: 10px;
+    box-shadow: 0 0 0 1px $color-grey inset;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $color-white;
+    transition: box-shadow $anim-easing $anim-timing;
+
+    &Focused {
+        box-shadow: 0 0 0 2px $color-pale-blue inset;
+    }
+
+    &Invalid {
+        box-shadow: 0 0 0 2px $color-error inset;
+    }
+}
+
+.field {
+    color: $color-pale-blue;
+    -webkit-appearance: none;
+    border: none;
+    text-align: center;
+    font-size: $font-size-body3;
+    width: 50px;
+    background-color: transparent;
+
+    &::placeholder {
+        color: $color-text-faded;
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    &Invalid {
+        color: $color-error;
+    }
+}
+
+.year {
+    composes: field;
+    width: 70px;
+}
+
+.divider {
+    display: inline-block;
+    margin: 0 20px;
+}

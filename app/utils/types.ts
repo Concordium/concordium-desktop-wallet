@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
-import { HTMLAttributes, ComponentType } from 'react';
+import { HTMLAttributes } from 'react';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
 export type Hex = string;
 type Proofs = Hex;
-type Word64 = BigInt;
+type Word64 = bigint;
 type Word32 = number;
-type Word8 = number;
+export type Word8 = number;
+type JSONString = string; // indicates that it is some object that has been stringified.
 
 export enum SchemeId {
     Ed25519 = 0,
@@ -18,15 +20,16 @@ export interface VerifyKey {
     verifyKey: Hex;
 }
 
+export interface SignedPublicKey {
+    key: Hex;
+    signature: Hex;
+}
+
 export interface NewAccount {
     keys: VerifyKey[];
     threshold: number;
 }
 
-// AccountAddress if deploying credentials to an existing account, and
-// NewAccount for deployment of a new account.
-// TODO: Add support for AccountAddress for updating existing account credentials.
-type CredentialAccount = NewAccount;
 export interface Versioned<T> {
     v: number;
     value: T;
@@ -35,18 +38,18 @@ export interface Versioned<T> {
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
 export enum ChosenAttributes {
-    countryOfResidence,
-    dob,
     firstName,
-    idDocExpiresAt,
-    idDocIsseudAt,
-    idDocIssuer,
-    idDocNo,
-    idDocType,
     lastName,
-    nationalIdNo,
-    nationality,
     sex,
+    dob,
+    countryOfResidence,
+    nationality,
+    idDocType,
+    idDocNo,
+    idDocIssuer,
+    idDocIssuedAt,
+    idDocExpiresAt,
+    nationalIdNo,
     taxIdNo,
 }
 
@@ -96,20 +99,21 @@ export enum AccountStatus {
 /**
  * This Interface models the structure of the accounts stored in the database
  */
+
 export interface Account {
-    accountNumber: number;
     name: string;
     address: Hex;
     identityId: number;
     identityName?: string;
     status: AccountStatus;
-    credentialDeploymentHash?: string;
-    credential?: string;
+    signatureThreshold?: number;
     totalDecrypted?: string;
     allDecrypted?: boolean;
     incomingAmounts?: string;
     selfAmounts?: string;
     maxTransactionId: number;
+    deploymentTransactionId?: string;
+    isInitial: boolean;
 }
 
 export enum TransactionKindString {
@@ -158,7 +162,7 @@ export interface SimpleTransferPayload {
 export interface EncryptedTransferPayload {
     transferAmount: string;
     toAddress: string;
-    remainingAmount?: string; // encrypted
+    remainingEncryptedAmount?: EncryptedAmount;
     index?: string;
     proof?: string;
 }
@@ -169,7 +173,7 @@ export interface TransferToEncryptedPayload {
 
 export interface TransferToPublicPayload {
     transferAmount: string;
-    remainingAmount?: string; // encrypted
+    remainingEncryptedAmount?: EncryptedAmount;
     index?: string;
     proof?: string;
 }
@@ -219,16 +223,63 @@ export enum BlockItemKind {
     UpdateInstructionKind = 2,
 }
 
+export interface ChainArData {
+    encIdCredPubShare: Hex;
+}
+
+export interface CredentialDeploymentValues {
+    credId: Hex;
+    ipIdentity: IpIdentity;
+    revocationThreshold: Threshold;
+    credentialPublicKeys: CredentialPublicKeys;
+    policy: Policy;
+    arData: Record<string, ChainArData>;
+}
+
+export interface IdOwnershipProofs {
+    challenge: Hex;
+    commitments: Hex;
+    credCounterLessThanMaxAccounts: Hex;
+    proofIdCredPub: Record<string, Hex>;
+    proofIpSig: Hex;
+    proofRegId: Hex;
+    sig: Hex;
+}
+
+// Reflects the structure of UnsignedCredentialDeploymentInformation
+// from the crypto dependency.
+export interface UnsignedCredentialDeploymentInformation
+    extends CredentialDeploymentValues {
+    proofs: IdOwnershipProofs;
+}
+
 // Reflects the structure of CredentialDeploymentInformation
 // from the crypto dependency.
-export interface CredentialDeploymentInformation {
-    account: CredentialAccount;
-    regId: RegId;
-    ipId: IpIdentity;
-    revocationThreshold: Threshold;
-    arData: Record<string, ArInfo>;
-    policy: Policy;
+export interface CredentialDeploymentInformation
+    extends CredentialDeploymentValues {
     proofs: Proofs;
+}
+
+export interface Credential {
+    accountAddress: string;
+    external: boolean;
+    credentialIndex?: number;
+    credentialNumber?: number;
+    identityId?: number;
+    credId: Hex;
+    policy: JSONString;
+}
+
+export interface LocalCredential extends Credential {
+    external: false;
+    identityId: number;
+    credentialNumber: number;
+}
+
+export function instanceOfLocalCredential(
+    object: Credential
+): object is LocalCredential {
+    return !object.external;
 }
 
 // 48 bytes containing a group element.
@@ -264,6 +315,11 @@ export enum AttributeTag {
     taxIdNo = 12,
 }
 
+export interface CredentialPublicKeys {
+    keys: Record<number, VerifyKey>;
+    threshold: number;
+}
+
 /**
  * This interface models the PublicInformationForIp structure, which we get from the Crypto Dependency
  * (And is used during Identity Issuance)
@@ -271,7 +327,7 @@ export enum AttributeTag {
 export interface PublicInformationForIp {
     idCredPub: Hex;
     regId: RegId;
-    publicKeys: NewAccount;
+    publicKeys: CredentialPublicKeys;
 }
 
 // Statuses that a transaction can have.
@@ -332,14 +388,14 @@ export enum RejectReason {
  * This Interface models the structure of the transfer transactions stored in the database
  */
 export interface TransferTransaction {
-    remote: boolean | 0 | 1; // SQlite converts booleans to 0/1
+    remote: boolean;
     originType: OriginType;
     transactionKind: TransactionKindString;
     id?: number; // only remote transactions have ids.
     blockHash: Hex;
     blockTime: string;
     total: string;
-    success?: boolean | 0 | 1; // SQlite converts booleans to 0/1
+    success?: boolean;
     transactionHash: Hex;
     subtotal?: string;
     cost?: string;
@@ -504,11 +560,16 @@ export interface UpdateHeader {
     payloadSize?: Word32;
 }
 
+export interface UpdateInstructionSignature {
+    authorizationKeyIndex: number;
+    signature: string;
+}
+
 export interface UpdateInstruction<T extends UpdateInstructionPayload> {
     header: UpdateHeader;
     payload: T;
     type: UpdateType;
-    signatures: string[];
+    signatures: UpdateInstructionSignature[];
 }
 
 export type UpdateInstructionPayload =
@@ -517,7 +578,9 @@ export type UpdateInstructionPayload =
     | FoundationAccount
     | MintDistribution
     | ProtocolUpdate
-    | GasRewards;
+    | GasRewards
+    | BakerStakeThreshold
+    | ElectionDifficulty;
 
 export type Transaction =
     | AccountTransaction
@@ -536,6 +599,7 @@ export enum UpdateType {
     UpdateMintDistribution = 6,
     UpdateTransactionFeeDistribution = 7,
     UpdateGASRewards = 8,
+    UpdateBakerStakeThreshold = 9,
 }
 
 export function instanceOfAccountTransaction(
@@ -619,17 +683,31 @@ export function isGasRewards(
     return UpdateType.UpdateGASRewards === transaction.type;
 }
 
+export function isBakerStakeThreshold(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<BakerStakeThreshold> {
+    return UpdateType.UpdateBakerStakeThreshold === transaction.type;
+}
+
+export function isElectionDifficulty(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<ElectionDifficulty> {
+    return UpdateType.UpdateElectionDifficulty === transaction.type;
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
  */
 export enum MultiSignatureTransactionStatus {
-    Open = 'open',
-    Submitted = 'submitted',
-    Rejected = 'rejected',
-    Finalized = 'finalized',
+    Closed = 'closed',
     Committed = 'committed',
+    Expired = 'expired',
     Failed = 'failed',
+    Finalized = 'finalized',
+    Open = 'open',
+    Rejected = 'rejected',
+    Submitted = 'submitted',
 }
 
 /**
@@ -656,6 +734,7 @@ export enum MultiSignatureMenuItems {
     MakeNewProposal = 'Make new proposal',
     ProposedTransactions = 'Proposed transactions',
     SignTransaction = 'Sign transaction',
+    ExportKey = 'Export public-key',
 }
 
 export interface ExchangeRate {
@@ -704,6 +783,14 @@ export interface GasRewards {
     chainUpdate: RewardFraction;
 }
 
+export interface BakerStakeThreshold {
+    threshold: Word64;
+}
+
+export interface ElectionDifficulty {
+    electionDifficulty: Word32;
+}
+
 export interface TransactionDetails {
     events: string[];
     rejectReason?: string;
@@ -719,8 +806,8 @@ export interface TransactionOrigin {
 }
 
 export interface EncryptedInfo {
-    encryptedAmount: string;
-    incomingAmounts: string[];
+    encryptedAmount: EncryptedAmount;
+    incomingAmounts: EncryptedAmount[];
 }
 
 export interface IncomingTransaction {
@@ -755,10 +842,18 @@ export enum ColorType {
     Black = 'black',
 }
 
+// Makes all properties of type T non-optional.
 export type NotOptional<T> = {
     [P in keyof T]-?: T[P];
 };
 
+/**
+ * @description
+ * Object where keys and values are the same. Useful for storing names of form fields, and other things.
+ *
+ * @example
+ * const equal: EqualRecord<{ name: string, address: string }> = { name: 'name', address: 'address' };
+ */
 export type EqualRecord<T> = { [P in keyof T]: P };
 
 export interface EncryptionMetaData {
@@ -780,6 +875,7 @@ export interface ExportData {
     accounts: Account[];
     identities: Identity[];
     addressBook: AddressBookEntry[];
+    credentials: Credential[];
 }
 
 interface EventResult {
@@ -796,17 +892,63 @@ export interface Action {
     location?: string;
 }
 
+export type ClassName = Pick<HTMLAttributes<HTMLElement>, 'className'>;
+
 export type ClassNameAndStyle = Pick<
     HTMLAttributes<HTMLElement>,
     'style' | 'className'
 >;
 
-export type WithAsProp<TAsProps> = TAsProps & {
-    as: ComponentType<TAsProps>;
+// Source: https://github.com/emotion-js/emotion/blob/master/packages/styled-base/types/helper.d.ts
+// A more precise version of just React.ComponentPropsWithRef on its own
+export type PropsOf<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    C extends keyof JSX.IntrinsicElements | React.JSXElementConstructor<any>
+> = JSX.LibraryManagedAttributes<C, React.ComponentPropsWithRef<C>>;
+
+export type AsProp<C extends React.ElementType> = {
+    /**
+     * An override of the default HTML tag.
+     * Can also be another React component.
+     */
+    as?: C;
 };
-export type WithAsPropOmit<TAsProps, TOmitKeys extends keyof TAsProps> = Omit<
-    TAsProps,
-    TOmitKeys
-> & {
-    as: ComponentType<TAsProps>;
-};
+
+/**
+ * Allows for extending a set of props (`ExtendedProps`) by an overriding set of props
+ * (`OverrideProps`), ensuring that any duplicates are overridden by the overriding
+ * set of props.
+ */
+export type ExtendableProps<
+    ExtendedProps = {},
+    OverrideProps = {}
+> = OverrideProps & Omit<ExtendedProps, keyof OverrideProps>;
+
+/**
+ * Allows for inheriting the props from the specified element type so that
+ * props like children, className & style work, as well as element-specific
+ * attributes like aria roles. The component (`C`) must be passed in.
+ */
+export type InheritableElementProps<
+    C extends React.ElementType,
+    Props = {}
+> = ExtendableProps<PropsOf<C>, Props>;
+
+/**
+ * @description
+ * A more sophisticated version of `InheritableElementProps` where
+ * the passed in `as` prop will determine which props can be included. Used for polymorphic components.
+ *
+ * @example
+ * type ButtonProps<TAs extends ElementType = 'button'> = PolymorphicComponentProps<TAs, { p1: string, p2?: number }>;
+ *
+ * function Button<TAs extends ElementType = 'button'>({ p1, p2, as, ...props }: ButtonProps<TAs>) {
+ *   const Component = as || 'button';
+ *
+ *   return <Component {...props} />;
+ * }
+ */
+export type PolymorphicComponentProps<
+    C extends React.ElementType,
+    Props = {}
+> = InheritableElementProps<C, Props & AsProp<C>>;

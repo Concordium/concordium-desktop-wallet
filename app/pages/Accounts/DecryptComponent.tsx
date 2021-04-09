@@ -13,7 +13,8 @@ import {
 } from '../../features/TransactionSlice';
 import { Account } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
+import SimpleLedger from '../../components/ledger/SimpleLedger';
+import { getCredentialsOfAccount } from '~/database/CredentialDao';
 
 interface Props {
     account: Account;
@@ -44,11 +45,26 @@ export default function DecryptComponent({ account }: Props) {
         const prfKeySeed = await ledger.getPrfKey(account.identityId);
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
-        await decryptAccountBalance(prfKey, account, global);
-        await decryptTransactions(transactions, prfKey, account, global);
+
+        const credentialNumber = (
+            await getCredentialsOfAccount(account.address)
+        ).find((cred) => cred.credentialIndex === 0)?.credentialNumber;
+
+        if (credentialNumber === undefined) {
+            throw new Error(
+                'Unable to decrypt amounts, because we were unable to find original credential'
+            );
+        }
+        await decryptAccountBalance(prfKey, account, credentialNumber, global);
+        await decryptTransactions(
+            transactions,
+            prfKey,
+            credentialNumber,
+            global
+        );
         await loadTransactions(account, dispatch);
         await loadAccounts(dispatch);
     }
 
-    return <LedgerComponent ledgerCall={ledgerCall} />;
+    return <SimpleLedger ledgerCall={ledgerCall} />;
 }

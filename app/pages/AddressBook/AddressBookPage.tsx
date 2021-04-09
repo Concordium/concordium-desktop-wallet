@@ -1,29 +1,44 @@
 import React from 'react';
-import { Grid } from 'semantic-ui-react';
-import AddressBookList from './AddressBookList';
-import AddressBookElementView from './AddressBookElementView';
-import PageHeader from '../../components/PageHeader';
 
+import { Route, Switch } from 'react-router';
 import PlusIcon from '../../../resources/svg/plus.svg';
 import UpsertAddress from '../../components/UpsertAddress';
+import PageLayout from '../../components/PageLayout';
+import Columns from '../../components/Columns';
+import routes from '../../constants/routes.json';
+
+import AddressBookList from './AddressBookList';
+import AddressBookSelected from './AddressBookSelected';
+
+import styles from './AddressBookPage.module.scss';
 
 export default function AddressBookPage() {
     return (
-        <>
-            <PageHeader>
+        <PageLayout noGutter>
+            <PageLayout.Header>
                 <h1>Address Book</h1>
-                <UpsertAddress as={PageHeader.Button} align="right">
-                    <PlusIcon />
+                <UpsertAddress as={PageLayout.HeaderButton} align="right">
+                    <PlusIcon height="20" />
                 </UpsertAddress>
-            </PageHeader>
-            <Grid centered columns="equal" divided>
-                <Grid.Column>
+            </PageLayout.Header>
+            <Columns
+                divider
+                className={styles.columns}
+                columnClassName={styles.column}
+                columnScroll
+            >
+                <Columns.Column verticalPadding>
                     <AddressBookList />
-                </Grid.Column>
-                <Grid.Column>
-                    <AddressBookElementView />
-                </Grid.Column>
-            </Grid>
-        </>
+                </Columns.Column>
+                <Columns.Column verticalPadding>
+                    <Switch>
+                        <Route
+                            path={routes.ADDRESSBOOK_SELECTED}
+                            render={() => <AddressBookSelected />}
+                        />
+                    </Switch>
+                </Columns.Column>
+            </Columns>
+        </PageLayout>
     );
 }

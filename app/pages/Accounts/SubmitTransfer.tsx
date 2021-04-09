@@ -3,30 +3,38 @@ import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Segment, Header, Grid, Button } from 'semantic-ui-react';
-import { parse } from '../../utils/JSONHelper';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
-import { sendTransaction } from '../../utils/nodeRequests';
-import { getAccountInfoOfAddress } from '../../utils/nodeHelpers';
+import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
+import { parse } from '~/utils/JSONHelper';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
+import { sendTransaction } from '~/utils/nodeRequests';
 import {
     serializeTransaction,
     getTransactionHash,
-} from '../../utils/transactionSerialization';
-import { monitorTransactionStatus } from '../../utils/TransactionStatusPoller';
+} from '~/utils/transactionSerialization';
+import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
 import {
     Account,
+    LocalCredential,
+    instanceOfLocalCredential,
     AccountInfo,
     AccountTransaction,
     Global,
     instanceOfTransferToPublic,
     instanceOfEncryptedTransfer,
-} from '../../utils/types';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { addPendingTransaction } from '../../features/TransactionSlice';
-import { accountsInfoSelector } from '../../features/AccountSlice';
-import { globalSelector } from '../../features/GlobalSlice';
-import { getAccountPath } from '../../features/ledger/Path';
-import TransactionDetails from '../../components/TransactionDetails';
-import { makeTransferToPublicData, makeEncryptedTransferData } from '../../utils/rustInterface';
+} from '~/utils/types';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { addPendingTransaction } from '~/features/TransactionSlice';
+import { accountsInfoSelector } from '~/features/AccountSlice';
+import { globalSelector } from '~/features/GlobalSlice';
+import { getAccountPath } from '~/features/ledger/Path';
+import TransactionDetails from '~/components/TransactionDetails';
+import {
+    makeTransferToPublicData,
+    makeEncryptedTransferData,
+} from '~/utils/rustInterface';
+import PageLayout from '~/components/PageLayout';
+import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
+import { getCredentialsOfAccount } from '~/database/CredentialDao';
 
 interface Location {
     pathname: string;
@@ -44,44 +52,48 @@ interface Props {
     location: LocationDescriptorObject<State>;
 }
 
-async function buildEncryptedPayload(
+async function attachCompletedPayload(
     transaction: AccountTransaction,
     ledger: ConcordiumLedgerClient,
     global: Global,
-    account: Account,
+    credential: LocalCredential,
     accountInfo: AccountInfo
 ) {
-    console.log(accountInfo);
-    console.log(account);
     if (instanceOfTransferToPublic(transaction)) {
-        const prfKeySeed = await ledger.getPrfKey(account.identityId);
+        const prfKeySeed = await ledger.getPrfKey(credential.identityId);
         const data = await makeTransferToPublicData(
             transaction.payload.transferAmount,
             prfKeySeed.toString('hex'),
-            accountInfo.accountEncryptionKey,
             global,
-            accountInfo.accountEncryptedAmount.selfAmount,
-            accountInfo.accountEncryptedAmount.incomingAmounts,
-            accountInfo.accountEncryptedAmount.startIndex,
-            account.accountNumber
+            accountInfo.accountEncryptedAmount,
+            credential.credentialNumber
         );
-        console.log(data);
         return { ...transaction, payload: data.payload };
     }
     if (instanceOfEncryptedTransfer(transaction)) {
-        const prfKeySeed = await ledger.getPrfKey(account.identityId);
-        const receiverAccountInfo = await getAccountInfoOfAddress(transaction.payload.toAddress);
+        const prfKeySeed = await ledger.getPrfKey(credential.identityId);
+        const receiverAccountInfo = await getAccountInfoOfAddress(
+            transaction.payload.toAddress
+        );
         const data = await makeEncryptedTransferData(
             transaction.payload.transferAmount,
             receiverAccountInfo.accountEncryptionKey,
             prfKeySeed.toString('hex'),
             global,
-            accountInfo.accountEncryptedAmount.selfAmount,
-            accountInfo.accountEncryptedAmount.startIndex,
-            account.accountNumber
+            accountInfo.accountEncryptedAmount,
+            credential.credentialNumber
         );
+
+        const payload = {
+            proof: data.payload.proof,
+            index: data.payload.index,
+            transferAmount: data.payload.transferAmount,
+            remainingEncryptedAmount: data.payload.remainingAmount,
+            toAddress: transaction.payload.toAddress,
+        };
+
         console.log(data);
-        return { ...transaction, payload: { ...data.payload, toAddress: transaction.payload.toAddress} };
+        return { ...transaction, payload };
     }
     return transaction;
 }
@@ -89,7 +101,6 @@ async function buildEncryptedPayload(
 /**
  * Receives transaction to sign, using the ledger,
  * and then submits it.
- * TODO generalize, as right now it only really works with simple transfers.
  */
 export default function SubmitTransfer({ location }: Props) {
     const dispatch = useDispatch();
@@ -112,30 +123,62 @@ export default function SubmitTransfer({ location }: Props) {
     // This function builds the transaction then signs the transaction,
     // send the transaction, saves it, begins monitoring it's status
     // and then redirects to final page.
-    // TODO: Break this function up
-    async function ledgerSignTransfer(ledger: ConcordiumLedgerClient) {
+    async function ledgerSignTransfer(
+        ledger: ConcordiumLedgerClient,
+        setMessage: (message: string) => void
+    ) {
+        const signatureIndex = 0;
+        const credentialAccountIndex = 0; // TODO: do we need to support other credential indices here?
+
         if (!global) {
-            throw new Error('whoops');
+            setMessage('Missing global object.');
+            return;
         }
-        transaction = await buildEncryptedPayload(
+
+        const credential = (
+            await getCredentialsOfAccount(account.address)
+        ).find((cred) => cred.credentialIndex === credentialAccountIndex);
+
+        if (!credential) {
+            setMessage(
+                'Unable to sign transfer, because we were unable to find a credential'
+            );
+            return;
+        }
+        if (!instanceOfLocalCredential(credential)) {
+            setMessage(
+                'Unable to sign transfer, because we got an external credential'
+            );
+            return;
+        }
+
+        transaction = await attachCompletedPayload(
             transaction,
             ledger,
             global,
-            account,
+            credential,
             accountInfoMap[account.address]
         );
+
         const path = getAccountPath({
             identityIndex: account.identityId,
-            accountIndex: account.accountNumber,
-            signatureIndex: 0,
+            accountIndex: credential.credentialNumber,
+            signatureIndex,
         });
         const signature: Buffer = await ledger.signTransfer(transaction, path);
-        const serializedTransaction = serializeTransaction(transaction, () => [
-            signature,
-        ]);
-        const transactionHash = getTransactionHash(transaction, () => [
-            signature,
-        ]).toString('hex');
+        const signatureStructured = buildTransactionAccountSignature(
+            credentialAccountIndex,
+            signatureIndex,
+            signature
+        );
+        const serializedTransaction = serializeTransaction(
+            transaction,
+            () => signatureStructured
+        );
+        const transactionHash = getTransactionHash(
+            transaction,
+            () => signatureStructured
+        ).toString('hex');
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
             addPendingTransaction(transaction, transactionHash);
@@ -148,31 +191,36 @@ export default function SubmitTransfer({ location }: Props) {
     }
 
     return (
-        <Container>
-            <Segment>
-                <Button onClick={() => dispatch(push(cancelled))}>
-                    {'<--'}
-                </Button>
-                <Header textAlign="center">
-                    Submit the transaction with your hardware wallet
-                </Header>
-                <Container text>
-                    <p>
-                        Choose your hardware wallet on the right. Be sure to
-                        verify that all the information below is exactly the
-                        same on your hardware wallet, before submitting the
-                        transaction.
-                    </p>
-                </Container>
-                <Grid columns={2} divided textAlign="center" padded>
-                    <Grid.Column>
-                        <TransactionDetails transaction={transaction} />
-                    </Grid.Column>
-                    <Grid.Column>
-                        <LedgerComponent ledgerCall={ledgerSignTransfer} />
-                    </Grid.Column>
-                </Grid>
-            </Segment>
-        </Container>
+        <PageLayout>
+            <PageLayout.Header>
+                <h1>Accounts | Submit Transfer</h1>
+            </PageLayout.Header>
+            <Container>
+                <Segment>
+                    <Button onClick={() => dispatch(push(cancelled))}>
+                        {'<--'}
+                    </Button>
+                    <Header textAlign="center">
+                        Submit the transaction with your hardware wallet
+                    </Header>
+                    <Container text>
+                        <p>
+                            Choose your hardware wallet on the right. Be sure to
+                            verify that all the information below is exactly the
+                            same on your hardware wallet, before submitting the
+                            transaction.
+                        </p>
+                    </Container>
+                    <Grid columns={2} divided textAlign="center" padded>
+                        <Grid.Column>
+                            <TransactionDetails transaction={transaction} />
+                        </Grid.Column>
+                        <Grid.Column>
+                            <SimpleLedger ledgerCall={ledgerSignTransfer} />
+                        </Grid.Column>
+                    </Grid>
+                </Segment>
+            </Container>
+        </PageLayout>
     );
 }

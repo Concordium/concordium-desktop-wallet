@@ -41,9 +41,21 @@ pub fn generate_unsigned_credential_ext(
 #[wasm_bindgen(js_name = getDeploymentInfo)]
 pub fn get_credential_deployment_info_ext(
     signature: &str,
-    unsigned_info: &str
+    unsigned_info: &str,
 ) -> String {
     match get_credential_deployment_info_aux(signature, unsigned_info) {
+        Ok(s) => s,
+        Err(e) => format!("unable to get credential due to: {}", e),
+    }
+}
+
+#[wasm_bindgen(js_name = getDeploymentDetails)]
+pub fn get_credential_deployment_details_ext(
+    signature: &str,
+    unsigned_info: &str,
+    expiry: u64
+) -> String {
+    match get_credential_deployment_details_aux(signature, unsigned_info, expiry) {
         Ok(s) => s,
         Err(e) => format!("unable to get credential due to: {}", e),
     }

@@ -1,9 +1,10 @@
-import { BlockSummary } from './NodeApiTypes';
+import { Authorization, Authorizations, BlockSummary } from './NodeApiTypes';
 import {
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     AddressBookEntry,
+    Word8,
 } from './types';
 
 export interface TransactionInput {
@@ -17,9 +18,6 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
-    forwardTransaction: (
-        multiSignatureTransaction: Partial<MultiSignatureTransaction>
-    ) => Promise<void>;
 }
 
 /**
@@ -45,8 +43,31 @@ export interface TransactionHandler<T, S> {
     confirmType: (
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ) => T;
+    createTransaction: (
+        blockSummary: BlockSummary,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fields: any,
+        effectiveTime: bigint
+    ) => Promise<Partial<MultiSignatureTransaction> | undefined>;
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
     view: (transaction: T) => JSX.Element;
+    getAuthorization: (authorizations: Authorizations) => Authorization;
     update: UpdateComponent;
+    type: string;
+    title: string;
 }
+
+// An actual signature, which goes into an account transaction.
+export type Signature = Buffer;
+
+type KeyIndex = Word8;
+// Signatures from a single credential, for an AccountTransaction
+export type TransactionCredentialSignature = Record<KeyIndex, Signature>;
+
+type CredentialIndex = Word8;
+// The signature of an account transaction.
+export type TransactionAccountSignature = Record<
+    CredentialIndex,
+    TransactionCredentialSignature
+>;

@@ -9,12 +9,11 @@ interface Props {
 }
 
 /**
- * Controls the flow of creating a simple transfer.
+ * Controls the flow of creating a transfer to public.
  */
-export default function ShieldAmount({ account }: Props) {
+export default function UnshieldAmount({ account }: Props) {
     const specific = {
-        title: 'Unshield Amount',
-        amountHeader: '',
+        amountHeader: 'Unshield Amount',
         createTransaction: createUnshieldAmountTransaction,
         location: routes.ACCOUNTS_UNSHIELDAMOUNT,
     };

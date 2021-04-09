@@ -7,18 +7,21 @@ import React, {
     useMemo,
 } from 'react';
 
-import { CommonFieldProps } from '../common';
+import { CommonInputProps } from '../common';
+import ErrorMessage from '../ErrorMessage';
 
 import styles from './TextArea.module.scss';
 
 function scaleTextArea(el: HTMLTextAreaElement) {
-    el.style.height = '5px';
-    el.style.height = `${el.scrollHeight}px`;
+    setTimeout(() => {
+        el.style.height = '5px';
+        el.style.height = `${el.scrollHeight}px`;
+    }, 0);
 }
 
 export interface TextAreaProps
     extends TextareaHTMLAttributes<HTMLTextAreaElement>,
-        CommonFieldProps {
+        CommonInputProps {
     /**
      * @description
      * Automatically scales the textarea to the size needed to display the content.
@@ -36,7 +39,16 @@ export interface TextAreaProps
  */
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
     (
-        { error, className, autoScale = false, onChange, rows, ...props },
+        {
+            error,
+            isInvalid = false,
+            className,
+            autoScale = true,
+            onChange,
+            rows = 2,
+            label,
+            ...props
+        },
         ref
     ) => {
         const interceptedRows = useMemo(() => (autoScale ? undefined : rows), [
@@ -58,14 +70,12 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 
         const setRef = useCallback(
             (instance: HTMLTextAreaElement) => {
-                if (!instance) {
+                if (!instance || !ref) {
                     return;
                 }
 
-                scaleTextArea(instance);
-
-                if (!ref) {
-                    return;
+                if (autoScale) {
+                    scaleTextArea(instance);
                 }
 
                 if (typeof ref === 'function') {
@@ -77,23 +87,28 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                     };
                 }
             },
-            [ref]
+            [ref, autoScale]
         );
 
         return (
-            <textarea
-                className={clsx(
-                    styles.field,
-                    className,
-                    autoScale && styles.autoScale,
-                    error !== undefined && styles.fieldInvalid
-                )}
-                ref={setRef}
-                onChange={handleChange}
-                onLoad={(e) => scaleTextArea(e.target as HTMLTextAreaElement)}
-                rows={interceptedRows}
-                {...props}
-            />
+            <label className={clsx(styles.root, className)}>
+                <span className={styles.label}>{label}</span>
+                <textarea
+                    className={clsx(
+                        styles.field,
+                        autoScale && styles.autoScale,
+                        isInvalid && styles.fieldInvalid
+                    )}
+                    ref={setRef}
+                    onChange={handleChange}
+                    onLoad={(e) =>
+                        scaleTextArea(e.target as HTMLTextAreaElement)
+                    }
+                    rows={interceptedRows}
+                    {...props}
+                />
+                <ErrorMessage>{error}</ErrorMessage>
+            </label>
         );
     }
 );

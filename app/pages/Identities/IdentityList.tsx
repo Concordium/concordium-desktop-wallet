@@ -1,19 +1,17 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
-import { Button, Menu } from 'semantic-ui-react';
-import routes from '../../constants/routes.json';
 import IdentityListElement from '../../components/IdentityListElement';
+// import Button from '~/cross-app-components/Button';
 import {
     chooseIdentity,
     identitiesSelector,
     chosenIdentitySelector,
 } from '../../features/IdentitySlice';
 import { Identity } from '../../utils/types';
+import styles from './Identities.module.scss';
 
 /**
  * Displays the List of local identities, And allows picking the chosen identity.
- * TODO: move the "IdentityIssuance start button"?
  */
 export default function IdentityList() {
     const dispatch = useDispatch();
@@ -22,20 +20,15 @@ export default function IdentityList() {
 
     return (
         <>
-            <Button onClick={() => dispatch(push(routes.IDENTITYISSUANCE))}>
-                +
-            </Button>
-            <Menu vertical fluid>
-                {identities.map((identity: Identity) => (
-                    <Menu.Item
-                        key={identity.id}
-                        onClick={() => dispatch(chooseIdentity(identity))}
-                        active={chosenIdentity === identity}
-                    >
-                        <IdentityListElement identity={identity} />
-                    </Menu.Item>
-                ))}
-            </Menu>
+            {identities.map((identity: Identity) => (
+                <IdentityListElement
+                    identity={identity}
+                    key={identity.id}
+                    className={styles.listElement}
+                    active={chosenIdentity === identity}
+                    onClick={() => dispatch(chooseIdentity(identity))}
+                />
+            ))}
         </>
     );
 }

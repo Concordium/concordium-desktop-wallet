@@ -1,15 +1,19 @@
 import { parse } from 'json-bigint';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import {
     UpdateComponent,
     TransactionHandler,
     TransactionInput,
 } from '../transactionTypes';
 import {
+    MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
 } from '../types';
+import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
+import ElectionDifficultyHandler from './ElectionDifficultyHandler';
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
 import FoundationAccountHandler from './FoundationAccountHandler';
 import GasRewardsHandler from './GasRewardsHandler';
@@ -28,13 +32,28 @@ class HandlerTypeMiddleware<T>
 
     update: UpdateComponent;
 
+    title: string;
+
+    type: string;
+
     constructor(base: TransactionHandler<T, ConcordiumLedgerClient>) {
         this.base = base;
         this.update = base.update;
+        this.title = base.title;
+        this.type = base.type;
     }
 
     confirmType(transaction: UpdateInstruction<UpdateInstructionPayload>) {
         return transaction;
+    }
+
+    createTransaction(
+        blockSummary: BlockSummary,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fields: any,
+        effectiveTime: bigint
+    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
+        return this.base.createTransaction(blockSummary, fields, effectiveTime);
     }
 
     serializePayload(transaction: UpdateInstruction<UpdateInstructionPayload>) {
@@ -53,6 +72,10 @@ class HandlerTypeMiddleware<T>
 
     view(transaction: UpdateInstruction<UpdateInstructionPayload>) {
         return this.base.view(this.base.confirmType(transaction));
+    }
+
+    getAuthorization(authorizations: Authorizations) {
+        return this.base.getAuthorization(authorizations);
     }
 }
 
@@ -79,6 +102,10 @@ export default function findHandler(
             return new HandlerTypeMiddleware(new ProtocolUpdateHandler());
         case UpdateType.UpdateGASRewards:
             return new HandlerTypeMiddleware(new GasRewardsHandler());
+        case UpdateType.UpdateBakerStakeThreshold:
+            return new HandlerTypeMiddleware(new BakerStakeThresholdHandler());
+        case UpdateType.UpdateElectionDifficulty:
+            return new HandlerTypeMiddleware(new ElectionDifficultyHandler());
         default:
             throw new Error(`Unsupported transaction type: ${type}`);
     }

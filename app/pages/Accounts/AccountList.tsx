@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Menu, Button } from 'semantic-ui-react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     loadAccounts,
     loadAccountInfos,
@@ -12,8 +11,9 @@ import {
 } from '../../features/AccountSlice';
 import { setViewingShielded } from '../../features/TransactionSlice';
 import AccountListElement from '../../components/AccountListElement';
-import routes from '../../constants/routes.json';
 import { Account, Dispatch } from '../../utils/types';
+import routes from '../../constants/routes.json';
+import styles from './Accounts.module.scss';
 
 async function load(dispatch: Dispatch) {
     const accounts = await loadAccounts(dispatch);
@@ -44,26 +44,20 @@ export default function AccountList() {
 
     return (
         <>
-            <Button onClick={() => dispatch(push(routes.ACCOUNTCREATION))}>
-                +
-            </Button>
-            <Menu vertical fluid>
-                {accounts.map((account: Account, index: number) => (
-                    <Menu.Item
-                        key={account.address}
-                        active={index === chosenIndex}
-                    >
-                        <AccountListElement
-                            account={account}
-                            accountInfo={accountsInfo[account.address]}
-                            onClick={(shielded) => {
-                                dispatch(chooseAccount(index));
-                                dispatch(setViewingShielded(shielded));
-                            }}
-                        />
-                    </Menu.Item>
-                ))}
-            </Menu>
+            {accounts.map((account: Account, index: number) => (
+                <AccountListElement
+                    key={account.address}
+                    className={styles.listElement}
+                    active={index === chosenIndex}
+                    account={account}
+                    accountInfo={accountsInfo[account.address]}
+                    onClick={(shielded) => {
+                        dispatch(push(routes.ACCOUNTS));
+                        dispatch(chooseAccount(index));
+                        dispatch(setViewingShielded(shielded));
+                    }}
+                />
+            ))}
         </>
     );
 }

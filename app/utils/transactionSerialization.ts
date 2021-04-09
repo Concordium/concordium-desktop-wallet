@@ -11,12 +11,18 @@ import {
     EncryptedTransferPayload,
 } from './types';
 import {
-    encodeWord16,
+    TransactionAccountSignature,
+    Signature,
+    TransactionCredentialSignature,
+} from './transactionTypes';
+import {
     encodeWord32,
     encodeWord64,
     put,
     putBase58Check,
     hashSha256,
+    serializeMap,
+    base58ToBuffer,
 } from './serializationHelpers';
 
 function serializeSimpleTransfer(payload: SimpleTransferPayload) {
@@ -66,33 +72,25 @@ function serializeTransferToEncypted(payload: TransferToEncryptedPayload) {
 }
 
 export function serializeTransferToPublicData(
-    payload: TransferToPublicPayload | EncryptedTransferPayload
+    payload: TransferToPublicPayload
 ) {
     if (
         !payload.proof ||
         payload.index === undefined ||
-        !payload.remainingAmount
+        !payload.remainingEncryptedAmount
     ) {
         throw new Error('unexpected missing data of Transfer to Public data');
     }
-    const remainingAmount = Buffer.from(payload.remainingAmount, 'hex');
-    const size = remainingAmount.length + 8 + 8;
-    console.log('data size:');
-    console.log(size);
-    const serialized = new Uint8Array(size);
+    const remainingEncryptedAmount = Buffer.from(
+        payload.remainingEncryptedAmount,
+        'hex'
+    );
 
-    put(serialized, 0, remainingAmount);
-    put(
-        serialized,
-        remainingAmount.length,
-        encodeWord64(BigInt(payload.transferAmount))
-    );
-    put(
-        serialized,
-        remainingAmount.length + 8,
-        encodeWord64(BigInt(payload.index))
-    );
-    return serialized;
+    return Buffer.concat([
+        remainingEncryptedAmount,
+        encodeWord64(BigInt(payload.transferAmount)),
+        encodeWord64(BigInt(payload.index)),
+    ]);
 }
 
 function serializeTransferToPublic(payload: TransferToPublicPayload) {
@@ -111,19 +109,41 @@ function serializeTransferToPublic(payload: TransferToPublicPayload) {
     return serialized;
 }
 
+export function serializeEncryptedTransferData(
+    payload: EncryptedTransferPayload
+) {
+    if (
+        !payload.proof ||
+        payload.index === undefined ||
+        !payload.remainingEncryptedAmount
+    ) {
+        throw new Error('unexpected missing data of Encrypted Transfer data');
+    }
+    const remainingEncryptedAmount = Buffer.from(
+        payload.remainingEncryptedAmount,
+        'hex'
+    );
+    const transferAmount = Buffer.from(payload.transferAmount, 'hex');
+
+    return Buffer.concat([
+        base58ToBuffer(payload.toAddress),
+        remainingEncryptedAmount,
+        transferAmount,
+        encodeWord64(BigInt(payload.index)),
+    ]);
+}
 
 function serializeEncryptedTransfer(payload: EncryptedTransferPayload) {
     if (!payload.proof) {
-        throw new Error('unexpected missing proof of Transfer to Public data');
+        throw new Error('unexpected missing proof of Encrypted Transfer data');
     }
 
     const proof = Buffer.from(payload.proof, 'hex');
-    const data = serializeTransferToPublicData(payload);
+    const data = serializeEncryptedTransferData(payload);
     const size = 1 + data.length + proof.length;
     const serialized = new Uint8Array(size);
 
     serialized[0] = TransactionKind.Encrypted_transfer;
-    putBase58Check(serialized, 1, payload.toAddress);
     put(serialized, 1 + 32, data);
     put(serialized, 1 + 32 + data.length, proof);
     return serialized;
@@ -176,30 +196,26 @@ export function serializeTransferPayload(
     }
 }
 
-function serializeSignature(sigs: Uint8Array[]) {
-    // Size should be 1 for number of signatures, then for each signature, index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
+function serializeSignature(signatures: TransactionAccountSignature) {
+    // Size should be 1 for number of credentials, then for each credential:
+    // 1 for the CredentialIndex, 1 for the number of signatures, then for each signature:
+    // index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
 
-    const signaturesCombinedSizes = sigs.reduce(
-        (acc, sig) => acc + sig.length,
-        0
-    );
-    const size = 1 + sigs.length * 3 + signaturesCombinedSizes;
-
-    const serialized = new Uint8Array(size);
-    serialized[0] = sigs.length; // Number of signatures (word8)
-    let index = 1;
-    for (let i = 0; i < sigs.length; i += 1) {
-        serialized[index] = i; // Key index (word8)
-        index += 1;
-        put(serialized, index, encodeWord16(sigs[i].length)); // length of signature/shortbytestring (word16)
-        index += 2;
-        put(serialized, index, sigs[i]);
-        index += sigs[i].length;
-    }
-    return serialized;
+    const putInt8 = (i: number) => Buffer.from(Uint8Array.of(i));
+    const putSignature = (signature: Signature) => {
+        const length = Buffer.alloc(2);
+        length.writeInt16BE(signature.length, 0);
+        return Buffer.concat([length, signature]);
+    };
+    const putCredentialSignatures = (credSig: TransactionCredentialSignature) =>
+        serializeMap(credSig, putInt8, putInt8, putSignature);
+    return serializeMap(signatures, putInt8, putInt8, putCredentialSignatures);
 }
 
-type SignFunction = (transaction: AccountTransaction, hash: Buffer) => [Buffer];
+type SignFunction = (
+    transaction: AccountTransaction,
+    hash: Buffer
+) => TransactionAccountSignature;
 
 function serializeUnversionedTransaction(
     transaction: AccountTransaction,

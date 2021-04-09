@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Card } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
-import { createCredential } from '../../utils/rustInterface';
+import { createCredentialDetails } from '../../utils/rustInterface';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import {
     Identity,
@@ -14,15 +14,19 @@ import { sendTransaction } from '../../utils/nodeRequests';
 import {
     addPendingAccount,
     confirmAccount,
-    getNextAccountNumber,
     removeAccount,
 } from '../../features/AccountSlice';
 import {
     addToAddressBook,
     removeFromAddressBook,
 } from '../../features/AddressBookSlice';
+import {
+    removeCredentialsOfAccount,
+    getNextCredentialNumber,
+} from '../../database/CredentialDao';
+import { insertNewCredential } from '../../features/CredentialSlice';
 import { globalSelector } from '../../features/GlobalSlice';
-import LedgerComponent from '../../components/ledger/LedgerComponent';
+import SimpleLedger from '../../components/ledger/SimpleLedger';
 import ErrorModal from '../../components/SimpleErrorModal';
 
 interface Props {
@@ -33,6 +37,7 @@ interface Props {
 
 function removeFailed(dispatch: Dispatch, accountAddress: string) {
     removeAccount(dispatch, accountAddress);
+    removeCredentialsOfAccount(accountAddress);
     removeFromAddressBook(dispatch, { address: accountAddress });
 }
 
@@ -74,21 +79,27 @@ export default function AccountCreationGenerate({
             accountAddress,
             transactionId,
         }: CredentialDeploymentDetails,
-        accountNumber: number
+        credentialNumber: number
     ) {
         await addPendingAccount(
             dispatch,
             accountName,
             identity.id,
-            accountNumber,
+            false,
             accountAddress,
-            credentialDeploymentInfo,
             transactionId
+        );
+        await insertNewCredential(
+            dispatch,
+            accountAddress,
+            credentialNumber,
+            identity.id,
+            credentialDeploymentInfo
         );
         addToAddressBook(dispatch, {
             name: accountName,
             address: accountAddress,
-            note: `Account ${accountNumber} of ${identity.name}`, // TODO: have better note
+            note: `Account for credential ${credentialNumber} of ${identity.name}`, // TODO: have better note
             readOnly: true,
         });
     }
@@ -102,21 +113,21 @@ export default function AccountCreationGenerate({
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
-        let accountNumber;
+        let credentialNumber;
         if (!global) {
             onError(`Unexpected missing global object`);
             return;
         }
         try {
-            accountNumber = await getNextAccountNumber(identity.id);
+            credentialNumber = await getNextCredentialNumber(identity.id);
         } catch (e) {
             onError(`Unable to create account due to ${e}`);
             return;
         }
 
-        const credentialDeploymentDetails = await createCredential(
+        const credentialDeploymentDetails = await createCredentialDetails(
             identity,
-            accountNumber,
+            credentialNumber,
             global,
             attributes,
             setMessage,
@@ -124,7 +135,7 @@ export default function AccountCreationGenerate({
         );
 
         try {
-            await saveAccount(credentialDeploymentDetails, accountNumber);
+            await saveAccount(credentialDeploymentDetails, credentialNumber);
             await sendCredential(credentialDeploymentDetails);
             confirmAccount(
                 dispatch,
@@ -148,7 +159,7 @@ export default function AccountCreationGenerate({
             <Card.Content textAlign="center">
                 <Card.Header>Generating the Account Credentials</Card.Header>
                 <Card.Content textAlign="center">
-                    <LedgerComponent ledgerCall={createAccount} />
+                    <SimpleLedger ledgerCall={createAccount} />
                 </Card.Content>
             </Card.Content>
         </Card>
