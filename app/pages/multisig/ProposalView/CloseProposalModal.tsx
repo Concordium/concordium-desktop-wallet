@@ -22,7 +22,7 @@ export default function CloseProposalModal({
         <Modal open={open} onOpen={() => {}} onClose={onClose}>
             <h2>Are you sure that you want to close this proposal?</h2>
             <ProposalStatus proposal={proposal} />
-            <Columns>
+            <Columns className="mT20">
                 <Columns.Column>
                     <Button onClick={onClose}>No, cancel</Button>
                 </Columns.Column>
