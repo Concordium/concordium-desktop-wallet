@@ -105,7 +105,7 @@ export function getScheduledTransferPayloadSize(scheduleLength: number) {
  *  Given the signatureAmount and schedule length,
  * returns the energy cost of a scheduled transfer.
  */
-export function getScheduledTransferEnergy(
+function getScheduledTransferEnergy(
     scheduleLength: number,
     signatureAmount = 1
 ): bigint {
@@ -123,7 +123,7 @@ export function getScheduledTransferEnergy(
  */
 export function getTransactionEnergyCost(
     transaction: AccountTransaction,
-    signatureAmount: number
+    signatureAmount = 1
 ): bigint {
     const payloadSize = serializeTransferPayload(
         transaction.transactionKind,

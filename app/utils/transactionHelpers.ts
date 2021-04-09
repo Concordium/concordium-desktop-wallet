@@ -21,10 +21,9 @@ import {
     TransactionCredentialSignature,
 } from './transactionTypes';
 import {
-    getScheduledTransferEnergy,
+    getTransactionEnergyCost,
     getTransactionKindEnergy,
 } from './transactionCosts';
-import { serializeTransferPayload } from './transactionSerialization';
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
@@ -70,7 +69,7 @@ export async function attachNames(
 /**
  *  Constructs a, simple transfer, transaction object,
  * Given the fromAddress, toAddress and the amount.
- * @param estimatedEnergyAmount, is the energyAmount on the transaction. If it is not provided, the energyAmount is calculated using only the payload size and transactionKind. Should be used for incomplete payloads, or for transaction types with variable type costs.
+ * @param estimatedEnergyAmount, is the energyAmount on the transaction. Should be used to overwrite the, internally calculated, energy amount, in case of incomplete payloads.
  */
 async function createTransferTransaction<T extends TransactionPayload>(
     fromAddress: string,
@@ -78,24 +77,23 @@ async function createTransferTransaction<T extends TransactionPayload>(
     transactionKind: number,
     payload: T,
     estimatedEnergyAmount?: bigint
-) {
-    let energyAmount;
-    if (!estimatedEnergyAmount) {
-        const payloadSize = serializeTransferPayload(transactionKind, payload)
-            .length;
-        energyAmount = getTransactionKindEnergy(transactionKind, payloadSize);
-    } else {
-        energyAmount = estimatedEnergyAmount;
-    }
+): Promise<AccountTransaction<T>> {
     const { nonce } = await getNextAccountNonce(fromAddress);
     const transferTransaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
-        energyAmount: energyAmount.toString(),
         expiry,
+        energyAmount: '',
         transactionKind,
         payload,
     };
+    if (!estimatedEnergyAmount) {
+        transferTransaction.energyAmount = getTransactionEnergyCost(
+            transferTransaction
+        ).toString();
+    } else {
+        transferTransaction.energyAmount = estimatedEnergyAmount.toString();
+    }
     return transferTransaction;
 }
 
@@ -197,8 +195,7 @@ export async function createScheduledTransferTransaction(
         fromAddress,
         expiry,
         TransactionKindId.Transfer_with_schedule,
-        payload,
-        getScheduledTransferEnergy(schedule.length)
+        payload
     );
 }
 
