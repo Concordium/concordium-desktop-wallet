@@ -70,8 +70,7 @@ export async function attachNames(
 /**
  *  Constructs a, simple transfer, transaction object,
  * Given the fromAddress, toAddress and the amount.
- * The optional parameter estimatedEnergyAmount should be used when the energyAmount cannot be calculated
- * from the payload and transactionKind alone.
+ * @param estimatedEnergyAmount, is the energyAmount on the transaction. If it is not provided, the energyAmount is calculated using only the payload size and transactionKind. Should be used for incomplete payloads, or for transaction types with variable type costs.
  */
 async function createTransferTransaction<T extends TransactionPayload>(
     fromAddress: string,
