@@ -17,9 +17,6 @@ import { CommonFieldProps } from '../common';
 
 import styles from './InlineNumber.module.scss';
 
-const ensureNumber = (v?: number): string =>
-    v === undefined || Number.isNaN(v) ? '' : v.toString();
-
 const formatValue = (fractionDigits: number) => (v?: number): string => {
     if (v === undefined || Number.isNaN(v)) {
         return '';
@@ -75,6 +72,7 @@ export default function InlineNumber({
     value,
     onChange,
     onBlur = noOp,
+    onFocus = noOp,
     allowFractions = false,
     className,
     isInvalid = false,
@@ -93,6 +91,7 @@ export default function InlineNumber({
     const [innerValue, setInnerValue] = useState<string>(
         format(value ?? defaultValue)
     );
+    const [isFocused, setIsFocused] = useState<boolean>(false);
 
     const ref = useRef<HTMLInputElement>(null);
 
@@ -103,8 +102,14 @@ export default function InlineNumber({
             setInnerValue(format(value));
         }
 
+        setIsFocused(false);
         onBlur();
     }, [format, onBlur, innerValue, defaultValue, value]);
+
+    const handleFocus: FocusEventHandler<HTMLInputElement> = useCallback(() => {
+        setIsFocused(true);
+        onFocus();
+    }, [onFocus]);
 
     // Ensure value and defaultValue match on init
     useEffect(() => {
@@ -119,8 +124,8 @@ export default function InlineNumber({
     }, [innerValue]);
 
     useUpdateEffect(() => {
-        if (!skipUpdate.current) {
-            setInnerValue(ensureNumber(value));
+        if (!skipUpdate.current && !isFocused) {
+            setInnerValue(format(value));
         }
         skipUpdate.current = false;
     }, [value]);
@@ -138,9 +143,10 @@ export default function InlineNumber({
             value={innerValue}
             onChange={(e) => setInnerValue(e.target.value)}
             onBlur={handleBlur}
+            onFocus={handleFocus}
             ref={ref}
             {...inputProps}
-            style={{ width: 0 }} // To prevent initial UI jitter.
+            style={{ width: 5 }} // To prevent initial UI jitter.
         />
     );
 }
