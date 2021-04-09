@@ -39,12 +39,20 @@ const parseValue = (parser: typeof parseFloat | typeof parseInt) => (
 
 export interface InlineNumberProps
     extends ClassName,
-        Pick<InputHTMLAttributes<HTMLInputElement>, 'onBlur'> {
+        Pick<
+            InputHTMLAttributes<HTMLInputElement>,
+            'onBlur' | 'step' | 'min' | 'max'
+        > {
     /**
      * Defaults to 0.
      */
     ensureDigits?: number;
     allowFractions?: boolean;
+    label?: string;
+    /**
+     * Default is postfix.
+     */
+    labelPosition?: 'prefix' | 'postfix';
     value: number | undefined;
     /**
      * Defaults to 0. This is the value used if field is unfocused without a value.
@@ -61,6 +69,9 @@ export default function InlineNumber({
     onBlur = noOp,
     allowFractions = false,
     className,
+    label,
+    labelPosition = 'postfix',
+    ...inputProps
 }: InlineNumberProps): JSX.Element {
     const skipUpdate = useRef(false);
     const format = useCallback(formatValue(allowFractions ? ensureDigits : 0), [
@@ -113,13 +124,18 @@ export default function InlineNumber({
     useLayoutEffect(() => scaleFieldWidth(ref.current), [innerValue]);
 
     return (
-        <input
-            className={clsx(styles.input, className)}
-            type="number"
-            value={innerValue}
-            onChange={(e) => setInnerValue(e.target.value)}
-            onBlur={handleBlur}
-            ref={ref}
-        />
+        <label className={clsx(styles.root, className)}>
+            {labelPosition === 'prefix' && label}
+            <input
+                className={styles.input}
+                type="number"
+                value={innerValue}
+                onChange={(e) => setInnerValue(e.target.value)}
+                onBlur={handleBlur}
+                ref={ref}
+                {...inputProps}
+            />
+            {labelPosition === 'postfix' && label}
+        </label>
     );
 }

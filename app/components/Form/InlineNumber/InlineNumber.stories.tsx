@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
+import { getGTUSymbol } from '~/utils/gtu';
 
 export default {
     title: 'Components/Form/Fields/Inline Number',
@@ -15,7 +16,6 @@ const Template: Story<InlineNumberProps> = (args) => {
         <div style={{ width: '500px', margin: '0 auto' }}>
             <div>Input Value: {`${value}`}</div>
             <InlineNumber {...args} value={value} onChange={setValue} />{' '}
-            Releases
         </div>
     );
 };
@@ -28,4 +28,23 @@ EnsureTwoDigits.args = {
     allowFractions: true,
     ensureDigits: 2,
     defaultValue: 0,
+    step: 0.01,
+};
+
+export const Label = Template.bind({});
+Label.args = {
+    allowFractions: true,
+    defaultValue: 0,
+    step: 5,
+    label: ' Releases',
+};
+
+export const PrefixLabel = Template.bind({});
+PrefixLabel.args = {
+    allowFractions: true,
+    ensureDigits: 2,
+    defaultValue: 0,
+    step: 0.01,
+    label: getGTUSymbol(),
+    labelPosition: 'prefix',
 };

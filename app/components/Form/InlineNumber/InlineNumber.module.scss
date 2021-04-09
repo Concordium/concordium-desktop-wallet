@@ -1,5 +1,9 @@
 @import 'config/bundle';
 
+.root {
+    display: inline;
+}
+
 .input {
     -moz-appearance: textfield;
     border: none;
