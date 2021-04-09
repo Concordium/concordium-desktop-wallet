@@ -3,24 +3,21 @@ import { useParams } from 'react-router';
 import { Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import SimpleLedger from '../../../components/ledger/SimpleLedger';
-import PageLayout from '../../../components/PageLayout';
-import Button from '../../../cross-app-components/Button';
-import ConcordiumLedgerClient from '../../../features/ledger/ConcordiumLedgerClient';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
+import PageLayout from '~/components/PageLayout';
+import Button from '~/cross-app-components/Button';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     getGovernanceLevel1Path,
     getGovernanceLevel2Path,
     getGovernanceRootPath,
-} from '../../../features/ledger/Path';
-import { saveFile } from '../../../utils/FileHelper';
-import {
-    ExportKeyType,
-    getKeyDisplay,
-} from '../MultiSignatureMenu/ExportKeyList';
-import { SignedPublicKey } from '../../../utils/types';
+} from '~/features/ledger/Path';
+import { saveFile } from '~/utils/FileHelper';
+import { SignedPublicKey } from '~/utils/types';
+import routes from '~/constants/routes.json';
+import CopiableIdenticon from '~/components/CopiableIdenticon/CopiableIdenticon';
+import { ExportKeyType, getKeyDisplay } from '../menu/ExportKeyList';
 import styles from './ExportKeyView.module.scss';
-import routes from '../../../constants/routes.json';
-import CopiableIdenticon from '../../../components/CopiableIdenticon/CopiableIdenticon';
 
 interface ParamTypes {
     keyType: ExportKeyType;
