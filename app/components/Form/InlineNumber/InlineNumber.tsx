@@ -42,20 +42,20 @@ export interface InlineNumberProps
         >,
         Pick<CommonFieldProps, 'isInvalid'> {
     /**
-     * Defaults to 0.
+     * Amount of digits to ensure in rendered value (e.g. `3` => `0.000`). Defaults to `0`.
      */
     ensureDigits?: number;
     /**
-     * Whether to work with floats or integers. Defaults to false.
+     * Whether to work with floats or integers. Defaults to `false`.
      */
     allowFractions?: boolean;
     value: number | undefined;
     /**
-     * Defaults to 0. This is the value used if field is unfocused without a value.
+     * Defaults to `0`. This is the value used if field is unfocused without a value.
      */
     fallbackValue?: number;
     /**
-     * If true, falls back to fallbackValue when field is invalid on blur. Defaults to false.
+     * If true, falls back to `fallbackValue` when fields `isInvalid` prop is set to `true` on blur. Defaults to `false`.
      */
     fallbackOnInvalid?: boolean;
     onChange(v?: number): void;
