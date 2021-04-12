@@ -74,8 +74,12 @@ export default function RewardDistributionField({
             <span className={styles.fieldTitle}>{label}</span>
             <div className={styles.inputWrapper}>
                 <InlineNumber
-                    onChange={(v) => setInnerValue(toFractionResolution(v))}
-                    value={toPercentage(innerValue)}
+                    onChange={(v) =>
+                        setInnerValue(
+                            toFractionResolution(v ? parseFloat(v) : undefined)
+                        )
+                    }
+                    value={toPercentage(innerValue).toString()}
                     onBlur={onBlur}
                     onFocus={onFocus}
                     disabled={disabled}

@@ -16,22 +16,25 @@ import { CommonFieldProps } from '../common';
 
 import styles from './InlineNumber.module.scss';
 
-const formatValue = (fractionDigits: number) => (v?: number): string => {
-    if (v === undefined || Number.isNaN(v)) {
+const ensureValidBigInt = (v = ''): string => {
+    try {
+        BigInt(v);
+        return v;
+    } catch {
+        return '';
+    }
+};
+
+const formatNumberString = (fractionDigits: number) => (v = ''): string => {
+    const parsed = parseFloat(v);
+
+    if (Number.isNaN(parsed)) {
         return '';
     }
 
-    const valueFractionDigits = v.toString().split('.')[1]?.length ?? 0;
+    const valueFractionDigits = v.split('.')[1]?.length ?? 0;
 
-    return v.toFixed(Math.max(fractionDigits, valueFractionDigits));
-};
-
-const parseValue = (parser: typeof parseFloat | typeof parseInt) => (
-    v: string
-): number | undefined => {
-    const parsed = parser(v);
-
-    return Number.isNaN(parsed) ? undefined : parsed;
+    return parsed.toFixed(Math.max(fractionDigits, valueFractionDigits));
 };
 
 export interface InlineNumberProps
@@ -49,16 +52,16 @@ export interface InlineNumberProps
      * Whether to work with floats or integers. Defaults to `false`.
      */
     allowFractions?: boolean;
-    value: number | undefined;
+    value: string | undefined;
     /**
      * Defaults to `0`. This is the value used if field is unfocused without a value.
      */
-    fallbackValue?: number;
+    fallbackValue?: number | bigint;
     /**
      * If true, falls back to `fallbackValue` when fields `isInvalid` prop is set to `true` on blur. Defaults to `false`.
      */
     fallbackOnInvalid?: boolean;
-    onChange(v?: number): void;
+    onChange(v?: string): void;
     /**
      * As internal formatting functionality is triggered on blur, settings value on blur externally is prone to trigger an infinite loop. Please take caution!
      */
@@ -85,18 +88,13 @@ export default function InlineNumber({
     isInvalid = false,
     ...inputProps
 }: InlineNumberProps): JSX.Element {
-    const skipUpdate = useRef(false);
-    const format = useCallback(formatValue(allowFractions ? ensureDigits : 0), [
-        ensureDigits,
-        allowFractions,
-    ]);
-    const parse = useCallback(
-        parseValue(allowFractions ? parseFloat : parseInt),
-        [allowFractions]
+    const format = useCallback(
+        allowFractions ? formatNumberString(ensureDigits) : ensureValidBigInt,
+        [ensureDigits, allowFractions]
     );
 
     const [innerValue, setInnerValue] = useState<string>(
-        format(value ?? fallbackValue)
+        format(value ?? fallbackValue.toString())
     );
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
@@ -106,7 +104,7 @@ export default function InlineNumber({
     const handleBlur = useCallback(() => {
         // Basically ensure correct formatting of field and that field has a value (otherwise it'll be invisible on screen)
         if (!innerValue || (fallbackOnInvalid && isInvalid)) {
-            setInnerValue(format(fallbackValue));
+            setInnerValue(format(fallbackValue.toString()));
         } else {
             setInnerValue(format(value));
         }
@@ -128,23 +126,14 @@ export default function InlineNumber({
         onFocus();
     }, [onFocus]);
 
-    // Ensure value and defaultValue match on init
     useEffect(() => {
-        if (fallbackValue !== undefined && value === undefined) {
-            skipUpdate.current = true;
-            onChange(fallbackValue);
-        }
-    }, []);
-
-    useUpdateEffect(() => {
-        onChange(parse(innerValue));
+        onChange(innerValue);
     }, [innerValue]);
 
     useUpdateEffect(() => {
-        if (!skipUpdate.current && !isFocused) {
+        if (!isFocused) {
             setInnerValue(format(value));
         }
-        skipUpdate.current = false;
     }, [value]);
 
     return (

@@ -10,7 +10,7 @@ export default {
 } as Meta;
 
 const Template: Story<InlineNumberProps> = (args) => {
-    const [value, setValue] = useState<number | undefined>(args.value);
+    const [value, setValue] = useState<string | undefined>(args.value);
 
     return (
         <div style={{ width: '500px', margin: '0 auto' }}>
@@ -32,7 +32,7 @@ EnsureTwoDigits.args = {
 };
 
 const LabelTemplate: Story<InlineNumberProps> = (args) => {
-    const [value, setValue] = useState<number | undefined>(args.value);
+    const [value, setValue] = useState<string | undefined>(args.value);
 
     return (
         <div style={{ width: '500px', margin: '0 auto' }}>
@@ -45,8 +45,8 @@ const LabelTemplate: Story<InlineNumberProps> = (args) => {
     );
 };
 
-export const Label = LabelTemplate.bind({});
-Label.args = {
+export const Labelled = LabelTemplate.bind({});
+Labelled.args = {
     allowFractions: true,
     fallbackValue: 0,
     step: 0.01,
@@ -68,5 +68,5 @@ Invalid.args = {
     fallbackValue: 0,
     step: 0.01,
     isInvalid: true,
-    value: -100,
+    value: '-100',
 };

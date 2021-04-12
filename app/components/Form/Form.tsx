@@ -94,7 +94,7 @@ Form.File = connectWithFormControlled<FileInputValue, FileInputProps>(
 );
 (Form.File as FC).displayName = 'Form.File';
 
-Form.InlineNumber = connectWithFormControlled<number, InlineNumberProps>(
+Form.InlineNumber = connectWithFormControlled<string, InlineNumberProps>(
     InlineNumber
 );
 (Form.InlineNumber as FC).displayName = 'Form.InlineNumber';
