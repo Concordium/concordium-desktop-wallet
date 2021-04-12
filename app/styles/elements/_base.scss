@@ -8,6 +8,7 @@ body {
     margin: 0;
 }
 
+// Scrollbar section inspired by https://stackoverflow.com/questions/21684101/css-vertical-scrollbar-padding-left-right-in-ul-possible
 ::-webkit-scrollbar {
     width: 18px;
     height: 18px;
