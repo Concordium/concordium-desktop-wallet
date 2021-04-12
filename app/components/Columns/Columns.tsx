@@ -3,7 +3,6 @@ import React, {
     Children,
     cloneElement,
     FC,
-    Fragment,
     ReactElement,
     useCallback,
     useMemo,
@@ -74,21 +73,12 @@ function Columns({
                 styles.root,
                 columnScroll && styles.rootColumnScroll,
                 variableSize && styles.rootVariableSize,
+                divider && styles.rootDivided,
                 headers.length > 0 && styles.rootWithHeaders,
                 className
             )}
         >
-            {divider
-                ? enrichedChildren.map((c, i) => (
-                      // eslint-disable-next-line react/no-array-index-key
-                      <Fragment key={i}>
-                          {c}
-                          {i < enrichedChildren.length - 1 && (
-                              <div className={styles.divider} />
-                          )}
-                      </Fragment>
-                  ))
-                : enrichedChildren}
+            {enrichedChildren}
         </div>
     );
 }

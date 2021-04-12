@@ -5,5 +5,7 @@
 }
 
 .column {
-    flex-basis: 560px;
+    width: 100%;
+    max-width: 464px;
+    margin: 0 auto;
 }

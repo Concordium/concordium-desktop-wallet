@@ -23,18 +23,6 @@ $columns-headers-inset: 31px;
     }
 }
 
-.divider {
-    flex-basis: 1px;
-    flex-shrink: 0;
-    background-color: $color-grey;
-    height: 100%;
-
-    .root:not(.rootWithHeaders) & {
-        margin: 20px 0;
-        height: calc(100% - 40px);
-    }
-}
-
 .column {
     position: relative;
     flex: 0 1 100%;
@@ -72,16 +60,20 @@ $columns-headers-inset: 31px;
     text-overflow: ellipsis;
     white-space: nowrap;
     margin: 0;
+    padding: 0 $page-gutter;
     padding-bottom: 10px;
 }
 
-.content {
+.contentBorder {
     width: 100%;
 
-    .rootColumnScroll & {
-        height: 100%;
-        overflow-y: overlay;
+    .rootDivided .column:not(:last-child) & {
+        border-right: 1px solid $color-grey;
     }
+}
+
+.content {
+    padding: 0 $page-gutter;
 
     &VertPadding {
         padding-top: $page-gutter;

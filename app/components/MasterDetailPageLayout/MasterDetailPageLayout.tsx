@@ -11,8 +11,10 @@ import PageLayout from '../PageLayout';
 import styles from './MasterDetailPageLayout.module.scss';
 
 const { Header } = PageLayout;
-const Column = (props: PropsWithChildren<unknown>) => (
-    <Columns.Column verticalPadding {...props} />
+const Column = ({ children }: PropsWithChildren<unknown>) => (
+    <Columns.Column verticalPadding>
+        <div className={styles.column}>{children}</div>
+    </Columns.Column>
 );
 
 function isPageHeader(el: ReactElement): boolean {
@@ -60,12 +62,7 @@ export default function MasterDetailPageLayout({
         <PageLayout noGutter>
             {header}
             {isColumnsContent ? (
-                <Columns
-                    divider
-                    className={styles.columns}
-                    columnClassName={styles.column}
-                    columnScroll
-                >
+                <Columns divider className={styles.columns} columnScroll>
                     {content}
                 </Columns>
             ) : (
