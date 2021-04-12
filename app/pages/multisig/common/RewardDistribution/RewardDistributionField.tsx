@@ -1,47 +1,25 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import clsx from 'clsx';
-import React, {
-    ChangeEventHandler,
-    FocusEventHandler,
-    InputHTMLAttributes,
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useRef,
-    useState,
-} from 'react';
+import React, { InputHTMLAttributes, useState } from 'react';
 
-import styles from './RewardDistribution.module.scss';
 import {
     fractionResolution,
     fractionResolutionToPercentage,
     percentageToFractionResolution,
 } from '~/utils/rewardFractionHelpers';
 import { noOp } from '~/utils/basicHelpers';
+import { RewardFraction } from '~/utils/types';
+import { useUpdateEffect } from '~/utils/hooks';
+import InlineNumber from '~/components/Form/InlineNumber';
 
-function scaleField(el: HTMLInputElement | null) {
-    if (!el) {
-        return;
-    }
+import styles from './RewardDistribution.module.scss';
 
-    setTimeout(() => {
-        el.style.width = '5px';
-        el.style.width = `${el.scrollWidth}px`;
-    }, 0);
+function toPercentage(v = 0): number {
+    return fractionResolutionToPercentage(v);
 }
 
-function formatValue(v?: number): string {
-    if (v === undefined || Number.isNaN(v)) {
-        return '';
-    }
-
-    return fractionResolutionToPercentage(v).toFixed(3);
-}
-
-function parseValue(v: string): number {
-    const parsed = parseFloat(v);
-
-    return Math.round(percentageToFractionResolution(parsed));
+function toFractionResolution(v = 0): number {
+    return Math.round(percentageToFractionResolution(v));
 }
 
 function isValid(v: number): boolean {
@@ -51,12 +29,14 @@ function isValid(v: number): boolean {
 interface RewardDistributionFieldProps
     extends Pick<
         InputHTMLAttributes<HTMLInputElement>,
-        'disabled' | 'className' | 'onFocus' | 'onBlur'
+        'disabled' | 'className'
     > {
     label: string;
     value: number;
     isInvalid?: boolean;
     onChange?(v: number): void;
+    onBlur?(): void;
+    onFocus?(): void;
 }
 
 export default function RewardDistributionField({
@@ -69,66 +49,18 @@ export default function RewardDistributionField({
     onBlur = noOp,
     ...inputProps
 }: RewardDistributionFieldProps): JSX.Element {
-    const ref = useRef<HTMLInputElement>(null);
-    const [stringValue, setStringValue] = useState(formatValue(value));
-    const [isFocused, setIsFocused] = useState(false);
     const { disabled } = inputProps;
+    const [innerValue, setInnerValue] = useState<RewardFraction>(value);
 
-    const setInternalValue = useCallback((v: string) => {
-        scaleField(ref.current);
-        setStringValue(v);
-    }, []);
-
-    const handleFocus: FocusEventHandler<HTMLInputElement> = useCallback(
-        (e) => {
-            setIsFocused(true);
-            onFocus(e);
-        },
-        [setIsFocused, onFocus]
-    );
-
-    const handleBlur: FocusEventHandler<HTMLInputElement> = useCallback(
-        (e) => {
-            setIsFocused(false);
-            onBlur(e);
-
-            const parsed = parseValue(e.target.value);
-
-            if (isValid(parsed)) {
-                setInternalValue(formatValue(parsed));
-                onChange(parsed);
-            } else {
-                setInternalValue(formatValue(value));
-            }
-        },
-        [onBlur, onChange, value, setInternalValue]
-    );
-
-    const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
-        (e) => {
-            const v = e.target.value;
-            setInternalValue(v);
-
-            if (v.endsWith('.')) {
-                return;
-            }
-
-            const parsed = parseValue(v);
-
-            if (isValid(parsed)) {
-                onChange(parsed);
-            }
-        },
-        [onChange, setInternalValue]
-    );
-
-    useEffect(() => {
-        if (!isFocused) {
-            setInternalValue(formatValue(value));
-        }
+    useUpdateEffect(() => {
+        setInnerValue(value);
     }, [value]);
 
-    useLayoutEffect(() => scaleField(ref.current), []);
+    useUpdateEffect(() => {
+        if (isValid(innerValue)) {
+            onChange(innerValue);
+        }
+    }, [innerValue]);
 
     return (
         <label
@@ -141,15 +73,26 @@ export default function RewardDistributionField({
         >
             <span className={styles.fieldTitle}>{label}</span>
             <div className={styles.inputWrapper}>
-                <input
-                    ref={ref}
-                    {...inputProps}
-                    value={stringValue}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    onFocus={handleFocus}
+                <InlineNumber
+                    onChange={(v) =>
+                        setInnerValue(
+                            toFractionResolution(v ? parseFloat(v) : undefined)
+                        )
+                    }
+                    value={toPercentage(innerValue).toString()}
+                    onBlur={onBlur}
+                    onFocus={onFocus}
+                    disabled={disabled}
+                    allowFractions
+                    ensureDigits={3}
+                    fallbackValue={toPercentage(value)} // value holds the last valid value.
+                    fallbackOnInvalid
+                    min={0}
+                    max={100}
+                    step={0.001}
+                    isInvalid={!isValid(innerValue)}
                 />
-                <span>%</span>
+                %
             </div>
         </label>
     );
