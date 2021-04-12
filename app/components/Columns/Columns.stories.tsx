@@ -27,7 +27,7 @@ export default {
                         }
 
                         .sb-columns {
-                            height: 400px;
+                            height: 400px !important;
                         }
                     `}
                 </style>
