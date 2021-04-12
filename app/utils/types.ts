@@ -110,6 +110,7 @@ export interface Account {
     totalDecrypted?: string;
     allDecrypted?: boolean;
     incomingAmounts?: string;
+    rewardFilter?: RewardFilter;
     selfAmounts?: string;
     maxTransactionId: number;
     deploymentTransactionId?: string;
@@ -130,6 +131,7 @@ export enum TransactionKindString {
     UpdateElectionDifficulty = 'updateElectionDifficulty',
     DeployCredential = 'deployCredential',
     BakingReward = 'bakingReward',
+    BlockReward = 'blockReward',
     EncryptedAmountTransfer = 'encryptedAmountTransfer',
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
@@ -590,7 +592,6 @@ export enum UpdateType {
     UpdateGASRewards = 8,
     UpdateBakerStakeThreshold = 9,
 }
-
 export function instanceOfAccountTransaction(
     object: Transaction
 ): object is AccountTransaction {
@@ -935,3 +936,9 @@ export type PolymorphicComponentProps<
     C extends React.ElementType,
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
+
+export enum RewardFilter {
+    None,
+    AllButFinalization,
+    All,
+}
