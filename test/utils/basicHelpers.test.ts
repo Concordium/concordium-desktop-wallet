@@ -5,6 +5,7 @@ import {
     onlyDigitsNoLeadingZeroes,
     partition,
     toCSV,
+    collapseFraction,
 } from '../../app/utils/basicHelpers';
 
 test('Partition should split booleans correctly', () => {
@@ -165,4 +166,59 @@ test('It is possible to chunk a buffer array', () => {
     const chunkedBuffers = chunkArray(buffers, 2);
     expect(Buffer.concat(chunkedBuffers[0])).toHaveLength(2);
     expect(Buffer.concat(chunkedBuffers[1])).toHaveLength(1);
+});
+
+test('collapseFraction should return numerator, if denominator is 1.', () => {
+    const fraction = { numerator: 13n, denominator: 1n };
+    expect(collapseFraction(fraction) === 13n).toBeTruthy();
+});
+
+test('if the denominator divides the numerator, collapseFraction should return the quotient. ', () => {
+    const fraction = { numerator: 500n, denominator: 25n };
+    expect(collapseFraction(fraction) === 20n).toBeTruthy();
+});
+
+test('Extra tests for collapseFraction with integer quotients', () => {
+    expect(
+        collapseFraction({ numerator: 39n, denominator: 13n }) === 3n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 100n, denominator: 1n }) === 100n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 514n, denominator: 257n }) === 2n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 39n, denominator: 39n }) === 1n
+    ).toBeTruthy();
+});
+
+test('if the denominator does not divide the numerator, collapseFraction should round up the result ', () => {
+    const fraction = { numerator: 13n, denominator: 3n };
+    expect(collapseFraction(fraction) === 5n).toBeTruthy();
+});
+
+test('Extra tests for collapseFraction with non-integer quotients', () => {
+    expect(
+        collapseFraction({ numerator: 39n, denominator: 12n }) === 4n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 100n, denominator: 3n }) === 34n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 514n, denominator: 4n }) === 129n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 40n, denominator: 39n }) === 2n
+    ).toBeTruthy();
+});
+
+test('if the denominator is larger than the numerator, collapseFraction should return 1. ', () => {
+    const fraction = { numerator: 13n, denominator: 1000n };
+    expect(collapseFraction(fraction) === 1n).toBeTruthy();
+});
+
+test('if the denominator is zero, collapseFraction fails', () => {
+    const fraction = { numerator: 13n, denominator: 0n };
+    expect(() => collapseFraction(fraction)).toThrow();
 });

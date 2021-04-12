@@ -87,7 +87,7 @@ WithValidation.args = {
     ],
     rules: {
         validate: validateRewardDistributionFirstMin(
-            0.5,
+            50000,
             'Baking reward account must be > 50%'
         ),
     },

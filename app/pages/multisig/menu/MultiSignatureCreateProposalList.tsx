@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ButtonNavLink from '../../../components/ButtonNavLink';
-import { foundationTransactionsEnabledSelector } from '../../../features/SettingsSlice';
+import ButtonNavLink from '~/components/ButtonNavLink';
+import { foundationTransactionsEnabledSelector } from '~/features/SettingsSlice';
 import {
     UpdateType,
     TransactionKindString as TransactionKind,
 } from '~/utils/types';
-
-import styles from './MultiSignatureMenu.module.scss';
-import { createProposalRoute } from '../../../utils/routerHelper';
+import { createProposalRoute } from '~/utils/routerHelper';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { expireProposals } from '~/utils/ProposalHelper';
+
+import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
 
 // TODO Show non-foundation transaction types.
 

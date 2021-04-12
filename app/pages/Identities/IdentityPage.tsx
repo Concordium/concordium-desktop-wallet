@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import PlusIcon from '@resources/svg/plus.svg';
@@ -7,44 +7,46 @@ import IdentityView from './IdentityView';
 import NoIdentities from '~/components/NoIdentities';
 import { identitiesSelector } from '~/features/IdentitySlice';
 import routes from '~/constants/routes.json';
-import styles from './Identities.module.scss';
 
 import PageLayout from '~/components/PageLayout';
-import Columns from '~/components/Columns';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
+
+const { Header, Master, Detail } = MasterDetailPageLayout;
 
 export default function IdentityPage() {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
 
-    const body = useMemo(() => {
-        if (identities.length === 0) {
-            return <NoIdentities />;
-        }
+    const header = (
+        <Header>
+            <h1>Identities</h1>
+            <PageLayout.HeaderButton
+                align="right"
+                onClick={() => dispatch(push(routes.IDENTITYISSUANCE))}
+            >
+                <PlusIcon height="20" />
+            </PageLayout.HeaderButton>
+        </Header>
+    );
 
+    if (identities.length === 0) {
         return (
-            <Columns divider columnScroll columnClassName={styles.column}>
-                <Columns.Column>
-                    <IdentityList />
-                </Columns.Column>
-                <Columns.Column>
-                    <IdentityView />
-                </Columns.Column>
-            </Columns>
+            <MasterDetailPageLayout>
+                {header}
+                <NoIdentities />
+            </MasterDetailPageLayout>
         );
-    }, [identities]);
+    }
 
     return (
-        <PageLayout>
-            <PageLayout.Header>
-                <h1>Identities</h1>
-                <PageLayout.HeaderButton
-                    align="right"
-                    onClick={() => dispatch(push(routes.IDENTITYISSUANCE))}
-                >
-                    <PlusIcon height="20" />
-                </PageLayout.HeaderButton>
-            </PageLayout.Header>
-            {body}
-        </PageLayout>
+        <MasterDetailPageLayout>
+            {header}
+            <Master>
+                <IdentityList />
+            </Master>
+            <Detail>
+                <IdentityView />
+            </Detail>
+        </MasterDetailPageLayout>
     );
 }
