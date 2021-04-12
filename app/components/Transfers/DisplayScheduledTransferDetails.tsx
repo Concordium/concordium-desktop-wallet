@@ -1,14 +1,11 @@
 import React from 'react';
 import { List, Grid } from 'semantic-ui-react';
-import {
-    ScheduledTransfer,
-    SchedulePoint,
-    TimeStampUnit,
-} from '../../utils/types';
-import { parseTime } from '../../utils/timeHelpers';
-import { getScheduledTransferAmount } from '../../utils/transactionHelpers';
-import { displayAsGTU } from '../../utils/gtu';
-import SidedRow from '../SidedRow';
+import { ScheduledTransfer, SchedulePoint, TimeStampUnit } from '~/utils/types';
+import { parseTime } from '~/utils/timeHelpers';
+import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
+import { displayAsGTU } from '~/utils/gtu';
+import SidedRow from '~/components/SidedRow';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {
     transaction: ScheduledTransfer;
@@ -34,6 +31,9 @@ export default function DisplayScheduledTransfer({
                 To Account: {toName} {transaction.payload.toAddress}
             </List.Item>
             <List.Item>Total Amount: {displayAsGTU(amount)}</List.Item>
+            <List.Item>
+                <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            </List.Item>
             <List.Item>
                 <Grid container columns={2}>
                     {transaction.payload.schedule.map((item: SchedulePoint) => (

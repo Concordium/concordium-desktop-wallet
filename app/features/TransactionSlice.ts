@@ -159,7 +159,10 @@ export async function addPendingTransaction(
     transaction: AccountTransaction,
     hash: string
 ) {
-    const convertedTransaction = convertAccountTransaction(transaction, hash);
+    const convertedTransaction = await convertAccountTransaction(
+        transaction,
+        hash
+    );
     return insertTransactions([convertedTransaction]);
 }
 

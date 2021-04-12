@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import bs58check from 'bs58check';
+import * as bs58check from 'bs58check';
 import { VerifyKey, SchemeId } from './types';
 
 export function putBase58Check(
@@ -14,7 +14,7 @@ export function putBase58Check(
 }
 
 export function base58ToBuffer(base58Sstring: string) {
-    return bs58check.decode(base58Sstring);
+    return bs58check.decode(base58Sstring).slice(1); // remove the first check byte
 }
 
 type Indexable = Buffer | Uint8Array;

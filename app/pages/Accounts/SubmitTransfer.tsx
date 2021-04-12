@@ -68,7 +68,14 @@ async function attachCompletedPayload(
             accountInfo.accountEncryptedAmount,
             credential.credentialNumber
         );
-        return { ...transaction, payload: data.payload };
+        const payload = {
+            ...transaction.payload,
+            proof: data.payload.proof,
+            index: data.payload.index,
+            remainingEncryptedAmount: data.payload.remainingAmount,
+        };
+
+        return { ...transaction, payload };
     }
     if (instanceOfEncryptedTransfer(transaction)) {
         const prfKeySeed = await ledger.getPrfKey(credential.identityId);

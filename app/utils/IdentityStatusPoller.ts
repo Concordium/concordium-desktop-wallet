@@ -39,6 +39,7 @@ export async function confirmIdentityAndInitialAccount(
                 accountAddress,
                 0,
                 identityId,
+                0, // credentialIndex = 0 on original
                 parsedCredential
             );
             addToAddressBook(dispatch, {

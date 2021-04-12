@@ -136,8 +136,8 @@ function serializeEncryptedTransfer(payload: EncryptedTransferPayload) {
     const serialized = new Uint8Array(size);
 
     serialized[0] = TransactionKind.Encrypted_transfer;
-    put(serialized, 1 + 32, data);
-    put(serialized, 1 + 32 + data.length, proof);
+    put(serialized, 1, data);
+    put(serialized, 1 + data.length, proof);
     return serialized;
 }
 
