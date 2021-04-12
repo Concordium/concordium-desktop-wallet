@@ -16,7 +16,7 @@ interface Props {
 /**
  * Controls the flow of creating a simple transfer.
  */
-export default function SimpleTransfer({ account }: Props) {
+export default function EncryptedTransfer({ account }: Props) {
     const dispatch = useDispatch();
 
     const toConfirmTransfer = useCallback(
@@ -36,7 +36,7 @@ export default function SimpleTransfer({ account }: Props) {
                     pathname: routes.SUBMITTRANSFER,
                     state: {
                         confirmed: {
-                            pathname: routes.ACCOUNTS_SIMPLETRANSFER,
+                            pathname: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
                             state: {
                                 initialPage: locations.transferSubmitted,
                                 transaction: stringify(transaction),
@@ -44,7 +44,7 @@ export default function SimpleTransfer({ account }: Props) {
                             },
                         },
                         cancelled: {
-                            pathname: routes.ACCOUNTS_SIMPLETRANSFER,
+                            pathname: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
                             state: {
                                 initialPage: locations.pickAmount,
                                 amount,
