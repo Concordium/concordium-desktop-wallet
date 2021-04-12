@@ -1,7 +1,21 @@
 @import 'config/bundle';
 
+$half-max-width: $page-max-width / 2;
+
 .columns {
     height: $page-height;
+}
+
+.halfMaxWidth {
+    max-width: $half-max-width - (2 * $page-gutter);
+
+    .master & {
+        margin-left: auto;
+    }
+
+    .detail & {
+        margin-right: auto;
+    }
 }
 
 .column {

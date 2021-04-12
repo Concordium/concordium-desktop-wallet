@@ -18,12 +18,15 @@
 }
 
 .content {
-    max-width: 1600px;
     flex: 1 1 100%;
     max-height: calc(100% - #{$page-header-height});
     margin: 0 auto;
 
-    &:not(.contentNoGutter) {
+    &:not(.noMaxWidth) {
+        max-width: $page-max-width;
+    }
+
+    &:not(.noGutter) {
         padding: 0 48px;
     }
 }
