@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
-import CheckmarkIcon from '@resources/svg/logo-checkmark.svg';
-import Button from '~/cross-app-components/Button';
+import {
+    Grid,
+    Button,
+    List,
+    Header,
+    Segment,
+    Divider,
+} from 'semantic-ui-react';
 import {
     AddressBookEntry,
     Account,
@@ -36,9 +41,6 @@ import {
 import MessageModal from '../../components/MessageModal';
 import { checkDuplicates } from '../../utils/importHelpers';
 import { partition } from '../../utils/basicHelpers';
-import PageLayout from '~/components/PageLayout';
-import Columns from '~/components/Columns';
-import styles from './ExportImport.module.scss';
 
 type IdentityKey = keyof Identity;
 type AccountKey = keyof Account;
@@ -223,25 +225,37 @@ export default function PerformImport({ location }: Props) {
         started,
     ]);
 
-    const accountList = (identity: Identity) =>
-        importedData.accounts
-            .filter((account: Account) => account.identityId === identity.id)
-            .map((account: Account) => (
-                <p key={account.address}>
-                    {account.name}
-                    {duplicateAccounts.includes(account)
+    const accountList = (identity: Identity) => (
+        <List.List relaxed="false">
+            {importedData.accounts
+                .filter(
+                    (account: Account) => account.identityId === identity.id
+                )
+                .map((account: Account) => (
+                    <List.Item key={account.address}>
+                        {account.name}
+                        {duplicateAccounts.includes(account)
+                            ? ' (Already existed)'
+                            : ''}
+                    </List.Item>
+                ))}
+        </List.List>
+    );
+
+    const AddressBookList = (
+        <List size="big">
+            <List.Item>
+                <List.Header>Recipient accounts:</List.Header>
+            </List.Item>
+            {importedData.addressBook.map((entry: AddressBookEntry) => (
+                <List.Item key={entry.address}>
+                    {entry.name}
+                    {duplicateEntries.includes(entry)
                         ? ' (Already existed)'
                         : ''}
-                </p>
-            ));
-
-    const AddressBookList = importedData.addressBook.map(
-        (entry: AddressBookEntry) => (
-            <p key={entry.address} className={styles.importedAddress}>
-                {entry.name}
-                {duplicateEntries.includes(entry) ? ' (Already existed)' : ''}
-            </p>
-        )
+                </List.Item>
+            ))}
+        </List>
     );
 
     return (
@@ -252,73 +266,51 @@ export default function PerformImport({ location }: Props) {
                 onClose={() => dispatch(push(routes.EXPORTIMPORT))}
                 open={open}
             />
-            <PageLayout>
-                <PageLayout.Header>
-                    <h1>Export and Import</h1>
-                </PageLayout.Header>
-                <PageLayout.Container disableBack>
-                    <Columns divider columnScroll>
-                        <Columns.Column>
-                            <div className={styles.successfulImport}>
-                                <h2 className={styles.title}>
-                                    Import successful
-                                </h2>
-                                <CheckmarkIcon className={styles.checkmark} />
-                                <p>
-                                    That’s it! Your import completed
-                                    successfully.
-                                </p>
-                                <Button
-                                    onClick={() =>
-                                        dispatch(push(routes.EXPORTIMPORT))
-                                    }
-                                >
-                                    Okay, thanks!
-                                </Button>
-                            </div>
-                        </Columns.Column>
-                        <Columns.Column className={styles.importedList}>
+
+            <Segment textAlign="center">
+                <Grid columns="equal" divided>
+                    <Grid.Column>
+                        <Segment basic>
+                            <Header size="large">Import successful</Header>
+                            That&apos;s it! Your import completed successfully.
+                            <Divider hidden />
+                            <Button
+                                fluid
+                                primary
+                                onClick={() =>
+                                    dispatch(push(routes.EXPORTIMPORT))
+                                }
+                            >
+                                Okay, thanks!
+                            </Button>
+                        </Segment>
+                    </Grid.Column>
+                    <Grid.Column>
+                        <List size="big" relaxed="very">
                             {importedData.identities.map(
                                 (identity: Identity) => (
-                                    <>
-                                        <h2
-                                            className={styles.importedIdentity}
-                                            key={identity.id}
-                                        >
-                                            <b>ID:</b> {identity.name}
+                                    <List.Item key={identity.id}>
+                                        <List.Header>
+                                            ID: {identity.name}
                                             {duplicateIdentities.includes(
                                                 identity
                                             )
                                                 ? ' (Already existed)'
                                                 : ''}
-                                        </h2>
-                                        <div
-                                            className={styles.importedAccounts}
-                                        >
-                                            <p className={styles.bold}>
-                                                Accounts:
-                                            </p>
+                                        </List.Header>
+                                        <List.Content>
+                                            Accounts:
                                             {accountList(identity)}
-                                        </div>
-                                    </>
+                                        </List.Content>
+                                    </List.Item>
                                 )
                             )}
-                            <h2 className={styles.AddressBookHeader}>
-                                Address Book
-                            </h2>
-                            <p
-                                className={clsx(
-                                    styles.bold,
-                                    styles.importedAddress
-                                )}
-                            >
-                                Recipient accounts:
-                            </p>
-                            {AddressBookList}
-                        </Columns.Column>
-                    </Columns>
-                </PageLayout.Container>
-            </PageLayout>
+                        </List>
+                        <Header>Address Book</Header>
+                        {AddressBookList}
+                    </Grid.Column>
+                </Grid>
+            </Segment>
         </>
     );
 }

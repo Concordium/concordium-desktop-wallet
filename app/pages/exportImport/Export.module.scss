@@ -1,0 +1,22 @@
+@import 'config/bundle';
+
+.import,
+.export {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 40px;
+
+    p {
+        font-size: $font-size-body2;
+    }
+
+    button {
+        margin-top: auto;
+        margin-bottom: 40px;
+    }
+}
+
+.title {
+    font-weight: $font-weight-bold;
+}
