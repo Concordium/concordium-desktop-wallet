@@ -7,8 +7,6 @@ $columns-vertical-gutter: 20px;
     position: relative;
     display: flex;
     flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: flex-start;
 
     &WithHeaders {
         border-top: 1px solid $color-grey;
@@ -86,6 +84,10 @@ $columns-vertical-gutter: 20px;
             margin-top: -$columns-vertical-gutter;
             margin-bottom: -$columns-vertical-gutter;
             height: calc(100% + #{2 * $columns-vertical-gutter});
+        }
+
+        .root:not(.rootColumnScroll) & {
+            height: auto;
         }
     }
 }
