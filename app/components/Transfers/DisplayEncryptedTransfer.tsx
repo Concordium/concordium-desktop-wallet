@@ -1,7 +1,7 @@
 import React from 'react';
 import { List, Header } from 'semantic-ui-react';
-import { EncryptedTransfer } from '../../utils/types';
-import { displayAsGTU } from '../../utils/gtu';
+import { EncryptedTransfer } from '~/utils/types';
+import { displayAsGTU } from '~/utils/gtu';
 
 interface Props {
     transaction: EncryptedTransfer;
