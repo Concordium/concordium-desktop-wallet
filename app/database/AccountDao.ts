@@ -29,11 +29,11 @@ export async function insertAccount(account: Account | Account[]) {
 }
 
 export async function updateAccount(
-    accountName: string,
-    updatedValues: Record<string, unknown>
+    address: string,
+    updatedValues: Partial<Account>
 ) {
     return (await knex())(accountsTable)
-        .where({ name: accountName })
+        .where({ address })
         .update(updatedValues);
 }
 
@@ -60,4 +60,16 @@ export async function updateSignatureThreshold(
     return (await knex())(accountsTable)
         .where({ address })
         .update({ signatureThreshold });
+}
+
+export async function confirmInitialAccount(
+    identityId: number,
+    updatedValues: Partial<Account>
+) {
+    return (await knex())
+        .select()
+        .table(accountsTable)
+        .where({ identityId, initial: 1 })
+        .first()
+        .update(updatedValues);
 }

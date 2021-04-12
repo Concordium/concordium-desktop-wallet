@@ -5,8 +5,8 @@ import {
     getAllAccounts,
     insertAccount,
     updateAccount,
+    confirmInitialAccount as confirmInitialAccountInDatabase,
     removeAccount as removeAccountFromDatabase,
-    updateSignatureThreshold as updateSignatureThresholdInDatabase,
 } from '../database/AccountDao';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
@@ -18,6 +18,7 @@ import {
     Dispatch,
     Global,
     Identity,
+    RewardFilter,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
@@ -124,7 +125,7 @@ function updateAccountEncryptedAmount(
             account.selfAmounts === selfAmounts
         )
     ) {
-        return updateAccount(account.name, {
+        return updateAccount(account.address, {
             incomingAmounts: incomingAmountsString,
             selfAmounts,
             allDecrypted: false,
@@ -194,10 +195,10 @@ export async function addPendingAccount(
 
 export async function confirmInitialAccount(
     dispatch: Dispatch,
-    accountName: string,
+    identityId: number,
     accountAddress: string
 ) {
-    await updateAccount(accountName, {
+    await confirmInitialAccountInDatabase(identityId, {
         status: AccountStatus.Confirmed,
         address: accountAddress,
     });
@@ -208,18 +209,18 @@ export async function confirmInitialAccount(
 // (Which is assumed to be of the credentialdeployment)
 export async function confirmAccount(
     dispatch: Dispatch,
-    accountName: string,
+    accountAddress: string,
     transactionId: string
 ) {
     const response = await getStatus(transactionId);
     switch (response.status) {
         case TransactionStatus.Rejected:
-            await updateAccount(accountName, {
+            await updateAccount(accountAddress, {
                 status: AccountStatus.Rejected,
             });
             break;
         case TransactionStatus.Finalized:
-            await updateAccount(accountName, {
+            await updateAccount(accountAddress, {
                 status: AccountStatus.Confirmed,
             });
             break;
@@ -254,7 +255,7 @@ export async function decryptAccountBalance(
         .reduce((acc, amount) => acc + BigInt(amount), 0n)
         .toString();
 
-    return updateAccount(account.name, {
+    return updateAccount(account.address, {
         totalDecrypted,
         allDecrypted: true,
     });
@@ -277,8 +278,17 @@ export async function updateSignatureThreshold(
     address: string,
     signatureThreshold: number
 ) {
-    updateSignatureThresholdInDatabase(address, signatureThreshold);
+    updateAccount(address, { signatureThreshold });
     return dispatch(updateAccountFields({ address, signatureThreshold }));
+}
+
+export async function updateRewardFilter(
+    dispatch: Dispatch,
+    address: string,
+    rewardFilter: RewardFilter
+) {
+    updateAccount(address, { rewardFilter });
+    return dispatch(updateAccountFields({ address, rewardFilter }));
 }
 
 export default accountsSlice.reducer;

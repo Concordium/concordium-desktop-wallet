@@ -141,7 +141,7 @@ export default function AccountCreationGenerate({
             await sendCredential(credentialDeploymentDetails);
             confirmAccount(
                 dispatch,
-                accountName,
+                credentialDeploymentDetails.accountAddress,
                 credentialDeploymentDetails.transactionId
             );
             dispatch(push(routes.ACCOUNTCREATION_FINAL));

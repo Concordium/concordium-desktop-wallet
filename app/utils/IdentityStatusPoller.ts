@@ -33,7 +33,7 @@ export async function confirmIdentityAndInitialAccount(
                 policy: credential.policy,
             };
             await confirmIdentity(dispatch, identityName, token.identityObject);
-            await confirmInitialAccount(dispatch, accountName, accountAddress);
+            await confirmInitialAccount(dispatch, identityId, accountAddress);
             insertNewCredential(
                 dispatch,
                 accountAddress,
