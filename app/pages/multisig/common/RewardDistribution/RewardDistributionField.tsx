@@ -89,6 +89,7 @@ export default function RewardDistributionField({
                     fallbackOnInvalid
                     min={0}
                     max={100}
+                    step={0.001}
                     isInvalid={!isValid(innerValue)}
                 />
                 %

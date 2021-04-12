@@ -99,7 +99,9 @@ export default function InlineNumber({
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
     const ref = useRef<HTMLInputElement>(null);
-    useLayoutEffect(() => scaleFieldWidth(ref.current), [innerValue]);
+    useLayoutEffect(() => {
+        scaleFieldWidth(ref.current);
+    }, [innerValue]);
 
     const handleBlur = useCallback(() => {
         // Basically ensure correct formatting of field and that field has a value (otherwise it'll be invisible on screen)
