@@ -77,14 +77,21 @@ $columns-vertical-gutter: 20px;
         border-right: 1px solid $color-grey;
     }
 
-    .rootPadded & > * {
-        margin-top: -$columns-vertical-gutter;
-        margin-bottom: -$columns-vertical-gutter;
-        max-height: calc(100% + #{2 * $columns-vertical-gutter});
+    // Targets ScrollContainer
+    > * {
+        max-height: none;
+        height: 100%;
+
+        .rootPadded & {
+            margin-top: -$columns-vertical-gutter;
+            margin-bottom: -$columns-vertical-gutter;
+            height: calc(100% + #{2 * $columns-vertical-gutter});
+        }
     }
 }
 
 .content {
+    height: 100%;
     padding: 0 $page-gutter;
 
     &VertPadding {
