@@ -1,12 +1,36 @@
+const types = {
+    BigInt: 'bigint',
+    Buffer: 'Buffer',
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function stringify(input: any) {
-    return JSON.stringify(input, (_, v) =>
-        typeof v === 'bigint' ? { '@type': 'bigint', value: v.toString() } : v
-    );
+    return JSON.stringify(input, (_, v) => {
+        if (typeof v === types.BigInt) {
+            return { '@type': types.BigInt, value: v.toString() };
+        }
+        if (v && v.type === types.Buffer) {
+            return {
+                '@type': types.Buffer,
+                value: Buffer.from(v).toString('hex'),
+            };
+        }
+        return v;
+    });
 }
 
 export function parse(input: string) {
-    return JSON.parse(input, (_, v) =>
-        v['@type'] === 'bigint' ? BigInt(v.value) : v
-    );
+    return JSON.parse(input, (_, v) => {
+        if (v) {
+            switch (v['@type']) {
+                case types.BigInt:
+                    return BigInt(v.value);
+                case types.Buffer:
+                    return Buffer.from(v.value, 'hex');
+                default:
+                    return v;
+            }
+        }
+        return v;
+    });
 }

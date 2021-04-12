@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
@@ -6,16 +6,25 @@ import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import { Account, TransferToEncrypted, TransferToPublic } from '~/utils/types';
+import {
+    Account,
+    TransferToEncrypted,
+    TransferToPublic,
+    TransactionKindId,
+    Fraction,
+} from '~/utils/types';
 import { toMicroUnits } from '~/utils/gtu';
 import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
+import { getTransactionKindCost } from '~/utils/transactionCosts';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 import TransferView from './TransferView';
 
 interface Specific<T> {
     amountHeader: string;
     createTransaction: (address: string, amount: bigint) => Promise<T>;
     location: string;
+    transactionKind: TransactionKindId;
 }
 
 interface Props<T> {
@@ -32,6 +41,17 @@ export default function InternalTransfer<
     const dispatch = useDispatch();
     const location = useLocation<TransferState>();
 
+    const [error, setError] = useState<string | undefined>();
+    const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
+
+    useEffect(() => {
+        getTransactionKindCost(specific.transactionKind)
+            .then((transferCost) => setEstimatedFee(transferCost))
+            .catch((e) =>
+                setError(`Unable to get transaction cost due to: ${e}`)
+            );
+    }, [specific.transactionKind, setEstimatedFee]);
+
     const [subLocation, setSubLocation] = useState<string>(
         location?.state?.initialPage || locations.pickAmount
     );
@@ -42,6 +62,7 @@ export default function InternalTransfer<
                 account.address,
                 toMicroUnits(amount)
             );
+            transaction.estimatedFee = estimatedFee;
 
             const transactionJSON = stringify(transaction);
             dispatch(
@@ -68,7 +89,7 @@ export default function InternalTransfer<
                 })
             );
         },
-        [specific, account, dispatch]
+        [specific, account, estimatedFee, dispatch]
     );
 
     function ChosenComponent() {
@@ -77,6 +98,7 @@ export default function InternalTransfer<
                 return (
                     <PickAmount
                         header={specific.amountHeader}
+                        estimatedFee={estimatedFee}
                         defaultAmount={location?.state?.amount}
                         toPickRecipient={undefined}
                         toConfirmTransfer={toConfirmTransfer}
@@ -91,12 +113,19 @@ export default function InternalTransfer<
     }
 
     return (
-        <TransferView
-            showBack={subLocation === locations.confirmTransfer}
-            exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
-            backOnClick={() => setSubLocation(locations.pickAmount)}
-        >
-            <ChosenComponent />
-        </TransferView>
+        <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                content={error}
+                onClick={() => dispatch(push(routes.ACCOUNTS))}
+            />
+            <TransferView
+                showBack={subLocation === locations.confirmTransfer}
+                exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
+                backOnClick={() => setSubLocation(locations.pickAmount)}
+            >
+                <ChosenComponent />
+            </TransferView>
+        </>
     );
 }

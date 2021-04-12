@@ -21,10 +21,10 @@
     &:focus {
         outline: none;
     }
+}
 
-    &:disabled {
-        cursor: default;
-    }
+.disabled {
+    cursor: default;
 }
 
 .clear {
@@ -49,24 +49,32 @@
     }
 
     &Tiny {
-        height: 28px;
-        font-size: $font-size-button2;
-        padding: 0 15px;
+        &:not(.rootClear) {
+            min-height: 28px;
+            font-size: $font-size-button2;
+            padding: 0 15px;
+        }
     }
 
     &Small {
-        height: 36px;
-        font-size: $font-size-button2;
-        padding: 0 15px;
+        &:not(.rootClear) {
+            min-height: 36px;
+            font-size: $font-size-button2;
+            padding: 0 15px;
+        }
     }
 
     &Big {
-        height: 58px;
+        &:not(.rootClear) {
+            min-height: 58px;
+        }
     }
 
     &Huge {
-        height: 76px;
-        font-size: $font-size-h2;
+        &:not(.rootClear) {
+            min-height: 76px;
+            font-size: $font-size-h2;
+        }
     }
 
     &WithIcon {

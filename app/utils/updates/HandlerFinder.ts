@@ -3,14 +3,19 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import {
     UpdateComponent,
-    TransactionHandler,
+    UpdateInstructionHandler,
     TransactionInput,
+    AccountTransactionHandler,
 } from '../transactionTypes';
 import {
+    instanceOfUpdateInstruction,
+    TransactionKindId,
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
+    Transaction,
+    AccountTransaction,
 } from '../types';
 import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
 import ElectionDifficultyHandler from './ElectionDifficultyHandler';
@@ -21,14 +26,16 @@ import MicroGtuPerEuroHandler from './MicroGtuPerEuroHandler';
 import MintDistributionHandler from './MintDistributionHandler';
 import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
+import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
+import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
 
 class HandlerTypeMiddleware<T>
     implements
-        TransactionHandler<
+        UpdateInstructionHandler<
             UpdateInstruction<UpdateInstructionPayload>,
             ConcordiumLedgerClient
         > {
-    base: TransactionHandler<T, ConcordiumLedgerClient>;
+    base: UpdateInstructionHandler<T, ConcordiumLedgerClient>;
 
     update: UpdateComponent;
 
@@ -36,7 +43,7 @@ class HandlerTypeMiddleware<T>
 
     type: string;
 
-    constructor(base: TransactionHandler<T, ConcordiumLedgerClient>) {
+    constructor(base: UpdateInstructionHandler<T, ConcordiumLedgerClient>) {
         this.base = base;
         this.update = base.update;
         this.title = base.title;
@@ -79,9 +86,20 @@ class HandlerTypeMiddleware<T>
     }
 }
 
-export default function findHandler(
+export function findAccountTransactionHandler(
+    transactionKind: TransactionKindId
+): AccountTransactionHandler<AccountTransaction, ConcordiumLedgerClient> {
+    if (transactionKind === TransactionKindId.Update_credentials) {
+        return new AccountHandlerTypeMiddleware(
+            new UpdateAccountCredentialsHandler()
+        );
+    }
+    throw new Error(`Unsupported transaction type: ${transactionKind}`);
+}
+
+export function findUpdateInstructionHandler(
     type: UpdateType
-): TransactionHandler<
+): UpdateInstructionHandler<
     UpdateInstruction<UpdateInstructionPayload>,
     ConcordiumLedgerClient
 > {
@@ -111,7 +129,16 @@ export default function findHandler(
     }
 }
 
-export function createTransactionHandler(state: TransactionInput | undefined) {
+export default function findHandler(transaction: Transaction) {
+    if (instanceOfUpdateInstruction(transaction)) {
+        return findUpdateInstructionHandler(transaction.type);
+    }
+    return findAccountTransactionHandler(transaction.transactionKind);
+}
+
+export function createUpdateInstructionHandler(
+    state: TransactionInput | undefined
+) {
     if (!state) {
         throw new Error(
             'No transaction handler was found. An invalid transaction has been received.'
@@ -123,8 +150,7 @@ export function createTransactionHandler(state: TransactionInput | undefined) {
     // TODO Add AccountTransactionHandler here when implemented.
 
     if (type === 'UpdateInstruction') {
-        const handler = findHandler(transactionObject.type);
-        return handler;
+        return findUpdateInstructionHandler(transactionObject.type);
     }
     throw new Error('Account transaction support not yet implemented.');
 }

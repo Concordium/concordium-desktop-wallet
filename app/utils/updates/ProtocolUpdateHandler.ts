@@ -6,7 +6,7 @@ import UpdateProtocol, {
 } from '../../pages/multisig/UpdateProtocol';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isProtocolUpdate,
     MultiSignatureTransaction,
@@ -22,7 +22,8 @@ const TYPE = 'Update Chain Protocol';
 type TransactionType = UpdateInstruction<ProtocolUpdate>;
 
 export default class ProtocolUpdateHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

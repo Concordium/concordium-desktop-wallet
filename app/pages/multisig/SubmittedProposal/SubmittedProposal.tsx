@@ -4,12 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, useParams } from 'react-router';
 import ErrorIcon from '@resources/svg/logo-error.svg';
 import CheckmarkIcon from '@resources/svg/logo-checkmark.svg';
-import { parse } from 'json-bigint';
+import { parse } from '~/utils/JSONHelper';
 import {
+    instanceOfAccountTransactionWithSignature,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
-    UpdateInstruction,
-    UpdateInstructionPayload,
+    instanceOfUpdateInstruction,
+    Transaction,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import MultiSignatureLayout from '../MultiSignatureLayout';
@@ -22,8 +23,12 @@ import {
 import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
 import styles from './SubmittedProposal.module.scss';
 import { sendTransaction } from '~/utils/nodeRequests';
-import findHandler from '~/utils/updates/HandlerFinder';
+import findHandler, {
+    findUpdateInstructionHandler,
+} from '~/utils/updates/HandlerFinder';
 import { serializeForSubmission } from '~/utils/UpdateSerialization';
+
+import { serializeTransaction } from '~/utils/transactionSerialization';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS;
 
@@ -63,21 +68,31 @@ function getStatusText(status: MultiSignatureTransactionStatus): string {
  */
 function SubmittedProposalView({ proposal }: Props) {
     const dispatch = useDispatch();
-    const { status, transaction } = proposal;
-    const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
-        transaction
-    );
-    const handler = findHandler(instruction.type);
-    const serializedPayload = handler.serializePayload(instruction);
+    const { status, transaction: transactionJSON } = proposal;
+    const transaction: Transaction = parse(transactionJSON);
+
+    const handler = findHandler(transaction);
 
     const isPending = [...ERROR_STATUSES, ...SUCCESS_STATUSES].every(
         (s) => s !== status
     );
 
     const init = useCallback(async () => {
-        const payload = serializeForSubmission(instruction, serializedPayload);
+        let payload;
+        if (instanceOfUpdateInstruction(transaction)) {
+            const serializedPayload = findUpdateInstructionHandler(
+                transaction.type
+            ).serializePayload(transaction);
+            payload = serializeForSubmission(transaction, serializedPayload);
+        } else if (instanceOfAccountTransactionWithSignature(transaction)) {
+            payload = serializeTransaction(
+                transaction,
+                () => transaction.signatures
+            );
+        } else {
+            throw new Error(`Unexpected Transaction type: ${transaction}`);
+        }
         const submitted = (await sendTransaction(payload)).getValue();
-
         const modifiedProposal: MultiSignatureTransaction = {
             ...proposal,
         };

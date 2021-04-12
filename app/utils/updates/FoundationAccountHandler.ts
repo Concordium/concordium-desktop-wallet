@@ -6,7 +6,7 @@ import UpdateFoundationAccount, {
 } from '../../pages/multisig/UpdateFoundationAccount';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     FoundationAccount,
     isFoundationAccount,
@@ -22,7 +22,8 @@ const TYPE = 'Update Foundation Account';
 type TransactionType = UpdateInstruction<FoundationAccount>;
 
 export default class FoundationAccountHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

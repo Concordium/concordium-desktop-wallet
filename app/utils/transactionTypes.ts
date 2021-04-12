@@ -1,10 +1,12 @@
+import { AccountPathInput } from '~/features/ledger/Path';
 import { Authorization, Authorizations, BlockSummary } from './NodeApiTypes';
 import {
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     AddressBookEntry,
-    Word8,
+    AccountTransaction,
+    TransactionPayload,
 } from './types';
 
 export interface TransactionInput {
@@ -39,7 +41,17 @@ export type UpdateComponent = (props: UpdateProps) => JSX.Element | null;
  * and generate a view of the transaction.
  * TODO: Decide whether this handler is only for updateInstruction, or make it support account transactions
  */
-export interface TransactionHandler<T, S> {
+export type TransactionHandler<T, S> =
+    | UpdateInstructionHandler<T, S>
+    | AccountTransactionHandler<T, S>;
+
+/**
+ * Interface definition for a class that handles a specific type
+ * of transaction. The handler can serialize and sign the transaction,
+ * and generate a view of the transaction.
+ * TODO: Decide whether this handler is only for updateInstruction, or make it support account transactions
+ */
+export interface UpdateInstructionHandler<T, S> {
     confirmType: (
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ) => T;
@@ -58,16 +70,21 @@ export interface TransactionHandler<T, S> {
     title: string;
 }
 
-// An actual signature, which goes into an account transaction.
-export type Signature = Buffer;
-
-type KeyIndex = Word8;
-// Signatures from a single credential, for an AccountTransaction
-export type TransactionCredentialSignature = Record<KeyIndex, Signature>;
-
-type CredentialIndex = Word8;
-// The signature of an account transaction.
-export type TransactionAccountSignature = Record<
-    CredentialIndex,
-    TransactionCredentialSignature
->;
+/**
+ * Interface definition for a class that handles a specific type
+ * of transaction. The handler can serialize and sign the transaction,
+ * and generate a view of the transaction.
+ * TODO: Fix Description
+ */
+export interface AccountTransactionHandler<T, S> {
+    confirmType: (transaction: AccountTransaction<TransactionPayload>) => T;
+    serializePayload: (transaction: T) => Buffer;
+    signTransaction: (
+        transaction: T,
+        signer: S,
+        path: AccountPathInput
+    ) => Promise<Buffer>;
+    view: (transaction: T) => JSX.Element;
+    type: string;
+    title: string;
+}

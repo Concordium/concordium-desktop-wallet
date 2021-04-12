@@ -28,7 +28,7 @@ export default function ChainUpdateProposalStatus<
     transaction,
     ...proposalStatusProps
 }: ChainUpdateProposalStatusProps<TUpdate>): JSX.Element {
-    const handler = findHandler(transaction.type);
+    const handler = findHandler(transaction);
     const expired = status === MultiSignatureTransactionStatus.Expired;
     const { year, month, date } =
         datePartsFromDate(

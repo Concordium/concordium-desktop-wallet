@@ -1,15 +1,14 @@
 import React from 'react';
 import { isExpired } from '~/utils/transactionHelpers';
 import {
+    Transaction,
     MultiSignatureTransaction,
-    UpdateInstruction,
-    UpdateInstructionPayload,
     MultiSignatureTransactionStatus,
-} from '../../utils/types';
+} from '~/utils/types';
 
 interface Props {
     proposal?: MultiSignatureTransaction;
-    transaction: UpdateInstruction<UpdateInstructionPayload>;
+    transaction: Transaction;
 }
 
 export default function ExpiredEffectiveTimeView({

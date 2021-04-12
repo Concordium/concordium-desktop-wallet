@@ -11,6 +11,11 @@ type Word32 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 
+export interface Fraction {
+    numerator: Word64;
+    denominator: Word64;
+}
+
 export enum SchemeId {
     Ed25519 = 0,
 }
@@ -136,6 +141,7 @@ export enum TransactionKindString {
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
     TransferWithSchedule = 'transferWithSchedule', // TODO confirm
+    UpdateCredentials = 'updateCredentials',
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -154,6 +160,7 @@ export enum TransactionKindId {
     Transfer_to_encrypted = 17,
     Transfer_to_public = 18,
     Transfer_with_schedule = 19,
+    Update_credentials = 20,
 } // TODO: Add all kinds (11- 18)
 
 export interface SimpleTransferPayload {
@@ -183,7 +190,19 @@ export interface ScheduledTransferPayload {
     toAddress: string;
 }
 
+export interface AddedCredential {
+    index: Word8;
+    value: CredentialDeploymentInformation;
+}
+
+export interface UpdateAccountCredentialsPayload {
+    addedCredentials: AddedCredential[];
+    removedCredIds: string[];
+    newThreshold: number;
+}
+
 export type TransactionPayload =
+    | UpdateAccountCredentialsPayload
     | TransferToPublicPayload
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
@@ -197,6 +216,7 @@ export interface AccountTransaction<
     sender: Hex;
     nonce: string;
     energyAmount: string;
+    estimatedFee?: Fraction;
     expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;
@@ -206,6 +226,7 @@ export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
+export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 
 // Types of block items, and their identifier numbers
@@ -262,10 +283,22 @@ export interface Credential {
     policy: JSONString;
 }
 
+export interface DeployedCredential extends Credential {
+    credentialIndex: number;
+}
+
 export interface LocalCredential extends Credential {
     external: false;
     identityId: number;
     credentialNumber: number;
+}
+
+export function instanceOfDeployedCredential(
+    object: Credential
+): object is DeployedCredential {
+    return !(
+        object.credentialIndex === undefined || object.credentialIndex === null
+    );
 }
 
 export function instanceOfLocalCredential(
@@ -556,7 +589,9 @@ export interface UpdateInstructionSignature {
     signature: string;
 }
 
-export interface UpdateInstruction<T extends UpdateInstructionPayload> {
+export interface UpdateInstruction<
+    T extends UpdateInstructionPayload = UpdateInstructionPayload
+> {
     header: UpdateHeader;
     payload: T;
     type: UpdateType;
@@ -573,9 +608,31 @@ export type UpdateInstructionPayload =
     | BakerStakeThreshold
     | ElectionDifficulty;
 
+// An actual signature, which goes into an account transaction.
+export type Signature = Buffer;
+
+type KeyIndex = Word8;
+// Signatures from a single credential, for an AccountTransaction
+export type TransactionCredentialSignature = Record<KeyIndex, Signature>;
+
+type CredentialIndex = Word8;
+// The signature of an account transaction.
+export type TransactionAccountSignature = Record<
+    CredentialIndex,
+    TransactionCredentialSignature
+>;
+
+export interface AccountTransactionWithSignature<
+    PayloadType extends TransactionPayload = TransactionPayload
+> extends AccountTransaction<PayloadType> {
+    signatures: TransactionAccountSignature;
+}
+
 export type Transaction =
     | AccountTransaction
-    | UpdateInstruction<UpdateInstructionPayload>;
+    | AccountTransactionWithSignature
+    | UpdateInstruction;
+
 /**
  * Update type enumeration. The numbering/order is important as that corresponds
  * to the byte written when serializing the update instruction.
@@ -604,6 +661,18 @@ export function instanceOfUpdateInstruction(
     return 'header' in object;
 }
 
+export function instanceOfUpdateInstructionSignature(
+    object: TransactionCredentialSignature | UpdateInstructionSignature
+): object is UpdateInstructionSignature {
+    return 'signature' in object && 'authorizationKeyIndex' in object;
+}
+
+export function instanceOfAccountTransactionWithSignature(
+    object: Transaction
+): object is AccountTransactionWithSignature {
+    return instanceOfAccountTransaction(object) && 'signatures' in object;
+}
+
 export function instanceOfSimpleTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
@@ -626,6 +695,12 @@ export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
     return object.transactionKind === TransactionKindId.Transfer_with_schedule;
+}
+
+export function instanceOfUpdateAccountCredentials(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateAccountCredentials {
+    return object.transactionKind === TransactionKindId.Update_credentials;
 }
 
 export function isExchangeRate(
@@ -721,10 +796,7 @@ export enum MultiSignatureMenuItems {
     ExportKey = 'Export public-key',
 }
 
-export interface ExchangeRate {
-    numerator: Word64;
-    denominator: Word64;
-}
+export type ExchangeRate = Fraction;
 
 /**
  * A reward fraction with a resolution of 1/100000, i.e. the
@@ -864,6 +936,7 @@ export interface ExportData {
 
 interface EventResult {
     outcome: string;
+    rejectReason?: string;
 }
 
 export interface TransactionEvent {

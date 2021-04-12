@@ -1,12 +1,30 @@
 import React from 'react';
 import Form from '~/components/Form';
+import {
+    UpdateInstructionSignature,
+    TransactionCredentialSignature,
+    instanceOfUpdateInstructionSignature,
+} from '~/utils/types';
 
 import styles from './SignatureCheckboxes.module.scss';
 
 export const getCheckboxName = (i: number) => `${i}`;
 
+function getSignature(
+    signature: TransactionCredentialSignature | UpdateInstructionSignature
+) {
+    if (instanceOfUpdateInstructionSignature(signature)) {
+        return signature.signature.substring(0, 16);
+    }
+    // TODO: Remove assumption that a credential only has 1 signature
+    return signature[0].toString('hex').substring(0, 16);
+}
+
 interface SignatureCheckboxProps {
-    signature: string | undefined;
+    signature:
+        | TransactionCredentialSignature
+        | UpdateInstructionSignature
+        | undefined;
     name: string;
 }
 
@@ -18,7 +36,7 @@ function SignatureCheckbox({
         <div className={styles.signedCheckoxLabel}>
             Signed
             <div>
-                {signature.substring(0, 16)}
+                {getSignature(signature)}
                 ...
             </div>
         </div>
@@ -42,7 +60,7 @@ function SignatureCheckbox({
 
 interface SignatureCheckboxesProps {
     threshold: number;
-    signatures: string[];
+    signatures: TransactionCredentialSignature[] | UpdateInstructionSignature[];
 }
 
 export default function SignatureCheckboxes({

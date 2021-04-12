@@ -6,7 +6,7 @@ import UpdateElectionDifficulty, {
 } from '../../pages/multisig/UpdateElectionDifficulty';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     ElectionDifficulty,
     isElectionDifficulty,
@@ -22,7 +22,8 @@ const TYPE = 'Update Election Difficulty';
 type TransactionType = UpdateInstruction<ElectionDifficulty>;
 
 export default class ElectionDifficultyHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

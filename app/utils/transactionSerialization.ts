@@ -7,21 +7,27 @@ import {
     SchedulePoint,
     TransactionPayload,
     TransferToEncryptedPayload,
+    UpdateAccountCredentialsPayload,
     TransferToPublicPayload,
-} from './types';
-import {
     TransactionAccountSignature,
     Signature,
     TransactionCredentialSignature,
-} from './transactionTypes';
+} from './types';
 import {
     encodeWord32,
     encodeWord64,
     put,
+    putInt8,
     putBase58Check,
     hashSha256,
     serializeMap,
+    serializeList,
+    serializeCredentialDeploymentInformation,
 } from './serializationHelpers';
+
+function putString(value: string) {
+    return Buffer.from(value, 'hex');
+}
 
 function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     const size = 1 + 32 + 8;
@@ -30,7 +36,7 @@ function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     serialized[0] = TransactionKind.Simple_transfer;
     putBase58Check(serialized, 1, payload.toAddress);
     put(serialized, 32 + 1, encodeWord64(BigInt(payload.amount)));
-    return serialized;
+    return Buffer.from(serialized);
 }
 
 export function serializeScheduledTransferPayloadBase(
@@ -42,7 +48,7 @@ export function serializeScheduledTransferPayloadBase(
     initialPayload[0] = TransactionKind.Transfer_with_schedule;
     putBase58Check(initialPayload, 1, payload.toAddress);
     initialPayload[33] = payload.schedule.length;
-    return initialPayload;
+    return Buffer.from(initialPayload);
 }
 
 export function serializeSchedulePoint(period: SchedulePoint) {
@@ -66,7 +72,38 @@ function serializeTransferToEncypted(payload: TransferToEncryptedPayload) {
 
     serialized[0] = TransactionKind.Transfer_to_encrypted;
     put(serialized, 1, encodeWord64(BigInt(payload.amount)));
-    return serialized;
+    return Buffer.from(serialized);
+}
+
+function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
+    const transactionType = Buffer.alloc(1);
+    transactionType.writeUInt8(TransactionKind.Update_credentials, 0);
+
+    const serializedNewCredentials = serializeList(
+        payload.addedCredentials,
+        putInt8,
+        ({ index, value }) =>
+            Buffer.concat([
+                putInt8(index),
+                serializeCredentialDeploymentInformation(value),
+            ])
+    );
+
+    const serializedRemovedCredentials = serializeList(
+        payload.removedCredIds,
+        putInt8,
+        putString
+    );
+
+    const newThreshold = Buffer.alloc(1);
+    newThreshold.writeUInt8(payload.newThreshold, 0);
+
+    return Buffer.concat([
+        transactionType,
+        serializedNewCredentials,
+        serializedRemovedCredentials,
+        newThreshold,
+    ]);
 }
 
 export function serializeTransferToPublicData(
@@ -104,7 +141,7 @@ function serializeTransferToPublic(payload: TransferToPublicPayload) {
     serialized[0] = TransactionKind.Transfer_to_public;
     put(serialized, 1, data);
     put(serialized, 1 + data.length, proof);
-    return serialized;
+    return Buffer.from(serialized);
 }
 
 export function serializeTransactionHeader(
@@ -123,16 +160,20 @@ export function serializeTransactionHeader(
     put(serialized, 32 + 8 + 8, encodeWord32(payloadSize));
     put(serialized, 32 + 8 + 8 + 4, encodeWord64(expiry));
 
-    return serialized;
+    return Buffer.from(serialized);
 }
 
 export function serializeTransferPayload(
     kind: TransactionKind,
     payload: TransactionPayload
-) {
+): Buffer {
     switch (kind) {
         case TransactionKind.Simple_transfer:
             return serializeSimpleTransfer(payload as SimpleTransferPayload);
+        case TransactionKind.Update_credentials:
+            return serializeUpdateCredentials(
+                payload as UpdateAccountCredentialsPayload
+            );
         case TransactionKind.Transfer_with_schedule:
             return serializeTransferWithSchedule(
                 payload as ScheduledTransferPayload
@@ -155,10 +196,9 @@ function serializeSignature(signatures: TransactionAccountSignature) {
     // 1 for the CredentialIndex, 1 for the number of signatures, then for each signature:
     // index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
 
-    const putInt8 = (i: number) => Buffer.from(Uint8Array.of(i));
     const putSignature = (signature: Signature) => {
         const length = Buffer.alloc(2);
-        length.writeInt16BE(signature.length, 0);
+        length.writeUInt16BE(signature.length, 0);
         return Buffer.concat([length, signature]);
     };
     const putCredentialSignatures = (credSig: TransactionCredentialSignature) =>
@@ -215,7 +255,7 @@ export function serializeTransaction(
     return serialized;
 }
 
-export function getTransactionHash(
+export function getAccountTransactionHash(
     transaction: AccountTransaction,
     signFunction: SignFunction
 ) {

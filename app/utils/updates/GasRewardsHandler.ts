@@ -6,7 +6,7 @@ import UpdateGasRewards, {
 } from '~/pages/multisig/updates/UpdateGasRewards/UpdateGasRewards';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     GasRewards,
     isGasRewards,
@@ -22,7 +22,8 @@ const TYPE = 'Update Gas Rewards';
 type TransactionType = UpdateInstruction<GasRewards>;
 
 export default class GasRewardsHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

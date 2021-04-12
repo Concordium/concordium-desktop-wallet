@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Menu } from 'semantic-ui-react';
 import { useSelector } from 'react-redux';
 import { Identity } from '~/utils/types';
 import { confirmedIdentitiesSelector } from '~/features/IdentitySlice';
 import IdentityListElement from '~/components/IdentityListElement';
+import styles from '~/pages/Identities/Identities.module.scss';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -21,20 +21,20 @@ export default function PickIdentity({
     const [chosenIndex, setChosenIndex] = useState(-1);
 
     return (
-        <Menu vertical fluid>
-            {identities.map((identity: Identity, i: number) => (
-                <Menu.Item
+        <>
+            {identities.map((identity: Identity, index: number) => (
+                <IdentityListElement
+                    identity={identity}
                     key={identity.id}
+                    className={styles.listElement}
+                    active={chosenIndex === index}
                     onClick={() => {
                         setReady(true);
-                        setChosenIndex(i);
+                        setChosenIndex(index);
                         setIdentity(identity);
                     }}
-                    active={chosenIndex === i}
-                >
-                    <IdentityListElement identity={identity} />
-                </Menu.Item>
+                />
             ))}
-        </Menu>
+        </>
     );
 }

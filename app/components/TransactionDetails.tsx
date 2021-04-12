@@ -5,6 +5,7 @@ import {
     instanceOfUpdateInstruction,
     UpdateInstruction,
     UpdateInstructionPayload,
+    AccountTransactionWithSignature,
 } from '../utils/types';
 import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
 import UpdateInstructionDetails from './UpdateInstructionDetails';
@@ -15,7 +16,8 @@ import UpdateInstructionDetails from './UpdateInstructionDetails';
 interface Props {
     transaction:
         | UpdateInstruction<UpdateInstructionPayload>
-        | AccountTransaction;
+        | AccountTransaction
+        | AccountTransactionWithSignature;
 }
 
 function generateView(
