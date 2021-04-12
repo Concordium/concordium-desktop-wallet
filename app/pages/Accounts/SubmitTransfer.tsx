@@ -83,7 +83,7 @@ async function attachCompletedPayload(
             transaction.payload.toAddress
         );
         const data = await makeEncryptedTransferData(
-            transaction.payload.transferAmount,
+            transaction.payload.plainTransferAmount,
             receiverAccountInfo.accountEncryptionKey,
             prfKeySeed.toString('hex'),
             global,
@@ -92,11 +92,11 @@ async function attachCompletedPayload(
         );
 
         const payload = {
+            ...transaction.payload,
             proof: data.payload.proof,
             index: data.payload.index,
             transferAmount: data.payload.transferAmount,
             remainingEncryptedAmount: data.payload.remainingAmount,
-            toAddress: transaction.payload.toAddress,
         };
         return { ...transaction, payload };
     }

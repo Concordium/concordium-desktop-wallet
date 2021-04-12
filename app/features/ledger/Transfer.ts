@@ -177,7 +177,10 @@ async function signEncryptedTransfer(
     if (!transaction.payload.proof) {
         throw new Error('Unexpected missing proof');
     }
-    if (!transaction.payload.remainingEncryptedAmount) {
+    if (
+        !transaction.payload.remainingEncryptedAmount ||
+        !transaction.payload.transferAmount
+    ) {
         throw new Error('Unexpected missing payload data');
     }
 

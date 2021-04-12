@@ -132,7 +132,7 @@ export function createEncryptedTransferTransaction(
 ): Promise<EncryptedTransfer> {
     const payload = {
         toAddress,
-        transferAmount: amount.toString(),
+        plainTransferAmount: amount.toString(),
     };
     return createTransferTransaction(
         fromAddress,

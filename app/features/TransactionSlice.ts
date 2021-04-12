@@ -104,6 +104,7 @@ function filterUnShieldedBalanceTransaction(transaction: TransferTransaction) {
         case TransactionKindString.TransferWithSchedule:
         case TransactionKindString.TransferToEncrypted:
         case TransactionKindString.TransferToPublic:
+        case TransactionKindString.EncryptedAmountTransfer:
             return true;
         default:
             return false;

@@ -108,7 +108,11 @@ function serializeTransferToPublic(payload: TransferToPublicPayload) {
 export function serializeEncryptedTransferData(
     payload: EncryptedTransferPayload
 ) {
-    if (payload.index === undefined || !payload.remainingEncryptedAmount) {
+    if (
+        payload.index === undefined ||
+        !payload.remainingEncryptedAmount ||
+        !payload.transferAmount
+    ) {
         throw new Error('unexpected missing data of Encrypted Transfer data');
     }
     const remainingEncryptedAmount = Buffer.from(

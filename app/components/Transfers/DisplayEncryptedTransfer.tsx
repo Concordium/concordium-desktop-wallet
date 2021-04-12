@@ -31,7 +31,9 @@ export default function DisplayEncryptedTransfer({
             </List.Item>
             <List.Item>
                 Amount:
-                <Header>{displayAsGTU(transaction.payload.transferAmount)}</Header>
+                <Header>
+                    {displayAsGTU(transaction.payload.plainTransferAmount)}
+                </Header>
             </List.Item>
         </List>
     );

@@ -165,9 +165,10 @@ export interface SimpleTransferPayload {
 }
 
 export interface EncryptedTransferPayload {
-    transferAmount: string;
+    plainTransferAmount: string;
     toAddress: string;
     remainingEncryptedAmount?: EncryptedAmount;
+    transferAmount?: EncryptedAmount;
     index?: string;
     proof?: string;
 }

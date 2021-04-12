@@ -175,7 +175,7 @@ function convertEncryptedTransfer(
     transaction: EncryptedTransfer,
     cost: bigint
 ): TypeSpecific {
-    const amount = 0n;
+    const amount = transaction.payload.plainTransferAmount;
     const estimatedTotal = amount + cost;
 
     return {

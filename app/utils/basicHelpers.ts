@@ -134,3 +134,10 @@ export function collapseFraction({ numerator, denominator }: Fraction): bigint {
     }
     return 1n + quotient;
 }
+
+/**
+ * Returns the absolute value of the given bigint.
+ */
+export function abs(value: bigint) {
+    return value < 0n ? -value : value;
+}

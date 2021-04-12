@@ -14,6 +14,7 @@ import { chosenAccountSelector } from '../../features/AccountSlice';
 import { viewingShieldedSelector } from '../../features/TransactionSlice';
 import SidedRow from '../../components/SidedRow';
 import { isFailed } from '../../utils/transactionHelpers';
+import { abs } from '~/utils/basicHelpers';
 
 function determineOutgoing(transaction: TransferTransaction, account: Account) {
     return transaction.fromAddress === account.address;
@@ -49,10 +50,10 @@ function buildOutgoingAmountStrings(
     };
 }
 
-function buildCostFreeAmountString(amount: bigint, negative = false) {
-    const sign = negative ? -1n : 1n;
+function buildCostFreeAmountString(amount: bigint, absolute = false) {
+    const displayAmount = absolute ? abs(amount) : amount;
     return {
-        amount: `${displayAsGTU(sign * amount)}`,
+        amount: `${displayAsGTU(displayAmount)}`,
         amountFormula: '',
     };
 }
@@ -64,30 +65,21 @@ function parseShieldedAmount(
     if (transaction.decryptedAmount) {
         if (
             transaction.transactionKind ===
-                TransactionKindString.TransferToEncrypted ||
-            transaction.transactionKind ===
-                TransactionKindString.TransferToPublic
-        ) {
-            return buildCostFreeAmountString(
-                BigInt(transaction.decryptedAmount)
-            );
-        }
-        if (
-            transaction.transactionKind ===
-            TransactionKindString.EncryptedAmountTransfer
+                TransactionKindString.EncryptedAmountTransfer &&
+            !isOutgoingTransaction
         ) {
             return buildCostFreeAmountString(
                 BigInt(transaction.decryptedAmount),
-                isOutgoingTransaction
+                true
             );
         }
-    } else {
-        const negative = isOutgoingTransaction ? '-' : '';
-        return {
-            amount: `${negative} ${getGTUSymbol()} ?`,
-            amountFormula: '',
-        };
+        return buildCostFreeAmountString(BigInt(transaction.decryptedAmount));
     }
+    const negative = isOutgoingTransaction ? '-' : '';
+    return {
+        amount: `${negative} ${getGTUSymbol()} ?`,
+        amountFormula: '',
+    };
 
     throw new Error(
         'Unexpected transaction type when viewing shielded balance.'
@@ -103,6 +95,15 @@ function parseAmount(
         case OriginType.Account:
             if (isOutgoingTransaction) {
                 const cost = BigInt(transaction.cost || '0');
+                if (
+                    transaction.transactionKind ===
+                    TransactionKindString.EncryptedAmountTransfer
+                ) {
+                    return {
+                        amount: `${displayAsGTU(-cost)}`,
+                        amountFormula: `${displayAsGTU(cost)} Fee`,
+                    };
+                }
                 return buildOutgoingAmountStrings(
                     BigInt(transaction.total),
                     BigInt(transaction.subtotal),
@@ -110,7 +111,10 @@ function parseAmount(
                 );
             }
             // incoming transaction:
-            return buildCostFreeAmountString(BigInt(transaction.subtotal));
+            return buildCostFreeAmountString(
+                BigInt(transaction.subtotal),
+                true
+            );
 
         default:
             return {
@@ -123,11 +127,13 @@ function parseAmount(
 function displayType(kind: TransactionKindString) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
-            return ' (schedule)';
+            return ' (With Schedule)';
         case TransactionKindString.TransferToEncrypted:
-            return ' (Shielded)';
+            return ' (To Encrypted)';
         case TransactionKindString.TransferToPublic:
-            return ' (Unshielded)';
+            return ' (To Public)';
+        case TransactionKindString.EncryptedAmountTransfer:
+            return ' (Encrypted)';
         default:
             return '';
     }
