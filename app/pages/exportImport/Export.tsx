@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { Button, Header, Segment, Divider } from 'semantic-ui-react';
 import { encrypt } from '../../utils/encryption';
 import { validatePassword } from '../../utils/importHelpers';
 import { saveFile } from '../../utils/FileHelper';
@@ -9,8 +10,6 @@ import { addressBookSelector } from '../../features/AddressBookSlice';
 import { credentialsSelector } from '../../features/CredentialSlice';
 import InputModal from '../../components/InputModal';
 import MessageModal from '../../components/MessageModal';
-import Button from '~/cross-app-components/Button';
-import styles from './Export.module.scss';
 
 /**
  * Component for exporting identities/account/addressBook.
@@ -85,13 +84,21 @@ export default function Export() {
                 onClose={() => setOpenConfirmationModal(false)}
                 open={openConfirmationModal}
             />
-            <div className={styles.export}>
-                <h2 className={styles.title}>Export</h2>
-                <p>Export your accounts, ID’s and address book.</p>
-                <Button onClick={() => setOpenPasswordModal(true)}>
+            <Segment basic textAlign="center">
+                <Header textAlign="center" size="large">
+                    Export
+                </Header>
+                Here you can choose to export all your identities, accounts and
+                the address book.
+                <Divider hidden />
+                <Button
+                    primary
+                    onClick={() => setOpenPasswordModal(true)}
+                    fluid
+                >
                     Export
                 </Button>
-            </div>
+            </Segment>
         </>
     );
 }
