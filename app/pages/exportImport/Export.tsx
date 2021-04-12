@@ -10,7 +10,7 @@ import { credentialsSelector } from '../../features/CredentialSlice';
 import InputModal from '../../components/InputModal';
 import MessageModal from '../../components/MessageModal';
 import Button from '~/cross-app-components/Button';
-import styles from './Export.module.scss';
+import styles from './ExportImport.module.scss';
 
 /**
  * Component for exporting identities/account/addressBook.
@@ -70,8 +70,8 @@ export default function Export() {
     return (
         <>
             <InputModal
-                title="Choose a password"
-                buttonText="Export"
+                title="Enter a password"
+                buttonText="Continue"
                 validValue={(password) => validatePassword(password)}
                 buttonOnClick={exportData}
                 placeholder="Enter your password"

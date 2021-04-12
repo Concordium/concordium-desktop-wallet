@@ -12,7 +12,7 @@ import {
     validateEncryptedStructure,
 } from '../../utils/importHelpers';
 import { EncryptedData } from '../../utils/types';
-import styles from './Export.module.scss';
+import styles from './ExportImport.module.scss';
 
 /**
  * Component to start importing identities/account/addressBook.

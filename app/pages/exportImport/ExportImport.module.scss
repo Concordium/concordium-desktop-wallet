@@ -1,0 +1,56 @@
+@import 'config/bundle';
+
+.import,
+.export,
+.successfulImport {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 40px;
+
+    p {
+        font-size: $font-size-body2;
+    }
+
+    button {
+        margin-top: auto;
+        margin-bottom: 40px;
+    }
+}
+
+.bold,
+.title {
+    font-weight: $font-weight-bold;
+}
+
+.importedAccounts {
+    font-size: $font-size-body3;
+    p {
+        margin: 0;
+    }
+}
+
+.importedAddress {
+    font-size: $font-size-body3;
+    margin: 0;
+}
+
+.AddressBookHeader,
+.importedIdentity {
+    margin-top: 60px;
+    font-size: $font-size-body2;
+}
+
+.importedList {
+    > div {
+        padding: 80px 20%;
+    }
+    div {
+        text-align: left;
+    }
+}
+
+.checkmark {
+    height: 100px;
+    margin: 40px 0;
+}
