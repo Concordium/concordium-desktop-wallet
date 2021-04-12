@@ -1,6 +1,7 @@
 @import 'config/bundle';
 
 $columns-headers-inset: 31px;
+$columns-vertical-gutter: 20px;
 
 .root {
     position: relative;
@@ -20,6 +21,11 @@ $columns-headers-inset: 31px;
         &.rootWithHeaders {
             height: calc(100% - #{$columns-headers-inset});
         }
+    }
+
+    &Padded {
+        padding-top: $columns-vertical-gutter;
+        padding-bottom: $columns-vertical-gutter;
     }
 }
 
@@ -69,6 +75,12 @@ $columns-headers-inset: 31px;
 
     .rootDivided .column:not(:last-child) & {
         border-right: 1px solid $color-grey;
+    }
+
+    .rootPadded & > * {
+        margin-top: -$columns-vertical-gutter;
+        margin-bottom: -$columns-vertical-gutter;
+        max-height: calc(100% + #{2 * $columns-vertical-gutter});
     }
 }
 

@@ -72,7 +72,11 @@ export default function MasterDetailPageLayout({
         <PageLayout noGutter noMaxWidth>
             {header}
             {isColumnsContent ? (
-                <Columns divider className={styles.columns} columnScroll>
+                <Columns
+                    divider="offset"
+                    className={styles.columns}
+                    columnScroll
+                >
                     {content}
                 </Columns>
             ) : (

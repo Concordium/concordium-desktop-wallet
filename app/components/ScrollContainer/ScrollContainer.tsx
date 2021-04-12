@@ -1,14 +1,16 @@
 import clsx from 'clsx';
 import React, { PropsWithChildren } from 'react';
+import { ClassName } from '~/utils/types';
 
 import styles from './ScrollContainer.module.scss';
 
-type ScrollContainerProps = PropsWithChildren<{
-    /**
-     * Defaults to y.
-     */
-    direction?: 'y' | 'x' | 'both';
-}>;
+type ScrollContainerProps = ClassName &
+    PropsWithChildren<{
+        /**
+         * Defaults to y.
+         */
+        direction?: 'y' | 'x' | 'both';
+    }>;
 
 /**
  * @description
@@ -16,13 +18,15 @@ type ScrollContainerProps = PropsWithChildren<{
  */
 export default function ScrollContainer({
     direction = 'y',
+    className,
     children,
 }: ScrollContainerProps): JSX.Element {
     return (
         <div
             className={clsx(
                 (direction === 'x' || direction === 'both') && styles.x,
-                (direction === 'y' || direction === 'both') && styles.y
+                (direction === 'y' || direction === 'both') && styles.y,
+                className
             )}
         >
             {children}

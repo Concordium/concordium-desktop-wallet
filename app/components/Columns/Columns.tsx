@@ -13,9 +13,9 @@ import styles from './Columns.module.scss';
 
 export interface ColumnsProps {
     /**
-     * Controls whether or not a divider is visible between columns.
+     * Controls whether or not a divider is visible between columns. Setting to 'offset' creates a gap between the containing element and the divider line.
      */
-    divider?: boolean;
+    divider?: boolean | 'offset';
     /**
      * Must be of type <Columns.Column />
      */
@@ -74,6 +74,7 @@ function Columns({
                 columnScroll && styles.rootColumnScroll,
                 variableSize && styles.rootVariableSize,
                 divider && styles.rootDivided,
+                divider === 'offset' && styles.rootPadded,
                 headers.length > 0 && styles.rootWithHeaders,
                 className
             )}
