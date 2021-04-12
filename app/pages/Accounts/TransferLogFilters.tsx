@@ -6,6 +6,7 @@ import Checkbox from '~/components/Form/Checkbox';
 import TransferView from '~/components/Transfers/TransferView';
 import routes from '../../constants/routes.json';
 import styles from './TransferLogFilters.module.scss';
+import { updateRewardFilter } from '~/features/AccountSlice';
 
 interface Props {
     account: Account;
@@ -18,9 +19,8 @@ interface Props {
 export default function TransferLogFilters({ account, returnFunction }: Props) {
     const dispatch = useDispatch();
 
-    function setRewardFilter(filterStatus: RewardFilter) {
-        account.rewardFilter = filterStatus;
-    }
+    const setRewardFilter = (filterStatus: RewardFilter) =>
+        updateRewardFilter(dispatch, account.address, filterStatus);
 
     return (
         <TransferView
