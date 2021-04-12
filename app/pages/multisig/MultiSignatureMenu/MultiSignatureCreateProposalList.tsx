@@ -25,6 +25,7 @@ const multiSigTransactionTypesMap: [UpdateType, string][] = [
     [UpdateType.UpdateGASRewards, 'Update GAS rewards'],
     [UpdateType.UpdateBakerStakeThreshold, 'Update baker stake threshold'],
     [UpdateType.UpdateElectionDifficulty, 'Update election difficulty'],
+    [UpdateType.UpdateRootKeysWithRootKeys, 'Update root keys with root keys'],
 ];
 
 /**

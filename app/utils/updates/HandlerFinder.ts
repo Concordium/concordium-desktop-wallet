@@ -21,6 +21,7 @@ import MicroGtuPerEuroHandler from './MicroGtuPerEuroHandler';
 import MintDistributionHandler from './MintDistributionHandler';
 import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
+import UpdateRootKeysWithRootKeysHandler from './UpdateRootKeysWithRootKeysHandler';
 
 class HandlerTypeMiddleware<T>
     implements
@@ -106,6 +107,10 @@ export default function findHandler(
             return new HandlerTypeMiddleware(new BakerStakeThresholdHandler());
         case UpdateType.UpdateElectionDifficulty:
             return new HandlerTypeMiddleware(new ElectionDifficultyHandler());
+        case UpdateType.UpdateRootKeysWithRootKeys:
+            return new HandlerTypeMiddleware(
+                new UpdateRootKeysWithRootKeysHandler()
+            );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);
     }

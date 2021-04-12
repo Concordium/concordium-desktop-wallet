@@ -33,6 +33,8 @@ interface UpdateQueues {
     protocol: UpdateQueue;
     gasRewards: UpdateQueue;
     bakerStakeThreshold: UpdateQueue;
+    rootKeys: UpdateQueue;
+    level1Keys: UpdateQueue;
 }
 
 export interface Authorization {
@@ -81,9 +83,21 @@ interface ChainParameters {
     electionDifficulty: number;
 }
 
+interface KeysWithThreshold {
+    keys: Key[];
+    threshold: number;
+}
+
+interface Keys {
+    rootKeys: KeysWithThreshold;
+    level1Keys: KeysWithThreshold;
+    level2Keys: Authorizations;
+}
+
 interface Updates {
     authorizations: Authorizations;
     chainParameters: ChainParameters;
+    keys: Keys;
     updateQueues: UpdateQueues;
 }
 

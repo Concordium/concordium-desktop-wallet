@@ -7,7 +7,7 @@ export default function UpdateHigherLevelKeys({ blockSummary }: UpdateProps) {
     // const currentValue: RewardDistributionValue = getCurrentValue(blockSummary);
 
     // TODO Fix this value to be using the blocksummary for what we need. This is just a placeholder.
-    const currentVal = blockSummary.updates.authorizations.bakerStakeThreshold;
+    const currentVal = blockSummary.updates.keys.rootKeys.keys.length;
 
     return (
         <>

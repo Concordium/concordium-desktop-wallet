@@ -39,14 +39,9 @@ export default class UpdateRootKeysWithRootKeysHandler
             return undefined;
         }
 
-        // TODO Fix sequence number and threshold after updating local blockchain
-        // to see what the correct format is now.
         const sequenceNumber =
-            blockSummary.updates.updateQueues.bakerStakeThreshold
-                .nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.authorizations.bakerStakeThreshold;
+            blockSummary.updates.updateQueues.rootKeys.nextSequenceNumber;
+        const { threshold } = blockSummary.updates.keys.rootKeys;
 
         // TODO Fix this
         return createUpdateMultiSignatureTransaction(

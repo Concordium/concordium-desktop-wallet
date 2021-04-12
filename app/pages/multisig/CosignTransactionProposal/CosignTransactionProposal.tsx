@@ -99,7 +99,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
             const authorizationKey = await findAuthorizationKey(
                 ledger,
                 transactionHandler,
-                blockSummary.updates.authorizations
+                blockSummary.updates.keys.level2Keys
             );
             if (!authorizationKey) {
                 setShowValidationError(true);
