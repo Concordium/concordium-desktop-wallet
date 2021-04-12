@@ -1,23 +1,42 @@
-import React, { useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { stringify } from '../../utils/JSONHelper';
-import routes from '../../constants/routes.json';
-import { AddressBookEntry, Account } from '../../utils/types';
-import { toMicroUnits } from '../../utils/gtu';
-import locations from '../../constants/transferLocations.json';
-import { createEncryptedTransferTransaction } from '../../utils/transactionHelpers';
+import { stringify } from '~/utils/JSONHelper';
+import routes from '~/constants/routes.json';
+import {
+    AddressBookEntry,
+    Account,
+    TransactionKindId,
+    Fraction,
+} from '~/utils/types';
+import { toMicroUnits } from '~/utils/gtu';
+import locations from '~/constants/transferLocations.json';
+import { createEncryptedTransferTransaction } from '~/utils/transactionHelpers';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
+
+import { getTransactionKindCost } from '~/utils/transactionCosts';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 interface Props {
     account: Account;
 }
 
 /**
- * Controls the flow of creating a simple transfer.
+ * Controls the flow of creating an encrypted transfer.
  */
 export default function EncryptedTransfer({ account }: Props) {
     const dispatch = useDispatch();
+
+    const [error, setError] = useState<string | undefined>();
+    const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
+
+    useEffect(() => {
+        getTransactionKindCost(TransactionKindId.Encrypted_transfer)
+            .then((transferCost) => setEstimatedFee(transferCost))
+            .catch((e) =>
+                setError(`Unable to get transaction cost due to: ${e}`)
+            );
+    }, [setEstimatedFee]);
 
     const toConfirmTransfer = useCallback(
         async (amount: string, recipient: AddressBookEntry) => {
@@ -30,6 +49,7 @@ export default function EncryptedTransfer({ account }: Props) {
                 toMicroUnits(amount),
                 recipient.address
             );
+            transaction.estimatedFee = estimatedFee;
 
             dispatch(
                 push({
@@ -62,10 +82,18 @@ export default function EncryptedTransfer({ account }: Props) {
     );
 
     return (
-        <ExternalTransfer
-            toConfirmTransfer={toConfirmTransfer}
-            exitFunction={() => dispatch(push(routes.ACCOUNTS))}
-            amountHeader="Send shielded funds"
-        />
+        <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                content={error}
+                onClick={() => dispatch(push(routes.ACCOUNTS))}
+            />
+            <ExternalTransfer
+                estimatedFee={estimatedFee}
+                toConfirmTransfer={toConfirmTransfer}
+                exitFunction={() => dispatch(push(routes.ACCOUNTS))}
+                amountHeader="Send shielded funds"
+            />
+        </>
     );
 }

@@ -44,7 +44,7 @@ function getAmount(transaction: AccountTransaction) {
         return transaction.payload.amount;
     }
     if (instanceOfEncryptedTransfer(transaction)) {
-        return '0'; // TODO: Have the decryptedamount
+        return transaction.payload.plainTransferAmount;
     }
     throw new Error('Unsupported transaction type - please implement');
 }
