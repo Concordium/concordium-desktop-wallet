@@ -15,7 +15,6 @@ export default function CloseButton({
     return (
         <Button
             type="button"
-            title="close"
             clear
             className={clsx(styles.root, className)}
             {...props}
