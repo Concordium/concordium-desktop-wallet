@@ -1,23 +1,32 @@
-import React from 'react';
-
+import React, { useState } from 'react';
+import { Key } from '~/utils/NodeApiTypes';
 import { UpdateProps } from '~/utils/transactionTypes';
 
 export default function UpdateHigherLevelKeys({ blockSummary }: UpdateProps) {
-    // TODO Get current authorization keys
-    // const currentValue: RewardDistributionValue = getCurrentValue(blockSummary);
+    const { keys } = blockSummary.updates.keys.rootKeys;
+    const currentKeySetSize = keys.length;
 
-    // TODO Fix this value to be using the blocksummary for what we need. This is just a placeholder.
-    const currentVal = blockSummary.updates.keys.rootKeys.keys.length;
+    const [newKeys, setNewKeys] = useState<Key[]>(keys);
+    // TODO Get current authorization keys
+
+    // TODO Make this dynamic in the set of keys, i.e. it should depend on the key
+    // set type being updates (root/level1).
+
+    // TODO This is just a placeholder, remove it.
+    if (!newKeys) {
+        setNewKeys(keys);
+    }
 
     return (
         <>
-            <div>
-                <h5>Root governance key updates</h5>
-                {currentVal}
-                <p>Current size of root keyset: 4</p>
-                <p>New size of root keyset: 3</p>
-                <p>INSERT COMPONENT FOR HANDLING THE KEY ADDITIONS/REMOVALS</p>
-            </div>
+            <h4>Root governance key updates</h4>
+            <p>Current size of root key set: {currentKeySetSize}</p>
+            <p>New size of root key set: {newKeys.length}</p>
+            <ul>
+                {newKeys.map((key) => {
+                    return <li key={key.verifyKey}>{key.verifyKey}</li>;
+                })}
+            </ul>
         </>
     );
 }

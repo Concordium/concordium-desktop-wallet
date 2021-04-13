@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
-import { useParams } from 'react-router';
+import { Route, Switch, useParams } from 'react-router';
 
 import { FieldValues } from 'react-hook-form';
 import {
@@ -24,6 +24,8 @@ import { futureDate } from '~/components/Form/util/validation';
 import styles from './MultiSignatureCreateProposal.module.scss';
 import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import MultiSignatureLayout from '../MultiSignatureLayout';
+import Columns from '~/components/Columns';
+import ProposeNewKey from '../updates/UpdateHigherLevelKeys/ProposeNewKey';
 
 interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -123,48 +125,81 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
         setRestrictionModalOpen(true);
     }
 
+    let component;
+
+    // TODO Check for one of the key update types here (includes in a set.)
+    if (type === UpdateType.UpdateRootKeysWithRootKeys) {
+        component = (
+            <Columns divider columnScroll columnClassName={styles.column}>
+                <Columns.Column header="Transaction Details">
+                    <div className={styles.columnContent}>
+                        {blockSummary && (
+                            <UpdateComponent blockSummary={blockSummary} />
+                        )}
+                    </div>
+                </Columns.Column>
+                <Columns.Column className={styles.stretchColumn}>
+                    <div className={styles.columnContent}>
+                        <Switch>
+                            <Route
+                                path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
+                                render={() => <ProposeNewKey />}
+                            />
+                        </Switch>
+                    </div>
+                </Columns.Column>
+            </Columns>
+        );
+    } else {
+        component = (
+            <>
+                <h3 className={styles.subHeader}>Transaction details</h3>
+                <Form<FieldValues & MultiSignatureCreateProposalForm>
+                    className={styles.details}
+                    onSubmit={handleSubmit}
+                >
+                    <div className={styles.proposal}>
+                        <p>
+                            Add all the details for the {displayType}{' '}
+                            transaction below.
+                        </p>
+                        {loading && (
+                            <Loading text="Getting current settings from chain" />
+                        )}
+                        {blockSummary && (
+                            <>
+                                <UpdateComponent blockSummary={blockSummary} />
+                                <Form.Timestamp
+                                    name="effectiveTime"
+                                    label="Effective Time"
+                                    defaultValue={
+                                        new Date(
+                                            getNow() + 5 * TimeConstants.Minute
+                                        )
+                                    }
+                                    rules={{
+                                        required: 'Effective time is required',
+                                        validate: futureDate(
+                                            'Effective time must be in the future'
+                                        ),
+                                    }}
+                                />
+                            </>
+                        )}
+                    </div>
+                    <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
+                </Form>
+            </>
+        );
+    }
+
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
             stepTitle={`Transaction Proposal - ${handler.type}`}
         >
             {RestrictionModal}
-            <h3 className={styles.subHeader}>Transaction details</h3>
-            <Form<FieldValues & MultiSignatureCreateProposalForm>
-                className={styles.details}
-                onSubmit={handleSubmit}
-            >
-                <div className={styles.proposal}>
-                    <p>
-                        Add all the details for the {displayType} transaction
-                        below.
-                    </p>
-                    {loading && (
-                        <Loading text="Getting current settings from chain" />
-                    )}
-                    {blockSummary && (
-                        <>
-                            <UpdateComponent blockSummary={blockSummary} />
-                            <Form.Timestamp
-                                name="effectiveTime"
-                                label="Effective Time"
-                                defaultValue={
-                                    new Date(
-                                        getNow() + 5 * TimeConstants.Minute
-                                    )
-                                }
-                                rules={{
-                                    required: 'Effective time is required',
-                                    validate: futureDate(
-                                        'Effective time must be in the future'
-                                    ),
-                                }}
-                            />
-                        </>
-                    )}
-                </div>
-                <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
-            </Form>
+            {component}
         </MultiSignatureLayout>
     );
 }
