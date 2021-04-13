@@ -6,6 +6,7 @@ import { useParams } from 'react-router';
 
 import { FieldValues } from 'react-hook-form';
 import {
+    HigherLevelKeyUpdate,
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
@@ -26,7 +27,7 @@ import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import CreateKeyUpdateProposal from '../updates/CreateKeyUpdateProposal';
 
-interface MultiSignatureCreateProposalForm {
+export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
 }
 
@@ -109,6 +110,32 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
         }
     }
 
+    /**
+     * Form submit function used for the higher level keys updates. They do not
+     * use Form element to input all the keys, so therefore it cannot use the
+     * regular handleSubmit function.
+     */
+    async function handleKeySubmit(
+        effectiveTime: Date,
+        higherLevelKeyUpdate: HigherLevelKeyUpdate
+    ) {
+        if (!blockSummary) {
+            return;
+        }
+        const timeInSeconds = BigInt(
+            Math.round(effectiveTime.getTime() / 1000)
+        );
+        const proposal = await handler.createTransaction(
+            blockSummary,
+            higherLevelKeyUpdate,
+            timeInSeconds
+        );
+
+        if (proposal) {
+            forwardTransactionToSigningPage(proposal);
+        }
+    }
+
     const RestrictionModal = (
         <Modal
             open={restrictionModalOpen}
@@ -136,6 +163,7 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                     UpdateComponentInput={UpdateComponent}
                     blockSummary={blockSummary}
                     type={type}
+                    handleKeySubmit={handleKeySubmit}
                 />
             );
         }

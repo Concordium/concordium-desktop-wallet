@@ -33,6 +33,7 @@ export default class UpdateRootKeysWithRootKeysHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
+        higherLevelKeyUpdate: HigherLevelKeyUpdate,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -43,10 +44,9 @@ export default class UpdateRootKeysWithRootKeysHandler
             blockSummary.updates.updateQueues.rootKeys.nextSequenceNumber;
         const { threshold } = blockSummary.updates.keys.rootKeys;
 
-        // TODO Fix this
         return createUpdateMultiSignatureTransaction(
-            { electionDifficulty: 15 },
-            UpdateType.UpdateBakerStakeThreshold,
+            higherLevelKeyUpdate,
+            UpdateType.UpdateRootKeysWithRootKeys,
             sequenceNumber,
             threshold,
             effectiveTime

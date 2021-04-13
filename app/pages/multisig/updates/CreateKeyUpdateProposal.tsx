@@ -7,14 +7,20 @@ import routes from '~/constants/routes.json';
 import styles from '../common/MultiSignatureFlowPage.module.scss';
 import ProposeNewKey from './UpdateHigherLevelKeys/ProposeNewKey';
 import KeySetSize from './UpdateHigherLevelKeys/KeySetSize';
-import { UpdateType, VerifyKey } from '~/utils/types';
+import { HigherLevelKeyUpdate, UpdateType, VerifyKey } from '~/utils/types';
 import { PublicKeyExportFormat } from '../ExportKeyView/ExportKeyView';
 import KeySetThreshold from './UpdateHigherLevelKeys/KeySetThreshold';
+import InputTimestamp from '~/components/Form/InputTimestamp';
+import { getNow, TimeConstants } from '~/utils/timeHelpers';
 
 interface Props {
     blockSummary: BlockSummary;
     UpdateComponentInput: UpdateComponent;
     type: UpdateType;
+    handleKeySubmit(
+        effectiveTime: Date,
+        higherLevelKeyUpdate: HigherLevelKeyUpdate
+    ): Promise<void>;
 }
 
 /**
@@ -25,6 +31,7 @@ export default function CreateKeyUpdateProposal({
     blockSummary,
     UpdateComponentInput,
     type,
+    handleKeySubmit,
 }: Props) {
     const { keys } = blockSummary.updates.keys.rootKeys;
     const currentKeySetSize = keys.length;
@@ -32,6 +39,9 @@ export default function CreateKeyUpdateProposal({
 
     const [newKeys, setNewKeys] = useState<VerifyKey[]>(keys);
     const [threshold, setThreshold] = useState<number>(currentThreshold);
+    const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
+        new Date(getNow() + 5 * TimeConstants.Minute)
+    );
 
     function addNewKey(publicKey: PublicKeyExportFormat) {
         // TODO Fix the format so that it matches with verify key directly, instead of having it split up.
@@ -44,6 +54,20 @@ export default function CreateKeyUpdateProposal({
         setNewKeys(updatedKeys);
     }
 
+    function submitFunctionTest() {
+        if (!effectiveTime) {
+            return;
+        }
+        const higherLevelKeyUpdate: HigherLevelKeyUpdate = {
+            // TODO Make dynamic, 0 for root, 1 for using level 1
+            keyUpdateType: 0,
+            threshold,
+            updateKeys: newKeys,
+        };
+
+        handleKeySubmit(effectiveTime, higherLevelKeyUpdate);
+    }
+
     return (
         <Columns divider columnScroll columnClassName={styles.column}>
             <Columns.Column header="Transaction Details">
@@ -52,6 +76,10 @@ export default function CreateKeyUpdateProposal({
                     {blockSummary && (
                         <UpdateComponentInput blockSummary={blockSummary} />
                     )}
+                    <InputTimestamp
+                        value={effectiveTime}
+                        onChange={setEffectiveTime}
+                    />
                 </div>
             </Columns.Column>
             <Columns.Column className={styles.stretchColumn}>
@@ -66,6 +94,7 @@ export default function CreateKeyUpdateProposal({
                                     type={type}
                                     currentThreshold={currentThreshold}
                                     setThreshold={setThreshold}
+                                    submitFunctionTest={submitFunctionTest}
                                 />
                             )}
                         />

@@ -20,7 +20,7 @@ import {
 import { TransactionHandler, TransactionInput } from '~/utils/transactionTypes';
 import { serializeUpdateInstructionHeaderAndPayload } from '~/utils/UpdateSerialization';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
+import { findAuthorizationKey } from '~/utils/updates/AuthorizationHelper';
 import { ensureProps } from '~/utils/componentHelpers';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';

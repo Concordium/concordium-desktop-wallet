@@ -1,6 +1,6 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import { Authorization, Authorizations, Key } from '../NodeApiTypes';
+import { Authorization, Authorizations, Key, Keys } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import { UpdateInstruction, UpdateInstructionPayload } from '../types';
 
@@ -31,11 +31,29 @@ function findAuthorizationKeyIndex(
         });
 }
 
+export async function findHigherLevelKey(
+    ledger: ConcordiumLedgerClient,
+    keys: Keys
+) {
+    // TODO It should be root key and leve 1 key, but my test network has the level 2 keys currently.
+    const publicKey = (
+        await ledger.getPublicKeySilent(getGovernanceLevel2Path())
+    ).toString('hex');
+
+    return keys.rootKeys.keys
+        .map((key, index) => {
+            return { index, key };
+        })
+        .find((indexedKey) => {
+            return indexedKey.key.verifyKey === publicKey;
+        });
+}
+
 /**
  * Attempts to the find the level 2 authorization key for the connected Ledger. If the public-key is not authorized,
  * then undefined is returned.
  */
-export default async function findAuthorizationKey(
+export async function findAuthorizationKey(
     ledger: ConcordiumLedgerClient,
     transactionHandler: TransactionHandler<
         UpdateInstruction<UpdateInstructionPayload>,

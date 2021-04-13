@@ -89,7 +89,7 @@ interface KeysWithThreshold {
     threshold: number;
 }
 
-interface Keys {
+export interface Keys {
     rootKeys: KeysWithThreshold;
     level1Keys: KeysWithThreshold;
     level2Keys: Authorizations;
