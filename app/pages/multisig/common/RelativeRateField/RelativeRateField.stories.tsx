@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
-import { ExchangeRate } from '~/utils/types';
 import { RelativeRateField, RelativeRateFieldProps } from './RelativeRateField';
+import { isValidBigInt } from './validation';
 
 export default {
     title: 'Multi Signature/Common/Relative Rate Field',
@@ -10,14 +10,21 @@ export default {
 } as Meta;
 
 const Template: Story<RelativeRateFieldProps> = (args) => {
-    const [value, setValue] = useState<ExchangeRate | undefined>({
-        denominator: 1n,
-        numerator: 1234n,
-    });
+    const [value, setValue] = useState<string | undefined>(args.value);
+    const denominator = 10n; // BigInt can't be set through args, as it can't be serialized by storybook.
+
+    const isInvalid = !value || !isValidBigInt(value); // An example of how to validate the field.
 
     return (
         <div style={{ width: '300px' }}>
-            <RelativeRateField {...args} value={value} onChange={setValue} />
+            {denominator?.toString()}, {value?.toString()}
+            <RelativeRateField
+                {...args}
+                denominator={denominator}
+                value={value}
+                onChange={setValue}
+                isInvalid={isInvalid}
+            />
         </div>
     );
 };
@@ -27,6 +34,16 @@ Primary.args = {
     denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
     unit: { value: '€ ', position: 'prefix' },
+    value: '1234',
+};
+
+export const Normalised = Template.bind({});
+Normalised.args = {
+    denominatorUnit: { position: 'postfix', value: ' NRG' },
+    label: 'New euro pr. energy rate',
+    unit: { value: '€ ', position: 'prefix' },
+    value: '1234',
+    normaliseTo: 1,
 };
 
 export const Invalid = Template.bind({});
@@ -34,8 +51,9 @@ Invalid.args = {
     denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
     unit: { value: '€ ', position: 'prefix' },
+    value: '-1234',
     isInvalid: true,
-    error: 'Field is required',
+    error: "Value can't be negative",
 };
 
 export const Disabled = Template.bind({});
@@ -43,5 +61,7 @@ Disabled.args = {
     denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
     unit: { value: '€ ', position: 'prefix' },
+    value: '1234',
+    normaliseTo: 1,
     disabled: true,
 };

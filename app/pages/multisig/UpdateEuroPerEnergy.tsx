@@ -1,14 +1,15 @@
 import React from 'react';
 import { noOp } from '~/utils/basicHelpers';
 import { UpdateProps } from '~/utils/transactionTypes';
-import { EqualRecord, ExchangeRate } from '~/utils/types';
+import { EqualRecord } from '~/utils/types';
 import {
     RelativeRateField,
     FormRelativeRateField,
 } from './common/RelativeRateField';
+import { isValidBigIntValidator } from './common/RelativeRateField/validation';
 
 export interface UpdateEuroPerEnergyFields {
-    euroPerEnergy: ExchangeRate;
+    euroPerEnergy: string;
 }
 
 const fieldNames: EqualRecord<UpdateEuroPerEnergyFields> = {
@@ -24,7 +25,9 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 label="Current euro per energy"
                 unit={{ position: 'prefix', value: '€ ' }}
                 denominatorUnit={{ position: 'postfix', value: ' NRG' }}
-                value={initialValue}
+                value={initialValue.numerator.toString()}
+                denominator={initialValue.denominator}
+                normaliseTo={1}
                 onChange={noOp}
                 onBlur={noOp}
                 disabled
@@ -34,7 +37,18 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 label="New euro per energy"
                 unit={{ position: 'prefix', value: '€ ' }}
                 denominatorUnit={{ position: 'postfix', value: ' NRG' }}
-                defaultValue={initialValue}
+                defaultValue={initialValue.numerator.toString()}
+                denominator={initialValue.denominator}
+                normaliseTo={1}
+                rules={{
+                    required: 'Value must be specified',
+                    min: { value: 0, message: 'Value cannot be negative' },
+                    validate: isValidBigIntValidator(
+                        `Value must go into ${
+                            1 / Number(initialValue.denominator)
+                        }`
+                    ),
+                }}
             />
         </>
     );

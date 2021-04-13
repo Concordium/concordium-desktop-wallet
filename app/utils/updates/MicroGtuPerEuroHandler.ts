@@ -1,9 +1,9 @@
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import MicroGtuPerEuroView from '../../pages/multisig/MicroGtuPerEuroView';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { getGovernanceLevel2Path } from '~/features/ledger/Path';
+import MicroGtuPerEuroView from '~/pages/multisig/MicroGtuPerEuroView';
 import UpdateMicroGtuPerEuro, {
     UpdateMicroGtuPerEuroRateFields,
-} from '../../pages/multisig/UpdateMicroGtuPerEuro';
+} from '~/pages/multisig/UpdateMicroGtuPerEuro';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
@@ -47,9 +47,12 @@ export default class MicroGtuPerEuroHandler
         const {
             threshold,
         } = blockSummary.updates.authorizations.microGTUPerEuro;
+        const {
+            denominator,
+        } = blockSummary.updates.chainParameters.microGTUPerEuro;
 
         return createUpdateMultiSignatureTransaction(
-            microGtuPerEuro,
+            { denominator, numerator: BigInt(microGtuPerEuro) },
             UpdateType.UpdateMicroGTUPerEuro,
             sequenceNumber,
             threshold,

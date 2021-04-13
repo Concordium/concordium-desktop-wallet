@@ -1,6 +1,5 @@
 import clsx from 'clsx';
-import React, { InputHTMLAttributes, useState } from 'react';
-import { ExchangeRate } from '~/utils/types';
+import React, { InputHTMLAttributes, useCallback, useState } from 'react';
 import { CommonInputProps } from '~/components/Form/common';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 
@@ -21,9 +20,38 @@ interface RelativeRateFieldUnit {
     position: UnitPosition;
 }
 
+const normaliseFactory = (denominator: bigint, normaliseTo?: number) => (
+    value?: string
+): string | undefined => {
+    if (value === undefined) {
+        return undefined;
+    }
+
+    if (normaliseTo === undefined) {
+        return value;
+    }
+
+    return `${Number(value) * (normaliseTo / Number(denominator))}`;
+};
+
+const undoNormalizeFactory = (denominator: bigint, normalisedFrom?: number) => (
+    value?: string
+): string | undefined => {
+    if (value === undefined) {
+        return undefined;
+    }
+
+    if (normalisedFrom === undefined) {
+        return value;
+    }
+
+    return `${parseFloat(value) / (normalisedFrom / Number(denominator))}`;
+};
+
 export interface RelativeRateFieldProps
     extends CommonInputProps,
         InputFieldProps {
+    denominator: bigint;
     /**
      * Unit of denominator. Position is "prefix" if string value.
      */
@@ -32,8 +60,12 @@ export interface RelativeRateFieldProps
      * Unit of value in the field. Position is "prefix" if string value.
      */
     unit: RelativeRateFieldUnit;
-    value: ExchangeRate | undefined;
-    onChange(v: ExchangeRate | undefined): void;
+    /**
+     * Normalises value to fractions of 1 instead of fractions of denominator. Setting this converts bigint props to Number internally, which might not be preferable.
+     */
+    normaliseTo?: number;
+    value: string | undefined;
+    onChange(v: string | undefined): void;
     onBlur(): void;
 }
 
@@ -45,6 +77,7 @@ export interface RelativeRateFieldProps
  * <RelativeRateField value={value} onChange={(e) => setValue(e.target.value)} unit="€" relativeTo="1 NRG" />
  */
 export function RelativeRateField({
+    denominator,
     denominatorUnit,
     unit,
     label,
@@ -54,45 +87,38 @@ export function RelativeRateField({
     className,
     value,
     onChange,
+    normaliseTo,
     ...props
 }: RelativeRateFieldProps) {
-    const [innerValue, setInnerValue] = useState<string | undefined>(
-        value?.numerator?.toString()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const normalise = useCallback(normaliseFactory(denominator, normaliseTo), [
+        denominator,
+        normaliseTo,
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const undoNormalize = useCallback(
+        undoNormalizeFactory(denominator, normaliseTo),
+        [denominator, normaliseTo]
     );
-    const denominator = value?.denominator || 1n; // TODO default?
 
-    let invalid = isInvalid;
-    let errorMessage = error;
-    let parsedValue: bigint | undefined;
-
-    try {
-        parsedValue = BigInt(innerValue);
-    } catch {
-        invalid = true;
-        errorMessage = 'Value must be a valid number';
-    }
+    const [innerValue, setInnerValue] = useState<string | undefined>(
+        normalise(value)
+    );
 
     useUpdateEffect(() => {
-        if (parsedValue === undefined) {
-            onChange(undefined);
-        } else {
-            onChange({
-                denominator,
-                numerator: parsedValue,
-            });
-        }
-    }, [parsedValue, denominator, onChange]);
+        onChange(undoNormalize(innerValue));
+    }, [innerValue, undoNormalize, onChange]);
 
     useUpdateEffect(() => {
-        setInnerValue(value?.numerator?.toString());
-    }, [value?.numerator]);
+        setInnerValue(normalise(value));
+    }, [value]);
 
     return (
         <div
             className={clsx(
                 styles.root,
                 disabled && styles.rootDisabled,
-                invalid && styles.rootInvalid,
+                isInvalid && styles.rootInvalid,
                 className
             )}
         >
@@ -101,7 +127,7 @@ export function RelativeRateField({
                 <div className={styles.container}>
                     {denominatorUnit.position === 'prefix' &&
                         denominatorUnit.value}
-                    {denominator.toString()}
+                    {(normaliseTo ?? denominator).toString()}
                     {denominatorUnit.position === 'postfix' &&
                         denominatorUnit.value}{' '}
                     ={' '}
@@ -114,19 +140,19 @@ export function RelativeRateField({
                         value={innerValue}
                         onChange={setInnerValue}
                         disabled={disabled}
+                        allowFractions={normaliseTo !== undefined}
                         {...props}
                     />
                     {unit.position === 'postfix' && (
                         <span className={styles.unit}>{unit.value}</span>
                     )}
                 </div>
-                <ErrorMessage>{errorMessage}</ErrorMessage>
+                <ErrorMessage>{error}</ErrorMessage>
             </label>
         </div>
     );
 }
 
-export const FormRelativeRateField = connectWithFormControlled<
-    Partial<ExchangeRate>,
-    RelativeRateFieldProps
->(RelativeRateField);
+export const FormRelativeRateField = connectWithFormControlled(
+    RelativeRateField
+);

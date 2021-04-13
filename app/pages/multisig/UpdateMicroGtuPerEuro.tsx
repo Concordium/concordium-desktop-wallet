@@ -1,15 +1,16 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import { EqualRecord, ExchangeRate } from '~/utils/types';
+import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import {
     RelativeRateField,
     FormRelativeRateField,
 } from './common/RelativeRateField';
 import { noOp } from '~/utils/basicHelpers';
+import { isValidBigIntValidator } from './common/RelativeRateField/validation';
 
 export interface UpdateMicroGtuPerEuroRateFields {
-    microGtuPerEuro: ExchangeRate;
+    microGtuPerEuro: string;
 }
 
 const fieldNames: EqualRecord<UpdateMicroGtuPerEuroRateFields> = {
@@ -19,16 +20,7 @@ const fieldNames: EqualRecord<UpdateMicroGtuPerEuroRateFields> = {
 export default function UpdateMicroGtuPerEuroRate({
     blockSummary,
 }: UpdateProps): JSX.Element | null {
-    const initialValue: ExchangeRate = useMemo(
-        () => ({
-            numerator:
-                blockSummary.updates.chainParameters.microGTUPerEuro.numerator,
-            denominator:
-                blockSummary.updates.chainParameters.microGTUPerEuro
-                    .denominator,
-        }),
-        [blockSummary]
-    );
+    const initialValue = blockSummary.updates.chainParameters.microGTUPerEuro;
 
     if (!initialValue) {
         return null;
@@ -40,7 +32,8 @@ export default function UpdateMicroGtuPerEuroRate({
                 label="Current micro GTU per euro rate"
                 unit={{ position: 'prefix', value: 'µǤ ' }}
                 denominatorUnit={{ position: 'prefix', value: '€ ' }}
-                value={initialValue}
+                value={initialValue.numerator.toString()}
+                denominator={initialValue.denominator}
                 onChange={noOp}
                 onBlur={noOp}
                 disabled
@@ -50,9 +43,14 @@ export default function UpdateMicroGtuPerEuroRate({
                 label="Current micro GTU per euro rate"
                 unit={{ position: 'prefix', value: 'µǤ ' }}
                 denominatorUnit={{ position: 'prefix', value: '€ ' }}
-                defaultValue={initialValue}
+                defaultValue={initialValue.numerator.toString()}
+                denominator={initialValue.denominator}
                 rules={{
                     required: 'Value must be specified',
+                    min: { value: 0, message: 'Value cannot be negative' },
+                    validate: isValidBigIntValidator(
+                        'Value must be a whole number'
+                    ),
                 }}
             />
         </>

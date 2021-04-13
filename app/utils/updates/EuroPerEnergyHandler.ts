@@ -1,9 +1,9 @@
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import EuroPerEnergyView from '../../pages/multisig/EuroPerEnergyView';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { getGovernanceLevel2Path } from '~/features/ledger/Path';
+import EuroPerEnergyView from '~/pages/multisig/EuroPerEnergyView';
 import UpdateEuroPerEnergy, {
     UpdateEuroPerEnergyFields,
-} from '../../pages/multisig/UpdateEuroPerEnergy';
+} from '~/pages/multisig/UpdateEuroPerEnergy';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
@@ -44,9 +44,12 @@ export default class EuroPerEnergyHandler
         const sequenceNumber =
             blockSummary.updates.updateQueues.euroPerEnergy.nextSequenceNumber;
         const { threshold } = blockSummary.updates.authorizations.euroPerEnergy;
+        const {
+            denominator,
+        } = blockSummary.updates.chainParameters.euroPerEnergy;
 
         return createUpdateMultiSignatureTransaction(
-            euroPerEnergy,
+            { denominator, numerator: BigInt(euroPerEnergy) },
             UpdateType.UpdateEuroPerEnergy,
             sequenceNumber,
             threshold,
