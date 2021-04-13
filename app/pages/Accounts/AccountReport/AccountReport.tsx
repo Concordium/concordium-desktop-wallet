@@ -1,24 +1,69 @@
 import React, { useState } from 'react';
 import AdmZip from 'adm-zip';
-import { Account, TransferTransaction } from '~/utils/types';
+import {
+    Account,
+    TransferTransaction,
+    TransactionKindString,
+} from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
 import AccountPageHeader from '../AccountPageHeader';
 import routes from '~/constants/routes.json';
+import {
+    getNow,
+    TimeConstants,
+    dateFromTimeStamp,
+    getISOFormat,
+} from '~/utils/timeHelpers';
 
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import Timestamp from '~/components/Form/InputTimestamp';
 import PickAccount from '~/pages/UpdateAccountCredentials/PickAccount';
+import Checkbox from '~/components/Form/Checkbox';
 
 import { getTransactionsOfAccount } from '~/database/TransactionDao';
 import { toCSV } from '~/utils/basicHelpers';
 import { attachNames } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
-import { getISOFormat } from '~/utils/timeHelpers';
+
 import { saveFile } from '~/utils/FileHelper';
 
 import multiSigLayout from '~/pages/multisig/MultiSignatureLayout/MultiSignatureLayout.module.scss';
 import styles from './AccountReport.module.scss';
+
+type Filter = (transaction: TransferTransaction) => boolean;
+
+interface FilterOption {
+    filter: Filter;
+    label: string;
+    key: string;
+}
+
+function filterKind(label: string, kind: TransactionKindString): FilterOption {
+    return {
+        label,
+        key: kind,
+        filter: (transaction: TransferTransaction) =>
+            transaction.transactionKind === kind,
+    };
+}
+
+const transactionTypeFilters: FilterOption[] = [
+    filterKind('Simple Transfers', TransactionKindString.Transfer),
+    filterKind(
+        'Scheduled Transfers',
+        TransactionKindString.TransferWithSchedule
+    ),
+    filterKind('Transfer to Public', TransactionKindString.TransferToPublic),
+    filterKind(
+        'Transfer to Encrypted',
+        TransactionKindString.TransferToEncrypted
+    ),
+    filterKind(
+        'Encrypted Transfer',
+        TransactionKindString.EncryptedAmountTransfer
+    ),
+];
 
 const getName = (i: string[]) => i[0];
 const getLabel = (i: string[]) => i[1];
@@ -37,8 +82,22 @@ function parseTransaction(transaction: TransferTransaction) {
 }
 
 // Updates transactions of the account, converts them to csv and saves the file.
-export async function getAccountCSV(account: Account) {
+export async function getAccountCSV(
+    account: Account,
+    filterOptions: FilterOption[],
+    fromTime?: Date,
+    toTime?: Date
+) {
     let transactions = await getTransactionsOfAccount(account); // load from database
+    transactions = transactions.filter(
+        (transaction) =>
+            (!fromTime ||
+                dateFromTimeStamp(transaction.blockTime) > fromTime) &&
+            (!toTime || dateFromTimeStamp(transaction.blockTime) < toTime)
+    );
+    transactions = transactions.filter((transaction) =>
+        filterOptions.some((filterOption) => filterOption.filter(transaction))
+    );
     transactions = await attachNames(transactions);
 
     return toCSV(
@@ -50,14 +109,37 @@ export async function getAccountCSV(account: Account) {
 export default function AccountReport() {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [adding, setAdding] = useState(false);
-    const [from, setFrom] = useState<Date | undefined>();
-    const [to, setTo] = useState<Date | undefined>();
+    const [fromDate, setFrom] = useState<Date | undefined>(
+        new Date(getNow() - TimeConstants.Day)
+    );
+    const [toDate, setTo] = useState<Date | undefined>(new Date(getNow()));
+    const [currentFilters, setFilters] = useState<FilterOption[]>([]);
+
+    function flip(filterOption: FilterOption) {
+        setFilters((filters) => {
+            if (
+                filters.some(
+                    (currentFilter) => filterOption.key === currentFilter.key
+                )
+            ) {
+                return filters.filter(
+                    (currentFilter) => currentFilter.key !== filterOption.key
+                );
+            }
+            return [filterOption, ...filters];
+        });
+    }
 
     async function makeReport() {
         const accountsLength = accounts.length;
         if (accountsLength === 1) {
             return saveFile(
-                await getAccountCSV(accounts[0]),
+                await getAccountCSV(
+                    accounts[0],
+                    currentFilters,
+                    fromDate,
+                    toDate
+                ),
                 'Save Account Report',
                 'csv'
             );
@@ -67,8 +149,15 @@ export default function AccountReport() {
             const account = accounts[i];
             zip.addFile(
                 `${account.name}.csv`,
-                // eslint-disable-next-line  no-await-in-loop
-                Buffer.from(await getAccountCSV(account))
+                Buffer.from(
+                    // eslint-disable-next-line  no-await-in-loop
+                    await getAccountCSV(
+                        account,
+                        currentFilters,
+                        fromDate,
+                        toDate
+                    )
+                )
             );
         }
         return saveFile(zip.toBuffer(), 'Save Account Reports', 'zip');
@@ -136,7 +225,7 @@ export default function AccountReport() {
                             <h2>Time Period to include</h2>
                             <div className={styles.timestamp}>
                                 <Timestamp
-                                    value={from}
+                                    value={fromDate}
                                     onChange={setFrom}
                                     name="from"
                                     label="From:"
@@ -144,12 +233,26 @@ export default function AccountReport() {
                             </div>
                             <div className={styles.timestamp}>
                                 <Timestamp
-                                    value={to}
+                                    value={toDate}
                                     onChange={setTo}
                                     name="to"
                                     label="To:"
                                 />
                             </div>
+                            <h2>Transaction Types to be included</h2>
+                            {transactionTypeFilters.map((filterOption) => (
+                                <Checkbox
+                                    key={filterOption.key}
+                                    checked={currentFilters.some(
+                                        (currentFilter) =>
+                                            filterOption.key ===
+                                            currentFilter.key
+                                    )}
+                                    onChange={() => flip(filterOption)}
+                                >
+                                    {filterOption.label}
+                                </Checkbox>
+                            ))}
                         </Columns.Column>
                         <Columns.Column header="Accounts to include">
                             {adding ? (
