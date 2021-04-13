@@ -6,18 +6,12 @@ import React, {
     useCallback,
     useMemo,
 } from 'react';
+import { scaleFieldHeight } from '~/utils/htmlHelpers';
 
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
 
 import styles from './TextArea.module.scss';
-
-function scaleTextArea(el: HTMLTextAreaElement) {
-    setTimeout(() => {
-        el.style.height = '5px';
-        el.style.height = `${el.scrollHeight}px`;
-    }, 0);
-}
 
 export interface TextAreaProps
     extends TextareaHTMLAttributes<HTMLTextAreaElement>,
@@ -62,7 +56,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                     onChange(e);
                 }
                 if (autoScale) {
-                    scaleTextArea(e.target);
+                    scaleFieldHeight(e.target);
                 }
             },
             [onChange, autoScale]
@@ -75,7 +69,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                 }
 
                 if (autoScale) {
-                    scaleTextArea(instance);
+                    scaleFieldHeight(instance);
                 }
 
                 if (typeof ref === 'function') {
@@ -102,7 +96,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
                     ref={setRef}
                     onChange={handleChange}
                     onLoad={(e) =>
-                        scaleTextArea(e.target as HTMLTextAreaElement)
+                        scaleFieldHeight(e.target as HTMLTextAreaElement)
                     }
                     rows={interceptedRows}
                     {...props}
