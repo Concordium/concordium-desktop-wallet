@@ -1,23 +1,13 @@
 import React from 'react';
 import DragAndDropFile from '~/components/DragAndDropFile';
+import Button from '~/cross-app-components/Button';
+// import { PublicKeyExportFormat } from '../../ExportKeyView/ExportKeyView';
 
 async function fileProcessor(rawData: Buffer) {
-    if (rawData) {
-        let encryptedData;
-        try {
-            encryptedData = JSON.parse(rawData.toString('utf-8'));
-        } catch (e) {
-            fail('This file is not a valid Export File!');
-            return;
-        }
-        const validation = validateEncryptedStructure(encryptedData);
-        if (!validation.isValid) {
-            fail(`This file is invalid due to: ${validation.reason}`);
-        } else {
-            setFile(encryptedData);
-            setPasswordModalOpen(true);
-        }
-    }
+    JSON.parse(rawData.toString('utf-8'));
+
+    // TODO Validate the signature on the public-key here.
+    // TODO Add the key to the list of keys, if it is not already there.
 }
 
 export default function ProposeNewKey() {
@@ -35,6 +25,7 @@ export default function ProposeNewKey() {
                     fileProcessor={fileProcessor}
                 />
             </div>
+            <Button onClick={() => {}}>Continue</Button>
         </>
     );
 }

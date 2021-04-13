@@ -26,7 +26,7 @@ interface ParamTypes {
     keyType: ExportKeyType;
 }
 
-interface PublicKeyExportFormat {
+export interface PublicKeyExportFormat {
     schemeId: string;
     verifyKey: string;
     signature: string;

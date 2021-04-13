@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Key } from '~/utils/NodeApiTypes';
 import { UpdateProps } from '~/utils/transactionTypes';
+import { VerifyKey } from '~/utils/types';
+import KeyUpdateEntry, { KeyUpdateEntryStatus } from './KeyUpdateEntry';
 
 export default function UpdateHigherLevelKeys({ blockSummary }: UpdateProps) {
     const { keys } = blockSummary.updates.keys.rootKeys;
     const currentKeySetSize = keys.length;
 
-    const [newKeys, setNewKeys] = useState<Key[]>(keys);
+    const [newKeys, setNewKeys] = useState<VerifyKey[]>(keys);
     // TODO Get current authorization keys
 
     // TODO Make this dynamic in the set of keys, i.e. it should depend on the key
@@ -24,7 +25,13 @@ export default function UpdateHigherLevelKeys({ blockSummary }: UpdateProps) {
             <p>New size of root key set: {newKeys.length}</p>
             <ul>
                 {newKeys.map((key) => {
-                    return <li key={key.verifyKey}>{key.verifyKey}</li>;
+                    return (
+                        <KeyUpdateEntry
+                            key={key.verifyKey}
+                            status={KeyUpdateEntryStatus.Unchanged}
+                            verifyKey={key}
+                        />
+                    );
                 })}
             </ul>
         </>

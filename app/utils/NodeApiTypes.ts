@@ -3,6 +3,7 @@ import {
     GasRewards,
     RewardFraction,
     TransactionFeeDistribution,
+    VerifyKey,
 } from './types';
 
 // This file contains interfaces that matches what is returned
@@ -84,7 +85,7 @@ interface ChainParameters {
 }
 
 interface KeysWithThreshold {
-    keys: Key[];
+    keys: VerifyKey[];
     threshold: number;
 }
 

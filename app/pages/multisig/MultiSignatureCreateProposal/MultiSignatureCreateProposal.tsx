@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
-import { Route, Switch, useParams } from 'react-router';
+import { useParams } from 'react-router';
 
 import { FieldValues } from 'react-hook-form';
 import {
@@ -24,8 +24,7 @@ import { futureDate } from '~/components/Form/util/validation';
 import styles from './MultiSignatureCreateProposal.module.scss';
 import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import MultiSignatureLayout from '../MultiSignatureLayout';
-import Columns from '~/components/Columns';
-import ProposeNewKey from '../updates/UpdateHigherLevelKeys/ProposeNewKey';
+import CreateKeyUpdateProposal from '../updates/CreateKeyUpdateProposal';
 
 interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -130,25 +129,10 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
     // TODO Check for one of the key update types here (includes in a set.)
     if (type === UpdateType.UpdateRootKeysWithRootKeys) {
         component = (
-            <Columns divider columnScroll columnClassName={styles.column}>
-                <Columns.Column header="Transaction Details">
-                    <div className={styles.columnContent}>
-                        {blockSummary && (
-                            <UpdateComponent blockSummary={blockSummary} />
-                        )}
-                    </div>
-                </Columns.Column>
-                <Columns.Column className={styles.stretchColumn}>
-                    <div className={styles.columnContent}>
-                        <Switch>
-                            <Route
-                                path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
-                                render={() => <ProposeNewKey />}
-                            />
-                        </Switch>
-                    </div>
-                </Columns.Column>
-            </Columns>
+            <CreateKeyUpdateProposal
+                UpdateComponentInput={UpdateComponent}
+                blockSummary={blockSummary}
+            />
         );
     } else {
         component = (
