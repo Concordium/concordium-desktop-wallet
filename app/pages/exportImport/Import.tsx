@@ -89,10 +89,13 @@ export default function Import() {
         <>
             <InputModal
                 title="Enter your password"
-                buttonText="Import"
-                validValue={(password) => validatePassword(password)}
+                text="Please enter the password you chose upon exporting your file."
+                buttonText="Continue"
+                validValue={(password) =>
+                    validatePassword(password) ? undefined : 'Invalid password'
+                }
                 buttonOnClick={decryptAndParseData}
-                placeholder="Enter the password you chose upon exporting your file"
+                placeholder="password"
                 onClose={() => setPasswordModalOpen(false)}
                 type="password"
                 open={passwordModalOpen}

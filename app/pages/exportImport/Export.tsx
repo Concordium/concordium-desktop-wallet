@@ -71,10 +71,13 @@ export default function Export() {
         <>
             <InputModal
                 title="Enter a password"
+                text="Please enter a password for your export"
                 buttonText="Continue"
-                validValue={(password) => validatePassword(password)}
+                validValue={(password) =>
+                    validatePassword(password) ? undefined : 'Invalid password'
+                }
                 buttonOnClick={exportData}
-                placeholder="Enter your password"
+                placeholder="password"
                 onClose={() => setOpenPasswordModal(false)}
                 type="password"
                 open={openPasswordModal}
