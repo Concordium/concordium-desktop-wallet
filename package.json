@@ -78,7 +78,8 @@
           "type": "link",
           "path": "/Applications"
         }
-      ]
+      ],
+      "sign": false
     },
     "win": {
       "target": [
@@ -94,6 +95,13 @@
       ],
       "category": "Development"
     },
+    "mac": {
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "afterSign": "scripts/notarize.js",
     "directories": {
       "buildResources": "resources",
       "output": "release"
@@ -161,6 +169,7 @@
     "electron": "^8",
     "electron-builder": "^22.3.6",
     "electron-devtools-installer": "^2.2.4",
+    "electron-notarize": "^1.0.0",
     "electron-rebuild": "^1.10.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.3",

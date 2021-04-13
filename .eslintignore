@@ -69,3 +69,6 @@ pkg
 # Proto
 app/proto
 
+#MacOS Code Signing
+scripts/notarize.js
+
