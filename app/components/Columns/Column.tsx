@@ -1,6 +1,5 @@
 import clsx from 'clsx';
 import React, { HTMLAttributes, PropsWithChildren } from 'react';
-import ScrollContainer from '../ScrollContainer';
 
 import styles from './Columns.module.scss';
 
@@ -45,17 +44,15 @@ export default function Column({
             {...props}
         >
             {header && <h3 className={styles.header}>{header}</h3>}
-            <div className={styles.contentBorder}>
-                <ScrollContainer>
-                    <div
-                        className={clsx(
-                            styles.content,
-                            verticalPadding && styles.contentVertPadding
-                        )}
-                    >
-                        {children}
-                    </div>
-                </ScrollContainer>
+            <div className={styles.contentWrapper}>
+                <div
+                    className={clsx(
+                        styles.content,
+                        verticalPadding && styles.contentVertPadding
+                    )}
+                >
+                    {children}
+                </div>
             </div>
         </div>
     );

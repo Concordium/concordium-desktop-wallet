@@ -73,7 +73,7 @@ export default function MasterDetailPageLayout({
             {header}
             {isColumnsContent ? (
                 <Columns
-                    divider="offset"
+                    divider="inset"
                     className={styles.columns}
                     columnScroll
                 >

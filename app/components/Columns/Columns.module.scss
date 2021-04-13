@@ -1,6 +1,5 @@
 @import 'config/bundle';
 
-$columns-headers-inset: 31px;
 $columns-vertical-gutter: 20px;
 
 .root {
@@ -8,17 +7,8 @@ $columns-vertical-gutter: 20px;
     display: flex;
     flex-wrap: nowrap;
 
-    &WithHeaders {
-        border-top: 1px solid $color-grey;
-        margin-top: $columns-headers-inset;
-    }
-
     &ColumnScroll {
         height: 100%;
-
-        &.rootWithHeaders {
-            height: calc(100% - #{$columns-headers-inset});
-        }
     }
 
     &Padded {
@@ -31,7 +21,7 @@ $columns-vertical-gutter: 20px;
     position: relative;
     flex: 0 1 100%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
 
     .rootColumnScroll & {
         height: 100%;
@@ -53,48 +43,52 @@ $columns-vertical-gutter: 20px;
 .header,
 .content {
     padding: 0 $page-gutter;
+    width: 100%;
 }
 
 .header {
-    position: absolute;
-    transform: translateY(-100%);
     text-align: center;
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     margin: 0;
-    padding: 0 $page-gutter;
-    padding-bottom: 10px;
+    height: 42px;
+    border-bottom: 1px solid $color-grey;
 }
 
-.contentBorder {
+.contentWrapper {
     width: 100%;
 
     .rootDivided .column:not(:last-child) & {
         border-right: 1px solid $color-grey;
     }
 
-    // Targets ScrollContainer
-    > * {
-        max-height: none;
+    .rootColumnScroll & {
         height: 100%;
+    }
 
-        .rootPadded & {
-            margin-top: -$columns-vertical-gutter;
-            margin-bottom: -$columns-vertical-gutter;
-            height: calc(100% + #{2 * $columns-vertical-gutter});
-        }
-
-        .root:not(.rootColumnScroll) & {
-            height: auto;
-        }
+    .rootColumnScroll .header + & {
+        height: calc(100% - 42px);
     }
 }
 
 .content {
-    height: 100%;
-    padding: 0 $page-gutter;
+    width: 100%;
+
+    .rootColumnScroll & {
+        height: 100%;
+        overflow-y: overlay;
+    }
+
+    .rootColumnScroll.rootPadded & {
+        height: calc(100% + (2 * #{$columns-vertical-gutter}));
+    }
+
+    .rootPadded & {
+        margin-top: -$columns-vertical-gutter;
+        margin-bottom: -$columns-vertical-gutter;
+    }
 
     &VertPadding {
         padding-top: $page-gutter;
