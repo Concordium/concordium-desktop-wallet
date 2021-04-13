@@ -18,6 +18,7 @@ import {
     TransactionEvent,
     RejectReason,
     Global,
+    RewardFilter,
 } from '../utils/types';
 import {
     attachNames,
@@ -130,7 +131,24 @@ function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
 // Load transactions from storage.
 // Filters according to viewingShielded parameter
 export async function loadTransactions(account: Account, dispatch: Dispatch) {
-    let transactions = await getTransactionsOfAccount(account, 'blockTime');
+    let filter;
+
+    if (account.rewardFilter === RewardFilter.AllButFinalization) {
+        filter = (transaction: TransferTransaction) =>
+            transaction.transactionKind !== TransactionKindString.BakingReward;
+    } else if (account.rewardFilter === RewardFilter.All) {
+        filter = (transaction: TransferTransaction) =>
+            ![
+                TransactionKindString.BakingReward,
+                TransactionKindString.BlockReward,
+            ].includes(transaction.transactionKind);
+    }
+
+    let transactions = await getTransactionsOfAccount(
+        account,
+        'blockTime',
+        filter
+    );
     transactions = await attachNames(transactions);
     dispatch(setTransactions(transactions));
 }

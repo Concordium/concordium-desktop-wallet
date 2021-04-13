@@ -39,6 +39,7 @@ export default function TransferLogFilters({ account, returnFunction }: Props) {
                     ].includes(account.rewardFilter)
                 }
                 onChange={() =>
+                    account.rewardFilter === undefined ||
                     account.rewardFilter === RewardFilter.None
                         ? setRewardFilter(RewardFilter.AllButFinalization)
                         : setRewardFilter(RewardFilter.None)

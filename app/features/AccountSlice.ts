@@ -75,6 +75,12 @@ const accountsSlice = createSlice({
             if (index > -1) {
                 state.accounts[index] = { ...state.accounts[index], ...fields };
             }
+            if (
+                state.chosenAccount &&
+                state.chosenAccount.address === address
+            ) {
+                state.chosenAccount = state.accounts[index];
+            }
         },
     },
 });
