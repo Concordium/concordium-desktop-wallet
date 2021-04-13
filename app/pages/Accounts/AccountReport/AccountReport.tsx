@@ -222,7 +222,7 @@ export default function AccountReport() {
                         columnClassName={styles.column}
                     >
                         <Columns.Column header="Time Period & Filters">
-                            <h2>Time Period to include</h2>
+                            <h5>Time Period to include</h5>
                             <div className={styles.timestamp}>
                                 <Timestamp
                                     value={fromDate}
@@ -239,9 +239,10 @@ export default function AccountReport() {
                                     label="To:"
                                 />
                             </div>
-                            <h2>Transaction Types to be included</h2>
+                            <h5>Transaction Types to be included</h5>
                             {transactionTypeFilters.map((filterOption) => (
                                 <Checkbox
+                                    className={styles.filterCheckbox}
                                     key={filterOption.key}
                                     checked={currentFilters.some(
                                         (currentFilter) =>
