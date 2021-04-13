@@ -50,10 +50,15 @@ export async function openFile(title: string): Promise<string> {
  * @param title the title of the save file window
  * @return the promise resolves true when the data has been written to file. if the result is false, then the user cancelled.
  */
-export async function saveFile(data: string, title: string): Promise<boolean> {
+export async function saveFile(
+    data: string | Buffer,
+    title: string,
+    extension?: string
+): Promise<boolean> {
     const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke(
         ipcCommands.saveFileDialog,
-        title
+        title,
+        extension
     );
 
     if (saveFileDialog.canceled) {

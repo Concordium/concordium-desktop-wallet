@@ -160,8 +160,11 @@ ipcMain.handle(ipcCommands.openFileDialog, async (_event, title) => {
 });
 
 // Provides access to save file dialog from renderer processes.
-ipcMain.handle(ipcCommands.saveFileDialog, async (_event, title) => {
-    return dialog.showSaveDialog({ title });
+ipcMain.handle(ipcCommands.saveFileDialog, async (_event, title, extension) => {
+    return dialog.showSaveDialog({
+        title,
+        filters: [{ name: extension, extensions: [extension] }],
+    });
 });
 
 // Updates the location of the grpc endpoint.

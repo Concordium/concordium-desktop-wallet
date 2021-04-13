@@ -14,6 +14,7 @@
     "ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER": "/accounts/more/create-scheduled-transfer",
     "ACCOUNTS_MORE_EXPORT_TRANSACTIONS": "/accounts/more/export-transactions",
     "ACCOUNTS_MORE_TRANSFER_LOG_FILTERS": "/accounts/more/transfer-log-filters",
+    "ACCOUNTS_ACCOUNT_REPORT": "/account-report",
     "IDENTITIES": "/identity/listview",
     "ADDRESSBOOK": "/addressbook",
     "ADDRESSBOOK_SELECTED": "/addressbook/:address",

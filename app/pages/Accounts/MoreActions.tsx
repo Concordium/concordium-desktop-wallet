@@ -34,6 +34,10 @@ const items = [
         name: 'Transfer Log Filters',
         location: routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS,
     },
+    {
+        name: 'Make Account Report',
+        location: routes.ACCOUNTS_ACCOUNT_REPORT,
+    },
 ];
 
 /**

@@ -408,8 +408,10 @@ export default function UpdateCredentialPage(): JSX.Element {
                             path={routes.UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT}
                             render={() => (
                                 <PickAccount
-                                    setReady={setReady}
-                                    setAccount={setAccount}
+                                    onClick={(clickedAccount: Account) => {
+                                        setReady(true);
+                                        setAccount(clickedAccount);
+                                    }}
                                     identity={identity}
                                 />
                             )}

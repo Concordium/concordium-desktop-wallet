@@ -1,0 +1,47 @@
+@import 'config/bundle';
+
+.column {
+    > div {
+        padding: 40px;
+    }
+}
+
+.rightColumn {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    :last-child {
+        margin-top: auto;
+    }
+}
+
+.accountList {
+    margin: 40px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.accountListElement {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+    text-align: left;
+    p {
+        margin: 0;
+    }
+
+    button {
+        margin-left: auto;
+    }
+}
+
+.timestamp {
+    margin: 20px;
+}
+
+.address {
+    font-size: $font-size-body3;
+    color: $color-text-faded;
+    word-break: break-all;
+}

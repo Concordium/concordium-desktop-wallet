@@ -14,11 +14,16 @@ import PerformImport from '../pages/exportImport/PerformImport';
 import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
 import GenerateCredential from '../pages/GenerateCredential/GenerateCredentialPage';
 import UpdateCredentials from '../pages/UpdateAccountCredentials/UpdateCredentialsPage';
+import AccountReport from '~/pages/Accounts/AccountReport';
 
 export default function Routes(): JSX.Element {
     return (
         <Switch>
             <Route path={routes.SUBMITTRANSFER} component={SubmitTransfer} />
+            <Route
+                path={routes.ACCOUNTS_ACCOUNT_REPORT}
+                component={AccountReport}
+            />
             <Route path={routes.ACCOUNTS} component={AccountPage} />
             <Route path={routes.IDENTITYISSUANCE} component={IssuancePage} />
             <Route path={routes.ACCOUNTCREATION} component={AccountCreation} />
