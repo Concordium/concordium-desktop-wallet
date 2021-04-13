@@ -128,12 +128,17 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
 
     // TODO Check for one of the key update types here (includes in a set.)
     if (type === UpdateType.UpdateRootKeysWithRootKeys) {
-        component = (
-            <CreateKeyUpdateProposal
-                UpdateComponentInput={UpdateComponent}
-                blockSummary={blockSummary}
-            />
-        );
+        if (!blockSummary) {
+            component = null;
+        } else {
+            component = (
+                <CreateKeyUpdateProposal
+                    UpdateComponentInput={UpdateComponent}
+                    blockSummary={blockSummary}
+                    type={type}
+                />
+            );
+        }
     } else {
         component = (
             <>

@@ -1,16 +1,27 @@
+import { push } from 'connected-react-router';
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import DragAndDropFile from '~/components/DragAndDropFile';
 import Button from '~/cross-app-components/Button';
-// import { PublicKeyExportFormat } from '../../ExportKeyView/ExportKeyView';
+import { PublicKeyExportFormat } from '../../ExportKeyView/ExportKeyView';
+import { UpdateType } from '~/utils/types';
+import { createProposalRoute } from '~/utils/routerHelper';
 
-async function fileProcessor(rawData: Buffer) {
-    JSON.parse(rawData.toString('utf-8'));
-
-    // TODO Validate the signature on the public-key here.
-    // TODO Add the key to the list of keys, if it is not already there.
+interface Props {
+    type: UpdateType;
+    addKey: (publicKey: PublicKeyExportFormat) => void;
 }
 
-export default function ProposeNewKey() {
+export default function ProposeNewKey({ type, addKey }: Props) {
+    const dispatch = useDispatch();
+
+    async function fileProcessor(rawData: Buffer) {
+        const publicKey: PublicKeyExportFormat = JSON.parse(
+            rawData.toString('utf-8')
+        );
+        addKey(publicKey);
+    }
+
     return (
         <>
             <div>
@@ -25,7 +36,13 @@ export default function ProposeNewKey() {
                     fileProcessor={fileProcessor}
                 />
             </div>
-            <Button onClick={() => {}}>Continue</Button>
+            <Button
+                onClick={() =>
+                    dispatch(push(`${createProposalRoute(type)}/keysetsize`))
+                }
+            >
+                Continue
+            </Button>
         </>
     );
 }
