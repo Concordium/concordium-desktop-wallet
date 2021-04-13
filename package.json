@@ -100,7 +100,7 @@
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "asarUnpack": ["**/*.node"]
+      "asarUnpack": ["**/sqlite3.node"]
     },
     "afterSign": "scripts/notarize.js",
     "directories": {
