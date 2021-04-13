@@ -72,7 +72,14 @@ export default function CreateKeyUpdateProposal({
         <Columns divider columnScroll columnClassName={styles.column}>
             <Columns.Column header="Transaction Details">
                 <div className={styles.columnContent}>
-                    {threshold}
+                    <h5>Signature threshold</h5>
+                    <p>
+                        Current root key signature threshold:{' '}
+                        <b>{currentThreshold}</b>
+                    </p>
+                    <p>
+                        New root key signature threshold: <b>{threshold}</b>
+                    </p>
                     {blockSummary && (
                         <UpdateComponentInput blockSummary={blockSummary} />
                     )}

@@ -46,28 +46,31 @@ export default function KeySetThreshold({
 
     return (
         <>
-            <h2>
-                Propose a new signature threshold for {typeToDisplay(type)} keys
-            </h2>
-            <p>
-                If you want to update the amount of required{' '}
-                {typeToDisplay(type)} key signatures to make transactions, then
-                you can do so below. If you do not want to make any c hanges to
-                the threshold, then you can just leave it as is.
-            </p>
-            <h2>Current signature threshold</h2>
-            <h1>{currentThreshold}</h1>
-            <h2>New signature threshold</h2>
-            <InlineNumber
-                className={styles.inputField}
-                value={threshold}
-                onChange={(v) => {
-                    setLocalThreshold(v);
-                    setThreshold(
-                        Number.parseInt(v !== undefined ? v : '0', 10)
-                    );
-                }}
-            />
+            <div>
+                <h2>
+                    Propose a new signature threshold for {typeToDisplay(type)}{' '}
+                    keys
+                </h2>
+                <p>
+                    If you want to update the amount of required{' '}
+                    {typeToDisplay(type)} key signatures to make transactions,
+                    then you can do so below. If you do not want to make any c
+                    hanges to the threshold, then you can just leave it as is.
+                </p>
+                <h2>Current signature threshold</h2>
+                <h1>{currentThreshold}</h1>
+                <h2>New signature threshold</h2>
+                <InlineNumber
+                    className={styles.inputField}
+                    value={threshold}
+                    onChange={(v) => {
+                        setLocalThreshold(v);
+                        setThreshold(
+                            Number.parseInt(v !== undefined ? v : '0', 10)
+                        );
+                    }}
+                />
+            </div>
             <Button onClick={submitFunctionTest}>Continue</Button>
         </>
     );
