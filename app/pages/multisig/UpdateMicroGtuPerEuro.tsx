@@ -38,8 +38,8 @@ export default function UpdateMicroGtuPerEuroRate({
         <>
             <RelativeRateField
                 label="Current micro GTU per euro rate"
-                unit="µǤ"
-                denominatorUnit="€"
+                unit={{ position: 'prefix', value: 'µǤ ' }}
+                denominatorUnit={{ position: 'prefix', value: '€ ' }}
                 value={initialValue}
                 onChange={noOp}
                 onBlur={noOp}
@@ -48,8 +48,8 @@ export default function UpdateMicroGtuPerEuroRate({
             <FormRelativeRateField
                 name={fieldNames.microGtuPerEuro}
                 label="Current micro GTU per euro rate"
-                unit="µǤ"
-                denominatorUnit="€"
+                unit={{ position: 'prefix', value: 'µǤ ' }}
+                denominatorUnit={{ position: 'prefix', value: '€ ' }}
                 defaultValue={initialValue}
                 rules={{
                     required: 'Value must be specified',

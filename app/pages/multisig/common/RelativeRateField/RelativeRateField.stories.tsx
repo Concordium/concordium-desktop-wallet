@@ -10,7 +10,7 @@ export default {
 } as Meta;
 
 const Template: Story<RelativeRateFieldProps> = (args) => {
-    const [value, setValue] = useState<Partial<ExchangeRate> | undefined>({
+    const [value, setValue] = useState<ExchangeRate | undefined>({
         denominator: 1n,
         numerator: 1234n,
     });
@@ -24,24 +24,24 @@ const Template: Story<RelativeRateFieldProps> = (args) => {
 
 export const Primary = Template.bind({});
 Primary.args = {
-    denominatorUnit: 'NRG',
+    denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
-    unit: '€',
+    unit: { value: '€ ', position: 'prefix' },
 };
 
 export const Invalid = Template.bind({});
 Invalid.args = {
-    denominatorUnit: 'NRG',
+    denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
-    unit: '€',
+    unit: { value: '€ ', position: 'prefix' },
     isInvalid: true,
     error: 'Field is required',
 };
 
 export const Disabled = Template.bind({});
 Disabled.args = {
-    denominatorUnit: 'NRG',
+    denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
-    unit: '€',
+    unit: { value: '€ ', position: 'prefix' },
     disabled: true,
 };

@@ -7,27 +7,33 @@ import ErrorMessage from '~/components/Form/ErrorMessage';
 import styles from './RelativeRateField.module.scss';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
 import { useUpdateEffect } from '~/utils/hooks';
+import InlineNumber from '~/components/Form/InlineNumber';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
-    'name' | 'disabled' | 'className'
+    'disabled' | 'className'
 >;
 
-const bigIntToString = (v?: bigint) => `${v || ''}`;
+type UnitPosition = 'postfix' | 'prefix';
+
+interface RelativeRateFieldUnit {
+    value: string;
+    position: UnitPosition;
+}
 
 export interface RelativeRateFieldProps
     extends CommonInputProps,
         InputFieldProps {
     /**
-     * Unit of denominator
+     * Unit of denominator. Position is "prefix" if string value.
      */
-    denominatorUnit: string;
+    denominatorUnit: RelativeRateFieldUnit;
     /**
-     * Unit of value in the field.
+     * Unit of value in the field. Position is "prefix" if string value.
      */
-    unit: string;
-    value: Partial<ExchangeRate> | undefined;
-    onChange(v: Partial<ExchangeRate> | undefined): void;
+    unit: RelativeRateFieldUnit;
+    value: ExchangeRate | undefined;
+    onChange(v: ExchangeRate | undefined): void;
     onBlur(): void;
 }
 
@@ -50,8 +56,8 @@ export function RelativeRateField({
     onChange,
     ...props
 }: RelativeRateFieldProps) {
-    const [innerValue, setInnerValue] = useState<string>(
-        bigIntToString(value?.numerator)
+    const [innerValue, setInnerValue] = useState<string | undefined>(
+        value?.numerator?.toString()
     );
     const denominator = value?.denominator || 1n; // TODO default?
 
@@ -67,14 +73,18 @@ export function RelativeRateField({
     }
 
     useUpdateEffect(() => {
-        onChange({
-            denominator,
-            numerator: parsedValue,
-        });
+        if (parsedValue === undefined) {
+            onChange(undefined);
+        } else {
+            onChange({
+                denominator,
+                numerator: parsedValue,
+            });
+        }
     }, [parsedValue, denominator, onChange]);
 
     useUpdateEffect(() => {
-        setInnerValue(bigIntToString(value?.numerator));
+        setInnerValue(value?.numerator?.toString());
     }, [value?.numerator]);
 
     return (
@@ -89,21 +99,26 @@ export function RelativeRateField({
             <label>
                 <span className={styles.label}>{label}</span>
                 <div className={styles.container}>
-                    <div className={styles.relativeTo}>
-                        {`${denominatorUnit} ${denominator}`}
-                    </div>
-                    <div>&nbsp;=&nbsp;</div>
-                    <div className={styles.fieldWrapper}>
-                        <div className={styles.unit}>{unit}&nbsp;</div>
-                        <input
-                            type="number"
-                            className={styles.field}
-                            disabled={disabled}
-                            onChange={(e) => setInnerValue(e.target.value)}
-                            value={innerValue}
-                            {...props}
-                        />
-                    </div>
+                    {denominatorUnit.position === 'prefix' &&
+                        denominatorUnit.value}
+                    {denominator.toString()}
+                    {denominatorUnit.position === 'postfix' &&
+                        denominatorUnit.value}{' '}
+                    ={' '}
+                    {unit.position === 'prefix' && (
+                        <span className={styles.unit}>{unit.value}</span>
+                    )}
+                    <InlineNumber
+                        className={styles.field}
+                        fallbackValue={0}
+                        value={innerValue}
+                        onChange={setInnerValue}
+                        disabled={disabled}
+                        {...props}
+                    />
+                    {unit.position === 'postfix' && (
+                        <span className={styles.unit}>{unit.value}</span>
+                    )}
                 </div>
                 <ErrorMessage>{errorMessage}</ErrorMessage>
             </label>

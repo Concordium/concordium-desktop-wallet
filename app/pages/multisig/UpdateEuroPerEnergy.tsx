@@ -22,8 +22,8 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
         <>
             <RelativeRateField
                 label="Current euro per energy"
-                unit="€"
-                denominatorUnit="NRG"
+                unit={{ position: 'prefix', value: '€ ' }}
+                denominatorUnit={{ position: 'postfix', value: ' NRG' }}
                 value={initialValue}
                 onChange={noOp}
                 onBlur={noOp}
@@ -32,8 +32,8 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
             <FormRelativeRateField
                 name={fieldNames.euroPerEnergy}
                 label="New euro per energy"
-                unit="€"
-                denominatorUnit="NRG"
+                unit={{ position: 'prefix', value: '€ ' }}
+                denominatorUnit={{ position: 'postfix', value: ' NRG' }}
                 defaultValue={initialValue}
             />
         </>
