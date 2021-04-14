@@ -37,7 +37,8 @@
 }
 
 .timestamp {
-    margin: 20px;
+    margin: 40px auto;
+    width: fit-content;
 }
 
 .address {
@@ -46,6 +47,23 @@
     word-break: break-all;
 }
 
+.filters {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    margin: 0 auto;
+}
+
 .filterCheckbox {
-    margin: 10px 30%;
+    margin: 10px;
+}
+
+.addingCloseButton {
+    position: absolute;
+    right: 10px;
+    top: 30px;
+
+    svg {
+        height: 10px;
+    }
 }

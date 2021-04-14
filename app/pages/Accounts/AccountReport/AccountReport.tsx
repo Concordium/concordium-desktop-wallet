@@ -17,6 +17,7 @@ import {
 
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
+import CloseButton from '~/cross-app-components/CloseButton';
 import Timestamp from '~/components/Form/InputTimestamp';
 import PickAccount from '~/pages/UpdateAccountCredentials/PickAccount';
 import Checkbox from '~/components/Form/Checkbox';
@@ -54,15 +55,21 @@ const transactionTypeFilters: FilterOption[] = [
         'Scheduled Transfers',
         TransactionKindString.TransferWithSchedule
     ),
-    filterKind('Transfer to Public', TransactionKindString.TransferToPublic),
+    filterKind('Transfers to Public', TransactionKindString.TransferToPublic),
     filterKind(
-        'Transfer to Encrypted',
+        'Transfers to Encrypted',
         TransactionKindString.TransferToEncrypted
     ),
     filterKind(
         'Encrypted Transfer',
         TransactionKindString.EncryptedAmountTransfer
     ),
+    filterKind(
+        'Finalization Rewards',
+        TransactionKindString.FinalizationReward
+    ),
+    filterKind('Baker Rewards', TransactionKindString.BakingReward),
+    filterKind('Block Rewards', TransactionKindString.BlockReward),
 ];
 
 const getName = (i: string[]) => i[0];
@@ -81,8 +88,8 @@ function parseTransaction(transaction: TransferTransaction) {
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }
 
-// Updates transactions of the account, converts them to csv and saves the file.
-export async function getAccountCSV(
+// Updates transactions of the account, and returns them as a csv string.
+async function getAccountCSV(
     account: Account,
     filterOptions: FilterOption[],
     fromTime?: Date,
@@ -106,6 +113,10 @@ export async function getAccountCSV(
     );
 }
 
+/**
+ * Components to make account reports.
+ * Allows the user to enable filters and to choose accounts.
+ */
 export default function AccountReport() {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [adding, setAdding] = useState(false);
@@ -115,6 +126,7 @@ export default function AccountReport() {
     const [toDate, setTo] = useState<Date | undefined>(new Date(getNow()));
     const [currentFilters, setFilters] = useState<FilterOption[]>([]);
 
+    // Flip the given filterOptions status (enabled/disabled)
     function flip(filterOption: FilterOption) {
         setFilters((filters) => {
             if (
@@ -130,6 +142,9 @@ export default function AccountReport() {
         });
     }
 
+    /** Constructs the account report(s).
+     * If there are multiple chosen accounts, the reports will be bundled into a zip file
+     */
     async function makeReport() {
         const accountsLength = accounts.length;
         if (accountsLength === 1) {
@@ -163,45 +178,69 @@ export default function AccountReport() {
         return saveFile(zip.toBuffer(), 'Save Account Reports', 'zip');
     }
 
+    // add account to the list of chosen accounts, and exit adding mode.
     function addAccount(account: Account) {
         setAccounts((currentAccounts) => [...currentAccounts, account]);
         setAdding(false);
     }
 
+    // remove account from the list of chosen accounts.
     function removeAccount(account: Account) {
         setAccounts((currentAccounts) =>
             currentAccounts.filter((acc) => acc.address !== account.address)
         );
     }
 
-    const rightColumn = (
-        <div className={styles.rightColumn}>
-            <Button onClick={() => setAdding(true)}>Add another account</Button>
-            <div className={styles.accountList}>
-                {accounts.map((account) => (
-                    <div
-                        key={account.address}
-                        className={styles.accountListElement}
-                    >
-                        <div>
-                            <p>{account.name}</p>
-                            <br />
-                            <p className={styles.address}>{account.address}</p>
-                        </div>
-                        <Button
-                            disabled={accounts.length === 0}
-                            onClick={() => removeAccount(account)}
+    function RightColumn() {
+        if (adding) {
+            return (
+                <>
+                    <CloseButton
+                        className={styles.addingCloseButton}
+                        onClick={() => setAdding(false)}
+                    />
+                    <PickAccount
+                        onClick={addAccount}
+                        filter={(account: Account) =>
+                            !accounts.includes(account)
+                        }
+                    />
+                </>
+            );
+        }
+        return (
+            <div className={styles.rightColumn}>
+                <Button onClick={() => setAdding(true)}>
+                    Add another account
+                </Button>
+                <div className={styles.accountList}>
+                    {accounts.map((account) => (
+                        <div
+                            key={account.address}
+                            className={styles.accountListElement}
                         >
-                            remove
-                        </Button>
-                    </div>
-                ))}
+                            <div>
+                                <p>{account.name}</p>
+                                <br />
+                                <p className={styles.address}>
+                                    {account.address}
+                                </p>
+                            </div>
+                            <Button
+                                disabled={accounts.length === 0}
+                                onClick={() => removeAccount(account)}
+                            >
+                                Remove
+                            </Button>
+                        </div>
+                    ))}
+                </div>
+                <Button size="big" onClick={makeReport}>
+                    Make Account Report
+                </Button>
             </div>
-            <Button size="big" onClick={makeReport}>
-                Make Account Report
-            </Button>
-        </div>
-    );
+        );
+    }
 
     return (
         <PageLayout>
@@ -240,32 +279,25 @@ export default function AccountReport() {
                                 />
                             </div>
                             <h5>Transaction Types to be included</h5>
-                            {transactionTypeFilters.map((filterOption) => (
-                                <Checkbox
-                                    className={styles.filterCheckbox}
-                                    key={filterOption.key}
-                                    checked={currentFilters.some(
-                                        (currentFilter) =>
-                                            filterOption.key ===
-                                            currentFilter.key
-                                    )}
-                                    onChange={() => flip(filterOption)}
-                                >
-                                    {filterOption.label}
-                                </Checkbox>
-                            ))}
+                            <div className={styles.filters}>
+                                {transactionTypeFilters.map((filterOption) => (
+                                    <Checkbox
+                                        className={styles.filterCheckbox}
+                                        key={filterOption.key}
+                                        checked={currentFilters.some(
+                                            (currentFilter) =>
+                                                filterOption.key ===
+                                                currentFilter.key
+                                        )}
+                                        onChange={() => flip(filterOption)}
+                                    >
+                                        {filterOption.label}
+                                    </Checkbox>
+                                ))}
+                            </div>
                         </Columns.Column>
                         <Columns.Column header="Accounts to include">
-                            {adding ? (
-                                <PickAccount
-                                    onClick={addAccount}
-                                    filter={(account: Account) =>
-                                        !accounts.includes(account)
-                                    }
-                                />
-                            ) : (
-                                rightColumn
-                            )}
+                            <RightColumn />
                         </Columns.Column>
                     </Columns>
                 </div>
