@@ -1,20 +1,11 @@
 import React, { useState } from 'react';
 import { LocationDescriptorObject } from 'history';
 import AdmZip from 'adm-zip';
-import {
-    Account,
-    TransferTransaction,
-    TransactionKindString,
-} from '~/utils/types';
+import { Account, TransactionKindString } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
 import AccountPageHeader from '../AccountPageHeader';
 import routes from '~/constants/routes.json';
-import {
-    getNow,
-    TimeConstants,
-    dateFromTimeStamp,
-    getISOFormat,
-} from '~/utils/timeHelpers';
+import { getNow, TimeConstants } from '~/utils/timeHelpers';
 
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
@@ -24,32 +15,11 @@ import PickAccount from '~/pages/UpdateAccountCredentials/PickAccount';
 import Checkbox from '~/components/Form/Checkbox';
 import ErrorModal from '~/components/SimpleErrorModal';
 
-import { getTransactionsOfAccount } from '~/database/TransactionDao';
-import { toCSV } from '~/utils/basicHelpers';
-import { attachNames } from '~/utils/transactionHelpers';
-import exportTransactionFields from '~/constants/exportTransactionFields.json';
-
 import { saveFile } from '~/utils/FileHelper';
+import { FilterOption, filterKind, getAccountCSV } from './util';
 
 import multiSigLayout from '~/pages/multisig/MultiSignatureLayout/MultiSignatureLayout.module.scss';
 import styles from './AccountReport.module.scss';
-
-type Filter = (transaction: TransferTransaction) => boolean;
-
-interface FilterOption {
-    filter: Filter;
-    label: string;
-    key: string;
-}
-
-function filterKind(label: string, kind: TransactionKindString): FilterOption {
-    return {
-        label,
-        key: kind,
-        filter: (transaction: TransferTransaction) =>
-            transaction.transactionKind === kind,
-    };
-}
 
 const transactionTypeFilters: FilterOption[] = [
     filterKind('Simple Transfers', TransactionKindString.Transfer),
@@ -74,47 +44,6 @@ const transactionTypeFilters: FilterOption[] = [
     filterKind('Block Rewards', TransactionKindString.BlockReward),
 ];
 
-const getName = (i: string[]) => i[0];
-const getLabel = (i: string[]) => i[1];
-const exportedFields = Object.entries(exportTransactionFields);
-
-// Parse a transaction into a array of values, corresponding to those of the exported fields.
-function parseTransaction(transaction: TransferTransaction) {
-    const fieldValues: Record<string, string> = {};
-    Object.entries(transaction).forEach(([key, value]) => {
-        fieldValues[key] = value?.toString();
-    });
-
-    fieldValues.dateTime = getISOFormat(transaction.blockTime);
-
-    return exportedFields.map((field) => fieldValues[getName(field)]);
-}
-
-// Updates transactions of the account, and returns them as a csv string.
-async function getAccountCSV(
-    account: Account,
-    filterOptions: FilterOption[],
-    fromTime?: Date,
-    toTime?: Date
-) {
-    let transactions = await getTransactionsOfAccount(account); // load from database
-    transactions = transactions.filter(
-        (transaction) =>
-            (!fromTime ||
-                dateFromTimeStamp(transaction.blockTime) > fromTime) &&
-            (!toTime || dateFromTimeStamp(transaction.blockTime) < toTime)
-    );
-    transactions = transactions.filter((transaction) =>
-        filterOptions.some((filterOption) => filterOption.filter(transaction))
-    );
-    transactions = await attachNames(transactions);
-
-    return toCSV(
-        transactions.map(parseTransaction),
-        exportedFields.map(getLabel)
-    );
-}
-
 interface Props {
     location: LocationDescriptorObject<Account>;
 }
@@ -130,13 +59,13 @@ export default function AccountReport({ location }: Props) {
     );
     const [adding, setAdding] = useState(false);
     const [fromDate, setFrom] = useState<Date | undefined>(
-        new Date(getNow() - TimeConstants.Day)
+        new Date(getNow() - TimeConstants.Month)
     );
     const [toDate, setTo] = useState<Date | undefined>(new Date(getNow()));
     const [currentFilters, setFilters] = useState<FilterOption[]>([]);
 
     // Flip the given filterOptions status (enabled/disabled)
-    function flip(filterOption: FilterOption) {
+    function flipStatus(filterOption: FilterOption) {
         setFilters((filters) => {
             if (
                 filters.some(
@@ -316,7 +245,7 @@ export default function AccountReport({ location }: Props) {
                                                         currentFilter.key
                                                 )}
                                                 onChange={() =>
-                                                    flip(filterOption)
+                                                    flipStatus(filterOption)
                                                 }
                                             >
                                                 {filterOption.label}
