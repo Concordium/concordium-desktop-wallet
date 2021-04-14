@@ -33,7 +33,7 @@ export default function UpdateMicroGtuPerEuroRate({
                 unit={{ position: 'prefix', value: 'µǤ ' }}
                 denominatorUnit={{ position: 'prefix', value: '€ ' }}
                 value={initialValue.numerator.toString()}
-                denominator={initialValue.denominator}
+                denominator={BigInt(initialValue.denominator)}
                 onChange={noOp}
                 onBlur={noOp}
                 disabled
@@ -44,7 +44,7 @@ export default function UpdateMicroGtuPerEuroRate({
                 unit={{ position: 'prefix', value: 'µǤ ' }}
                 denominatorUnit={{ position: 'prefix', value: '€ ' }}
                 defaultValue={initialValue.numerator.toString()}
-                denominator={initialValue.denominator}
+                denominator={BigInt(initialValue.denominator)}
                 rules={{
                     required: 'Value must be specified',
                     min: { value: 0, message: 'Value cannot be negative' },

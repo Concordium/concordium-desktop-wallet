@@ -18,7 +18,7 @@ function getZeros(resolution: bigint): number {
     return resolution
         .toString()
         .split('')
-        .filter((c) => c !== '0').length;
+        .filter((c) => c === '0').length;
 }
 
 function isPowOf10(resolution: bigint): boolean {

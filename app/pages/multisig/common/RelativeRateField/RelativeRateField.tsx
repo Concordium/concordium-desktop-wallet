@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { InputHTMLAttributes, useCallback, useState } from 'react';
+import React, { InputHTMLAttributes, useMemo, useState } from 'react';
 import { CommonInputProps } from '~/components/Form/common';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 
@@ -21,38 +21,12 @@ interface RelativeRateFieldUnit {
     position: UnitPosition;
 }
 
-// const normaliseFactory = (denominator: bigint, normaliseTo?: number) => (
-//     value?: string
-// ): string | undefined => {
-//     if (value === undefined) {
-//         return undefined;
-//     }
-
-//     if (normaliseTo === undefined) {
-//         return value;
-//     }
-
-//     return `${Number(value) * (normaliseTo / Number(denominator))}`;
-// };
-
-// const undoNormalizeFactory = (denominator: bigint, normalisedFrom?: number) => (
-//     value?: string
-// ): string | undefined => {
-//     if (value === undefined) {
-//         return undefined;
-//     }
-
-//     if (normalisedFrom === undefined) {
-//         return value;
-//     }
-
-//     return `${parseFloat(value) / (normalisedFrom / Number(denominator))}`;
-// };
-
-// function tryGetReturn<F extends (...args: any) => any>(f: F): F | undefined {
-//     const proxy: F = (...args) => f(...args);
-//     return proxy;
-// }
+type ConversionFunctionsTuple = [
+    ReturnType<typeof toNumberString>,
+    (
+        ...args: Parameters<ReturnType<typeof toResolution>>
+    ) => ReturnType<ReturnType<typeof toResolution>> | string
+];
 
 export interface RelativeRateFieldProps
     extends CommonInputProps,
@@ -77,7 +51,7 @@ export interface RelativeRateFieldProps
 
 /**
  * @description
- * Used to for number values of a unit relative to a value of another unit.
+ * Used to represent and update values of a unit relative to a value of another unit.
  *
  * @example
  * <RelativeRateField value={value} onChange={(e) => setValue(e.target.value)} unit="€" relativeTo="1 NRG" />
@@ -96,36 +70,31 @@ export function RelativeRateField({
     normalise = false,
     ...props
 }: RelativeRateFieldProps) {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const toDenominatorFraction = useCallback(
-        normalise
-            ? toNumberString(denominator)
-            : (v?: string | bigint) => v?.toString(),
-        [normalise, denominator]
-    );
+    const [
+        toDenominatorFraction,
+        toDenominatorResolution,
+    ]: ConversionFunctionsTuple = useMemo(() => {
+        const noOps: ConversionFunctionsTuple = [
+            (amount?: string | bigint | undefined) => amount?.toString(),
+            (amount?: string | undefined) => amount,
+        ];
 
-    const toDenominatorResolution = useCallback(
-        (amount?: string) =>
-            normalise ? toResolution(denominator)(amount)?.toString() : amount,
-        [normalise, denominator]
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // const normalise = useCallback(normaliseFactory(denominator, normaliseTo), [
-    //     denominator,
-    //     normaliseTo,
-    // ]);
-    // // eslint-disable-next-line react-hooks/exhaustive-deps
-    // const undoNormalize = useCallback(
-    //     undoNormalizeFactory(denominator, normaliseTo),
-    //     [denominator, normaliseTo]
-    // );
+        if (!normalise) {
+            return noOps;
+        }
+        try {
+            return [toNumberString(denominator), toResolution(denominator)];
+        } catch {
+            return noOps;
+        }
+    }, [denominator, normalise]);
 
     const [innerValue, setInnerValue] = useState<string | undefined>(
         toDenominatorFraction(value)
     );
 
     useUpdateEffect(() => {
-        onChange(toDenominatorResolution(innerValue));
+        onChange(toDenominatorResolution(innerValue)?.toString());
     }, [innerValue, toDenominatorResolution, onChange]);
 
     useUpdateEffect(() => {

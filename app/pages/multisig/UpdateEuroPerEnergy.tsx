@@ -18,6 +18,9 @@ const fieldNames: EqualRecord<UpdateEuroPerEnergyFields> = {
 
 export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
     const initialValue = blockSummary.updates.chainParameters.euroPerEnergy;
+    const errorMessage = `Value must go into ${
+        1 / Number(initialValue.denominator)
+    }`;
 
     return (
         <>
@@ -26,7 +29,7 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 unit={{ position: 'prefix', value: '€ ' }}
                 denominatorUnit={{ position: 'postfix', value: ' NRG' }}
                 value={initialValue.numerator.toString()}
-                denominator={initialValue.denominator}
+                denominator={BigInt(initialValue.denominator)}
                 normalise
                 onChange={noOp}
                 onBlur={noOp}
@@ -38,16 +41,12 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 unit={{ position: 'prefix', value: '€ ' }}
                 denominatorUnit={{ position: 'postfix', value: ' NRG' }}
                 defaultValue={initialValue.numerator.toString()}
-                denominator={initialValue.denominator}
+                denominator={BigInt(initialValue.denominator)}
                 normalise
                 rules={{
-                    required: 'Value must be specified',
+                    required: errorMessage,
                     min: { value: 0, message: 'Value cannot be negative' },
-                    validate: isValidBigIntValidator(
-                        `Value must go into ${
-                            1 / Number(initialValue.denominator)
-                        }`
-                    ),
+                    validate: isValidBigIntValidator(errorMessage),
                 }}
             />
         </>
