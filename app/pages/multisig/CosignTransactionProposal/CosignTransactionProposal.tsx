@@ -62,7 +62,9 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
     ({ location, blockSummary }) => {
         const [showValidationError, setShowValidationError] = useState(false);
         const [signature, setSignature] = useState<
-            UpdateInstructionSignature | TransactionAccountSignature | undefined
+            | UpdateInstructionSignature[]
+            | TransactionAccountSignature
+            | undefined
         >();
         const [transactionHash, setTransactionHash] = useState<string>();
 
@@ -117,7 +119,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
         async function exportSignedTransaction() {
             const signedTransaction = {
                 ...transactionObject,
-                signatures: [signature],
+                signatures: signature,
             };
             const signedTransactionJson = stringify(signedTransaction);
 

@@ -607,7 +607,7 @@ export type UpdateInstructionPayload =
     | ElectionDifficulty;
 
 // An actual signature, which goes into an account transaction.
-export type Signature = Buffer;
+export type Signature = Hex;
 
 type KeyIndex = Word8;
 // Signatures from a single credential, for an AccountTransaction

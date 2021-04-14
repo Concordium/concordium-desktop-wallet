@@ -302,7 +302,7 @@ export function buildTransactionAccountSignature(
     signature: Buffer
 ): TransactionAccountSignature {
     const transactionCredentialSignature: TransactionCredentialSignature = {};
-    transactionCredentialSignature[signatureIndex] = signature;
+    transactionCredentialSignature[signatureIndex] = signature.toString('hex');
     const transactionAccountSignature: TransactionAccountSignature = {};
     transactionAccountSignature[
         credentialAccountIndex

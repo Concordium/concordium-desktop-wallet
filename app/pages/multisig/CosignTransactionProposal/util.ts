@@ -19,7 +19,7 @@ export async function signUpdateInstruction(
     instruction: UpdateInstruction,
     ledger: ConcordiumLedgerClient,
     blockSummary: BlockSummary
-): Promise<UpdateInstructionSignature> {
+): Promise<UpdateInstructionSignature[]> {
     const transactionHandler = await findUpdateInstructionHandler(
         instruction.type
     );
@@ -37,10 +37,12 @@ export async function signUpdateInstruction(
         ledger
     );
 
-    return {
-        signature: signatureBytes.toString('hex'),
-        authorizationKeyIndex: authorizationKey.index,
-    };
+    return [
+        {
+            signature: signatureBytes.toString('hex'),
+            authorizationKeyIndex: authorizationKey.index,
+        },
+    ];
 }
 
 export async function signAccountTransaction(

@@ -194,9 +194,10 @@ function serializeSignature(signatures: TransactionAccountSignature) {
     // index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
 
     const putSignature = (signature: Signature) => {
+        const signatureBytes = Buffer.from(signature, 'hex');
         const length = Buffer.alloc(2);
-        length.writeUInt16BE(signature.length, 0);
-        return Buffer.concat([length, signature]);
+        length.writeUInt16BE(signatureBytes.length, 0);
+        return Buffer.concat([length, signatureBytes]);
     };
     const putCredentialSignatures = (credSig: TransactionCredentialSignature) =>
         serializeMap(credSig, putInt8, putInt8, putSignature);
