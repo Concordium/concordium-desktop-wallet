@@ -117,6 +117,8 @@ export function serializeYearMonth(yearMonth: string) {
 
 export const putInt8 = (i: number) => Buffer.from(Uint8Array.of(i));
 
+export const putString = (s: string) => Buffer.from(s, 'hex');
+
 export function serializeCredentialDeploymentInformation(
     credential: CredentialDeploymentInformation
 ) {

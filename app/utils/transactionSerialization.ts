@@ -17,6 +17,7 @@ import {
     encodeWord32,
     encodeWord64,
     put,
+    putString,
     putInt8,
     putBase58Check,
     hashSha256,
@@ -24,10 +25,6 @@ import {
     serializeList,
     serializeCredentialDeploymentInformation,
 } from './serializationHelpers';
-
-function putString(value: string) {
-    return Buffer.from(value, 'hex');
-}
 
 function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     const size = 1 + 32 + 8;

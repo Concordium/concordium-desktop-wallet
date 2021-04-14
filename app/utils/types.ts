@@ -16,10 +16,6 @@ export interface Fraction {
     denominator: Word64;
 }
 
-export function instanceOfFraction(object: any): object is Fraction {
-    return object.numerator !== undefined && object.denominator !== undefined;
-}
-
 export enum SchemeId {
     Ed25519 = 0,
 }

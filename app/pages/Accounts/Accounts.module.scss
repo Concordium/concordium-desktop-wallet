@@ -4,10 +4,6 @@
     margin-bottom: 20px;
 }
 
-.column {
-    flex-basis: 560px;
-}
-
 .accountActionButton {
     height: 100px;
     width: 30%;
@@ -31,12 +27,6 @@
 
 .inverted {
     filter: invert(100%);
-}
-
-.flexBetween {
-    display: flex;
-    justify-content: space-between;
-    flex-direction: column;
 }
 
 .buildSchedule {
