@@ -3,11 +3,11 @@ import { useSelector } from 'react-redux';
 import { Identity } from '~/utils/types';
 import { confirmedIdentitiesSelector } from '~/features/IdentitySlice';
 import IdentityListElement from '~/components/IdentityListElement';
-import styles from '~/pages/Identities/Identities.module.scss';
 
 interface Props {
     setReady: (ready: boolean) => void;
     setIdentity: (identity: Identity) => void;
+    elementClassName?: string;
 }
 
 /**
@@ -16,6 +16,7 @@ interface Props {
 export default function PickIdentity({
     setReady,
     setIdentity,
+    elementClassName,
 }: Props): JSX.Element {
     const identities = useSelector(confirmedIdentitiesSelector);
     const [chosenIndex, setChosenIndex] = useState(-1);
@@ -26,7 +27,7 @@ export default function PickIdentity({
                 <IdentityListElement
                     identity={identity}
                     key={identity.id}
-                    className={styles.listElement}
+                    className={elementClassName}
                     active={chosenIndex === index}
                     onClick={() => {
                         setReady(true);

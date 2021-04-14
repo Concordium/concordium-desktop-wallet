@@ -11,7 +11,7 @@ import {
     Identity,
     CredentialDeploymentInformation,
 } from '~/utils/types';
-import PickIdentity from '../GenerateCredential/PickIdentity';
+import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
 import AddCredential from './AddCredential';
 import ChangeSignatureThreshold from './ChangeSignatureThreshold';
