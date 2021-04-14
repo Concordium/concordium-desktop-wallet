@@ -22,7 +22,7 @@ function TransactionList({ onTransactionClick }: Props): JSX.Element {
             {transactions.map((transaction: TransferTransaction) => (
                 <Menu.Item
                     onClick={() => onTransactionClick(transaction)}
-                    key={transaction.transactionHash}
+                    key={transaction.transactionHash || transaction.id}
                 >
                     <TransactionListElement transaction={transaction} />
                 </Menu.Item>

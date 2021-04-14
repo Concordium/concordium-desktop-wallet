@@ -297,4 +297,13 @@ export async function updateRewardFilter(
     return dispatch(updateAccountFields({ address, rewardFilter }));
 }
 
+export async function updateMaxTransactionId(
+    dispatch: Dispatch,
+    address: string,
+    maxTransactionId: number
+) {
+    updateAccount(address, { maxTransactionId });
+    return dispatch(updateAccountFields({ address, maxTransactionId }));
+}
+
 export default accountsSlice.reducer;

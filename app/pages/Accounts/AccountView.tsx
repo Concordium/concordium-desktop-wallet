@@ -31,7 +31,8 @@ export default function AccountView() {
         if (account && account.status === AccountStatus.Confirmed) {
             updateTransactions(dispatch, account);
         }
-    }, [dispatch, account]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch, account?.address, account?.status]);
 
     if (account === undefined) {
         return null;

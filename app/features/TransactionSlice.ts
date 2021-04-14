@@ -28,9 +28,8 @@ import {
     convertIncomingTransaction,
     convertAccountTransaction,
 } from '../utils/TransactionConverters';
-import { updateAccount } from '../database/AccountDao';
 // eslint-disable-next-line import/no-cycle
-import { loadAccounts } from './AccountSlice';
+import { updateMaxTransactionId } from './AccountSlice';
 
 const transactionSlice = createSlice({
     name: 'transactions',
@@ -105,6 +104,8 @@ function filterUnShieldedBalanceTransaction(transaction: TransferTransaction) {
     switch (transaction.transactionKind) {
         case TransactionKindString.Transfer:
         case TransactionKindString.BakingReward:
+        case TransactionKindString.FinalizationReward:
+        case TransactionKindString.BlockReward:
         case TransactionKindString.TransferWithSchedule:
         case TransactionKindString.TransferToEncrypted:
         case TransactionKindString.TransferToPublic:
@@ -166,13 +167,15 @@ export async function updateTransactions(dispatch: Dispatch, account: Account) {
                 convertIncomingTransaction(transaction, account.address)
             )
         );
-        await updateAccount(account.address, {
-            maxTransactionId: transactions.reduce(
-                (id, t) => Math.max(id, t.id),
-                0
-            ),
-        });
-        loadAccounts(dispatch);
+        const maxTransactionId = transactions.reduce(
+            (id, t) => Math.max(id, t.id),
+            0
+        );
+        await updateMaxTransactionId(
+            dispatch,
+            account.address,
+            maxTransactionId
+        );
         loadTransactions(account, dispatch);
     }
 }

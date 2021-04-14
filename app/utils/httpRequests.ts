@@ -58,9 +58,11 @@ export async function getTransactions(
     );
     const { transactions, count, limit } = response.data;
     if (count === limit) {
-        return transactions.push(
-            getTransactions(address, getHighestId(transactions))
+        const additionalTransactions = await getTransactions(
+            address,
+            getHighestId(transactions)
         );
+        return [...transactions, ...additionalTransactions];
     }
     return transactions;
 }

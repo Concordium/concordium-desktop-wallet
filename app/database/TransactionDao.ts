@@ -5,7 +5,9 @@ import {
 } from '../utils/types';
 import knex from './knex';
 import { transactionTable } from '../constants/databaseNames.json';
-import { partition } from '../utils/basicHelpers';
+import { partition, chunkArray } from '../utils/basicHelpers';
+
+const chunkSize = 50;
 
 function convertBooleans(transactions: TransferTransaction[]) {
     return transactions.map((transaction) => {
@@ -56,9 +58,11 @@ export async function insertTransactions(
             (t_) => t.transactionHash === t_.transactionHash
         )
     );
-    for (let i = 0; i < additions.length; i += 1) {
+
+    const additionChunks = chunkArray(additions, chunkSize);
+    for (let i = 0; i < additionChunks.length; i += 1) {
         // eslint-disable-next-line no-await-in-loop
-        await table.insert(additions[i]);
+        await table.insert(additionChunks[i]);
     }
 
     return Promise.all(

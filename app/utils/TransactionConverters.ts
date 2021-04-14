@@ -77,7 +77,6 @@ export function convertIncomingTransaction(
         subtotal,
         cost: transaction.cost,
         origin: JSON.stringify(transaction.origin),
-        details: JSON.stringify(transaction.details),
         rejectReason: transaction.details.rejectReason,
         encrypted,
         decryptedAmount,

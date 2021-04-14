@@ -112,6 +112,8 @@ function parseAmount(
             // incoming transaction:
             return buildCostFreeAmountString(BigInt(transaction.subtotal));
 
+        case OriginType.Reward:
+            return buildCostFreeAmountString(BigInt(transaction.subtotal));
         default:
             return {
                 amount: `${getGTUSymbol()} ?`,
@@ -128,6 +130,12 @@ function displayType(kind: TransactionKindString) {
             return ' (Shielded)';
         case TransactionKindString.TransferToPublic:
             return ' (Unshielded)';
+        case TransactionKindString.BakingReward:
+            return 'Baker reward';
+        case TransactionKindString.BlockReward:
+            return 'Block reward';
+        case TransactionKindString.FinalizationReward:
+            return 'Finalization reward';
         default:
             return '';
     }
