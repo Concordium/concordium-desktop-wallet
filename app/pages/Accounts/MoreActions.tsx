@@ -58,7 +58,14 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 <Menu vertical>
                     {items.map((item) => (
                         <Menu.Item
-                            onClick={() => dispatch(push(item.location))}
+                            onClick={() =>
+                                dispatch(
+                                    push({
+                                        pathname: item.location,
+                                        state: account,
+                                    })
+                                )
+                            }
                             key={item.location}
                         >
                             {item.name}

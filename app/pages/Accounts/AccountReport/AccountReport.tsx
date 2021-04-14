@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LocationDescriptorObject } from 'history';
 import AdmZip from 'adm-zip';
 import {
     Account,
@@ -113,12 +114,18 @@ async function getAccountCSV(
     );
 }
 
+interface Props {
+    location: LocationDescriptorObject<Account>;
+}
+
 /**
  * Components to make account reports.
  * Allows the user to enable filters and to choose accounts.
  */
-export default function AccountReport() {
-    const [accounts, setAccounts] = useState<Account[]>([]);
+export default function AccountReport({ location }: Props) {
+    const [accounts, setAccounts] = useState<Account[]>(
+        location?.state ? [location?.state] : []
+    );
     const [adding, setAdding] = useState(false);
     const [fromDate, setFrom] = useState<Date | undefined>(
         new Date(getNow() - TimeConstants.Day)
