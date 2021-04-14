@@ -11,6 +11,7 @@ import React, {
 import { noOp } from '~/utils/basicHelpers';
 import { useUpdateEffect } from '~/utils/hooks';
 import { scaleFieldWidth } from '~/utils/htmlHelpers';
+import { formatNumberStringWithDigits } from '~/utils/numberStringHelpers';
 import { ClassName } from '~/utils/types';
 import { CommonFieldProps } from '../common';
 
@@ -23,35 +24,6 @@ const ensureValidBigInt = (v = ''): string => {
     } catch {
         return '';
     }
-};
-
-const formatNumberString = (
-    fractionDigits: number,
-    allowFractions: true | number
-) => (v = ''): string => {
-    const parsed = parseFloat(v);
-
-    if (Number.isNaN(parsed)) {
-        return '';
-    }
-
-    const valueFractionDigits = v.split('.')[1]?.length ?? 0;
-
-    if (typeof allowFractions === 'number') {
-        if (allowFractions < fractionDigits) {
-            throw new Error(
-                `Tried to ensure more digits (${fractionDigits}) that allowed by allowFractions (${allowFractions})`
-            );
-        }
-        return parsed.toFixed(
-            Math.max(
-                fractionDigits,
-                Math.min(allowFractions, valueFractionDigits)
-            )
-        );
-    }
-
-    return parsed.toFixed(Math.max(fractionDigits, valueFractionDigits));
 };
 
 export interface InlineNumberProps
@@ -107,7 +79,10 @@ export default function InlineNumber({
 }: InlineNumberProps): JSX.Element {
     const format = useCallback(
         allowFractions
-            ? formatNumberString(ensureDigits, allowFractions)
+            ? formatNumberStringWithDigits(
+                  ensureDigits,
+                  allowFractions !== true ? allowFractions : undefined
+              )
             : ensureValidBigInt,
         [ensureDigits, allowFractions]
     );
