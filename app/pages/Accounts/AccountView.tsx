@@ -32,7 +32,7 @@ export default function AccountView() {
             updateTransactions(dispatch, account);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dispatch, account?.address, account?.status]);
+    }, [dispatch, account?.address, account?.status, account?.rewardFilter]);
 
     if (account === undefined) {
         return null;
