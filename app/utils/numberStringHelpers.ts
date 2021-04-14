@@ -43,7 +43,7 @@ const withValidResolution = <TReturn>(
  *
  * @throws If resolution x is anything but a power of 10 (1, 10, 100, 1000, etc.)
  *
- * @example ()
+ * @example toNumberString(100n)(10n) => '0.1'
  */
 export const toNumberString = withValidResolution(
     (resolution: bigint) => (amount: bigint | string): string => {
@@ -68,6 +68,13 @@ const parseSubNumber = (powOf10: number, subGTU: string): string => {
     return result;
 };
 
+/**
+ * @description converts fraction string to bigint by multiplying with resolution.
+ *
+ * @throws If resolution x is anything but a power of 10 (1, 10, 100, 1000, etc.)
+ *
+ * @example toResolution(100n)('0.1') => 10n
+ */
 export const toResolution = withValidResolution(
     (resolution: bigint) => (amount: string): bigint => {
         if (!amount.includes(numberSeparator)) {
