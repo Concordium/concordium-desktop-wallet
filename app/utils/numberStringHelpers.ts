@@ -3,13 +3,7 @@ const pow10Format = /^1(0*)$/;
 
 function toBigInt(input: bigint | string): bigint {
     if (typeof input === 'string') {
-        try {
-            return BigInt(input);
-        } catch (e) {
-            throw new Error(
-                'Given string that was not a valid microGTU string.'
-            );
-        }
+        return BigInt(input);
     }
     return input;
 }
@@ -24,6 +18,17 @@ function getZeros(resolution: bigint): number {
 function isPowOf10(resolution: bigint): boolean {
     return pow10Format.test(resolution.toString());
 }
+
+export const isValidResolutionString = (resolution: bigint) => {
+    const re = new RegExp(
+        `^(0|[1-9]\\d*)(\\.\\d{1,${getZeros(resolution)}})?$`
+    );
+
+    return (value: string): boolean => {
+        // Only allow numerals, and only allow decimals according to resolution (in order to keep microGTU atomic)
+        return re.test(value);
+    };
+};
 
 const withValidResolution = <TReturn>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,8 +50,10 @@ const withValidResolution = <TReturn>(
  *
  * @example toNumberString(100n)(10n) => '0.1'
  */
-export const toNumberString = withValidResolution(
-    (resolution: bigint) => (value?: bigint | string): string | undefined => {
+export const toNumberString = withValidResolution((resolution: bigint) => {
+    const zeros = getZeros(resolution);
+
+    return (value?: bigint | string): string | undefined => {
         if (value === undefined) {
             return undefined;
         }
@@ -60,15 +67,21 @@ export const toNumberString = withValidResolution(
             fractions === 0n
                 ? ''
                 : `.${'0'.repeat(
-                      getZeros(resolution) - fractions.toString().length
+                      zeros - fractions.toString().length
                   )}${fractions.toString().replace(/0+$/, '')}`;
         return `${whole}${fractionsFormatted}`;
-    }
-);
+    };
+});
 
-const parseSubNumber = (powOf10: number, subGTU: string): string => {
-    let result = subGTU;
-    result += '0'.repeat(powOf10 - subGTU.toString().length);
+/**
+ * expects the fractional part of the a fraction number string.
+ * i.e. from an amount of 10.001, the fraction number string is 001.
+ */
+export const parseSubNumber = (powOf10: number) => (
+    fraction: string
+): string => {
+    let result = fraction;
+    result += '0'.repeat(powOf10 - fraction.toString().length);
     return result;
 };
 
@@ -79,10 +92,19 @@ const parseSubNumber = (powOf10: number, subGTU: string): string => {
  *
  * @example toResolution(100n)('0.1') => 10n
  */
-export const toResolution = withValidResolution(
-    (resolution: bigint) => (value?: string): bigint | undefined => {
+export const toResolution = withValidResolution((resolution: bigint) => {
+    const isValid = isValidResolutionString(resolution);
+    const parseFraction = parseSubNumber(getZeros(resolution));
+
+    return (value?: string): bigint | undefined => {
         if (value === undefined) {
             return undefined;
+        }
+
+        if (!isValid(value)) {
+            throw new Error(
+                `Given string cannot be parsed to resolution: ${resolution}`
+            );
         }
 
         if (!value.includes(numberSeparator)) {
@@ -91,13 +113,10 @@ export const toResolution = withValidResolution(
 
         const separatorIndex = value.indexOf(numberSeparator);
         const whole = value.slice(0, separatorIndex);
-        const fractions = parseSubNumber(
-            getZeros(resolution),
-            value.slice(separatorIndex + 1)
-        );
+        const fractions = parseFraction(value.slice(separatorIndex + 1));
         return BigInt(whole) * resolution + BigInt(fractions);
-    }
-);
+    };
+});
 
 const replaceCharAt = (
     value: string,
