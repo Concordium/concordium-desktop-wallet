@@ -62,7 +62,9 @@ export default function AccountReport({ location }: Props) {
         new Date(getNow() - TimeConstants.Month)
     );
     const [toDate, setTo] = useState<Date | undefined>(new Date(getNow()));
-    const [currentFilters, setFilters] = useState<FilterOption[]>([]);
+    const [currentFilters, setFilters] = useState<FilterOption[]>(() => [
+        ...transactionTypeFilters,
+    ]);
 
     // Flip the given filterOptions status (enabled/disabled)
     function flipStatus(filterOption: FilterOption) {
