@@ -22,6 +22,7 @@ import CloseButton from '~/cross-app-components/CloseButton';
 import Timestamp from '~/components/Form/InputTimestamp';
 import PickAccount from '~/pages/UpdateAccountCredentials/PickAccount';
 import Checkbox from '~/components/Form/Checkbox';
+import ErrorModal from '~/components/SimpleErrorModal';
 
 import { getTransactionsOfAccount } from '~/database/TransactionDao';
 import { toCSV } from '~/utils/basicHelpers';
@@ -123,6 +124,7 @@ interface Props {
  * Allows the user to enable filters and to choose accounts.
  */
 export default function AccountReport({ location }: Props) {
+    const [modalOpen, setModalOpen] = useState(false);
     const [accounts, setAccounts] = useState<Account[]>(
         location?.state ? [location?.state] : []
     );
@@ -153,36 +155,41 @@ export default function AccountReport({ location }: Props) {
      * If there are multiple chosen accounts, the reports will be bundled into a zip file
      */
     async function makeReport() {
-        const accountsLength = accounts.length;
-        if (accountsLength === 1) {
-            return saveFile(
-                await getAccountCSV(
-                    accounts[0],
-                    currentFilters,
-                    fromDate,
-                    toDate
-                ),
-                'Save Account Report',
-                'csv'
-            );
-        }
-        const zip = new AdmZip();
-        for (let i = 0; i < accounts.length; i += 1) {
-            const account = accounts[i];
-            zip.addFile(
-                `${account.name}.csv`,
-                Buffer.from(
-                    // eslint-disable-next-line  no-await-in-loop
+        try {
+            const accountsLength = accounts.length;
+            if (accountsLength === 1) {
+                return saveFile(
                     await getAccountCSV(
-                        account,
+                        accounts[0],
                         currentFilters,
                         fromDate,
                         toDate
+                    ),
+                    'Save Account Report',
+                    'csv'
+                );
+            }
+            const zip = new AdmZip();
+            for (let i = 0; i < accounts.length; i += 1) {
+                const account = accounts[i];
+                zip.addFile(
+                    `${account.name}.csv`,
+                    Buffer.from(
+                        // eslint-disable-next-line  no-await-in-loop
+                        await getAccountCSV(
+                            account,
+                            currentFilters,
+                            fromDate,
+                            toDate
+                        )
                     )
-                )
-            );
+                );
+            }
+            return saveFile(zip.toBuffer(), 'Save Account Reports', 'zip');
+        } catch (e) {
+            setModalOpen(true);
+            return Promise.resolve(false);
         }
-        return saveFile(zip.toBuffer(), 'Save Account Reports', 'zip');
     }
 
     // add account to the list of chosen accounts, and exit adding mode.
@@ -233,16 +240,17 @@ export default function AccountReport({ location }: Props) {
                                     {account.address}
                                 </p>
                             </div>
-                            <Button
-                                disabled={accounts.length === 0}
-                                onClick={() => removeAccount(account)}
-                            >
+                            <Button onClick={() => removeAccount(account)}>
                                 Remove
                             </Button>
                         </div>
                     ))}
                 </div>
-                <Button size="big" onClick={makeReport}>
+                <Button
+                    size="big"
+                    disabled={accounts.length === 0}
+                    onClick={makeReport}
+                >
                     Make Account Report
                 </Button>
             </div>
@@ -250,65 +258,80 @@ export default function AccountReport({ location }: Props) {
     }
 
     return (
-        <PageLayout>
-            <PageLayout.Header>
-                <AccountPageHeader />
-            </PageLayout.Header>
-            <PageLayout.Container
-                className={multiSigLayout.container}
-                padding="vertical"
-                closeRoute={routes.ACCOUNTS}
-                disableBack={false}
-            >
-                <h2 className={multiSigLayout.header}>Make Account Report</h2>
-                <div className={multiSigLayout.content}>
-                    <Columns
-                        divider
-                        columnScroll
-                        columnClassName={styles.column}
-                    >
-                        <Columns.Column header="Time Period & Filters">
-                            <h5>Time Period to include</h5>
-                            <div className={styles.timestamp}>
-                                <Timestamp
-                                    value={fromDate}
-                                    onChange={setFrom}
-                                    name="from"
-                                    label="From:"
-                                />
-                            </div>
-                            <div className={styles.timestamp}>
-                                <Timestamp
-                                    value={toDate}
-                                    onChange={setTo}
-                                    name="to"
-                                    label="To:"
-                                />
-                            </div>
-                            <h5>Transaction Types to be included</h5>
-                            <div className={styles.filters}>
-                                {transactionTypeFilters.map((filterOption) => (
-                                    <Checkbox
-                                        className={styles.filterCheckbox}
-                                        key={filterOption.key}
-                                        checked={currentFilters.some(
-                                            (currentFilter) =>
-                                                filterOption.key ===
-                                                currentFilter.key
-                                        )}
-                                        onChange={() => flip(filterOption)}
-                                    >
-                                        {filterOption.label}
-                                    </Checkbox>
-                                ))}
-                            </div>
-                        </Columns.Column>
-                        <Columns.Column header="Accounts to include">
-                            <RightColumn />
-                        </Columns.Column>
-                    </Columns>
-                </div>
-            </PageLayout.Container>
-        </PageLayout>
+        <>
+            <ErrorModal
+                show={modalOpen}
+                header="Account Report was not saved."
+                onClick={() => setModalOpen(false)}
+            />
+            <PageLayout>
+                <PageLayout.Header>
+                    <AccountPageHeader />
+                </PageLayout.Header>
+                <PageLayout.Container
+                    className={multiSigLayout.container}
+                    padding="vertical"
+                    closeRoute={routes.ACCOUNTS}
+                    disableBack={false}
+                >
+                    <h2 className={multiSigLayout.header}>
+                        Make Account Report
+                    </h2>
+                    <div className={multiSigLayout.content}>
+                        <Columns
+                            divider
+                            columnScroll
+                            columnClassName={styles.column}
+                        >
+                            <Columns.Column header="Time Period & Filters">
+                                <h5>Time Period to include</h5>
+                                <div className={styles.timestamp}>
+                                    <Timestamp
+                                        value={fromDate}
+                                        onChange={setFrom}
+                                        name="from"
+                                        label="From:"
+                                    />
+                                </div>
+                                <div className={styles.timestamp}>
+                                    <Timestamp
+                                        value={toDate}
+                                        onChange={setTo}
+                                        name="to"
+                                        label="To:"
+                                    />
+                                </div>
+                                <h5>Transaction Types to be included</h5>
+                                <div className={styles.filters}>
+                                    {transactionTypeFilters.map(
+                                        (filterOption) => (
+                                            <Checkbox
+                                                className={
+                                                    styles.filterCheckbox
+                                                }
+                                                key={filterOption.key}
+                                                checked={currentFilters.some(
+                                                    (currentFilter) =>
+                                                        filterOption.key ===
+                                                        currentFilter.key
+                                                )}
+                                                onChange={() =>
+                                                    flip(filterOption)
+                                                }
+                                            >
+                                                {filterOption.label}
+                                            </Checkbox>
+                                        )
+                                    )}
+                                </div>
+                            </Columns.Column>
+                            <Columns.Column header="Accounts to include">
+                                <RightColumn />
+                            </Columns.Column>
+                        </Columns>
+                    </div>
+                </PageLayout.Container>
+            </PageLayout>
+        </>
     );
 }
