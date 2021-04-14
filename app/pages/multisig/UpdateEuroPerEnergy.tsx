@@ -27,7 +27,7 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 denominatorUnit={{ position: 'postfix', value: ' NRG' }}
                 value={initialValue.numerator.toString()}
                 denominator={initialValue.denominator}
-                normaliseTo={1}
+                normalise
                 onChange={noOp}
                 onBlur={noOp}
                 disabled
@@ -39,7 +39,7 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 denominatorUnit={{ position: 'postfix', value: ' NRG' }}
                 defaultValue={initialValue.numerator.toString()}
                 denominator={initialValue.denominator}
-                normaliseTo={1}
+                normalise
                 rules={{
                     required: 'Value must be specified',
                     min: { value: 0, message: 'Value cannot be negative' },

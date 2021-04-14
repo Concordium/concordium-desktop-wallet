@@ -46,7 +46,11 @@ const withValidResolution = <TReturn>(
  * @example toNumberString(100n)(10n) => '0.1'
  */
 export const toNumberString = withValidResolution(
-    (resolution: bigint) => (amount: bigint | string): string => {
+    (resolution: bigint) => (amount?: bigint | string): string | undefined => {
+        if (amount === undefined) {
+            return undefined;
+        }
+
         const numberAmount: bigint = toBigInt(amount);
         const absolute = numberAmount < 0 ? -numberAmount : numberAmount;
         const whole = absolute / resolution;
@@ -76,7 +80,11 @@ const parseSubNumber = (powOf10: number, subGTU: string): string => {
  * @example toResolution(100n)('0.1') => 10n
  */
 export const toResolution = withValidResolution(
-    (resolution: bigint) => (amount: string): bigint => {
+    (resolution: bigint) => (amount?: string): bigint | undefined => {
+        if (amount === undefined) {
+            return undefined;
+        }
+
         if (!amount.includes(numberSeparator)) {
             return BigInt(amount) * resolution;
         }

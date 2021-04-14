@@ -7,6 +7,7 @@ import styles from './RelativeRateField.module.scss';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
 import { useUpdateEffect } from '~/utils/hooks';
 import InlineNumber from '~/components/Form/InlineNumber';
+import { toNumberString, toResolution } from '~/utils/numberStringHelpers';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
@@ -20,33 +21,38 @@ interface RelativeRateFieldUnit {
     position: UnitPosition;
 }
 
-const normaliseFactory = (denominator: bigint, normaliseTo?: number) => (
-    value?: string
-): string | undefined => {
-    if (value === undefined) {
-        return undefined;
-    }
+// const normaliseFactory = (denominator: bigint, normaliseTo?: number) => (
+//     value?: string
+// ): string | undefined => {
+//     if (value === undefined) {
+//         return undefined;
+//     }
 
-    if (normaliseTo === undefined) {
-        return value;
-    }
+//     if (normaliseTo === undefined) {
+//         return value;
+//     }
 
-    return `${Number(value) * (normaliseTo / Number(denominator))}`;
-};
+//     return `${Number(value) * (normaliseTo / Number(denominator))}`;
+// };
 
-const undoNormalizeFactory = (denominator: bigint, normalisedFrom?: number) => (
-    value?: string
-): string | undefined => {
-    if (value === undefined) {
-        return undefined;
-    }
+// const undoNormalizeFactory = (denominator: bigint, normalisedFrom?: number) => (
+//     value?: string
+// ): string | undefined => {
+//     if (value === undefined) {
+//         return undefined;
+//     }
 
-    if (normalisedFrom === undefined) {
-        return value;
-    }
+//     if (normalisedFrom === undefined) {
+//         return value;
+//     }
 
-    return `${parseFloat(value) / (normalisedFrom / Number(denominator))}`;
-};
+//     return `${parseFloat(value) / (normalisedFrom / Number(denominator))}`;
+// };
+
+// function tryGetReturn<F extends (...args: any) => any>(f: F): F | undefined {
+//     const proxy: F = (...args) => f(...args);
+//     return proxy;
+// }
 
 export interface RelativeRateFieldProps
     extends CommonInputProps,
@@ -61,9 +67,9 @@ export interface RelativeRateFieldProps
      */
     unit: RelativeRateFieldUnit;
     /**
-     * Normalises value to fractions of 1 instead of fractions of denominator. Setting this converts bigint props to Number internally, which might not be preferable.
+     * Normalises value to fractions of 1 instead of fractions of denominator. Defaults to false
      */
-    normaliseTo?: number;
+    normalise?: boolean;
     value: string | undefined;
     onChange(v: string | undefined): void;
     onBlur(): void;
@@ -87,30 +93,43 @@ export function RelativeRateField({
     className,
     value,
     onChange,
-    normaliseTo,
+    normalise = false,
     ...props
 }: RelativeRateFieldProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const normalise = useCallback(normaliseFactory(denominator, normaliseTo), [
-        denominator,
-        normaliseTo,
-    ]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const undoNormalize = useCallback(
-        undoNormalizeFactory(denominator, normaliseTo),
-        [denominator, normaliseTo]
+    const toDenominatorFraction = useCallback(
+        normalise
+            ? toNumberString(denominator)
+            : (v?: string | bigint) => v?.toString(),
+        [normalise, denominator]
     );
+
+    const toDenominatorResolution = useCallback(
+        (amount?: string) =>
+            normalise ? toResolution(denominator)(amount)?.toString() : amount,
+        [normalise, denominator]
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // const normalise = useCallback(normaliseFactory(denominator, normaliseTo), [
+    //     denominator,
+    //     normaliseTo,
+    // ]);
+    // // eslint-disable-next-line react-hooks/exhaustive-deps
+    // const undoNormalize = useCallback(
+    //     undoNormalizeFactory(denominator, normaliseTo),
+    //     [denominator, normaliseTo]
+    // );
 
     const [innerValue, setInnerValue] = useState<string | undefined>(
-        normalise(value)
+        toDenominatorFraction(value)
     );
 
     useUpdateEffect(() => {
-        onChange(undoNormalize(innerValue));
-    }, [innerValue, undoNormalize, onChange]);
+        onChange(toDenominatorResolution(innerValue));
+    }, [innerValue, toDenominatorResolution, onChange]);
 
     useUpdateEffect(() => {
-        setInnerValue(normalise(value));
+        setInnerValue(toDenominatorFraction(value));
     }, [value]);
 
     return (
@@ -127,7 +146,7 @@ export function RelativeRateField({
                 <div className={styles.container}>
                     {denominatorUnit.position === 'prefix' &&
                         denominatorUnit.value}
-                    {(normaliseTo ?? denominator).toString()}
+                    {normalise ? 1 : denominator.toString()}
                     {denominatorUnit.position === 'postfix' &&
                         denominatorUnit.value}{' '}
                     ={' '}
@@ -140,7 +159,7 @@ export function RelativeRateField({
                         value={innerValue}
                         onChange={setInnerValue}
                         disabled={disabled}
-                        allowFractions={normaliseTo !== undefined}
+                        allowFractions={normalise && denominator !== 1n}
                         {...props}
                     />
                     {unit.position === 'postfix' && (

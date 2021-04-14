@@ -43,7 +43,7 @@ Normalised.args = {
     label: 'New euro pr. energy rate',
     unit: { value: '€ ', position: 'prefix' },
     value: '1234',
-    normaliseTo: 1,
+    normalise: true,
 };
 
 export const Invalid = Template.bind({});
@@ -62,6 +62,6 @@ Disabled.args = {
     label: 'New euro pr. energy rate',
     unit: { value: '€ ', position: 'prefix' },
     value: '1234',
-    normaliseTo: 1,
+    normalise: true,
     disabled: true,
 };
