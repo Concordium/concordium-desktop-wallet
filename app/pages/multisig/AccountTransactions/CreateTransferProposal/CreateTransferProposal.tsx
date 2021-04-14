@@ -14,7 +14,7 @@ import PickAmount from '../PickAmount';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
-import PickIdentity from '~/pages/GenerateCredential/PickIdentity';
+import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '../PickAccount';
 import Button from '~/cross-app-components/Button';
 import TransactionProposalDetails from '../TransactionProposalDetails';

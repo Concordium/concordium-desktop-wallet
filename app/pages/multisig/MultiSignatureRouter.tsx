@@ -1,6 +1,6 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
 import MultiSignaturePage from './MultiSignaturePage';
 import ProposalView from './ProposalView';
 import CosignTransactionProposal from './CosignTransactionProposal';

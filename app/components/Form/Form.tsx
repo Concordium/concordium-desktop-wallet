@@ -20,6 +20,7 @@ import InputTimestamp, {
 } from './InputTimestamp/InputTimestamp';
 import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
+import InlineNumber, { InlineNumberProps } from './InlineNumber/InlineNumber';
 
 export type FormProps<TFormValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
@@ -94,6 +95,11 @@ Form.File = connectWithFormControlled<FileInputValue, FileInputProps>(
     FileInput
 );
 (Form.File as FC).displayName = 'Form.File';
+
+Form.InlineNumber = connectWithFormControlled<string, InlineNumberProps>(
+    InlineNumber
+);
+(Form.InlineNumber as FC).displayName = 'Form.InlineNumber';
 
 Form.Timestamp = connectWithFormControlled<Date, InputTimestampProps>(
     InputTimestamp

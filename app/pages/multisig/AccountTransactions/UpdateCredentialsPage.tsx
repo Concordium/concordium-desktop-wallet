@@ -12,7 +12,7 @@ import {
     CredentialDeploymentInformation,
     TransactionKindId,
 } from '~/utils/types';
-import PickIdentity from '~/pages/GenerateCredential/PickIdentity';
+import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
 import AddCredential from './AddCredential';
 import ChangeSignatureThreshold from './ChangeSignatureThreshold';

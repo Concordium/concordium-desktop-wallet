@@ -143,6 +143,7 @@
         border: none;
         background: transparent;
         padding: 0;
+        max-width: 80px;
 
         &:disabled,
         &:disabled + * {
