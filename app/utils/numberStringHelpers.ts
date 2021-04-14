@@ -15,14 +15,27 @@ function getZeros(resolution: bigint): number {
         .filter((c) => c === '0').length;
 }
 
-function isPowOf10(resolution: bigint): boolean {
+export function isPowOf10(resolution: bigint): boolean {
     return pow10Format.test(resolution.toString());
 }
 
-export const isValidResolutionString = (resolution: bigint) => {
-    const re = new RegExp(
-        `^(0|[1-9]\\d*)(\\.\\d{1,${getZeros(resolution)}})?$`
-    );
+export const isValidResolutionString = (
+    resolution: bigint,
+    allowNegative = false
+) => {
+    const zeros = getZeros(resolution);
+
+    let re: RegExp;
+
+    if (zeros === 0) {
+        re = new RegExp(`^${allowNegative ? '(-)?' : ''}\\d*$`);
+    } else {
+        re = new RegExp(
+            `^${allowNegative ? '(-)?' : ''}(0|[1-9]\\d*)(\\.\\d{1,${getZeros(
+                resolution
+            )}})?$`
+        );
+    }
 
     return (value: string): boolean => {
         // Only allow numerals, and only allow decimals according to resolution (in order to keep microGTU atomic)
@@ -59,7 +72,8 @@ export const toNumberString = withValidResolution((resolution: bigint) => {
         }
 
         const numberValue: bigint = toBigInt(value);
-        const absolute = numberValue < 0 ? -numberValue : numberValue;
+        const isNegative = numberValue < 0;
+        const absolute = isNegative ? -numberValue : numberValue;
         const whole = absolute / resolution;
 
         const fractions = absolute % resolution;
@@ -69,7 +83,7 @@ export const toNumberString = withValidResolution((resolution: bigint) => {
                 : `.${'0'.repeat(
                       zeros - fractions.toString().length
                   )}${fractions.toString().replace(/0+$/, '')}`;
-        return `${whole}${fractionsFormatted}`;
+        return `${isNegative ? '-' : ''}${whole}${fractionsFormatted}`;
     };
 });
 
@@ -81,7 +95,7 @@ export const parseSubNumber = (powOf10: number) => (
     fraction: string
 ): string => {
     let result = fraction;
-    result += '0'.repeat(powOf10 - fraction.toString().length);
+    result += '0'.repeat(Math.max(0, powOf10 - fraction.toString().length));
     return result;
 };
 
