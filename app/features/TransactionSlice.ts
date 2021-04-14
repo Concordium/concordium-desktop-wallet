@@ -135,12 +135,14 @@ export async function loadTransactions(account: Account, dispatch: Dispatch) {
 
     if (account.rewardFilter === RewardFilter.AllButFinalization) {
         filter = (transaction: TransferTransaction) =>
-            transaction.transactionKind !== TransactionKindString.BakingReward;
-    } else if (account.rewardFilter === RewardFilter.All) {
+            transaction.transactionKind !==
+            TransactionKindString.FinalizationReward;
+    } else if (account.rewardFilter === RewardFilter.None) {
         filter = (transaction: TransferTransaction) =>
             ![
                 TransactionKindString.BakingReward,
                 TransactionKindString.BlockReward,
+                TransactionKindString.FinalizationReward,
             ].includes(transaction.transactionKind);
     }
 

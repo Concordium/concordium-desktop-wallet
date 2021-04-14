@@ -137,6 +137,7 @@ export enum TransactionKindString {
     DeployCredential = 'deployCredential',
     BakingReward = 'bakingReward',
     BlockReward = 'blockReward',
+    FinalizationReward = 'finalizationReward',
     EncryptedAmountTransfer = 'encryptedAmountTransfer',
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
