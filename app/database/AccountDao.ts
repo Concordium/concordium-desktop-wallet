@@ -69,7 +69,7 @@ export async function confirmInitialAccount(
     return (await knex())
         .select()
         .table(accountsTable)
-        .where({ identityId, initial: 1 })
+        .where({ identityId, isInitial: 1 })
         .first()
         .update(updatedValues);
 }
