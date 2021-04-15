@@ -10,4 +10,15 @@ module.exports = {
     moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json'],
     moduleDirectories: ['node_modules', 'app/node_modules'],
     setupFiles: ['./internals/scripts/CheckBuildsExist.js'],
+    globals: {
+        'ts-jest': {
+            tsconfig: 'tsconfig.jest.json',
+            babelConfig: {
+                plugins: [
+                    '@babel/plugin-proposal-optional-chaining',
+                    '@babel/plugin-proposal-nullish-coalescing-operator',
+                ],
+            },
+        },
+    },
 };

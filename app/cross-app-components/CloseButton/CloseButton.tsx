@@ -1,26 +1,13 @@
-import clsx from 'clsx';
-import React, { ButtonHTMLAttributes } from 'react';
+import React from 'react';
+import CloseIcon from '@resources/svg/cross.svg';
+import IconButton, { IconButtonProps } from '../IconButton';
 
-import CloseIcon from '../../../resources/svg/cross.svg';
-import styles from './CloseButton.module.scss';
+type CloseButtonProps = Omit<IconButtonProps, 'type' | 'title' | 'children'>;
 
-type CloseButtonProps = Omit<
-    ButtonHTMLAttributes<HTMLButtonElement>,
-    'title' | 'type'
->;
-
-export default function CloseButton({
-    className,
-    ...props
-}: CloseButtonProps): JSX.Element {
+export default function CloseButton(props: CloseButtonProps): JSX.Element {
     return (
-        <button
-            type="button"
-            title="close"
-            className={clsx(styles.root, className)}
-            {...props}
-        >
-            <CloseIcon height="20" />
-        </button>
+        <IconButton type="button" title="close" {...props}>
+            <CloseIcon width="20" />
+        </IconButton>
     );
 }
