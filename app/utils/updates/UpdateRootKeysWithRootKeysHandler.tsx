@@ -17,7 +17,7 @@ import {
 } from '../types';
 import { serializeHigherLevelKeyUpdate } from '../UpdateSerialization';
 
-const TYPE = 'Update root keys with root keys';
+const TYPE = 'Update Root Governance Keys';
 
 type TransactionType = UpdateInstruction<HigherLevelKeyUpdate>;
 
@@ -110,7 +110,7 @@ export default class UpdateRootKeysWithRootKeysHandler
         return authorizations.bakerStakeThreshold;
     }
 
-    // TODO This should perhaps not be set? Or do we set it to the create key update proposal, and load it throug that?
+    // TODO This should perhaps not be set? Or do we set it to the create key update proposal, and load it through that?
     update = UpdateTransactionFeeDistribution;
 
     title = `Foundation Transaction | ${TYPE}`;

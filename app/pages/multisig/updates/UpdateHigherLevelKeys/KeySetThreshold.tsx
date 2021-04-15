@@ -69,6 +69,7 @@ export default function KeySetThreshold({
                             Number.parseInt(v !== undefined ? v : '0', 10)
                         );
                     }}
+                    fallbackValue={1}
                 />
             </div>
             <Button onClick={submitFunctionTest}>Continue</Button>

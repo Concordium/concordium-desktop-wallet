@@ -1,3 +1,5 @@
+@import 'config/bundle';
+
 .listItem {
     columns: 3;
     list-style-type: none;
@@ -16,7 +18,18 @@ li:last-child {
 }
 
 .keyText {
-    line-height: 1.5em;
+    line-height: 1em;
     height: 3em;
-    overflow: hidden;
+}
+
+.removed {
+    color: $color-danger;
+}
+
+.unchanged {
+    color: $color-text-faded;
+}
+
+.added {
+    color: #2caa00;
 }

@@ -51,6 +51,19 @@ function updateKeyStatus(key: KeyWithStatus) {
     };
 }
 
+export function getStatusClassName(status: KeyUpdateEntryStatus) {
+    switch (status) {
+        case KeyUpdateEntryStatus.Added:
+            return styles.added;
+        case KeyUpdateEntryStatus.Removed:
+            return styles.removed;
+        case KeyUpdateEntryStatus.Unchanged:
+            return styles.unchanged;
+        default:
+            return '';
+    }
+}
+
 export default function KeyUpdateEntry({
     keyInput,
     updateKey,
@@ -62,7 +75,9 @@ export default function KeyUpdateEntry({
                     {generateButtonText(keyInput.status)}
                 </Button>
                 <p className={styles.keyText}>{keyInput.verifyKey.verifyKey}</p>
-                <h2>{generateStatusLabelText(keyInput.status)}</h2>
+                <h2 className={getStatusClassName(keyInput.status)}>
+                    {generateStatusLabelText(keyInput.status)}
+                </h2>
             </li>
         </>
     );

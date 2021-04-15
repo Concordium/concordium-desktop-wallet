@@ -9,7 +9,7 @@ import {
 import withBlockSummary, {
     WithBlockSummary,
 } from '../../common/withBlockSummary';
-import { generateStatusLabelText } from './KeyUpdateEntry';
+import { generateStatusLabelText, getStatusClassName } from './KeyUpdateEntry';
 import styles from './HigherLevelKeysView.module.scss';
 
 interface Props extends WithBlockSummary {
@@ -37,23 +37,26 @@ function HigherLevelKeysView({
 
     return (
         <>
-            <h5>{typeDisplayText} governance key signature threshold</h5>
-            <p>
-                Current signature threshold: <b>{currentThreshold}</b>
-            </p>
-            <p>
-                New signature threshold: <b>{higherLevelKeyUpdate.threshold}</b>
-            </p>
-
-            <h5>{typeDisplayText} governance amount of keys</h5>
-            <p>
-                Current size of key set: <b>{currentKeySetSize}</b>
-            </p>
-            <p>
-                New size of key set:
-                <b>{higherLevelKeyUpdate.updateKeys.length}</b>
-            </p>
-
+            <div className={styles.content}>
+                <h5>Signature threshold</h5>
+                <p>
+                    Current {typeDisplayText} key signature threshold:{' '}
+                    <b>{currentThreshold}</b>
+                </p>
+                <p>
+                    New {typeDisplayText} key signature threshold:{' '}
+                    <b>{higherLevelKeyUpdate.threshold}</b>
+                </p>
+                <h5>Root governance key updates</h5>
+                <p>
+                    Current size of {typeDisplayText} key set:{' '}
+                    <b>{currentKeySetSize}</b>
+                </p>
+                <p>
+                    New size of {typeDisplayText} key set:{' '}
+                    <b>{higherLevelKeyUpdate.updateKeys.length}</b>
+                </p>
+            </div>
             <ul>
                 {higherLevelKeyUpdate.updateKeys.map((key) => {
                     return (
@@ -64,7 +67,9 @@ function HigherLevelKeysView({
                             <p className={styles.keyText}>
                                 {key.verifyKey.verifyKey}
                             </p>
-                            <h2>{generateStatusLabelText(key.status)}</h2>
+                            <h2 className={getStatusClassName(key.status)}>
+                                {generateStatusLabelText(key.status)}
+                            </h2>
                         </li>
                     );
                 })}

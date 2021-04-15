@@ -134,33 +134,24 @@ export default function CreateKeyUpdateProposal({
                     <p>
                         New root key signature threshold: <b>{threshold}</b>
                     </p>
-                    {blockSummary && (
-                        <>
-                            <h5>Root governance key updates</h5>
-                            <p>
-                                Current size of root key set:{' '}
-                                <b>{currentKeySetSize}</b>
-                            </p>
-                            <p>
-                                New size of root key set:{' '}
-                                <b>{newKeys.length}</b>
-                            </p>
-                            <ul>
-                                {newKeys.map((keyWithStatus) => {
-                                    return (
-                                        <KeyUpdateEntry
-                                            key={
-                                                keyWithStatus.verifyKey
-                                                    .verifyKey
-                                            }
-                                            updateKey={updateKey}
-                                            keyInput={keyWithStatus}
-                                        />
-                                    );
-                                })}
-                            </ul>
-                        </>
-                    )}
+                    <h5>Root governance key updates</h5>
+                    <p>
+                        Current size of root key set: <b>{currentKeySetSize}</b>
+                    </p>
+                    <p>
+                        New size of root key set: <b>{newKeys.length}</b>
+                    </p>
+                    <ul>
+                        {newKeys.map((keyWithStatus) => {
+                            return (
+                                <KeyUpdateEntry
+                                    key={keyWithStatus.verifyKey.verifyKey}
+                                    updateKey={updateKey}
+                                    keyInput={keyWithStatus}
+                                />
+                            );
+                        })}
+                    </ul>
                     <InputTimestamp
                         value={effectiveTime}
                         onChange={setEffectiveTime}
