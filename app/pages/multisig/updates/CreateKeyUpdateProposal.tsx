@@ -18,6 +18,7 @@ import KeySetThreshold from './UpdateHigherLevelKeys/KeySetThreshold';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
 import KeyUpdateEntry from './UpdateHigherLevelKeys/KeyUpdateEntry';
+import { typeToHigherLevelKeyUpdateType } from '~/utils/updates/HigherLevelKeysHelpers';
 
 interface Props {
     blockSummary: BlockSummary;
@@ -30,7 +31,7 @@ interface Props {
 
 /**
  * Component used for the subset of update instructions that are used to update the
- * authorization key sets.
+ * higher level key sets (root keys and level 1 keys).
  */
 export default function CreateKeyUpdateProposal({
     blockSummary,
@@ -108,13 +109,12 @@ export default function CreateKeyUpdateProposal({
         setNewKeys(updatedKeys);
     }
 
-    function submitFunctionTest() {
+    function submitFunction() {
         if (!effectiveTime) {
             return;
         }
         const higherLevelKeyUpdate: HigherLevelKeyUpdate = {
-            // TODO Make dynamic, 0 for root, 1 for using level 1
-            keyUpdateType: 0,
+            keyUpdateType: typeToHigherLevelKeyUpdateType(type),
             threshold,
             updateKeys: newKeys,
         };
@@ -168,9 +168,10 @@ export default function CreateKeyUpdateProposal({
                             render={() => (
                                 <KeySetThreshold
                                     type={type}
+                                    maxThreshold={newKeys.length}
                                     currentThreshold={currentThreshold}
                                     setThreshold={setThreshold}
-                                    submitFunctionTest={submitFunctionTest}
+                                    submitFunction={submitFunction}
                                 />
                             )}
                         />

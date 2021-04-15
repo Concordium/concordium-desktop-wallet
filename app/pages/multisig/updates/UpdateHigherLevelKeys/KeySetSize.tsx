@@ -4,26 +4,12 @@ import { useDispatch } from 'react-redux';
 import Button from '~/cross-app-components/Button';
 import { createProposalRoute } from '~/utils/routerHelper';
 import { UpdateType } from '~/utils/types';
+import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 
 interface Props {
     type: UpdateType;
     currentKeySetSize: number;
     newKeySetSize: number;
-}
-
-function typeToDisplay(type: UpdateType) {
-    switch (type) {
-        case UpdateType.UpdateRootKeysWithRootKeys:
-            return 'root';
-        case UpdateType.UpdateLevel1KeysWithRootKeys:
-            return 'level 1';
-        case UpdateType.UpdateLevel1KeysWithLevel1Keys:
-            return 'level 1';
-        default:
-            throw new Error(
-                `The update type is not a higher level key update: ${type}`
-            );
-    }
 }
 
 /**

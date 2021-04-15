@@ -21,14 +21,14 @@ function generateButtonText(status: KeyUpdateEntryStatus) {
     }
 }
 
-export function generateStatusLabelText(status: KeyUpdateEntryStatus) {
+export function generateStatusLabel(status: KeyUpdateEntryStatus) {
     switch (status) {
         case KeyUpdateEntryStatus.Added:
-            return 'Added';
+            return <h2 className={styles.added}>Added</h2>;
         case KeyUpdateEntryStatus.Removed:
-            return 'Removed';
+            return <h2 className={styles.removed}>Removed</h2>;
         case KeyUpdateEntryStatus.Unchanged:
-            return 'Unchanged';
+            return <h2 className={styles.unchanged}>Unchanged</h2>;
         default:
             throw new Error(`Unsupported status type: ${status}`);
     }
@@ -51,19 +51,11 @@ function updateKeyStatus(key: KeyWithStatus) {
     };
 }
 
-export function getStatusClassName(status: KeyUpdateEntryStatus) {
-    switch (status) {
-        case KeyUpdateEntryStatus.Added:
-            return styles.added;
-        case KeyUpdateEntryStatus.Removed:
-            return styles.removed;
-        case KeyUpdateEntryStatus.Unchanged:
-            return styles.unchanged;
-        default:
-            return '';
-    }
-}
-
+/**
+ * Component for displaying a key update entry. The status of the entry
+ * can be updated by clicking the button to remove the key, or to revert
+ * the removal of the key, depending on the status of the entry.
+ */
 export default function KeyUpdateEntry({
     keyInput,
     updateKey,
@@ -75,9 +67,7 @@ export default function KeyUpdateEntry({
                     {generateButtonText(keyInput.status)}
                 </Button>
                 <p className={styles.keyText}>{keyInput.verifyKey.verifyKey}</p>
-                <h2 className={getStatusClassName(keyInput.status)}>
-                    {generateStatusLabelText(keyInput.status)}
-                </h2>
+                {generateStatusLabel(keyInput.status)}
             </li>
         </>
     );

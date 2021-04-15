@@ -9,7 +9,7 @@ import {
 import withBlockSummary, {
     WithBlockSummary,
 } from '../../common/withBlockSummary';
-import { generateStatusLabelText, getStatusClassName } from './KeyUpdateEntry';
+import { generateStatusLabel } from './KeyUpdateEntry';
 import styles from './HigherLevelKeysView.module.scss';
 
 interface Props extends WithBlockSummary {
@@ -18,9 +18,10 @@ interface Props extends WithBlockSummary {
 }
 
 /**
- * Displays an overview of a higher level key update. Currently it also
- * shows the existing threshold and key set sizes on chain, but this could
- * be removed if it should not depend on the block summary.
+ * Displays an overview of a higher level key update.
+ *
+ * Currently it also shows the existing threshold and key set sizes on chain,
+ * but this could be removed if it should not depend on the block summary.
  */
 function HigherLevelKeysView({
     higherLevelKeyUpdate,
@@ -67,9 +68,7 @@ function HigherLevelKeysView({
                             <p className={styles.keyText}>
                                 {key.verifyKey.verifyKey}
                             </p>
-                            <h2 className={getStatusClassName(key.status)}>
-                                {generateStatusLabelText(key.status)}
-                            </h2>
+                            {generateStatusLabel(key.status)}
                         </li>
                     );
                 })}

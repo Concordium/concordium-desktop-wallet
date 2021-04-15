@@ -796,7 +796,7 @@ export interface KeyWithStatus {
     status: KeyUpdateEntryStatus;
 }
 
-type HigherLevelKeyUpdateType = 0 | 1;
+export type HigherLevelKeyUpdateType = 0 | 1;
 /**
  * The higher level key update covers three transaction types:
  *  - Updating root keys with root keys

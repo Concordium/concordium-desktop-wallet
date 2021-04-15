@@ -2,32 +2,26 @@ import React, { useState } from 'react';
 import InlineNumber from '~/components/Form/InlineNumber';
 import Button from '~/cross-app-components/Button';
 import { UpdateType } from '~/utils/types';
+import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 import styles from './KeySetThreshold.module.scss';
-
-// TODO The continue button should drop to the bottom. Howto when it is inside a form?
-// TODO Max value of threshold should be set to the length of the current key set.
 
 interface Props {
     type: UpdateType;
     currentThreshold: number;
+    maxThreshold: number;
     setThreshold: React.Dispatch<React.SetStateAction<number>>;
-    submitFunctionTest(): void;
+    submitFunction(): void;
 }
 
-// TODO This function is a duplicate and should be shared instead.
-function typeToDisplay(type: UpdateType) {
-    switch (type) {
-        case UpdateType.UpdateRootKeysWithRootKeys:
-            return 'root';
-        case UpdateType.UpdateLevel1KeysWithRootKeys:
-            return 'level 1';
-        case UpdateType.UpdateLevel1KeysWithLevel1Keys:
-            return 'level 1';
-        default:
-            throw new Error(
-                `The update type is not a higher level key update: ${type}`
-            );
+function isInvalid(
+    threshold: string | undefined,
+    maxThreshold: number
+): boolean {
+    if (threshold === undefined) {
+        return true;
     }
+    const thresholdAsNumber = Number.parseInt(threshold, 10);
+    return thresholdAsNumber < 0 || thresholdAsNumber > maxThreshold;
 }
 
 /**
@@ -36,9 +30,10 @@ function typeToDisplay(type: UpdateType) {
  */
 export default function KeySetThreshold({
     type,
+    maxThreshold,
     currentThreshold,
     setThreshold,
-    submitFunctionTest,
+    submitFunction,
 }: Props) {
     const [threshold, setLocalThreshold] = useState<string | undefined>(
         currentThreshold.toString()
@@ -72,7 +67,12 @@ export default function KeySetThreshold({
                     fallbackValue={1}
                 />
             </div>
-            <Button onClick={submitFunctionTest}>Continue</Button>
+            <Button
+                disabled={isInvalid(threshold, maxThreshold)}
+                onClick={submitFunction}
+            >
+                Continue
+            </Button>
         </>
     );
 }

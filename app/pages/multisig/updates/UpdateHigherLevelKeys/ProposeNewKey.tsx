@@ -12,6 +12,13 @@ interface Props {
     addKey: (publicKey: PublicKeyExportFormat) => void;
 }
 
+// TODO Check if the loaded key is already present in the update already, and show
+// an error modal if that is the case.
+
+/**
+ * Component that allows the user to import a file that contains
+ * a higher level governance key that should be added to the proposal.
+ */
 export default function ProposeNewKey({ type, addKey }: Props) {
     const dispatch = useDispatch();
 
