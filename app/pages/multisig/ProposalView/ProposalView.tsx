@@ -68,7 +68,7 @@ async function isSignatureValid(
     );
 
     const matchingKey =
-        blockSummary.updates.authorizations.keys[
+        blockSummary.updates.keys.level2Keys.keys[
             signature.authorizationKeyIndex
         ];
     return ed.verify(
