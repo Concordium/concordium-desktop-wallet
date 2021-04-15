@@ -9,6 +9,7 @@ import {
     FormRelativeRateField,
     RelativeRateFieldProps,
 } from '../../common/RelativeRateField';
+import { toFixed } from '~/utils/numberStringHelpers';
 
 export interface UpdateMicroGtuPerEuroRateFields {
     microGtuPerEuro: string;
@@ -31,7 +32,7 @@ export default function UpdateMicroGtuPerEuroRate({
     > = {
         unit: { position: 'prefix', value: 'µǤ ' },
         denominatorUnit: { position: 'prefix', value: '€ ' },
-        denominator: denominator.toString(),
+        denominator: toFixed(2)(denominator.toString()),
     };
 
     return (
