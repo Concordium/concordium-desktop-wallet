@@ -2,7 +2,7 @@ import React from 'react';
 import HigherLevelKeysView from '~/pages/multisig/updates/UpdateHigherLevelKeys/HigherLevelKeysView';
 import UpdateHigherLevelKeys from '~/pages/multisig/updates/UpdateHigherLevelKeys/UpdateHigherLevelKeys';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
+import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
@@ -61,7 +61,7 @@ export default class UpdateRootKeysWithRootKeysHandler
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient
     ) {
-        const path: number[] = getGovernanceLevel2Path();
+        const path: number[] = getGovernanceRootPath();
         return ledger.signHigherLevelKeysUpdate(
             transaction,
             this.serializePayload(transaction),
@@ -71,7 +71,10 @@ export default class UpdateRootKeysWithRootKeysHandler
 
     view(transaction: TransactionType) {
         return (
-            <HigherLevelKeysView higherLevelKeyUpdate={transaction.payload} />
+            <HigherLevelKeysView
+                higherLevelKeyUpdate={transaction.payload}
+                type={transaction.type}
+            />
         );
     }
 

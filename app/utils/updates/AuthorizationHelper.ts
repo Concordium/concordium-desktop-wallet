@@ -1,5 +1,8 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
+import {
+    getGovernanceLevel2Path,
+    getGovernanceRootPath,
+} from '../../features/ledger/Path';
 import { Authorization, Authorizations, Key, Keys } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import { UpdateInstruction, UpdateInstructionPayload } from '../types';
@@ -37,7 +40,7 @@ export async function findHigherLevelKey(
 ) {
     // TODO It should be root key and leve 1 key, but my test network has the level 2 keys currently.
     const publicKey = (
-        await ledger.getPublicKeySilent(getGovernanceLevel2Path())
+        await ledger.getPublicKeySilent(getGovernanceRootPath())
     ).toString('hex');
 
     return keys.rootKeys.keys
