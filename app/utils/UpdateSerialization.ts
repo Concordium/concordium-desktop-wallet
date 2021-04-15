@@ -53,7 +53,7 @@ export function serializeHigherLevelKeyUpdate(
     );
 
     higherLevelKeyUpdate.updateKeys.forEach((updateKey) => {
-        const serializedUpdateKey = serializeVerifyKey(updateKey);
+        const serializedUpdateKey = serializeVerifyKey(updateKey.verifyKey);
         serializedHigherLevelKeyUpdate = Buffer.concat([
             serializedHigherLevelKeyUpdate,
             serializedUpdateKey,

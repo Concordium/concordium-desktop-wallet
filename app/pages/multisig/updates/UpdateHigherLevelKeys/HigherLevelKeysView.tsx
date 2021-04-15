@@ -9,7 +9,8 @@ import {
 import withBlockSummary, {
     WithBlockSummary,
 } from '../../common/withBlockSummary';
-import KeyUpdateEntry, { KeyUpdateEntryStatus } from './KeyUpdateEntry';
+import { generateStatusLabelText } from './KeyUpdateEntry';
+import styles from './HigherLevelKeysView.module.scss';
 
 interface Props extends WithBlockSummary {
     higherLevelKeyUpdate: HigherLevelKeyUpdate;
@@ -17,10 +18,9 @@ interface Props extends WithBlockSummary {
 }
 
 /**
- * Displays an overview of a higher level key update. In particular it also
- * uses the current on-chain authorization keys to generate the view, so that
- * what the user is presented works as a sort of diff between the existing keys
- * and what is going to be changed.
+ * Displays an overview of a higher level key update. Currently it also
+ * shows the existing threshold and key set sizes on chain, but this could
+ * be removed if it should not depend on the block summary.
  */
 function HigherLevelKeysView({
     higherLevelKeyUpdate,
@@ -57,11 +57,15 @@ function HigherLevelKeysView({
             <ul>
                 {higherLevelKeyUpdate.updateKeys.map((key) => {
                     return (
-                        <KeyUpdateEntry
-                            key={key.verifyKey}
-                            status={KeyUpdateEntryStatus.Unchanged}
-                            verifyKey={key}
-                        />
+                        <li
+                            className={styles.listItem}
+                            key={key.verifyKey.verifyKey}
+                        >
+                            <p className={styles.keyText}>
+                                {key.verifyKey.verifyKey}
+                            </p>
+                            <h2>{generateStatusLabelText(key.status)}</h2>
+                        </li>
                     );
                 })}
             </ul>

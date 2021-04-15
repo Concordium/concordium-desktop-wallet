@@ -785,6 +785,17 @@ export interface ElectionDifficulty {
     electionDifficulty: Word32;
 }
 
+export enum KeyUpdateEntryStatus {
+    Added,
+    Removed,
+    Unchanged,
+}
+
+export interface KeyWithStatus {
+    verifyKey: VerifyKey;
+    status: KeyUpdateEntryStatus;
+}
+
 type HigherLevelKeyUpdateType = 0 | 1;
 /**
  * The higher level key update covers three transaction types:
@@ -797,7 +808,7 @@ export interface HigherLevelKeyUpdate {
     // 1 when updating level 1 keys with root keys, and
     // 0 when updating level 1 keys with level 1 keys.
     keyUpdateType: HigherLevelKeyUpdateType;
-    updateKeys: VerifyKey[];
+    updateKeys: KeyWithStatus[];
     threshold: number;
 }
 

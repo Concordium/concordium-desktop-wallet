@@ -1,17 +1,11 @@
 import React from 'react';
 import Button from '~/cross-app-components/Button';
-import { VerifyKey } from '~/utils/types';
+import { KeyUpdateEntryStatus, KeyWithStatus } from '~/utils/types';
 import styles from './KeyUpdateEntry.module.scss';
 
-export enum KeyUpdateEntryStatus {
-    Added,
-    Removed,
-    Unchanged,
-}
-
 export interface KeyUpdateEntryProps {
-    status: KeyUpdateEntryStatus;
-    verifyKey: VerifyKey;
+    keyInput: KeyWithStatus;
+    updateKey(keyToUpdate: KeyWithStatus): void;
 }
 
 function generateButtonText(status: KeyUpdateEntryStatus) {
@@ -27,7 +21,7 @@ function generateButtonText(status: KeyUpdateEntryStatus) {
     }
 }
 
-function generateStatusLabelText(status: KeyUpdateEntryStatus) {
+export function generateStatusLabelText(status: KeyUpdateEntryStatus) {
     switch (status) {
         case KeyUpdateEntryStatus.Added:
             return 'Added';
@@ -40,16 +34,32 @@ function generateStatusLabelText(status: KeyUpdateEntryStatus) {
     }
 }
 
+function updateKeyStatus(key: KeyWithStatus) {
+    let updatedStatus = key.status;
+    if (key.status === KeyUpdateEntryStatus.Unchanged) {
+        updatedStatus = KeyUpdateEntryStatus.Removed;
+    } else if (key.status === KeyUpdateEntryStatus.Removed) {
+        updatedStatus = KeyUpdateEntryStatus.Unchanged;
+    }
+
+    return {
+        ...key,
+        status: updatedStatus,
+    };
+}
+
 export default function KeyUpdateEntry({
-    status,
-    verifyKey,
+    keyInput,
+    updateKey,
 }: KeyUpdateEntryProps) {
     return (
         <>
             <li className={styles.listItem}>
-                <Button>{generateButtonText(status)}</Button>
-                <p className={styles.keyText}>{verifyKey.verifyKey}</p>
-                <h2>{generateStatusLabelText(status)}</h2>
+                <Button onClick={() => updateKey(updateKeyStatus(keyInput))}>
+                    {generateButtonText(keyInput.status)}
+                </Button>
+                <p className={styles.keyText}>{keyInput.verifyKey.verifyKey}</p>
+                <h2>{generateStatusLabelText(keyInput.status)}</h2>
             </li>
         </>
     );

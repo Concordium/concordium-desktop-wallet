@@ -1,18 +1,9 @@
 .listItem {
-    columns: 3;
+    columns: 2;
     list-style-type: none;
     padding-bottom: 14px;
     margin-bottom: 14px;
     border-bottom: 1px solid #dcdcdc;
-}
-
-ul {
-    margin-top: 36px;
-}
-
-/* No border-bottom for the final key entry in the list. */
-li:last-child {
-    border-bottom: none;
 }
 
 .keyText {

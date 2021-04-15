@@ -160,7 +160,6 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
         } else {
             component = (
                 <CreateKeyUpdateProposal
-                    UpdateComponentInput={UpdateComponent}
                     blockSummary={blockSummary}
                     type={type}
                     handleKeySubmit={handleKeySubmit}

@@ -2,20 +2,25 @@ import React, { useState } from 'react';
 import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
 import { BlockSummary } from '~/utils/NodeApiTypes';
-import { UpdateComponent } from '~/utils/transactionTypes';
 import routes from '~/constants/routes.json';
 import styles from '../common/MultiSignatureFlowPage.module.scss';
 import ProposeNewKey from './UpdateHigherLevelKeys/ProposeNewKey';
 import KeySetSize from './UpdateHigherLevelKeys/KeySetSize';
-import { HigherLevelKeyUpdate, UpdateType, VerifyKey } from '~/utils/types';
+import {
+    HigherLevelKeyUpdate,
+    KeyUpdateEntryStatus,
+    KeyWithStatus,
+    UpdateType,
+    VerifyKey,
+} from '~/utils/types';
 import { PublicKeyExportFormat } from '../ExportKeyView/ExportKeyView';
 import KeySetThreshold from './UpdateHigherLevelKeys/KeySetThreshold';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
+import KeyUpdateEntry from './UpdateHigherLevelKeys/KeyUpdateEntry';
 
 interface Props {
     blockSummary: BlockSummary;
-    UpdateComponentInput: UpdateComponent;
     type: UpdateType;
     handleKeySubmit(
         effectiveTime: Date,
@@ -29,7 +34,6 @@ interface Props {
  */
 export default function CreateKeyUpdateProposal({
     blockSummary,
-    UpdateComponentInput,
     type,
     handleKeySubmit,
 }: Props) {
@@ -37,7 +41,15 @@ export default function CreateKeyUpdateProposal({
     const currentKeySetSize = keys.length;
     const currentThreshold = blockSummary.updates.keys.rootKeys.threshold;
 
-    const [newKeys, setNewKeys] = useState<VerifyKey[]>(keys);
+    const [newKeys, setNewKeys] = useState<KeyWithStatus[]>(
+        keys.map((key) => {
+            return {
+                verifyKey: key,
+                status: KeyUpdateEntryStatus.Unchanged,
+            };
+        })
+    );
+
     const [threshold, setThreshold] = useState<number>(currentThreshold);
     const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
         new Date(getNow() + 5 * TimeConstants.Minute)
@@ -50,7 +62,26 @@ export default function CreateKeyUpdateProposal({
             schemeId: publicKey.schemeId,
         };
 
-        const updatedKeys = [...newKeys, newVerifyKey];
+        const addedKey = {
+            status: KeyUpdateEntryStatus.Added,
+            verifyKey: newVerifyKey,
+        };
+
+        const updatedKeys = [...newKeys, addedKey];
+        setNewKeys(updatedKeys);
+    }
+
+    /**
+     * Updates the state with the supplied key. The key should already
+     * be present in the state for any changes to be made.
+     */
+    function updateKey(keyToUpdate: KeyWithStatus) {
+        const updatedKeys = newKeys.map((key) => {
+            if (keyToUpdate.verifyKey.verifyKey === key.verifyKey.verifyKey) {
+                return keyToUpdate;
+            }
+            return key;
+        });
         setNewKeys(updatedKeys);
     }
 
@@ -81,7 +112,31 @@ export default function CreateKeyUpdateProposal({
                         New root key signature threshold: <b>{threshold}</b>
                     </p>
                     {blockSummary && (
-                        <UpdateComponentInput blockSummary={blockSummary} />
+                        <>
+                            <h5>Root governance key updates</h5>
+                            <p>
+                                Current size of root key set:{' '}
+                                <b>{currentKeySetSize}</b>
+                            </p>
+                            <p>
+                                New size of root key set:{' '}
+                                <b>{newKeys.length}</b>
+                            </p>
+                            <ul>
+                                {newKeys.map((keyWithStatus) => {
+                                    return (
+                                        <KeyUpdateEntry
+                                            key={
+                                                keyWithStatus.verifyKey
+                                                    .verifyKey
+                                            }
+                                            updateKey={updateKey}
+                                            keyInput={keyWithStatus}
+                                        />
+                                    );
+                                })}
+                            </ul>
+                        </>
                     )}
                     <InputTimestamp
                         value={effectiveTime}
@@ -113,7 +168,13 @@ export default function CreateKeyUpdateProposal({
                                 <KeySetSize
                                     type={type}
                                     currentKeySetSize={currentKeySetSize}
-                                    newKeySetSize={newKeys.length}
+                                    newKeySetSize={
+                                        newKeys.filter(
+                                            (key) =>
+                                                key.status !==
+                                                KeyUpdateEntryStatus.Removed
+                                        ).length
+                                    }
                                 />
                             )}
                         />
