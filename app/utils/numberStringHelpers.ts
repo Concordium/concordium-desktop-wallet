@@ -255,17 +255,18 @@ export const formatNumberStringWithDigits = (
         const [, fractions] = value.split('.');
         const valueFractionDigits = fractions?.length ?? 0;
 
-        if (maxFractionDigits === undefined) {
-            return toFixed(Math.max(valueFractionDigits, minFractionDigits))(
-                value
-            );
+        if (valueFractionDigits === 0 && minFractionDigits === 0) {
+            return value;
         }
 
-        return toFixed(
-            Math.max(
-                minFractionDigits,
-                Math.min(maxFractionDigits, valueFractionDigits)
-            )
-        )(value);
+        const digits =
+            maxFractionDigits === undefined
+                ? Math.max(valueFractionDigits, minFractionDigits)
+                : Math.max(
+                      minFractionDigits,
+                      Math.min(maxFractionDigits, valueFractionDigits)
+                  );
+
+        return toFixed(digits)(value);
     };
 };

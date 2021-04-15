@@ -4,7 +4,7 @@ import {
     isValidResolutionString,
     round,
     toFixed,
-    toNumberString,
+    toFraction,
     toResolution,
 } from '../../app/utils/numberStringHelpers';
 
@@ -53,28 +53,28 @@ describe(isValidResolutionString, () => {
 
 describe('Valid resolution common check', () => {
     test('Throws when given non "power of 10" resolution', () => {
-        expect(() => toNumberString(5n)('1')).toThrow();
+        expect(() => toFraction(5n)('1')).toThrow();
         expect(() => toResolution(-10n)('1')).toThrow();
-        expect(() => toNumberString(123n)('1')).toThrow();
+        expect(() => toFraction(123n)('1')).toThrow();
     });
 });
 
-describe(toNumberString, () => {
+describe(toFraction, () => {
     test('Correctly formats numbers to fractions', () => {
-        expect(toNumberString(100n)(10n)).toBe('0.1');
-        expect(toNumberString(100n)('12')).toBe('0.12');
-        expect(toNumberString(10n)(12n)).toBe('1.2');
-        expect(toNumberString(10n)('-12')).toBe('-1.2');
-        expect(toNumberString(10n)(-22n)).toBe('-2.2');
-        expect(toNumberString(1n)('3')).toBe('3');
-        expect(toNumberString(1n)(-22n)).toBe('-22');
-        expect(toNumberString(1n)(undefined)).toBe(undefined);
+        expect(toFraction(100n)(10n)).toBe('0.1');
+        expect(toFraction(100n)('12')).toBe('0.12');
+        expect(toFraction(10n)(12n)).toBe('1.2');
+        expect(toFraction(10n)('-12')).toBe('-1.2');
+        expect(toFraction(10n)(-22n)).toBe('-2.2');
+        expect(toFraction(1n)('3')).toBe('3');
+        expect(toFraction(1n)(-22n)).toBe('-22');
+        expect(toFraction(1n)(undefined)).toBe(undefined);
     });
 
     test('Throws on invalid value for fraction conversion', () => {
-        expect(() => toNumberString(100n)('text')).toThrow();
-        expect(() => toNumberString(100n)('.3')).toThrow();
-        expect(() => toNumberString(100n)('2.3')).toThrow();
+        expect(() => toFraction(100n)('text')).toThrow();
+        expect(() => toFraction(100n)('.3')).toThrow();
+        expect(() => toFraction(100n)('2.3')).toThrow();
     });
 });
 
@@ -127,6 +127,7 @@ describe(toFixed, () => {
 
 describe(formatNumberStringWithDigits, () => {
     test('Formats numbers according to min/max digits', () => {
+        expect(formatNumberStringWithDigits(0)('10')).toBe('10');
         expect(formatNumberStringWithDigits(3)('0')).toBe('0.000');
         expect(formatNumberStringWithDigits(5)('3.9')).toBe('3.90000');
         expect(formatNumberStringWithDigits(1)('3.9123')).toBe('3.9123');

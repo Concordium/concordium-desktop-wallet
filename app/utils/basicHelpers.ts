@@ -88,6 +88,9 @@ export async function asyncNoOp(): Promise<void> {
     return new Promise((resolve) => resolve());
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const valueNoOp = (v: any) => v;
+
 export const ensureNumberLength = (length: number) => (
     value?: string
 ): string => {

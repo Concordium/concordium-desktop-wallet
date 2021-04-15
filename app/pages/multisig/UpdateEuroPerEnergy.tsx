@@ -1,5 +1,7 @@
 import React from 'react';
 import { Validate } from 'react-hook-form';
+import Form from '~/components/Form';
+import { valueNoOp } from '~/utils/basicHelpers';
 import { ensureBigIntValues } from '~/utils/exchangeRateHelpers';
 import { toFraction, toResolution } from '~/utils/numberStringHelpers';
 import { UpdateProps } from '~/utils/transactionTypes';
@@ -12,10 +14,34 @@ import {
 
 export interface UpdateEuroPerEnergyFields {
     euroPerEnergy: string;
+    isNormalised: boolean;
 }
 
 const fieldNames: EqualRecord<UpdateEuroPerEnergyFields> = {
     euroPerEnergy: 'euroPerEnergy',
+    isNormalised: 'isNormalised',
+};
+
+interface GetConverters {
+    safeToFraction(value?: string | bigint | undefined): string | undefined;
+    safeToResolution(value?: string | undefined): bigint | undefined;
+    isNormalised: boolean;
+}
+
+const getConverters = (denominator: bigint): GetConverters => {
+    try {
+        return {
+            safeToFraction: toFraction(denominator),
+            safeToResolution: toResolution(denominator),
+            isNormalised: true,
+        };
+    } catch {
+        return {
+            safeToFraction: valueNoOp,
+            safeToResolution: BigInt,
+            isNormalised: false,
+        };
+    }
 };
 
 export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
@@ -23,7 +49,13 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
         blockSummary.updates.chainParameters.euroPerEnergy
     );
 
-    const errorMessage = `Value must go into 1/${denominator}`;
+    const { safeToFraction, safeToResolution, isNormalised } = getConverters(
+        denominator
+    );
+
+    const errorMessage = isNormalised
+        ? `Value must go into 1/${denominator}`
+        : 'Value must be a whole number';
 
     const fieldProps: Pick<
         RelativeRateFieldProps,
@@ -34,16 +66,15 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
         denominator: '1',
     };
 
-    const normalisedNumerator = toFraction(denominator)(numerator);
+    const normalisedNumerator = safeToFraction(numerator);
 
     const validate: Validate = (value: string) => {
         try {
-            toResolution(denominator)(value);
+            safeToResolution(value);
+            return true;
         } catch {
             return errorMessage;
         }
-
-        return true;
     };
 
     return (
@@ -64,6 +95,12 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                     min: { value: 0, message: 'Value cannot be negative' },
                     validate,
                 }}
+            />
+            <Form.Checkbox
+                name={fieldNames.isNormalised}
+                checked={isNormalised}
+                readOnly
+                style={{ display: 'none' }}
             />
         </>
     );

@@ -36,7 +36,7 @@ export default class EuroPerEnergyHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { euroPerEnergy }: UpdateEuroPerEnergyFields,
+        { euroPerEnergy, isNormalised }: UpdateEuroPerEnergyFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -52,7 +52,9 @@ export default class EuroPerEnergyHandler
             blockSummary.updates.chainParameters.euroPerEnergy
         );
 
-        const numerator = toResolution(denominator)(euroPerEnergy);
+        const numerator = isNormalised
+            ? toResolution(denominator)(euroPerEnergy)
+            : BigInt(euroPerEnergy);
 
         if (!numerator) {
             return undefined;
