@@ -1,13 +1,21 @@
-import React, { useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from '../../utils/JSONHelper';
 import routes from '../../constants/routes.json';
-import { AddressBookEntry, Account } from '../../utils/types';
+import {
+    AddressBookEntry,
+    Account,
+    TransactionKindId,
+    Fraction,
+} from '../../utils/types';
 import { toMicroUnits } from '../../utils/gtu';
 import locations from '../../constants/transferLocations.json';
 import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
+
+import { getTransactionKindCost } from '~/utils/transactionCosts';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 interface Props {
     account: Account;
@@ -18,6 +26,17 @@ interface Props {
  */
 export default function SimpleTransfer({ account }: Props) {
     const dispatch = useDispatch();
+
+    const [error, setError] = useState<string | undefined>();
+    const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
+
+    useEffect(() => {
+        getTransactionKindCost(TransactionKindId.Simple_transfer)
+            .then((transferCost) => setEstimatedFee(transferCost))
+            .catch((e) =>
+                setError(`Unable to get transaction cost due to: ${e}`)
+            );
+    }, [setEstimatedFee]);
 
     const toConfirmTransfer = useCallback(
         async (amount: string, recipient: AddressBookEntry) => {
@@ -30,6 +49,7 @@ export default function SimpleTransfer({ account }: Props) {
                 toMicroUnits(amount),
                 recipient.address
             );
+            transaction.estimatedFee = estimatedFee;
 
             dispatch(
                 push({
@@ -58,14 +78,22 @@ export default function SimpleTransfer({ account }: Props) {
             );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [JSON.stringify(account)]
+        [JSON.stringify(account), estimatedFee]
     );
 
     return (
-        <ExternalTransfer
-            toConfirmTransfer={toConfirmTransfer}
-            exitFunction={() => dispatch(push(routes.ACCOUNTS))}
-            amountHeader="Send funds"
-        />
+        <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                content={error}
+                onClick={() => dispatch(push(routes.ACCOUNTS))}
+            />
+            <ExternalTransfer
+                estimatedFee={estimatedFee}
+                toConfirmTransfer={toConfirmTransfer}
+                exitFunction={() => dispatch(push(routes.ACCOUNTS))}
+                amountHeader="Send funds"
+            />
+        </>
     );
 }

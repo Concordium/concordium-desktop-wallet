@@ -1,7 +1,8 @@
 import React from 'react';
 import { List, Header } from 'semantic-ui-react';
-import { SimpleTransfer } from '../../utils/types';
-import { displayAsGTU } from '../../utils/gtu';
+import { SimpleTransfer } from '~/utils/types';
+import { displayAsGTU } from '~/utils/gtu';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {
     transaction: SimpleTransfer;
@@ -32,6 +33,7 @@ export default function DisplaySimpleTransfer({
             <List.Item>
                 Amount:
                 <Header>{displayAsGTU(transaction.payload.amount)}</Header>
+                <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
             </List.Item>
         </List>
     );

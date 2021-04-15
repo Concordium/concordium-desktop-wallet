@@ -34,6 +34,7 @@ export default function ExportCredential({
                 credentialBlob.address,
                 credentialBlob.credentialNumber,
                 credentialBlob.identityId,
+                undefined,
                 credentialBlob.credential
             );
             setReady(true);
