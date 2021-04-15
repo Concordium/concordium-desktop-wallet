@@ -8,6 +8,7 @@ import {
     RelativeRateFieldProps,
 } from '../../common/RelativeRateField';
 import { validBigInt } from '~/components/Form/util/validation';
+import { ensureBigIntValues } from '../../util';
 
 export interface UpdateMicroGtuPerEuroRateFields {
     microGtuPerEuro: string;
@@ -25,14 +26,14 @@ export default function UpdateMicroGtuPerEuroRate({
     if (!initialValue) {
         return null;
     }
-
+    const { denominator, numerator } = ensureBigIntValues(initialValue);
     const fieldProps: Pick<
         RelativeRateFieldProps,
         'unit' | 'denominator' | 'denominatorUnit'
     > = {
         unit: { position: 'prefix', value: 'µǤ ' },
         denominatorUnit: { position: 'prefix', value: '€ ' },
-        denominator: initialValue.denominator.toString(),
+        denominator: denominator.toString(),
     };
 
     return (
@@ -40,14 +41,14 @@ export default function UpdateMicroGtuPerEuroRate({
             <RelativeRateField
                 {...fieldProps}
                 label="Current micro GTU per euro rate"
-                value={initialValue.numerator.toString()}
+                value={numerator.toString()}
                 disabled
             />
             <FormRelativeRateField
                 {...fieldProps}
                 name={fieldNames.microGtuPerEuro}
                 label="Current micro GTU per euro rate"
-                defaultValue={initialValue.numerator.toString()}
+                defaultValue={numerator.toString()}
                 rules={{
                     required: 'Value must be specified',
                     min: { value: 0, message: 'Value cannot be negative' },

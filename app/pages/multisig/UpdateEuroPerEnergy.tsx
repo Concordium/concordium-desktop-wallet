@@ -8,6 +8,7 @@ import {
     FormRelativeRateField,
     RelativeRateFieldProps,
 } from './common/RelativeRateField';
+import { ensureBigIntValues } from './util';
 
 export interface UpdateEuroPerEnergyFields {
     euroPerEnergy: string;
@@ -18,10 +19,12 @@ const fieldNames: EqualRecord<UpdateEuroPerEnergyFields> = {
 };
 
 export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
-    const {
-        denominator,
-        numerator,
-    } = blockSummary.updates.chainParameters.euroPerEnergy;
+    const initialValue = blockSummary.updates.chainParameters.euroPerEnergy;
+    if (!initialValue) {
+        return null;
+    }
+
+    const { denominator, numerator } = ensureBigIntValues(initialValue);
     const errorMessage = `Value must go into 1/${denominator}`;
 
     const fieldProps: Pick<
@@ -30,10 +33,10 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
     > = {
         unit: { position: 'prefix', value: '€ ' },
         denominatorUnit: { position: 'postfix', value: ' NRG' },
-        denominator: denominator.toString(),
+        denominator: '1',
     };
 
-    const normalisedNumerator = toFraction(BigInt(denominator))(numerator);
+    const normalisedNumerator = toFraction(denominator)(numerator);
 
     const validate: Validate = (value: string) => {
         try {
@@ -54,12 +57,10 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 disabled
             />
             <FormRelativeRateField
+                {...fieldProps}
                 name={fieldNames.euroPerEnergy}
                 label="New euro per energy"
-                unit={{ position: 'prefix', value: '€ ' }}
-                denominatorUnit={{ position: 'postfix', value: ' NRG' }}
                 defaultValue={normalisedNumerator}
-                denominator={denominator.toString()}
                 rules={{
                     required: errorMessage,
                     min: { value: 0, message: 'Value cannot be negative' },
