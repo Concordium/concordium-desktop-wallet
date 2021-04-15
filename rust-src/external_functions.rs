@@ -1,6 +1,7 @@
 use wasm_bindgen::prelude::*;
 use crate::{
     aux_functions::*,
+    genesis_account::*,
 };
 
 #[wasm_bindgen(js_name = buildPublicInformationForIp)]
@@ -78,5 +79,17 @@ pub fn create_sec_to_pub_ext(
     match create_sec_to_pub_aux(input) {
         Ok(s) => s,
         Err(e) => format!("unable to create transfer to public due to: {}", e),
+    }
+}
+
+#[wasm_bindgen(js_name = createGenesisAccount)]
+pub fn create_genesis_account_ext(
+    input: &str,
+    id_cred_sec_string: &str,
+    prf_key_string: &str,
+) -> String {
+    match create_genesis_account(input, id_cred_sec_string, prf_key_string) {
+        Ok(s) => s,
+        Err(e) => format!("unable to create genesis account due to: {}", e),
     }
 }

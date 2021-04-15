@@ -16,7 +16,7 @@ use elgamal::BabyStepGiantStep;
 use dodis_yampolskiy_prf::secret as prf;
 use hex::FromHex;
 use pairing::bls12_381::{Bls12, Fr, G1};
-use serde_json::{from_str, from_value, Value as SerdeValue};
+use serde_json::{from_str, Value as SerdeValue};
 use std::{cmp::max, collections::BTreeMap, convert::TryInto};
 type ExampleCurve = G1;
 use ed25519_dalek as ed25519;
@@ -31,25 +31,7 @@ use id::{
     types::*,
     ffi::AttributeKind,
 };
-use keygen_bls::keygen_bls;
 use pedersen_scheme::value::Value;
-
-/// Try to extract a field with a given name from the JSON value.
-fn try_get<A: serde::de::DeserializeOwned>(v: &SerdeValue, fname: &str) -> Fallible<A> {
-    match v.get(fname) {
-        Some(v) => Ok(from_value(v.clone())?),
-        None => Err(format_err!("Field {} not present, but should be.", fname)),
-    }
-}
-
-pub fn generate_bls(seed: &str) -> Fallible<Fr> {
-    let key_info = b"";
-
-    match keygen_bls(seed.as_bytes(), key_info) {
-        Ok(s) => Ok(s),
-        Err(_) => Err(format_err!("unable to build parse id_cred_sec.")),
-    }
-}
 
 pub fn build_pub_info_for_ip_aux(
     input: &str,
@@ -58,10 +40,7 @@ pub fn build_pub_info_for_ip_aux(
 ) -> Fallible<String> {
     let v: SerdeValue = from_str(input)?;
 
-    let ip_info: IpInfo<Bls12> = try_get(&v, "ipInfo")?;
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
-    let ars_infos: BTreeMap<ArIdentity, ArInfo<ExampleCurve>> = try_get(&v, "arsInfos")?;
-    let context = IPContext::new(&ip_info, &ars_infos, &global_context);
 
     let id_cred_sec = Value::new(generate_bls(id_cred_sec_seed)?);
     let prf_key = prf::SecretKey::new(generate_bls(prf_key_seed)?);
@@ -72,7 +51,7 @@ pub fn build_pub_info_for_ip_aux(
     };
 
     let pub_info_for_ip =
-        match build_pub_info_for_ip(&context, &id_cred_sec, &prf_key, &initial_acc_data) {
+        match build_pub_info_for_ip(&global_context, &id_cred_sec, &prf_key, &initial_acc_data) {
             Some(x) => x,
             None => return Err(format_err!("failed building pub_info_for_ip.")),
         };
