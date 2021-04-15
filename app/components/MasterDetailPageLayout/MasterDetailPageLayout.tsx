@@ -11,8 +11,19 @@ import PageLayout from '../PageLayout';
 import styles from './MasterDetailPageLayout.module.scss';
 
 const { Header } = PageLayout;
-const Column = (props: PropsWithChildren<unknown>) => (
-    <Columns.Column verticalPadding {...props} />
+const Master = ({ children }: PropsWithChildren<unknown>) => (
+    <Columns.Column verticalPadding className={styles.master}>
+        <div className={styles.halfMaxWidth}>
+            <div className={styles.column}>{children}</div>
+        </div>
+    </Columns.Column>
+);
+const Detail = ({ children }: PropsWithChildren<unknown>) => (
+    <Columns.Column verticalPadding className={styles.detail}>
+        <div className={styles.halfMaxWidth}>
+            <div className={styles.column}>{children}</div>
+        </div>
+    </Columns.Column>
 );
 
 function isPageHeader(el: ReactElement): boolean {
@@ -54,16 +65,16 @@ export default function MasterDetailPageLayout({
     }, [children]);
 
     const isColumnsContent =
-        content.every((c) => c.type === Column) && content.length === 2;
+        content.every((c) => c.type === Master || c.type === Detail) &&
+        content.length === 2;
 
     return (
-        <PageLayout noGutter>
+        <PageLayout noGutter noMaxWidth>
             {header}
             {isColumnsContent ? (
                 <Columns
-                    divider
+                    divider="inset"
                     className={styles.columns}
-                    columnClassName={styles.column}
                     columnScroll
                 >
                     {content}
@@ -76,5 +87,5 @@ export default function MasterDetailPageLayout({
 }
 
 MasterDetailPageLayout.Header = Header;
-MasterDetailPageLayout.Master = Column;
-MasterDetailPageLayout.Detail = Column;
+MasterDetailPageLayout.Master = Master;
+MasterDetailPageLayout.Detail = Detail;
