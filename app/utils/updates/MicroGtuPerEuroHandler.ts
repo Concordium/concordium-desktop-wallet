@@ -1,9 +1,9 @@
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
-import MicroGtuPerEuroView from '~/pages/multisig/MicroGtuPerEuroView';
+import MicroGtuPerEuroView from '~/pages/multisig/updates/MicroGtuPerEuro/MicroGtuPerEuroView';
 import UpdateMicroGtuPerEuro, {
     UpdateMicroGtuPerEuroRateFields,
-} from '~/pages/multisig/UpdateMicroGtuPerEuro';
+} from '~/pages/multisig/updates/MicroGtuPerEuro/UpdateMicroGtuPerEuro';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';

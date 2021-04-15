@@ -1,7 +1,7 @@
 import React from 'react';
 import { Label } from 'semantic-ui-react';
-import { getGTUSymbol } from '../../utils/gtu';
-import { ExchangeRate } from '../../utils/types';
+import { getGTUSymbol } from '../../../../utils/gtu';
+import { ExchangeRate } from '../../../../utils/types';
 
 interface Props {
     exchangeRate: ExchangeRate;

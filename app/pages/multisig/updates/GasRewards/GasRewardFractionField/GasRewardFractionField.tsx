@@ -6,6 +6,7 @@ import {
     percentageToFractionResolution,
 } from '~/utils/rewardFractionHelpers';
 import { useUpdateEffect } from '~/utils/hooks';
+import { noOp } from '~/utils/basicHelpers';
 
 export interface GasRewardFractionFieldProps
     extends Pick<
@@ -16,7 +17,7 @@ export interface GasRewardFractionFieldProps
     defaultValue?: RewardFraction;
     value: RewardFraction | undefined;
     isInvalid?: boolean;
-    onChange(v: RewardFraction | undefined): void;
+    onChange?(v: RewardFraction | undefined): void;
     onBlur?(): void;
 }
 
@@ -37,7 +38,7 @@ function parseValue(v: string): number {
 // TODO Implementation missing.
 export function GasRewardFractionField({
     label,
-    onChange,
+    onChange = noOp,
     value,
     defaultValue,
     readOnly,

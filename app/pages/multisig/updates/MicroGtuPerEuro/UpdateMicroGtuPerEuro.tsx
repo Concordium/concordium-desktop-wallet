@@ -5,9 +5,8 @@ import { UpdateProps } from '~/utils/transactionTypes';
 import {
     RelativeRateField,
     FormRelativeRateField,
-} from './common/RelativeRateField';
-import { noOp } from '~/utils/basicHelpers';
-import { isValidBigIntValidator } from './common/RelativeRateField/validation';
+} from '../../common/RelativeRateField';
+import { isValidBigIntValidator } from '../../common/RelativeRateField/validation';
 
 export interface UpdateMicroGtuPerEuroRateFields {
     microGtuPerEuro: string;
@@ -34,8 +33,6 @@ export default function UpdateMicroGtuPerEuroRate({
                 denominatorUnit={{ position: 'prefix', value: '€ ' }}
                 value={initialValue.numerator.toString()}
                 denominator={BigInt(initialValue.denominator)}
-                onChange={noOp}
-                onBlur={noOp}
                 disabled
             />
             <FormRelativeRateField

@@ -8,6 +8,7 @@ import { connectWithFormControlled } from '~/components/Form/common/connectWithF
 import { useUpdateEffect } from '~/utils/hooks';
 import InlineNumber from '~/components/Form/InlineNumber';
 import { toNumberString, toResolution } from '~/utils/numberStringHelpers';
+import { noOp } from '~/utils/basicHelpers';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
@@ -45,8 +46,8 @@ export interface RelativeRateFieldProps
      */
     normalise?: boolean;
     value: string | undefined;
-    onChange(v: string | undefined): void;
-    onBlur(): void;
+    onChange?(v: string | undefined): void;
+    onBlur?(): void;
 }
 
 /**
@@ -66,7 +67,8 @@ export function RelativeRateField({
     disabled,
     className,
     value,
-    onChange,
+    onChange = noOp,
+    onBlur = noOp,
     normalise = false,
     ...props
 }: RelativeRateFieldProps) {
@@ -129,6 +131,7 @@ export function RelativeRateField({
                         onChange={setInnerValue}
                         disabled={disabled}
                         allowFractions={normalise && denominator !== 1n}
+                        onBlur={onBlur}
                         {...props}
                     />
                     {unit.position === 'postfix' && (

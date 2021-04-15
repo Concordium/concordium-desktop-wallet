@@ -1,5 +1,4 @@
 import React from 'react';
-import { noOp } from '~/utils/basicHelpers';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { EqualRecord } from '~/utils/types';
 import {
@@ -31,8 +30,6 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 value={initialValue.numerator.toString()}
                 denominator={BigInt(initialValue.denominator)}
                 normalise
-                onChange={noOp}
-                onBlur={noOp}
                 disabled
             />
             <FormRelativeRateField
