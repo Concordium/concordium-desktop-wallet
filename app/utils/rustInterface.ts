@@ -7,10 +7,12 @@ import {
     Identity,
     IpInfo,
     ArInfo,
+    Versioned,
     CredentialDeploymentDetails,
     CredentialDeploymentInformation,
     Global,
     AccountEncryptedAmount,
+    GenesisAccount,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -349,4 +351,54 @@ export async function makeTransferToPublicData(
         input: JSON.stringify(input),
     });
     return JSON.parse(transferToPublicData);
+}
+
+export async function createGenesisAccount(
+    ledger: ConcordiumLedgerClient,
+    identityId: number,
+    credentialNumber: number,
+    ipInfo: Versioned<IpInfo>,
+    arInfo: Versioned<ArInfo>,
+    global: Versioned<Global>,
+    displayMessage: (message: string) => void
+): Promise<GenesisAccount> {
+    const path = getAccountPath({
+        identityIndex: identityId,
+        accountIndex: credentialNumber,
+        signatureIndex: 0,
+    });
+
+    const { prfKey, idCredSec } = await getSecretsFromLedger(
+        ledger,
+        displayMessage,
+        identityId
+    );
+    displayMessage('Please confirm exporting public key on device');
+    const publicKey = await ledger.getPublicKey(path);
+    displayMessage('Please wait');
+
+    const context = {
+        ipInfo: ipInfo.value,
+        arInfo: arInfo.value,
+        global: global.value,
+        publicKeys: [
+            {
+                schemeId: 'Ed25519',
+                verifyKey: publicKey.toString('hex'),
+            },
+        ],
+        threshold: 1,
+        currentYearMonth: '202104', // TODO dont hardcode this
+    };
+
+    const contextString = JSON.stringify(context);
+
+    const genesisAccount = await worker.postMessage({
+        command: workerCommands.createGenesisAccount,
+        context: contextString,
+        idCredSec,
+        prfKey,
+    });
+
+    return JSON.parse(genesisAccount);
 }

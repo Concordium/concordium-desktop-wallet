@@ -23,6 +23,7 @@ const warningMessages = new Map<string, string>([
 const settingDisplayTexts = new Map<string, string>([
     [settingKeys.foundationTransactionsEnabled, 'Foundation transactions'],
     [settingKeys.nodeLocation, 'Node location'],
+    [settingKeys.genesisAccount, 'Genesis Account'],
 ]);
 
 export default function SettingsView() {

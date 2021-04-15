@@ -2,5 +2,6 @@
     "multiSignatureSettings": "multisig",
     "nodeSettings": "node",
     "foundationTransactionsEnabled": "foundationTransactionsEnabled",
-    "nodeLocation": "nodeLocation"
+    "nodeLocation": "nodeLocation",
+    "genesisAccount": "genesisAccount"
 }

@@ -1,23 +1,18 @@
 import React, { useState } from 'react';
-import { push } from 'connected-react-router';
-import { useDispatch } from 'react-redux';
 import { Card, Form, Label, Input, Button } from 'semantic-ui-react';
-import routes from '../../constants/routes.json';
 
 interface Props {
-    setAccountName: (name: string) => void;
+    submitName: (name: string) => void;
 }
 
 // TODO: add Validation check on the name.
 export default function IdentityIssuancePickName({
-    setAccountName,
+    submitName,
 }: Props): JSX.Element {
     const [name, setName] = useState('');
-    const dispatch = useDispatch();
 
     function submit() {
-        setAccountName(name);
-        dispatch(push(routes.ACCOUNTCREATION_PICKIDENTITY));
+        submitName(name);
     }
 
     return (

@@ -68,9 +68,9 @@ pub fn create_genesis_account (
     let threshold = Threshold(1);
 
     // Expire in 1 year from now.
-    let created_at = YearMonth::now();
+    let created_at: YearMonth = try_get(&v, "currentYearMonth")?;
     let valid_to = {
-        let mut now = YearMonth::now();
+        let mut now: YearMonth = try_get(&v, "currentYearMonth")?;
         now.year += 1;
         now
     };
@@ -154,7 +154,6 @@ pub fn create_genesis_account (
     let public_account_data = json!({
         "schemeId": "Ed25519",
         "address": address,
-        "balance": "1",
         "accountThreshold": 1, // only a single credential
         "credentials": versioned_credentials,
     });
