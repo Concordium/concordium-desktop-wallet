@@ -2,13 +2,13 @@ import React from 'react';
 
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
+import { validBigInt } from '~/components/Form/util/validation';
+import { ensureBigIntValues } from '~/utils/exchangeRateHelpers';
 import {
     RelativeRateField,
     FormRelativeRateField,
     RelativeRateFieldProps,
 } from '../../common/RelativeRateField';
-import { validBigInt } from '~/components/Form/util/validation';
-import { ensureBigIntValues } from '../../util';
 
 export interface UpdateMicroGtuPerEuroRateFields {
     microGtuPerEuro: string;
@@ -21,12 +21,10 @@ const fieldNames: EqualRecord<UpdateMicroGtuPerEuroRateFields> = {
 export default function UpdateMicroGtuPerEuroRate({
     blockSummary,
 }: UpdateProps): JSX.Element | null {
-    const initialValue = blockSummary.updates.chainParameters.microGTUPerEuro;
+    const { denominator, numerator } = ensureBigIntValues(
+        blockSummary.updates.chainParameters.microGTUPerEuro
+    );
 
-    if (!initialValue) {
-        return null;
-    }
-    const { denominator, numerator } = ensureBigIntValues(initialValue);
     const fieldProps: Pick<
         RelativeRateFieldProps,
         'unit' | 'denominator' | 'denominatorUnit'

@@ -4,6 +4,7 @@ import EuroPerEnergyView from '~/pages/multisig/EuroPerEnergyView';
 import UpdateEuroPerEnergy, {
     UpdateEuroPerEnergyFields,
 } from '~/pages/multisig/UpdateEuroPerEnergy';
+import { ensureBigIntValues } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { toResolution } from '../numberStringHelpers';
@@ -44,10 +45,12 @@ export default class EuroPerEnergyHandler
 
         const sequenceNumber =
             blockSummary.updates.updateQueues.euroPerEnergy.nextSequenceNumber;
-        const { threshold } = blockSummary.updates.authorizations.euroPerEnergy;
         const {
-            denominator,
-        } = blockSummary.updates.chainParameters.euroPerEnergy;
+            threshold,
+        } = blockSummary.updates.keys.level2Keys.euroPerEnergy;
+        const { denominator } = ensureBigIntValues(
+            blockSummary.updates.chainParameters.euroPerEnergy
+        );
 
         const numerator = toResolution(denominator)(euroPerEnergy);
 

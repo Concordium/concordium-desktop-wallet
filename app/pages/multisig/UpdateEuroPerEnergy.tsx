@@ -1,5 +1,6 @@
 import React from 'react';
 import { Validate } from 'react-hook-form';
+import { ensureBigIntValues } from '~/utils/exchangeRateHelpers';
 import { toFraction, toResolution } from '~/utils/numberStringHelpers';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { EqualRecord } from '~/utils/types';
@@ -8,7 +9,6 @@ import {
     FormRelativeRateField,
     RelativeRateFieldProps,
 } from './common/RelativeRateField';
-import { ensureBigIntValues } from './util';
 
 export interface UpdateEuroPerEnergyFields {
     euroPerEnergy: string;
@@ -19,12 +19,10 @@ const fieldNames: EqualRecord<UpdateEuroPerEnergyFields> = {
 };
 
 export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
-    const initialValue = blockSummary.updates.chainParameters.euroPerEnergy;
-    if (!initialValue) {
-        return null;
-    }
+    const { denominator, numerator } = ensureBigIntValues(
+        blockSummary.updates.chainParameters.euroPerEnergy
+    );
 
-    const { denominator, numerator } = ensureBigIntValues(initialValue);
     const errorMessage = `Value must go into 1/${denominator}`;
 
     const fieldProps: Pick<

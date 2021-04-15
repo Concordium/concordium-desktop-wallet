@@ -50,7 +50,7 @@ export default class MintDistributionHandler
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.authorizations.mintDistribution;
+        } = blockSummary.updates.keys.level2Keys.mintDistribution;
 
         const mintDistribution: MintDistribution = {
             mintPerSlot: {
