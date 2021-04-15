@@ -1,6 +1,15 @@
 const numberSeparator = '.';
 const pow10Format = /^1(0*)$/;
 
+export const isValidBigInt = (value: string) => {
+    try {
+        BigInt(value);
+        return true;
+    } catch {
+        return false;
+    }
+};
+
 function toBigInt(input: bigint | string): bigint {
     if (typeof input === 'string') {
         return BigInt(input);
@@ -67,7 +76,7 @@ const withValidResolution = <TReturn>(
  *
  * @example toNumberString(100n)(10n) => '0.1'
  */
-export const toNumberString = withValidResolution((resolution: bigint) => {
+export const toFraction = withValidResolution((resolution: bigint) => {
     const zeros = getPowerOf10(resolution);
 
     return (value?: bigint | string): string | undefined => {

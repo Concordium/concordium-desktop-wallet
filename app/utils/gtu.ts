@@ -1,7 +1,7 @@
 import {
     isValidResolutionString,
     parseSubNumber,
-    toNumberString,
+    toFraction,
 } from './numberStringHelpers';
 
 export function getGTUSymbol(): string {
@@ -43,7 +43,7 @@ const parseSubGTU = parseSubNumber(6);
  * N.B. Gives the absolute value of the amount.
  * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
  */
-export const toGTUString = toNumberString(microGTUPerGTU);
+export const toGTUString = toFraction(microGTUPerGTU);
 
 /**
  * Given a GTU string, convert to microGTU

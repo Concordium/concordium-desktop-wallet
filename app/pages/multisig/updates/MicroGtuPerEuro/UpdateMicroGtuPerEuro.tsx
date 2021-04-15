@@ -5,8 +5,9 @@ import { UpdateProps } from '~/utils/transactionTypes';
 import {
     RelativeRateField,
     FormRelativeRateField,
+    RelativeRateFieldProps,
 } from '../../common/RelativeRateField';
-import { isValidBigIntValidator } from '../../common/RelativeRateField/validation';
+import { validBigInt } from '~/components/Form/util/validation';
 
 export interface UpdateMicroGtuPerEuroRateFields {
     microGtuPerEuro: string;
@@ -25,29 +26,32 @@ export default function UpdateMicroGtuPerEuroRate({
         return null;
     }
 
+    const fieldProps: Pick<
+        RelativeRateFieldProps,
+        'unit' | 'denominator' | 'denominatorUnit'
+    > = {
+        unit: { position: 'prefix', value: 'µǤ ' },
+        denominatorUnit: { position: 'prefix', value: '€ ' },
+        denominator: initialValue.denominator.toString(),
+    };
+
     return (
         <>
             <RelativeRateField
+                {...fieldProps}
                 label="Current micro GTU per euro rate"
-                unit={{ position: 'prefix', value: 'µǤ ' }}
-                denominatorUnit={{ position: 'prefix', value: '€ ' }}
                 value={initialValue.numerator.toString()}
-                denominator={BigInt(initialValue.denominator)}
                 disabled
             />
             <FormRelativeRateField
+                {...fieldProps}
                 name={fieldNames.microGtuPerEuro}
                 label="Current micro GTU per euro rate"
-                unit={{ position: 'prefix', value: 'µǤ ' }}
-                denominatorUnit={{ position: 'prefix', value: '€ ' }}
                 defaultValue={initialValue.numerator.toString()}
-                denominator={BigInt(initialValue.denominator)}
                 rules={{
                     required: 'Value must be specified',
                     min: { value: 0, message: 'Value cannot be negative' },
-                    validate: isValidBigIntValidator(
-                        'Value must be a whole number'
-                    ),
+                    validate: validBigInt('Value must be a whole number'),
                 }}
             />
         </>

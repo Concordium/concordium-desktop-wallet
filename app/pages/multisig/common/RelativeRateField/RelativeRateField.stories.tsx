@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
 import { RelativeRateField, RelativeRateFieldProps } from './RelativeRateField';
-import { isValidBigInt } from './validation';
 
 export default {
     title: 'Multi Signature/Common/Relative Rate Field',
@@ -11,20 +10,10 @@ export default {
 
 const Template: Story<RelativeRateFieldProps> = (args) => {
     const [value, setValue] = useState<string | undefined>(args.value);
-    const denominator = 10n; // BigInt can't be set through args, as it can't be serialized by storybook.
-
-    const isInvalid = !value || !isValidBigInt(value); // An example of how to validate the field.
 
     return (
         <div style={{ width: '300px' }}>
-            {denominator?.toString()}, {value?.toString()}
-            <RelativeRateField
-                {...args}
-                denominator={denominator}
-                value={value}
-                onChange={setValue}
-                isInvalid={isInvalid}
-            />
+            <RelativeRateField {...args} value={value} onChange={setValue} />
         </div>
     );
 };
@@ -34,20 +23,13 @@ Primary.args = {
     denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
     unit: { value: '€ ', position: 'prefix' },
+    denominator: '1',
     value: '1234',
-};
-
-export const Normalised = Template.bind({});
-Normalised.args = {
-    denominatorUnit: { position: 'postfix', value: ' NRG' },
-    label: 'New euro pr. energy rate',
-    unit: { value: '€ ', position: 'prefix' },
-    value: '1234',
-    normalise: true,
 };
 
 export const Invalid = Template.bind({});
 Invalid.args = {
+    denominator: '1.00',
     denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
     unit: { value: '€ ', position: 'prefix' },
@@ -58,10 +40,10 @@ Invalid.args = {
 
 export const Disabled = Template.bind({});
 Disabled.args = {
+    denominator: '10',
     denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
     unit: { value: '€ ', position: 'prefix' },
     value: '1234',
-    normalise: true,
     disabled: true,
 };

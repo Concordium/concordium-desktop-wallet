@@ -6,6 +6,7 @@ import UpdateEuroPerEnergy, {
 } from '~/pages/multisig/UpdateEuroPerEnergy';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { toResolution } from '../numberStringHelpers';
 import { TransactionHandler } from '../transactionTypes';
 import {
     isExchangeRate,
@@ -48,8 +49,14 @@ export default class EuroPerEnergyHandler
             denominator,
         } = blockSummary.updates.chainParameters.euroPerEnergy;
 
+        const numerator = toResolution(denominator)(euroPerEnergy);
+
+        if (!numerator) {
+            return undefined;
+        }
+
         return createUpdateMultiSignatureTransaction(
-            { denominator, numerator: BigInt(euroPerEnergy) },
+            { denominator, numerator },
             UpdateType.UpdateEuroPerEnergy,
             sequenceNumber,
             threshold,

@@ -1,13 +1,11 @@
 import clsx from 'clsx';
-import React, { InputHTMLAttributes, useMemo, useState } from 'react';
+import React, { InputHTMLAttributes } from 'react';
 import { CommonInputProps } from '~/components/Form/common';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 
 import styles from './RelativeRateField.module.scss';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
-import { useUpdateEffect } from '~/utils/hooks';
 import InlineNumber from '~/components/Form/InlineNumber';
-import { toNumberString, toResolution } from '~/utils/numberStringHelpers';
 import { noOp } from '~/utils/basicHelpers';
 
 type InputFieldProps = Pick<
@@ -22,17 +20,10 @@ interface RelativeRateFieldUnit {
     position: UnitPosition;
 }
 
-type ConversionFunctionsTuple = [
-    ReturnType<typeof toNumberString>,
-    (
-        ...args: Parameters<ReturnType<typeof toResolution>>
-    ) => ReturnType<ReturnType<typeof toResolution>> | string
-];
-
 export interface RelativeRateFieldProps
     extends CommonInputProps,
         InputFieldProps {
-    denominator: bigint;
+    denominator: string;
     /**
      * Unit of denominator. Position is "prefix" if string value.
      */
@@ -41,10 +32,6 @@ export interface RelativeRateFieldProps
      * Unit of value in the field. Position is "prefix" if string value.
      */
     unit: RelativeRateFieldUnit;
-    /**
-     * Normalises value to fractions of 1 instead of fractions of denominator. Defaults to false
-     */
-    normalise?: boolean;
     value: string | undefined;
     onChange?(v: string | undefined): void;
     onBlur?(): void;
@@ -69,40 +56,8 @@ export function RelativeRateField({
     value,
     onChange = noOp,
     onBlur = noOp,
-    normalise = false,
     ...props
 }: RelativeRateFieldProps) {
-    const [
-        toDenominatorFraction,
-        toDenominatorResolution,
-    ]: ConversionFunctionsTuple = useMemo(() => {
-        const noOps: ConversionFunctionsTuple = [
-            (amount?: string | bigint | undefined) => amount?.toString(),
-            (amount?: string | undefined) => amount,
-        ];
-
-        if (!normalise) {
-            return noOps;
-        }
-        try {
-            return [toNumberString(denominator), toResolution(denominator)];
-        } catch {
-            return noOps;
-        }
-    }, [denominator, normalise]);
-
-    const [innerValue, setInnerValue] = useState<string | undefined>(
-        toDenominatorFraction(value)
-    );
-
-    useUpdateEffect(() => {
-        onChange(toDenominatorResolution(innerValue)?.toString());
-    }, [innerValue, toDenominatorResolution, onChange]);
-
-    useUpdateEffect(() => {
-        setInnerValue(toDenominatorFraction(value));
-    }, [value]);
-
     return (
         <div
             className={clsx(
@@ -117,7 +72,7 @@ export function RelativeRateField({
                 <div className={styles.container}>
                     {denominatorUnit.position === 'prefix' &&
                         denominatorUnit.value}
-                    {normalise ? 1 : denominator.toString()}
+                    {denominator}
                     {denominatorUnit.position === 'postfix' &&
                         denominatorUnit.value}{' '}
                     ={' '}
@@ -127,10 +82,10 @@ export function RelativeRateField({
                     <InlineNumber
                         className={styles.field}
                         fallbackValue={0}
-                        value={innerValue}
-                        onChange={setInnerValue}
+                        value={value}
+                        onChange={onChange}
                         disabled={disabled}
-                        allowFractions={normalise && denominator !== 1n}
+                        allowFractions
                         onBlur={onBlur}
                         {...props}
                     />
