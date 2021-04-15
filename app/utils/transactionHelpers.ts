@@ -20,6 +20,10 @@ import {
     TransactionAccountSignature,
     TransactionCredentialSignature,
 } from './transactionTypes';
+import {
+    getTransactionEnergyCost,
+    getTransactionKindEnergy,
+} from './transactionCosts';
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
@@ -65,23 +69,31 @@ export async function attachNames(
 /**
  *  Constructs a, simple transfer, transaction object,
  * Given the fromAddress, toAddress and the amount.
+ * @param estimatedEnergyAmount, is the energyAmount on the transaction. Should be used to overwrite the, internally calculated, energy amount, in case of incomplete payloads.
  */
 async function createTransferTransaction<T extends TransactionPayload>(
     fromAddress: string,
     expiry: bigint = getDefaultExpiry(),
-    energyAmount: string,
     transactionKind: number,
-    payload: T
-) {
+    payload: T,
+    estimatedEnergyAmount?: bigint
+): Promise<AccountTransaction<T>> {
     const { nonce } = await getNextAccountNonce(fromAddress);
     const transferTransaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
-        energyAmount,
         expiry,
+        energyAmount: '',
         transactionKind,
         payload,
     };
+    if (!estimatedEnergyAmount) {
+        transferTransaction.energyAmount = getTransactionEnergyCost(
+            transferTransaction
+        ).toString();
+    } else {
+        transferTransaction.energyAmount = estimatedEnergyAmount.toString();
+    }
     return transferTransaction;
 }
 
@@ -93,8 +105,7 @@ export function createSimpleTransferTransaction(
     fromAddress: string,
     amount: BigInt,
     toAddress: string,
-    expiry: bigint = getDefaultExpiry(),
-    energyAmount = '200'
+    expiry: bigint = getDefaultExpiry()
 ): Promise<SimpleTransfer> {
     const payload = {
         toAddress,
@@ -103,7 +114,6 @@ export function createSimpleTransferTransaction(
     return createTransferTransaction(
         fromAddress,
         expiry,
-        energyAmount,
         TransactionKindId.Simple_transfer,
         payload
     );
@@ -112,8 +122,7 @@ export function createSimpleTransferTransaction(
 export function createShieldAmountTransaction(
     address: string,
     amount: bigint,
-    expiry: bigint = getDefaultExpiry(),
-    energyAmount = '1000'
+    expiry: bigint = getDefaultExpiry()
 ): Promise<TransferToEncrypted> {
     const payload = {
         amount: amount.toString(),
@@ -121,7 +130,6 @@ export function createShieldAmountTransaction(
     return createTransferTransaction(
         address,
         expiry,
-        energyAmount,
         TransactionKindId.Transfer_to_encrypted,
         payload
     );
@@ -130,8 +138,7 @@ export function createShieldAmountTransaction(
 export async function createUnshieldAmountTransaction(
     address: string,
     amount: BigInt,
-    expiry: bigint = getDefaultExpiry(),
-    energyAmount = '30000'
+    expiry: bigint = getDefaultExpiry()
 ) {
     const payload = {
         transferAmount: amount.toString(),
@@ -139,9 +146,9 @@ export async function createUnshieldAmountTransaction(
     return createTransferTransaction(
         address,
         expiry,
-        energyAmount,
         TransactionKindId.Transfer_to_public,
-        payload
+        payload,
+        getTransactionKindEnergy(TransactionKindId.Transfer_to_public) // Supply the energy, so that the cost is not computed using the incomplete payload.
     );
 }
 
@@ -177,17 +184,16 @@ export async function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: SchedulePoint[],
-    expiry: bigint = getDefaultExpiry(),
-    energyAmount = '20000'
+    expiry: bigint = getDefaultExpiry()
 ) {
     const payload = {
         toAddress,
         schedule,
     };
+
     return createTransferTransaction(
         fromAddress,
         expiry,
-        energyAmount,
         TransactionKindId.Transfer_with_schedule,
         payload
     );

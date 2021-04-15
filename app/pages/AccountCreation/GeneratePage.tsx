@@ -94,6 +94,7 @@ export default function AccountCreationGenerate({
             accountAddress,
             credentialNumber,
             identity.id,
+            0, // credentialIndex = 0 on original
             credentialDeploymentInfo
         );
         addToAddressBook(dispatch, {
