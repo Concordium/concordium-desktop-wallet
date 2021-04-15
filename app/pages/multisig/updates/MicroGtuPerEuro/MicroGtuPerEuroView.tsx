@@ -1,20 +1,66 @@
 import React from 'react';
-import { Label } from 'semantic-ui-react';
-import { getGTUSymbol } from '../../../../utils/gtu';
-import { ExchangeRate } from '../../../../utils/types';
+import Loading from '~/cross-app-components/Loading';
+import { BlockSummary } from '~/utils/NodeApiTypes';
+import { ExchangeRate } from '~/utils/types';
+import {
+    RelativeRateField,
+    RelativeRateFieldProps,
+} from '../../common/RelativeRateField';
+import withBlockSummary, {
+    WithBlockSummary,
+} from '../../common/withBlockSummary';
+import { formatDenominator, getCurrentValue } from './util';
 
-interface Props {
+interface Props extends WithBlockSummary {
     exchangeRate: ExchangeRate;
 }
 
 /**
  * Displays an overview of a micro GTU per euro transaction payload.
  */
-export default function MicroGtuPerEuroView({ exchangeRate }: Props) {
+export default withBlockSummary(function MicroGtuPerEuroView({
+    exchangeRate,
+    blockSummary,
+}: Props) {
+    const fieldProps: Pick<
+        RelativeRateFieldProps,
+        'unit' | 'denominatorUnit' | 'disabled'
+    > = {
+        unit: { position: 'prefix', value: 'µǤ ' },
+        denominatorUnit: { position: 'prefix', value: '€ ' },
+        disabled: true,
+    };
+
+    function renderCurrentValue(bs: BlockSummary): JSX.Element {
+        const currentValue = getCurrentValue(bs);
+
+        return (
+            <RelativeRateField
+                {...fieldProps}
+                label="Current micro GTU per euro rate"
+                denominator={formatDenominator(
+                    currentValue.denominator.toString()
+                )}
+                value={currentValue.numerator.toString()}
+            />
+        );
+    }
+
     return (
-        <Label size="big">
-            € 1.00 = µ{getGTUSymbol()} {exchangeRate.numerator}/
-            {exchangeRate.denominator}
-        </Label>
+        <>
+            {blockSummary ? (
+                renderCurrentValue(blockSummary)
+            ) : (
+                <Loading inline />
+            )}
+            <RelativeRateField
+                {...fieldProps}
+                label="New micro GTU per euro rate"
+                denominator={formatDenominator(
+                    exchangeRate.denominator.toString()
+                )}
+                value={exchangeRate.numerator.toString()}
+            />
+        </>
     );
-}
+});

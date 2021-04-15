@@ -3,13 +3,12 @@ import React from 'react';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { validBigInt } from '~/components/Form/util/validation';
-import { ensureBigIntValues } from '~/utils/exchangeRateHelpers';
 import {
     RelativeRateField,
     FormRelativeRateField,
     RelativeRateFieldProps,
 } from '../../common/RelativeRateField';
-import { toFixed } from '~/utils/numberStringHelpers';
+import { formatDenominator, getCurrentValue } from './util';
 
 export interface UpdateMicroGtuPerEuroRateFields {
     microGtuPerEuro: string;
@@ -22,9 +21,7 @@ const fieldNames: EqualRecord<UpdateMicroGtuPerEuroRateFields> = {
 export default function UpdateMicroGtuPerEuroRate({
     blockSummary,
 }: UpdateProps): JSX.Element | null {
-    const { denominator, numerator } = ensureBigIntValues(
-        blockSummary.updates.chainParameters.microGTUPerEuro
-    );
+    const { denominator, numerator } = getCurrentValue(blockSummary);
 
     const fieldProps: Pick<
         RelativeRateFieldProps,
@@ -32,7 +29,7 @@ export default function UpdateMicroGtuPerEuroRate({
     > = {
         unit: { position: 'prefix', value: 'µǤ ' },
         denominatorUnit: { position: 'prefix', value: '€ ' },
-        denominator: toFixed(2)(denominator.toString()),
+        denominator: formatDenominator(denominator.toString()),
     };
 
     return (
@@ -46,12 +43,12 @@ export default function UpdateMicroGtuPerEuroRate({
             <FormRelativeRateField
                 {...fieldProps}
                 name={fieldNames.microGtuPerEuro}
-                label="Current micro GTU per euro rate"
+                label="New micro GTU per euro rate"
                 defaultValue={numerator.toString()}
                 rules={{
                     required: 'Value must be specified',
                     min: { value: 0, message: 'Value cannot be negative' },
-                    validate: validBigInt('Value must be a whole number'),
+                    validate: validBigInt('Value must be a whole number'), // TODO: validate that value is actually a new value.
                 }}
             />
         </>

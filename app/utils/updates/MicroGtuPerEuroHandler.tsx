@@ -1,3 +1,4 @@
+import React from 'react';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import MicroGtuPerEuroView from '~/pages/multisig/updates/MicroGtuPerEuro/MicroGtuPerEuroView';
@@ -77,7 +78,7 @@ export default class MicroGtuPerEuroHandler
     }
 
     view(transaction: TransactionType) {
-        return MicroGtuPerEuroView({ exchangeRate: transaction.payload });
+        return <MicroGtuPerEuroView exchangeRate={transaction.payload} />;
     }
 
     getAuthorization(authorizations: Authorizations) {

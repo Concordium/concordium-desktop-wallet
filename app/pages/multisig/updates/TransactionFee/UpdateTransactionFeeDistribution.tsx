@@ -38,7 +38,7 @@ export default function UpdateTransactionFeeDistribution({
                     name={fieldNames.rewardDistribution}
                     defaultValue={currentValue}
                     labels={rewardDistributionLabels}
-                    rules={{ required: 'Must specify reward distribution' }}
+                    rules={{ required: 'Must specify reward distribution' }} // TODO: validate that value is actually a new value.
                 />
             </div>
         </>
