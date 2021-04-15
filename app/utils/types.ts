@@ -40,6 +40,11 @@ export interface Versioned<T> {
     value: T;
 }
 
+export interface Typed<T> {
+    type: string;
+    contents: T;
+}
+
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
 export enum ChosenAttributes {
@@ -1012,5 +1017,5 @@ export interface GenesisAccount {
     schemeId: string;
     address: string;
     accountThreshold: number;
-    credentials: Versioned<CredentialDeploymentValues>;
+    credentials: Versioned<Typed<CredentialDeploymentValues>>; // TODO: add commitments to type
 }

@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import PickName from '../AccountCreation/PickName';
-import PageLayout from '../../components/PageLayout';
-import Form from '../../components/Form';
-import SimpleLedger from '../../components/ledger/SimpleLedger';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { createGenesisAccount } from '../../utils/rustInterface';
-import { importAccount } from '../../features/AccountSlice';
-import { Account, AccountStatus } from '../../utils/types';
+import PageLayout from '~/components/PageLayout';
+import Form from '~/components/Form';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { createGenesisAccount } from '~/utils/rustInterface';
+import { importAccount } from '~/features/AccountSlice';
+import { insertNewCredential } from '~/features/CredentialSlice';
+import { Account, AccountStatus, IdentityStatus } from '~/utils/types';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import { saveFile } from '~/utils/FileHelper';
 import routes from '~/constants/routes.json';
 import { toMicroUnits } from '~/utils/gtu';
+import {
+    identitiesSelector,
+    importIdentities,
+    loadIdentities,
+} from '~/features/IdentitySlice';
+import { getNextCredentialNumber } from '~/database/CredentialDao';
 
 interface FileInputForm {
     file: FileInputValue;
@@ -57,27 +64,46 @@ enum Locations {
 // The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
 export default function GenesisAccount(): JSX.Element {
     const dispatch = useDispatch();
+    const identities = useSelector(identitiesSelector);
     const [currentLocation, setLocation] = useState<Locations>(Locations.Name);
     const [accountName, setAccountName] = useState('');
     const [ipInfo, setIpInfo] = useState<string | undefined>();
     const [arInfo, setArInfo] = useState<string | undefined>();
     const [global, setGlobal] = useState<string | undefined>();
     const [balance] = useState<string>('100');
+    const [identityId, setIdentityId] = useState<number>(0);
 
-    // get Identity
-    useEffect(() => {}, []);
+    useEffect(() => {
+        if (identities.length === 0) {
+            const identity = {
+                name: 'Genesis',
+                id: 0,
+                identityObject: '',
+                status: IdentityStatus.Confirmed,
+                detail: '',
+                codeUri: '',
+                identityProvider: 'Genesis',
+                randomness: '',
+            };
+            importIdentities(identity);
+            loadIdentities(dispatch);
+        } else {
+            setIdentityId(identities[0].id);
+        }
+    }, []);
 
     async function createAccount(
         ledger: ConcordiumLedgerClient,
         displayMessage: (message: string) => void
     ) {
+        const credentialNumber = await getNextCredentialNumber(identityId);
         if (!ipInfo || !arInfo || !global) {
             throw new Error('missing info');
         }
         const accountDetails = await createGenesisAccount(
             ledger,
-            0,
-            0,
+            identityId,
+            credentialNumber,
             JSON.parse(ipInfo),
             JSON.parse(arInfo),
             JSON.parse(global),
@@ -96,13 +122,20 @@ export default function GenesisAccount(): JSX.Element {
                 status: AccountStatus.Confirmed,
                 address: accountDetails.address,
                 name: accountName,
-                identityId: 0,
+                identityId,
                 maxTransactionId: 0,
                 isInitial: false,
             };
 
             importAccount(account);
-            // import credential
+            insertNewCredential(
+                dispatch,
+                accountDetails.address,
+                credentialNumber,
+                identityId,
+                0,
+                accountDetails.credentials.value.contents
+            );
             dispatch(push(routes.ACCOUNTS));
         }
     }
