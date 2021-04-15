@@ -8,7 +8,7 @@ function toBigInt(input: bigint | string): bigint {
     return input;
 }
 
-function getZeros(resolution: bigint): number {
+function getPowerOf10(resolution: bigint): number {
     return resolution
         .toString()
         .split('')
@@ -19,29 +19,33 @@ export function isPowOf10(resolution: bigint): boolean {
     return pow10Format.test(resolution.toString());
 }
 
-export const isValidResolutionString = (
-    resolution: bigint,
-    allowNegative = false
-) => {
-    const zeros = getZeros(resolution);
-
+const isValidNumberString = (allowNegative = false, allowedDigits?: number) => {
     let re: RegExp;
 
-    if (zeros === 0) {
-        re = new RegExp(`^${allowNegative ? '(-)?' : ''}\\d*$`);
+    if (allowedDigits === undefined) {
+        re = new RegExp(
+            `^${allowNegative ? '(-)?' : ''}(0|[1-9]\\d*)(\\.\\d*)?$`
+        );
+    } else if (allowedDigits === 0) {
+        re = new RegExp(`^${allowNegative ? '(-)?' : ''}(0|[1-9]\\d*)$`);
     } else {
         re = new RegExp(
-            `^${allowNegative ? '(-)?' : ''}(0|[1-9]\\d*)(\\.\\d{1,${getZeros(
-                resolution
-            )}})?$`
+            `^${
+                allowNegative ? '(-)?' : ''
+            }(0|[1-9]\\d*)(\\.\\d{1,${allowedDigits}})?$`
         );
     }
 
     return (value: string): boolean => {
-        // Only allow numerals, and only allow decimals according to resolution (in order to keep microGTU atomic)
+        // Only allow numerals, and only allow decimals according to resolution.
         return re.test(value);
     };
 };
+
+export const isValidResolutionString = (
+    resolution: bigint,
+    allowNegative = false
+) => isValidNumberString(allowNegative, getPowerOf10(resolution));
 
 const withValidResolution = <TReturn>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,7 +68,7 @@ const withValidResolution = <TReturn>(
  * @example toNumberString(100n)(10n) => '0.1'
  */
 export const toNumberString = withValidResolution((resolution: bigint) => {
-    const zeros = getZeros(resolution);
+    const zeros = getPowerOf10(resolution);
 
     return (value?: bigint | string): string | undefined => {
         if (value === undefined) {
@@ -108,7 +112,7 @@ export const parseSubNumber = (powOf10: number) => (
  */
 export const toResolution = withValidResolution((resolution: bigint) => {
     const isValid = isValidResolutionString(resolution);
-    const parseFraction = parseSubNumber(getZeros(resolution));
+    const parseFraction = parseSubNumber(getPowerOf10(resolution));
 
     return (value?: string): bigint | undefined => {
         if (value === undefined) {
@@ -141,18 +145,22 @@ const replaceCharAt = (
     replacement +
     value.substr(index + replacement.length);
 
-function increment(value: string): string {
+function increment(value: string, allowOverflow = true): string {
+    const negative = value.charAt(0) === '-';
     let valueInc = value;
+    const lastIndex = negative ? 1 : 0;
 
-    // Round up - increment chars from right to left while char incremented hits 0.
+    // Round up - increment chars from right to left while char incremented hits lastIndex.
     // eslint-disable-next-line no-plusplus
-    for (let i = valueInc.length - 1; i > 0; i--) {
+    for (let i = valueInc.length - 1; i >= lastIndex; i--) {
         const char = valueInc.charAt(i);
         const parsed = parseInt(char, 10);
+        const overflows = parsed === 9;
+        const replacement =
+            !overflows || (allowOverflow && i === lastIndex) ? parsed + 1 : 0;
 
-        valueInc = replaceCharAt(valueInc, i, (parsed + 1).toString());
-
-        if (parsed !== 9) {
+        valueInc = replaceCharAt(valueInc, i, replacement.toString());
+        if (!overflows) {
             return valueInc;
         }
     }
@@ -160,7 +168,11 @@ function increment(value: string): string {
     return valueInc;
 }
 
+const formatRounded = (isInt: boolean) => (whole: string, fractions: string) =>
+    `${whole}${isInt ? '' : `.${fractions}`}`;
+
 export const round = (digits = 0) => (value: string): string => {
+    const format = formatRounded(digits === 0);
     const [whole, fractions = ''] = value.split('.');
 
     if (fractions.length <= digits) {
@@ -169,27 +181,28 @@ export const round = (digits = 0) => (value: string): string => {
     }
 
     let roundedFractions = fractions.substr(0, digits);
-    const overflow = fractions.substr(digits + 1);
+    const overflow = fractions.substr(digits);
 
-    const upperBound = BigInt(`1${overflow.replaceAll(/\d/g, '0')}`);
+    const upperBound = BigInt(
+        `1${new Array(overflow.length).fill('0').join('')}`
+    );
 
     const nOverflow = BigInt(overflow);
     if (upperBound - nOverflow > nOverflow) {
         // Round down - simply remove overflowing digits.
-        return `${whole}.${roundedFractions}`;
-    }
-
-    roundedFractions = increment(roundedFractions);
-    if (parseInt(roundedFractions, 10) !== 0) {
-        return `${whole}.${roundedFractions}`;
+        return format(whole, roundedFractions);
     }
 
     const wholeInc = increment(whole);
-    if (parseInt(wholeInc, 10) !== 0) {
-        return `${wholeInc}.${roundedFractions}`;
+    if (digits !== 0) {
+        roundedFractions = increment(roundedFractions, false);
+
+        if (parseInt(roundedFractions, 10) !== 0 && digits) {
+            return format(whole, roundedFractions);
+        }
     }
 
-    return `1${wholeInc}.${roundedFractions}`;
+    return format(wholeInc, roundedFractions);
 };
 
 export const toFixed = (digits: number) => (value: string): string => {
@@ -218,7 +231,14 @@ export const formatNumberStringWithDigits = (
         );
     }
 
+    const isValid = isValidNumberString(true);
+
     return (value = ''): string => {
+        if (!isValid(value)) {
+            throw new Error(
+                "Tried to format a string that doesn't represent a number"
+            );
+        }
         if (value === '') {
             return value;
         }
