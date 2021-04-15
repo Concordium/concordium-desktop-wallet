@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
@@ -60,7 +60,7 @@ export default function BuildSchedule({ location }: Props) {
             .catch((e) =>
                 setError(`Unable to get transaction cost due to: ${e}`)
             );
-    });
+    }, []);
 
     useEffect(() => {
         if (feeCalculator && scheduleLength) {
@@ -72,46 +72,48 @@ export default function BuildSchedule({ location }: Props) {
 
     const { account, amount, recipient, defaults } = location.state;
 
-    async function createTransaction(
-        schedule: Schedule,
-        recoverState: unknown
-    ) {
-        const transaction = await createScheduledTransferTransaction(
-            account.address,
-            recipient.address,
-            schedule
-        );
-        transaction.estimatedFee = estimatedFee;
-        const transactionJSON = stringify(transaction);
-        dispatch(
-            push({
-                pathname: routes.SUBMITTRANSFER,
-                state: {
-                    confirmed: {
-                        pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
-                        state: {
-                            transaction: transactionJSON,
-                            account,
-                            recipient,
-                            initialPage: locations.transferSubmitted,
+    const createTransaction = useCallback(
+        async (schedule: Schedule, recoverState: unknown) => {
+            const transaction = await createScheduledTransferTransaction(
+                account.address,
+                recipient.address,
+                schedule
+            );
+            transaction.estimatedFee = estimatedFee;
+            const transactionJSON = stringify(transaction);
+            dispatch(
+                push({
+                    pathname: routes.SUBMITTRANSFER,
+                    state: {
+                        confirmed: {
+                            pathname:
+                                routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+                            state: {
+                                transaction: transactionJSON,
+                                account,
+                                recipient,
+                                initialPage: locations.transferSubmitted,
+                            },
                         },
-                    },
-                    cancelled: {
-                        pathname: routes.ACCOUNTS_SCHEDULED_TRANSFER,
-                        state: {
-                            account,
-                            amount,
-                            defaults: recoverState,
-                            explicit,
-                            recipient,
+                        cancelled: {
+                            pathname: routes.ACCOUNTS_SCHEDULED_TRANSFER,
+                            state: {
+                                account,
+                                amount,
+                                defaults: recoverState,
+                                explicit,
+                                recipient,
+                            },
                         },
+                        transaction: transactionJSON,
+                        account,
                     },
-                    transaction: transactionJSON,
-                    account,
-                },
-            })
-        );
-    }
+                })
+            );
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [JSON.stringify(account), estimatedFee, recipient]
+    );
 
     const BuildComponent = explicit ? ExplicitSchedule : RegularInterval;
 
