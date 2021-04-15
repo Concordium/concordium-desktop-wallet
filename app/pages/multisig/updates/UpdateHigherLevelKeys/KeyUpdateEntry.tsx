@@ -36,7 +36,10 @@ export function generateStatusLabelText(status: KeyUpdateEntryStatus) {
 
 function updateKeyStatus(key: KeyWithStatus) {
     let updatedStatus = key.status;
-    if (key.status === KeyUpdateEntryStatus.Unchanged) {
+    if (
+        key.status === KeyUpdateEntryStatus.Unchanged ||
+        key.status === KeyUpdateEntryStatus.Added
+    ) {
         updatedStatus = KeyUpdateEntryStatus.Removed;
     } else if (key.status === KeyUpdateEntryStatus.Removed) {
         updatedStatus = KeyUpdateEntryStatus.Unchanged;

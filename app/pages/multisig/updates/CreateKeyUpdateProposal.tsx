@@ -56,6 +56,7 @@ export default function CreateKeyUpdateProposal({
     );
 
     function addNewKey(publicKey: PublicKeyExportFormat) {
+        // TODO Protect against adding a key that is already present to avoid duplicates.
         // TODO Fix the format so that it matches with verify key directly, instead of having it split up.
         const newVerifyKey: VerifyKey = {
             verifyKey: publicKey.verifyKey,
@@ -76,12 +77,34 @@ export default function CreateKeyUpdateProposal({
      * be present in the state for any changes to be made.
      */
     function updateKey(keyToUpdate: KeyWithStatus) {
-        const updatedKeys = newKeys.map((key) => {
-            if (keyToUpdate.verifyKey.verifyKey === key.verifyKey.verifyKey) {
-                return keyToUpdate;
-            }
-            return key;
-        });
+        let removeAddedKey = false;
+        const updatedKeys = newKeys
+            .map((key) => {
+                if (
+                    keyToUpdate.verifyKey.verifyKey === key.verifyKey.verifyKey
+                ) {
+                    // For the special case where the key was not in the current key set, i.e. it was added,
+                    // then we remove it entirely if set to removed instead of just updating the status.
+                    if (
+                        key.status === KeyUpdateEntryStatus.Added &&
+                        keyToUpdate.status === KeyUpdateEntryStatus.Removed
+                    ) {
+                        removeAddedKey = true;
+                    }
+
+                    return keyToUpdate;
+                }
+                return key;
+            })
+            .filter((key) => {
+                if (
+                    removeAddedKey &&
+                    keyToUpdate.verifyKey.verifyKey === key.verifyKey.verifyKey
+                ) {
+                    return false;
+                }
+                return true;
+            });
         setNewKeys(updatedKeys);
     }
 
