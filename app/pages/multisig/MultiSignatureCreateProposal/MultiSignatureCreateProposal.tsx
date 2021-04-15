@@ -156,7 +156,7 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
     // TODO Check for one of the key update types here (includes in a set.)
     if (type === UpdateType.UpdateRootKeysWithRootKeys) {
         if (!blockSummary) {
-            component = null;
+            component = <Loading text="Getting current settings from chain" />;
         } else {
             component = (
                 <CreateKeyUpdateProposal
