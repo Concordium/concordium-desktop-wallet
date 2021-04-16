@@ -25,7 +25,7 @@ import { futureDate } from '~/components/Form/util/validation';
 import styles from './MultiSignatureCreateProposal.module.scss';
 import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import MultiSignatureLayout from '../MultiSignatureLayout';
-import CreateKeyUpdateProposal from '../updates/CreateKeyUpdateProposal';
+import UpdateHigherLevelKeys from '../updates/UpdateHigherLevelKeys/UpdateHigherLevelKeys';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -159,7 +159,7 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
             component = <Loading text="Getting current settings from chain" />;
         } else {
             component = (
-                <CreateKeyUpdateProposal
+                <UpdateHigherLevelKeys
                     blockSummary={blockSummary}
                     type={type}
                     handleKeySubmit={handleKeySubmit}

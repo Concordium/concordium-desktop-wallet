@@ -3,20 +3,20 @@ import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
 import { BlockSummary, KeysWithThreshold } from '~/utils/NodeApiTypes';
 import routes from '~/constants/routes.json';
-import styles from '../common/MultiSignatureFlowPage.module.scss';
-import ProposeNewKey from './UpdateHigherLevelKeys/ProposeNewKey';
-import KeySetSize from './UpdateHigherLevelKeys/KeySetSize';
+import styles from '../../common/MultiSignatureFlowPage.module.scss';
+import ProposeNewKey from './ProposeNewKey';
+import KeySetSize from './KeySetSize';
 import {
     HigherLevelKeyUpdate,
     KeyUpdateEntryStatus,
     KeyWithStatus,
     UpdateType,
 } from '~/utils/types';
-import { PublicKeyExportFormat } from '../ExportKeyView/ExportKeyView';
-import KeySetThreshold from './UpdateHigherLevelKeys/KeySetThreshold';
+import { PublicKeyExportFormat } from '../../ExportKeyView/ExportKeyView';
+import KeySetThreshold from './KeySetThreshold';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
-import KeyUpdateEntry from './UpdateHigherLevelKeys/KeyUpdateEntry';
+import KeyUpdateEntry from './KeyUpdateEntry';
 import { typeToHigherLevelKeyUpdateType } from '~/utils/updates/HigherLevelKeysHelpers';
 
 interface Props {
@@ -54,7 +54,7 @@ function getCurrentKeysWithThreshold(
  * Component used for the subset of update instructions that are used to update the
  * higher level key sets (root keys and level 1 keys).
  */
-export default function CreateKeyUpdateProposal({
+export default function UpdateHigherLevelKeys({
     blockSummary,
     type,
     handleKeySubmit,
