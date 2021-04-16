@@ -19,7 +19,9 @@ use id::{
     ffi::AttributeKind,
     constants::BaseField,
 };
-use pedersen_scheme::value::Value;
+use pedersen_scheme::{
+    randomness::Randomness as PedersenRandomness, value::Value,
+};
 
 type ExampleAttributeList = AttributeList<BaseField, AttributeKind>;
 
@@ -35,6 +37,7 @@ pub fn create_genesis_account (
     let ar_info: ArInfo<ExampleCurve> = try_get(&v, "arInfo")?;
     let ip_info: IpInfo<Bls12> = try_get(&v, "ipInfo")?;
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
+    let cred_counter: u8 = try_get(&v, "credentialNumber")?;
 
     let id_cred_sec = Value::new(generate_bls(id_cred_sec_seed)?);
     let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(prf_key_seed)?);
@@ -43,6 +46,22 @@ pub fn create_genesis_account (
         public_keys: try_get(&v, "publicKeys")?,
         threshold: try_get(&v, "threshold")?,
     };
+
+    let cred_id_exponent = match prf_key.prf_exponent(cred_counter) {
+        Ok(exp) => exp,
+        Err(_) => bail!(
+            "Cannot create CDI with this account number because K + {} = 0.",
+            cred_counter
+        ),
+    };
+
+    let cred_id = global_context
+        .on_chain_commitment_key
+        .hide(
+            &Value::<ExampleCurve>::new(cred_id_exponent),
+            &PedersenRandomness::zero(),
+        )
+        .0;
 
     let ar_data = {
         let mut ar_data = BTreeMap::new();
@@ -99,7 +118,7 @@ pub fn create_genesis_account (
 
     let cdv = CredentialDeploymentValues {
         cred_key_info: acc_data.vk_acc,
-        cred_id: acc_data.reg_id,
+        cred_id,
         ip_identity: ip_info.ip_identity,
         threshold,
         ar_data,
@@ -120,8 +139,6 @@ pub fn create_genesis_account (
         threshold,
         &global_context.on_chain_commitment_key,
     );
-
-    let cred_counter = 0;
 
     let policy = Policy {
         valid_to:   attributes.valid_to,

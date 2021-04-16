@@ -55,9 +55,7 @@ function inputFile(saveFileContent: (file: string) => void) {
 
 enum Locations {
     Name,
-    Ip,
-    Ar,
-    Global,
+    Context,
     Create,
 }
 
@@ -65,30 +63,25 @@ const subtitle = (currentLocation: Locations) => {
     switch (currentLocation) {
         case Locations.Name:
             return 'Pick Name';
-        case Locations.Ip:
-            return 'Input IpInfo';
-        case Locations.Ar:
-            return 'Input ArInfo';
-        case Locations.Global:
-            return 'Input globalContext';
+        case Locations.Context:
+            return 'Input Context file';
         case Locations.Create:
             return 'Export keys from ledger';
         default:
             throw new Error('unknown location');
     }
 };
+const defaultId = 0;
 
-// The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
+// Component to create genesis account;
 export default function GenesisAccount(): JSX.Element {
     const dispatch = useDispatch();
     const identities = useSelector(identitiesSelector);
     const [currentLocation, setLocation] = useState<Locations>(Locations.Name);
     const [accountName, setAccountName] = useState('');
-    const [ipInfo, setIpInfo] = useState<string | undefined>();
-    const [arInfo, setArInfo] = useState<string | undefined>();
-    const [global, setGlobal] = useState<string | undefined>();
+    const [context, setContext] = useState<string | undefined>();
     const [balance] = useState<string>('100');
-    const [identityId, setIdentityId] = useState<number>(0);
+    const [identityId, setIdentityId] = useState<number>(defaultId);
 
     const createdAt = '202104';
 
@@ -107,7 +100,7 @@ export default function GenesisAccount(): JSX.Element {
 
             const identity = {
                 name: 'Genesis',
-                id: 0,
+                id: defaultId,
                 identityObject: JSON.stringify(identityObject),
                 status: IdentityStatus.Local,
                 detail: '',
@@ -127,16 +120,19 @@ export default function GenesisAccount(): JSX.Element {
         displayMessage: (message: string) => void
     ) {
         const credentialNumber = await getNextCredentialNumber(identityId);
-        if (!ipInfo || !arInfo || !global) {
-            throw new Error('missing info');
+        if (!context) {
+            throw new Error('missing context');
         }
+
+        const { ipInfo, arInfo, global } = JSON.parse(context);
+
         const accountDetails = await createGenesisAccount(
             ledger,
             identityId,
             credentialNumber,
-            JSON.parse(ipInfo),
-            JSON.parse(arInfo),
-            JSON.parse(global),
+            ipInfo,
+            arInfo,
+            global,
             createdAt,
             displayMessage
         );
@@ -186,23 +182,13 @@ export default function GenesisAccount(): JSX.Element {
                     <PickName
                         submitName={(name: string) => {
                             setAccountName(name);
-                            setLocation(Locations.Ip);
+                            setLocation(Locations.Context);
                         }}
                     />
                 );
-            case Locations.Ip:
+            case Locations.Context:
                 return inputFile((file: string) => {
-                    setIpInfo(file);
-                    setLocation(Locations.Ar);
-                });
-            case Locations.Ar:
-                return inputFile((file: string) => {
-                    setArInfo(file);
-                    setLocation(Locations.Global);
-                });
-            case Locations.Global:
-                return inputFile((file: string) => {
-                    setGlobal(file);
+                    setContext(file);
                     setLocation(Locations.Create);
                 });
             case Locations.Create:

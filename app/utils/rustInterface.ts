@@ -390,6 +390,7 @@ export async function createGenesisAccount(
         ],
         threshold: 1,
         currentYearMonth: createdAt,
+        credentialNumber,
     };
 
     const contextString = JSON.stringify(context);
