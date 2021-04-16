@@ -10,13 +10,6 @@ export const isValidBigInt = (value: string): boolean => {
     }
 };
 
-function toBigInt(input: bigint | string): bigint {
-    if (typeof input === 'string' || typeof input === 'number') {
-        return BigInt(input);
-    }
-    return input;
-}
-
 function getPowerOf10(resolution: bigint): number {
     return resolution
         .toString()
@@ -94,7 +87,7 @@ export const toFraction = withValidResolution((resolution: bigint) => {
             return undefined;
         }
 
-        const numberValue: bigint = toBigInt(value);
+        const numberValue = BigInt(value);
         const isNegative = numberValue < 0;
         const absolute = isNegative ? -numberValue : numberValue;
         const whole = absolute / resolution;
