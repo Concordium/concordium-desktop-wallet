@@ -74,6 +74,7 @@ export default function ProposeNewKey({ type, addKey }: Props) {
                         <CopiableIdenticon data={loadedKey.verifyKey} />
                         <Form onSubmit={addNewKey}>
                             <Form.Checkbox
+                                className={styles.checkbox}
                                 name="agree"
                                 rules={{
                                     required:
