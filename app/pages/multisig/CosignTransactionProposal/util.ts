@@ -49,6 +49,7 @@ export async function signAccountTransaction(
     transaction: AccountTransaction,
     ledger: ConcordiumLedgerClient
 ) {
+    // We assume that there is only 1 key on a credential. // TODO: Remove assumption that a credential only has 1 signature
     const signatureIndex = 0;
 
     const credential = (await getCredentialsOfAccount(transaction.sender)).find(
@@ -57,7 +58,6 @@ export async function signAccountTransaction(
             instanceOfDeployedCredential(cred)
     );
 
-    // TODO: can we avoid checking instances twice?
     if (
         !credential ||
         !instanceOfLocalCredential(credential) ||
