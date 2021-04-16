@@ -360,6 +360,7 @@ export async function createGenesisAccount(
     ipInfo: Versioned<IpInfo>,
     arInfo: Versioned<ArInfo>,
     global: Versioned<Global>,
+    createdAt: string,
     displayMessage: (message: string) => void
 ): Promise<GenesisAccount> {
     const path = getAccountPath({
@@ -388,7 +389,7 @@ export async function createGenesisAccount(
             },
         ],
         threshold: 1,
-        currentYearMonth: '202104', // TODO dont hardcode this
+        currentYearMonth: createdAt,
     };
 
     const contextString = JSON.stringify(context);

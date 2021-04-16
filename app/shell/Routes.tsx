@@ -1,7 +1,7 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import routes from '../constants/routes.json';
-/// /////////////////////////////////////////////////////////////////////////// import HomePage from '../pages/HomePage';
+import HomePage from '../pages/HomePage';
 import AccountPage from '../pages/Accounts/AccountPage';
 import IdentityPage from '../pages/Identities/IdentityPage';
 import AddressBookPage from '../pages/AddressBook/AddressBookPage';
@@ -19,6 +19,11 @@ import genesisAccount from '../pages/GenesisAccount/GenesisAccount';
 export default function Routes(): JSX.Element {
     return (
         <Switch>
+            <Route
+                path={routes.CREATEGENESISACCOUNT}
+                component={genesisAccount}
+            />
+
             <Route path={routes.SUBMITTRANSFER} component={SubmitTransfer} />
             <Route path={routes.ACCOUNTS} component={AccountPage} />
             <Route path={routes.IDENTITYISSUANCE} component={IssuancePage} />
@@ -40,7 +45,7 @@ export default function Routes(): JSX.Element {
                 path={routes.UPDATE_ACCOUNT_CREDENTIALS}
                 component={UpdateCredentials}
             />
-            <Route path={routes.HOME} component={genesisAccount} />
+            <Route path={routes.HOME} component={HomePage} />
         </Switch>
     );
 }

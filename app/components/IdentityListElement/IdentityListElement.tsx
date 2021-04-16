@@ -56,7 +56,7 @@ function IdentityListElement({
             <div className={styles.topRow}>
                 <img
                     className={styles.statusImage}
-                    src={`data:image/png;base64, ${identityProvider.metadata.icon}`}
+                    src={`data:image/png;base64, ${identityProvider?.metadata?.icon}`}
                     alt={identity.status}
                 />
                 {statusImage(identity.status)}

@@ -61,6 +61,23 @@ enum Locations {
     Create,
 }
 
+const subtitle = (currentLocation: Locations) => {
+    switch (currentLocation) {
+        case Locations.Name:
+            return 'Pick Name';
+        case Locations.Ip:
+            return 'Input IpInfo';
+        case Locations.Ar:
+            return 'Input ArInfo';
+        case Locations.Global:
+            return 'Input globalContext';
+        case Locations.Create:
+            return 'Export keys from ledger';
+        default:
+            throw new Error('unknown location');
+    }
+};
+
 // The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
 export default function GenesisAccount(): JSX.Element {
     const dispatch = useDispatch();
@@ -73,16 +90,29 @@ export default function GenesisAccount(): JSX.Element {
     const [balance] = useState<string>('100');
     const [identityId, setIdentityId] = useState<number>(0);
 
+    const createdAt = '202104';
+
     useEffect(() => {
         if (identities.length === 0) {
+            const identityObject = {
+                v: 0,
+                value: {
+                    attributeList: {
+                        chosenAttributes: {},
+                        createdAt,
+                        validTo: '202204', // Should be 1 year after createdAt?
+                    },
+                },
+            };
+
             const identity = {
                 name: 'Genesis',
                 id: 0,
-                identityObject: '',
-                status: IdentityStatus.Confirmed,
+                identityObject: JSON.stringify(identityObject),
+                status: IdentityStatus.Local,
                 detail: '',
                 codeUri: '',
-                identityProvider: 'Genesis',
+                identityProvider: '{}',
                 randomness: '',
             };
             importIdentities(identity);
@@ -107,13 +137,14 @@ export default function GenesisAccount(): JSX.Element {
             JSON.parse(ipInfo),
             JSON.parse(arInfo),
             JSON.parse(global),
+            createdAt,
             displayMessage
         );
 
         const success = await saveFile(
             JSON.stringify({
                 ...accountDetails,
-                balance: toMicroUnits(balance),
+                balance: toMicroUnits(balance).toString(),
             }),
             'Save account details'
         );
@@ -128,13 +159,17 @@ export default function GenesisAccount(): JSX.Element {
             };
 
             importAccount(account);
-            insertNewCredential(
-                dispatch,
-                accountDetails.address,
-                credentialNumber,
-                identityId,
-                0,
-                accountDetails.credentials.value.contents
+            Object.entries(
+                accountDetails.credentials.value
+            ).forEach(([index, { contents }]) =>
+                insertNewCredential(
+                    dispatch,
+                    accountDetails.address,
+                    credentialNumber,
+                    identityId,
+                    parseInt(index, 10),
+                    contents
+                )
             );
             dispatch(push(routes.ACCOUNTS));
         }
@@ -143,23 +178,6 @@ export default function GenesisAccount(): JSX.Element {
     function Create() {
         return <SimpleLedger ledgerCall={createAccount} />;
     }
-
-    const subtitle = () => {
-        switch (currentLocation) {
-            case Locations.Name:
-                return 'Pick Name';
-            case Locations.Ip:
-                return 'Input IpInfo';
-            case Locations.Ar:
-                return 'Input ArInfo';
-            case Locations.Global:
-                return 'Input globalContext';
-            case Locations.Create:
-                return 'Export keys from ledger';
-            default:
-                throw new Error('unknown location');
-        }
-    };
 
     function Current() {
         switch (currentLocation) {
@@ -200,7 +218,7 @@ export default function GenesisAccount(): JSX.Element {
                 <h1> New Account | Genesis Account </h1>
             </PageLayout.Header>
             <PageLayout.Container>
-                <h2>{subtitle()}</h2>
+                <h2>{subtitle(currentLocation)}</h2>
                 <Current />
             </PageLayout.Container>
         </PageLayout>

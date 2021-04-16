@@ -83,6 +83,7 @@ export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    Local = 'local', // for genesis accounts
 }
 
 /**
@@ -1017,5 +1018,5 @@ export interface GenesisAccount {
     schemeId: string;
     address: string;
     accountThreshold: number;
-    credentials: Versioned<Typed<CredentialDeploymentValues>>; // TODO: add commitments to type
+    credentials: Versioned<Record<string, Typed<CredentialDeploymentValues>>>; // TODO: add commitments to type
 }
