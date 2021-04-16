@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Validate } from 'react-hook-form';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { validBigInt } from '~/components/Form/util/validation';
@@ -31,6 +32,8 @@ export default function UpdateMicroGtuPerEuroRate({
         denominatorUnit: { position: 'prefix', value: '€ ' },
         denominator: formatDenominator(denominator.toString()),
     };
+    const notEqual: Validate = (value: string) =>
+        value !== numerator.toString() || "Value hasn't changed";
 
     return (
         <>
@@ -48,7 +51,12 @@ export default function UpdateMicroGtuPerEuroRate({
                 rules={{
                     required: 'Value must be specified',
                     min: { value: 0, message: 'Value cannot be negative' },
-                    validate: validBigInt('Value must be a whole number'), // TODO: validate that value is actually a new value.
+                    validate: {
+                        validBigInt: validBigInt(
+                            'Value must be a whole number'
+                        ),
+                        notEqual,
+                    },
                 }}
             />
         </>

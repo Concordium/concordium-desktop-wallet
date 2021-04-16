@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Validate } from 'react-hook-form';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import {
@@ -21,6 +22,10 @@ export default function UpdateTransactionFeeDistribution({
     blockSummary,
 }: UpdateProps) {
     const currentValue: RewardDistributionValue = getCurrentValue(blockSummary);
+    const notEqual: Validate = (value: RewardDistributionValue) =>
+        value.first !== currentValue.first ||
+        value.second !== currentValue.second ||
+        "Value hasn't changed";
 
     return (
         <>
@@ -38,7 +43,10 @@ export default function UpdateTransactionFeeDistribution({
                     name={fieldNames.rewardDistribution}
                     defaultValue={currentValue}
                     labels={rewardDistributionLabels}
-                    rules={{ required: 'Must specify reward distribution' }} // TODO: validate that value is actually a new value.
+                    rules={{
+                        required: 'Must specify reward distribution',
+                        validate: { notEqual },
+                    }}
                 />
             </div>
         </>

@@ -68,7 +68,7 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
 
     const normalisedNumerator = safeToFraction(numerator);
 
-    const validate: Validate = (value: string) => {
+    const isResolutionFraction: Validate = (value: string) => {
         try {
             safeToResolution(value);
             return true;
@@ -76,6 +76,8 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
             return errorMessage;
         }
     };
+    const notEqual: Validate = (value: string) =>
+        value !== normalisedNumerator || "Value hasn't changed";
 
     return (
         <>
@@ -93,7 +95,7 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 rules={{
                     required: errorMessage,
                     min: { value: 0, message: 'Value cannot be negative' },
-                    validate,
+                    validate: { isResolutionFraction, notEqual },
                 }}
             />
             <Form.Checkbox
