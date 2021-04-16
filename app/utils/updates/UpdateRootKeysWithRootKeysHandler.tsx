@@ -91,6 +91,7 @@ export default class UpdateRootKeysWithRootKeysHandler
     }
 
     getAuthorization(authorizations: Authorizations) {
+        // TODO This should throw an error if called, as it is not required by this type.
         return authorizations.bakerStakeThreshold;
     }
 

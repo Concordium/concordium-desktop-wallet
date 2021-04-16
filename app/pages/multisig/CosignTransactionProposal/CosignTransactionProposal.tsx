@@ -20,7 +20,7 @@ import {
 import { TransactionHandler, TransactionInput } from '~/utils/transactionTypes';
 import { serializeUpdateInstructionHeaderAndPayload } from '~/utils/UpdateSerialization';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import { findAuthorizationKey } from '~/utils/updates/AuthorizationHelper';
+import { findKey } from '~/utils/updates/AuthorizationHelper';
 import { ensureProps } from '~/utils/componentHelpers';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
@@ -77,7 +77,9 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
         const dispatch = useDispatch();
 
         const { transaction } = location.state as TransactionInput;
-        const [transactionObject] = useState(parse(transaction));
+        const [transactionObject] = useState<
+            UpdateInstruction<UpdateInstructionPayload>
+        >(parse(transaction));
 
         useEffect(() => {
             const serialized = serializeUpdateInstructionHeaderAndPayload(
@@ -96,10 +98,11 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                 return;
             }
 
-            const authorizationKey = await findAuthorizationKey(
+            const authorizationKey = await findKey(
                 ledger,
-                transactionHandler,
-                blockSummary.updates.keys.level2Keys
+                blockSummary.updates.keys,
+                transactionObject.type,
+                transactionHandler
             );
             if (!authorizationKey) {
                 setShowValidationError(true);

@@ -23,7 +23,7 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { serializeUpdateInstructionHeaderAndPayload } from '~/utils/UpdateSerialization';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BlockSummary } from '~/utils/NodeApiTypes';
-import { findHigherLevelKey } from '~/utils/updates/AuthorizationHelper';
+import { findKey } from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import Form from '~/components/Form';
@@ -87,25 +87,16 @@ function SignTransactionProposalView({ location }: Props) {
     }, [setTransactionHash, transactionHandler, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        // TODO Signing depends on whether it is a level 2, level 1 or root.
-        const authorizationKey = await findHigherLevelKey(
+        const authorizationKey = await findKey(
             ledger,
-            blockSummary.updates.keys
+            blockSummary.updates.keys,
+            updateInstruction.type,
+            transactionHandler
         );
         if (!authorizationKey) {
             setShowValidationError(true);
             return;
         }
-
-        // const authorizationKey = await findAuthorizationKey(
-        //     ledger,
-        //     transactionHandler,
-        //     blockSummary.updates.keys.level2Keys
-        // );
-        // if (!authorizationKey) {
-        //     setShowValidationError(true);
-        //     return;
-        // }
 
         const signatureBytes = await transactionHandler.signTransaction(
             updateInstruction,
