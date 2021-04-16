@@ -10,6 +10,8 @@ import Card from '~/cross-app-components/Card';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 import CopiableIdenticon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import Form from '~/components/Form/Form';
+import CloseButton from '~/cross-app-components/CloseButton';
+import styles from './ProposeNewKey.module.scss';
 
 interface Props {
     type: UpdateType;
@@ -63,6 +65,10 @@ export default function ProposeNewKey({ type, addKey }: Props) {
                 )}
                 {loadedKey && (
                     <Card>
+                        <CloseButton
+                            className={styles.close}
+                            onClick={() => setLoadedKey(undefined)}
+                        />
                         <h2>New {typeToDisplay(type)} key</h2>
                         <p>{loadedKey.verifyKey}</p>
                         <CopiableIdenticon data={loadedKey.verifyKey} />
