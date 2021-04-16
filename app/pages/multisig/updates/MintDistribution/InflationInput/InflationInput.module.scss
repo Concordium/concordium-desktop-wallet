@@ -1,0 +1,10 @@
+@import 'config/bundle';
+
+.exponent {
+    vertical-align: super;
+    font-size: $font-size-body4;
+}
+
+.field:disabled {
+    color: $color-text;
+}

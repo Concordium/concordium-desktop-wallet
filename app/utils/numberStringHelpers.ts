@@ -1,5 +1,10 @@
 const numberSeparator = '.';
 const pow10Format = /^1(0*)$/;
+const fractionRenderSeperator = new Intl.NumberFormat()
+    .format(0.1)
+    .includes('.')
+    ? '.'
+    : ',';
 
 export const isValidBigInt = (value: string): boolean => {
     try {
@@ -102,6 +107,12 @@ export const toFraction = withValidResolution((resolution: bigint) => {
         return `${isNegative ? '-' : ''}${whole}${fractionsFormatted}`;
     };
 });
+
+export const toLocalisedFraction: typeof toFraction = (resolution) => {
+    const converter = toFraction(resolution);
+
+    return (value) => converter(value)?.replace('.', fractionRenderSeperator);
+};
 
 /**
  * expects the fractional part of the a fraction number string.

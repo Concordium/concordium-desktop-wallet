@@ -31,7 +31,7 @@ export interface InlineNumberProps
     extends ClassName,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            'step' | 'min' | 'max' | 'disabled'
+            'step' | 'min' | 'max' | 'disabled' | 'readOnly'
         >,
         Pick<CommonFieldProps, 'isInvalid'> {
     /**
@@ -51,7 +51,7 @@ export interface InlineNumberProps
      * If true, falls back to `fallbackValue` when fields `isInvalid` prop is set to `true` on blur. Defaults to `false`.
      */
     fallbackOnInvalid?: boolean;
-    onChange(v?: string): void;
+    onChange?(v?: string): void;
     /**
      * As internal formatting functionality is triggered on blur, settings value on blur externally is prone to trigger an infinite loop. Please take caution!
      */
@@ -70,7 +70,7 @@ export default function InlineNumber({
     fallbackValue = 0,
     fallbackOnInvalid = false,
     value,
-    onChange,
+    onChange = noOp,
     onBlur = noOp,
     onFocus = noOp,
     allowFractions = false,
