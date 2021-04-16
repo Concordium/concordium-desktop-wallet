@@ -21,7 +21,7 @@ function isInvalid(
         return true;
     }
     const thresholdAsNumber = Number.parseInt(threshold, 10);
-    return thresholdAsNumber < 0 || thresholdAsNumber > maxThreshold;
+    return thresholdAsNumber <= 0 || thresholdAsNumber > maxThreshold;
 }
 
 /**
