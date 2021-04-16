@@ -15,7 +15,7 @@ import {
     UpdateInstructionSignature,
 } from '~/utils/types';
 import { UpdateInstructionHandler } from '~/utils/transactionTypes';
-import { createUpdateInstructionHandler } from '~/utils/updates/HandlerFinder';
+import { createUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';

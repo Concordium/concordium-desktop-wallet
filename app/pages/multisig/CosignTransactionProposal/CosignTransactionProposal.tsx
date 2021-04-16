@@ -8,7 +8,7 @@ import { parse, stringify } from '~/utils/JSONHelper';
 
 import routes from '~/constants/routes.json';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import findHandler from '~/utils/updates/HandlerFinder';
+import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import {
     EqualRecord,
     instanceOfUpdateInstruction,

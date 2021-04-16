@@ -10,7 +10,7 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '~/utils/types';
-import { findUpdateInstructionHandler } from '~/utils/updates/HandlerFinder';
+import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
 import styles from './UpdateInstructionDetails.module.scss';
 

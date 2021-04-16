@@ -10,9 +10,10 @@ export function stringify(input: any) {
             return { '@type': types.BigInt, value: v.toString() };
         }
         if (v && v.type === types.Buffer) {
+            console.log('test');
             return {
                 '@type': types.Buffer,
-                value: Buffer.from(v).toString('hex'),
+                value: Buffer.from(v).toString('base64'),
             };
         }
         return v;
@@ -26,7 +27,7 @@ export function parse(input: string) {
                 case types.BigInt:
                     return BigInt(v.value);
                 case types.Buffer:
-                    return Buffer.from(v.value, 'hex');
+                    return Buffer.from(v.value, 'base64');
                 default:
                     return v;
             }

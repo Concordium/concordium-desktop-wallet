@@ -11,7 +11,7 @@ import {
 import {
     findAccountTransactionHandler,
     findUpdateInstructionHandler,
-} from '~/utils/updates/HandlerFinder';
+} from '~/utils/transactionHandlers/HandlerFinder';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 

@@ -4,7 +4,7 @@ import {
     instanceOfUpdateInstruction,
     Transaction,
 } from './types';
-import { findUpdateInstructionHandler } from './updates/HandlerFinder';
+import { findUpdateInstructionHandler } from './transactionHandlers/HandlerFinder';
 import {
     serializeUpdateInstruction,
     serializeUpdateInstructionHeaderAndPayload,

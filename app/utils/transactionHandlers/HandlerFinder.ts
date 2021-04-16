@@ -1,8 +1,6 @@
 import { parse } from 'json-bigint';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import {
-    UpdateComponent,
     UpdateInstructionHandler,
     TransactionInput,
     AccountTransactionHandler,
@@ -10,7 +8,6 @@ import {
 import {
     instanceOfUpdateInstruction,
     TransactionKindId,
-    MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
@@ -28,63 +25,7 @@ import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
 import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
-
-class HandlerTypeMiddleware<T>
-    implements
-        UpdateInstructionHandler<
-            UpdateInstruction<UpdateInstructionPayload>,
-            ConcordiumLedgerClient
-        > {
-    base: UpdateInstructionHandler<T, ConcordiumLedgerClient>;
-
-    update: UpdateComponent;
-
-    title: string;
-
-    type: string;
-
-    constructor(base: UpdateInstructionHandler<T, ConcordiumLedgerClient>) {
-        this.base = base;
-        this.update = base.update;
-        this.title = base.title;
-        this.type = base.type;
-    }
-
-    confirmType(transaction: UpdateInstruction<UpdateInstructionPayload>) {
-        return transaction;
-    }
-
-    createTransaction(
-        blockSummary: BlockSummary,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fields: any,
-        effectiveTime: bigint
-    ): Promise<Partial<MultiSignatureTransaction> | undefined> {
-        return this.base.createTransaction(blockSummary, fields, effectiveTime);
-    }
-
-    serializePayload(transaction: UpdateInstruction<UpdateInstructionPayload>) {
-        return this.base.serializePayload(this.base.confirmType(transaction));
-    }
-
-    signTransaction(
-        transaction: UpdateInstruction<UpdateInstructionPayload>,
-        ledger: ConcordiumLedgerClient
-    ) {
-        return this.base.signTransaction(
-            this.base.confirmType(transaction),
-            ledger
-        );
-    }
-
-    view(transaction: UpdateInstruction<UpdateInstructionPayload>) {
-        return this.base.view(this.base.confirmType(transaction));
-    }
-
-    getAuthorization(authorizations: Authorizations) {
-        return this.base.getAuthorization(authorizations);
-    }
-}
+import UpdateInstructionHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -105,25 +46,41 @@ export function findUpdateInstructionHandler(
 > {
     switch (type) {
         case UpdateType.UpdateMicroGTUPerEuro:
-            return new HandlerTypeMiddleware(new MicroGtuPerEuroHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new MicroGtuPerEuroHandler()
+            );
         case UpdateType.UpdateEuroPerEnergy:
-            return new HandlerTypeMiddleware(new EuroPerEnergyHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new EuroPerEnergyHandler()
+            );
         case UpdateType.UpdateTransactionFeeDistribution:
-            return new HandlerTypeMiddleware(
+            return new UpdateInstructionHandlerTypeMiddleware(
                 new TransactionFeeDistributionHandler()
             );
         case UpdateType.UpdateFoundationAccount:
-            return new HandlerTypeMiddleware(new FoundationAccountHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new FoundationAccountHandler()
+            );
         case UpdateType.UpdateMintDistribution:
-            return new HandlerTypeMiddleware(new MintDistributionHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new MintDistributionHandler()
+            );
         case UpdateType.UpdateProtocol:
-            return new HandlerTypeMiddleware(new ProtocolUpdateHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new ProtocolUpdateHandler()
+            );
         case UpdateType.UpdateGASRewards:
-            return new HandlerTypeMiddleware(new GasRewardsHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new GasRewardsHandler()
+            );
         case UpdateType.UpdateBakerStakeThreshold:
-            return new HandlerTypeMiddleware(new BakerStakeThresholdHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new BakerStakeThresholdHandler()
+            );
         case UpdateType.UpdateElectionDifficulty:
-            return new HandlerTypeMiddleware(new ElectionDifficultyHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new ElectionDifficultyHandler()
+            );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);
     }
@@ -147,7 +104,6 @@ export function createUpdateInstructionHandler(
     const { transaction, type } = state;
 
     const transactionObject = parse(transaction);
-    // TODO Add AccountTransactionHandler here when implemented.
 
     if (type === 'UpdateInstruction') {
         return findUpdateInstructionHandler(transactionObject.type);
