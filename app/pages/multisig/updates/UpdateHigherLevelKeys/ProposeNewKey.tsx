@@ -35,19 +35,19 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
      * is set (to trigger a modal).
      */
     async function fileProcessor(rawData: Buffer) {
-        const publicKey: PublicKeyExportFormat = JSON.parse(
+        const exportedPublicKey: PublicKeyExportFormat = JSON.parse(
             rawData.toString('utf-8')
         );
 
         const duplicateKey = newKeys
             .map((key) => key.verifyKey.verifyKey)
-            .includes(publicKey.verifyKey);
+            .includes(exportedPublicKey.verifyKey.verifyKey);
         if (duplicateKey) {
             setDuplicate(true);
             return;
         }
 
-        setLoadedKey(publicKey);
+        setLoadedKey(exportedPublicKey);
     }
 
     function addNewKey() {
@@ -93,8 +93,10 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
                             onClick={() => setLoadedKey(undefined)}
                         />
                         <h2>New {typeToDisplay(type)} key</h2>
-                        <p>{loadedKey.verifyKey}</p>
-                        <CopiableIdenticon data={loadedKey.verifyKey} />
+                        <p>{loadedKey.verifyKey.verifyKey}</p>
+                        <CopiableIdenticon
+                            data={loadedKey.verifyKey.verifyKey}
+                        />
                         <Form onSubmit={addNewKey}>
                             <Form.Checkbox
                                 className={styles.checkbox}

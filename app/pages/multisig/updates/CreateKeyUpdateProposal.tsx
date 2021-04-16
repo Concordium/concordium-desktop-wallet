@@ -11,7 +11,6 @@ import {
     KeyUpdateEntryStatus,
     KeyWithStatus,
     UpdateType,
-    VerifyKey,
 } from '~/utils/types';
 import { PublicKeyExportFormat } from '../ExportKeyView/ExportKeyView';
 import KeySetThreshold from './UpdateHigherLevelKeys/KeySetThreshold';
@@ -88,16 +87,9 @@ export default function CreateKeyUpdateProposal({
     );
 
     function addNewKey(publicKey: PublicKeyExportFormat) {
-        // TODO Protect against adding a key that is already present to avoid duplicates.
-        // TODO Fix the format so that it matches with verify key directly, instead of having it split up.
-        const newVerifyKey: VerifyKey = {
-            verifyKey: publicKey.verifyKey,
-            schemeId: publicKey.schemeId,
-        };
-
         const addedKey = {
+            ...publicKey,
             status: KeyUpdateEntryStatus.Added,
-            verifyKey: newVerifyKey,
         };
 
         const updatedKeys = [...newKeys, addedKey];
