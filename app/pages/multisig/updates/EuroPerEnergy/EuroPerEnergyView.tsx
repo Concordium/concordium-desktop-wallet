@@ -3,15 +3,12 @@ import Loading from '~/cross-app-components/Loading';
 import { ensureBigIntValues } from '~/utils/exchangeRateHelpers';
 import { BlockSummary } from '~/utils/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
-import {
-    RelativeRateField,
-    RelativeRateFieldProps,
-} from '../../common/RelativeRateField';
+import { RelativeRateField } from '../../common/RelativeRateField';
 import { useNormalisation } from '../../common/RelativeRateField/util';
 import withBlockSummary, {
     WithBlockSummary,
 } from '../../common/withBlockSummary';
-import { getCurrentValue } from './util';
+import { getCommonFieldProps, getCurrentValue } from './util';
 
 interface Props extends WithBlockSummary {
     exchangeRate: ExchangeRate;
@@ -25,14 +22,6 @@ export default withBlockSummary(function MicroGtuPerEuroView({
     blockSummary,
 }: Props) {
     const newValue = ensureBigIntValues(exchangeRate);
-    const fieldProps: Pick<
-        RelativeRateFieldProps,
-        'unit' | 'denominatorUnit' | 'disabled'
-    > = {
-        unit: { position: 'prefix', value: '€ ' },
-        denominatorUnit: { position: 'postfix', value: ' NRG' },
-        disabled: true,
-    };
 
     // We can use the same for both current and new values, as it's not possible to update the denominator.
     const { safeToFraction, isNormalised } = useNormalisation(
@@ -40,6 +29,11 @@ export default withBlockSummary(function MicroGtuPerEuroView({
     );
     const getNormalisedDenominator = (denominator: bigint) =>
         isNormalised ? '1' : denominator.toString();
+
+    const fieldProps = {
+        ...getCommonFieldProps(isNormalised),
+        disabled: true,
+    };
 
     function renderCurrentValue(bs: BlockSummary): JSX.Element {
         const currentValue = getCurrentValue(bs);

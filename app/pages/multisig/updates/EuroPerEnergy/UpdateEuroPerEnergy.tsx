@@ -6,10 +6,9 @@ import { EqualRecord } from '~/utils/types';
 import {
     RelativeRateField,
     FormRelativeRateField,
-    RelativeRateFieldProps,
 } from '../../common/RelativeRateField';
 import { useNormalisation } from '../../common/RelativeRateField/util';
-import { getCurrentValue } from './util';
+import { getCommonFieldProps, getCurrentValue } from './util';
 
 export interface UpdateEuroPerEnergyFields {
     euroPerEnergy: string;
@@ -28,12 +27,8 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
         denominator
     );
 
-    const fieldProps: Pick<
-        RelativeRateFieldProps,
-        'unit' | 'denominator' | 'denominatorUnit'
-    > = {
-        unit: { position: 'prefix', value: '€ ' },
-        denominatorUnit: { position: 'postfix', value: ' NRG' },
+    const fieldProps = {
+        ...getCommonFieldProps(isNormalised),
         denominator: isNormalised ? '1' : denominator.toString(),
     };
 

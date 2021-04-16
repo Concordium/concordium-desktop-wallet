@@ -3,14 +3,11 @@ import Loading from '~/cross-app-components/Loading';
 import { ensureBigIntValues } from '~/utils/exchangeRateHelpers';
 import { BlockSummary } from '~/utils/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
-import {
-    RelativeRateField,
-    RelativeRateFieldProps,
-} from '../../common/RelativeRateField';
+import { RelativeRateField } from '../../common/RelativeRateField';
 import withBlockSummary, {
     WithBlockSummary,
 } from '../../common/withBlockSummary';
-import { formatDenominator, getCurrentValue } from './util';
+import { commonFieldProps, formatDenominator, getCurrentValue } from './util';
 
 interface Props extends WithBlockSummary {
     exchangeRate: ExchangeRate;
@@ -25,12 +22,8 @@ export default withBlockSummary(function MicroGtuPerEuroView({
 }: Props) {
     const newValue = ensureBigIntValues(exchangeRate);
 
-    const fieldProps: Pick<
-        RelativeRateFieldProps,
-        'unit' | 'denominatorUnit' | 'disabled'
-    > = {
-        unit: { position: 'prefix', value: 'µǤ ' },
-        denominatorUnit: { position: 'prefix', value: '€ ' },
+    const fieldProps = {
+        ...commonFieldProps,
         disabled: true,
     };
 

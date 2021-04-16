@@ -7,9 +7,8 @@ import { validBigInt } from '~/components/Form/util/validation';
 import {
     RelativeRateField,
     FormRelativeRateField,
-    RelativeRateFieldProps,
 } from '../../common/RelativeRateField';
-import { formatDenominator, getCurrentValue } from './util';
+import { commonFieldProps, formatDenominator, getCurrentValue } from './util';
 
 export interface UpdateMicroGtuPerEuroRateFields {
     microGtuPerEuro: string;
@@ -24,12 +23,8 @@ export default function UpdateMicroGtuPerEuroRate({
 }: UpdateProps): JSX.Element | null {
     const { denominator, numerator } = getCurrentValue(blockSummary);
 
-    const fieldProps: Pick<
-        RelativeRateFieldProps,
-        'unit' | 'denominator' | 'denominatorUnit'
-    > = {
-        unit: { position: 'prefix', value: 'µǤ ' },
-        denominatorUnit: { position: 'prefix', value: '€ ' },
+    const fieldProps = {
+        ...commonFieldProps,
         denominator: formatDenominator(denominator.toString()),
     };
     const notEqual: Validate = (value: string) =>

@@ -7,6 +7,7 @@ import styles from './RelativeRateField.module.scss';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
 import InlineNumber from '~/components/Form/InlineNumber';
 import { noOp } from '~/utils/basicHelpers';
+import { InlineNumberProps } from '~/components/Form/InlineNumber/InlineNumber';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
@@ -22,6 +23,7 @@ interface RelativeRateFieldUnit {
 
 export interface RelativeRateFieldProps
     extends CommonInputProps,
+        Pick<InlineNumberProps, 'allowFractions' | 'ensureDigits'>,
         InputFieldProps {
     denominator: string;
     /**
@@ -85,7 +87,6 @@ export function RelativeRateField({
                         value={value}
                         onChange={onChange}
                         disabled={disabled}
-                        allowFractions
                         onBlur={onBlur}
                         {...props}
                     />

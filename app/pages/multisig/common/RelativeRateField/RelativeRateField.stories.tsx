@@ -27,6 +27,17 @@ Primary.args = {
     value: '1234',
 };
 
+export const Normalised = Template.bind({});
+Normalised.args = {
+    denominatorUnit: { position: 'postfix', value: ' NRG' },
+    label: 'New euro pr. energy rate',
+    unit: { value: '€ ', position: 'prefix' },
+    denominator: '1',
+    value: '123.4',
+    ensureDigits: 2,
+    allowFractions: true,
+};
+
 export const Invalid = Template.bind({});
 Invalid.args = {
     denominator: '1.00',
