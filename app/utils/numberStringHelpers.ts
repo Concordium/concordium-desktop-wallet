@@ -1,7 +1,7 @@
 const numberSeparator = '.';
 const pow10Format = /^1(0*)$/;
 
-export const isValidBigInt = (value: string) => {
+export const isValidBigInt = (value: string): boolean => {
     try {
         BigInt(value);
         return true;
@@ -24,6 +24,16 @@ function getPowerOf10(resolution: bigint): number {
         .filter((c) => c === '0').length;
 }
 
+/**
+ * @description
+ * Tests whether or not given resolution is a power of 10.
+ *
+ * @param resolution power of 10 resolution (1, 10, 100, etc.)
+ *
+ * @example
+ * isPowerOf10(10) => true
+ * isPowerOf10(105) => false
+ */
 export function isPowOf10(resolution: bigint): boolean {
     return pow10Format.test(resolution.toString());
 }
@@ -180,6 +190,12 @@ function increment(value: string, allowOverflow = true): string {
 const formatRounded = (isInt: boolean) => (whole: string, fractions: string) =>
     `${whole}${isInt ? '' : `.${fractions}`}`;
 
+/**
+ * @description
+ * Rounds number strings to nearest value with n fraction digits.
+ *
+ * @param digits digits to round to. f.x. 3 gives 1.2345 => 1.235
+ */
 export const round = (digits = 0) => (value: string): string => {
     const format = formatRounded(digits === 0);
     const [whole, fractions = ''] = value.split('.');
@@ -214,6 +230,16 @@ export const round = (digits = 0) => (value: string): string => {
     return format(wholeInc, roundedFractions);
 };
 
+/**
+ * @description
+ * Works like Number.toFixed.
+ *
+ * @example
+ * const ensureTwoDigits = toFixed(2);
+ *
+ * ensureTwoDigits('1.2') => '1.20'
+ * ensureTwoDigits('1.223') => '1.22'
+ */
 export const toFixed = (digits: number) => (value: string): string => {
     const [whole, fractions = ''] = value.split('.');
 
@@ -227,6 +253,23 @@ export const toFixed = (digits: number) => (value: string): string => {
     return round(digits)(value);
 };
 
+/**
+ * @description
+ * Formats number strings according to specified fraction digit rules.
+ *
+ * @param minFractionDigits min fraction digits in formatted result
+ * @param maxFractionDigits max fraction digits in formatted result. Must be below min fraction digits
+ *
+ * @throws If given invalid value (e.g. non-number string)
+ * @throws If max fraction digits < min fraction digits.
+ *
+ * @example
+ * const formatNumber = formatNumberStringWithDigits(2, 5);
+ *
+ * formatNumber('1') => '1.00'
+ * formatNumber('1.234') => '1.234'
+ * formatNumber('1.23456789') => '1.23457'
+ */
 export const formatNumberStringWithDigits = (
     minFractionDigits: number,
     maxFractionDigits?: number
