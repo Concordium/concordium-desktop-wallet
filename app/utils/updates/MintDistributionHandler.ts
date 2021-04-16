@@ -1,9 +1,9 @@
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import MintDistributionView from '../../pages/multisig/MintDistributionView';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { getGovernanceLevel2Path } from '~/features/ledger/Path';
+import MintDistributionView from '~/pages/multisig/updates/MintDistribution/MintDistributionView';
 import UpdateMintDistribution, {
     UpdateMintDistributionFields,
-} from '../../pages/multisig/UpdateMintDistribution';
+} from '~/pages/multisig/updates/MintDistribution/UpdateMintDistribution';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';

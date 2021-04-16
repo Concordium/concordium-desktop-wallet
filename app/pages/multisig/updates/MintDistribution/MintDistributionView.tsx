@@ -1,7 +1,7 @@
 import React from 'react';
 import { Header, Progress } from 'semantic-ui-react';
-import { ColorType, MintDistribution } from '../../utils/types';
-import { rewardFractionResolution } from '../../constants/updateConstants.json';
+import { ColorType, MintDistribution } from '~/utils/types';
+import { rewardFractionResolution } from '~/constants/updateConstants.json';
 
 interface Props {
     mintDistribution: MintDistribution;

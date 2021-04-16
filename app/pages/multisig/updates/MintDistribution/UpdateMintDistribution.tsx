@@ -10,7 +10,7 @@ import {
     RewardDistributionValue,
     FormRewardDistribution,
     RewardDistribution,
-} from './common/RewardDistribution';
+} from '../../common/RewardDistribution';
 
 export interface UpdateMintDistributionFields {
     mantissa: string;
