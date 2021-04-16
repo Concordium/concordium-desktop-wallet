@@ -24,11 +24,7 @@ export default function ExpiredEffectiveTimeView({
             proposal.status === MultiSignatureTransactionStatus.Expired) &&
         isExpired(transaction)
     ) {
-        return (
-            <span className="textError">
-                The effective time has been exceeded
-            </span>
-        );
+        return <span className="textError">The transaction has expired</span>;
     }
     return null;
 }

@@ -291,6 +291,11 @@ export function isFailed(transaction: TransferTransaction) {
     );
 }
 
+/**
+ * Get the timeout/expiry of a transaction.
+ * For an update instruction this is the timeout.
+ * For an account transation this is the expiry.
+ */
 export function getTimeout(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
         return transaction.header.timeout;
