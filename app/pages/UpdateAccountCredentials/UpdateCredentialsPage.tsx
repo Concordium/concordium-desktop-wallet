@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
-import { Grid, List } from 'semantic-ui-react';
 import { credentialsSelector } from '~/features/CredentialSlice';
 import Button from '~/cross-app-components/Button';
 import {
@@ -19,12 +18,11 @@ import routes from '~/constants/routes.json';
 import CreateUpdate from './CreateUpdate';
 import { CredentialStatus } from './CredentialStatus';
 import styles from './UpdateAccountCredentials.module.scss';
-import ConfirmPage from './ConfirmPage';
 import Columns from '~/components/Columns';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 
-const placeHolderText = 'To be determined';
+const placeHolderText = <h3>To be determined</h3>;
 
 function assignIndices<T>(items: T[], usedIndices: number[]) {
     let candidate = 1;
@@ -55,8 +53,6 @@ function subTitle(currentLocation: string) {
             return 'New Credentials';
         case routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD:
             return '';
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM:
-            return '';
         case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
             return 'Signature and Hardware Wallet';
         default:
@@ -74,8 +70,6 @@ function nextLocation(currentLocation: string, proposalId: number) {
         case routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL:
             return routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD;
         case routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD:
-            return routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM;
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM:
             return routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN;
         case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
             return selectedProposalRoute(proposalId);
@@ -87,12 +81,8 @@ function nextLocation(currentLocation: string, proposalId: number) {
 function displayAccount(account: Account | undefined) {
     return (
         <>
-            <List.Item>Account:</List.Item>
-            <List.Item>
-                <b>
-                    {account ? account.name : 'Choose an account on the right'}
-                </b>
-            </List.Item>
+            <h5>Account:</h5>
+            <h3>{account ? account.name : 'Choose an account on the right'}</h3>
         </>
     );
 }
@@ -103,22 +93,22 @@ function displaySignatureThreshold(
 ) {
     let body;
     if (!currentThreshold) {
-        body = <List.Item>{placeHolderText}</List.Item>;
+        body = placeHolderText;
     } else {
         body = (
             <>
-                <List.Item>
+                <h3>
                     Current amount of required signatures: {currentThreshold}
-                </List.Item>
-                <List.Item>
+                </h3>
+                <h3>
                     New amount of required signatures: {newThreshold || '?'}
-                </List.Item>
+                </h3>
             </>
         );
     }
     return (
         <>
-            <List.Item>Signature Threshold:</List.Item>
+            <h5>Signature Threshold:</h5>
             {body}
         </>
     );
@@ -130,20 +120,18 @@ function displayCredentialCount(
 ) {
     let body;
     if (!currentAmount) {
-        body = <List.Item>{placeHolderText}</List.Item>;
+        body = placeHolderText;
     } else {
         body = (
             <>
-                <List.Item>
-                    Current amount of credentials: {currentAmount}
-                </List.Item>
-                <List.Item>New amount of credentials: {newAmount}</List.Item>
+                <h3>Current amount of credentials: {currentAmount}</h3>
+                <h3>New amount of credentials: {newAmount}</h3>
             </>
         );
     }
     return (
         <>
-            <List.Item>Credentials:</List.Item>
+            <h5>Credentials:</h5>
             {body}
         </>
     );
@@ -157,45 +145,37 @@ function listCredentials(
     if (credentialIds.length === 0) {
         return null;
     }
-    return (
-        <Grid columns="3">
-            {credentialIds.map(([credId, status]) => {
-                let leftText = null;
-                let right = null;
-                if (status === CredentialStatus.Added) {
-                    leftText = 'Remove';
-                    right = <h2 className={styles.green}>Added</h2>;
-                } else if (status === CredentialStatus.Unchanged) {
-                    leftText = 'Remove';
-                    right = <h2 className={styles.gray}>Unchanged</h2>;
-                } else if (status === CredentialStatus.Removed) {
-                    leftText = 'Revert';
-                    right = <h2 className={styles.red}>Removed</h2>;
-                } else if (status === CredentialStatus.Original) {
-                    right = <h2>Original</h2>;
-                }
-                return (
-                    <Grid.Row key={credId}>
-                        <Grid.Column>
-                            {leftText && isEditing ? (
-                                <Button
-                                    onClick={() =>
-                                        updateCredential([credId, status])
-                                    }
-                                >
-                                    {leftText}
-                                </Button>
-                            ) : null}
-                        </Grid.Column>
-                        <Grid.Column>
-                            <h5>{credId}</h5>
-                        </Grid.Column>
-                        <Grid.Column>{right}</Grid.Column>
-                    </Grid.Row>
-                );
-            })}
-        </Grid>
-    );
+    return credentialIds.map(([credId, status]) => {
+        let leftText = null;
+        let right = null;
+        if (status === CredentialStatus.Added) {
+            leftText = 'Remove';
+            right = <h2 className={styles.green}>Added</h2>;
+        } else if (status === CredentialStatus.Unchanged) {
+            leftText = 'Remove';
+            right = <h2 className={styles.gray}>Unchanged</h2>;
+        } else if (status === CredentialStatus.Removed) {
+            leftText = 'Revert';
+            right = <h2 className={styles.red}>Removed</h2>;
+        } else if (status === CredentialStatus.Original) {
+            right = <h2>Original</h2>;
+        }
+        return (
+            <div key={credId} className={styles.credentialListElement}>
+                {leftText && isEditing ? (
+                    <Button onClick={() => updateCredential([credId, status])}>
+                        {leftText}
+                    </Button>
+                ) : (
+                    <div />
+                )}
+                <div>
+                    <h5>{credId}</h5>
+                </div>
+                {right}
+            </div>
+        );
+    });
 }
 
 /**
@@ -272,25 +252,6 @@ export default function UpdateCredentialPage(): JSX.Element {
         }
     }
 
-    function renderConfirmPage() {
-        if (!account?.signatureThreshold) {
-            throw new Error('Unexpected missing account/signatureThreshold');
-        }
-        return (
-            <ConfirmPage
-                setReady={setReady}
-                currentThreshold={account.signatureThreshold}
-                currentCredentialAmount={currentCredentials.length}
-                newCredentialAmount={
-                    credentialIds.filter(
-                        ([, status]) => status !== CredentialStatus.Removed
-                    ).length
-                }
-                newThreshold={newThreshold}
-            />
-        );
-    }
-
     function renderCreateUpdate() {
         if (!newThreshold) {
             throw new Error('Unexpected missing threshold');
@@ -328,27 +289,21 @@ export default function UpdateCredentialPage(): JSX.Element {
             pageTitle="Multi Signature Transactions | Update Account Credentials"
             stepTitle="Transaction Proposal - Update Account Credentials"
         >
-            <Columns columnClassName={styles.columns} divider>
+            <Columns columnClassName={styles.columns} divider="inset">
                 <Columns.Column header="Transaction Details">
-                    <List relaxed>
-                        <List.Item>Identity:</List.Item>
-                        <List.Item>
-                            <b>
-                                {identity
-                                    ? identity.name
-                                    : 'Choose an ID on the right'}
-                            </b>
-                        </List.Item>
-                        {displayAccount(account)}
-                        {displaySignatureThreshold(
-                            account?.signatureThreshold,
-                            newThreshold
-                        )}
-                        {displayCredentialCount(
-                            currentCredentials.length,
-                            credentialIds.length
-                        )}
-                    </List>
+                    <h5>Identity:</h5>
+                    <h3>
+                        {identity ? identity.name : 'Choose an ID on the right'}
+                    </h3>
+                    {displayAccount(account)}
+                    {displaySignatureThreshold(
+                        account?.signatureThreshold,
+                        newThreshold
+                    )}
+                    {displayCredentialCount(
+                        currentCredentials.length,
+                        credentialIds.length
+                    )}
                     {listCredentials(
                         credentialIds,
                         updateCredentialStatus,
@@ -379,10 +334,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                                     setNewThreshold={setNewThreshold}
                                 />
                             )}
-                        />
-                        <Route
-                            path={routes.UPDATE_ACCOUNT_CREDENTIALS_CONFIRM}
-                            render={renderConfirmPage}
                         />
                         <Route
                             path={

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from 'semantic-ui-react';
 import Identicon from 'react-identicons';
+import Card from '~/cross-app-components/Card';
 import { CredentialDeploymentInformation } from '~/utils/types';
-import DragAndDrop from '~/components/DragAndDropFile';
+import FileInput from '~/components/Form/FileInput';
+import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import Button from '~/cross-app-components/Button';
+import CloseButton from '~/cross-app-components/CloseButton';
 import { CredentialStatus } from './CredentialStatus';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
+import styles from './UpdateAccountCredentials.module.scss';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -42,54 +45,59 @@ export default function AddCredential({
         setReady(currentCredential === undefined);
     }, [setReady, currentCredential]);
 
-    function loadCredential(file: Buffer) {
-        let credential: CredentialDeploymentInformation;
-        // TODO Validate the structure of the file
-        try {
-            credential = JSON.parse(file.toString());
-        } catch (e) {
-            setShowError({
-                show: true,
-                header: 'Invalid Credential',
-                content: 'unable to parse the file contents as a credential',
-            });
-            return;
-        }
-        if (credentialIds.find(([credId]) => credId === credential.credId)) {
-            setShowError({
-                show: true,
-                header: 'Invalid Credential',
-                content: 'No duplicate credentials allowed',
-            });
-            // TODO Add check that the credential belongs to this address.
-        } else {
-            setCurrentCredential(credential);
+    async function loadCredential(file: FileInputValue) {
+        if (file) {
+            const rawCredential = Buffer.from(await file[0].arrayBuffer());
+
+            let credential: CredentialDeploymentInformation;
+            // TODO Validate the structure of the file
+            try {
+                credential = JSON.parse(rawCredential.toString());
+            } catch (e) {
+                setShowError({
+                    show: true,
+                    header: 'Invalid Credential',
+                    content:
+                        'unable to parse the file contents as a credential',
+                });
+                return;
+            }
+            if (
+                credentialIds.find(([credId]) => credId === credential.credId)
+            ) {
+                setShowError({
+                    show: true,
+                    header: 'Invalid Credential',
+                    content: 'No duplicate credentials allowed',
+                });
+                // TODO Add check that the credential belongs to this address.
+            } else {
+                setCurrentCredential(credential);
+            }
         }
     }
 
-    function addCurrentCredential() {
-        if (!currentCredential) {
-            throw new Error('unexpected missing current credential');
-        }
-
-        addCredentialId([currentCredential.credId, CredentialStatus.Added]);
-        setNewCredentials((newCredentials) => [
-            ...newCredentials,
-            currentCredential,
-        ]);
+    function addCurrentCredential(credential: CredentialDeploymentInformation) {
+        addCredentialId([credential.credId, CredentialStatus.Added]);
+        setNewCredentials((newCredentials) => [...newCredentials, credential]);
         setCurrentCredential(undefined);
     }
 
     if (currentCredential) {
         return (
-            <Card>
-                <h2>New Credential</h2>
-                <Button onClick={() => setCurrentCredential(undefined)}>
-                    x
-                </Button>
-                {currentCredential.credId}
-                <Identicon string={JSON.stringify(currentCredential)} />
-                <Button onClick={addCurrentCredential}>
+            <Card className={styles.addingCard}>
+                <h2>
+                    New Credential{' '}
+                    <CloseButton
+                        onClick={() => setCurrentCredential(undefined)}
+                    />
+                </h2>
+                <p>{currentCredential.credId}</p>
+                <Identicon
+                    size={128}
+                    string={JSON.stringify(currentCredential)}
+                />
+                <Button onClick={() => addCurrentCredential(currentCredential)}>
                     Add Credential to Proposal
                 </Button>
             </Card>
@@ -108,9 +116,11 @@ export default function AddCredential({
                 You can add new credentials to the proposal by dropping the
                 below, or by browsing to the file on your compuiter.
             </h3>
-            <DragAndDrop
-                text="Drag and drop the credentials here"
-                fileProcessor={loadCredential}
+            <FileInput
+                value={null}
+                placeholder="Drag and drop the credentials here"
+                buttonTitle="Or browse to file"
+                onChange={loadCredential}
             />
         </>
     );

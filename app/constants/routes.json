@@ -52,6 +52,5 @@
     "UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL": "/update_account_credentials/add-credential",
     "UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD": "/update_account_credentials/change-signature-threshold",
     "UPDATE_ACCOUNT_CREDENTIALS_SIGN": "/update_account_credentials/sign",
-    "UPDATE_ACCOUNT_CREDENTIALS_SEND": "/update_account_credentials/send",
-    "UPDATE_ACCOUNT_CREDENTIALS_CONFIRM": "/update_account_credentials/confirm"
+    "UPDATE_ACCOUNT_CREDENTIALS_SEND": "/update_account_credentials/send"
 }
