@@ -253,6 +253,10 @@ export function serializeTransaction(
     return serialized;
 }
 
+/**
+ * Returns the transactionHash, which includes the signature, and is used as the
+ * submissionId on chain.
+ */
 export function getAccountTransactionHash(
     transaction: AccountTransaction,
     signFunction: SignFunction
