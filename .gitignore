@@ -30,9 +30,6 @@ node_modules
 # OSX
 .DS_Store
 
-#MacOS Signing Data
-.env
-
 # App packaged
 release
 app/main.prod.js
