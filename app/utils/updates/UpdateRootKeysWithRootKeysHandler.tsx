@@ -1,6 +1,6 @@
 import React from 'react';
 import HigherLevelKeysView from '~/pages/multisig/updates/UpdateHigherLevelKeys/HigherLevelKeysView';
-import UpdateTransactionFeeDistribution from '~/pages/multisig/updates/UpdateTransactionFee/UpdateTransactionFeeDistribution';
+import UpdateRootKeys from '~/pages/multisig/updates/UpdateHigherLevelKeys/UpdateRootKeys';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
@@ -13,9 +13,9 @@ import {
     UpdateType,
     HigherLevelKeyUpdate,
     isUpdateRootKeysWithRootKeys,
-    KeyUpdateEntryStatus,
 } from '../types';
 import { serializeHigherLevelKeyUpdate } from '../UpdateSerialization';
+import { removeRemovedKeys } from './HigherLevelKeysHelpers';
 
 const TYPE = 'Update Root Governance Keys';
 
@@ -55,18 +55,9 @@ export default class UpdateRootKeysWithRootKeysHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        // The transaction submitted to the chain has to contain the exact set
-        // of keys to be the new key set. Our transaction holds a bit more information,
-        // so that we can display a 'diff' of what keys have changed, and that is
-        // removed here to serialize the transaction correctly.
-        const keysWithoutRemoved = transaction.payload.updateKeys.filter(
-            (key) => key.status !== KeyUpdateEntryStatus.Removed
+        const payloadWithoutRemovedKeys = removeRemovedKeys(
+            transaction.payload
         );
-        const payloadWithoutRemovedKeys = {
-            ...transaction.payload,
-            updateKeys: keysWithoutRemoved,
-        };
-
         return serializeHigherLevelKeyUpdate(payloadWithoutRemovedKeys);
     }
 
@@ -75,16 +66,9 @@ export default class UpdateRootKeysWithRootKeysHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceRootPath();
-
-        // TODO Fix duplicated code here...
-        const keysWithoutRemoved = transaction.payload.updateKeys.filter(
-            (key) => key.status !== KeyUpdateEntryStatus.Removed
+        const payloadWithoutRemovedKeys = removeRemovedKeys(
+            transaction.payload
         );
-        const payloadWithoutRemovedKeys = {
-            ...transaction.payload,
-            updateKeys: keysWithoutRemoved,
-        };
-
         const transactionWithoutRemoved: TransactionType = {
             ...transaction,
             payload: payloadWithoutRemovedKeys,
@@ -110,8 +94,7 @@ export default class UpdateRootKeysWithRootKeysHandler
         return authorizations.bakerStakeThreshold;
     }
 
-    // TODO This should perhaps not be set? Or do we set it to the create key update proposal, and load it through that?
-    update = UpdateTransactionFeeDistribution;
+    update = UpdateRootKeys;
 
     title = `Foundation Transaction | ${TYPE}`;
 

@@ -5,6 +5,7 @@ import {
     UpdateInstructionPayload,
     AddressBookEntry,
     Word8,
+    HigherLevelKeyUpdate,
 } from './types';
 
 export interface TransactionInput {
@@ -18,7 +19,17 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
+    handleKeySubmit?(
+        effectiveTime: Date,
+        higherLevelKeyUpdate: HigherLevelKeyUpdate
+    ): Promise<void>;
 }
+
+/**
+ * The property interface used by components for handling higher
+ * level key updates.
+ */
+export type HigherLevelKeyUpdateProps = UpdateProps;
 
 /**
  * The interface contains the location state used by components

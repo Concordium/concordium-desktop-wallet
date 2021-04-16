@@ -1,5 +1,28 @@
 import { Keys } from '../NodeApiTypes';
-import { HigherLevelKeyUpdateType, UpdateType } from '../types';
+import {
+    HigherLevelKeyUpdate,
+    HigherLevelKeyUpdateType,
+    KeyUpdateEntryStatus,
+    UpdateType,
+} from '../types';
+
+/**
+ * Removes any keys with the Removed status from the payload. This is useful
+ * as those be skipped in the serialization, as they should not be sent to
+ * signing or the chain. This is needed as the model on client side contains
+ * some extra information that is required by the UI.
+ */
+export function removeRemovedKeys(
+    payload: HigherLevelKeyUpdate
+): HigherLevelKeyUpdate {
+    const keysWithoutRemoved = payload.updateKeys.filter(
+        (key) => key.status !== KeyUpdateEntryStatus.Removed
+    );
+    return {
+        ...payload,
+        updateKeys: keysWithoutRemoved,
+    };
+}
 
 /**
  * Helper for mapping an update type to its HigherLevelKeyUpdateType, which
