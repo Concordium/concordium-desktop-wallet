@@ -1,16 +1,15 @@
 import React from 'react';
 import { Validate } from 'react-hook-form';
 import Form from '~/components/Form';
-import { valueNoOp } from '~/utils/basicHelpers';
-import { ensureBigIntValues } from '~/utils/exchangeRateHelpers';
-import { toFraction, toResolution } from '~/utils/numberStringHelpers';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { EqualRecord } from '~/utils/types';
 import {
     RelativeRateField,
     FormRelativeRateField,
     RelativeRateFieldProps,
-} from './common/RelativeRateField';
+} from '../../common/RelativeRateField';
+import { useNormalisation } from '../../common/RelativeRateField/util';
+import { getCurrentValue } from './util';
 
 export interface UpdateEuroPerEnergyFields {
     euroPerEnergy: string;
@@ -22,40 +21,12 @@ const fieldNames: EqualRecord<UpdateEuroPerEnergyFields> = {
     isNormalised: 'isNormalised',
 };
 
-interface GetConverters {
-    safeToFraction(value?: string | bigint | undefined): string | undefined;
-    safeToResolution(value?: string | undefined): bigint | undefined;
-    isNormalised: boolean;
-}
-
-const getConverters = (denominator: bigint): GetConverters => {
-    try {
-        return {
-            safeToFraction: toFraction(denominator),
-            safeToResolution: toResolution(denominator),
-            isNormalised: true,
-        };
-    } catch {
-        return {
-            safeToFraction: valueNoOp,
-            safeToResolution: BigInt,
-            isNormalised: false,
-        };
-    }
-};
-
 export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
-    const { denominator, numerator } = ensureBigIntValues(
-        blockSummary.updates.chainParameters.euroPerEnergy
-    );
+    const { denominator, numerator } = getCurrentValue(blockSummary);
 
-    const { safeToFraction, safeToResolution, isNormalised } = getConverters(
+    const { safeToFraction, safeToResolution, isNormalised } = useNormalisation(
         denominator
     );
-
-    const errorMessage = isNormalised
-        ? `Value must go into 1/${denominator}`
-        : 'Value must be a whole number';
 
     const fieldProps: Pick<
         RelativeRateFieldProps,
@@ -63,7 +34,7 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
     > = {
         unit: { position: 'prefix', value: '€ ' },
         denominatorUnit: { position: 'postfix', value: ' NRG' },
-        denominator: '1',
+        denominator: isNormalised ? '1' : denominator.toString(),
     };
 
     const normalisedNumerator = safeToFraction(numerator);
@@ -73,7 +44,9 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
             safeToResolution(value);
             return true;
         } catch {
-            return errorMessage;
+            return isNormalised
+                ? `Value must go into 1/${denominator}`
+                : 'Value must be a whole number';
         }
     };
     const notEqual: Validate = (value: string) =>
@@ -93,7 +66,7 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 label="New euro per energy"
                 defaultValue={normalisedNumerator}
                 rules={{
-                    required: errorMessage,
+                    required: 'Value is required',
                     min: { value: 0, message: 'Value cannot be negative' },
                     validate: { isResolutionFraction, notEqual },
                 }}

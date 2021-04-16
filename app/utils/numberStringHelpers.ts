@@ -11,7 +11,7 @@ export const isValidBigInt = (value: string) => {
 };
 
 function toBigInt(input: bigint | string): bigint {
-    if (typeof input === 'string') {
+    if (typeof input === 'string' || typeof input === 'number') {
         return BigInt(input);
     }
     return input;

@@ -7,32 +7,39 @@ import {
     RelativeRateField,
     RelativeRateFieldProps,
 } from '../../common/RelativeRateField';
+import { useNormalisation } from '../../common/RelativeRateField/util';
 import withBlockSummary, {
     WithBlockSummary,
 } from '../../common/withBlockSummary';
-import { formatDenominator, getCurrentValue } from './util';
+import { getCurrentValue } from './util';
 
 interface Props extends WithBlockSummary {
     exchangeRate: ExchangeRate;
 }
 
 /**
- * Displays an overview of a micro GTU per euro transaction payload.
+ * Displays an overview of a euro per energy transaction payload.
  */
 export default withBlockSummary(function MicroGtuPerEuroView({
     exchangeRate,
     blockSummary,
 }: Props) {
     const newValue = ensureBigIntValues(exchangeRate);
-
     const fieldProps: Pick<
         RelativeRateFieldProps,
         'unit' | 'denominatorUnit' | 'disabled'
     > = {
-        unit: { position: 'prefix', value: 'µǤ ' },
-        denominatorUnit: { position: 'prefix', value: '€ ' },
+        unit: { position: 'prefix', value: '€ ' },
+        denominatorUnit: { position: 'postfix', value: ' NRG' },
         disabled: true,
     };
+
+    // We can use the same for both current and new values, as it's not possible to update the denominator.
+    const { safeToFraction, isNormalised } = useNormalisation(
+        newValue.denominator
+    );
+    const getNormalisedDenominator = (denominator: bigint) =>
+        isNormalised ? '1' : denominator.toString();
 
     function renderCurrentValue(bs: BlockSummary): JSX.Element {
         const currentValue = getCurrentValue(bs);
@@ -41,10 +48,8 @@ export default withBlockSummary(function MicroGtuPerEuroView({
             <RelativeRateField
                 {...fieldProps}
                 label="Current micro GTU per euro rate"
-                denominator={formatDenominator(
-                    currentValue.denominator.toString()
-                )}
-                value={currentValue.numerator.toString()}
+                denominator={getNormalisedDenominator(currentValue.denominator)}
+                value={safeToFraction(currentValue.numerator)}
             />
         );
     }
@@ -59,8 +64,8 @@ export default withBlockSummary(function MicroGtuPerEuroView({
             <RelativeRateField
                 {...fieldProps}
                 label="New micro GTU per euro rate"
-                denominator={formatDenominator(newValue.denominator.toString())}
-                value={newValue.numerator.toString()}
+                denominator={getNormalisedDenominator(newValue.denominator)}
+                value={safeToFraction(newValue.numerator)}
             />
         </>
     );

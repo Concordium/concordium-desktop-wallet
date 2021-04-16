@@ -5,6 +5,7 @@ import React, {
     useCallback,
     useEffect,
     useLayoutEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -87,9 +88,11 @@ export default function InlineNumber({
         [ensureDigits, allowFractions]
     );
 
-    const [innerValue, setInnerValue] = useState<string>(
-        format(value) || format(fallbackValue.toString())
+    const initialFormatted = useMemo(
+        () => format(value) || format(fallbackValue.toString()),
+        []
     );
+    const [innerValue, setInnerValue] = useState<string>(initialFormatted);
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
     const ref = useRef<HTMLInputElement>(null);

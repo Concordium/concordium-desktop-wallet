@@ -1,9 +1,10 @@
+import React from 'react';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
-import EuroPerEnergyView from '~/pages/multisig/EuroPerEnergyView';
+import EuroPerEnergyView from '~/pages/multisig/updates/EuroPerEnergy/EuroPerEnergyView';
 import UpdateEuroPerEnergy, {
     UpdateEuroPerEnergyFields,
-} from '~/pages/multisig/UpdateEuroPerEnergy';
+} from '~/pages/multisig/updates/EuroPerEnergy/UpdateEuroPerEnergy';
 import { ensureBigIntValues } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
@@ -86,7 +87,7 @@ export default class EuroPerEnergyHandler
     }
 
     view(transaction: TransactionType) {
-        return EuroPerEnergyView({ exchangeRate: transaction.payload });
+        return <EuroPerEnergyView exchangeRate={transaction.payload} />;
     }
 
     getAuthorization(authorizations: Authorizations) {
