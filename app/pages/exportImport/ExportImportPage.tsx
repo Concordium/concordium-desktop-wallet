@@ -11,7 +11,7 @@ export default function ExportImportPage() {
                 <h1>Export and Import</h1>
             </PageLayout.Header>
             <PageLayout.Container disableBack>
-                <Columns divider columnScroll>
+                <Columns divider="inset" columnScroll>
                     <Columns.Column>
                         <Export />
                     </Columns.Column>
