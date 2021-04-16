@@ -42,7 +42,7 @@ export function transactionPerformConsequence(
                 updateSignatureThreshold(
                     dispatch,
                     transaction.sender,
-                    transaction.payload.newThreshold
+                    transaction.payload.threshold
                 );
             }
         }

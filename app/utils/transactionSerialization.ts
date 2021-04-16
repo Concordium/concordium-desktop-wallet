@@ -92,14 +92,14 @@ function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
         putString
     );
 
-    const newThreshold = Buffer.alloc(1);
-    newThreshold.writeUInt8(payload.newThreshold, 0);
+    const threshold = Buffer.alloc(1);
+    threshold.writeUInt8(payload.threshold, 0);
 
     return Buffer.concat([
         transactionType,
         serializedNewCredentials,
         serializedRemovedCredentials,
-        newThreshold,
+        threshold,
     ]);
 }
 

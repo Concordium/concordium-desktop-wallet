@@ -24,7 +24,7 @@ export default function DisplayAccountCredentialUpdate({
             </List.Item>
             <List.Item>
                 New Threshold:
-                {transaction.payload.newThreshold}
+                {transaction.payload.threshold}
             </List.Item>
             {removedCredIds.length > 0 ? (
                 <List.Item>

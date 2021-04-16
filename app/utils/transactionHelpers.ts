@@ -206,7 +206,7 @@ export async function createUpdateCredentialsTransaction(
     sender: string,
     addedCredentials: AddedCredential[],
     removedCredIds: string[],
-    newThreshold: number,
+    threshold: number,
     currentCredentialAmount: number,
     signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
@@ -214,7 +214,7 @@ export async function createUpdateCredentialsTransaction(
     const payload = {
         addedCredentials,
         removedCredIds,
-        newThreshold,
+        threshold,
     };
 
     return createTransferTransaction(

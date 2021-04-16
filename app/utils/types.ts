@@ -195,7 +195,7 @@ export interface AddedCredential {
 export interface UpdateAccountCredentialsPayload {
     addedCredentials: AddedCredential[];
     removedCredIds: Hex[];
-    newThreshold: number;
+    threshold: number;
 }
 
 export type TransactionPayload =
