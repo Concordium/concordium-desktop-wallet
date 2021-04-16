@@ -17,7 +17,7 @@ import {
     encodeWord32,
     encodeWord64,
     put,
-    putString,
+    putHexString,
     putInt8,
     putBase58Check,
     hashSha256,
@@ -89,7 +89,7 @@ function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
     const serializedRemovedCredentials = serializeList(
         payload.removedCredIds,
         putInt8,
-        putString
+        putHexString
     );
 
     const threshold = Buffer.alloc(1);
