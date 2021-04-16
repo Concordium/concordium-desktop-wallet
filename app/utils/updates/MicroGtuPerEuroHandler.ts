@@ -46,7 +46,7 @@ export default class MicroGtuPerEuroHandler
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.authorizations.microGTUPerEuro;
+        } = blockSummary.updates.keys.level2Keys.microGTUPerEuro;
 
         return createUpdateMultiSignatureTransaction(
             microGtuPerEuro,

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
-import { Account, AddressBookEntry, Schedule } from '~/utils/types';
+import { Account, AddressBookEntry, Schedule, Fraction } from '~/utils/types';
 import { displayAsGTU, toGTUString } from '~/utils/gtu';
 import { createScheduledTransferTransaction } from '~/utils/transactionHelpers';
 import locations from '~/constants/transferLocations.json';
@@ -14,8 +14,11 @@ import RegularInterval, {
 import ExplicitSchedule, {
     Defaults as ExplicitScheduleDefaults,
 } from './BuildExplicitSchedule';
+import { scheduledTransferCost } from '~/utils/transactionCosts';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 import TransferView from '~/components/Transfers/TransferView';
 import styles from './Accounts.module.scss';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonGroup from '~/components/ButtonGroup';
 
 interface Defaults extends ExplicitScheduleDefaults, RegularIntervalDefaults {}
@@ -45,49 +48,86 @@ export default function BuildSchedule({ location }: Props) {
         throw new Error('Unexpected missing state.');
     }
 
+    const [error, setError] = useState<string | undefined>();
+    const [scheduleLength, setScheduleLength] = useState<number>(0);
+    const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
+    const [feeCalculator, setFeeCalculator] = useState<
+        ((scheduleLength: number) => Fraction) | undefined
+    >();
+    useEffect(() => {
+        scheduledTransferCost()
+            .then((calculator) => setFeeCalculator(() => calculator))
+            .catch((e) =>
+                setError(`Unable to get transaction cost due to: ${e}`)
+            );
+    }, []);
+
+    useEffect(() => {
+        if (feeCalculator && scheduleLength) {
+            setEstimatedFee(feeCalculator(scheduleLength));
+        } else {
+            setEstimatedFee(undefined);
+        }
+    }, [scheduleLength, setEstimatedFee, feeCalculator]);
+
     const { account, amount, recipient, defaults } = location.state;
 
-    async function createTransaction(
-        schedule: Schedule,
-        recoverState: unknown
-    ) {
-        const transaction = await createScheduledTransferTransaction(
-            account.address,
-            recipient.address,
-            schedule
-        );
-        const transactionJSON = stringify(transaction);
-        dispatch(
-            push({
-                pathname: routes.SUBMITTRANSFER,
-                state: {
-                    confirmed: {
-                        pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
-                        state: {
-                            transaction: transactionJSON,
-                            account,
-                            recipient,
-                            initialPage: locations.transferSubmitted,
+    const createTransaction = useCallback(
+        async (schedule: Schedule, recoverState: unknown) => {
+            const transaction = await createScheduledTransferTransaction(
+                account.address,
+                recipient.address,
+                schedule
+            );
+            transaction.estimatedFee = estimatedFee;
+            const transactionJSON = stringify(transaction);
+            dispatch(
+                push({
+                    pathname: routes.SUBMITTRANSFER,
+                    state: {
+                        confirmed: {
+                            pathname:
+                                routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+                            state: {
+                                transaction: transactionJSON,
+                                account,
+                                recipient,
+                                initialPage: locations.transferSubmitted,
+                            },
                         },
-                    },
-                    cancelled: {
-                        pathname: routes.ACCOUNTS_SCHEDULED_TRANSFER,
-                        state: {
-                            account,
-                            amount,
-                            defaults: recoverState,
-                            explicit,
-                            recipient,
+                        cancelled: {
+                            pathname: routes.ACCOUNTS_SCHEDULED_TRANSFER,
+                            state: {
+                                account,
+                                amount,
+                                defaults: recoverState,
+                                explicit,
+                                recipient,
+                            },
                         },
+                        transaction: transactionJSON,
+                        account,
                     },
-                    transaction: transactionJSON,
-                    account,
-                },
-            })
-        );
-    }
+                })
+            );
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [JSON.stringify(account), estimatedFee, recipient]
+    );
 
     const BuildComponent = explicit ? ExplicitSchedule : RegularInterval;
+
+    if (!feeCalculator) {
+        return (
+            <>
+                <SimpleErrorModal
+                    show={Boolean(error)}
+                    content={error}
+                    onClick={() => dispatch(push(routes.ACCOUNTS))}
+                />
+            </>
+        );
+    }
 
     return (
         <TransferView
@@ -108,9 +148,12 @@ export default function BuildSchedule({ location }: Props) {
                     {' '}
                     Send fund with a release schedule{' '}
                 </h3>
-                <h2>
-                    {displayAsGTU(amount)} to {recipient.name}
-                </h2>
+                <div className={styles.scheduleAmount}>
+                    <h2>
+                        {displayAsGTU(amount)} to {recipient.name}
+                    </h2>
+                    <DisplayEstimatedFee estimatedFee={estimatedFee} />
+                </div>
                 <ButtonGroup
                     buttons={[
                         { label: 'Regular Interval', value: false },
@@ -124,6 +167,7 @@ export default function BuildSchedule({ location }: Props) {
             </div>
             <BuildComponent
                 defaults={defaults}
+                setScheduleLength={setScheduleLength}
                 submitSchedule={createTransaction}
                 amount={BigInt(amount)}
             />

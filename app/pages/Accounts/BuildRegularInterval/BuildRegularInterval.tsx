@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { EqualRecord, Schedule } from '~/utils/types';
 import { createRegularIntervalSchedule } from '~/utils/transactionHelpers';
 import { TimeConstants } from '~/utils/timeHelpers';
@@ -11,6 +12,7 @@ export interface Interval {
     label: string;
     value: number;
 }
+
 export const intervals: Interval[] = [
     { label: 'Minute', value: TimeConstants.Minute },
     { label: 'Hour', value: TimeConstants.Hour },
@@ -39,6 +41,7 @@ interface Props {
     defaults: Defaults;
     submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
+    setScheduleLength: (scheduleLength: number) => void;
 }
 
 /**
@@ -48,12 +51,19 @@ export default function RegularInterval({
     submitSchedule,
     amount,
     defaults,
+    setScheduleLength,
 }: Props) {
     const [chosenInterval, setChosenInterval] = useState<Interval>(
         defaults?.chosenInterval || intervals[0]
     );
+    const form = useForm<FormValues>({ mode: 'onTouched' });
+    const releases = form.watch(fieldNames.releases);
 
-    function createSchedule({ releases, startTime }: FormValues) {
+    useEffect(() => {
+        setScheduleLength(releases);
+    }, [setScheduleLength, releases]);
+
+    function createSchedule({ startTime }: FormValues) {
         const schedule = createRegularIntervalSchedule(
             amount,
             releases,
@@ -77,7 +87,11 @@ export default function RegularInterval({
                 name="interval"
                 title="Release Every:"
             />
-            <Form onSubmit={createSchedule} className={styles.regularInterval}>
+            <Form
+                onSubmit={createSchedule}
+                formMethods={form}
+                className={styles.regularInterval}
+            >
                 <Form.Input
                     label="Split transfer in:"
                     name={fieldNames.releases}
@@ -85,7 +99,7 @@ export default function RegularInterval({
                     autoFocus
                     type="number"
                     defaultValue={defaults?.releases || 1}
-                    rules={{ required: 'Releases required', min: 0 }}
+                    rules={{ required: 'Releases required', min: 1 }}
                 />
                 <Form.Timestamp
                     name={fieldNames.startTime}

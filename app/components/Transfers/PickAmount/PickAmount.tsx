@@ -2,11 +2,12 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
-import { AddressBookEntry, AccountInfo } from '~/utils/types';
+import { AddressBookEntry, AccountInfo, Fraction } from '~/utils/types';
 import { toMicroUnits, getGTUSymbol, isValidGTUString } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
 
@@ -14,6 +15,7 @@ interface Props {
     recipient?: AddressBookEntry | undefined;
     defaultAmount: string;
     header: string;
+    estimatedFee?: Fraction | undefined;
     toPickRecipient?(currentAmount: string): void;
     toConfirmTransfer(amount: string): void;
 }
@@ -38,6 +40,7 @@ interface PickAmountForm {
 export default function PickAmount({
     recipient,
     header,
+    estimatedFee,
     defaultAmount,
     toPickRecipient,
     toConfirmTransfer,
@@ -85,6 +88,10 @@ export default function PickAmount({
                         }}
                     />
                 </div>
+                <DisplayEstimatedFee
+                    className={styles.estimatedFee}
+                    estimatedFee={estimatedFee}
+                />
                 {toPickRecipient ? (
                     <>
                         <div style={{ display: 'none' }}>

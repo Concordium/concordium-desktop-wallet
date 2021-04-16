@@ -3,6 +3,7 @@ import {
     GasRewards,
     RewardFraction,
     TransactionFeeDistribution,
+    VerifyKey,
 } from './types';
 
 // This file contains interfaces that matches what is returned
@@ -81,9 +82,20 @@ interface ChainParameters {
     electionDifficulty: number;
 }
 
+interface KeysWithThreshold {
+    keys: VerifyKey[];
+    threshold: number;
+}
+
+export interface Keys {
+    rootKeys: KeysWithThreshold;
+    level1Keys: KeysWithThreshold;
+    level2Keys: Authorizations;
+}
+
 interface Updates {
-    authorizations: Authorizations;
     chainParameters: ChainParameters;
+    keys: Keys;
     updateQueues: UpdateQueues;
 }
 
