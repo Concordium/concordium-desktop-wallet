@@ -78,6 +78,10 @@ export async function insertNewCredential(
     return dispatch(addCredential(parsed));
 }
 
+/**
+ * updates the credentialIndex of the credential with the given credId.
+ * @param credentialIndex, the new value to set. If this is undefined, this will remove the current index.
+ */
 export async function updateCredentialIndex(
     dispatch: Dispatch,
     credId: string,
