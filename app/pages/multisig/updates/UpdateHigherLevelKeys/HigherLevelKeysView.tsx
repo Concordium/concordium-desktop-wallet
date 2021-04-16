@@ -1,6 +1,10 @@
 import React from 'react';
 import Loading from '~/cross-app-components/Loading';
-import { HigherLevelKeyUpdate, UpdateType } from '~/utils/types';
+import {
+    HigherLevelKeyUpdate,
+    KeyUpdateEntryStatus,
+    UpdateType,
+} from '~/utils/types';
 import {
     getKeySetSize,
     getThreshold,
@@ -35,6 +39,9 @@ function HigherLevelKeysView({
     const typeDisplayText = typeToDisplay(type);
     const currentThreshold = getThreshold(blockSummary.updates.keys, type);
     const currentKeySetSize = getKeySetSize(blockSummary.updates.keys, type);
+    const newKeySetSize = higherLevelKeyUpdate.updateKeys.filter(
+        (key) => key.status !== KeyUpdateEntryStatus.Removed
+    ).length;
 
     return (
         <>
@@ -55,7 +62,7 @@ function HigherLevelKeysView({
                 </p>
                 <p>
                     New size of {typeDisplayText} key set:{' '}
-                    <b>{higherLevelKeyUpdate.updateKeys.length}</b>
+                    <b>{newKeySetSize}</b>
                 </p>
             </div>
             <ul>

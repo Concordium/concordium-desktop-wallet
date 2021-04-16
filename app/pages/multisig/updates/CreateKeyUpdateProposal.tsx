@@ -78,6 +78,10 @@ export default function CreateKeyUpdateProposal({
             };
         })
     );
+    const newKeySetSize = newKeys.filter(
+        (key) => key.status !== KeyUpdateEntryStatus.Removed
+    ).length;
+
     const [threshold, setThreshold] = useState<number>(currentThreshold);
     const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
         new Date(getNow() + 5 * TimeConstants.Minute)
@@ -166,7 +170,7 @@ export default function CreateKeyUpdateProposal({
                         Current size of root key set: <b>{currentKeySetSize}</b>
                     </p>
                     <p>
-                        New size of root key set: <b>{newKeys.length}</b>
+                        New size of root key set: <b>{newKeySetSize}</b>
                     </p>
                     <ul>
                         {newKeys.map((keyWithStatus) => {
@@ -195,7 +199,7 @@ export default function CreateKeyUpdateProposal({
                             render={() => (
                                 <KeySetThreshold
                                     type={type}
-                                    maxThreshold={newKeys.length}
+                                    maxThreshold={newKeySetSize}
                                     currentThreshold={currentThreshold}
                                     setThreshold={setThreshold}
                                     submitFunction={submitFunction}
@@ -210,20 +214,18 @@ export default function CreateKeyUpdateProposal({
                                 <KeySetSize
                                     type={type}
                                     currentKeySetSize={currentKeySetSize}
-                                    newKeySetSize={
-                                        newKeys.filter(
-                                            (key) =>
-                                                key.status !==
-                                                KeyUpdateEntryStatus.Removed
-                                        ).length
-                                    }
+                                    newKeySetSize={newKeySetSize}
                                 />
                             )}
                         />
                         <Route
                             path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
                             render={() => (
-                                <ProposeNewKey type={type} addKey={addNewKey} />
+                                <ProposeNewKey
+                                    type={type}
+                                    addKey={addNewKey}
+                                    newKeys={newKeys}
+                                />
                             )}
                         />
                     </Switch>
