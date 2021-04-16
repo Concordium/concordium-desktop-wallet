@@ -42,7 +42,7 @@ export default class ProtocolUpdateHandler
             return undefined;
         }
 
-        const { threshold } = blockSummary.updates.authorizations.protocol;
+        const { threshold } = blockSummary.updates.keys.level2Keys.protocol;
         const sequenceNumber =
             blockSummary.updates.updateQueues.protocol.nextSequenceNumber;
 

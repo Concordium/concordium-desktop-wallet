@@ -76,7 +76,7 @@ async function isSignatureValid(
     const transactionHash = getTransactionHash(proposal);
 
     const matchingKey =
-        blockSummary.updates.authorizations.keys[
+        blockSummary.updates.keys.level2Keys.keys[
             signature.authorizationKeyIndex
         ];
     return ed.verify(

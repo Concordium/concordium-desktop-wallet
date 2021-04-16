@@ -46,7 +46,7 @@ export default class GasRewardsHandler
             blockSummary.updates.updateQueues.gasRewards.nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.authorizations.paramGASRewards;
+        } = blockSummary.updates.keys.level2Keys.paramGASRewards;
 
         return createUpdateMultiSignatureTransaction(
             gasRewards,

@@ -26,7 +26,7 @@ export async function signUpdateInstruction(
     const authorizationKey = await findAuthorizationKey(
         ledger,
         transactionHandler,
-        blockSummary.updates.authorizations
+        blockSummary.updates.keys.level2Keys
     );
     if (!authorizationKey) {
         throw new Error('Unable to get authorizationKey.');

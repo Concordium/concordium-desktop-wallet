@@ -47,7 +47,7 @@ export default class ElectionDifficultyHandler
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.authorizations.electionDifficulty;
+        } = blockSummary.updates.keys.level2Keys.electionDifficulty;
 
         return createUpdateMultiSignatureTransaction(
             {

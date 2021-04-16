@@ -44,7 +44,9 @@ export default class EuroPerEnergyHandler
 
         const sequenceNumber =
             blockSummary.updates.updateQueues.euroPerEnergy.nextSequenceNumber;
-        const { threshold } = blockSummary.updates.authorizations.euroPerEnergy;
+        const {
+            threshold,
+        } = blockSummary.updates.keys.level2Keys.euroPerEnergy;
 
         return createUpdateMultiSignatureTransaction(
             euroPerEnergy,
