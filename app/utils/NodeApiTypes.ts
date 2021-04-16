@@ -84,7 +84,7 @@ interface ChainParameters {
     electionDifficulty: number;
 }
 
-interface KeysWithThreshold {
+export interface KeysWithThreshold {
     keys: VerifyKey[];
     threshold: number;
 }

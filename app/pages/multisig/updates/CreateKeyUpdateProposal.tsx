@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
-import { BlockSummary } from '~/utils/NodeApiTypes';
+import { BlockSummary, KeysWithThreshold } from '~/utils/NodeApiTypes';
 import routes from '~/constants/routes.json';
 import styles from '../common/MultiSignatureFlowPage.module.scss';
 import ProposeNewKey from './UpdateHigherLevelKeys/ProposeNewKey';
@@ -30,6 +30,28 @@ interface Props {
 }
 
 /**
+ * Returns the key set that matches the update type, i.e. the key set
+ * that is updated by the given update type.
+ */
+function getCurrentKeysWithThreshold(
+    type: UpdateType,
+    blockSummary: BlockSummary
+): KeysWithThreshold {
+    switch (type) {
+        case UpdateType.UpdateRootKeysWithRootKeys:
+            return blockSummary.updates.keys.rootKeys;
+        case UpdateType.UpdateLevel1KeysWithRootKeys:
+            return blockSummary.updates.keys.level1Keys;
+        case UpdateType.UpdateLevel1KeysWithLevel1Keys:
+            return blockSummary.updates.keys.level1Keys;
+        default:
+            throw new Error(
+                `An update type that was not a higher level key update was received: ${type}`
+            );
+    }
+}
+
+/**
  * Component used for the subset of update instructions that are used to update the
  * higher level key sets (root keys and level 1 keys).
  */
@@ -38,19 +60,24 @@ export default function CreateKeyUpdateProposal({
     type,
     handleKeySubmit,
 }: Props) {
-    const { keys } = blockSummary.updates.keys.rootKeys;
-    const currentKeySetSize = keys.length;
-    const currentThreshold = blockSummary.updates.keys.rootKeys.threshold;
+    // Current values on the blockchain received from the node.
+    const currentKeysWithThreshold = getCurrentKeysWithThreshold(
+        type,
+        blockSummary
+    );
+    const currentKeys = currentKeysWithThreshold.keys;
+    const currentKeySetSize = currentKeys.length;
+    const currentThreshold = currentKeysWithThreshold.threshold;
 
+    // The values for the transaction proposal, i.e. the updated key set and threshold.
     const [newKeys, setNewKeys] = useState<KeyWithStatus[]>(
-        keys.map((key) => {
+        currentKeys.map((key) => {
             return {
                 verifyKey: key,
                 status: KeyUpdateEntryStatus.Unchanged,
             };
         })
     );
-
     const [threshold, setThreshold] = useState<number>(currentThreshold);
     const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
         new Date(getNow() + 5 * TimeConstants.Minute)
