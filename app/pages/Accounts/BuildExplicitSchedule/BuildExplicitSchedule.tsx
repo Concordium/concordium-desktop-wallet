@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import BinIcon from '@resources/svg/bin.svg';
 import PlusIcon from '@resources/svg/plus.svg';
@@ -20,6 +20,7 @@ interface Props {
     submitSchedule(schedule: Schedule, recoverState: Defaults): void;
     amount: bigint;
     defaults: Defaults;
+    setScheduleLength: (scheduleLength: number) => void;
 }
 
 function getDefaultTimestamp() {
@@ -43,6 +44,7 @@ export default function BuildExplicitSchedule({
     submitSchedule,
     amount,
     defaults,
+    setScheduleLength,
 }: Props) {
     const [schedule, setSchedule] = useState<Schedule>(
         defaults?.schedule || []
@@ -58,19 +60,17 @@ export default function BuildExplicitSchedule({
         amount: pointAmount,
         timestamp,
     }: AddSchedulePointForm) {
-        const newSchedule = schedule;
         const pointAmountMicro = toMicroUnits(pointAmount);
         const newPoint = {
             amount: pointAmountMicro.toString(),
             timestamp: timestamp?.getTime().toString(),
         };
         setUsedAmount(usedAmount + pointAmountMicro);
-        newSchedule.push(newPoint);
-        setSchedule(
-            newSchedule.sort(
-                (a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10)
-            )
+        const newSchedule = [...schedule, newPoint];
+        newSchedule.sort(
+            (a, b) => parseInt(a.timestamp, 10) - parseInt(b.timestamp, 10)
         );
+        setSchedule(newSchedule);
         setAdding(false);
         reset();
     }
@@ -87,6 +87,10 @@ export default function BuildExplicitSchedule({
         }
         return false;
     }
+
+    useEffect(() => {
+        setScheduleLength(schedule.length);
+    }, [schedule.length, setScheduleLength]);
 
     const addSchedulePointForm = (
         <Form onSubmit={addToSchedule} formMethods={methods}>

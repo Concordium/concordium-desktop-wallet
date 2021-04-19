@@ -1,9 +1,11 @@
 import {
+    chunkArray,
+    chunkBuffer,
     isHex,
     onlyDigitsNoLeadingZeroes,
     partition,
-    toChunks,
     toCSV,
+    collapseFraction,
 } from '../../app/utils/basicHelpers';
 
 test('Partition should split booleans correctly', () => {
@@ -104,53 +106,119 @@ test('An empty string does not validate', () => {
 });
 
 test('Empty array is chunked into an empty array', () => {
-    expect(toChunks(new Uint8Array(0), 1)).toStrictEqual([]);
+    expect(chunkBuffer(Buffer.from('', 'hex'), 1)).toStrictEqual([]);
 });
 
 test('Zero chunk size fails', () => {
-    expect(() => toChunks(new Uint8Array(0), 0)).toThrow();
+    expect(() => chunkBuffer(Buffer.from('', 'hex'), 0)).toThrow();
 });
 
 test('Negative chunk size fails', () => {
-    expect(() => toChunks(new Uint8Array(0), -5)).toThrow();
+    expect(() => chunkBuffer(Buffer.from('', 'hex'), -5)).toThrow();
 });
 
-test('Array is chunked into chunks of the supplied size', () => {
-    expect(toChunks(new Uint8Array(8), 2)).toStrictEqual([
-        new Uint8Array(2),
-        new Uint8Array(2),
-        new Uint8Array(2),
-        new Uint8Array(2),
+test('Buffer is chunked into chunks of the supplied size', () => {
+    expect(
+        chunkBuffer(Buffer.from('0000000000000000', 'hex'), 2)
+    ).toStrictEqual([
+        Buffer.from('0000', 'hex'),
+        Buffer.from('0000', 'hex'),
+        Buffer.from('0000', 'hex'),
+        Buffer.from('0000', 'hex'),
     ]);
 });
 
 test('Last chunk can be of a size less than the chunk size if array size is not divided equally', () => {
-    expect(toChunks(new Uint8Array(8), 3)).toStrictEqual([
-        new Uint8Array(3),
-        new Uint8Array(3),
-        new Uint8Array(2),
+    expect(
+        chunkBuffer(Buffer.from('0000000000000000', 'hex'), 3)
+    ).toStrictEqual([
+        Buffer.from('000000', 'hex'),
+        Buffer.from('000000', 'hex'),
+        Buffer.from('0000', 'hex'),
     ]);
 });
 
-test('It is possible to chunk a generic array', () => {
-    expect(toChunks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5)).toStrictEqual([
-        [1, 2, 3, 4, 5],
-        [6, 7, 8, 9, 10],
-    ]);
-});
+test('Buffer content is preserved in chunks', () => {
+    const array = Buffer.alloc(5);
+    array.writeUInt8(5, 0);
+    array.writeUInt8(1, 1);
+    array.writeUInt8(2, 2);
+    array.writeUInt8(3, 3);
+    array.writeUInt8(4, 4);
 
-test('Array content is preserved in chunks', () => {
-    const array = new Uint8Array(5);
-    array[0] = 5;
-    array[1] = 1;
-    array[2] = 2;
-    array[3] = 3;
-    array[4] = 4;
-
-    const asChunks = toChunks(array, 3);
+    const asChunks = chunkBuffer(array, 3);
     expect(asChunks[0][0]).toStrictEqual(5);
     expect(asChunks[0][1]).toStrictEqual(1);
     expect(asChunks[0][2]).toStrictEqual(2);
     expect(asChunks[1][0]).toStrictEqual(3);
     expect(asChunks[1][1]).toStrictEqual(4);
+});
+
+test('It is possible to chunk a generic array', () => {
+    expect(chunkArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 5)).toStrictEqual([
+        [1, 2, 3, 4, 5],
+        [6, 7, 8, 9, 10],
+    ]);
+});
+
+test('It is possible to chunk a buffer array', () => {
+    const buffers = [Buffer.of(1), Buffer.of(2), Buffer.of(3)];
+    const chunkedBuffers = chunkArray(buffers, 2);
+    expect(Buffer.concat(chunkedBuffers[0])).toHaveLength(2);
+    expect(Buffer.concat(chunkedBuffers[1])).toHaveLength(1);
+});
+
+test('collapseFraction should return numerator, if denominator is 1.', () => {
+    const fraction = { numerator: 13n, denominator: 1n };
+    expect(collapseFraction(fraction) === 13n).toBeTruthy();
+});
+
+test('if the denominator divides the numerator, collapseFraction should return the quotient. ', () => {
+    const fraction = { numerator: 500n, denominator: 25n };
+    expect(collapseFraction(fraction) === 20n).toBeTruthy();
+});
+
+test('Extra tests for collapseFraction with integer quotients', () => {
+    expect(
+        collapseFraction({ numerator: 39n, denominator: 13n }) === 3n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 100n, denominator: 1n }) === 100n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 514n, denominator: 257n }) === 2n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 39n, denominator: 39n }) === 1n
+    ).toBeTruthy();
+});
+
+test('if the denominator does not divide the numerator, collapseFraction should round up the result ', () => {
+    const fraction = { numerator: 13n, denominator: 3n };
+    expect(collapseFraction(fraction) === 5n).toBeTruthy();
+});
+
+test('Extra tests for collapseFraction with non-integer quotients', () => {
+    expect(
+        collapseFraction({ numerator: 39n, denominator: 12n }) === 4n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 100n, denominator: 3n }) === 34n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 514n, denominator: 4n }) === 129n
+    ).toBeTruthy();
+    expect(
+        collapseFraction({ numerator: 40n, denominator: 39n }) === 2n
+    ).toBeTruthy();
+});
+
+test('if the denominator is larger than the numerator, collapseFraction should return 1. ', () => {
+    const fraction = { numerator: 13n, denominator: 1000n };
+    expect(collapseFraction(fraction) === 1n).toBeTruthy();
+});
+
+test('if the denominator is zero, collapseFraction fails', () => {
+    const fraction = { numerator: 13n, denominator: 0n };
+    expect(() => collapseFraction(fraction)).toThrow();
 });

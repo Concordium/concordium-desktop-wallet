@@ -15,6 +15,8 @@ import {
     TransferToPublic,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
+import getTransactionCost from './transactionCosts';
+import { collapseFraction } from './basicHelpers';
 
 /*
  * Converts the given transaction into the structure, which is used in the database.
@@ -96,9 +98,12 @@ type TypeSpecific = Pick<
 
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a simple transfer, which cannot be converted by the generic function .
-function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
+function convertSimpleTransfer(
+    transaction: SimpleTransfer,
+    cost: bigint
+): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
-    const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
+    const estimatedTotal = amount + cost;
 
     return {
         transactionKind: TransactionKindString.Transfer,
@@ -111,10 +116,11 @@ function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a transfer to encrypted, which cannot be converted by the generic function .
 function convertTransferToEncrypted(
-    transaction: TransferToEncrypted
+    transaction: TransferToEncrypted,
+    cost: bigint
 ): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
-    const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
+    const estimatedTotal = amount + cost;
 
     return {
         transactionKind: TransactionKindString.TransferToEncrypted,
@@ -127,9 +133,12 @@ function convertTransferToEncrypted(
 
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a transfer to public, which cannot be converted by the generic function .
-function convertTransferToPublic(transaction: TransferToPublic): TypeSpecific {
+function convertTransferToPublic(
+    transaction: TransferToPublic,
+    cost: bigint
+): TypeSpecific {
     const amount = BigInt(transaction.payload.transferAmount);
-    const estimatedTotal = amount - BigInt(transaction.energyAmount); // TODO: convert from energy to cost
+    const estimatedTotal = amount - cost;
 
     return {
         transactionKind: TransactionKindString.TransferToPublic,
@@ -143,10 +152,11 @@ function convertTransferToPublic(transaction: TransferToPublic): TypeSpecific {
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a scheduled transfer, which cannot be converted by the generic function .
 function convertScheduledTransfer(
-    transaction: ScheduledTransfer
+    transaction: ScheduledTransfer,
+    cost: bigint
 ): TypeSpecific {
     const amount = getScheduledTransferAmount(transaction);
-    const estimatedTotal = amount + BigInt(transaction.energyAmount); // TODO: convert from energy to cost
+    const estimatedTotal = amount + cost;
 
     return {
         transactionKind: TransactionKindString.TransferWithSchedule,
@@ -161,19 +171,23 @@ function convertScheduledTransfer(
  * Converts an Account Transaction, so that it fits local Transfer Transaction model and
  * can be entered into the local database.
  */
-export function convertAccountTransaction(
+export async function convertAccountTransaction(
     transaction: AccountTransaction,
     hash: string
-): TransferTransaction {
+): Promise<TransferTransaction> {
+    const cost = collapseFraction(
+        transaction.estimatedFee || (await getTransactionCost(transaction))
+    );
+
     let typeSpecific;
     if (instanceOfSimpleTransfer(transaction)) {
-        typeSpecific = convertSimpleTransfer(transaction);
+        typeSpecific = convertSimpleTransfer(transaction, cost);
     } else if (instanceOfScheduledTransfer(transaction)) {
-        typeSpecific = convertScheduledTransfer(transaction);
+        typeSpecific = convertScheduledTransfer(transaction, cost);
     } else if (instanceOfTransferToEncrypted(transaction)) {
-        typeSpecific = convertTransferToEncrypted(transaction);
+        typeSpecific = convertTransferToEncrypted(transaction, cost);
     } else if (instanceOfTransferToPublic(transaction)) {
-        typeSpecific = convertTransferToPublic(transaction);
+        typeSpecific = convertTransferToPublic(transaction, cost);
     } else {
         throw new Error('unsupported transaction type - please implement');
     }
@@ -183,7 +197,7 @@ export function convertAccountTransaction(
         remote: false,
         originType: OriginType.Self,
         transactionHash: hash,
-        cost: transaction.energyAmount, // Fix this: convert from energy to cost
+        cost: cost.toString(),
         fromAddress: transaction.sender,
         blockTime: (Date.now() / 1000).toString(), // Temporary value, unless it fails
         status: TransactionStatus.Pending,

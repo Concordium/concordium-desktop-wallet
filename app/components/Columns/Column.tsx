@@ -44,13 +44,15 @@ export default function Column({
             {...props}
         >
             {header && <h3 className={styles.header}>{header}</h3>}
-            <div
-                className={clsx(
-                    styles.content,
-                    verticalPadding && styles.contentVertPadding
-                )}
-            >
-                {children}
+            <div className={styles.contentWrapper}>
+                <div
+                    className={clsx(
+                        styles.content,
+                        verticalPadding && styles.contentVertPadding
+                    )}
+                >
+                    {children}
+                </div>
             </div>
         </div>
     );

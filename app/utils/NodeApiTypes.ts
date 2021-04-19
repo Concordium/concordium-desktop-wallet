@@ -96,7 +96,6 @@ export interface Keys {
 }
 
 interface Updates {
-    authorizations: Authorizations;
     chainParameters: ChainParameters;
     keys: Keys;
     updateQueues: UpdateQueues;
