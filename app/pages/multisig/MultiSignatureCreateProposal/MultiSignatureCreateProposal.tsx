@@ -36,8 +36,11 @@ interface MultiSignatureCreateProposalForm {
  * The component retrieves the block summary of the last finalized block, which
  * is used to get the threshold and sequence number required for update instructions.
  */
-function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
-    const loading = !blockSummary;
+function MultiSignatureCreateProposal({
+    blockSummary,
+    consensusStatus,
+}: WithBlockSummary) {
+    const loading = !blockSummary || !consensusStatus;
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const dispatch = useDispatch();
@@ -142,9 +145,12 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                     {loading && (
                         <Loading text="Getting current settings from chain" />
                     )}
-                    {blockSummary && (
+                    {blockSummary && consensusStatus && (
                         <>
-                            <UpdateComponent blockSummary={blockSummary} />
+                            <UpdateComponent
+                                blockSummary={blockSummary}
+                                consensusStatus={consensusStatus}
+                            />
                             <Form.Timestamp
                                 name="effectiveTime"
                                 label="Effective Time"

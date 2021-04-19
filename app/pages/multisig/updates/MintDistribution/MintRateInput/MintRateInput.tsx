@@ -7,7 +7,7 @@ import {
 } from 'react-hook-form';
 import Form from '~/components/Form';
 import { toFraction, toResolution } from '~/utils/numberStringHelpers';
-import { EqualRecord } from '~/utils/types';
+import { ClassName, EqualRecord } from '~/utils/types';
 
 import styles from './MintRateInput.module.scss';
 
@@ -27,7 +27,7 @@ function DynamicFormProvider({
     ...props
 }: DynamicFormProviderProps): JSX.Element {
     if (!disabled) {
-        return <div>{children}</div>;
+        return <>{children}</>;
     }
 
     return <FormProvider {...props}>{children}</FormProvider>;
@@ -43,7 +43,7 @@ const formatNumber = new Intl.NumberFormat(undefined, {
     maximumSignificantDigits: 10,
 }).format;
 
-export interface MintRateInputProps {
+export interface MintRateInputProps extends ClassName {
     mantissa: string;
     exponent: string;
     slotsPerYear: string;
@@ -55,6 +55,7 @@ export default function MintRateInput({
     exponent,
     slotsPerYear,
     disabled = false,
+    className,
 }: MintRateInputProps): JSX.Element {
     const disabledForm = useForm<MintRateInputFields>();
     const form = useFormContext<MintRateInputFields>();
@@ -97,41 +98,43 @@ export default function MintRateInput({
     const renderApproxResult = approxResult !== 0 && approxResult !== Infinity;
 
     return (
-        <DynamicFormProvider disabled={disabled} {...dynamicForm}>
-            {renderApproxResult && (
-                <>
-                    <span title="Anual mint rate">
-                        {formatNumber(approxResult)}
-                    </span>{' '}
-                    ≈{' '}
-                </>
-            )}
-            (1 +{' '}
-            <Form.InlineNumber
-                className={styles.field}
-                name={fieldNames.mantissa}
-                defaultValue={mantissa}
-                rules={{
-                    required: 'Mantissa value is required',
-                    min: { value: 0, message: "Value can't be negative" },
-                }}
-                disabled={disabled}
-            />
-            e
-            <Form.InlineNumber
-                className={styles.field}
-                name={fieldNames.exponent}
-                defaultValue={exponent}
-                rules={{
-                    required: 'Exponent value is required',
-                }}
-                disabled={disabled}
-            />
-            )
-            <span className={styles.exponent} title="Slots per year">
-                {BigInt(slotsPerYear).toLocaleString()}
-            </span>{' '}
-            - 1
-        </DynamicFormProvider>
+        <div className={className}>
+            <DynamicFormProvider disabled={disabled} {...dynamicForm}>
+                {renderApproxResult && (
+                    <>
+                        <span title="Anual mint rate">
+                            {formatNumber(approxResult)}
+                        </span>{' '}
+                        ≈{' '}
+                    </>
+                )}
+                (1 +{' '}
+                <Form.InlineNumber
+                    className={styles.field}
+                    name={fieldNames.mantissa}
+                    defaultValue={mantissa}
+                    rules={{
+                        required: 'Mantissa value is required',
+                        min: { value: 0, message: "Value can't be negative" },
+                    }}
+                    disabled={disabled}
+                />
+                e
+                <Form.InlineNumber
+                    className={styles.field}
+                    name={fieldNames.exponent}
+                    defaultValue={exponent}
+                    rules={{
+                        required: 'Exponent value is required',
+                    }}
+                    disabled={disabled}
+                />
+                )
+                <span className={styles.exponent} title="Slots per year">
+                    {BigInt(slotsPerYear).toLocaleString()}
+                </span>{' '}
+                - 1
+            </DynamicFormProvider>
+        </div>
     );
 }

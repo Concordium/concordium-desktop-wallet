@@ -1,4 +1,9 @@
-import { Authorization, Authorizations, BlockSummary } from './NodeApiTypes';
+import {
+    Authorization,
+    Authorizations,
+    BlockSummary,
+    ConsensusStatus,
+} from './NodeApiTypes';
 import {
     MultiSignatureTransaction,
     UpdateInstruction,
@@ -18,6 +23,7 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
+    consensusStatus: ConsensusStatus;
 }
 
 /**
