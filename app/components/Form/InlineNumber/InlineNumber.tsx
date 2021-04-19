@@ -79,12 +79,19 @@ export default function InlineNumber({
     ...inputProps
 }: InlineNumberProps): JSX.Element {
     const format = useCallback(
-        allowFractions
-            ? formatNumberStringWithDigits(
-                  ensureDigits,
-                  allowFractions !== true ? allowFractions : undefined
-              )
-            : ensureValidBigInt,
+        (v?: string) => {
+            if (allowFractions === false) {
+                return ensureValidBigInt(v);
+            }
+            if (typeof allowFractions === 'number') {
+                return formatNumberStringWithDigits(
+                    ensureDigits,
+                    allowFractions
+                )(value);
+            }
+
+            return value ?? '';
+        },
         [ensureDigits, allowFractions]
     );
 
