@@ -695,6 +695,12 @@ export function isUpdateLevel1KeysWithRootKeys(
     return UpdateType.UpdateLevel1KeysWithRootKeys === transaction.type;
 }
 
+export function isUpdateLevel1KeysWithLevel1Keys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel1KeysWithLevel1Keys === transaction.type;
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
