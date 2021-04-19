@@ -26,7 +26,7 @@ export default function KeySetSize({
     return (
         <>
             <div>
-                <h2>Size of the {typeToDisplay(type)} set</h2>
+                <h2>Size of the {typeToDisplay(type)} key set</h2>
                 <p>
                     Please confirm that the changes to the total amount of{' '}
                     {typeToDisplay(type)} keys is as expected.

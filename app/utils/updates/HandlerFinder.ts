@@ -21,6 +21,7 @@ import MicroGtuPerEuroHandler from './MicroGtuPerEuroHandler';
 import MintDistributionHandler from './MintDistributionHandler';
 import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
+import UpdateLevel1KeysWithRootKeysHandler from './UpdateLevel1KeysWithRootKeysHandler';
 import UpdateRootKeysWithRootKeysHandler from './UpdateRootKeysWithRootKeysHandler';
 
 class HandlerTypeMiddleware<T>
@@ -110,6 +111,10 @@ export default function findHandler(
         case UpdateType.UpdateRootKeysWithRootKeys:
             return new HandlerTypeMiddleware(
                 new UpdateRootKeysWithRootKeysHandler()
+            );
+        case UpdateType.UpdateLevel1KeysWithRootKeys:
+            return new HandlerTypeMiddleware(
+                new UpdateLevel1KeysWithRootKeysHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);

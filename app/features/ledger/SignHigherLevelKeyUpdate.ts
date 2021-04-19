@@ -8,14 +8,12 @@ import {
 } from '../../utils/UpdateSerialization';
 import { serializeVerifyKey } from '~/utils/serializationHelpers';
 
-// TODO It should take this as input instead, so we can support all 3 types.
-const INS = 0x28;
-
 export default async function signHigherLevelKeyUpdate(
     transport: Transport,
     path: number[],
     transaction: UpdateInstruction<HigherLevelKeyUpdate>,
-    serializedPayload: Buffer
+    serializedPayload: Buffer,
+    INS: number
 ): Promise<Buffer> {
     const updateHeaderWithPayloadSize = {
         ...transaction.header,

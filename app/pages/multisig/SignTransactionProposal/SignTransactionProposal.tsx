@@ -187,7 +187,7 @@ function SignTransactionProposalView({ location }: Props) {
                                         }}
                                         disabled={signing}
                                     >
-                                        I am sure that the propsed changes are
+                                        I am sure that the proposed changes are
                                         correct
                                     </Form.Checkbox>
                                     <Form.Submit

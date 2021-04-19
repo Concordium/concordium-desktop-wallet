@@ -26,6 +26,7 @@ import {
     UpdateInstruction,
     UnsignedCredentialDeploymentInformation,
     HigherLevelKeyUpdate,
+    UpdateType,
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -258,11 +259,29 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
+        let INS;
+        if (transaction.type === UpdateType.UpdateRootKeysWithRootKeys) {
+            INS = 0x28;
+        } else if (
+            transaction.type === UpdateType.UpdateLevel1KeysWithRootKeys
+        ) {
+            INS = 0x29;
+        } else if (
+            transaction.type === UpdateType.UpdateLevel1KeysWithLevel1Keys
+        ) {
+            INS = 0x2b;
+        } else {
+            throw new Error(
+                'The supplied transaction was not a higher level key update.'
+            );
+        }
+
         return signHigherLevelKeyUpdate(
             this.transport,
             path,
             transaction,
-            serializedPayload
+            serializedPayload,
+            INS
         );
     }
 
