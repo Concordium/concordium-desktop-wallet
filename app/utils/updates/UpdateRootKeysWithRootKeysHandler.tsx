@@ -4,7 +4,7 @@ import UpdateRootKeys from '~/pages/multisig/updates/UpdateHigherLevelKeys/Updat
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorization, Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
 import {
     UpdateInstruction,
@@ -90,9 +90,10 @@ export default class UpdateRootKeysWithRootKeysHandler
         );
     }
 
-    getAuthorization(authorizations: Authorizations) {
-        // TODO This should throw an error if called, as it is not required by this type.
-        return authorizations.bakerStakeThreshold;
+    getAuthorization(_authorizations: Authorizations): Authorization {
+        throw new Error(
+            'If this method was invoked, then it happened due to an implementation error.'
+        );
     }
 
     update = UpdateRootKeys;
