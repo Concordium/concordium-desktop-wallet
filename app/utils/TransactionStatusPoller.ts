@@ -21,6 +21,12 @@ import { getTransactionSubmissionId } from './transactionHash';
 import { updateSignatureThreshold } from '~/features/AccountSlice';
 import { updateCredentialIndex } from '~/features/CredentialSlice';
 
+/**
+ * Given an UpdateAccountCredentials transaction, update the local credentialIndices
+ * according to the transaction, and update the signatureThreshold of the account.
+ * For each added credential, update its index. For each removed credential,
+ * remove its index to indicate that it has been removed.
+ */
 export function updateAccountCredentialsPerformConsequence(
     dispatch: Dispatch,
     transaction: UpdateAccountCredentials
