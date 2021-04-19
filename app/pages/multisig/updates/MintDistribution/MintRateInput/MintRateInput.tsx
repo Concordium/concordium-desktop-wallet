@@ -1,140 +1,138 @@
-import React, { useCallback, useMemo } from 'react';
-import {
-    FormProvider,
-    FormProviderProps,
-    useForm,
-    useFormContext,
-} from 'react-hook-form';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import Form from '~/components/Form';
-import { toFraction, toResolution } from '~/utils/numberStringHelpers';
 import { ClassName, EqualRecord } from '~/utils/types';
 
 import styles from './MintRateInput.module.scss';
+
+const mintRateFormatter = Intl.NumberFormat(undefined, {
+    maximumSignificantDigits: 9,
+}).format;
 
 interface MintRateInputFields {
     mantissa: string;
     exponent: string;
 }
 
-interface DynamicFormProviderProps
-    extends FormProviderProps<MintRateInputFields> {
-    disabled: boolean;
-}
-
-function DynamicFormProvider({
-    disabled,
-    children,
-    ...props
-}: DynamicFormProviderProps): JSX.Element {
-    if (!disabled) {
-        return <>{children}</>;
-    }
-
-    return <FormProvider {...props}>{children}</FormProvider>;
-}
-
 const fieldNames: EqualRecord<MintRateInputFields> = {
     mantissa: 'mantissa',
     exponent: 'exponent',
 };
-
-const formatNumber = new Intl.NumberFormat(undefined, {
-    useGrouping: true,
-    maximumSignificantDigits: 10,
-}).format;
+interface InnerFields {
+    anualRate: string;
+    mintPerSlot: string;
+}
+const innerFieldNames: EqualRecord<InnerFields> = {
+    anualRate: 'anualRate',
+    mintPerSlot: 'mintPerSlot',
+};
 
 export interface MintRateInputProps extends ClassName {
-    mantissa: string;
-    exponent: string;
-    slotsPerYear: string;
+    mintPerSlot: number;
+    slotsPerYear: number;
     disabled?: boolean;
 }
 
 export default function MintRateInput({
-    mantissa,
-    exponent,
+    mintPerSlot,
     slotsPerYear,
     disabled = false,
     className,
 }: MintRateInputProps): JSX.Element {
-    const disabledForm = useForm<MintRateInputFields>();
-    const form = useFormContext<MintRateInputFields>();
+    const innerForm = useForm<InnerFields>();
 
-    const dynamicForm = disabled ? disabledForm : form;
-    const { watch } = dynamicForm;
-    const fields = watch([fieldNames.mantissa, fieldNames.exponent], {
-        [fieldNames.mantissa]: mantissa,
-        [fieldNames.exponent]: exponent,
-    });
+    const { watch, setValue } = innerForm;
 
-    const calculateFields = useCallback(
-        (value: string) => {
-            const parsed = Number(fields.exponent);
-            const absolute = parsed >= 0 ? parsed : -parsed;
-            const resolution = BigInt(`1${'0'.repeat(absolute)}`);
-
-            if (parsed > 0) {
-                return toResolution(resolution)(value)?.toString();
-            }
-
-            if (parsed < 0) {
-                return toFraction(resolution)(value);
-            }
-
-            return value;
-        },
-        [fields.exponent]
+    const calculateAnualRate = useCallback(
+        (m: number) => (1 + Number(m)) ** Number(slotsPerYear) - 1,
+        [slotsPerYear]
+    );
+    const calculateMintPerSlot = useCallback(
+        (a: number) => (1 + Number(a)) ** (1 / Number(slotsPerYear)) - 1,
+        [slotsPerYear]
     );
 
-    const fieldsValue = useMemo(() => calculateFields(fields.mantissa), [
-        calculateFields,
-        fields.mantissa,
-    ]);
+    const initialAnualRate = calculateAnualRate(mintPerSlot).toString();
+    const fields = watch(
+        [innerFieldNames.mintPerSlot, innerFieldNames.anualRate],
+        {
+            [innerFieldNames.mintPerSlot]: mintRateFormatter(mintPerSlot),
+            [innerFieldNames.anualRate]: initialAnualRate,
+        }
+    );
 
-    const approxResult = useMemo(() => {
-        return (1 + Number(fieldsValue)) ** Number(slotsPerYear) - 1;
-    }, [fieldsValue, slotsPerYear]);
+    useEffect(() => {
+        const calculated = calculateAnualRate(Number(fields.mintPerSlot));
+        setValue(innerFieldNames.anualRate, calculated.toString());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fields.mintPerSlot]);
 
-    const renderApproxResult = approxResult !== 0 && approxResult !== Infinity;
+    useEffect(() => {
+        const calculated = calculateMintPerSlot(Number(fields.anualRate));
+        setValue(innerFieldNames.mintPerSlot, mintRateFormatter(calculated));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fields.anualRate]);
+
+    const { mantissa, exponent } = useMemo(() => {
+        const [, fractions] = fields.mintPerSlot.split('.');
+        if (!fractions) {
+            return {};
+        }
+
+        return {
+            [fieldNames.mantissa]: BigInt(fractions).toString(),
+            [fieldNames.exponent]: fractions.length,
+        };
+    }, [fields.mintPerSlot]);
 
     return (
         <div className={className}>
-            <DynamicFormProvider disabled={disabled} {...dynamicForm}>
-                {renderApproxResult && (
-                    <>
-                        <span title="Anual mint rate">
-                            {formatNumber(approxResult)}
-                        </span>{' '}
-                        ≈{' '}
-                    </>
-                )}
-                (1 +{' '}
+            <FormProvider {...innerForm}>
                 <Form.InlineNumber
                     className={styles.field}
-                    name={fieldNames.mantissa}
-                    defaultValue={mantissa}
+                    name={innerFieldNames.anualRate}
+                    allowFractions
+                    defaultValue={initialAnualRate}
                     rules={{
-                        required: 'Mantissa value is required',
+                        required: 'Field is required',
                         min: { value: 0, message: "Value can't be negative" },
                     }}
                     disabled={disabled}
-                />
-                e
+                />{' '}
+                ≈ (1 +{' '}
                 <Form.InlineNumber
                     className={styles.field}
-                    name={fieldNames.exponent}
-                    defaultValue={exponent}
+                    name={innerFieldNames.mintPerSlot}
+                    defaultValue={mintRateFormatter(mintPerSlot)}
                     rules={{
-                        required: 'Exponent value is required',
+                        required: 'Field is required',
+                        min: { value: 0, message: "Value can't be negative" },
                     }}
                     disabled={disabled}
+                    allowFractions
                 />
                 )
                 <span className={styles.exponent} title="Slots per year">
                     {BigInt(slotsPerYear).toLocaleString()}
                 </span>{' '}
                 - 1
-            </DynamicFormProvider>
+            </FormProvider>
+            {!disabled && (
+                <>
+                    <Form.Input
+                        name="mantissa"
+                        type="hidden"
+                        value={mantissa}
+                        readOnly
+                    />
+                    <Form.Input
+                        name="exponent"
+                        type="hidden"
+                        value={exponent}
+                        readOnly
+                    />
+                </>
+            )}
         </div>
     );
 }

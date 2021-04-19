@@ -64,8 +64,8 @@ export default function UpdateMintDistribution({
                 <h3>Current Mint Distribution</h3>
                 {mintPerSlot}
                 <MintRateInput
-                    mintPerSlot={mintPerSlot.toString()}
-                    slotsPerYear={slotsPerYear.toString()}
+                    mintPerSlot={mintPerSlot}
+                    slotsPerYear={slotsPerYear}
                     disabled
                     className="mB20"
                 />
@@ -78,8 +78,8 @@ export default function UpdateMintDistribution({
             <div>
                 <h3>New Mint Distribution</h3>
                 <MintRateInput
-                    mintPerSlot={mintPerSlot.toString()}
-                    slotsPerYear={slotsPerYear.toString()}
+                    mintPerSlot={mintPerSlot}
+                    slotsPerYear={slotsPerYear}
                     className="mB20"
                 />
                 <FormRewardDistribution

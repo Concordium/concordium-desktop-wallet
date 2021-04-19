@@ -64,7 +64,7 @@ export interface Authorizations {
 // which does not match the serialization format entirely. Therefore
 // this interface is required.
 interface MintDistributionNode {
-    mintPerSlot: string;
+    mintPerSlot: number;
     bakingReward: RewardFraction;
     finalizationReward: RewardFraction;
 }

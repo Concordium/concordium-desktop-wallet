@@ -21,15 +21,13 @@ const Template: Story<MintRateInputProps> = (args) => {
 
 export const Primary = Template.bind({});
 Primary.args = {
-    mantissa: '123',
-    exponent: '-12',
-    slotsPerYear: '126144000',
+    mintPerSlot: 0.0000000001234,
+    slotsPerYear: 126144000,
 };
 
 export const Disabled = Template.bind({});
 Disabled.args = {
-    mantissa: '123',
-    exponent: '-12',
-    slotsPerYear: '126144000',
+    mintPerSlot: 0.0000000001234,
+    slotsPerYear: 126144000,
     disabled: true,
 };
