@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import PickName from '../AccountCreation/PickName';
 import PageLayout from '~/components/PageLayout';
 import Form from '~/components/Form';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
@@ -20,6 +19,7 @@ import {
     loadIdentities,
 } from '~/features/IdentitySlice';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
+import styles from './GenesisAccount.module.scss';
 
 interface FileInputForm {
     file: FileInputValue;
@@ -39,7 +39,10 @@ function inputFile(saveFileContent: (file: string) => void) {
     }
 
     return (
-        <Form<FileInputForm> onSubmit={handleSubmit}>
+        <Form<FileInputForm>
+            className={styles.fileForm}
+            onSubmit={handleSubmit}
+        >
             <Form.File
                 name="file"
                 placeholder="Drag and drop file here"
@@ -53,6 +56,60 @@ function inputFile(saveFileContent: (file: string) => void) {
     );
 }
 
+interface PickSettingsProps {
+    onSubmit(name: string, balance: string, address?: string): void;
+}
+
+interface PickSettingsForm {
+    name: string;
+    balance: string;
+    address: string | undefined;
+}
+
+function PickSettings({ onSubmit }: PickSettingsProps) {
+    const [existingAccount, setExistingAccount] = useState(false);
+
+    function setSettings(values: PickSettingsForm) {
+        const { name, balance, address } = values;
+        onSubmit(name, balance, address);
+    }
+
+    return (
+        <Form onSubmit={setSettings}>
+            <Form.Input
+                className={styles.settingInput}
+                name="name"
+                placeholder="Account name"
+                rules={{ required: 'name is required' }}
+            />
+            <div className={styles.settingInput}>
+                <Form.Checkbox
+                    name="existingAccount"
+                    onChange={(e) => setExistingAccount(e.target.checked)}
+                >
+                    Existing Account:
+                </Form.Checkbox>
+                {existingAccount ? (
+                    <Form.Input
+                        name="address"
+                        placeholder="Address"
+                        rules={{ required: 'address is required' }}
+                    />
+                ) : (
+                    <Form.Input
+                        className={styles.settingInput}
+                        name="balance"
+                        type="number"
+                        placeholder="Input Balance as GTU"
+                        rules={{ required: 'balance is required' }}
+                    />
+                )}
+            </div>
+            <Form.Submit className={styles.settingInput}>Continue</Form.Submit>
+        </Form>
+    );
+}
+
 enum Locations {
     Name,
     Context,
@@ -62,7 +119,7 @@ enum Locations {
 const subtitle = (currentLocation: Locations) => {
     switch (currentLocation) {
         case Locations.Name:
-            return 'Pick Name';
+            return 'Settings';
         case Locations.Context:
             return 'Input Context file';
         case Locations.Create:
@@ -80,7 +137,8 @@ export default function GenesisAccount(): JSX.Element {
     const [currentLocation, setLocation] = useState<Locations>(Locations.Name);
     const [accountName, setAccountName] = useState('');
     const [context, setContext] = useState<string | undefined>();
-    const [balance] = useState<string>('100');
+    const [accountAddress, setAddress] = useState<string | undefined>();
+    const [balance, setBalance] = useState<string>('');
     const [identityId, setIdentityId] = useState<number>(defaultId);
 
     const createdAt = '202104';
@@ -113,6 +171,7 @@ export default function GenesisAccount(): JSX.Element {
         } else {
             setIdentityId(identities[0].id);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     async function createAccount(
@@ -136,6 +195,10 @@ export default function GenesisAccount(): JSX.Element {
             createdAt,
             displayMessage
         );
+
+        if (accountAddress) {
+            accountDetails.address = accountAddress;
+        }
 
         const success = await saveFile(
             JSON.stringify({
@@ -172,16 +235,26 @@ export default function GenesisAccount(): JSX.Element {
     }
 
     function Create() {
-        return <SimpleLedger ledgerCall={createAccount} />;
+        return (
+            <div className={styles.genesisContainer}>
+                <SimpleLedger ledgerCall={createAccount} />
+            </div>
+        );
     }
 
     function Current() {
         switch (currentLocation) {
             case Locations.Name:
                 return (
-                    <PickName
-                        submitName={(name: string) => {
+                    <PickSettings
+                        onSubmit={(
+                            name: string,
+                            newBalance: string,
+                            address?: string
+                        ) => {
                             setAccountName(name);
+                            setBalance(newBalance);
+                            setAddress(address);
                             setLocation(Locations.Context);
                         }}
                     />
@@ -203,7 +276,7 @@ export default function GenesisAccount(): JSX.Element {
             <PageLayout.Header>
                 <h1> New Account | Genesis Account </h1>
             </PageLayout.Header>
-            <PageLayout.Container>
+            <PageLayout.Container className={styles.genesisContainer}>
                 <h2>{subtitle(currentLocation)}</h2>
                 <Current />
             </PageLayout.Container>
