@@ -16,6 +16,7 @@ import {
  * added. If additional fields are required, then extend the interface.
  */
 export interface ConsensusStatus {
+    slotDuration: number;
     lastFinalizedBlock: string;
 }
 
