@@ -1,7 +1,7 @@
 import React from 'react';
 // import { Validate } from 'react-hook-form';
 
-import { EqualRecord, MintRate } from '~/utils/types';
+import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 
@@ -44,52 +44,47 @@ export default function UpdateMintDistribution({
     blockSummary,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
-    const currentMintDistribution =
-        blockSummary.updates.chainParameters.rewardParameters.mintDistribution;
+    const {
+        bakingReward,
+        finalizationReward,
+        mintPerSlot,
+    } = blockSummary.updates.chainParameters.rewardParameters.mintDistribution;
 
-    // TODO Parse the current mint distribution value instead of hardcording this value.
-    const mintRate: MintRate = {
-        mantissa: 7555999,
-        exponent: -16,
-    };
     const slotsPerSecond = 1000 / consensusStatus.slotDuration;
     const slotsPerYear = slotsPerSecond * 60 * 60 * 24 * 365.25;
 
-    const currentValue: RewardDistributionValue = {
-        first: currentMintDistribution.bakingReward * rewardFractionResolution,
-        second:
-            currentMintDistribution.finalizationReward *
-            rewardFractionResolution,
+    const currentDistribitionRatio: RewardDistributionValue = {
+        first: bakingReward * rewardFractionResolution,
+        second: finalizationReward * rewardFractionResolution,
     };
 
     return (
         <>
             <div>
                 <h3>Current Mint Distribution</h3>
+                {mintPerSlot}
                 <MintRateInput
-                    mantissa={mintRate.mantissa.toString()}
-                    exponent={mintRate.exponent.toString()}
+                    mintPerSlot={mintPerSlot.toString()}
                     slotsPerYear={slotsPerYear.toString()}
                     disabled
                     className="mB20"
                 />
                 <RewardDistribution
                     labels={rewardDistributionLabels}
-                    value={currentValue}
+                    value={currentDistribitionRatio}
                     disabled
                 />
             </div>
             <div>
                 <h3>New Mint Distribution</h3>
                 <MintRateInput
-                    mantissa={mintRate.mantissa.toString()}
-                    exponent={mintRate.exponent.toString()}
+                    mintPerSlot={mintPerSlot.toString()}
                     slotsPerYear={slotsPerYear.toString()}
                     className="mB20"
                 />
                 <FormRewardDistribution
                     name={fieldNames.rewardDistribution}
-                    defaultValue={currentValue}
+                    defaultValue={currentDistribitionRatio}
                     labels={rewardDistributionLabels}
                     rules={{ required: 'Reward distribution is required' }}
                 />
