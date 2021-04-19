@@ -9,15 +9,15 @@ import Form from '~/components/Form';
 import { toFraction, toResolution } from '~/utils/numberStringHelpers';
 import { EqualRecord } from '~/utils/types';
 
-import styles from './InflationInput.module.scss';
+import styles from './MintRateInput.module.scss';
 
-interface InflationInputFields {
+interface MintRateInputFields {
     mantissa: string;
     exponent: string;
 }
 
 interface DynamicFormProviderProps
-    extends FormProviderProps<InflationInputFields> {
+    extends FormProviderProps<MintRateInputFields> {
     disabled: boolean;
 }
 
@@ -33,7 +33,7 @@ function DynamicFormProvider({
     return <FormProvider {...props}>{children}</FormProvider>;
 }
 
-const fieldNames: EqualRecord<InflationInputFields> = {
+const fieldNames: EqualRecord<MintRateInputFields> = {
     mantissa: 'mantissa',
     exponent: 'exponent',
 };
@@ -43,21 +43,21 @@ const formatNumber = new Intl.NumberFormat(undefined, {
     maximumSignificantDigits: 10,
 }).format;
 
-export interface InflationInputProps {
+export interface MintRateInputProps {
     mantissa: string;
     exponent: string;
     slotsPerYear: string;
     disabled?: boolean;
 }
 
-export default function InflationInput({
+export default function MintRateInput({
     mantissa,
     exponent,
     slotsPerYear,
     disabled = false,
-}: InflationInputProps): JSX.Element {
-    const disabledForm = useForm<InflationInputFields>();
-    const form = useFormContext<InflationInputFields>();
+}: MintRateInputProps): JSX.Element {
+    const disabledForm = useForm<MintRateInputFields>();
+    const form = useFormContext<MintRateInputFields>();
 
     const dynamicForm = disabled ? disabledForm : form;
     const { watch } = dynamicForm;

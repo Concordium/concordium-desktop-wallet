@@ -2,19 +2,19 @@ import React from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
 import { FormProvider, useForm } from 'react-hook-form';
-import InflationInput, { InflationInputProps } from './InflationInput';
+import MintRateInput, { MintRateInputProps } from './MintRateInput';
 
 export default {
-    title: 'Multi Signature/Update Mint Distribution/Inflation Input',
-    component: InflationInput,
+    title: 'Multi Signature/Update Mint Distribution/Mint Rate Input',
+    component: MintRateInput,
 } as Meta;
 
-const Template: Story<InflationInputProps> = (args) => {
+const Template: Story<MintRateInputProps> = (args) => {
     const form = useForm();
 
     return (
         <FormProvider {...form}>
-            <InflationInput {...args} />
+            <MintRateInput {...args} />
         </FormProvider>
     );
 };

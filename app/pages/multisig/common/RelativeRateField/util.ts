@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 
-import { valueNoOp } from '~/utils/basicHelpers';
 import { toFraction, toResolution } from '~/utils/numberStringHelpers';
 
 interface GetConverters {
@@ -20,7 +19,7 @@ export const useNormalisation = (denominator: bigint): GetConverters =>
             };
         } catch {
             return {
-                safeToFraction: valueNoOp,
+                safeToFraction: (v) => v?.toString(),
                 safeToResolution: BigInt,
                 isNormalised: false,
             };
