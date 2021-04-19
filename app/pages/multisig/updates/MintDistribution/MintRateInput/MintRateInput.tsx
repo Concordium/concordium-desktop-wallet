@@ -98,7 +98,14 @@ export default function MintRateInput({
 
     return (
         <DynamicFormProvider disabled={disabled} {...dynamicForm}>
-            {renderApproxResult && `${formatNumber(approxResult)} ≈ `}
+            {renderApproxResult && (
+                <>
+                    <span title="Anual mint rate">
+                        {formatNumber(approxResult)}
+                    </span>{' '}
+                    ≈{' '}
+                </>
+            )}
             (1 +{' '}
             <Form.InlineNumber
                 className={styles.field}
@@ -121,7 +128,7 @@ export default function MintRateInput({
                 disabled={disabled}
             />
             )
-            <span className={styles.exponent}>
+            <span className={styles.exponent} title="Slots per year">
                 {BigInt(slotsPerYear).toLocaleString()}
             </span>{' '}
             - 1
