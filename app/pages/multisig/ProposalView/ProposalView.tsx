@@ -25,7 +25,7 @@ import SimpleErrorModal, {
 import routes from '~/constants/routes.json';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { expirationEffect } from '~/utils/ProposalHelper';
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
+import ExpiredTransactionView from '../ExpiredTransactionView';
 import Button from '~/cross-app-components/Button';
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '../MultiSignatureLayout';
@@ -157,7 +157,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                     <Columns.Column header="Transaction Details">
                         <div className={styles.columnContent}>
                             <TransactionDetails transaction={transaction} />
-                            <ExpiredEffectiveTimeView
+                            <ExpiredTransactionView
                                 transaction={transaction}
                                 proposal={proposal}
                             />

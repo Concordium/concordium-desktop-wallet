@@ -10,7 +10,6 @@ export function stringify(input: any) {
             return { '@type': types.BigInt, value: v.toString() };
         }
         if (v && v.type === types.Buffer) {
-            console.log('test');
             return {
                 '@type': types.Buffer,
                 value: Buffer.from(v).toString('base64'),

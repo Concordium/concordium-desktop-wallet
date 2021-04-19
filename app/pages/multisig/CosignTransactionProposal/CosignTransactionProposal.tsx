@@ -29,7 +29,7 @@ import TransactionExpirationDetails from '~/components/TransactionExpirationDeta
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import getTransactionHash from '~/utils/transactionHash';
 
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
+import ExpiredTransactionView from '../ExpiredTransactionView';
 import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import styles from './CosignTransactionProposal.module.scss';
@@ -201,7 +201,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                             {instanceOfUpdateInstruction(
                                                 transactionObject
                                             ) && (
-                                                <ExpiredEffectiveTimeView
+                                                <ExpiredTransactionView
                                                     transaction={
                                                         transactionObject
                                                     }

@@ -26,7 +26,7 @@ import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import Form from '~/components/Form';
 import TransactionDetails from '~/components/TransactionDetails';
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
+import ExpiredTransactionView from '../ExpiredTransactionView';
 import { ensureProps } from '~/utils/componentHelpers';
 import getTransactionHash from '~/utils/transactionHash';
 
@@ -144,7 +144,7 @@ function SignTransactionProposalView({ location }: Props) {
                     <section className={styles.columnContent}>
                         <TransactionDetails transaction={transactionObject} />
                         {instanceOfUpdateInstruction(transactionObject) && (
-                            <ExpiredEffectiveTimeView
+                            <ExpiredTransactionView
                                 transaction={transactionObject}
                             />
                         )}

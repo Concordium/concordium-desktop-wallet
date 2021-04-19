@@ -53,6 +53,7 @@ function subTitle(currentLocation: string) {
             return 'New Credentials';
         case routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD:
             return '';
+
         case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
             return 'Signature and Hardware Wallet';
         default:
@@ -162,13 +163,16 @@ function listCredentials(
         }
         return (
             <div key={credId} className={styles.credentialListElement}>
-                {leftText && isEditing ? (
-                    <Button onClick={() => updateCredential([credId, status])}>
-                        {leftText}
-                    </Button>
-                ) : (
-                    <div />
-                )}
+                <div>
+                    {leftText && isEditing ? (
+                        <Button
+                            size="small"
+                            onClick={() => updateCredential([credId, status])}
+                        >
+                            {leftText}
+                        </Button>
+                    ) : null}
+                </div>
                 <div>
                     <h5>{credId}</h5>
                 </div>
@@ -289,8 +293,8 @@ export default function UpdateCredentialPage(): JSX.Element {
             pageTitle="Multi Signature Transactions | Update Account Credentials"
             stepTitle="Transaction Proposal - Update Account Credentials"
         >
-            <Columns columnClassName={styles.columns} divider="inset">
-                <Columns.Column header="Transaction Details">
+            <Columns divider="inset">
+                <Columns.Column verticalPadding header="Transaction Details">
                     <h5>Identity:</h5>
                     <h3>
                         {identity ? identity.name : 'Choose an ID on the right'}
@@ -311,7 +315,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                             routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL
                     )}
                 </Columns.Column>
-                <Columns.Column header={subTitle(location)}>
+                <Columns.Column verticalPadding header={subTitle(location)}>
                     <Switch>
                         <Route
                             path={
@@ -376,6 +380,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                             ]}
                             render={() => (
                                 <PickIdentity
+                                    elementClassName={styles.listElement}
                                     setReady={setReady}
                                     setIdentity={setIdentity}
                                 />
