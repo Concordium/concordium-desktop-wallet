@@ -87,10 +87,10 @@ export default function InlineNumber({
                 return formatNumberStringWithDigits(
                     ensureDigits,
                     allowFractions
-                )(value);
+                )(v);
             }
 
-            return value ?? '';
+            return v ?? '';
         },
         [ensureDigits, allowFractions]
     );
