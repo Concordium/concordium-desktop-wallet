@@ -22,7 +22,9 @@ import Columns from '~/components/Columns';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 
-const placeHolderText = <h3>To be determined</h3>;
+const placeHolderText = (
+    <h2 className={styles.LargePropertyValue}>To be determined</h2>
+);
 
 function assignIndices<T>(items: T[], usedIndices: number[]) {
     let candidate = 1;
@@ -52,7 +54,7 @@ function subTitle(currentLocation: string) {
         case routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL:
             return 'New Credentials';
         case routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD:
-            return '';
+            return '.';
 
         case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
             return 'Signature and Hardware Wallet';
@@ -79,11 +81,24 @@ function nextLocation(currentLocation: string, proposalId: number) {
     }
 }
 
+function displayIdentity(identity: Identity | undefined) {
+    return (
+        <>
+            <h5 className={styles.PropertyName}>Identity:</h5>
+            <h2 className={styles.LargePropertyValue}>
+                {identity ? identity.name : 'Choose an ID on the right'}
+            </h2>
+        </>
+    );
+}
+
 function displayAccount(account: Account | undefined) {
     return (
         <>
-            <h5>Account:</h5>
-            <h3>{account ? account.name : 'Choose an account on the right'}</h3>
+            <h5 className={styles.PropertyName}>Account:</h5>
+            <h2 className={styles.LargePropertyValue}>
+                {account ? account.name : 'Choose an account on the right'}
+            </h2>
         </>
     );
 }
@@ -97,19 +112,16 @@ function displaySignatureThreshold(
         body = placeHolderText;
     } else {
         body = (
-            <>
-                <h3>
-                    Current amount of required signatures: {currentThreshold}
-                </h3>
-                <h3>
-                    New amount of required signatures: {newThreshold || '?'}
-                </h3>
-            </>
+            <p>
+                Current amount of required signatures: <b>{currentThreshold}</b>
+                <br />
+                New amount of required signatures: <b>{newThreshold || '?'}</b>
+            </p>
         );
     }
     return (
         <>
-            <h5>Signature Threshold:</h5>
+            <h5 className={styles.PropertyName}>Signature Threshold:</h5>
             {body}
         </>
     );
@@ -124,15 +136,16 @@ function displayCredentialCount(
         body = placeHolderText;
     } else {
         body = (
-            <>
-                <h3>Current amount of credentials: {currentAmount}</h3>
-                <h3>New amount of credentials: {newAmount}</h3>
-            </>
+            <p>
+                Current amount of credentials: <b>{currentAmount}</b>
+                <br />
+                New amount of credentials: <b>{newAmount}</b>
+            </p>
         );
     }
     return (
         <>
-            <h5>Credentials:</h5>
+            <h5 className={styles.PropertyName}>Credentials:</h5>
             {body}
         </>
     );
@@ -166,7 +179,6 @@ function listCredentials(
                 <div>
                     {leftText && isEditing ? (
                         <Button
-                            size="small"
                             onClick={() => updateCredential([credId, status])}
                         >
                             {leftText}
@@ -293,12 +305,9 @@ export default function UpdateCredentialPage(): JSX.Element {
             pageTitle="Multi Signature Transactions | Update Account Credentials"
             stepTitle="Transaction Proposal - Update Account Credentials"
         >
-            <Columns divider="inset">
+            <Columns columnScroll divider="inset">
                 <Columns.Column verticalPadding header="Transaction Details">
-                    <h5>Identity:</h5>
-                    <h3>
-                        {identity ? identity.name : 'Choose an ID on the right'}
-                    </h3>
+                    {displayIdentity(identity)}
                     {displayAccount(account)}
                     {displaySignatureThreshold(
                         account?.signatureThreshold,
@@ -316,87 +325,94 @@ export default function UpdateCredentialPage(): JSX.Element {
                     )}
                 </Columns.Column>
                 <Columns.Column verticalPadding header={subTitle(location)}>
-                    <Switch>
-                        <Route
-                            path={
-                                routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD
-                            }
-                            render={() => (
-                                <ChangeSignatureThreshold
-                                    setReady={setReady}
-                                    currentThreshold={
-                                        account?.signatureThreshold || 1
-                                    }
-                                    newCredentialAmount={
-                                        credentialIds.filter(
-                                            ([, status]) =>
-                                                status !==
-                                                CredentialStatus.Removed
-                                        ).length
-                                    }
-                                    newThreshold={newThreshold}
-                                    setNewThreshold={setNewThreshold}
-                                />
-                            )}
-                        />
-                        <Route
-                            path={
-                                routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL
-                            }
-                            render={() => (
-                                <AddCredential
-                                    setReady={setReady}
-                                    credentialIds={credentialIds}
-                                    addCredentialId={(newId) =>
-                                        setCredentialIds(
-                                            (currentCredentialIds) => [
-                                                ...currentCredentialIds,
-                                                newId,
-                                            ]
-                                        )
-                                    }
-                                    setNewCredentials={setNewCredentials}
-                                />
-                            )}
-                        />
-                        <Route
-                            path={routes.UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT}
-                            render={() => (
-                                <PickAccount
-                                    setReady={setReady}
-                                    setAccount={setAccount}
-                                    identity={identity}
-                                />
-                            )}
-                        />
-                        <Route
-                            path={routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN}
-                            render={renderCreateUpdate}
-                        />
-                        <Route
-                            path={[
-                                routes.UPDATE_ACCOUNT_CREDENTIALS,
-                                routes.UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY,
-                            ]}
-                            render={() => (
-                                <PickIdentity
-                                    elementClassName={styles.listElement}
-                                    setReady={setReady}
-                                    setIdentity={setIdentity}
-                                />
-                            )}
-                        />
-                    </Switch>
-                    <Button
-                        disabled={!isReady}
-                        className={styles.continueButton}
-                        onClick={() => {
-                            setReady(false);
-                            dispatch(push(nextLocation(location, proposalId)));
-                        }}
-                    >
-                        Continue
-                    </Button>
+                    <div className={styles.rightColumnContainer}>
+                        <Switch>
+                            <Route
+                                path={
+                                    routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD
+                                }
+                                render={() => (
+                                    <ChangeSignatureThreshold
+                                        setReady={setReady}
+                                        currentThreshold={
+                                            account?.signatureThreshold || 1
+                                        }
+                                        newCredentialAmount={
+                                            credentialIds.filter(
+                                                ([, status]) =>
+                                                    status !==
+                                                    CredentialStatus.Removed
+                                            ).length
+                                        }
+                                        newThreshold={newThreshold}
+                                        setNewThreshold={setNewThreshold}
+                                    />
+                                )}
+                            />
+                            <Route
+                                path={
+                                    routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL
+                                }
+                                render={() => (
+                                    <AddCredential
+                                        setReady={setReady}
+                                        credentialIds={credentialIds}
+                                        addCredentialId={(newId) =>
+                                            setCredentialIds(
+                                                (currentCredentialIds) => [
+                                                    ...currentCredentialIds,
+                                                    newId,
+                                                ]
+                                            )
+                                        }
+                                        setNewCredentials={setNewCredentials}
+                                    />
+                                )}
+                            />
+                            <Route
+                                path={
+                                    routes.UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT
+                                }
+                                render={() => (
+                                    <PickAccount
+                                        setReady={setReady}
+                                        setAccount={setAccount}
+                                        identity={identity}
+                                    />
+                                )}
+                            />
+                            <Route
+                                path={routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN}
+                                render={renderCreateUpdate}
+                            />
+                            <Route
+                                path={[
+                                    routes.UPDATE_ACCOUNT_CREDENTIALS,
+                                    routes.UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY,
+                                ]}
+                                render={() => (
+                                    <PickIdentity
+                                        elementClassName={styles.listElement}
+                                        setReady={setReady}
+                                        setIdentity={setIdentity}
+                                    />
+                                )}
+                            />
+                        </Switch>
+                        <Button
+                            disabled={!isReady}
+                            size="big"
+                            className={styles.continueButton}
+                            onClick={() => {
+                                setReady(false);
+                                dispatch(
+                                    push(nextLocation(location, proposalId))
+                                );
+                            }}
+                        >
+                            Continue
+                        </Button>
+                    </div>
                 </Columns.Column>
             </Columns>
         </MultiSignatureLayout>

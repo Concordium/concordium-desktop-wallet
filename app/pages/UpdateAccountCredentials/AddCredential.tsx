@@ -83,16 +83,18 @@ export default function AddCredential({
         setCurrentCredential(undefined);
     }
 
+    let body;
     if (currentCredential) {
-        return (
+        body = (
             <Card className={styles.addingCard}>
-                <h2>
-                    New Credential{' '}
+                <div className={styles.addingCardHeader}>
+                    <h2>New Credential:</h2>
                     <CloseButton
                         onClick={() => setCurrentCredential(undefined)}
                     />
-                </h2>
+                </div>
                 <p>{currentCredential.credId}</p>
+                <h3>Identicon:</h3>
                 <Identicon
                     size={128}
                     string={JSON.stringify(currentCredential)}
@@ -101,6 +103,16 @@ export default function AddCredential({
                     Add Credential to Proposal
                 </Button>
             </Card>
+        );
+    } else {
+        body = (
+            <FileInput
+                className={styles.fileInput}
+                value={null}
+                placeholder="Drag and drop the credentials here"
+                buttonTitle="Or browse to file"
+                onChange={loadCredential}
+            />
         );
     }
     return (
@@ -111,17 +123,14 @@ export default function AddCredential({
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
-            <h1>Do you want to propose new credentials?</h1>
-            <h3>
+            <h3 className={styles.bold}>
+                Do you want to propose new credentials?
+            </h3>
+            <p>
                 You can add new credentials to the proposal by dropping the
                 below, or by browsing to the file on your compuiter.
-            </h3>
-            <FileInput
-                value={null}
-                placeholder="Drag and drop the credentials here"
-                buttonTitle="Or browse to file"
-                onChange={loadCredential}
-            />
+            </p>
+            {body}
         </>
     );
 }

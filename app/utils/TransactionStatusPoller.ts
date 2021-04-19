@@ -19,12 +19,15 @@ import { getPendingTransactions } from '~/database/TransactionDao';
 import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
 import { getTransactionSubmissionId } from './transactionHash';
 import { updateSignatureThreshold } from '~/features/AccountSlice';
-import { updateCredentialIndex } from '~/features/CredentialSlice';
+import {
+    updateCredentialIndex,
+    insertExternalCredential,
+} from '~/features/CredentialSlice';
 
 /**
  * Given an UpdateAccountCredentials transaction, update the local credentialIndices
  * according to the transaction, and update the signatureThreshold of the account.
- * For each added credential, update its index. For each removed credential,
+ * For each added credential, addi. For each removed credential,
  * remove its index to indicate that it has been removed.
  */
 export function updateAccountCredentialsPerformConsequence(
@@ -32,7 +35,7 @@ export function updateAccountCredentialsPerformConsequence(
     transaction: UpdateAccountCredentials
 ) {
     transaction.payload.addedCredentials.forEach(({ index, value }) =>
-        updateCredentialIndex(dispatch, value.credId, index)
+        insertExternalCredential(dispatch, transaction.sender, index, value)
     );
     transaction.payload.removedCredIds.forEach((credId) =>
         updateCredentialIndex(dispatch, credId, undefined)
