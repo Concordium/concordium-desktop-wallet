@@ -1,6 +1,35 @@
 @import 'config/bundle';
 
+p {
+    font-size: $font-size-body2;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.details {
+    width: 650px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.submit {
+    margin: auto;
+    margin-top: 50px;
+    display: flex;
+}
+
 .actions {
     display: flex;
     justify-content: center;
+}
+
+.finish {
+    margin: auto;
+    margin-bottom: 60px;
+    width: 450px;
 }

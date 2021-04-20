@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router';
-import { Divider, Header, Segment } from 'semantic-ui-react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import SimpleLedger from '~/components/ledger/SimpleLedger';
 import PageLayout from '~/components/PageLayout';
 import Button from '~/cross-app-components/Button';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -18,6 +16,9 @@ import routes from '~/constants/routes.json';
 import CopiableIdenticon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import { ExportKeyType, getKeyDisplay } from '../menu/ExportKeyList';
 import styles from './ExportKeyView.module.scss';
+import Ledger from '~/components/ledger/Ledger';
+import { asyncNoOp } from '~/utils/basicHelpers';
+import Card from '~/cross-app-components/Card';
 
 interface ParamTypes {
     keyType: ExportKeyType;
@@ -83,66 +84,89 @@ export default function ExportKeyView(): JSX.Element {
     let exportComponent;
     if (signedPublicKey) {
         exportComponent = (
-            <Segment textAlign="center">
-                <Header>New {getKeyDisplay(keyType)}</Header>
-                {signedPublicKey.key}
-                <CopiableIdenticon data={signedPublicKey.key} />
-                <Divider clearing hidden />
-                <div className={styles.actions}>
-                    <Button
-                        disabled={!signedPublicKey}
-                        onClick={() => {
-                            if (signedPublicKey) {
-                                saveExportedPublicKey(signedPublicKey, keyType);
-                            }
-                        }}
-                    >
-                        Export
-                    </Button>
-                </div>
-            </Segment>
+            <>
+                <p>
+                    You can now export your new public key. It is recommended
+                    that you copy the identicon, and send that via a separate
+                    secure channel.
+                </p>
+                <Card>
+                    <h3>New {getKeyDisplay(keyType)}</h3>
+                    {signedPublicKey.key}
+                    <CopiableIdenticon data={signedPublicKey.key} />
+                    <div className={styles.actions}>
+                        <Button
+                            disabled={!signedPublicKey}
+                            onClick={() => {
+                                if (signedPublicKey) {
+                                    saveExportedPublicKey(
+                                        signedPublicKey,
+                                        keyType
+                                    );
+                                }
+                            }}
+                        >
+                            Export
+                        </Button>
+                    </div>
+                </Card>
+            </>
         );
     } else {
         exportComponent = (
             <>
-                <Segment basic textAlign="center">
+                <p>
                     To export your key, you must connect a secure hardware
                     wallet. After pressing the submit button, you can finish
                     exporting the key on the hardware wallet.
-                </Segment>
-                <SimpleLedger
-                    ledgerCall={(
-                        ledger: ConcordiumLedgerClient,
-                        setMessage: (message: string) => void
-                    ) => exportPublicKey(ledger, setMessage, keyType)}
-                />
+                </p>
+                <Card>
+                    <Ledger
+                        ledgerCallback={(
+                            ledger: ConcordiumLedgerClient,
+                            setMessage: (message: string) => void
+                        ) => exportPublicKey(ledger, setMessage, keyType)}
+                    >
+                        {({
+                            isReady,
+                            statusView,
+                            submitHandler = asyncNoOp,
+                        }) => (
+                            <>
+                                {statusView}
+                                <Button
+                                    className={styles.submit}
+                                    onClick={submitHandler}
+                                    disabled={!isReady}
+                                >
+                                    Submit
+                                </Button>
+                            </>
+                        )}
+                    </Ledger>
+                </Card>
             </>
         );
     }
 
-    let finishButton;
-    if (signedPublicKey) {
-        finishButton = (
-            <div className={styles.actions}>
-                <Button
-                    onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
-                >
-                    Finish
-                </Button>
-            </div>
-        );
-    }
+    const finishButton = (
+        <Button
+            className={styles.finish}
+            disabled={!signedPublicKey}
+            onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+        >
+            Finish
+        </Button>
+    );
 
     return (
         <PageLayout>
             <PageLayout.Header>
                 <h1>Multi Signature Transactions</h1>
             </PageLayout.Header>
-            <PageLayout.Container>
-                <Header textAlign="center">
-                    Export your {getKeyDisplay(keyType)}
-                </Header>
-                {exportComponent}
+            <PageLayout.Container className={styles.container}>
+                <h2>Export your {getKeyDisplay(keyType)}</h2>
+                <div className={styles.details}>{exportComponent}</div>
                 {finishButton}
             </PageLayout.Container>
         </PageLayout>

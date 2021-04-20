@@ -1,10 +1,10 @@
-import { push } from 'connected-react-router';
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Header, Menu } from 'semantic-ui-react';
+import { useSelector } from 'react-redux';
+import ButtonNavLink from '~/components/ButtonNavLink';
 import { foundationTransactionsEnabledSelector } from '../../../features/SettingsSlice';
 // eslint-disable-next-line import/no-cycle
 import { selectedExportKeyRoute } from '../../../utils/routerHelper';
+import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
 
 export enum ExportKeyType {
     Root = 'root',
@@ -17,7 +17,7 @@ const exportKeyOptionMap = new Map<ExportKeyType, string>([
     [ExportKeyType.Root, 'Governance root key'],
     [ExportKeyType.Level1, 'Governance level 1 key'],
     [ExportKeyType.Level2, 'Governance level 2 key'],
-    [ExportKeyType.Credential, 'Account Credentials'],
+    [ExportKeyType.Credential, 'Account credentials'],
 ]);
 
 export function getKeyDisplay(keyType: ExportKeyType): string | undefined {
@@ -25,11 +25,11 @@ export function getKeyDisplay(keyType: ExportKeyType): string | undefined {
 }
 
 /**
- * Component that displays a list of multi signature transaction proposals.
+ * Displays a list a possible exports of "keys". This can be governance keys, if
+ * foundation transactions have been turned on, or account credentials to be added
+ * to external accounts.
  */
 export default function ExportKeyList(): JSX.Element {
-    const dispatch = useDispatch();
-
     const foundationTransactionsEnabled: boolean = useSelector(
         foundationTransactionsEnabledSelector
     );
@@ -45,19 +45,18 @@ export default function ExportKeyList(): JSX.Element {
     }
 
     return (
-        <Menu vertical fluid>
+        <>
             {keyTypes.map(([keyType, label]) => {
                 return (
-                    <Menu.Item
+                    <ButtonNavLink
+                        className={styles.link}
                         key={keyType}
-                        onClick={() =>
-                            dispatch(push(selectedExportKeyRoute(keyType)))
-                        }
+                        to={selectedExportKeyRoute(keyType)}
                     >
-                        <Header>{label}</Header>
-                    </Menu.Item>
+                        {label}
+                    </ButtonNavLink>
                 );
             })}
-        </Menu>
+        </>
     );
 }
