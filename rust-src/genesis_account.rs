@@ -2,7 +2,6 @@ use crate::{
     helpers::*,
     types::*,
 };
-use crypto_common::{types::KeyIndex, *};
 use dodis_yampolskiy_prf::secret as prf;
 use pairing::bls12_381::{Bls12, G1};
 use serde_json::{from_str, Value as SerdeValue};
@@ -125,8 +124,6 @@ pub fn create_genesis_account (
         policy,
     };
 
-    let address = AccountAddress::new(&cdv.cred_id);
-
     let chosen_ars = {
         let mut chosen_ars = BTreeMap::new();
         chosen_ars.insert(ar_info.ar_identity, ar_info.clone());
@@ -161,19 +158,6 @@ pub fn create_genesis_account (
 
     let cdvc = AccountCredentialWithoutProofs::Normal { cdv, commitments };
 
-
-    let versioned_credentials = {
-        let mut credentials = BTreeMap::new();
-        credentials.insert(KeyIndex(0), cdvc);
-        Versioned::new(VERSION_0, credentials)
-    };
-
-    let public_account_data = json!({
-        "schemeId": "Ed25519",
-        "address": address,
-        "accountThreshold": 1, // only a single credential
-        "credentials": versioned_credentials,
-    });
-
-    Ok(public_account_data.to_string())
+    let credential = json!(cdvc);
+    Ok(credential.to_string())
 }

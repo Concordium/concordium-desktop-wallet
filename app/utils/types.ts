@@ -105,6 +105,7 @@ export enum AccountStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    Genesis = 'genesis',
 }
 
 /**
@@ -1013,10 +1014,3 @@ export type PolymorphicComponentProps<
     C extends React.ElementType,
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
-
-export interface GenesisAccount {
-    schemeId: string;
-    address: string;
-    accountThreshold: number;
-    credentials: Versioned<Record<string, Typed<CredentialDeploymentValues>>>; // TODO: add commitments to type
-}

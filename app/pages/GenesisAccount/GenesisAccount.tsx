@@ -8,11 +8,15 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { createGenesisAccount } from '~/utils/rustInterface';
 import { importAccount } from '~/features/AccountSlice';
 import { insertNewCredential } from '~/features/CredentialSlice';
-import { Account, AccountStatus, IdentityStatus } from '~/utils/types';
+import {
+    Account,
+    AccountStatus,
+    IdentityStatus,
+    CredentialDeploymentValues,
+} from '~/utils/types';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import { saveFile } from '~/utils/FileHelper';
 import routes from '~/constants/routes.json';
-import { toMicroUnits } from '~/utils/gtu';
 import {
     identitiesSelector,
     importIdentities,
@@ -20,6 +24,7 @@ import {
 } from '~/features/IdentitySlice';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import styles from './GenesisAccount.module.scss';
+import Button from '~/cross-app-components/Button';
 
 interface FileInputForm {
     file: FileInputValue;
@@ -57,12 +62,11 @@ function inputFile(saveFileContent: (file: string) => void) {
 }
 
 interface PickSettingsProps {
-    onSubmit(name: string, balance: string, address?: string): void;
+    onSubmit(name: string, address?: string): void;
 }
 
 interface PickSettingsForm {
     name: string;
-    balance: string;
     address: string | undefined;
 }
 
@@ -70,8 +74,8 @@ function PickSettings({ onSubmit }: PickSettingsProps) {
     const [existingAccount, setExistingAccount] = useState(false);
 
     function setSettings(values: PickSettingsForm) {
-        const { name, balance, address } = values;
-        onSubmit(name, balance, address);
+        const { name, address } = values;
+        onSubmit(name, address);
     }
 
     return (
@@ -95,15 +99,7 @@ function PickSettings({ onSubmit }: PickSettingsProps) {
                         placeholder="Address"
                         rules={{ required: 'address is required' }}
                     />
-                ) : (
-                    <Form.Input
-                        className={styles.settingInput}
-                        name="balance"
-                        type="number"
-                        placeholder="Input Balance as GTU"
-                        rules={{ required: 'balance is required' }}
-                    />
-                )}
+                ) : null}
             </div>
             <Form.Submit className={styles.settingInput}>Continue</Form.Submit>
         </Form>
@@ -114,6 +110,7 @@ enum Locations {
     Name,
     Context,
     Create,
+    Confirm,
 }
 
 const subtitle = (currentLocation: Locations) => {
@@ -124,6 +121,8 @@ const subtitle = (currentLocation: Locations) => {
             return 'Input Context file';
         case Locations.Create:
             return 'Export keys from ledger';
+        case Locations.Confirm:
+            return 'Confirm Details';
         default:
             throw new Error('unknown location');
     }
@@ -138,8 +137,10 @@ export default function GenesisAccount(): JSX.Element {
     const [accountName, setAccountName] = useState('');
     const [context, setContext] = useState<string | undefined>();
     const [accountAddress, setAddress] = useState<string | undefined>();
-    const [balance, setBalance] = useState<string>('');
     const [identityId, setIdentityId] = useState<number>(defaultId);
+    const [credential, setCredential] = useState<
+        CredentialDeploymentValues | undefined
+    >();
 
     const createdAt = '202104';
 
@@ -185,7 +186,7 @@ export default function GenesisAccount(): JSX.Element {
 
         const { ipInfo, arInfo, global } = JSON.parse(context);
 
-        const accountDetails = await createGenesisAccount(
+        const typedCredential = await createGenesisAccount(
             ledger,
             identityId,
             credentialNumber,
@@ -195,22 +196,23 @@ export default function GenesisAccount(): JSX.Element {
             createdAt,
             displayMessage
         );
+        const credentialContent = typedCredential.contents;
+
+        let address = `genesis-${credentialContent.credId}`;
 
         if (accountAddress) {
-            accountDetails.address = accountAddress;
+            address = accountAddress;
         }
 
         const success = await saveFile(
-            JSON.stringify({
-                ...accountDetails,
-                balance: toMicroUnits(balance).toString(),
-            }),
-            'Save account details'
+            JSON.stringify(typedCredential),
+            'Save credential'
         );
+
         if (success) {
             const account: Account = {
-                status: AccountStatus.Confirmed,
-                address: accountDetails.address,
+                status: AccountStatus.Genesis,
+                address,
                 name: accountName,
                 identityId,
                 maxTransactionId: 0,
@@ -218,19 +220,16 @@ export default function GenesisAccount(): JSX.Element {
             };
 
             importAccount(account);
-            Object.entries(
-                accountDetails.credentials.value
-            ).forEach(([index, { contents }]) =>
-                insertNewCredential(
-                    dispatch,
-                    accountDetails.address,
-                    credentialNumber,
-                    identityId,
-                    parseInt(index, 10),
-                    contents
-                )
+            insertNewCredential(
+                dispatch,
+                address,
+                credentialNumber,
+                identityId,
+                undefined,
+                credentialContent
             );
-            dispatch(push(routes.ACCOUNTS));
+            setCredential(credentialContent);
+            setLocation(Locations.Confirm);
         }
     }
 
@@ -242,18 +241,38 @@ export default function GenesisAccount(): JSX.Element {
         );
     }
 
+    function Confirm() {
+        if (!credential) {
+            return null;
+        }
+
+        return (
+            <div className={styles.genesisContainer}>
+                <h3>Credential Id: </h3>
+                <p>{credential.credId}</p>
+                <h3>Public keys: </h3>
+                {Object.entries(credential.credentialPublicKeys.keys).map(
+                    ([index, value]) => (
+                        <p key={index}>
+                            {index}: {value.verifyKey}
+                        </p>
+                    )
+                )}
+                <p>Threshold: {credential.credentialPublicKeys.threshold}</p>
+                <Button onClick={() => dispatch(push(routes.ACCOUNTS))}>
+                    Done
+                </Button>
+            </div>
+        );
+    }
+
     function Current() {
         switch (currentLocation) {
             case Locations.Name:
                 return (
                     <PickSettings
-                        onSubmit={(
-                            name: string,
-                            newBalance: string,
-                            address?: string
-                        ) => {
+                        onSubmit={(name: string, address?: string) => {
                             setAccountName(name);
-                            setBalance(newBalance);
                             setAddress(address);
                             setLocation(Locations.Context);
                         }}
@@ -266,6 +285,8 @@ export default function GenesisAccount(): JSX.Element {
                 });
             case Locations.Create:
                 return <Create />;
+            case Locations.Confirm:
+                return <Confirm />;
             default:
                 throw new Error('unknown location');
         }

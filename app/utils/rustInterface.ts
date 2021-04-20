@@ -12,7 +12,8 @@ import {
     CredentialDeploymentInformation,
     Global,
     AccountEncryptedAmount,
-    GenesisAccount,
+    Typed,
+    CredentialDeploymentValues,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -362,7 +363,7 @@ export async function createGenesisAccount(
     global: Versioned<Global>,
     createdAt: string,
     displayMessage: (message: string) => void
-): Promise<GenesisAccount> {
+): Promise<Typed<CredentialDeploymentValues>> {
     const path = getAccountPath({
         identityIndex: identityId,
         accountIndex: credentialNumber,
@@ -395,12 +396,12 @@ export async function createGenesisAccount(
 
     const contextString = JSON.stringify(context);
 
-    const genesisAccount = await worker.postMessage({
+    const credential = await worker.postMessage({
         command: workerCommands.createGenesisAccount,
         context: contextString,
         idCredSec,
         prfKey,
     });
 
-    return JSON.parse(genesisAccount);
+    return JSON.parse(credential);
 }
