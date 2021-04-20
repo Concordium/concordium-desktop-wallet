@@ -88,7 +88,7 @@ export default function ExportKeyView(): JSX.Element {
                     that you copy the identicon, and send that via a separate
                     secure channel.
                 </p>
-                <Card>
+                <Card className={styles.card}>
                     <h3>New {getKeyDisplay(keyType)}</h3>
                     {signedPublicKey.key}
                     <CopiableIdenticon data={signedPublicKey.key} />
