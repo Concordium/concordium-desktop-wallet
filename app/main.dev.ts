@@ -210,7 +210,7 @@ ipcMain.handle(ipcCommands.print, (_event, body) => {
                     fs.readFileSync(
                         path.join(__dirname, './dist/style.css'),
                         'utf8'
-                    ) // TODO: test in production
+                    )
                 );
                 content.print({}, (success, errorType) => {
                     if (!success) {
