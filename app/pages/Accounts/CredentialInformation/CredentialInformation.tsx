@@ -15,9 +15,8 @@ interface Props {
     returnFunction(): void;
 }
 /**
- * Displays the account's release schedule:
- * Each release (amount and time)
- * and the total locked value.
+ * Displays the account's credentails' information,
+ * and the signature threshold of the account.
  */
 export default function CredentialInformation({
     account,
