@@ -94,8 +94,9 @@ export default function ExportKeyView(): JSX.Element {
                     <h3>New {getKeyDisplay(keyType)}</h3>
                     {signedPublicKey.key}
                     <CopiableIdenticon data={signedPublicKey.key} />
-                    <div className={styles.actions}>
+                    <div>
                         <Button
+                            className={styles.button}
                             disabled={!signedPublicKey}
                             onClick={() => {
                                 if (signedPublicKey) {
@@ -120,7 +121,7 @@ export default function ExportKeyView(): JSX.Element {
                     wallet. After pressing the submit button, you can finish
                     exporting the key on the hardware wallet.
                 </p>
-                <Card>
+                <Card className={styles.card}>
                     <Ledger
                         ledgerCallback={(
                             ledger: ConcordiumLedgerClient,
@@ -135,7 +136,7 @@ export default function ExportKeyView(): JSX.Element {
                             <>
                                 {statusView}
                                 <Button
-                                    className={styles.submit}
+                                    className={styles.button}
                                     onClick={submitHandler}
                                     disabled={!isReady}
                                 >
