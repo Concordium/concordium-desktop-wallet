@@ -149,7 +149,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                 header={showError.header}
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
-        />
+            />
             <Form
                 formMethods={form}
                 onSubmit={submitTransaction}
