@@ -11,6 +11,7 @@ export enum ExportKeyType {
     Level1 = 'level1',
     Level2 = 'level2',
     Credential = 'credential',
+    Genesis = 'Genesis',
 }
 
 const exportKeyOptionMap = new Map<ExportKeyType, string>([
@@ -18,6 +19,7 @@ const exportKeyOptionMap = new Map<ExportKeyType, string>([
     [ExportKeyType.Level1, 'Governance level 1 key'],
     [ExportKeyType.Level2, 'Governance level 2 key'],
     [ExportKeyType.Credential, 'Account Credentials'],
+    [ExportKeyType.Genesis, 'Genesis Account'],
 ]);
 
 export function getKeyDisplay(keyType: ExportKeyType): string | undefined {

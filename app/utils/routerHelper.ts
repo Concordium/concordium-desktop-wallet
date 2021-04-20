@@ -17,6 +17,9 @@ export function selectedExportKeyRoute(keyType: string) {
     if (keyType === ExportKeyType.Credential) {
         return routes.GENERATE_CREDENTIAL;
     }
+    if (keyType === ExportKeyType.Genesis) {
+        return routes.CREATEGENESISACCOUNT;
+    }
     return routes.MULTISIGTRANSACTIONS_EXPORT_KEY_SELECTED.replace(
         ':keyType',
         keyType

@@ -259,7 +259,11 @@ export default function GenesisAccount(): JSX.Element {
                     )
                 )}
                 <p>Threshold: {credential.credentialPublicKeys.threshold}</p>
-                <Button onClick={() => dispatch(push(routes.ACCOUNTS))}>
+                <Button
+                    onClick={() =>
+                        dispatch(push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY))
+                    }
+                >
                     Done
                 </Button>
             </div>

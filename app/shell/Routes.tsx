@@ -23,7 +23,6 @@ export default function Routes(): JSX.Element {
                 path={routes.CREATEGENESISACCOUNT}
                 component={genesisAccount}
             />
-
             <Route path={routes.SUBMITTRANSFER} component={SubmitTransfer} />
             <Route path={routes.ACCOUNTS} component={AccountPage} />
             <Route path={routes.IDENTITYISSUANCE} component={IssuancePage} />
