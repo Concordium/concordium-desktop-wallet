@@ -1,12 +1,13 @@
 import clsx from 'clsx';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import Form from '~/components/Form';
+import { useUpdateEffect } from '~/utils/hooks';
 import { ClassName, EqualRecord } from '~/utils/types';
 
 import styles from './MintRateInput.module.scss';
 
-const mintRateFormatter = Intl.NumberFormat(undefined, {
+const mintRateFormat = Intl.NumberFormat(undefined, {
     maximumSignificantDigits: 9,
 }).format;
 
@@ -41,8 +42,8 @@ export default function MintRateInput({
     className,
 }: MintRateInputProps): JSX.Element {
     const innerForm = useForm<InnerFields>();
-
     const { watch, setValue } = innerForm;
+    const [anualFocused, setAnualFocused] = useState<boolean>(false);
 
     const calculateAnualRate = useCallback(
         (m: number) => (1 + Number(m)) ** Number(slotsPerYear) - 1,
@@ -57,7 +58,7 @@ export default function MintRateInput({
     const fields = watch(
         [innerFieldNames.mintPerSlot, innerFieldNames.anualRate],
         {
-            [innerFieldNames.mintPerSlot]: mintRateFormatter(mintPerSlot),
+            [innerFieldNames.mintPerSlot]: mintRateFormat(mintPerSlot),
             [innerFieldNames.anualRate]: initialAnualRate,
         }
     );
@@ -68,21 +69,30 @@ export default function MintRateInput({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fields.mintPerSlot]);
 
-    useEffect(() => {
+    useUpdateEffect(() => {
+        if (!anualFocused) {
+            return;
+        }
+
         const calculated = calculateMintPerSlot(Number(fields.anualRate));
-        setValue(innerFieldNames.mintPerSlot, mintRateFormatter(calculated));
+        setValue(innerFieldNames.mintPerSlot, mintRateFormat(calculated));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fields.anualRate]);
 
     const { mantissa, exponent } = useMemo(() => {
-        const [, fractions] = fields.mintPerSlot.split('.');
+        const [m, e = '0'] = fields.mintPerSlot.toLowerCase().split('e-');
+        const [, fractions = ''] = m.split('.');
+
         if (!fractions) {
-            return {};
+            return {
+                mantissa: '',
+                exponent: '',
+            };
         }
 
         return {
-            [fieldNames.mantissa]: BigInt(fractions).toString(),
-            [fieldNames.exponent]: fractions.length,
+            mantissa: BigInt(m.replace('.', '')).toString(),
+            exponent: parseInt(e, 10) + fractions.length,
         };
     }, [fields.mintPerSlot]);
 
@@ -90,56 +100,72 @@ export default function MintRateInput({
         <span className={clsx(styles.root, className)}>
             <div>
                 <FormProvider {...innerForm}>
-                    <Form.InlineNumber
-                        className={styles.field}
-                        name={innerFieldNames.anualRate}
-                        allowFractions
-                        defaultValue={initialAnualRate}
-                        rules={{
-                            required: 'Field is required',
-                            min: {
-                                value: 0,
-                                message: "Value can't be negative",
-                            },
-                        }}
-                        disabled={disabled}
-                    />{' '}
-                    ≈ (1 +{' '}
-                    <Form.InlineNumber
-                        className={styles.field}
-                        name={innerFieldNames.mintPerSlot}
-                        defaultValue={mintRateFormatter(mintPerSlot)}
-                        rules={{
-                            required: 'Field is required',
-                            min: {
-                                value: 0,
-                                message: "Value can't be negative",
-                            },
-                        }}
-                        disabled={disabled}
-                        allowFractions
-                    />
-                    )
-                    <span className={styles.exponent} title="Slots per year">
-                        {BigInt(slotsPerYear).toLocaleString()}
-                    </span>{' '}
-                    - 1
+                    <span>
+                        <Form.InlineNumber
+                            className={styles.field}
+                            name={innerFieldNames.anualRate}
+                            title="Anual mint rate"
+                            allowFractions={6}
+                            defaultValue={initialAnualRate}
+                            onFocus={() => setAnualFocused(true)}
+                            onBlur={() => setAnualFocused(false)}
+                            rules={{
+                                required: 'Field is required',
+                                min: {
+                                    value: 0,
+                                    message: "Value can't be negative",
+                                },
+                            }}
+                            disabled={disabled}
+                        />{' '}
+                        ≈ (1 +{' '}
+                        <Form.InlineNumber
+                            className={styles.field}
+                            name={innerFieldNames.mintPerSlot}
+                            defaultValue={mintRateFormat(mintPerSlot)}
+                            title="Mint per slot (product of chain value)"
+                            rules={{
+                                required: 'Field is required',
+                                min: {
+                                    value: 0,
+                                    message: "Value can't be negative",
+                                },
+                            }}
+                            disabled={disabled}
+                            customFormatter={(v = '') => {
+                                if (v === '') {
+                                    return v;
+                                }
+
+                                return mintRateFormat(Number(v));
+                            }}
+                            allowFractions
+                        />
+                        )
+                        <span
+                            className={styles.exponent}
+                            title="Slots per year"
+                        >
+                            {BigInt(slotsPerYear).toLocaleString()}
+                        </span>{' '}
+                        - 1
+                    </span>
                 </FormProvider>
                 <div className={styles.description}>
-                    Chain values - Mantissa: {mantissa}, Exponent: {exponent} (
-                    {mantissa}e-{exponent})
+                    Chain value: {mantissa}E-{exponent} (Mantissa: {mantissa},
+                    Exponent: {exponent})
                 </div>
             </div>
             {!disabled && (
                 <>
                     <Form.Input
-                        name="mantissa"
+                        name={fieldNames.mantissa}
                         type="hidden"
                         value={mantissa}
                         readOnly
                     />
                     <Form.Input
-                        name="exponent"
+                        name={fieldNames.exponent}
                         type="hidden"
                         value={exponent}
                         readOnly

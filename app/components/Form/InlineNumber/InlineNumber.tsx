@@ -31,7 +31,7 @@ export interface InlineNumberProps
     extends ClassName,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            'step' | 'min' | 'max' | 'disabled' | 'readOnly'
+            'step' | 'min' | 'max' | 'disabled' | 'readOnly' | 'title'
         >,
         Pick<CommonFieldProps, 'isInvalid'> {
     /**
@@ -51,6 +51,7 @@ export interface InlineNumberProps
      * If true, falls back to `fallbackValue` when fields `isInvalid` prop is set to `true` on blur. Defaults to `false`.
      */
     fallbackOnInvalid?: boolean;
+    customFormatter?(v?: string): string;
     onChange?(v?: string): void;
     /**
      * As internal formatting functionality is triggered on blur, settings value on blur externally is prone to trigger an infinite loop. Please take caution!
@@ -70,6 +71,7 @@ export default function InlineNumber({
     fallbackValue = 0,
     fallbackOnInvalid = false,
     value,
+    customFormatter,
     onChange = noOp,
     onBlur = noOp,
     onFocus = noOp,
@@ -80,19 +82,22 @@ export default function InlineNumber({
 }: InlineNumberProps): JSX.Element {
     const format = useCallback(
         (v?: string) => {
+            if (customFormatter !== undefined) {
+                return customFormatter(v);
+            }
             if (allowFractions === false) {
                 return ensureValidBigInt(v);
             }
-            if (typeof allowFractions === 'number') {
+            if (typeof allowFractions === 'number' || ensureDigits !== 0) {
                 return formatNumberStringWithDigits(
                     ensureDigits,
-                    allowFractions
+                    allowFractions !== true ? allowFractions : undefined
                 )(v);
             }
 
             return v ?? '';
         },
-        [ensureDigits, allowFractions]
+        [ensureDigits, allowFractions, customFormatter]
     );
 
     const initialFormatted = useMemo(

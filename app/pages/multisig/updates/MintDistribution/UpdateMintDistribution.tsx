@@ -61,8 +61,7 @@ export default function UpdateMintDistribution({
     return (
         <>
             <div>
-                <h3>Current Mint Distribution</h3>
-                {mintPerSlot}
+                <h5>Current Mint Distribution</h5>
                 <MintRateInput
                     mintPerSlot={mintPerSlot}
                     slotsPerYear={slotsPerYear}
@@ -76,7 +75,7 @@ export default function UpdateMintDistribution({
                 />
             </div>
             <div>
-                <h3>New Mint Distribution</h3>
+                <h5>New Mint Distribution</h5>
                 <MintRateInput
                     mintPerSlot={mintPerSlot}
                     slotsPerYear={slotsPerYear}
