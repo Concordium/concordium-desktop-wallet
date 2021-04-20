@@ -152,14 +152,18 @@ function serializeIdOwnerShipProofs(proofs: IdOwnershipProofs) {
         Object.entries(proofs.proofIdCredPub).length,
         0
     );
-    // TODO: Make sure that these are sorted, otherwise sort them.
     const idCredPubProofs = Buffer.concat(
-        Object.entries(proofs.proofIdCredPub).map(([index, value]) => {
-            const proof = Buffer.alloc(4 + 96);
-            proof.writeUInt32BE(parseInt(index, 10), 0);
-            proof.write(value, 4, 100, 'hex');
-            return proof;
-        })
+        Object.entries(proofs.proofIdCredPub)
+            .sort(
+                ([indexA], [indexB]) =>
+                    parseInt(indexA, 10) - parseInt(indexB, 10)
+            )
+            .map(([index, value]) => {
+                const proof = Buffer.alloc(4 + 96);
+                proof.writeUInt32BE(parseInt(index, 10), 0);
+                proof.write(value, 4, 100, 'hex');
+                return proof;
+            })
     );
 
     return Buffer.concat([

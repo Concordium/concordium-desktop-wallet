@@ -15,7 +15,7 @@ import {
     UpdateInstructionSignature,
 } from '~/utils/types';
 import { UpdateInstructionHandler } from '~/utils/transactionTypes';
-import { createUpdateInstructionHandler } from '~/utils/updates/HandlerFinder';
+import { createUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -26,7 +26,7 @@ import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import Form from '~/components/Form';
 import TransactionDetails from '~/components/TransactionDetails';
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
+import ExpiredTransactionView from '../ExpiredTransactionView';
 import { ensureProps } from '~/utils/componentHelpers';
 import getTransactionHash from '~/utils/transactionHash';
 
@@ -81,7 +81,7 @@ function SignTransactionProposalView({ location }: Props) {
         const authorizationKey = await findAuthorizationKey(
             ledger,
             transactionHandler,
-            blockSummary.updates.authorizations
+            blockSummary.updates.keys.level2Keys
         );
         if (!authorizationKey) {
             setShowValidationError(true);
@@ -144,7 +144,7 @@ function SignTransactionProposalView({ location }: Props) {
                     <section className={styles.columnContent}>
                         <TransactionDetails transaction={transactionObject} />
                         {instanceOfUpdateInstruction(transactionObject) && (
-                            <ExpiredEffectiveTimeView
+                            <ExpiredTransactionView
                                 transaction={transactionObject}
                             />
                         )}

@@ -1,0 +1,9 @@
+@import 'config/bundle';
+
+.root {
+    transition: transform $anim-easing $anim-timing;
+
+    &:hover {
+        transform: scale(1.1);
+    }
+}

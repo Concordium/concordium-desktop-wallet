@@ -17,7 +17,7 @@ function getSignature(
         return signature.signature.substring(0, 16);
     }
     // TODO: Remove assumption that a credential only has 1 signature
-    return signature[0].toString('hex').substring(0, 16);
+    return signature[0].substring(0, 16);
 }
 
 interface SignatureCheckboxProps {

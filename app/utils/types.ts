@@ -11,6 +11,11 @@ type Word32 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 
+export interface Fraction {
+    numerator: Word64;
+    denominator: Word64;
+}
+
 export enum SchemeId {
     Ed25519 = 0,
 }
@@ -123,18 +128,17 @@ export enum TransactionKindString {
     Transfer = 'transfer',
     AddBaker = 'addBaker',
     RemoveBaker = 'removeBaker',
-    UpdateBakerAccount = 'updateBakerAccount',
-    UpdateBakerSignKey = 'updateBakerSignKey',
-    DelegateStake = 'delegateStake',
-    UndelegateStake = 'undelegateStake',
-    UpdateElectionDifficulty = 'updateElectionDifficulty',
-    DeployCredential = 'deployCredential',
+    UpdateBakerStake = 'updateBakerStake',
+    UpdateBakerRestakeEarnings = 'updateBakerRestakeEarnings',
+    UpdateBakerKeys = 'updateBakerKeys',
+    UpdateCredentialKeys = 'updateCredentialKeys',
     BakingReward = 'bakingReward',
     EncryptedAmountTransfer = 'encryptedAmountTransfer',
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
-    TransferWithSchedule = 'transferWithSchedule', // TODO confirm
+    TransferWithSchedule = 'transferWithSchedule',
     UpdateCredentials = 'updateCredentials',
+    RegisterData = 'registerData',
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -145,17 +149,17 @@ export enum TransactionKindId {
     Simple_transfer = 3,
     Add_baker = 4,
     Remove_baker = 5,
-    Update_baker_account = 6,
-    Update_baker_sign_key = 7,
-    Delegate_stake = 8,
-    Undelegate_stake = 9,
+    Update_baker_stake = 6,
+    Update_baker_restake_earnings = 7,
+    Update_baker_keys = 8,
+    Update_credential_keys = 13,
     Encrypted_transfer = 16,
     Transfer_to_encrypted = 17,
     Transfer_to_public = 18,
     Transfer_with_schedule = 19,
     Update_credentials = 20,
-} // TODO: Add all kinds (11- 18)
-
+    Register_data = 21,
+}
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
@@ -190,8 +194,8 @@ export interface AddedCredential {
 
 export interface UpdateAccountCredentialsPayload {
     addedCredentials: AddedCredential[];
-    removedCredIds: string[];
-    newThreshold: number;
+    removedCredIds: Hex[];
+    threshold: number;
 }
 
 export type TransactionPayload =
@@ -209,7 +213,7 @@ export interface AccountTransaction<
     sender: Hex;
     nonce: string;
     energyAmount: string;
-    estimatedFee?: bigint;
+    estimatedFee?: Fraction;
     expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;
@@ -602,7 +606,7 @@ export type UpdateInstructionPayload =
     | ElectionDifficulty;
 
 // An actual signature, which goes into an account transaction.
-export type Signature = Buffer;
+export type Signature = Hex;
 
 type KeyIndex = Word8;
 // Signatures from a single credential, for an AccountTransaction
@@ -790,10 +794,7 @@ export enum MultiSignatureMenuItems {
     ExportKey = 'Export public-key',
 }
 
-export interface ExchangeRate {
-    numerator: Word64;
-    denominator: Word64;
-}
+export type ExchangeRate = Fraction;
 
 /**
  * A reward fraction with a resolution of 1/100000, i.e. the

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
-import { AddressBookEntry, AccountInfo } from '~/utils/types';
+import { AddressBookEntry, AccountInfo, Fraction } from '~/utils/types';
 import { toMicroUnits, getGTUSymbol, isValidGTUString } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
@@ -15,7 +15,7 @@ interface Props {
     recipient?: AddressBookEntry | undefined;
     defaultAmount: string;
     header: string;
-    estimatedFee?: bigint | undefined;
+    estimatedFee?: Fraction | undefined;
     toPickRecipient?(currentAmount: string): void;
     toConfirmTransfer(amount: string): void;
 }

@@ -16,6 +16,7 @@ import {
     MultiSignatureTransactionStatus,
     Transaction,
     UpdateInstructionSignature,
+    instanceOfAccountTransaction,
     TransactionCredentialSignature,
 } from '~/utils/types';
 import { saveFile } from '~/utils/FileHelper';
@@ -23,9 +24,9 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
 import routes from '~/constants/routes.json';
-import findHandler from '~/utils/updates/HandlerFinder';
+import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { expirationEffect } from '~/utils/ProposalHelper';
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
+import ExpiredTransactionView from '../ExpiredTransactionView';
 import Button from '~/cross-app-components/Button';
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '../MultiSignatureLayout';
@@ -44,6 +45,7 @@ import { submittedProposalRoute } from '~/utils/routerHelper';
 import { getTimeout } from '~/utils/transactionHelpers';
 import getTransactionHash from '~/utils/transactionHash';
 import { HandleSignatureFile, getSignatures } from './util';
+import ProposalViewStatusText from './ProposalViewStatusText';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING;
 
@@ -130,6 +132,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
         <MultiSignatureLayout
             pageTitle={handler.title}
             stepTitle={`Transaction Proposal - ${handler.type}`}
+            disableBack={instanceOfAccountTransaction(transaction)}
             closeRoute={CLOSE_ROUTE}
         >
             <CloseProposalModal
@@ -156,7 +159,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                     <Columns.Column header="Transaction Details">
                         <div className={styles.columnContent}>
                             <TransactionDetails transaction={transaction} />
-                            <ExpiredEffectiveTimeView
+                            <ExpiredTransactionView
                                 transaction={transaction}
                                 proposal={proposal}
                             />
@@ -187,7 +190,9 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                 multiple
                                 className={styles.fileInput}
                                 disabled={
-                                    !missingSignatures || currentlyLoadingFile
+                                    !missingSignatures ||
+                                    currentlyLoadingFile ||
+                                    !isOpen
                                 }
                             />
                         </div>
@@ -198,6 +203,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                     >
                         <div className={styles.columnContent}>
                             <div>
+                                <ProposalViewStatusText {...proposal} />
                                 <TransactionHashView
                                     transactionHash={transactionHash}
                                 />
@@ -207,19 +213,17 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                         getTimeout(transaction)
                                     )}
                                 />
+                                <br />
+                                <Button
+                                    size="small"
+                                    className={styles.closeProposalButton}
+                                    onClick={() => setShowCloseModal(true)}
+                                    disabled={!isOpen}
+                                >
+                                    Close proposal
+                                </Button>
                             </div>
                             <div className={styles.actions}>
-                                {proposal.status ===
-                                    MultiSignatureTransactionStatus.Open && (
-                                    <Button
-                                        size="small"
-                                        className={styles.closeProposalButton}
-                                        onClick={() => setShowCloseModal(true)}
-                                        danger
-                                    >
-                                        Close proposal
-                                    </Button>
-                                )}
                                 <Button
                                     className={styles.exportButton}
                                     disabled={!isOpen}

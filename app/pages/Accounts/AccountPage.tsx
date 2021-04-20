@@ -3,7 +3,6 @@ import { Switch, Route } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import PlusIcon from '@resources/svg/plus.svg';
-import Columns from '~/components/Columns';
 import AccountList from './AccountList';
 import AccountView from './AccountView';
 import NoIdentities from '~/components/NoIdentities';
@@ -11,13 +10,13 @@ import {
     accountsSelector,
     accountsInfoSelector,
 } from '~/features/AccountSlice';
-import BuildSchedule from './BuildSchedule';
 import routes from '~/constants/routes.json';
 import { Account, AccountInfo } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import { sumToBigInt } from '~/utils/basicHelpers';
-import styles from './Accounts.module.scss';
 import PageLayout from '~/components/PageLayout';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
+import BuildSchedule from './BuildSchedule';
 
 function getTotalAmount(accountsInfo: AccountInfo[]) {
     return sumToBigInt(accountsInfo, (accountInfo) =>
@@ -43,6 +42,8 @@ function isAllDecrypted(accounts: Account[]) {
     return accounts.every((account) => account.allDecrypted);
 }
 
+const { Header, Master, Detail } = MasterDetailPageLayout;
+
 export default function AccountsPage() {
     const dispatch = useDispatch();
     const accounts = useSelector(accountsSelector);
@@ -51,12 +52,12 @@ export default function AccountsPage() {
 
     if (accounts.length === 0) {
         return (
-            <PageLayout>
-                <PageLayout.Header>
+            <MasterDetailPageLayout>
+                <Header>
                     <h1>Accounts</h1>
-                </PageLayout.Header>
-                <NoIdentities />;
-            </PageLayout>
+                </Header>
+                <NoIdentities />
+            </MasterDetailPageLayout>
         );
     }
 
@@ -67,8 +68,8 @@ export default function AccountsPage() {
     const allDecrypted = isAllDecrypted(accounts);
 
     return (
-        <PageLayout>
-            <PageLayout.Header>
+        <MasterDetailPageLayout>
+            <Header>
                 <h1>Accounts | </h1>
                 <h2>
                     Wallet Total: {displayAsGTU(totalAmount)}
@@ -82,21 +83,19 @@ export default function AccountsPage() {
                 >
                     <PlusIcon height="20" />
                 </PageLayout.HeaderButton>
-            </PageLayout.Header>
-            <Columns divider columnScroll columnClassName={styles.column}>
-                <Columns.Column>
-                    <AccountList />
-                </Columns.Column>
-                <Columns.Column>
-                    <Switch>
-                        <Route
-                            path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
-                            component={BuildSchedule}
-                        />
-                        <Route component={AccountView} />
-                    </Switch>
-                </Columns.Column>
-            </Columns>
-        </PageLayout>
+            </Header>
+            <Master>
+                <AccountList />
+            </Master>
+            <Detail>
+                <Switch>
+                    <Route
+                        path={routes.ACCOUNTS_SCHEDULED_TRANSFER}
+                        component={BuildSchedule}
+                    />
+                    <Route component={AccountView} />
+                </Switch>
+            </Detail>
+        </MasterDetailPageLayout>
     );
 }

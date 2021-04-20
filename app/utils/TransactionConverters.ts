@@ -16,6 +16,7 @@ import {
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 import getTransactionCost from './transactionCosts';
+import { collapseFraction } from './basicHelpers';
 
 /*
  * Converts the given transaction into the structure, which is used in the database.
@@ -174,8 +175,9 @@ export async function convertAccountTransaction(
     transaction: AccountTransaction,
     hash: string
 ): Promise<TransferTransaction> {
-    const cost =
-        transaction.estimatedFee || (await getTransactionCost(transaction));
+    const cost = collapseFraction(
+        transaction.estimatedFee || (await getTransactionCost(transaction))
+    );
 
     let typeSpecific;
     if (instanceOfSimpleTransfer(transaction)) {

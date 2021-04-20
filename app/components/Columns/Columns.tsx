@@ -3,7 +3,6 @@ import React, {
     Children,
     cloneElement,
     FC,
-    Fragment,
     ReactElement,
     useCallback,
     useMemo,
@@ -14,9 +13,9 @@ import styles from './Columns.module.scss';
 
 export interface ColumnsProps {
     /**
-     * Controls whether or not a divider is visible between columns.
+     * Controls whether or not a divider is visible between columns. Setting to 'inset' creates a gap between the containing element and the divider line.
      */
-    divider?: boolean;
+    divider?: boolean | 'inset';
     /**
      * Must be of type <Columns.Column />
      */
@@ -61,7 +60,6 @@ function Columns({
         }),
         [columnClassName]
     );
-    const headers = Children.map(children, (c) => c.props.header);
 
     const enrichedChildren = useMemo(
         () => Children.map(children, (c) => cloneElement(c, getColProps(c))),
@@ -74,21 +72,12 @@ function Columns({
                 styles.root,
                 columnScroll && styles.rootColumnScroll,
                 variableSize && styles.rootVariableSize,
-                headers.length > 0 && styles.rootWithHeaders,
+                divider && styles.rootDivided,
+                divider === 'inset' && styles.rootPadded,
                 className
             )}
         >
-            {divider
-                ? enrichedChildren.map((c, i) => (
-                      // eslint-disable-next-line react/no-array-index-key
-                      <Fragment key={i}>
-                          {c}
-                          {i < enrichedChildren.length - 1 && (
-                              <div className={styles.divider} />
-                          )}
-                      </Fragment>
-                  ))
-                : enrichedChildren}
+            {enrichedChildren}
         </div>
     );
 }
