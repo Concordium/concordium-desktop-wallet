@@ -25,10 +25,11 @@ import {
 } from '~/features/CredentialSlice';
 
 /**
- * Given an UpdateAccountCredentials transaction, update the local credentialIndices
- * according to the transaction, and update the signatureThreshold of the account.
- * For each added credential, addi. For each removed credential,
- * remove its index to indicate that it has been removed.
+ * Given an UpdateAccountCredentials transaction, update the local state
+ * according to the transaction's changes.
+ * For each added credential, add it to the local database.
+ * For each removed credential, remove its index to indicate that it has been removed.
+ * Update the signatureThreshold of the account.
  */
 export function updateAccountCredentialsPerformConsequence(
     dispatch: Dispatch,
