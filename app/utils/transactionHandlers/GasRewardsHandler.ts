@@ -1,32 +1,33 @@
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import MicroGtuPerEuroView from '../../pages/multisig/MicroGtuPerEuroView';
-import UpdateMicroGtuPerEuro, {
-    UpdateMicroGtuPerEuroRateFields,
-} from '../../pages/multisig/UpdateMicroGtuPerEuro';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { getGovernanceLevel2Path } from '~/features/ledger/Path';
+import GasRewardsView from '~/pages/multisig/updates/UpdateGasRewards/GasRewardsView';
+import UpdateGasRewards, {
+    UpdateGasRewardsFields,
+} from '~/pages/multisig/updates/UpdateGasRewards/UpdateGasRewards';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    ExchangeRate,
+    GasRewards,
+    isGasRewards,
+    MultiSignatureTransaction,
     UpdateInstruction,
-    isExchangeRate,
     UpdateInstructionPayload,
     UpdateType,
-    MultiSignatureTransaction,
 } from '../types';
-import { serializeExchangeRate } from '../UpdateSerialization';
+import { serializeGasRewards } from '../UpdateSerialization';
 
-const TYPE = 'Update Micro GTU Per Euro';
+const TYPE = 'Update Gas Rewards';
 
-type TransactionType = UpdateInstruction<ExchangeRate>;
+type TransactionType = UpdateInstruction<GasRewards>;
 
-export default class MicroGtuPerEuroHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+export default class GasRewardsHandler
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isExchangeRate(transaction)) {
+        if (isGasRewards(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -34,7 +35,7 @@ export default class MicroGtuPerEuroHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { microGtuPerEuro }: UpdateMicroGtuPerEuroRateFields,
+        gasRewards: UpdateGasRewardsFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -42,15 +43,14 @@ export default class MicroGtuPerEuroHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.microGTUPerEuro
-                .nextSequenceNumber;
+            blockSummary.updates.updateQueues.gasRewards.nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.microGTUPerEuro;
+        } = blockSummary.updates.keys.level2Keys.paramGASRewards;
 
         return createUpdateMultiSignatureTransaction(
-            microGtuPerEuro,
-            UpdateType.UpdateMicroGTUPerEuro,
+            gasRewards,
+            UpdateType.UpdateGASRewards,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -58,7 +58,7 @@ export default class MicroGtuPerEuroHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeExchangeRate(transaction.payload);
+        return serializeGasRewards(transaction.payload);
     }
 
     signTransaction(
@@ -66,7 +66,7 @@ export default class MicroGtuPerEuroHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signMicroGtuPerEuro(
+        return ledger.signGasRewards(
             transaction,
             this.serializePayload(transaction),
             path
@@ -74,14 +74,14 @@ export default class MicroGtuPerEuroHandler
     }
 
     view(transaction: TransactionType) {
-        return MicroGtuPerEuroView({ exchangeRate: transaction.payload });
+        return GasRewardsView({ gasRewards: transaction.payload });
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.microGTUPerEuro;
+        return authorizations.paramGASRewards;
     }
 
-    update = UpdateMicroGtuPerEuro;
+    update = UpdateGasRewards;
 
     title = `Foundation Transaction | ${TYPE}`;
 

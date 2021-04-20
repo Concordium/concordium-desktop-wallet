@@ -8,7 +8,7 @@ import UpdateTransactionFeeDistribution, {
 } from '../../pages/multisig/updates/UpdateTransactionFee/UpdateTransactionFeeDistribution';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isTransactionFeeDistribution,
     MultiSignatureTransaction,
@@ -24,7 +24,8 @@ const TYPE = 'Update Transaction Fee Distribution';
 type TransactionType = UpdateInstruction<TransactionFeeDistribution>;
 
 export default class TransactionFeeDistributionHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
