@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import Form from '~/components/Form';
@@ -86,37 +87,49 @@ export default function MintRateInput({
     }, [fields.mintPerSlot]);
 
     return (
-        <div className={className}>
-            <FormProvider {...innerForm}>
-                <Form.InlineNumber
-                    className={styles.field}
-                    name={innerFieldNames.anualRate}
-                    allowFractions
-                    defaultValue={initialAnualRate}
-                    rules={{
-                        required: 'Field is required',
-                        min: { value: 0, message: "Value can't be negative" },
-                    }}
-                    disabled={disabled}
-                />{' '}
-                ≈ (1 +{' '}
-                <Form.InlineNumber
-                    className={styles.field}
-                    name={innerFieldNames.mintPerSlot}
-                    defaultValue={mintRateFormatter(mintPerSlot)}
-                    rules={{
-                        required: 'Field is required',
-                        min: { value: 0, message: "Value can't be negative" },
-                    }}
-                    disabled={disabled}
-                    allowFractions
-                />
-                )
-                <span className={styles.exponent} title="Slots per year">
-                    {BigInt(slotsPerYear).toLocaleString()}
-                </span>{' '}
-                - 1
-            </FormProvider>
+        <span className={clsx(styles.root, className)}>
+            <div>
+                <FormProvider {...innerForm}>
+                    <Form.InlineNumber
+                        className={styles.field}
+                        name={innerFieldNames.anualRate}
+                        allowFractions
+                        defaultValue={initialAnualRate}
+                        rules={{
+                            required: 'Field is required',
+                            min: {
+                                value: 0,
+                                message: "Value can't be negative",
+                            },
+                        }}
+                        disabled={disabled}
+                    />{' '}
+                    ≈ (1 +{' '}
+                    <Form.InlineNumber
+                        className={styles.field}
+                        name={innerFieldNames.mintPerSlot}
+                        defaultValue={mintRateFormatter(mintPerSlot)}
+                        rules={{
+                            required: 'Field is required',
+                            min: {
+                                value: 0,
+                                message: "Value can't be negative",
+                            },
+                        }}
+                        disabled={disabled}
+                        allowFractions
+                    />
+                    )
+                    <span className={styles.exponent} title="Slots per year">
+                        {BigInt(slotsPerYear).toLocaleString()}
+                    </span>{' '}
+                    - 1
+                </FormProvider>
+                <div className={styles.description}>
+                    Chain values - Mantissa: {mantissa}, Exponent: {exponent} (
+                    {mantissa}e-{exponent})
+                </div>
+            </div>
             {!disabled && (
                 <>
                     <Form.Input
@@ -133,6 +146,6 @@ export default function MintRateInput({
                     />
                 </>
             )}
-        </div>
+        </span>
     );
 }
