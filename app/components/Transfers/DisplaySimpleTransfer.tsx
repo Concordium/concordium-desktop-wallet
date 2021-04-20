@@ -9,7 +9,6 @@ interface Props {
     fromName?: string;
     toName?: string;
 }
-
 /**
  * Displays an overview of a simple transfer.
  */
