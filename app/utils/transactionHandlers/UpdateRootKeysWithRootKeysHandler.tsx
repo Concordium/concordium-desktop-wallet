@@ -1,32 +1,33 @@
 import React from 'react';
 import HigherLevelKeysView from '~/pages/multisig/updates/UpdateHigherLevelKeys/HigherLevelKeysView';
-import UpdateLevel1KeysWithRootKeys from '~/pages/multisig/updates/UpdateHigherLevelKeys/UpdateLevel1KeysWithRootKeys';
+import UpdateRootKeys from '~/pages/multisig/updates/UpdateHigherLevelKeys/UpdateRootKeys';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorization, Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
     MultiSignatureTransaction,
     UpdateType,
     HigherLevelKeyUpdate,
-    isUpdateLevel1KeysWithRootKeys,
+    isUpdateRootKeysWithRootKeys,
 } from '../types';
 import { serializeHigherLevelKeyUpdate } from '../UpdateSerialization';
-import { removeRemovedKeys } from './HigherLevelKeysHelpers';
+import { removeRemovedKeys } from '../updates/HigherLevelKeysHelpers';
+import { UpdateInstructionHandler } from '../transactionTypes';
 
-const TYPE = 'Update Level 1 Governance Keys';
+const TYPE = 'Update Root Governance Keys';
 
 type TransactionType = UpdateInstruction<HigherLevelKeyUpdate>;
 
-export default class UpdateLevel1KeysWithRootKeysHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+export default class UpdateRootKeysWithRootKeysHandler
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isUpdateLevel1KeysWithRootKeys(transaction)) {
+        if (isUpdateRootKeysWithRootKeys(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -42,12 +43,12 @@ export default class UpdateLevel1KeysWithRootKeysHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.level1Keys.nextSequenceNumber;
-        const { threshold } = blockSummary.updates.keys.level1Keys;
+            blockSummary.updates.updateQueues.rootKeys.nextSequenceNumber;
+        const { threshold } = blockSummary.updates.keys.rootKeys;
 
         return createUpdateMultiSignatureTransaction(
             higherLevelKeyUpdate,
-            UpdateType.UpdateLevel1KeysWithRootKeys,
+            UpdateType.UpdateRootKeysWithRootKeys,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -97,7 +98,7 @@ export default class UpdateLevel1KeysWithRootKeysHandler
         );
     }
 
-    update = UpdateLevel1KeysWithRootKeys;
+    update = UpdateRootKeys;
 
     title = `Foundation Transaction | ${TYPE}`;
 

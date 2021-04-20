@@ -5,7 +5,7 @@ import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient
 import { getGovernanceLevel1Path } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorization, Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -15,14 +15,15 @@ import {
     isUpdateLevel1KeysWithLevel1Keys,
 } from '../types';
 import { serializeHigherLevelKeyUpdate } from '../UpdateSerialization';
-import { removeRemovedKeys } from './HigherLevelKeysHelpers';
+import { removeRemovedKeys } from '../updates/HigherLevelKeysHelpers';
 
 const TYPE = 'Update Level 1 Governance Keys';
 
 type TransactionType = UpdateInstruction<HigherLevelKeyUpdate>;
 
 export default class UpdateLevel1KeysWithLevel1KeysHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

@@ -128,17 +128,17 @@ export enum TransactionKindString {
     Transfer = 'transfer',
     AddBaker = 'addBaker',
     RemoveBaker = 'removeBaker',
-    UpdateBakerAccount = 'updateBakerAccount',
-    UpdateBakerSignKey = 'updateBakerSignKey',
-    DelegateStake = 'delegateStake',
-    UndelegateStake = 'undelegateStake',
-    UpdateElectionDifficulty = 'updateElectionDifficulty',
-    DeployCredential = 'deployCredential',
+    UpdateBakerStake = 'updateBakerStake',
+    UpdateBakerRestakeEarnings = 'updateBakerRestakeEarnings',
+    UpdateBakerKeys = 'updateBakerKeys',
+    UpdateCredentialKeys = 'updateCredentialKeys',
     BakingReward = 'bakingReward',
     EncryptedAmountTransfer = 'encryptedAmountTransfer',
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
-    TransferWithSchedule = 'transferWithSchedule', // TODO confirm
+    TransferWithSchedule = 'transferWithSchedule',
+    UpdateCredentials = 'updateCredentials',
+    RegisterData = 'registerData',
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -149,16 +149,17 @@ export enum TransactionKindId {
     Simple_transfer = 3,
     Add_baker = 4,
     Remove_baker = 5,
-    Update_baker_account = 6,
-    Update_baker_sign_key = 7,
-    Delegate_stake = 8,
-    Undelegate_stake = 9,
+    Update_baker_stake = 6,
+    Update_baker_restake_earnings = 7,
+    Update_baker_keys = 8,
+    Update_credential_keys = 13,
     Encrypted_transfer = 16,
     Transfer_to_encrypted = 17,
     Transfer_to_public = 18,
     Transfer_with_schedule = 19,
-} // TODO: Add all kinds (11- 18)
-
+    Update_credentials = 20,
+    Register_data = 21,
+}
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
@@ -186,7 +187,19 @@ export interface ScheduledTransferPayload {
     toAddress: string;
 }
 
+export interface AddedCredential {
+    index: Word8;
+    value: CredentialDeploymentInformation;
+}
+
+export interface UpdateAccountCredentialsPayload {
+    addedCredentials: AddedCredential[];
+    removedCredIds: Hex[];
+    threshold: number;
+}
+
 export type TransactionPayload =
+    | UpdateAccountCredentialsPayload
     | TransferToPublicPayload
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
@@ -210,6 +223,7 @@ export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
+export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 
 // Types of block items, and their identifier numbers
@@ -266,10 +280,22 @@ export interface Credential {
     policy: JSONString;
 }
 
+export interface DeployedCredential extends Credential {
+    credentialIndex: number;
+}
+
 export interface LocalCredential extends Credential {
     external: false;
     identityId: number;
     credentialNumber: number;
+}
+
+export function instanceOfDeployedCredential(
+    object: Credential
+): object is DeployedCredential {
+    return !(
+        object.credentialIndex === undefined || object.credentialIndex === null
+    );
 }
 
 export function instanceOfLocalCredential(
@@ -560,7 +586,9 @@ export interface UpdateInstructionSignature {
     signature: string;
 }
 
-export interface UpdateInstruction<T extends UpdateInstructionPayload> {
+export interface UpdateInstruction<
+    T extends UpdateInstructionPayload = UpdateInstructionPayload
+> {
     header: UpdateHeader;
     payload: T;
     type: UpdateType;
@@ -578,9 +606,31 @@ export type UpdateInstructionPayload =
     | ElectionDifficulty
     | HigherLevelKeyUpdate;
 
+// An actual signature, which goes into an account transaction.
+export type Signature = Hex;
+
+type KeyIndex = Word8;
+// Signatures from a single credential, for an AccountTransaction
+export type TransactionCredentialSignature = Record<KeyIndex, Signature>;
+
+type CredentialIndex = Word8;
+// The signature of an account transaction.
+export type TransactionAccountSignature = Record<
+    CredentialIndex,
+    TransactionCredentialSignature
+>;
+
+export interface AccountTransactionWithSignature<
+    PayloadType extends TransactionPayload = TransactionPayload
+> extends AccountTransaction<PayloadType> {
+    signatures: TransactionAccountSignature;
+}
+
 export type Transaction =
     | AccountTransaction
-    | UpdateInstruction<UpdateInstructionPayload>;
+    | AccountTransactionWithSignature
+    | UpdateInstruction;
+
 /**
  * Update type enumeration. The numbering/order is important as that corresponds
  * to the byte written when serializing the update instruction.
@@ -614,6 +664,18 @@ export function instanceOfUpdateInstruction(
     return 'header' in object;
 }
 
+export function instanceOfUpdateInstructionSignature(
+    object: TransactionCredentialSignature | UpdateInstructionSignature
+): object is UpdateInstructionSignature {
+    return 'signature' in object && 'authorizationKeyIndex' in object;
+}
+
+export function instanceOfAccountTransactionWithSignature(
+    object: Transaction
+): object is AccountTransactionWithSignature {
+    return instanceOfAccountTransaction(object) && 'signatures' in object;
+}
+
 export function instanceOfSimpleTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is SimpleTransfer {
@@ -636,6 +698,12 @@ export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
     return object.transactionKind === TransactionKindId.Transfer_with_schedule;
+}
+
+export function instanceOfUpdateAccountCredentials(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateAccountCredentials {
+    return object.transactionKind === TransactionKindId.Update_credentials;
 }
 
 export function isExchangeRate(
@@ -916,6 +984,7 @@ export interface ExportData {
 
 interface EventResult {
     outcome: string;
+    rejectReason?: string;
 }
 
 export interface TransactionEvent {

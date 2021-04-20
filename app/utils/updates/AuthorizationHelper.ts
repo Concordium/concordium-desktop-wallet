@@ -11,7 +11,7 @@ import {
     Keys,
     KeysWithThreshold,
 } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -61,7 +61,7 @@ function findHigherLevelKey(publicKey: string, keys: KeysWithThreshold) {
  */
 function findAuthorizationKey(
     publicKey: string,
-    transactionHandler: TransactionHandler<
+    transactionHandler: UpdateInstructionHandler<
         UpdateInstruction<UpdateInstructionPayload>,
         ConcordiumLedgerClient
     >,
@@ -84,14 +84,12 @@ function findAuthorizationKey(
  *
  * The type of authorization key (root, level 1 or level 2) is derived directly from
  * the update type, as the type of key used to sign a given update is determined by its type.
- *
- *
  */
 export async function findKey(
     ledger: ConcordiumLedgerClient,
     keys: Keys,
     updateType: UpdateType,
-    transactionHandler: TransactionHandler<
+    transactionHandler: UpdateInstructionHandler<
         UpdateInstruction<UpdateInstructionPayload>,
         ConcordiumLedgerClient
     >

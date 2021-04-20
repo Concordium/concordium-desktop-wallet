@@ -1,32 +1,33 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import ElectionDifficultyView from '../../pages/multisig/ElectionDifficultyView';
-import UpdateElectionDifficulty, {
-    UpdateElectionDifficultyFields,
-} from '../../pages/multisig/UpdateElectionDifficulty';
+import EuroPerEnergyView from '../../pages/multisig/EuroPerEnergyView';
+import UpdateEuroPerEnergy, {
+    UpdateEuroPerEnergyFields,
+} from '../../pages/multisig/UpdateEuroPerEnergy';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    ElectionDifficulty,
-    isElectionDifficulty,
-    MultiSignatureTransaction,
+    isExchangeRate,
+    ExchangeRate,
     UpdateInstruction,
     UpdateInstructionPayload,
+    MultiSignatureTransaction,
     UpdateType,
 } from '../types';
-import { serializeElectionDifficulty } from '../UpdateSerialization';
+import { serializeExchangeRate } from '../UpdateSerialization';
 
-const TYPE = 'Update Election Difficulty';
+const TYPE = 'Update Euro Per Energy';
 
-type TransactionType = UpdateInstruction<ElectionDifficulty>;
+type TransactionType = UpdateInstruction<ExchangeRate>;
 
-export default class ElectionDifficultyHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+export default class EuroPerEnergyHandler
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isElectionDifficulty(transaction)) {
+        if (isExchangeRate(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -34,7 +35,7 @@ export default class ElectionDifficultyHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { electionDifficulty }: UpdateElectionDifficultyFields,
+        { euroPerEnergy }: UpdateEuroPerEnergyFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -42,17 +43,14 @@ export default class ElectionDifficultyHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.foundationAccount
-                .nextSequenceNumber;
+            blockSummary.updates.updateQueues.euroPerEnergy.nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.electionDifficulty;
+        } = blockSummary.updates.keys.level2Keys.euroPerEnergy;
 
         return createUpdateMultiSignatureTransaction(
-            {
-                electionDifficulty: parseInt(electionDifficulty, 10),
-            },
-            UpdateType.UpdateElectionDifficulty,
+            euroPerEnergy,
+            UpdateType.UpdateEuroPerEnergy,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -60,7 +58,7 @@ export default class ElectionDifficultyHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeElectionDifficulty(transaction.payload);
+        return serializeExchangeRate(transaction.payload);
     }
 
     signTransaction(
@@ -68,7 +66,7 @@ export default class ElectionDifficultyHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signElectionDifficulty(
+        return ledger.signEuroPerEnergy(
             transaction,
             this.serializePayload(transaction),
             path
@@ -76,14 +74,14 @@ export default class ElectionDifficultyHandler
     }
 
     view(transaction: TransactionType) {
-        return ElectionDifficultyView(transaction.payload);
+        return EuroPerEnergyView({ exchangeRate: transaction.payload });
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.electionDifficulty;
+        return authorizations.euroPerEnergy;
     }
 
-    update = UpdateElectionDifficulty;
+    update = UpdateEuroPerEnergy;
 
     title = `Foundation Transaction | ${TYPE}`;
 
