@@ -11,7 +11,7 @@ import {
     getGovernanceRootPath,
 } from '~/features/ledger/Path';
 import { saveFile } from '~/utils/FileHelper';
-import { SignedPublicKey } from '~/utils/types';
+import { SignedPublicKey, VerifyKey } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import CopiableIdenticon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import { ExportKeyType, getKeyDisplay } from '../menu/ExportKeyList';
@@ -25,8 +25,7 @@ interface ParamTypes {
 }
 
 interface PublicKeyExportFormat {
-    schemeId: string;
-    verifyKey: string;
+    key: VerifyKey;
     signature: string;
     type: ExportKeyType;
 }
@@ -72,8 +71,7 @@ export default function ExportKeyView(): JSX.Element {
         exportKeyType: ExportKeyType
     ) {
         const publicKeyExport: PublicKeyExportFormat = {
-            schemeId: 'Ed25519',
-            verifyKey: sPublicKey.key,
+            key: { verifyKey: sPublicKey.key, schemeId: 'Ed25519' },
             signature: sPublicKey.signature,
             type: exportKeyType,
         };
