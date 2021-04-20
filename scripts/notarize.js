@@ -3,8 +3,13 @@ const { notarize } = require('electron-notarize');
 
 exports.default = async function notarizing(context) {
     const { electronPlatformName, appOutDir } = context;
-    if (electronPlatformName !== 'darwin') {
-        return 'Skipping MacOS signing and notarizing';
+    if (
+        electronPlatformName !== 'darwin' ||
+        process.env.BUILDMODE === 'development'
+    ) {
+        return console.log(
+            'Not building for production, skipping notarization process.'
+        );
     }
 
     if (!process.env.APPLEID || !process.env.APPLEIDPASS) {
