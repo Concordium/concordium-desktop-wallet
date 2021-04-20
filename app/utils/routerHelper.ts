@@ -23,8 +23,11 @@ export function selectedExportKeyRoute(keyType: string) {
     );
 }
 
-export const submittedProposalRoute = (id: number) =>
-    routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION.replace(':id', `${id}`);
+export const submittedProposalRoute = (proposalId: number) =>
+    routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION.replace(
+        ':id',
+        `${proposalId}`
+    );
 
 export function createProposalRoute(
     transactionType: TransactionTypes,

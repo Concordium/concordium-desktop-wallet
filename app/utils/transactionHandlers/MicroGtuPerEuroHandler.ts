@@ -1,33 +1,33 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import MintDistributionView from '../../pages/multisig/MintDistributionView';
-import UpdateMintDistribution, {
-    UpdateMintDistributionFields,
-} from '../../pages/multisig/UpdateMintDistribution';
+import MicroGtuPerEuroView from '../../pages/multisig/MicroGtuPerEuroView';
+import UpdateMicroGtuPerEuro, {
+    UpdateMicroGtuPerEuroRateFields,
+} from '../../pages/multisig/UpdateMicroGtuPerEuro';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    isMintDistribution,
-    MintDistribution,
-    MultiSignatureTransaction,
+    ExchangeRate,
     UpdateInstruction,
+    isExchangeRate,
     UpdateInstructionPayload,
     UpdateType,
+    MultiSignatureTransaction,
 } from '../types';
-import { serializeMintDistribution } from '../UpdateSerialization';
+import { serializeExchangeRate } from '../UpdateSerialization';
 
-const TYPE = 'Update Mint Distribution';
+const TYPE = 'Update Micro GTU Per Euro';
 
-type TransactionType = UpdateInstruction<MintDistribution>;
+type TransactionType = UpdateInstruction<ExchangeRate>;
 
-export default class MintDistributionHandler
+export default class MicroGtuPerEuroHandler
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isMintDistribution(transaction)) {
+        if (isExchangeRate(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -35,11 +35,7 @@ export default class MintDistributionHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        {
-            exponent,
-            mantissa,
-            rewardDistribution,
-        }: UpdateMintDistributionFields,
+        { microGtuPerEuro }: UpdateMicroGtuPerEuroRateFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -47,24 +43,15 @@ export default class MintDistributionHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.mintDistribution
+            blockSummary.updates.updateQueues.microGTUPerEuro
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.authorizations.mintDistribution;
-
-        const mintDistribution: MintDistribution = {
-            mintPerSlot: {
-                mantissa: parseInt(mantissa, 10),
-                exponent: parseInt(exponent, 10),
-            },
-            bakingReward: rewardDistribution.first,
-            finalizationReward: rewardDistribution.second,
-        };
+        } = blockSummary.updates.keys.level2Keys.microGTUPerEuro;
 
         return createUpdateMultiSignatureTransaction(
-            mintDistribution,
-            UpdateType.UpdateMintDistribution,
+            microGtuPerEuro,
+            UpdateType.UpdateMicroGTUPerEuro,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -72,7 +59,7 @@ export default class MintDistributionHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeMintDistribution(transaction.payload);
+        return serializeExchangeRate(transaction.payload);
     }
 
     signTransaction(
@@ -80,7 +67,7 @@ export default class MintDistributionHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signMintDistribution(
+        return ledger.signMicroGtuPerEuro(
             transaction,
             this.serializePayload(transaction),
             path
@@ -88,14 +75,14 @@ export default class MintDistributionHandler
     }
 
     view(transaction: TransactionType) {
-        return MintDistributionView({ mintDistribution: transaction.payload });
+        return MicroGtuPerEuroView({ exchangeRate: transaction.payload });
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.mintDistribution;
+        return authorizations.microGTUPerEuro;
     }
 
-    update = UpdateMintDistribution;
+    update = UpdateMicroGtuPerEuro;
 
     title = `Foundation Transaction | ${TYPE}`;
 

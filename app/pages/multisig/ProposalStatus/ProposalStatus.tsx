@@ -24,7 +24,6 @@ export default function ProposalStatus({
     const { status, transaction } = proposal;
     const parsed = useMemo(() => parse(transaction), [transaction]);
 
-    // TODO handle other transaction types...
     if (instanceOfUpdateInstruction(parsed)) {
         return (
             <ChainUpdateProposalStatus

@@ -48,7 +48,7 @@ async function HandleAccountTransactionSignatureFile(
             show: true,
             header: 'Duplicate Credential',
             content:
-                'The loaded signature file contains a signature, from a credential, which is already has a signature on the proposal.',
+                'The loaded signature file contains a signature, from a credential, which already has a signature on the proposal.',
         };
     }
 
@@ -76,7 +76,7 @@ async function isSignatureValid(
     const transactionHash = getTransactionHash(proposal);
 
     const matchingKey =
-        blockSummary.updates.authorizations.keys[
+        blockSummary.updates.keys.level2Keys.keys[
             signature.authorizationKeyIndex
         ];
     return ed.verify(
@@ -91,12 +91,6 @@ async function HandleUpdateInstructionSignatureFile(
     transactionObject: UpdateInstruction,
     currentProposal: MultiSignatureTransaction
 ): Promise<ModalErrorInput | undefined> {
-    if (!currentProposal) {
-        return {
-            show: true,
-            header: 'Unexpected missing current proposal',
-        };
-    }
     const proposal: UpdateInstruction = parse(currentProposal.transaction);
 
     // We currently restrict the amount of signatures imported at the same time to be 1, as it

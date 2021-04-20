@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import Form from '~/components/Form';
+import InlineNumber from '~/components/Form/InlineNumber';
+import styles from './UpdateAccountCredentials.module.scss';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -39,42 +40,43 @@ export default function ChangeThreshold({
 
     return (
         <>
-            <h1>Propose new signature threshold for the account?</h1>
-            <h3>
+            <h3 className={styles.bold}>
+                Propose new signature threshold for the account?
+            </h3>
+            <p>
                 If you want to update the amount of required signatures to make
                 transactions from the account, you can do so below. If you do
                 not want to make changes to the threshold, you can just leave it
                 as it is.
-            </h3>
+            </p>
 
-            <h2>Current signature threshold:</h2>
-            {currentThreshold}
+            <h3>Current signature threshold:</h3>
+            <h1 className={styles.bold}>{currentThreshold}</h1>
 
             <h2>New signature threshold:</h2>
-            <Form onSubmit={() => {}}>
-                <Form.Input
-                    name="newThreshold"
-                    placeholder="new threshold"
-                    value={newThreshold}
-                    type="number"
-                    onChange={(e) => {
-                        let proposedThreshold;
-                        try {
-                            proposedThreshold = parseInt(e.target.value, 10);
-                            setNewThreshold(proposedThreshold);
-                            setReady(
-                                validateThreshold(
-                                    proposedThreshold,
-                                    newCredentialAmount
-                                )
-                            );
-                        } catch (error) {
-                            setNewThreshold(undefined);
-                            setReady(false);
-                        }
-                    }}
-                />
-            </Form>
+            <InlineNumber
+                className={styles.inlineNumber}
+                onChange={(v) => {
+                    let proposedThreshold;
+                    if (v) {
+                        proposedThreshold = parseInt(v, 10);
+                        setNewThreshold(proposedThreshold);
+                        setReady(
+                            validateThreshold(
+                                proposedThreshold,
+                                newCredentialAmount
+                            )
+                        );
+                    } else {
+                        setReady(false);
+                        setNewThreshold(undefined);
+                    }
+                }}
+                value={currentThreshold.toString()}
+                min={1}
+                max={newCredentialAmount}
+                step={1}
+            />
         </>
     );
 }

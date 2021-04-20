@@ -20,7 +20,7 @@ import Button from '~/cross-app-components/Button';
 import TransactionProposalDetails from '../TransactionProposalDetails';
 import { isValidGTUString } from '~/utils/gtu';
 import CreateTransaction from '../CreateTransaction';
-import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 import styles from './CreateTransferProposal.module.scss';

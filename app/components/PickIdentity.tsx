@@ -19,7 +19,7 @@ export default function PickIdentity({
     elementClassName,
 }: Props): JSX.Element {
     const identities = useSelector(confirmedIdentitiesSelector);
-    const [chosenIndex, setChosenIndex] = useState(-1);
+    const [chosenIndex, setChosenIndex] = useState<number | undefined>();
 
     return (
         <>

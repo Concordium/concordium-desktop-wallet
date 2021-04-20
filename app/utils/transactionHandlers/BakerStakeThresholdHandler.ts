@@ -47,7 +47,7 @@ export default class EuroPerEnergyHandler
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.authorizations.bakerStakeThreshold;
+        } = blockSummary.updates.keys.level2Keys.bakerStakeThreshold;
 
         return createUpdateMultiSignatureTransaction(
             { threshold: BigInt(bakerStakeThreshold) },

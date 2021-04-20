@@ -1,33 +1,33 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import ElectionDifficultyView from '../../pages/multisig/ElectionDifficultyView';
-import UpdateElectionDifficulty, {
-    UpdateElectionDifficultyFields,
-} from '../../pages/multisig/UpdateElectionDifficulty';
+import ProtocolUpdateView from '../../pages/multisig/ProtocolUpdateView';
+import UpdateProtocol, {
+    UpdateProtocolFields,
+} from '../../pages/multisig/UpdateProtocol';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    ElectionDifficulty,
-    isElectionDifficulty,
+    isProtocolUpdate,
     MultiSignatureTransaction,
+    ProtocolUpdate,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
 } from '../types';
-import { serializeElectionDifficulty } from '../UpdateSerialization';
+import { serializeProtocolUpdate } from '../UpdateSerialization';
 
-const TYPE = 'Update Election Difficulty';
+const TYPE = 'Update Chain Protocol';
 
-type TransactionType = UpdateInstruction<ElectionDifficulty>;
+type TransactionType = UpdateInstruction<ProtocolUpdate>;
 
-export default class ElectionDifficultyHandler
+export default class ProtocolUpdateHandler
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isElectionDifficulty(transaction)) {
+        if (isProtocolUpdate(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -35,25 +35,33 @@ export default class ElectionDifficultyHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { electionDifficulty }: UpdateElectionDifficultyFields,
+        { specificationAuxiliaryData: files, ...fields }: UpdateProtocolFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
         }
 
+        const { threshold } = blockSummary.updates.keys.level2Keys.protocol;
         const sequenceNumber =
-            blockSummary.updates.updateQueues.foundationAccount
-                .nextSequenceNumber;
-        const {
-            threshold,
-        } = blockSummary.updates.authorizations.electionDifficulty;
+            blockSummary.updates.updateQueues.protocol.nextSequenceNumber;
+
+        const file = files.item(0);
+
+        if (!file) {
+            throw new Error('No auxiliary data file in update transaction');
+        }
+        const ab = await file.arrayBuffer();
+        const specificationAuxiliaryData = Buffer.from(ab).toString('base64');
+
+        const protocolUpdate: ProtocolUpdate = {
+            ...fields,
+            specificationAuxiliaryData,
+        };
 
         return createUpdateMultiSignatureTransaction(
-            {
-                electionDifficulty: parseInt(electionDifficulty, 10),
-            },
-            UpdateType.UpdateElectionDifficulty,
+            protocolUpdate,
+            UpdateType.UpdateProtocol,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -61,7 +69,7 @@ export default class ElectionDifficultyHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeElectionDifficulty(transaction.payload);
+        return serializeProtocolUpdate(transaction.payload).serialization;
     }
 
     signTransaction(
@@ -69,7 +77,7 @@ export default class ElectionDifficultyHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signElectionDifficulty(
+        return ledger.signProtocolUpdate(
             transaction,
             this.serializePayload(transaction),
             path
@@ -77,14 +85,14 @@ export default class ElectionDifficultyHandler
     }
 
     view(transaction: TransactionType) {
-        return ElectionDifficultyView(transaction.payload);
+        return ProtocolUpdateView({ protocolUpdate: transaction.payload });
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.electionDifficulty;
+        return authorizations.protocol;
     }
 
-    update = UpdateElectionDifficulty;
+    update = UpdateProtocol;
 
     title = `Foundation Transaction | ${TYPE}`;
 

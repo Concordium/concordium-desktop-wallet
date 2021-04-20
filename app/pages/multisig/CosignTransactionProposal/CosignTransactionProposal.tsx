@@ -7,7 +7,7 @@ import { parse, stringify } from '~/utils/JSONHelper';
 
 import routes from '~/constants/routes.json';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import findHandler from '~/utils/updates/HandlerFinder';
+import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import {
     EqualRecord,
     instanceOfUpdateInstruction,
@@ -28,7 +28,7 @@ import TransactionExpirationDetails from '~/components/TransactionExpirationDeta
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import getTransactionHash from '~/utils/transactionHash';
 
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
+import ExpiredTransactionView from '../ExpiredTransactionView';
 import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import styles from './CosignTransactionProposal.module.scss';
@@ -61,7 +61,9 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
     ({ location, blockSummary }) => {
         const [showValidationError, setShowValidationError] = useState(false);
         const [signature, setSignature] = useState<
-            UpdateInstructionSignature | TransactionAccountSignature | undefined
+            | UpdateInstructionSignature[]
+            | TransactionAccountSignature
+            | undefined
         >();
         const [transactionHash, setTransactionHash] = useState<string>();
 
@@ -116,7 +118,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
         async function exportSignedTransaction() {
             const signedTransaction = {
                 ...transactionObject,
-                signatures: [signature],
+                signatures: signature,
             };
             const signedTransactionJson = stringify(signedTransaction);
 
@@ -196,7 +198,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                             {instanceOfUpdateInstruction(
                                                 transactionObject
                                             ) && (
-                                                <ExpiredEffectiveTimeView
+                                                <ExpiredTransactionView
                                                     transaction={
                                                         transactionObject
                                                     }

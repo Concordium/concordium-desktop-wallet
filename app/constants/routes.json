@@ -53,7 +53,6 @@
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION": "/multi-signature-transaction/simple-transfer/credentials/sign_transaction",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_MAKETRANSFER": "/multi-signature-transaction/simple-transfer/credentials/make-transfer",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL": "/multi-signature-transaction/simple-transfer/add-credential",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD": "/multi-signature-transaction/simple-transfer/change-signature-threshold",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE": "/multi-signature-transaction/simple-transfer/build-schedule",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CONFIRM": "/multi-signature-transaction/simple-transfer/confirm"
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD": "/multi-signature-transaction/simple-transfer/change-signature-threshold"
 }

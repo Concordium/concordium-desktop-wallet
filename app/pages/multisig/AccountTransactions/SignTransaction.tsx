@@ -11,7 +11,7 @@ import {
 import { stringify } from '~/utils/JSONHelper';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { globalSelector } from '~/features/GlobalSlice';
-import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';

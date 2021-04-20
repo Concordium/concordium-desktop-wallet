@@ -7,14 +7,13 @@ import { Redirect } from 'react-router';
 import routes from '~/constants/routes.json';
 import {
     AccountTransaction,
-    instanceOfUpdateInstruction,
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateInstructionSignature,
 } from '~/utils/types';
 import { UpdateInstructionHandler } from '~/utils/transactionTypes';
-import { createUpdateInstructionHandler } from '~/utils/updates/HandlerFinder';
+import { createUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -24,7 +23,7 @@ import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
+import ExpiredTransactionView from '../ExpiredTransactionView';
 import { ensureProps } from '~/utils/componentHelpers';
 import getTransactionHash from '~/utils/transactionHash';
 import SignTransaction from './SignTransaction';
@@ -77,7 +76,7 @@ function SignTransactionProposalView({ location }: Props) {
         const authorizationKey = await findAuthorizationKey(
             ledger,
             transactionHandler,
-            blockSummary.updates.authorizations
+            blockSummary.updates.keys.level2Keys
         );
         if (!authorizationKey) {
             setShowValidationError(true);
@@ -140,11 +139,9 @@ function SignTransactionProposalView({ location }: Props) {
                 <Columns.Column header="Transaction Details">
                     <section className={styles.columnContent}>
                         <TransactionDetails transaction={transactionObject} />
-                        {instanceOfUpdateInstruction(transactionObject) && (
-                            <ExpiredEffectiveTimeView
-                                transaction={transactionObject}
-                            />
-                        )}
+                        <ExpiredTransactionView
+                            transaction={transactionObject}
+                        />
                     </section>
                 </Columns.Column>
                 <Columns.Column

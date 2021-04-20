@@ -27,7 +27,7 @@ import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
 import SimpleTransferHandler from './SimpleTransferHandler';
 import ScheduledTransferHandler from './ScheduledTransferHandler';
 import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
-import UpdateHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
+import UpdateInstructionHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -54,33 +54,39 @@ export function findUpdateInstructionHandler(
 > {
     switch (type) {
         case UpdateType.UpdateMicroGTUPerEuro:
-            return new UpdateHandlerTypeMiddleware(
+            return new UpdateInstructionHandlerTypeMiddleware(
                 new MicroGtuPerEuroHandler()
             );
         case UpdateType.UpdateEuroPerEnergy:
-            return new UpdateHandlerTypeMiddleware(new EuroPerEnergyHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new EuroPerEnergyHandler()
+            );
         case UpdateType.UpdateTransactionFeeDistribution:
-            return new UpdateHandlerTypeMiddleware(
+            return new UpdateInstructionHandlerTypeMiddleware(
                 new TransactionFeeDistributionHandler()
             );
         case UpdateType.UpdateFoundationAccount:
-            return new UpdateHandlerTypeMiddleware(
+            return new UpdateInstructionHandlerTypeMiddleware(
                 new FoundationAccountHandler()
             );
         case UpdateType.UpdateMintDistribution:
-            return new UpdateHandlerTypeMiddleware(
+            return new UpdateInstructionHandlerTypeMiddleware(
                 new MintDistributionHandler()
             );
         case UpdateType.UpdateProtocol:
-            return new UpdateHandlerTypeMiddleware(new ProtocolUpdateHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new ProtocolUpdateHandler()
+            );
         case UpdateType.UpdateGASRewards:
-            return new UpdateHandlerTypeMiddleware(new GasRewardsHandler());
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new GasRewardsHandler()
+            );
         case UpdateType.UpdateBakerStakeThreshold:
-            return new UpdateHandlerTypeMiddleware(
+            return new UpdateInstructionHandlerTypeMiddleware(
                 new BakerStakeThresholdHandler()
             );
         case UpdateType.UpdateElectionDifficulty:
-            return new UpdateHandlerTypeMiddleware(
+            return new UpdateInstructionHandlerTypeMiddleware(
                 new ElectionDifficultyHandler()
             );
         default:
@@ -106,7 +112,6 @@ export function createUpdateInstructionHandler(
     const { transaction, type } = state;
 
     const transactionObject = parse(transaction);
-    // TODO Add AccountTransactionHandler here when implemented.
 
     if (type === 'UpdateInstruction') {
         return findUpdateInstructionHandler(transactionObject.type);

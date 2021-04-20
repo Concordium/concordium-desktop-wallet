@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { toMicroUnits } from '~/utils/gtu';
-import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import {
     Account,
     AddressBookEntry,

@@ -49,7 +49,7 @@ export default class TransactionFeeDistributionHandler
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.authorizations.transactionFeeDistribution;
+        } = blockSummary.updates.keys.level2Keys.transactionFeeDistribution;
 
         const transactionFeeDistribution: TransactionFeeDistribution = {
             baker: rewardDistribution.first,

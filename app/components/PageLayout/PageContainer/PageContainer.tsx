@@ -2,12 +2,8 @@ import clsx from 'clsx';
 import { routerActions } from 'connected-react-router';
 import React, { PropsWithChildren } from 'react';
 import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-
-import BackIcon from '@resources/svg/back-arrow.svg';
-import CloseIcon from '@resources/svg/cross.svg';
-import Button from '~/cross-app-components/Button';
-
+import CloseButton from '~/cross-app-components/CloseButton';
+import BackButton from '~/cross-app-components/BackButton';
 import styles from './PageContainer.module.scss';
 
 export interface PageContainerProps {
@@ -47,19 +43,17 @@ export default function PageContainer({
             )}
         >
             {!disableBack && (
-                <Button
+                <BackButton
                     className={styles.back}
-                    clear
                     onClick={() => dispatch(routerActions.goBack())}
-                >
-                    <BackIcon />
-                </Button>
+                />
             )}
             {children}
             {closeRoute && (
-                <Link className={styles.close} to={closeRoute}>
-                    <CloseIcon />
-                </Link>
+                <CloseButton
+                    className={styles.close}
+                    onClick={() => dispatch(routerActions.push(closeRoute))}
+                />
             )}
         </section>
     );
