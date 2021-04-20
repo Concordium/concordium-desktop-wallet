@@ -19,8 +19,8 @@ export const energyConstants = {
     TransferToPublicCost: 14850n,
     ScheduledTransferPerRelease: 300n + 64n,
     UpdateCredentialsBaseCost: 500n,
-    UpdateCredentialsPerCredentialVariable: 500n,
-    UpdateCredentialsVariableCostBase: 55000n,
+    UpdateCredentialsCostPerCurrentCredential: 500n,
+    UpdateCredentialsCostPerNewCredential: 54000n + 100n * 1n, // TODO: remove assumption that a credential has 1 key.
 };
 
 /**
@@ -174,20 +174,18 @@ export function getUpdateAccountCredentialEnergy(
         payload
     ).length;
 
-    const newCredentialAmount = BigInt(
-        currentCredentialAmount + payload.addedCredentials.length
-    );
+    const newCredentialAmount = BigInt(payload.addedCredentials.length);
 
     const variableCost =
-        energyConstants.UpdateCredentialsPerCredentialVariable *
+        energyConstants.UpdateCredentialsCostPerNewCredential *
             newCredentialAmount +
-        energyConstants.UpdateCredentialsVariableCostBase;
+        energyConstants.UpdateCredentialsCostPerCurrentCredential *
+            BigInt(currentCredentialAmount);
 
     return calculateCost(
         BigInt(signatureAmount),
         BigInt(payloadSize),
-        energyConstants.UpdateCredentialsBaseCost +
-            variableCost * newCredentialAmount
+        energyConstants.UpdateCredentialsBaseCost + variableCost
     );
 }
 
