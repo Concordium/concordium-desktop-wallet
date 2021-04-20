@@ -54,7 +54,7 @@ function subTitle(currentLocation: string) {
         case routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL:
             return 'New Credentials';
         case routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD:
-            return '.';
+            return ' ';
 
         case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
             return 'Signature and Hardware Wallet';
