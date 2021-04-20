@@ -47,7 +47,7 @@ export default class FoundationAccountHandler
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.authorizations.foundationAccount;
+        } = blockSummary.updates.keys.level2Keys.foundationAccount;
 
         return createUpdateMultiSignatureTransaction(
             { address: foundationAccount },

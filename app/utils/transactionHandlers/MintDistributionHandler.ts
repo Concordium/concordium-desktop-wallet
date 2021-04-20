@@ -1,33 +1,33 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import EuroPerEnergyView from '../../pages/multisig/EuroPerEnergyView';
-import UpdateEuroPerEnergy, {
-    UpdateEuroPerEnergyFields,
-} from '../../pages/multisig/UpdateEuroPerEnergy';
+import MintDistributionView from '../../pages/multisig/MintDistributionView';
+import UpdateMintDistribution, {
+    UpdateMintDistributionFields,
+} from '../../pages/multisig/UpdateMintDistribution';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    isExchangeRate,
-    ExchangeRate,
+    isMintDistribution,
+    MintDistribution,
+    MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
-    MultiSignatureTransaction,
     UpdateType,
 } from '../types';
-import { serializeExchangeRate } from '../UpdateSerialization';
+import { serializeMintDistribution } from '../UpdateSerialization';
 
-const TYPE = 'Update Euro Per Energy';
+const TYPE = 'Update Mint Distribution';
 
-type TransactionType = UpdateInstruction<ExchangeRate>;
+type TransactionType = UpdateInstruction<MintDistribution>;
 
-export default class EuroPerEnergyHandler
+export default class MintDistributionHandler
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isExchangeRate(transaction)) {
+        if (isMintDistribution(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -35,7 +35,11 @@ export default class EuroPerEnergyHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { euroPerEnergy }: UpdateEuroPerEnergyFields,
+        {
+            exponent,
+            mantissa,
+            rewardDistribution,
+        }: UpdateMintDistributionFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -43,12 +47,24 @@ export default class EuroPerEnergyHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.euroPerEnergy.nextSequenceNumber;
-        const { threshold } = blockSummary.updates.authorizations.euroPerEnergy;
+            blockSummary.updates.updateQueues.mintDistribution
+                .nextSequenceNumber;
+        const {
+            threshold,
+        } = blockSummary.updates.keys.level2Keys.mintDistribution;
+
+        const mintDistribution: MintDistribution = {
+            mintPerSlot: {
+                mantissa: parseInt(mantissa, 10),
+                exponent: parseInt(exponent, 10),
+            },
+            bakingReward: rewardDistribution.first,
+            finalizationReward: rewardDistribution.second,
+        };
 
         return createUpdateMultiSignatureTransaction(
-            euroPerEnergy,
-            UpdateType.UpdateEuroPerEnergy,
+            mintDistribution,
+            UpdateType.UpdateMintDistribution,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -56,7 +72,7 @@ export default class EuroPerEnergyHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeExchangeRate(transaction.payload);
+        return serializeMintDistribution(transaction.payload);
     }
 
     signTransaction(
@@ -64,7 +80,7 @@ export default class EuroPerEnergyHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signEuroPerEnergy(
+        return ledger.signMintDistribution(
             transaction,
             this.serializePayload(transaction),
             path
@@ -72,14 +88,14 @@ export default class EuroPerEnergyHandler
     }
 
     view(transaction: TransactionType) {
-        return EuroPerEnergyView({ exchangeRate: transaction.payload });
+        return MintDistributionView({ mintDistribution: transaction.payload });
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.euroPerEnergy;
+        return authorizations.mintDistribution;
     }
 
-    update = UpdateEuroPerEnergy;
+    update = UpdateMintDistribution;
 
     title = `Foundation Transaction | ${TYPE}`;
 

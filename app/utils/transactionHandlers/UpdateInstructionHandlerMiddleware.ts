@@ -10,7 +10,7 @@ import {
     MultiSignatureTransaction,
 } from '~/utils/types';
 
-export default class UpdateHandlerTypeMiddleware<T>
+export default class UpdateInstructionHandlerTypeMiddleware<T>
     implements
         UpdateInstructionHandler<
             UpdateInstruction<UpdateInstructionPayload>,

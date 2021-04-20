@@ -12,7 +12,7 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import { globalSelector } from '~/features/GlobalSlice';
-import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';

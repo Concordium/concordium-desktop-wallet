@@ -25,7 +25,6 @@ import {
     getTransactionKindEnergy,
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
-import { serializeTransferPayload } from './transactionSerialization';
 import { toMicroUnits, isValidGTUString } from '~/utils/gtu';
 
 /**
@@ -70,19 +69,22 @@ export async function attachNames(
 }
 
 /**
- *  Constructs a, simple transfer, transaction object,
- * Given the fromAddress, toAddress and the amount.
+ *  Constructs an account transaction object,
+ * @param fromAddress, the sender's address.
+ * @param expiry, expiry of the transaction, is given as an unix timestamp.
+ * @param transactionKind, the id of the TransactionKind of the transaction.
+ * @param payload, the payload of the transaction.
  * @param estimatedEnergyAmount, is the energyAmount on the transaction. Should be used to overwrite the, internally calculated, energy amount, in case of incomplete payloads.
  */
-async function createTransferTransaction<T extends TransactionPayload>(
+async function createAccountTransaction<T extends TransactionPayload>(
     fromAddress: string,
-    expiry: bigint = getDefaultExpiry(),
-    transactionKind: number,
+    expiry: bigint,
+    transactionKind: TransactionKindId,
     payload: T,
     estimatedEnergyAmount?: bigint
 ): Promise<AccountTransaction<T>> {
     const { nonce } = await getNextAccountNonce(fromAddress);
-    const transferTransaction: AccountTransaction<T> = {
+    const transaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
         expiry,
@@ -91,13 +93,13 @@ async function createTransferTransaction<T extends TransactionPayload>(
         payload,
     };
     if (!estimatedEnergyAmount) {
-        transferTransaction.energyAmount = getTransactionEnergyCost(
-            transferTransaction
+        transaction.energyAmount = getTransactionEnergyCost(
+            transaction
         ).toString();
     } else {
-        transferTransaction.energyAmount = estimatedEnergyAmount.toString();
+        transaction.energyAmount = estimatedEnergyAmount.toString();
     }
-    return transferTransaction;
+    return transaction;
 }
 
 /**
@@ -114,7 +116,7 @@ export function createSimpleTransferTransaction(
         toAddress,
         amount: amount.toString(),
     };
-    return createTransferTransaction(
+    return createAccountTransaction(
         fromAddress,
         expiry,
         TransactionKindId.Simple_transfer,
@@ -130,7 +132,7 @@ export function createShieldAmountTransaction(
     const payload = {
         amount: amount.toString(),
     };
-    return createTransferTransaction(
+    return createAccountTransaction(
         address,
         expiry,
         TransactionKindId.Transfer_to_encrypted,
@@ -146,7 +148,7 @@ export async function createUnshieldAmountTransaction(
     const payload = {
         transferAmount: amount.toString(),
     };
-    return createTransferTransaction(
+    return createAccountTransaction(
         address,
         expiry,
         TransactionKindId.Transfer_to_public,
@@ -194,7 +196,7 @@ export async function createScheduledTransferTransaction(
         schedule,
     };
 
-    return createTransferTransaction(
+    return createAccountTransaction(
         fromAddress,
         expiry,
         TransactionKindId.Transfer_with_schedule,
@@ -209,7 +211,7 @@ export async function createUpdateCredentialsTransaction(
     sender: string,
     addedCredentials: AddedCredential[],
     removedCredIds: string[],
-    newThreshold: number,
+    threshold: number,
     currentCredentialAmount: number,
     signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
@@ -217,10 +219,10 @@ export async function createUpdateCredentialsTransaction(
     const payload = {
         addedCredentials,
         removedCredIds,
-        newThreshold,
+        threshold,
     };
 
-    return createTransferTransaction(
+    return createAccountTransaction(
         sender,
         expiry,
         TransactionKindId.Update_credentials,
@@ -291,6 +293,11 @@ export function isFailed(transaction: TransferTransaction) {
     );
 }
 
+/**
+ * Get the timeout/expiry of a transaction.
+ * For an update instruction this is the timeout.
+ * For an account transation this is the expiry.
+ */
 export function getTimeout(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
         return transaction.header.timeout;
@@ -305,7 +312,7 @@ export function buildTransactionAccountSignature(
     signature: Buffer
 ): TransactionAccountSignature {
     const transactionCredentialSignature: TransactionCredentialSignature = {};
-    transactionCredentialSignature[signatureIndex] = signature;
+    transactionCredentialSignature[signatureIndex] = signature.toString('hex');
     const transactionAccountSignature: TransactionAccountSignature = {};
     transactionAccountSignature[
         credentialAccountIndex

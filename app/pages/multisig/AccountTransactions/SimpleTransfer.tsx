@@ -13,13 +13,13 @@ import PickAmount from './PickAmount';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
-import PickIdentity from '~/pages/GenerateCredential/PickIdentity';
+import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
 import Button from '~/cross-app-components/Button';
 import TransactionProposalDetails from './TransactionProposalDetails';
 import { isValidGTUString } from '~/utils/gtu';
 import CreateTransaction from './CreateTransaction';
-import { findAccountTransactionHandler } from '~/utils/updates/HandlerFinder';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 
 function subTitle(currentLocation: string) {

@@ -78,6 +78,27 @@ export async function insertNewCredential(
     return dispatch(addCredential(parsed));
 }
 
+export async function insertExternalCredential(
+    dispatch: Dispatch,
+    accountAddress: string,
+    credentialIndex: number | undefined,
+    credential: Pick<CredentialDeploymentInformation, 'credId' | 'policy'>
+) {
+    const parsed = {
+        credId: credential.credId,
+        external: true,
+        policy: JSON.stringify(credential.policy),
+        accountAddress,
+        credentialIndex,
+    };
+    await insertCredential(parsed);
+    return dispatch(addCredential(parsed));
+}
+
+/**
+ * updates the credentialIndex of the credential with the given credId.
+ * @param credentialIndex, the new value to set. If this is undefined, this will remove the current index.
+ */
 export async function updateCredentialIndex(
     dispatch: Dispatch,
     credId: string,

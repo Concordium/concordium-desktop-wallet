@@ -37,9 +37,7 @@ export type UpdateComponent = (props: UpdateProps) => JSX.Element | null;
 
 /**
  * Interface definition for a class that handles a specific type
- * of transaction. The handler can serialize and sign the transaction,
- * and generate a view of the transaction.
- * TODO: Decide whether this handler is only for updateInstruction, or make it support account transactions
+ * of transaction.
  */
 export type TransactionHandler<T, S> =
     | UpdateInstructionHandler<T, S>
@@ -47,14 +45,20 @@ export type TransactionHandler<T, S> =
 
 /**
  * Interface definition for a class that handles a specific type
- * of transaction. The handler can serialize and sign the transaction,
- * and generate a view of the transaction.
- * TODO: Decide whether this handler is only for updateInstruction, or make it support account transactions
+ * of update instructions.
  */
 export interface UpdateInstructionHandler<T, S> {
+    /**
+     * Used to resolve type ambiguity. N.B. If given another type of update than T,
+     * this might throw an error.
+     */
     confirmType: (
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ) => T;
+    /**
+     * Creates a instance of update type T.
+     * if the fields are not appropiate, will return undefined
+     */
     createTransaction: (
         blockSummary: BlockSummary,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,8 +67,14 @@ export interface UpdateInstructionHandler<T, S> {
     ) => Promise<Partial<MultiSignatureTransaction> | undefined>;
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
+    /**
+     * Returns a React element, in which the details of the transaction are displayed
+     */
     view: (transaction: T) => JSX.Element;
     getAuthorization: (authorizations: Authorizations) => Authorization;
+    /**
+     * Returns a React element, in which the update's fields can be chosen.
+     */
     update: UpdateComponent;
     type: string;
     title: string;
@@ -72,11 +82,13 @@ export interface UpdateInstructionHandler<T, S> {
 
 /**
  * Interface definition for a class that handles a specific type
- * of transaction. The handler can serialize and sign the transaction,
- * and generate a view of the transaction.
- * TODO: Fix Description
+ * of account transaction.
  */
 export interface AccountTransactionHandler<T, S> {
+    /**
+     * Used to resolve type ambiguity. N.B. If given another type of transaction than T,
+     * this might throw an error.
+     */
     confirmType: (transaction: AccountTransaction<TransactionPayload>) => T;
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (
@@ -84,6 +96,9 @@ export interface AccountTransactionHandler<T, S> {
         signer: S,
         path: AccountPathInput
     ) => Promise<Buffer>;
+    /**
+     * Returns a React element, in which the details of the transaction are displayed
+     */
     view: (transaction: T) => JSX.Element;
     creationLocationHandler: (
         currentLocation: string,

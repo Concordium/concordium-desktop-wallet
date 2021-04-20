@@ -15,6 +15,10 @@ interface PageLayoutProps {
      * Whether or not to include gutter for content. Useful if using in combination with \<Columns /\> to avoid double gutter. Defaults to false.
      */
     noGutter?: boolean;
+    /**
+     * Removes max width limitation of content. Defaults to false.
+     */
+    noMaxWidth?: boolean;
 }
 
 /**
@@ -30,6 +34,7 @@ interface PageLayoutProps {
 function PageLayout({
     children,
     noGutter = false,
+    noMaxWidth = false,
 }: PropsWithChildren<PageLayoutProps>): JSX.Element {
     const { content, header } = useMemo(() => {
         const reactChildren = React.Children.toArray(
@@ -48,7 +53,8 @@ function PageLayout({
             <section
                 className={clsx(
                     styles.content,
-                    noGutter && styles.contentNoGutter
+                    noGutter && styles.noGutter,
+                    noMaxWidth && styles.noMaxWidth
                 )}
             >
                 {content}
