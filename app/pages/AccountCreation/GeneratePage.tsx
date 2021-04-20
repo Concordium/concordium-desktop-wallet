@@ -56,6 +56,7 @@ export default function AccountCreationGenerate({
         accountAddress,
     }: CredentialDeploymentDetails) {
         const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
+
         try {
             const response = await sendTransaction(payload);
             if (response.getValue()) {

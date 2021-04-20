@@ -2,7 +2,10 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import { foundationTransactionsEnabledSelector } from '~/features/SettingsSlice';
-import { UpdateType } from '~/utils/types';
+import {
+    UpdateType,
+    TransactionKindString as TransactionKind,
+} from '~/utils/types';
 import { createProposalRoute } from '~/utils/routerHelper';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { expireProposals } from '~/utils/ProposalHelper';
@@ -39,7 +42,9 @@ export default function MultiSignatureCreateProposalView() {
     );
     const dispatch = useDispatch();
 
-    let availableTransactionTypes: [UpdateType, string][] = [];
+    let availableTransactionTypes: [UpdateType | TransactionKind, string][] = [
+        [TransactionKind.UpdateCredentials, 'Update Account Credentials'],
+    ];
     if (foundationTransactionsEnabled) {
         availableTransactionTypes = availableTransactionTypes.concat(
             multiSigTransactionTypesMap
@@ -52,11 +57,11 @@ export default function MultiSignatureCreateProposalView() {
 
     return (
         <>
-            {availableTransactionTypes.map(([updateType, label]) => (
+            {availableTransactionTypes.map(([transactionType, label]) => (
                 <ButtonNavLink
                     className={styles.link}
-                    key={updateType}
-                    to={createProposalRoute(updateType)}
+                    key={transactionType}
+                    to={createProposalRoute(transactionType)}
                 >
                     {label}
                 </ButtonNavLink>

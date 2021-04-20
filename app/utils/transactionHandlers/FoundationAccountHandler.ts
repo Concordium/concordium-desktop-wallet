@@ -1,32 +1,33 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import ProtocolUpdateView from '../../pages/multisig/ProtocolUpdateView';
-import UpdateProtocol, {
-    UpdateProtocolFields,
-} from '../../pages/multisig/UpdateProtocol';
+import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
+import UpdateFoundationAccount, {
+    UpdateFoundationAccountFields,
+} from '../../pages/multisig/UpdateFoundationAccount';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    isProtocolUpdate,
+    FoundationAccount,
+    isFoundationAccount,
     MultiSignatureTransaction,
-    ProtocolUpdate,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
 } from '../types';
-import { serializeProtocolUpdate } from '../UpdateSerialization';
+import { serializeFoundationAccount } from '../UpdateSerialization';
 
-const TYPE = 'Update Chain Protocol';
+const TYPE = 'Update Foundation Account';
 
-type TransactionType = UpdateInstruction<ProtocolUpdate>;
+type TransactionType = UpdateInstruction<FoundationAccount>;
 
-export default class ProtocolUpdateHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+export default class FoundationAccountHandler
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isProtocolUpdate(transaction)) {
+        if (isFoundationAccount(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -34,33 +35,23 @@ export default class ProtocolUpdateHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { specificationAuxiliaryData: files, ...fields }: UpdateProtocolFields,
+        { foundationAccount }: UpdateFoundationAccountFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
         }
 
-        const { threshold } = blockSummary.updates.keys.level2Keys.protocol;
         const sequenceNumber =
-            blockSummary.updates.updateQueues.protocol.nextSequenceNumber;
-
-        const file = files.item(0);
-
-        if (!file) {
-            throw new Error('No auxiliary data file in update transaction');
-        }
-        const ab = await file.arrayBuffer();
-        const specificationAuxiliaryData = Buffer.from(ab).toString('base64');
-
-        const protocolUpdate: ProtocolUpdate = {
-            ...fields,
-            specificationAuxiliaryData,
-        };
+            blockSummary.updates.updateQueues.foundationAccount
+                .nextSequenceNumber;
+        const {
+            threshold,
+        } = blockSummary.updates.keys.level2Keys.foundationAccount;
 
         return createUpdateMultiSignatureTransaction(
-            protocolUpdate,
-            UpdateType.UpdateProtocol,
+            { address: foundationAccount },
+            UpdateType.UpdateFoundationAccount,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -68,7 +59,7 @@ export default class ProtocolUpdateHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeProtocolUpdate(transaction.payload).serialization;
+        return serializeFoundationAccount(transaction.payload);
     }
 
     signTransaction(
@@ -76,7 +67,7 @@ export default class ProtocolUpdateHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signProtocolUpdate(
+        return ledger.signFoundationAccount(
             transaction,
             this.serializePayload(transaction),
             path
@@ -84,14 +75,16 @@ export default class ProtocolUpdateHandler
     }
 
     view(transaction: TransactionType) {
-        return ProtocolUpdateView({ protocolUpdate: transaction.payload });
+        return FoundationAccountView({
+            foundationAccount: transaction.payload,
+        });
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.protocol;
+        return authorizations.foundationAccount;
     }
 
-    update = UpdateProtocol;
+    update = UpdateFoundationAccount;
 
     title = `Foundation Transaction | ${TYPE}`;
 

@@ -8,7 +8,7 @@ import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { sendTransaction } from '~/utils/nodeRequests';
 import {
     serializeTransaction,
-    getTransactionHash,
+    getAccountTransactionHash,
 } from '~/utils/transactionSerialization';
 import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
 import {
@@ -152,7 +152,7 @@ export default function SubmitTransfer({ location }: Props) {
             transaction,
             () => signatureStructured
         );
-        const transactionHash = getTransactionHash(
+        const transactionHash = getAccountTransactionHash(
             transaction,
             () => signatureStructured
         ).toString('hex');

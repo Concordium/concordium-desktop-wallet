@@ -1,26 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { parse } from 'json-bigint';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
+import { parse, stringify } from '~/utils/JSONHelper';
 
-import { hashSha256 } from '~/utils/serializationHelpers';
 import routes from '~/constants/routes.json';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { createTransactionHandler } from '~/utils/updates/HandlerFinder';
+import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import {
     EqualRecord,
     instanceOfUpdateInstruction,
-    UpdateInstruction,
-    UpdateInstructionPayload,
     UpdateInstructionSignature,
+    TransactionAccountSignature,
 } from '~/utils/types';
-import { TransactionHandler, TransactionInput } from '~/utils/transactionTypes';
-import { serializeUpdateInstructionHeaderAndPayload } from '~/utils/UpdateSerialization';
+import { TransactionInput } from '~/utils/transactionTypes';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
 import { ensureProps } from '~/utils/componentHelpers';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
@@ -31,11 +27,13 @@ import { asyncNoOp } from '~/utils/basicHelpers';
 import { isExpired } from '~/utils/transactionHelpers';
 import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import getTransactionHash from '~/utils/transactionHash';
 
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
+import ExpiredTransactionView from '../ExpiredTransactionView';
 import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import styles from './CosignTransactionProposal.module.scss';
+import { signUpdateInstruction, signAccountTransaction } from './util';
 import { saveFile } from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
 import { LedgerCallback } from '~/components/ledger/util';
@@ -64,58 +62,56 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
     ({ location, blockSummary }) => {
         const [showValidationError, setShowValidationError] = useState(false);
         const [signature, setSignature] = useState<
-            UpdateInstructionSignature | undefined
+            | UpdateInstructionSignature[]
+            | TransactionAccountSignature
+            | undefined
         >();
         const [transactionHash, setTransactionHash] = useState<string>();
-        const [transactionHandler] = useState<
-            TransactionHandler<
-                UpdateInstruction<UpdateInstructionPayload>,
-                ConcordiumLedgerClient
-            >
-        >(() => createTransactionHandler(location.state));
 
         const dispatch = useDispatch();
 
         const { transaction } = location.state as TransactionInput;
         const [transactionObject] = useState(parse(transaction));
 
+        const [transactionHandler] = useState(() =>
+            findHandler(transactionObject)
+        );
+
         useEffect(() => {
-            const serialized = serializeUpdateInstructionHeaderAndPayload(
-                transactionObject,
-                transactionHandler.serializePayload(transactionObject)
-            );
-            const hashed = hashSha256(serialized).toString('hex');
-            setTransactionHash(hashed);
-        }, [setTransactionHash, transactionHandler, transactionObject]);
+            setTransactionHash(getTransactionHash(transactionObject));
+        }, [setTransactionHash, transactionObject]);
 
         const signingFunction: LedgerCallback = async (
             ledger: ConcordiumLedgerClient,
             setStatusText
         ) => {
-            if (!blockSummary) {
-                return;
+            let sig;
+            if (instanceOfUpdateInstruction(transactionObject)) {
+                if (blockSummary) {
+                    try {
+                        sig = await signUpdateInstruction(
+                            transactionObject,
+                            ledger,
+                            blockSummary
+                        );
+                    } catch (e) {
+                        setShowValidationError(true);
+                        return;
+                    }
+                } else {
+                    return;
+                }
+            } else {
+                try {
+                    sig = await signAccountTransaction(
+                        transactionObject,
+                        ledger
+                    );
+                } catch (e) {
+                    setStatusText(e);
+                    return;
+                }
             }
-
-            const authorizationKey = await findAuthorizationKey(
-                ledger,
-                transactionHandler,
-                blockSummary.updates.keys.level2Keys
-            );
-            if (!authorizationKey) {
-                setShowValidationError(true);
-                return;
-            }
-
-            const signatureBytes = await transactionHandler.signTransaction(
-                transactionObject,
-                ledger
-            );
-
-            const sig: UpdateInstructionSignature = {
-                signature: signatureBytes.toString('hex'),
-                authorizationKeyIndex: authorizationKey.index,
-            };
-
             setSignature(sig);
             setStatusText('Proposal signed successfully');
         };
@@ -123,9 +119,9 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
         async function exportSignedTransaction() {
             const signedTransaction = {
                 ...transactionObject,
-                signatures: [signature],
+                signatures: signature,
             };
-            const signedTransactionJson = JSON.stringify(signedTransaction);
+            const signedTransactionJson = stringify(signedTransaction);
 
             try {
                 const fileSaved = await saveFile(
@@ -205,7 +201,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                             {instanceOfUpdateInstruction(
                                                 transactionObject
                                             ) && (
-                                                <ExpiredEffectiveTimeView
+                                                <ExpiredTransactionView
                                                     transaction={
                                                         transactionObject
                                                     }
