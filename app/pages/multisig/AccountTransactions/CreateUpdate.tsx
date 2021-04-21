@@ -56,6 +56,7 @@ export default function CreateUpdate({
         account,
         addedCredentials,
         removedCredIds,
+        currentCredentialAmount,
         newThreshold,
     ]);
 

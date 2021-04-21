@@ -25,7 +25,7 @@ import {
     getTransactionKindEnergy,
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
-import { toMicroUnits, isValidGTUString } from '~/utils/gtu';
+import { toMicroUnits, isValidGTUString } from './gtu';
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
