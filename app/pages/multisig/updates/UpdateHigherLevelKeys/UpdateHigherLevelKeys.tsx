@@ -8,7 +8,6 @@ import ProposeNewKey from './ProposeNewKey';
 import KeySetSize from './KeySetSize';
 import {
     HigherLevelKeyUpdate,
-    HigherLevelKeyUpdateType,
     KeyUpdateEntryStatus,
     KeyWithStatus,
     UpdateType,
@@ -22,11 +21,10 @@ import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 
 interface Props {
     blockSummary: BlockSummary;
-    keyType: HigherLevelKeyUpdateType;
     type: UpdateType;
     handleKeySubmit(
         effectiveTime: Date,
-        higherLevelKeyUpdate: HigherLevelKeyUpdate
+        higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
     ): Promise<void>;
 }
 
@@ -59,7 +57,6 @@ function getCurrentKeysWithThreshold(
 export default function UpdateHigherLevelKeys({
     blockSummary,
     type,
-    keyType,
     handleKeySubmit,
 }: Props) {
     // Current values on the blockchain received from the node.
@@ -139,8 +136,7 @@ export default function UpdateHigherLevelKeys({
         if (!effectiveTime) {
             return;
         }
-        const higherLevelKeyUpdate: HigherLevelKeyUpdate = {
-            keyUpdateType: keyType,
+        const higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate> = {
             threshold,
             updateKeys: newKeys,
         };

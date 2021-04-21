@@ -1,9 +1,32 @@
 import { Keys } from '../NodeApiTypes';
 import {
     HigherLevelKeyUpdate,
+    HigherLevelKeyUpdateType,
     KeyUpdateEntryStatus,
     UpdateType,
 } from '../types';
+
+/**
+ * Maps an update type to the key type byte value that is part of the transaction.
+ * @param updateType
+ * @returns
+ */
+export function updateTypeToKeyType(
+    updateType: UpdateType
+): HigherLevelKeyUpdateType {
+    if (UpdateType.UpdateRootKeys === updateType) {
+        return 0;
+    }
+    if (UpdateType.UpdateLevel1KeysUsingRootKeys) {
+        return 1;
+    }
+    if (UpdateType.UpdateLevel1KeysUsingLevel1Keys) {
+        return 0;
+    }
+    throw new Error(
+        `The supplied update type was not a higher level key update: ${updateType}`
+    );
+}
 
 /**
  * Removes any keys with the Removed status from the payload. This is useful

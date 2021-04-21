@@ -1,6 +1,6 @@
 import React from 'react';
 import { HigherLevelKeyUpdateProps } from '~/utils/transactionTypes';
-import { RootKeysUpdateTypes, UpdateType } from '~/utils/types';
+import { UpdateType } from '~/utils/types';
 import UpdateHigherLevelKeys from './UpdateHigherLevelKeys';
 
 export default function UpdateRootKeys({
@@ -15,7 +15,6 @@ export default function UpdateRootKeys({
         <UpdateHigherLevelKeys
             blockSummary={blockSummary}
             type={UpdateType.UpdateRootKeys}
-            keyType={RootKeysUpdateTypes.RootKeysRootUpdate}
             handleKeySubmit={handleKeySubmit}
         />
     );

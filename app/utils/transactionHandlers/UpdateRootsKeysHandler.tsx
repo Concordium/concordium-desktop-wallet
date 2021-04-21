@@ -47,7 +47,7 @@ export default class UpdateRootKeysHandler
         const { threshold } = blockSummary.updates.keys.rootKeys;
 
         return createUpdateMultiSignatureTransaction(
-            higherLevelKeyUpdate,
+            { ...higherLevelKeyUpdate, keyUpdateType: 0 },
             UpdateType.UpdateRootKeys,
             sequenceNumber,
             threshold,

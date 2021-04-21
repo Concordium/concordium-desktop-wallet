@@ -116,7 +116,7 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
      */
     async function handleKeySubmit(
         effectiveTime: Date,
-        higherLevelKeyUpdate: HigherLevelKeyUpdate
+        higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
     ) {
         if (!blockSummary) {
             return;
