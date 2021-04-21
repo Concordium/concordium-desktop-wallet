@@ -1,4 +1,4 @@
-import React, { useState, RefObject, ReactInstance } from 'react';
+import React, { useRef, useState, PropsWithChildren } from 'react';
 import ReactToPrint from 'react-to-print';
 import PrinterIcon from '@resources/svg/printer.svg';
 import printContent from '~/utils/printContent';
@@ -6,24 +6,29 @@ import IconButton from '~/cross-app-components/IconButton';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
+import styles from './PrintButton.module.scss';
 
-interface Props<T> {
-    componentRef: RefObject<T | undefined>;
+interface Props {
     className?: string;
+    printClassName?: string;
 }
 /**
  * A button which onclick prints the referenced component.
  *
  * @example
- * <PrintButton componentRef={componentRef}/>
+ * <PrintButton>
+ *     <ComponentsToBePrinted/>
+ * </PrintButton>
  */
-export default function PrintButton<T extends ReactInstance>({
-    componentRef,
+export default function PrintButton({
     className,
-}: Props<T>) {
+    printClassName,
+    children,
+}: PropsWithChildren<Props>) {
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
+    const componentRef = useRef(null);
 
     return (
         <>
@@ -33,6 +38,11 @@ export default function PrintButton<T extends ReactInstance>({
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
+            <div className={styles.hidden}>
+                <div className={printClassName} ref={componentRef}>
+                    {children}
+                </div>
+            </div>
             <ReactToPrint
                 trigger={() => (
                     <IconButton className={className}>
