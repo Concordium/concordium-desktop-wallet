@@ -6,8 +6,16 @@ export default async function printContent(target: HTMLIFrameElement) {
     if (!window) {
         throw new Error('Unexpected missing contentWindow');
     }
-    await ipcRenderer.invoke(
-        ipcCommands.print,
-        encodeURI(window.document.body.outerHTML)
-    );
+    let error;
+    try {
+        error = await ipcRenderer.invoke(
+            ipcCommands.print,
+            encodeURI(window.document.body.outerHTML)
+        );
+    } catch (e) {
+        throw new Error('Failed to Print');
+    }
+    if (error) {
+        throw new Error(`Failed to print due to: ${error}`);
+    }
 }
