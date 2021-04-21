@@ -1,17 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import ButtonNavLink from '~/components/ButtonNavLink';
+import { ExportKeyType } from '~/utils/types';
 import { foundationTransactionsEnabledSelector } from '../../../features/SettingsSlice';
 // eslint-disable-next-line import/no-cycle
 import { selectedExportKeyRoute } from '../../../utils/routerHelper';
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
-
-export enum ExportKeyType {
-    Root = 'root',
-    Level1 = 'level1',
-    Level2 = 'level2',
-    Credential = 'credential',
-}
 
 const exportKeyOptionMap = new Map<ExportKeyType, string>([
     [ExportKeyType.Root, 'Governance root key'],

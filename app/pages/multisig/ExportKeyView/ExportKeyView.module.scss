@@ -9,6 +9,12 @@ p {
     flex-direction: column;
 }
 
+.printButton {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
 .details {
     width: 650px;
     margin: 0 auto;
@@ -18,6 +24,7 @@ p {
 }
 
 .card {
+    position: relative;
     margin-top: 40px;
 }
 

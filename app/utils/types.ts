@@ -1007,3 +1007,22 @@ export type PolymorphicComponentProps<
     C extends React.ElementType,
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
+
+export enum ExportKeyType {
+    Root = 'root',
+    Level1 = 'level1',
+    Level2 = 'level2',
+    Credential = 'credential',
+}
+
+/**
+ * Model for the export of governance keys. It contains the
+ * actual key, a signature on that key, the type of key and
+ * an optional note that a user can append to the export.
+ */
+export interface PublicKeyExportFormat {
+    key: VerifyKey;
+    signature: string;
+    type: ExportKeyType;
+    note?: string;
+}

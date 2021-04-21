@@ -11,23 +11,24 @@ import {
     getGovernanceRootPath,
 } from '~/features/ledger/Path';
 import { saveFile } from '~/utils/FileHelper';
-import { SignedPublicKey, VerifyKey } from '~/utils/types';
+import {
+    ExportKeyType,
+    PublicKeyExportFormat,
+    SignedPublicKey,
+} from '~/utils/types';
 import routes from '~/constants/routes.json';
 import CopiableIdenticon from '~/components/CopiableIdenticon/CopiableIdenticon';
-import { ExportKeyType, getKeyDisplay } from '../menu/ExportKeyList';
+import { getKeyDisplay } from '../menu/ExportKeyList';
 import styles from './ExportKeyView.module.scss';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import Card from '~/cross-app-components/Card';
+import PrintButton from '~/components/PrintButton';
+import Input from '~/components/Form/Input';
+import PrintFormat from './ExportKeyPrintFormat';
 
 interface ParamTypes {
     keyType: ExportKeyType;
-}
-
-interface PublicKeyExportFormat {
-    key: VerifyKey;
-    signature: string;
-    type: ExportKeyType;
 }
 
 /**
@@ -36,6 +37,8 @@ interface PublicKeyExportFormat {
  */
 export default function ExportKeyView(): JSX.Element {
     const [signedPublicKey, setSignedPublicKey] = useState<SignedPublicKey>();
+    const [note, setNote] = useState<string>();
+    const [image, setImage] = useState<string>();
     const { keyType } = useParams<ParamTypes>();
     const dispatch = useDispatch();
 
@@ -66,7 +69,7 @@ export default function ExportKeyView(): JSX.Element {
         setSignedPublicKey(await ledger.getSignedPublicKey(path));
     }
 
-    async function saveExportedPublicKey(
+    function buildExportFormat(
         sPublicKey: SignedPublicKey,
         exportKeyType: ExportKeyType
     ) {
@@ -74,7 +77,16 @@ export default function ExportKeyView(): JSX.Element {
             key: { verifyKey: sPublicKey.key, schemeId: 'Ed25519' },
             signature: sPublicKey.signature,
             type: exportKeyType,
+            note,
         };
+        return publicKeyExport;
+    }
+
+    async function saveExportedPublicKey(
+        sPublicKey: SignedPublicKey,
+        exportKeyType: ExportKeyType
+    ) {
+        const publicKeyExport = buildExportFormat(sPublicKey, exportKeyType);
         const publicKeyExportJson = JSON.stringify(publicKeyExport);
         await saveFile(publicKeyExportJson, 'Save exported public-key');
     }
@@ -89,9 +101,27 @@ export default function ExportKeyView(): JSX.Element {
                     secure channel.
                 </p>
                 <Card className={styles.card}>
+                    <PrintButton className={styles.printButton}>
+                        <PrintFormat
+                            image={image || ''}
+                            publicKeyExport={buildExportFormat(
+                                signedPublicKey,
+                                keyType
+                            )}
+                        />
+                    </PrintButton>
                     <h3>New {getKeyDisplay(keyType)}</h3>
                     {signedPublicKey.key}
-                    <CopiableIdenticon data={signedPublicKey.key} />
+                    <CopiableIdenticon
+                        data={signedPublicKey.key}
+                        setScreenshot={setImage}
+                    />
+                    <Input
+                        label="Note"
+                        placeholder="Here you can add a note describing your key"
+                        value={note || ''}
+                        onChange={(e) => setNote(e.target.value)}
+                    />
                     <div>
                         <Button
                             className={styles.button}
