@@ -48,7 +48,7 @@ export default function TransactionProposalDetails({
             <h2>{amount ? `${getGTUSymbol()} ${amount}` : placeholderText}</h2>
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <b>Recipient:</b>
-            <h2>{recipient ? recipient.name : 'To be determined'}</h2>
+            <h2>{recipient ? recipient.name : placeholderText}</h2>
             {recipient ? `Note: ${recipient.note}` : null}
             <br />
         </div>

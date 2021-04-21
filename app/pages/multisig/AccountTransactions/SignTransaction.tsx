@@ -44,6 +44,8 @@ export default function SignTransaction({
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
+        const signatureIndex = 0;
+
         if (!account || !global) {
             throw new Error('unexpected missing global/account');
         }
@@ -59,7 +61,7 @@ export default function SignTransaction({
         const path = {
             identityIndex: primaryCredential.identityId,
             accountIndex: primaryCredential.credentialNumber,
-            signatureIndex: 0,
+            signatureIndex,
         };
 
         const handler = findAccountTransactionHandler(
@@ -71,7 +73,6 @@ export default function SignTransaction({
             path
         );
 
-        const signatureIndex = 0;
         const multiSignatureTransaction: Partial<MultiSignatureTransaction> = {
             // The JSON serialization of the transaction
             transaction: stringify({

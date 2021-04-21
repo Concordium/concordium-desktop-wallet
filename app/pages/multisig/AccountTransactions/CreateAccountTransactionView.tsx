@@ -8,7 +8,9 @@ interface Props {
     location: LocationDescriptorObject<TransactionKindString>;
 }
 
-export default function MultiSignatureRoutes({ location }: Props): JSX.Element {
+export default function CreateAccountTransactionView({
+    location,
+}: Props): JSX.Element {
     const type = location.state;
     if (type === TransactionKindString.UpdateCredentials) {
         return <UpdateCredentialPage />;
