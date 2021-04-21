@@ -13,9 +13,10 @@ import {
 } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
+    isUpdateUsingLevel1Keys,
+    isUpdateUsingRootKeys,
     UpdateInstruction,
     UpdateInstructionPayload,
-    UpdateType,
 } from '../types';
 
 export interface AuthorizationKey {
@@ -88,35 +89,26 @@ function findAuthorizationKey(
 export async function findKey(
     ledger: ConcordiumLedgerClient,
     keys: Keys,
-    updateType: UpdateType,
+    transaction: UpdateInstruction<UpdateInstructionPayload>,
     transactionHandler: UpdateInstructionHandler<
         UpdateInstruction<UpdateInstructionPayload>,
         ConcordiumLedgerClient
     >
 ): Promise<AuthorizationKey | undefined> {
-    if (
-        [
-            UpdateType.UpdateRootKeysWithRootKeys,
-            UpdateType.UpdateLevel1KeysWithRootKeys,
-            UpdateType.UpdateLevel2KeysWithRootKeys,
-        ].includes(updateType)
-    ) {
+    if (isUpdateUsingRootKeys(transaction)) {
         const publicKey = (
             await ledger.getPublicKeySilent(getGovernanceRootPath())
         ).toString('hex');
         return findHigherLevelKey(publicKey, keys.rootKeys);
     }
-    if (
-        [
-            UpdateType.UpdateLevel1KeysWithLevel1Keys,
-            UpdateType.UpdateLevel2KeysWithLevel1Keys,
-        ].includes(updateType)
-    ) {
+
+    if (isUpdateUsingLevel1Keys(transaction)) {
         const publicKey = (
             await ledger.getPublicKeySilent(getGovernanceLevel1Path())
         ).toString('hex');
         return findHigherLevelKey(publicKey, keys.level1Keys);
     }
+
     const publicKey = (
         await ledger.getPublicKeySilent(getGovernanceLevel2Path())
     ).toString('hex');

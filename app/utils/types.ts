@@ -632,24 +632,36 @@ export type Transaction =
     | UpdateInstruction;
 
 /**
- * Update type enumeration. The numbering/order is important as that corresponds
- * to the byte written when serializing the update instruction.
+ * Internal enumeration of the different update types that are available. This
+ * does not correspond one-to-one with the transaction UpdateType enum, and is
+ * necessary due to the key update transactions sharing the same update type.
  */
 export enum UpdateType {
-    UpdateProtocol = 1,
-    UpdateElectionDifficulty = 2,
-    UpdateEuroPerEnergy = 3,
-    UpdateMicroGTUPerEuro = 4,
-    UpdateFoundationAccount = 5,
-    UpdateMintDistribution = 6,
-    UpdateTransactionFeeDistribution = 7,
-    UpdateGASRewards = 8,
-    UpdateBakerStakeThreshold = 9,
-    UpdateRootKeysWithRootKeys = 10,
-    UpdateLevel1KeysWithRootKeys = 11,
-    UpdateLevel2KeysWithRootKeys = 12,
-    UpdateLevel1KeysWithLevel1Keys = 13,
-    UpdateLevel2KeysWithLevel1Keys = 14,
+    UpdateProtocol,
+    UpdateElectionDifficulty,
+    UpdateEuroPerEnergy,
+    UpdateMicroGTUPerEuro,
+    UpdateFoundationAccount,
+    UpdateMintDistribution,
+    UpdateTransactionFeeDistribution,
+    UpdateGASRewards,
+    UpdateBakerStakeThreshold,
+    UpdateRootKeys,
+    UpdateLevel1KeysUsingRootKeys,
+    UpdateLevel1KeysUsingLevel1Keys,
+    UpdateLevel2KeysUsingRootKeys,
+    UpdateLevel2KeysUsingLevel1Keys,
+}
+
+export enum RootKeysUpdateTypes {
+    RootKeysRootUpdate,
+    Level1KeysRootUpdate,
+    Level2KeysRootUpdate,
+}
+
+export enum Level1KeysUpdateTypes {
+    Level1KeysLevel1Update,
+    Level2KeysLevel1Update,
 }
 
 export function instanceOfAccountTransaction(
@@ -757,22 +769,53 @@ export function isElectionDifficulty(
     return UpdateType.UpdateElectionDifficulty === transaction.type;
 }
 
-export function isUpdateRootKeysWithRootKeys(
+export function isUpdateRootKeys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
-    return UpdateType.UpdateRootKeysWithRootKeys === transaction.type;
+    return UpdateType.UpdateRootKeys === transaction.type;
 }
 
 export function isUpdateLevel1KeysWithRootKeys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
-    return UpdateType.UpdateLevel1KeysWithRootKeys === transaction.type;
+    return UpdateType.UpdateLevel1KeysUsingRootKeys === transaction.type;
+}
+
+export function isUpdateLevel2KeysWithRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel2KeysUsingRootKeys === transaction.type;
+}
+
+export function isUpdateUsingRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return (
+        isUpdateRootKeys(transaction) ||
+        isUpdateLevel1KeysWithRootKeys(transaction) ||
+        isUpdateLevel2KeysWithRootKeys(transaction)
+    );
 }
 
 export function isUpdateLevel1KeysWithLevel1Keys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
-    return UpdateType.UpdateLevel1KeysWithLevel1Keys === transaction.type;
+    return UpdateType.UpdateLevel1KeysUsingLevel1Keys === transaction.type;
+}
+
+export function isUpdateLevel2KeysWithLevel1Keys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel2KeysUsingLevel1Keys === transaction.type;
+}
+
+export function isUpdateUsingLevel1Keys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return (
+        isUpdateLevel1KeysWithLevel1Keys(transaction) ||
+        isUpdateLevel2KeysWithLevel1Keys(transaction)
+    );
 }
 
 /**

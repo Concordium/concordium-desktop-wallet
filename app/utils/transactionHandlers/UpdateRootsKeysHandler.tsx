@@ -11,7 +11,7 @@ import {
     MultiSignatureTransaction,
     UpdateType,
     HigherLevelKeyUpdate,
-    isUpdateRootKeysWithRootKeys,
+    isUpdateRootKeys,
 } from '../types';
 import { serializeHigherLevelKeyUpdate } from '../UpdateSerialization';
 import { removeRemovedKeys } from '../updates/HigherLevelKeysHelpers';
@@ -21,13 +21,13 @@ const TYPE = 'Update Root Governance Keys';
 
 type TransactionType = UpdateInstruction<HigherLevelKeyUpdate>;
 
-export default class UpdateRootKeysWithRootKeysHandler
+export default class UpdateRootKeysHandler
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isUpdateRootKeysWithRootKeys(transaction)) {
+        if (isUpdateRootKeys(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -48,7 +48,7 @@ export default class UpdateRootKeysWithRootKeysHandler
 
         return createUpdateMultiSignatureTransaction(
             higherLevelKeyUpdate,
-            UpdateType.UpdateRootKeysWithRootKeys,
+            UpdateType.UpdateRootKeys,
             sequenceNumber,
             threshold,
             effectiveTime

@@ -24,7 +24,7 @@ export async function signUpdateInstruction(
     const authorizationKey = await findKey(
         ledger,
         blockSummary.updates.keys,
-        instruction.type,
+        instruction,
         transactionHandler
     );
     if (!authorizationKey) {

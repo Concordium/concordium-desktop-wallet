@@ -35,6 +35,7 @@ import signUpdateTransaction from './SignUpdateTransaction';
 import signUpdateProtocolTransaction from './SignProtocolUpdate';
 import signHigherLevelKeyUpdate from './SignHigherLevelKeyUpdate';
 import signUpdateCredentialTransaction from './SignUpdateCredentials';
+
 /**
  * Concordium Ledger API.
  *
@@ -272,16 +273,12 @@ export default class ConcordiumLedgerClient {
         path: number[]
     ): Promise<Buffer> {
         let INS;
-        if (transaction.type === UpdateType.UpdateRootKeysWithRootKeys) {
+        if (transaction.type === UpdateType.UpdateRootKeys) {
             INS = 0x28;
         } else if (
-            transaction.type === UpdateType.UpdateLevel1KeysWithRootKeys
+            transaction.type === UpdateType.UpdateLevel1KeysUsingLevel1Keys
         ) {
             INS = 0x29;
-        } else if (
-            transaction.type === UpdateType.UpdateLevel1KeysWithLevel1Keys
-        ) {
-            INS = 0x2b;
         } else {
             throw new Error(
                 'The supplied transaction was not a higher level key update.'

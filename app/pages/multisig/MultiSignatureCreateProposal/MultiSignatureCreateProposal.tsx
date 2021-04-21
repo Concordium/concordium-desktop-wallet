@@ -151,13 +151,7 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
     }
 
     let component;
-    if (
-        [
-            UpdateType.UpdateRootKeysWithRootKeys,
-            UpdateType.UpdateLevel1KeysWithRootKeys,
-            UpdateType.UpdateLevel1KeysWithLevel1Keys,
-        ].includes(type)
-    ) {
+    if ([UpdateType.UpdateRootKeys].includes(type)) {
         if (!blockSummary) {
             component = <Loading text="Getting current settings from chain" />;
         } else {

@@ -81,7 +81,7 @@ function SignTransactionProposalView({ location }: Props) {
         const authorizationKey = await findKey(
             ledger,
             blockSummary.updates.keys,
-            updateInstruction.type,
+            updateInstruction,
             transactionHandler
         );
         if (!authorizationKey) {

@@ -8,6 +8,7 @@ import ProposeNewKey from './ProposeNewKey';
 import KeySetSize from './KeySetSize';
 import {
     HigherLevelKeyUpdate,
+    HigherLevelKeyUpdateType,
     KeyUpdateEntryStatus,
     KeyWithStatus,
     UpdateType,
@@ -17,10 +18,10 @@ import KeySetThreshold from './KeySetThreshold';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
 import KeyUpdateEntry from './KeyUpdateEntry';
-import { typeToHigherLevelKeyUpdateType } from '~/utils/updates/HigherLevelKeysHelpers';
 
 interface Props {
     blockSummary: BlockSummary;
+    keyType: HigherLevelKeyUpdateType;
     type: UpdateType;
     handleKeySubmit(
         effectiveTime: Date,
@@ -37,11 +38,9 @@ function getCurrentKeysWithThreshold(
     blockSummary: BlockSummary
 ): KeysWithThreshold {
     switch (type) {
-        case UpdateType.UpdateRootKeysWithRootKeys:
+        case UpdateType.UpdateRootKeys:
             return blockSummary.updates.keys.rootKeys;
-        case UpdateType.UpdateLevel1KeysWithRootKeys:
-            return blockSummary.updates.keys.level1Keys;
-        case UpdateType.UpdateLevel1KeysWithLevel1Keys:
+        case UpdateType.UpdateLevel1KeysUsingRootKeys:
             return blockSummary.updates.keys.level1Keys;
         default:
             throw new Error(
@@ -57,6 +56,7 @@ function getCurrentKeysWithThreshold(
 export default function UpdateHigherLevelKeys({
     blockSummary,
     type,
+    keyType,
     handleKeySubmit,
 }: Props) {
     // Current values on the blockchain received from the node.
@@ -137,7 +137,7 @@ export default function UpdateHigherLevelKeys({
             return;
         }
         const higherLevelKeyUpdate: HigherLevelKeyUpdate = {
-            keyUpdateType: typeToHigherLevelKeyUpdateType(type),
+            keyUpdateType: keyType,
             threshold,
             updateKeys: newKeys,
         };

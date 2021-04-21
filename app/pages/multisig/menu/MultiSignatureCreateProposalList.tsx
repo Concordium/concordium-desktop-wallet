@@ -12,8 +12,6 @@ import { expireProposals } from '~/utils/ProposalHelper';
 
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
 
-// TODO Show non-foundation transaction types.
-
 // Defines the list of options for creating multi signature transactions.
 const multiSigTransactionTypesMap: [UpdateType, string][] = [
     [UpdateType.UpdateMicroGTUPerEuro, 'Update µGTU per Euro'],
@@ -28,15 +26,7 @@ const multiSigTransactionTypesMap: [UpdateType, string][] = [
     [UpdateType.UpdateGASRewards, 'Update GAS rewards'],
     [UpdateType.UpdateBakerStakeThreshold, 'Update baker stake threshold'],
     [UpdateType.UpdateElectionDifficulty, 'Update election difficulty'],
-    [UpdateType.UpdateRootKeysWithRootKeys, 'Update root keys with root keys'],
-    [
-        UpdateType.UpdateLevel1KeysWithRootKeys,
-        'Update level 1 keys with root keys',
-    ],
-    [
-        UpdateType.UpdateLevel1KeysWithLevel1Keys,
-        'Update level 1 keys with level 1 keys',
-    ],
+    [UpdateType.UpdateRootKeys, 'Update root keys'],
 ];
 
 /**
