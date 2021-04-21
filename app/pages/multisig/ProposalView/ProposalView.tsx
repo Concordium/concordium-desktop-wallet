@@ -16,6 +16,7 @@ import {
     MultiSignatureTransactionStatus,
     Transaction,
     UpdateInstructionSignature,
+    instanceOfAccountTransaction,
     TransactionCredentialSignature,
 } from '~/utils/types';
 import { saveFile } from '~/utils/FileHelper';
@@ -131,6 +132,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
         <MultiSignatureLayout
             pageTitle={handler.title}
             stepTitle={`Transaction Proposal - ${handler.type}`}
+            disableBack={instanceOfAccountTransaction(transaction)}
             closeRoute={CLOSE_ROUTE}
         >
             <CloseProposalModal
