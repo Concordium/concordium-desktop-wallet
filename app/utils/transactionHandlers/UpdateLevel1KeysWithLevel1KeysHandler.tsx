@@ -78,7 +78,8 @@ export default class UpdateLevel1KeysWithLevel1KeysHandler
         return ledger.signHigherLevelKeysUpdate(
             transactionWithoutRemoved,
             this.serializePayload(transactionWithoutRemoved),
-            path
+            path,
+            0x29
         );
     }
 
