@@ -55,7 +55,7 @@ function HigherLevelKeysView({
                     New {typeDisplayText} key signature threshold:{' '}
                     <b>{higherLevelKeyUpdate.threshold}</b>
                 </p>
-                <h5>Root governance key updates</h5>
+                <h5>{typeToDisplay(type)} governance key updates</h5>
                 <p>
                     Current size of {typeDisplayText} key set:{' '}
                     <b>{currentKeySetSize}</b>

@@ -18,6 +18,7 @@ import KeySetThreshold from './KeySetThreshold';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
 import KeyUpdateEntry from './KeyUpdateEntry';
+import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 
 interface Props {
     blockSummary: BlockSummary;
@@ -151,18 +152,21 @@ export default function UpdateHigherLevelKeys({
                 <div className={styles.columnContent}>
                     <h5>Signature threshold</h5>
                     <p>
-                        Current root key signature threshold:{' '}
+                        Current {typeToDisplay(type)} key signature threshold:{' '}
                         <b>{currentThreshold}</b>
                     </p>
                     <p>
-                        New root key signature threshold: <b>{threshold}</b>
+                        New {typeToDisplay(type)} key signature threshold:{' '}
+                        <b>{threshold}</b>
                     </p>
-                    <h5>Root governance key updates</h5>
+                    <h5>{typeToDisplay(type)} governance key updates</h5>
                     <p>
-                        Current size of root key set: <b>{currentKeySetSize}</b>
+                        Current size of {typeToDisplay(type)} key set:{' '}
+                        <b>{currentKeySetSize}</b>
                     </p>
                     <p>
-                        New size of root key set: <b>{newKeySetSize}</b>
+                        New size of {typeToDisplay(type)} key set:{' '}
+                        <b>{newKeySetSize}</b>
                     </p>
                     <ul>
                         {newKeys.map((keyWithStatus) => {
@@ -181,7 +185,7 @@ export default function UpdateHigherLevelKeys({
                     />
                 </div>
             </Columns.Column>
-            <Columns.Column className={styles.stretchColumn}>
+            <Columns.Column className={styles.stretchColumn} header={' '}>
                 <div className={styles.columnContent}>
                     <Switch>
                         <Route

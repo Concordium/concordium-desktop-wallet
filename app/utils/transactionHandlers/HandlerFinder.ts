@@ -27,6 +27,7 @@ import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
 import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
 import UpdateInstructionHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
 import UpdateRootKeysHandler from './UpdateRootsKeysHandler';
+import UpdateLevel1KeysWithRootKeysHandler from './UpdateLevel1KeysWithRootKeysHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -85,6 +86,10 @@ export function findUpdateInstructionHandler(
         case UpdateType.UpdateRootKeys:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new UpdateRootKeysHandler()
+            );
+        case UpdateType.UpdateLevel1KeysUsingRootKeys:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new UpdateLevel1KeysWithRootKeysHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);

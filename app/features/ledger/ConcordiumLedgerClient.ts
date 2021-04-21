@@ -273,7 +273,10 @@ export default class ConcordiumLedgerClient {
         path: number[]
     ): Promise<Buffer> {
         let INS;
-        if (transaction.type === UpdateType.UpdateRootKeys) {
+        if (
+            transaction.type === UpdateType.UpdateRootKeys ||
+            transaction.type === UpdateType.UpdateLevel1KeysUsingRootKeys
+        ) {
             INS = 0x28;
         } else if (
             transaction.type === UpdateType.UpdateLevel1KeysUsingLevel1Keys
