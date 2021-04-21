@@ -12,7 +12,7 @@ import {
     UpdateType,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
-import findHandler from '~/utils/updates/HandlerFinder';
+import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import Loading from '~/cross-app-components/Loading';
 import Modal from '~/cross-app-components/Modal';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
@@ -51,7 +51,7 @@ function MultiSignatureCreateProposal({
 
     const displayType = UpdateType[type];
 
-    const handler = findHandler(type);
+    const handler = findUpdateInstructionHandler(type);
     const UpdateComponent = handler.update;
 
     /**

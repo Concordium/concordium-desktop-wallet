@@ -1,7 +1,7 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import { Authorization, Authorizations, Key } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import { UpdateInstruction, UpdateInstructionPayload } from '../types';
 
 export interface AuthorizationKey {
@@ -37,7 +37,7 @@ function findAuthorizationKeyIndex(
  */
 export default async function findAuthorizationKey(
     ledger: ConcordiumLedgerClient,
-    transactionHandler: TransactionHandler<
+    transactionHandler: UpdateInstructionHandler<
         UpdateInstruction<UpdateInstructionPayload>,
         ConcordiumLedgerClient
     >,

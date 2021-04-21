@@ -49,3 +49,17 @@ export async function getNextCredentialNumber(identityId: number) {
     );
     return currentNumber + 1;
 }
+
+export async function updateCredentialIndex(
+    credId: string,
+    credentialIndex: number | undefined
+) {
+    if (credentialIndex === undefined) {
+        return (await knex())(credentialsTable)
+            .where({ credId })
+            .update({ credentialIndex: null });
+    }
+    return (await knex())(credentialsTable)
+        .where({ credId })
+        .update({ credentialIndex });
+}

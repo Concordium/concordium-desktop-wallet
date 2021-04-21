@@ -8,7 +8,7 @@ import UpdateMintDistribution, {
 import { parseMintPerSlot } from '../mintDistributionHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isMintDistribution,
     MintDistribution,
@@ -24,7 +24,8 @@ const TYPE = 'Update Mint Distribution';
 type TransactionType = UpdateInstruction<MintDistribution>;
 
 export default class MintDistributionHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

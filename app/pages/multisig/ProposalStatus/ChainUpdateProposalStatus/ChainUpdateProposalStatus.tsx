@@ -8,7 +8,7 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '~/utils/types';
-import findHandler from '~/utils/updates/HandlerFinder';
+import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import ProposalStatusView, {
     ProposalStatusViewProps,
 } from '../ProposalStatusView';
@@ -28,7 +28,7 @@ export default function ChainUpdateProposalStatus<
     transaction,
     ...proposalStatusProps
 }: ChainUpdateProposalStatusProps<TUpdate>): JSX.Element {
-    const handler = findHandler(transaction.type);
+    const handler = findHandler(transaction);
     const expired = status === MultiSignatureTransactionStatus.Expired;
     const { year, month, date } =
         datePartsFromDate(
