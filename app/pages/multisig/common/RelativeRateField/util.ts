@@ -25,8 +25,8 @@ export const validBigIntValues: Validate = (value: RelativeRateValue) =>
 export const notEqual = (currentValue: RelativeRateValue): Validate => (
     value: RelativeRateValue
 ) =>
-    (value.denominator !== currentValue.denominator &&
-        value.numerator !== currentValue.numerator) ||
+    value.denominator !== currentValue.denominator ||
+    value.numerator !== currentValue.numerator ||
     "Value hasn't changed";
 
 export const fromExchangeRate = (rate: ExchangeRate): RelativeRateValue => ({

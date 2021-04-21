@@ -23,19 +23,21 @@
 }
 
 .label {
+    display: inline;
     color: $color-black;
 }
 
-.unit,
-.field {
+.fieldWrapper {
+    display: inline;
     color: $color-pale-blue;
 
     .rootDisabled & {
-        color: inherit;
+        color: $color-grey;
     }
 }
 
 .field {
+    display: inline;
     text-align: left;
     border: none;
 }
