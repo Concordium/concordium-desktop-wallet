@@ -91,7 +91,10 @@ export default function Export() {
             <div className={styles.export}>
                 <h2 className={styles.title}>Export</h2>
                 <p>Export your accounts, ID’s and address book.</p>
-                <Button onClick={() => setOpenPasswordModal(true)}>
+                <Button
+                    className={styles.exportButton}
+                    onClick={() => setOpenPasswordModal(true)}
+                >
                     Export
                 </Button>
             </div>

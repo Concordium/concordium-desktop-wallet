@@ -11,11 +11,10 @@
     p {
         font-size: $font-size-body2;
     }
-
-    button {
-        margin-top: auto;
-        margin-bottom: 40px;
-    }
+}
+.exportButton {
+    margin-top: auto;
+    margin-bottom: 40px;
 }
 
 .bold,
@@ -60,5 +59,5 @@
 }
 
 .fileInput {
-    height: 100%;
+    height: calc(100% - 200px);
 }
