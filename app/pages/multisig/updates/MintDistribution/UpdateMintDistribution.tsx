@@ -1,6 +1,7 @@
 import React from 'react';
 // import { Validate } from 'react-hook-form';
 
+import { Validate } from 'react-hook-form';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
@@ -10,26 +11,31 @@ import {
     FormRewardDistribution,
     RewardDistribution,
 } from '../../common/RewardDistribution';
-import MintRateInput from './MintRateInput/MintRateInput';
+import MintRateInput, {
+    FormMintRateInput,
+} from './MintRateInput/MintRateInput';
+import { getCurrentValue, getSlotsPerYear } from './util';
+import { parseMintPerSlot } from '~/utils/mintDistributionHelpers';
 
 export interface UpdateMintDistributionFields {
-    mantissa: string;
-    exponent: string;
+    mintPerSlot: string;
     rewardDistribution: RewardDistributionValue;
 }
 
 const fieldNames: EqualRecord<UpdateMintDistributionFields> = {
-    mantissa: 'mantissa',
-    exponent: 'exponent',
+    mintPerSlot: 'mintPerSlot',
     rewardDistribution: 'rewardDistribution',
 };
 
-// const isValidNumber = (parseFun: (v: string) => number): Validate => (
-//     v: string
-// ) => !Number.isNaN(parseFun(v)) || 'Value must be a valid number';
+const canParseMintPerSlot: Validate = (value?: string) =>
+    (value !== undefined && parseMintPerSlot(value) !== undefined) ||
+    'Invalid mint per slot value';
 
-// const isValidFloat = isValidNumber(parseFloat);
-// const isValidInteger = isValidNumber((v) => parseInt(v, 10));
+const isValidNumber = (parseFun: (v: string) => number): Validate => (
+    v: string
+) => !Number.isNaN(parseFun(v)) || 'Value must be a valid number';
+
+const isValidFloat = isValidNumber(parseFloat);
 
 const rewardDistributionLabels: [string, string, string] = [
     'Baking Reward Account',
@@ -44,14 +50,10 @@ export default function UpdateMintDistribution({
     blockSummary,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
-    const {
-        bakingReward,
-        finalizationReward,
-        mintPerSlot,
-    } = blockSummary.updates.chainParameters.rewardParameters.mintDistribution;
-
-    const slotsPerSecond = 1000 / consensusStatus.slotDuration;
-    const slotsPerYear = slotsPerSecond * 60 * 60 * 24 * 365.25;
+    const { bakingReward, finalizationReward, mintPerSlot } = getCurrentValue(
+        blockSummary
+    );
+    const slotsPerYear = getSlotsPerYear(consensusStatus);
 
     const currentDistribitionRatio: RewardDistributionValue = {
         first: bakingReward * rewardFractionResolution,
@@ -63,7 +65,7 @@ export default function UpdateMintDistribution({
             <div>
                 <h5>Current Mint Distribution</h5>
                 <MintRateInput
-                    mintPerSlot={mintPerSlot}
+                    value={mintPerSlot.toString()}
                     slotsPerYear={slotsPerYear}
                     disabled
                     className="mB20"
@@ -76,10 +78,22 @@ export default function UpdateMintDistribution({
             </div>
             <div>
                 <h5>New Mint Distribution</h5>
-                <MintRateInput
-                    mintPerSlot={mintPerSlot}
+                <FormMintRateInput
+                    name={fieldNames.mintPerSlot}
+                    defaultValue={mintPerSlot.toString()}
                     slotsPerYear={slotsPerYear}
                     className="mB20"
+                    rules={{
+                        required: 'Mint rate value is required',
+                        min: {
+                            value: 0,
+                            message: "Mint rate value can't be negative",
+                        },
+                        validate: {
+                            isValidFloat,
+                            canParseMintPerSlot,
+                        },
+                    }}
                 />
                 <FormRewardDistribution
                     name={fieldNames.rewardDistribution}

@@ -290,13 +290,14 @@ export const formatNumberStringWithDigits = (
     const isValid = isValidNumberString(true);
 
     return (value = ''): string => {
+        if (value === '') {
+            return value;
+        }
+
         if (!isValid(value)) {
             throw new Error(
                 "Tried to format a string that doesn't represent a number"
             );
-        }
-        if (value === '') {
-            return value;
         }
 
         const [, fractions] = value.split('.');

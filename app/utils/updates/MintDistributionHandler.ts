@@ -4,6 +4,7 @@ import MintDistributionView from '~/pages/multisig/updates/MintDistribution/Mint
 import UpdateMintDistribution, {
     UpdateMintDistributionFields,
 } from '~/pages/multisig/updates/MintDistribution/UpdateMintDistribution';
+import { parseMintPerSlot } from '../mintDistributionHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { TransactionHandler } from '../transactionTypes';
@@ -34,14 +35,11 @@ export default class MintDistributionHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        {
-            exponent,
-            mantissa,
-            rewardDistribution,
-        }: UpdateMintDistributionFields,
+        { mintPerSlot, rewardDistribution }: UpdateMintDistributionFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
-        if (!blockSummary) {
+        const parsedMintPerSlot = parseMintPerSlot(mintPerSlot);
+        if (!blockSummary || !parsedMintPerSlot) {
             return undefined;
         }
 
@@ -53,10 +51,7 @@ export default class MintDistributionHandler
         } = blockSummary.updates.keys.level2Keys.mintDistribution;
 
         const mintDistribution: MintDistribution = {
-            mintPerSlot: {
-                mantissa: parseInt(mantissa, 10),
-                exponent: parseInt(exponent, 10),
-            },
+            mintPerSlot: parsedMintPerSlot,
             bakingReward: rewardDistribution.first,
             finalizationReward: rewardDistribution.second,
         };

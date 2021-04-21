@@ -1,7 +1,6 @@
 import React from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
-import { FormProvider, useForm } from 'react-hook-form';
 import MintRateInput, { MintRateInputProps } from './MintRateInput';
 
 export default {
@@ -10,24 +9,18 @@ export default {
 } as Meta;
 
 const Template: Story<MintRateInputProps> = (args) => {
-    const form = useForm();
-
-    return (
-        <FormProvider {...form}>
-            <MintRateInput {...args} />
-        </FormProvider>
-    );
+    return <MintRateInput {...args} />;
 };
 
 export const Primary = Template.bind({});
 Primary.args = {
-    mintPerSlot: 7.555665e-10,
+    value: '7.555665e-10',
     slotsPerYear: 126144000,
 };
 
 export const Disabled = Template.bind({});
 Disabled.args = {
-    mintPerSlot: 7.555665e-10,
+    value: '7.555665e-10',
     slotsPerYear: 126144000,
     disabled: true,
 };
