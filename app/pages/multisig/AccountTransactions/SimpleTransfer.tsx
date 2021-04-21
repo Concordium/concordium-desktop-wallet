@@ -42,7 +42,6 @@ function subTitle(currentLocation: string) {
 /**
  * This component controls the flow of creating a multisignature account transaction.
  * It contains the logic for displaying the current parameters.
- * TODO center continue button
  */
 export default function SimpleTransfer(): JSX.Element {
     const dispatch = useDispatch();
@@ -67,7 +66,7 @@ export default function SimpleTransfer(): JSX.Element {
 
     function renderSignTransaction() {
         if (!account || !recipient) {
-            throw new Error('fuck');
+            throw new Error('Unexpected missing account or recipient');
         }
         return (
             <CreateTransaction

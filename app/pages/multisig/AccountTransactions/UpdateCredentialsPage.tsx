@@ -354,7 +354,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                             />
                             <Route
                                 path={
-                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
                                 }
                                 render={() => (
                                     <PickAccount
