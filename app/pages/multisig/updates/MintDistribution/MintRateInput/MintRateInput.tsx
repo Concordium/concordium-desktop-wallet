@@ -101,8 +101,8 @@ export default function MintRateInput({
             - 1
             {mantissa && exponent && (
                 <div className={styles.description}>
-                    Chain value: {mantissa}e-{exponent} (Mantissa: {mantissa},
-                    Exponent: {exponent})
+                    Chain value: {mantissa} · 10
+                    <span className={styles.exponent}>-{exponent}</span>
                 </div>
             )}
             <ErrorMessage>{error}</ErrorMessage>
