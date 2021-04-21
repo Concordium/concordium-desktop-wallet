@@ -1,3 +1,4 @@
+import React from 'react';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import MintDistributionView from '~/pages/multisig/updates/MintDistribution/MintDistributionView';
@@ -82,7 +83,7 @@ export default class MintDistributionHandler
     }
 
     view(transaction: TransactionType) {
-        return MintDistributionView({ mintDistribution: transaction.payload });
+        return <MintDistributionView mintDistribution={transaction.payload} />;
     }
 
     getAuthorization(authorizations: Authorizations) {

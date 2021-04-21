@@ -15,23 +15,6 @@ const mintRateFormat = Intl.NumberFormat(undefined, {
     maximumSignificantDigits: 9,
 }).format;
 
-// const innerFieldValidation: Partial<RegisterOptions> = {
-//     required: 'Field is required',
-//     min: {
-//         value: 0,
-//         message: "Value can't be negative",
-//     },
-//     validate: {
-//         validNumber: (v: string) => {
-//             const p = parseFloat(v);
-
-//             return (
-//                 (!Number.isNaN(p) && p !== 0) || 'Invalid mint per slot value'
-//             );
-//         },
-//     },
-// };
-
 export interface MintRateInputProps extends ClassName, CommonFieldProps {
     value: string;
     onChange?(v: string): void;
@@ -116,10 +99,12 @@ export default function MintRateInput({
                 {BigInt(slotsPerYear).toLocaleString()}
             </span>{' '}
             - 1
-            <div className={styles.description}>
-                Chain value: {mantissa}E-{exponent} (Mantissa: {mantissa},
-                Exponent: {exponent})
-            </div>
+            {mantissa && exponent && (
+                <div className={styles.description}>
+                    Chain value: {mantissa}e-{exponent} (Mantissa: {mantissa},
+                    Exponent: {exponent})
+                </div>
+            )}
             <ErrorMessage>{error}</ErrorMessage>
         </span>
     );

@@ -1,46 +1,87 @@
 import React from 'react';
-import { Header, Progress } from 'semantic-ui-react';
-import { ColorType, MintDistribution } from '~/utils/types';
-import { rewardFractionResolution } from '~/constants/updateConstants.json';
+import { MintDistribution } from '~/utils/types';
+import Loading from '~/cross-app-components/Loading';
+import withBlockSummary, {
+    WithBlockSummary,
+} from '../../common/withBlockSummary';
+import {
+    getCurrentValue,
+    getSlotsPerYear,
+    rewardDistributionLabels,
+    toRewardDistributionValue,
+} from './util';
+import {
+    RewardDistribution,
+    RewardDistributionValue,
+} from '../../common/RewardDistribution';
+import MintRateInput from './MintRateInput';
 
-interface Props {
+interface Props extends WithBlockSummary {
     mintDistribution: MintDistribution;
 }
 
 /**
  * Displays an overview of a mint distribution transaction payload.
  */
-export default function MintDistributionView({ mintDistribution }: Props) {
+export default withBlockSummary(function MintDistributionView({
+    mintDistribution,
+    blockSummary,
+    consensusStatus,
+}: Props) {
+    if (!consensusStatus || !blockSummary) {
+        return <Loading />;
+    }
+    const slotsPerYear = getSlotsPerYear(consensusStatus);
+
+    const {
+        mintPerSlot: currentMintPerSlot,
+        ...currentRewardDistribution
+    } = getCurrentValue(blockSummary);
+    const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(
+        currentRewardDistribution
+    );
+
+    const {
+        mintPerSlot: newMintRate,
+        bakingReward,
+        finalizationReward,
+    } = mintDistribution;
+    const newMintPerSlot = `${newMintRate.mantissa}e-${newMintRate.exponent}`;
+    const newDistribitionRatio: RewardDistributionValue = {
+        first: bakingReward,
+        second: finalizationReward,
+    };
+
     return (
         <>
-            <Header>Mint per slot</Header>
-            {mintDistribution.mintPerSlot.mantissa} * 10^(-
-            {mintDistribution.mintPerSlot.exponent})
-            <Progress
-                value={mintDistribution.bakingReward}
-                total={rewardFractionResolution}
-                progress="percent"
-                label="Baking reward fraction"
-                color={ColorType.Blue}
-            />
-            <Progress
-                value={mintDistribution.finalizationReward}
-                total={rewardFractionResolution}
-                progress="percent"
-                label="Finalization reward fraction"
-                color={ColorType.Teal}
-            />
-            <Progress
-                value={
-                    rewardFractionResolution -
-                    (mintDistribution.bakingReward +
-                        mintDistribution.finalizationReward)
-                }
-                total={rewardFractionResolution}
-                progress="percent"
-                label="Foundation reward fraction"
-                color={ColorType.Grey}
-            />
+            <div>
+                <h5>Current Mint Distribution</h5>
+                <MintRateInput
+                    value={currentMintPerSlot.toString()}
+                    slotsPerYear={slotsPerYear}
+                    disabled
+                    className="mB20"
+                />
+                <RewardDistribution
+                    labels={rewardDistributionLabels}
+                    value={currentDistribitionRatio}
+                    disabled
+                />
+            </div>
+            <div>
+                <h5>New Mint Distribution</h5>
+                <MintRateInput
+                    value={newMintPerSlot.toString()}
+                    slotsPerYear={slotsPerYear}
+                    disabled
+                    className="mB20"
+                />
+                <RewardDistribution
+                    labels={rewardDistributionLabels}
+                    value={newDistribitionRatio}
+                    disabled
+                />
+            </div>
         </>
     );
-}
+});
