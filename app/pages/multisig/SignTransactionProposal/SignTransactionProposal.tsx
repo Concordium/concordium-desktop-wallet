@@ -142,7 +142,7 @@ function SignTransactionProposalView({ location }: Props) {
                 columnScroll
             >
                 <Columns.Column header="Transaction Details">
-                    <section className={styles.columnContent}>
+                    <section className={styles.detailsColumnContent}>
                         <TransactionDetails transaction={transactionObject} />
                         {instanceOfUpdateInstruction(transactionObject) && (
                             <ExpiredTransactionView
