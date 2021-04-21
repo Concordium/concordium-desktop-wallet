@@ -63,7 +63,7 @@ export interface Authorizations {
 // The node returns the mint per slot value as a scientific notation String,
 // which does not match the serialization format entirely. Therefore
 // this interface is required.
-interface MintDistributionNode {
+export interface MintDistributionNode {
     mintPerSlot: number;
     bakingReward: RewardFraction;
     finalizationReward: RewardFraction;

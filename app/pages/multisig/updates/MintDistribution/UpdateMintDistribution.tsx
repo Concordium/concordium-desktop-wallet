@@ -4,7 +4,6 @@ import React from 'react';
 import { Validate } from 'react-hook-form';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
-import { rewardFractionResolution } from '~/constants/updateConstants.json';
 
 import {
     RewardDistributionValue,
@@ -14,7 +13,12 @@ import {
 import MintRateInput, {
     FormMintRateInput,
 } from './MintRateInput/MintRateInput';
-import { getCurrentValue, getSlotsPerYear } from './util';
+import {
+    getCurrentValue,
+    getSlotsPerYear,
+    rewardDistributionLabels,
+    toRewardDistributionValue,
+} from './util';
 import { parseMintPerSlot } from '~/utils/mintDistributionHelpers';
 
 export interface UpdateMintDistributionFields {
@@ -37,12 +41,6 @@ const isValidNumber = (parseFun: (v: string) => number): Validate => (
 
 const isValidFloat = isValidNumber(parseFloat);
 
-const rewardDistributionLabels: [string, string, string] = [
-    'Baking Reward Account',
-    'Finalization Account Reward',
-    'Foundation',
-];
-
 /**
  * Component for creating an update mint distribution transaction.
  */
@@ -50,15 +48,13 @@ export default function UpdateMintDistribution({
     blockSummary,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
-    const { bakingReward, finalizationReward, mintPerSlot } = getCurrentValue(
+    const { mintPerSlot, ...rewardDistribution } = getCurrentValue(
         blockSummary
     );
     const slotsPerYear = getSlotsPerYear(consensusStatus);
-
-    const currentDistribitionRatio: RewardDistributionValue = {
-        first: bakingReward * rewardFractionResolution,
-        second: finalizationReward * rewardFractionResolution,
-    };
+    const currentDistribitionRatio: RewardDistributionValue = toRewardDistributionValue(
+        rewardDistribution
+    );
 
     return (
         <>
