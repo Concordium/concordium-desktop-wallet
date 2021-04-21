@@ -24,8 +24,8 @@ import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import Card from '~/cross-app-components/Card';
 import PrintButton from '~/components/PrintButton';
-import Input from '~/components/Form/Input';
 import PrintFormat from './ExportKeyPrintFormat';
+import TextArea from '~/components/Form/TextArea';
 
 interface ParamTypes {
     keyType: ExportKeyType;
@@ -116,7 +116,7 @@ export default function ExportKeyView(): JSX.Element {
                         data={signedPublicKey.key}
                         setScreenshot={setImage}
                     />
-                    <Input
+                    <TextArea
                         label="Note"
                         placeholder="Here you can add a note describing your key"
                         value={note || ''}
