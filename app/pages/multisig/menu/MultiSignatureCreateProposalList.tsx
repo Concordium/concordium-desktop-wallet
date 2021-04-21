@@ -31,6 +31,10 @@ const multiSigTransactionTypesMap: [UpdateType, string][] = [
         UpdateType.UpdateLevel1KeysUsingRootKeys,
         'Update level 1 keys using root keys',
     ],
+    [
+        UpdateType.UpdateLevel1KeysUsingLevel1Keys,
+        'Update level 1 keys using level 1 keys',
+    ],
 ];
 
 /**

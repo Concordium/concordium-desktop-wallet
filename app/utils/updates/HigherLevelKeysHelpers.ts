@@ -33,6 +33,8 @@ export function typeToDisplay(type: UpdateType) {
             return 'root';
         case UpdateType.UpdateLevel1KeysUsingRootKeys:
             return 'level 1';
+        case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
+            return 'level 1';
         default:
             throw new Error(
                 `The update type is not a higher level key update: ${type}`
@@ -51,6 +53,8 @@ export function getThreshold(keys: Keys, type: UpdateType) {
         case UpdateType.UpdateRootKeys:
             return keys.rootKeys.threshold;
         case UpdateType.UpdateLevel1KeysUsingRootKeys:
+            return keys.level1Keys.threshold;
+        case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
             return keys.level1Keys.threshold;
         default:
             throw new Error(
@@ -71,6 +75,8 @@ export function getKeySetSize(keys: Keys, type: UpdateType) {
         case UpdateType.UpdateRootKeys:
             return keys.rootKeys.keys.length;
         case UpdateType.UpdateLevel1KeysUsingRootKeys:
+            return keys.level1Keys.keys.length;
+        case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
             return keys.level1Keys.keys.length;
         default:
             throw new Error(

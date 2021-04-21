@@ -43,6 +43,8 @@ function getCurrentKeysWithThreshold(
             return blockSummary.updates.keys.rootKeys;
         case UpdateType.UpdateLevel1KeysUsingRootKeys:
             return blockSummary.updates.keys.level1Keys;
+        case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
+            return blockSummary.updates.keys.level1Keys;
         default:
             throw new Error(
                 `An update type that was not a higher level key update was received: ${type}`

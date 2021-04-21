@@ -155,6 +155,7 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
         [
             UpdateType.UpdateRootKeys,
             UpdateType.UpdateLevel1KeysUsingRootKeys,
+            UpdateType.UpdateLevel1KeysUsingLevel1Keys,
         ].includes(type)
     ) {
         if (!blockSummary) {
