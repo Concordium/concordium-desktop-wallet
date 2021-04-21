@@ -11,6 +11,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
+import fs from 'fs';
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -57,6 +58,7 @@ export default class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let printWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
     const sourceMapSupport = require('source-map-support');
@@ -116,6 +118,16 @@ const createWindow = async () => {
                       preload: path.join(__dirname, 'dist/renderer.prod.js'),
                       webviewTag: true,
                   },
+    });
+
+    printWindow = new BrowserWindow({
+        parent: mainWindow,
+        modal: true,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true,
+            devTools: false,
+        },
     });
 
     mainWindow.loadURL(`file://${__dirname}/app.html`);
@@ -184,6 +196,32 @@ ipcMain.handle(
         }
     }
 );
+
+// Prints the given body.
+ipcMain.handle(ipcCommands.print, (_event, body) => {
+    return new Promise<void>((resolve, reject) => {
+        if (!printWindow) {
+            reject(new Error('Internal error: Unable to print'));
+        } else {
+            printWindow.loadURL(`data:text/html;charset=utf-8,${body}`);
+            const content = printWindow.webContents;
+            content.on('did-finish-load', () => {
+                content.insertCSS(
+                    fs.readFileSync(
+                        path.join(__dirname, './dist/style.css'),
+                        'utf8'
+                    )
+                );
+                content.print({}, (success, errorType) => {
+                    if (!success) {
+                        reject(new Error(`Print failed due to ${errorType}`));
+                    }
+                    resolve();
+                });
+            });
+        }
+    });
+});
 
 /**
  * Add event listeners...
