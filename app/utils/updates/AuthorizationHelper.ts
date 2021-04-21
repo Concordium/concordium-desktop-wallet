@@ -17,11 +17,37 @@ import {
     isUpdateUsingRootKeys,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateType,
+    VerifyKey,
 } from '../types';
 
 export interface AuthorizationKey {
     index: number;
     key: Key;
+}
+
+/**
+ * Returns the key set that is used to sign the given update type.
+ */
+export function findKeySet(updateType: UpdateType, keys: Keys): VerifyKey[] {
+    if (
+        [
+            UpdateType.UpdateRootKeys,
+            UpdateType.UpdateLevel1KeysUsingRootKeys,
+            UpdateType.UpdateLevel2KeysUsingRootKeys,
+        ].includes(updateType)
+    ) {
+        return keys.rootKeys.keys;
+    }
+    if (
+        [
+            UpdateType.UpdateLevel1KeysUsingLevel1Keys,
+            UpdateType.UpdateLevel2KeysUsingLevel1Keys,
+        ].includes(updateType)
+    ) {
+        return keys.level1Keys.keys;
+    }
+    return keys.level2Keys.keys;
 }
 
 /**
