@@ -1,16 +1,23 @@
+$width: 600px;
+
 .settingInput {
-    max-width: 400px;
+    max-width: $width;
     margin: 20px auto;
 }
 
 .genesisContainer {
     > * {
-        max-width: 400px;
+        max-width: $width;
         margin: 20px auto;
     }
 }
 
 .fileForm {
-    max-width: 400px;
-    margin: 20px auto;
+    .fileInput {
+        height: 400px;
+    }
+
+    button {
+        margin: 20px 0;
+    }
 }

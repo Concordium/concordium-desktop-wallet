@@ -50,6 +50,7 @@ function inputFile(saveFileContent: (file: string) => void) {
             onSubmit={handleSubmit}
         >
             <Form.File
+                className={styles.fileInput}
                 name="file"
                 placeholder="Drag and drop file here"
                 buttonTitle="or browse to file"
@@ -62,46 +63,28 @@ function inputFile(saveFileContent: (file: string) => void) {
     );
 }
 
-interface PickSettingsProps {
-    onSubmit(name: string, address?: string): void;
+interface PickNameProps {
+    setName(name: string): void;
 }
 
-interface PickSettingsForm {
+interface PickNameForm {
     name: string;
-    address: string | undefined;
 }
 
-function PickSettings({ onSubmit }: PickSettingsProps) {
-    const [existingAccount, setExistingAccount] = useState(false);
-
-    function setSettings(values: PickSettingsForm) {
-        const { name, address } = values;
-        onSubmit(name, address);
+function PickName({ setName }: PickNameProps) {
+    function onSubmit(values: PickNameForm) {
+        const { name } = values;
+        setName(name);
     }
 
     return (
-        <Form onSubmit={setSettings}>
+        <Form onSubmit={onSubmit}>
             <Form.Input
                 className={styles.settingInput}
                 name="name"
                 placeholder="Account name"
                 rules={{ required: 'name is required' }}
             />
-            <div className={styles.settingInput}>
-                <Form.Checkbox
-                    name="existingAccount"
-                    onChange={(e) => setExistingAccount(e.target.checked)}
-                >
-                    Existing Account:
-                </Form.Checkbox>
-                {existingAccount ? (
-                    <Form.Input
-                        name="address"
-                        placeholder="Address"
-                        rules={{ required: 'address is required' }}
-                    />
-                ) : null}
-            </div>
             <Form.Submit className={styles.settingInput}>Continue</Form.Submit>
         </Form>
     );
@@ -117,7 +100,7 @@ enum Locations {
 const subtitle = (currentLocation: Locations) => {
     switch (currentLocation) {
         case Locations.Name:
-            return 'Settings';
+            return 'Choose Account Name';
         case Locations.Context:
             return 'Input Context file';
         case Locations.Create:
@@ -137,7 +120,6 @@ export default function GenesisAccount(): JSX.Element {
     const [currentLocation, setLocation] = useState<Locations>(Locations.Name);
     const [accountName, setAccountName] = useState('');
     const [context, setContext] = useState<string | undefined>();
-    const [accountAddress, setAddress] = useState<string | undefined>();
     const [identityId, setIdentityId] = useState<number>(defaultId);
     const [credential, setCredential] = useState<
         CredentialDeploymentValues | undefined
@@ -199,11 +181,7 @@ export default function GenesisAccount(): JSX.Element {
         );
         const credentialContent = typedCredential.contents;
 
-        let address = `genesis-${credentialContent.credId}`;
-
-        if (accountAddress) {
-            address = accountAddress;
-        }
+        const address = `genesis-${credentialContent.credId}`;
 
         const success = await saveFile(
             JSON.stringify(typedCredential),
@@ -296,10 +274,9 @@ export default function GenesisAccount(): JSX.Element {
         switch (currentLocation) {
             case Locations.Name:
                 return (
-                    <PickSettings
-                        onSubmit={(name: string, address?: string) => {
+                    <PickName
+                        setName={(name: string) => {
                             setAccountName(name);
-                            setAddress(address);
                             setLocation(Locations.Context);
                         }}
                     />
