@@ -1,56 +1,52 @@
 import React from 'react';
 
-import { Validate } from 'react-hook-form';
 import { EqualRecord } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
-import { validBigInt } from '~/components/Form/util/validation';
 import {
     RelativeRateField,
     FormRelativeRateField,
 } from '../../common/RelativeRateField';
-import { commonFieldProps, formatDenominator, getCurrentValue } from './util';
+import { commonFieldProps, getCurrentValue } from './util';
+import {
+    notEqual,
+    isPositiveNumber,
+    validBigIntValues,
+    fromExchangeRate,
+    RelativeRateValue,
+} from '../../common/RelativeRateField/util';
 
 export interface UpdateMicroGtuPerEuroRateFields {
-    microGtuPerEuro: string;
+    microGtuPerEuroRate: RelativeRateValue;
 }
 
 const fieldNames: EqualRecord<UpdateMicroGtuPerEuroRateFields> = {
-    microGtuPerEuro: 'microGtuPerEuro',
+    microGtuPerEuroRate: 'microGtuPerEuroRate',
 };
 
 export default function UpdateMicroGtuPerEuroRate({
     blockSummary,
 }: UpdateProps): JSX.Element | null {
-    const { denominator, numerator } = getCurrentValue(blockSummary);
-
-    const fieldProps = {
-        ...commonFieldProps,
-        denominator: formatDenominator(denominator.toString()),
-    };
-    const notEqual: Validate = (value: string) =>
-        value !== numerator.toString() || "Value hasn't changed";
+    const exchangeRate = getCurrentValue(blockSummary);
+    const currentValue: RelativeRateValue = fromExchangeRate(exchangeRate);
 
     return (
         <>
             <RelativeRateField
-                {...fieldProps}
+                {...commonFieldProps}
                 label="Current micro GTU per euro rate"
-                value={numerator.toString()}
+                value={currentValue}
                 disabled
             />
             <FormRelativeRateField
-                {...fieldProps}
-                name={fieldNames.microGtuPerEuro}
+                {...commonFieldProps}
+                name={fieldNames.microGtuPerEuroRate}
                 label="New micro GTU per euro rate"
-                defaultValue={numerator.toString()}
+                defaultValue={currentValue}
                 rules={{
-                    required: 'Value must be specified',
-                    min: { value: 0, message: 'Value cannot be negative' },
                     validate: {
-                        validBigInt: validBigInt(
-                            'Value must be a whole number'
-                        ),
-                        notEqual,
+                        isPositiveNumber,
+                        validBigIntValues,
+                        notEqual: notEqual(currentValue),
                     },
                 }}
             />

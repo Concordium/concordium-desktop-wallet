@@ -35,7 +35,7 @@ export default class MicroGtuPerEuroHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { microGtuPerEuro }: UpdateMicroGtuPerEuroRateFields,
+        { microGtuPerEuroRate }: UpdateMicroGtuPerEuroRateFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -48,12 +48,12 @@ export default class MicroGtuPerEuroHandler
         const {
             threshold,
         } = blockSummary.updates.keys.level2Keys.microGTUPerEuro;
-        const {
-            denominator,
-        } = blockSummary.updates.chainParameters.microGTUPerEuro;
 
         return createUpdateMultiSignatureTransaction(
-            { denominator, numerator: BigInt(microGtuPerEuro) },
+            {
+                denominator: BigInt(microGtuPerEuroRate.denominator),
+                numerator: BigInt(microGtuPerEuroRate.numerator),
+            },
             UpdateType.UpdateMicroGTUPerEuro,
             sequenceNumber,
             threshold,

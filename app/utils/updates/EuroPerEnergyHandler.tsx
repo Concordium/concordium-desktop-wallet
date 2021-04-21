@@ -5,10 +5,8 @@ import EuroPerEnergyView from '~/pages/multisig/updates/EuroPerEnergy/EuroPerEne
 import UpdateEuroPerEnergy, {
     UpdateEuroPerEnergyFields,
 } from '~/pages/multisig/updates/EuroPerEnergy/UpdateEuroPerEnergy';
-import { ensureBigIntValues } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { toResolution } from '../numberStringHelpers';
 import { TransactionHandler } from '../transactionTypes';
 import {
     isExchangeRate,
@@ -37,7 +35,7 @@ export default class EuroPerEnergyHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { euroPerEnergy, isNormalised }: UpdateEuroPerEnergyFields,
+        { euroPerEnergyRate }: UpdateEuroPerEnergyFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -49,20 +47,12 @@ export default class EuroPerEnergyHandler
         const {
             threshold,
         } = blockSummary.updates.keys.level2Keys.euroPerEnergy;
-        const { denominator } = ensureBigIntValues(
-            blockSummary.updates.chainParameters.euroPerEnergy
-        );
-
-        const numerator = isNormalised
-            ? toResolution(denominator)(euroPerEnergy)
-            : BigInt(euroPerEnergy);
-
-        if (!numerator) {
-            return undefined;
-        }
 
         return createUpdateMultiSignatureTransaction(
-            { denominator, numerator },
+            {
+                denominator: BigInt(euroPerEnergyRate.denominator),
+                numerator: BigInt(euroPerEnergyRate.numerator),
+            },
             UpdateType.UpdateEuroPerEnergy,
             sequenceNumber,
             threshold,
