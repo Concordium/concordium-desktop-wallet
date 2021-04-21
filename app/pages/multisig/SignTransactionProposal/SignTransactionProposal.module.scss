@@ -3,8 +3,8 @@
 
 .detailsColumnContent,
 .signColumnContent {
-    max-width: 450px;
     composes: columnContent;
+    max-width: 450px;
     margin: 0 auto;
 }
 
