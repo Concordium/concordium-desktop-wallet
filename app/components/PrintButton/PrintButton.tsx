@@ -10,7 +10,6 @@ import styles from './PrintButton.module.scss';
 
 interface Props {
     className?: string;
-    printClassName?: string;
 }
 /**
  * A button which onclick prints the referenced component.
@@ -22,7 +21,6 @@ interface Props {
  */
 export default function PrintButton({
     className,
-    printClassName,
     children,
 }: PropsWithChildren<Props>) {
     const [showError, setShowError] = useState<ModalErrorInput>({
@@ -38,10 +36,8 @@ export default function PrintButton({
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
-            <div className={styles.hidden}>
-                <div className={printClassName} ref={componentRef}>
-                    {children}
-                </div>
+            <div className={styles.hidden} ref={componentRef}>
+                {children}
             </div>
             <ReactToPrint
                 trigger={() => (

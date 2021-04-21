@@ -19,50 +19,29 @@ export default function DisplaySimpleTransfer({
     toName,
 }: Props) {
     const componentRef = useRef();
+    const body = (
+        <List relaxed="very" ref={componentRef}>
+            <List.Item>
+                From Account:
+                <Header>{fromName}</Header>
+                {transaction.sender}
+            </List.Item>
+            <List.Item>
+                To Account:
+                <Header>{toName} </Header>
+                {transaction.payload.toAddress}
+            </List.Item>
+            <List.Item>
+                Amount:
+                <Header>{displayAsGTU(transaction.payload.amount)}</Header>
+                <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            </List.Item>
+        </List>
+    );
     return (
         <>
-            <PrintButton>
-                <List relaxed="very" ref={componentRef}>
-                    <List.Item>
-                        From Account:
-                        <Header>{fromName}</Header>
-                        {transaction.sender}
-                    </List.Item>
-                    <List.Item>
-                        To Account:
-                        <Header>{toName} </Header>
-                        {transaction.payload.toAddress}
-                    </List.Item>
-                    <List.Item>
-                        Amount:
-                        <Header>
-                            {displayAsGTU(transaction.payload.amount)}
-                        </Header>
-                        <DisplayEstimatedFee
-                            estimatedFee={transaction.estimatedFee}
-                        />
-                    </List.Item>
-                </List>
-            </PrintButton>
-            <List relaxed="very" ref={componentRef}>
-                <List.Item>
-                    From Account:
-                    <Header>{fromName}</Header>
-                    {transaction.sender}
-                </List.Item>
-                <List.Item>
-                    To Account:
-                    <Header>{toName} </Header>
-                    {transaction.payload.toAddress}
-                </List.Item>
-                <List.Item>
-                    Amount:
-                    <Header>{displayAsGTU(transaction.payload.amount)}</Header>
-                    <DisplayEstimatedFee
-                        estimatedFee={transaction.estimatedFee}
-                    />
-                </List.Item>
-            </List>
+            <PrintButton>{body}</PrintButton>
+            {body}
         </>
     );
 }
