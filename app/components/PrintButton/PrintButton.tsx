@@ -51,7 +51,7 @@ export default function PrintButton({
                         setShowError({
                             show: true,
                             header: 'Print Failed',
-                            content: error,
+                            content: error.toString(),
                         })
                     )
                 }
