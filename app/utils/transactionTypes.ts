@@ -28,12 +28,6 @@ export interface UpdateProps {
 }
 
 /**
- * The property interface used by components for handling higher
- * level key updates.
- */
-export type HigherLevelKeyUpdateProps = UpdateProps;
-
-/**
  * The interface contains the location state used by components
  *  for handling the flows to create transfers.
  */
