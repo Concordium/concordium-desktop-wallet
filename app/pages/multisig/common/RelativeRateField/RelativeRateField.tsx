@@ -7,7 +7,7 @@ import styles from './RelativeRateField.module.scss';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
 import InlineNumber from '~/components/Form/InlineNumber';
 import { noOp } from '~/utils/basicHelpers';
-import { InlineNumberProps } from '~/components/Form/InlineNumber/InlineNumber';
+import { isValidRelativeRatePart, RelativeRateValue } from './util';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
@@ -23,9 +23,7 @@ interface RelativeRateFieldUnit {
 
 export interface RelativeRateFieldProps
     extends CommonInputProps,
-        Pick<InlineNumberProps, 'allowFractions' | 'ensureDigits'>,
         InputFieldProps {
-    denominator: string;
     /**
      * Unit of denominator. Position is "prefix" if string value.
      */
@@ -33,9 +31,9 @@ export interface RelativeRateFieldProps
     /**
      * Unit of value in the field. Position is "prefix" if string value.
      */
-    unit: RelativeRateFieldUnit;
-    value: string | undefined;
-    onChange?(v: string | undefined): void;
+    numeratorUnit: RelativeRateFieldUnit;
+    value: RelativeRateValue;
+    onChange?(v: RelativeRateValue): void;
     onBlur?(): void;
 }
 
@@ -44,12 +42,11 @@ export interface RelativeRateFieldProps
  * Used to represent and update values of a unit relative to a value of another unit.
  *
  * @example
- * <RelativeRateField value={value} onChange={(e) => setValue(e.target.value)} unit="€" relativeTo="1 NRG" />
+ * <RelativeRateField value={value} onChange={setValue} numeratorUnit={{ value: '€' }} denominatorUnit={{ value: '€' }} />
  */
 export function RelativeRateField({
-    denominator,
     denominatorUnit,
-    unit,
+    numeratorUnit,
     label,
     isInvalid,
     error,
@@ -58,7 +55,6 @@ export function RelativeRateField({
     value,
     onChange = noOp,
     onBlur = noOp,
-    ...props
 }: RelativeRateFieldProps) {
     return (
         <div
@@ -74,24 +70,36 @@ export function RelativeRateField({
                 <div className={styles.container}>
                     {denominatorUnit.position === 'prefix' &&
                         denominatorUnit.value}
-                    {denominator}
+                    <InlineNumber
+                        className={styles.field}
+                        fallbackValue={0}
+                        value={value.denominator}
+                        onChange={(v) => onChange({ ...value, denominator: v })}
+                        disabled={disabled}
+                        onBlur={onBlur}
+                        isInvalid={!isValidRelativeRatePart(value.denominator)}
+                    />
                     {denominatorUnit.position === 'postfix' &&
                         denominatorUnit.value}{' '}
                     ={' '}
-                    {unit.position === 'prefix' && (
-                        <span className={styles.unit}>{unit.value}</span>
+                    {numeratorUnit.position === 'prefix' && (
+                        <span className={styles.unit}>
+                            {numeratorUnit.value}
+                        </span>
                     )}
                     <InlineNumber
                         className={styles.field}
                         fallbackValue={0}
-                        value={value}
-                        onChange={onChange}
+                        value={value.numerator}
+                        onChange={(v) => onChange({ ...value, numerator: v })}
                         disabled={disabled}
                         onBlur={onBlur}
-                        {...props}
+                        isInvalid={!isValidRelativeRatePart(value.numerator)}
                     />
-                    {unit.position === 'postfix' && (
-                        <span className={styles.unit}>{unit.value}</span>
+                    {numeratorUnit.position === 'postfix' && (
+                        <span className={styles.unit}>
+                            {numeratorUnit.value}
+                        </span>
                     )}
                 </div>
                 <ErrorMessage>{error}</ErrorMessage>

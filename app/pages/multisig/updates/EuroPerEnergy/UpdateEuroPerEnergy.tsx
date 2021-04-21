@@ -1,76 +1,51 @@
 import React from 'react';
-import { Validate } from 'react-hook-form';
-import Form from '~/components/Form';
 import { UpdateProps } from '~/utils/transactionTypes';
 import { EqualRecord } from '~/utils/types';
 import {
     RelativeRateField,
     FormRelativeRateField,
 } from '../../common/RelativeRateField';
-import { useNormalisation } from '../../common/RelativeRateField/util';
-import { getCommonFieldProps, getCurrentValue } from './util';
+import {
+    notEqual,
+    isPositiveNumber,
+    validBigIntValues,
+    fromExchangeRate,
+    RelativeRateValue,
+} from '../../common/RelativeRateField/util';
+import { commonFieldProps, getCurrentValue } from './util';
 
 export interface UpdateEuroPerEnergyFields {
-    euroPerEnergy: string;
-    isNormalised: boolean;
+    euroPerEnergyRate: RelativeRateValue;
 }
 
 const fieldNames: EqualRecord<UpdateEuroPerEnergyFields> = {
-    euroPerEnergy: 'euroPerEnergy',
-    isNormalised: 'isNormalised',
+    euroPerEnergyRate: 'euroPerEnergyRate',
 };
 
 export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
-    const { denominator, numerator } = getCurrentValue(blockSummary);
-
-    const { safeToFraction, safeToResolution, isNormalised } = useNormalisation(
-        denominator
-    );
-
-    const fieldProps = {
-        ...getCommonFieldProps(isNormalised),
-        denominator: isNormalised ? '1' : denominator.toString(),
-    };
-
-    const normalisedNumerator = safeToFraction(numerator);
-
-    const isResolutionFraction: Validate = (value: string) => {
-        try {
-            safeToResolution(value);
-            return true;
-        } catch {
-            return isNormalised
-                ? `Value must go into 1/${denominator}`
-                : 'Value must be a whole number';
-        }
-    };
-    const notEqual: Validate = (value: string) =>
-        value !== normalisedNumerator || "Value hasn't changed";
+    const exchangeRate = getCurrentValue(blockSummary);
+    const currentValue: RelativeRateValue = fromExchangeRate(exchangeRate);
 
     return (
         <>
             <RelativeRateField
-                {...fieldProps}
+                {...commonFieldProps}
                 label="Current euro per energy"
-                value={normalisedNumerator}
+                value={currentValue}
                 disabled
             />
             <FormRelativeRateField
-                {...fieldProps}
-                name={fieldNames.euroPerEnergy}
+                {...commonFieldProps}
+                name={fieldNames.euroPerEnergyRate}
                 label="New euro per energy"
-                defaultValue={normalisedNumerator}
+                defaultValue={currentValue}
                 rules={{
-                    required: 'Value is required',
-                    min: { value: 0, message: 'Value cannot be negative' },
-                    validate: { isResolutionFraction, notEqual },
+                    validate: {
+                        isPositiveNumber,
+                        validBigIntValues,
+                        notEqual: notEqual(currentValue),
+                    },
                 }}
-            />
-            <Form.Checkbox
-                name={fieldNames.isNormalised}
-                checked={isNormalised}
-                readOnly
-                style={{ display: 'none' }}
             />
         </>
     );

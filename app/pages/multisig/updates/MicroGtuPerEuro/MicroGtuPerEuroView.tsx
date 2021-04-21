@@ -1,13 +1,13 @@
 import React from 'react';
 import Loading from '~/cross-app-components/Loading';
-import { ensureBigIntValues } from '~/utils/exchangeRateHelpers';
 import { BlockSummary } from '~/utils/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
 import { RelativeRateField } from '../../common/RelativeRateField';
+import { fromExchangeRate } from '../../common/RelativeRateField/util';
 import withBlockSummary, {
     WithBlockSummary,
 } from '../../common/withBlockSummary';
-import { commonFieldProps, formatDenominator, getCurrentValue } from './util';
+import { commonFieldProps, getCurrentValue } from './util';
 
 interface Props extends WithBlockSummary {
     exchangeRate: ExchangeRate;
@@ -20,24 +20,15 @@ export default withBlockSummary(function MicroGtuPerEuroView({
     exchangeRate,
     blockSummary,
 }: Props) {
-    const newValue = ensureBigIntValues(exchangeRate);
-
-    const fieldProps = {
-        ...commonFieldProps,
-        disabled: true,
-    };
-
     function renderCurrentValue(bs: BlockSummary): JSX.Element {
         const currentValue = getCurrentValue(bs);
 
         return (
             <RelativeRateField
-                {...fieldProps}
+                {...commonFieldProps}
                 label="Current micro GTU per euro rate"
-                denominator={formatDenominator(
-                    currentValue.denominator.toString()
-                )}
-                value={currentValue.numerator.toString()}
+                value={fromExchangeRate(currentValue)}
+                disabled
             />
         );
     }
@@ -50,10 +41,10 @@ export default withBlockSummary(function MicroGtuPerEuroView({
                 <Loading inline />
             )}
             <RelativeRateField
-                {...fieldProps}
+                {...commonFieldProps}
                 label="New micro GTU per euro rate"
-                denominator={formatDenominator(newValue.denominator.toString())}
-                value={newValue.numerator.toString()}
+                value={fromExchangeRate(exchangeRate)}
+                disabled
             />
         </>
     );

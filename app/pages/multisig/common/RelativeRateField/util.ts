@@ -1,28 +1,35 @@
-import { useMemo } from 'react';
+import { Validate } from 'react-hook-form';
 
-import { valueNoOp } from '~/utils/basicHelpers';
-import { toFraction, toResolution } from '~/utils/numberStringHelpers';
+import { isValidBigInt } from '~/utils/numberStringHelpers';
+import { ExchangeRate } from '~/utils/types';
 
-interface GetConverters {
-    safeToFraction(value?: string | bigint | undefined): string | undefined;
-    safeToResolution(value?: string | undefined): bigint | undefined;
-    isNormalised: boolean;
-}
+export type RelativeRateValue = {
+    [P in keyof ExchangeRate]: string | undefined;
+};
 
-// eslint-disable-next-line import/prefer-default-export
-export const useNormalisation = (denominator: bigint): GetConverters =>
-    useMemo(() => {
-        try {
-            return {
-                safeToFraction: toFraction(denominator),
-                safeToResolution: toResolution(denominator),
-                isNormalised: true,
-            };
-        } catch {
-            return {
-                safeToFraction: valueNoOp,
-                safeToResolution: BigInt,
-                isNormalised: false,
-            };
-        }
-    }, [denominator]);
+const validatePositiveNumber = (v = '') => parseInt(v, 10) > 0;
+
+export const isValidRelativeRatePart = (v = '') =>
+    validatePositiveNumber(v) && isValidBigInt(v);
+
+export const isPositiveNumber: Validate = (value: RelativeRateValue) =>
+    Object.values(value)
+        .map(validatePositiveNumber)
+        .every((v) => v === true) || 'Values must above 1';
+
+export const validBigIntValues: Validate = (value: RelativeRateValue) =>
+    Object.values(value)
+        .map(isValidBigInt)
+        .every((v) => v === true) || 'Values must be whole numbers';
+
+export const notEqual = (currentValue: RelativeRateValue): Validate => (
+    value: RelativeRateValue
+) =>
+    (value.denominator !== currentValue.denominator &&
+        value.numerator !== currentValue.numerator) ||
+    "Value hasn't changed";
+
+export const fromExchangeRate = (rate: ExchangeRate): RelativeRateValue => ({
+    denominator: rate.denominator.toString(),
+    numerator: rate.numerator.toString(),
+});

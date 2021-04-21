@@ -1,7 +1,7 @@
 const numberSeparator = '.';
 const pow10Format = /^1(0*)$/;
 
-export const isValidBigInt = (value: string): boolean => {
+export const isValidBigInt = (value = ''): boolean => {
     try {
         BigInt(value);
         return true;
