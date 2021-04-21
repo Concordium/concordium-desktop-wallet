@@ -10,19 +10,19 @@ import {
     ScheduledTransfer,
     SchedulePoint,
     TransferToEncrypted,
+    instanceOfUpdateInstruction,
+    Transaction,
+    AddedCredential,
     AccountTransaction,
     TransactionPayload,
-    UpdateInstruction,
-    UpdateInstructionPayload,
     TimeStampUnit,
-} from './types';
-import {
     TransactionAccountSignature,
     TransactionCredentialSignature,
-} from './transactionTypes';
+} from './types';
 import {
     getTransactionEnergyCost,
     getTransactionKindEnergy,
+    getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
 
 /**
@@ -67,19 +67,22 @@ export async function attachNames(
 }
 
 /**
- *  Constructs a, simple transfer, transaction object,
- * Given the fromAddress, toAddress and the amount.
+ *  Constructs an account transaction object,
+ * @param fromAddress, the sender's address.
+ * @param expiry, expiry of the transaction, is given as an unix timestamp.
+ * @param transactionKind, the id of the TransactionKind of the transaction.
+ * @param payload, the payload of the transaction.
  * @param estimatedEnergyAmount, is the energyAmount on the transaction. Should be used to overwrite the, internally calculated, energy amount, in case of incomplete payloads.
  */
-async function createTransferTransaction<T extends TransactionPayload>(
+async function createAccountTransaction<T extends TransactionPayload>(
     fromAddress: string,
-    expiry: bigint = getDefaultExpiry(),
-    transactionKind: number,
+    expiry: bigint,
+    transactionKind: TransactionKindId,
     payload: T,
     estimatedEnergyAmount?: bigint
 ): Promise<AccountTransaction<T>> {
     const { nonce } = await getNextAccountNonce(fromAddress);
-    const transferTransaction: AccountTransaction<T> = {
+    const transaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
         expiry,
@@ -88,13 +91,13 @@ async function createTransferTransaction<T extends TransactionPayload>(
         payload,
     };
     if (!estimatedEnergyAmount) {
-        transferTransaction.energyAmount = getTransactionEnergyCost(
-            transferTransaction
+        transaction.energyAmount = getTransactionEnergyCost(
+            transaction
         ).toString();
     } else {
-        transferTransaction.energyAmount = estimatedEnergyAmount.toString();
+        transaction.energyAmount = estimatedEnergyAmount.toString();
     }
-    return transferTransaction;
+    return transaction;
 }
 
 /**
@@ -111,7 +114,7 @@ export function createSimpleTransferTransaction(
         toAddress,
         amount: amount.toString(),
     };
-    return createTransferTransaction(
+    return createAccountTransaction(
         fromAddress,
         expiry,
         TransactionKindId.Simple_transfer,
@@ -127,7 +130,7 @@ export function createShieldAmountTransaction(
     const payload = {
         amount: amount.toString(),
     };
-    return createTransferTransaction(
+    return createAccountTransaction(
         address,
         expiry,
         TransactionKindId.Transfer_to_encrypted,
@@ -143,7 +146,7 @@ export async function createUnshieldAmountTransaction(
     const payload = {
         transferAmount: amount.toString(),
     };
-    return createTransferTransaction(
+    return createAccountTransaction(
         address,
         expiry,
         TransactionKindId.Transfer_to_public,
@@ -191,7 +194,7 @@ export async function createScheduledTransferTransaction(
         schedule,
     };
 
-    return createTransferTransaction(
+    return createAccountTransaction(
         fromAddress,
         expiry,
         TransactionKindId.Transfer_with_schedule,
@@ -199,14 +202,40 @@ export async function createScheduledTransferTransaction(
     );
 }
 
-export async function getDataObject(
-    transactionHash: string
-): Promise<Record<string, TransactionEvent>> {
-    const data = (await getTransactionStatus(transactionHash)).getValue();
-    if (data === 'null') {
-        throw new Error('Unexpected missing data object!');
-    }
-    return JSON.parse(data);
+/**
+ *  Constructs an account credential update transaction,
+ */
+export async function createUpdateCredentialsTransaction(
+    sender: string,
+    addedCredentials: AddedCredential[],
+    removedCredIds: string[],
+    threshold: number,
+    currentCredentialAmount: number,
+    signatureAmount = 1,
+    expiry: bigint = getDefaultExpiry()
+) {
+    const payload = {
+        addedCredentials,
+        removedCredIds,
+        threshold,
+    };
+
+    return createAccountTransaction(
+        sender,
+        expiry,
+        TransactionKindId.Update_credentials,
+        payload,
+        getUpdateAccountCredentialEnergy(
+            payload,
+            currentCredentialAmount,
+            signatureAmount
+        )
+    );
+}
+
+export interface StatusResponse {
+    status: TransactionStatus;
+    outcomes: Record<string, TransactionEvent>;
 }
 
 /**
@@ -218,7 +247,7 @@ export async function getDataObject(
 export async function getStatus(
     transactionHash: string,
     pollingIntervalMs = 20000
-): Promise<TransactionStatus> {
+): Promise<StatusResponse> {
     return new Promise((resolve) => {
         const interval = setInterval(async () => {
             let response;
@@ -233,14 +262,14 @@ export async function getStatus(
             }
             if (response === 'null') {
                 clearInterval(interval);
-                resolve(TransactionStatus.Rejected);
+                resolve({ status: TransactionStatus.Rejected, outcomes: {} });
                 return;
             }
 
-            const { status } = JSON.parse(response);
-            if (status === 'finalized') {
+            const parsedResponse = JSON.parse(response);
+            if (parsedResponse.status === 'finalized') {
                 clearInterval(interval);
-                resolve(TransactionStatus.Finalized);
+                resolve(parsedResponse);
             }
         }, pollingIntervalMs);
     });
@@ -261,6 +290,19 @@ export function isFailed(transaction: TransferTransaction) {
         transaction.status === TransactionStatus.Rejected
     );
 }
+
+/**
+ * Get the timeout/expiry of a transaction.
+ * For an update instruction this is the timeout.
+ * For an account transation this is the expiry.
+ */
+export function getTimeout(transaction: Transaction) {
+    if (instanceOfUpdateInstruction(transaction)) {
+        return transaction.header.timeout;
+    }
+    return transaction.expiry;
+}
+
 /** Used to build a simple TransactionAccountSignature, with only a single signature. */
 export function buildTransactionAccountSignature(
     credentialAccountIndex: number,
@@ -268,7 +310,7 @@ export function buildTransactionAccountSignature(
     signature: Buffer
 ): TransactionAccountSignature {
     const transactionCredentialSignature: TransactionCredentialSignature = {};
-    transactionCredentialSignature[signatureIndex] = signature;
+    transactionCredentialSignature[signatureIndex] = signature.toString('hex');
     const transactionAccountSignature: TransactionAccountSignature = {};
     transactionAccountSignature[
         credentialAccountIndex
@@ -276,6 +318,12 @@ export function buildTransactionAccountSignature(
     return transactionAccountSignature;
 }
 
-export const isExpired = (
-    transaction: UpdateInstruction<UpdateInstructionPayload>
-) => transaction.header.timeout <= getNow(TimeStampUnit.seconds);
+export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
+    return outcomes.reduce(
+        (accu, event) => accu && event.result.outcome === 'success',
+        true
+    );
+}
+
+export const isExpired = (transaction: Transaction) =>
+    getTimeout(transaction) <= getNow(TimeStampUnit.seconds);

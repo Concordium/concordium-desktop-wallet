@@ -1,32 +1,33 @@
-import BakerStakeThresholdView from '~/pages/multisig/BakerStakeThresholdView';
-import UpdateBakerStakeThreshold, {
-    UpdateBakerStakeThresholdFields,
-} from '~/pages/multisig/UpdateBakerStakeThreshold';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
+import ElectionDifficultyView from '../../pages/multisig/ElectionDifficultyView';
+import UpdateElectionDifficulty, {
+    UpdateElectionDifficultyFields,
+} from '../../pages/multisig/UpdateElectionDifficulty';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
+    ElectionDifficulty,
+    isElectionDifficulty,
+    MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
-    isBakerStakeThreshold,
-    BakerStakeThreshold,
-    MultiSignatureTransaction,
     UpdateType,
 } from '../types';
-import { serializeBakerStakeThreshold } from '../UpdateSerialization';
+import { serializeElectionDifficulty } from '../UpdateSerialization';
 
-const TYPE = 'Update Baker Stake Threshold';
+const TYPE = 'Update Election Difficulty';
 
-type TransactionType = UpdateInstruction<BakerStakeThreshold>;
+type TransactionType = UpdateInstruction<ElectionDifficulty>;
 
-export default class EuroPerEnergyHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+export default class ElectionDifficultyHandler
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isBakerStakeThreshold(transaction)) {
+        if (isElectionDifficulty(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -34,7 +35,7 @@ export default class EuroPerEnergyHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { threshold: bakerStakeThreshold }: UpdateBakerStakeThresholdFields,
+        { electionDifficulty }: UpdateElectionDifficultyFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -42,15 +43,17 @@ export default class EuroPerEnergyHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.bakerStakeThreshold
+            blockSummary.updates.updateQueues.foundationAccount
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.bakerStakeThreshold;
+        } = blockSummary.updates.keys.level2Keys.electionDifficulty;
 
         return createUpdateMultiSignatureTransaction(
-            { threshold: BigInt(bakerStakeThreshold) },
-            UpdateType.UpdateBakerStakeThreshold,
+            {
+                electionDifficulty: parseInt(electionDifficulty, 10),
+            },
+            UpdateType.UpdateElectionDifficulty,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -58,7 +61,7 @@ export default class EuroPerEnergyHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeBakerStakeThreshold(transaction.payload);
+        return serializeElectionDifficulty(transaction.payload);
     }
 
     signTransaction(
@@ -66,7 +69,7 @@ export default class EuroPerEnergyHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signBakerStakeThreshold(
+        return ledger.signElectionDifficulty(
             transaction,
             this.serializePayload(transaction),
             path
@@ -74,16 +77,14 @@ export default class EuroPerEnergyHandler
     }
 
     view(transaction: TransactionType) {
-        return BakerStakeThresholdView({
-            bakerStakeThreshold: transaction.payload,
-        });
+        return ElectionDifficultyView(transaction.payload);
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.bakerStakeThreshold;
+        return authorizations.electionDifficulty;
     }
 
-    update = UpdateBakerStakeThreshold;
+    update = UpdateElectionDifficulty;
 
     title = `Foundation Transaction | ${TYPE}`;
 

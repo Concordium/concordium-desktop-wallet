@@ -1,32 +1,33 @@
+import BakerStakeThresholdView from '~/pages/multisig/BakerStakeThresholdView';
+import UpdateBakerStakeThreshold, {
+    UpdateBakerStakeThresholdFields,
+} from '~/pages/multisig/UpdateBakerStakeThreshold';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import MintDistributionView from '../../pages/multisig/MintDistributionView';
-import UpdateMintDistribution, {
-    UpdateMintDistributionFields,
-} from '../../pages/multisig/UpdateMintDistribution';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    isMintDistribution,
-    MintDistribution,
-    MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
+    isBakerStakeThreshold,
+    BakerStakeThreshold,
+    MultiSignatureTransaction,
     UpdateType,
 } from '../types';
-import { serializeMintDistribution } from '../UpdateSerialization';
+import { serializeBakerStakeThreshold } from '../UpdateSerialization';
 
-const TYPE = 'Update Mint Distribution';
+const TYPE = 'Update Baker Stake Threshold';
 
-type TransactionType = UpdateInstruction<MintDistribution>;
+type TransactionType = UpdateInstruction<BakerStakeThreshold>;
 
-export default class MintDistributionHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+export default class EuroPerEnergyHandler
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isMintDistribution(transaction)) {
+        if (isBakerStakeThreshold(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -34,11 +35,7 @@ export default class MintDistributionHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        {
-            exponent,
-            mantissa,
-            rewardDistribution,
-        }: UpdateMintDistributionFields,
+        { threshold: bakerStakeThreshold }: UpdateBakerStakeThresholdFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -46,24 +43,15 @@ export default class MintDistributionHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.mintDistribution
+            blockSummary.updates.updateQueues.bakerStakeThreshold
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.mintDistribution;
-
-        const mintDistribution: MintDistribution = {
-            mintPerSlot: {
-                mantissa: parseInt(mantissa, 10),
-                exponent: parseInt(exponent, 10),
-            },
-            bakingReward: rewardDistribution.first,
-            finalizationReward: rewardDistribution.second,
-        };
+        } = blockSummary.updates.keys.level2Keys.bakerStakeThreshold;
 
         return createUpdateMultiSignatureTransaction(
-            mintDistribution,
-            UpdateType.UpdateMintDistribution,
+            { threshold: BigInt(bakerStakeThreshold) },
+            UpdateType.UpdateBakerStakeThreshold,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -71,7 +59,7 @@ export default class MintDistributionHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeMintDistribution(transaction.payload);
+        return serializeBakerStakeThreshold(transaction.payload);
     }
 
     signTransaction(
@@ -79,7 +67,7 @@ export default class MintDistributionHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signMintDistribution(
+        return ledger.signBakerStakeThreshold(
             transaction,
             this.serializePayload(transaction),
             path
@@ -87,14 +75,16 @@ export default class MintDistributionHandler
     }
 
     view(transaction: TransactionType) {
-        return MintDistributionView({ mintDistribution: transaction.payload });
+        return BakerStakeThresholdView({
+            bakerStakeThreshold: transaction.payload,
+        });
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.mintDistribution;
+        return authorizations.bakerStakeThreshold;
     }
 
-    update = UpdateMintDistribution;
+    update = UpdateBakerStakeThreshold;
 
     title = `Foundation Transaction | ${TYPE}`;
 
