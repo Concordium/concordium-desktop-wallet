@@ -2,6 +2,7 @@
 
 .root {
     display: inline-block;
+    text-align: center;
 }
 
 .exponent {
@@ -16,5 +17,4 @@
 .description {
     composes: textFaded from global, body4 from global;
     margin-top: 5px;
-    text-align: center;
 }
