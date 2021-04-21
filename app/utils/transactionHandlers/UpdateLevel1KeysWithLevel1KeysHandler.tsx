@@ -17,7 +17,7 @@ import { removeRemovedKeys } from '../updates/HigherLevelKeysHelpers';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import UpdateLevel1KeysWithLevel1Keys from '~/pages/multisig/updates/UpdateHigherLevelKeys/UpdateLevel1KeysWithLevel1Keys';
 
-const TYPE = 'Update Level 1 Governance Keys';
+const TYPE = 'Update Level 1 Governance Keys using level 1 keys';
 
 type TransactionType = UpdateInstruction<HigherLevelKeyUpdate>;
 
