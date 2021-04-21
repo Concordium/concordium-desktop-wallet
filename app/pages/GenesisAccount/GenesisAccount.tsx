@@ -25,6 +25,7 @@ import {
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import styles from './GenesisAccount.module.scss';
 import Button from '~/cross-app-components/Button';
+import PrintButton from '~/components/PrintButton';
 
 interface FileInputForm {
     file: FileInputValue;
@@ -246,27 +247,48 @@ export default function GenesisAccount(): JSX.Element {
             return null;
         }
 
+        const keys = Object.entries(credential.credentialPublicKeys.keys);
+
         return (
-            <div className={styles.genesisContainer}>
-                <h3>Credential Id: </h3>
-                <p>{credential.credId}</p>
-                <h3>Public keys: </h3>
-                {Object.entries(credential.credentialPublicKeys.keys).map(
-                    ([index, value]) => (
+            <>
+                <PrintButton>
+                    <h3>Account Name:</h3>
+                    <p>{accountName}</p>
+                    <h3>Credential Id: </h3>
+                    <p>{credential.credId}</p>
+                    <h3>Public keys: </h3>
+                    {keys.map(([index, value]) => (
+                        <>
+                            <p key={index}>Index {index}:</p>
+                            <p>{value.verifyKey}</p>
+                        </>
+                    ))}
+                </PrintButton>
+                <div className={styles.genesisContainer}>
+                    <h3>Account Name:</h3>
+                    <p>{accountName}</p>
+                    <h3>Credential Id: </h3>
+                    <p>{credential.credId}</p>
+                    <h3>Public keys: </h3>
+                    {keys.map(([index, value]) => (
                         <p key={index}>
                             {index}: {value.verifyKey}
                         </p>
-                    )
-                )}
-                <p>Threshold: {credential.credentialPublicKeys.threshold}</p>
-                <Button
-                    onClick={() =>
-                        dispatch(push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY))
-                    }
-                >
-                    Done
-                </Button>
-            </div>
+                    ))}
+                    <p>
+                        Threshold: {credential.credentialPublicKeys.threshold}
+                    </p>
+                    <Button
+                        onClick={() =>
+                            dispatch(
+                                push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY)
+                            )
+                        }
+                    >
+                        Done
+                    </Button>
+                </div>
+            </>
         );
     }
 
