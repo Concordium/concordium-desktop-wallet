@@ -36,20 +36,24 @@ export function isPowOf10(resolution: bigint): boolean {
     return pow10Format.test(resolution.toString());
 }
 
-const isValidNumberString = (allowNegative = false, allowedDigits?: number) => {
+const isValidNumberString = (
+    allowNegative = false,
+    allowedFractions: number | true = true
+) => {
     let re: RegExp;
+    const signedPart = allowNegative ? '(-)?' : '';
+    const intPart = '(0|[1-9]\\d*)';
+    const fractionPart =
+        allowedFractions === true
+            ? '(\\.\\d*)?'
+            : `(\\.\\d{1,${allowedFractions}})?`;
+    const exponentPart = '(e[+,-]?\\d*)?';
 
-    if (allowedDigits === undefined) {
+    re = new RegExp(`^${signedPart}${intPart}${exponentPart}$`);
+
+    if (allowedFractions !== 0) {
         re = new RegExp(
-            `^${allowNegative ? '(-)?' : ''}(0|[1-9]\\d*)(\\.\\d*)?$`
-        );
-    } else if (allowedDigits === 0) {
-        re = new RegExp(`^${allowNegative ? '(-)?' : ''}(0|[1-9]\\d*)$`);
-    } else {
-        re = new RegExp(
-            `^${
-                allowNegative ? '(-)?' : ''
-            }(0|[1-9]\\d*)(\\.\\d{1,${allowedDigits}})?$`
+            `^${signedPart}${intPart}${fractionPart}${exponentPart}$`
         );
     }
 
@@ -114,6 +118,17 @@ export const toLocalisedFraction: typeof toFraction = (resolution) => {
     return (value) => converter(value)?.replace('.', fractionRenderSeperator);
 };
 
+const getNumberParts = (value: string) => {
+    const [mantissa, exponent] = value.toLowerCase().split('e');
+    const [whole, fractions = ''] = mantissa.split(numberSeparator);
+
+    return {
+        whole,
+        fractions,
+        exponent,
+    };
+};
+
 /**
  * expects the fractional part of the a fraction number string.
  * i.e. from an amount of 10.001, the fraction number string is 001.
@@ -127,7 +142,7 @@ export const parseSubNumber = (powOf10: number) => (
 };
 
 /**
- * @description converts fraction string to bigint by multiplying with resolution.
+ * @description converts fraction string to bigint by multiplying with resolution. Doesn't work with order or magnitude numbers (e.g. 1.23e-3)
  *
  * @throws If resolution x is anything but a power of 10 (1, 10, 100, 1000, etc.)
  *
@@ -191,8 +206,14 @@ function increment(value: string, allowOverflow = true): string {
     return valueInc;
 }
 
-const formatRounded = (isInt: boolean) => (whole: string, fractions: string) =>
-    `${whole}${isInt ? '' : `.${fractions}`}`;
+const formatRounded = (isInt: boolean) => (
+    whole: string,
+    fractions: string,
+    exponent?: string
+) =>
+    `${whole}${isInt ? '' : `.${fractions}`}${
+        exponent !== undefined ? `e${exponent}` : ''
+    }`;
 
 /**
  * @description
@@ -202,7 +223,7 @@ const formatRounded = (isInt: boolean) => (whole: string, fractions: string) =>
  */
 export const round = (digits = 0) => (value: string): string => {
     const format = formatRounded(digits === 0);
-    const [whole, fractions = ''] = value.split('.');
+    const { whole, fractions = '', exponent } = getNumberParts(value);
 
     if (fractions.length <= digits) {
         // If less fractions than digits to round to, do nothing.
@@ -219,7 +240,7 @@ export const round = (digits = 0) => (value: string): string => {
     const nOverflow = BigInt(overflow);
     if (upperBound - nOverflow > nOverflow) {
         // Round down - simply remove overflowing digits.
-        return format(whole, roundedFractions);
+        return format(whole, roundedFractions, exponent);
     }
 
     const wholeInc = increment(whole);
@@ -227,11 +248,11 @@ export const round = (digits = 0) => (value: string): string => {
         roundedFractions = increment(roundedFractions, false);
 
         if (parseInt(roundedFractions, 10) !== 0 && digits) {
-            return format(whole, roundedFractions);
+            return format(whole, roundedFractions, exponent);
         }
     }
 
-    return format(wholeInc, roundedFractions);
+    return format(wholeInc, roundedFractions, exponent);
 };
 
 /**
@@ -245,17 +266,20 @@ export const round = (digits = 0) => (value: string): string => {
  * ensureTwoDigits('1.223') => '1.22'
  */
 export const toFixed = (digits: number) => (value: string): string => {
-    const [whole, fractions = ''] = value.split('.');
+    const format = formatRounded(digits === 0);
+    const { whole, fractions = '', exponent } = getNumberParts(value);
 
     if (fractions.length <= digits) {
         const missingDigits = digits - fractions.length;
-        const danglingZeros = new Array(missingDigits).fill('0').join('');
+        const danglingZeros = '0'.repeat(missingDigits);
 
-        return `${whole}.${fractions ?? ''}${danglingZeros}`;
+        return format(whole, `${fractions + danglingZeros}`, exponent);
     }
 
     return round(digits)(value);
 };
+
+const fallbackValues = ['', Infinity.toString()];
 
 /**
  * @description
@@ -290,7 +314,7 @@ export const formatNumberStringWithDigits = (
     const isValid = isValidNumberString(true);
 
     return (value = ''): string => {
-        if (value === '') {
+        if (fallbackValues.includes(value)) {
             return value;
         }
 
@@ -300,7 +324,7 @@ export const formatNumberStringWithDigits = (
             );
         }
 
-        const [, fractions] = value.split('.');
+        const { fractions } = getNumberParts(value);
         const valueFractionDigits = fractions?.length ?? 0;
 
         if (valueFractionDigits === 0 && minFractionDigits === 0) {
