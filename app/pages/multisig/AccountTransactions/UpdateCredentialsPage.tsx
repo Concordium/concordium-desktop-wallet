@@ -54,7 +54,7 @@ function subTitle(currentLocation: string) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
             return 'New Credentials';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
-            return '';
+            return ' ';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
             return 'Signature and Hardware Wallet';
         default:
