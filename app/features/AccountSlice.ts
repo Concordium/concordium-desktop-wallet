@@ -6,6 +6,7 @@ import {
     insertAccount,
     updateAccount,
     removeAccount as removeAccountFromDatabase,
+    updateSignatureThreshold as updateSignatureThresholdInDatabase,
 } from '../database/AccountDao';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
@@ -16,6 +17,7 @@ import {
     AccountInfo,
     Dispatch,
     Global,
+    Identity,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
@@ -64,10 +66,26 @@ const accountsSlice = createSlice({
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
         },
+        updateAccountFields: (state, update) => {
+            const { address, ...fields } = update.payload;
+            const index = state.accounts.findIndex(
+                (account) => account.address === address
+            );
+            if (index > -1) {
+                state.accounts[index] = { ...state.accounts[index], ...fields };
+            }
+        },
     },
 });
 
 export const accountsSelector = (state: RootState) => state.accounts.accounts;
+
+export const accountsOfIdentitySelector = (identity: Identity) => (
+    state: RootState
+) =>
+    state.accounts.accounts.filter(
+        (account) => account.identityId === identity.id
+    );
 
 export const accountsInfoSelector = (state: RootState) =>
     state.accounts.accountsInfo;
@@ -87,6 +105,7 @@ export const {
     chooseAccount,
     updateAccounts,
     setAccountInfos,
+    updateAccountFields,
 } = accountsSlice.actions;
 
 // given an account and the accountEncryptedAmount from the accountInfo
@@ -192,8 +211,8 @@ export async function confirmAccount(
     accountName: string,
     transactionId: string
 ) {
-    const status = await getStatus(transactionId);
-    switch (status) {
+    const response = await getStatus(transactionId);
+    switch (response.status) {
         case TransactionStatus.Rejected:
             await updateAccount(accountName, {
                 status: AccountStatus.Rejected,
@@ -251,6 +270,15 @@ export async function removeAccount(
 ) {
     await removeAccountFromDatabase(accountAddress);
     return loadAccounts(dispatch);
+}
+
+export async function updateSignatureThreshold(
+    dispatch: Dispatch,
+    address: string,
+    signatureThreshold: number
+) {
+    updateSignatureThresholdInDatabase(address, signatureThreshold);
+    return dispatch(updateAccountFields({ address, signatureThreshold }));
 }
 
 export default accountsSlice.reducer;

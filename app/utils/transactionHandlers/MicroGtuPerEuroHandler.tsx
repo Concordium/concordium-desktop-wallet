@@ -7,7 +7,7 @@ import UpdateMicroGtuPerEuro, {
 } from '~/pages/multisig/updates/MicroGtuPerEuro/UpdateMicroGtuPerEuro';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     ExchangeRate,
     UpdateInstruction,
@@ -23,7 +23,8 @@ const TYPE = 'Update Micro GTU Per Euro';
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
 export default class MicroGtuPerEuroHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {

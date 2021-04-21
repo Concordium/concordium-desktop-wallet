@@ -1,32 +1,33 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
-import UpdateFoundationAccount, {
-    UpdateFoundationAccountFields,
-} from '../../pages/multisig/UpdateFoundationAccount';
+import MintDistributionView from '../../pages/multisig/MintDistributionView';
+import UpdateMintDistribution, {
+    UpdateMintDistributionFields,
+} from '../../pages/multisig/UpdateMintDistribution';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    FoundationAccount,
-    isFoundationAccount,
+    isMintDistribution,
+    MintDistribution,
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
 } from '../types';
-import { serializeFoundationAccount } from '../UpdateSerialization';
+import { serializeMintDistribution } from '../UpdateSerialization';
 
-const TYPE = 'Update Foundation Account';
+const TYPE = 'Update Mint Distribution';
 
-type TransactionType = UpdateInstruction<FoundationAccount>;
+type TransactionType = UpdateInstruction<MintDistribution>;
 
-export default class FoundationAccountHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+export default class MintDistributionHandler
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isFoundationAccount(transaction)) {
+        if (isMintDistribution(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -34,7 +35,11 @@ export default class FoundationAccountHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { foundationAccount }: UpdateFoundationAccountFields,
+        {
+            exponent,
+            mantissa,
+            rewardDistribution,
+        }: UpdateMintDistributionFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -42,15 +47,24 @@ export default class FoundationAccountHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.foundationAccount
+            blockSummary.updates.updateQueues.mintDistribution
                 .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.foundationAccount;
+        } = blockSummary.updates.keys.level2Keys.mintDistribution;
+
+        const mintDistribution: MintDistribution = {
+            mintPerSlot: {
+                mantissa: parseInt(mantissa, 10),
+                exponent: parseInt(exponent, 10),
+            },
+            bakingReward: rewardDistribution.first,
+            finalizationReward: rewardDistribution.second,
+        };
 
         return createUpdateMultiSignatureTransaction(
-            { address: foundationAccount },
-            UpdateType.UpdateFoundationAccount,
+            mintDistribution,
+            UpdateType.UpdateMintDistribution,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -58,7 +72,7 @@ export default class FoundationAccountHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeFoundationAccount(transaction.payload);
+        return serializeMintDistribution(transaction.payload);
     }
 
     signTransaction(
@@ -66,7 +80,7 @@ export default class FoundationAccountHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signFoundationAccount(
+        return ledger.signMintDistribution(
             transaction,
             this.serializePayload(transaction),
             path
@@ -74,16 +88,14 @@ export default class FoundationAccountHandler
     }
 
     view(transaction: TransactionType) {
-        return FoundationAccountView({
-            foundationAccount: transaction.payload,
-        });
+        return MintDistributionView({ mintDistribution: transaction.payload });
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.foundationAccount;
+        return authorizations.mintDistribution;
     }
 
-    update = UpdateFoundationAccount;
+    update = UpdateMintDistribution;
 
     title = `Foundation Transaction | ${TYPE}`;
 

@@ -1,21 +1,52 @@
-import { parse } from 'json-bigint';
-import { getAll, updateEntry } from '../database/MultiSignatureProposalDao';
-import { loadProposals } from '../features/MultiSignatureSlice';
-import { hashSha256 } from './serializationHelpers';
+import { parse } from './JSONHelper';
+import { getAll, updateEntry } from '~/database/MultiSignatureProposalDao';
+import { loadProposals } from '~/features/MultiSignatureSlice';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     TransactionStatus,
     Dispatch,
+    instanceOfAccountTransaction,
+    instanceOfUpdateAccountCredentials,
+    UpdateAccountCredentials,
+    Transaction,
 } from './types';
-import { serializeUpdateInstruction } from './UpdateSerialization';
 import {
     confirmTransaction,
     rejectTransaction,
-} from '../features/TransactionSlice';
-import { getPendingTransactions } from '../database/TransactionDao';
-import { getStatus, getDataObject } from './transactionHelpers';
-import findHandler from './updates/HandlerFinder';
+} from '~/features/TransactionSlice';
+import { getPendingTransactions } from '~/database/TransactionDao';
+import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
+import { getTransactionSubmissionId } from './transactionHash';
+import { updateSignatureThreshold } from '~/features/AccountSlice';
+import {
+    updateCredentialIndex,
+    insertExternalCredential,
+} from '~/features/CredentialSlice';
+
+/**
+ * Given an UpdateAccountCredentials transaction, update the local state
+ * according to the transaction's changes.
+ * For each added credential, add it to the local database.
+ * For each removed credential, remove its index to indicate that it has been removed.
+ * Update the signatureThreshold of the account.
+ */
+export function updateAccountCredentialsPerformConsequence(
+    dispatch: Dispatch,
+    transaction: UpdateAccountCredentials
+) {
+    transaction.payload.addedCredentials.forEach(({ index, value }) =>
+        insertExternalCredential(dispatch, transaction.sender, index, value)
+    );
+    transaction.payload.removedCredIds.forEach((credId) =>
+        updateCredentialIndex(dispatch, credId, undefined)
+    );
+    updateSignatureThreshold(
+        dispatch,
+        transaction.sender,
+        transaction.payload.threshold
+    );
+}
 
 /**
  * Poll for the transaction status of the provided multi signature transaction proposal, and
@@ -27,28 +58,36 @@ export async function getMultiSignatureTransactionStatus(
     proposal: MultiSignatureTransaction,
     dispatch: Dispatch
 ) {
-    const updateInstruction = parse(proposal.transaction);
-    const handler = findHandler(updateInstruction.type);
+    const transaction: Transaction = parse(proposal.transaction);
 
-    const serializedUpdateInstruction = serializeUpdateInstruction(
-        updateInstruction,
-        handler.serializePayload(updateInstruction)
-    );
-    const transactionHash = hashSha256(serializedUpdateInstruction).toString(
-        'hex'
-    );
-    const status = await getStatus(transactionHash);
+    const transactionHash = getTransactionSubmissionId(transaction);
+
+    const response = await getStatus(transactionHash);
 
     const updatedProposal = {
         ...proposal,
     };
 
-    switch (status) {
+    switch (response.status) {
         case TransactionStatus.Rejected:
-            updatedProposal.status = MultiSignatureTransactionStatus.Failed;
+            updatedProposal.status = MultiSignatureTransactionStatus.Rejected;
             break;
         case TransactionStatus.Finalized:
-            updatedProposal.status = MultiSignatureTransactionStatus.Finalized;
+            if (isSuccessfulTransaction(Object.values(response.outcomes))) {
+                if (
+                    instanceOfAccountTransaction(transaction) &&
+                    instanceOfUpdateAccountCredentials(transaction)
+                ) {
+                    updateAccountCredentialsPerformConsequence(
+                        dispatch,
+                        transaction
+                    );
+                }
+                updatedProposal.status =
+                    MultiSignatureTransactionStatus.Finalized;
+            } else {
+                updatedProposal.status = MultiSignatureTransactionStatus.Failed;
+            }
             break;
         default:
             throw new Error('Unexpected status was returned by the poller!');
@@ -63,14 +102,13 @@ export async function getMultiSignatureTransactionStatus(
  * Wait for the transaction to be finalized (or rejected) and update accordingly
  */
 export async function monitorTransactionStatus(transactionHash: string) {
-    const status = await getStatus(transactionHash);
-    switch (status) {
+    const response = await getStatus(transactionHash);
+    switch (response.status) {
         case TransactionStatus.Rejected:
             rejectTransaction(transactionHash);
             break;
         case TransactionStatus.Finalized: {
-            const dataObject = await getDataObject(transactionHash);
-            confirmTransaction(transactionHash, dataObject);
+            confirmTransaction(transactionHash, response.outcomes);
             break;
         }
         default:

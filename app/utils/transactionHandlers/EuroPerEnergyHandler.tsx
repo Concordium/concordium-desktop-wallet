@@ -7,7 +7,7 @@ import UpdateEuroPerEnergy, {
 } from '~/pages/multisig/updates/EuroPerEnergy/UpdateEuroPerEnergy';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
-import { TransactionHandler } from '../transactionTypes';
+import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isExchangeRate,
     ExchangeRate,
@@ -23,7 +23,8 @@ const TYPE = 'Update Euro Per Energy';
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
 export default class EuroPerEnergyHandler
-    implements TransactionHandler<TransactionType, ConcordiumLedgerClient> {
+    implements
+        UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
