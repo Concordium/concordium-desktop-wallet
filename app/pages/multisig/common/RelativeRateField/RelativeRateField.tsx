@@ -95,8 +95,7 @@ export function RelativeRateField({
         } catch {
             return undefined;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(value)]);
+    }, [value.numerator, value.denominator]);
 
     return (
         <div
