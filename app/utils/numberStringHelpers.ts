@@ -31,20 +31,37 @@ export function isPowOf10(resolution: bigint): boolean {
     return pow10Format.test(resolution.toString());
 }
 
-const isValidNumberString = (allowNegative = false, allowedDigits?: number) => {
+/**
+ * @description
+ * Generates a validation function for number strings.
+ *
+ * @param allowNegative whether or not to allow negative values in the validation.
+ * @param allowedFractionDigits fraction digits to allow in validation (e.g. 1 invalidates 0.01, and validates 0.3). If not specified, an infinte amount of fraction digits is allowed.
+ * @returns function validating a value according to the params.
+ *
+ * @example
+ * isValidNumberString(true, 3)('0.01') => true
+ * isValidNumberString(true, 3)('-0.01') => true
+ * isValidNumberString(true, 3)('0.0001') => false
+ * isValidNumberString()('0.000000000001') => true
+ */
+const isValidNumberString = (
+    allowNegative = false,
+    allowedFractionDigits?: number
+) => {
     let re: RegExp;
 
-    if (allowedDigits === undefined) {
+    if (allowedFractionDigits === undefined) {
         re = new RegExp(
             `^${allowNegative ? '(-)?' : ''}(0|[1-9]\\d*)(\\.\\d*)?$`
         );
-    } else if (allowedDigits === 0) {
+    } else if (allowedFractionDigits === 0) {
         re = new RegExp(`^${allowNegative ? '(-)?' : ''}(0|[1-9]\\d*)$`);
     } else {
         re = new RegExp(
             `^${
                 allowNegative ? '(-)?' : ''
-            }(0|[1-9]\\d*)(\\.\\d{1,${allowedDigits}})?$`
+            }(0|[1-9]\\d*)(\\.\\d{1,${allowedFractionDigits}})?$`
         );
     }
 
@@ -54,6 +71,19 @@ const isValidNumberString = (allowNegative = false, allowedDigits?: number) => {
     };
 };
 
+/**
+ * @description
+ * Generates a function that validates values according to given resolution.
+ *
+ * @param resolution power of 10 resolution the value can be described as fractions of (e.g. 0.01 is valid with resolution 100, however 0.001 is not)
+ * @param allowNegative whether or not to allow negative values in the validation.
+ * @returns function validating a value according to the params.
+ *
+ * @example
+ * isValidResolutionString(100)('0.03') => true
+ * isValidResolutionString(100)('0.25') => true
+ * isValidResolutionString(100)('0.008') => false
+ */
 export const isValidResolutionString = (
     resolution: bigint,
     allowNegative = false
@@ -165,7 +195,7 @@ function increment(value: string, allowOverflow = true): string {
     let valueInc = value;
     const lastIndex = negative ? 1 : 0;
 
-    // Round up - increment chars from right to left while char incremented hits lastIndex.
+    // Round up - increment chars from right to left while char incremented doesn't overflow.
     // eslint-disable-next-line no-plusplus
     for (let i = valueInc.length - 1; i >= lastIndex; i--) {
         const char = valueInc.charAt(i);
