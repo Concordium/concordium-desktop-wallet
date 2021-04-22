@@ -1,5 +1,6 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import clsx from 'clsx';
-import React, { InputHTMLAttributes } from 'react';
+import React, { InputHTMLAttributes, PropsWithChildren, useMemo } from 'react';
 import { CommonInputProps } from '~/components/Form/common';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 
@@ -7,7 +8,12 @@ import styles from './RelativeRateField.module.scss';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
 import InlineNumber from '~/components/Form/InlineNumber';
 import { noOp } from '~/utils/basicHelpers';
-import { isValidRelativeRatePart, RelativeRateValue } from './util';
+import {
+    fromExchangeRate,
+    isValidRelativeRatePart,
+    RelativeRateValue,
+} from './util';
+import { getReducedExchangeRate } from '~/utils/exchangeRateHelpers';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
@@ -19,6 +25,20 @@ type UnitPosition = 'postfix' | 'prefix';
 interface RelativeRateFieldUnit {
     value: string;
     position: UnitPosition;
+}
+
+function UnitContext({
+    children,
+    position,
+    value,
+}: PropsWithChildren<RelativeRateFieldUnit>): JSX.Element {
+    return (
+        <>
+            {position === 'prefix' && value}
+            {children}
+            {position === 'postfix' && value}
+        </>
+    );
 }
 
 export interface RelativeRateFieldProps
@@ -56,6 +76,28 @@ export function RelativeRateField({
     onChange = noOp,
     onBlur = noOp,
 }: RelativeRateFieldProps) {
+    const reduced = useMemo(() => {
+        try {
+            const r = fromExchangeRate(
+                getReducedExchangeRate({
+                    numerator: BigInt(value.numerator),
+                    denominator: BigInt(value.denominator),
+                })
+            );
+
+            const { numerator: rn, denominator: rd } = r;
+
+            if (rn !== value.numerator || rd !== value.denominator) {
+                return r;
+            }
+
+            return undefined;
+        } catch {
+            return undefined;
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(value)]);
+
     return (
         <div
             className={clsx(
@@ -69,45 +111,53 @@ export function RelativeRateField({
                 <span className={styles.label}>{label}</span>
                 <div className={styles.container}>
                     <label className={styles.fieldWrapper}>
-                        {denominatorUnit.position === 'prefix' &&
-                            denominatorUnit.value}
-                        <InlineNumber
-                            className={styles.field}
-                            fallbackValue={0}
-                            value={value.denominator}
-                            onChange={(v) =>
-                                onChange({ ...value, denominator: v })
-                            }
-                            disabled={disabled}
-                            onBlur={onBlur}
-                            isInvalid={
-                                !isValidRelativeRatePart(value.denominator)
-                            }
-                        />
-                        {denominatorUnit.position === 'postfix' &&
-                            denominatorUnit.value}
+                        <UnitContext {...denominatorUnit}>
+                            <InlineNumber
+                                className={styles.field}
+                                fallbackValue={0}
+                                value={value.denominator}
+                                onChange={(v) =>
+                                    onChange({ ...value, denominator: v })
+                                }
+                                disabled={disabled}
+                                onBlur={onBlur}
+                                isInvalid={
+                                    !isValidRelativeRatePart(value.denominator)
+                                }
+                            />
+                        </UnitContext>
                     </label>
                     {' = '}
                     <label className={styles.fieldWrapper}>
-                        {numeratorUnit.position === 'prefix' &&
-                            numeratorUnit.value}
-                        <InlineNumber
-                            className={styles.field}
-                            fallbackValue={0}
-                            value={value.numerator}
-                            onChange={(v) =>
-                                onChange({ ...value, numerator: v })
-                            }
-                            disabled={disabled}
-                            onBlur={onBlur}
-                            isInvalid={
-                                !isValidRelativeRatePart(value.numerator)
-                            }
-                        />
-                        {numeratorUnit.position === 'postfix' &&
-                            numeratorUnit.value}
+                        <UnitContext {...numeratorUnit}>
+                            <InlineNumber
+                                className={styles.field}
+                                fallbackValue={0}
+                                value={value.numerator}
+                                onChange={(v) =>
+                                    onChange({ ...value, numerator: v })
+                                }
+                                disabled={disabled}
+                                onBlur={onBlur}
+                                isInvalid={
+                                    !isValidRelativeRatePart(value.numerator)
+                                }
+                            />
+                        </UnitContext>
                     </label>
                 </div>
+                {reduced && (
+                    <div className={styles.reduced}>
+                        Reduced to:{' '}
+                        <UnitContext {...denominatorUnit}>
+                            {reduced.denominator}
+                        </UnitContext>
+                        {' = '}
+                        <UnitContext {...numeratorUnit}>
+                            {reduced.numerator}
+                        </UnitContext>
+                    </div>
+                )}
                 <ErrorMessage>{error}</ErrorMessage>
             </label>
         </div>
