@@ -120,15 +120,14 @@ export default function UpdateHigherLevelKeys({
                 }
                 return key;
             })
-            .filter((key) => {
-                if (
-                    removeAddedKey &&
-                    keyToUpdate.verifyKey.verifyKey === key.verifyKey.verifyKey
-                ) {
-                    return false;
-                }
-                return true;
-            });
+            .filter(
+                (key) =>
+                    !(
+                        removeAddedKey &&
+                        keyToUpdate.verifyKey.verifyKey ===
+                            key.verifyKey.verifyKey
+                    )
+            );
         setNewKeys(updatedKeys);
     }
 

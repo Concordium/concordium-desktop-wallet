@@ -45,10 +45,7 @@ export default async function signHigherLevelKeyUpdate(
     p1 = 0x01;
     for (let i = 0; i < updateKeysLength; i += 1) {
         const verificationKey = transaction.payload.updateKeys[i];
-
-        const data = Buffer.concat([
-            serializeVerifyKey(verificationKey.verifyKey),
-        ]);
+        const data = serializeVerifyKey(verificationKey.verifyKey);
 
         // eslint-disable-next-line  no-await-in-loop
         await transport.send(0xe0, INS, p1, p2, data);

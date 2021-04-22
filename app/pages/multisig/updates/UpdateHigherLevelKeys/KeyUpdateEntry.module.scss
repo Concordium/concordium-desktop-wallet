@@ -13,7 +13,7 @@ ul {
 }
 
 /* No border-bottom for the final key entry in the list. */
-li:last-child {
+.listItem:last-child {
     border-bottom: none;
 }
 

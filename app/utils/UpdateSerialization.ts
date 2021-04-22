@@ -62,7 +62,7 @@ export interface SerializedProtocolUpdate {
 export function serializeHigherLevelKeyUpdate(
     higherLevelKeyUpdate: HigherLevelKeyUpdate
 ) {
-    let serializedHigherLevelKeyUpdate = Buffer.alloc(3);
+    const serializedHigherLevelKeyUpdate = Buffer.alloc(3);
     serializedHigherLevelKeyUpdate.writeInt8(
         higherLevelKeyUpdate.keyUpdateType,
         0
@@ -72,18 +72,18 @@ export function serializeHigherLevelKeyUpdate(
         1
     );
 
-    higherLevelKeyUpdate.updateKeys.forEach((updateKey) => {
-        const serializedUpdateKey = serializeVerifyKey(updateKey.verifyKey);
-        serializedHigherLevelKeyUpdate = Buffer.concat([
-            serializedHigherLevelKeyUpdate,
-            serializedUpdateKey,
-        ]);
-    });
+    const serializedKeys = higherLevelKeyUpdate.updateKeys
+        .map((updateKey) => serializeVerifyKey(updateKey.verifyKey))
+        .reduce((acc, curr) => Buffer.concat([acc, curr]));
 
     const threshold = Buffer.alloc(2);
     threshold.writeUInt16BE(higherLevelKeyUpdate.threshold, 0);
 
-    return Buffer.concat([serializedHigherLevelKeyUpdate, threshold]);
+    return Buffer.concat([
+        serializedHigherLevelKeyUpdate,
+        serializedKeys,
+        threshold,
+    ]);
 }
 
 /**

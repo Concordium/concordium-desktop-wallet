@@ -84,7 +84,7 @@ function findHigherLevelKey(publicKey: string, keys: KeysWithThreshold) {
 
 /**
  * Attempts to the find the level 2 authorization key for the connected Ledger. If the public-key is not authorized,
- * then undefined is returned.
+ * then undefined is returned. Note that the Authorizations key structure is the level 2 key set.
  */
 function findAuthorizationKey(
     publicKey: string,

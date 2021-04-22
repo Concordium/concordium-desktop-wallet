@@ -8,8 +8,6 @@ import {
 
 /**
  * Maps an update type to the key type byte value that is part of the transaction.
- * @param updateType
- * @returns
  */
 export function updateTypeToKeyType(
     updateType: UpdateType
