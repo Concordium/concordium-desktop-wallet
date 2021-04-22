@@ -6,6 +6,7 @@ $width: 600px;
 }
 
 .genesisContainer {
+    position: relative;
     > * {
         max-width: $width;
         margin: 20px auto;
@@ -20,4 +21,11 @@ $width: 600px;
     button {
         margin: 20px 0;
     }
+}
+
+.printButton {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin-top: 0;
 }

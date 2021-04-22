@@ -229,8 +229,8 @@ export default function GenesisAccount(): JSX.Element {
         const keys = Object.entries(credential.credentialPublicKeys.keys);
 
         return (
-            <>
-                <PrintButton>
+            <div className={styles.genesisContainer}>
+                <PrintButton className={styles.printButton}>
                     <h3>Account Name:</h3>
                     <p>{accountName}</p>
                     <h3>Credential Id: </h3>
@@ -243,31 +243,25 @@ export default function GenesisAccount(): JSX.Element {
                         </>
                     ))}
                 </PrintButton>
-                <div className={styles.genesisContainer}>
-                    <h3>Account Name:</h3>
-                    <p>{accountName}</p>
-                    <h3>Credential Id: </h3>
-                    <p>{credential.credId}</p>
-                    <h3>Public keys: </h3>
-                    {keys.map(([index, value]) => (
-                        <p key={index}>
-                            Index {index}: {value.verifyKey}
-                        </p>
-                    ))}
-                    <p>
-                        Threshold: {credential.credentialPublicKeys.threshold}
+                <h3>Account Name:</h3>
+                <p>{accountName}</p>
+                <h3>Credential Id: </h3>
+                <p>{credential.credId}</p>
+                <h3>Public keys: </h3>
+                {keys.map(([index, value]) => (
+                    <p key={index}>
+                        Index {index}: {value.verifyKey}
                     </p>
-                    <Button
-                        onClick={() =>
-                            dispatch(
-                                push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY)
-                            )
-                        }
-                    >
-                        Done
-                    </Button>
-                </div>
-            </>
+                ))}
+                <p>Threshold: {credential.credentialPublicKeys.threshold}</p>
+                <Button
+                    onClick={() =>
+                        dispatch(push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY))
+                    }
+                >
+                    Done
+                </Button>
+            </div>
         );
     }
 
