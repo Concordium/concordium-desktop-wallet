@@ -1,5 +1,6 @@
 import React from 'react';
 import Button, { ButtonProps } from '~/cross-app-components/Button';
+import Label from '../Label';
 import styles from './ButtonGroup.module.scss';
 
 interface Element {
@@ -29,7 +30,7 @@ export default function Group<T extends Element>({
 }: Omit<ButtonProps, 'as' | 'onClick'> & Props<T>): JSX.Element {
     return (
         <div className={styles.buttonGroup}>
-            <p className={styles.title}>{title}</p>
+            <Label className={styles.title}>{title}</Label>
             <div className={styles.buttons}>
                 {buttons.map((button) => (
                     <Button

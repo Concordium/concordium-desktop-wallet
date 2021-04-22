@@ -1,1 +1,1 @@
-export { default } from './InlineNumber';
+export { default, InlineNumberProps } from './InlineNumber';

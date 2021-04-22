@@ -20,7 +20,7 @@ import InputTimestamp, {
 } from './InputTimestamp/InputTimestamp';
 import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
-import InlineNumber, { InlineNumberProps } from './InlineNumber/InlineNumber';
+import InlineNumber, { InlineNumberProps } from './InlineNumber';
 
 export type FormProps<TFormValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
