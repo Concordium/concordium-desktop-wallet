@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Button, Header, Segment, Divider } from 'semantic-ui-react';
 import { encrypt } from '../../utils/encryption';
 import { validatePassword } from '../../utils/importHelpers';
 import { saveFile } from '../../utils/FileHelper';
@@ -10,6 +9,8 @@ import { addressBookSelector } from '../../features/AddressBookSlice';
 import { credentialsSelector } from '../../features/CredentialSlice';
 import InputModal from '../../components/InputModal';
 import MessageModal from '../../components/MessageModal';
+import Button from '~/cross-app-components/Button';
+import styles from './ExportImport.module.scss';
 
 /**
  * Component for exporting identities/account/addressBook.
@@ -69,11 +70,14 @@ export default function Export() {
     return (
         <>
             <InputModal
-                title="Choose a password"
-                buttonText="Export"
-                validValue={(password) => validatePassword(password)}
+                title="Enter a password"
+                text="Please enter a password for your export"
+                buttonText="Continue"
+                validValue={(password) =>
+                    validatePassword(password) ? undefined : 'Invalid password'
+                }
                 buttonOnClick={exportData}
-                placeholder="Enter your password"
+                placeholder="password"
                 onClose={() => setOpenPasswordModal(false)}
                 type="password"
                 open={openPasswordModal}
@@ -84,21 +88,16 @@ export default function Export() {
                 onClose={() => setOpenConfirmationModal(false)}
                 open={openConfirmationModal}
             />
-            <Segment basic textAlign="center">
-                <Header textAlign="center" size="large">
-                    Export
-                </Header>
-                Here you can choose to export all your identities, accounts and
-                the address book.
-                <Divider hidden />
+            <div className={styles.export}>
+                <h2 className={styles.title}>Export</h2>
+                <p>Export your accounts, ID’s and address book.</p>
                 <Button
-                    primary
+                    className={styles.exportButton}
                     onClick={() => setOpenPasswordModal(true)}
-                    fluid
                 >
                     Export
                 </Button>
-            </Segment>
+            </div>
         </>
     );
 }

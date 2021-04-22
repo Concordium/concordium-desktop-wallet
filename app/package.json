@@ -18,6 +18,6 @@
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "knex": "^0.21.13",
         "node-abi": "^2.19.3",
-        "sqlite3": "^5.0.0"
+        "sqlite3": "5.0.0"
     }
 }
