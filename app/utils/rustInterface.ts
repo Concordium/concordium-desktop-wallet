@@ -12,8 +12,7 @@ import {
     CredentialDeploymentInformation,
     Global,
     AccountEncryptedAmount,
-    Typed,
-    CredentialDeploymentValues,
+    GenesisCredential,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -352,11 +351,6 @@ export async function makeTransferToPublicData(
         input: JSON.stringify(input),
     });
     return JSON.parse(transferToPublicData);
-}
-
-interface GenesisCredential {
-    generatedAddress: string;
-    cdvc: Typed<CredentialDeploymentValues>; // TODO: Actual type is CredentialDeploymentValues + commitments
 }
 
 export async function createGenesisAccount(

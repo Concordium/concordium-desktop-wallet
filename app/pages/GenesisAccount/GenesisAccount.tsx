@@ -12,10 +12,11 @@ import {
     Account,
     AccountStatus,
     IdentityStatus,
-    CredentialDeploymentValues,
+    GenesisCredential,
 } from '~/utils/types';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import { saveFile } from '~/utils/FileHelper';
+import { getCurrentYearMonth } from '~/utils/timeHelpers';
 import routes from '~/constants/routes.json';
 import {
     identitiesSelector,
@@ -121,21 +122,21 @@ export default function GenesisAccount(): JSX.Element {
     const [accountName, setAccountName] = useState('');
     const [context, setContext] = useState<string | undefined>();
     const [identityId, setIdentityId] = useState<number>(defaultId);
-    const [credential, setCredential] = useState<
-        CredentialDeploymentValues | undefined
-    >();
+    const [genesis, setGenesis] = useState<GenesisCredential>();
+    const [credentialNumber, setCredentialNumber] = useState<number>();
 
-    const createdAt = '202104';
+    const createdAt = getCurrentYearMonth();
 
     useEffect(() => {
         if (identities.length === 0) {
+            const validTo = (parseInt(createdAt, 10) + 100).toString(); // Should be 1 year after createdAt (Match what will be generated for account)
             const identityObject = {
                 v: 0,
                 value: {
                     attributeList: {
                         chosenAttributes: {},
                         createdAt,
-                        validTo: '202204', // Should be 1 year after createdAt?
+                        validTo,
                     },
                 },
             };
@@ -162,55 +163,27 @@ export default function GenesisAccount(): JSX.Element {
         ledger: ConcordiumLedgerClient,
         displayMessage: (message: string) => void
     ) {
-        const credentialNumber = await getNextCredentialNumber(identityId);
+        const nextCredentialNumber = await getNextCredentialNumber(identityId);
+        setCredentialNumber(nextCredentialNumber);
         if (!context) {
             throw new Error('missing context');
         }
 
         const { ipInfo, arInfo, global } = JSON.parse(context);
 
-        const genesis = await createGenesisAccount(
-            ledger,
-            identityId,
-            credentialNumber,
-            ipInfo,
-            arInfo,
-            global,
-            createdAt,
-            displayMessage
-        );
-        const credentialContent = genesis.cdvc.contents;
-
-        const address = `genesis-${credentialContent.credId}`;
-
-        const success = await saveFile(
-            JSON.stringify(genesis),
-            'Save credential',
-            `${accountName}_${credentialContent.credId.substring(0, 8)}.json`
-        );
-
-        if (success) {
-            const account: Account = {
-                status: AccountStatus.Genesis,
-                address,
-                name: accountName,
+        setGenesis(
+            await createGenesisAccount(
+                ledger,
                 identityId,
-                maxTransactionId: 0,
-                isInitial: false,
-            };
-
-            importAccount(account);
-            insertNewCredential(
-                dispatch,
-                address,
-                credentialNumber,
-                identityId,
-                undefined,
-                credentialContent
-            );
-            setCredential(credentialContent);
-            setLocation(Locations.Confirm);
-        }
+                nextCredentialNumber,
+                ipInfo,
+                arInfo,
+                global,
+                createdAt,
+                displayMessage
+            )
+        );
+        setLocation(Locations.Confirm);
     }
 
     function Create() {
@@ -222,11 +195,53 @@ export default function GenesisAccount(): JSX.Element {
     }
 
     function Confirm() {
-        if (!credential) {
-            return null;
+        if (!genesis) {
+            throw new Error('Unexpected missing genesis data');
         }
+        const credentialContent = genesis.cdvc.contents;
 
-        const keys = Object.entries(credential.credentialPublicKeys.keys);
+        const keys = Object.entries(
+            credentialContent.credentialPublicKeys.keys
+        );
+
+        async function exportGenesis() {
+            if (credentialNumber === undefined) {
+                throw new Error('Unexpected missing credentialNumber');
+            }
+
+            const address = `genesis-${credentialContent.credId}`;
+
+            const success = await saveFile(
+                JSON.stringify(genesis),
+                'Save credential',
+                `${accountName}_${credentialContent.credId.substring(
+                    0,
+                    8
+                )}.json`
+            );
+
+            if (success) {
+                const account: Account = {
+                    status: AccountStatus.Genesis,
+                    address,
+                    name: accountName,
+                    identityId,
+                    maxTransactionId: 0,
+                    isInitial: false,
+                };
+
+                importAccount(account);
+                insertNewCredential(
+                    dispatch,
+                    address,
+                    credentialNumber,
+                    identityId,
+                    undefined,
+                    credentialContent
+                );
+            }
+            dispatch(push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY));
+        }
 
         return (
             <div className={styles.genesisContainer}>
@@ -234,7 +249,7 @@ export default function GenesisAccount(): JSX.Element {
                     <h3>Account Name:</h3>
                     <p>{accountName}</p>
                     <h3>Credential Id: </h3>
-                    <p>{credential.credId}</p>
+                    <p>{credentialContent.credId}</p>
                     <h3>Public keys: </h3>
                     {keys.map(([index, value]) => (
                         <>
@@ -246,21 +261,14 @@ export default function GenesisAccount(): JSX.Element {
                 <h3>Account Name:</h3>
                 <p>{accountName}</p>
                 <h3>Credential Id: </h3>
-                <p>{credential.credId}</p>
+                <p>{credentialContent.credId}</p>
                 <h3>Public keys: </h3>
                 {keys.map(([index, value]) => (
                     <p key={index}>
                         Index {index}: {value.verifyKey}
                     </p>
                 ))}
-                <p>Threshold: {credential.credentialPublicKeys.threshold}</p>
-                <Button
-                    onClick={() =>
-                        dispatch(push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY))
-                    }
-                >
-                    Done
-                </Button>
+                <Button onClick={exportGenesis}>Export</Button>
             </div>
         );
     }

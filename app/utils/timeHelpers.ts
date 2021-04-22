@@ -13,6 +13,16 @@ export function formatDate(date: YearMonth) {
     return dtFormat.format(new Date(`${date.slice(0, 4)}-${date.slice(4, 6)}`));
 }
 
+// Returns the YearMonth string (YYYYMM), of the current time.
+export function getCurrentYearMonth(): YearMonth {
+    const date = new Date();
+    let month = (date.getMonth() + 1).toString();
+    if (month.length === 1) {
+        month = `0${month}`;
+    }
+    return date.getFullYear() + month;
+}
+
 /**
  * Given a unix timeStamp, return the date and time in a displayable format.
  * Assumes the timestamp is in seconds, otherwise the unit should be specified.
