@@ -72,9 +72,11 @@ export function serializeHigherLevelKeyUpdate(
         1
     );
 
-    const serializedKeys = higherLevelKeyUpdate.updateKeys
-        .map((updateKey) => serializeVerifyKey(updateKey.verifyKey))
-        .reduce((acc, curr) => Buffer.concat([acc, curr]));
+    const serializedKeys = Buffer.concat(
+        higherLevelKeyUpdate.updateKeys.map((updateKey) =>
+            serializeVerifyKey(updateKey.verifyKey)
+        )
+    );
 
     const threshold = Buffer.alloc(2);
     threshold.writeUInt16BE(higherLevelKeyUpdate.threshold, 0);
