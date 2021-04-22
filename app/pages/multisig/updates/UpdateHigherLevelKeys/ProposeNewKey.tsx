@@ -125,7 +125,7 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
                 }}
             />
             <div>
-                <h2>Do you want to propose a new key?</h2>
+                <h3>Do you want to propose a new key?</h3>
                 <p>
                     You can add a new key by dropping it below. If you do not
                     want to make changes to the keys, then you can continue to

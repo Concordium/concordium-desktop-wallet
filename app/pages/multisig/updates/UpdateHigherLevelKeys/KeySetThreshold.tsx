@@ -42,10 +42,10 @@ export default function KeySetThreshold({
     return (
         <>
             <div>
-                <h2>
+                <h3>
                     Propose a new signature threshold for {typeToDisplay(type)}{' '}
                     keys
-                </h2>
+                </h3>
                 <p>
                     If you want to update the amount of required{' '}
                     {typeToDisplay(type)} key signatures to make transactions,
