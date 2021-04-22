@@ -156,8 +156,12 @@ pub fn create_genesis_account (
     )
         .expect("Could not compute commitments.");
 
+    let address = AccountAddress::new(&cdv.cred_id);
     let cdvc = AccountCredentialWithoutProofs::Normal { cdv, commitments };
 
-    let credential = json!(cdvc);
-    Ok(credential.to_string())
+    let output = json!({
+        "cdvc": cdvc,
+        "generatedAddress": address
+    });
+    Ok(output.to_string())
 }

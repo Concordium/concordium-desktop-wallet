@@ -48,12 +48,18 @@ export async function openFile(title: string): Promise<string> {
  * the data to that destination.
  * @param data the string to save to a file
  * @param title the title of the save file window
+ * @param defaultPath the default path that the save window starts on. Can be used just to set default file name.
  * @return the promise resolves true when the data has been written to file. if the result is false, then the user cancelled.
  */
-export async function saveFile(data: string, title: string): Promise<boolean> {
+export async function saveFile(
+    data: string,
+    title: string,
+    defaultPath?: string
+): Promise<boolean> {
     const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke(
         ipcCommands.saveFileDialog,
-        title
+        title,
+        defaultPath?.replace(/\s/g, '_')
     );
 
     if (saveFileDialog.canceled) {

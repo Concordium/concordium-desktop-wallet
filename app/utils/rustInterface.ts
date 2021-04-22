@@ -354,6 +354,11 @@ export async function makeTransferToPublicData(
     return JSON.parse(transferToPublicData);
 }
 
+interface GenesisCredential {
+    generatedAddress: string;
+    cdvc: Typed<CredentialDeploymentValues>; // TODO: Actual type is CredentialDeploymentValues + commitments
+}
+
 export async function createGenesisAccount(
     ledger: ConcordiumLedgerClient,
     identityId: number,
@@ -363,7 +368,7 @@ export async function createGenesisAccount(
     global: Versioned<Global>,
     createdAt: string,
     displayMessage: (message: string) => void
-): Promise<Typed<CredentialDeploymentValues>> {
+): Promise<GenesisCredential> {
     const path = getAccountPath({
         identityIndex: identityId,
         accountIndex: credentialNumber,

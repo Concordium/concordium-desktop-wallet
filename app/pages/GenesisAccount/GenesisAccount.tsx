@@ -169,7 +169,7 @@ export default function GenesisAccount(): JSX.Element {
 
         const { ipInfo, arInfo, global } = JSON.parse(context);
 
-        const typedCredential = await createGenesisAccount(
+        const genesis = await createGenesisAccount(
             ledger,
             identityId,
             credentialNumber,
@@ -179,13 +179,14 @@ export default function GenesisAccount(): JSX.Element {
             createdAt,
             displayMessage
         );
-        const credentialContent = typedCredential.contents;
+        const credentialContent = genesis.cdvc.contents;
 
         const address = `genesis-${credentialContent.credId}`;
 
         const success = await saveFile(
-            JSON.stringify(typedCredential),
-            'Save credential'
+            JSON.stringify(genesis),
+            'Save credential',
+            `${accountName}_${credentialContent.credId.substring(0, 8)}.json`
         );
 
         if (success) {
@@ -250,7 +251,7 @@ export default function GenesisAccount(): JSX.Element {
                     <h3>Public keys: </h3>
                     {keys.map(([index, value]) => (
                         <p key={index}>
-                            {index}: {value.verifyKey}
+                            Index {index}: {value.verifyKey}
                         </p>
                     ))}
                     <p>
