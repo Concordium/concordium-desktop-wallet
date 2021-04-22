@@ -92,7 +92,7 @@ export async function insertExternalCredential(
 ) {
     const parsed = {
         credId: credential.credId,
-        external: false,
+        external: true,
         policy: JSON.stringify(credential.policy),
         accountAddress,
         credentialIndex,
@@ -101,6 +101,10 @@ export async function insertExternalCredential(
     return dispatch(addCredential(parsed));
 }
 
+/**
+ * updates the credentialIndex of the credential with the given credId.
+ * @param credentialIndex, the new value to set. If this is undefined, this will remove the current index.
+ */
 export async function updateCredentialIndex(
     dispatch: Dispatch,
     credId: string,

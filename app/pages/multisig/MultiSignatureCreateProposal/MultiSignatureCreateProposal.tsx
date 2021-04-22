@@ -12,7 +12,7 @@ import {
     UpdateType,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
-import { findUpdateInstructionHandler } from '~/utils/updates/HandlerFinder';
+import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import Loading from '~/cross-app-components/Loading';
 import Modal from '~/cross-app-components/Modal';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';

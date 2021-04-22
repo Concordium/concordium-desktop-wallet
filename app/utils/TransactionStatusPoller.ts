@@ -8,6 +8,7 @@ import {
     Dispatch,
     instanceOfAccountTransaction,
     instanceOfUpdateAccountCredentials,
+    UpdateAccountCredentials,
     Transaction,
 } from './types';
 import {
@@ -15,38 +16,36 @@ import {
     rejectTransaction,
 } from '~/features/TransactionSlice';
 import { getPendingTransactions } from '~/database/TransactionDao';
-import {
-    getStatus,
-    StatusResponse,
-    isSuccessfulTransaction,
-} from './transactionHelpers';
-import getTransactionHash from './transactionHash';
+import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
+import { getTransactionSubmissionId } from './transactionHash';
 import { updateSignatureThreshold } from '~/features/AccountSlice';
-import { updateCredentialIndex } from '~/features/CredentialSlice';
+import {
+    updateCredentialIndex,
+    insertExternalCredential,
+} from '~/features/CredentialSlice';
 
-export function transactionPerformConsequence(
+/**
+ * Given an UpdateAccountCredentials transaction, update the local state
+ * according to the transaction's changes.
+ * For each added credential, add it to the local database.
+ * For each removed credential, remove its index to indicate that it has been removed.
+ * Update the signatureThreshold of the account.
+ */
+export function updateAccountCredentialsPerformConsequence(
     dispatch: Dispatch,
-    transaction: Transaction,
-    response: StatusResponse
+    transaction: UpdateAccountCredentials
 ) {
-    if (isSuccessfulTransaction(Object.values(response.outcomes))) {
-        if (instanceOfAccountTransaction(transaction)) {
-            if (instanceOfUpdateAccountCredentials(transaction)) {
-                transaction.payload.addedCredentials.forEach(
-                    ({ index, value }) =>
-                        updateCredentialIndex(dispatch, value.credId, index)
-                );
-                transaction.payload.removedCredIds.forEach((credId) =>
-                    updateCredentialIndex(dispatch, credId, undefined)
-                );
-                updateSignatureThreshold(
-                    dispatch,
-                    transaction.sender,
-                    transaction.payload.newThreshold
-                );
-            }
-        }
-    }
+    transaction.payload.addedCredentials.forEach(({ index, value }) =>
+        insertExternalCredential(dispatch, transaction.sender, index, value)
+    );
+    transaction.payload.removedCredIds.forEach((credId) =>
+        updateCredentialIndex(dispatch, credId, undefined)
+    );
+    updateSignatureThreshold(
+        dispatch,
+        transaction.sender,
+        transaction.payload.threshold
+    );
 }
 
 /**
@@ -59,9 +58,9 @@ export async function getMultiSignatureTransactionStatus(
     proposal: MultiSignatureTransaction,
     dispatch: Dispatch
 ) {
-    const transaction = parse(proposal.transaction);
+    const transaction: Transaction = parse(proposal.transaction);
 
-    const transactionHash = getTransactionHash(transaction);
+    const transactionHash = getTransactionSubmissionId(transaction);
 
     const response = await getStatus(transactionHash);
 
@@ -71,11 +70,24 @@ export async function getMultiSignatureTransactionStatus(
 
     switch (response.status) {
         case TransactionStatus.Rejected:
-            updatedProposal.status = MultiSignatureTransactionStatus.Failed;
+            updatedProposal.status = MultiSignatureTransactionStatus.Rejected;
             break;
         case TransactionStatus.Finalized:
-            transactionPerformConsequence(dispatch, transaction, response);
-            updatedProposal.status = MultiSignatureTransactionStatus.Finalized;
+            if (isSuccessfulTransaction(Object.values(response.outcomes))) {
+                if (
+                    instanceOfAccountTransaction(transaction) &&
+                    instanceOfUpdateAccountCredentials(transaction)
+                ) {
+                    updateAccountCredentialsPerformConsequence(
+                        dispatch,
+                        transaction
+                    );
+                }
+                updatedProposal.status =
+                    MultiSignatureTransactionStatus.Finalized;
+            } else {
+                updatedProposal.status = MultiSignatureTransactionStatus.Failed;
+            }
             break;
         default:
             throw new Error('Unexpected status was returned by the poller!');

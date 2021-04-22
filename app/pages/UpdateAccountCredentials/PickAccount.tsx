@@ -31,7 +31,7 @@ export default function PickAccount({
 
     const accounts = useSelector(accountsOfIdentitySelector(identity));
     const accountsInfo = useSelector(accountsInfoSelector);
-    const [chosenIndex, setChosenIndex] = useState(-1);
+    const [chosenIndex, setChosenIndex] = useState<number | undefined>();
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {

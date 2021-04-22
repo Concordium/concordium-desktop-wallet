@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, Modal } from 'semantic-ui-react';
+import Modal from '~/cross-app-components/Modal';
+import Button from '~/cross-app-components/Button';
 
 interface Props {
     title: string;
@@ -15,20 +16,9 @@ export default function MessageModal({
     onClose,
 }: Props) {
     return (
-        <Modal
-            closeIcon
-            centered
-            onClose={onClose}
-            open={open}
-            dimmer="blurring"
-            closeOnDimmerClick={false}
-        >
-            <Modal.Header>{title}</Modal.Header>
-            <Modal.Actions>
-                <Button primary onClick={onClose}>
-                    {buttonText}
-                </Button>
-            </Modal.Actions>
+        <Modal onClose={onClose} onOpen={() => {}} open={open}>
+            <h2>{title}</h2>
+            <Button onClick={onClose}>{buttonText}</Button>
         </Modal>
     );
 }

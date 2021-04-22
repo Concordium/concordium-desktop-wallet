@@ -1,7 +1,7 @@
 import routes from '../constants/routes.json';
-// eslint-disable-next-line import/no-cycle
-import { ExportKeyType } from '~/pages/multisig/MultiSignatureMenu/ExportKeyList';
 import { UpdateType, TransactionKindString } from './types';
+// eslint-disable-next-line import/no-cycle
+import { ExportKeyType } from '~/pages/multisig/menu/ExportKeyList';
 
 export const selectedAddressBookEntryRoute = (address: string) =>
     routes.ADDRESSBOOK_SELECTED.replace(':address', address);
@@ -23,8 +23,11 @@ export function selectedExportKeyRoute(keyType: string) {
     );
 }
 
-export const submittedProposalRoute = (id: number) =>
-    routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION.replace(':id', `${id}`);
+export const submittedProposalRoute = (proposalId: number) =>
+    routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION.replace(
+        ':id',
+        `${proposalId}`
+    );
 
 export function createProposalRoute(
     transactionType: UpdateType | TransactionKindString
