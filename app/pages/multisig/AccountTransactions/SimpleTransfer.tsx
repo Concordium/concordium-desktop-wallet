@@ -40,7 +40,7 @@ function subTitle(currentLocation: string) {
 }
 
 /**
- * This component controls the flow of creating a multisignature account transaction.
+ * This component controls the flow of creating a multisignature simple transfer.
  * It contains the logic for displaying the current parameters.
  */
 export default function SimpleTransfer(): JSX.Element {

@@ -13,10 +13,10 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {
     transactionType: TransactionKindId;
-    account: Account | undefined;
-    identity: Identity | undefined;
-    amount: string | undefined;
-    recipient: AddressBookEntry | undefined;
+    account?: Account;
+    identity?: Identity;
+    amount?: string;
+    recipient?: AddressBookEntry;
 }
 
 const placeholderText = 'To be determined';
@@ -28,7 +28,7 @@ export default function TransactionProposalDetails({
     recipient,
     transactionType,
 }: Props) {
-    const [estimatedFee, setFee] = useState<Fraction | undefined>();
+    const [estimatedFee, setFee] = useState<Fraction>();
 
     useEffect(() => {
         if (account) {
@@ -50,7 +50,6 @@ export default function TransactionProposalDetails({
             <b>Recipient:</b>
             <h2>{recipient ? recipient.name : placeholderText}</h2>
             {recipient ? `Note: ${recipient.note}` : null}
-            <br />
         </div>
     );
 }

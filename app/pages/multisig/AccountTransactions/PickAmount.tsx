@@ -15,10 +15,10 @@ interface Props {
 }
 
 /**
- * Displays the currently chosen account's information.
- * Allows the user to reveal attributes.
+ * Allow the user to input amount,
+ * and displays the given account's information.
  */
-export default function PickAccount({
+export default function PickAmount({
     account,
     setAmount,
     amount,
@@ -29,10 +29,8 @@ export default function PickAccount({
         throw new Error('Unexpected missing account');
     }
 
-    const [error, setError] = useState<string | undefined>();
-    const [accountInfo, setAccountInfo] = useState<AccountInfo | undefined>(
-        undefined
-    );
+    const [error, setError] = useState<string>();
+    const [accountInfo, setAccountInfo] = useState<AccountInfo>();
 
     useEffect(() => {
         getAccountInfoOfAddress(account.address)
