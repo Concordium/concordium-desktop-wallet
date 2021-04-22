@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -48,7 +49,13 @@ function subTitle(currentLocation: string) {
  */
 export default function SimpleTransfer(): JSX.Element {
     const dispatch = useDispatch();
-    const location = useLocation().pathname;
+    const { transactionKind: transactionKindString } = useParams<{
+        transactionKind: TransactionKindString;
+    }>();
+    const location = useLocation().pathname.replace(
+        transactionKindString,
+        ':transactionKind'
+    );
 
     const transactionKind = TransactionKindId.Simple_transfer;
     const handler = findAccountTransactionHandler(transactionKind);

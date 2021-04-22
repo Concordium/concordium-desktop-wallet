@@ -1,22 +1,19 @@
 import React from 'react';
-import { LocationDescriptorObject } from 'history';
+import { useParams } from 'react-router';
 import { TransactionKindString } from '~/utils/types';
 import SimpleTransfer from './SimpleTransfer';
 import UpdateCredentialPage from './UpdateCredentialsPage';
 
-interface Props {
-    location: LocationDescriptorObject<TransactionKindString>;
-}
+export default function CreateAccountTransactionView(): JSX.Element {
+    const { transactionKind } = useParams<{
+        transactionKind: TransactionKindString;
+    }>();
 
-export default function CreateAccountTransactionView({
-    location,
-}: Props): JSX.Element {
-    const type = location.state;
-    if (type === TransactionKindString.UpdateCredentials) {
+    if (transactionKind === TransactionKindString.UpdateCredentials) {
         return <UpdateCredentialPage />;
     }
-    if (type === TransactionKindString.Transfer) {
+    if (transactionKind === TransactionKindString.Transfer) {
         return <SimpleTransfer />;
     }
-    throw new Error(`unsupported transaction type: ${type}`);
+    throw new Error(`unsupported transaction type: ${transactionKind}`);
 }

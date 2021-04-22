@@ -38,8 +38,8 @@ export function createProposalRoute(
             `${transactionType}`
         );
     }
-    return {
-        pathname: routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION,
-        state: transactionType,
-    };
+    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
+        ':transactionKind',
+        `${transactionType}`
+    );
 }

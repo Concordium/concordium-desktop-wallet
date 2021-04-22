@@ -6,6 +6,7 @@ import {
     SimpleTransfer,
     AccountTransaction,
     TransactionPayload,
+    TransactionKindString,
     instanceOfSimpleTransfer,
 } from '../types';
 import routes from '~/constants/routes.json';
@@ -36,20 +37,26 @@ export default class UpdateAccountCredentialsHandler
     }
 
     creationLocationHandler(currentLocation: string, proposalId: number) {
-        switch (currentLocation) {
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-                return selectedProposalRoute(proposalId);
-            default:
-                throw new Error('unknown location');
-        }
+        const getNewLocation = () => {
+            switch (currentLocation) {
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
+                    return selectedProposalRoute(proposalId);
+                default:
+                    throw new Error('unknown location');
+            }
+        };
+        return getNewLocation().replace(
+            ':transactionKind',
+            TransactionKindString.Transfer
+        );
     }
 
     async signTransaction(

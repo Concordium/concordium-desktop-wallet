@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -181,7 +182,13 @@ function listCredentials(
  */
 export default function UpdateCredentialPage(): JSX.Element {
     const dispatch = useDispatch();
-    const location = useLocation().pathname;
+    const { transactionKind } = useParams<{
+        transactionKind: TransactionKindString;
+    }>();
+    const location = useLocation().pathname.replace(
+        transactionKind,
+        ':transactionKind'
+    );
     const credentials = useSelector(credentialsSelector);
 
     const [isReady, setReady] = useState(false);
