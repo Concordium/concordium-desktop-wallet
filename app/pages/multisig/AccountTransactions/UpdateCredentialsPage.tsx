@@ -377,7 +377,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 }
                                 render={() => (
                                     <PickIdentity
-                                        elementClassName={styles.listElement}
                                         setReady={setReady}
                                         setIdentity={setIdentity}
                                     />
