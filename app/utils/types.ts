@@ -457,6 +457,7 @@ type AccountBakerDetails = any; // TODO
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
+    accountThreshold: number;
     accountReleaseSchedule: AccountReleaseSchedule;
     accountBaker: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;

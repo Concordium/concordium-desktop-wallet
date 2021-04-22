@@ -135,6 +135,15 @@ function updateAccountEncryptedAmount(
     return Promise.resolve();
 }
 
+export async function updateSignatureThreshold(
+    dispatch: Dispatch,
+    address: string,
+    signatureThreshold: number
+) {
+    updateSignatureThresholdInDatabase(address, signatureThreshold);
+    return dispatch(updateAccountFields({ address, signatureThreshold }));
+}
+
 // Loads the given accounts' infos from the node, then updates the
 // AccountInfo state.
 export async function loadAccountInfos(
@@ -155,6 +164,16 @@ export async function loadAccountInfos(
         ({ account, accountInfo }) => {
             map[account.address] = accountInfo;
 
+            if (
+                accountInfo.accountThreshold &&
+                account.signatureThreshold !== accountInfo.accountThreshold
+            ) {
+                updateSignatureThreshold(
+                    dispatch,
+                    account.address,
+                    accountInfo.accountThreshold
+                );
+            }
             updateCredentialsStatus(dispatch, account.address, accountInfo);
             return updateAccountEncryptedAmount(
                 account,
@@ -294,15 +313,6 @@ export async function removeAccount(
 ) {
     await removeAccountFromDatabase(accountAddress);
     return loadAccounts(dispatch);
-}
-
-export async function updateSignatureThreshold(
-    dispatch: Dispatch,
-    address: string,
-    signatureThreshold: number
-) {
-    updateSignatureThresholdInDatabase(address, signatureThreshold);
-    return dispatch(updateAccountFields({ address, signatureThreshold }));
 }
 
 export default accountsSlice.reducer;
