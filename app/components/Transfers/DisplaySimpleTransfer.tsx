@@ -1,8 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { List, Header } from 'semantic-ui-react';
 import { SimpleTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
-import PrintButton from '~/components/PrintButton';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {
@@ -10,6 +9,7 @@ interface Props {
     fromName?: string;
     toName?: string;
 }
+
 /**
  * Displays an overview of a simple transfer.
  */
@@ -18,9 +18,8 @@ export default function DisplaySimpleTransfer({
     fromName,
     toName,
 }: Props) {
-    const componentRef = useRef();
-    const body = (
-        <List relaxed="very" ref={componentRef}>
+    return (
+        <List relaxed="very">
             <List.Item>
                 From Account:
                 <Header>{fromName}</Header>
@@ -37,11 +36,5 @@ export default function DisplaySimpleTransfer({
                 <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
             </List.Item>
         </List>
-    );
-    return (
-        <>
-            <PrintButton>{body}</PrintButton>
-            {body}
-        </>
     );
 }
