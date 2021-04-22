@@ -6,7 +6,6 @@ import {
     FormRelativeRateField,
 } from '../../common/RelativeRateField';
 import {
-    notEqual,
     isPositiveNumber,
     validBigIntValues,
     fromExchangeRate,
@@ -43,7 +42,6 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                     validate: {
                         isPositiveNumber,
                         validBigIntValues,
-                        notEqual: notEqual(currentValue),
                     },
                 }}
             />

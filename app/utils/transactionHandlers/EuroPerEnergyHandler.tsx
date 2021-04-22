@@ -5,6 +5,7 @@ import EuroPerEnergyView from '~/pages/multisig/updates/EuroPerEnergy/EuroPerEne
 import UpdateEuroPerEnergy, {
     UpdateEuroPerEnergyFields,
 } from '~/pages/multisig/updates/EuroPerEnergy/UpdateEuroPerEnergy';
+import { getReducedExchangeRate } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -49,11 +50,13 @@ export default class EuroPerEnergyHandler
             threshold,
         } = blockSummary.updates.keys.level2Keys.euroPerEnergy;
 
+        const reduced = getReducedExchangeRate({
+            denominator: BigInt(euroPerEnergyRate.denominator),
+            numerator: BigInt(euroPerEnergyRate.numerator),
+        });
+
         return createUpdateMultiSignatureTransaction(
-            {
-                denominator: BigInt(euroPerEnergyRate.denominator),
-                numerator: BigInt(euroPerEnergyRate.numerator),
-            },
+            reduced,
             UpdateType.UpdateEuroPerEnergy,
             sequenceNumber,
             threshold,

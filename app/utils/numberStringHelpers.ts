@@ -36,22 +36,36 @@ export function isPowOf10(resolution: bigint): boolean {
     return pow10Format.test(resolution.toString());
 }
 
+/**
+ * @description
+ * Generates a validation function for number strings.
+ *
+ * @param allowNegative whether or not to allow negative values in the validation.
+ * @param allowFractionDigits fraction digits to allow in validation (e.g. 1 invalidates 0.01, and validates 0.3). Defaults to true if not specified, an infinte amount of fraction digits is allowed.
+ * @returns function validating a value according to the params.
+ *
+ * @example
+ * isValidNumberString(true, 3)('0.01') => true
+ * isValidNumberString(true, 3)('-0.01') => true
+ * isValidNumberString(true, 3)('0.0001') => false
+ * isValidNumberString()('0.000000000001') => true
+ */
 const isValidNumberString = (
     allowNegative = false,
-    allowedFractions: number | true = true
+    allowFractionDigits: number | true = true
 ) => {
     let re: RegExp;
     const signedPart = allowNegative ? '(-)?' : '';
     const intPart = '(0|[1-9]\\d*)';
     const fractionPart =
-        allowedFractions === true
+        allowFractionDigits === true
             ? '(\\.\\d*)?'
-            : `(\\.\\d{1,${allowedFractions}})?`;
+            : `(\\.\\d{1,${allowFractionDigits}})?`;
     const exponentPart = '(e[+,-]?\\d*)?';
 
     re = new RegExp(`^${signedPart}${intPart}${exponentPart}$`);
 
-    if (allowedFractions !== 0) {
+    if (allowFractionDigits !== 0) {
         re = new RegExp(
             `^${signedPart}${intPart}${fractionPart}${exponentPart}$`
         );
@@ -63,6 +77,19 @@ const isValidNumberString = (
     };
 };
 
+/**
+ * @description
+ * Generates a function that validates values according to given resolution.
+ *
+ * @param resolution power of 10 resolution the value can be described as fractions of (e.g. 0.01 is valid with resolution 100, however 0.001 is not)
+ * @param allowNegative whether or not to allow negative values in the validation.
+ * @returns function validating a value according to the params.
+ *
+ * @example
+ * isValidResolutionString(100)('0.03') => true
+ * isValidResolutionString(100)('0.25') => true
+ * isValidResolutionString(100)('0.008') => false
+ */
 export const isValidResolutionString = (
     resolution: bigint,
     allowNegative = false
@@ -130,8 +157,11 @@ const getNumberParts = (value: string) => {
 };
 
 /**
- * expects the fractional part of the a fraction number string.
+ * expects the fractional part of a number string.
  * i.e. from an amount of 10.001, the fraction number string is 001.
+ *
+ * @example
+ * parseSubNumber(6)('001') => '001000'
  */
 export const parseSubNumber = (powOf10: number) => (
     fraction: string
@@ -188,7 +218,7 @@ function increment(value: string, allowOverflow = true): string {
     let valueInc = value;
     const lastIndex = negative ? 1 : 0;
 
-    // Round up - increment chars from right to left while char incremented hits lastIndex.
+    // Round up - increment chars from right to left while char incremented doesn't overflow.
     // eslint-disable-next-line no-plusplus
     for (let i = valueInc.length - 1; i >= lastIndex; i--) {
         const char = valueInc.charAt(i);

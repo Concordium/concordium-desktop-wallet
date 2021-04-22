@@ -5,6 +5,7 @@ import MicroGtuPerEuroView from '~/pages/multisig/updates/MicroGtuPerEuro/MicroG
 import UpdateMicroGtuPerEuro, {
     UpdateMicroGtuPerEuroRateFields,
 } from '~/pages/multisig/updates/MicroGtuPerEuro/UpdateMicroGtuPerEuro';
+import { getReducedExchangeRate } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -50,11 +51,13 @@ export default class MicroGtuPerEuroHandler
             threshold,
         } = blockSummary.updates.keys.level2Keys.microGTUPerEuro;
 
+        const reduced = getReducedExchangeRate({
+            denominator: BigInt(microGtuPerEuroRate.denominator),
+            numerator: BigInt(microGtuPerEuroRate.numerator),
+        });
+
         return createUpdateMultiSignatureTransaction(
-            {
-                denominator: BigInt(microGtuPerEuroRate.denominator),
-                numerator: BigInt(microGtuPerEuroRate.numerator),
-            },
+            reduced,
             UpdateType.UpdateMicroGTUPerEuro,
             sequenceNumber,
             threshold,

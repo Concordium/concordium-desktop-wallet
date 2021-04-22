@@ -8,7 +8,6 @@ import {
 } from '../../common/RelativeRateField';
 import { commonFieldProps, getCurrentValue } from './util';
 import {
-    notEqual,
     isPositiveNumber,
     validBigIntValues,
     fromExchangeRate,
@@ -46,7 +45,6 @@ export default function UpdateMicroGtuPerEuroRate({
                     validate: {
                         isPositiveNumber,
                         validBigIntValues,
-                        notEqual: notEqual(currentValue),
                     },
                 }}
             />
