@@ -450,15 +450,18 @@ export interface TypedCredentialDeploymentInformation {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AccountReleaseSchedule = any; // TODO
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AccountBakerDetails = any; // TODO
+
+interface AccountBakerDetails {
+    stakedAmount: string;
+    bakerId: string;
+}
 
 // Reflects the structure given by the node,
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
     accountReleaseSchedule: AccountReleaseSchedule;
-    accountBaker: AccountBakerDetails;
+    accountBaker?: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
     accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
 }

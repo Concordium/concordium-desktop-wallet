@@ -330,13 +330,15 @@ export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
 export const isExpired = (transaction: Transaction) =>
     getTimeout(transaction) <= getNow(TimeStampUnit.seconds);
 
-// TODO: Take staked amount into consideration
-function atDisposal(accountInfo: AccountInfo): bigint {
+function amountAtDisposal(accountInfo: AccountInfo): bigint {
     const unShielded = BigInt(accountInfo.accountAmount);
+    const stakedAmount = accountInfo.accountBaker
+        ? BigInt(accountInfo.accountBaker.stakedAmount)
+        : 0n;
     const scheduled = accountInfo.accountReleaseSchedule
         ? BigInt(accountInfo.accountReleaseSchedule.total)
         : 0n;
-    return unShielded - scheduled;
+    return unShielded - scheduled - stakedAmount;
 }
 
 export function validateAmount(
@@ -349,7 +351,7 @@ export function validateAmount(
     }
     if (
         accountInfo &&
-        atDisposal(accountInfo) <
+        amountAtDisposal(accountInfo) <
             toMicroUnits(amountToValidate) + (estimatedFee || 0n)
     ) {
         return 'Insufficient funds';
