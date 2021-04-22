@@ -104,8 +104,11 @@ export const toFraction = withValidResolution((resolution: bigint) => {
 });
 
 /**
- * expects the fractional part of the a fraction number string.
+ * expects the fractional part of a number string.
  * i.e. from an amount of 10.001, the fraction number string is 001.
+ *
+ * @example
+ * parseSubNumber(6)('001') => '001000'
  */
 export const parseSubNumber = (powOf10: number) => (
     fraction: string
