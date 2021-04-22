@@ -41,7 +41,7 @@ export interface InlineNumberProps
     extends ClassName,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            'step' | 'min' | 'max' | 'disabled'
+            'step' | 'min' | 'max' | 'disabled' | 'autoFocus'
         >,
         Pick<CommonFieldProps, 'isInvalid'> {
     /**

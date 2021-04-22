@@ -53,12 +53,7 @@ export default function PickAmount({
         <div className="flexColumn">
             <AccountListElement account={account} accountInfo={accountInfo} />
             <h5 className="mB0">Amount:</h5>
-            <div
-                className={clsx(
-                    styles.inputWrapper,
-                    error && styles.inputWrapperInvalid
-                )}
-            >
+            <div className={clsx(styles.inputWrapper)}>
                 {getGTUSymbol()}{' '}
                 <InlineNumber
                     value={amount}

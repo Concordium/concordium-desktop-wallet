@@ -129,7 +129,9 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                         <span className={styles.releasesInputWrapper}>
                             <Form.InlineNumber
                                 name={fieldNames.releases}
-                                defaultValue={defaults?.releases.toString()}
+                                defaultValue={
+                                    defaults?.releases.toString() ?? '1'
+                                }
                                 fallbackValue={1}
                                 rules={{
                                     required: 'Releases required',

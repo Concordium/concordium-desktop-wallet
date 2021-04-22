@@ -65,7 +65,7 @@ export default function CreateTransferProposal({
     const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
     const [identity, setIdentity] = useState<Identity | undefined>();
-    const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string>('0.00'); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
     const [schedule, setSchedule] = useState<Schedule>();
 
