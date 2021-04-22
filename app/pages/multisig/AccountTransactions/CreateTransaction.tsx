@@ -2,13 +2,19 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { toMicroUnits } from '~/utils/gtu';
 import { createSimpleTransferTransaction } from '~/utils/transactionHelpers';
-import { Account, AddressBookEntry, AccountTransaction } from '~/utils/types';
+import {
+    Account,
+    AddressBookEntry,
+    AccountTransaction,
+    Fraction,
+} from '~/utils/types';
 import { credentialsSelector } from '~/features/CredentialSlice';
 import SignTransaction from './SignTransaction';
 
 interface Props {
     account: Account;
     recipient: AddressBookEntry;
+    estimatedFee?: Fraction;
     amount: string;
     setReady: (ready: boolean) => void;
     setProposalId: (id: number) => void;
@@ -19,6 +25,7 @@ export default function CreateTransaction({
     recipient,
     amount,
     setProposalId,
+    estimatedFee,
     setReady,
 }: Props) {
     const [transaction, setTransaction] = useState<
@@ -30,11 +37,12 @@ export default function CreateTransaction({
         createSimpleTransferTransaction(
             account.address,
             toMicroUnits(amount),
-            recipient.address
+            recipient.address,
+            account.signatureThreshold
         )
-            .then(setTransaction)
-            .catch(() => {});
-    }, [setTransaction, account, amount, recipient]);
+            .then((t) => setTransaction({ ...t, estimatedFee }))
+            .catch(() => {}); // The failure happens if we are unable to get the nonce. // TODO This should be refactored to not happen here.
+    }, [setTransaction, account, amount, recipient, estimatedFee]);
 
     const credential = useMemo(
         () =>

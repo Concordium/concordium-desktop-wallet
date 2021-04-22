@@ -1,22 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import {
-    Account,
-    Identity,
-    AddressBookEntry,
-    TransactionKindId,
-    Fraction,
-} from '~/utils/types';
+import React from 'react';
+import { Account, Identity, AddressBookEntry, Fraction } from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
 import styles from './MultisignatureAccountTransactions.module.scss';
-import { getTransactionKindCost } from '~/utils/transactionCosts';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {
-    transactionType: TransactionKindId;
     account?: Account;
     identity?: Identity;
     amount?: string;
     recipient?: AddressBookEntry;
+    estimatedFee?: Fraction;
 }
 
 const placeholderText = 'To be determined';
@@ -26,18 +19,8 @@ export default function TransactionProposalDetails({
     account,
     amount,
     recipient,
-    transactionType,
+    estimatedFee,
 }: Props) {
-    const [estimatedFee, setFee] = useState<Fraction>();
-
-    useEffect(() => {
-        if (account) {
-            getTransactionKindCost(transactionType, account.signatureThreshold)
-                .then((fee) => setFee(fee))
-                .catch(() => {});
-        }
-    }, [account, transactionType, setFee]);
-
     return (
         <div className={styles.details}>
             <b>Identity:</b>

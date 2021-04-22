@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Account, AccountInfo } from '~/utils/types';
+import { Account, AccountInfo, Fraction } from '~/utils/types';
 import AccountListElement from '~/components/AccountListElement';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
 import Input from '~/components/Form/Input';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import { validateAmount } from '~/utils/transactionHelpers';
+import { collapseFraction } from '~/utils/basicHelpers';
 
 interface Props {
     setReady: (ready: boolean) => void;
     account: Account | undefined;
-    estimatedFee?: bigint;
+    estimatedFee?: Fraction;
     amount: string;
     setAmount: (amount: string) => void;
 }
@@ -42,7 +43,7 @@ export default function PickAmount({
         const validation = validateAmount(
             amountString,
             accountInfo,
-            estimatedFee
+            estimatedFee && collapseFraction(estimatedFee)
         );
         setError(validation);
         setReady(!validation);

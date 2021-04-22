@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -8,6 +8,7 @@ import {
     TransactionKindString,
     TransactionKindId,
     AddressBookEntry,
+    Fraction,
 } from '~/utils/types';
 import PickAmount from './PickAmount';
 import PickRecipient from '~/components/Transfers/PickRecipient';
@@ -21,6 +22,8 @@ import { isValidGTUString } from '~/utils/gtu';
 import CreateTransaction from './CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
+import { getTransactionKindCost } from '~/utils/transactionCosts';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -51,11 +54,24 @@ export default function SimpleTransfer(): JSX.Element {
     const handler = findAccountTransactionHandler(transactionKind);
 
     const [isReady, setReady] = useState(false);
-    const [account, setAccount] = useState<Account | undefined>();
-    const [identity, setIdentity] = useState<Identity | undefined>();
+    const [account, setAccount] = useState<Account>();
+    const [identity, setIdentity] = useState<Identity>();
     const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
-    const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
+    const [recipient, setRecipient] = useState<AddressBookEntry>();
     const [proposalId, setProposalId] = useState<number>(-1);
+    const [estimatedFee, setFee] = useState<Fraction>();
+    const [error, setError] = useState<string>();
+
+    useEffect(() => {
+        if (account) {
+            getTransactionKindCost(
+                TransactionKindId.Simple_transfer,
+                account.signatureThreshold
+            )
+                .then((fee) => setFee(fee))
+                .catch(() => setError('Unable to reach Node.'));
+        }
+    }, [account, setFee]);
 
     function updateAmount(newAmount: string) {
         if (isValidGTUString(newAmount)) {
@@ -74,6 +90,7 @@ export default function SimpleTransfer(): JSX.Element {
                 recipient={recipient}
                 amount={amount}
                 account={account}
+                estimatedFee={estimatedFee}
                 setProposalId={setProposalId}
             />
         );
@@ -84,14 +101,20 @@ export default function SimpleTransfer(): JSX.Element {
             pageTitle={handler.title}
             stepTitle="Transaction Proposal - Send GTU"
         >
+            <SimpleErrorModal
+                show={Boolean(error)}
+                header="Unable to perform transfer"
+                content={error}
+                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+            />
             <Columns divider columnScroll>
                 <Columns.Column header="Transaction Details">
                     <TransactionProposalDetails
-                        transactionType={transactionKind}
                         account={account}
                         identity={identity}
                         amount={amount}
                         recipient={recipient}
+                        estimatedFee={estimatedFee}
                     />
                     <Button
                         disabled={!isReady}
@@ -141,6 +164,7 @@ export default function SimpleTransfer(): JSX.Element {
                                     account={account}
                                     amount={amount}
                                     setAmount={updateAmount}
+                                    estimatedFee={estimatedFee}
                                 />
                             )}
                         />
