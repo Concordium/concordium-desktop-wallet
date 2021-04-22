@@ -22,13 +22,6 @@ export const validBigIntValues: Validate = (value: RelativeRateValue) =>
         .map(isValidBigInt)
         .every((v) => v === true) || 'Values must be whole numbers';
 
-export const notEqual = (currentValue: RelativeRateValue): Validate => (
-    value: RelativeRateValue
-) =>
-    value.denominator !== currentValue.denominator ||
-    value.numerator !== currentValue.numerator ||
-    "Value hasn't changed";
-
 export const fromExchangeRate = (rate: ExchangeRate): RelativeRateValue => ({
     denominator: rate.denominator.toString(),
     numerator: rate.numerator.toString(),
