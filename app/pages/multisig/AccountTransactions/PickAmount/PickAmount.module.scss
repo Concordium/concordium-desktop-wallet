@@ -1,0 +1,10 @@
+@import 'config/bundle';
+
+.inputWrapper {
+    font-size: $font-size-h2;
+    color: $color-pale-blue;
+
+    &Invalid {
+        color: $color-error;
+    }
+}

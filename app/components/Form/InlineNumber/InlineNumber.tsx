@@ -94,7 +94,7 @@ export default function InlineNumber({
     );
 
     const [innerValue, setInnerValue] = useState<string>(
-        format(value ?? fallbackValue.toString())
+        format(value || fallbackValue.toString())
     );
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
