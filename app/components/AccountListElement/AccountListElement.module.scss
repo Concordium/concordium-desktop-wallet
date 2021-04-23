@@ -27,31 +27,6 @@
     }
 }
 
-.row {
-    display: flex;
-    margin-top: 10px;
-
-    .left,
-    .right {
-        width: 50%;
-    }
-
-    &:not(:last-of-type) {
-        margin-bottom: 10px;
-    }
-    &:first-of-type {
-        margin: 0;
-    }
-}
-
-.left {
-    text-align: left;
-}
-
-.right {
-    text-align: right;
-}
-
 .inline {
     display: inline;
     padding-right: 10px;
@@ -64,4 +39,16 @@
     height: 1px;
     display: block;
     margin-left: -10px;
+}
+
+.firstRow {
+    margin: 0;
+}
+
+.row {
+    margin: 10px 0;
+
+    :last-of-type {
+        margin-bottom: 0;
+    }
 }
