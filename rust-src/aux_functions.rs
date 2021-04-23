@@ -406,3 +406,8 @@ pub fn create_sec_to_pub_aux(
 
     Ok(response.to_string())
 }
+
+pub fn get_address_from_cred_id(cred_id: &str) -> Fallible<String> {
+    let hasher = Sha256::new().chain(cred_id);
+    Ok(format!("{:X}", hasher.finalize()))
+}

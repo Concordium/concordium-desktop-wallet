@@ -1,6 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
+// eslint-disable-next-line import/no-cycle
+import { initializeGenesisCredential } from './CredentialSlice';
 import {
     getAllAccounts,
     insertAccount,
@@ -8,7 +10,11 @@ import {
     removeAccount as removeAccountFromDatabase,
     updateSignatureThreshold as updateSignatureThresholdInDatabase,
 } from '../database/AccountDao';
-import { decryptAmounts } from '../utils/rustInterface';
+import { getCredentialsOfAccount } from '~/database/CredentialDao';
+import {
+    decryptAmounts,
+    getAddressFromCredentialId,
+} from '../utils/rustInterface';
 import {
     AccountStatus,
     TransactionStatus,
@@ -21,6 +27,7 @@ import {
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
+
 import { getAccountInfos } from '../utils/nodeHelpers';
 
 interface AccountState {
@@ -133,6 +140,30 @@ function updateAccountEncryptedAmount(
     return Promise.resolve();
 }
 
+async function initializeGenesisAccount(
+    dispatch: Dispatch,
+    account: Account,
+    accountInfo: AccountInfo
+) {
+    const localCredentials = await getCredentialsOfAccount(account.address);
+    const address = await getAddressFromCredentialId(
+        accountInfo.accountCredentials[0].value.contents.credId
+    );
+    await updateAccount(account.name, {
+        address,
+        status: AccountStatus.Confirmed,
+        signatureThreshold: accountInfo.accountThreshold,
+    });
+    localCredentials.forEach((cred) =>
+        initializeGenesisCredential(
+            dispatch,
+            account.address,
+            cred,
+            accountInfo
+        )
+    );
+}
+
 // Loads the given accounts' infos from the node, then updates the
 // AccountInfo state.
 export async function loadAccountInfos(
@@ -140,18 +171,25 @@ export async function loadAccountInfos(
     dispatch: Dispatch
 ) {
     const map: Record<string, AccountInfo> = {};
+    console.log(accounts);
     const confirmedAccounts = accounts.filter(
         (account) =>
-            isValidAddress(account.address) &&
-            account.status === AccountStatus.Confirmed
+            (isValidAddress(account.address) &&
+                account.status === AccountStatus.Confirmed) ||
+            AccountStatus.Genesis === account.status
     );
     if (confirmedAccounts.length === 0) {
         return Promise.resolve();
     }
+    console.log(confirmedAccounts);
     const accountInfos = await getAccountInfos(confirmedAccounts);
+    console.log(accountInfos);
     const updateEncryptedAmountsPromises = accountInfos.map(
         ({ account, accountInfo }) => {
             map[account.address] = accountInfo;
+            if (account.status === AccountStatus.Genesis) {
+                return initializeGenesisAccount(dispatch, account, accountInfo);
+            }
             return updateAccountEncryptedAmount(
                 account,
                 accountInfo.accountEncryptedAmount

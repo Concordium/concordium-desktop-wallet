@@ -5,8 +5,13 @@ import {
     insertCredential,
     getCredentials,
     updateCredentialIndex as updateCredentialIndexInDatabase,
+    updateCredential as updateCredentialInDatabase,
 } from '~/database/CredentialDao';
-import { Credential, CredentialDeploymentInformation } from '~/utils/types';
+import {
+    Credential,
+    CredentialDeploymentInformation,
+    AccountInfo,
+} from '~/utils/types';
 
 interface CredentialState {
     credentials: Credential[];
@@ -108,4 +113,29 @@ export async function updateCredentialIndex(
     return dispatch(updateCredential({ credId, credentialIndex }));
 }
 
+export async function initializeGenesisCredential(
+    dispatch: Dispatch,
+    accountAddress: string,
+    credential: Credential,
+    accountInfo: AccountInfo
+) {
+    const credentialIndex = Object.keys(accountInfo.accountCredentials).find(
+        (key) =>
+            accountInfo.accountCredentials[parseInt(key, 10)].value.contents
+                .credId === credential.credId
+    );
+    await updateCredentialInDatabase(credential.credId, {
+        accountAddress,
+        credentialIndex: credentialIndex
+            ? parseInt(credentialIndex, 10)
+            : undefined,
+    });
+    return dispatch(
+        updateCredential({
+            credId: credential.credId,
+            credentialIndex,
+            accountAddress,
+        })
+    );
+}
 export default credentialSlice.reducer;

@@ -1,4 +1,5 @@
 import PromiseWorker from 'promise-worker';
+import bs58check from 'bs58check';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error : has no default export.
 import RustWorker from './rust.worker';
@@ -403,4 +404,18 @@ export async function createGenesisAccount(
     });
 
     return JSON.parse(credential);
+}
+
+export async function getAddressFromCredentialId(
+    credId: string
+): Promise<string> {
+    const rawAddress = await worker.postMessage({
+        command: workerCommands.getAddressFromCredId,
+        credId,
+    });
+    console.log(rawAddress);
+    const buffer = Buffer.from(rawAddress, 'hex');
+    console.log(bs58check.encode(buffer));
+    console.log(bs58check.encode(buffer.slice(0, 32)));
+    return bs58check.encode(buffer);
 }
