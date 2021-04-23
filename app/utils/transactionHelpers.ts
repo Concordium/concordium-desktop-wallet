@@ -92,6 +92,7 @@ async function createAccountTransaction<T extends TransactionPayload>({
     transactionKind,
     payload,
     estimatedEnergyAmount,
+    signatureAmount,
 }: CreateAccountTransactionInput<T>): Promise<AccountTransaction<T>> {
     const { nonce } = await getNextAccountNonce(fromAddress);
     const transaction: AccountTransaction<T> = {
@@ -104,7 +105,8 @@ async function createAccountTransaction<T extends TransactionPayload>({
     };
     if (!estimatedEnergyAmount) {
         transaction.energyAmount = getTransactionEnergyCost(
-            transaction
+            transaction,
+            signatureAmount
         ).toString();
     } else {
         transaction.energyAmount = estimatedEnergyAmount.toString();
