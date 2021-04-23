@@ -170,7 +170,7 @@ export default function GenesisAccount(): JSX.Element {
                 throw new Error('Unexpected missing credentialNumber');
             }
 
-            const address = `genesis-${credentialContent.credId}`;
+            const address = credentialContent.credId;
 
             const success = await saveFile(
                 JSON.stringify(genesis),
