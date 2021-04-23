@@ -10,9 +10,9 @@ import {
     HigherLevelKeyUpdate,
     KeyUpdateEntryStatus,
     KeyWithStatus,
+    PublicKeyExportFormat,
     UpdateType,
 } from '~/utils/types';
-import { PublicKeyExportFormat } from '../../ExportKeyView/ExportKeyView';
 import KeySetThreshold from './KeySetThreshold';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
@@ -72,7 +72,7 @@ export default function UpdateHigherLevelKeys({
     const [newKeys, setNewKeys] = useState<KeyWithStatus[]>(
         currentKeys.map((key) => {
             return {
-                verifyKey: key,
+                key,
                 status: KeyUpdateEntryStatus.Unchanged,
             };
         })
@@ -104,9 +104,7 @@ export default function UpdateHigherLevelKeys({
         let removeAddedKey = false;
         const updatedKeys = newKeys
             .map((key) => {
-                if (
-                    keyToUpdate.verifyKey.verifyKey === key.verifyKey.verifyKey
-                ) {
+                if (keyToUpdate.key.verifyKey === key.key.verifyKey) {
                     // For the special case where the key was not in the current key set, i.e. it was added,
                     // then we remove it entirely if set to removed instead of just updating the status.
                     if (
@@ -124,8 +122,7 @@ export default function UpdateHigherLevelKeys({
                 (key) =>
                     !(
                         removeAddedKey &&
-                        keyToUpdate.verifyKey.verifyKey ===
-                            key.verifyKey.verifyKey
+                        keyToUpdate.key.verifyKey === key.key.verifyKey
                     )
             );
         setNewKeys(updatedKeys);
@@ -169,7 +166,7 @@ export default function UpdateHigherLevelKeys({
                         {newKeys.map((keyWithStatus) => {
                             return (
                                 <KeyUpdateEntry
-                                    key={keyWithStatus.verifyKey.verifyKey}
+                                    key={keyWithStatus.key.verifyKey}
                                     updateKey={updateKey}
                                     keyInput={keyWithStatus}
                                 />

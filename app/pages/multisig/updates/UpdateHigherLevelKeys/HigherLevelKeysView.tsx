@@ -68,12 +68,9 @@ function HigherLevelKeysView({
             <ul>
                 {higherLevelKeyUpdate.updateKeys.map((key) => {
                     return (
-                        <li
-                            className={styles.listItem}
-                            key={key.verifyKey.verifyKey}
-                        >
+                        <li className={styles.listItem} key={key.key.verifyKey}>
                             <p className={styles.keyText}>
-                                {key.verifyKey.verifyKey}
+                                {key.key.verifyKey}
                             </p>
                             {generateStatusLabel(key.status)}
                         </li>

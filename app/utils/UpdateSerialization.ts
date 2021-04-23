@@ -74,7 +74,7 @@ export function serializeHigherLevelKeyUpdate(
 
     const serializedKeys = Buffer.concat(
         higherLevelKeyUpdate.updateKeys.map((updateKey) =>
-            serializeVerifyKey(updateKey.verifyKey)
+            serializeVerifyKey(updateKey.key)
         )
     );
 

@@ -2,8 +2,12 @@ import { push } from 'connected-react-router';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Button from '~/cross-app-components/Button';
-import { PublicKeyExportFormat } from '../../ExportKeyView/ExportKeyView';
-import { KeyWithStatus, UpdateType } from '~/utils/types';
+import {
+    ExportKeyType,
+    KeyWithStatus,
+    PublicKeyExportFormat,
+    UpdateType,
+} from '~/utils/types';
 import { createProposalRoute } from '~/utils/routerHelper';
 import Card from '~/cross-app-components/Card';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
@@ -16,7 +20,6 @@ import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
-import { ExportKeyType } from '../../menu/ExportKeyList';
 
 interface Props {
     newKeys: KeyWithStatus[];
@@ -90,8 +93,8 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
                 return;
             }
             const duplicateKey = newKeys
-                .map((key) => key.verifyKey.verifyKey)
-                .includes(exportedPublicKey.verifyKey.verifyKey);
+                .map((key) => key.key.verifyKey)
+                .includes(exportedPublicKey.key.verifyKey);
             if (duplicateKey) {
                 setShowError({
                     show: true,
@@ -146,10 +149,8 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
                             onClick={() => setLoadedKey(undefined)}
                         />
                         <h2>New {typeToDisplay(type)} key</h2>
-                        <p>{loadedKey.verifyKey.verifyKey}</p>
-                        <CopiableIdenticon
-                            data={loadedKey.verifyKey.verifyKey}
-                        />
+                        <p>{loadedKey.key.verifyKey}</p>
+                        <CopiableIdenticon data={loadedKey.key.verifyKey} />
                         <Form onSubmit={addNewKey}>
                             <Form.Checkbox
                                 className={styles.checkbox}

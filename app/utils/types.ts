@@ -918,7 +918,7 @@ export enum KeyUpdateEntryStatus {
 }
 
 export interface KeyWithStatus {
-    verifyKey: VerifyKey;
+    key: VerifyKey;
     status: KeyUpdateEntryStatus;
 }
 

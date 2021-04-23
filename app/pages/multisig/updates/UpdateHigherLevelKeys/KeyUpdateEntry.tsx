@@ -66,7 +66,7 @@ export default function KeyUpdateEntry({
                 <Button onClick={() => updateKey(updateKeyStatus(keyInput))}>
                     {generateButtonText(keyInput.status)}
                 </Button>
-                <p className={styles.keyText}>{keyInput.verifyKey.verifyKey}</p>
+                <p className={styles.keyText}>{keyInput.key.verifyKey}</p>
                 {generateStatusLabel(keyInput.status)}
             </li>
         </>
