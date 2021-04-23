@@ -223,7 +223,7 @@ ipcMain.handle(ipcCommands.print, (_event, body) => {
                         if (errorType === PrintErrorTypes.Cancelled) {
                             resolve();
                         }
-                        reject(errorType);
+                        resolve(errorType);
                     } else {
                         resolve();
                     }
