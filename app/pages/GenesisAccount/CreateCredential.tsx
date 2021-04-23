@@ -5,9 +5,7 @@ import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { createGenesisAccount } from '~/utils/rustInterface';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
 import styles from './GenesisAccount.module.scss';
-import {
-    GenesisCredential,
-} from '~/utils/types';
+import { GenesisCredential } from '~/utils/types';
 
 interface Props {
     identityId: number;
@@ -17,8 +15,13 @@ interface Props {
     context?: string;
 }
 
-export default function CreateCredential({identityId, setCredentialNumber, setGenesis, onFinish, context}: Props) {
-
+export default function CreateCredential({
+    identityId,
+    setCredentialNumber,
+    setGenesis,
+    onFinish,
+    context,
+}: Props) {
     async function createAccount(
         ledger: ConcordiumLedgerClient,
         displayMessage: (message: string) => void
@@ -47,9 +50,9 @@ export default function CreateCredential({identityId, setCredentialNumber, setGe
         onFinish();
     }
 
-        return (
-            <div className={styles.genesisContainer}>
-                <SimpleLedger ledgerCall={createAccount} />
-            </div>
-        );
+    return (
+        <div className={styles.genesisContainer}>
+            <SimpleLedger ledgerCall={createAccount} />
+        </div>
+    );
 }
