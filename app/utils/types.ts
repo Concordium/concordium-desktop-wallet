@@ -1019,3 +1019,23 @@ export interface GenesisCredential {
     generatedAddress: string;
     cdvc: Typed<CredentialDeploymentValues>; // TODO: Actual type is CredentialDeploymentValues + commitments
 }
+
+export enum ExportKeyType {
+    Root = 'root',
+    Level1 = 'level1',
+    Level2 = 'level2',
+    Credential = 'credential',
+    Genesis = 'genesis',
+}
+
+/**
+ * Model for the export of governance keys. It contains the
+ * actual key, a signature on that key, the type of key and
+ * an optional note that a user can append to the export.
+ */
+export interface PublicKeyExportFormat {
+    key: VerifyKey;
+    signature: string;
+    type: ExportKeyType;
+    note?: string;
+}

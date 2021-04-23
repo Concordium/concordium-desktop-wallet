@@ -122,10 +122,10 @@ const createWindow = async () => {
 
     printWindow = new BrowserWindow({
         parent: mainWindow,
-        modal: true,
+        modal: false,
         show: false,
         webPreferences: {
-            nodeIntegration: true,
+            nodeIntegration: false,
             devTools: false,
         },
     });
@@ -200,9 +200,15 @@ ipcMain.handle(
     }
 );
 
+enum PrintErrorTypes {
+    Cancelled = 'cancelled',
+    Failed = 'failed',
+    NoPrinters = 'no valid printers available',
+}
+
 // Prints the given body.
 ipcMain.handle(ipcCommands.print, (_event, body) => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<string | void>((resolve, reject) => {
         if (!printWindow) {
             reject(new Error('Internal error: Unable to print'));
         } else {
@@ -217,9 +223,13 @@ ipcMain.handle(ipcCommands.print, (_event, body) => {
                 );
                 content.print({}, (success, errorType) => {
                     if (!success) {
-                        reject(new Error(`Print failed due to ${errorType}`));
+                        if (errorType === PrintErrorTypes.Cancelled) {
+                            resolve();
+                        }
+                        resolve(errorType);
+                    } else {
+                        resolve();
                     }
-                    resolve();
                 });
             });
         }

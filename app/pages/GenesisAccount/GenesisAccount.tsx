@@ -3,9 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import PageLayout from '~/components/PageLayout';
 import Form from '~/components/Form';
-import SimpleLedger from '~/components/ledger/SimpleLedger';
-import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { createGenesisAccount } from '~/utils/rustInterface';
 import { importAccount } from '~/features/AccountSlice';
 import { insertNewCredential } from '~/features/CredentialSlice';
 import {
@@ -23,10 +20,11 @@ import {
     importIdentities,
     loadIdentities,
 } from '~/features/IdentitySlice';
-import { getNextCredentialNumber } from '~/database/CredentialDao';
 import styles from './GenesisAccount.module.scss';
 import Button from '~/cross-app-components/Button';
 import PrintButton from '~/components/PrintButton';
+import CopiableIdenticon from '~/components/CopiableIdenticon/CopiableIdenticon';
+import CreateCredential from './CreateCredential';
 
 interface FileInputForm {
     file: FileInputValue;
@@ -125,10 +123,10 @@ export default function GenesisAccount(): JSX.Element {
     const [genesis, setGenesis] = useState<GenesisCredential>();
     const [credentialNumber, setCredentialNumber] = useState<number>();
 
-    const createdAt = getCurrentYearMonth();
 
     useEffect(() => {
         if (identities.length === 0) {
+            const createdAt = getCurrentYearMonth();
             const validTo = (parseInt(createdAt, 10) + 100).toString(); // Should be 1 year after createdAt (Match what will be generated for account)
             const identityObject = {
                 v: 0,
@@ -159,50 +157,14 @@ export default function GenesisAccount(): JSX.Element {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    async function createAccount(
-        ledger: ConcordiumLedgerClient,
-        displayMessage: (message: string) => void
-    ) {
-        const nextCredentialNumber = await getNextCredentialNumber(identityId);
-        setCredentialNumber(nextCredentialNumber);
-        if (!context) {
-            throw new Error('missing context');
-        }
-
-        const { ipInfo, arInfo, global } = JSON.parse(context);
-
-        setGenesis(
-            await createGenesisAccount(
-                ledger,
-                identityId,
-                nextCredentialNumber,
-                ipInfo,
-                arInfo,
-                global,
-                createdAt,
-                displayMessage
-            )
-        );
-        setLocation(Locations.Confirm);
-    }
-
-    function Create() {
-        return (
-            <div className={styles.genesisContainer}>
-                <SimpleLedger ledgerCall={createAccount} />
-            </div>
-        );
-    }
-
     function Confirm() {
+        const [image, setImage] = useState<string>();
         if (!genesis) {
             throw new Error('Unexpected missing genesis data');
         }
         const credentialContent = genesis.cdvc.contents;
 
-        const keys = Object.entries(
-            credentialContent.credentialPublicKeys.keys
-        );
+        const publicKey = credentialContent.credentialPublicKeys.keys[0];
 
         async function exportGenesis() {
             if (credentialNumber === undefined) {
@@ -250,24 +212,20 @@ export default function GenesisAccount(): JSX.Element {
                     <p>{accountName}</p>
                     <h3>Credential Id: </h3>
                     <p>{credentialContent.credId}</p>
-                    <h3>Public keys: </h3>
-                    {keys.map(([index, value]) => (
-                        <>
-                            <p key={index}>Index {index}:</p>
-                            <p>{value.verifyKey}</p>
-                        </>
-                    ))}
+                    <h3>Public key: </h3>
+                    <p>{publicKey.verifyKey}</p>
+                    <img src={image} alt="" />
                 </PrintButton>
                 <h3>Account Name:</h3>
                 <p>{accountName}</p>
                 <h3>Credential Id: </h3>
                 <p>{credentialContent.credId}</p>
-                <h3>Public keys: </h3>
-                {keys.map(([index, value]) => (
-                    <p key={index}>
-                        Index {index}: {value.verifyKey}
-                    </p>
-                ))}
+                <h3>Public key: </h3>
+                <p>{publicKey.verifyKey}</p>
+                <CopiableIdenticon
+                    data={publicKey.verifyKey}
+                    setScreenshot={setImage}
+                />
                 <Button onClick={exportGenesis}>Export</Button>
             </div>
         );
@@ -290,7 +248,7 @@ export default function GenesisAccount(): JSX.Element {
                     setLocation(Locations.Create);
                 });
             case Locations.Create:
-                return <Create />;
+                return <CreateCredential identityId={identityId} setCredentialNumber={setCredentialNumber} setGenesis={setGenesis} onFinish={() => setLocation(Locations.Confirm)} context={context} />;
             case Locations.Confirm:
                 return <Confirm />;
             default:
