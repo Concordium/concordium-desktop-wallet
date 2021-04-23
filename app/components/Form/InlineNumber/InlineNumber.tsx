@@ -41,7 +41,7 @@ export interface InlineNumberProps
     extends ClassName,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            'step' | 'min' | 'max' | 'disabled'
+            'step' | 'min' | 'max' | 'disabled' | 'autoFocus'
         >,
         Pick<CommonFieldProps, 'isInvalid'> {
     /**
@@ -94,7 +94,7 @@ export default function InlineNumber({
     );
 
     const [innerValue, setInnerValue] = useState<string>(
-        format(value ?? fallbackValue.toString())
+        format(value || fallbackValue.toString())
     );
     const [isFocused, setIsFocused] = useState<boolean>(false);
 

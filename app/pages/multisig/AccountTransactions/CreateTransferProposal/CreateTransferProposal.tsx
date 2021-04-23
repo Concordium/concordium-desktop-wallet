@@ -23,8 +23,8 @@ import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import styles from './CreateTransferProposal.module.scss';
 import { ScheduledTransferBuilderRef } from '~/components/BuildSchedule/util';
+import styles from './CreateTransferProposal.module.scss';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -65,7 +65,7 @@ export default function CreateTransferProposal({
     const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
     const [identity, setIdentity] = useState<Identity | undefined>();
-    const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string>('0.00'); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
     const [schedule, setSchedule] = useState<Schedule>();
 

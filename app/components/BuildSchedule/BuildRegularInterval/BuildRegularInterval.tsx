@@ -17,6 +17,8 @@ import {
     ScheduledTransferBuilderRef,
 } from '../util';
 import { noOp } from '~/utils/basicHelpers';
+import Label from '~/components/Label';
+import ErrorMessage from '~/components/Form/ErrorMessage';
 
 export interface Interval {
     label: string;
@@ -74,7 +76,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         );
         const form = useForm<FormValues>({ mode: 'onTouched' });
         const releases = form.watch(fieldNames.releases);
-        const { handleSubmit } = form;
+        const { handleSubmit, errors } = form;
 
         function createSchedule({ startTime }: FormValues) {
             const schedule = createRegularIntervalSchedule(
@@ -122,15 +124,29 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                     formMethods={form}
                     className={styles.regularInterval}
                 >
-                    <Form.Input
-                        label="Split transfer in:"
-                        name={fieldNames.releases}
-                        placeholder="Enter releases"
-                        autoFocus
-                        type="number"
-                        defaultValue={defaults?.releases || 1}
-                        rules={{ required: 'Releases required', min: 1 }}
-                    />
+                    <div>
+                        <Label>Split transfer in:</Label>
+                        <span className={styles.releasesInputWrapper}>
+                            <Form.InlineNumber
+                                name={fieldNames.releases}
+                                defaultValue={
+                                    defaults?.releases.toString() ?? '1'
+                                }
+                                fallbackValue={1}
+                                rules={{
+                                    required: 'Releases required',
+                                    min: {
+                                        value: 1,
+                                        message: 'Minimum value is 1',
+                                    },
+                                }}
+                            />{' '}
+                            releases
+                        </span>
+                        <ErrorMessage>
+                            {errors[fieldNames.releases]?.message}
+                        </ErrorMessage>
+                    </div>
                     <Form.Timestamp
                         name={fieldNames.startTime}
                         label="Starting:"

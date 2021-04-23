@@ -13,6 +13,7 @@ import styles from './InputTimestamp.module.scss';
 import useMultiFieldFocus from '../common/useMultiFieldFocus';
 import { DateParts } from '~/utils/timeHelpers';
 import { ClassName } from '~/utils/types';
+import Label from '~/components/Label';
 
 type TimestampErrorMessages = DateParts;
 
@@ -77,7 +78,7 @@ export default function InputTimestamp({
 
     return (
         <div className={clsx(styles.root, className)}>
-            <span className={styles.label}>{label}</span>
+            <Label>{label}</Label>
             <div
                 className={clsx(
                     styles.input,
