@@ -5,6 +5,7 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
     AddressBookEntry,
+    HigherLevelKeyUpdate,
     AccountTransaction,
     TransactionPayload,
 } from './types';
@@ -20,6 +21,10 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
+    handleKeySubmit?(
+        effectiveTime: Date,
+        higherLevelKeyUpdate: HigherLevelKeyUpdate
+    ): Promise<void>;
 }
 
 /**

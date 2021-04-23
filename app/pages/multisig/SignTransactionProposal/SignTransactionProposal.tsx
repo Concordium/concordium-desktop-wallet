@@ -21,7 +21,7 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BlockSummary } from '~/utils/NodeApiTypes';
-import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
+import { findKey } from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import Form from '~/components/Form';
@@ -78,10 +78,11 @@ function SignTransactionProposalView({ location }: Props) {
     }, [setTransactionHash, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const authorizationKey = await findAuthorizationKey(
+        const authorizationKey = await findKey(
             ledger,
-            transactionHandler,
-            blockSummary.updates.keys.level2Keys
+            blockSummary.updates.keys,
+            updateInstruction,
+            transactionHandler
         );
         if (!authorizationKey) {
             setShowValidationError(true);
@@ -177,7 +178,7 @@ function SignTransactionProposalView({ location }: Props) {
                                         }}
                                         disabled={signing}
                                     >
-                                        I am sure that the propsed changes are
+                                        I am sure that the proposed changes are
                                         correct
                                     </Form.Checkbox>
                                     <Form.Submit

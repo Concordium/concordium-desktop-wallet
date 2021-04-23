@@ -69,7 +69,7 @@ export function toHex(value: number, minLength = 2) {
     return hex;
 }
 
-export function serializeVerifyKey(key: VerifyKey) {
+export function serializeVerifyKey(key: VerifyKey): Buffer {
     const scheme = key.schemeId as keyof typeof SchemeId;
     let schemeId;
     if (SchemeId[scheme] !== undefined) {
