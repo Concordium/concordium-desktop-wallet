@@ -160,7 +160,7 @@ pub fn create_genesis_account (
     let cdvc = AccountCredentialWithoutProofs::Normal { cdv, commitments };
 
     let output = json!({
-        "cdvc": cdvc,
+        "credential": cdvc,
         "generatedAddress": address
     });
     Ok(output.to_string())

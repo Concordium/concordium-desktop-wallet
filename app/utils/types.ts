@@ -83,7 +83,7 @@ export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
-    Local = 'local', // for genesis accounts
+    Genesis = 'genesis',
 }
 
 /**
@@ -1015,9 +1015,14 @@ export type PolymorphicComponentProps<
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
 
+interface AccountCredentialWithoutProofs extends CredentialDeploymentValues {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    commitments: any;
+}
+
 export interface GenesisCredential {
     generatedAddress: string;
-    cdvc: Typed<CredentialDeploymentValues>; // TODO: Actual type is CredentialDeploymentValues + commitments
+    credential: Typed<AccountCredentialWithoutProofs>;
 }
 
 export enum ExportKeyType {

@@ -123,7 +123,6 @@ export default function GenesisAccount(): JSX.Element {
     const [genesis, setGenesis] = useState<GenesisCredential>();
     const [credentialNumber, setCredentialNumber] = useState<number>();
 
-
     useEffect(() => {
         if (identities.length === 0) {
             const createdAt = getCurrentYearMonth();
@@ -143,7 +142,7 @@ export default function GenesisAccount(): JSX.Element {
                 name: 'Genesis',
                 id: defaultId,
                 identityObject: JSON.stringify(identityObject),
-                status: IdentityStatus.Local,
+                status: IdentityStatus.Genesis,
                 detail: '',
                 codeUri: '',
                 identityProvider: '{}',
@@ -162,7 +161,7 @@ export default function GenesisAccount(): JSX.Element {
         if (!genesis) {
             throw new Error('Unexpected missing genesis data');
         }
-        const credentialContent = genesis.cdvc.contents;
+        const credentialContent = genesis.credential.contents;
 
         const publicKey = credentialContent.credentialPublicKeys.keys[0];
 
@@ -248,7 +247,15 @@ export default function GenesisAccount(): JSX.Element {
                     setLocation(Locations.Create);
                 });
             case Locations.Create:
-                return <CreateCredential identityId={identityId} setCredentialNumber={setCredentialNumber} setGenesis={setGenesis} onFinish={() => setLocation(Locations.Confirm)} context={context} />;
+                return (
+                    <CreateCredential
+                        identityId={identityId}
+                        setCredentialNumber={setCredentialNumber}
+                        setGenesis={setGenesis}
+                        onFinish={() => setLocation(Locations.Confirm)}
+                        context={context}
+                    />
+                );
             case Locations.Confirm:
                 return <Confirm />;
             default:
