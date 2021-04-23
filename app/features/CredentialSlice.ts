@@ -123,13 +123,15 @@ export async function updateCredentialsStatus(
     const onChainCredentials: [
         CredentialDeploymentInformation,
         number
-    ][] = Object.entries(
-        accountInfo.accountCredentials
-    ).map(([index, versioned]) => [
-        versioned.value.contents,
-        parseInt(index, 10),
-    ]);
-
+    ][] = Object.entries(accountInfo.accountCredentials).map(
+        ([index, versioned]) => {
+            const { regId, credId, ...content } = versioned.value.contents;
+            return [
+                { ...content, credId: regId || credId },
+                parseInt(index, 10),
+            ];
+        }
+    );
     // Find any credentials, which have been removed from the account, and remove their (former) index.
     const removed = localCredentials.filter(
         (cred) =>
