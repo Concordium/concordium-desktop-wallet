@@ -103,6 +103,20 @@ export default function SimpleTransfer(): JSX.Element {
         );
     }
 
+    function renderPickRecipient() {
+        if (recipient) {
+            setReady(true);
+        }
+        return (
+            <PickRecipient
+                pickRecipient={(newRecipient) => {
+                    setReady(true);
+                    setRecipient(newRecipient);
+                }}
+            />
+        );
+    }
+
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
@@ -152,6 +166,7 @@ export default function SimpleTransfer(): JSX.Element {
                                     setReady={setReady}
                                     setAccount={setAccount}
                                     identity={identity}
+                                    chosenAccount={account}
                                 />
                             )}
                         />
@@ -179,14 +194,7 @@ export default function SimpleTransfer(): JSX.Element {
                             path={
                                 routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT
                             }
-                            render={() => (
-                                <PickRecipient
-                                    pickRecipient={(newRecipient) => {
-                                        setReady(true);
-                                        setRecipient(newRecipient);
-                                    }}
-                                />
-                            )}
+                            render={renderPickRecipient}
                         />
                         <Route
                             path={
@@ -196,6 +204,7 @@ export default function SimpleTransfer(): JSX.Element {
                                 <PickIdentity
                                     setReady={setReady}
                                     setIdentity={setIdentity}
+                                    chosenIdentity={identity}
                                 />
                             )}
                         />
