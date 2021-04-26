@@ -1,0 +1,35 @@
+@import 'config/bundle';
+
+.listItem {
+    columns: 3;
+    list-style-type: none;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #dcdcdc;
+}
+
+ul {
+    margin-top: 36px;
+}
+
+/* No border-bottom for the final key entry in the list. */
+.listItem:last-child {
+    border-bottom: none;
+}
+
+.keyText {
+    line-height: 1em;
+    height: 3em;
+}
+
+.removed {
+    color: $color-danger;
+}
+
+.unchanged {
+    color: $color-text-faded;
+}
+
+.added {
+    color: #2caa00;
+}

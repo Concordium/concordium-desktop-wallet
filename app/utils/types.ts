@@ -457,15 +457,18 @@ export interface TypedCredentialDeploymentInformation {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AccountReleaseSchedule = any; // TODO
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AccountBakerDetails = any; // TODO
+
+interface AccountBakerDetails {
+    stakedAmount: string;
+    bakerId: string;
+}
 
 // Reflects the structure given by the node,
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
     accountReleaseSchedule: AccountReleaseSchedule;
-    accountBaker: AccountBakerDetails;
+    accountBaker?: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
     accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
 }
@@ -610,7 +613,8 @@ export type UpdateInstructionPayload =
     | ProtocolUpdate
     | GasRewards
     | BakerStakeThreshold
-    | ElectionDifficulty;
+    | ElectionDifficulty
+    | HigherLevelKeyUpdate;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -638,20 +642,36 @@ export type Transaction =
     | UpdateInstruction;
 
 /**
- * Update type enumeration. The numbering/order is important as that corresponds
- * to the byte written when serializing the update instruction.
+ * Internal enumeration of the different update types that are available. This
+ * does not correspond one-to-one with the transaction UpdateType enum, and is
+ * necessary due to the key update transactions sharing the same update type.
  */
 export enum UpdateType {
-    UpdateAuthorization = 0,
-    UpdateProtocol = 1,
-    UpdateElectionDifficulty = 2,
-    UpdateEuroPerEnergy = 3,
-    UpdateMicroGTUPerEuro = 4,
-    UpdateFoundationAccount = 5,
-    UpdateMintDistribution = 6,
-    UpdateTransactionFeeDistribution = 7,
-    UpdateGASRewards = 8,
-    UpdateBakerStakeThreshold = 9,
+    UpdateProtocol,
+    UpdateElectionDifficulty,
+    UpdateEuroPerEnergy,
+    UpdateMicroGTUPerEuro,
+    UpdateFoundationAccount,
+    UpdateMintDistribution,
+    UpdateTransactionFeeDistribution,
+    UpdateGASRewards,
+    UpdateBakerStakeThreshold,
+    UpdateRootKeys,
+    UpdateLevel1KeysUsingRootKeys,
+    UpdateLevel1KeysUsingLevel1Keys,
+    UpdateLevel2KeysUsingRootKeys,
+    UpdateLevel2KeysUsingLevel1Keys,
+}
+
+export enum RootKeysUpdateTypes {
+    RootKeysRootUpdate,
+    Level1KeysRootUpdate,
+    Level2KeysRootUpdate,
+}
+
+export enum Level1KeysUpdateTypes {
+    Level1KeysLevel1Update,
+    Level2KeysLevel1Update,
 }
 
 export function instanceOfAccountTransaction(
@@ -759,6 +779,55 @@ export function isElectionDifficulty(
     return UpdateType.UpdateElectionDifficulty === transaction.type;
 }
 
+export function isUpdateRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateRootKeys === transaction.type;
+}
+
+export function isUpdateLevel1KeysWithRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel1KeysUsingRootKeys === transaction.type;
+}
+
+export function isUpdateLevel2KeysWithRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel2KeysUsingRootKeys === transaction.type;
+}
+
+export function isUpdateUsingRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return (
+        isUpdateRootKeys(transaction) ||
+        isUpdateLevel1KeysWithRootKeys(transaction) ||
+        isUpdateLevel2KeysWithRootKeys(transaction)
+    );
+}
+
+export function isUpdateLevel1KeysWithLevel1Keys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel1KeysUsingLevel1Keys === transaction.type;
+}
+
+export function isUpdateLevel2KeysWithLevel1Keys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel2KeysUsingLevel1Keys === transaction.type;
+}
+
+export function isUpdateUsingLevel1Keys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return (
+        isUpdateLevel1KeysWithLevel1Keys(transaction) ||
+        isUpdateLevel2KeysWithLevel1Keys(transaction)
+    );
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
@@ -850,6 +919,33 @@ export interface BakerStakeThreshold {
 
 export interface ElectionDifficulty {
     electionDifficulty: Word32;
+}
+
+export enum KeyUpdateEntryStatus {
+    Added,
+    Removed,
+    Unchanged,
+}
+
+export interface KeyWithStatus {
+    key: VerifyKey;
+    status: KeyUpdateEntryStatus;
+}
+
+export type HigherLevelKeyUpdateType = 0 | 1;
+/**
+ * The higher level key update covers three transaction types:
+ *  - Updating root keys with root keys
+ *  - Updating level 1 keys with root keys
+ *  - Updating level 1 keys with level 1 keys
+ */
+export interface HigherLevelKeyUpdate {
+    // Has to be 0 when updating root keys with root keys,
+    // 1 when updating level 1 keys with root keys, and
+    // 0 when updating level 1 keys with level 1 keys.
+    keyUpdateType: HigherLevelKeyUpdateType;
+    updateKeys: KeyWithStatus[];
+    threshold: number;
 }
 
 export interface TransactionDetails {

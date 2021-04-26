@@ -50,7 +50,7 @@ export default function getTransactionHash(transaction: Transaction) {
  */
 export function getTransactionSubmissionId(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
-        getUpdateInstructionSubmissionId(transaction);
+        return getUpdateInstructionSubmissionId(transaction);
     }
     if (instanceOfAccountTransactionWithSignature(transaction)) {
         return getAccountTransactionHash(
@@ -59,6 +59,6 @@ export function getTransactionSubmissionId(transaction: Transaction) {
         ).toString('hex');
     }
     throw new Error(
-        'Unable to get submissionId of Account Transaction without signature'
+        'Unable to get submissionId for a transaction that is not an update instruction or an account transaction with a signature'
     );
 }

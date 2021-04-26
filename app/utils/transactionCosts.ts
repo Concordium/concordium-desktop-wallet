@@ -201,8 +201,8 @@ function energyToCost(energy: bigint, exchangeRate: Fraction): Fraction {
  */
 export async function getTransactionKindCost(
     transactionKind: TransactionKindId,
-    payloadSize: number = getPayloadSizeEstimate(transactionKind),
-    signatureAmount = 1
+    signatureAmount = 1,
+    payloadSize: number = getPayloadSizeEstimate(transactionKind)
 ): Promise<Fraction> {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
     const energy = getTransactionKindEnergy(

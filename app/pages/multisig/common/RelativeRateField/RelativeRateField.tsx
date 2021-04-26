@@ -1,117 +1,168 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import clsx from 'clsx';
-import React, { InputHTMLAttributes, useState } from 'react';
-import { ExchangeRate } from '~/utils/types';
+import React, { InputHTMLAttributes, PropsWithChildren, useMemo } from 'react';
 import { CommonInputProps } from '~/components/Form/common';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 
 import styles from './RelativeRateField.module.scss';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
-import { useUpdateEffect } from '~/utils/hooks';
+import InlineNumber from '~/components/Form/InlineNumber';
+import { noOp } from '~/utils/basicHelpers';
+import {
+    fromExchangeRate,
+    isValidRelativeRatePart,
+    RelativeRateValue,
+} from './util';
+import { getReducedExchangeRate } from '~/utils/exchangeRateHelpers';
 
 type InputFieldProps = Pick<
     InputHTMLAttributes<HTMLInputElement>,
-    'name' | 'disabled' | 'className'
+    'disabled' | 'className'
 >;
 
-const bigIntToString = (v?: bigint) => `${v || ''}`;
+type UnitPosition = 'postfix' | 'prefix';
+
+interface RelativeRateFieldUnit {
+    value: string;
+    position: UnitPosition;
+}
+
+function UnitContext({
+    children,
+    position,
+    value,
+}: PropsWithChildren<RelativeRateFieldUnit>): JSX.Element {
+    return (
+        <>
+            {position === 'prefix' && value}
+            {children}
+            {position === 'postfix' && value}
+        </>
+    );
+}
 
 export interface RelativeRateFieldProps
     extends CommonInputProps,
         InputFieldProps {
     /**
-     * Unit of denominator
+     * Unit of denominator. Position is "prefix" if string value.
      */
-    denominatorUnit: string;
+    denominatorUnit: RelativeRateFieldUnit;
     /**
-     * Unit of value in the field.
+     * Unit of value in the field. Position is "prefix" if string value.
      */
-    unit: string;
-    value: Partial<ExchangeRate> | undefined;
-    onChange(v: Partial<ExchangeRate> | undefined): void;
-    onBlur(): void;
+    numeratorUnit: RelativeRateFieldUnit;
+    value: RelativeRateValue;
+    onChange?(v: RelativeRateValue): void;
+    onBlur?(): void;
 }
 
 /**
  * @description
- * Used to for number values of a unit relative to a value of another unit.
+ * Used to represent and update values of a unit relative to a value of another unit.
  *
  * @example
- * <RelativeRateField value={value} onChange={(e) => setValue(e.target.value)} unit="€" relativeTo="1 NRG" />
+ * <RelativeRateField value={value} onChange={setValue} numeratorUnit={{ value: '€' }} denominatorUnit={{ value: '€' }} />
  */
 export function RelativeRateField({
     denominatorUnit,
-    unit,
+    numeratorUnit,
     label,
     isInvalid,
     error,
     disabled,
     className,
     value,
-    onChange,
-    ...props
+    onChange = noOp,
+    onBlur = noOp,
 }: RelativeRateFieldProps) {
-    const [innerValue, setInnerValue] = useState<string>(
-        bigIntToString(value?.numerator)
-    );
-    const denominator = value?.denominator || 1n; // TODO default?
+    const reduced = useMemo(() => {
+        try {
+            const r = fromExchangeRate(
+                getReducedExchangeRate({
+                    numerator: BigInt(value.numerator),
+                    denominator: BigInt(value.denominator),
+                })
+            );
 
-    let invalid = isInvalid;
-    let errorMessage = error;
-    let parsedValue: bigint | undefined;
+            const { numerator: rn, denominator: rd } = r;
 
-    try {
-        parsedValue = BigInt(innerValue);
-    } catch {
-        invalid = true;
-        errorMessage = 'Value must be a valid number';
-    }
+            if (rn !== value.numerator || rd !== value.denominator) {
+                return r;
+            }
 
-    useUpdateEffect(() => {
-        onChange({
-            denominator,
-            numerator: parsedValue,
-        });
-    }, [parsedValue, denominator, onChange]);
-
-    useUpdateEffect(() => {
-        setInnerValue(bigIntToString(value?.numerator));
-    }, [value?.numerator]);
+            return undefined;
+        } catch {
+            return undefined;
+        }
+    }, [value.numerator, value.denominator]);
 
     return (
         <div
             className={clsx(
                 styles.root,
                 disabled && styles.rootDisabled,
-                invalid && styles.rootInvalid,
+                isInvalid && styles.rootInvalid,
                 className
             )}
         >
             <label>
                 <span className={styles.label}>{label}</span>
                 <div className={styles.container}>
-                    <div className={styles.relativeTo}>
-                        {`${denominatorUnit} ${denominator}`}
-                    </div>
-                    <div>&nbsp;=&nbsp;</div>
-                    <div className={styles.fieldWrapper}>
-                        <div className={styles.unit}>{unit}&nbsp;</div>
-                        <input
-                            type="number"
-                            className={styles.field}
-                            disabled={disabled}
-                            onChange={(e) => setInnerValue(e.target.value)}
-                            value={innerValue}
-                            {...props}
-                        />
-                    </div>
+                    <label className={styles.fieldWrapper}>
+                        <UnitContext {...denominatorUnit}>
+                            <InlineNumber
+                                className={styles.field}
+                                fallbackValue={0}
+                                value={value.denominator}
+                                onChange={(v) =>
+                                    onChange({ ...value, denominator: v })
+                                }
+                                disabled={disabled}
+                                onBlur={onBlur}
+                                isInvalid={
+                                    !isValidRelativeRatePart(value.denominator)
+                                }
+                            />
+                        </UnitContext>
+                    </label>
+                    {' = '}
+                    <label className={styles.fieldWrapper}>
+                        <UnitContext {...numeratorUnit}>
+                            <InlineNumber
+                                className={styles.field}
+                                fallbackValue={0}
+                                value={value.numerator}
+                                onChange={(v) =>
+                                    onChange({ ...value, numerator: v })
+                                }
+                                disabled={disabled}
+                                onBlur={onBlur}
+                                isInvalid={
+                                    !isValidRelativeRatePart(value.numerator)
+                                }
+                            />
+                        </UnitContext>
+                    </label>
                 </div>
-                <ErrorMessage>{errorMessage}</ErrorMessage>
+                {reduced && (
+                    <div className={styles.reduced}>
+                        Reduced to:{' '}
+                        <UnitContext {...denominatorUnit}>
+                            {reduced.denominator}
+                        </UnitContext>
+                        {' = '}
+                        <UnitContext {...numeratorUnit}>
+                            {reduced.numerator}
+                        </UnitContext>
+                    </div>
+                )}
+                <ErrorMessage>{error}</ErrorMessage>
             </label>
         </div>
     );
 }
 
-export const FormRelativeRateField = connectWithFormControlled<
-    Partial<ExchangeRate>,
-    RelativeRateFieldProps
->(RelativeRateField);
+export const FormRelativeRateField = connectWithFormControlled(
+    RelativeRateField
+);

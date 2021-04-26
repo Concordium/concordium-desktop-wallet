@@ -8,6 +8,11 @@ export default class AccountHandlerTypeMiddleware<T>
         AccountTransactionHandler<AccountTransaction, ConcordiumLedgerClient> {
     base: AccountTransactionHandler<T, ConcordiumLedgerClient>;
 
+    creationLocationHandler: (
+        currentLocation: string,
+        proposalId: number
+    ) => string;
+
     title: string;
 
     type: string;
@@ -15,6 +20,7 @@ export default class AccountHandlerTypeMiddleware<T>
     constructor(base: AccountTransactionHandler<T, ConcordiumLedgerClient>) {
         this.base = base;
         this.title = base.title;
+        this.creationLocationHandler = base.creationLocationHandler;
         this.type = base.type;
     }
 

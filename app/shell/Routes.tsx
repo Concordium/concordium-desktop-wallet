@@ -13,7 +13,6 @@ import ExportImport from '../pages/exportImport/ExportImportPage';
 import PerformImport from '../pages/exportImport/PerformImport';
 import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
 import GenerateCredential from '../pages/GenerateCredential/GenerateCredentialPage';
-import UpdateCredentials from '../pages/UpdateAccountCredentials/UpdateCredentialsPage';
 import genesisAccount from '../pages/GenesisAccount/GenesisAccount';
 
 export default function Routes(): JSX.Element {
@@ -39,10 +38,6 @@ export default function Routes(): JSX.Element {
             <Route
                 path={routes.GENERATE_CREDENTIAL}
                 component={GenerateCredential}
-            />
-            <Route
-                path={routes.UPDATE_ACCOUNT_CREDENTIALS}
-                component={UpdateCredentials}
             />
             <Route path={routes.HOME} component={HomePage} />
         </Switch>

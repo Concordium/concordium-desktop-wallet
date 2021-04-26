@@ -8,7 +8,6 @@ import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import {
     AccountTransaction,
-    instanceOfUpdateInstruction,
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -21,7 +20,7 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BlockSummary } from '~/utils/NodeApiTypes';
-import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
+import { findKey } from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import Form from '~/components/Form';
@@ -78,10 +77,11 @@ function SignTransactionProposalView({ location }: Props) {
     }, [setTransactionHash, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const authorizationKey = await findAuthorizationKey(
+        const authorizationKey = await findKey(
             ledger,
-            transactionHandler,
-            blockSummary.updates.keys.level2Keys
+            blockSummary.updates.keys,
+            updateInstruction,
+            transactionHandler
         );
         if (!authorizationKey) {
             setShowValidationError(true);
@@ -139,18 +139,20 @@ function SignTransactionProposalView({ location }: Props) {
                 className={clsx(styles.body, styles.bodySubtractPadding)}
                 divider
                 columnClassName={styles.column}
+                columnScroll
             >
                 <Columns.Column header="Transaction Details">
                     <section className={styles.columnContent}>
                         <TransactionDetails transaction={transactionObject} />
-                        {instanceOfUpdateInstruction(transactionObject) && (
-                            <ExpiredTransactionView
-                                transaction={transactionObject}
-                            />
-                        )}
+                        <ExpiredTransactionView
+                            transaction={transactionObject}
+                        />
                     </section>
                 </Columns.Column>
-                <Columns.Column header="Signature and Hardware Wallet">
+                <Columns.Column
+                    header="Signature and Hardware Wallet"
+                    className={styles.stretchColumn}
+                >
                     <Ledger
                         ledgerCallback={signingFunction}
                         onSignError={() => setSigning(false)}
@@ -177,7 +179,7 @@ function SignTransactionProposalView({ location }: Props) {
                                         }}
                                         disabled={signing}
                                     >
-                                        I am sure that the propsed changes are
+                                        I am sure that the proposed changes are
                                         correct
                                     </Form.Checkbox>
                                     <Form.Submit

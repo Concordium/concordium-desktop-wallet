@@ -2,18 +2,18 @@ import { parse } from 'json-bigint';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import {
     UpdateInstructionHandler,
-    TransactionInput,
     AccountTransactionHandler,
-} from '../transactionTypes';
+    TransactionInput,
+} from '~/utils/transactionTypes';
 import {
     instanceOfUpdateInstruction,
     TransactionKindId,
+    AccountTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
     Transaction,
-    AccountTransaction,
-} from '../types';
+} from '~/utils/types';
 import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
 import ElectionDifficultyHandler from './ElectionDifficultyHandler';
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
@@ -24,8 +24,12 @@ import MintDistributionHandler from './MintDistributionHandler';
 import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
+import SimpleTransferHandler from './SimpleTransferHandler';
 import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
 import UpdateInstructionHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
+import UpdateRootKeysHandler from './UpdateRootsKeysHandler';
+import UpdateLevel1KeysWithRootKeysHandler from './UpdateLevel1KeysWithRootKeysHandler';
+import UpdateLevel1KeysWithLevel1KeysHandler from './UpdateLevel1KeysWithLevel1KeysHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -34,6 +38,9 @@ export function findAccountTransactionHandler(
         return new AccountHandlerTypeMiddleware(
             new UpdateAccountCredentialsHandler()
         );
+    }
+    if (transactionKind === TransactionKindId.Simple_transfer) {
+        return new AccountHandlerTypeMiddleware(new SimpleTransferHandler());
     }
     throw new Error(`Unsupported transaction type: ${transactionKind}`);
 }
@@ -80,6 +87,18 @@ export function findUpdateInstructionHandler(
         case UpdateType.UpdateElectionDifficulty:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new ElectionDifficultyHandler()
+            );
+        case UpdateType.UpdateRootKeys:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new UpdateRootKeysHandler()
+            );
+        case UpdateType.UpdateLevel1KeysUsingRootKeys:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new UpdateLevel1KeysWithRootKeysHandler()
+            );
+        case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new UpdateLevel1KeysWithLevel1KeysHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);
