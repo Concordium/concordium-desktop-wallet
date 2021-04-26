@@ -69,7 +69,7 @@ export default function MintRateInput({
         <span className={clsx(styles.root, className)}>
             <InlineNumber
                 className={styles.field}
-                title="Anual mint rate"
+                title="Annual mint rate"
                 allowFractions={6}
                 value={anualRate}
                 onChange={setAnualRate}
