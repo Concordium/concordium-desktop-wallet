@@ -54,7 +54,7 @@ function subTitle(currentLocation: string) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
             return 'New Credentials';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
-            return '';
+            return ' ';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
             return 'Signature and Hardware Wallet';
         default:
@@ -181,7 +181,11 @@ function listCredentials(
  */
 export default function UpdateCredentialPage(): JSX.Element {
     const dispatch = useDispatch();
-    const location = useLocation().pathname;
+    const transactionKind = TransactionKindId.Update_credentials;
+    const location = useLocation().pathname.replace(
+        `${transactionKind}`,
+        ':transactionKind'
+    );
     const credentials = useSelector(credentialsSelector);
 
     const [isReady, setReady] = useState(false);
@@ -361,6 +365,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                     <PickAccount
                                         setReady={setReady}
                                         setAccount={setAccount}
+                                        chosenAccount={account}
                                         identity={identity}
                                     />
                                 )}
@@ -377,6 +382,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 }
                                 render={() => (
                                     <PickIdentity
+                                        chosenIdentity={identity}
                                         elementClassName={styles.listElement}
                                         setReady={setReady}
                                         setIdentity={setIdentity}

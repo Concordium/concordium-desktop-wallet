@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Account, AccountInfo } from '~/utils/types';
+import { Account, AccountInfo, Fraction } from '~/utils/types';
 import AccountListElement from '~/components/AccountListElement';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
 import Input from '~/components/Form/Input';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import { validateAmount } from '~/utils/transactionHelpers';
+import { collapseFraction } from '~/utils/basicHelpers';
 
 interface Props {
     setReady: (ready: boolean) => void;
     account: Account | undefined;
-    estimatedFee?: bigint;
+    estimatedFee?: Fraction;
     amount: string;
     setAmount: (amount: string) => void;
 }
 
 /**
- * Displays the currently chosen account's information.
- * Allows the user to reveal attributes.
+ * Allow the user to input amount,
+ * and displays the given account's information.
  */
-export default function PickAccount({
+export default function PickAmount({
     account,
     setAmount,
     amount,
@@ -29,10 +30,8 @@ export default function PickAccount({
         throw new Error('Unexpected missing account');
     }
 
-    const [error, setError] = useState<string | undefined>();
-    const [accountInfo, setAccountInfo] = useState<AccountInfo | undefined>(
-        undefined
-    );
+    const [error, setError] = useState<string>();
+    const [accountInfo, setAccountInfo] = useState<AccountInfo>();
 
     useEffect(() => {
         getAccountInfoOfAddress(account.address)
@@ -44,7 +43,7 @@ export default function PickAccount({
         const validation = validateAmount(
             amountString,
             accountInfo,
-            estimatedFee
+            estimatedFee && collapseFraction(estimatedFee)
         );
         setError(validation);
         setReady(!validation);

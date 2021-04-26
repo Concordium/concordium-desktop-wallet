@@ -46,13 +46,13 @@
     "GENERATE_CREDENTIAL_EXPORT": "/generate-credential/export",
     "GENERATE_CREDENTIAL_REVEALATTRIBUTES": "/generate-credential/reveal-attributes",
     "GENERATE_CREDENTIAL_PICKACCOUNT": "/generate-credential/pick-account",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION": "/multi-signature-transaction/simple-transfer",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT": "/multi-signature-transaction/simple-transfer/pick-account",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT": "/multi-signature-transaction/simple-transfer/credentials/pick_amount",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT": "/multi-signature-transaction/simple-transfer/credentials/pick_recipient",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION": "/multi-signature-transaction/simple-transfer/credentials/sign_transaction",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_MAKETRANSFER": "/multi-signature-transaction/simple-transfer/credentials/make-transfer",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL": "/multi-signature-transaction/simple-transfer/add-credential",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE": "/multi-signature-transaction/simple-transfer/build-schedule",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD": "/multi-signature-transaction/simple-transfer/change-signature-threshold"
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION": "/multi-signature-transaction/account-transaction/:transactionKind",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT": "/multi-signature-transaction/account-transaction/:transactionKind/pick-account",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT": "/multi-signature-transaction/account-transaction/:transactionKind/pick_amount",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT": "/multi-signature-transaction/account-transaction/:transactionKind/pick_recipient",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION": "/multi-signature-transaction/account-transaction/:transactionKind/sign_transaction",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_MAKETRANSFER": "/multi-signature-transaction/account-transaction/:transactionKind/make-transfer",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE": "/multi-signature-transaction/account-transaction/:transactionKind/build-schedule",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL": "/multi-signature-transaction/account-transaction/:transactionKind/add-credential",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD": "/multi-signature-transaction/account-transaction/:transactionKind/change-signature-threshold"
 }

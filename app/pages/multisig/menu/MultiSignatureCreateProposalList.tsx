@@ -89,12 +89,12 @@ export default function MultiSignatureCreateProposalView() {
         [
             TransactionTypes.AccountTransaction,
             TransactionKind.Simple_transfer,
-            'Simple Transfer',
+            'Send GTU',
         ],
         [
             TransactionTypes.AccountTransaction,
             TransactionKind.Transfer_with_schedule,
-            'Scheduled Transfer',
+            'Send GTU with a schedule',
         ],
     ];
     if (foundationTransactionsEnabled) {

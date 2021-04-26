@@ -39,8 +39,8 @@ export function createProposalRoute(
             `${specificType}`
         );
     }
-    return {
-        pathname: routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION,
-        state: specificType,
-    };
+    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
+        ':transactionKind',
+        `${specificType}`
+    );
 }

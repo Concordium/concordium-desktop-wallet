@@ -7,6 +7,7 @@ import {
     AccountTransaction,
     TransactionPayload,
     instanceOfUpdateAccountCredentials,
+    TransactionKindId,
 } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
 import routes from '~/constants/routes.json';
@@ -35,18 +36,24 @@ export default class UpdateAccountCredentialsHandler
     }
 
     creationLocationHandler(currentLocation: string) {
-        switch (currentLocation) {
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-            default:
-                throw new Error('unknown location');
-        }
+        const getNewLocation = () => {
+            switch (currentLocation) {
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
+                default:
+                    throw new Error('unknown location');
+            }
+        };
+        return getNewLocation().replace(
+            ':transactionKind',
+            `${TransactionKindId.Update_credentials}`
+        );
     }
 
     createTransaction() {

@@ -86,6 +86,7 @@ export interface CreateTransactionInput {
     recipient: string;
     amount: bigint;
     schedule: Schedule;
+    signatureAmount: number;
 }
 
 /**

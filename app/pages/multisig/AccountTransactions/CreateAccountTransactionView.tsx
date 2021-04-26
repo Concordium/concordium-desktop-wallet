@@ -1,36 +1,36 @@
 import React from 'react';
-import { LocationDescriptorObject } from 'history';
-import { Redirect } from 'react-router';
+import { Redirect, useParams } from 'react-router';
 import { TransactionKindId } from '~/utils/types';
 import CreateTransferProposal from './CreateTransferProposal';
+
 import UpdateCredentialPage from './UpdateCredentialsPage';
 import ErrorBoundary from '~/components/ErrorBoundary';
 import routes from '~/constants/routes.json';
 
-interface Props {
-    location: LocationDescriptorObject<TransactionKindId>;
-}
+function AccountTransactionRoutes(): JSX.Element {
+    const { transactionKind: transactionKindRaw } = useParams<{
+        transactionKind: string;
+    }>();
+    const transactionKind: TransactionKindId = parseInt(transactionKindRaw, 10);
 
-function MultiSignatureRoutes({ location }: Props): JSX.Element {
-    const type = location.state;
-    if (type === TransactionKindId.Update_credentials) {
+    if (transactionKind === TransactionKindId.Update_credentials) {
         return <UpdateCredentialPage />;
     }
     if (
-        type === TransactionKindId.Simple_transfer ||
-        type === TransactionKindId.Transfer_with_schedule
+        [
+            TransactionKindId.Simple_transfer,
+            TransactionKindId.Transfer_with_schedule,
+        ].includes(transactionKind)
     ) {
-        return <CreateTransferProposal transactionKind={type} />;
+        return <CreateTransferProposal transactionKind={transactionKind} />;
     }
-    throw new Error(`unsupported transaction type: ${type}`);
+    throw new Error(`unsupported transaction type: ${transactionKind}`);
 }
 
-export default function CreateAccountTransactionView(
-    props: Props
-): JSX.Element {
+export default function CreateAccountTransactionView(): JSX.Element {
     return (
         <ErrorBoundary fallback={<Redirect to={routes.MULTISIGTRANSACTIONS} />}>
-            <MultiSignatureRoutes {...props} />
+            <AccountTransactionRoutes />
         </ErrorBoundary>
     );
 }
