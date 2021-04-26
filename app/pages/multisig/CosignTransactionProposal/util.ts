@@ -64,7 +64,7 @@ export async function signAccountTransaction(
         !instanceOfDeployedCredential(credential)
     ) {
         throw new Error(
-            'Unable to sign transfer, because we were unable to find local and deployed credential'
+            'Unable to the sign the account transaction. You do not currently have a credential deployed on the associated account.'
         );
     }
 
