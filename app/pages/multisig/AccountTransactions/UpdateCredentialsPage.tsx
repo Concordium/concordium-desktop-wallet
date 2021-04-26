@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -9,6 +10,7 @@ import {
     Account,
     Identity,
     CredentialDeploymentInformation,
+    TransactionKindString,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
@@ -18,8 +20,8 @@ import routes from '~/constants/routes.json';
 import CreateUpdate from './CreateUpdate';
 import { CredentialStatus } from './CredentialStatus';
 import styles from './UpdateAccountCredentials.module.scss';
+import UpdateAccountCredentialsHandler from '~/utils/transactionHandlers/UpdateAccountCredentialsHandler';
 import Columns from '~/components/Columns';
-import { selectedProposalRoute } from '~/utils/routerHelper';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 
 const placeHolderText = (
@@ -46,36 +48,16 @@ function assignIndices<T>(items: T[], usedIndices: number[]) {
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
-        case routes.UPDATE_ACCOUNT_CREDENTIALS:
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY:
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
             return 'Identities';
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT:
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
             return 'Accounts';
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL:
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
             return 'New Credentials';
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD:
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
             return ' ';
-
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
             return 'Signature and Hardware Wallet';
-        default:
-            throw new Error('unknown location');
-    }
-}
-
-function nextLocation(currentLocation: string, proposalId: number) {
-    switch (currentLocation) {
-        case routes.UPDATE_ACCOUNT_CREDENTIALS:
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY:
-            return routes.UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT;
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT:
-            return routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL;
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL:
-            return routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD;
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD:
-            return routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN;
-        case routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN:
-            return selectedProposalRoute(proposalId);
         default:
             throw new Error('unknown location');
     }
@@ -200,7 +182,13 @@ function listCredentials(
  */
 export default function UpdateCredentialPage(): JSX.Element {
     const dispatch = useDispatch();
-    const location = useLocation().pathname;
+    const { transactionKind } = useParams<{
+        transactionKind: TransactionKindString;
+    }>();
+    const location = useLocation().pathname.replace(
+        transactionKind,
+        ':transactionKind'
+    );
     const credentials = useSelector(credentialsSelector);
 
     const [isReady, setReady] = useState(false);
@@ -209,6 +197,8 @@ export default function UpdateCredentialPage(): JSX.Element {
     const [currentCredentials, setCurrentCredentials] = useState<Credential[]>(
         []
     );
+
+    const handler = new UpdateAccountCredentialsHandler();
 
     const [newThreshold, setNewThreshold] = useState<number | undefined>();
     const [credentialIds, setCredentialIds] = useState<
@@ -321,7 +311,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                         credentialIds,
                         updateCredentialStatus,
                         location ===
-                            routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL
+                            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
                     )}
                 </Columns.Column>
                 <Columns.Column verticalPadding header={subTitle(location)}>
@@ -329,7 +319,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                         <Switch>
                             <Route
                                 path={
-                                    routes.UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD
                                 }
                                 render={() => (
                                     <ChangeSignatureThreshold
@@ -351,7 +341,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                             />
                             <Route
                                 path={
-                                    routes.UPDATE_ACCOUNT_CREDENTIALS_ADDCREDENTIAL
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
                                 }
                                 render={() => (
                                     <AddCredential
@@ -371,27 +361,30 @@ export default function UpdateCredentialPage(): JSX.Element {
                             />
                             <Route
                                 path={
-                                    routes.UPDATE_ACCOUNT_CREDENTIALS_PICKACCOUNT
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
                                 }
                                 render={() => (
                                     <PickAccount
                                         setReady={setReady}
                                         setAccount={setAccount}
+                                        chosenAccount={account}
                                         identity={identity}
                                     />
                                 )}
                             />
                             <Route
-                                path={routes.UPDATE_ACCOUNT_CREDENTIALS_SIGN}
+                                path={
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION
+                                }
                                 render={renderCreateUpdate}
                             />
                             <Route
-                                path={[
-                                    routes.UPDATE_ACCOUNT_CREDENTIALS,
-                                    routes.UPDATE_ACCOUNT_CREDENTIALS_PICKIDENTITY,
-                                ]}
+                                path={
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
+                                }
                                 render={() => (
                                     <PickIdentity
+                                        chosenIdentity={identity}
                                         elementClassName={styles.listElement}
                                         setReady={setReady}
                                         setIdentity={setIdentity}
@@ -406,7 +399,14 @@ export default function UpdateCredentialPage(): JSX.Element {
                             onClick={() => {
                                 setReady(false);
                                 dispatch(
-                                    push(nextLocation(location, proposalId))
+                                    push({
+                                        pathname: handler.creationLocationHandler(
+                                            location,
+                                            proposalId
+                                        ),
+                                        state:
+                                            TransactionKindString.UpdateCredentials,
+                                    })
                                 );
                             }}
                         >

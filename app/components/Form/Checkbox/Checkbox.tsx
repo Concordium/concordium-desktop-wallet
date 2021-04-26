@@ -36,6 +36,7 @@ const Checkbox = forwardRef<HTMLInputElement, PropsWithChildren<CheckboxProps>>(
             isInvalid = false,
             className,
             size = 'regular',
+            style,
             ...props
         },
         ref
@@ -49,6 +50,7 @@ const Checkbox = forwardRef<HTMLInputElement, PropsWithChildren<CheckboxProps>>(
                     disabled && styles.rootDisabled,
                     className
                 )}
+                style={style}
             >
                 <label className={styles.wrapper}>
                     <input type="checkbox" ref={ref} {...props} />

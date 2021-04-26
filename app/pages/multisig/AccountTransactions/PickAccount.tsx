@@ -10,6 +10,7 @@ import {
 import styles from './UpdateAccountCredentials.module.scss';
 
 interface Props {
+    chosenAccount?: Account;
     identity: Identity | undefined;
     setReady: (ready: boolean) => void;
     setAccount: (account: Account) => void;
@@ -20,6 +21,7 @@ interface Props {
  */
 export default function PickAccount({
     setReady,
+    chosenAccount,
     setAccount,
     identity,
 }: Props): JSX.Element {
@@ -33,6 +35,18 @@ export default function PickAccount({
     const accountsInfo = useSelector(accountsInfoSelector);
     const [chosenIndex, setChosenIndex] = useState<number | undefined>();
     const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        if (chosenAccount) {
+            setReady(true);
+            setChosenIndex(
+                accounts.findIndex(
+                    (acc) => acc.address === chosenAccount.address
+                )
+            );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (accounts && !loaded) {

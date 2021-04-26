@@ -7,11 +7,11 @@
 .container {
     position: relative;
     display: flex;
-    align-items: center;
     justify-content: center;
     width: 100%;
-    font-size: $font-size-body2;
+    font-size: $font-size-body1;
     border-bottom: 1px solid $color-off-black;
+    white-space: pre;
 
     .rootDisabled & {
         border-color: transparent;
@@ -23,35 +23,26 @@
 }
 
 .label {
+    display: inline;
     color: $color-black;
 }
 
-.relativeTo,
 .fieldWrapper {
-    flex: 1 1 50%;
-}
-
-.fieldWrapper {
-    display: flex;
-    align-items: center;
-}
-
-.relativeTo {
-    text-align: right;
-}
-
-.unit,
-.field {
+    display: inline;
     color: $color-pale-blue;
 
     .rootDisabled & {
-        color: inherit;
+        color: $color-grey;
     }
 }
 
 .field {
+    display: inline;
     text-align: left;
     border: none;
-    padding: 0;
-    height: 100%;
+}
+
+.reduced {
+    margin-top: 5px;
+    font-size: $font-size-body4;
 }

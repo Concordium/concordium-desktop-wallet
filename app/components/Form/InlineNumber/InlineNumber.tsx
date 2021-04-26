@@ -5,12 +5,14 @@ import React, {
     useCallback,
     useEffect,
     useLayoutEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
 import { noOp } from '~/utils/basicHelpers';
 import { useUpdateEffect } from '~/utils/hooks';
 import { scaleFieldWidth } from '~/utils/htmlHelpers';
+import { formatNumberStringWithDigits } from '~/utils/numberStringHelpers';
 import { ClassName } from '~/utils/types';
 import { CommonFieldProps } from '../common';
 
@@ -25,18 +27,6 @@ const ensureValidBigInt = (v = ''): string => {
     }
 };
 
-const formatNumberString = (fractionDigits: number) => (v = ''): string => {
-    const parsed = parseFloat(v);
-
-    if (Number.isNaN(parsed)) {
-        return '';
-    }
-
-    const valueFractionDigits = v.split('.')[1]?.length ?? 0;
-
-    return parsed.toFixed(Math.max(fractionDigits, valueFractionDigits));
-};
-
 export interface InlineNumberProps
     extends ClassName,
         Pick<
@@ -49,9 +39,9 @@ export interface InlineNumberProps
      */
     ensureDigits?: number;
     /**
-     * Whether to work with floats or integers. Defaults to `false`.
+     * Whether to work with floats or integers. If set to a number, value is rounded to amount of digits specified. Defaults to `false`.
      */
-    allowFractions?: boolean;
+    allowFractions?: boolean | number;
     value: string | undefined;
     /**
      * Defaults to `0`. This is the value used if field is unfocused without a value.
@@ -89,13 +79,20 @@ export default function InlineNumber({
     ...inputProps
 }: InlineNumberProps): JSX.Element {
     const format = useCallback(
-        allowFractions ? formatNumberString(ensureDigits) : ensureValidBigInt,
+        allowFractions
+            ? formatNumberStringWithDigits(
+                  ensureDigits,
+                  allowFractions !== true ? allowFractions : undefined
+              )
+            : ensureValidBigInt,
         [ensureDigits, allowFractions]
     );
 
-    const [innerValue, setInnerValue] = useState<string>(
-        format(value ?? fallbackValue.toString())
+    const initialFormatted = useMemo(
+        () => format(value) || format(fallbackValue.toString()),
+        []
     );
+    const [innerValue, setInnerValue] = useState<string>(initialFormatted);
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
     const ref = useRef<HTMLInputElement>(null);
@@ -108,7 +105,10 @@ export default function InlineNumber({
         if (!innerValue || (fallbackOnInvalid && isInvalid)) {
             setInnerValue(format(fallbackValue.toString()));
         } else {
-            setInnerValue(format(value));
+            const formatted = format(value);
+            if (formatted !== '') {
+                setInnerValue(formatted);
+            }
         }
 
         setIsFocused(false);

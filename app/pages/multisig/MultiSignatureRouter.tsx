@@ -7,7 +7,8 @@ import CosignTransactionProposal from './CosignTransactionProposal';
 import SignTransactionProposal from './SignTransactionProposal';
 import MultiSignatureCreateProposal from './MultiSignatureCreateProposal';
 import SubmittedProposal from './SubmittedProposal';
-import ExportKeyView from './ExportKeyView';
+import ExportKeyView from './ExportKeyView/ExportKeyView';
+import CreateAccountTransactionView from './AccountTransactions/CreateAccountTransactionView';
 
 export default function MultiSignatureRoutes(): JSX.Element {
     return (
@@ -19,6 +20,10 @@ export default function MultiSignatureRoutes(): JSX.Element {
             <Route
                 path={routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION}
                 component={SignTransactionProposal}
+            />
+            <Route
+                path={routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION}
+                component={CreateAccountTransactionView}
             />
             <Route
                 path={routes.MULTISIGTRANSACTIONS_COSIGN_TRANSACTION}

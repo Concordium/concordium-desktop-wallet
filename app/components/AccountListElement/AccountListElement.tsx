@@ -62,7 +62,9 @@ export default function AccountListElement({
             + <ShieldImage height="15" />
         </>
     );
-
+    const accountBaker = accountInfo?.accountBaker;
+    const stakedAmount = accountBaker ? BigInt(accountBaker.stakedAmount) : 0n;
+    const amountAtDisposal = unShielded - scheduled - stakedAmount;
     return (
         <div
             className={clsx(
@@ -113,12 +115,12 @@ export default function AccountListElement({
             <SidedRow
                 className={styles.row}
                 left="- At Disposal:"
-                right={displayAsGTU(unShielded - scheduled)}
+                right={displayAsGTU(amountAtDisposal)}
             />
             <SidedRow
                 className={styles.row}
                 left="- Staked:"
-                right={displayAsGTU(unShielded - scheduled)}
+                right={displayAsGTU(stakedAmount)}
             />
             <div className={styles.dividingLine} />
             <SidedRow
