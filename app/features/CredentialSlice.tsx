@@ -119,17 +119,22 @@ export async function initializeGenesisCredential(
     credential: Credential,
     accountInfo: AccountInfo
 ) {
-    const credentialIndex = Object.keys(accountInfo.accountCredentials).find(
-        (key) =>
-            accountInfo.accountCredentials[parseInt(key, 10)].value.contents
-                .credId === credential.credId
-    );
+    const credentialOnChain = Object.entries(
+        accountInfo.accountCredentials
+    ).find(([, cred]) => cred.value.contents.credId === credential.credId);
+    if (!credentialOnChain) {
+        throw new Error(
+            'Unexpected missing reference to credential in accountInfo'
+        );
+    }
+
+    const credentialIndex = parseInt(credentialOnChain[0], 10);
+
     await updateCredentialInDatabase(credential.credId, {
         accountAddress,
-        credentialIndex: credentialIndex
-            ? parseInt(credentialIndex, 10)
-            : undefined,
+        credentialIndex,
     });
+
     return dispatch(
         updateCredential({
             credId: credential.credId,

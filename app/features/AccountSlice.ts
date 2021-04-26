@@ -3,6 +3,8 @@ import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store/store';
 // eslint-disable-next-line import/no-cycle
 import { initializeGenesisCredential } from './CredentialSlice';
+// eslint-disable-next-line import/no-cycle
+import { addToAddressBook } from './AddressBookSlice';
 import {
     getAllAccounts,
     insertAccount,
@@ -74,12 +76,15 @@ const accountsSlice = createSlice({
             state.accountsInfo = map.payload;
         },
         updateAccountFields: (state, update) => {
-            const { address, ...fields } = update.payload;
+            const { address, updatedFields } = update.payload;
             const index = state.accounts.findIndex(
                 (account) => account.address === address
             );
             if (index > -1) {
-                state.accounts[index] = { ...state.accounts[index], ...fields };
+                state.accounts[index] = {
+                    ...state.accounts[index],
+                    ...updatedFields,
+                };
             }
         },
     },
@@ -140,28 +145,40 @@ function updateAccountEncryptedAmount(
     return Promise.resolve();
 }
 
+/** Generates the actual address of the account, and updates the account address, status, signatureThreshold,
+ *   and the associated credentials' address and credentialIndex
+ *  Also adds the account to the address book.
+ *  @return, returns the generated address.
+ * */
 async function initializeGenesisAccount(
     dispatch: Dispatch,
     account: Account,
     accountInfo: AccountInfo
 ) {
     const localCredentials = await getCredentialsOfAccount(account.address);
-    const address = await getAddressFromCredentialId(
-        accountInfo.accountCredentials[0].value.contents.credId
-    );
-    await updateAccount(account.name, {
+    const firstCredential = accountInfo.accountCredentials[0].value.contents;
+    const address = await getAddressFromCredentialId(firstCredential.credId);
+    const accountUpdate = {
         address,
         status: AccountStatus.Confirmed,
         signatureThreshold: accountInfo.accountThreshold,
-    });
+    };
+    await updateAccount(account.name, accountUpdate);
     localCredentials.forEach((cred) =>
-        initializeGenesisCredential(
-            dispatch,
-            account.address,
-            cred,
-            accountInfo
-        )
+        initializeGenesisCredential(dispatch, address, cred, accountInfo)
     );
+    await dispatch(
+        updateAccountFields({
+            address: account.address,
+            updatedFields: accountUpdate,
+        })
+    );
+    await addToAddressBook(dispatch, {
+        name: account.name,
+        address,
+        readOnly: true,
+    });
+    return address;
 }
 
 // Loads the given accounts' infos from the node, then updates the
@@ -171,7 +188,6 @@ export async function loadAccountInfos(
     dispatch: Dispatch
 ) {
     const map: Record<string, AccountInfo> = {};
-    console.log(accounts);
     const confirmedAccounts = accounts.filter(
         (account) =>
             (isValidAddress(account.address) &&
@@ -181,14 +197,20 @@ export async function loadAccountInfos(
     if (confirmedAccounts.length === 0) {
         return Promise.resolve();
     }
-    console.log(confirmedAccounts);
     const accountInfos = await getAccountInfos(confirmedAccounts);
-    console.log(accountInfos);
     const updateEncryptedAmountsPromises = accountInfos.map(
         ({ account, accountInfo }) => {
-            map[account.address] = accountInfo;
             if (account.status === AccountStatus.Genesis) {
-                return initializeGenesisAccount(dispatch, account, accountInfo);
+                return new Promise<void>((resolve) => {
+                    return initializeGenesisAccount(
+                        dispatch,
+                        account,
+                        accountInfo
+                    ).then((address) => {
+                        map[address] = accountInfo;
+                        return resolve();
+                    });
+                });
             }
             return updateAccountEncryptedAmount(
                 account,
