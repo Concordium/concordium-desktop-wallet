@@ -5,12 +5,10 @@ import {
     RewardDistribution,
     RewardDistributionValue,
 } from '../../common/RewardDistribution';
-import withBlockSummary, {
-    WithBlockSummary,
-} from '../../common/withBlockSummary';
+import withChainData, { ChainData } from '../../common/withChainData';
 import { getCurrentValue, rewardDistributionLabels } from './util';
 
-interface Props extends WithBlockSummary {
+interface Props extends ChainData {
     transactionFeeDistribution: TransactionFeeDistribution;
 }
 
@@ -52,4 +50,4 @@ function SignTransactionFeeDistribution({
     );
 }
 
-export default withBlockSummary(SignTransactionFeeDistribution);
+export default withChainData(SignTransactionFeeDistribution);

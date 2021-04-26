@@ -15,6 +15,10 @@ const mintRateFormat = Intl.NumberFormat(undefined, {
     maximumSignificantDigits: 9,
 }).format;
 
+const mintRateDescriptionFormat = Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 1,
+}).format;
+
 export interface MintRateInputProps extends ClassName, CommonFieldProps {
     value: string;
     onChange?(v: string): void;
@@ -32,10 +36,10 @@ export default function MintRateInput({
     onChange = noOp,
     onBlur = noOp,
 }: MintRateInputProps): JSX.Element {
-    const [anualRate, setAnualRate] = useState<string | undefined>();
-    const [anualFocused, setAnualFocused] = useState<boolean>(false);
+    const [annualRate, setAnnualRate] = useState<string | undefined>();
+    const [annualFocused, setAnnualFocused] = useState<boolean>(false);
 
-    const calculateAnualRate = useCallback(
+    const calculateAnnualRate = useCallback(
         (m: number) => (1 + Number(m)) ** Number(slotsPerYear) - 1,
         [slotsPerYear]
     );
@@ -45,20 +49,20 @@ export default function MintRateInput({
     );
 
     useEffect(() => {
-        const calculated = calculateAnualRate(Number(mintPerSlot));
-        setAnualRate(calculated.toString());
+        const calculated = calculateAnnualRate(Number(mintPerSlot));
+        setAnnualRate(calculated.toString());
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mintPerSlot]);
 
     useUpdateEffect(() => {
-        if (!anualFocused) {
+        if (!annualFocused) {
             return;
         }
 
-        const calculated = calculateMintPerSlot(Number(anualRate));
+        const calculated = calculateMintPerSlot(Number(annualRate));
         onChange(mintRateFormat(calculated));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [anualRate]);
+    }, [annualRate]);
 
     const { mantissa, exponent } = useMemo(
         () => parseMintPerSlot(mintPerSlot) ?? ({} as Partial<MintRate>),
@@ -69,12 +73,14 @@ export default function MintRateInput({
         <span className={clsx(styles.root, className)}>
             <InlineNumber
                 className={styles.field}
-                title="Annual mint rate"
+                title={`Annual mint rate (~${mintRateDescriptionFormat(
+                    parseFloat(annualRate ?? '') * 100
+                )}% new GTU per year)`}
                 allowFractions={6}
-                value={anualRate}
-                onChange={setAnualRate}
-                onFocus={() => setAnualFocused(true)}
-                onBlur={() => setAnualFocused(false)}
+                value={annualRate}
+                onChange={setAnnualRate}
+                onFocus={() => setAnnualFocused(true)}
+                onBlur={() => setAnnualFocused(false)}
                 disabled={disabled}
             />{' '}
             ≈ (1 +{' '}

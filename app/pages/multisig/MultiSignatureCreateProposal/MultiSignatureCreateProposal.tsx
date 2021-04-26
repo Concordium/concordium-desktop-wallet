@@ -23,7 +23,7 @@ import { getNow, TimeConstants } from '~/utils/timeHelpers';
 import { futureDate } from '~/components/Form/util/validation';
 
 import styles from './MultiSignatureCreateProposal.module.scss';
-import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
+import withChainData, { ChainData } from '../common/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface MultiSignatureCreateProposalForm {
@@ -40,8 +40,7 @@ export interface MultiSignatureCreateProposalForm {
 function MultiSignatureCreateProposal({
     blockSummary,
     consensusStatus,
-}: WithBlockSummary) {
-    const loading = !blockSummary || !consensusStatus;
+}: ChainData) {
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const dispatch = useDispatch();
@@ -185,10 +184,7 @@ function MultiSignatureCreateProposal({
                             Add all the details for the {displayType}{' '}
                             transaction below.
                         </p>
-                        {loading && (
-                            <Loading text="Getting current settings from chain" />
-                        )}
-                        {blockSummary && consensusStatus && (
+                        {blockSummary && consensusStatus ? (
                             <>
                                 <UpdateComponent
                                     blockSummary={blockSummary}
@@ -210,6 +206,8 @@ function MultiSignatureCreateProposal({
                                     }}
                                 />
                             </>
+                        ) : (
+                            <Loading text="Getting current settings from chain" />
                         )}
                     </div>
                     <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
@@ -229,4 +227,4 @@ function MultiSignatureCreateProposal({
     );
 }
 
-export default withBlockSummary(MultiSignatureCreateProposal);
+export default withChainData(MultiSignatureCreateProposal);

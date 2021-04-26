@@ -7,21 +7,19 @@ import { getConsensusStatus, getBlockSummary } from '~/utils/nodeRequests';
 import routes from '~/constants/routes.json';
 import DynamicModal from '../DynamicModal';
 
-export interface WithBlockSummary {
+export interface ChainData {
     consensusStatus: ConsensusStatus | undefined;
     blockSummary: BlockSummary | undefined;
 }
 
-export default function withBlockSummary<TProps extends WithBlockSummary>(
+export default function withChainData<TProps extends ChainData>(
     Component: ComponentType<TProps>
-): ComponentType<Omit<TProps, keyof WithBlockSummary>> {
+): ComponentType<Omit<TProps, keyof ChainData>> {
     return (props) => {
-        const [chainData, setChainData] = useState<
-            WithBlockSummary | undefined
-        >();
+        const [chainData, setChainData] = useState<ChainData | undefined>();
         const dispatch = useDispatch();
 
-        const init = useCallback(async (): Promise<WithBlockSummary> => {
+        const init = useCallback(async (): Promise<ChainData> => {
             const cs: ConsensusStatus = await getConsensusStatus();
             const bs = await getBlockSummary(cs.lastFinalizedBlock);
 
@@ -31,7 +29,7 @@ export default function withBlockSummary<TProps extends WithBlockSummary>(
             };
         }, []);
 
-        const propsWithBlockSummary: TProps = {
+        const enrichedProps: TProps = {
             ...props,
             ...chainData,
         } as TProps;
@@ -51,7 +49,7 @@ export default function withBlockSummary<TProps extends WithBlockSummary>(
             configured node. Verify your node settings, and check that
             the node is running."
                 />
-                <Component {...propsWithBlockSummary} />
+                <Component {...enrichedProps} />
             </>
         );
     };
