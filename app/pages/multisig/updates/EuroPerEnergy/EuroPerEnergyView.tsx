@@ -16,7 +16,7 @@ interface Props extends WithBlockSummary {
 /**
  * Displays an overview of a euro per energy transaction payload.
  */
-export default withBlockSummary(function MicroGtuPerEuroView({
+export default withBlockSummary(function EuroPerEnergyView({
     exchangeRate,
     blockSummary,
 }: Props) {
@@ -26,7 +26,7 @@ export default withBlockSummary(function MicroGtuPerEuroView({
         return (
             <RelativeRateField
                 {...commonFieldProps}
-                label="Current micro GTU per euro rate"
+                label="Current euro per energy"
                 value={fromExchangeRate(currentValue)}
                 disabled
             />
@@ -42,7 +42,7 @@ export default withBlockSummary(function MicroGtuPerEuroView({
             )}
             <RelativeRateField
                 {...commonFieldProps}
-                label="New micro GTU per euro rate"
+                label="New euro per energy rate"
                 value={fromExchangeRate(exchangeRate)}
                 disabled
             />

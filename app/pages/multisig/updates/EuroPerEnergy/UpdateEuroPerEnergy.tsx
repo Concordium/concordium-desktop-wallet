@@ -36,7 +36,7 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
             <FormRelativeRateField
                 {...commonFieldProps}
                 name={fieldNames.euroPerEnergyRate}
-                label="New euro per energy"
+                label="New euro per energy rate"
                 defaultValue={currentValue}
                 rules={{
                     validate: {
