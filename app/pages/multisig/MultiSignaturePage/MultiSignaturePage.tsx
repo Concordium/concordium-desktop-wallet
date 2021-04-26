@@ -43,7 +43,7 @@ export default function MultiSignaturePage() {
                     to={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
                     className={styles.link}
                 >
-                    Export public-key
+                    Export a key
                 </ButtonNavLink>
             </Master>
             <Detail>

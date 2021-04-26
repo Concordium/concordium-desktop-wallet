@@ -6,6 +6,7 @@ import { useParams } from 'react-router';
 
 import { FieldValues } from 'react-hook-form';
 import {
+    HigherLevelKeyUpdate,
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
@@ -25,7 +26,7 @@ import styles from './MultiSignatureCreateProposal.module.scss';
 import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 
-interface MultiSignatureCreateProposalForm {
+export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
 }
 
@@ -108,6 +109,32 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
         }
     }
 
+    /**
+     * Form submit function used for the higher level keys updates. They do not
+     * use Form element to input all the keys, so therefore it cannot use the
+     * regular handleSubmit function.
+     */
+    async function handleKeySubmit(
+        effectiveTime: Date,
+        higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
+    ) {
+        if (!blockSummary) {
+            return;
+        }
+        const timeInSeconds = BigInt(
+            Math.round(effectiveTime.getTime() / 1000)
+        );
+        const proposal = await handler.createTransaction(
+            blockSummary,
+            higherLevelKeyUpdate,
+            timeInSeconds
+        );
+
+        if (proposal) {
+            forwardTransactionToSigningPage(proposal);
+        }
+    }
+
     const RestrictionModal = (
         <Modal
             open={restrictionModalOpen}
@@ -123,48 +150,74 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
         setRestrictionModalOpen(true);
     }
 
+    let component;
+    if (
+        [
+            UpdateType.UpdateRootKeys,
+            UpdateType.UpdateLevel1KeysUsingRootKeys,
+            UpdateType.UpdateLevel1KeysUsingLevel1Keys,
+        ].includes(type)
+    ) {
+        if (!blockSummary) {
+            component = <Loading text="Getting current settings from chain" />;
+        } else {
+            component = (
+                <UpdateComponent
+                    blockSummary={blockSummary}
+                    handleKeySubmit={handleKeySubmit}
+                />
+            );
+        }
+    } else {
+        component = (
+            <>
+                <h3 className={styles.subHeader}>Transaction details</h3>
+                <Form<FieldValues & MultiSignatureCreateProposalForm>
+                    className={styles.details}
+                    onSubmit={handleSubmit}
+                >
+                    <div className={styles.proposal}>
+                        <p>
+                            Add all the details for the {displayType}{' '}
+                            transaction below.
+                        </p>
+                        {loading && (
+                            <Loading text="Getting current settings from chain" />
+                        )}
+                        {blockSummary && (
+                            <>
+                                <UpdateComponent blockSummary={blockSummary} />
+                                <Form.Timestamp
+                                    name="effectiveTime"
+                                    label="Effective Time"
+                                    defaultValue={
+                                        new Date(
+                                            getNow() + 5 * TimeConstants.Minute
+                                        )
+                                    }
+                                    rules={{
+                                        required: 'Effective time is required',
+                                        validate: futureDate(
+                                            'Effective time must be in the future'
+                                        ),
+                                    }}
+                                />
+                            </>
+                        )}
+                    </div>
+                    <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
+                </Form>
+            </>
+        );
+    }
+
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
             stepTitle={`Transaction Proposal - ${handler.type}`}
         >
             {RestrictionModal}
-            <h3 className={styles.subHeader}>Transaction details</h3>
-            <Form<FieldValues & MultiSignatureCreateProposalForm>
-                className={styles.details}
-                onSubmit={handleSubmit}
-            >
-                <div className={styles.proposal}>
-                    <p>
-                        Add all the details for the {displayType} transaction
-                        below.
-                    </p>
-                    {loading && (
-                        <Loading text="Getting current settings from chain" />
-                    )}
-                    {blockSummary && (
-                        <>
-                            <UpdateComponent blockSummary={blockSummary} />
-                            <Form.Timestamp
-                                name="effectiveTime"
-                                label="Effective Time"
-                                defaultValue={
-                                    new Date(
-                                        getNow() + 5 * TimeConstants.Minute
-                                    )
-                                }
-                                rules={{
-                                    required: 'Effective time is required',
-                                    validate: futureDate(
-                                        'Effective time must be in the future'
-                                    ),
-                                }}
-                            />
-                        </>
-                    )}
-                </div>
-                <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
-            </Form>
+            {component}
         </MultiSignatureLayout>
     );
 }

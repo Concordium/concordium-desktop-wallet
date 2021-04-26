@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Identicon from 'react-identicons';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -10,6 +10,7 @@ const imageWidth = 128;
 
 interface Props {
     data: string;
+    setScreenshot?: (dataUrl: string) => void;
 }
 
 function copyIdenticonToClipboard(dataUrl: string) {
@@ -21,16 +22,19 @@ function copyIdenticonToClipboard(dataUrl: string) {
  * Component that displays a copiable identicon. Clicking the identicon will
  * copy the identicon to the clipboard as a PNG file.
  */
-export default function CopiableIdenticon({ data }: Props) {
+export default function CopiableIdenticon({ data, setScreenshot }: Props) {
     const ref = useRef(null);
     const [image, takeScreenshot] = useScreenshot();
-    const getImage = () => {
-        takeScreenshot(ref.current);
-    };
 
-    if (image) {
-        copyIdenticonToClipboard(image);
-    }
+    // Take a screenshot of the identicon after the component has rendered
+    // the first time.
+    useEffect(() => {
+        if (!image) {
+            takeScreenshot(ref.current);
+        } else if (setScreenshot) {
+            setScreenshot(image);
+        }
+    }, [image, takeScreenshot, setScreenshot]);
 
     return (
         <>
@@ -41,7 +45,7 @@ export default function CopiableIdenticon({ data }: Props) {
             <button
                 ref={ref}
                 className={styles.identicon}
-                onClick={() => getImage()}
+                onClick={() => copyIdenticonToClipboard(image)}
                 type="button"
             >
                 <Identicon string={data} size={imageWidth} />

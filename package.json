@@ -22,6 +22,7 @@
     "package-all": "yarn build && electron-builder build -mwl",
     "package-ci": "yarn postinstall && yarn build && electron-builder --publish always",
     "package-mac": "yarn build && electron-builder build --mac",
+    "package-mac-no-notarize": "export NOTARIZE=skip && yarn build && electron-builder build --mac",
     "package-linux": "yarn build && electron-builder build --linux",
     "package-win": "yarn build && electron-builder build --win --x64",
     "postinstall": "node internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall  && sh ./internals/scripts/build_protos.sh",
@@ -78,7 +79,8 @@
           "type": "link",
           "path": "/Applications"
         }
-      ]
+      ],
+      "sign": false
     },
     "win": {
       "target": [
@@ -94,6 +96,16 @@
       ],
       "category": "Development"
     },
+    "mac": {
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "asarUnpack": [
+        "**/*.node"
+      ]
+    },
+    "afterSign": "scripts/notarize.js",
     "directories": {
       "buildResources": "resources",
       "output": "release"
@@ -161,6 +173,7 @@
     "electron": "^8",
     "electron-builder": "^22.3.6",
     "electron-devtools-installer": "^2.2.4",
+    "electron-notarize": "^1.0.0",
     "electron-rebuild": "^1.10.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.3",
@@ -247,6 +260,7 @@
     "react-modal": "^3.12.1",
     "react-redux": "^7.2.1",
     "react-router-dom": "^5.2.0",
+    "react-to-print": "^2.12.4",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",

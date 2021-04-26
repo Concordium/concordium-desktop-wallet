@@ -1,5 +1,5 @@
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
+import { findKey } from '~/utils/updates/AuthorizationHelper';
 import { BlockSummary } from '~/utils/NodeApiTypes';
 import {
     AccountTransaction,
@@ -20,13 +20,12 @@ export async function signUpdateInstruction(
     ledger: ConcordiumLedgerClient,
     blockSummary: BlockSummary
 ): Promise<UpdateInstructionSignature[]> {
-    const transactionHandler = await findUpdateInstructionHandler(
-        instruction.type
-    );
-    const authorizationKey = await findAuthorizationKey(
+    const transactionHandler = findUpdateInstructionHandler(instruction.type);
+    const authorizationKey = await findKey(
         ledger,
-        transactionHandler,
-        blockSummary.updates.keys.level2Keys
+        blockSummary.updates.keys,
+        instruction,
+        transactionHandler
     );
     if (!authorizationKey) {
         throw new Error('Unable to get authorizationKey.');
