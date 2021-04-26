@@ -1,0 +1,24 @@
+@import 'config/bundle';
+
+.connection {
+    text-align: center;
+}
+
+.input {
+    margin-bottom: 14px;
+}
+
+.icon {
+    width: 100px;
+    height: 100px;
+}
+
+.submit {
+    margin-top: 14px;
+}
+
+.error {
+    font-size: $font-size-body2;
+    margin-top: 15px;
+    color: $color-danger;
+}
