@@ -5,11 +5,16 @@ import React, {
     useImperativeHandle,
     useCallback,
 } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Validate } from 'react-hook-form';
 import PlusIcon from '@resources/svg/plus.svg';
 import CloseIcon from '@resources/svg/cross.svg';
 import { EqualRecord, Schedule } from '~/utils/types';
-import { displayAsGTU, isValidGTUString, toMicroUnits } from '~/utils/gtu';
+import {
+    displayAsGTU,
+    getGTUSymbol,
+    isValidGTUString,
+    toMicroUnits,
+} from '~/utils/gtu';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
 import Form from '../../Form';
 import { futureDate } from '../../Form/util/validation';
@@ -23,6 +28,7 @@ import {
     ScheduledTransferBuilderRef,
 } from '../util';
 import { noOp } from '~/utils/basicHelpers';
+import Label from '~/components/Label';
 
 export interface Defaults {
     schedule: Schedule;
@@ -118,13 +124,14 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             );
         }
 
-        function validateCurrentAmount(pointAmount: string): boolean {
+        const validateCurrentAmount: Validate = (pointAmount: string) => {
+            let isValid = false;
             if (pointAmount && isValidGTUString(pointAmount)) {
                 const value = toMicroUnits(pointAmount);
-                return value > 0n && value + usedAmount <= amount;
+                isValid = value + usedAmount <= amount;
             }
-            return false;
-        }
+            return isValid || 'Value exceeds transaction amount';
+        };
 
         useEffect(() => {
             setScheduleLength(schedule.length);
@@ -132,13 +139,25 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
 
         const addSchedulePointForm = (
             <Form onSubmit={addToSchedule} formMethods={methods}>
-                <Form.Input
-                    label="Amount:"
-                    name={addSchedulePointFormNames.amount}
-                    placeholder="Enter Amount"
-                    autoFocus
-                    rules={{ validate: validateCurrentAmount, required: true }}
-                />
+                <div className={styles.amountInputWrapper}>
+                    <Label>Amount:</Label>
+                    {getGTUSymbol()}{' '}
+                    <Form.InlineNumber
+                        name={addSchedulePointFormNames.amount}
+                        defaultValue="0.00"
+                        allowFractions
+                        ensureDigits={2}
+                        autoFocus
+                        rules={{
+                            min: {
+                                value: 0,
+                                message: 'Value can not be negative',
+                            },
+                            validate: validateCurrentAmount,
+                            required: true,
+                        }}
+                    />
+                </div>
                 <Form.Timestamp
                     name={addSchedulePointFormNames.timestamp}
                     label="Release time:"
@@ -168,7 +187,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                             className={styles.addScheduleCardHeader}
                             onClick={() => setAdding(!adding)}
                         >
-                            <p>Add release to schedule</p>
+                            <span>Add release to schedule</span>
                             <HeaderIcon />
                         </Button>
                         {adding ? addSchedulePointForm : null}

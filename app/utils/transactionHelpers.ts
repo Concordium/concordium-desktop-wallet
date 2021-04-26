@@ -363,7 +363,7 @@ export function validateAmount(
     estimatedFee: bigint | undefined
 ): string | undefined {
     if (!isValidGTUString(amountToValidate)) {
-        return 'Invalid input';
+        return 'Value is not a valid GTU amount';
     }
     if (
         accountInfo &&
