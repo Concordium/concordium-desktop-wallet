@@ -145,9 +145,14 @@ export const toLocalisedFraction: typeof toFraction = (resolution) => {
     return (value) => converter(value)?.replace('.', fractionRenderSeperator);
 };
 
-const getNumberParts = (value: string) => {
+interface NumberParts {
+    whole: string;
+    fractions?: string;
+    exponent?: string;
+}
+export const getNumberParts = (value: string): NumberParts => {
     const [mantissa, exponent] = value.toLowerCase().split('e');
-    const [whole, fractions = ''] = mantissa.split(numberSeparator);
+    const [whole, fractions] = mantissa.split(numberSeparator);
 
     return {
         whole,
@@ -354,8 +359,8 @@ export const formatNumberStringWithDigits = (
             );
         }
 
-        const { fractions } = getNumberParts(value);
-        const valueFractionDigits = fractions?.length ?? 0;
+        const { fractions = '' } = getNumberParts(value);
+        const valueFractionDigits = fractions.length;
 
         if (valueFractionDigits === 0 && minFractionDigits === 0) {
             return value;

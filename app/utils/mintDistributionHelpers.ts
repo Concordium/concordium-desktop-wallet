@@ -1,12 +1,14 @@
+import { getNumberParts } from './numberStringHelpers';
 import { MintRate } from './types';
 
 // eslint-disable-next-line import/prefer-default-export
 export const parseMintPerSlot = (mintPerSlot: string): MintRate | undefined => {
-    const [m, e = '0'] = mintPerSlot.toLowerCase().split('e-');
-    const [, fractions = ''] = m.split('.');
+    const { whole, fractions = '', exponent = '0' } = getNumberParts(
+        mintPerSlot
+    );
 
     return {
-        mantissa: parseInt(m.replace('.', ''), 10),
-        exponent: parseInt(e, 10) + fractions.length,
+        mantissa: parseInt(whole, 10),
+        exponent: parseInt(exponent.replace('-', ''), 10) + fractions.length,
     };
 };
