@@ -58,13 +58,19 @@ export default class ScheduledTransferHandler
         sender,
         schedule,
         recipient,
+        signatureAmount,
     }: Partial<CreateTransactionInput>) {
         if (!sender || !recipient || !schedule) {
             throw new Error(
                 `Unexpected Missing input: ${{ sender, schedule, recipient }}`
             );
         }
-        return createScheduledTransferTransaction(sender, recipient, schedule);
+        return createScheduledTransferTransaction(
+            sender,
+            recipient,
+            schedule,
+            signatureAmount
+        );
     }
 
     title = `Account Transaction | ${TYPE}`;
