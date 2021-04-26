@@ -20,7 +20,8 @@ function displayIdentity(
     ) {
         return (
             <>
-                {account.identityName} + <MultiSigIcon height="15" />
+                {account.identityName} +{' '}
+                <MultiSigIcon className={styles.multisig} />
             </>
         );
     }
@@ -98,12 +99,12 @@ export default function AccountListElement({
             />
             <SidedRow
                 className={styles.row}
-                left={<h2>Account Total:</h2>}
+                left={<h3>Account Total:</h3>}
                 right={
-                    <>
+                    <h3>
                         {displayAsGTU(shielded + unShielded)}
                         {hidden}
-                    </>
+                    </h3>
                 }
             />
             <div className={styles.dividingLine} />

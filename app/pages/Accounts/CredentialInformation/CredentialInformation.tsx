@@ -38,33 +38,38 @@ export default function CredentialInformation({
                 <p>Signature threshold: {account.signatureThreshold}</p>
                 <CloseButton onClick={returnFunction} />
             </div>
-            {credentialsOfAccount.map((credential: Credential) => {
-                const policy = JSON.parse(credential.policy);
-                return (
-                    <div className={styles.listElement} key={credential.credId}>
-                        <SidedRow
-                            left="Credential ID:"
-                            right={
-                                <>
-                                    <CopyButton
-                                        className={styles.copy}
-                                        value={credential.credId}
-                                    />
-                                    {credential.credId.substring(0, 8)}
-                                </>
-                            }
-                        />
-                        <SidedRow
-                            left="Date of Creation:"
-                            right={formatDate(policy.createdAt)}
-                        />
-                        <SidedRow
-                            left="Valid to:"
-                            right={formatDate(policy.validTo)}
-                        />
-                    </div>
-                );
-            })}
+            <div className={styles.credentialList}>
+                {credentialsOfAccount.map((credential: Credential) => {
+                    const policy = JSON.parse(credential.policy);
+                    return (
+                        <div
+                            className={styles.listElement}
+                            key={credential.credId}
+                        >
+                            <SidedRow
+                                left="Credential ID:"
+                                right={
+                                    <>
+                                        <CopyButton
+                                            className={styles.copy}
+                                            value={credential.credId}
+                                        />
+                                        {credential.credId.substring(0, 8)}
+                                    </>
+                                }
+                            />
+                            <SidedRow
+                                left="Date of Creation:"
+                                right={formatDate(policy.createdAt)}
+                            />
+                            <SidedRow
+                                left="Valid to:"
+                                right={formatDate(policy.validTo)}
+                            />
+                        </div>
+                    );
+                })}
+            </div>
         </Card>
     );
 }

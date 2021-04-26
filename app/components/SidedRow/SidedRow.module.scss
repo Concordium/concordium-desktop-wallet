@@ -8,9 +8,13 @@
 }
 
 .left {
-    text-align: left;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .right {
-    text-align: right;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
 }
