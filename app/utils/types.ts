@@ -1020,7 +1020,7 @@ interface AccountCredentialWithoutProofs extends CredentialDeploymentValues {
     commitments: any;
 }
 
-export interface GenesisCredential {
+export interface GenesisAccount {
     generatedAddress: string;
     credential: Typed<AccountCredentialWithoutProofs>;
 }

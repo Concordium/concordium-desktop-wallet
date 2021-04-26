@@ -53,5 +53,5 @@
     "UPDATE_ACCOUNT_CREDENTIALS_CHANGESIGNATURETHRESHOLD": "/update_account_credentials/change-signature-threshold",
     "UPDATE_ACCOUNT_CREDENTIALS_SIGN": "/update_account_credentials/sign",
     "UPDATE_ACCOUNT_CREDENTIALS_SEND": "/update_account_credentials/send",
-    "CREATEGENESISACCOUNT": "/genesis-account"
+    "CREATE_GENESIS_ACCOUNT": "/genesis-account"
 }

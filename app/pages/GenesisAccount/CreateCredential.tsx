@@ -1,16 +1,19 @@
 import React from 'react';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { createGenesisAccount } from '~/utils/rustInterface';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
 import styles from './GenesisAccount.module.scss';
-import { GenesisCredential } from '~/utils/types';
+import { GenesisAccount } from '~/utils/types';
+import Ledger from '~/components/ledger/Ledger';
+import Card from '~/cross-app-components/Card';
+import Button from '~/cross-app-components/Button';
+import { asyncNoOp } from '~/utils/basicHelpers';
 
 interface Props {
     identityId: number;
     setCredentialNumber: (c: number) => void;
-    setGenesis: (g: GenesisCredential) => void;
+    setGenesisAccount: (g: GenesisAccount) => void;
     onFinish: () => void;
     context?: string;
 }
@@ -18,7 +21,7 @@ interface Props {
 export default function CreateCredential({
     identityId,
     setCredentialNumber,
-    setGenesis,
+    setGenesisAccount,
     onFinish,
     context,
 }: Props) {
@@ -26,15 +29,14 @@ export default function CreateCredential({
         ledger: ConcordiumLedgerClient,
         displayMessage: (message: string) => void
     ) {
-        const nextCredentialNumber = await getNextCredentialNumber(identityId);
         if (!context) {
             throw new Error('missing context');
         }
-
+        const nextCredentialNumber = await getNextCredentialNumber(identityId);
         const { ipInfo, arInfo, global } = JSON.parse(context);
         const createdAt = getCurrentYearMonth();
 
-        setGenesis(
+        setGenesisAccount(
             await createGenesisAccount(
                 ledger,
                 identityId,
@@ -51,8 +53,21 @@ export default function CreateCredential({
     }
 
     return (
-        <div className={styles.genesisContainer}>
-            <SimpleLedger ledgerCall={createAccount} />
-        </div>
+        <Card className={styles.ledgerCard}>
+            <Ledger ledgerCallback={createAccount}>
+                {({ isReady, statusView, submitHandler = asyncNoOp }) => (
+                    <>
+                        {statusView}
+                        <Button
+                            className={styles.ledgerButton}
+                            onClick={submitHandler}
+                            disabled={!isReady}
+                        >
+                            Submit
+                        </Button>
+                    </>
+                )}
+            </Ledger>
+        </Card>
     );
 }

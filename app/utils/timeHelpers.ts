@@ -1,9 +1,11 @@
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth } from './types';
 
-// given a YearMonth string (YYYYMM), returns
-// a displayable format eg:
-// given "202001" => "January 2020"
+/**
+ * given a YearMonth string (YYYYMM), returns
+ * a displayable format eg:
+ * given "202001" => "January 2020"
+ */
 export function formatDate(date: YearMonth) {
     const dtFormat = new Intl.DateTimeFormat('en-GB', {
         month: 'long',

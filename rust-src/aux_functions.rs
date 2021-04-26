@@ -42,8 +42,8 @@ pub fn build_pub_info_for_ip_aux(
 
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
 
-    let id_cred_sec = Value::new(generate_bls(id_cred_sec_seed)?);
-    let prf_key = prf::SecretKey::new(generate_bls(prf_key_seed)?);
+    let id_cred_sec = Value::new(generate_bls_key(id_cred_sec_seed)?);
+    let prf_key = prf::SecretKey::new(generate_bls_key(prf_key_seed)?);
 
     let initial_acc_data = InitialAccountDataStruct {
         public_keys: try_get(&v, "publicKeys")?,
@@ -80,8 +80,8 @@ pub fn create_id_request_aux(
         Threshold(max((l - 1).try_into().unwrap_or(255), 1))
     };
 
-    let id_cred_sec = Value::new(generate_bls(id_cred_sec_seed)?);
-    let prf_key = prf::SecretKey::new(generate_bls(prf_key_seed)?);
+    let id_cred_sec = Value::new(generate_bls_key(id_cred_sec_seed)?);
+    let prf_key = prf::SecretKey::new(generate_bls_key(prf_key_seed)?);
 
     let chi = CredentialHolderInfo::<ExampleCurve> {
         id_cred: IdCredentials { id_cred_sec },
@@ -140,10 +140,10 @@ pub fn generate_unsigned_credential_aux(
     };
 
     let id_string: String = try_get(&v, "idCredSec")?;
-    let id_cred_sec = Value::new(generate_bls(&id_string)?);
+    let id_cred_sec = Value::new(generate_bls_key(&id_string)?);
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key = prf::SecretKey::new(generate_bls(&prf_key_string)?);
+    let prf_key = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let chi = CredentialHolderInfo::<ExampleCurve> {
         id_cred: IdCredentials { id_cred_sec },
@@ -310,7 +310,7 @@ pub fn decrypt_amounts_aux(
     let encrypted_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "encryptedAmounts")?;
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let credential_number: u8 = try_get(&v, "credentialNumber")?;
 
@@ -342,7 +342,7 @@ pub fn create_sec_to_pub_aux(
     let v: SerdeValue = from_str(input)?;
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let account_number: u8 = try_get(&v, "accountNumber")?;
 

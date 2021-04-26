@@ -20,7 +20,7 @@ export default function Routes(): JSX.Element {
     return (
         <Switch>
             <Route
-                path={routes.CREATEGENESISACCOUNT}
+                path={routes.CREATE_GENESIS_ACCOUNT}
                 component={genesisAccount}
             />
             <Route path={routes.SUBMITTRANSFER} component={SubmitTransfer} />

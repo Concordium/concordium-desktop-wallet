@@ -1,31 +1,46 @@
 $width: 600px;
 
-.settingInput {
+.fileForm,
+.pickName,
+.ledgerCard,
+.confirmCard {
+    flex-direction: column;
+    justify-content: center;
     max-width: $width;
     margin: 20px auto;
 }
 
-.genesisContainer {
-    position: relative;
-    > * {
-        max-width: $width;
-        margin: 20px auto;
-    }
+.fileForm,
+.pickName {
+    display: flex;
+    height: 90%;
 }
 
-.fileForm {
-    .fileInput {
-        height: 400px;
-    }
+.fileInput {
+    height: 400px;
+}
 
-    button {
-        margin: 20px 0;
-    }
+.fileInput,
+.nameInput {
+    margin-top: 40px;
+}
+.submitButton {
+    margin-top: auto;
 }
 
 .printButton {
     position: absolute;
-    right: 0;
-    top: 0;
+    right: 10px;
+    top: 10px;
     margin-top: 0;
+}
+
+.ledgerButton {
+    margin: auto;
+    margin-top: 50px;
+    display: flex;
+}
+
+.confirmCard {
+    position: relative;
 }

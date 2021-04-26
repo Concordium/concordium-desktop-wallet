@@ -19,11 +19,11 @@ pub fn try_get<A: serde::de::DeserializeOwned>(v: &SerdeValue, fname: &str) -> F
     }
 }
 
-pub fn generate_bls(seed: &str) -> Fallible<Fr> {
+pub fn generate_bls_key(seed: &str) -> Fallible<Fr> {
     let key_info = b"";
 
     match keygen_bls(seed.as_bytes(), key_info) {
         Ok(s) => Ok(s),
-        Err(_) => Err(format_err!("unable to build parse id_cred_sec.")),
+        Err(_) => Err(format_err!("unable to build parse seed for bls_keygen.")),
     }
 }

@@ -24,6 +24,19 @@ use pedersen_scheme::{
 
 type ExampleAttributeList = AttributeList<BaseField, AttributeKind>;
 
+/**
+ * creates an AccountCredentialWithoutProofs and the address, which is generated from the credId of the credential.
+ * @input is a json string containing:
+ * arInfo: ArInfo<ExampleCurve>
+ * ipInfo: IpInfo<Bls12>
+ * global: GlobalContext<ExampleCurve>
+ * credentialNumber: u8
+ * publicKeys: Vec<VerifyKey>
+ * threshold: SignatureThreshold
+ * currentYearMonth: YearMonth
+ *
+ * Additionally it takes the seeds for the id_cred_sec and prf_key as inputs.
+**/
 pub fn create_genesis_account (
     input: &str,
     id_cred_sec_seed: &str,
@@ -38,8 +51,8 @@ pub fn create_genesis_account (
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
     let cred_counter: u8 = try_get(&v, "credentialNumber")?;
 
-    let id_cred_sec = Value::new(generate_bls(id_cred_sec_seed)?);
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(prf_key_seed)?);
+    let id_cred_sec = Value::new(generate_bls_key(id_cred_sec_seed)?);
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(prf_key_seed)?);
 
     let initial_acc_data = InitialAccountDataStruct {
         public_keys: try_get(&v, "publicKeys")?,
@@ -82,9 +95,6 @@ pub fn create_genesis_account (
         id_cred: IdCredentials { id_cred_sec },
     };
 
-    // only a single dummy anonymity revoker.
-    let threshold = Threshold(1);
-
     // Expire in 1 year from now.
     let created_at: YearMonth = try_get(&v, "currentYearMonth")?;
     let valid_to = {
@@ -100,10 +110,14 @@ pub fn create_genesis_account (
         prf_key,
     };
 
+    // We need to choose some value, to compute commitments,
+    // however the commitment is never opened so we just choose some large value.
+    let max_accounts = 238;
+
     let attributes = ExampleAttributeList {
         valid_to,
         created_at,
-        max_accounts: 238,
+        max_accounts,
         alist,
         _phantom: Default::default(),
     };
@@ -115,11 +129,14 @@ pub fn create_genesis_account (
         _phantom:   Default::default(),
     };
 
+    // Anonymity revocation treshold, set to 1 because we only have asingle dummy anonymity revoker.
+    let revocation_threshold = Threshold(1);
+
     let cdv = CredentialDeploymentValues {
         cred_key_info: acc_data.vk_acc,
         cred_id,
         ip_identity: ip_info.ip_identity,
-        threshold,
+        threshold: revocation_threshold,
         ar_data,
         policy,
     };
@@ -133,7 +150,7 @@ pub fn create_genesis_account (
     let (_, cmm_id_cred_sec_sharing_coeff, cmm_coeff_randomness) = compute_sharing_data(
         &aci.cred_holder_info.id_cred.id_cred_sec,
         &chosen_ars,
-        threshold,
+        revocation_threshold,
         &global_context.on_chain_commitment_key,
     );
 

@@ -12,7 +12,7 @@ import {
     CredentialDeploymentInformation,
     Global,
     AccountEncryptedAmount,
-    GenesisCredential,
+    GenesisAccount,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -362,7 +362,7 @@ export async function createGenesisAccount(
     global: Versioned<Global>,
     createdAt: string,
     displayMessage: (message: string) => void
-): Promise<GenesisCredential> {
+): Promise<GenesisAccount> {
     const path = getAccountPath({
         identityIndex: identityId,
         accountIndex: credentialNumber,

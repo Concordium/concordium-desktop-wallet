@@ -9,7 +9,7 @@ import {
     Account,
     AccountStatus,
     IdentityStatus,
-    GenesisCredential,
+    GenesisAccount,
 } from '~/utils/types';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import { saveFile } from '~/utils/FileHelper';
@@ -25,6 +25,7 @@ import Button from '~/cross-app-components/Button';
 import PrintButton from '~/components/PrintButton';
 import CopiableIdenticon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import CreateCredential from './CreateCredential';
+import Card from '~/cross-app-components/Card';
 
 interface FileInputForm {
     file: FileInputValue;
@@ -52,12 +53,13 @@ function inputFile(saveFileContent: (file: string) => void) {
                 className={styles.fileInput}
                 name="file"
                 placeholder="Drag and drop file here"
+                defaultValue={null}
                 buttonTitle="or browse to file"
                 rules={{
                     required: 'File is required',
                 }}
             />
-            <Form.Submit>Submit</Form.Submit>
+            <Form.Submit className={styles.submitButton}>Submit</Form.Submit>
         </Form>
     );
 }
@@ -77,14 +79,14 @@ function PickName({ setName }: PickNameProps) {
     }
 
     return (
-        <Form onSubmit={onSubmit}>
+        <Form onSubmit={onSubmit} className={styles.pickName}>
             <Form.Input
-                className={styles.settingInput}
+                className={styles.nameInput}
                 name="name"
                 placeholder="Account name"
-                rules={{ required: 'name is required' }}
+                rules={{ required: 'Account name is required' }}
             />
-            <Form.Submit className={styles.settingInput}>Continue</Form.Submit>
+            <Form.Submit className={styles.submitButton}>Continue</Form.Submit>
         </Form>
     );
 }
@@ -120,7 +122,7 @@ export default function GenesisAccount(): JSX.Element {
     const [accountName, setAccountName] = useState('');
     const [context, setContext] = useState<string | undefined>();
     const [identityId, setIdentityId] = useState<number>(defaultId);
-    const [genesis, setGenesis] = useState<GenesisCredential>();
+    const [genesisAccount, setGenesisAccount] = useState<GenesisAccount>();
     const [credentialNumber, setCredentialNumber] = useState<number>();
 
     useEffect(() => {
@@ -158,10 +160,10 @@ export default function GenesisAccount(): JSX.Element {
 
     function Confirm() {
         const [image, setImage] = useState<string>();
-        if (!genesis) {
-            throw new Error('Unexpected missing genesis data');
+        if (!genesisAccount) {
+            throw new Error('Unexpected missing genesis account');
         }
-        const credentialContent = genesis.credential.contents;
+        const credentialContent = genesisAccount.credential.contents;
 
         const publicKey = credentialContent.credentialPublicKeys.keys[0];
 
@@ -173,7 +175,7 @@ export default function GenesisAccount(): JSX.Element {
             const address = credentialContent.credId;
 
             const success = await saveFile(
-                JSON.stringify(genesis),
+                JSON.stringify(genesisAccount),
                 'Save credential',
                 `${accountName}_${credentialContent.credId.substring(
                     0,
@@ -205,13 +207,14 @@ export default function GenesisAccount(): JSX.Element {
         }
 
         return (
-            <div className={styles.genesisContainer}>
+            <Card className={styles.confirmCard}>
                 <PrintButton className={styles.printButton}>
-                    <h3>Account Name:</h3>
+                    <h1>Genesis Account</h1>
+                    <h3>Account Name</h3>
                     <p>{accountName}</p>
-                    <h3>Credential Id: </h3>
+                    <h3>Credential Id</h3>
                     <p>{credentialContent.credId}</p>
-                    <h3>Public key: </h3>
+                    <h3>Public key</h3>
                     <p>{publicKey.verifyKey}</p>
                     <img src={image} alt="" />
                 </PrintButton>
@@ -226,7 +229,7 @@ export default function GenesisAccount(): JSX.Element {
                     setScreenshot={setImage}
                 />
                 <Button onClick={exportGenesis}>Export</Button>
-            </div>
+            </Card>
         );
     }
 
@@ -251,7 +254,7 @@ export default function GenesisAccount(): JSX.Element {
                     <CreateCredential
                         identityId={identityId}
                         setCredentialNumber={setCredentialNumber}
-                        setGenesis={setGenesis}
+                        setGenesisAccount={setGenesisAccount}
                         onFinish={() => setLocation(Locations.Confirm)}
                         context={context}
                     />
@@ -268,7 +271,7 @@ export default function GenesisAccount(): JSX.Element {
             <PageLayout.Header>
                 <h1> New Account | Genesis Account </h1>
             </PageLayout.Header>
-            <PageLayout.Container className={styles.genesisContainer}>
+            <PageLayout.Container>
                 <h2>{subtitle(currentLocation)}</h2>
                 <Current />
             </PageLayout.Container>
