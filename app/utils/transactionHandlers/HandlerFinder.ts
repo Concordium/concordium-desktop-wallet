@@ -2,18 +2,18 @@ import { parse } from 'json-bigint';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import {
     UpdateInstructionHandler,
-    TransactionInput,
     AccountTransactionHandler,
-} from '../transactionTypes';
+    TransactionInput,
+} from '~/utils/transactionTypes';
 import {
     instanceOfUpdateInstruction,
     TransactionKindId,
+    AccountTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
     Transaction,
-    AccountTransaction,
-} from '../types';
+} from '~/utils/types';
 import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
 import ElectionDifficultyHandler from './ElectionDifficultyHandler';
 import EuroPerEnergyHandler from './EuroPerEnergyHandler';
@@ -24,6 +24,7 @@ import MintDistributionHandler from './MintDistributionHandler';
 import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
+import SimpleTransferHandler from './SimpleTransferHandler';
 import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
 import UpdateInstructionHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
 import UpdateRootKeysHandler from './UpdateRootsKeysHandler';
@@ -37,6 +38,9 @@ export function findAccountTransactionHandler(
         return new AccountHandlerTypeMiddleware(
             new UpdateAccountCredentialsHandler()
         );
+    }
+    if (transactionKind === TransactionKindId.Simple_transfer) {
+        return new AccountHandlerTypeMiddleware(new SimpleTransferHandler());
     }
     throw new Error(`Unsupported transaction type: ${transactionKind}`);
 }

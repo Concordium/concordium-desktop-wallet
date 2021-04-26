@@ -1,21 +1,21 @@
-import AccountTransactionDetails from '../../components/Transfers/AccountTransactionDetails';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { AccountPathInput, getAccountPath } from '../../features/ledger/Path';
-import { AccountTransactionHandler } from '../transactionTypes';
+import AccountTransactionDetails from '~/components/Transfers/AccountTransactionDetails';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
+import { AccountTransactionHandler } from '~/utils/transactionTypes';
 import {
-    UpdateAccountCredentials,
+    SimpleTransfer,
     AccountTransaction,
     TransactionPayload,
-    instanceOfUpdateAccountCredentials,
     TransactionKindString,
+    instanceOfSimpleTransfer,
 } from '../types';
-import { serializeTransferPayload } from '../transactionSerialization';
 import routes from '~/constants/routes.json';
+import { serializeTransferPayload } from '../transactionSerialization';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 
-const TYPE = 'Update Account Credentials';
+type TransactionType = SimpleTransfer;
 
-type TransactionType = UpdateAccountCredentials;
+const TYPE = 'Simple Transfer';
 
 export default class UpdateAccountCredentialsHandler
     implements
@@ -23,7 +23,7 @@ export default class UpdateAccountCredentialsHandler
     confirmType(
         transaction: AccountTransaction<TransactionPayload>
     ): TransactionType {
-        if (instanceOfUpdateAccountCredentials(transaction)) {
+        if (instanceOfSimpleTransfer(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -42,10 +42,10 @@ export default class UpdateAccountCredentialsHandler
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
-                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL;
-                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
-                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD;
-                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
                     return selectedProposalRoute(proposalId);
@@ -55,7 +55,7 @@ export default class UpdateAccountCredentialsHandler
         };
         return getNewLocation().replace(
             ':transactionKind',
-            TransactionKindString.UpdateCredentials
+            TransactionKindString.Transfer
         );
     }
 
@@ -64,10 +64,7 @@ export default class UpdateAccountCredentialsHandler
         ledger: ConcordiumLedgerClient,
         path: AccountPathInput
     ) {
-        return ledger.signUpdateCredentialTransaction(
-            transaction,
-            getAccountPath(path)
-        );
+        return ledger.signTransfer(transaction, getAccountPath(path));
     }
 
     view(transaction: TransactionType) {

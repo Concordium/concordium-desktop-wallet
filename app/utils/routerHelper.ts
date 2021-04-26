@@ -37,8 +37,8 @@ export function createProposalRoute(
             `${transactionType}`
         );
     }
-    return {
-        pathname: routes.UPDATE_ACCOUNT_CREDENTIALS,
-        state: transactionType,
-    };
+    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
+        ':transactionKind',
+        `${transactionType}`
+    );
 }
