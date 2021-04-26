@@ -8,7 +8,6 @@ import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import {
     AccountTransaction,
-    instanceOfUpdateInstruction,
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -145,11 +144,9 @@ function SignTransactionProposalView({ location }: Props) {
                 <Columns.Column header="Transaction Details">
                     <section className={styles.columnContent}>
                         <TransactionDetails transaction={transactionObject} />
-                        {instanceOfUpdateInstruction(transactionObject) && (
-                            <ExpiredTransactionView
-                                transaction={transactionObject}
-                            />
-                        )}
+                        <ExpiredTransactionView
+                            transaction={transactionObject}
+                        />
                     </section>
                 </Columns.Column>
                 <Columns.Column

@@ -105,6 +105,10 @@ export interface AccountTransactionHandler<T, S> {
      * Returns a React element, in which the details of the transaction are displayed
      */
     view: (transaction: T) => JSX.Element;
+    creationLocationHandler: (
+        currentLocation: string,
+        proposalId: number
+    ) => string;
     type: string;
     title: string;
 }
