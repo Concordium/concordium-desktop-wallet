@@ -1,27 +1,29 @@
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import EuroPerEnergyView from '../../pages/multisig/EuroPerEnergyView';
-import UpdateEuroPerEnergy, {
-    UpdateEuroPerEnergyFields,
-} from '../../pages/multisig/UpdateEuroPerEnergy';
+import React from 'react';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { getGovernanceLevel2Path } from '~/features/ledger/Path';
+import MicroGtuPerEuroView from '~/pages/multisig/updates/MicroGtuPerEuro/MicroGtuPerEuroView';
+import UpdateMicroGtuPerEuro, {
+    UpdateMicroGtuPerEuroRateFields,
+} from '~/pages/multisig/updates/MicroGtuPerEuro/UpdateMicroGtuPerEuro';
+import { getReducedExchangeRate } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    isExchangeRate,
     ExchangeRate,
     UpdateInstruction,
+    isExchangeRate,
     UpdateInstructionPayload,
-    MultiSignatureTransaction,
     UpdateType,
+    MultiSignatureTransaction,
 } from '../types';
 import { serializeExchangeRate } from '../UpdateSerialization';
 
-const TYPE = 'Update Euro Per Energy';
+const TYPE = 'Update Micro GTU Per Euro';
 
 type TransactionType = UpdateInstruction<ExchangeRate>;
 
-export default class EuroPerEnergyHandler
+export default class MicroGtuPerEuroHandler
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
@@ -35,7 +37,7 @@ export default class EuroPerEnergyHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { euroPerEnergy }: UpdateEuroPerEnergyFields,
+        { microGtuPerEuroRate }: UpdateMicroGtuPerEuroRateFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -43,14 +45,20 @@ export default class EuroPerEnergyHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.euroPerEnergy.nextSequenceNumber;
+            blockSummary.updates.updateQueues.microGTUPerEuro
+                .nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.euroPerEnergy;
+        } = blockSummary.updates.keys.level2Keys.microGTUPerEuro;
+
+        const reduced = getReducedExchangeRate({
+            denominator: BigInt(microGtuPerEuroRate.denominator),
+            numerator: BigInt(microGtuPerEuroRate.numerator),
+        });
 
         return createUpdateMultiSignatureTransaction(
-            euroPerEnergy,
-            UpdateType.UpdateEuroPerEnergy,
+            reduced,
+            UpdateType.UpdateMicroGTUPerEuro,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -66,7 +74,7 @@ export default class EuroPerEnergyHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signEuroPerEnergy(
+        return ledger.signMicroGtuPerEuro(
             transaction,
             this.serializePayload(transaction),
             path
@@ -74,14 +82,14 @@ export default class EuroPerEnergyHandler
     }
 
     view(transaction: TransactionType) {
-        return EuroPerEnergyView({ exchangeRate: transaction.payload });
+        return <MicroGtuPerEuroView exchangeRate={transaction.payload} />;
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.euroPerEnergy;
+        return authorizations.microGTUPerEuro;
     }
 
-    update = UpdateEuroPerEnergy;
+    update = UpdateMicroGtuPerEuro;
 
     title = `Foundation Transaction | ${TYPE}`;
 

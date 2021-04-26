@@ -7,7 +7,6 @@ import {
     GasRewardFractionField,
     FormGasRewardFractionField,
 } from './GasRewardFractionField';
-import { noOp } from '~/utils/basicHelpers';
 
 export type UpdateGasRewardsFields = GasRewards;
 
@@ -56,25 +55,21 @@ export default function UpdateGasRewards({ blockSummary }: UpdateProps) {
             <GasRewardFractionField
                 label="Baker"
                 value={currentRewards.baker}
-                onChange={noOp}
                 disabled
             />
             <GasRewardFractionField
                 label="Finalization Proof"
                 value={currentRewards.finalizationProof}
-                onChange={noOp}
                 disabled
             />
             <GasRewardFractionField
                 label="Account Creation"
                 value={currentRewards.accountCreation}
-                onChange={noOp}
                 disabled
             />
             <GasRewardFractionField
                 label="Chain Update"
                 value={currentRewards.chainUpdate}
-                onChange={noOp}
                 disabled
             />
             <h3>New GAS rewards</h3>

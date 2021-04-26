@@ -140,6 +140,7 @@ function SignTransactionProposalView({ location }: Props) {
                 className={clsx(styles.body, styles.bodySubtractPadding)}
                 divider
                 columnClassName={styles.column}
+                columnScroll
             >
                 <Columns.Column header="Transaction Details">
                     <section className={styles.columnContent}>
@@ -151,7 +152,10 @@ function SignTransactionProposalView({ location }: Props) {
                         )}
                     </section>
                 </Columns.Column>
-                <Columns.Column header="Signature and Hardware Wallet">
+                <Columns.Column
+                    header="Signature and Hardware Wallet"
+                    className={styles.stretchColumn}
+                >
                     <Ledger
                         ledgerCallback={signingFunction}
                         onSignError={() => setSigning(false)}
