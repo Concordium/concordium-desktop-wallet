@@ -36,14 +36,9 @@ export default function BooleanSetting({
     }
 
     const toggleCheckbox = (
-        <>
-            <Switch
-                defaultChecked={setting.value === '1'}
-                onClick={handleClick}
-            >
-                <h3>{displayText}</h3>
-            </Switch>
-        </>
+        <Switch defaultChecked={setting.value === '1'} onClick={handleClick}>
+            <h3>{displayText}</h3>
+        </Switch>
     );
 
     const enableWarningModal = (
