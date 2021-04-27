@@ -90,7 +90,6 @@ export default function AccountCredentialSummary({
                                 validate,
                             },
                         }}
-                        autoScale
                     />
                 </FormProvider>
             ) : (

@@ -18,10 +18,10 @@ export interface TextAreaProps
         CommonInputProps {
     /**
      * @description
-     * Automatically scales the textarea to the size needed to display the content.
-     * This disables resizing and setting the height of the element manually either by height or rows prop.
+     * Disables automatically scaling the textarea to the size needed to display the content. Defaults to false.
+     * This enables resizing and setting the height of the element manually either by height or rows prop, which is otherwise disabled.
      */
-    autoScale?: boolean;
+    noAutoScale?: boolean;
 }
 
 /**
@@ -37,7 +37,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
             error,
             isInvalid = false,
             className,
-            autoScale = true,
+            noAutoScale = false,
             onChange,
             rows = 2,
             label,
@@ -45,7 +45,8 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         },
         ref
     ) => {
-        const interceptedRows = useMemo(() => (autoScale ? undefined : rows), [
+        const autoScale = !noAutoScale;
+        const interceptedRows = useMemo(() => (autoScale ? 1 : rows), [
             autoScale,
             rows,
         ]);
