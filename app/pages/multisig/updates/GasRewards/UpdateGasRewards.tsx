@@ -19,12 +19,12 @@ export default function UpdateGasRewards({ blockSummary }: UpdateProps) {
     return (
         <>
             <GasRewardsForm
-                title="Current GAS rewards"
+                title="Current GAS Reward Fractions"
                 disabled
                 gasRewards={currentRewards}
             />
             <GasRewardsForm
-                title="New GAS rewards"
+                title="New GAS Reward Fractions"
                 gasRewards={currentRewards}
             />
         </>

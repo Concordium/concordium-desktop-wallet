@@ -28,12 +28,12 @@ export default withChainData(function GasRewardsView({
     return (
         <>
             <GasRewardsForm
-                title="Current GAS rewards"
+                title="Current GAS Reward Fractions"
                 disabled
                 gasRewards={currentValue}
             />
             <GasRewardsForm
-                title="New GAS rewards"
+                title="New GAS Reward Fractions"
                 readOnly
                 gasRewards={gasRewards}
             />
