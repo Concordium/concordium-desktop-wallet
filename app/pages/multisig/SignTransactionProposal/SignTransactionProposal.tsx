@@ -19,7 +19,7 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BlockSummary } from '~/utils/NodeApiTypes';
-import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
+import { findKey } from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
@@ -73,10 +73,11 @@ function SignTransactionProposalView({ location }: Props) {
     }, [setTransactionHash, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const authorizationKey = await findAuthorizationKey(
+        const authorizationKey = await findKey(
             ledger,
-            transactionHandler,
-            blockSummary.updates.keys.level2Keys
+            blockSummary.updates.keys,
+            updateInstruction,
+            transactionHandler
         );
         if (!authorizationKey) {
             setShowValidationError(true);
@@ -135,6 +136,7 @@ function SignTransactionProposalView({ location }: Props) {
                 className={styles.subtractContainerPadding}
                 divider
                 columnClassName={styles.column}
+                columnScroll
             >
                 <Columns.Column header="Transaction Details">
                     <section className={styles.columnContent}>

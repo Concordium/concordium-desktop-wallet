@@ -1,7 +1,11 @@
 import routes from '../constants/routes.json';
-import { TransactionTypes, UpdateType, TransactionKindId } from './types';
+import {
+    TransactionTypes,
+    UpdateType,
+    TransactionKindId,
+    ExportKeyType,
+} from './types';
 // eslint-disable-next-line import/no-cycle
-import { ExportKeyType } from '~/pages/multisig/menu/ExportKeyList';
 
 export const selectedAddressBookEntryRoute = (address: string) =>
     routes.ADDRESSBOOK_SELECTED.replace(':address', address);

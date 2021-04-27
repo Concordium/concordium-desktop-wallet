@@ -9,6 +9,7 @@ import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
 import ScheduleTransfer from './ScheduleTransfer';
 import ExportTransactions from './ExportTransactions';
+import CredentialInformation from './CredentialInformation';
 
 interface Props {
     account: Account;
@@ -28,6 +29,10 @@ const items = [
     {
         name: 'Export Transactions',
         location: routes.ACCOUNTS_MORE_EXPORT_TRANSACTIONS,
+    },
+    {
+        name: 'Credential Information',
+        location: routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION,
     },
 ];
 
@@ -97,6 +102,17 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 path={routes.ACCOUNTS_MORE_EXPORT_TRANSACTIONS}
                 render={() => (
                     <ExportTransactions
+                        account={account}
+                        returnFunction={() =>
+                            dispatch(push(routes.ACCOUNTS_MORE))
+                        }
+                    />
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION}
+                render={() => (
+                    <CredentialInformation
                         account={account}
                         returnFunction={() =>
                             dispatch(push(routes.ACCOUNTS_MORE))
