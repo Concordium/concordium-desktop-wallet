@@ -12,6 +12,7 @@ const exportKeyOptionMap = new Map<ExportKeyType, string>([
     [ExportKeyType.Level1, 'Governance level 1 key'],
     [ExportKeyType.Level2, 'Governance level 2 key'],
     [ExportKeyType.Credential, 'Account credentials'],
+    [ExportKeyType.Genesis, 'Genesis account'],
 ]);
 
 export function getKeyDisplay(keyType: ExportKeyType): string | undefined {

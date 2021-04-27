@@ -40,6 +40,11 @@ export interface Versioned<T> {
     value: T;
 }
 
+export interface Typed<T> {
+    type: string;
+    contents: T;
+}
+
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
 export enum ChosenAttributes {
@@ -78,6 +83,7 @@ export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    Genesis = 'genesis',
 }
 
 /**
@@ -99,6 +105,7 @@ export enum AccountStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    Genesis = 'genesis',
 }
 
 /**
@@ -1104,11 +1111,22 @@ export type PolymorphicComponentProps<
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
 
+interface AccountCredentialWithoutProofs extends CredentialDeploymentValues {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    commitments: any;
+}
+
+export interface GenesisAccount {
+    generatedAddress: string;
+    credential: Typed<AccountCredentialWithoutProofs>;
+}
+
 export enum ExportKeyType {
     Root = 'root',
     Level1 = 'level1',
     Level2 = 'level2',
     Credential = 'credential',
+    Genesis = 'genesis',
 }
 
 /**

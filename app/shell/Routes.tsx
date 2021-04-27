@@ -13,10 +13,15 @@ import ExportImport from '../pages/exportImport/ExportImportPage';
 import PerformImport from '../pages/exportImport/PerformImport';
 import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
 import GenerateCredential from '../pages/GenerateCredential/GenerateCredentialPage';
+import genesisAccount from '../pages/GenesisAccount/GenesisAccount';
 
 export default function Routes(): JSX.Element {
     return (
         <Switch>
+            <Route
+                path={routes.CREATE_GENESIS_ACCOUNT}
+                component={genesisAccount}
+            />
             <Route path={routes.SUBMITTRANSFER} component={SubmitTransfer} />
             <Route path={routes.ACCOUNTS} component={AccountPage} />
             <Route path={routes.IDENTITYISSUANCE} component={IssuancePage} />
