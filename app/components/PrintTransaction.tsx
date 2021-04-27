@@ -1,6 +1,6 @@
 import React from 'react';
 import { Transaction, instanceOfAccountTransaction } from '~/utils/types';
-import PrintAccountTransactionProposal from './PrintAccountTransactionProposal';
+import PrintAccountTransaction from './PrintAccountTransaction';
 
 interface Props {
     transaction: Transaction;
@@ -8,7 +8,7 @@ interface Props {
 
 export default function PrintTransaction({ transaction }: Props) {
     if (instanceOfAccountTransaction(transaction)) {
-        return <PrintAccountTransactionProposal transaction={transaction} />;
+        return <PrintAccountTransaction transaction={transaction} />;
     }
 
     return null;

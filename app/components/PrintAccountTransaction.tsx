@@ -17,9 +17,7 @@ interface Props {
     transaction: AccountTransaction;
 }
 
-export default function PrintAccountTransactionProposal({
-    transaction,
-}: Props) {
+export default function PrintAccountTransaction({ transaction }: Props) {
     const [fromName, setFromName] = useState<string | undefined>();
     const [toName, setToName] = useState<string | undefined>();
 
@@ -34,10 +32,6 @@ export default function PrintAccountTransactionProposal({
         }
     });
 
-    if (!fromName) {
-        return null;
-    }
-
     if (instanceOfScheduledTransfer(transaction)) {
         return (
             <>
@@ -49,15 +43,17 @@ export default function PrintAccountTransactionProposal({
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Sender Name</td>
-                            <td>{fromName}</td>
-                        </tr>
+                        {fromName && (
+                            <tr>
+                                <td>Sender Name</td>
+                                <td>{fromName}</td>
+                            </tr>
+                        )}
                         <tr>
                             <td>Sender</td>
                             <td>{transaction.sender}</td>
                         </tr>
-                        {fromName && (
+                        {toName && (
                             <tr>
                                 <td>Recipient Name</td>
                                 <td>{toName}</td>
