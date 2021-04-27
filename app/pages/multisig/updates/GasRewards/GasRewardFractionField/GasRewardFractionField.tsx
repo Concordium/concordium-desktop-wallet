@@ -1,20 +1,23 @@
 import React, { InputHTMLAttributes, useState } from 'react';
+import clsx from 'clsx';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
-import { RewardFraction } from '~/utils/types';
+import { ClassName, RewardFraction } from '~/utils/types';
 import {
     fractionResolutionToPercentage,
+    percentageModifier,
     percentageToFractionResolution,
 } from '~/utils/rewardFractionHelpers';
 import { useUpdateEffect } from '~/utils/hooks';
 import { noOp } from '~/utils/basicHelpers';
+import InlineNumber from '~/components/Form/InlineNumber';
+import { getPowerOf10 } from '~/utils/numberStringHelpers';
+
+import styles from './GasRewardFractionField.module.scss';
 
 export interface GasRewardFractionFieldProps
-    extends Pick<
-        InputHTMLAttributes<HTMLInputElement>,
-        'disabled' | 'readOnly'
-    > {
+    extends Pick<InputHTMLAttributes<HTMLInputElement>, 'disabled'>,
+        ClassName {
     label: string;
-    defaultValue?: RewardFraction;
     value: RewardFraction | undefined;
     isInvalid?: boolean;
     onChange?(v: RewardFraction | undefined): void;
@@ -29,24 +32,23 @@ function formatValue(v?: number): string {
     return fractionResolutionToPercentage(v).toString();
 }
 
-function parseValue(v: string): number {
+function parseValue(v = ''): number {
     const parsed = parseFloat(v);
 
     return percentageToFractionResolution(parsed);
 }
 
-// TODO Implementation missing.
 export function GasRewardFractionField({
     label,
     onChange = noOp,
     value,
-    defaultValue,
-    readOnly,
     disabled,
-    // isInvalid = false,
+    className,
     ...props
 }: GasRewardFractionFieldProps): JSX.Element {
-    const [innerValue, setInnerValue] = useState<string>(formatValue(value));
+    const [innerValue, setInnerValue] = useState<string | undefined>(
+        formatValue(value)
+    );
 
     useUpdateEffect(() => {
         onChange(parseValue(innerValue));
@@ -56,16 +58,21 @@ export function GasRewardFractionField({
     }, [value]);
 
     return (
-        <label>
+        <label
+            className={clsx(
+                styles.root,
+                disabled && styles.disabled,
+                className
+            )}
+        >
             <span>{label}</span>
-            <span>
-                <input
-                    type="number"
-                    {...props}
-                    disabled={disabled}
-                    readOnly={readOnly}
+            <span className={styles.value}>
+                <InlineNumber
+                    allowFractions={getPowerOf10(percentageModifier)}
                     value={innerValue}
-                    onChange={(e) => setInnerValue(e.target.value)}
+                    onChange={setInnerValue}
+                    disabled={disabled}
+                    {...props}
                 />
                 %
             </span>

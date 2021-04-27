@@ -15,7 +15,7 @@ export const isValidBigInt = (value = ''): boolean => {
     }
 };
 
-function getPowerOf10(resolution: bigint): number {
+export function getPowerOf10(resolution: bigint | number): number {
     return resolution
         .toString()
         .split('')
