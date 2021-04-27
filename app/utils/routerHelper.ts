@@ -49,8 +49,11 @@ export function createProposalRoute(
             `${specificType}`
         );
     }
-    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
-        ':transactionKind',
-        `${specificType}`
-    );
+    if (transactionType === TransactionTypes.AccountTransaction) {
+        return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
+            ':transactionKind',
+            `${specificType}`
+        );
+    }
+    throw new Error(`Unknown transactionType given:${transactionType}`);
 }

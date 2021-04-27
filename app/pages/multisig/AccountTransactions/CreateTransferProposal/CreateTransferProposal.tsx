@@ -57,7 +57,6 @@ interface Props {
 /**
  * This component controls the flow of creating a multisignature account transaction.
  * It contains the logic for displaying the current parameters.
- * TODO center continue button
  */
 export default function CreateTransferProposal({
     transactionKind,
@@ -130,12 +129,14 @@ export default function CreateTransferProposal({
             setReady(true);
         }
         return (
-            <PickRecipient
-                pickRecipient={(newRecipient) => {
-                    setReady(true);
-                    setRecipient(newRecipient);
-                }}
-            />
+            <div className={styles.columnContent}>
+                <PickRecipient
+                    pickRecipient={(newRecipient) => {
+                        setReady(true);
+                        setRecipient(newRecipient);
+                    }}
+                />
+            </div>
         );
     }
 

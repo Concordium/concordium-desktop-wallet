@@ -58,7 +58,6 @@ const addSchedulePointFormNames: EqualRecord<AddSchedulePointForm> = {
 /**
  * Component to build a "explicit" schedule, by adding invidual releases.
  */
-// export default function BuildExplicitSchedule({
 const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
     (
         {

@@ -56,7 +56,7 @@ export default function TransactionProposalDetails({
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             {title('Recipient:')}
             {recipient ? showAccount(recipient) : placeholder}
-            {recipient ? (
+            {recipient && recipient.note ? (
                 <p className={styles.note}>Note: {recipient.note}</p>
             ) : null}
             {isScheduledTransfer ? (
