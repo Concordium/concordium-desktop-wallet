@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import ErrorIcon from '@resources/svg/logo-error.svg';
+import SuccessIcon from '@resources/svg/logo-checkmark.svg';
 import { updateSettingEntry } from '../../features/SettingsSlice';
 import { Setting } from '../../utils/types';
 import { getNodeInfo } from '../../utils/nodeRequests';
@@ -56,12 +57,21 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
         setTestingConnection(false);
     }
 
-    let errorComponent;
+    let statusComponent;
     if (!connected && hasBeenTested && !testingConnection) {
-        errorComponent = (
+        statusComponent = (
             <div>
                 <ErrorIcon className={styles.icon} />
                 <div className={styles.error}>Connection failed</div>
+            </div>
+        );
+    } else if (testingConnection) {
+        statusComponent = <Loading inline text="Connecting to node" />;
+    } else if (!testingConnection && connected) {
+        statusComponent = (
+            <div>
+                <SuccessIcon className={styles.icon} />
+                <div className={styles.success}>Successfully connected</div>
             </div>
         );
     }
@@ -80,6 +90,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
                     className={styles.input}
                     name="address"
                     label="Address"
+                    placeholder="Insert node IP address here"
                     defaultValue={address}
                     onChange={(event) => {
                         const newAddress = event.target.value;
@@ -91,6 +102,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
                     className={styles.input}
                     name="port"
                     label="Port"
+                    placeholder="Insert port here"
                     defaultValue={port}
                     onChange={(event) => {
                         const newPort = event.target.value;
@@ -102,13 +114,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
                         max: portRangeMax,
                     }}
                 />
-                {testingConnection && (
-                    <Loading inline text="Connecting to node" />
-                )}
-                {errorComponent}
-                {!testingConnection && connected && (
-                    <h3>Successfully connected</h3>
-                )}
+                <div className={styles.status}>{statusComponent}</div>
                 <Form.Submit className={styles.submit}>
                     Test connection
                 </Form.Submit>
