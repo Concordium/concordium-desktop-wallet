@@ -5,6 +5,9 @@ import { UpdateType, TransactionKindString, ExportKeyType } from './types';
 export const selectedAddressBookEntryRoute = (address: string) =>
     routes.ADDRESSBOOK_SELECTED.replace(':address', address);
 
+export const selectedSettingRoute = (type: string) =>
+    routes.SETTINGS_SELECTED.replace(':type', type);
+
 export const selectedProposalRoute = (proposalId: number) => {
     return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED.replace(
         ':id',

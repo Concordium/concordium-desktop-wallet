@@ -1,15 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Form } from 'semantic-ui-react';
-import {
-    chosenIndexSelector,
-    settingsSelector,
-} from '../../features/SettingsSlice';
-import { Setting, SettingTypeEnum } from '../../utils/types';
-import BooleanSetting from './BooleanSettingElement';
-import TextSetting from './TextSettingElement';
-import ConnectionSettingElement from './ConnectionSettingElement';
+import { useParams } from 'react-router';
+import { settingsSelector } from '../../features/SettingsSlice';
 import settingKeys from '../../constants/settingKeys.json';
+import { Setting, SettingTypeEnum } from '~/utils/types';
+import BooleanSetting from './BooleanSettingElement';
+import ConnectionSettingElement from './ConnectionSettingElement';
 
 // A static definition of warning messages, where the key matches the
 // setting name that the warning is for.
@@ -22,20 +18,21 @@ const warningMessages = new Map<string, string>([
 
 const settingDisplayTexts = new Map<string, string>([
     [settingKeys.foundationTransactionsEnabled, 'Foundation transactions'],
-    [settingKeys.nodeLocation, 'Node location'],
+    [settingKeys.nodeLocation, 'Node connection settings'],
 ]);
 
 export default function SettingsView() {
-    const settings = useSelector(settingsSelector);
-    const chosenIndex = useSelector(chosenIndexSelector);
+    const { type } = useParams<{ type: string }>();
 
-    if (chosenIndex === undefined || settings[chosenIndex] === undefined) {
-        return null;
+    const settings = useSelector(settingsSelector);
+    const subSettings = settings.find((subSetting) => subSetting.type === type);
+    if (!subSettings) {
+        throw new Error(`An invalid type of setting was selected: ${type}`);
     }
 
     return (
-        <Form>
-            {settings[chosenIndex].settings.map((childSetting: Setting) => {
+        <>
+            {subSettings.settings.map((childSetting: Setting) => {
                 const settingDisplayText = settingDisplayTexts.get(
                     childSetting.name
                 );
@@ -57,13 +54,6 @@ export default function SettingsView() {
                                 warning={warning}
                             />
                         );
-                    case SettingTypeEnum.Text:
-                        return (
-                            <TextSetting
-                                setting={childSetting}
-                                key={childSetting.name}
-                            />
-                        );
                     case SettingTypeEnum.Connection:
                         return (
                             <ConnectionSettingElement
@@ -76,6 +66,6 @@ export default function SettingsView() {
                         return null;
                 }
             })}
-        </Form>
+        </>
     );
 }
