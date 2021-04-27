@@ -42,10 +42,10 @@ export function GasRewardFractionField({
     label,
     onChange = noOp,
     value,
-    disabled,
     className,
     ...props
 }: GasRewardFractionFieldProps): JSX.Element {
+    const { disabled, isInvalid } = props;
     const [innerValue, setInnerValue] = useState<string | undefined>(
         formatValue(value)
     );
@@ -62,6 +62,7 @@ export function GasRewardFractionField({
             className={clsx(
                 styles.root,
                 disabled && styles.disabled,
+                isInvalid && styles.invalid,
                 className
             )}
         >
@@ -71,7 +72,6 @@ export function GasRewardFractionField({
                     allowFractions={getPowerOf10(percentageModifier)}
                     value={innerValue}
                     onChange={setInnerValue}
-                    disabled={disabled}
                     {...props}
                 />
                 %

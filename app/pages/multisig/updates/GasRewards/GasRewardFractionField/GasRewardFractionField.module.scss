@@ -17,4 +17,8 @@
     .disabled & {
         color: inherit;
     }
+
+    .invalid & {
+        color: $color-error;
+    }
 }
