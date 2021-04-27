@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { push } from 'connected-react-router';
+import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import routes from '../../constants/routes.json';
 import PickName from './PickName';
@@ -26,6 +28,7 @@ function getSubtitle(location: string) {
 
 // The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
 export default function AccountCreationPage(): JSX.Element {
+    const dispatch = useDispatch();
     const [accountName, setAccountName] = useState('');
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [chosenAttributes, setChosenAttributes] = useState<string[]>([]);
@@ -78,7 +81,16 @@ export default function AccountCreationPage(): JSX.Element {
                     render={renderPickAttributes}
                 />
                 <Route
-                    render={() => <PickName setAccountName={setAccountName} />}
+                    render={() => (
+                        <PickName
+                            submitName={(name: string) => {
+                                setAccountName(name);
+                                dispatch(
+                                    push(routes.ACCOUNTCREATION_PICKIDENTITY)
+                                );
+                            }}
+                        />
+                    )}
                 />
             </Switch>
         </PageLayout>

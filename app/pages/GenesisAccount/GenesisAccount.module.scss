@@ -1,0 +1,50 @@
+$width: 600px;
+
+.fileForm,
+.pickName,
+.ledgerCard,
+.confirmCard {
+    flex-direction: column;
+    justify-content: center;
+    max-width: $width;
+    margin: 20px auto;
+}
+
+.fileForm,
+.pickName {
+    display: flex;
+    height: 90%;
+}
+
+.fileInput {
+    height: 400px;
+}
+
+.fileInput,
+.nameInput {
+    margin-top: 40px;
+}
+.submitButton {
+    margin-top: auto;
+}
+
+.printButton {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    margin-top: 0;
+}
+
+.ledgerButton {
+    margin: auto;
+    margin-top: 50px;
+    display: flex;
+}
+
+.confirmCard {
+    position: relative;
+}
+
+.exportButton {
+    margin-top: 20px;
+}

@@ -145,7 +145,6 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                             }}
                             placeholder="Paste the account address here"
                             defaultValue={initialValues?.address}
-                            autoScale
                         />
                         <Form.Input
                             className={styles.input}
