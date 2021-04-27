@@ -120,6 +120,7 @@ export default function CreateTransferProposal({
                 amount={amount}
                 account={account}
                 schedule={schedule}
+                estimatedFee={estimatedFee}
             />
         );
     }
