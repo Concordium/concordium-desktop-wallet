@@ -12,6 +12,7 @@ import {
     IdentityObject,
     IdentityProvider,
     Dispatch,
+    Hex,
 } from '../utils/types';
 
 interface IdentityState {
@@ -60,7 +61,8 @@ export async function addPendingIdentity(
     identityName: string,
     codeUri: string,
     identityProvider: IdentityProvider,
-    randomness: string
+    randomness: string,
+    pairingKey: Hex
 ) {
     const identity = {
         name: identityName,
@@ -68,6 +70,7 @@ export async function addPendingIdentity(
         codeUri,
         identityProvider: JSON.stringify(identityProvider),
         randomness,
+        hwWallet: pairingKey,
     };
     await insertIdentity(identity);
     return loadIdentities(dispatch);

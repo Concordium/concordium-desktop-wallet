@@ -37,6 +37,19 @@ export function getAccountPath(accountPath: AccountPathInput): number[] {
 }
 
 /**
+ * Constructs the path for the public-key that is used to pair a hardware
+ * wallet with the desktop wallet.
+ *
+ * - m/purpose'/coin_type'/0'/
+ *
+ * @returns the derivation path used to retrieve the public-key used for pairing
+ * the hardware wallet with the desktop wallet.
+ */
+export function getPairingPath(): number[] {
+    return [0];
+}
+
+/**
  * Constructs a path to a governance signature key. The governance key derivation path structure
  * is given by:
  *

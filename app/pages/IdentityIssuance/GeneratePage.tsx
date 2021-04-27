@@ -14,10 +14,12 @@ import {
 } from '../../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
-import { IdentityProvider, Dispatch, Global } from '../../utils/types';
+import { IdentityProvider, Dispatch, Global, Hex } from '../../utils/types';
 import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoller';
 import SimpleLedger from '../../components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import { getPairingPath } from '~/features/ledger/Path';
+import { hardwareWalletExists, insertHwWallet } from '~/database/HwWalletDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -79,6 +81,7 @@ async function generateIdentity(
     provider: IdentityProvider,
     accountName: string,
     identityName: string,
+    pairingKey: Hex,
     iframeRef: RefObject<HTMLIFrameElement>,
     onError: (message: string) => void
 ) {
@@ -93,13 +96,21 @@ async function generateIdentity(
         identityObjectLocation = await handleIdentityProviderLocation(
             iframeRef
         );
+
+        // Pair the hardware wallet with the desktop wallet, if it has not
+        // already been paired.
+        if (!(await hardwareWalletExists(pairingKey))) {
+            await insertHwWallet(pairingKey);
+        }
+
         // TODO: Handle the case where the app closes before we are able to save pendingIdentity
         await addPendingIdentity(
             dispatch,
             identityName,
             identityObjectLocation,
             provider,
-            randomness
+            randomness,
+            pairingKey
         );
         await addPendingAccount(dispatch, accountName, identityId, true); // TODO: can we add the address already here?
     } catch (e) {
@@ -158,6 +169,11 @@ export default function IdentityIssuanceGenerate({
             ledger,
             global
         );
+
+        // Extract the pairing public-key
+        const pairingKey = (
+            await ledger.getPublicKeySilent(getPairingPath())
+        ).toString('hex');
         generateIdentity(
             idObjectRequest,
             randomness,
@@ -167,6 +183,7 @@ export default function IdentityIssuanceGenerate({
             provider,
             accountName,
             identityName,
+            pairingKey,
             iframeRef,
             onError
         );
