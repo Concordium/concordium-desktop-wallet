@@ -1,17 +1,23 @@
 import React from 'react';
-import { Button } from 'semantic-ui-react';
+import CopyIcon from '@resources/svg/copy.svg';
+import Button from '~/cross-app-components/Button';
 
 interface Props {
     value: string;
+    className?: string;
 }
 
 /**
  * Button, that, when pressed, copies the given value into the user's clipboard.
  */
-export default function CopyButton({ value }: Props): JSX.Element {
+export default function CopyButton({ value, className }: Props): JSX.Element {
     return (
-        <Button onClick={() => navigator.clipboard.writeText(value)}>
-            copy
+        <Button
+            clear
+            className={className}
+            onClick={() => navigator.clipboard.writeText(value)}
+        >
+            <CopyIcon height="20" />
         </Button>
     );
 }

@@ -4,6 +4,7 @@ const { notarize } = require('electron-notarize');
 exports.default = async function notarizing(context) {
     const { electronPlatformName, appOutDir } = context;
     if (electronPlatformName !== 'darwin' || process.env.NOTARIZE === 'skip') {
+        // eslint-disable-next-line no-console
         return console.log(
             'Not building for MacOS or for production, skipping notarization process.'
         );

@@ -10,13 +10,11 @@ import {
     getThreshold,
     typeToDisplay,
 } from '~/utils/updates/HigherLevelKeysHelpers';
-import withBlockSummary, {
-    WithBlockSummary,
-} from '../../common/withBlockSummary';
+import withChainData, { ChainData } from '../../common/withChainData';
 import { generateStatusLabel } from './KeyUpdateEntry';
 import styles from './HigherLevelKeysView.module.scss';
 
-interface Props extends WithBlockSummary {
+interface Props extends ChainData {
     higherLevelKeyUpdate: HigherLevelKeyUpdate;
     type: UpdateType;
 }
@@ -81,4 +79,4 @@ function HigherLevelKeysView({
     );
 }
 
-export default withBlockSummary(HigherLevelKeysView);
+export default withChainData(HigherLevelKeysView);

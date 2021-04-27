@@ -4,7 +4,7 @@ import { ScheduledTransfer, SchedulePoint, TimeStampUnit } from '~/utils/types';
 import { parseTime } from '~/utils/timeHelpers';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import { displayAsGTU } from '~/utils/gtu';
-import SidedRow from '~/components/SidedRow';
+import SidedRow from '~/components/SemanticSidedRow';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 
 interface Props {

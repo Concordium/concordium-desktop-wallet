@@ -6,19 +6,14 @@ import { Setting, Settings } from '../utils/types';
 
 interface SettingsState {
     settings: Settings[];
-    chosenIndex: number;
 }
 
 const settingsSlice = createSlice({
     name: 'settings',
     initialState: {
         settings: [],
-        chosenIndex: 0,
     } as SettingsState,
     reducers: {
-        chooseSetting: (state, input) => {
-            state.chosenIndex = input.payload.index;
-        },
         updateSettings: (state, index) => {
             state.settings = index.payload;
         },
@@ -26,9 +21,6 @@ const settingsSlice = createSlice({
 });
 
 export const settingsSelector = (state: RootState) => state.settings.settings;
-
-export const chosenIndexSelector = (state: RootState) =>
-    state.settings.chosenIndex;
 
 /**
  * Searches the settings for a setting with the provided name.
@@ -58,11 +50,7 @@ export const foundationTransactionsEnabledSelector = (
     return false;
 };
 
-export const { chooseSetting, updateSettings } = settingsSlice.actions;
-
-export async function selectSettings(dispatch: Dispatch, index: number) {
-    dispatch(chooseSetting({ index }));
-}
+export const { updateSettings } = settingsSlice.actions;
 
 /**
  * Updates the given Setting in the database, and dispatches an update to the state

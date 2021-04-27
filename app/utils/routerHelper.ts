@@ -5,6 +5,9 @@ import { UpdateType, TransactionKindString, ExportKeyType } from './types';
 export const selectedAddressBookEntryRoute = (address: string) =>
     routes.ADDRESSBOOK_SELECTED.replace(':address', address);
 
+export const selectedSettingRoute = (type: string) =>
+    routes.SETTINGS_SELECTED.replace(':type', type);
+
 export const selectedProposalRoute = (proposalId: number) => {
     return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED.replace(
         ':id',
@@ -15,6 +18,9 @@ export const selectedProposalRoute = (proposalId: number) => {
 export function selectedExportKeyRoute(keyType: string) {
     if (keyType === ExportKeyType.Credential) {
         return routes.GENERATE_CREDENTIAL;
+    }
+    if (keyType === ExportKeyType.Genesis) {
+        return routes.CREATE_GENESIS_ACCOUNT;
     }
     return routes.MULTISIGTRANSACTIONS_EXPORT_KEY_SELECTED.replace(
         ':keyType',

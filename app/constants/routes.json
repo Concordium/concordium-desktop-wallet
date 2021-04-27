@@ -13,12 +13,14 @@
     "ACCOUNTS_MORE_INSPECTRELEASESCHEDULE": "/accounts/more/inspect-release-schedule",
     "ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER": "/accounts/more/create-scheduled-transfer",
     "ACCOUNTS_MORE_EXPORT_TRANSACTIONS": "/accounts/more/export-transactions",
+    "ACCOUNTS_MORE_CREDENTIAL_INFORMATION": "/accounts/more/credential-information",
     "IDENTITIES": "/identity/listview",
     "ADDRESSBOOK": "/addressbook",
     "ADDRESSBOOK_SELECTED": "/addressbook/:address",
     "EXPORTIMPORT": "/export_import",
     "IMPORT": "/export_import/import",
     "SETTINGS": "/settings",
+    "SETTINGS_SELECTED": "/settings/:type",
     "MULTISIGTRANSACTIONS": "/multi-signature-transaction",
     "MULTISIGTRANSACTIONS_PROPOSAL": "/multi-signature-transaction/create/:updateType",
     "MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_SIZE": "/multi-signature-transaction/create/:updateType/keysetsize",
@@ -56,5 +58,6 @@
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION": "/multi-signature-transaction/account-transaction/:transactionKind/sign_transaction",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_MAKETRANSFER": "/multi-signature-transaction/account-transaction/:transactionKind/make-transfer",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL": "/multi-signature-transaction/account-transaction/:transactionKind/add-credential",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD": "/multi-signature-transaction/account-transaction/:transactionKind/change-signature-threshold"
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD": "/multi-signature-transaction/account-transaction/:transactionKind/change-signature-threshold",
+    "CREATE_GENESIS_ACCOUNT": "/genesis-account"
 }
