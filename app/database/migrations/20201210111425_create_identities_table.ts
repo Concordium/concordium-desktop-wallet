@@ -1,5 +1,8 @@
 import * as Knex from 'knex';
-import { identitiesTable } from '../../constants/databaseNames.json';
+import {
+    hwWalletTable,
+    identitiesTable,
+} from '../../constants/databaseNames.json';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
@@ -13,6 +16,11 @@ export async function up(knex: Knex): Promise<void> {
             table.string('identityProvider');
             table.string('identityObject');
             table.string('randomness');
+            table
+                .string('hwWallet')
+                .references('identifier')
+                .inTable(hwWalletTable)
+                .notNullable();
         }
     );
 }

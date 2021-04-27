@@ -92,6 +92,7 @@ export interface Identity {
     codeUri: string;
     identityProvider: string;
     randomness: string;
+    hwWallet: string;
 }
 
 // Statuses that an account can have.
