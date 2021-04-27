@@ -66,6 +66,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
     });
     const [currentlyLoadingFile, setCurrentlyLoadingFile] = useState(false);
     const [files, setFiles] = useState<FileInputValue>(null);
+    const [image, setImage] = useState<string>();
     const dispatch = useDispatch();
     const form = useForm();
 
@@ -131,7 +132,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
-            print={<PrintTransaction transaction={transaction} />}
+            print={<PrintTransaction transaction={transaction} image={image} />}
             stepTitle={`Transaction Proposal - ${handler.type}`}
             disableBack={instanceOfAccountTransaction(transaction)}
             closeRoute={CLOSE_ROUTE}
@@ -208,6 +209,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                 <ProposalViewStatusText {...proposal} />
                                 <TransactionHashView
                                     transactionHash={transactionHash}
+                                    setScreenshot={setImage}
                                 />
                                 <TransactionExpirationDetails
                                     title="Transaction must be submitted before:"

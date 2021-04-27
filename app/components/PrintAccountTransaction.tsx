@@ -4,6 +4,7 @@ import {
     instanceOfSimpleTransfer,
     instanceOfScheduledTransfer,
     TimeStampUnit,
+    Fraction,
 } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import { collapseFraction } from '~/utils/basicHelpers';
@@ -12,12 +13,74 @@ import {
     lookupName,
 } from '~/utils/transactionHelpers';
 import { parseTime } from '~/utils/timeHelpers';
+import getTransactionHash from '~/utils/transactionHash';
 
 interface Props {
     transaction: AccountTransaction;
+    image?: string;
 }
 
-export default function PrintAccountTransaction({ transaction }: Props) {
+const account = (title: string, address: string, name?: string) => (
+    <>
+        {name && (
+            <tr>
+                <td>{title} Name</td>
+                <td>{name}</td>
+            </tr>
+        )}
+        <tr>
+            <td>{title}</td>
+            <td>{address}</td>
+        </tr>
+    </>
+);
+const sender = (address: string, name?: string) =>
+    account('Sender', address, name);
+const recipient = (address: string, name?: string) =>
+    account('Recipient', address, name);
+
+const amount = (microGTUAmount: string | bigint) => (
+    <tr>
+        <td>Amount</td>
+        <td>{displayAsGTU(microGTUAmount)}</td>
+    </tr>
+);
+
+const fee = (estimatedFee?: Fraction) => (
+    <tr>
+        <td>Estimated fee</td>
+        <td>
+            {estimatedFee
+                ? displayAsGTU(collapseFraction(estimatedFee))
+                : 'unknown'}
+        </td>
+    </tr>
+);
+
+const hash = (transaction: AccountTransaction) => (
+    <tr>
+        <td>Transaction hash</td>
+        <td>{getTransactionHash(transaction)}</td>
+    </tr>
+);
+
+const standardHeader = (
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+);
+
+const table = (header: JSX.Element, body: JSX.Element) => (
+    <table style={{ width: '100%', textAlign: 'left' }}>
+        {header}
+        {body}
+    </table>
+);
+
+export default function PrintAccountTransaction({ transaction, image }: Props) {
     const [fromName, setFromName] = useState<string | undefined>();
     const [toName, setToName] = useState<string | undefined>();
 
@@ -35,67 +98,28 @@ export default function PrintAccountTransaction({ transaction }: Props) {
     if (instanceOfScheduledTransfer(transaction)) {
         return (
             <>
-                <table style={{ width: '100%', textAlign: 'left' }}>
-                    <thead>
-                        <tr>
-                            <th>Property</th>
-                            <th>Value</th>
-                        </tr>
-                    </thead>
+                <h1>Transaction - Send GTU with a schedule</h1>
+                {table(
+                    standardHeader,
                     <tbody>
-                        {fromName && (
-                            <tr>
-                                <td>Sender Name</td>
-                                <td>{fromName}</td>
-                            </tr>
-                        )}
+                        {sender(transaction.sender, fromName)}
+                        {recipient(transaction.payload.toAddress, toName)}
+                        {amount(getScheduledTransferAmount(transaction))}
+                        {fee(transaction.estimatedFee)}
+                        {hash(transaction)}
                         <tr>
-                            <td>Sender</td>
-                            <td>{transaction.sender}</td>
-                        </tr>
-                        {toName && (
-                            <tr>
-                                <td>Recipient Name</td>
-                                <td>{toName}</td>
-                            </tr>
-                        )}
-                        <tr>
-                            <td>Recipient</td>
-                            <td>{transaction.payload.toAddress}</td>
-                        </tr>
-                        <tr>
-                            <td>Total Amount</td>
-                            <td>
-                                {displayAsGTU(
-                                    getScheduledTransferAmount(transaction)
-                                )}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Estimated fee</td>
-                            <td>
-                                {transaction.estimatedFee
-                                    ? displayAsGTU(
-                                          collapseFraction(
-                                              transaction.estimatedFee
-                                          )
-                                      )
-                                    : 'unknown'}
-                            </td>
+                            <td>Identicon:</td>
                         </tr>
                     </tbody>
-                </table>
-                <table
-                    style={{
-                        marginTop: '40px',
-                        width: '100%',
-                        textAlign: 'left',
-                    }}
-                >
+                )}
+                <img src={image} alt="" />
+                {table(
                     <thead>
-                        <th>Release Time</th>
-                        <th>Amount</th>
-                    </thead>
+                        <tr>
+                            <th>Release Time</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>,
                     <tbody>
                         {transaction.payload.schedule.map(
                             (schedulePoint, index) => (
@@ -119,54 +143,29 @@ export default function PrintAccountTransaction({ transaction }: Props) {
                             )
                         )}
                     </tbody>
-                </table>
+                )}
             </>
         );
     }
     if (instanceOfSimpleTransfer(transaction)) {
         return (
-            <table style={{ width: '100%', textAlign: 'left' }}>
-                <thead>
-                    <tr>
-                        <th>Property</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Sender Name</td>
-                        <td>{fromName}</td>
-                    </tr>
-                    <tr>
-                        <td>Sender</td>
-                        <td>{transaction.sender}</td>
-                    </tr>
-                    {fromName && (
+            <>
+                <h1>Transaction - Send GTU</h1>
+                {table(
+                    standardHeader,
+                    <tbody>
+                        {sender(transaction.sender, fromName)}
+                        {recipient(transaction.payload.toAddress, toName)}
+                        {amount(transaction.payload.amount)}
+                        {fee(transaction.estimatedFee)}
+                        {hash(transaction)}
                         <tr>
-                            <td>Recipient Name</td>
-                            <td>{toName}</td>
+                            <td>Identicon:</td>
                         </tr>
-                    )}
-                    <tr>
-                        <td>Recipient</td>
-                        <td>{transaction.payload.toAddress}</td>
-                    </tr>
-                    <tr>
-                        <td>Amount</td>
-                        <td>{displayAsGTU(transaction.payload.amount)}</td>
-                    </tr>
-                    <tr>
-                        <td>Estimated fee</td>
-                        <td>
-                            {transaction.estimatedFee
-                                ? displayAsGTU(
-                                      collapseFraction(transaction.estimatedFee)
-                                  )
-                                : 'unknown'}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                )}
+                <img src={image} alt="" />
+            </>
         );
     }
 

@@ -71,6 +71,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
             | undefined
         >();
         const [transactionHash, setTransactionHash] = useState<string>();
+        const [image, setImage] = useState<string>();
 
         const dispatch = useDispatch();
 
@@ -166,7 +167,12 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                 />
                 <MultiSignatureLayout
                     pageTitle={transactionHandler.title}
-                    print={<PrintTransaction transaction={transactionObject} />}
+                    print={
+                        <PrintTransaction
+                            transaction={transactionObject}
+                            image={image}
+                        />
+                    }
                     stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
                     delegateScroll
                 >
@@ -191,6 +197,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                 transactionHash={
                                                     transactionHash
                                                 }
+                                                setScreenshot={setImage}
                                             />
                                             {instanceOfUpdateInstruction(
                                                 transactionObject
