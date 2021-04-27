@@ -1,4 +1,4 @@
-import React, { InputHTMLAttributes, useState } from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
 import { connectWithFormControlled } from '~/components/Form/common/connectWithForm';
 import { ClassName, RewardFraction } from '~/utils/types';
@@ -13,13 +13,13 @@ import InlineNumber from '~/components/Form/InlineNumber';
 import { getPowerOf10 } from '~/utils/numberStringHelpers';
 
 import styles from './GasRewardFractionField.module.scss';
+import { InlineNumberProps } from '~/components/Form/InlineNumber/InlineNumber';
 
 export interface GasRewardFractionFieldProps
-    extends Pick<InputHTMLAttributes<HTMLInputElement>, 'disabled'>,
+    extends Pick<InlineNumberProps, 'disabled' | 'readOnly' | 'isInvalid'>,
         ClassName {
     label: string;
     value: RewardFraction | undefined;
-    isInvalid?: boolean;
     onChange?(v: RewardFraction | undefined): void;
     onBlur?(): void;
 }
@@ -45,7 +45,7 @@ export function GasRewardFractionField({
     className,
     ...props
 }: GasRewardFractionFieldProps): JSX.Element {
-    const { disabled, isInvalid } = props;
+    const { disabled, isInvalid, readOnly } = props;
     const [innerValue, setInnerValue] = useState<string | undefined>(
         formatValue(value)
     );
@@ -62,6 +62,7 @@ export function GasRewardFractionField({
             className={clsx(
                 styles.root,
                 disabled && styles.disabled,
+                readOnly && styles.readOnly,
                 isInvalid && styles.invalid,
                 className
             )}

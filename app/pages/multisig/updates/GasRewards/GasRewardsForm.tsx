@@ -38,23 +38,25 @@ const validationRules: RegisterOptions = {
 interface GasRewardsFormProps {
     gasRewards: GasRewards;
     disabled?: boolean;
+    readOnly?: boolean;
     title: string;
 }
 
 export default function GasRewardsForm({
     gasRewards,
     disabled = false,
+    readOnly = false,
     title,
 }: GasRewardsFormProps): JSX.Element {
     const fields = Object.keys(gasRewards) as Array<keyof GasRewards>;
-    const { errors } = useFormContext<GasRewards>();
+    const { errors = {} } = useFormContext<GasRewards>() ?? {};
 
     const firstError = fields.map((f) => errors[f]).filter(isDefined)[0]
         ?.message;
 
     return (
         <section>
-            <h3>{title}</h3>
+            <h5>{title}</h5>
             {fields.map((f) => {
                 const label = labels[f];
                 const name = fieldNames[f];
@@ -69,11 +71,12 @@ export default function GasRewardsForm({
                     key: f,
                 };
 
-                return disabled ? (
+                return disabled || readOnly ? (
                     <GasRewardFractionField
                         {...common}
                         value={value}
-                        disabled
+                        disabled={disabled}
+                        readOnly={readOnly}
                     />
                 ) : (
                     <FormGasRewardFractionField

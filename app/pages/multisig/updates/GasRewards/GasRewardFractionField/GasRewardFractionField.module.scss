@@ -21,4 +21,8 @@
     .invalid & {
         color: $color-error;
     }
+
+    .readOnly & {
+        color: $color-text;
+    }
 }

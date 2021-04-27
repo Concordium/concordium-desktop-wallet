@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { rewardFractionResolution } from '~/constants/updateConstants.json';
 import { GasRewards } from '~/utils/types';
 import { UpdateProps } from '~/utils/transactionTypes';
 import GasRewardsForm from './GasRewardsForm';
+import { getCurrentValue, toRewardFractions } from './util';
 
 export type { UpdateGasRewardsFields } from './GasRewardsForm';
 
@@ -12,20 +12,7 @@ export type { UpdateGasRewardsFields } from './GasRewardsForm';
  */
 export default function UpdateGasRewards({ blockSummary }: UpdateProps) {
     const currentRewards: GasRewards = useMemo(
-        () => ({
-            baker:
-                blockSummary.updates.chainParameters.rewardParameters.gASRewards
-                    .baker * rewardFractionResolution,
-            finalizationProof:
-                blockSummary.updates.chainParameters.rewardParameters.gASRewards
-                    .finalizationProof * rewardFractionResolution,
-            accountCreation:
-                blockSummary.updates.chainParameters.rewardParameters.gASRewards
-                    .accountCreation * rewardFractionResolution,
-            chainUpdate:
-                blockSummary.updates.chainParameters.rewardParameters.gASRewards
-                    .chainUpdate * rewardFractionResolution,
-        }),
+        () => toRewardFractions(getCurrentValue(blockSummary)),
         [blockSummary]
     );
 
