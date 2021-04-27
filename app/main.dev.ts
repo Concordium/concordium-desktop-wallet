@@ -93,19 +93,10 @@ const createWindow = async () => {
         await installExtensions();
     }
 
-    const RESOURCES_PATH = app.isPackaged
-        ? path.join(process.resourcesPath, 'resources')
-        : path.join(__dirname, '../resources');
-
-    const getAssetPath = (...paths: string[]): string => {
-        return path.join(RESOURCES_PATH, ...paths);
-    };
-
     mainWindow = new BrowserWindow({
         show: false,
         width: 4096,
         height: 2912,
-        icon: getAssetPath('icon.png'),
         webPreferences:
             (process.env.NODE_ENV === 'development' ||
                 process.env.E2E_BUILD === 'true') &&
@@ -172,9 +163,12 @@ ipcMain.handle(ipcCommands.openFileDialog, async (_event, title) => {
 });
 
 // Provides access to save file dialog from renderer processes.
-ipcMain.handle(ipcCommands.saveFileDialog, async (_event, title) => {
-    return dialog.showSaveDialog({ title });
-});
+ipcMain.handle(
+    ipcCommands.saveFileDialog,
+    async (_event, title, defaultPath) => {
+        return dialog.showSaveDialog({ title, defaultPath });
+    }
+);
 
 // Updates the location of the grpc endpoint.
 ipcMain.handle(

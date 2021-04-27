@@ -20,7 +20,8 @@ function displayIdentity(
     ) {
         return (
             <>
-                {account.identityName} + <MultiSigIcon height="15" />
+                {account.identityName} +{' '}
+                <MultiSigIcon className={styles.multisig} />
             </>
         );
     }
@@ -62,7 +63,9 @@ export default function AccountListElement({
             + <ShieldImage height="15" />
         </>
     );
-
+    const accountBaker = accountInfo?.accountBaker;
+    const stakedAmount = accountBaker ? BigInt(accountBaker.stakedAmount) : 0n;
+    const amountAtDisposal = unShielded - scheduled - stakedAmount;
     return (
         <div
             className={clsx(
@@ -96,12 +99,12 @@ export default function AccountListElement({
             />
             <SidedRow
                 className={styles.row}
-                left={<h2>Account Total:</h2>}
+                left={<h3>Account Total:</h3>}
                 right={
-                    <>
+                    <h3>
                         {displayAsGTU(shielded + unShielded)}
                         {hidden}
-                    </>
+                    </h3>
                 }
             />
             <div className={styles.dividingLine} />
@@ -113,12 +116,12 @@ export default function AccountListElement({
             <SidedRow
                 className={styles.row}
                 left="- At Disposal:"
-                right={displayAsGTU(unShielded - scheduled)}
+                right={displayAsGTU(amountAtDisposal)}
             />
             <SidedRow
                 className={styles.row}
                 left="- Staked:"
-                right={displayAsGTU(unShielded - scheduled)}
+                right={displayAsGTU(stakedAmount)}
             />
             <div className={styles.dividingLine} />
             <SidedRow

@@ -11,7 +11,6 @@ import {
     FormRewardDistribution,
     RewardDistribution,
 } from './common/RewardDistribution';
-import { noOp } from '~/utils/basicHelpers';
 
 export interface UpdateMintDistributionFields {
     mantissa: string;
@@ -68,7 +67,6 @@ export default function UpdateMintDistribution({
                 <RewardDistribution
                     labels={rewardDistributionLabels}
                     value={currentValue}
-                    onChange={noOp}
                     disabled
                 />
             </div>

@@ -1,9 +1,11 @@
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth } from './types';
 
-// given a YearMonth string (YYYYMM), returns
-// a displayable format eg:
-// given "202001" => "January 2020"
+/**
+ * given a YearMonth string (YYYYMM), returns
+ * a displayable format eg:
+ * given "202001" => "January 2020"
+ */
 export function formatDate(date: YearMonth) {
     const dtFormat = new Intl.DateTimeFormat('en-GB', {
         month: 'long',
@@ -11,6 +13,16 @@ export function formatDate(date: YearMonth) {
         timeZone: 'UTC',
     });
     return dtFormat.format(new Date(`${date.slice(0, 4)}-${date.slice(4, 6)}`));
+}
+
+// Returns the YearMonth string (YYYYMM), of the current time.
+export function getCurrentYearMonth(): YearMonth {
+    const date = new Date();
+    let month = (date.getMonth() + 1).toString();
+    if (month.length === 1) {
+        month = `0${month}`;
+    }
+    return date.getFullYear() + month;
 }
 
 /**

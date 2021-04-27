@@ -2,12 +2,14 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
-import { AddressBookEntry, AccountInfo, Fraction } from '~/utils/types';
-import { toMicroUnits, getGTUSymbol, isValidGTUString } from '~/utils/gtu';
+import { AddressBookEntry, Fraction } from '~/utils/types';
+import { getGTUSymbol } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import { validateAmount } from '~/utils/transactionHelpers';
+import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
 
@@ -18,15 +20,6 @@ interface Props {
     estimatedFee?: Fraction | undefined;
     toPickRecipient?(currentAmount: string): void;
     toConfirmTransfer(amount: string): void;
-}
-
-// TODO: Take staked amount into consideration
-function atDisposal(accountInfo: AccountInfo): bigint {
-    const unShielded = BigInt(accountInfo.accountAmount);
-    const scheduled = accountInfo.accountReleaseSchedule
-        ? BigInt(accountInfo.accountReleaseSchedule.total)
-        : 0n;
-    return unShielded - scheduled;
 }
 
 interface PickAmountForm {
@@ -46,21 +39,7 @@ export default function PickAmount({
     toConfirmTransfer,
 }: Props) {
     const accountInfo = useSelector(chosenAccountInfoSelector);
-    const fee = 5900n; // TODO: Add cost calculator
     const form = useForm<PickAmountForm>({ mode: 'onTouched' });
-
-    function validateAmount(amountToValidate: string): string | undefined {
-        if (!isValidGTUString(amountToValidate)) {
-            return 'Invalid input';
-        }
-        if (
-            accountInfo &&
-            atDisposal(accountInfo) < toMicroUnits(amountToValidate) + fee
-        ) {
-            return 'Insufficient funds';
-        }
-        return undefined;
-    }
 
     const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
         (values) => {
@@ -69,6 +48,14 @@ export default function PickAmount({
         },
         [toConfirmTransfer]
     );
+
+    function validate(amount: string) {
+        return validateAmount(
+            amount,
+            accountInfo,
+            estimatedFee && collapseFraction(estimatedFee)
+        );
+    }
 
     return (
         <>
@@ -83,7 +70,7 @@ export default function PickAmount({
                         rules={{
                             required: 'Amount Required',
                             validate: {
-                                validateAmount,
+                                validate,
                             },
                         }}
                     />

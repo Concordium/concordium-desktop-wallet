@@ -54,11 +54,13 @@ function IdentityListElement({
             role="button"
         >
             <div className={styles.topRow}>
-                <img
-                    className={styles.statusImage}
-                    src={`data:image/png;base64, ${identityProvider.metadata.icon}`}
-                    alt={identity.status}
-                />
+                {identityProvider?.metadata?.icon ? (
+                    <img
+                        className={styles.statusImage}
+                        src={`data:image/png;base64, ${identityProvider?.metadata?.icon}`}
+                        alt={identity.status}
+                    />
+                ) : null}
                 {statusImage(identity.status)}
                 <h3 className={styles.rightAligned}>Identity</h3>
             </div>

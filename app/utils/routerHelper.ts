@@ -1,7 +1,6 @@
 import routes from '../constants/routes.json';
-import { UpdateType, TransactionKindString } from './types';
+import { UpdateType, TransactionKindString, ExportKeyType } from './types';
 // eslint-disable-next-line import/no-cycle
-import { ExportKeyType } from '~/pages/multisig/menu/ExportKeyList';
 
 export const selectedAddressBookEntryRoute = (address: string) =>
     routes.ADDRESSBOOK_SELECTED.replace(':address', address);
@@ -16,6 +15,9 @@ export const selectedProposalRoute = (proposalId: number) => {
 export function selectedExportKeyRoute(keyType: string) {
     if (keyType === ExportKeyType.Credential) {
         return routes.GENERATE_CREDENTIAL;
+    }
+    if (keyType === ExportKeyType.Genesis) {
+        return routes.CREATE_GENESIS_ACCOUNT;
     }
     return routes.MULTISIGTRANSACTIONS_EXPORT_KEY_SELECTED.replace(
         ':keyType',
@@ -38,8 +40,8 @@ export function createProposalRoute(
             `${transactionType}`
         );
     }
-    return {
-        pathname: routes.UPDATE_ACCOUNT_CREDENTIALS,
-        state: transactionType,
-    };
+    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
+        ':transactionKind',
+        `${transactionType}`
+    );
 }
