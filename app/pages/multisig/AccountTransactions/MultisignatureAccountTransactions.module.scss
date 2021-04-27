@@ -9,15 +9,6 @@
     color: $color-error;
 }
 
-.pickAmount {
-    display: flex;
-    flex-direction: column;
-
-    > *:not(:first-child) {
-        margin-top: 20px;
-    }
-}
-
 .buildSchedule {
     display: flex;
     flex-direction: column;

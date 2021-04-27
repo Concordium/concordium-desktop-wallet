@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Grid, Header } from 'semantic-ui-react';
 import attributeNamesJson from '../../constants/attributeNames.json';
 import { chosenAccountInfoSelector } from '../../features/AccountSlice';
-import SidedRow from '../../components/SidedRow';
+import SidedRow from '~/components/SemanticSidedRow';
 
 const attributeNames: Record<string, string> = attributeNamesJson;
 

@@ -181,7 +181,11 @@ function listCredentials(
  */
 export default function UpdateCredentialPage(): JSX.Element {
     const dispatch = useDispatch();
-    const location = useLocation().pathname;
+    const transactionKind = TransactionKindId.Update_credentials;
+    const location = useLocation().pathname.replace(
+        `${transactionKind}`,
+        ':transactionKind'
+    );
     const credentials = useSelector(credentialsSelector);
 
     const [isReady, setReady] = useState(false);
@@ -361,6 +365,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                     <PickAccount
                                         setReady={setReady}
                                         setAccount={setAccount}
+                                        chosenAccount={account}
                                         identity={identity}
                                     />
                                 )}
@@ -377,7 +382,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 }
                                 render={() => (
                                     <PickIdentity
-                                        elementClassName={styles.listElement}
+                                        chosenIdentity={identity}
                                         setReady={setReady}
                                         setIdentity={setIdentity}
                                     />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
     Account,
     Identity,
@@ -9,20 +9,17 @@ import {
 } from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
 import styles from './TransactionProposalDetails.module.scss';
-import {
-    getTransactionKindCost,
-    scheduledTransferCost,
-} from '~/utils/transactionCosts';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ScheduleList from '~/components/ScheduleList';
 
 interface Props {
     transactionType: TransactionKindId;
-    account: Account | undefined;
-    identity: Identity | undefined;
-    amount: string | undefined;
-    schedule: Schedule | undefined;
-    recipient: AddressBookEntry | undefined;
+    account?: Account;
+    identity?: Identity;
+    amount?: string;
+    recipient?: AddressBookEntry;
+    schedule?: Schedule;
+    estimatedFee?: Fraction;
 }
 
 const placeholder = <p className={styles.placeholder}>To be determined</p>;
@@ -43,30 +40,10 @@ export default function TransactionProposalDetails({
     recipient,
     schedule,
     transactionType,
+    estimatedFee,
 }: Props) {
-    const [estimatedFee, setFee] = useState<Fraction | undefined>();
-
     const isScheduledTransfer =
         transactionType === TransactionKindId.Transfer_with_schedule;
-
-    useEffect(() => {
-        if (account) {
-            if (isScheduledTransfer && schedule) {
-                scheduledTransferCost(account.signatureThreshold)
-                    .then((feeCalculator) =>
-                        setFee(feeCalculator(schedule.length))
-                    )
-                    .catch(() => {});
-            } else {
-                getTransactionKindCost(
-                    transactionType,
-                    account.signatureThreshold
-                )
-                    .then((fee) => setFee(fee))
-                    .catch(() => {});
-            }
-        }
-    }, [account, transactionType, setFee, schedule, isScheduledTransfer]);
 
     return (
         <div className={styles.details}>

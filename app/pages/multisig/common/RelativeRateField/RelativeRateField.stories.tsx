@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 // also exported from '@storybook/react' if you can deal with breaking changes in 6.1
 import { Story, Meta } from '@storybook/react/types-6-0';
-import { ExchangeRate } from '~/utils/types';
 import { RelativeRateField, RelativeRateFieldProps } from './RelativeRateField';
+import { RelativeRateValue } from './util';
 
 export default {
     title: 'Multi Signature/Common/Relative Rate Field',
@@ -10,10 +10,7 @@ export default {
 } as Meta;
 
 const Template: Story<RelativeRateFieldProps> = (args) => {
-    const [value, setValue] = useState<Partial<ExchangeRate> | undefined>({
-        denominator: 1n,
-        numerator: 1234n,
-    });
+    const [value, setValue] = useState<RelativeRateValue>(args.value ?? {});
 
     return (
         <div style={{ width: '300px' }}>
@@ -24,24 +21,27 @@ const Template: Story<RelativeRateFieldProps> = (args) => {
 
 export const Primary = Template.bind({});
 Primary.args = {
-    denominatorUnit: 'NRG',
+    denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
-    unit: '€',
+    numeratorUnit: { value: '€ ', position: 'prefix' },
+    value: { denominator: '1', numerator: '10' },
 };
 
 export const Invalid = Template.bind({});
 Invalid.args = {
-    denominatorUnit: 'NRG',
+    denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
-    unit: '€',
+    numeratorUnit: { value: '€ ', position: 'prefix' },
+    value: { denominator: '1', numerator: '-10' },
     isInvalid: true,
-    error: 'Field is required',
+    error: "Value can't be negative",
 };
 
 export const Disabled = Template.bind({});
 Disabled.args = {
-    denominatorUnit: 'NRG',
+    denominatorUnit: { position: 'postfix', value: ' NRG' },
     label: 'New euro pr. energy rate',
-    unit: '€',
+    numeratorUnit: { value: '€ ', position: 'prefix' },
+    value: { denominator: '1', numerator: '10' },
     disabled: true,
 };

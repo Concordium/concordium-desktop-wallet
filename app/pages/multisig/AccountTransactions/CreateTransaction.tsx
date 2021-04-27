@@ -8,6 +8,7 @@ import {
     AccountTransaction,
     Schedule,
     TransactionKindId,
+    Fraction,
 } from '~/utils/types';
 import { credentialsSelector } from '~/features/CredentialSlice';
 import SignTransaction from './SignTransaction';
@@ -16,6 +17,7 @@ interface Props {
     transactionKind: TransactionKindId;
     account: Account;
     recipient: AddressBookEntry;
+    estimatedFee?: Fraction;
     amount: string;
     schedule?: Schedule;
 }
@@ -26,6 +28,7 @@ export default function CreateTransaction({
     recipient,
     amount,
     schedule,
+    estimatedFee,
 }: Props) {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
@@ -39,11 +42,20 @@ export default function CreateTransaction({
                 sender: account.address,
                 amount: toMicroUnits(amount),
                 recipient: recipient.address,
+                signatureAmount: account.signatureThreshold,
                 schedule,
             })
-            .then(setTransaction)
-            .catch(() => {});
-    }, [setTransaction, account, amount, recipient, schedule, transactionKind]);
+            .then((t) => setTransaction({ ...t, estimatedFee }))
+            .catch(() => {}); // The failure happens if we are unable to get the nonce. // TODO This should be refactored to not happen here.
+    }, [
+        setTransaction,
+        account,
+        amount,
+        recipient,
+        schedule,
+        transactionKind,
+        estimatedFee,
+    ]);
 
     const credential = useMemo(
         () =>

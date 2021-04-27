@@ -1,4 +1,5 @@
 {
+    "createGenesisAccount": "createGenesisAccount",
     "createIdRequest": "'createIdRequest'",
     "buildPublicInformationForIp": "buildPubInfo",
     "createUnsignedCredential": "createUnsignedCredential",

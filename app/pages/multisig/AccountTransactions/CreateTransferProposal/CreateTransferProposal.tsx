@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -9,6 +9,7 @@ import {
     TransactionKindId,
     AddressBookEntry,
     Schedule,
+    Fraction,
 } from '~/utils/types';
 import PickAmount from '../PickAmount';
 import PickRecipient from '~/components/Transfers/PickRecipient';
@@ -23,8 +24,13 @@ import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import styles from './CreateTransferProposal.module.scss';
 import { ScheduledTransferBuilderRef } from '~/components/BuildSchedule/util';
+import {
+    scheduledTransferCost,
+    getTransactionKindCost,
+} from '~/utils/transactionCosts';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+import styles from './CreateTransferProposal.module.scss';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -57,7 +63,11 @@ export default function CreateTransferProposal({
     transactionKind,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const location = useLocation().pathname;
+    const location = useLocation().pathname.replace(
+        `${transactionKind}`,
+        ':transactionKind'
+    );
+
     const scheduleBuilderRef = useRef<ScheduledTransferBuilderRef>(null);
 
     const handler = findAccountTransactionHandler(transactionKind);
@@ -65,9 +75,32 @@ export default function CreateTransferProposal({
     const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
     const [identity, setIdentity] = useState<Identity | undefined>();
-    const [amount, setAmount] = useState<string>(''); // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string>('0.00'); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
     const [schedule, setSchedule] = useState<Schedule>();
+    const [estimatedFee, setFee] = useState<Fraction>();
+    const [error, setError] = useState<string>();
+
+    useEffect(() => {
+        if (account) {
+            if (transactionKind === TransactionKindId.Transfer_with_schedule) {
+                if (schedule) {
+                    scheduledTransferCost(account.signatureThreshold)
+                        .then((feeCalculator) =>
+                            setFee(feeCalculator(schedule.length))
+                        )
+                        .catch(() => setError('Unable to reach Node.'));
+                }
+            } else {
+                getTransactionKindCost(
+                    transactionKind,
+                    account.signatureThreshold
+                )
+                    .then((fee) => setFee(fee))
+                    .catch(() => setError('Unable to reach Node.'));
+            }
+        }
+    }, [account, transactionKind, setFee, schedule]);
 
     function updateAmount(newAmount: string) {
         if (isValidGTUString(newAmount)) {
@@ -87,6 +120,20 @@ export default function CreateTransferProposal({
                 amount={amount}
                 account={account}
                 schedule={schedule}
+            />
+        );
+    }
+
+    function renderPickRecipient() {
+        if (recipient) {
+            setReady(true);
+        }
+        return (
+            <PickRecipient
+                pickRecipient={(newRecipient) => {
+                    setReady(true);
+                    setRecipient(newRecipient);
+                }}
             />
         );
     }
@@ -137,6 +184,12 @@ export default function CreateTransferProposal({
             stepTitle={`Transaction Proposal - ${handler.type}`}
             delegateScroll
         >
+            <SimpleErrorModal
+                show={Boolean(error)}
+                header="Unable to perform transfer"
+                content={error}
+                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+            />
             <div className={styles.subtractContainerPadding}>
                 <Columns divider columnScroll columnClassName={styles.column}>
                     <Columns.Column
@@ -154,6 +207,7 @@ export default function CreateTransferProposal({
                                 amount={amount}
                                 recipient={recipient}
                                 schedule={schedule}
+                                estimatedFee={estimatedFee}
                             />
                             {showButton && (
                                 <Button
@@ -198,6 +252,7 @@ export default function CreateTransferProposal({
                                             setReady={setReady}
                                             setAccount={setAccount}
                                             identity={identity}
+                                            chosenAccount={account}
                                         />
                                     </div>
                                 )}
@@ -219,6 +274,7 @@ export default function CreateTransferProposal({
                                             account={account}
                                             amount={amount}
                                             setAmount={updateAmount}
+                                            estimatedFee={estimatedFee}
                                         />
                                     </div>
                                 )}
@@ -227,16 +283,7 @@ export default function CreateTransferProposal({
                                 path={
                                     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT
                                 }
-                                render={() => (
-                                    <div className={styles.columnContent}>
-                                        <PickRecipient
-                                            pickRecipient={(newRecipient) => {
-                                                setReady(true);
-                                                setRecipient(newRecipient);
-                                            }}
-                                        />
-                                    </div>
-                                )}
+                                render={renderPickRecipient}
                             />
                             <Route
                                 path={
@@ -247,6 +294,7 @@ export default function CreateTransferProposal({
                                         <PickIdentity
                                             setReady={setReady}
                                             setIdentity={setIdentity}
+                                            chosenIdentity={identity}
                                         />
                                     </div>
                                 )}

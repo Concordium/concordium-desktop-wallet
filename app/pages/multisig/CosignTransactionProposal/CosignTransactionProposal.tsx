@@ -15,7 +15,9 @@ import {
     TransactionAccountSignature,
 } from '~/utils/types';
 import { TransactionInput } from '~/utils/transactionTypes';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
+import SimpleErrorModal, {
+    ModalErrorInput,
+} from '~/components/SimpleErrorModal';
 import { ensureProps } from '~/utils/componentHelpers';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
@@ -59,7 +61,9 @@ interface CosignTransactionProposalProps extends WithBlockSummary {
  */
 const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProps>(
     ({ location, blockSummary }) => {
-        const [showValidationError, setShowValidationError] = useState(false);
+        const [showError, setShowError] = useState<ModalErrorInput>({
+            show: false,
+        });
         const [signature, setSignature] = useState<
             | UpdateInstructionSignature[]
             | TransactionAccountSignature
@@ -94,7 +98,12 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                             blockSummary
                         );
                     } catch (e) {
-                        setShowValidationError(true);
+                        setShowError({
+                            show: true,
+                            header: 'Unauthorized key',
+                            content:
+                                'Your key is not authorized to sign this update type.',
+                        });
                         return;
                     }
                 } else {
@@ -107,7 +116,11 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                         ledger
                     );
                 } catch (e) {
-                    setStatusText(e);
+                    setShowError({
+                        show: true,
+                        header: 'Unable to sign transaction',
+                        content: e.message,
+                    });
                     return;
                 }
             }
@@ -145,9 +158,9 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
         return (
             <>
                 <SimpleErrorModal
-                    show={showValidationError}
-                    header="Unauthorized key"
-                    content="Your key is not authorized to sign this update type."
+                    show={showError.show}
+                    header={showError.header}
+                    content={showError.content}
                     onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
                 />
                 <MultiSignatureLayout

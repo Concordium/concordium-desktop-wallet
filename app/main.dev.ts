@@ -93,19 +93,10 @@ const createWindow = async () => {
         await installExtensions();
     }
 
-    const RESOURCES_PATH = app.isPackaged
-        ? path.join(process.resourcesPath, 'resources')
-        : path.join(__dirname, '../resources');
-
-    const getAssetPath = (...paths: string[]): string => {
-        return path.join(RESOURCES_PATH, ...paths);
-    };
-
     mainWindow = new BrowserWindow({
         show: false,
         width: 4096,
         height: 2912,
-        icon: getAssetPath('icon.png'),
         webPreferences:
             (process.env.NODE_ENV === 'development' ||
                 process.env.E2E_BUILD === 'true') &&
@@ -122,10 +113,10 @@ const createWindow = async () => {
 
     printWindow = new BrowserWindow({
         parent: mainWindow,
-        modal: true,
+        modal: false,
         show: false,
         webPreferences: {
-            nodeIntegration: true,
+            nodeIntegration: false,
             devTools: false,
         },
     });
@@ -172,9 +163,12 @@ ipcMain.handle(ipcCommands.openFileDialog, async (_event, title) => {
 });
 
 // Provides access to save file dialog from renderer processes.
-ipcMain.handle(ipcCommands.saveFileDialog, async (_event, title) => {
-    return dialog.showSaveDialog({ title });
-});
+ipcMain.handle(
+    ipcCommands.saveFileDialog,
+    async (_event, title, defaultPath) => {
+        return dialog.showSaveDialog({ title, defaultPath });
+    }
+);
 
 // Updates the location of the grpc endpoint.
 ipcMain.handle(
@@ -197,9 +191,15 @@ ipcMain.handle(
     }
 );
 
+enum PrintErrorTypes {
+    Cancelled = 'cancelled',
+    Failed = 'failed',
+    NoPrinters = 'no valid printers available',
+}
+
 // Prints the given body.
 ipcMain.handle(ipcCommands.print, (_event, body) => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<string | void>((resolve, reject) => {
         if (!printWindow) {
             reject(new Error('Internal error: Unable to print'));
         } else {
@@ -214,9 +214,13 @@ ipcMain.handle(ipcCommands.print, (_event, body) => {
                 );
                 content.print({}, (success, errorType) => {
                     if (!success) {
-                        reject(new Error(`Print failed due to ${errorType}`));
+                        if (errorType === PrintErrorTypes.Cancelled) {
+                            resolve();
+                        }
+                        resolve(errorType);
+                    } else {
+                        resolve();
                     }
-                    resolve();
                 });
             });
         }

@@ -43,6 +43,9 @@ export async function getNextCredentialNumber(identityId: number) {
         .select()
         .table(credentialsTable)
         .where({ identityId });
+    if (credentials.length === 0) {
+        return 0;
+    }
     const currentNumber = credentials.reduce(
         (num, cred) => Math.max(num, cred.credentialNumber),
         0

@@ -20,6 +20,10 @@
     composes: textfaded from global;
 }
 
+.amountInputWrapper {
+    font-size: $font-size-body1;
+}
+
 .addScheduleCard {
     position: relative;
     padding: 10px;
@@ -48,7 +52,7 @@
         width: 100%;
         margin-bottom: 0;
 
-        p {
+        span {
             font-size: $font-size-body3;
             padding-left: 20px;
             margin-bottom: 0;

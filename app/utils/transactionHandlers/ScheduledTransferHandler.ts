@@ -3,6 +3,7 @@ import {
     AccountTransaction,
     TransactionPayload,
     instanceOfScheduledTransfer,
+    TransactionKindId,
 } from '../types';
 import routes from '~/constants/routes.json';
 import TransferHandler from './TransferHandler';
@@ -31,33 +32,45 @@ export default class ScheduledTransferHandler
     }
 
     creationLocationHandler(currentLocation: string) {
-        switch (currentLocation) {
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
-                return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-            default:
-                throw new Error('unknown location');
-        }
+        const getNewLocation = () => {
+            switch (currentLocation) {
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
+                default:
+                    throw new Error('unknown location');
+            }
+        };
+        return getNewLocation().replace(
+            ':transactionKind',
+            `${TransactionKindId.Transfer_with_schedule}`
+        );
     }
 
     createTransaction({
         sender,
         schedule,
         recipient,
+        signatureAmount,
     }: Partial<CreateTransactionInput>) {
         if (!sender || !recipient || !schedule) {
             throw new Error(
                 `Unexpected Missing input: ${{ sender, schedule, recipient }}`
             );
         }
-        return createScheduledTransferTransaction(sender, recipient, schedule);
+        return createScheduledTransferTransaction(
+            sender,
+            recipient,
+            schedule,
+            signatureAmount
+        );
     }
 
     title = `Account Transaction | ${TYPE}`;

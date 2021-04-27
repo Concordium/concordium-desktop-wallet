@@ -3,7 +3,7 @@ import { Header, Grid, Button } from 'semantic-ui-react';
 import { AccountInfo, ScheduleItem, TimeStampUnit } from '../../utils/types';
 import { parseTime } from '../../utils/timeHelpers';
 import { displayAsGTU } from '../../utils/gtu';
-import SidedRow from '../../components/SidedRow';
+import SidedRow from '~/components/SemanticSidedRow';
 
 interface Props {
     accountInfo: AccountInfo;

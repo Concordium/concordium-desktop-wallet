@@ -28,6 +28,9 @@ import SimpleTransferHandler from './SimpleTransferHandler';
 import ScheduledTransferHandler from './ScheduledTransferHandler';
 import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
 import UpdateInstructionHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
+import UpdateRootKeysHandler from './UpdateRootsKeysHandler';
+import UpdateLevel1KeysWithRootKeysHandler from './UpdateLevel1KeysWithRootKeysHandler';
+import UpdateLevel1KeysWithLevel1KeysHandler from './UpdateLevel1KeysWithLevel1KeysHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -88,6 +91,18 @@ export function findUpdateInstructionHandler(
         case UpdateType.UpdateElectionDifficulty:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new ElectionDifficultyHandler()
+            );
+        case UpdateType.UpdateRootKeys:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new UpdateRootKeysHandler()
+            );
+        case UpdateType.UpdateLevel1KeysUsingRootKeys:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new UpdateLevel1KeysWithRootKeysHandler()
+            );
+        case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new UpdateLevel1KeysWithLevel1KeysHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);

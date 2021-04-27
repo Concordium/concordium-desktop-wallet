@@ -7,9 +7,12 @@
 .title {
     display: block;
     margin-bottom: 0;
-    margin-top: 40px;
     font-size: $font-size-body3;
     font-weight: $font-weight-bold;
+
+    &:not(:first-child) {
+        margin-top: 40px;
+    }
 }
 
 .value,

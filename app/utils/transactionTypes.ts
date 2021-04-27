@@ -5,6 +5,7 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
     AddressBookEntry,
+    HigherLevelKeyUpdate,
     AccountTransaction,
     TransactionPayload,
     Schedule,
@@ -21,6 +22,10 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
+    handleKeySubmit?(
+        effectiveTime: Date,
+        higherLevelKeyUpdate: HigherLevelKeyUpdate
+    ): Promise<void>;
 }
 
 /**
@@ -86,6 +91,7 @@ export interface CreateTransactionInput {
     recipient: string;
     amount: bigint;
     schedule: Schedule;
+    signatureAmount: number;
 }
 
 /**
