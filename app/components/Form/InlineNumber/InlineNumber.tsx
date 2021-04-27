@@ -31,7 +31,13 @@ export interface InlineNumberProps
     extends ClassName,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            'step' | 'min' | 'max' | 'disabled' | 'autoFocus'
+            | 'step'
+            | 'min'
+            | 'max'
+            | 'disabled'
+            | 'autoFocus'
+            | 'readOnly'
+            | 'title'
         >,
         Pick<CommonFieldProps, 'isInvalid'> {
     /**
@@ -51,7 +57,8 @@ export interface InlineNumberProps
      * If true, falls back to `fallbackValue` when fields `isInvalid` prop is set to `true` on blur. Defaults to `false`.
      */
     fallbackOnInvalid?: boolean;
-    onChange(v?: string): void;
+    customFormatter?(v?: string): string;
+    onChange?(v?: string): void;
     /**
      * As internal formatting functionality is triggered on blur, settings value on blur externally is prone to trigger an infinite loop. Please take caution!
      */
@@ -70,7 +77,8 @@ export default function InlineNumber({
     fallbackValue = 0,
     fallbackOnInvalid = false,
     value,
-    onChange,
+    customFormatter,
+    onChange = noOp,
     onBlur = noOp,
     onFocus = noOp,
     allowFractions = false,
@@ -79,13 +87,23 @@ export default function InlineNumber({
     ...inputProps
 }: InlineNumberProps): JSX.Element {
     const format = useCallback(
-        allowFractions
-            ? formatNumberStringWithDigits(
-                  ensureDigits,
-                  allowFractions !== true ? allowFractions : undefined
-              )
-            : ensureValidBigInt,
-        [ensureDigits, allowFractions]
+        (v?: string) => {
+            if (customFormatter !== undefined) {
+                return customFormatter(v);
+            }
+            if (allowFractions === false) {
+                return ensureValidBigInt(v);
+            }
+            if (typeof allowFractions === 'number' || ensureDigits !== 0) {
+                return formatNumberStringWithDigits(
+                    ensureDigits,
+                    allowFractions !== true ? allowFractions : undefined
+                )(v);
+            }
+
+            return v ?? '';
+        },
+        [ensureDigits, allowFractions, customFormatter]
     );
 
     const initialFormatted = useMemo(

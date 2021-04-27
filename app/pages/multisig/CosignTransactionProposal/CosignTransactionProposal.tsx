@@ -31,7 +31,7 @@ import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import getTransactionHash from '~/utils/transactionHash';
 
 import ExpiredTransactionView from '../ExpiredTransactionView';
-import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
+import withChainData, { ChainData } from '../common/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import styles from './CosignTransactionProposal.module.scss';
 import { signUpdateInstruction, signAccountTransaction } from './util';
@@ -51,7 +51,7 @@ const fieldNames: EqualRecord<CosignTransactionProposalForm> = {
     hashMatch: 'hashMatch',
 };
 
-interface CosignTransactionProposalProps extends WithBlockSummary {
+interface CosignTransactionProposalProps extends ChainData {
     location: LocationDescriptorObject<TransactionInput>;
 }
 
@@ -59,7 +59,7 @@ interface CosignTransactionProposalProps extends WithBlockSummary {
  * Component that displays an overview of an imported multi signature transaction proposal
  * that is to be signed.
  */
-const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProps>(
+const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
     ({ location, blockSummary }) => {
         const [showError, setShowError] = useState<ModalErrorInput>({
             show: false,

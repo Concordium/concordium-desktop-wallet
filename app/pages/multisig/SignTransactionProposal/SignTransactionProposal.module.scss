@@ -1,11 +1,15 @@
 @import 'config/bundle';
 @import '../common/MultiSignatureFlowPage.module';
 
+.detailsColumnContent,
 .signColumnContent {
     composes: columnContent;
     height: 100%;
-    max-width: 400px;
+    max-width: 450px;
     margin: 0 auto;
+}
+
+.signColumnContent {
     display: flex;
     flex-direction: column;
     justify-content: space-between;

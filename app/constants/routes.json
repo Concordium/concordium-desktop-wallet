@@ -20,6 +20,7 @@
     "EXPORTIMPORT": "/export_import",
     "IMPORT": "/export_import/import",
     "SETTINGS": "/settings",
+    "SETTINGS_SELECTED": "/settings/:type",
     "MULTISIGTRANSACTIONS": "/multi-signature-transaction",
     "MULTISIGTRANSACTIONS_PROPOSAL": "/multi-signature-transaction/create/:updateType",
     "MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_SIZE": "/multi-signature-transaction/create/:updateType/keysetsize",

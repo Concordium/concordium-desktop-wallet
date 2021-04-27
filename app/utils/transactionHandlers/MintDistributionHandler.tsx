@@ -1,9 +1,11 @@
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import MintDistributionView from '../../pages/multisig/MintDistributionView';
+import React from 'react';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { getGovernanceLevel2Path } from '~/features/ledger/Path';
+import MintDistributionView from '~/pages/multisig/updates/MintDistribution/MintDistributionView';
 import UpdateMintDistribution, {
     UpdateMintDistributionFields,
-} from '../../pages/multisig/UpdateMintDistribution';
+} from '~/pages/multisig/updates/MintDistribution/UpdateMintDistribution';
+import { parseMintPerSlot } from '../mintDistributionHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -35,14 +37,11 @@ export default class MintDistributionHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        {
-            exponent,
-            mantissa,
-            rewardDistribution,
-        }: UpdateMintDistributionFields,
+        { mintPerSlot, rewardDistribution }: UpdateMintDistributionFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
-        if (!blockSummary) {
+        const parsedMintPerSlot = parseMintPerSlot(mintPerSlot);
+        if (!blockSummary || !parsedMintPerSlot) {
             return undefined;
         }
 
@@ -54,10 +53,7 @@ export default class MintDistributionHandler
         } = blockSummary.updates.keys.level2Keys.mintDistribution;
 
         const mintDistribution: MintDistribution = {
-            mintPerSlot: {
-                mantissa: parseInt(mantissa, 10),
-                exponent: parseInt(exponent, 10),
-            },
+            mintPerSlot: parsedMintPerSlot,
             bakingReward: rewardDistribution.first,
             finalizationReward: rewardDistribution.second,
         };
@@ -88,7 +84,7 @@ export default class MintDistributionHandler
     }
 
     view(transaction: TransactionType) {
-        return MintDistributionView({ mintDistribution: transaction.payload });
+        return <MintDistributionView mintDistribution={transaction.payload} />;
     }
 
     getAuthorization(authorizations: Authorizations) {

@@ -4,19 +4,17 @@ import { BlockSummary } from '~/utils/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
 import { RelativeRateField } from '../../common/RelativeRateField';
 import { fromExchangeRate } from '../../common/RelativeRateField/util';
-import withBlockSummary, {
-    WithBlockSummary,
-} from '../../common/withBlockSummary';
+import withChainData, { ChainData } from '../../common/withChainData';
 import { commonFieldProps, getCurrentValue } from './util';
 
-interface Props extends WithBlockSummary {
+interface Props extends ChainData {
     exchangeRate: ExchangeRate;
 }
 
 /**
  * Displays an overview of a euro per energy transaction payload.
  */
-export default withBlockSummary(function EuroPerEnergyView({
+export default withChainData(function EuroPerEnergyView({
     exchangeRate,
     blockSummary,
 }: Props) {
