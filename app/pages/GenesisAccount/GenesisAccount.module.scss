@@ -30,8 +30,8 @@ $width: 600px;
 
 .printButton {
     position: absolute;
-    right: 10px;
-    top: 10px;
+    right: 20px;
+    top: 20px;
     margin-top: 0;
 }
 
@@ -43,4 +43,8 @@ $width: 600px;
 
 .confirmCard {
     position: relative;
+}
+
+.exportButton {
+    margin-top: 20px;
 }

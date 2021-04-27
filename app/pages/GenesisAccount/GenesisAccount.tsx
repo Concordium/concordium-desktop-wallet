@@ -228,7 +228,9 @@ export default function GenesisAccount(): JSX.Element {
                     data={publicKey.verifyKey}
                     setScreenshot={setImage}
                 />
-                <Button onClick={exportGenesis}>Export</Button>
+                <Button className={styles.exportButton} onClick={exportGenesis}>
+                    Export
+                </Button>
             </Card>
         );
     }
