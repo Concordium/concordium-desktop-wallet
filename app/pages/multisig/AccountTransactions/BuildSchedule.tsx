@@ -15,9 +15,9 @@ interface Props {
     setReady(isReady: boolean): void;
 }
 
+// TODO: Add Estimated Fee connection
 /**
  * Allows the user to build the schedule of a scheduled transfer.
-   TODO: Add Estimated Fee connection
  */
 const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
     ({ amount, submitSchedule, setReady }, ref) => {
