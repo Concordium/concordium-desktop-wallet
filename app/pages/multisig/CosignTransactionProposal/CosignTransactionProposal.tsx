@@ -29,6 +29,7 @@ import { isExpired } from '~/utils/transactionHelpers';
 import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import getTransactionHash from '~/utils/transactionHash';
+import PrintTransaction from '~/components/PrintTransaction';
 
 import ExpiredTransactionView from '../ExpiredTransactionView';
 import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
@@ -165,6 +166,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                 />
                 <MultiSignatureLayout
                     pageTitle={transactionHandler.title}
+                    print={<PrintTransaction transaction={transactionObject} />}
                     stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
                     delegateScroll
                 >

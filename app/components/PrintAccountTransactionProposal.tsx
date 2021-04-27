@@ -43,8 +43,10 @@ export default function PrintAccountTransactionProposal({
             <>
                 <table style={{ width: '100%', textAlign: 'left' }}>
                     <thead>
-                        <th>Property</th>
-                        <th>Value</th>
+                        <tr>
+                            <th>Property</th>
+                            <th>Value</th>
+                        </tr>
                     </thead>
                     <tbody>
                         <tr>
@@ -129,8 +131,10 @@ export default function PrintAccountTransactionProposal({
         return (
             <table style={{ width: '100%', textAlign: 'left' }}>
                 <thead>
-                    <th>Property</th>
-                    <th>Value</th>
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <tr>
