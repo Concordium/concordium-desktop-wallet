@@ -25,6 +25,4 @@ export default abstract class TransferHandler<
     view(transaction: TransactionType) {
         return AccountTransactionDetails({ transaction });
     }
-
-    title = 'Account Transaction | Update Account Credentials';
 }
