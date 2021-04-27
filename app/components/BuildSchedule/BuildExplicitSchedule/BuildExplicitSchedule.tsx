@@ -30,6 +30,8 @@ import {
 import { noOp } from '~/utils/basicHelpers';
 import Label from '~/components/Label';
 
+const maxScheduleAmount = 255;
+
 export interface Defaults {
     schedule: Schedule;
 }
@@ -80,7 +82,8 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
         const methods = useForm<AddSchedulePointForm>({ mode: 'onTouched' });
         const { reset } = methods;
 
-        const canSubmit = usedAmount === amount;
+        const canSubmit =
+            usedAmount === amount && schedule.length <= maxScheduleAmount;
         // eslint-disable-next-line react-hooks/exhaustive-deps
         useEffect(() => onValidChange(canSubmit), [canSubmit]);
 
@@ -127,6 +130,11 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             let isValid = false;
             if (pointAmount && isValidGTUString(pointAmount)) {
                 const value = toMicroUnits(pointAmount);
+
+                if (value === 0n) {
+                    return 'Amount may not be zero';
+                }
+
                 isValid = value + usedAmount <= amount;
             }
             return isValid || 'Value exceeds transaction amount';

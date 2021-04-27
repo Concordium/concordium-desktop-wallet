@@ -143,6 +143,11 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                                         value: 255,
                                         message: 'Maximum value is 255',
                                     },
+                                    validate: {
+                                        splitable: (numberOfReleases: bigint) =>
+                                            numberOfReleases <= amount ||
+                                            'Amount cannot be split among releases',
+                                    },
                                 }}
                             />{' '}
                             releases
