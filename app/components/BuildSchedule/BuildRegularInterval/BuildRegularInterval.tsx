@@ -139,6 +139,10 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                                         value: 1,
                                         message: 'Minimum value is 1',
                                     },
+                                    max: {
+                                        value: 255,
+                                        message: 'Maximum value is 255',
+                                    },
                                 }}
                             />{' '}
                             releases
