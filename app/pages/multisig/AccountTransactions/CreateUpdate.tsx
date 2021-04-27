@@ -53,7 +53,6 @@ export default function CreateUpdate({
         addedCredentials,
         currentCredentialAmount,
         removedCredIds,
-        currentCredentialAmount,
         newThreshold,
     ]);
 
