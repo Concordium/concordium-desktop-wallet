@@ -21,8 +21,18 @@ export async function getAllIdentities(): Promise<Identity[]> {
     return (await knex()).select().table(identitiesTable);
 }
 
+// TODO Clean up this temp import hack.
 export async function insertIdentity(identity: Partial<Identity> | Identity[]) {
-    return (await knex())(identitiesTable).insert(identity);
+    if (Array.isArray(identity)) {
+        const withHwWallet = identity.map((id) => {
+            return { ...id, hwWallet: 'Testing' };
+        });
+        return (await knex())(identitiesTable).insert(withHwWallet);
+    }
+    return (await knex())(identitiesTable).insert({
+        ...identity,
+        hwWallet: 'Testing',
+    });
 }
 
 export async function updateIdentity(
