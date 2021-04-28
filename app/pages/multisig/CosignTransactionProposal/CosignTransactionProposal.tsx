@@ -137,10 +137,9 @@ const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
             const signedTransactionJson = stringify(signedTransaction);
 
             try {
-                const fileSaved = await saveFile(
-                    signedTransactionJson,
-                    'Export signed transaction'
-                );
+                const fileSaved = await saveFile(signedTransactionJson, {
+                    title: 'Export signed transaction',
+                });
 
                 if (fileSaved) {
                     dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));

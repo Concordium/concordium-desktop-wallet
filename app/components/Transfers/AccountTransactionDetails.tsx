@@ -7,12 +7,14 @@ import {
     instanceOfTransferToPublic,
     instanceOfScheduledTransfer,
     instanceOfUpdateAccountCredentials,
+    instanceOfAddBaker,
 } from '../../utils/types';
 import { lookupName } from '../../utils/transactionHelpers';
 import { chosenAccountSelector } from '../../features/AccountSlice';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
 import DisplayInternalTransfer from './DisplayInternalTransfer';
 import DisplaySimpleTransfer from './DisplaySimpleTransfer';
+import DisplayAddBaker from './DisplayAddBaker';
 import DisplayAccountCredentialsUpdate from '../DisplayAccountCredentialUpdate';
 
 interface Props {
@@ -44,6 +46,9 @@ export default function AccountTransactionDetails({ transaction }: Props) {
                 fromName={fromName}
             />
         );
+    }
+    if (instanceOfAddBaker(transaction)) {
+        return <DisplayAddBaker transaction={transaction} />;
     }
     if (
         instanceOfTransferToEncrypted(transaction) ||

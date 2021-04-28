@@ -50,10 +50,9 @@ export default function Export() {
         const encrypted = encrypt(JSON.stringify(data), password);
 
         try {
-            const completed = await saveFile(
-                JSON.stringify(encrypted),
-                'Export your data'
-            );
+            const completed = await saveFile(JSON.stringify(encrypted), {
+                title: 'Export your data',
+            });
             if (completed) {
                 setModalMessage('Export was successful');
                 setOpenConfirmationModal(true);

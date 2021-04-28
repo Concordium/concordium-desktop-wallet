@@ -93,3 +93,16 @@ pub fn create_genesis_account_ext(
         Err(e) => format!("unable to create genesis account due to: {}", e),
     }
 }
+
+#[wasm_bindgen(js_name = generateBakerKeys)]
+pub fn _generate_baker_keys(
+    input: &str
+) -> String {
+    let sender = match input.parse() {
+        Ok(sender) => sender,
+        Err(e) => return format!("unable to parse sender account address: {}.", e)
+    };
+
+    serde_json::to_string(&generate_baker_keys(&sender))
+        .unwrap_or_else(|e| format!("unable to serialize baker keys: {}", e))
+}

@@ -26,7 +26,7 @@ export default function ExportCredential({
 
         const success = await saveFile(
             JSON.stringify(credentialBlob.credential),
-            'Save credential'
+            { title: 'Save credential' }
         );
         if (success) {
             insertNewCredential(

@@ -229,10 +229,9 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     disabled={!isOpen}
                                     onClick={
                                         () =>
-                                            saveFile(
-                                                proposal.transaction,
-                                                'Export transaction'
-                                            )
+                                            saveFile(proposal.transaction, {
+                                                title: 'Export transaction',
+                                            })
                                         // TODO Handle failure
                                     }
                                 >

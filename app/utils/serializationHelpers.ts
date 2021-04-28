@@ -124,6 +124,10 @@ export const putInt8 = (i: number) => Buffer.from(Uint8Array.of(i));
 
 export const putHexString = (s: string) => Buffer.from(s, 'hex');
 
+export function serializeBoolean(b: boolean): Buffer {
+    return Buffer.from(Uint8Array.of(b ? 1 : 0));
+}
+
 export function serializeCredentialDeploymentInformation(
     credential: CredentialDeploymentInformation
 ) {

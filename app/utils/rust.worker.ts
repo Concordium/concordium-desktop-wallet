@@ -29,6 +29,7 @@ interface RustInterface {
         idCredSec: string,
         prfKey: string
     ): string;
+    generateBakerKeys(sender: string): string;
 }
 
 let rustReference: RustInterface;
@@ -107,6 +108,13 @@ function createGenesisAccount(
     );
 }
 
+function generateBakerKeys(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.generateBakerKeys(message.sender);
+}
+
 function mapCommand(command: string) {
     switch (command) {
         case workerCommands.buildPublicInformationForIp:
@@ -125,6 +133,8 @@ function mapCommand(command: string) {
             return createTransferToPublicData;
         case workerCommands.createGenesisAccount:
             return createGenesisAccount;
+        case workerCommands.generateBakerKeys:
+            return generateBakerKeys;
         default:
             return () => 'unknown command';
     }

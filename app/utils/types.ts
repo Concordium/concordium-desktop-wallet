@@ -10,6 +10,7 @@ type Word64 = bigint;
 type Word32 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
+type Amount = string;
 
 export interface Fraction {
     numerator: Word64;
@@ -205,12 +206,24 @@ export interface UpdateAccountCredentialsPayload {
     threshold: number;
 }
 
+export interface AddBakerPayload {
+    electionVerifyKey: Hex;
+    signatureVerifyKey: Hex;
+    aggregationVerifyKey: Hex;
+    proofElection: Hex;
+    proofSignature: Hex;
+    proofAggregation: Hex;
+    bakingStake: Amount;
+    restakeEarnings: boolean;
+}
+
 export type TransactionPayload =
     | UpdateAccountCredentialsPayload
     | TransferToPublicPayload
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
-    | SimpleTransferPayload;
+    | SimpleTransferPayload
+    | AddBakerPayload;
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
@@ -232,6 +245,7 @@ export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
+export type AddBaker = AccountTransaction<AddBakerPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -725,6 +739,12 @@ export function instanceOfUpdateAccountCredentials(
     object: AccountTransaction<TransactionPayload>
 ): object is UpdateAccountCredentials {
     return object.transactionKind === TransactionKindId.Update_credentials;
+}
+
+export function instanceOfAddBaker(
+    object: AccountTransaction<TransactionPayload>
+): object is AddBaker {
+    return object.transactionKind === TransactionKindId.Add_baker;
 }
 
 export function isExchangeRate(
