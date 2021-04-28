@@ -2,22 +2,8 @@ import { BlockSummary } from '~/utils/NodeApiTypes';
 import { GasRewards } from '~/utils/types';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 
-export function getCurrentValue(blockSummary: BlockSummary): GasRewards {
-    return {
-        baker:
-            blockSummary.updates.chainParameters.rewardParameters.gASRewards
-                .baker,
-        finalizationProof:
-            blockSummary.updates.chainParameters.rewardParameters.gASRewards
-                .finalizationProof,
-        accountCreation:
-            blockSummary.updates.chainParameters.rewardParameters.gASRewards
-                .accountCreation,
-        chainUpdate:
-            blockSummary.updates.chainParameters.rewardParameters.gASRewards
-                .chainUpdate,
-    };
-}
+export const getCurrentValue = (blockSummary: BlockSummary): GasRewards =>
+    blockSummary.updates.chainParameters.rewardParameters.gASRewards;
 
 export function toRewardFractions(gasRewards: GasRewards): GasRewards {
     return (Object.keys(gasRewards) as Array<keyof GasRewards>).reduce(
