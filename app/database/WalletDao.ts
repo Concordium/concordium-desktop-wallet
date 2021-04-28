@@ -1,6 +1,17 @@
 import { Hex } from '../utils/types';
 import knex from './knex';
-import { hwWalletTable } from '../constants/databaseNames.json';
+import { walletTable } from '../constants/databaseNames.json';
+
+/**
+ * Finds the primary key id for the wallet with the given identifier.
+ * @param identifier wallet identifier
+ * @returns primary key for the wallet entry
+ */
+export async function getId(identifier: Hex): Promise<number> {
+    const table = (await knex())(walletTable);
+    const result = await table.where('identifier', identifier);
+    return result[0].id;
+}
 
 /**
  * Insert a unique identifier for a hardware wallet to pair the hardware wallet
@@ -8,7 +19,7 @@ import { hwWalletTable } from '../constants/databaseNames.json';
  * @param identifier the pairing identifier that identities the hardware wallet uniquely
  */
 export async function insertHwWallet(identifier: Hex) {
-    const table = (await knex())(hwWalletTable);
+    const table = (await knex())(walletTable);
     return table.insert({ identifier });
 }
 
@@ -18,11 +29,11 @@ export async function insertHwWallet(identifier: Hex) {
  * @param identifier the pairing identifier of the hardware wallet
  * @returns true if an entry already exists
  */
-export async function hardwareWalletExists(identifier: Hex): Promise<boolean> {
+export async function walletExists(identifier: Hex): Promise<boolean> {
     return (
         (
             await (await knex())
-                .table(hwWalletTable)
+                .table(walletTable)
                 .where('identifier', identifier)
         ).length > 0
     );

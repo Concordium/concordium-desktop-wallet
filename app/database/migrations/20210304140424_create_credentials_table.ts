@@ -8,19 +8,16 @@ export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
         credentialsTable,
         (table: Knex.TableBuilder) => {
+            table
+                .integer('identityId')
+                .references('id')
+                .inTable(identitiesTable)
+                .notNullable();
             table.string('accountAddress');
             table.string('credId').primary();
             table.boolean('external');
             table.integer('credentialNumber');
             table.integer('credentialIndex');
-
-            table.integer('identityId');
-            table.string('hwWallet');
-            table
-                .foreign(['identityId', 'hwWallet'])
-                .references(['id', 'hwWallet'])
-                .inTable(identitiesTable);
-
             table.json('policy');
             table.unique(['credentialIndex', 'accountAddress']);
             table.unique(['credentialNumber', 'identityId']);

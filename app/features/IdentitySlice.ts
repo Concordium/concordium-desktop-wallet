@@ -12,7 +12,6 @@ import {
     IdentityObject,
     IdentityProvider,
     Dispatch,
-    Hex,
 } from '../utils/types';
 
 interface IdentityState {
@@ -57,20 +56,22 @@ export async function loadIdentities(dispatch: Dispatch) {
 }
 
 export async function addPendingIdentity(
+    identityId: number,
     dispatch: Dispatch,
     identityName: string,
     codeUri: string,
     identityProvider: IdentityProvider,
     randomness: string,
-    pairingKey: Hex
+    walletId: number
 ) {
     const identity = {
+        id: identityId,
         name: identityName,
         status: IdentityStatus.Pending,
         codeUri,
         identityProvider: JSON.stringify(identityProvider),
         randomness,
-        hwWallet: pairingKey,
+        walletId,
     };
     await insertIdentity(identity);
     return loadIdentities(dispatch);

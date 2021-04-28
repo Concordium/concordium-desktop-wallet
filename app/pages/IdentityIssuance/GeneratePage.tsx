@@ -14,12 +14,12 @@ import {
 } from '../../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
 import { getNextId } from '../../database/IdentityDao';
-import { IdentityProvider, Dispatch, Global, Hex } from '../../utils/types';
+import { IdentityProvider, Dispatch, Global } from '../../utils/types';
 import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoller';
 import SimpleLedger from '../../components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
-import { hardwareWalletExists, insertHwWallet } from '~/database/HwWalletDao';
+import { getId, walletExists, insertHwWallet } from '~/database/WalletDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -81,7 +81,7 @@ async function generateIdentity(
     provider: IdentityProvider,
     accountName: string,
     identityName: string,
-    pairingKey: Hex,
+    walletId: number,
     iframeRef: RefObject<HTMLIFrameElement>,
     onError: (message: string) => void
 ) {
@@ -97,20 +97,15 @@ async function generateIdentity(
             iframeRef
         );
 
-        // Pair the hardware wallet with the desktop wallet, if it has not
-        // already been paired.
-        if (!(await hardwareWalletExists(pairingKey))) {
-            await insertHwWallet(pairingKey);
-        }
-
         // TODO: Handle the case where the app closes before we are able to save pendingIdentity
         await addPendingIdentity(
+            identityId,
             dispatch,
             identityName,
             identityObjectLocation,
             provider,
             randomness,
-            pairingKey
+            walletId
         );
         await addPendingAccount(dispatch, accountName, identityId, true); // TODO: can we add the address already here?
     } catch (e) {
@@ -163,7 +158,15 @@ export default function IdentityIssuanceGenerate({
             await ledger.getPublicKeySilent(getPairingPath())
         ).toString('hex');
 
-        const identityId = await getNextId(pairingKey);
+        // Pair the hardware wallet with the desktop wallet, if it has not
+        // already been paired.
+        if (!(await walletExists(pairingKey))) {
+            await insertHwWallet(pairingKey);
+        }
+
+        const walletId = await getId(pairingKey);
+
+        const identityId = await getNextId(walletId);
         const {
             idObjectRequest,
             randomness,
@@ -184,7 +187,7 @@ export default function IdentityIssuanceGenerate({
             provider,
             accountName,
             identityName,
-            pairingKey,
+            walletId,
             iframeRef,
             onError
         );

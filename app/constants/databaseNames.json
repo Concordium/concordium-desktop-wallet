@@ -3,7 +3,7 @@
     "addressBookTable": "addressBook",
     "credentialsTable": "credentials",
     "globalTable": "global",
-    "hwWalletTable": "hw_wallet",
+    "walletTable": "wallet",
     "identitiesTable": "identities",
     "multiSignatureProposalTable": "multi_signature_proposal",
     "transactionTable": "transactions"

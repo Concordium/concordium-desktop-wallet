@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 import {
-    hwWalletTable,
+    walletTable,
     identitiesTable,
 } from '../../constants/databaseNames.json';
 
@@ -8,7 +8,7 @@ export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
         identitiesTable,
         (table: Knex.TableBuilder) => {
-            table.integer('id');
+            table.increments('id');
             table.string('name');
             table.string('status');
             table.string('detail');
@@ -17,12 +17,10 @@ export async function up(knex: Knex): Promise<void> {
             table.string('identityObject');
             table.string('randomness');
             table
-                .string('hwWallet')
-                .references('identifier')
-                .inTable(hwWalletTable)
+                .string('walletId')
+                .references('id')
+                .inTable(walletTable)
                 .notNullable();
-            table.primary(['id', 'hwWallet']);
-            table.unique(['id', 'hwWallet']);
         }
     );
 }

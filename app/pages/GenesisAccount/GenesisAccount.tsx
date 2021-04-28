@@ -150,7 +150,7 @@ export default function GenesisAccount(): JSX.Element {
                 identityProvider: '{}',
                 randomness: '',
                 // TODO Get the pairing key for this instead.
-                hwWallet: 'Testing',
+                walletId: 1,
             };
             importIdentities(identity);
             loadIdentities(dispatch);
