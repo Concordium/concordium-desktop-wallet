@@ -13,6 +13,7 @@ import {
     instanceOfUpdateInstruction,
     UpdateInstructionSignature,
     TransactionAccountSignature,
+    MultiSignatureTransactionStatus,
 } from '~/utils/types';
 import { TransactionInput } from '~/utils/transactionTypes';
 import SimpleErrorModal, {
@@ -171,6 +172,11 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                         <PrintTransaction
                             transaction={transactionObject}
                             image={image}
+                            status={
+                                isTransactionExpired
+                                    ? MultiSignatureTransactionStatus.Expired
+                                    : MultiSignatureTransactionStatus.Open
+                            }
                         />
                     }
                     stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
+    MultiSignatureTransactionStatus,
     AccountTransaction,
     instanceOfSimpleTransfer,
     instanceOfScheduledTransfer,
@@ -12,13 +13,20 @@ import {
     getScheduledTransferAmount,
     lookupName,
 } from '~/utils/transactionHelpers';
-import { parseTime } from '~/utils/timeHelpers';
+import { parseTime, getNow } from '~/utils/timeHelpers';
 import getTransactionHash from '~/utils/transactionHash';
+import { getStatusText } from '~/pages/multisig/ProposalStatus/util';
 
 interface Props {
     transaction: AccountTransaction;
+    status: MultiSignatureTransactionStatus;
     image?: string;
 }
+
+const timeFormat: Intl.DateTimeFormatOptions = {
+    dateStyle: 'short',
+    timeStyle: 'medium',
+};
 
 const account = (title: string, address: string, name?: string) => (
     <>
@@ -39,7 +47,22 @@ const sender = (address: string, name?: string) =>
 const recipient = (address: string, name?: string) =>
     account('Recipient', address, name);
 
-const amount = (microGTUAmount: string | bigint) => (
+const totalWithdrawn = (
+    microGTUAmount: string | bigint,
+    estimatedFee: Fraction | undefined
+) => (
+    <tr>
+        <td>Est. total amount withdrawn</td>
+        <td>
+            {displayAsGTU(
+                BigInt(microGTUAmount) +
+                    (estimatedFee ? collapseFraction(estimatedFee) : 0n)
+            )}
+        </td>
+    </tr>
+);
+
+const displayAmount = (microGTUAmount: string | bigint) => (
     <tr>
         <td>Amount</td>
         <td>{displayAsGTU(microGTUAmount)}</td>
@@ -64,6 +87,47 @@ const hash = (transaction: AccountTransaction) => (
     </tr>
 );
 
+function getStatusColor(
+    status: MultiSignatureTransactionStatus
+): string | undefined {
+    if (status === MultiSignatureTransactionStatus.Submitted) {
+        return '#303982';
+    }
+    if (
+        [
+            MultiSignatureTransactionStatus.Expired,
+            MultiSignatureTransactionStatus.Rejected,
+            MultiSignatureTransactionStatus.Failed,
+        ].includes(status)
+    ) {
+        return '#ff8a8a';
+    }
+    if (status === MultiSignatureTransactionStatus.Finalized) {
+        return '#4ac29e';
+    }
+    return undefined;
+}
+
+const displayStatus = (status: MultiSignatureTransactionStatus) => (
+    <tr>
+        <td>Status</td>
+        <td style={{ color: getStatusColor(status) }}>
+            {getStatusText(status)}
+        </td>
+    </tr>
+);
+
+const timestamp = () => (
+    <p style={{ position: 'absolute', right: '10px', bottom: '0px' }}>
+        Printed on:{' '}
+        {parseTime(
+            getNow(TimeStampUnit.seconds).toString(),
+            TimeStampUnit.seconds,
+            timeFormat
+        )}{' '}
+    </p>
+);
+
 const standardHeader = (
     <thead>
         <tr>
@@ -80,7 +144,11 @@ const table = (header: JSX.Element, body: JSX.Element) => (
     </table>
 );
 
-export default function PrintAccountTransaction({ transaction, image }: Props) {
+export default function PrintAccountTransaction({
+    transaction,
+    image,
+    status,
+}: Props) {
     const [fromName, setFromName] = useState<string | undefined>();
     const [toName, setToName] = useState<string | undefined>();
 
@@ -96,16 +164,20 @@ export default function PrintAccountTransaction({ transaction, image }: Props) {
     });
 
     if (instanceOfScheduledTransfer(transaction)) {
+        const amount = getScheduledTransferAmount(transaction);
         return (
             <>
                 <h1>Transaction - Send GTU with a schedule</h1>
+                {timestamp()}
                 {table(
                     standardHeader,
                     <tbody>
                         {sender(transaction.sender, fromName)}
                         {recipient(transaction.payload.toAddress, toName)}
-                        {amount(getScheduledTransferAmount(transaction))}
+                        {totalWithdrawn(amount, transaction.estimatedFee)}
+                        {displayAmount(amount)}
                         {fee(transaction.estimatedFee)}
+                        {displayStatus(status)}
                         {hash(transaction)}
                         <tr>
                             <td>Identicon:</td>
@@ -133,7 +205,8 @@ export default function PrintAccountTransaction({ transaction, image }: Props) {
                                         {index + 1}.{' '}
                                         {parseTime(
                                             schedulePoint.timestamp,
-                                            TimeStampUnit.milliSeconds
+                                            TimeStampUnit.milliSeconds,
+                                            timeFormat
                                         )}
                                     </td>
                                     <td>
@@ -148,16 +221,20 @@ export default function PrintAccountTransaction({ transaction, image }: Props) {
         );
     }
     if (instanceOfSimpleTransfer(transaction)) {
+        const { amount } = transaction.payload;
         return (
             <>
                 <h1>Transaction - Send GTU</h1>
+                {timestamp()}
                 {table(
                     standardHeader,
                     <tbody>
                         {sender(transaction.sender, fromName)}
                         {recipient(transaction.payload.toAddress, toName)}
-                        {amount(transaction.payload.amount)}
+                        {totalWithdrawn(amount, transaction.estimatedFee)}
+                        {displayAmount(amount)}
                         {fee(transaction.estimatedFee)}
+                        {displayStatus(status)}
                         {hash(transaction)}
                         <tr>
                             <td>Identicon:</td>

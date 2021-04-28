@@ -132,7 +132,13 @@ function ProposalView({ proposal }: ProposalViewProps) {
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
-            print={<PrintTransaction transaction={transaction} image={image} />}
+            print={
+                <PrintTransaction
+                    transaction={transaction}
+                    image={image}
+                    status={proposal.status}
+                />
+            }
             stepTitle={`Transaction Proposal - ${handler.type}`}
             disableBack={instanceOfAccountTransaction(transaction)}
             closeRoute={CLOSE_ROUTE}
