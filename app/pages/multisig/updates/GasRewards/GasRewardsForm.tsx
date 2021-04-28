@@ -48,7 +48,7 @@ export default function GasRewardsForm({
     readOnly = false,
     title,
 }: GasRewardsFormProps): JSX.Element {
-    const fields = Object.keys(gasRewards) as Array<keyof GasRewards>;
+    const fields = Object.keys(fieldNames) as Array<keyof GasRewards>;
     const { errors = {} } = useFormContext<GasRewards>() ?? {};
 
     const firstError = fields.map((f) => errors[f]).filter(isDefined)[0]
@@ -57,10 +57,9 @@ export default function GasRewardsForm({
     return (
         <section>
             <h5>{title}</h5>
-            {fields.map((f) => {
-                const label = labels[f];
-                const name = fieldNames[f];
-                const value = gasRewards[f];
+            {fields.map((field) => {
+                const label = labels[field];
+                const value = gasRewards[field];
 
                 const common: Pick<
                     GasRewardFractionFieldProps,
@@ -68,7 +67,7 @@ export default function GasRewardsForm({
                 > & { key: string } = {
                     label,
                     className: 'mB10',
-                    key: f,
+                    key: field,
                 };
 
                 return disabled || readOnly ? (
@@ -81,7 +80,7 @@ export default function GasRewardsForm({
                 ) : (
                     <FormGasRewardFractionField
                         {...common}
-                        name={name}
+                        name={field}
                         defaultValue={value}
                         rules={validationRules}
                     />
