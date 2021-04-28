@@ -188,7 +188,7 @@ export const toResolution = withValidResolution(
         const isValid = isValidResolutionString(resolution);
         const parseFraction = parseSubNumber(getPowerOf10(resolution));
 
-        return (value?: string): bigint | number | undefined => {
+        return (value?: string): bigint | undefined => {
             if (value === undefined) {
                 return undefined;
             }

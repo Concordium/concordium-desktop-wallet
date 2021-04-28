@@ -1,23 +1,24 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import clsx from 'clsx';
 import React, { useCallback, useMemo } from 'react';
-import { useFormContext, Validate } from 'react-hook-form';
+import { useFormContext, UseFormMethods, Validate } from 'react-hook-form';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { toResolution } from '~/utils/numberStringHelpers';
 import { convertMiliseconds } from '~/utils/timeHelpers';
+import { electionDifficultyResolution } from '../util';
 
 import styles from './ElectionDifficultyInput.module.scss';
 
-const resolution = 100000;
-
-const parseFraction = toResolution(resolution);
+export const toElectionDifficultyResolution = toResolution(
+    electionDifficultyResolution
+);
 
 const validateResolutionConversion: Validate = (value: string) => {
     try {
-        parseFraction(value);
+        toElectionDifficultyResolution(value);
         return true;
     } catch {
-        return `Value must go into ${1 / resolution}`;
+        return `Value must go into ${1 / electionDifficultyResolution}`;
     }
 };
 
@@ -44,8 +45,8 @@ export default function ElectionDifficultyInput({
     readOnly = false,
 }: ElectionDifficultyInputProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const initial = useMemo(() => value?.toString(), []);
-    const form = useFormContext<ElectionDifficultyField>();
+    const initial = useMemo(() => value?.toString() ?? '', []);
+    const form = useFormContext<ElectionDifficultyField>() as UseFormMethods<ElectionDifficultyField> | null;
     const error = form?.errors[fieldName];
     const shouldRegister = !disabled && !readOnly;
 
@@ -77,14 +78,14 @@ export default function ElectionDifficultyInput({
 
     const blockTime = useMemo(() => {
         if (!shouldRegister) {
-            return getBlockTime(initial ?? '');
+            return getBlockTime(initial);
         }
 
         if (error && error.message !== blockTimeError) {
             return undefined;
         }
 
-        const v = form.watch().electionDifficulty ?? initial;
+        const v = form?.watch().electionDifficulty ?? initial;
         return getBlockTime(v);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form, getBlockTime, initial]);
@@ -94,8 +95,10 @@ export default function ElectionDifficultyInput({
     const registration = form?.register({
         required: 'Must have a value',
         min: {
-            value: 1 / resolution,
-            message: `Value can not be below ${1 / resolution}`,
+            value: 1 / electionDifficultyResolution,
+            message: `Value can not be below ${
+                1 / electionDifficultyResolution
+            }`,
         },
         max: {
             value: 1,
@@ -120,7 +123,7 @@ export default function ElectionDifficultyInput({
                 type="number"
                 disabled={disabled}
                 readOnly={readOnly}
-                step={1 / resolution}
+                step={1 / electionDifficultyResolution}
                 min={0}
                 max={1}
                 ref={shouldRegister ? registration : undefined}

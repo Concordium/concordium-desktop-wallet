@@ -2,10 +2,6 @@ import React from 'react';
 import { UpdateProps } from '~/utils/transactionTypes';
 import ElectionDifficultyInput from './ElectionDifficultyInput';
 
-export interface UpdateElectionDifficultyFields {
-    electionDifficulty: string;
-}
-
 /**
  * Component for creating an election difficulty update.
  */

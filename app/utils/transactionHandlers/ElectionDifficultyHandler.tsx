@@ -1,9 +1,12 @@
+import React from 'react';
+import {
+    ElectionDifficultyField,
+    toElectionDifficultyResolution,
+} from '~/pages/multisig/updates/ElectionDifficulty/ElectionDifficultyInput/ElectionDifficultyInput';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import ElectionDifficultyView from '../../pages/multisig/updates/ElectionDifficulty/ElectionDifficultyView';
-import UpdateElectionDifficulty, {
-    UpdateElectionDifficultyFields,
-} from '../../pages/multisig/updates/ElectionDifficulty/UpdateElectionDifficulty';
+import UpdateElectionDifficulty from '../../pages/multisig/updates/ElectionDifficulty/UpdateElectionDifficulty';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -35,7 +38,7 @@ export default class ElectionDifficultyHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { electionDifficulty }: UpdateElectionDifficultyFields,
+        { electionDifficulty }: ElectionDifficultyField,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -48,10 +51,17 @@ export default class ElectionDifficultyHandler
         const {
             threshold,
         } = blockSummary.updates.keys.level2Keys.electionDifficulty;
+        const parsedElectionDifficulty = toElectionDifficultyResolution(
+            electionDifficulty
+        );
+
+        if (parsedElectionDifficulty === undefined) {
+            return undefined;
+        }
 
         return createUpdateMultiSignatureTransaction(
             {
-                electionDifficulty: parseInt(electionDifficulty, 10),
+                electionDifficulty: Number(parsedElectionDifficulty),
             },
             UpdateType.UpdateElectionDifficulty,
             sequenceNumber,
@@ -77,7 +87,11 @@ export default class ElectionDifficultyHandler
     }
 
     view(transaction: TransactionType) {
-        return ElectionDifficultyView(transaction.payload);
+        return (
+            <ElectionDifficultyView
+                electionDifficulty={transaction.payload.electionDifficulty}
+            />
+        );
     }
 
     getAuthorization(authorizations: Authorizations) {
