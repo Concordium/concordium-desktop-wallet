@@ -4,7 +4,7 @@ import { walletTable } from '~/constants/databaseNames.json';
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(walletTable, (table: Knex.TableBuilder) => {
         table.increments('id');
-        table.string('identifier').unique();
+        table.string('identifier').unique().notNullable();
     });
 }
 
