@@ -5,9 +5,6 @@ import GasRewardsForm from './GasRewardsForm';
 import Loading from '~/cross-app-components/Loading';
 import { getCurrentValue, toRewardFractions } from './util';
 
-// TODO Make the UI better when drawings are available, and non-semantic UI
-// components are ready.
-
 interface Props extends ChainData {
     gasRewards: GasRewards;
 }
