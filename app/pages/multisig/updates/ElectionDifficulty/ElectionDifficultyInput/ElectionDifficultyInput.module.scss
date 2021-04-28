@@ -10,6 +10,19 @@
         -webkit-appearance: none;
         margin: 0;
     }
+
+    &:disabled,
+    &:read-only {
+        border-bottom: none;
+    }
+
+    &:disabled {
+        color: $color-text-faded;
+    }
+
+    &:read-only {
+        color: $color-text;
+    }
 }
 
 .blockTime {

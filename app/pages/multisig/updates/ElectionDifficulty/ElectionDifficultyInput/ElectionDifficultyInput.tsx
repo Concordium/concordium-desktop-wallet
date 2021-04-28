@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import React, { useCallback, useMemo } from 'react';
 import { useFormContext, Validate } from 'react-hook-form';
 import ErrorMessage from '~/components/Form/ErrorMessage';
-import { toFraction, toResolution } from '~/utils/numberStringHelpers';
+import { toResolution } from '~/utils/numberStringHelpers';
 import { convertMiliseconds } from '~/utils/timeHelpers';
 
 import styles from './ElectionDifficultyInput.module.scss';
@@ -11,7 +11,6 @@ import styles from './ElectionDifficultyInput.module.scss';
 const resolution = 100000;
 
 const parseFraction = toResolution(resolution);
-const fraction = toFraction(resolution);
 
 const validateResolutionConversion: Validate = (value: string) => {
     try {
@@ -45,9 +44,10 @@ export default function ElectionDifficultyInput({
     readOnly = false,
 }: ElectionDifficultyInputProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const initial = useMemo(() => fraction(value), []);
+    const initial = useMemo(() => value?.toString(), []);
     const form = useFormContext<ElectionDifficultyField>();
     const error = form?.errors[fieldName];
+    const shouldRegister = !disabled && !readOnly;
 
     const getBlockTime = useCallback(
         (v: string) => {
@@ -76,16 +76,21 @@ export default function ElectionDifficultyInput({
     );
 
     const blockTime = useMemo(() => {
+        if (!shouldRegister) {
+            return getBlockTime(initial ?? '');
+        }
+
         if (error && error.message !== blockTimeError) {
             return undefined;
         }
 
-        const v = form?.watch().electionDifficulty ?? initial;
+        const v = form.watch().electionDifficulty ?? initial;
         return getBlockTime(v);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [form, getBlockTime, initial]);
 
     const { days, hours, minutes, seconds } = blockTime ?? {};
+
     const registration = form?.register({
         required: 'Must have a value',
         min: {
@@ -106,12 +111,11 @@ export default function ElectionDifficultyInput({
         <label className={styles.root}>
             <div className={styles.label}>{label}</div>
             <input
-                className={clsx(styles.field, error && styles.fieldInvalid)}
-                name={
-                    registration !== undefined && !disabled
-                        ? fieldName
-                        : undefined
-                }
+                className={clsx(
+                    styles.field,
+                    shouldRegister && error && styles.fieldInvalid
+                )}
+                name={shouldRegister ? fieldName : undefined}
                 defaultValue={initial}
                 type="number"
                 disabled={disabled}
@@ -119,7 +123,7 @@ export default function ElectionDifficultyInput({
                 step={1 / resolution}
                 min={0}
                 max={1}
-                ref={registration}
+                ref={shouldRegister ? registration : undefined}
             />
             {blockTime && (
                 <span className={styles.blockTime}>
@@ -130,7 +134,7 @@ export default function ElectionDifficultyInput({
                     {Boolean(seconds) && `${seconds}s `}
                 </span>
             )}
-            <ErrorMessage>{error?.message}</ErrorMessage>
+            {shouldRegister && <ErrorMessage>{error?.message}</ErrorMessage>}
         </label>
     );
 }

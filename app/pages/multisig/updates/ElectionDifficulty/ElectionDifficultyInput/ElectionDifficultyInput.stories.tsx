@@ -27,5 +27,5 @@ export const Primary = Template.bind({});
 Primary.args = {
     label: 'Election Difficulty',
     timePerSlot: 250,
-    value: 2500,
+    value: 0.025,
 };
