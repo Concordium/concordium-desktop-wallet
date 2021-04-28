@@ -91,7 +91,6 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                 ),
                 explicit: false,
             };
-            console.log(schedule);
             submitSchedule(schedule, recoverState);
         }
         const formSubmit = handleSubmit(createSchedule);

@@ -12,7 +12,7 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAmount from '../PickAmount';
-import PickRecipient from '~/components/Transfers/PickRecipient';
+import PickRecipient from '../PickRecipientWrapper';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
 import PickIdentity from '~/components/PickIdentity';
@@ -130,22 +130,6 @@ export default function CreateTransferProposal({
                 schedule={schedule}
                 estimatedFee={estimatedFee}
             />
-        );
-    }
-
-    function renderPickRecipient() {
-        if (recipient) {
-            setReady(true);
-        }
-        return (
-            <div className={styles.columnContent}>
-                <PickRecipient
-                    pickRecipient={(newRecipient) => {
-                        setReady(true);
-                        setRecipient(newRecipient);
-                    }}
-                />
-            </div>
         );
     }
 
@@ -296,7 +280,15 @@ export default function CreateTransferProposal({
                                 path={
                                     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT
                                 }
-                                render={renderPickRecipient}
+                                render={() => (
+                                    <div className={styles.columnContent}>
+                                        <PickRecipient
+                                            setReady={setReady}
+                                            setRecipient={setRecipient}
+                                            recipient={recipient}
+                                        />
+                                    </div>
+                                )}
                             />
                             <Route
                                 path={
