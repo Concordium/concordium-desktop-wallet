@@ -19,7 +19,7 @@ import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoll
 import SimpleLedger from '../../components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
-import { getId, walletExists, insertHwWallet } from '~/database/WalletDao';
+import { getId, walletExists, insertWallet } from '~/database/WalletDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -161,7 +161,7 @@ export default function IdentityIssuanceGenerate({
         // Pair the hardware wallet with the desktop wallet, if it has not
         // already been paired.
         if (!(await walletExists(pairingKey))) {
-            await insertHwWallet(pairingKey);
+            await insertWallet(pairingKey);
         }
 
         const walletId = await getId(pairingKey);

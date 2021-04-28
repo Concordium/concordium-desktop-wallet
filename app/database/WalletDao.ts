@@ -16,15 +16,15 @@ export async function getId(identifier: Hex): Promise<number> {
 /**
  * Insert a unique identifier for a hardware wallet to pair the hardware wallet
  * with the desktop wallet.
- * @param identifier the pairing identifier that identities the hardware wallet uniquely
+ * @param identifier the pairing identifier that identities the wallet uniquely
  */
-export async function insertHwWallet(identifier: Hex) {
+export async function insertWallet(identifier: Hex) {
     const table = (await knex())(walletTable);
     return table.insert({ identifier });
 }
 
 /**
- * Check whether or not a hardware wallet with the supplied
+ * Check whether or not a wallet with the supplied
  * identifier already exists in the database.
  * @param identifier the pairing identifier of the hardware wallet
  * @returns true if an entry already exists

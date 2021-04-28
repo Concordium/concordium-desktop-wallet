@@ -3,8 +3,8 @@
     "addressBookTable": "addressBook",
     "credentialsTable": "credentials",
     "globalTable": "global",
-    "walletTable": "wallet",
     "identitiesTable": "identities",
     "multiSignatureProposalTable": "multi_signature_proposal",
+    "walletTable": "wallet",
     "transactionTable": "transactions"
 }
