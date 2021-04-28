@@ -84,6 +84,8 @@ export default class ElectionDifficultyHandler
         return authorizations.electionDifficulty;
     }
 
+    print = () => undefined;
+
     update = UpdateElectionDifficulty;
 
     title = `Foundation Transaction | ${TYPE}`;

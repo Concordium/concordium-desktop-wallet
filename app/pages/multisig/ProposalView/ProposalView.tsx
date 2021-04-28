@@ -30,7 +30,6 @@ import Button from '~/cross-app-components/Button';
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import Form from '~/components/Form';
-import PrintTransaction from '~/components/PrintTransaction';
 import FileInput from '~/components/Form/FileInput';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import CloseProposalModal from './CloseProposalModal';
@@ -132,13 +131,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
-            print={
-                <PrintTransaction
-                    transaction={transaction}
-                    image={image}
-                    status={proposal.status}
-                />
-            }
+            print={handler.print(transaction, proposal.status, image)}
             stepTitle={`Transaction Proposal - ${handler.type}`}
             disableBack={instanceOfAccountTransaction(transaction)}
             closeRoute={CLOSE_ROUTE}

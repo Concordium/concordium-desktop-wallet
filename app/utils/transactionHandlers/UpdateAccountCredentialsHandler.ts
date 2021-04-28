@@ -79,6 +79,8 @@ export default class UpdateAccountCredentialsHandler
         return AccountTransactionDetails({ transaction });
     }
 
+    print = () => undefined;
+
     title = `Account Transaction | ${TYPE}`;
 
     type = TYPE;

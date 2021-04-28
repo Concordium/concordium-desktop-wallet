@@ -84,6 +84,8 @@ export default class FoundationAccountHandler
         return authorizations.foundationAccount;
     }
 
+    print = () => undefined;
+
     update = UpdateFoundationAccount;
 
     title = `Foundation Transaction | ${TYPE}`;

@@ -1,8 +1,10 @@
+import React from 'react';
 import {
-    SimpleTransfer,
+    MultiSignatureTransactionStatus,
+    ScheduledTransfer,
     AccountTransaction,
     TransactionPayload,
-    instanceOfSimpleTransfer,
+    instanceOfScheduledTransfer,
     TransactionKindId,
 } from '../types';
 import routes from '~/constants/routes.json';
@@ -12,20 +14,21 @@ import {
     CreateTransactionInput,
 } from '../transactionTypes';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { createSimpleTransferTransaction } from '../transactionHelpers';
+import PrintFormatScheduledTransfer from '~/components/PrintFormat/ScheduledTransfer';
+import { createScheduledTransferTransaction } from '../transactionHelpers';
 
-type TransactionType = SimpleTransfer;
+type TransactionType = ScheduledTransfer;
 
-const TYPE = 'Simple Transfer';
+const TYPE = 'Scheduled Transfer';
 
-export default class SimpleTransferHandler
+export default class ScheduledTransferHandler
     extends TransferHandler<TransactionType>
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: AccountTransaction<TransactionPayload>
     ): TransactionType {
-        if (instanceOfSimpleTransfer(transaction)) {
+        if (instanceOfScheduledTransfer(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -41,6 +44,8 @@ export default class SimpleTransferHandler
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
                 default:
                     throw new Error('unknown location');
@@ -48,26 +53,40 @@ export default class SimpleTransferHandler
         };
         return getNewLocation().replace(
             ':transactionKind',
-            `${TransactionKindId.Simple_transfer}`
+            `${TransactionKindId.Transfer_with_schedule}`
         );
     }
 
     createTransaction({
         sender,
-        amount,
+        schedule,
         recipient,
         signatureAmount,
     }: Partial<CreateTransactionInput>) {
-        if (!sender || !recipient || amount === undefined) {
+        if (!sender || !recipient || !schedule) {
             throw new Error(
-                `Unexpected Missing input: ${{ sender, amount, recipient }}`
+                `Unexpected Missing input: ${{ sender, schedule, recipient }}`
             );
         }
-        return createSimpleTransferTransaction(
+        return createScheduledTransferTransaction(
             sender,
-            amount,
             recipient,
+            schedule,
             signatureAmount
+        );
+    }
+
+    print(
+        transaction: AccountTransaction,
+        status: MultiSignatureTransactionStatus,
+        identiconImage?: string
+    ) {
+        return (
+            <PrintFormatScheduledTransfer
+                transaction={this.confirmType(transaction)}
+                status={status}
+                image={identiconImage}
+            />
         );
     }
 

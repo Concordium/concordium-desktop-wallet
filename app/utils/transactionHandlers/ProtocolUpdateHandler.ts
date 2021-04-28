@@ -92,6 +92,8 @@ export default class ProtocolUpdateHandler
         return authorizations.protocol;
     }
 
+    print = () => undefined;
+
     update = UpdateProtocol;
 
     title = `Foundation Transaction | ${TYPE}`;

@@ -4,11 +4,20 @@ import {
     CreateTransactionInput,
     AccountTransactionHandler,
 } from '~/utils/transactionTypes';
-import { AccountTransaction } from '~/utils/types';
+import {
+    MultiSignatureTransactionStatus,
+    AccountTransaction,
+    instanceOfAccountTransaction,
+    Transaction,
+} from '~/utils/types';
 
 export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
     implements
-        AccountTransactionHandler<AccountTransaction, ConcordiumLedgerClient> {
+        AccountTransactionHandler<
+            AccountTransaction,
+            ConcordiumLedgerClient,
+            Transaction
+        > {
     base: AccountTransactionHandler<T, ConcordiumLedgerClient>;
 
     creationLocationHandler: (currentLocation: string) => string;
@@ -24,8 +33,11 @@ export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
         this.type = base.type;
     }
 
-    confirmType(transaction: AccountTransaction) {
-        return transaction;
+    confirmType(transaction: Transaction) {
+        if (instanceOfAccountTransaction(transaction)) {
+            return transaction;
+        }
+        throw Error('Invalid transaction type was given as input.');
     }
 
     serializePayload(transaction: AccountTransaction) {
@@ -50,5 +62,17 @@ export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
 
     view(transaction: AccountTransaction) {
         return this.base.view(this.base.confirmType(transaction));
+    }
+
+    print(
+        transaction: Transaction,
+        status: MultiSignatureTransactionStatus,
+        identiconImage?: string
+    ) {
+        return this.base.print(
+            this.confirmType(transaction),
+            status,
+            identiconImage
+        );
     }
 }
