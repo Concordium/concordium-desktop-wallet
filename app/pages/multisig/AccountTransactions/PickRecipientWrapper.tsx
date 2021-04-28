@@ -18,7 +18,7 @@ export default function PickRecipientWrapper({
 }: Props) {
     useEffect(() => {
         setReady(Boolean(recipient));
-        // es-lint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [recipient]);
 
     return <PickRecipient pickRecipient={setRecipient} />;
