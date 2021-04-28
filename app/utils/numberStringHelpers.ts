@@ -15,7 +15,7 @@ export const isValidBigInt = (value = ''): boolean => {
     }
 };
 
-function getPowerOf10(resolution: bigint): number {
+function getPowerOf10(resolution: bigint | number): number {
     return resolution
         .toString()
         .split('')
@@ -32,7 +32,7 @@ function getPowerOf10(resolution: bigint): number {
  * isPowerOf10(10) => true
  * isPowerOf10(105) => false
  */
-export function isPowOf10(resolution: bigint): boolean {
+export function isPowOf10(resolution: bigint | number): boolean {
     return pow10Format.test(resolution.toString());
 }
 
@@ -91,15 +91,15 @@ const isValidNumberString = (
  * isValidResolutionString(100)('0.008') => false
  */
 export const isValidResolutionString = (
-    resolution: bigint,
+    resolution: bigint | number,
     allowNegative = false
 ) => isValidNumberString(allowNegative, getPowerOf10(resolution));
 
 const withValidResolution = <TReturn>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    f: (resolution: bigint) => TReturn
+    f: (resolution: bigint | number) => TReturn
 ): typeof f => {
-    return (resolution: bigint) => {
+    return (resolution: bigint | number) => {
         if (!isPowOf10(resolution)) {
             throw new Error('Resolution must be a power of 10');
         }
@@ -115,10 +115,10 @@ const withValidResolution = <TReturn>(
  *
  * @example toNumberString(100n)(10n) => '0.1'
  */
-export const toFraction = withValidResolution((resolution: bigint) => {
+export const toFraction = withValidResolution((resolution: bigint | number) => {
     const zeros = getPowerOf10(resolution);
 
-    return (value?: bigint | string): string | undefined => {
+    return (value?: bigint | number | string): string | undefined => {
         if (value === undefined) {
             return undefined;
         }
@@ -126,9 +126,9 @@ export const toFraction = withValidResolution((resolution: bigint) => {
         const numberValue = BigInt(value);
         const isNegative = numberValue < 0;
         const absolute = isNegative ? -numberValue : numberValue;
-        const whole = absolute / resolution;
+        const whole = absolute / BigInt(resolution);
 
-        const fractions = absolute % resolution;
+        const fractions = absolute % BigInt(resolution);
         const fractionsFormatted =
             fractions === 0n
                 ? ''
@@ -183,31 +183,33 @@ export const parseSubNumber = (powOf10: number) => (
  *
  * @example toResolution(100n)('0.1') => 10n
  */
-export const toResolution = withValidResolution((resolution: bigint) => {
-    const isValid = isValidResolutionString(resolution);
-    const parseFraction = parseSubNumber(getPowerOf10(resolution));
+export const toResolution = withValidResolution(
+    (resolution: bigint | number) => {
+        const isValid = isValidResolutionString(resolution);
+        const parseFraction = parseSubNumber(getPowerOf10(resolution));
 
-    return (value?: string): bigint | undefined => {
-        if (value === undefined) {
-            return undefined;
-        }
+        return (value?: string): bigint | number | undefined => {
+            if (value === undefined) {
+                return undefined;
+            }
 
-        if (!isValid(value)) {
-            throw new Error(
-                `Given string cannot be parsed to resolution: ${resolution}`
-            );
-        }
+            if (!isValid(value)) {
+                throw new Error(
+                    `Given string cannot be parsed to resolution: ${resolution}`
+                );
+            }
 
-        if (!value.includes(numberSeparator)) {
-            return BigInt(value) * resolution;
-        }
+            if (!value.includes(numberSeparator)) {
+                return BigInt(value) * BigInt(resolution);
+            }
 
-        const separatorIndex = value.indexOf(numberSeparator);
-        const whole = value.slice(0, separatorIndex);
-        const fractions = parseFraction(value.slice(separatorIndex + 1));
-        return BigInt(whole) * resolution + BigInt(fractions);
-    };
-});
+            const separatorIndex = value.indexOf(numberSeparator);
+            const whole = value.slice(0, separatorIndex);
+            const fractions = parseFraction(value.slice(separatorIndex + 1));
+            return BigInt(whole) * BigInt(resolution) + BigInt(fractions);
+        };
+    }
+);
 
 const replaceCharAt = (
     value: string,

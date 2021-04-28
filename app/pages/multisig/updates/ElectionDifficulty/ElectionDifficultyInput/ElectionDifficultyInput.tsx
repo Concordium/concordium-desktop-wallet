@@ -27,8 +27,7 @@ export interface ElectionDifficultyField {
 }
 
 const fieldName: keyof ElectionDifficultyField = 'electionDifficulty';
-const blockTimeError =
-    'Estimated block time above 1 day is currently disallowed';
+const blockTimeError = 'Estimated block time above 1 day is disallowed';
 
 export interface ElectionDifficultyInputProps {
     label: string;
@@ -90,8 +89,8 @@ export default function ElectionDifficultyInput({
     const registration = form?.register({
         required: 'Must have a value',
         min: {
-            value: 0,
-            message: 'Value can not be negative',
+            value: 1 / resolution,
+            message: `Value can not be below ${1 / resolution}`,
         },
         max: {
             value: 1,
@@ -124,7 +123,8 @@ export default function ElectionDifficultyInput({
             />
             {blockTime && (
                 <span className={styles.blockTime}>
-                    Approximate time per block: {Boolean(days) && `${days}d `}
+                    Approximate time per block:{' '}
+                    {Boolean(days) && `${days}${days !== Infinity ? 'd' : ''} `}
                     {Boolean(hours) && `${hours}h `}
                     {Boolean(minutes) && `${minutes}m `}
                     {Boolean(seconds) && `${seconds}s `}
