@@ -8,7 +8,7 @@ export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
         identitiesTable,
         (table: Knex.TableBuilder) => {
-            table.increments('id');
+            table.integer('id');
             table.string('name');
             table.string('status');
             table.string('detail');
@@ -21,6 +21,8 @@ export async function up(knex: Knex): Promise<void> {
                 .references('identifier')
                 .inTable(hwWalletTable)
                 .notNullable();
+            table.primary(['id', 'hwWallet']);
+            table.unique(['id', 'hwWallet']);
         }
     );
 }

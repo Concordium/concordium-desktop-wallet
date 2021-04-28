@@ -158,7 +158,12 @@ export default function IdentityIssuanceGenerate({
             return;
         }
 
-        const identityId = await getNextId();
+        // Extract the pairing public-key
+        const pairingKey = (
+            await ledger.getPublicKeySilent(getPairingPath())
+        ).toString('hex');
+
+        const identityId = await getNextId(pairingKey);
         const {
             idObjectRequest,
             randomness,
@@ -170,10 +175,6 @@ export default function IdentityIssuanceGenerate({
             global
         );
 
-        // Extract the pairing public-key
-        const pairingKey = (
-            await ledger.getPublicKeySilent(getPairingPath())
-        ).toString('hex');
         generateIdentity(
             idObjectRequest,
             randomness,
