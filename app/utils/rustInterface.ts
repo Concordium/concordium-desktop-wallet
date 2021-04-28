@@ -137,7 +137,7 @@ async function createUnsignedCredentialInfo(
     address?: string
 ) {
     const path = getAccountPath({
-        identityIndex: identity.id,
+        identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
@@ -145,7 +145,7 @@ async function createUnsignedCredentialInfo(
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identity.id
+        identity.identityNumber
     );
     displayMessage('Please confirm exporting public key on device');
     const publicKey = await ledger.getPublicKey(path);
@@ -269,7 +269,7 @@ export async function createCredentialDetails(
     // Adding credential on a new account
     const expiry = getDefaultExpiry();
     const path = getAccountPath({
-        identityIndex: identity.id,
+        identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
@@ -369,6 +369,7 @@ export async function createGenesisAccount(
         signatureIndex: 0,
     });
 
+    // TODO Make sure it uses the identityNumber and not the identity id.
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,

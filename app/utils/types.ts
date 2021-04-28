@@ -91,6 +91,7 @@ export enum IdentityStatus {
  */
 export interface Identity {
     id: number;
+    identityNumber: number;
     name: string;
     identityObject: string;
     status: IdentityStatus;

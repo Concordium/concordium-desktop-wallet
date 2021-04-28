@@ -9,6 +9,7 @@ export async function up(knex: Knex): Promise<void> {
         identitiesTable,
         (table: Knex.TableBuilder) => {
             table.increments('id');
+            table.integer('identityNumber');
             table.string('name');
             table.string('status');
             table.string('detail');

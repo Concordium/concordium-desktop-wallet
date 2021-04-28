@@ -56,7 +56,7 @@ export async function loadIdentities(dispatch: Dispatch) {
 }
 
 export async function addPendingIdentity(
-    identityId: number,
+    identityNumber: number,
     dispatch: Dispatch,
     identityName: string,
     codeUri: string,
@@ -65,7 +65,7 @@ export async function addPendingIdentity(
     walletId: number
 ) {
     const identity = {
-        id: identityId,
+        identityNumber,
         name: identityName,
         status: IdentityStatus.Pending,
         codeUri,
@@ -73,8 +73,10 @@ export async function addPendingIdentity(
         randomness,
         walletId,
     };
-    await insertIdentity(identity);
-    return loadIdentities(dispatch);
+    // TODO Insert identity should only insert one identity, and not an array.
+    const identityId = await insertIdentity(identity);
+    loadIdentities(dispatch);
+    return identityId[0];
 }
 
 export async function confirmIdentity(
@@ -94,7 +96,9 @@ export async function rejectIdentity(dispatch: Dispatch, identityName: string) {
     await loadIdentities(dispatch);
 }
 
-export async function importIdentities(identities: Identity | Identity[]) {
+export async function importIdentities(
+    identities: Identity | Identity[] | Partial<Identity>
+) {
     await insertIdentity(identities);
 }
 

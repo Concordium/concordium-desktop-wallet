@@ -142,7 +142,7 @@ export default function GenesisAccount(): JSX.Element {
 
             const identity = {
                 name: 'Genesis',
-                id: defaultId,
+                identityNumber: defaultId,
                 identityObject: JSON.stringify(identityObject),
                 status: IdentityStatus.Genesis,
                 detail: '',

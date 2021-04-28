@@ -8,7 +8,7 @@ import { identitiesTable } from '../constants/databaseNames.json';
  * @param walletId the database id key for the wallet used
  * @returns the id for the next identity to be created by the given wallet
  */
-export async function getNextId(walletId: number): Promise<number> {
+export async function getNextIdentityNumber(walletId: number): Promise<number> {
     const model = (await knex())
         .table(identitiesTable)
         .where('walletId', walletId);

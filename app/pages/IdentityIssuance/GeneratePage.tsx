@@ -13,7 +13,7 @@ import {
     performIdObjectRequest,
 } from '../../utils/httpRequests';
 import { createIdentityRequestObjectLedger } from '../../utils/rustInterface';
-import { getNextId } from '../../database/IdentityDao';
+import { getNextIdentityNumber } from '../../database/IdentityDao';
 import { IdentityProvider, Dispatch, Global } from '../../utils/types';
 import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoller';
 import SimpleLedger from '../../components/ledger/SimpleLedger';
@@ -75,7 +75,7 @@ async function handleIdentityProviderLocation(
 async function generateIdentity(
     idObjectRequest: string,
     randomness: string,
-    identityId: number,
+    identityNumber: number,
     setLocation: (location: string) => void,
     dispatch: Dispatch,
     provider: IdentityProvider,
@@ -86,6 +86,7 @@ async function generateIdentity(
     onError: (message: string) => void
 ) {
     let identityObjectLocation;
+    let identityId;
     try {
         const IdentityProviderLocation = await performIdObjectRequest(
             provider.metadata.issuanceStart,
@@ -98,8 +99,8 @@ async function generateIdentity(
         );
 
         // TODO: Handle the case where the app closes before we are able to save pendingIdentity
-        await addPendingIdentity(
-            identityId,
+        identityId = await addPendingIdentity(
+            identityNumber,
             dispatch,
             identityName,
             identityObjectLocation,
@@ -166,12 +167,12 @@ export default function IdentityIssuanceGenerate({
 
         const walletId = await getId(pairingKey);
 
-        const identityId = await getNextId(walletId);
+        const identityNumber = await getNextIdentityNumber(walletId);
         const {
             idObjectRequest,
             randomness,
         } = await createIdentityObjectRequest(
-            identityId,
+            identityNumber,
             provider,
             setMessage,
             ledger,
@@ -181,7 +182,7 @@ export default function IdentityIssuanceGenerate({
         generateIdentity(
             idObjectRequest,
             randomness,
-            identityId,
+            identityNumber,
             setLocation,
             dispatch,
             provider,
