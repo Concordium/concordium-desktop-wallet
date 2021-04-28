@@ -24,7 +24,10 @@ import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import { ScheduledTransferBuilderRef } from '~/components/BuildSchedule/util';
+import {
+    ScheduledTransferBuilderRef,
+    BuildScheduleDefaults,
+} from '~/components/BuildSchedule/util';
 import {
     scheduledTransferCost,
     getTransactionKindCost,
@@ -76,7 +79,13 @@ export default function CreateTransferProposal({
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [amount, setAmount] = useState<string>('0.00'); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
+
     const [schedule, setSchedule] = useState<Schedule>();
+    const [
+        scheduleDefaults,
+        setScheduleDefaults,
+    ] = useState<BuildScheduleDefaults>();
+
     const [estimatedFee, setFee] = useState<Fraction>();
     const [error, setError] = useState<string>();
 
@@ -160,13 +169,15 @@ export default function CreateTransferProposal({
         }
         return (
             <BuildSchedule
-                submitSchedule={(newSchedule) => {
+                submitSchedule={(newSchedule, defaults) => {
                     setSchedule(newSchedule);
+                    setScheduleDefaults(defaults);
                     continueAction();
                 }}
                 amount={amount}
                 ref={scheduleBuilderRef}
                 setReady={setReady}
+                defaults={scheduleDefaults}
             />
         );
     }

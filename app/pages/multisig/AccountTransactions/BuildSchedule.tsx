@@ -5,14 +5,21 @@ import { Schedule } from '~/utils/types';
 import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
 import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';
 import ButtonGroup from '~/components/ButtonGroup';
-import { ScheduledTransferBuilderRef } from '~/components/BuildSchedule/util';
+import {
+    ScheduledTransferBuilderRef,
+    BuildScheduleDefaults,
+} from '~/components/BuildSchedule/util';
 import accountStyles from '~/pages/Accounts/Accounts.module.scss';
 import styles from './MultisignatureAccountTransactions.module.scss';
 
 interface Props {
-    submitSchedule: (schedule: Schedule) => void;
+    submitSchedule: (
+        schedule: Schedule,
+        defaults: BuildScheduleDefaults
+    ) => void;
     amount: string;
     setReady(isReady: boolean): void;
+    defaults?: BuildScheduleDefaults;
 }
 
 // TODO: Add Estimated Fee connection
@@ -20,8 +27,10 @@ interface Props {
  * Allows the user to build the schedule of a scheduled transfer.
  */
 const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
-    ({ amount, submitSchedule, setReady }, ref) => {
-        const [explicit, setExplicit] = useState<boolean>(false);
+    ({ amount, submitSchedule, setReady, defaults }, ref) => {
+        const [explicit, setExplicit] = useState<boolean>(
+            defaults?.explicit || false
+        );
 
         const BuildComponent = explicit ? ExplicitSchedule : RegularInterval;
 
@@ -43,6 +52,7 @@ const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                     title="Schedule type:"
                 />
                 <BuildComponent
+                    defaults={defaults}
                     submitSchedule={submitSchedule}
                     setScheduleLength={() => {}}
                     amount={toMicroUnits(amount)}

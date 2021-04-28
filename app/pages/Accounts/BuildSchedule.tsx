@@ -8,12 +8,9 @@ import { Account, AddressBookEntry, Schedule, Fraction } from '~/utils/types';
 import { displayAsGTU, toGTUString } from '~/utils/gtu';
 import { createScheduledTransferTransaction } from '~/utils/transactionHelpers';
 import locations from '~/constants/transferLocations.json';
-import RegularInterval, {
-    Defaults as RegularIntervalDefaults,
-} from '~/components/BuildSchedule/BuildRegularInterval';
-import ExplicitSchedule, {
-    Defaults as ExplicitScheduleDefaults,
-} from '~/components/BuildSchedule/BuildExplicitSchedule';
+import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
+import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';
+import { BuildScheduleDefaults } from '~/components/BuildSchedule/util';
 import { scheduledTransferCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import TransferView from '~/components/Transfers/TransferView';
@@ -21,14 +18,11 @@ import styles from './Accounts.module.scss';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonGroup from '~/components/ButtonGroup';
 
-interface Defaults extends ExplicitScheduleDefaults, RegularIntervalDefaults {}
-
 interface State {
     account: Account;
     amount: string;
     recipient: AddressBookEntry;
-    explicit: boolean;
-    defaults?: Defaults;
+    defaults?: BuildScheduleDefaults;
 }
 
 interface Props {
@@ -40,7 +34,7 @@ interface Props {
  */
 export default function BuildSchedule({ location }: Props) {
     const [explicit, setExplicit] = useState<boolean>(
-        location?.state?.explicit || false
+        location?.state?.defaults?.explicit || false
     );
     const dispatch = useDispatch();
 
@@ -101,7 +95,6 @@ export default function BuildSchedule({ location }: Props) {
                                 account,
                                 amount,
                                 defaults: recoverState,
-                                explicit,
                                 recipient,
                             },
                         },

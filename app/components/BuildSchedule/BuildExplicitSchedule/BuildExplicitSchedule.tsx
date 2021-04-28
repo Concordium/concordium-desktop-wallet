@@ -26,20 +26,20 @@ import styles from './BuildExplicitSchedule.module.scss';
 import {
     ScheduledTransferBuilderBaseProps,
     ScheduledTransferBuilderRef,
+    ExplicitScheduleDefaults,
 } from '../util';
 import { noOp } from '~/utils/basicHelpers';
 import Label from '~/components/Label';
 
 const maxScheduleAmount = 255;
 
-export interface Defaults {
-    schedule: Schedule;
-}
-
 interface Props extends ScheduledTransferBuilderBaseProps {
-    submitSchedule(schedule: Schedule, recoverState: Defaults): void;
+    submitSchedule(
+        schedule: Schedule,
+        recoverState: ExplicitScheduleDefaults
+    ): void;
     amount: bigint;
-    defaults?: Defaults;
+    defaults?: ExplicitScheduleDefaults;
     setScheduleLength: (scheduleLength: number) => void;
 }
 
@@ -88,7 +88,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
         useEffect(() => onValidChange(canSubmit), [canSubmit]);
 
         const submit = useCallback(
-            () => submitSchedule(schedule, { schedule }),
+            () => submitSchedule(schedule, { schedule, explicit: true }),
             [schedule, submitSchedule]
         );
 

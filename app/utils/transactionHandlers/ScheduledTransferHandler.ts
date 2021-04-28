@@ -62,7 +62,7 @@ export default class ScheduledTransferHandler
     }: Partial<CreateTransactionInput>) {
         if (!sender || !recipient || !schedule) {
             throw new Error(
-                `Unexpected Missing input: ${{ sender, schedule, recipient }}`
+                `Unexpected Missing input: ${sender}, ${schedule}, ${recipient}`
             );
         }
         return createScheduledTransferTransaction(
