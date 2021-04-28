@@ -1,9 +1,9 @@
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import ElectionDifficultyView from '../../pages/multisig/ElectionDifficultyView';
+import ElectionDifficultyView from '../../pages/multisig/updates/ElectionDifficulty/ElectionDifficultyView';
 import UpdateElectionDifficulty, {
     UpdateElectionDifficultyFields,
-} from '../../pages/multisig/UpdateElectionDifficulty';
+} from '../../pages/multisig/updates/ElectionDifficulty/UpdateElectionDifficulty';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
