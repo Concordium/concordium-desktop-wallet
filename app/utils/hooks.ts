@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { getAccountInfoOfAddress } from './nodeHelpers';
 import { lookupName } from './transactionHelpers';
+import { AccountInfo } from './types';
 
 export const useIsFirstRender = () => {
     const ref = useRef<boolean>(false);
@@ -32,4 +34,15 @@ export function useAccountName(address: string) {
             .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
     }, [address]);
     return name;
+}
+
+/** Hook for fetching account info given an account address */
+export function useAccountInfo(address: string) {
+    const [accountInfo, setAccountInfo] = useState<AccountInfo>();
+    useEffect(() => {
+        getAccountInfoOfAddress(address)
+            .then(setAccountInfo)
+            .catch(() => {});
+    }, [address]);
+    return accountInfo;
 }

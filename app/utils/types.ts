@@ -10,7 +10,7 @@ type Word64 = bigint;
 type Word32 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
-type Amount = string;
+export type Amount = bigint;
 
 export interface Fraction {
     numerator: Word64;
@@ -485,6 +485,7 @@ export interface AccountInfo {
     accountBaker?: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
     accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
+    accountIndex: number;
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.

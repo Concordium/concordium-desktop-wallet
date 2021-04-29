@@ -6,7 +6,6 @@ import Form from '~/components/Form';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
-import SwitchToggle from '~/cross-app-components/Switch';
 import {
     Identity,
     Account,
@@ -14,6 +13,7 @@ import {
     TransactionKindId,
     AccountTransaction,
     AddBakerPayload,
+    Amount,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
@@ -26,17 +26,23 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import { chunk } from '../util';
 import SignTransaction from './SignTransaction';
-import { createAddBakerTransaction } from '~/utils/transactionHelpers';
+import {
+    amountToString,
+    createAddBakerTransaction,
+    parseGTUString,
+} from '~/utils/transactionHelpers';
 import { credentialsSelector } from '~/features/CredentialSlice';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
 import { saveFile } from '~/utils/FileHelper';
+import { useAccountInfo } from '~/utils/hooks';
 
 export default function AddBakerPage() {
     const { path, url } = useRouteMatch();
     const dispatch = useDispatch();
     const [proposalId, setProposalId] = useState<number>();
     const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
+    const [senderAddress, setSenderAddress] = useState<string>();
 
     return (
         <Switch>
@@ -52,18 +58,21 @@ export default function AddBakerPage() {
             </Route>
             <Route path={`${path}/proposal`}>
                 <BuildAddBakerTransactionProposalStep
-                    onNewProposal={(id, keys) => {
+                    onNewProposal={(id, keys, address) => {
                         setProposalId(id);
                         setBakerKeys(keys);
+                        setSenderAddress(address);
                         dispatch(push(`${url}/download-keys`));
                     }}
                 />
             </Route>
             <Route path={`${path}/download-keys`}>
-                {bakerKeys !== undefined && proposalId !== undefined ? (
+                {bakerKeys !== undefined &&
+                proposalId !== undefined &&
+                senderAddress !== undefined ? (
                     <DownloadBakerCredentialsStep
                         bakerKeys={bakerKeys}
-                        bakerId={0 /* TODO get baker id */}
+                        accountAddress={senderAddress}
                         onContinue={() => {
                             dispatch(push(selectedProposalRoute(proposalId)));
                         }}
@@ -86,24 +95,32 @@ function BeforeYouStartStep({ onContinue }: BeforeYouStartStepProps) {
             pageTitle="Multi Signature Transactions | Add Baker"
             stepTitle="Before you start"
         >
-            <Form<FormValues> onSubmit={onContinue}>
-                Maybe insert some explanation of what it means to become a
-                baker, and what it is needed to do so. <br />
-                <br />
-                Maybe something about stake as well. Maybe mention that the flow
-                will end with a json file, that the user needs to start the
-                baking node with.
-                <Form.Checkbox
-                    name="implications"
-                    rules={{
-                        required:
-                            'It is important that you understand the implications',
-                    }}
-                >
-                    I understand the implications of adding a baker
-                </Form.Checkbox>
-                <Form.Submit>Continue</Form.Submit>
-            </Form>
+            <div className={styles.descriptionStep}>
+                <div style={{ flex: 1 }}>
+                    <p>
+                        Maybe insert some explanation of what it means to become
+                        a baker, and what it is needed to do so.{' '}
+                    </p>
+                    <p>
+                        Maybe something about stake as well. Maybe mention that
+                        the flow will end with a json file, that the user needs
+                        to start the baking node with.
+                    </p>
+                </div>
+                <Form<FormValues> onSubmit={onContinue}>
+                    <Form.Checkbox
+                        name="implications"
+                        style={{ margin: 20 }}
+                        rules={{
+                            required:
+                                'It is important that you understand the implications',
+                        }}
+                    >
+                        I understand the implications of adding a baker
+                    </Form.Checkbox>
+                    <Form.Submit>Continue</Form.Submit>
+                </Form>
+            </div>
         </MultiSignatureLayout>
     );
 }
@@ -120,8 +137,12 @@ function TheProcessDescriptionStep({
             pageTitle="Multi Signature Transactions | Add Baker"
             stepTitle="The process"
         >
-            Maybe write out the process here?
-            <Button onClick={onContinue}>Continue</Button>
+            <div className={styles.descriptionStep}>
+                <div style={{ flex: 1 }}>
+                    <p>Maybe write out the process here?</p>
+                </div>
+                <Button onClick={onContinue}>Continue</Button>
+            </div>
         </MultiSignatureLayout>
     );
 }
@@ -129,7 +150,11 @@ function TheProcessDescriptionStep({
 const placeholderText = 'To be determined';
 
 type BuildTransactionProposalStepProps = {
-    onNewProposal: (proposalId: number, keys: BakerKeys) => void;
+    onNewProposal: (
+        proposalId: number,
+        keys: BakerKeys,
+        accountAddress: string
+    ) => void;
 };
 
 function BuildAddBakerTransactionProposalStep({
@@ -139,9 +164,9 @@ function BuildAddBakerTransactionProposalStep({
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account>();
-    const [stake, setStake] = useState<string>('0');
+    const [stake, setStake] = useState<Amount>(BigInt(0));
     const [estimatedFee, setFee] = useState<Fraction>();
-    const [restakeEnabled, setRestakeEnabled] = useState<boolean>(false);
+    const [restakeEnabled, setRestakeEnabled] = useState(true);
     const [error, setError] = useState<string>();
     const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
     const [transaction, setTransaction] = useState<
@@ -222,7 +247,7 @@ function BuildAddBakerTransactionProposalStep({
                         <b>Amount to stake:</b>
                         <h2>
                             {stake
-                                ? `${getGTUSymbol()} ${stake}`
+                                ? `${getGTUSymbol()} ${amountToString(stake)}`
                                 : placeholderText}
                         </h2>
                         <DisplayEstimatedFee estimatedFee={estimatedFee} />
@@ -260,83 +285,120 @@ function BuildAddBakerTransactionProposalStep({
                 <Switch>
                     <Route exact path={path}>
                         <Columns.Column header="Identities">
-                            <PickIdentity
-                                setReady={() => {}}
-                                setIdentity={setIdentity}
-                                chosenIdentity={identity}
-                            />
-                            <Button
-                                disabled={identity === undefined}
-                                onClick={() =>
-                                    dispatch(push(`${url}/accounts`))
-                                }
-                            >
-                                Continue
-                            </Button>
+                            <div className={styles.descriptionStep}>
+                                <div style={{ flex: 1, alignSelf: 'normal' }}>
+                                    <PickIdentity
+                                        setReady={() => {}}
+                                        setIdentity={setIdentity}
+                                        chosenIdentity={identity}
+                                    />
+                                </div>
+                                <Button
+                                    disabled={identity === undefined}
+                                    onClick={() =>
+                                        dispatch(push(`${url}/accounts`))
+                                    }
+                                >
+                                    Continue
+                                </Button>
+                            </div>
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/accounts`}>
                         <Columns.Column header="Accounts">
-                            <PickAccount
-                                setReady={() => {}}
-                                identity={identity}
-                                setAccount={setAccount}
-                                chosenAccount={account}
-                            />
-                            <Button
-                                disabled={account === undefined}
-                                onClick={() => dispatch(push(`${url}/stake`))}
-                            >
-                                Continue
-                            </Button>
+                            <div className={styles.descriptionStep}>
+                                <div style={{ flex: 1 }}>
+                                    <PickAccount
+                                        setReady={() => {}}
+                                        identity={identity}
+                                        setAccount={setAccount}
+                                        chosenAccount={account}
+                                    />
+                                </div>
+                                <Button
+                                    disabled={account === undefined}
+                                    onClick={() =>
+                                        dispatch(push(`${url}/stake`))
+                                    }
+                                >
+                                    Continue
+                                </Button>
+                            </div>
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/stake`}>
                         <Columns.Column header="Stake">
-                            <PickAmount
-                                setReady={() => {}}
-                                amount={stake}
-                                account={account}
-                                estimatedFee={estimatedFee}
-                                setAmount={setStake}
-                            />
-                            <SwitchToggle
-                                checked={restakeEnabled}
-                                onChange={(event) =>
-                                    setRestakeEnabled(event.target.checked)
-                                }
-                            >
-                                Enable restaking
-                            </SwitchToggle>
-                            <Button
-                                onClick={() => {
-                                    onGenerateKeys();
-                                    dispatch(push(`${url}/keys`));
-                                }}
-                            >
-                                Generate keys
-                            </Button>
+                            <div className={styles.descriptionStep}>
+                                <div style={{ flex: 1 }}>
+                                    <p>
+                                        To add a baker you must choose an amount
+                                        to stake on the account. The staked
+                                        amount will be part of the balance, but
+                                        while staked the amount is unavailable
+                                        for transactions.{' '}
+                                    </p>
+                                    <PickAmount
+                                        setReady={() => {}}
+                                        amount={amountToString(stake)}
+                                        account={account}
+                                        estimatedFee={estimatedFee}
+                                        setAmount={(gtuString) =>
+                                            setStake(parseGTUString(gtuString))
+                                        }
+                                    />
+                                    <p>
+                                        By default all baker rewards are added
+                                        to the staked amount. This can be
+                                        disabled below.
+                                    </p>
+                                    <Button
+                                        inverted={!restakeEnabled}
+                                        onClick={() => setRestakeEnabled(true)}
+                                    >
+                                        Yes, restake
+                                    </Button>
+                                    <Button
+                                        inverted={restakeEnabled}
+                                        onClick={() => setRestakeEnabled(false)}
+                                    >
+                                        No, don’t restake
+                                    </Button>
+                                </div>
+                                <Button
+                                    onClick={() => {
+                                        onGenerateKeys();
+                                        dispatch(push(`${url}/keys`));
+                                    }}
+                                >
+                                    Generate keys
+                                </Button>
+                            </div>
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/keys`}>
                         <Columns.Column header="Baker keys">
-                            {bakerKeys === undefined ? (
-                                <p>Generating keys...</p>
-                            ) : (
-                                <p>
-                                    Your baker keys have been generated, and the
-                                    public keys can be seen to the left.
-                                </p>
-                            )}
-                            <Button
-                                disabled={bakerKeys === undefined}
-                                onClick={() => {
-                                    onCreateTransaction();
-                                    dispatch(push(`${url}/sign`));
-                                }}
-                            >
-                                Continue
-                            </Button>
+                            <div className={styles.descriptionStep}>
+                                <div style={{ flex: 1 }}>
+                                    {bakerKeys === undefined ? (
+                                        <p>Generating keys...</p>
+                                    ) : (
+                                        <p>
+                                            Your baker keys have been generated,
+                                            and the public keys can be seen to
+                                            the left.
+                                        </p>
+                                    )}
+                                </div>
+                                <Button
+                                    disabled={bakerKeys === undefined}
+                                    onClick={() => {
+                                        onCreateTransaction();
+                                        dispatch(push(`${url}/sign`));
+                                    }}
+                                >
+                                    Continue
+                                </Button>
+                            </div>
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/sign`}>
@@ -351,7 +413,11 @@ function BuildAddBakerTransactionProposalStep({
                                     primaryCredential={credential}
                                     transaction={transaction}
                                     setProposalId={(id) =>
-                                        onNewProposal(id, bakerKeys)
+                                        onNewProposal(
+                                            id,
+                                            bakerKeys,
+                                            account.address
+                                        )
                                     }
                                 />
                             ) : null}
@@ -372,19 +438,24 @@ function PublicKey({ children }: PublicKeyProps) {
 }
 
 type DownloadBakerCredentialsStepProps = {
+    accountAddress: string;
     bakerKeys: BakerKeys;
-    bakerId: number;
     onContinue: () => void;
 };
 
 function DownloadBakerCredentialsStep({
+    accountAddress,
     bakerKeys,
-    bakerId,
     onContinue,
 }: DownloadBakerCredentialsStepProps) {
+    const accountInfo = useAccountInfo(accountAddress);
+
     const onExport = async () => {
+        if (accountInfo === undefined) {
+            return;
+        }
         const fileString = JSON.stringify({
-            bakerId,
+            bakerId: accountInfo.accountIndex,
             aggregationSignKey: bakerKeys.aggregationSecret,
             aggregationVerifyKey: bakerKeys.aggregationPublic,
             electionPrivateKey: bakerKeys.electionSecret,
@@ -406,7 +477,22 @@ function DownloadBakerCredentialsStep({
             pageTitle="Multi Signature Transactions | Add Baker"
             stepTitle="Baker Credentials"
         >
-            <Button onClick={onExport}>Export Baker Credentials</Button>
+            <div className={styles.descriptionStep}>
+                <div style={{ flex: 1 }}>
+                    <p>
+                        Make sure to export and backup your Baker Credentials,
+                        as you will have to generate a new if lost.
+                    </p>
+                    <p>
+                        {' '}
+                        ... Warning, this will be the only chance to export the
+                        baker credentials or the user will have to generate new
+                        ones ...
+                    </p>
+                    <p>... Warning about sharing the credentials ...</p>
+                </div>
+                <Button onClick={onExport}>Export Baker Credentials</Button>
+            </div>
         </MultiSignatureLayout>
     );
 }
