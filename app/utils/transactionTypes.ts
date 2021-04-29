@@ -57,6 +57,9 @@ export type TransactionHandler<T, S> =
 /**
  * Interface definition for a class that handles a specific type
  * of update instructions.
+ * T = Instruction type that the handler handles
+ * S = The class which signs the transaction
+ * P = 'Parent' type of the transaction.
  */
 export interface UpdateInstructionHandler<T, S, P = UpdateInstruction> {
     /**
@@ -104,6 +107,9 @@ export interface CreateTransactionInput {
 /**
  * Interface definition for a class that handles a specific type
  * of account transaction.
+ * T = Transaction kind that the handler handles
+ * S = The class which signs the transaction
+ * P = 'Parent' type of the transaction.
  */
 export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
     /**
