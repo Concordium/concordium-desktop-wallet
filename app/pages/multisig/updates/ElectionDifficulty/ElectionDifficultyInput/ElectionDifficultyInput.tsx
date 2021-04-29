@@ -4,7 +4,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useFormContext, UseFormMethods, Validate } from 'react-hook-form';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import { toResolution } from '~/utils/numberStringHelpers';
-import { convertMiliseconds } from '~/utils/timeHelpers';
+import { msToTimeParts } from '~/utils/timeHelpers';
 import { electionDifficultyResolution } from '../util';
 
 import styles from './ElectionDifficultyInput.module.scss';
@@ -60,7 +60,7 @@ export default function ElectionDifficultyInput({
 
             try {
                 const msPerBlock = timePerSlot / Number(v);
-                return convertMiliseconds(msPerBlock);
+                return msToTimeParts(msPerBlock);
             } catch {
                 return undefined;
             }

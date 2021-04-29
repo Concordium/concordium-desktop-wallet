@@ -88,6 +88,13 @@ export interface DateParts {
     seconds: string;
 }
 
+interface TimeParts {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+}
+
 /**
  * Converts miliseconds into days, hours, minutes, and seconds.
  *
@@ -98,11 +105,9 @@ export interface DateParts {
  * convertMiliseconds(1000 * 3603) => { days: 0, hours: 1, minutes: 0, seconds: 3 };
  * convertMiliseconds(1000 * 3600 * 36) => { days: 1, hours: 12, minutes: 0, seconds: 0 };
  */
-export function convertMiliseconds(
+export function msToTimeParts(
     miliseconds: number | undefined
-):
-    | { days: number; hours: number; minutes: number; seconds: number }
-    | undefined {
+): TimeParts | undefined {
     if (!miliseconds) {
         return undefined;
     }
