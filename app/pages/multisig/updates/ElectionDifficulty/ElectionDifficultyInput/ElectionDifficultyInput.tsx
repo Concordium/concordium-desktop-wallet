@@ -134,7 +134,8 @@ export default function ElectionDifficultyInput({
                     {Boolean(days) && `${days}${days !== Infinity ? 'd' : ''} `}
                     {Boolean(hours) && `${hours}h `}
                     {Boolean(minutes) && `${minutes}m `}
-                    {Boolean(seconds) && `${seconds}s `}
+                    {Boolean(seconds) && `${seconds}s`}
+                    {Object.values(blockTime).every((u) => u === 0) && '<1s'}
                 </span>
             )}
             {shouldRegister && <ErrorMessage>{error?.message}</ErrorMessage>}
