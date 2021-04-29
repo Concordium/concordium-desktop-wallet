@@ -59,7 +59,7 @@ export default class UpdateAccountCredentialsHandler
     createTransaction() {
         return Promise.reject(
             new Error(
-                'Not Implemented: Create UpdateCredentials transaction in Handler'
+                'Unsupported function: UpdateAccountCredentials transactions should be created explicitly and not through handler.'
             )
         );
     }

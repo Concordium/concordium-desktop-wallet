@@ -48,7 +48,7 @@ export function useKeyPress(handleKeyPress: (e: KeyboardEvent) => void) {
     useEffect(() => {
         document.addEventListener('keyup', handleKeyPress, true);
         return () => {
-            document.removeEventListener('keyup', handleKeyPress);
+            document.removeEventListener('keyup', handleKeyPress, true);
         };
     }, [handleKeyPress]);
 }

@@ -26,18 +26,20 @@ import styles from './BuildExplicitSchedule.module.scss';
 import {
     ScheduledTransferBuilderBaseProps,
     ScheduledTransferBuilderRef,
+    ExplicitScheduleDefaults,
 } from '../util';
 import { noOp } from '~/utils/basicHelpers';
 import Label from '~/components/Label';
 
-export interface Defaults {
-    schedule: Schedule;
-}
+const maxScheduleAmount = 255;
 
 interface Props extends ScheduledTransferBuilderBaseProps {
-    submitSchedule(schedule: Schedule, recoverState: Defaults): void;
+    submitSchedule(
+        schedule: Schedule,
+        recoverState: ExplicitScheduleDefaults
+    ): void;
     amount: bigint;
-    defaults?: Defaults;
+    defaults?: ExplicitScheduleDefaults;
     setScheduleLength: (scheduleLength: number) => void;
 }
 
@@ -58,7 +60,6 @@ const addSchedulePointFormNames: EqualRecord<AddSchedulePointForm> = {
 /**
  * Component to build a "explicit" schedule, by adding invidual releases.
  */
-// export default function BuildExplicitSchedule({
 const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
     (
         {
@@ -81,12 +82,13 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
         const methods = useForm<AddSchedulePointForm>({ mode: 'onTouched' });
         const { reset } = methods;
 
-        const canSubmit = usedAmount === amount;
+        const canSubmit =
+            usedAmount === amount && schedule.length <= maxScheduleAmount;
         // eslint-disable-next-line react-hooks/exhaustive-deps
         useEffect(() => onValidChange(canSubmit), [canSubmit]);
 
         const submit = useCallback(
-            () => submitSchedule(schedule, { schedule }),
+            () => submitSchedule(schedule, { schedule, explicit: true }),
             [schedule, submitSchedule]
         );
 
@@ -128,6 +130,11 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             let isValid = false;
             if (pointAmount && isValidGTUString(pointAmount)) {
                 const value = toMicroUnits(pointAmount);
+
+                if (value === 0n) {
+                    return 'Amount may not be zero';
+                }
+
                 isValid = value + usedAmount <= amount;
             }
             return isValid || 'Value exceeds transaction amount';

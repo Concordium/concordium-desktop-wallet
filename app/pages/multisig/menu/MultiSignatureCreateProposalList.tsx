@@ -14,7 +14,7 @@ import { expireProposals } from '~/utils/ProposalHelper';
 import styles from '../MultiSignaturePage/MultiSignaturePage.module.scss';
 
 // Defines the list of options for creating multi signature transactions.
-const multiSigTransactionTypesMap: [TransactionTypes, UpdateType, string][] = [
+const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
     [
         TransactionTypes.UpdateInstruction,
         UpdateType.UpdateMicroGTUPerEuro,
@@ -77,6 +77,28 @@ const multiSigTransactionTypesMap: [TransactionTypes, UpdateType, string][] = [
     ],
 ];
 
+const accountTransactionTypes: [
+    TransactionTypes,
+    UpdateType | TransactionKind,
+    string
+][] = [
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_credentials,
+        'Update Account Credentials',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Simple_transfer,
+        'Send GTU',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Transfer_with_schedule,
+        'Send GTU with a schedule',
+    ],
+];
+
 /**
  * Component that displays a menu containing the available multi signature
  * transaction types. If foundation transactions area enabled in settings,
@@ -89,30 +111,11 @@ export default function MultiSignatureCreateProposalView() {
     );
     const dispatch = useDispatch();
 
-    let availableTransactionTypes: [
-        TransactionTypes,
-        UpdateType | TransactionKind,
-        string
-    ][] = [
-        [
-            TransactionTypes.AccountTransaction,
-            TransactionKind.Update_credentials,
-            'Update Account Credentials',
-        ],
-        [
-            TransactionTypes.AccountTransaction,
-            TransactionKind.Simple_transfer,
-            'Send GTU',
-        ],
-        [
-            TransactionTypes.AccountTransaction,
-            TransactionKind.Transfer_with_schedule,
-            'Send GTU with a schedule',
-        ],
-    ];
+    let availableTransactionTypes = accountTransactionTypes;
+
     if (foundationTransactionsEnabled) {
         availableTransactionTypes = availableTransactionTypes.concat(
-            multiSigTransactionTypesMap
+            updateInstructionTypes
         );
     }
 

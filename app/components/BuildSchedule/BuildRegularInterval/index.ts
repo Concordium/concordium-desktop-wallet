@@ -1,1 +1,1 @@
-export { default, Defaults } from './BuildRegularInterval';
+export { default } from './BuildRegularInterval';

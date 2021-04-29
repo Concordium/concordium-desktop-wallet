@@ -10,6 +10,9 @@ import {
 export const selectedAddressBookEntryRoute = (address: string) =>
     routes.ADDRESSBOOK_SELECTED.replace(':address', address);
 
+export const selectedSettingRoute = (type: string) =>
+    routes.SETTINGS_SELECTED.replace(':type', type);
+
 export const selectedProposalRoute = (proposalId: number) => {
     return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED.replace(
         ':id',
@@ -46,8 +49,11 @@ export function createProposalRoute(
             `${specificType}`
         );
     }
-    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
-        ':transactionKind',
-        `${specificType}`
-    );
+    if (transactionType === TransactionTypes.AccountTransaction) {
+        return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
+            ':transactionKind',
+            `${specificType}`
+        );
+    }
+    throw new Error(`Unknown transactionType given:${transactionType}`);
 }

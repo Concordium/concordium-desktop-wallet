@@ -23,7 +23,7 @@ import { getNow, TimeConstants } from '~/utils/timeHelpers';
 import { futureDate } from '~/components/Form/util/validation';
 
 import styles from './MultiSignatureCreateProposal.module.scss';
-import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
+import withChainData, { ChainData } from '../common/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface MultiSignatureCreateProposalForm {
@@ -37,8 +37,10 @@ export interface MultiSignatureCreateProposalForm {
  * The component retrieves the block summary of the last finalized block, which
  * is used to get the threshold and sequence number required for update instructions.
  */
-function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
-    const loading = !blockSummary;
+function MultiSignatureCreateProposal({
+    blockSummary,
+    consensusStatus,
+}: ChainData) {
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const dispatch = useDispatch();
@@ -158,12 +160,13 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
             UpdateType.UpdateLevel1KeysUsingLevel1Keys,
         ].includes(type)
     ) {
-        if (!blockSummary) {
+        if (!blockSummary || !consensusStatus) {
             component = <Loading text="Getting current settings from chain" />;
         } else {
             component = (
                 <UpdateComponent
                     blockSummary={blockSummary}
+                    consensusStatus={consensusStatus}
                     handleKeySubmit={handleKeySubmit}
                 />
             );
@@ -181,12 +184,12 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                             Add all the details for the {displayType}{' '}
                             transaction below.
                         </p>
-                        {loading && (
-                            <Loading text="Getting current settings from chain" />
-                        )}
-                        {blockSummary && (
+                        {blockSummary && consensusStatus ? (
                             <>
-                                <UpdateComponent blockSummary={blockSummary} />
+                                <UpdateComponent
+                                    blockSummary={blockSummary}
+                                    consensusStatus={consensusStatus}
+                                />
                                 <Form.Timestamp
                                     name="effectiveTime"
                                     label="Effective Time"
@@ -203,6 +206,8 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                                     }}
                                 />
                             </>
+                        ) : (
+                            <Loading text="Getting current settings from chain" />
                         )}
                     </div>
                     <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
@@ -222,4 +227,4 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
     );
 }
 
-export default withBlockSummary(MultiSignatureCreateProposal);
+export default withChainData(MultiSignatureCreateProposal);

@@ -15,6 +15,7 @@ import styles from './BuildRegularInterval.module.scss';
 import {
     ScheduledTransferBuilderBaseProps,
     ScheduledTransferBuilderRef,
+    RegularIntervalDefaults,
 } from '../util';
 import { noOp } from '~/utils/basicHelpers';
 import Label from '~/components/Label';
@@ -43,15 +44,12 @@ const fieldNames: EqualRecord<FormValues> = {
     startTime: 'startTime',
 };
 
-export interface Defaults {
-    releases: number;
-    chosenInterval: Interval;
-    startTime: number;
-}
-
 interface Props extends ScheduledTransferBuilderBaseProps {
-    defaults?: Defaults;
-    submitSchedule(schedule: Schedule, recoverState: Defaults): void;
+    defaults?: RegularIntervalDefaults;
+    submitSchedule(
+        schedule: Schedule,
+        recoverState: RegularIntervalDefaults
+    ): void;
     amount: bigint;
     setScheduleLength: (scheduleLength: number) => void;
 }
@@ -72,7 +70,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         ref
     ) => {
         const [chosenInterval, setChosenInterval] = useState<Interval>(
-            defaults?.chosenInterval || intervals[0]
+            intervals[defaults?.chosenInterval || 0]
         );
         const form = useForm<FormValues>({ mode: 'onTouched' });
         const releases = form.watch(fieldNames.releases);
@@ -88,7 +86,10 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
             const recoverState = {
                 releases,
                 startTime: startTime.getTime(),
-                chosenInterval,
+                chosenInterval: intervals.findIndex(
+                    (interval) => interval.value === chosenInterval.value
+                ),
+                explicit: false,
             };
             submitSchedule(schedule, recoverState);
         }
@@ -130,7 +131,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                             <Form.InlineNumber
                                 name={fieldNames.releases}
                                 defaultValue={
-                                    defaults?.releases.toString() ?? '1'
+                                    defaults?.releases?.toString() ?? '1'
                                 }
                                 fallbackValue={1}
                                 rules={{
@@ -138,6 +139,15 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                                     min: {
                                         value: 1,
                                         message: 'Minimum value is 1',
+                                    },
+                                    max: {
+                                        value: 255,
+                                        message: 'Maximum value is 255',
+                                    },
+                                    validate: {
+                                        splitable: (numberOfReleases: bigint) =>
+                                            numberOfReleases <= amount ||
+                                            'Amount cannot be split among releases',
                                     },
                                 }}
                             />{' '}

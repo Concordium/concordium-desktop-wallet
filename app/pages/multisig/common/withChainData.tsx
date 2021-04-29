@@ -7,27 +7,31 @@ import { getConsensusStatus, getBlockSummary } from '~/utils/nodeRequests';
 import routes from '~/constants/routes.json';
 import DynamicModal from '../DynamicModal';
 
-export interface WithBlockSummary {
+export interface ChainData {
+    consensusStatus: ConsensusStatus | undefined;
     blockSummary: BlockSummary | undefined;
 }
 
-export default function withBlockSummary<TProps extends WithBlockSummary>(
+export default function withChainData<TProps extends ChainData>(
     Component: ComponentType<TProps>
-): ComponentType<Omit<TProps, keyof WithBlockSummary>> {
+): ComponentType<Omit<TProps, keyof ChainData>> {
     return (props) => {
-        const [blockSummary, setBlockSummary] = useState<
-            BlockSummary | undefined
-        >();
+        const [chainData, setChainData] = useState<ChainData | undefined>();
         const dispatch = useDispatch();
 
-        const init = useCallback(async () => {
-            const consensusStatus: ConsensusStatus = await getConsensusStatus();
-            return getBlockSummary(consensusStatus.lastFinalizedBlock);
+        const init = useCallback(async (): Promise<ChainData> => {
+            const cs: ConsensusStatus = await getConsensusStatus();
+            const bs = await getBlockSummary(cs.lastFinalizedBlock);
+
+            return {
+                blockSummary: bs,
+                consensusStatus: cs,
+            };
         }, []);
 
-        const propsWithBlockSummary: TProps = {
+        const enrichedProps: TProps = {
             ...props,
-            blockSummary,
+            ...chainData,
         } as TProps;
 
         return (
@@ -39,13 +43,13 @@ export default function withBlockSummary<TProps extends WithBlockSummary>(
                             push({ pathname: routes.MULTISIGTRANSACTIONS })
                         )
                     }
-                    onSuccess={setBlockSummary}
+                    onSuccess={setChainData}
                     title="Error communicating with node"
                     content="We were unable to retrieve the block summary from the
             configured node. Verify your node settings, and check that
             the node is running."
                 />
-                <Component {...propsWithBlockSummary} />
+                <Component {...enrichedProps} />
             </>
         );
     };

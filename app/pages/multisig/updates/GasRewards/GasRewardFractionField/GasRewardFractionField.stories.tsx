@@ -7,7 +7,7 @@ import {
 } from './GasRewardFractionField';
 
 export default {
-    title: 'Multi Signature/Update Gas Rewards Page/GAS Reward Fraction Field',
+    title: 'Multi Signature/Update Gas Rewards/GAS Reward Fraction Field',
     component: GasRewardFractionField,
 } as Meta;
 

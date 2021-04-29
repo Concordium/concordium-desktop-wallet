@@ -374,5 +374,8 @@ export function validateAmount(
     ) {
         return 'Insufficient funds';
     }
+    if (toMicroUnits(amountToValidate) === 0n) {
+        return 'Amount may not be zero';
+    }
     return undefined;
 }

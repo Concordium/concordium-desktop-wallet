@@ -12,7 +12,7 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAmount from '../PickAmount';
-import PickRecipient from '~/components/Transfers/PickRecipient';
+import PickRecipient from '../PickRecipientWrapper';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
 import PickIdentity from '~/components/PickIdentity';
@@ -24,7 +24,10 @@ import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import { ScheduledTransferBuilderRef } from '~/components/BuildSchedule/util';
+import {
+    ScheduledTransferBuilderRef,
+    BuildScheduleDefaults,
+} from '~/components/BuildSchedule/util';
 import {
     scheduledTransferCost,
     getTransactionKindCost,
@@ -57,7 +60,6 @@ interface Props {
 /**
  * This component controls the flow of creating a multisignature account transaction.
  * It contains the logic for displaying the current parameters.
- * TODO center continue button
  */
 export default function CreateTransferProposal({
     transactionKind,
@@ -77,7 +79,13 @@ export default function CreateTransferProposal({
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [amount, setAmount] = useState<string>('0.00'); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
+
     const [schedule, setSchedule] = useState<Schedule>();
+    const [
+        scheduleDefaults,
+        setScheduleDefaults,
+    ] = useState<BuildScheduleDefaults>();
+
     const [estimatedFee, setFee] = useState<Fraction>();
     const [error, setError] = useState<string>();
 
@@ -125,20 +133,6 @@ export default function CreateTransferProposal({
         );
     }
 
-    function renderPickRecipient() {
-        if (recipient) {
-            setReady(true);
-        }
-        return (
-            <PickRecipient
-                pickRecipient={(newRecipient) => {
-                    setReady(true);
-                    setRecipient(newRecipient);
-                }}
-            />
-        );
-    }
-
     function continueAction() {
         setReady(false);
         dispatch(
@@ -159,13 +153,15 @@ export default function CreateTransferProposal({
         }
         return (
             <BuildSchedule
-                submitSchedule={(newSchedule) => {
+                submitSchedule={(newSchedule, defaults) => {
                     setSchedule(newSchedule);
+                    setScheduleDefaults(defaults);
                     continueAction();
                 }}
                 amount={amount}
                 ref={scheduleBuilderRef}
                 setReady={setReady}
+                defaults={scheduleDefaults}
             />
         );
     }
@@ -284,7 +280,15 @@ export default function CreateTransferProposal({
                                 path={
                                     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT
                                 }
-                                render={renderPickRecipient}
+                                render={() => (
+                                    <div className={styles.columnContent}>
+                                        <PickRecipient
+                                            setReady={setReady}
+                                            setRecipient={setRecipient}
+                                            recipient={recipient}
+                                        />
+                                    </div>
+                                )}
                             />
                             <Route
                                 path={
