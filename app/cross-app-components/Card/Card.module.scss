@@ -1,7 +1,7 @@
 @import 'config/bundle';
 
 .root {
-    border: 1px solid $color-grey;
+    box-shadow: 0 0 0 1px $color-grey inset;
     border-radius: 10px;
     padding: 20px;
     background-color: $color-white;
