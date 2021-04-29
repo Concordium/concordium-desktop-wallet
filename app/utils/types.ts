@@ -1115,6 +1115,11 @@ export type PolymorphicComponentProps<
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
 
+export enum TransactionTypes {
+    UpdateInstruction,
+    AccountTransaction,
+}
+
 interface AccountCredentialWithoutProofs extends CredentialDeploymentValues {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     commitments: any;

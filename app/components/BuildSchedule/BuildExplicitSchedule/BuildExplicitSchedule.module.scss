@@ -20,6 +20,10 @@
     composes: textfaded from global;
 }
 
+.amountInputWrapper {
+    font-size: $font-size-body1;
+}
+
 .addScheduleCard {
     position: relative;
     padding: 10px;
@@ -48,7 +52,7 @@
         width: 100%;
         margin-bottom: 0;
 
-        p {
+        span {
             font-size: $font-size-body3;
             padding-left: 20px;
             margin-bottom: 0;
@@ -64,44 +68,7 @@
     }
 }
 
-.scheduleList {
-    margin-top: 10px;
-
-    > * {
-        margin-bottom: 10px;
-    }
-}
-
-.scheduleListRow {
-    width: 100%;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-
-    :first-child {
-        text-align: left;
-    }
-
-    :last-child {
-        text-align: right;
-    }
-
-    * {
-        flex-grow: 1;
-    }
-}
-
-.binIcon {
-    height: $font-size-body3;
-    transition: transform $anim-easing $anim-timing;
-    &:hover {
-        transform: scale(1.1);
-    }
-}
-
 .submitButton {
     flex-shrink: 0;
-    margin-bottom: 20px;
     margin-top: auto;
 }

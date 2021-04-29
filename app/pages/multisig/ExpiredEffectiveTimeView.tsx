@@ -20,7 +20,11 @@ export default function ExpiredTransactionView({
             proposal.status === MultiSignatureTransactionStatus.Expired) &&
         isExpired(transaction)
     ) {
-        return <span className="textError">The transaction has expired</span>;
+        return (
+            <div className="textError mT10">
+                The effective time has been exceeded
+            </div>
+        );
     }
     return null;
 }

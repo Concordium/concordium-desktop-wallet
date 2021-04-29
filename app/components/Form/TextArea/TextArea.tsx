@@ -6,6 +6,7 @@ import React, {
     useCallback,
     useMemo,
 } from 'react';
+import Label from '~/components/Label';
 import { scaleFieldHeight } from '~/utils/htmlHelpers';
 
 import { CommonInputProps } from '../common';
@@ -87,7 +88,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
 
         return (
             <label className={clsx(styles.root, className)}>
-                <span className={styles.label}>{label}</span>
+                <Label>{label}</Label>
                 <textarea
                     className={clsx(
                         styles.field,

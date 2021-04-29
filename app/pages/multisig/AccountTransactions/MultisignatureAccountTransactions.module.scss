@@ -4,29 +4,13 @@
     display: flex;
 }
 
-.details {
-    text-align: center;
-
-    b {
-        display: block;
-        margin-top: 20px;
-    }
-    h2 {
-        margin: 0;
-    }
-
-    margin-bottom: 20px;
-}
-
 .errorLabel {
     text-align: center;
     color: $color-error;
 }
 
-.pickAmount {
+.buildSchedule {
     display: flex;
     flex-direction: column;
-    > * {
-        margin-top: 20px;
-    }
+    flex: 1;
 }

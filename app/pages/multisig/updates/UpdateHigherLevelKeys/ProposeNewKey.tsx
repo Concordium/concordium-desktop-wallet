@@ -7,6 +7,7 @@ import {
     KeyWithStatus,
     PublicKeyExportFormat,
     UpdateType,
+    TransactionTypes,
 } from '~/utils/types';
 import { createProposalRoute } from '~/utils/routerHelper';
 import Card from '~/cross-app-components/Card';
@@ -170,7 +171,14 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
             </div>
             <Button
                 onClick={() =>
-                    dispatch(push(`${createProposalRoute(type)}/keysetsize`))
+                    dispatch(
+                        push(
+                            `${createProposalRoute(
+                                TransactionTypes.UpdateInstruction,
+                                type
+                            )}/keysetsize`
+                        )
+                    )
                 }
             >
                 Continue

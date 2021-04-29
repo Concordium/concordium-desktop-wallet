@@ -11,6 +11,8 @@
 }
 
 .actions {
+    composes: mT20 from global;
+
     > * {
         width: 100%;
         display: block;
@@ -22,6 +24,8 @@
 }
 
 .finalCheckbox {
+    composes: mB10 from global;
+
     input:disabled ~ * {
         color: $color-text-faded;
     }

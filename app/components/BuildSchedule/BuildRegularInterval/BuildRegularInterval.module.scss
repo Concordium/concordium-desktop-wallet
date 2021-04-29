@@ -6,12 +6,16 @@
     flex-direction: column;
     height: 100%;
 
-    > * {
+    > *:not(:last-child) {
         margin-bottom: 40px;
     }
 }
 
+.releasesInputWrapper {
+    font-size: $font-size-body1;
+}
+
 .submitButton {
-    margin-bottom: 20px;
     margin-top: auto;
+    margin-bottom: 20px;
 }
