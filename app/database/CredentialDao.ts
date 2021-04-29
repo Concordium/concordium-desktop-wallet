@@ -27,7 +27,19 @@ export async function removeCredentialsOfAccount(accountAddress: string) {
 }
 
 export async function getCredentials(): Promise<Credential[]> {
-    const credentials = await (await knex()).select().table(credentialsTable);
+    const credentials = await (await knex())
+        .select()
+        .table(credentialsTable)
+        .join(
+            identitiesTable,
+            `${credentialsTable}.identityId`,
+            '=',
+            `${identitiesTable}.id`
+        )
+        .select(
+            `${credentialsTable}.*`,
+            `${identitiesTable}.identityNumber as identityNumber`
+        );
     return convertBooleans(credentials);
 }
 
