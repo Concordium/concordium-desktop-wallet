@@ -2,7 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 // eslint-disable-next-line import/no-cycle
-import { initializeGenesisCredential } from './CredentialSlice';
+import {
+    initializeGenesisCredential,
+    updateCredentialsStatus,
+} from './CredentialSlice';
 // eslint-disable-next-line import/no-cycle
 import { addToAddressBook } from './AddressBookSlice';
 import {
@@ -181,6 +184,15 @@ async function initializeGenesisAccount(
     return address;
 }
 
+export async function updateSignatureThreshold(
+    dispatch: Dispatch,
+    address: string,
+    signatureThreshold: number
+) {
+    updateSignatureThresholdInDatabase(address, signatureThreshold);
+    return dispatch(updateAccountFields({ address, signatureThreshold }));
+}
+
 // Loads the given accounts' infos from the node, then updates the
 // AccountInfo state.
 export async function loadAccountInfos(
@@ -212,6 +224,19 @@ export async function loadAccountInfos(
                     });
                 });
             }
+            map[account.address] = accountInfo;
+
+            if (
+                accountInfo.accountThreshold &&
+                account.signatureThreshold !== accountInfo.accountThreshold
+            ) {
+                updateSignatureThreshold(
+                    dispatch,
+                    account.address,
+                    accountInfo.accountThreshold
+                );
+            }
+            updateCredentialsStatus(dispatch, account.address, accountInfo);
             return updateAccountEncryptedAmount(
                 account,
                 accountInfo.accountEncryptedAmount
@@ -320,6 +345,26 @@ export async function decryptAccountBalance(
     });
 }
 
+// Add an account with pending status.
+export async function addExternalAccount(
+    dispatch: Dispatch,
+    accountAddress: string,
+    identityId: number,
+    signatureThreshold: number
+) {
+    const account: Account = {
+        name: accountAddress.substring(0, 8),
+        identityId,
+        status: AccountStatus.Confirmed,
+        address: accountAddress,
+        signatureThreshold,
+        maxTransactionId: 0,
+        isInitial: false,
+    };
+    await insertAccount(account);
+    return loadAccounts(dispatch);
+}
+
 export async function importAccount(account: Account | Account[]) {
     await insertAccount(account);
 }
@@ -330,15 +375,6 @@ export async function removeAccount(
 ) {
     await removeAccountFromDatabase(accountAddress);
     return loadAccounts(dispatch);
-}
-
-export async function updateSignatureThreshold(
-    dispatch: Dispatch,
-    address: string,
-    signatureThreshold: number
-) {
-    updateSignatureThresholdInDatabase(address, signatureThreshold);
-    return dispatch(updateAccountFields({ address, signatureThreshold }));
 }
 
 export default accountsSlice.reducer;

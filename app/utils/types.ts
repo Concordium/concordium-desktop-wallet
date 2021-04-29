@@ -245,6 +245,7 @@ export interface ChainArData {
 }
 
 export interface CredentialDeploymentValues {
+    regId?: Hex;
     credId: Hex;
     ipIdentity: IpIdentity;
     revocationThreshold: Threshold;
