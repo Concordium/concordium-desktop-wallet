@@ -52,6 +52,8 @@ export async function signAccountTransaction(
     // We presently assume that there is only 1 key on a credential.
     const signatureIndex = 0;
 
+    // TODO Add restriction to look for a credential that is for the connected Ledger.
+
     const credential = (await getCredentialsOfAccount(transaction.sender)).find(
         (cred) =>
             instanceOfLocalCredential(cred) &&

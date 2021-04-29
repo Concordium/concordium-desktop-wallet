@@ -275,6 +275,9 @@ export default function UpdateCredentialPage(): JSX.Element {
             .map(({ credentialIndex }) => credentialIndex || 0);
 
         return (
+            // TODO currentCredentials[0] will not always select the correct credential.
+            // Stop sending along the primary credential, and get the correct one
+            // within the signing method.
             <CreateUpdate
                 setReady={setReady}
                 account={account}

@@ -113,6 +113,7 @@ export default function SubmitTransfer({ location }: Props) {
             return;
         }
 
+        // TODO Find a local and deployed credential for the ledger that is connected.
         const credential = (
             await getCredentialsOfAccount(account.address)
         ).find((cred) => cred.credentialIndex === credentialAccountIndex);

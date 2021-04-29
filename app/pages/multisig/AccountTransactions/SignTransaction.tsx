@@ -49,6 +49,10 @@ export default function SignTransaction({
         if (!account || !global) {
             throw new Error('unexpected missing global/account');
         }
+
+        // TODO Instead of this, do like in the other places.
+        // Find the credential that matches the connected ledger.
+
         if (
             primaryCredential.identityNumber === undefined ||
             primaryCredential.credentialNumber === undefined ||
