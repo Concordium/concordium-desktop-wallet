@@ -93,7 +93,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                 `Address already exists under name: ${existing.name}`
             );
         },
-        [entries]
+        [entries, initialValues]
     );
 
     const handleSubmit: SubmitHandler<AddressBookEntryForm> = useCallback(
