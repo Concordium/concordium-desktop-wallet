@@ -63,7 +63,7 @@ const isValidNumberString = (
             : `(\\.\\d{1,${allowFractionDigits}})?(0)*`;
     const exponentPart = '(e[+,-]?\\d*)?';
 
-    re = new RegExp(`^${signedPart}${intPart}${exponentPart}$`);
+    re = new RegExp(`^${signedPart}${intPart}\\.?(0)*${exponentPart}$`);
 
     if (allowFractionDigits !== 0) {
         re = new RegExp(

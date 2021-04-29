@@ -27,21 +27,23 @@ describe(isPowOf10, () => {
 describe(isValidResolutionString, () => {
     test('Validates correct fraction values', () => {
         expect(isValidResolutionString(BigInt(1), true)('3')).toBe(true);
+        expect(isValidResolutionString(BigInt(1), true)('1.00')).toBe(true);
         expect(isValidResolutionString(BigInt(1), true)('-6')).toBe(true);
         expect(isValidResolutionString(BigInt(10), true)('0.1')).toBe(true);
         expect(isValidResolutionString(BigInt(10), true)('-0.3')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('0.1')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('0.20')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('-0.22')).toBe(true);
+        expect(isValidResolutionString(BigInt(100), true)('0.0100')).toBe(true);
     });
 
     test('Invalidates invalid fraction values', () => {
         expect(isValidResolutionString(BigInt(1), true)('0.3')).toBe(false);
         expect(isValidResolutionString(BigInt(10), true)('0.12')).toBe(false);
-        expect(isValidResolutionString(BigInt(100), true)('-0.100')).toBe(
+        expect(isValidResolutionString(BigInt(100), true)('-0.101')).toBe(
             false
         );
-        expect(isValidResolutionString(BigInt(100), true)('0.200')).toBe(false);
+        expect(isValidResolutionString(BigInt(100), true)('0.202')).toBe(false);
         expect(isValidResolutionString(BigInt(100), true)('0.2233')).toBe(
             false
         );
