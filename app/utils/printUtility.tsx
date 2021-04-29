@@ -107,6 +107,15 @@ export const displayStatus = (status: MultiSignatureTransactionStatus) => (
     </tr>
 );
 
+export const displayExpiry = (expiry: bigint) => (
+    <tr>
+        <td>Expires on</td>
+        <td>
+            {parseTime(expiry.toString(), TimeStampUnit.seconds, timeFormat)}
+        </td>
+    </tr>
+);
+
 export const timestamp = () => (
     <p style={{ position: 'absolute', right: '10px', bottom: '0px' }}>
         Printed on:{' '}

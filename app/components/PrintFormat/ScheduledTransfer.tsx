@@ -17,6 +17,7 @@ import {
     hash,
     standardHeader,
     timeFormat,
+    displayExpiry,
 } from '~/utils/printUtility';
 import { parseTime } from '~/utils/timeHelpers';
 import { displayAsGTU } from '~/utils/gtu';
@@ -51,6 +52,8 @@ function PrintFormatScheduledTransfer({
                     {displayAmount(amount)}
                     {fee(transaction.estimatedFee)}
                     {displayStatus(status)}
+                    {status === MultiSignatureTransactionStatus.Open &&
+                        displayExpiry(transaction.expiry)}
                     {hash(transaction)}
                     <tr>
                         <td>Identicon:</td>

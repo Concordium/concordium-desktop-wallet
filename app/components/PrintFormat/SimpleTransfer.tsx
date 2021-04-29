@@ -11,6 +11,7 @@ import {
     displayStatus,
     hash,
     standardHeader,
+    displayExpiry,
 } from '~/utils/printUtility';
 import withNames from '~/components/Transfers/withNames';
 
@@ -43,6 +44,8 @@ function PrintFormatScheduledTransfer({
                     {displayAmount(amount)}
                     {fee(transaction.estimatedFee)}
                     {displayStatus(status)}
+                    {status === MultiSignatureTransactionStatus.Open &&
+                        displayExpiry(transaction.expiry)}
                     {hash(transaction)}
                     <tr>
                         <td>Identicon:</td>
