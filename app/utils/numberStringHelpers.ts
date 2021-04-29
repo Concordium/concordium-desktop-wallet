@@ -60,7 +60,7 @@ const isValidNumberString = (
     const fractionPart =
         allowFractionDigits === true
             ? '(\\.\\d*)?'
-            : `(\\.\\d{1,${allowFractionDigits}})?`;
+            : `(\\.\\d{1,${allowFractionDigits}})?(0)*`;
     const exponentPart = '(e[+,-]?\\d*)?';
 
     re = new RegExp(`^${signedPart}${intPart}${exponentPart}$`);
@@ -172,7 +172,13 @@ export const parseSubNumber = (powOf10: number) => (
     fraction: string
 ): string => {
     let result = fraction;
-    result += '0'.repeat(Math.max(0, powOf10 - fraction.toString().length));
+
+    if (fraction.length < powOf10) {
+        result += '0'.repeat(Math.max(0, powOf10 - fraction.length));
+    } else {
+        result = fraction.substr(0, powOf10);
+    }
+
     return result;
 };
 
