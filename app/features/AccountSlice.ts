@@ -151,6 +151,7 @@ function updateAccountEncryptedAmount(
 /** Generates the actual address of the account, and updates the account address, status, signatureThreshold,
  *   and the associated credentials' address and credentialIndex
  *  Also adds the account to the address book.
+ *  N.B. A Genesis account's does not know its actual address, and account.address is a placeholder (a credId), and therefore we have to update it here.
  *  @return, returns the generated address.
  * */
 async function initializeGenesisAccount(
@@ -210,7 +211,7 @@ export async function loadAccountInfos(
         (account) =>
             (isValidAddress(account.address) &&
                 account.status === AccountStatus.Confirmed) ||
-            AccountStatus.Genesis === account.status
+            AccountStatus.Genesis === account.status // We don't check that the address is valid for genesis account, because they have a credId as placeholder. The lookup for accountInfo will still suceed, because the node will, given an invalid address, interpret it as a credId, and return the associated accounts's info. // TODO Remove this.
     );
     if (confirmedAccounts.length === 0) {
         return Promise.resolve();

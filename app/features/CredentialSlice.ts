@@ -114,7 +114,9 @@ export async function updateCredentialIndex(
     updateCredentialIndexInDatabase(credId, credentialIndex);
     return dispatch(updateCredential({ credId, credentialIndex }));
 }
-
+/**
+ * Adds the credential's credentialIndex and updates the account address (Because previously this was a credId acting as a placeholder).
+ */
 export async function initializeGenesisCredential(
     dispatch: Dispatch,
     accountAddress: string,
