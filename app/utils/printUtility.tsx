@@ -70,7 +70,7 @@ export const fee = (estimatedFee?: Fraction) => (
 
 export const hash = (transaction: AccountTransaction) => (
     <tr>
-        <td>Transaction hash</td>
+        <td>Signing hash</td>
         <td>
             {getAccountTransactionHash(transaction, () => []).toString('hex')}
         </td>
