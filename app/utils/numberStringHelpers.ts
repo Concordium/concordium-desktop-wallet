@@ -6,7 +6,7 @@ const fractionRenderSeperator = new Intl.NumberFormat()
     ? '.'
     : ',';
 
-export const isValidBigInt = (value = ''): boolean => {
+export const isValidBigInt = (value: string | number = ''): boolean => {
     try {
         BigInt(value);
         return true;

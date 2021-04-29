@@ -1,14 +1,16 @@
-import { RegisterOptions, useFormContext } from 'react-hook-form';
 import React from 'react';
+import { RegisterOptions, useFormContext, Validate } from 'react-hook-form';
 import { EqualRecord, GasRewards } from '~/utils/types';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 import {
     FormGasRewardFractionField,
     GasRewardFractionField,
     GasRewardFractionFieldProps,
+    gasRewardFractionFieldResolution,
 } from './GasRewardFractionField';
 import { isDefined } from '~/utils/basicHelpers';
 import ErrorMessage from '~/components/Form/ErrorMessage';
+import { isValidBigInt } from '~/utils/numberStringHelpers';
 
 export type UpdateGasRewardsFields = GasRewards;
 
@@ -26,12 +28,19 @@ const labels: { [P in keyof UpdateGasRewardsFields]: string } = {
     chainUpdate: 'Chain Update:',
 };
 
+const convertsToInteger: Validate = (v: number) =>
+    isValidBigInt(v) ||
+    `Value must go into ${1 / gasRewardFractionFieldResolution}`;
+
 const validationRules: RegisterOptions = {
     required: 'Value is required',
     min: { value: 0, message: 'Value can not be negative' },
     max: {
         value: rewardFractionResolution,
         message: 'Value can not be above 100',
+    },
+    validate: {
+        convertsToInteger,
     },
 };
 

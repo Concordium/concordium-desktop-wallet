@@ -38,6 +38,8 @@ function parseValue(v = ''): number {
     return percentageToFractionResolution(parsed);
 }
 
+export const gasRewardFractionFieldResolution = percentageModifier;
+
 export function GasRewardFractionField({
     label,
     onChange = noOp,
@@ -70,7 +72,9 @@ export function GasRewardFractionField({
             <span>{label}</span>
             <span className={styles.value}>
                 <InlineNumber
-                    allowFractions={getPowerOf10(percentageModifier)}
+                    allowFractions={getPowerOf10(
+                        gasRewardFractionFieldResolution
+                    )}
                     value={innerValue}
                     onChange={setInnerValue}
                     {...props}
