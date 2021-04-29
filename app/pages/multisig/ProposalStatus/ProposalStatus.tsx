@@ -5,11 +5,13 @@ import {
     instanceOfUpdateAccountCredentials,
     MultiSignatureTransaction,
     instanceOfAddBaker,
+    instanceOfRemoveBaker,
 } from '~/utils/types';
 import ChainUpdateProposalStatus from './ChainUpdateProposalStatus';
 import UpdateAccountCredentialsProposalStatus from './UpdateAccountCredentialStatus';
 import { ProposalStatusViewProps } from './ProposalStatusView';
 import AddBakerProposalStatus from './AddBakerStatus';
+import RemoveBakerProposalStatus from './RemoveBakerStatus';
 
 interface ProposalStatusProps
     extends Pick<ProposalStatusViewProps, 'className'> {
@@ -46,6 +48,16 @@ export default function ProposalStatus({
     if (instanceOfAddBaker(parsed)) {
         return (
             <AddBakerProposalStatus
+                {...proposalStatusProps}
+                transaction={parsed}
+                status={status}
+            />
+        );
+    }
+
+    if (instanceOfRemoveBaker(parsed)) {
+        return (
+            <RemoveBakerProposalStatus
                 {...proposalStatusProps}
                 transaction={parsed}
                 status={status}

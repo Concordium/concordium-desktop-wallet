@@ -12,6 +12,8 @@ import {
     instanceOfTransferToPublic,
     instanceOfAddBaker,
     AddBaker,
+    instanceOfRemoveBaker,
+    RemoveBaker,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -22,6 +24,7 @@ import {
     serializeAddBaker,
     serializeAddBakerKeys,
     serializeAddBakerProofsStakeRestake,
+    serializeRemoveBaker,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import { encodeWord16 } from '~/utils/serializationHelpers';
@@ -32,6 +35,7 @@ const INS_TRANSFER_TO_ENCRYPTED = 0x11;
 const INS_TRANSFER_TO_PUBLIC = 0x12;
 const INS_TRANSFER_WITH_SCHEDULE = 0x03;
 const INS_ADD_BAKER = 0x13;
+const INS_REMOVE_BAKER = 0x14;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -259,6 +263,38 @@ async function signAddBaker(
     return response.slice(0, 64);
 }
 
+async function signRemoveBaker(
+    transport: Transport,
+    path: number[],
+    transaction: RemoveBaker
+): Promise<Buffer> {
+    const payload = serializeRemoveBaker();
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const cdata = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        Uint8Array.of(TransactionKindId.Remove_baker),
+    ]);
+
+    const response = await transport.send(
+        0xe0,
+        INS_REMOVE_BAKER,
+        0x00,
+        0x00,
+        cdata
+    );
+
+    return response.slice(0, 64);
+}
+
 export default async function signTransfer(
     transport: Transport,
     path: number[],
@@ -278,6 +314,9 @@ export default async function signTransfer(
     }
     if (instanceOfAddBaker(transaction)) {
         return signAddBaker(transport, path, transaction);
+    }
+    if (instanceOfRemoveBaker(transaction)) {
+        return signRemoveBaker(transport, path, transaction);
     }
     throw new Error(
         `The received transaction was not a supported transaction type`

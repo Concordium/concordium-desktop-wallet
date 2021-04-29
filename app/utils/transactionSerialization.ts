@@ -188,6 +188,10 @@ export function serializeAddBaker(payload: AddBakerPayload) {
     ]);
 }
 
+export function serializeRemoveBaker() {
+    return Buffer.from(Uint8Array.of(5));
+}
+
 export function serializeTransferPayload(
     kind: TransactionKind,
     payload: TransactionPayload
@@ -213,6 +217,8 @@ export function serializeTransferPayload(
             );
         case TransactionKind.Add_baker:
             return serializeAddBaker(payload as AddBakerPayload);
+        case TransactionKind.Remove_baker:
+            return serializeRemoveBaker();
         default:
             throw new Error('Unsupported transactionkind');
     }

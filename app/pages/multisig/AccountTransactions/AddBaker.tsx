@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { push } from 'connected-react-router';
@@ -9,7 +9,6 @@ import Button from '~/cross-app-components/Button';
 import {
     Identity,
     Account,
-    Fraction,
     TransactionKindId,
     AccountTransaction,
     AddBakerPayload,
@@ -21,7 +20,6 @@ import styles from './MultisignatureAccountTransactions.module.scss';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { getGTUSymbol } from '~/utils/gtu';
 import PickAmount from './PickAmount';
-import { getTransactionKindCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import { chunk } from '../util';
@@ -35,7 +33,7 @@ import { credentialsSelector } from '~/features/CredentialSlice';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
 import { saveFile } from '~/utils/FileHelper';
-import { useAccountInfo } from '~/utils/hooks';
+import { useAccountInfo, useTransactionCost } from '~/utils/hooks';
 
 export default function AddBakerPage() {
     const { path, url } = useRouteMatch();
@@ -165,7 +163,6 @@ function BuildAddBakerTransactionProposalStep({
     const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account>();
     const [stake, setStake] = useState<Amount>(BigInt(0));
-    const [estimatedFee, setFee] = useState<Fraction>();
     const [restakeEnabled, setRestakeEnabled] = useState(true);
     const [error, setError] = useState<string>();
     const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
@@ -173,11 +170,8 @@ function BuildAddBakerTransactionProposalStep({
         AccountTransaction<AddBakerPayload>
     >();
 
-    useEffect(() => {
-        getTransactionKindCost(TransactionKindId.Add_baker)
-            .then((fee) => setFee(fee))
-            .catch(() => setError('Unable to reach Node.'));
-    }, []);
+    const estimatedFee = useTransactionCost(TransactionKindId.Remove_baker);
+
     const onGenerateKeys = () => {
         if (account === undefined) {
             setError('An account is needed to generate baker keys');

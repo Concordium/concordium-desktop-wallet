@@ -31,6 +31,7 @@ import UpdateRootKeysHandler from './UpdateRootsKeysHandler';
 import UpdateLevel1KeysWithRootKeysHandler from './UpdateLevel1KeysWithRootKeysHandler';
 import UpdateLevel1KeysWithLevel1KeysHandler from './UpdateLevel1KeysWithLevel1KeysHandler';
 import AddBakerHandler from './AddBakerHandler';
+import RemoveBakerHandler from './RemoveBakerHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -45,6 +46,9 @@ export function findAccountTransactionHandler(
     }
     if (transactionKind === TransactionKindId.Add_baker) {
         return new AccountHandlerTypeMiddleware(new AddBakerHandler());
+    }
+    if (transactionKind === TransactionKindId.Remove_baker) {
+        return new AccountHandlerTypeMiddleware(new RemoveBakerHandler());
     }
     throw new Error(`Unsupported transaction type: ${transactionKind}`);
 }

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { getAccountInfoOfAddress } from './nodeHelpers';
+import { getTransactionKindCost } from './transactionCosts';
 import { lookupName } from './transactionHelpers';
-import { AccountInfo } from './types';
+import { AccountInfo, Fraction, TransactionKindId } from './types';
 
 export const useIsFirstRender = () => {
     const ref = useRef<boolean>(false);
@@ -45,4 +46,18 @@ export function useAccountInfo(address: string) {
             .catch(() => {});
     }, [address]);
     return accountInfo;
+}
+
+export function useTransactionCost(
+    kind: TransactionKindId,
+    signatureAmount?: number,
+    payloadSize?: number
+) {
+    const [fee, setFee] = useState<Fraction>();
+    useEffect(() => {
+        getTransactionKindCost(kind, signatureAmount, payloadSize)
+            .then(setFee)
+            .catch(() => {});
+    }, [kind, payloadSize, signatureAmount]);
+    return fee;
 }

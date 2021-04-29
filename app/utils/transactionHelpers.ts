@@ -22,6 +22,7 @@ import {
     AddBaker,
     AddBakerPayload,
     Amount,
+    RemoveBaker,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -265,6 +266,20 @@ export function createAddBakerTransaction(
         expiry,
         transactionKind: TransactionKindId.Add_baker,
         payload,
+        signatureAmount,
+    });
+}
+
+export function createRemoveBakerTransaction(
+    fromAddress: string,
+    signatureAmount = 1,
+    expiry: bigint = getDefaultExpiry()
+): Promise<RemoveBaker> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Remove_baker,
+        payload: {},
         signatureAmount,
     });
 }

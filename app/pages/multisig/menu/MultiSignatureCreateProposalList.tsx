@@ -53,6 +53,7 @@ export default function MultiSignatureCreateProposalView() {
         [TransactionKind.UpdateCredentials, 'Update Account Credentials'],
         [TransactionKind.Transfer, 'Send GTU'],
         [TransactionKind.AddBaker, 'Add Baker'],
+        [TransactionKind.RemoveBaker, 'Remove Baker'],
     ];
     if (foundationTransactionsEnabled) {
         availableTransactionTypes = availableTransactionTypes.concat(
