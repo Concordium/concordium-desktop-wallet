@@ -36,6 +36,34 @@ The following are the most important props to work with `Input`:
     </Story>
 </Canvas>
 
+## Disabled
+
+<Canvas>
+    <Story name="Disabled" args={{
+        placeholder: 'Name',
+        name: 'name',
+        label: 'Name',
+        disabled: true,
+        value: 'John Doe',
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Read Only
+
+<Canvas>
+    <Story name="Read Only" args={{
+        placeholder: 'Name',
+        name: 'name',
+        label: 'Name',
+        readOnly: true,
+        value: 'John Doe',
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
 ## Invalid
 
 <Canvas>
@@ -43,7 +71,8 @@ The following are the most important props to work with `Input`:
         placeholder: 'Name',
         name: 'name',
         label: 'Name',
-        error: 'Name is required'
+        error: 'Name is required',
+        isInvalid: true,
     }}>
         {Template.bind({})}
     </Story>
