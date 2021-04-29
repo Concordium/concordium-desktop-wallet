@@ -245,6 +245,7 @@ export interface ChainArData {
 }
 
 export interface CredentialDeploymentValues {
+    regId?: Hex;
     credId: Hex;
     ipIdentity: IpIdentity;
     revocationThreshold: Threshold;
@@ -467,10 +468,14 @@ interface AccountBakerDetails {
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
+    accountThreshold: number;
     accountReleaseSchedule: AccountReleaseSchedule;
     accountBaker?: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
-    accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
+    accountCredentials: Record<
+        number,
+        Versioned<TypedCredentialDeploymentInformation>
+    >;
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.
