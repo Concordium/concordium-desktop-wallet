@@ -2,22 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
-import { Segment } from 'semantic-ui-react';
 import { Account, AccountInfo, AccountStatus, Identity } from '~/utils/types';
 import AccountListElement from '~/components/AccountListElement';
 import { isValidAddress } from '~/utils/accountHelpers';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
 import Button from '~/cross-app-components/Button';
+import Loading from '~/cross-app-components/Loading';
 import RevealAttributes from './RevealAttributes';
 import routes from '~/constants/routes.json';
+import styles from './GenerateCredential.module.scss';
 
 interface Props {
     setReady: (ready: boolean) => void;
     isReady: boolean;
     address: string;
     setChosenAttributes: (attributes: string[]) => void;
+    setAccountValidationError: (error?: string) => void;
     identity: Identity | undefined;
 }
+
+const mustBeDeployedMessage = 'Address must belong to an deployed account';
+const invalidAddres = 'Address format is invalid';
 
 /**
  * Displays the currently chosen account's information.
@@ -28,6 +33,7 @@ export default function PickAccount({
     setReady,
     address,
     setChosenAttributes,
+    setAccountValidationError,
     identity,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
@@ -37,20 +43,31 @@ export default function PickAccount({
         throw new Error('unexpected missing identity');
     }
 
+    const [loading, setLoading] = useState<boolean>(false);
     const [accountInfo, setAccountInfo] = useState<AccountInfo | undefined>(
         undefined
     );
 
     useEffect(() => {
         if (isValidAddress(address)) {
+            setLoading(true);
             getAccountInfoOfAddress(address)
                 .then((loadedAccountInfo) => {
+                    setLoading(false);
                     setAccountInfo(loadedAccountInfo);
+                    if (!loadedAccountInfo) {
+                        setAccountValidationError(mustBeDeployedMessage);
+                    }
                     return setReady(Boolean(loadedAccountInfo));
                 })
-                .catch(() => setReady(false));
+                .catch(() => {
+                    setLoading(false);
+                    setAccountValidationError('Unable to reach node');
+                    setReady(false);
+                });
         } else {
             setAccountInfo(undefined);
+            setAccountValidationError(invalidAddres);
             setReady(false);
         }
     }, [address, setReady, setAccountInfo]);
@@ -65,14 +82,31 @@ export default function PickAccount({
         isInitial: false,
     };
 
+    let accountDisplay;
+    if (loading) {
+        accountDisplay = (
+            <div className={styles.accountListElementPlaceholder}>
+                <Loading />
+            </div>
+        );
+    } else if (accountInfo) {
+        accountDisplay = (
+            <AccountListElement
+                account={fakeAccount}
+                accountInfo={accountInfo}
+            />
+        );
+    } else {
+        accountDisplay = (
+            <div className={styles.accountListElementPlaceholder}>
+                Waiting for Address
+            </div>
+        );
+    }
+
     return (
         <>
-            <Segment textAlign="center" secondary loading={!accountInfo}>
-                <AccountListElement
-                    account={fakeAccount}
-                    accountInfo={accountInfo}
-                />
-            </Segment>
+            {accountDisplay}
             {location === routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES ? (
                 <RevealAttributes
                     setChosenAttributes={setChosenAttributes}

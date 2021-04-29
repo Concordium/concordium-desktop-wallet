@@ -1,12 +1,15 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { List } from 'semantic-ui-react';
-import { Validate, FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import { Identity, CredentialDeploymentInformation } from '~/utils/types';
 import Form from '~/components/Form';
 import routes from '~/constants/routes.json';
-import { isValidAddress } from '~/utils/accountHelpers';
+import {
+    isValidAddress,
+    commonAddressValidators,
+} from '~/utils/accountHelpers';
 import styles from './GenerateCredential.module.scss';
 
 interface Props {
@@ -15,45 +18,33 @@ interface Props {
     setAddress: (address: string) => void;
     credential: CredentialDeploymentInformation | undefined;
     Button?: () => JSX.Element | null;
-    isReady: boolean;
+    accountValidationError?: string;
 }
 
-const mustBeDeployedMessage = 'Address must belong to an deployed account';
-
 export default function AccountCredentialSummary({
-    isReady,
     identity,
     address,
     setAddress,
     credential,
     Button = () => null,
+    accountValidationError,
 }: Props) {
     const location = useLocation().pathname;
     const form = useForm({ mode: 'onTouched' });
     const { watch, setError, clearErrors } = form;
     const addressWatcher = watch('address');
 
-    const validate: Validate = (newAddress: string) => {
-        if (!isValidAddress(newAddress)) {
-            return 'Address format is invalid';
-        }
-        if (!isReady) {
-            return mustBeDeployedMessage;
-        }
-        return true;
-    };
-
     useEffect(() => {
-        if (isValidAddress(address) && !isReady) {
+        if (isValidAddress(address) && accountValidationError) {
             setError('address', {
                 type: 'manual',
-                message: mustBeDeployedMessage,
+                message: accountValidationError,
             });
         }
-        if (isReady) {
+        if (!accountValidationError) {
             clearErrors();
         }
-    }, [setError, clearErrors, address, isReady]);
+    }, [setError, clearErrors, address, accountValidationError]);
 
     useEffect(() => {
         if (location === routes.GENERATE_CREDENTIAL_PICKACCOUNT) {
@@ -77,18 +68,8 @@ export default function AccountCredentialSummary({
                         name="address"
                         placeholder="Paste the account address here"
                         rules={{
-                            required: 'Address required',
-                            minLength: {
-                                value: 50,
-                                message: 'Address should be 50 characters',
-                            },
-                            maxLength: {
-                                value: 50,
-                                message: 'Address should be 50 characters',
-                            },
-                            validate: {
-                                validate,
-                            },
+                            required: 'Please enter address',
+                            ...commonAddressValidators,
                         }}
                     />
                 </FormProvider>
