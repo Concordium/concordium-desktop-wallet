@@ -119,6 +119,7 @@ export interface Account {
     address: Hex;
     identityId: number;
     identityName?: string;
+    identityNumber?: number;
     status: AccountStatus;
     signatureThreshold?: number;
     totalDecrypted?: string;
@@ -285,6 +286,7 @@ export interface Credential {
     credentialIndex?: number;
     credentialNumber?: number;
     identityId?: number;
+    identityNumber?: number;
     credId: Hex;
     policy: JSONString;
 }
@@ -296,6 +298,7 @@ export interface DeployedCredential extends Credential {
 export interface LocalCredential extends Credential {
     external: false;
     identityId: number;
+    identityNumber: number;
     credentialNumber: number;
 }
 

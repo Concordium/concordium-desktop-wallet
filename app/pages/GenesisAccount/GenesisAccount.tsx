@@ -140,6 +140,8 @@ export default function GenesisAccount(): JSX.Element {
                 },
             };
 
+            // TODO Make sure that this flow works with the new database changes as well.
+
             const identity = {
                 name: 'Genesis',
                 identityNumber: defaultId,

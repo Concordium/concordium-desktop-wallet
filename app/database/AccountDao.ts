@@ -20,7 +20,8 @@ export async function getAllAccounts(): Promise<Account[]> {
         )
         .select(
             `${accountsTable}.*`,
-            `${identitiesTable}.name as identityName`
+            `${identitiesTable}.name as identityName`,
+            `${identitiesTable}.identityNumber as identityNumber`
         );
 }
 
@@ -41,6 +42,11 @@ export async function findAccounts(condition: Record<string, unknown>) {
     return (await knex()).select().table(accountsTable).where(condition);
 }
 
+/**
+ * Extracts all accounts for a given identity.
+ * @param identityId the id of the identity to get the accounts for
+ * @returns all accounts attached to the provided identity
+ */
 export async function getAccountsOfIdentity(
     identityId: number
 ): Promise<Account[]> {

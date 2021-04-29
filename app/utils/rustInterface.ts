@@ -195,8 +195,10 @@ async function createUnsignedCredentialInfo(
 }
 
 /**
- *  This function creates a CredentialDeploymentInfo using the ledger, given the nesessary information and the account number.
- * N.B. This function is to construct a credential for an existing account.
+ * Used to construct a credential for an existing account.
+ *
+ * This function creates a CredentialDeploymentInfo using the hardware wallet, using the necessary information
+ * and the account number. The hardware wallet is used, as part of the constructed data has to be signed.
  */
 export async function createCredentialInfo(
     identity: Identity,
@@ -221,7 +223,7 @@ export async function createCredentialInfo(
     displayMessage(`Please sign details on device.`);
     // Adding credential on an existing account
     const path = getAccountPath({
-        identityIndex: identity.id,
+        identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });

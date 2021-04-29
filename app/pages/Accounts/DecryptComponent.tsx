@@ -41,8 +41,14 @@ export default function DecryptComponent({ account }: Props) {
         if (!global) {
             throw new Error('Unexpected missing global object');
         }
-        setMessage('Please confirm exporting prf key on device');
-        const prfKeySeed = await ledger.getPrfKey(account.identityId);
+
+        if (!account.identityNumber) {
+            throw new Error(
+                'The account must have been joined with the identity table, to resolve its identity number'
+            );
+        }
+        setMessage('Please confirm exporting PRF key on device');
+        const prfKeySeed = await ledger.getPrfKey(account.identityNumber);
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
 

@@ -55,7 +55,7 @@ async function attachCompletedPayload(
     accountInfo: AccountInfo
 ) {
     if (instanceOfTransferToPublic(transaction)) {
-        const prfKeySeed = await ledger.getPrfKey(credential.identityId);
+        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
         const data = await makeTransferToPublicData(
             transaction.payload.transferAmount,
             prfKeySeed.toString('hex'),
@@ -105,7 +105,8 @@ export default function SubmitTransfer({ location }: Props) {
         setMessage: (message: string) => void
     ) {
         const signatureIndex = 0;
-        const credentialAccountIndex = 0; // TODO: do we need to support other credential indices here?
+        // TODO: Do we need to support other credential indices here?
+        const credentialAccountIndex = 0;
 
         if (!global) {
             setMessage('Missing global object.');
@@ -124,7 +125,7 @@ export default function SubmitTransfer({ location }: Props) {
         }
         if (!instanceOfLocalCredential(credential)) {
             setMessage(
-                'Unable to sign transfer, because we got an external credential'
+                'Unable to sign transfer because the found credential was not a local credential'
             );
             return;
         }
@@ -138,7 +139,7 @@ export default function SubmitTransfer({ location }: Props) {
         );
 
         const path = getAccountPath({
-            identityIndex: account.identityId,
+            identityIndex: credential.identityNumber,
             accountIndex: credential.credentialNumber,
             signatureIndex,
         });
@@ -163,7 +164,7 @@ export default function SubmitTransfer({ location }: Props) {
 
             dispatch(push(confirmed));
         } else {
-            // TODO: handle rejection from node
+            // TODO: Handle rejection from node
         }
     }
 

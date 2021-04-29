@@ -48,7 +48,8 @@ export async function signAccountTransaction(
     transaction: AccountTransaction,
     ledger: ConcordiumLedgerClient
 ) {
-    // We assume that there is only 1 key on a credential. // TODO: Remove assumption that a credential only has 1 signature
+    // TODO: Remove assumption that a credential only has 1 signature
+    // We presently assume that there is only 1 key on a credential.
     const signatureIndex = 0;
 
     const credential = (await getCredentialsOfAccount(transaction.sender)).find(
@@ -68,7 +69,7 @@ export async function signAccountTransaction(
     }
 
     const path = {
-        identityIndex: credential.identityId,
+        identityIndex: credential.identityNumber,
         accountIndex: credential.credentialNumber,
         signatureIndex,
     };

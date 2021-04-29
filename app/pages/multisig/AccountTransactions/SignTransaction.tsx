@@ -50,7 +50,7 @@ export default function SignTransaction({
             throw new Error('unexpected missing global/account');
         }
         if (
-            primaryCredential.identityId === undefined ||
+            primaryCredential.identityNumber === undefined ||
             primaryCredential.credentialNumber === undefined ||
             primaryCredential.credentialIndex === undefined
         ) {
@@ -59,7 +59,7 @@ export default function SignTransaction({
             );
         }
         const path = {
-            identityIndex: primaryCredential.identityId,
+            identityIndex: primaryCredential.identityNumber,
             accountIndex: primaryCredential.credentialNumber,
             signatureIndex,
         };

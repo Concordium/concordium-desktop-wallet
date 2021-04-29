@@ -17,7 +17,8 @@ interface Props {
 }
 
 /**
- * Creates the credentialInformation, and prompts the user to sign it.
+ * Component for creating the credential information. The user is prompted to sign
+ * the necessary information to create it as part of the flow.
  */
 export default function SignCredential({
     identity,
@@ -32,8 +33,14 @@ export default function SignCredential({
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
-        if (!identity || !global) {
-            throw new Error('unexpected missing identity/global');
+        if (!identity) {
+            throw new Error(
+                'An identity has to be supplied. This is an internal error.'
+            );
+        } else if (!global) {
+            throw new Error(
+                'The global information is missing. Make sure that you have previously connected to a node.'
+            );
         }
 
         const credentialNumber = await getNextCredentialNumber(identity.id);
