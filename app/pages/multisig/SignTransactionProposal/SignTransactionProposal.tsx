@@ -83,8 +83,7 @@ function SignTransactionProposalView({ location }: Props) {
             updateInstruction,
             transactionHandler
         );
-        if (authorizationKey) {
-            // if (!authorizationKey) {
+        if (!authorizationKey) {
             setShowValidationError(true);
             return;
         }
@@ -97,8 +96,7 @@ function SignTransactionProposalView({ location }: Props) {
         // Set signature
         const signature: UpdateInstructionSignature = {
             signature: signatureBytes.toString('hex'),
-            // authorizationKeyIndex: authorizationKey.index,
-            authorizationKeyIndex: 0,
+            authorizationKeyIndex: authorizationKey.index,
         };
         updateInstruction.signatures = [signature];
 

@@ -30,7 +30,7 @@ const labels: { [P in keyof UpdateGasRewardsFields]: string } = {
 
 const convertsToInteger: Validate = (v: number) =>
     isValidBigInt(v) ||
-    `Value be divisible by ${1 / gasRewardFractionFieldResolution}`;
+    `Value must be divisible by ${1 / gasRewardFractionFieldResolution}`;
 
 const validationRules: RegisterOptions = {
     required: 'Value is required',
