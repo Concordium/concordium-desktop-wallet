@@ -1,9 +1,10 @@
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import FoundationAccountView from '../../pages/multisig/FoundationAccountView';
+import React from 'react';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { getGovernanceLevel2Path } from '~/features/ledger/Path';
+import FoundationAccountView from '~/pages/multisig/updates/FoundationAccount/FoundationAccountView';
 import UpdateFoundationAccount, {
     UpdateFoundationAccountFields,
-} from '../../pages/multisig/UpdateFoundationAccount';
+} from '~/pages/multisig/updates/FoundationAccount/UpdateFoundationAccount';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
@@ -75,9 +76,9 @@ export default class FoundationAccountHandler
     }
 
     view(transaction: TransactionType) {
-        return FoundationAccountView({
-            foundationAccount: transaction.payload,
-        });
+        return (
+            <FoundationAccountView foundationAccount={transaction.payload} />
+        );
     }
 
     getAuthorization(authorizations: Authorizations) {

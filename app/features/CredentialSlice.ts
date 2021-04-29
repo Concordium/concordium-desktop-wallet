@@ -5,8 +5,14 @@ import {
     insertCredential,
     getCredentials,
     updateCredentialIndex as updateCredentialIndexInDatabase,
+    getCredentialsOfAccount,
 } from '~/database/CredentialDao';
-import { Credential, CredentialDeploymentInformation } from '~/utils/types';
+import {
+    Credential,
+    CredentialDeploymentInformation,
+    AccountInfo,
+    instanceOfDeployedCredential,
+} from '~/utils/types';
 
 interface CredentialState {
     credentials: Credential[];
@@ -106,6 +112,68 @@ export async function updateCredentialIndex(
 ) {
     updateCredentialIndexInDatabase(credId, credentialIndex);
     return dispatch(updateCredential({ credId, credentialIndex }));
+}
+
+export async function updateCredentialsStatus(
+    dispatch: Dispatch,
+    accountAddress: string,
+    accountInfo: AccountInfo
+) {
+    const localCredentials = await getCredentialsOfAccount(accountAddress);
+    const onChainCredentials: [
+        CredentialDeploymentInformation,
+        number
+    ][] = Object.entries(accountInfo.accountCredentials).map(
+        ([index, versioned]) => {
+            const { regId, credId, ...content } = versioned.value.contents;
+            return [
+                { ...content, credId: regId || credId },
+                parseInt(index, 10),
+            ];
+        }
+    );
+    // Find any credentials, which have been removed from the account, and remove their (former) index.
+    const removed = localCredentials.filter(
+        (cred) =>
+            instanceOfDeployedCredential(cred) &&
+            !onChainCredentials.some(
+                ([onChainCredential]) =>
+                    cred.credId === onChainCredential.credId
+            )
+    );
+    removed.forEach((cred) =>
+        updateCredentialIndex(dispatch, cred.credId, undefined)
+    );
+
+    // Find any local credentials, which have been deployed on the account, and attach their index.
+    localCredentials.forEach((cred) => {
+        if (!instanceOfDeployedCredential(cred)) {
+            const onChainReference = onChainCredentials.find(
+                ([onChainCredential]) =>
+                    cred.credId === onChainCredential.credId
+            );
+            if (onChainReference) {
+                const [, credentialIndex] = onChainReference;
+                updateCredentialIndex(dispatch, cred.credId, credentialIndex);
+            }
+        }
+    });
+
+    // Check if any external credentials have been added to the account. If so, then add them.
+    const newCredentials = onChainCredentials.filter(
+        ([onChainCredential]) =>
+            !localCredentials.some(
+                (cred) => cred.credId === onChainCredential.credId
+            )
+    );
+    newCredentials.forEach(([onChainCredential, index]) =>
+        insertExternalCredential(
+            dispatch,
+            accountAddress,
+            index,
+            onChainCredential
+        )
+    );
 }
 
 export default credentialSlice.reducer;
