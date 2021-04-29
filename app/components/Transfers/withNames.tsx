@@ -12,8 +12,8 @@ export interface WithTransaction extends WithNames {
 }
 
 /**
- * Component that displays the details of an AccountTransaction in a human readable way.
- * @param {AccountTransaction} transaction: The transaction, which details is displayed.
+ * Component that injects the names of the transaction sender (and recipient) into the props.
+ * Requires the component to have prop transaction containing an AccountTransaction.
  */
 export default function withNames<TProps extends WithTransaction>(
     Component: ComponentType<TProps>
@@ -32,13 +32,13 @@ export default function withNames<TProps extends WithTransaction>(
                     .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
             }
         });
-        const propsWithBlockSummary: TProps = {
+        const propsWithNames: TProps = {
             ...props,
             fromName,
             toName,
             transaction,
         } as TProps;
 
-        return <Component {...propsWithBlockSummary} />;
+        return <Component {...propsWithNames} />;
     };
 }

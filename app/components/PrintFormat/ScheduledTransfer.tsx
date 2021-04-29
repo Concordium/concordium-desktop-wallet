@@ -31,6 +31,10 @@ interface Props {
     toName?: string;
 }
 
+/**
+ * Component that contains the information of a scheduled
+ * Transfer, in a format suited for print.
+ */
 function PrintFormatScheduledTransfer({
     transaction,
     image,

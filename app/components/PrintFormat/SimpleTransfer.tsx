@@ -23,7 +23,11 @@ interface Props {
     toName?: string;
 }
 
-function PrintFormatScheduledTransfer({
+/**
+ * Component that contains the information of a simple
+ * Transfer, in a format suited for print.
+ */
+function PrintFormatSimpleTransfer({
     transaction,
     image,
     status,
@@ -57,4 +61,4 @@ function PrintFormatScheduledTransfer({
     );
 }
 
-export default withNames(PrintFormatScheduledTransfer);
+export default withNames(PrintFormatSimpleTransfer);
