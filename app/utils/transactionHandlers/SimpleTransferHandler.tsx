@@ -19,7 +19,7 @@ import PrintFormatSimpleTransfer from '~/components/PrintFormat/SimpleTransfer';
 
 type TransactionType = SimpleTransfer;
 
-const TYPE = 'Simple Transfer';
+const TYPE = 'Send GTU';
 
 export default class SimpleTransferHandler
     extends TransferHandler<TransactionType>

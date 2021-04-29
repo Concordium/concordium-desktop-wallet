@@ -19,7 +19,7 @@ import { createScheduledTransferTransaction } from '../transactionHelpers';
 
 type TransactionType = ScheduledTransfer;
 
-const TYPE = 'Scheduled Transfer';
+const TYPE = 'Send GTU with a schedule';
 
 export default class ScheduledTransferHandler
     extends TransferHandler<TransactionType>
