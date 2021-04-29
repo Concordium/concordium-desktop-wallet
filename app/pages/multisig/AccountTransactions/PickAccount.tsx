@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Identity, Account } from '~/utils/types';
+import { Identity, Account, AccountInfo } from '~/utils/types';
 import AccountListElement from '~/components/AccountListElement';
 import {
     accountsOfIdentitySelector,
@@ -14,6 +14,7 @@ interface Props {
     identity: Identity | undefined;
     setReady: (ready: boolean) => void;
     setAccount: (account: Account) => void;
+    filter?: (account: Account, info?: AccountInfo) => boolean;
 }
 
 /**
@@ -24,6 +25,7 @@ export default function PickAccount({
     chosenAccount,
     setAccount,
     identity,
+    filter,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
 
@@ -57,20 +59,22 @@ export default function PickAccount({
 
     return (
         <>
-            {accounts.map((account: Account, index: number) => (
-                <AccountListElement
-                    key={account.address}
-                    className={styles.listElement}
-                    active={index === chosenIndex}
-                    account={account}
-                    accountInfo={accountsInfo[account.address]}
-                    onClick={() => {
-                        setReady(true);
-                        setChosenIndex(index);
-                        setAccount(account);
-                    }}
-                />
-            ))}
+            {accounts
+                .filter((a) => filter?.(a, accountsInfo[a.address]) ?? true)
+                .map((account: Account, index: number) => (
+                    <AccountListElement
+                        key={account.address}
+                        className={styles.listElement}
+                        active={index === chosenIndex}
+                        account={account}
+                        accountInfo={accountsInfo[account.address]}
+                        onClick={() => {
+                            setReady(true);
+                            setChosenIndex(index);
+                            setAccount(account);
+                        }}
+                    />
+                ))}
         </>
     );
 }
