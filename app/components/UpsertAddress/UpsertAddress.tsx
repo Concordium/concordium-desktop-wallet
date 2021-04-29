@@ -82,6 +82,10 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
 
     const addressUnique: Validate = useCallback(
         (address: string) => {
+            if (address === initialValues?.address) {
+                return true;
+            }
+
             const existing = entries.find((e) => e.address === address);
 
             return (
