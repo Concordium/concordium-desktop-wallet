@@ -126,7 +126,7 @@ export async function initializeGenesisCredential(
     ).find(([, cred]) => cred.value.contents.credId === credential.credId);
     if (!credentialOnChain) {
         throw new Error(
-            'Unexpected missing reference to credential in accountInfo'
+            `Unexpected missing reference to genesis credential on chain, with credId: ${credential.credId}`
         );
     }
 

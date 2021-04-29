@@ -160,16 +160,22 @@ async function initializeGenesisAccount(
 ) {
     const localCredentials = await getCredentialsOfAccount(account.address);
     const firstCredential = accountInfo.accountCredentials[0].value.contents;
-    const address = await getAddressFromCredentialId(firstCredential.credId);
+    const address = await getAddressFromCredentialId(
+        firstCredential.regId || firstCredential.credId
+    );
     const accountUpdate = {
         address,
         status: AccountStatus.Confirmed,
         signatureThreshold: accountInfo.accountThreshold,
     };
     await updateAccount(account.name, accountUpdate);
-    localCredentials.forEach((cred) =>
-        initializeGenesisCredential(dispatch, address, cred, accountInfo)
-    );
+    await Promise.all(
+        localCredentials.map((cred) =>
+            initializeGenesisCredential(dispatch, address, cred, accountInfo)
+        )
+    ).catch((e) => {
+        throw e;
+    });
     await dispatch(
         updateAccountFields({
             address: account.address,
@@ -213,15 +219,22 @@ export async function loadAccountInfos(
     const updateEncryptedAmountsPromises = accountInfos.map(
         ({ account, accountInfo }) => {
             if (account.status === AccountStatus.Genesis) {
-                return new Promise<void>((resolve) => {
+                if (!accountInfo) {
+                    throw new Error(
+                        `Genesis Account '${account.name}' not found on chain.`
+                    );
+                }
+                return new Promise<void>((resolve, reject) => {
                     return initializeGenesisAccount(
                         dispatch,
                         account,
                         accountInfo
-                    ).then((address) => {
-                        map[address] = accountInfo;
-                        return resolve();
-                    });
+                    )
+                        .then((address) => {
+                            map[address] = accountInfo;
+                            return resolve();
+                        })
+                        .catch(reject);
                 });
             }
             map[account.address] = accountInfo;
