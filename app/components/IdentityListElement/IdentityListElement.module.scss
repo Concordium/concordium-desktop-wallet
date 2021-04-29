@@ -1,12 +1,15 @@
 @import 'config/bundle';
 
 .identityListElement {
+    composes: flexColumn from global;
+    justify-content: space-between;
     text-align: center;
     border-radius: 10px;
     background-color: $color-white;
     box-shadow: 0 0 0 1px $color-text inset;
     padding: 15px 30px;
     padding-bottom: 40px;
+    height: 250px;
 
     &:focus {
         outline: none;
@@ -36,7 +39,6 @@
 .rightAligned {
     margin-top: 0;
     margin-left: auto;
-    align-self: flex-end;
 }
 
 .statusImage {

@@ -62,18 +62,20 @@ function IdentityListElement({
                     />
                 ) : null}
                 {statusImage(identity.status)}
-                <h3 className={styles.rightAligned}>Identity</h3>
+                <span className={clsx(styles.rightAligned, 'body2')}>
+                    Identity
+                </span>
             </div>
 
             <h1> {identity.name} </h1>
-            <h3>
+            <div className="textFaded">
                 {' '}
                 {identityObject
                     ? ` Expires on ${formatDate(
                           identityObject.value.attributeList.validTo
                       )} `
                     : undefined}
-            </h3>
+            </div>
         </div>
     );
 }
