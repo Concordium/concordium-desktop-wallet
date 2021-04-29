@@ -18,7 +18,7 @@ const validateResolutionConversion: Validate = (value: string) => {
         toElectionDifficultyResolution(value);
         return true;
     } catch {
-        return `Value must go into ${1 / electionDifficultyResolution}`;
+        return `Value must be divisible by ${1 / electionDifficultyResolution}`;
     }
 };
 
