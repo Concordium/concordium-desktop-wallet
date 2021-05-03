@@ -27,12 +27,14 @@ enum Sex {
 
 const parseGender = (sex: Sex) => {
     switch (sex) {
+        case Sex.NotKnown:
+            return 'Not known';
         case Sex.Male:
             return 'Male';
         case Sex.Female:
             return 'Female';
         default:
-            return 'Not known';
+            return 'N/A';
     }
 };
 
