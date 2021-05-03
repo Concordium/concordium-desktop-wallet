@@ -84,6 +84,8 @@ export default class EuroPerEnergyHandler
         return authorizations.bakerStakeThreshold;
     }
 
+    print = () => undefined;
+
     update = UpdateBakerStakeThreshold;
 
     title = `Foundation Transaction | ${TYPE}`;

@@ -1,4 +1,6 @@
+import React from 'react';
 import {
+    MultiSignatureTransactionStatus,
     SimpleTransfer,
     AccountTransaction,
     TransactionPayload,
@@ -13,10 +15,11 @@ import {
 } from '../transactionTypes';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { createSimpleTransferTransaction } from '../transactionHelpers';
+import PrintFormatSimpleTransfer from '~/components/PrintFormat/SimpleTransfer';
 
 type TransactionType = SimpleTransfer;
 
-const TYPE = 'Simple Transfer';
+const TYPE = 'Send GTU';
 
 export default class SimpleTransferHandler
     extends TransferHandler<TransactionType>
@@ -68,6 +71,20 @@ export default class SimpleTransferHandler
             amount,
             recipient,
             signatureAmount
+        );
+    }
+
+    print(
+        transaction: AccountTransaction,
+        status: MultiSignatureTransactionStatus,
+        identiconImage?: string
+    ) {
+        return (
+            <PrintFormatSimpleTransfer
+                transaction={this.confirmType(transaction)}
+                status={status}
+                image={identiconImage}
+            />
         );
     }
 

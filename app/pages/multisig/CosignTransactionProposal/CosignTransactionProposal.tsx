@@ -13,6 +13,7 @@ import {
     instanceOfUpdateInstruction,
     UpdateInstructionSignature,
     TransactionAccountSignature,
+    MultiSignatureTransactionStatus,
 } from '~/utils/types';
 import { TransactionInput } from '~/utils/transactionTypes';
 import SimpleErrorModal, {
@@ -70,6 +71,7 @@ const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
             | undefined
         >();
         const [transactionHash, setTransactionHash] = useState<string>();
+        const [image, setImage] = useState<string>();
 
         const dispatch = useDispatch();
 
@@ -165,6 +167,13 @@ const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
                 />
                 <MultiSignatureLayout
                     pageTitle={transactionHandler.title}
+                    print={transactionHandler.print(
+                        transactionObject,
+                        isTransactionExpired
+                            ? MultiSignatureTransactionStatus.Expired
+                            : MultiSignatureTransactionStatus.Open,
+                        image
+                    )}
                     stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
                     delegateScroll
                 >
@@ -189,6 +198,7 @@ const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
                                                 transactionHash={
                                                     transactionHash
                                                 }
+                                                setScreenshot={setImage}
                                             />
                                             {instanceOfUpdateInstruction(
                                                 transactionObject

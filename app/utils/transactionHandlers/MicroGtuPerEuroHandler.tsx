@@ -89,6 +89,8 @@ export default class MicroGtuPerEuroHandler
         return authorizations.microGTUPerEuro;
     }
 
+    print = () => undefined;
+
     update = UpdateMicroGtuPerEuro;
 
     title = `Foundation Transaction | ${TYPE}`;

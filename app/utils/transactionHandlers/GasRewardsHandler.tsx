@@ -1,33 +1,34 @@
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { getGovernanceLevel2Path } from '../../features/ledger/Path';
-import ElectionDifficultyView from '../../pages/multisig/ElectionDifficultyView';
-import UpdateElectionDifficulty, {
-    UpdateElectionDifficultyFields,
-} from '../../pages/multisig/UpdateElectionDifficulty';
+import React from 'react';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { getGovernanceLevel2Path } from '~/features/ledger/Path';
+import GasRewardsView from '~/pages/multisig/updates/GasRewards/GasRewardsView';
+import UpdateGasRewards, {
+    UpdateGasRewardsFields,
+} from '~/pages/multisig/updates/GasRewards/UpdateGasRewards';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
 import { Authorizations, BlockSummary } from '../NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
-    ElectionDifficulty,
-    isElectionDifficulty,
+    GasRewards,
+    isGasRewards,
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateType,
 } from '../types';
-import { serializeElectionDifficulty } from '../UpdateSerialization';
+import { serializeGasRewards } from '../UpdateSerialization';
 
-const TYPE = 'Update Election Difficulty';
+const TYPE = 'Update Gas Rewards';
 
-type TransactionType = UpdateInstruction<ElectionDifficulty>;
+type TransactionType = UpdateInstruction<GasRewards>;
 
-export default class ElectionDifficultyHandler
+export default class GasRewardsHandler
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isElectionDifficulty(transaction)) {
+        if (isGasRewards(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -35,7 +36,7 @@ export default class ElectionDifficultyHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        { electionDifficulty }: UpdateElectionDifficultyFields,
+        gasRewards: UpdateGasRewardsFields,
         effectiveTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
@@ -43,17 +44,14 @@ export default class ElectionDifficultyHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.foundationAccount
-                .nextSequenceNumber;
+            blockSummary.updates.updateQueues.gasRewards.nextSequenceNumber;
         const {
             threshold,
-        } = blockSummary.updates.keys.level2Keys.electionDifficulty;
+        } = blockSummary.updates.keys.level2Keys.paramGASRewards;
 
         return createUpdateMultiSignatureTransaction(
-            {
-                electionDifficulty: parseInt(electionDifficulty, 10),
-            },
-            UpdateType.UpdateElectionDifficulty,
+            gasRewards,
+            UpdateType.UpdateGASRewards,
             sequenceNumber,
             threshold,
             effectiveTime
@@ -61,7 +59,7 @@ export default class ElectionDifficultyHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        return serializeElectionDifficulty(transaction.payload);
+        return serializeGasRewards(transaction.payload);
     }
 
     signTransaction(
@@ -69,7 +67,7 @@ export default class ElectionDifficultyHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceLevel2Path();
-        return ledger.signElectionDifficulty(
+        return ledger.signGasRewards(
             transaction,
             this.serializePayload(transaction),
             path
@@ -77,14 +75,16 @@ export default class ElectionDifficultyHandler
     }
 
     view(transaction: TransactionType) {
-        return ElectionDifficultyView(transaction.payload);
+        return <GasRewardsView gasRewards={transaction.payload} />;
     }
 
     getAuthorization(authorizations: Authorizations) {
-        return authorizations.electionDifficulty;
+        return authorizations.paramGASRewards;
     }
 
-    update = UpdateElectionDifficulty;
+    print = () => undefined;
+
+    update = UpdateGasRewards;
 
     title = `Foundation Transaction | ${TYPE}`;
 

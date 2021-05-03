@@ -34,7 +34,11 @@ import UpdateLevel1KeysWithLevel1KeysHandler from './UpdateLevel1KeysWithLevel1K
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
-): AccountTransactionHandler<AccountTransaction, ConcordiumLedgerClient> {
+): AccountTransactionHandler<
+    AccountTransaction,
+    ConcordiumLedgerClient,
+    Transaction
+> {
     if (transactionKind === TransactionKindId.Update_credentials) {
         return new AccountHandlerTypeMiddleware(
             new UpdateAccountCredentialsHandler()
@@ -53,7 +57,8 @@ export function findUpdateInstructionHandler(
     type: UpdateType
 ): UpdateInstructionHandler<
     UpdateInstruction<UpdateInstructionPayload>,
-    ConcordiumLedgerClient
+    ConcordiumLedgerClient,
+    Transaction
 > {
     switch (type) {
         case UpdateType.UpdateMicroGTUPerEuro:

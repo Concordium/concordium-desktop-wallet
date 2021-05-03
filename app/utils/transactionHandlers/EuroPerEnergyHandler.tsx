@@ -88,6 +88,8 @@ export default class EuroPerEnergyHandler
         return authorizations.euroPerEnergy;
     }
 
+    print = () => undefined;
+
     update = UpdateEuroPerEnergy;
 
     title = `Foundation Transaction | ${TYPE}`;
