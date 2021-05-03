@@ -32,6 +32,7 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { signUsingLedger } from './SignTransaction';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import { chunkString } from '~/utils/basicHelpers';
+import ButtonGroup from '~/components/ButtonGroup';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
@@ -334,18 +335,26 @@ function BuildAddBakerTransactionProposalStep({
                                         to the staked amount. This can be
                                         disabled below.
                                     </p>
-                                    <Button
-                                        inverted={!restakeEnabled}
-                                        onClick={() => setRestakeEnabled(true)}
-                                    >
-                                        Yes, restake
-                                    </Button>
-                                    <Button
-                                        inverted={restakeEnabled}
-                                        onClick={() => setRestakeEnabled(false)}
-                                    >
-                                        No, don’t restake
-                                    </Button>
+                                    <ButtonGroup
+                                        title="Enable restake earnings"
+                                        name="restake"
+                                        buttons={[
+                                            {
+                                                label: 'Yes, restake',
+                                                value: true,
+                                            },
+                                            {
+                                                label: 'No, don’t restake',
+                                                value: false,
+                                            },
+                                        ]}
+                                        isSelected={({ value }) =>
+                                            value === restakeEnabled
+                                        }
+                                        onClick={({ value }) =>
+                                            setRestakeEnabled(value)
+                                        }
+                                    />
                                 </div>
                                 <Button
                                     onClick={() => {
