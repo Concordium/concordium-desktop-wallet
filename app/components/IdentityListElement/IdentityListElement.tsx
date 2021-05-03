@@ -3,13 +3,19 @@ import clsx from 'clsx';
 import PendingImage from '@resources/svg/pending-small.svg';
 import SuccessImage from '@resources/svg/success-small.svg';
 import RejectedImage from '@resources/svg/warning-small.svg';
-import { Identity, IdentityObject, IdentityStatus } from '~/utils/types';
+import {
+    ChosenAttributes,
+    Identity,
+    IdentityObject,
+    IdentityStatus,
+} from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
 import Card from '~/cross-app-components/Card';
 import attributeNames from '~/constants/attributeNames.json';
+import SidedRow from '../SidedRow';
+import { formatAttributeValue } from '~/utils/identityHelpers';
 
 import styles from './IdentityListElement.module.scss';
-import SidedRow from '../SidedRow';
 
 interface Props {
     identity: Identity;
@@ -88,16 +94,17 @@ function IdentityListElement({
             </div>
             {expanded && (
                 <div className={styles.details}>
-                    {Object.keys(
+                    {(Object.keys(
                         identityObject.attributeList.chosenAttributes
-                    ).map((k) => (
+                    ) as Array<keyof ChosenAttributes>).map((k) => (
                         <SidedRow
                             className={styles.detailsRow}
                             key={k}
                             left={(attributeNames as Record<string, string>)[k]}
-                            right={
+                            right={formatAttributeValue(
+                                k,
                                 identityObject.attributeList.chosenAttributes[k]
-                            }
+                            )}
                         />
                     ))}
                 </div>
