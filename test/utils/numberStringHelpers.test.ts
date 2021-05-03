@@ -152,6 +152,38 @@ describe(formatNumberStringWithDigits, () => {
         );
     });
 
+    test('Formats numbers with exponent', () => {
+        expect(formatNumberStringWithDigits(0)('10e-10')).toBe('10e-10');
+        expect(formatNumberStringWithDigits(5)('3.9e3')).toBe('3.90000e3');
+        expect(formatNumberStringWithDigits(3)('-10e+5')).toBe('-10.000e+5');
+
+        expect(
+            formatNumberStringWithDigits(3, 5)('3.9123456789456123e-10')
+        ).toBe('3.91235e-10');
+    });
+
+    test('Formats numbers with exponent transformed', () => {
+        expect(formatNumberStringWithDigits(0, undefined, true)('1e2')).toBe(
+            '100'
+        );
+        expect(formatNumberStringWithDigits(0, undefined, true)('10e-10')).toBe(
+            '0.0000000010'
+        );
+        expect(formatNumberStringWithDigits(0, 5, true)('679.7899e-2')).toBe(
+            '6.79790'
+        );
+        expect(formatNumberStringWithDigits(5, undefined, true)('3.9e3')).toBe(
+            '3900.00000'
+        );
+        expect(formatNumberStringWithDigits(3, undefined, true)('-1e+5')).toBe(
+            '-100000.000'
+        );
+
+        expect(
+            formatNumberStringWithDigits(3, 5, true)('3.9123456789456123e-10')
+        ).toBe('0.00000');
+    });
+
     test('Throws when given incorrect values', () => {
         expect(() => formatNumberStringWithDigits(3, 2)('-10')).toThrow(); // min digits > max digits.
         expect(() => formatNumberStringWithDigits(3)('text')).toThrow();

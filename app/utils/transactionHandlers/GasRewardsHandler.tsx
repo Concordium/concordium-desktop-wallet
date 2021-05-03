@@ -1,3 +1,4 @@
+import React from 'react';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import GasRewardsView from '~/pages/multisig/updates/GasRewards/GasRewardsView';
@@ -74,7 +75,7 @@ export default class GasRewardsHandler
     }
 
     view(transaction: TransactionType) {
-        return GasRewardsView({ gasRewards: transaction.payload });
+        return <GasRewardsView gasRewards={transaction.payload} />;
     }
 
     getAuthorization(authorizations: Authorizations) {
