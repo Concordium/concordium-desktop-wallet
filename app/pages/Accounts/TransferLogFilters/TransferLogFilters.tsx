@@ -14,7 +14,7 @@ interface Props {
 }
 
 /**
- * Displays the account's address, and allows the user to copy it.
+ * Displays available transaction filters, and allows the user to activate/deactive them..
  */
 export default function TransferLogFilters({ account, returnFunction }: Props) {
     const dispatch = useDispatch();
