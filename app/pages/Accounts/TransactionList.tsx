@@ -1,9 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Menu } from 'semantic-ui-react';
 import TransactionListElement from './TransactionListElement';
-import { TransferTransaction } from '../../utils/types';
-import { transactionsSelector } from '../../features/TransactionSlice';
+import { TransferTransaction } from '~/utils/types';
+import { transactionsSelector } from '~/features/TransactionSlice';
 
 interface Props {
     onTransactionClick: (transaction: TransferTransaction) => void;
@@ -18,16 +17,15 @@ function TransactionList({ onTransactionClick }: Props): JSX.Element {
     const transactions = useSelector(transactionsSelector);
 
     return (
-        <Menu vertical fluid>
+        <>
             {transactions.map((transaction: TransferTransaction) => (
-                <Menu.Item
+                <TransactionListElement
                     onClick={() => onTransactionClick(transaction)}
                     key={transaction.transactionHash}
-                >
-                    <TransactionListElement transaction={transaction} />
-                </Menu.Item>
+                    transaction={transaction}
+                />
             ))}
-        </Menu>
+        </>
     );
 }
 

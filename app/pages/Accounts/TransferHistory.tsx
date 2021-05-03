@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Button } from 'semantic-ui-react';
+import Button from '~/cross-app-components/Button';
+import Card from '~/cross-app-components/Card';
 import TransactionList from './TransactionList';
 import TransactionView from './TransactionView';
 import DisplayIdentityAttributes from './DisplayIdentityAttributes';
 import locations from '../../constants/transactionLocations.json';
 import { TransferTransaction } from '../../utils/types';
+import styles from './Transactions.module.scss';
 
 /**
  * Contains view of the account's transactions,
@@ -20,20 +22,32 @@ export default function TransferHistory() {
 
     function Header() {
         return (
-            <Button.Group>
+            <div className={styles.transactionListHeader}>
                 <Button
+                    clear
                     onClick={() => setLocation(locations.listTransactions)}
+                    className={
+                        location === locations.listTransactions
+                            ? styles.transactionListHeaderChosen
+                            : undefined
+                    }
                     disabled={location === locations.listTransactions}
                 >
                     Transfers
                 </Button>
                 <Button
+                    clear
+                    className={
+                        location === locations.viewIdentityData
+                            ? styles.transactionListHeaderChosen
+                            : undefined
+                    }
                     onClick={() => setLocation(locations.viewIdentityData)}
                     disabled={location === locations.viewIdentityData}
                 >
                     Identity Data
                 </Button>
-            </Button.Group>
+            </div>
         );
     }
 
@@ -41,7 +55,7 @@ export default function TransferHistory() {
         switch (location) {
             case locations.listTransactions:
                 return (
-                    <>
+                    <Card>
                         <Header />
                         <TransactionList
                             onTransactionClick={(transaction) => {
@@ -49,7 +63,7 @@ export default function TransferHistory() {
                                 setLocation(locations.viewTransaction);
                             }}
                         />
-                    </>
+                    </Card>
                 );
             case locations.viewTransaction:
                 if (chosenTransaction === undefined) {
@@ -65,10 +79,10 @@ export default function TransferHistory() {
                 );
             case locations.viewIdentityData:
                 return (
-                    <>
+                    <Card>
                         <Header />
                         <DisplayIdentityAttributes />
-                    </>
+                    </Card>
                 );
             default:
                 return null;

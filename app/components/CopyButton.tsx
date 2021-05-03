@@ -1,6 +1,6 @@
 import React from 'react';
 import CopyIcon from '@resources/svg/copy.svg';
-import Button from '~/cross-app-components/Button';
+import IconButton from '~/cross-app-components/IconButton';
 
 interface Props {
     value: string;
@@ -12,12 +12,11 @@ interface Props {
  */
 export default function CopyButton({ value, className }: Props): JSX.Element {
     return (
-        <Button
-            clear
+        <IconButton
             className={className}
             onClick={() => navigator.clipboard.writeText(value)}
         >
             <CopyIcon height="20" />
-        </Button>
+        </IconButton>
     );
 }

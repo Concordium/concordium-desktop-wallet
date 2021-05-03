@@ -1,25 +1,58 @@
 import React from 'react';
-import { List, Button, Header, Divider } from 'semantic-ui-react';
 import TransactionListElement from './TransactionListElement';
-import CopiableListElement from '../../components/CopiableListElement';
 import { TransferTransaction } from '../../utils/types';
 import { isFailed } from '../../utils/transactionHelpers';
+import CloseButton from '~/cross-app-components/CloseButton';
+import Card from '~/cross-app-components/Card';
+import SidedRow from '~/components/SidedRow';
+import CopyButton from '~/components/CopyButton';
+import styles from './TransactionView.module.scss';
 
 interface Props {
     transaction: TransferTransaction;
     returnFunction: () => void;
 }
 
+interface CopiableListElementProps {
+    title: string;
+    value: string;
+    note?: string;
+    className?: string;
+}
+
+/**
+ * This Display the title (and the note) and contains an CopyButton, that, when pressed, copies the given value into the user's clipboard.
+ */
+function CopiableListElement({
+    title,
+    value,
+    note,
+    className,
+}: CopiableListElementProps): JSX.Element {
+    return (
+        <SidedRow
+            className={className}
+            left={
+                <div className={styles.copiableListElementLeftSide}>
+                    <p className={styles.copiableListElementTitle}>{title}</p>
+                    {'\n'}
+                    <p className={styles.copiableListElementValue}>
+                        {value} {note ? `(${note})` : undefined}
+                    </p>
+                </div>
+            }
+            right={<CopyButton value={value} />}
+        />
+    );
+}
+
 function displayRejectReason(transaction: TransferTransaction) {
     if (isFailed(transaction)) {
         return (
-            <List.Item>
-                <Header color="red" textAlign="center">
-                    Failed:{' '}
-                    {transaction.rejectReason || 'Unknown reason for failure'}
-                </Header>
-                <Divider />
-            </List.Item>
+            <p className={styles.errorMessage}>
+                Failed:{' '}
+                {transaction.rejectReason || 'Unknown reason for failure'}
+            </p>
         );
     }
     return null;
@@ -30,39 +63,37 @@ function displayRejectReason(transaction: TransferTransaction) {
  */
 function TransactionView({ transaction, returnFunction }: Props) {
     return (
-        <List>
-            <List.Item>
-                <Header textAlign="center">Transaction Details</Header>
-                <Button onClick={returnFunction}>x</Button>
-            </List.Item>
-            <List.Item>
-                <Divider />
-                <TransactionListElement transaction={transaction} />
-                <Divider />
-            </List.Item>
+        <Card className={styles.transactionView}>
+            <h2 className={styles.title}> Transaction Details </h2>
+            <CloseButton
+                className={styles.closeButton}
+                onClick={returnFunction}
+            />
+            <TransactionListElement transaction={transaction} />
             {displayRejectReason(transaction)}
             <CopiableListElement
                 title="From Address:"
-                value={transaction.fromAddress}
+                className={styles.listElement}
+                value={`${transaction.fromAddress.substring(0, 8)}...`}
                 note={transaction.fromAddressName}
             />
-            <Divider />
             <CopiableListElement
                 title="To Address:"
-                value={transaction.toAddress}
+                className={styles.listElement}
+                value={`${transaction.toAddress.substring(0, 8)}...`}
                 note={transaction.toAddressName}
             />
-            <Divider />
             <CopiableListElement
+                className={styles.listElement}
                 title="Transaction Hash"
                 value={transaction.transactionHash || 'No Transaction.'}
             />
-            <Divider />
             <CopiableListElement
+                className={styles.listElement}
                 title="Block Hash"
                 value={transaction.blockHash}
             />
-        </List>
+        </Card>
     );
 }
 

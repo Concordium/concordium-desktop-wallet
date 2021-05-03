@@ -1,19 +1,20 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Grid, Icon } from 'semantic-ui-react';
-import { parseTime } from '../../utils/timeHelpers';
-import { getGTUSymbol, displayAsGTU } from '../../utils/gtu';
+import Warning from '@resources/svg/warning.svg';
+import { parseTime } from '~/utils/timeHelpers';
+import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import {
     TransferTransaction,
     TransactionStatus,
     OriginType,
     TransactionKindString,
     Account,
-} from '../../utils/types';
-import { chosenAccountSelector } from '../../features/AccountSlice';
-import { viewingShieldedSelector } from '../../features/TransactionSlice';
-import SidedRow from '~/components/SemanticSidedRow';
-import { isFailed } from '../../utils/transactionHelpers';
+} from '~/utils/types';
+import { chosenAccountSelector } from '~/features/AccountSlice';
+import { viewingShieldedSelector } from '~/features/TransactionSlice';
+import SidedRow from '~/components/SidedRow';
+import { isFailed } from '~/utils/transactionHelpers';
+import styles from './Transactions.module.scss';
 
 function determineOutgoing(transaction: TransferTransaction, account: Account) {
     return transaction.fromAddress === account.address;
@@ -150,12 +151,13 @@ function statusSymbol(status: TransactionStatus) {
 
 interface Props {
     transaction: TransferTransaction;
+    onClick?: () => void;
 }
 
 /**
  * Displays the given transaction basic information.
  */
-function TransactionListElement({ transaction }: Props): JSX.Element {
+function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
     if (!account) {
@@ -171,13 +173,17 @@ function TransactionListElement({ transaction }: Props): JSX.Element {
     );
 
     return (
-        <Grid container columns={2}>
+        <div
+            className={styles.transactionListElement}
+            onClick={onClick}
+            onKeyPress={onClick}
+            tabIndex={0}
+            role="button"
+        >
             <SidedRow
                 left={
                     <>
-                        {isFailed(transaction) ? (
-                            <Icon name="warning circle" color="red" />
-                        ) : null}
+                        {isFailed(transaction) ? <Warning /> : null}
                         {name.concat(displayType(transaction.transactionKind))}
                     </>
                 }
@@ -193,7 +199,7 @@ function TransactionListElement({ transaction }: Props): JSX.Element {
                     }`
                 )}
             />
-        </Grid>
+        </div>
     );
 }
 

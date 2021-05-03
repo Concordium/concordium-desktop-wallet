@@ -1,9 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Grid, Header } from 'semantic-ui-react';
 import attributeNamesJson from '../../constants/attributeNames.json';
 import { chosenAccountInfoSelector } from '../../features/AccountSlice';
-import SidedRow from '~/components/SemanticSidedRow';
+import SidedRow from '~/components/SidedRow';
 
 const attributeNames: Record<string, string> = attributeNamesJson;
 
@@ -25,13 +24,13 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
 
     if (attributeKeys.length === 0) {
         return (
-            <Header textAlign="center">
+            <h3 className="flex justifyCenter">
                 This account has no revealed attributes!
-            </Header>
+            </h3>
         );
     }
     return (
-        <Grid container columns={2} divided="vertically">
+        <>
             {attributeKeys.map((attributeKey: string) => {
                 return (
                     <SidedRow
@@ -41,6 +40,6 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
                     />
                 );
             })}
-        </Grid>
+        </>
     );
 }
