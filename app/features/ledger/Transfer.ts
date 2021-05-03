@@ -246,15 +246,14 @@ async function signAddBaker(
     const part2 = serializeAddBakerKeys(transaction.payload);
     const part3 = serializeAddBakerProofsStakeRestake(transaction.payload);
 
-    await transport.send(0xe0, INS_ADD_BAKER, 0x00, 0x00, part1);
-    await transport.send(0xe0, INS_ADD_BAKER, 0x01, 0x00, part2);
-    const response = await transport.send(
-        0xe0,
-        INS_ADD_BAKER,
-        0x02,
-        0x00,
-        part3
-    );
+    let p1 = 0x00;
+    const p2 = 0x00;
+
+    await transport.send(0xe0, INS_ADD_BAKER, p1, p2, part1);
+    p1 = 0x01;
+    await transport.send(0xe0, INS_ADD_BAKER, p1, p2, part2);
+    p1 = 0x02;
+    const response = await transport.send(0xe0, INS_ADD_BAKER, p1, p2, part3);
 
     return response.slice(0, 64);
 }

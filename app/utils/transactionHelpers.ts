@@ -21,7 +21,6 @@ import {
     AccountInfo,
     AddBaker,
     AddBakerPayload,
-    Amount,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -396,30 +395,4 @@ export function validateAmount(
         return 'Amount may not be zero';
     }
     return undefined;
-}
-
-/** Converts an amount to a GTU string and adds microGTU if needed
- *
- * Example: amountToString(1000000n) === "1"
- * Example: amountToString(1000100n) === "1.000100"
- */
-export function amountToString(amount: Amount) {
-    const padded = amount.toString().padStart(7, '0');
-    const containsMicroGTU = amount % 1000000n !== 0n;
-    return containsMicroGTU
-        ? `${padded.slice(0, -6)}.${padded.slice(-6)}`
-        : padded.slice(0, -6);
-}
-
-/** Parse a GTU string into an amount
- *
- * Example: parseGTUString("123.456789") === 123456789n
- */
-export function parseGTUString(str: string): Amount {
-    const [gtu, microGtu, ...rest] = str.split('.');
-    if (rest.length !== 0) {
-        throw new Error('Invalid GTU string');
-    }
-
-    return 1000000n * BigInt(gtu) + BigInt(microGtu ?? '0');
 }
