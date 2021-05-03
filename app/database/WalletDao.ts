@@ -21,10 +21,11 @@ export async function getId(identifier: Hex): Promise<number> {
  * Insert a unique identifier for a hardware wallet to pair the hardware wallet
  * with the desktop wallet.
  * @param identifier the pairing identifier that identities the wallet uniquely
+ * @returns the id of the inserted row
  */
 export async function insertWallet(identifier: Hex, type: WalletType) {
     const table = (await knex())(walletTable);
-    return table.insert({ identifier, type });
+    return (await table.insert({ identifier, type }))[0];
 }
 
 /**

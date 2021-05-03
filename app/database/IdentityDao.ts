@@ -32,3 +32,13 @@ export async function updateIdentity(
         .where({ name: identityName })
         .update(updatedValues);
 }
+
+/**
+ * Find all the identities for a given wallet.
+ * @returns a list of identities that have been created from the supplied wallet
+ */
+export async function getIdentitiesForWallet(
+    walletId: number
+): Promise<Identity[]> {
+    return (await knex()).select().table(identitiesTable).where({ walletId });
+}

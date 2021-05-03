@@ -31,10 +31,10 @@ async function getSecretsFromLedger(
     displayMessage: (message: string) => void,
     identityNumber: number
 ) {
-    displayMessage('Please confirm exporting prf key on device');
+    displayMessage('Please confirm exporting PRF key on device');
     const prfKeySeed = await ledger.getPrfKey(identityNumber);
 
-    displayMessage('Please confirm exporting id cred sec on device');
+    displayMessage('Please confirm exporting IdCredSec on device');
     const idCredSecSeed = await ledger.getIdCredSec(identityNumber);
 
     const prfKey = prfKeySeed.toString('hex');
@@ -357,7 +357,7 @@ export async function makeTransferToPublicData(
 
 export async function createGenesisAccount(
     ledger: ConcordiumLedgerClient,
-    identityId: number,
+    identityNumber: number,
     credentialNumber: number,
     ipInfo: Versioned<IpInfo>,
     arInfo: Versioned<ArInfo>,
@@ -366,18 +366,17 @@ export async function createGenesisAccount(
     displayMessage: (message: string) => void
 ): Promise<GenesisAccount> {
     const path = getAccountPath({
-        identityIndex: identityId,
+        identityIndex: identityNumber,
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
 
-    // TODO Make sure it uses the identityNumber and not the identity id.
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identityId
+        identityNumber
     );
-    displayMessage('Please confirm exporting public key on device');
+    displayMessage('Please confirm exporting public-key on device');
     const publicKey = await ledger.getPublicKey(path);
     displayMessage('Please wait');
 
