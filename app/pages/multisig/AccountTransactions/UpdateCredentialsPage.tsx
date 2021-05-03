@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -10,7 +9,7 @@ import {
     Account,
     Identity,
     CredentialDeploymentInformation,
-    TransactionKindString,
+    TransactionKindId,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
@@ -182,11 +181,9 @@ function listCredentials(
  */
 export default function UpdateCredentialPage(): JSX.Element {
     const dispatch = useDispatch();
-    const { transactionKind } = useParams<{
-        transactionKind: TransactionKindString;
-    }>();
+    const transactionKind = TransactionKindId.Update_credentials;
     const location = useLocation().pathname.replace(
-        transactionKind,
+        `${transactionKind}`,
         ':transactionKind'
     );
     const credentials = useSelector(credentialsSelector);
@@ -207,7 +204,6 @@ export default function UpdateCredentialPage(): JSX.Element {
     const [newCredentials, setNewCredentials] = useState<
         CredentialDeploymentInformation[]
     >([]);
-    const [proposalId, setProposalId] = useState<number>(-1);
     useEffect(() => {
         if (account) {
             const credentialsOfAccount = credentials.filter(
@@ -276,19 +272,21 @@ export default function UpdateCredentialPage(): JSX.Element {
 
         return (
             <CreateUpdate
-                setReady={setReady}
                 account={account}
                 addedCredentials={assignIndices(newCredentials, usedIndices)}
                 removedCredIds={credentialIds
                     .filter(([, status]) => status === CredentialStatus.Removed)
                     .map(([id]) => id)}
                 newThreshold={newThreshold}
-                setProposalId={setProposalId}
                 currentCredentialAmount={currentCredentials.length}
                 primaryCredential={currentCredentials[0]}
             />
         );
     }
+
+    const showButton =
+        location !==
+        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
 
     return (
         <MultiSignatureLayout
@@ -385,33 +383,33 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 render={() => (
                                     <PickIdentity
                                         chosenIdentity={identity}
-                                        elementClassName={styles.listElement}
                                         setReady={setReady}
                                         setIdentity={setIdentity}
                                     />
                                 )}
                             />
                         </Switch>
-                        <Button
-                            disabled={!isReady}
-                            size="big"
-                            className={styles.continueButton}
-                            onClick={() => {
-                                setReady(false);
-                                dispatch(
-                                    push({
-                                        pathname: handler.creationLocationHandler(
-                                            location,
-                                            proposalId
-                                        ),
-                                        state:
-                                            TransactionKindString.UpdateCredentials,
-                                    })
-                                );
-                            }}
-                        >
-                            Continue
-                        </Button>
+                        {showButton && (
+                            <Button
+                                disabled={!isReady}
+                                size="big"
+                                className={styles.continueButton}
+                                onClick={() => {
+                                    setReady(false);
+                                    dispatch(
+                                        push({
+                                            pathname: handler.creationLocationHandler(
+                                                location
+                                            ),
+                                            state:
+                                                TransactionKindId.Update_credentials,
+                                        })
+                                    );
+                                }}
+                            >
+                                Continue
+                            </Button>
+                        )}
                     </div>
                 </Columns.Column>
             </Columns>

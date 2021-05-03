@@ -245,6 +245,7 @@ export interface ChainArData {
 }
 
 export interface CredentialDeploymentValues {
+    regId?: Hex;
     credId: Hex;
     ipIdentity: IpIdentity;
     revocationThreshold: Threshold;
@@ -467,10 +468,14 @@ interface AccountBakerDetails {
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
+    accountThreshold: number;
     accountReleaseSchedule: AccountReleaseSchedule;
     accountBaker?: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
-    accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
+    accountCredentials: Record<
+        number,
+        Versioned<TypedCredentialDeploymentInformation>
+    >;
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.
@@ -548,7 +553,6 @@ export interface SettingGroup {
  * settings table, then it should be represented here.
  */
 export enum SettingTypeEnum {
-    Text = 'text',
     Boolean = 'boolean',
     Connection = 'connection',
 }
@@ -1110,6 +1114,11 @@ export type PolymorphicComponentProps<
     C extends React.ElementType,
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
+
+export enum TransactionTypes {
+    UpdateInstruction,
+    AccountTransaction,
+}
 
 interface AccountCredentialWithoutProofs extends CredentialDeploymentValues {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
