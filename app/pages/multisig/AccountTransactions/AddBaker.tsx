@@ -25,7 +25,8 @@ import { getTransactionKindCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import { chunk } from '../util';
-import SignTransaction from './SignTransaction';
+import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
+
 import {
     amountToString,
     createAddBakerTransaction,
@@ -36,6 +37,11 @@ import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
 import { saveFile } from '~/utils/FileHelper';
 import { useAccountInfo } from '~/utils/hooks';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { signUsingLedger } from './SignTransaction';
+import { addProposal } from '~/features/MultiSignatureSlice';
+
+const pageTitle = 'Multi Signature Transactions | Add Baker';
 
 export default function AddBakerPage() {
     const { path, url } = useRouteMatch();
@@ -92,7 +98,7 @@ function BeforeYouStartStep({ onContinue }: BeforeYouStartStepProps) {
 
     return (
         <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Add Baker"
+            pageTitle={pageTitle}
             stepTitle="Before you start"
         >
             <div className={styles.descriptionStep}>
@@ -133,10 +139,7 @@ function TheProcessDescriptionStep({
     onContinue,
 }: TheProcessDescriptionStepProps) {
     return (
-        <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Add Baker"
-            stepTitle="The process"
-        >
+        <MultiSignatureLayout pageTitle={pageTitle} stepTitle="The process">
             <div className={styles.descriptionStep}>
                 <div style={{ flex: 1 }}>
                     <p>Maybe write out the process here?</p>
@@ -226,9 +229,38 @@ function BuildAddBakerTransactionProposalStep({
 
     const formatRestakeEnabled = restakeEnabled ? 'Yes' : 'No';
 
+    const signingFunction = async (ledger: ConcordiumLedgerClient) => {
+        if (!account || !global) {
+            throw new Error('unexpected missing global/account');
+        }
+        if (transaction === undefined) {
+            throw new Error('unexpected missing transaction');
+        }
+        if (credential === undefined) {
+            throw new Error('unexpected missing credential');
+        }
+        if (bakerKeys === undefined) {
+            throw new Error('unexpected missing bakerKeys');
+        }
+
+        const proposal = await signUsingLedger(
+            ledger,
+            transaction,
+            account,
+            credential
+        );
+        if (proposal.id === undefined) {
+            throw new Error('unexpected undefined proposal id');
+        }
+
+        // Set the current proposal in the state to the one that was just generated.
+        dispatch(addProposal(proposal));
+        onNewProposal(proposal.id, bakerKeys, account.address);
+    };
+
     return (
         <MultiSignatureLayout
-            pageTitle="Multi Signature Transactions | Add Baker"
+            pageTitle={pageTitle}
             stepTitle="Transaction Proposal - Add Baker"
         >
             <SimpleErrorModal
@@ -407,18 +439,8 @@ function BuildAddBakerTransactionProposalStep({
                             account !== undefined &&
                             credential !== undefined &&
                             bakerKeys !== undefined ? (
-                                <SignTransaction
-                                    setReady={() => {}}
-                                    account={account}
-                                    primaryCredential={credential}
-                                    transaction={transaction}
-                                    setProposalId={(id) =>
-                                        onNewProposal(
-                                            id,
-                                            bakerKeys,
-                                            account.address
-                                        )
-                                    }
+                                <SignTransactionColumn
+                                    signingFunction={signingFunction}
                                 />
                             ) : null}
                         </Columns.Column>

@@ -57,6 +57,7 @@
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT": "/multi-signature-transaction/account-transaction/:transactionKind/pick_recipient",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION": "/multi-signature-transaction/account-transaction/:transactionKind/sign_transaction",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_MAKETRANSFER": "/multi-signature-transaction/account-transaction/:transactionKind/make-transfer",
+    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE": "/multi-signature-transaction/account-transaction/:transactionKind/build-schedule",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL": "/multi-signature-transaction/account-transaction/:transactionKind/add-credential",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD": "/multi-signature-transaction/account-transaction/:transactionKind/change-signature-threshold",
     "CREATE_GENESIS_ACCOUNT": "/genesis-account"

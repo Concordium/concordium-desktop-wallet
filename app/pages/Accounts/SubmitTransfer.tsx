@@ -15,6 +15,7 @@ import {
     Account,
     LocalCredential,
     instanceOfLocalCredential,
+    instanceOfDeployedCredential,
     AccountInfo,
     AccountTransaction,
     Global,
@@ -105,7 +106,6 @@ export default function SubmitTransfer({ location }: Props) {
         setMessage: (message: string) => void
     ) {
         const signatureIndex = 0;
-        const credentialAccountIndex = 0; // TODO: do we need to support other credential indices here?
 
         if (!global) {
             setMessage('Missing global object.');
@@ -114,7 +114,21 @@ export default function SubmitTransfer({ location }: Props) {
 
         const credential = (
             await getCredentialsOfAccount(account.address)
-        ).find((cred) => cred.credentialIndex === credentialAccountIndex);
+        ).find(
+            (cred) =>
+                instanceOfLocalCredential(cred) ||
+                instanceOfDeployedCredential(cred)
+        );
+
+        if (
+            !credential ||
+            !instanceOfLocalCredential(credential) ||
+            !instanceOfDeployedCredential(credential)
+        ) {
+            throw new Error(
+                'Unable to sign transfer, because we were unable to find local and deployed credential'
+            );
+        }
 
         if (!credential) {
             setMessage(
@@ -144,7 +158,7 @@ export default function SubmitTransfer({ location }: Props) {
         });
         const signature: Buffer = await ledger.signTransfer(transaction, path);
         const signatureStructured = buildTransactionAccountSignature(
-            credentialAccountIndex,
+            credential.credentialIndex,
             signatureIndex,
             signature
         );

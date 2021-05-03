@@ -3,7 +3,7 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import Button from '~/cross-app-components/Button';
 import { createProposalRoute } from '~/utils/routerHelper';
-import { UpdateType } from '~/utils/types';
+import { UpdateType, TransactionTypes } from '~/utils/types';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 
 interface Props {
@@ -38,7 +38,14 @@ export default function KeySetSize({
             </div>
             <Button
                 onClick={() =>
-                    dispatch(push(`${createProposalRoute(type)}/threshold`))
+                    dispatch(
+                        push(
+                            `${createProposalRoute(
+                                TransactionTypes.UpdateInstruction,
+                                type
+                            )}/threshold`
+                        )
+                    )
                 }
             >
                 Continue

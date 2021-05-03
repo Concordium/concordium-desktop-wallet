@@ -22,6 +22,15 @@
     background-color: transparent;
     display: block;
     width: 100%;
+    color: $color-pale-blue;
+
+    &:disabled {
+        color: $color-text-faded;
+    }
+
+    &:read-only {
+        color: $color-text;
+    }
 
     &:focus {
         outline: none;
@@ -38,6 +47,7 @@
     }
 
     &Invalid {
+        color: $color-error;
         border-color: $color-error !important;
     }
 }

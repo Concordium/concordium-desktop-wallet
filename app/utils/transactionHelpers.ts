@@ -208,6 +208,7 @@ export async function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: SchedulePoint[],
+    signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
 ) {
     const payload = {
@@ -220,6 +221,7 @@ export async function createScheduledTransferTransaction(
         expiry,
         transactionKind: TransactionKindId.Transfer_with_schedule,
         payload,
+        signatureAmount,
     });
 }
 
@@ -381,7 +383,7 @@ export function validateAmount(
     estimatedFee: bigint | undefined
 ): string | undefined {
     if (!isValidGTUString(amountToValidate)) {
-        return 'Invalid input';
+        return 'Value is not a valid GTU amount';
     }
     if (
         accountInfo &&
@@ -389,6 +391,9 @@ export function validateAmount(
             toMicroUnits(amountToValidate) + (estimatedFee || 0n)
     ) {
         return 'Insufficient funds';
+    }
+    if (toMicroUnits(amountToValidate) === 0n) {
+        return 'Amount may not be zero';
     }
     return undefined;
 }

@@ -259,6 +259,7 @@ export interface ChainArData {
 }
 
 export interface CredentialDeploymentValues {
+    regId?: Hex;
     credId: Hex;
     ipIdentity: IpIdentity;
     revocationThreshold: Threshold;
@@ -481,10 +482,14 @@ interface AccountBakerDetails {
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
+    accountThreshold: number;
     accountReleaseSchedule: AccountReleaseSchedule;
     accountBaker?: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
-    accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
+    accountCredentials: Record<
+        number,
+        Versioned<TypedCredentialDeploymentInformation>
+    >;
     accountIndex: number;
 }
 
@@ -1130,6 +1135,11 @@ export type PolymorphicComponentProps<
     C extends React.ElementType,
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
+
+export enum TransactionTypes {
+    UpdateInstruction,
+    AccountTransaction,
+}
 
 interface AccountCredentialWithoutProofs extends CredentialDeploymentValues {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

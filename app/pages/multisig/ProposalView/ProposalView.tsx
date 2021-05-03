@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Redirect, useParams } from 'react-router';
-import clsx from 'clsx';
 import { useForm } from 'react-hook-form';
 import { parse } from '~/utils/JSONHelper';
 import {
@@ -30,8 +29,6 @@ import ExpiredTransactionView from '../ExpiredTransactionView';
 import Button from '~/cross-app-components/Button';
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '../MultiSignatureLayout';
-
-import styles from './ProposalView.module.scss';
 import Form from '~/components/Form';
 import FileInput from '~/components/Form/FileInput';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
@@ -46,6 +43,8 @@ import { getTimeout } from '~/utils/transactionHelpers';
 import getTransactionHash from '~/utils/transactionHash';
 import { HandleSignatureFile, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
+
+import styles from './ProposalView.module.scss';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING;
 
@@ -66,6 +65,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
     });
     const [currentlyLoadingFile, setCurrentlyLoadingFile] = useState(false);
     const [files, setFiles] = useState<FileInputValue>(null);
+    const [image, setImage] = useState<string>();
     const dispatch = useDispatch();
     const form = useForm();
 
@@ -131,9 +131,11 @@ function ProposalView({ proposal }: ProposalViewProps) {
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
+            print={handler.print(transaction, proposal.status, image)}
             stepTitle={`Transaction Proposal - ${handler.type}`}
             disableBack={instanceOfAccountTransaction(transaction)}
             closeRoute={CLOSE_ROUTE}
+            delegateScroll
         >
             <CloseProposalModal
                 open={showCloseModal}
@@ -153,7 +155,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
             <Form
                 formMethods={form}
                 onSubmit={submitTransaction}
-                className={clsx(styles.body, styles.bodySubtractPadding)}
+                className={styles.subtractContainerPadding}
             >
                 <Columns divider columnScroll columnClassName={styles.column}>
                     <Columns.Column header="Transaction Details">
@@ -206,6 +208,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                 <ProposalViewStatusText {...proposal} />
                                 <TransactionHashView
                                     transactionHash={transactionHash}
+                                    setScreenshot={setImage}
                                 />
                                 <TransactionExpirationDetails
                                     title="Transaction must be submitted before:"
