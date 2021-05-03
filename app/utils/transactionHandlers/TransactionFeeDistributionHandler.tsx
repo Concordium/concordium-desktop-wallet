@@ -93,6 +93,8 @@ export default class TransactionFeeDistributionHandler
         return authorizations.transactionFeeDistribution;
     }
 
+    print = () => undefined;
+
     update = UpdateTransactionFeeDistribution;
 
     title = getFoundationTransactionPageTitle(TYPE);

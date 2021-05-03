@@ -1,4 +1,6 @@
+import React from 'react';
 import {
+    MultiSignatureTransactionStatus,
     ScheduledTransfer,
     AccountTransaction,
     TransactionPayload,
@@ -12,11 +14,12 @@ import {
     CreateTransactionInput,
 } from '../transactionTypes';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import PrintFormatScheduledTransfer from '~/components/PrintFormat/ScheduledTransfer';
 import { createScheduledTransferTransaction } from '../transactionHelpers';
 
 type TransactionType = ScheduledTransfer;
 
-const TYPE = 'Scheduled Transfer';
+const TYPE = 'Send GTU with a schedule';
 
 export default class ScheduledTransferHandler
     extends TransferHandler<TransactionType>
@@ -70,6 +73,20 @@ export default class ScheduledTransferHandler
             recipient,
             schedule,
             signatureAmount
+        );
+    }
+
+    print(
+        transaction: AccountTransaction,
+        status: MultiSignatureTransactionStatus,
+        identiconImage?: string
+    ) {
+        return (
+            <PrintFormatScheduledTransfer
+                transaction={this.confirmType(transaction)}
+                status={status}
+                image={identiconImage}
+            />
         );
     }
 

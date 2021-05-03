@@ -25,3 +25,9 @@ $multi-sig-layout-header-height: 42px;
         height: calc(100% - #{$multi-sig-layout-header-height});
     }
 }
+
+.printButton {
+    position: absolute;
+    top: 35px;
+    right: 75px;
+}

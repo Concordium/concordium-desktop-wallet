@@ -99,6 +99,8 @@ export default class UpdateRootKeysHandler
         );
     }
 
+    print = () => undefined;
+
     update = UpdateRootKeys;
 
     title = `Foundation Transaction | ${TYPE}`;

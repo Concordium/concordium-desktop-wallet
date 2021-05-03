@@ -81,6 +81,8 @@ export default class GasRewardsHandler
         return authorizations.paramGASRewards;
     }
 
+    print = () => undefined;
+
     update = UpdateGasRewards;
 
     title = `Foundation Transaction | ${TYPE}`;
