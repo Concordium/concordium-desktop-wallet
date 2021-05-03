@@ -1,8 +1,19 @@
 @import 'config/bundle';
 
-.accountActionButton {
-    height: 100px;
-    width: 30%;
+.actionButtonsCard {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
+    height: 90px;
+}
+
+.actionButton {
+    width: 32%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 20px;
 }
 
 .accountBalanceView {
@@ -18,7 +29,11 @@
 }
 
 .actionImage {
-    width: 100%;
+    margin-bottom: 5px;
+}
+
+.moreImage {
+    margin-bottom: 15px;
 }
 
 .inverted {
