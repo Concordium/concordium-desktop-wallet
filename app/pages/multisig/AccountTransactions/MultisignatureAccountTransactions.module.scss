@@ -1,0 +1,16 @@
+@import 'config/bundle';
+
+.flex {
+    display: flex;
+}
+
+.errorLabel {
+    text-align: center;
+    color: $color-error;
+}
+
+.buildSchedule {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}

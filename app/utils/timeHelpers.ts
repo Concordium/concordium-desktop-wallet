@@ -1,9 +1,11 @@
 import { ensureNumberLength } from './basicHelpers';
 import { TimeStampUnit, YearMonth } from './types';
 
-// given a YearMonth string (YYYYMM), returns
-// a displayable format eg:
-// given "202001" => "January 2020"
+/**
+ * given a YearMonth string (YYYYMM), returns
+ * a displayable format eg:
+ * given "202001" => "January 2020"
+ */
 export function formatDate(date: YearMonth) {
     const dtFormat = new Intl.DateTimeFormat('en-GB', {
         month: 'long',
@@ -11,6 +13,16 @@ export function formatDate(date: YearMonth) {
         timeZone: 'UTC',
     });
     return dtFormat.format(new Date(`${date.slice(0, 4)}-${date.slice(4, 6)}`));
+}
+
+// Returns the YearMonth string (YYYYMM), of the current time.
+export function getCurrentYearMonth(): YearMonth {
+    const date = new Date();
+    let month = (date.getMonth() + 1).toString();
+    if (month.length === 1) {
+        month = `0${month}`;
+    }
+    return date.getFullYear() + month;
 }
 
 /**
@@ -74,6 +86,42 @@ export interface DateParts {
     hours: string;
     minutes: string;
     seconds: string;
+}
+
+interface TimeParts {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+}
+
+/**
+ * Converts miliseconds into days, hours, minutes, and seconds.
+ *
+ * @param miliseconds time to convert in ms.
+ *
+ * @example
+ * convertMiliseconds(1000) => { ..., seconds: 1 };
+ * convertMiliseconds(1000 * 3603) => { days: 0, hours: 1, minutes: 0, seconds: 3 };
+ * convertMiliseconds(1000 * 3600 * 36) => { days: 1, hours: 12, minutes: 0, seconds: 0 };
+ */
+export function msToTimeParts(
+    miliseconds: number | undefined
+): TimeParts | undefined {
+    if (!miliseconds) {
+        return undefined;
+    }
+
+    const totalSeconds = Math.floor(miliseconds / 1000);
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    const totalHours = Math.floor(totalMinutes / 60);
+    const days = Math.floor(totalHours / 24);
+
+    const seconds = totalSeconds % 60;
+    const minutes = totalMinutes % 60;
+    const hours = totalHours % 24;
+
+    return { days, hours, minutes, seconds };
 }
 
 export function datePartsFromDate(date?: Date): DateParts | undefined {

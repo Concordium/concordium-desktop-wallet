@@ -1,11 +1,14 @@
 import { parse } from 'json-bigint';
 import React, { useMemo } from 'react';
 import {
+    instanceOfScheduledTransfer,
+    instanceOfSimpleTransfer,
     instanceOfUpdateInstruction,
     instanceOfUpdateAccountCredentials,
     MultiSignatureTransaction,
 } from '~/utils/types';
 import ChainUpdateProposalStatus from './ChainUpdateProposalStatus';
+import GtuTransferProposalStatus from './GtuTransferProposalStatus';
 import UpdateAccountCredentialsProposalStatus from './UpdateAccountCredentialStatus';
 import { ProposalStatusViewProps } from './ProposalStatusView';
 
@@ -21,13 +24,25 @@ export default function ProposalStatus({
     const { status, transaction } = proposal;
     const parsed = useMemo(() => parse(transaction), [transaction]);
 
-    // TODO handle other transaction types...
     if (instanceOfUpdateInstruction(parsed)) {
         return (
             <ChainUpdateProposalStatus
                 {...proposalStatusProps}
                 status={status}
                 transaction={parsed}
+            />
+        );
+    }
+
+    if (
+        instanceOfSimpleTransfer(parsed) ||
+        instanceOfScheduledTransfer(parsed)
+    ) {
+        return (
+            <GtuTransferProposalStatus
+                {...proposalStatusProps}
+                transaction={parsed}
+                status={status}
             />
         );
     }
@@ -42,5 +57,5 @@ export default function ProposalStatus({
         );
     }
 
-    return <>Transaction type unsupported...</>;
+    return <>Not supported yet...</>;
 }

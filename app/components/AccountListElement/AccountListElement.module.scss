@@ -1,5 +1,7 @@
 @import 'config/bundle';
 
+$horizontal-padding: 30px;
+
 .accountListElement {
     display: flex;
     flex-direction: column;
@@ -7,7 +9,7 @@
     background-color: $color-white;
     color: $color-text;
     box-shadow: 0 0 0 1px $color-text inset;
-    padding: 15px 30px;
+    padding: 15px $horizontal-padding;
 
     &:focus {
         outline: none;
@@ -27,31 +29,6 @@
     }
 }
 
-.row {
-    display: flex;
-    margin-top: 10px;
-
-    .left,
-    .right {
-        width: 50%;
-    }
-
-    &:not(:last-of-type) {
-        margin-bottom: 10px;
-    }
-    &:first-of-type {
-        margin: 0;
-    }
-}
-
-.left {
-    text-align: left;
-}
-
-.right {
-    text-align: right;
-}
-
 .inline {
     display: inline;
     padding-right: 10px;
@@ -60,8 +37,25 @@
 .dividingLine {
     content: '';
     background: $color-grey;
-    width: calc(100% + 20px);
+    width: calc(100% + 2 * #{$horizontal-padding});
     height: 1px;
     display: block;
-    margin-left: -10px;
+    margin-left: calc(-1 * #{$horizontal-padding});
+}
+
+.firstRow {
+    margin: 0;
+}
+
+.row {
+    margin: 10px 0;
+
+    :last-of-type {
+        margin-bottom: 0;
+    }
+}
+
+.multisig {
+    padding-left: 5px;
+    height: $font-size-body3;
 }

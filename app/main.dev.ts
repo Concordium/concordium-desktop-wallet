@@ -57,6 +57,7 @@ export default class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let printWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
     const sourceMapSupport = require('source-map-support');
@@ -91,19 +92,10 @@ const createWindow = async () => {
         await installExtensions();
     }
 
-    const RESOURCES_PATH = app.isPackaged
-        ? path.join(process.resourcesPath, 'resources')
-        : path.join(__dirname, '../resources');
-
-    const getAssetPath = (...paths: string[]): string => {
-        return path.join(RESOURCES_PATH, ...paths);
-    };
-
     mainWindow = new BrowserWindow({
         show: false,
         width: 4096,
         height: 2912,
-        icon: getAssetPath('icon.png'),
         webPreferences:
             (process.env.NODE_ENV === 'development' ||
                 process.env.E2E_BUILD === 'true') &&
@@ -116,6 +108,16 @@ const createWindow = async () => {
                       preload: path.join(__dirname, 'dist/renderer.prod.js'),
                       webviewTag: true,
                   },
+    });
+
+    printWindow = new BrowserWindow({
+        parent: mainWindow,
+        modal: false,
+        show: false,
+        webPreferences: {
+            nodeIntegration: false,
+            devTools: false,
+        },
     });
 
     mainWindow.loadURL(`file://${__dirname}/app.html`);
@@ -160,9 +162,12 @@ ipcMain.handle(ipcCommands.openFileDialog, async (_event, title) => {
 });
 
 // Provides access to save file dialog from renderer processes.
-ipcMain.handle(ipcCommands.saveFileDialog, async (_event, title) => {
-    return dialog.showSaveDialog({ title });
-});
+ipcMain.handle(
+    ipcCommands.saveFileDialog,
+    async (_event, title, defaultPath) => {
+        return dialog.showSaveDialog({ title, defaultPath });
+    }
+);
 
 // Updates the location of the grpc endpoint.
 ipcMain.handle(
@@ -184,6 +189,36 @@ ipcMain.handle(
         }
     }
 );
+
+enum PrintErrorTypes {
+    Cancelled = 'cancelled',
+    Failed = 'failed',
+    NoPrinters = 'no valid printers available',
+}
+
+// Prints the given body.
+ipcMain.handle(ipcCommands.print, (_event, body) => {
+    return new Promise<string | void>((resolve, reject) => {
+        if (!printWindow) {
+            reject(new Error('Internal error: Unable to print'));
+        } else {
+            printWindow.loadURL(`data:text/html;charset=utf-8,${body}`);
+            const content = printWindow.webContents;
+            content.on('did-finish-load', () => {
+                content.print({}, (success, errorType) => {
+                    if (!success) {
+                        if (errorType === PrintErrorTypes.Cancelled) {
+                            resolve();
+                        }
+                        resolve(errorType);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
+        }
+    });
+});
 
 /**
  * Add event listeners...

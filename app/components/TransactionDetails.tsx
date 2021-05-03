@@ -1,11 +1,8 @@
 import React from 'react';
 import {
-    AccountTransaction,
+    Transaction,
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
-    UpdateInstruction,
-    UpdateInstructionPayload,
-    AccountTransactionWithSignature,
 } from '../utils/types';
 import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
 import UpdateInstructionDetails from './UpdateInstructionDetails';
@@ -14,17 +11,10 @@ import UpdateInstructionDetails from './UpdateInstructionDetails';
 // transactions.
 
 interface Props {
-    transaction:
-        | UpdateInstruction<UpdateInstructionPayload>
-        | AccountTransaction
-        | AccountTransactionWithSignature;
+    transaction: Transaction;
 }
 
-function generateView(
-    transaction:
-        | UpdateInstruction<UpdateInstructionPayload>
-        | AccountTransaction
-) {
+function generateView(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
         return <UpdateInstructionDetails transaction={transaction} />;
     }

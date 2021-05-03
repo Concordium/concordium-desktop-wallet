@@ -3,6 +3,7 @@ import {
     GasRewards,
     RewardFraction,
     TransactionFeeDistribution,
+    VerifyKey,
 } from './types';
 
 // This file contains interfaces that matches what is returned
@@ -15,6 +16,7 @@ import {
  * added. If additional fields are required, then extend the interface.
  */
 export interface ConsensusStatus {
+    slotDuration: number;
     lastFinalizedBlock: string;
 }
 
@@ -33,6 +35,8 @@ interface UpdateQueues {
     protocol: UpdateQueue;
     gasRewards: UpdateQueue;
     bakerStakeThreshold: UpdateQueue;
+    rootKeys: UpdateQueue;
+    level1Keys: UpdateQueue;
 }
 
 export interface Authorization {
@@ -61,8 +65,8 @@ export interface Authorizations {
 // The node returns the mint per slot value as a scientific notation String,
 // which does not match the serialization format entirely. Therefore
 // this interface is required.
-interface MintDistributionNode {
-    mintPerSlot: string;
+export interface MintDistributionNode {
+    mintPerSlot: number;
     bakingReward: RewardFraction;
     finalizationReward: RewardFraction;
 }
@@ -81,9 +85,20 @@ interface ChainParameters {
     electionDifficulty: number;
 }
 
+export interface KeysWithThreshold {
+    keys: VerifyKey[];
+    threshold: number;
+}
+
+export interface Keys {
+    rootKeys: KeysWithThreshold;
+    level1Keys: KeysWithThreshold;
+    level2Keys: Authorizations;
+}
+
 interface Updates {
-    authorizations: Authorizations;
     chainParameters: ChainParameters;
+    keys: Keys;
     updateQueues: UpdateQueues;
 }
 

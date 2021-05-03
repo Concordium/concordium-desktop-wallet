@@ -3,20 +3,22 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { Redirect } from 'react-router';
-import clsx from 'clsx';
 import { parse, stringify } from '~/utils/JSONHelper';
 
 import routes from '~/constants/routes.json';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import findHandler from '~/utils/updates/HandlerFinder';
+import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import {
     EqualRecord,
     instanceOfUpdateInstruction,
     UpdateInstructionSignature,
     TransactionAccountSignature,
+    MultiSignatureTransactionStatus,
 } from '~/utils/types';
 import { TransactionInput } from '~/utils/transactionTypes';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
+import SimpleErrorModal, {
+    ModalErrorInput,
+} from '~/components/SimpleErrorModal';
 import { ensureProps } from '~/utils/componentHelpers';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
@@ -29,8 +31,8 @@ import TransactionExpirationDetails from '~/components/TransactionExpirationDeta
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import getTransactionHash from '~/utils/transactionHash';
 
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
-import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
+import ExpiredTransactionView from '../ExpiredTransactionView';
+import withChainData, { ChainData } from '../common/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import styles from './CosignTransactionProposal.module.scss';
 import { signUpdateInstruction, signAccountTransaction } from './util';
@@ -50,7 +52,7 @@ const fieldNames: EqualRecord<CosignTransactionProposalForm> = {
     hashMatch: 'hashMatch',
 };
 
-interface CosignTransactionProposalProps extends WithBlockSummary {
+interface CosignTransactionProposalProps extends ChainData {
     location: LocationDescriptorObject<TransactionInput>;
 }
 
@@ -58,13 +60,18 @@ interface CosignTransactionProposalProps extends WithBlockSummary {
  * Component that displays an overview of an imported multi signature transaction proposal
  * that is to be signed.
  */
-const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProps>(
+const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
     ({ location, blockSummary }) => {
-        const [showValidationError, setShowValidationError] = useState(false);
+        const [showError, setShowError] = useState<ModalErrorInput>({
+            show: false,
+        });
         const [signature, setSignature] = useState<
-            UpdateInstructionSignature | TransactionAccountSignature | undefined
+            | UpdateInstructionSignature[]
+            | TransactionAccountSignature
+            | undefined
         >();
         const [transactionHash, setTransactionHash] = useState<string>();
+        const [image, setImage] = useState<string>();
 
         const dispatch = useDispatch();
 
@@ -93,7 +100,12 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                             blockSummary
                         );
                     } catch (e) {
-                        setShowValidationError(true);
+                        setShowError({
+                            show: true,
+                            header: 'Unauthorized key',
+                            content:
+                                'Your key is not authorized to sign this update type.',
+                        });
                         return;
                     }
                 } else {
@@ -106,7 +118,11 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                         ledger
                     );
                 } catch (e) {
-                    setStatusText(e);
+                    setShowError({
+                        show: true,
+                        header: 'Unable to sign transaction',
+                        content: e.message,
+                    });
                     return;
                 }
             }
@@ -117,7 +133,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
         async function exportSignedTransaction() {
             const signedTransaction = {
                 ...transactionObject,
-                signatures: [signature],
+                signatures: signature,
             };
             const signedTransactionJson = stringify(signedTransaction);
 
@@ -144,14 +160,22 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
         return (
             <>
                 <SimpleErrorModal
-                    show={showValidationError}
-                    header="Unauthorized key"
-                    content="Your key is not authorized to sign this update type."
+                    show={showError.show}
+                    header={showError.header}
+                    content={showError.content}
                     onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
                 />
                 <MultiSignatureLayout
                     pageTitle={transactionHandler.title}
+                    print={transactionHandler.print(
+                        transactionObject,
+                        isTransactionExpired
+                            ? MultiSignatureTransactionStatus.Expired
+                            : MultiSignatureTransactionStatus.Open,
+                        image
+                    )}
                     stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+                    delegateScroll
                 >
                     <Ledger ledgerCallback={signingFunction}>
                         {({
@@ -160,10 +184,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                             submitHandler = asyncNoOp,
                         }) => (
                             <Form<CosignTransactionProposalForm>
-                                className={clsx(
-                                    styles.body,
-                                    styles.bodySubtractPadding
-                                )}
+                                className={styles.subtractContainerPadding}
                                 onSubmit={submitHandler}
                             >
                                 <Columns
@@ -177,6 +198,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                                 transactionHash={
                                                     transactionHash
                                                 }
+                                                setScreenshot={setImage}
                                             />
                                             {instanceOfUpdateInstruction(
                                                 transactionObject
@@ -199,7 +221,7 @@ const CosignTransactionProposal = withBlockSummary<CosignTransactionProposalProp
                                             {instanceOfUpdateInstruction(
                                                 transactionObject
                                             ) && (
-                                                <ExpiredEffectiveTimeView
+                                                <ExpiredTransactionView
                                                     transaction={
                                                         transactionObject
                                                     }

@@ -1,10 +1,17 @@
 import routes from '../constants/routes.json';
-import { UpdateType, TransactionKindString } from './types';
+import {
+    TransactionTypes,
+    UpdateType,
+    TransactionKindId,
+    ExportKeyType,
+} from './types';
 // eslint-disable-next-line import/no-cycle
-import { ExportKeyType } from '~/pages/multisig/menu/ExportKeyList';
 
 export const selectedAddressBookEntryRoute = (address: string) =>
     routes.ADDRESSBOOK_SELECTED.replace(':address', address);
+
+export const selectedSettingRoute = (type: string) =>
+    routes.SETTINGS_SELECTED.replace(':type', type);
 
 export const selectedProposalRoute = (proposalId: number) => {
     return routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING_SELECTED.replace(
@@ -17,26 +24,36 @@ export function selectedExportKeyRoute(keyType: string) {
     if (keyType === ExportKeyType.Credential) {
         return routes.GENERATE_CREDENTIAL;
     }
+    if (keyType === ExportKeyType.Genesis) {
+        return routes.CREATE_GENESIS_ACCOUNT;
+    }
     return routes.MULTISIGTRANSACTIONS_EXPORT_KEY_SELECTED.replace(
         ':keyType',
         keyType
     );
 }
 
-export const submittedProposalRoute = (id: number) =>
-    routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION.replace(':id', `${id}`);
+export const submittedProposalRoute = (proposalId: number) =>
+    routes.MULTISIGTRANSACTIONS_SUBMITTED_TRANSACTION.replace(
+        ':id',
+        `${proposalId}`
+    );
 
 export function createProposalRoute(
-    transactionType: UpdateType | TransactionKindString
+    transactionType: TransactionTypes,
+    specificType: UpdateType | TransactionKindId
 ) {
-    if (transactionType in UpdateType) {
+    if (transactionType === TransactionTypes.UpdateInstruction) {
         return routes.MULTISIGTRANSACTIONS_PROPOSAL.replace(
             ':updateType',
-            `${transactionType}`
+            `${specificType}`
         );
     }
-    return {
-        pathname: routes.UPDATE_ACCOUNT_CREDENTIALS,
-        state: transactionType,
-    };
+    if (transactionType === TransactionTypes.AccountTransaction) {
+        return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
+            ':transactionKind',
+            `${specificType}`
+        );
+    }
+    throw new Error(`Unknown transactionType given:${transactionType}`);
 }

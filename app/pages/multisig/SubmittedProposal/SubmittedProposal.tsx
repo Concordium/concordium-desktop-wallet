@@ -25,7 +25,7 @@ import styles from './SubmittedProposal.module.scss';
 import { sendTransaction } from '~/utils/nodeRequests';
 import findHandler, {
     findUpdateInstructionHandler,
-} from '~/utils/updates/HandlerFinder';
+} from '~/utils/transactionHandlers/HandlerFinder';
 import { serializeForSubmission } from '~/utils/UpdateSerialization';
 
 import { serializeTransaction } from '~/utils/transactionSerialization';

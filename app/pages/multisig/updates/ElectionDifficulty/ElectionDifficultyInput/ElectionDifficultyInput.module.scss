@@ -1,0 +1,31 @@
+@import '../../../../../components/Form/common/common';
+
+.field {
+    color: $color-pale-blue;
+    display: block;
+    font-size: $font-size-body1;
+
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    &:disabled,
+    &:read-only {
+        border-bottom: none;
+    }
+
+    &:disabled {
+        color: $color-text-faded;
+    }
+
+    &:read-only {
+        color: $color-text;
+    }
+}
+
+.blockTime {
+    color: $color-text-faded;
+    font-size: $font-size-body4;
+}

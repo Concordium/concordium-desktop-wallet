@@ -1,5 +1,5 @@
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
+import { findKey } from '~/utils/updates/AuthorizationHelper';
 import { BlockSummary } from '~/utils/NodeApiTypes';
 import {
     AccountTransaction,
@@ -11,7 +11,7 @@ import {
 import {
     findAccountTransactionHandler,
     findUpdateInstructionHandler,
-} from '~/utils/updates/HandlerFinder';
+} from '~/utils/transactionHandlers/HandlerFinder';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 
@@ -19,14 +19,13 @@ export async function signUpdateInstruction(
     instruction: UpdateInstruction,
     ledger: ConcordiumLedgerClient,
     blockSummary: BlockSummary
-): Promise<UpdateInstructionSignature> {
-    const transactionHandler = await findUpdateInstructionHandler(
-        instruction.type
-    );
-    const authorizationKey = await findAuthorizationKey(
+): Promise<UpdateInstructionSignature[]> {
+    const transactionHandler = findUpdateInstructionHandler(instruction.type);
+    const authorizationKey = await findKey(
         ledger,
-        transactionHandler,
-        blockSummary.updates.authorizations
+        blockSummary.updates.keys,
+        instruction,
+        transactionHandler
     );
     if (!authorizationKey) {
         throw new Error('Unable to get authorizationKey.');
@@ -37,16 +36,19 @@ export async function signUpdateInstruction(
         ledger
     );
 
-    return {
-        signature: signatureBytes.toString('hex'),
-        authorizationKeyIndex: authorizationKey.index,
-    };
+    return [
+        {
+            signature: signatureBytes.toString('hex'),
+            authorizationKeyIndex: authorizationKey.index,
+        },
+    ];
 }
 
 export async function signAccountTransaction(
     transaction: AccountTransaction,
     ledger: ConcordiumLedgerClient
 ) {
+    // We assume that there is only 1 key on a credential. // TODO: Remove assumption that a credential only has 1 signature
     const signatureIndex = 0;
 
     const credential = (await getCredentialsOfAccount(transaction.sender)).find(
@@ -55,14 +57,13 @@ export async function signAccountTransaction(
             instanceOfDeployedCredential(cred)
     );
 
-    // TODO: can we avoid checking instances twice?
     if (
         !credential ||
         !instanceOfLocalCredential(credential) ||
         !instanceOfDeployedCredential(credential)
     ) {
         throw new Error(
-            'Unable to sign transfer, because we were unable to find local and deployed credential'
+            'Unable to the sign the account transaction. You do not currently have a credential deployed on the associated account.'
         );
     }
 

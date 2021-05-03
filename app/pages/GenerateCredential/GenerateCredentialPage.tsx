@@ -6,7 +6,7 @@ import { Grid, List } from 'semantic-ui-react';
 import Button from '~/cross-app-components/Button';
 import { Identity } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
-import PickIdentity from './PickIdentity';
+import PickIdentity from '~/components/PickIdentity';
 import ExportCredential from './ExportCredential';
 import PickAccount from './PickAccount';
 import SignCredential from './SignCredential';

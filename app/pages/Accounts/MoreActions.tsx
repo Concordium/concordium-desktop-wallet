@@ -10,6 +10,7 @@ import ShowReleaseSchedule from './ShowReleaseSchedule';
 import ScheduleTransfer from './ScheduleTransfer';
 import ExportTransactions from './ExportTransactions';
 import TransferLogFilters from './TransferLogFilters';
+import CredentialInformation from './CredentialInformation';
 
 interface Props {
     account: Account;
@@ -33,6 +34,10 @@ const items = [
     {
         name: 'Transfer Log Filters',
         location: routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS,
+    },
+    {
+        name: 'Credential Information',
+        location: routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION,
     },
 ];
 
@@ -108,6 +113,17 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     <TransferLogFilters
                         account={account}
                         returnFunction={returnFunction}
+                    />
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION}
+                render={() => (
+                    <CredentialInformation
+                        account={account}
+                        returnFunction={() =>
+                            dispatch(push(routes.ACCOUNTS_MORE))
+                        }
                     />
                 )}
             />
