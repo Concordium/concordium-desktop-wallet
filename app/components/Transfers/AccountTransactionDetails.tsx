@@ -9,6 +9,7 @@ import {
     instanceOfUpdateAccountCredentials,
     instanceOfAddBaker,
     instanceOfRemoveBaker,
+    instanceOfUpdateBakerKeys,
 } from '../../utils/types';
 import { lookupName } from '../../utils/transactionHelpers';
 import { chosenAccountSelector } from '../../features/AccountSlice';
@@ -16,6 +17,7 @@ import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
 import DisplayInternalTransfer from './DisplayInternalTransfer';
 import DisplaySimpleTransfer from './DisplaySimpleTransfer';
 import DisplayAddBaker from './DisplayAddBaker';
+import DisplayUpdateBakerKeys from './DisplayUpdateBakerKeys';
 import DisplayRemoveBaker from './DisplayRemoveBaker';
 import DisplayAccountCredentialsUpdate from '../DisplayAccountCredentialUpdate';
 
@@ -51,6 +53,9 @@ export default function AccountTransactionDetails({ transaction }: Props) {
     }
     if (instanceOfAddBaker(transaction)) {
         return <DisplayAddBaker transaction={transaction} />;
+    }
+    if (instanceOfUpdateBakerKeys(transaction)) {
+        return <DisplayUpdateBakerKeys transaction={transaction} />;
     }
     if (instanceOfRemoveBaker(transaction)) {
         return <DisplayRemoveBaker transaction={transaction} />;

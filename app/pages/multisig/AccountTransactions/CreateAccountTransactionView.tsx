@@ -4,6 +4,7 @@ import { TransactionKindString } from '~/utils/types';
 import SimpleTransfer from './SimpleTransfer';
 import UpdateCredentialPage from './UpdateCredentialsPage';
 import AddBaker from './AddBaker';
+import UpdateBakerKeys from './UpdateBakerKeys';
 import RemoveBaker from './RemoveBaker';
 
 export default function CreateAccountTransactionView(): JSX.Element {
@@ -19,6 +20,8 @@ export default function CreateAccountTransactionView(): JSX.Element {
             return <SimpleTransfer />;
         case TransactionKindString.AddBaker:
             return <AddBaker />;
+        case TransactionKindString.UpdateBakerKeys:
+            return <UpdateBakerKeys />;
         case TransactionKindString.RemoveBaker:
             return <RemoveBaker />;
         default:

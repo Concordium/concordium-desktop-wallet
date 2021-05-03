@@ -206,16 +206,25 @@ export interface UpdateAccountCredentialsPayload {
     threshold: number;
 }
 
-export interface AddBakerPayload {
+export type BakerVerifyKeys = {
     electionVerifyKey: Hex;
     signatureVerifyKey: Hex;
     aggregationVerifyKey: Hex;
+};
+
+export type BakerKeyProofs = {
     proofElection: Hex;
     proofSignature: Hex;
     proofAggregation: Hex;
-    bakingStake: Amount;
-    restakeEarnings: boolean;
-}
+};
+
+export type AddBakerPayload = BakerVerifyKeys &
+    BakerKeyProofs & {
+        bakingStake: Amount;
+        restakeEarnings: boolean;
+    };
+
+export type UpdateBakerKeysPayload = BakerVerifyKeys & BakerKeyProofs;
 
 export type RemoveBakerPayload = {};
 
@@ -226,6 +235,7 @@ export type TransactionPayload =
     | ScheduledTransferPayload
     | SimpleTransferPayload
     | AddBakerPayload
+    | UpdateBakerKeysPayload
     | RemoveBakerPayload;
 
 // Structure of an accountTransaction, which is expected
@@ -249,6 +259,7 @@ export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 export type AddBaker = AccountTransaction<AddBakerPayload>;
+export type UpdateBakerKeys = AccountTransaction<UpdateBakerKeysPayload>;
 export type RemoveBaker = AccountTransaction<RemoveBakerPayload>;
 
 // Types of block items, and their identifier numbers
@@ -750,6 +761,12 @@ export function instanceOfAddBaker(
     object: AccountTransaction<TransactionPayload>
 ): object is AddBaker {
     return object.transactionKind === TransactionKindId.Add_baker;
+}
+
+export function instanceOfUpdateBakerKeys(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateBakerKeys {
+    return object.transactionKind === TransactionKindId.Update_baker_keys;
 }
 
 export function instanceOfRemoveBaker(

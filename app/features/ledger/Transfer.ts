@@ -14,6 +14,8 @@ import {
     AddBaker,
     instanceOfRemoveBaker,
     RemoveBaker,
+    instanceOfUpdateBakerKeys,
+    UpdateBakerKeys,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -22,9 +24,11 @@ import {
     serializeScheduledTransferPayloadBase,
     serializeTransferToPublicData,
     serializeAddBaker,
-    serializeAddBakerKeys,
+    serializeBakerVerifyKeys,
     serializeAddBakerProofsStakeRestake,
     serializeRemoveBaker,
+    serializeUpdateBakerKeys,
+    serializeBakerKeyProofs,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import { encodeWord16 } from '~/utils/serializationHelpers';
@@ -34,7 +38,7 @@ const INS_SIMPLE_TRANSFER = 0x02;
 const INS_TRANSFER_TO_ENCRYPTED = 0x11;
 const INS_TRANSFER_TO_PUBLIC = 0x12;
 const INS_TRANSFER_WITH_SCHEDULE = 0x03;
-const INS_ADD_BAKER = 0x13;
+const INS_ADD_OR_UPDATE_BAKER = 0x13;
 const INS_REMOVE_BAKER = 0x14;
 
 async function signSimpleTransfer(
@@ -247,16 +251,53 @@ async function signAddBaker(
         Uint8Array.of(TransactionKindId.Add_baker),
     ]);
 
-    const part2 = serializeAddBakerKeys(transaction.payload);
+    const part2 = serializeBakerVerifyKeys(transaction.payload);
     const part3 = serializeAddBakerProofsStakeRestake(transaction.payload);
 
-    await transport.send(0xe0, INS_ADD_BAKER, 0x00, 0x00, part1);
-    await transport.send(0xe0, INS_ADD_BAKER, 0x01, 0x00, part2);
+    await transport.send(0xe0, INS_ADD_OR_UPDATE_BAKER, 0x00, 0x00, part1);
+    await transport.send(0xe0, INS_ADD_OR_UPDATE_BAKER, 0x01, 0x00, part2);
     const response = await transport.send(
         0xe0,
-        INS_ADD_BAKER,
+        INS_ADD_OR_UPDATE_BAKER,
         0x02,
         0x00,
+        part3
+    );
+
+    return response.slice(0, 64);
+}
+
+async function signUpdateBakerKeys(
+    transport: Transport,
+    path: number[],
+    transaction: UpdateBakerKeys
+): Promise<Buffer> {
+    const payload = serializeUpdateBakerKeys(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const part1 = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        Uint8Array.of(TransactionKindId.Update_baker_keys),
+    ]);
+
+    const part2 = serializeBakerVerifyKeys(transaction.payload);
+    const part3 = serializeBakerKeyProofs(transaction.payload);
+
+    await transport.send(0xe0, INS_ADD_OR_UPDATE_BAKER, 0x00, 0x01, part1);
+    await transport.send(0xe0, INS_ADD_OR_UPDATE_BAKER, 0x01, 0x01, part2);
+    const response = await transport.send(
+        0xe0,
+        INS_ADD_OR_UPDATE_BAKER,
+        0x02,
+        0x01,
         part3
     );
 
@@ -314,6 +355,9 @@ export default async function signTransfer(
     }
     if (instanceOfAddBaker(transaction)) {
         return signAddBaker(transport, path, transaction);
+    }
+    if (instanceOfUpdateBakerKeys(transaction)) {
+        return signUpdateBakerKeys(transport, path, transaction);
     }
     if (instanceOfRemoveBaker(transaction)) {
         return signRemoveBaker(transport, path, transaction);
