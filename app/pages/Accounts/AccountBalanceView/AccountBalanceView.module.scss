@@ -1,0 +1,37 @@
+@import 'config/bundle';
+
+.accountBalanceView {
+    background-color: #000;
+    text-align: center;
+    padding-bottom: 10px;
+    height: 250px;
+}
+
+.inverted {
+    filter: invert(100%);
+}
+
+.ViewingShielded {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 20px;
+}
+
+.bold {
+    font-weight: $font-weight-bold;
+}
+
+.amountRow,
+.ViewingShieldedButton,
+.blueText {
+    color: $color-pale-blue;
+}
+
+.ViewingShieldedButton,
+.amountRow {
+    font-size: $font-size-body2;
+}
+
+.amountRow {
+    margin: 10px 80px;
+}

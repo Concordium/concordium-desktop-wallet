@@ -8,12 +8,12 @@ import {
     chooseAccount,
     chosenAccountIndexSelector,
     accountsInfoSelector,
-} from '../../features/AccountSlice';
-import { setViewingShielded } from '../../features/TransactionSlice';
-import AccountListElement from '../../components/AccountListElement';
-import { Account, Dispatch } from '../../utils/types';
-import routes from '../../constants/routes.json';
-import styles from './Accounts.module.scss';
+} from '~/features/AccountSlice';
+import { setViewingShielded } from '~/features/TransactionSlice';
+import AccountListElement from '~/components/AccountListElement';
+import { Account, Dispatch } from '~/utils/types';
+import routes from '~/constants/routes.json';
+import CardList from '~/cross-app-components/CardList';
 
 async function load(dispatch: Dispatch) {
     const accounts = await loadAccounts(dispatch);
@@ -43,11 +43,10 @@ export default function AccountList() {
     }
 
     return (
-        <>
+        <CardList>
             {accounts.map((account: Account, index: number) => (
                 <AccountListElement
                     key={account.address}
-                    className={styles.listElement}
                     active={index === chosenIndex}
                     account={account}
                     accountInfo={accountsInfo[account.address]}
@@ -58,6 +57,6 @@ export default function AccountList() {
                     }}
                 />
             ))}
-        </>
+        </CardList>
     );
 }
