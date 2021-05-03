@@ -3,6 +3,7 @@ import knex from './knex';
 import {
     credentialsTable,
     identitiesTable,
+    walletTable,
 } from '../constants/databaseNames.json';
 
 function convertBooleans(credentials: Credential[]) {
@@ -61,10 +62,17 @@ export async function getCredentialsOfAccount(
             '=',
             `${identitiesTable}.id`
         )
+        .join(
+            walletTable,
+            `${identitiesTable}.walletId`,
+            '=',
+            `${walletTable}.id`
+        )
         .where({ accountAddress })
         .select(
             `${credentialsTable}.*`,
-            `${identitiesTable}.identityNumber as identityNumber`
+            `${identitiesTable}.identityNumber as identityNumber`,
+            `${walletTable}.id as walletId`
         );
     return convertBooleans(credentials);
 }

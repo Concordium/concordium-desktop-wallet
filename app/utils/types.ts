@@ -287,6 +287,7 @@ export interface Credential {
     credentialNumber?: number;
     identityId?: number;
     identityNumber?: number;
+    walletId?: number;
     credId: Hex;
     policy: JSONString;
 }
