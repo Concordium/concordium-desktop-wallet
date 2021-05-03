@@ -43,9 +43,26 @@ export async function getNextCredentialNumber(identityId: number) {
         .select()
         .table(credentialsTable)
         .where({ identityId });
+    if (credentials.length === 0) {
+        return 0;
+    }
     const currentNumber = credentials.reduce(
         (num, cred) => Math.max(num, cred.credentialNumber),
         0
     );
     return currentNumber + 1;
+}
+
+export async function updateCredentialIndex(
+    credId: string,
+    credentialIndex: number | undefined
+) {
+    if (credentialIndex === undefined) {
+        return (await knex())(credentialsTable)
+            .where({ credId })
+            .update({ credentialIndex: null });
+    }
+    return (await knex())(credentialsTable)
+        .where({ credId })
+        .update({ credentialIndex });
 }

@@ -10,7 +10,7 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '~/utils/types';
-import findHandler from '~/utils/updates/HandlerFinder';
+import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 
 import styles from './UpdateInstructionDetails.module.scss';
 
@@ -25,9 +25,9 @@ interface Props {
 export default function UpdateInstructionDetails({
     transaction,
 }: Props): JSX.Element {
-    const handler = findHandler(transaction.type);
+    const handler = findUpdateInstructionHandler(transaction.type);
     const date = dateFromTimeStamp(transaction.header.effectiveTime);
-    const isExpired = date.getDate() > getNow(TimeStampUnit.milliSeconds);
+    const isExpired = date.valueOf() < getNow(TimeStampUnit.milliSeconds);
 
     return (
         <div className={styles.root}>

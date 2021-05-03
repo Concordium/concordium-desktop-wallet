@@ -1,11 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
+// eslint-disable-next-line import/no-cycle
+import { updateCredentialsStatus } from './CredentialSlice';
 import {
     getAllAccounts,
     insertAccount,
     updateAccount,
     removeAccount as removeAccountFromDatabase,
+    updateSignatureThreshold as updateSignatureThresholdInDatabase,
 } from '../database/AccountDao';
 import { decryptAmounts } from '../utils/rustInterface';
 import {
@@ -16,6 +19,7 @@ import {
     AccountInfo,
     Dispatch,
     Global,
+    Identity,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
@@ -64,10 +68,26 @@ const accountsSlice = createSlice({
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
         },
+        updateAccountFields: (state, update) => {
+            const { address, ...fields } = update.payload;
+            const index = state.accounts.findIndex(
+                (account) => account.address === address
+            );
+            if (index > -1) {
+                state.accounts[index] = { ...state.accounts[index], ...fields };
+            }
+        },
     },
 });
 
 export const accountsSelector = (state: RootState) => state.accounts.accounts;
+
+export const accountsOfIdentitySelector = (identity: Identity) => (
+    state: RootState
+) =>
+    state.accounts.accounts.filter(
+        (account) => account.identityId === identity.id
+    );
 
 export const accountsInfoSelector = (state: RootState) =>
     state.accounts.accountsInfo;
@@ -87,6 +107,7 @@ export const {
     chooseAccount,
     updateAccounts,
     setAccountInfos,
+    updateAccountFields,
 } = accountsSlice.actions;
 
 // given an account and the accountEncryptedAmount from the accountInfo
@@ -114,6 +135,15 @@ function updateAccountEncryptedAmount(
     return Promise.resolve();
 }
 
+export async function updateSignatureThreshold(
+    dispatch: Dispatch,
+    address: string,
+    signatureThreshold: number
+) {
+    updateSignatureThresholdInDatabase(address, signatureThreshold);
+    return dispatch(updateAccountFields({ address, signatureThreshold }));
+}
+
 // Loads the given accounts' infos from the node, then updates the
 // AccountInfo state.
 export async function loadAccountInfos(
@@ -133,6 +163,18 @@ export async function loadAccountInfos(
     const updateEncryptedAmountsPromises = accountInfos.map(
         ({ account, accountInfo }) => {
             map[account.address] = accountInfo;
+
+            if (
+                accountInfo.accountThreshold &&
+                account.signatureThreshold !== accountInfo.accountThreshold
+            ) {
+                updateSignatureThreshold(
+                    dispatch,
+                    account.address,
+                    accountInfo.accountThreshold
+                );
+            }
+            updateCredentialsStatus(dispatch, account.address, accountInfo);
             return updateAccountEncryptedAmount(
                 account,
                 accountInfo.accountEncryptedAmount
@@ -192,8 +234,8 @@ export async function confirmAccount(
     accountName: string,
     transactionId: string
 ) {
-    const status = await getStatus(transactionId);
-    switch (status) {
+    const response = await getStatus(transactionId);
+    switch (response.status) {
         case TransactionStatus.Rejected:
             await updateAccount(accountName, {
                 status: AccountStatus.Rejected,
@@ -239,6 +281,26 @@ export async function decryptAccountBalance(
         totalDecrypted,
         allDecrypted: true,
     });
+}
+
+// Add an account with pending status.
+export async function addExternalAccount(
+    dispatch: Dispatch,
+    accountAddress: string,
+    identityId: number,
+    signatureThreshold: number
+) {
+    const account: Account = {
+        name: accountAddress.substring(0, 8),
+        identityId,
+        status: AccountStatus.Confirmed,
+        address: accountAddress,
+        signatureThreshold,
+        maxTransactionId: 0,
+        isInitial: false,
+    };
+    await insertAccount(account);
+    return loadAccounts(dispatch);
 }
 
 export async function importAccount(account: Account | Account[]) {

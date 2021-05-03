@@ -13,19 +13,19 @@ import {
     EqualRecord,
     NotOptional,
     PolymorphicComponentProps,
-} from '../../utils/types';
-import { isValidAddress } from '../../utils/accountHelpers';
+} from '~/utils/types';
+import { commonAddressValidators } from '~/utils/accountHelpers';
 import {
     addressBookSelector,
     addToAddressBook,
     updateAddressBookEntry,
-} from '../../features/AddressBookSlice';
+} from '~/features/AddressBookSlice';
+import Modal from '~/cross-app-components/Modal';
+import Button from '~/cross-app-components/Button';
+import Card from '~/cross-app-components/Card';
 import Form from '../Form';
 
 import styles from './UpsertAddress.module.scss';
-import Modal from '../../cross-app-components/Modal';
-import Button from '../../cross-app-components/Button';
-import Card from '../../cross-app-components/Card';
 
 type Props = PropsWithChildren<{
     initialValues?: AddressBookEntryForm;
@@ -45,9 +45,6 @@ const fieldNames: NotOptional<EqualRecord<AddressBookEntryForm>> = {
 };
 
 const noteMaxLength = 255;
-
-const addressFormat: Validate = (address: string) =>
-    isValidAddress(address) || 'Address format is invalid';
 
 export default function UpsertAddress<TAs extends ElementType = typeof Button>({
     onSubmit,
@@ -82,6 +79,10 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
 
     const addressUnique: Validate = useCallback(
         (address: string) => {
+            if (address === initialValues?.address) {
+                return true;
+            }
+
             const existing = entries.find((e) => e.address === address);
 
             return (
@@ -89,7 +90,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                 `Address already exists under name: ${existing.name}`
             );
         },
-        [entries]
+        [entries, initialValues]
     );
 
     const handleSubmit: SubmitHandler<AddressBookEntryForm> = useCallback(
@@ -130,22 +131,14 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                             name={fieldNames.address}
                             rules={{
                                 required: 'Address required',
-                                minLength: {
-                                    value: 50,
-                                    message: 'Address should be 50 characters',
-                                },
-                                maxLength: {
-                                    value: 50,
-                                    message: 'Address should be 50 characters',
-                                },
+                                ...commonAddressValidators,
                                 validate: {
-                                    addressFormat,
+                                    ...commonAddressValidators.validate,
                                     addressUnique,
                                 },
                             }}
                             placeholder="Paste the account address here"
                             defaultValue={initialValues?.address}
-                            autoScale
                         />
                         <Form.Input
                             className={styles.input}

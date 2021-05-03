@@ -1,8 +1,10 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Header, Menu } from 'semantic-ui-react';
-import { selectSettings, settingsSelector } from '../../features/SettingsSlice';
+import { useSelector } from 'react-redux';
+import { settingsSelector } from '../../features/SettingsSlice';
 import settingKeys from '../../constants/settingKeys.json';
+import ButtonNavLink from '~/components/ButtonNavLink';
+import { selectedSettingRoute } from '~/utils/routerHelper';
+import styles from './SettingsList.module.scss';
 
 const settingsName = new Map<string, string>([
     [settingKeys.multiSignatureSettings, 'Multi signature settings'],
@@ -10,20 +12,19 @@ const settingsName = new Map<string, string>([
 ]);
 
 export default function SettingsList() {
-    const dispatch = useDispatch();
     const settings = useSelector(settingsSelector);
 
     return (
-        <Menu vertical size="massive" fluid>
-            {settings.map((setting, i) => (
-                <Menu.Item
+        <>
+            {settings.map((setting) => (
+                <ButtonNavLink
+                    className={styles.item}
                     key={setting.type}
-                    name={setting.type}
-                    onClick={() => selectSettings(dispatch, i)}
+                    to={selectedSettingRoute(setting.type)}
                 >
-                    <Header>{settingsName.get(setting.type)}</Header>
-                </Menu.Item>
+                    {settingsName.get(setting.type)}
+                </ButtonNavLink>
             ))}
-        </Menu>
+        </>
     );
 }

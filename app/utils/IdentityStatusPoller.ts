@@ -27,7 +27,7 @@ export async function confirmIdentityAndInitialAccount(
             await rejectIdentity(dispatch, identityName);
         } else {
             const { accountAddress } = token;
-            const credential = token.credential.value.contents;
+            const credential = token.credential.value.credential.contents;
             const parsedCredential = {
                 credId: credential.credId || credential.regId,
                 policy: credential.policy,
@@ -39,6 +39,7 @@ export async function confirmIdentityAndInitialAccount(
                 accountAddress,
                 0,
                 identityId,
+                0, // credentialIndex = 0 on original
                 parsedCredential
             );
             addToAddressBook(dispatch, {

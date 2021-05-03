@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import {
     AccountTransaction,
     instanceOfSimpleTransfer,
     instanceOfTransferToEncrypted,
     instanceOfTransferToPublic,
     instanceOfScheduledTransfer,
+    instanceOfUpdateAccountCredentials,
 } from '../../utils/types';
 import { lookupName } from '../../utils/transactionHelpers';
-import { chosenAccountSelector } from '../../features/AccountSlice';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
 import DisplayInternalTransfer from './DisplayInternalTransfer';
 import DisplaySimpleTransfer from './DisplaySimpleTransfer';
+import DisplayAccountCredentialsUpdate from '../DisplayAccountCredentialUpdate';
 
 interface Props {
     transaction: AccountTransaction;
@@ -22,11 +22,13 @@ interface Props {
  * @param {AccountTransaction} transaction: The transaction, which details is displayed.
  */
 export default function AccountTransactionDetails({ transaction }: Props) {
-    const account = useSelector(chosenAccountSelector);
-    const fromName = account?.name;
+    const [fromName, setFromName] = useState<string | undefined>();
     const [toName, setToName] = useState<string | undefined>();
 
     useEffect(() => {
+        lookupName(transaction.sender)
+            .then((name) => setFromName(name))
+            .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
         if ('toAddress' in transaction.payload) {
             lookupName(transaction.payload.toAddress)
                 .then((name) => setToName(name))
@@ -59,6 +61,14 @@ export default function AccountTransactionDetails({ transaction }: Props) {
             <DisplayScheduleTransfer
                 transaction={transaction}
                 toName={toName}
+                fromName={fromName}
+            />
+        );
+    }
+    if (instanceOfUpdateAccountCredentials(transaction)) {
+        return (
+            <DisplayAccountCredentialsUpdate
+                transaction={transaction}
                 fromName={fromName}
             />
         );

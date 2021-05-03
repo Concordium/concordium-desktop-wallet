@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import React, { InputHTMLAttributes, useMemo, useState } from 'react';
+import Label from '~/components/Label';
 import Button from '~/cross-app-components/Button';
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
@@ -60,7 +61,7 @@ export default function FileInput({
             onDragOver={() => setDragOver(true)}
             onDragLeave={() => setDragOver(false)}
         >
-            {label && <span className={styles.label}>{label}</span>}
+            {label && <Label className={styles.label}>{label}</Label>}
             <div className={styles.wrapper}>
                 {files.length === 0 || disableFileNames
                     ? placeholder && (

@@ -8,13 +8,14 @@ import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { sendTransaction } from '~/utils/nodeRequests';
 import {
     serializeTransaction,
-    getTransactionHash,
+    getAccountTransactionHash,
 } from '~/utils/transactionSerialization';
 import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
 import {
     Account,
     LocalCredential,
     instanceOfLocalCredential,
+    instanceOfDeployedCredential,
     AccountInfo,
     AccountTransaction,
     Global,
@@ -63,7 +64,14 @@ async function attachCompletedPayload(
             accountInfo.accountEncryptedAmount,
             credential.credentialNumber
         );
-        return { ...transaction, payload: data.payload };
+        const payload = {
+            ...transaction.payload,
+            proof: data.payload.proof,
+            index: data.payload.index,
+            remainingEncryptedAmount: data.payload.remainingAmount,
+        };
+
+        return { ...transaction, payload };
     }
     return transaction;
 }
@@ -98,7 +106,6 @@ export default function SubmitTransfer({ location }: Props) {
         setMessage: (message: string) => void
     ) {
         const signatureIndex = 0;
-        const credentialAccountIndex = 0; // TODO: do we need to support other credential indices here?
 
         if (!global) {
             setMessage('Missing global object.');
@@ -107,7 +114,21 @@ export default function SubmitTransfer({ location }: Props) {
 
         const credential = (
             await getCredentialsOfAccount(account.address)
-        ).find((cred) => cred.credentialIndex === credentialAccountIndex);
+        ).find(
+            (cred) =>
+                instanceOfLocalCredential(cred) ||
+                instanceOfDeployedCredential(cred)
+        );
+
+        if (
+            !credential ||
+            !instanceOfLocalCredential(credential) ||
+            !instanceOfDeployedCredential(credential)
+        ) {
+            throw new Error(
+                'Unable to sign transfer, because we were unable to find local and deployed credential'
+            );
+        }
 
         if (!credential) {
             setMessage(
@@ -137,7 +158,7 @@ export default function SubmitTransfer({ location }: Props) {
         });
         const signature: Buffer = await ledger.signTransfer(transaction, path);
         const signatureStructured = buildTransactionAccountSignature(
-            credentialAccountIndex,
+            credential.credentialIndex,
             signatureIndex,
             signature
         );
@@ -145,7 +166,7 @@ export default function SubmitTransfer({ location }: Props) {
             transaction,
             () => signatureStructured
         );
-        const transactionHash = getTransactionHash(
+        const transactionHash = getAccountTransactionHash(
             transaction,
             () => signatureStructured
         ).toString('hex');

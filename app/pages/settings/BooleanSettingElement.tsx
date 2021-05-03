@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Button, Modal, Segment } from 'semantic-ui-react';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+import Card from '~/cross-app-components/Card';
 import Switch from '../../cross-app-components/Switch';
 import { updateSettingEntry } from '../../features/SettingsSlice';
 import { Setting } from '../../utils/types';
@@ -41,20 +42,19 @@ export default function BooleanSetting({
     );
 
     const enableWarningModal = (
-        <Modal open={open}>
-            <Modal.Header>Warning</Modal.Header>
-            <Modal.Content>{warning}</Modal.Content>
-            <Modal.Actions>
-                <Button onClick={() => setOpen(false)}>Continue</Button>
-            </Modal.Actions>
-        </Modal>
+        <SimpleErrorModal
+            show={open}
+            header="Warning"
+            content={warning}
+            onClick={() => setOpen(false)}
+        />
     );
 
     return (
-        <Segment>
+        <Card>
             {enableWarningModal}
             {toggleCheckbox}
-        </Segment>
+        </Card>
     );
 }
 

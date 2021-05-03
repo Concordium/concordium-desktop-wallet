@@ -52,3 +52,12 @@ export async function removeAccount(accountAddress: string) {
         .where({ address: accountAddress })
         .del();
 }
+
+export async function updateSignatureThreshold(
+    address: string,
+    signatureThreshold: number
+) {
+    return (await knex())(accountsTable)
+        .where({ address })
+        .update({ signatureThreshold });
+}

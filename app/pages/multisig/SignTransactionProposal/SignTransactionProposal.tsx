@@ -4,36 +4,31 @@ import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { parse, stringify } from 'json-bigint';
 import { Redirect } from 'react-router';
-import clsx from 'clsx';
-import { hashSha256 } from '~/utils/serializationHelpers';
 import routes from '~/constants/routes.json';
 import {
     AccountTransaction,
-    instanceOfUpdateInstruction,
     MultiSignatureTransaction,
     UpdateInstruction,
     UpdateInstructionPayload,
     UpdateInstructionSignature,
 } from '~/utils/types';
-import { TransactionHandler } from '~/utils/transactionTypes';
-import { createTransactionHandler } from '~/utils/updates/HandlerFinder';
+import { UpdateInstructionHandler } from '~/utils/transactionTypes';
+import { createUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { serializeUpdateInstructionHeaderAndPayload } from '~/utils/UpdateSerialization';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BlockSummary } from '~/utils/NodeApiTypes';
-import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
+import { findKey } from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
-import Form from '~/components/Form';
 import TransactionDetails from '~/components/TransactionDetails';
-import ExpiredEffectiveTimeView from '../ExpiredEffectiveTimeView';
+import ExpiredTransactionView from '../ExpiredTransactionView';
 import { ensureProps } from '~/utils/componentHelpers';
+import getTransactionHash from '~/utils/transactionHash';
+import SignTransaction from './SignTransaction';
 
 import styles from './SignTransactionProposal.module.scss';
-import Ledger from '~/components/ledger/Ledger';
-import { asyncNoOp } from '~/utils/basicHelpers';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface SignInput {
@@ -53,7 +48,6 @@ interface Props {
 function SignTransactionProposalView({ location }: Props) {
     const [showValidationError, setShowValidationError] = useState(false);
     const [transactionHash, setTransactionHash] = useState<string>();
-    const [signing, setSigning] = useState(false);
     const dispatch = useDispatch();
 
     const { multiSignatureTransaction, blockSummary }: SignInput = parse(
@@ -63,11 +57,8 @@ function SignTransactionProposalView({ location }: Props) {
     const type = 'UpdateInstruction';
 
     const transactionHandler = useMemo<
-        TransactionHandler<
-            UpdateInstruction<UpdateInstructionPayload>,
-            ConcordiumLedgerClient
-        >
-    >(() => createTransactionHandler({ transaction, type }), [
+        UpdateInstructionHandler<UpdateInstruction, ConcordiumLedgerClient>
+    >(() => createUpdateInstructionHandler({ transaction, type }), [
         transaction,
         type,
     ]);
@@ -78,19 +69,15 @@ function SignTransactionProposalView({ location }: Props) {
     );
 
     useEffect(() => {
-        const serialized = serializeUpdateInstructionHeaderAndPayload(
-            updateInstruction,
-            transactionHandler.serializePayload(updateInstruction)
-        );
-        const hashed = hashSha256(serialized).toString('hex');
-        setTransactionHash(hashed);
-    }, [setTransactionHash, transactionHandler, updateInstruction]);
+        setTransactionHash(getTransactionHash(updateInstruction));
+    }, [setTransactionHash, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const authorizationKey = await findAuthorizationKey(
+        const authorizationKey = await findKey(
             ledger,
-            transactionHandler,
-            blockSummary.updates.authorizations
+            blockSummary.updates.keys,
+            updateInstruction,
+            transactionHandler
         );
         if (!authorizationKey) {
             setShowValidationError(true);
@@ -137,6 +124,7 @@ function SignTransactionProposalView({ location }: Props) {
         <MultiSignatureLayout
             pageTitle={transactionHandler.title}
             stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+            delegateScroll
         >
             <SimpleErrorModal
                 show={showValidationError}
@@ -145,60 +133,24 @@ function SignTransactionProposalView({ location }: Props) {
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
             <Columns
-                className={clsx(styles.body, styles.bodySubtractPadding)}
+                className={styles.subtractContainerPadding}
                 divider
                 columnClassName={styles.column}
+                columnScroll
             >
                 <Columns.Column header="Transaction Details">
-                    <section className={styles.columnContent}>
+                    <section className={styles.detailsColumnContent}>
                         <TransactionDetails transaction={transactionObject} />
-                        {instanceOfUpdateInstruction(transactionObject) && (
-                            <ExpiredEffectiveTimeView
-                                transaction={transactionObject}
-                            />
-                        )}
+                        <ExpiredTransactionView
+                            transaction={transactionObject}
+                        />
                     </section>
                 </Columns.Column>
-                <Columns.Column header="Signature and Hardware Wallet">
-                    <Ledger
-                        ledgerCallback={signingFunction}
-                        onSignError={() => setSigning(false)}
-                    >
-                        {({
-                            isReady,
-                            statusView,
-                            submitHandler = asyncNoOp,
-                        }) => (
-                            <section className={styles.signColumnContent}>
-                                <h5>Hardware wallet status</h5>
-                                {statusView}
-                                <Form
-                                    onSubmit={() => {
-                                        setSigning(true);
-                                        submitHandler();
-                                    }}
-                                >
-                                    <Form.Checkbox
-                                        name="check"
-                                        rules={{
-                                            required:
-                                                'Make sure the proposed changes are correct',
-                                        }}
-                                        disabled={signing}
-                                    >
-                                        I am sure that the propsed changes are
-                                        correct
-                                    </Form.Checkbox>
-                                    <Form.Submit
-                                        disabled={signing || !isReady}
-                                        className={styles.submit}
-                                    >
-                                        Generate Transaction
-                                    </Form.Submit>
-                                </Form>
-                            </section>
-                        )}
-                    </Ledger>
+                <Columns.Column
+                    header="Signature and Hardware Wallet"
+                    className={styles.stretchColumn}
+                >
+                    <SignTransaction signingFunction={signingFunction} />
                 </Columns.Column>
             </Columns>
         </MultiSignatureLayout>

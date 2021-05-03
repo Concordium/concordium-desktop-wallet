@@ -12,15 +12,11 @@ import {
 } from '../../utils/types';
 import { chosenAccountSelector } from '../../features/AccountSlice';
 import { viewingShieldedSelector } from '../../features/TransactionSlice';
-import SidedRow from '../../components/SidedRow';
+import SidedRow from '~/components/SemanticSidedRow';
 import { isFailed } from '../../utils/transactionHelpers';
 
 function determineOutgoing(transaction: TransferTransaction, account: Account) {
-    const { toAddress } = transaction;
-    if (toAddress.length === 0 && transaction.success) {
-        return false;
-    }
-    return toAddress !== account.address;
+    return transaction.fromAddress === account.address;
 }
 
 function getName(
@@ -107,15 +103,6 @@ function parseAmount(
         case OriginType.Account:
             if (isOutgoingTransaction) {
                 const cost = BigInt(transaction.cost || '0');
-                if (
-                    transaction.transactionKind ===
-                    TransactionKindString.EncryptedAmountTransfer
-                ) {
-                    return {
-                        amount: `${displayAsGTU(-cost)}`,
-                        amountFormula: `${displayAsGTU(cost)} Fee`,
-                    };
-                }
                 return buildOutgoingAmountStrings(
                     BigInt(transaction.total),
                     BigInt(transaction.subtotal),

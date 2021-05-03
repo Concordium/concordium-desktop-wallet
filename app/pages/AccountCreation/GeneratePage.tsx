@@ -56,6 +56,7 @@ export default function AccountCreationGenerate({
         accountAddress,
     }: CredentialDeploymentDetails) {
         const payload = Buffer.from(credentialDeploymentInfoHex, 'hex');
+
         try {
             const response = await sendTransaction(payload);
             if (response.getValue()) {
@@ -94,6 +95,7 @@ export default function AccountCreationGenerate({
             accountAddress,
             credentialNumber,
             identity.id,
+            0, // credentialIndex = 0 on original
             credentialDeploymentInfo
         );
         addToAddressBook(dispatch, {

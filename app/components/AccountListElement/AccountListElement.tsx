@@ -1,27 +1,31 @@
-import React, { MouseEvent } from 'react';
+import React from 'react';
 import clsx from 'clsx';
+import MultiSigIcon from '@resources/svg/multisig.svg';
 import PendingImage from '@resources/svg/pending_old.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import { displayAsGTU } from '~/utils/gtu';
 import { AccountInfo, Account, AccountStatus } from '~/utils/types';
 import { isInitialAccount } from '~/utils/accountHelpers';
-// import SidedRow from '~/components/SidedRow';
+import SidedRow from '~/components/SidedRow';
+
 import styles from './AccountListElement.module.scss';
 
-interface RowProps {
-    left: string | JSX.Element;
-    right: string | JSX.Element;
-    onClick?(e: MouseEvent): void;
-}
-
-function SidedRow({ left, right, onClick }: RowProps): JSX.Element {
-    return (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-        <div className={styles.row} onClick={onClick}>
-            <div className={styles.left}>{left}</div>
-            <div className={styles.right}>{right}</div>
-        </div>
-    );
+function displayIdentity(
+    account: Account,
+    accountInfo: AccountInfo | undefined
+) {
+    if (
+        accountInfo &&
+        Object.values(accountInfo.accountCredentials).length > 1
+    ) {
+        return (
+            <>
+                {account.identityName} +{' '}
+                <MultiSigIcon className={styles.multisig} />
+            </>
+        );
+    }
+    return account.identityName;
 }
 
 interface Props {
@@ -59,7 +63,9 @@ export default function AccountListElement({
             + <ShieldImage height="15" />
         </>
     );
-
+    const accountBaker = accountInfo?.accountBaker;
+    const stakedAmount = accountBaker ? BigInt(accountBaker.stakedAmount) : 0n;
+    const amountAtDisposal = unShielded - scheduled - stakedAmount;
     return (
         <div
             className={clsx(
@@ -74,6 +80,7 @@ export default function AccountListElement({
             role="button"
         >
             <SidedRow
+                className={styles.firstRow}
                 left={
                     <>
                         <b className={styles.inline}>
@@ -88,32 +95,37 @@ export default function AccountListElement({
                         ) : undefined}
                     </>
                 }
-                right={account.identityName || ''}
+                right={displayIdentity(account, accountInfo)}
             />
             <SidedRow
-                left={<h2>Account Total:</h2>}
+                className={styles.row}
+                left={<h3>Account Total:</h3>}
                 right={
-                    <>
+                    <h3>
                         {displayAsGTU(shielded + unShielded)}
                         {hidden}
-                    </>
+                    </h3>
                 }
             />
             <div className={styles.dividingLine} />
             <SidedRow
+                className={styles.row}
                 left={<h3>Balance:</h3>}
                 right={<h3>{displayAsGTU(unShielded)}</h3>}
             />
             <SidedRow
+                className={styles.row}
                 left="- At Disposal:"
-                right={displayAsGTU(unShielded - scheduled)}
+                right={displayAsGTU(amountAtDisposal)}
             />
             <SidedRow
+                className={styles.row}
                 left="- Staked:"
-                right={displayAsGTU(unShielded - scheduled)}
+                right={displayAsGTU(stakedAmount)}
             />
             <div className={styles.dividingLine} />
             <SidedRow
+                className={styles.row}
                 left={<h3>Shielded Balance:</h3>}
                 right={
                     <h3>

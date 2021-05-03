@@ -36,3 +36,13 @@ test('parse/stringify should handle an object with a bigint field and preserves 
     expect(y.small).toBe(2);
     expect(y.text).toBe('2n');
 });
+
+test('parse/stringify handles null', () => {
+    const x = null;
+    expect(parse(stringify(x))).toBeNull();
+});
+
+test('parse/stringify handles undefined fields', () => {
+    const x = { a: undefined };
+    expect(parse(stringify(x)).a).toBeUndefined();
+});

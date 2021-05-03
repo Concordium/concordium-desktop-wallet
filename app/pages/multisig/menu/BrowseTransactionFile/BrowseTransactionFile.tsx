@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { parse } from 'json-bigint';
+import { parse } from '~/utils/JSONHelper';
 import {
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
@@ -46,8 +46,7 @@ export default function BrowseTransactionFile() {
         if (instanceOfUpdateInstruction(transactionObject)) {
             type = 'UpdateInstruction';
         } else if (instanceOfAccountTransaction(transactionObject)) {
-            // TODO Implement account transaction handler and set it here.
-            throw new Error('Not implemented yet.');
+            type = 'AccountTransaction';
         } else {
             setShowError({
                 show: true,

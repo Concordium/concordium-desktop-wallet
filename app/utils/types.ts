@@ -11,6 +11,11 @@ type Word32 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 
+export interface Fraction {
+    numerator: Word64;
+    denominator: Word64;
+}
+
 export enum SchemeId {
     Ed25519 = 0,
 }
@@ -33,6 +38,11 @@ export interface NewAccount {
 export interface Versioned<T> {
     v: number;
     value: T;
+}
+
+export interface Typed<T> {
+    type: string;
+    contents: T;
 }
 
 // Reflects the attributes of an Identity, which describes
@@ -73,6 +83,7 @@ export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    Genesis = 'genesis',
 }
 
 /**
@@ -94,6 +105,7 @@ export enum AccountStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    Genesis = 'genesis',
 }
 
 /**
@@ -123,17 +135,17 @@ export enum TransactionKindString {
     Transfer = 'transfer',
     AddBaker = 'addBaker',
     RemoveBaker = 'removeBaker',
-    UpdateBakerAccount = 'updateBakerAccount',
-    UpdateBakerSignKey = 'updateBakerSignKey',
-    DelegateStake = 'delegateStake',
-    UndelegateStake = 'undelegateStake',
-    UpdateElectionDifficulty = 'updateElectionDifficulty',
-    DeployCredential = 'deployCredential',
+    UpdateBakerStake = 'updateBakerStake',
+    UpdateBakerRestakeEarnings = 'updateBakerRestakeEarnings',
+    UpdateBakerKeys = 'updateBakerKeys',
+    UpdateCredentialKeys = 'updateCredentialKeys',
     BakingReward = 'bakingReward',
     EncryptedAmountTransfer = 'encryptedAmountTransfer',
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
-    TransferWithSchedule = 'transferWithSchedule', // TODO confirm
+    TransferWithSchedule = 'transferWithSchedule',
+    UpdateCredentials = 'updateCredentials',
+    RegisterData = 'registerData',
 }
 
 // The ids of the different types of an AccountTransaction.
@@ -144,16 +156,17 @@ export enum TransactionKindId {
     Simple_transfer = 3,
     Add_baker = 4,
     Remove_baker = 5,
-    Update_baker_account = 6,
-    Update_baker_sign_key = 7,
-    Delegate_stake = 8,
-    Undelegate_stake = 9,
+    Update_baker_stake = 6,
+    Update_baker_restake_earnings = 7,
+    Update_baker_keys = 8,
+    Update_credential_keys = 13,
     Encrypted_transfer = 16,
     Transfer_to_encrypted = 17,
     Transfer_to_public = 18,
     Transfer_with_schedule = 19,
-} // TODO: Add all kinds (11- 18)
-
+    Update_credentials = 20,
+    Register_data = 21,
+}
 export interface SimpleTransferPayload {
     amount: string;
     toAddress: string;
@@ -181,7 +194,19 @@ export interface ScheduledTransferPayload {
     toAddress: string;
 }
 
+export interface AddedCredential {
+    index: Word8;
+    value: CredentialDeploymentInformation;
+}
+
+export interface UpdateAccountCredentialsPayload {
+    addedCredentials: AddedCredential[];
+    removedCredIds: Hex[];
+    threshold: number;
+}
+
 export type TransactionPayload =
+    | UpdateAccountCredentialsPayload
     | TransferToPublicPayload
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
@@ -195,6 +220,7 @@ export interface AccountTransaction<
     sender: Hex;
     nonce: string;
     energyAmount: string;
+    estimatedFee?: Fraction;
     expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;
@@ -204,6 +230,7 @@ export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
+export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 
 // Types of block items, and their identifier numbers
@@ -218,6 +245,7 @@ export interface ChainArData {
 }
 
 export interface CredentialDeploymentValues {
+    regId?: Hex;
     credId: Hex;
     ipIdentity: IpIdentity;
     revocationThreshold: Threshold;
@@ -260,10 +288,22 @@ export interface Credential {
     policy: JSONString;
 }
 
+export interface DeployedCredential extends Credential {
+    credentialIndex: number;
+}
+
 export interface LocalCredential extends Credential {
     external: false;
     identityId: number;
     credentialNumber: number;
+}
+
+export function instanceOfDeployedCredential(
+    object: Credential
+): object is DeployedCredential {
+    return !(
+        object.credentialIndex === undefined || object.credentialIndex === null
+    );
 }
 
 export function instanceOfLocalCredential(
@@ -418,17 +458,24 @@ export interface TypedCredentialDeploymentInformation {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AccountReleaseSchedule = any; // TODO
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AccountBakerDetails = any; // TODO
+
+interface AccountBakerDetails {
+    stakedAmount: string;
+    bakerId: string;
+}
 
 // Reflects the structure given by the node,
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
+    accountThreshold: number;
     accountReleaseSchedule: AccountReleaseSchedule;
-    accountBaker: AccountBakerDetails;
+    accountBaker?: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
-    accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
+    accountCredentials: Record<
+        number,
+        Versioned<TypedCredentialDeploymentInformation>
+    >;
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.
@@ -506,7 +553,6 @@ export interface SettingGroup {
  * settings table, then it should be represented here.
  */
 export enum SettingTypeEnum {
-    Text = 'text',
     Boolean = 'boolean',
     Connection = 'connection',
 }
@@ -554,7 +600,9 @@ export interface UpdateInstructionSignature {
     signature: string;
 }
 
-export interface UpdateInstruction<T extends UpdateInstructionPayload> {
+export interface UpdateInstruction<
+    T extends UpdateInstructionPayload = UpdateInstructionPayload
+> {
     header: UpdateHeader;
     payload: T;
     type: UpdateType;
@@ -569,26 +617,65 @@ export type UpdateInstructionPayload =
     | ProtocolUpdate
     | GasRewards
     | BakerStakeThreshold
-    | ElectionDifficulty;
+    | ElectionDifficulty
+    | HigherLevelKeyUpdate;
+
+// An actual signature, which goes into an account transaction.
+export type Signature = Hex;
+
+type KeyIndex = Word8;
+// Signatures from a single credential, for an AccountTransaction
+export type TransactionCredentialSignature = Record<KeyIndex, Signature>;
+
+type CredentialIndex = Word8;
+// The signature of an account transaction.
+export type TransactionAccountSignature = Record<
+    CredentialIndex,
+    TransactionCredentialSignature
+>;
+
+export interface AccountTransactionWithSignature<
+    PayloadType extends TransactionPayload = TransactionPayload
+> extends AccountTransaction<PayloadType> {
+    signatures: TransactionAccountSignature;
+}
 
 export type Transaction =
     | AccountTransaction
-    | UpdateInstruction<UpdateInstructionPayload>;
+    | AccountTransactionWithSignature
+    | UpdateInstruction;
+
 /**
- * Update type enumeration. The numbering/order is important as that corresponds
- * to the byte written when serializing the update instruction.
+ * Internal enumeration of the different update types that are available. This
+ * does not correspond one-to-one with the transaction UpdateType enum, and is
+ * necessary due to the key update transactions sharing the same update type.
  */
 export enum UpdateType {
-    UpdateAuthorization = 0,
-    UpdateProtocol = 1,
-    UpdateElectionDifficulty = 2,
-    UpdateEuroPerEnergy = 3,
-    UpdateMicroGTUPerEuro = 4,
-    UpdateFoundationAccount = 5,
-    UpdateMintDistribution = 6,
-    UpdateTransactionFeeDistribution = 7,
-    UpdateGASRewards = 8,
-    UpdateBakerStakeThreshold = 9,
+    UpdateProtocol,
+    UpdateElectionDifficulty,
+    UpdateEuroPerEnergy,
+    UpdateMicroGTUPerEuro,
+    UpdateFoundationAccount,
+    UpdateMintDistribution,
+    UpdateTransactionFeeDistribution,
+    UpdateGASRewards,
+    UpdateBakerStakeThreshold,
+    UpdateRootKeys,
+    UpdateLevel1KeysUsingRootKeys,
+    UpdateLevel1KeysUsingLevel1Keys,
+    UpdateLevel2KeysUsingRootKeys,
+    UpdateLevel2KeysUsingLevel1Keys,
+}
+
+export enum RootKeysUpdateTypes {
+    RootKeysRootUpdate,
+    Level1KeysRootUpdate,
+    Level2KeysRootUpdate,
+}
+
+export enum Level1KeysUpdateTypes {
+    Level1KeysLevel1Update,
+    Level2KeysLevel1Update,
 }
 
 export function instanceOfAccountTransaction(
@@ -601,6 +688,18 @@ export function instanceOfUpdateInstruction(
     object: Transaction
 ): object is UpdateInstruction<UpdateInstructionPayload> {
     return 'header' in object;
+}
+
+export function instanceOfUpdateInstructionSignature(
+    object: TransactionCredentialSignature | UpdateInstructionSignature
+): object is UpdateInstructionSignature {
+    return 'signature' in object && 'authorizationKeyIndex' in object;
+}
+
+export function instanceOfAccountTransactionWithSignature(
+    object: Transaction
+): object is AccountTransactionWithSignature {
+    return instanceOfAccountTransaction(object) && 'signatures' in object;
 }
 
 export function instanceOfSimpleTransfer(
@@ -625,6 +724,12 @@ export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
     return object.transactionKind === TransactionKindId.Transfer_with_schedule;
+}
+
+export function instanceOfUpdateAccountCredentials(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateAccountCredentials {
+    return object.transactionKind === TransactionKindId.Update_credentials;
 }
 
 export function isExchangeRate(
@@ -678,6 +783,55 @@ export function isElectionDifficulty(
     return UpdateType.UpdateElectionDifficulty === transaction.type;
 }
 
+export function isUpdateRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateRootKeys === transaction.type;
+}
+
+export function isUpdateLevel1KeysWithRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel1KeysUsingRootKeys === transaction.type;
+}
+
+export function isUpdateLevel2KeysWithRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel2KeysUsingRootKeys === transaction.type;
+}
+
+export function isUpdateUsingRootKeys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return (
+        isUpdateRootKeys(transaction) ||
+        isUpdateLevel1KeysWithRootKeys(transaction) ||
+        isUpdateLevel2KeysWithRootKeys(transaction)
+    );
+}
+
+export function isUpdateLevel1KeysWithLevel1Keys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel1KeysUsingLevel1Keys === transaction.type;
+}
+
+export function isUpdateLevel2KeysWithLevel1Keys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return UpdateType.UpdateLevel2KeysUsingLevel1Keys === transaction.type;
+}
+
+export function isUpdateUsingLevel1Keys(
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+    return (
+        isUpdateLevel1KeysWithLevel1Keys(transaction) ||
+        isUpdateLevel2KeysWithLevel1Keys(transaction)
+    );
+}
+
 /**
  * Enum for the different states that a multi signature transaction proposal
  * can go through.
@@ -720,10 +874,7 @@ export enum MultiSignatureMenuItems {
     ExportKey = 'Export public-key',
 }
 
-export interface ExchangeRate {
-    numerator: Word64;
-    denominator: Word64;
-}
+export type ExchangeRate = Fraction;
 
 /**
  * A reward fraction with a resolution of 1/100000, i.e. the
@@ -772,6 +923,33 @@ export interface BakerStakeThreshold {
 
 export interface ElectionDifficulty {
     electionDifficulty: Word32;
+}
+
+export enum KeyUpdateEntryStatus {
+    Added,
+    Removed,
+    Unchanged,
+}
+
+export interface KeyWithStatus {
+    key: VerifyKey;
+    status: KeyUpdateEntryStatus;
+}
+
+export type HigherLevelKeyUpdateType = 0 | 1;
+/**
+ * The higher level key update covers three transaction types:
+ *  - Updating root keys with root keys
+ *  - Updating level 1 keys with root keys
+ *  - Updating level 1 keys with level 1 keys
+ */
+export interface HigherLevelKeyUpdate {
+    // Has to be 0 when updating root keys with root keys,
+    // 1 when updating level 1 keys with root keys, and
+    // 0 when updating level 1 keys with level 1 keys.
+    keyUpdateType: HigherLevelKeyUpdateType;
+    updateKeys: KeyWithStatus[];
+    threshold: number;
 }
 
 export interface TransactionDetails {
@@ -863,6 +1041,7 @@ export interface ExportData {
 
 interface EventResult {
     outcome: string;
+    rejectReason?: string;
 }
 
 export interface TransactionEvent {
@@ -935,3 +1114,38 @@ export type PolymorphicComponentProps<
     C extends React.ElementType,
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
+
+export enum TransactionTypes {
+    UpdateInstruction,
+    AccountTransaction,
+}
+
+interface AccountCredentialWithoutProofs extends CredentialDeploymentValues {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    commitments: any;
+}
+
+export interface GenesisAccount {
+    generatedAddress: string;
+    credential: Typed<AccountCredentialWithoutProofs>;
+}
+
+export enum ExportKeyType {
+    Root = 'root',
+    Level1 = 'level1',
+    Level2 = 'level2',
+    Credential = 'credential',
+    Genesis = 'genesis',
+}
+
+/**
+ * Model for the export of governance keys. It contains the
+ * actual key, a signature on that key, the type of key and
+ * an optional note that a user can append to the export.
+ */
+export interface PublicKeyExportFormat {
+    key: VerifyKey;
+    signature: string;
+    type: ExportKeyType;
+    note?: string;
+}
