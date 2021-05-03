@@ -70,7 +70,8 @@ export default function PickAccount({
             setAccountValidationError(invalidAddres);
             setReady(false);
         }
-    }, [address, setReady, setAccountInfo]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [address]);
 
     const fakeAccount: Account = {
         status: AccountStatus.Confirmed,
