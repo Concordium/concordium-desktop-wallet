@@ -7,7 +7,7 @@ import {
     accountsInfoSelector,
     loadAccountInfos,
 } from '~/features/AccountSlice';
-import styles from './UpdateAccountCredentials.module.scss';
+import CardList from '~/cross-app-components/CardList';
 
 interface Props {
     chosenAccount?: Account;
@@ -56,11 +56,10 @@ export default function PickAccount({
     }, [accounts, dispatch, loaded]);
 
     return (
-        <>
+        <CardList>
             {accounts.map((account: Account, index: number) => (
                 <AccountListElement
                     key={account.address}
-                    className={styles.listElement}
                     active={index === chosenIndex}
                     account={account}
                     accountInfo={accountsInfo[account.address]}
@@ -71,6 +70,6 @@ export default function PickAccount({
                     }}
                 />
             ))}
-        </>
+        </CardList>
     );
 }

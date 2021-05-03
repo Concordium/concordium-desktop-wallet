@@ -1,0 +1,24 @@
+@import 'config/bundle';
+
+.title {
+    composes: textFaded from global;
+    font-size: $font-size-body3;
+    margin-bottom: 0;
+    margin-top: 40px;
+}
+
+.name {
+    font-size: $font-size-body1;
+    font-weight: $font-weight-emphasized;
+    margin: 0;
+}
+
+.address {
+    font-size: $font-size-body4;
+    margin-top: 0;
+}
+
+.amount {
+    font-size: $font-size-h1;
+    margin: 0;
+}

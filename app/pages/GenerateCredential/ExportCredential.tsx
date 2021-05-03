@@ -4,6 +4,7 @@ import { saveFile } from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
 import { CredentialBlob } from './types';
 import { insertNewCredential } from '~/features/CredentialSlice';
+import { addExternalAccount } from '~/features/AccountSlice';
 
 interface Props {
     credentialBlob: CredentialBlob | undefined;
@@ -36,6 +37,12 @@ export default function ExportCredential({
                 credentialBlob.identityId,
                 undefined,
                 credentialBlob.credential
+            );
+            addExternalAccount(
+                dispatch,
+                credentialBlob.address,
+                credentialBlob.identityId,
+                1
             );
             setReady(true);
         }

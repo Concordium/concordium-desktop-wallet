@@ -1,32 +1,34 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { toMicroUnits } from '~/utils/gtu';
-import { createSimpleTransferTransaction } from '~/utils/transactionHelpers';
+import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import {
     Account,
     AddressBookEntry,
     AccountTransaction,
+    Schedule,
+    TransactionKindId,
     Fraction,
 } from '~/utils/types';
 import { credentialsSelector } from '~/features/CredentialSlice';
 import SignTransaction from './SignTransaction';
 
 interface Props {
+    transactionKind: TransactionKindId;
     account: Account;
     recipient: AddressBookEntry;
     estimatedFee?: Fraction;
     amount: string;
-    setReady: (ready: boolean) => void;
-    setProposalId: (id: number) => void;
+    schedule?: Schedule;
 }
 
 export default function CreateTransaction({
+    transactionKind,
     account,
     recipient,
     amount,
-    setProposalId,
+    schedule,
     estimatedFee,
-    setReady,
 }: Props) {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
@@ -34,15 +36,26 @@ export default function CreateTransaction({
     const credentials = useSelector(credentialsSelector);
 
     useEffect(() => {
-        createSimpleTransferTransaction(
-            account.address,
-            toMicroUnits(amount),
-            recipient.address,
-            account.signatureThreshold
-        )
+        const handler = findAccountTransactionHandler(transactionKind);
+        handler
+            .createTransaction({
+                sender: account.address,
+                amount: toMicroUnits(amount),
+                recipient: recipient.address,
+                signatureAmount: account.signatureThreshold,
+                schedule,
+            })
             .then((t) => setTransaction({ ...t, estimatedFee }))
             .catch(() => {}); // The failure happens if we are unable to get the nonce. // TODO This should be refactored to not happen here.
-    }, [setTransaction, account, amount, recipient, estimatedFee]);
+    }, [
+        setTransaction,
+        account,
+        amount,
+        recipient,
+        schedule,
+        transactionKind,
+        estimatedFee,
+    ]);
 
     const credential = useMemo(
         () =>
@@ -61,10 +74,8 @@ export default function CreateTransaction({
     return (
         <SignTransaction
             transaction={transaction}
-            setReady={setReady}
             account={account}
             primaryCredential={credential}
-            setProposalId={setProposalId}
         />
     );
 }

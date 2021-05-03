@@ -1,23 +1,25 @@
-import AccountTransactionDetails from '~/components/Transfers/AccountTransactionDetails';
-import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
-import { AccountTransactionHandler } from '~/utils/transactionTypes';
 import {
     SimpleTransfer,
     AccountTransaction,
     TransactionPayload,
-    TransactionKindString,
     instanceOfSimpleTransfer,
+    TransactionKindId,
 } from '../types';
 import routes from '~/constants/routes.json';
-import { serializeTransferPayload } from '../transactionSerialization';
-import { selectedProposalRoute } from '~/utils/routerHelper';
+import TransferHandler from './TransferHandler';
+import {
+    AccountTransactionHandler,
+    CreateTransactionInput,
+} from '../transactionTypes';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { createSimpleTransferTransaction } from '../transactionHelpers';
 
 type TransactionType = SimpleTransfer;
 
 const TYPE = 'Simple Transfer';
 
-export default class UpdateAccountCredentialsHandler
+export default class SimpleTransferHandler
+    extends TransferHandler<TransactionType>
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
@@ -29,14 +31,7 @@ export default class UpdateAccountCredentialsHandler
         throw Error('Invalid transaction type was given as input.');
     }
 
-    serializePayload(transaction: TransactionType) {
-        return serializeTransferPayload(
-            transaction.transactionKind,
-            transaction.payload
-        );
-    }
-
-    creationLocationHandler(currentLocation: string, proposalId: number) {
+    creationLocationHandler(currentLocation: string) {
         const getNewLocation = () => {
             switch (currentLocation) {
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
@@ -47,28 +42,33 @@ export default class UpdateAccountCredentialsHandler
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-                    return selectedProposalRoute(proposalId);
                 default:
                     throw new Error('unknown location');
             }
         };
         return getNewLocation().replace(
             ':transactionKind',
-            TransactionKindString.Transfer
+            `${TransactionKindId.Simple_transfer}`
         );
     }
 
-    async signTransaction(
-        transaction: TransactionType,
-        ledger: ConcordiumLedgerClient,
-        path: AccountPathInput
-    ) {
-        return ledger.signTransfer(transaction, getAccountPath(path));
-    }
-
-    view(transaction: TransactionType) {
-        return AccountTransactionDetails({ transaction });
+    createTransaction({
+        sender,
+        amount,
+        recipient,
+        signatureAmount,
+    }: Partial<CreateTransactionInput>) {
+        if (!sender || !recipient || amount === undefined) {
+            throw new Error(
+                `Unexpected Missing input: ${{ sender, amount, recipient }}`
+            );
+        }
+        return createSimpleTransferTransaction(
+            sender,
+            amount,
+            recipient,
+            signatureAmount
+        );
     }
 
     title = `Account Transaction | ${TYPE}`;

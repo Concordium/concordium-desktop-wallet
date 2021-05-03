@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { Redirect } from 'react-router';
-import clsx from 'clsx';
 import { parse, stringify } from '~/utils/JSONHelper';
 
 import routes from '~/constants/routes.json';
@@ -167,6 +166,7 @@ const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
                 <MultiSignatureLayout
                     pageTitle={transactionHandler.title}
                     stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+                    delegateScroll
                 >
                     <Ledger ledgerCallback={signingFunction}>
                         {({
@@ -175,10 +175,7 @@ const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
                             submitHandler = asyncNoOp,
                         }) => (
                             <Form<CosignTransactionProposalForm>
-                                className={clsx(
-                                    styles.body,
-                                    styles.bodySubtractPadding
-                                )}
+                                className={styles.subtractContainerPadding}
                                 onSubmit={submitHandler}
                             >
                                 <Columns

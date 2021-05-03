@@ -128,7 +128,7 @@ export default function GenesisAccount(): JSX.Element {
     useEffect(() => {
         if (identities.length === 0) {
             const createdAt = getCurrentYearMonth();
-            const validTo = (parseInt(createdAt, 10) + 100).toString(); // Should be 1 year after createdAt (Match what will be generated for account)
+            const validTo = (parseInt(createdAt, 10) + 500).toString(); // Should be 5 year after createdAt (Match what will be generated in account)
             const identityObject = {
                 v: 0,
                 value: {

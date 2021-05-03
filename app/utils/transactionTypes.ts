@@ -13,6 +13,7 @@ import {
     HigherLevelKeyUpdate,
     AccountTransaction,
     TransactionPayload,
+    Schedule,
 } from './types';
 
 export interface TransactionInput {
@@ -91,6 +92,14 @@ export interface UpdateInstructionHandler<T, S> {
     title: string;
 }
 
+export interface CreateTransactionInput {
+    sender: string;
+    recipient: string;
+    amount: bigint;
+    schedule: Schedule;
+    signatureAmount: number;
+}
+
 /**
  * Interface definition for a class that handles a specific type
  * of account transaction.
@@ -111,10 +120,10 @@ export interface AccountTransactionHandler<T, S> {
      * Returns a React element, in which the details of the transaction are displayed
      */
     view: (transaction: T) => JSX.Element;
-    creationLocationHandler: (
-        currentLocation: string,
-        proposalId: number
-    ) => string;
+    createTransaction: (
+        informationBlob: Partial<CreateTransactionInput>
+    ) => Promise<T>;
+    creationLocationHandler: (currentLocation: string) => string;
     type: string;
     title: string;
 }

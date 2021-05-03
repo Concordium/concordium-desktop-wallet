@@ -99,7 +99,7 @@ pub fn create_genesis_account (
     let created_at: YearMonth = try_get(&v, "currentYearMonth")?;
     let valid_to = {
         let mut now: YearMonth = try_get(&v, "currentYearMonth")?;
-        now.year += 1;
+        now.year += 5; // Credentials valid to 5 years from creation
         now
     };
 

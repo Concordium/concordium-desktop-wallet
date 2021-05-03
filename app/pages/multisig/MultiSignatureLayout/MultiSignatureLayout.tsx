@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React, { PropsWithChildren } from 'react';
 import PageLayout from '~/components/PageLayout';
 import { PageContainerProps } from '~/components/PageLayout/PageContainer/PageContainer';
@@ -9,6 +10,7 @@ interface MultiSignatureLayoutProps
     extends Pick<PageContainerProps, 'closeRoute' | 'disableBack'> {
     pageTitle: string;
     stepTitle: string;
+    delegateScroll?: boolean;
 }
 
 export default function MultiSignatureLayout({
@@ -17,6 +19,7 @@ export default function MultiSignatureLayout({
     closeRoute = routes.MULTISIGTRANSACTIONS,
     children,
     disableBack,
+    delegateScroll = false,
 }: PropsWithChildren<MultiSignatureLayoutProps>): JSX.Element {
     return (
         <PageLayout>
@@ -24,7 +27,10 @@ export default function MultiSignatureLayout({
                 <h1>{pageTitle}</h1>
             </PageLayout.Header>
             <PageLayout.Container
-                className={styles.container}
+                className={clsx(
+                    styles.container,
+                    delegateScroll && styles.delegatedScroll
+                )}
                 closeRoute={closeRoute}
                 padding="vertical"
                 disableBack={disableBack}
