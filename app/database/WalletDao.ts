@@ -2,6 +2,10 @@ import { Hex } from '../utils/types';
 import knex from './knex';
 import { walletTable } from '../constants/databaseNames.json';
 
+export enum WalletType {
+    LedgerNanoS = 'ledgernanos',
+}
+
 /**
  * Finds the primary key id for the wallet with the given identifier.
  * @param identifier wallet identifier
@@ -18,9 +22,9 @@ export async function getId(identifier: Hex): Promise<number> {
  * with the desktop wallet.
  * @param identifier the pairing identifier that identities the wallet uniquely
  */
-export async function insertWallet(identifier: Hex) {
+export async function insertWallet(identifier: Hex, type: WalletType) {
     const table = (await knex())(walletTable);
-    return table.insert({ identifier });
+    return table.insert({ identifier, type });
 }
 
 /**

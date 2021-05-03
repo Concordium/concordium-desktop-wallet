@@ -19,7 +19,12 @@ import { confirmIdentityAndInitialAccount } from '../../utils/IdentityStatusPoll
 import SimpleLedger from '../../components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
-import { getId, walletExists, insertWallet } from '~/database/WalletDao';
+import {
+    getId,
+    walletExists,
+    insertWallet,
+    WalletType,
+} from '~/database/WalletDao';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
@@ -154,15 +159,13 @@ export default function IdentityIssuanceGenerate({
             return;
         }
 
-        // Extract the pairing public-key
+        // Pair the hardware wallet with the desktop wallet, if it has not
+        // already been paired.
         const pairingKey = (
             await ledger.getPublicKeySilent(getPairingPath())
         ).toString('hex');
-
-        // Pair the hardware wallet with the desktop wallet, if it has not
-        // already been paired.
         if (!(await walletExists(pairingKey))) {
-            await insertWallet(pairingKey);
+            await insertWallet(pairingKey, WalletType.LedgerNanoS);
         }
 
         const walletId = await getId(pairingKey);

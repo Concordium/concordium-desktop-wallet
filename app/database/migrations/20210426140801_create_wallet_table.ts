@@ -5,6 +5,7 @@ export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(walletTable, (table: Knex.TableBuilder) => {
         table.increments('id');
         table.string('identifier').unique().notNullable();
+        table.string('type').notNullable();
     });
 }
 

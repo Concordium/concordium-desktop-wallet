@@ -46,9 +46,10 @@ export async function getCredentials(): Promise<Credential[]> {
 
 /**
  * Get all credentials for the account with the given account address. The identity
- * number is joined in from the identity table and augmented to the credential object.
+ * number is joined in from the identity table, and the walletId is joined from
+ * the wallet table and augmented into the credential object.
  * @param accountAddress address of the account to get the credentials for
- * @returns an array of credentials for the given account, augmented with the identityNumber
+ * @returns an array of credentials for the given account, augmented with the identityNumber and walletId
  */
 export async function getCredentialsOfAccount(
     accountAddress: string
