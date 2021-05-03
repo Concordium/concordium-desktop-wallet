@@ -89,15 +89,18 @@ export default function SignTransaction({
         if (!account || !global) {
             throw new Error('unexpected missing global/account');
         }
-        const multiSignatureTransaction = await signUsingLedger(
+        const proposal = await signUsingLedger(
             ledger,
             transaction,
             account,
             primaryCredential
         );
+        if (proposal.id === undefined) {
+            throw new Error('unexpected missing proposal id');
+        }
         // Set the current proposal in the state to the one that was just generated.
-        dispatch(addProposal(multiSignatureTransaction));
-        dispatch(push(selectedProposalRoute(multiSignatureTransaction.id!)));
+        dispatch(addProposal(proposal));
+        dispatch(push(selectedProposalRoute(proposal.id)));
     }
 
     return <SignTransactionColumn signingFunction={sign} />;
