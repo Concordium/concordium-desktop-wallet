@@ -271,9 +271,6 @@ export default function UpdateCredentialPage(): JSX.Element {
             .map(({ credentialIndex }) => credentialIndex || 0);
 
         return (
-            // TODO currentCredentials[0] will not always select the correct credential.
-            // Stop sending along the primary credential, and get the correct one
-            // within the signing method.
             <CreateUpdate
                 account={account}
                 addedCredentials={assignIndices(newCredentials, usedIndices)}
@@ -282,7 +279,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                     .map(([id]) => id)}
                 newThreshold={newThreshold}
                 currentCredentialAmount={currentCredentials.length}
-                primaryCredential={currentCredentials[0]}
             />
         );
     }

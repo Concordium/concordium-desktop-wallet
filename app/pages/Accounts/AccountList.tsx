@@ -20,7 +20,8 @@ async function load(dispatch: Dispatch) {
     try {
         loadAccountInfos(accounts, dispatch);
     } catch (e) {
-        throw new Error('Unable to load AccountInfo'); // TODO: Handle the case where we can't reach the node
+        // TODO: Handle the case where we can't reach the node
+        throw new Error('Unable to load AccountInfo');
     }
 }
 

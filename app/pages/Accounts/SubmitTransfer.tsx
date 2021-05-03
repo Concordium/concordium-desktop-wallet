@@ -14,8 +14,6 @@ import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
 import {
     Account,
     LocalCredential,
-    instanceOfLocalCredential,
-    instanceOfDeployedCredential,
     AccountInfo,
     AccountTransaction,
     Global,
@@ -30,7 +28,7 @@ import TransactionDetails from '~/components/TransactionDetails';
 import { makeTransferToPublicData } from '~/utils/rustInterface';
 import PageLayout from '~/components/PageLayout';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
-import { getCredentialsOfAccount } from '~/database/CredentialDao';
+import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 
 interface Location {
     pathname: string;
@@ -98,9 +96,11 @@ export default function SubmitTransfer({ location }: Props) {
 
     let transaction: AccountTransaction = parse(transactionJSON);
 
-    // This function builds the transaction then signs the transaction,
-    // send the transaction, saves it, begins monitoring it's status
-    // and then redirects to final page.
+    /**
+     * Builds the transaciton, signs it, sends it to the node, saves it and
+     * then beings monitoring its status before redirecting the user to the
+     * final page.
+     */
     async function ledgerSignTransfer(
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
@@ -112,34 +112,13 @@ export default function SubmitTransfer({ location }: Props) {
             return;
         }
 
-        // TODO Find a local and deployed credential for the ledger that is connected.
-        const credential = (
-            await getCredentialsOfAccount(account.address)
-        ).find(
-            (cred) =>
-                instanceOfLocalCredential(cred) ||
-                instanceOfDeployedCredential(cred)
+        const credential = await findLocalDeployedCredentialWithWallet(
+            account.address,
+            ledger
         );
-
-        if (
-            !credential ||
-            !instanceOfLocalCredential(credential) ||
-            !instanceOfDeployedCredential(credential)
-        ) {
-            throw new Error(
-                'Unable to sign transfer, because we were unable to find local and deployed credential'
-            );
-        }
-
         if (!credential) {
             setMessage(
-                'Unable to sign transfer, because we were unable to find a credential'
-            );
-            return;
-        }
-        if (!instanceOfLocalCredential(credential)) {
-            setMessage(
-                'Unable to sign transfer because the found credential was not a local credential'
+                'Unable to sign transfer as we were unable to find a deployed credential for the connected wallet.'
             );
             return;
         }

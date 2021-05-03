@@ -100,9 +100,8 @@ export default function useLedger(
             if (instanceOfTransportStatusError(e)) {
                 errorMessage = getErrorDescription(e.statusCode);
             } else {
-                errorMessage = `An error occurred: ${e}`;
+                errorMessage = `${e}`;
             }
-            errorMessage += ' Please try again.';
             dispatch(errorAction(errorMessage));
 
             onSignError(e);

@@ -3,8 +3,6 @@ import { findKey } from '~/utils/updates/AuthorizationHelper';
 import { BlockSummary } from '~/utils/NodeApiTypes';
 import {
     AccountTransaction,
-    instanceOfLocalCredential,
-    instanceOfDeployedCredential,
     UpdateInstruction,
     UpdateInstructionSignature,
 } from '~/utils/types';
@@ -12,8 +10,8 @@ import {
     findAccountTransactionHandler,
     findUpdateInstructionHandler,
 } from '~/utils/transactionHandlers/HandlerFinder';
-import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
+import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 
 export async function signUpdateInstruction(
     instruction: UpdateInstruction,
@@ -49,24 +47,17 @@ export async function signAccountTransaction(
     ledger: ConcordiumLedgerClient
 ) {
     // TODO: Remove assumption that a credential only has 1 signature
-    // We presently assume that there is only 1 key on a credential.
+    // We presently assume that there is only 1 key on a credential. If support
+    // for multiple signatures is added, then this has to be updated.
     const signatureIndex = 0;
 
-    // TODO Add restriction to look for a credential that is for the connected Ledger.
-
-    const credential = (await getCredentialsOfAccount(transaction.sender)).find(
-        (cred) =>
-            instanceOfLocalCredential(cred) &&
-            instanceOfDeployedCredential(cred)
+    const credential = await findLocalDeployedCredentialWithWallet(
+        transaction.sender,
+        ledger
     );
-
-    if (
-        !credential ||
-        !instanceOfLocalCredential(credential) ||
-        !instanceOfDeployedCredential(credential)
-    ) {
+    if (!credential) {
         throw new Error(
-            'Unable to the sign the account transaction. You do not currently have a credential deployed on the associated account.'
+            'Unable to sign the account transaction, as you do not currently have a matching credential deployed on the given account for the connected wallet.'
         );
     }
 

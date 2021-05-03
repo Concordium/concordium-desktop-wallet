@@ -14,7 +14,7 @@ import {
 import { Account } from '../../utils/types';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import SimpleLedger from '../../components/ledger/SimpleLedger';
-import { getCredentialsOfAccount } from '~/database/CredentialDao';
+import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 
 interface Props {
     account: Account;
@@ -42,27 +42,28 @@ export default function DecryptComponent({ account }: Props) {
             throw new Error('Unexpected missing global object');
         }
 
-        if (!account.identityNumber) {
+        if (account.identityNumber === undefined) {
             throw new Error(
-                'The account must have been joined with the identity table, to resolve its identity number'
+                'The account is missing an identity number. This is an internal error that should be reported'
             );
         }
+
+        const credential = await findLocalDeployedCredentialWithWallet(
+            account.address,
+            ledger
+        );
+        const credentialNumber = credential?.credentialNumber;
+        if (credentialNumber === undefined) {
+            throw new Error(
+                'Unable to decrypt shielded balance and encrypted transfers. Please verify that the connected wallet is for this account.'
+            );
+        }
+
         setMessage('Please confirm exporting PRF key on device');
         const prfKeySeed = await ledger.getPrfKey(account.identityNumber);
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
 
-        // TODO The correct credential can only be found by also using the pairing key.
-
-        const credentialNumber = (
-            await getCredentialsOfAccount(account.address)
-        ).find((cred) => cred.credentialIndex === 0)?.credentialNumber;
-
-        if (credentialNumber === undefined) {
-            throw new Error(
-                'Unable to decrypt amounts, because we were unable to find original credential'
-            );
-        }
         await decryptAccountBalance(prfKey, account, credentialNumber, global);
         await decryptTransactions(
             transactions,
