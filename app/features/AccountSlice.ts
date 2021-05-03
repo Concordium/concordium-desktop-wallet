@@ -222,7 +222,7 @@ export async function loadAccountInfos(
             if (account.status === AccountStatus.Genesis) {
                 if (!accountInfo) {
                     throw new Error(
-                        `Genesis Account '${account.name}' not found on chain.`
+                        `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}` // account.address contains the placeholder credId
                     );
                 }
                 return new Promise<void>((resolve, reject) => {
