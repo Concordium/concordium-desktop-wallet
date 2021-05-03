@@ -97,7 +97,7 @@ export default function SubmitTransfer({ location }: Props) {
     let transaction: AccountTransaction = parse(transactionJSON);
 
     /**
-     * Builds the transaciton, signs it, sends it to the node, saves it and
+     * Builds the transaction, signs it, sends it to the node, saves it and
      * then beings monitoring its status before redirecting the user to the
      * final page.
      */

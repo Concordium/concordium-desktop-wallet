@@ -46,6 +46,7 @@ export function getAccountPath(accountPath: AccountPathInput): number[] {
  * the hardware wallet with the desktop wallet.
  */
 export function getPairingPath(): number[] {
+    // TODO This path has not been finally decided. Awaiting input on what to use as the pairing path.
     return [0];
 }
 

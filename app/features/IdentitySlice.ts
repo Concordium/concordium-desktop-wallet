@@ -73,7 +73,6 @@ export async function addPendingIdentity(
         randomness,
         walletId,
     };
-    // TODO Insert identity should only insert one identity, and not an array.
     const identityId = await insertIdentity(identity);
     loadIdentities(dispatch);
     return identityId[0];
