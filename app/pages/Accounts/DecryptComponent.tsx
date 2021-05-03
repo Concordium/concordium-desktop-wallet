@@ -52,6 +52,8 @@ export default function DecryptComponent({ account }: Props) {
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
 
+        // TODO The correct credential can only be found by also using the pairing key.
+
         const credentialNumber = (
             await getCredentialsOfAccount(account.address)
         ).find((cred) => cred.credentialIndex === 0)?.credentialNumber;
