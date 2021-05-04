@@ -1,7 +1,7 @@
 import React from 'react';
-import TransactionListElement from './TransactionListElement';
-import { TransferTransaction } from '../../utils/types';
-import { isFailed } from '../../utils/transactionHelpers';
+import TransactionListElement from '../TransactionListElement';
+import { TransferTransaction } from '~/utils/types';
+import { isFailed } from '~/utils/transactionHelpers';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Card from '~/cross-app-components/Card';
 import SidedRow from '~/components/SidedRow';
@@ -36,7 +36,7 @@ function CopiableListElement({
                 <div className={styles.copiableListElementLeftSide}>
                     <p className={styles.copiableListElementTitle}>{title}</p>
                     {'\n'}
-                    <p className={styles.copiableListElementValue}>
+                    <p className="body4">
                         {value} {note ? `(${note})` : undefined}
                     </p>
                 </div>
@@ -63,7 +63,7 @@ function displayRejectReason(transaction: TransferTransaction) {
  */
 function TransactionView({ transaction, returnFunction }: Props) {
     return (
-        <Card className={styles.transactionView}>
+        <Card className="relative">
             <h2 className={styles.title}> Transaction Details </h2>
             <CloseButton
                 className={styles.closeButton}

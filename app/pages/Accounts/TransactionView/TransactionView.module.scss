@@ -1,8 +1,5 @@
 @import 'config/bundle';
-
-.transactionView {
-    position: relative;
-}
+@import '../common';
 
 .errorMessage,
 .title {
@@ -13,18 +10,11 @@
     color: $color-error;
 }
 
-.closeButton {
-    position: absolute;
-    top: 25px;
-    right: 25px;
-}
-
 .title,
 .errorMessage,
 .listElement {
-    margin: 0 -20px;
-    width: calc(100% + 40px);
-    padding: 10px 20px;
+    composes: fillCardPadding;
+    composes: greySeparator;
 
     &:not(:last-child) {
         border-bottom: 0.5px solid $color-soft-grey;
@@ -35,10 +25,6 @@
     &:not(:last-child) {
         border-bottom-width: 2px;
     }
-}
-
-.copiableListElementValue {
-    font-size: $font-size-body4;
 }
 
 .copiableListElementLeftSide {

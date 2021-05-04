@@ -7,13 +7,13 @@ import SendEncryptedImage from '@resources/svg/shielded-paperplane.svg';
 import routes from '~/constants/routes.json';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
 import ButtonNavLink from '~/components/ButtonNavLink';
-import styles from './Accounts.module.scss';
+import styles from './AccountViewAction.module.scss';
 
 const more = {
     route: routes.ACCOUNTS_MORE,
     label: 'More',
     Image: MoreImage,
-    imageClassName: styles.moreImage,
+    imageClassName: 'mB15',
     height: '10',
 };
 const viewingShieldedbuttons = [

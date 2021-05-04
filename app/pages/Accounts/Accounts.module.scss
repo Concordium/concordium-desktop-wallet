@@ -1,91 +1,8 @@
 @import 'config/bundle';
-
-.actionButtonsCard {
-    display: flex;
-    justify-content: space-between;
-    margin: 15px 0;
-    height: 90px;
-}
-
-.actionButton {
-    width: 32%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    padding: 20px;
-    font-size: $font-size-body3;
-    box-shadow: 0 0 0 1px $color-grey inset;
-}
-
-.accountBalanceView {
-    background-color: #000;
-    text-align: center;
-    padding-bottom: 10px;
-}
-
-.accountBalanceView button {
-    margin-left: 20%;
-    margin-right: 20%;
-    margin-top: 20px;
-}
-
-.actionImage {
-    margin-bottom: 5px;
-}
-
-.moreImage {
-    margin-bottom: 15px;
-}
-
-.inverted {
-    filter: invert(100%);
-}
-
-.buildSchedule {
-    min-height: 850px;
-    text-align: center;
-    position: relative;
-
-    > div {
-        margin-bottom: 40px;
-    }
-
-    h2 {
-        margin-top: 0;
-    }
-}
-
-.buildScheduleCommon {
-    .title {
-        margin-top: 20px;
-        margin-bottom: 50px;
-    }
-
-    > * {
-        margin-bottom: 40px;
-    }
-}
-
-.scheduleAmount {
-    font-size: $font-size-body3;
-
-    h2 {
-        margin: 0;
-    }
-}
-
-.closeButton {
-    position: absolute;
-    top: 25px;
-    right: 25px;
-}
+@import './common';
 
 .identityAttributesOfCredential {
-    &:not(:last-child) {
-        border-bottom: 5px solid $color-light-blue;
-    }
-
+    composes: blueSeparator;
     margin-left: -20px;
 }
 
@@ -97,21 +14,6 @@
 
 .identityAttribute,
 .releaseScheduleElement {
+    composes: greySeparator;
     padding: 10px 20px;
-    &:not(:last-child) {
-        border-bottom: 0.5px solid $color-soft-grey;
-    }
-}
-
-.releaseScheduleListHeader {
-    background-color: $color-light-blue;
-    color: $color-pale-blue;
-    padding: 2px 20px;
-}
-
-.releaseScheduleTitle {
-    margin: 0;
-    margin-bottom: 20px;
-    color: $color-pale-blue;
-    width: 100%;
 }

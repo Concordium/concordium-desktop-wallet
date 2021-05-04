@@ -50,6 +50,7 @@ export default function CredentialInformation({
                             key={credential.credId}
                         >
                             <SidedRow
+                                className={styles.listElementRow}
                                 left="Credential ID:"
                                 right={
                                     <>
@@ -62,10 +63,12 @@ export default function CredentialInformation({
                                 }
                             />
                             <SidedRow
+                                className={styles.listElementRow}
                                 left="Date of Creation:"
                                 right={formatDate(policy.createdAt)}
                             />
                             <SidedRow
+                                className={styles.listElementRow}
                                 left="Valid to:"
                                 right={formatDate(policy.validTo)}
                             />

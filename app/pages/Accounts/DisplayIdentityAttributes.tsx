@@ -1,8 +1,8 @@
 import React from 'react';
 import clsx from 'clsx';
 import { useSelector } from 'react-redux';
-import attributeNamesJson from '../../constants/attributeNames.json';
-import { chosenAccountInfoSelector } from '../../features/AccountSlice';
+import attributeNamesJson from '~/constants/attributeNames.json';
+import { chosenAccountInfoSelector } from '~/features/AccountSlice';
 import SidedRow from '~/components/SidedRow';
 import styles from './Accounts.module.scss';
 
@@ -29,7 +29,7 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
                 if (attributeKeys.length === 0) {
                     return (
                         <h3
-                            key={credential.value.credId}
+                            key={credential.value.contents.credId}
                             className={clsx(
                                 styles.identityAttributesOfCredential,
                                 'flex justifyCenter pB20'
@@ -42,7 +42,7 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
 
                 return (
                     <div
-                        key={credential.value.credId}
+                        key={credential.value.contents.credId}
                         className={styles.identityAttributesOfCredential}
                     >
                         {attributeKeys.map((attributeKey: string) => {

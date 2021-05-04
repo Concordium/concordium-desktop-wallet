@@ -1,11 +1,11 @@
 import React from 'react';
-import { AccountInfo } from '../../utils/types';
-import { displayAsGTU } from '../../utils/gtu';
+import { AccountInfo } from '~/utils/types';
+import { displayAsGTU } from '~/utils/gtu';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Card from '~/cross-app-components/Card';
 import ScheduleList from '~/components/ScheduleList';
 import SidedRow from '~/components/SidedRow';
-import styles from './Accounts.module.scss';
+import styles from './ShowReleaseSchedule.module.scss';
 
 interface Props {
     accountInfo: AccountInfo;
