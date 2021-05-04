@@ -14,7 +14,6 @@ import UnshieldAmount from '~/components/Transfers/UnshieldAmount';
 import TransferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
 import AccountViewActions from './AccountViewActions';
-import DecryptComponent from './DecryptComponent';
 import { AccountStatus } from '~/utils/types';
 
 /**
@@ -66,9 +65,11 @@ export default function AccountView() {
                     path={routes.ACCOUNTS_UNSHIELDAMOUNT}
                     render={() => <UnshieldAmount account={account} />}
                 />
-                <Route path={routes.DEFAULT} component={TransferHistory} />
+                <Route
+                    path={routes.DEFAULT}
+                    render={() => <TransferHistory account={account} />}
+                />
             </Switch>
-            <DecryptComponent account={account} />
         </>
     );
 }
