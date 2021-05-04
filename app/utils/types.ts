@@ -990,6 +990,16 @@ export interface IncomingTransaction {
     cost?: Hex;
 }
 
+export enum WalletType {
+    LedgerNanoS = 'ledgernanos',
+}
+
+export interface WalletEntry {
+    id: number;
+    identifier: string;
+    type: WalletType;
+}
+
 /**
  * The basic color types supported by Semantic UI components color property.
  */
@@ -1043,6 +1053,7 @@ export interface ExportData {
     identities: Identity[];
     addressBook: AddressBookEntry[];
     credentials: Credential[];
+    wallets: WalletEntry[];
 }
 
 interface EventResult {

@@ -1,11 +1,7 @@
-import {
-    getId,
-    insertWallet,
-    walletExists,
-    WalletType,
-} from '~/database/WalletDao';
+import { getId, insertWallet, walletExists } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
+import { WalletType } from './types';
 
 /**
  * Pairs a (hardware) wallet with the desktop wallet. If the (hardware) wallet was already

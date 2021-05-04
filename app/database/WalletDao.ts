@@ -1,9 +1,14 @@
-import { Hex } from '../utils/types';
+import { Hex, WalletEntry, WalletType } from '../utils/types';
 import knex from './knex';
 import { walletTable } from '../constants/databaseNames.json';
 
-export enum WalletType {
-    LedgerNanoS = 'ledgernanos',
+/**
+ * Extracts all wallet entries from the database
+ * @returns all wallet enetries
+ */
+export async function getAllWallets(): Promise<WalletEntry[]> {
+    const table = (await knex())(walletTable);
+    return table.select();
 }
 
 /**

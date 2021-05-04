@@ -1,13 +1,71 @@
 import { EncryptedData, ExportData } from './types';
 
+export interface HasWalletId {
+    walletId?: number;
+}
+
+export interface HasIdentityId {
+    identityId?: number;
+}
+
+export function updateIdentityIdReference<T extends HasIdentityId>(
+    importedIdentityId: number,
+    insertedIdentityId: number,
+    input: T[]
+) {
+    return input
+        .filter((item) => importedIdentityId === item.identityId)
+        .map((matchingItem) => {
+            return {
+                ...matchingItem,
+                identityId: insertedIdentityId,
+            };
+        });
+}
+
+export function updateWalletIdReference<T extends HasWalletId>(
+    importedWalletId: number,
+    insertedWalletId: number,
+    input: T[]
+) {
+    return input
+        .filter((item) => importedWalletId === item.walletId)
+        .map((matchingItem) => {
+            return {
+                ...matchingItem,
+                walletId: insertedWalletId,
+            };
+        });
+}
+
+/**
+ * Checks whether an entry is a duplicate of an element present
+ * in the existing list. Whether the entry is a duplicate is checked
+ * by equality of the fields provided.
+ * @param entry the entry to check whether is a duplicate
+ * @param list the existing list of elements
+ * @param fields the fields that defines equality between the entries
+ * @returns true if the entry is a duplicate of an element in the existing list
+ */
+export function isDuplicate<T>(entry: T, list: T[], fields: (keyof T)[]) {
+    const result = list.find((listElement) =>
+        fields
+            .map((field) => listElement[field] === entry[field])
+            .every(Boolean)
+    );
+    return !!result;
+}
+
 /**
  * Checks whether the entry has a "duplicate" in the given list
  * This is determined by equality of the given fields.
  * If the commonFields parameter is given, the function also checks
  * that there are no shared fields, except for those specified in commonFields.
- * Returns true if the entry is not a duplicate.
+ *
+ *
+ * @returns true if the entry is not a duplicate
  */
-export function checkDuplicates<T>(
+export function hasNoDuplicate<T>(
     entry: T,
     list: T[],
     fields: (keyof T)[],
