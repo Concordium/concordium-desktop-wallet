@@ -93,3 +93,14 @@ pub fn create_genesis_account_ext(
         Err(e) => format!("unable to create genesis account due to: {}", e),
     }
 }
+
+
+#[wasm_bindgen(js_name = getAddressFromCredId)]
+pub fn get_address_from_cred_id_ext(
+    cred_id: &str,
+) -> String {
+    match get_address_from_cred_id(cred_id) {
+        Ok(s) => s,
+        Err(e) => format!("unable to create genesis account due to: {}", e),
+    }
+}

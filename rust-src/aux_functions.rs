@@ -406,3 +406,8 @@ pub fn create_sec_to_pub_aux(
 
     Ok(response.to_string())
 }
+
+pub fn get_address_from_cred_id(cred_id: &str) -> Fallible<String> {
+    let cred_id_parsed: ExampleCurve = base16_decode_string(cred_id)?;
+    Ok(AccountAddress::new(&cred_id_parsed).to_string())
+}
