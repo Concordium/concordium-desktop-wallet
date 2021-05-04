@@ -18,7 +18,7 @@ export async function up(knex: Knex): Promise<void> {
             table.string('identityObject');
             table.string('randomness');
             table
-                .string('walletId')
+                .integer('walletId')
                 .references('id')
                 .inTable(walletTable)
                 .notNullable();
