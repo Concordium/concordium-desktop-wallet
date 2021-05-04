@@ -1,4 +1,4 @@
-import { getId, insertWallet, walletExists } from '~/database/WalletDao';
+import { getId, insertWallet } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import { WalletType } from './types';
@@ -15,8 +15,9 @@ export default async function pairWallet(
     const pairingKey = (
         await ledger.getPublicKeySilent(getPairingPath())
     ).toString('hex');
-    if (!(await walletExists(pairingKey))) {
+    const walletId = await getId(pairingKey);
+    if (walletId === undefined) {
         return insertWallet(pairingKey, WalletType.LedgerNanoS);
     }
-    return getId(pairingKey);
+    return walletId;
 }

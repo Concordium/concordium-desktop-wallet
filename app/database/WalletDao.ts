@@ -16,10 +16,15 @@ export async function getAllWallets(): Promise<WalletEntry[]> {
  * @param identifier wallet identifier
  * @returns primary key for the wallet entry
  */
-export async function getId(identifier: Hex): Promise<number> {
+export async function getId(identifier: Hex): Promise<number | undefined> {
     const table = (await knex())(walletTable);
-    const result = await table.where('identifier', identifier);
-    return result[0].id;
+    const result: WalletEntry = await table
+        .where('identifier', identifier)
+        .first();
+    if (result === undefined) {
+        return undefined;
+    }
+    return result.id;
 }
 
 /**
@@ -31,20 +36,4 @@ export async function getId(identifier: Hex): Promise<number> {
 export async function insertWallet(identifier: Hex, type: WalletType) {
     const table = (await knex())(walletTable);
     return (await table.insert({ identifier, type }))[0];
-}
-
-/**
- * Check whether or not a wallet with the supplied
- * identifier already exists in the database.
- * @param identifier the pairing identifier of the hardware wallet
- * @returns true if an entry already exists
- */
-export async function walletExists(identifier: Hex): Promise<boolean> {
-    return (
-        (
-            await (await knex())
-                .table(walletTable)
-                .where('identifier', identifier)
-        ).length > 0
-    );
 }

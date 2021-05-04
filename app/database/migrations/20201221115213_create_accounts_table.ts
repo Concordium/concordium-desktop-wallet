@@ -12,7 +12,7 @@ export async function up(knex: Knex): Promise<void> {
                 .notNullable();
             table.string('name');
             table.string('status');
-            table.string('address');
+            table.string('address').unique();
             table.integer('signatureThreshold');
             table.string('incomingAmounts').defaultTo('[]');
             table.string('selfAmounts').defaultTo('');

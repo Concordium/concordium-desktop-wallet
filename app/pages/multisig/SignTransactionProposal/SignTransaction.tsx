@@ -39,7 +39,7 @@ export default function SignTransaction({ signingFunction, className }: Props) {
                             }}
                             disabled={signing}
                         >
-                            I am sure that the propsed changes are correct
+                            I am sure that the proposed changes are correct
                         </Form.Checkbox>
                         <Form.Submit
                             disabled={signing || !isReady}

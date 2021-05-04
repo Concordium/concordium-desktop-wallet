@@ -7,6 +7,7 @@ import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { globalSelector } from '~/features/GlobalSlice';
 import { CredentialBlob } from './types';
+import pairWallet from '~/utils/WalletPairing';
 
 interface Props {
     identity: Identity | undefined;
@@ -43,8 +44,14 @@ export default function SignCredential({
             );
         }
 
-        const credentialNumber = await getNextCredentialNumber(identity.id);
+        const walletId = await pairWallet(ledger);
+        if (walletId !== identity.walletId) {
+            throw new Error(
+                'The chosen identity was not created using the connected wallet.'
+            );
+        }
 
+        const credentialNumber = await getNextCredentialNumber(identity.id);
         const credential = await createCredentialInfo(
             identity,
             credentialNumber,

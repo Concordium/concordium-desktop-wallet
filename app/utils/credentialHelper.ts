@@ -24,8 +24,8 @@ async function findLocalDeployedCredential(
     }
 
     const result = (await getCredentialsOfAccount(accountAddress))
-        .filter((credential) => instanceOfLocalCredential(credential))
-        .filter((credential) => instanceOfDeployedCredential(credential))
+        .filter(instanceOfLocalCredential)
+        .filter(instanceOfDeployedCredential)
         .find((credential) => credential.walletId === walletId);
 
     if (
@@ -50,5 +50,8 @@ export default async function findLocalDeployedCredentialWithWallet(
 ): Promise<(LocalCredential & DeployedCredential) | undefined> {
     const walletIdentifier = await ledger.getPublicKeySilent(getPairingPath());
     const walletId = await getId(walletIdentifier.toString('hex'));
+    if (walletId === undefined) {
+        return undefined;
+    }
     return findLocalDeployedCredential(walletId, accountAddress);
 }

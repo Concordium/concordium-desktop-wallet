@@ -19,10 +19,6 @@ import { getPendingTransactions } from '~/database/TransactionDao';
 import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
 import { getTransactionSubmissionId } from './transactionHash';
 import { updateSignatureThreshold } from '~/features/AccountSlice';
-import {
-    updateCredentialIndex,
-    insertExternalCredential,
-} from '~/features/CredentialSlice';
 
 /**
  * Given an UpdateAccountCredentials transaction, update the local state
@@ -35,12 +31,6 @@ export function updateAccountCredentialsPerformConsequence(
     dispatch: Dispatch,
     transaction: UpdateAccountCredentials
 ) {
-    transaction.payload.addedCredentials.forEach(({ index, value }) =>
-        insertExternalCredential(dispatch, transaction.sender, index, value)
-    );
-    transaction.payload.removedCredIds.forEach((credId) =>
-        updateCredentialIndex(dispatch, credId, undefined)
-    );
     updateSignatureThreshold(
         dispatch,
         transaction.sender,
