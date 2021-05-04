@@ -21,6 +21,7 @@ interface Props {
     identity: Identity | undefined;
 }
 
+const addressLength = 50;
 const mustBeDeployedMessage = 'Address must belong to an deployed account';
 const invalidAddres = 'Address format is invalid';
 
@@ -49,15 +50,23 @@ export default function PickAccount({
     );
 
     useEffect(() => {
-        if (isValidAddress(address)) {
+        if (!address || address.length !== addressLength) {
+            setAccountValidationError(undefined);
+            setAccountInfo(undefined);
+            setReady(false);
+        } else if (!isValidAddress(address)) {
+            setAccountValidationError(invalidAddres);
+            setAccountInfo(undefined);
+            setReady(false);
+        } else {
             setLoading(true);
             getAccountInfoOfAddress(address)
                 .then((loadedAccountInfo) => {
                     setLoading(false);
                     setAccountInfo(loadedAccountInfo);
-                    if (!loadedAccountInfo) {
-                        setAccountValidationError(mustBeDeployedMessage);
-                    }
+                    setAccountValidationError(
+                        loadedAccountInfo ? undefined : mustBeDeployedMessage
+                    );
                     return setReady(Boolean(loadedAccountInfo));
                 })
                 .catch(() => {
@@ -65,10 +74,6 @@ export default function PickAccount({
                     setAccountValidationError('Unable to reach node');
                     setReady(false);
                 });
-        } else {
-            setAccountInfo(undefined);
-            setAccountValidationError(invalidAddres);
-            setReady(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [address]);

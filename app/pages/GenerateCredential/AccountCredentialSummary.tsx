@@ -6,10 +6,7 @@ import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import { Identity, CredentialDeploymentInformation } from '~/utils/types';
 import Form from '~/components/Form';
 import routes from '~/constants/routes.json';
-import {
-    isValidAddress,
-    commonAddressValidators,
-} from '~/utils/accountHelpers';
+import { commonAddressValidators } from '~/utils/accountHelpers';
 import styles from './GenerateCredential.module.scss';
 
 interface Props {
@@ -21,6 +18,8 @@ interface Props {
     accountValidationError?: string;
 }
 
+const addressForm = 'address';
+
 export default function AccountCredentialSummary({
     identity,
     address,
@@ -31,20 +30,18 @@ export default function AccountCredentialSummary({
 }: Props) {
     const location = useLocation().pathname;
     const form = useForm({ mode: 'onTouched' });
-    const { watch, setError, clearErrors } = form;
-    const addressWatcher = watch('address');
+    const { watch, setError } = form;
+    const addressWatcher = watch(addressForm);
 
     useEffect(() => {
-        if (isValidAddress(address) && accountValidationError) {
-            setError('address', {
+        if (accountValidationError) {
+            setError(addressForm, {
                 type: 'manual',
                 message: accountValidationError,
             });
         }
-        if (!accountValidationError) {
-            clearErrors();
-        }
-    }, [setError, clearErrors, address, accountValidationError]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [accountValidationError]);
 
     useEffect(() => {
         if (location === routes.GENERATE_CREDENTIAL_PICKACCOUNT) {
@@ -65,11 +62,14 @@ export default function AccountCredentialSummary({
             {location === routes.GENERATE_CREDENTIAL_PICKACCOUNT ? (
                 <FormProvider {...form}>
                     <Form.TextArea
-                        name="address"
+                        name={addressForm}
                         placeholder="Paste the account address here"
                         rules={{
                             required: 'Please enter address',
                             ...commonAddressValidators,
+                            validate: {
+                                accountValidation: () => accountValidationError,
+                            },
                         }}
                     />
                 </FormProvider>
