@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import routes from '~/constants/routes.json';
 import { accountsSelector } from '~/features/AccountSlice';
 import { identitiesSelector } from '~/features/IdentitySlice';
-import AccountCard from '~/components/AccountCard';
+import AccountListElement from '~/components/AccountListElement';
 import IdentityCard from '~/components/IdentityCard';
 import Button from '~/cross-app-components/Button';
 
@@ -41,7 +41,7 @@ export default function IdentityIssuanceFinal({
                 Once finished by the provider, you can start using both.
             </p>
             <IdentityCard className={styles.card} identity={identity} />
-            <AccountCard className={styles.card} account={account} />
+            <AccountListElement className={styles.card} account={account} />
             <Button className={styles.button} as={Link} to={routes.IDENTITIES}>
                 Finished!
             </Button>

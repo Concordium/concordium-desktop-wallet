@@ -5,7 +5,7 @@ import { Card, Button, Divider } from 'semantic-ui-react';
 
 import routes from '~/constants/routes.json';
 import { accountsSelector } from '~/features/AccountSlice';
-import AccountCard from '~/components/AccountCard';
+import AccountListElement from '~/components/AccountListElement';
 
 interface Props {
     accountName: string;
@@ -38,7 +38,7 @@ export default function AccountCreationFinal({
                 </Card.Description>
                 <Divider />
                 <Card centered>
-                    <AccountCard account={account} />
+                    <AccountListElement account={account} />
                 </Card>
                 <Divider />
                 <Link to={routes.ACCOUNTS}>

@@ -42,7 +42,7 @@ interface Props {
  * the shielded balance (with argument true)
  * or the public balances (with argument false)
  */
-export default function AccountCard({
+export default function AccountListElement({
     account,
     accountInfo,
     onClick,
