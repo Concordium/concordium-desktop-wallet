@@ -1154,3 +1154,10 @@ export interface PublicKeyExportFormat {
     type: ExportKeyType;
     note?: string;
 }
+
+export interface SignedIdRequest {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    idObjectRequest: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    randomness: any;
+}

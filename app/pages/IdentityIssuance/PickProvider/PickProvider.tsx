@@ -13,6 +13,7 @@ import { getNextId } from '~/database/IdentityDao';
 import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
 
 import styles from './PickProvider.module.scss';
+import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
 
 interface Props {
     setProvider(provider: IdentityProvider): void;
@@ -63,10 +64,15 @@ export default function IdentityIssuanceChooseProvider({
             ledger
         );
 
+        const nextLocationState: ExternalIssuanceLocationState = {
+            ...idObj,
+            id: identityId,
+        };
+
         dispatch(
             push({
                 pathname: routes.IDENTITYISSUANCE_EXTERNAL,
-                state: JSON.stringify({ ...idObj, id: identityId }),
+                state: nextLocationState,
             })
         );
     }

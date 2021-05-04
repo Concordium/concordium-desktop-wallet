@@ -10,7 +10,7 @@ import {
     getResponseBody,
     performIdObjectRequest,
 } from '~/utils/httpRequests';
-import { IdentityProvider, Dispatch } from '~/utils/types';
+import { IdentityProvider, Dispatch, SignedIdRequest } from '~/utils/types';
 import { confirmIdentityAndInitialAccount } from '~/utils/IdentityStatusPoller';
 import Loading from '~/cross-app-components/Loading';
 
@@ -101,6 +101,10 @@ async function generateIdentity(
     }
 }
 
+export interface ExternalIssuanceLocationState extends SignedIdRequest {
+    id: number;
+}
+
 interface Props {
     identityName: string;
     accountName: string;
@@ -116,7 +120,7 @@ export default function ExternalIssuance({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { state } = useLocation<string>();
+    const { state } = useLocation<ExternalIssuanceLocationState>();
 
     const [location, setLocation] = useState<string>();
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -126,7 +130,7 @@ export default function ExternalIssuance({
             return;
         }
 
-        const { idObjectRequest, randomness, id } = JSON.parse(state);
+        const { idObjectRequest, randomness, id } = state;
 
         generateIdentity(
             idObjectRequest,
