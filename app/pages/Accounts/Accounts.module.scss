@@ -73,3 +73,34 @@
         margin: 0;
     }
 }
+
+.closeButton {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+}
+
+.releaseSchedule {
+    width: calc(100% + 40px);
+}
+
+.releaseScheduleElement {
+    padding: 10px 20px;
+    &:not(:last-child) {
+        border-bottom: 0.5px solid $color-soft-grey;
+    }
+}
+
+.releaseScheduleListHeader {
+    width: calc(100% + 40px);
+    background-color: $color-light-blue;
+    color: $color-pale-blue;
+    padding: 2px 20px;
+}
+
+.releaseScheduleTitle {
+    margin: 0;
+    margin-bottom: 20px;
+    color: $color-pale-blue;
+    width: 100%;
+}

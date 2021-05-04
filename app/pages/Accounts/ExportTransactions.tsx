@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Header, Button } from 'semantic-ui-react';
 import { Account, TransferTransaction } from '../../utils/types';
 import { getTransactionsOfAccount } from '../../database/TransactionDao';
 import { saveFile } from '../../utils/FileHelper';
@@ -8,6 +7,10 @@ import { getISOFormat } from '../../utils/timeHelpers';
 import { attachNames } from '../../utils/transactionHelpers';
 import exportTransactionFields from '../../constants/exportTransactionFields.json';
 import ErrorModal from '../../components/SimpleErrorModal';
+import CloseButton from '~/cross-app-components/CloseButton';
+import Button from '~/cross-app-components/Button';
+import Card from '~/cross-app-components/Card';
+import styles from './Accounts.module.scss';
 
 interface Props {
     account: Account;
@@ -49,14 +52,17 @@ async function exportTransactions(account: Account, openModal: () => void) {
 export default function ExportTransactions({ account, returnFunction }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     return (
-        <>
+        <Card className="relative">
             <ErrorModal
                 show={modalOpen}
                 header="Export failed"
                 onClick={() => setModalOpen(false)}
             />
-            <Button onClick={returnFunction}>x</Button>
-            <Header textAlign="center">Export Transactions</Header>
+            <CloseButton
+                className={styles.closeButton}
+                onClick={returnFunction}
+            />
+            <h3 className="textCenter">Export Transactions</h3>
             <Button
                 onClick={() =>
                     exportTransactions(account, () => setModalOpen(true))
@@ -64,6 +70,6 @@ export default function ExportTransactions({ account, returnFunction }: Props) {
             >
                 Export
             </Button>
-        </>
+        </Card>
     );
 }

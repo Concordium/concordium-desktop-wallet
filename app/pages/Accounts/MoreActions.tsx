@@ -1,8 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Switch, Route, Link } from 'react-router-dom';
-import { Menu, Button } from 'semantic-ui-react';
+import { Switch, Route } from 'react-router-dom';
 import { Account, AccountInfo } from '../../utils/types';
 import routes from '../../constants/routes.json';
 import ShowAccountAddress from './ShowAccountAddress';
@@ -10,6 +9,10 @@ import ShowReleaseSchedule from './ShowReleaseSchedule';
 import ScheduleTransfer from './ScheduleTransfer';
 import ExportTransactions from './ExportTransactions';
 import CredentialInformation from './CredentialInformation';
+import CloseButton from '~/cross-app-components/CloseButton';
+import Card from '~/cross-app-components/Card';
+import ButtonNavLink from '~/components/ButtonNavLink';
+import styles from './Accounts.module.scss';
 
 interface Props {
     account: Account;
@@ -46,21 +49,22 @@ export default function MoreActions({ account, accountInfo }: Props) {
 
     function MoreActionsMenu() {
         return (
-            <>
-                <Button as={Link} to={routes.ACCOUNTS}>
-                    x
-                </Button>
-                <Menu vertical>
-                    {items.map((item) => (
-                        <Menu.Item
-                            onClick={() => dispatch(push(item.location))}
-                            key={item.location}
-                        >
-                            {item.name}
-                        </Menu.Item>
-                    ))}
-                </Menu>
-            </>
+            <Card className="relative flexColumn">
+                <h3 className="textCenter">More Actions</h3>
+                <CloseButton
+                    className={styles.closeButton}
+                    onClick={() => dispatch(push(routes.ACCOUNTS))}
+                />
+                {items.map((item) => (
+                    <ButtonNavLink
+                        to={item.location}
+                        key={item.location}
+                        className="h3 m10"
+                    >
+                        {item.name}
+                    </ButtonNavLink>
+                ))}
+            </Card>
         );
     }
     return (

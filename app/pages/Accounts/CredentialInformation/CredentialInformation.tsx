@@ -30,13 +30,16 @@ export default function CredentialInformation({
     );
 
     return (
-        <Card>
+        <Card className="relative">
             <div className={styles.header}>
                 <p>
                     Credentials on this account: {credentialsOfAccount.length}
                 </p>
                 <p>Signature threshold: {account.signatureThreshold}</p>
-                <CloseButton onClick={returnFunction} />
+                <CloseButton
+                    className={styles.closeButton}
+                    onClick={returnFunction}
+                />
             </div>
             <div className={styles.credentialList}>
                 {credentialsOfAccount.map((credential: Credential) => {
