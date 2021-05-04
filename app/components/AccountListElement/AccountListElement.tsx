@@ -8,7 +8,7 @@ import { AccountInfo, Account, AccountStatus } from '~/utils/types';
 import { isInitialAccount } from '~/utils/accountHelpers';
 import SidedRow from '~/components/SidedRow';
 
-import styles from './AccountCard.module.scss';
+import styles from './AccountListElement.module.scss';
 
 function displayIdentity(
     account: Account,
