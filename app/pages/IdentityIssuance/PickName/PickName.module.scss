@@ -1,27 +1,12 @@
 @import 'config/bundle';
 
-.header {
-    grid-area: header;
-}
-
-.spanBoth {
-    grid-column: span 2;
-    max-width: 650px;
-    margin: 0 auto;
-}
-
 .form {
-    composes: spanBoth;
-    align-self: start;
+    composes: spanBoth from '../IdentityIssuance.module.scss';
+    align-self: center;
 }
 
 .field {
     margin-left: 50px;
     margin-right: 50px;
     font-size: $font-size-body2;
-}
-
-.button {
-    composes: spanBoth;
-    width: 400px;
 }

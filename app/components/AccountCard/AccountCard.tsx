@@ -8,7 +8,7 @@ import { AccountInfo, Account, AccountStatus } from '~/utils/types';
 import { isInitialAccount } from '~/utils/accountHelpers';
 import SidedRow from '~/components/SidedRow';
 
-import styles from './AccountListElement.module.scss';
+import styles from './AccountCard.module.scss';
 
 function displayIdentity(
     account: Account,
@@ -42,7 +42,7 @@ interface Props {
  * the shielded balance (with argument true)
  * or the public balances (with argument false)
  */
-export default function AccountListElement({
+export default function AccountCard({
     account,
     accountInfo,
     onClick,

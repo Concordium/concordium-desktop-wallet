@@ -1,9 +1,17 @@
 @import 'config/bundle';
 
+.text,
+.header {
+    text-align: left;
+}
+
 .header {
     grid-area: header;
-    text-align: left;
     margin-top: 0;
+}
+
+.container {
+    grid-row: 3 / end;
 }
 
 .item {

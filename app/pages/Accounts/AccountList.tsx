@@ -10,7 +10,7 @@ import {
     accountsInfoSelector,
 } from '../../features/AccountSlice';
 import { setViewingShielded } from '../../features/TransactionSlice';
-import AccountListElement from '../../components/AccountListElement';
+import AccountCard from '../../components/AccountCard';
 import { Account, Dispatch } from '../../utils/types';
 import routes from '../../constants/routes.json';
 import styles from './Accounts.module.scss';
@@ -50,7 +50,7 @@ export default function AccountList() {
                 onClick={() => dispatch(push(routes.HOME))}
             />
             {accounts.map((account: Account, index: number) => (
-                <AccountListElement
+                <AccountCard
                     key={account.address}
                     className={styles.listElement}
                     active={index === chosenIndex}

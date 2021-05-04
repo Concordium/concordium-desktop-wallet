@@ -13,7 +13,6 @@ import { getNextId } from '~/database/IdentityDao';
 import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
 
 import styles from './PickProvider.module.scss';
-import { stringify } from '~/utils/JSONHelper';
 
 interface Props {
     setProvider(provider: IdentityProvider): void;
@@ -64,12 +63,10 @@ export default function IdentityIssuanceChooseProvider({
             ledger
         );
 
-        console.log(idObj);
-
         dispatch(
             push({
                 pathname: routes.IDENTITYISSUANCE_EXTERNAL,
-                state: JSON.stringify(idObj),
+                state: JSON.stringify({ ...idObj, id: identityId }),
             })
         );
     }
@@ -77,17 +74,17 @@ export default function IdentityIssuanceChooseProvider({
     return (
         <>
             <h2 className={styles.header}>The identity provider</h2>
-            <p>
+            <p className={styles.text}>
                 The next step of creating a new identity is to choose an
                 identity provider. The list of providers will be expanding over
                 time, but the current providers can be seen below. You can check
                 out their privacy policies before selecting a provider.
             </p>
-            <p>
+            <p className={styles.text}>
                 When you have entered your names on the left, you must sign your
                 submission with your hardware wallet, before you can continue.
             </p>
-            <div>
+            <div className={styles.container}>
                 {providers.map((p) => (
                     <Card
                         key={p.ipInfo.ipIdentity}
@@ -107,48 +104,9 @@ export default function IdentityIssuanceChooseProvider({
                     </Card>
                 ))}
             </div>
-            <div>
+            <div className={styles.container}>
                 <SimpleLedger ledgerCall={withLedger} disabled={!provider} />
             </div>
         </>
     );
-
-    // return (
-    //     <Card fluid centered>
-    //         <Card.Content textAlign="center">
-    //             <Card.Header>The identity provider</Card.Header>
-    //             <Card.Description>
-    //                 The next step of creating a new identity is to choose an
-    //                 identity provider. The list of providers will be expanding
-    //                 over time, but the current providers can be seen below. You
-    //                 can check out their privacy policies before selecting a
-    //                 provider.
-    //             </Card.Description>
-    //             <List>
-    //                 <Divider />
-    //                 {providers.map((provider) => (
-    //                     <>
-    //                         <List.Item
-    //                             key={provider.ipInfo.ipIdentity}
-    //                             onClick={() => onClick(provider)}
-    //                         >
-    //                             <Image
-    //                                 spaced="right"
-    //                                 size="small"
-    //                                 src={`data:image/png;base64, ${provider.metadata.icon}`}
-    //                             />
-    //                             <List.Content verticalAlign="middle">
-    //                                 <List.Header>
-    //                                     {provider.ipInfo.ipDescription.name}
-    //                                 </List.Header>
-    //                             </List.Content>
-    //                             <Button>Privacy Policy</Button>
-    //                         </List.Item>
-    //                         <Divider />
-    //                     </>
-    //                 ))}
-    //             </List>
-    //         </Card.Content>
-    //     </Card>
-    // );
 }

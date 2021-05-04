@@ -7,9 +7,10 @@ import routes from '~/constants/routes.json';
 import Card from '~/cross-app-components/Card';
 import Form from '~/components/Form';
 import { EqualRecord } from '~/utils/types';
-
-import styles from './PickName.module.scss';
 import Button from '~/cross-app-components/Button';
+
+import generalStyles from '../IdentityIssuance.module.scss';
+import styles from './PickName.module.scss';
 
 interface IdentityIssuancePickNameFields {
     account: string;
@@ -45,10 +46,10 @@ export default function IdentityIssuancePickName({
 
     return (
         <>
-            <h2 className={styles.header}>
+            <h2 className={generalStyles.header}>
                 The initial account and identity names
             </h2>
-            <p className={styles.spanBoth}>
+            <p className={generalStyles.textRow}>
                 The first step of creating a new identity is decide what to name
                 it. Besides naming the identity, you must also pick a name for
                 the initial account of the identity. After choosing your names,
@@ -79,7 +80,7 @@ export default function IdentityIssuancePickName({
                         }}
                     />
                 </Card>
-                <Button className={styles.button} onClick={submit}>
+                <Button className={generalStyles.singleButton} onClick={submit}>
                     Continue
                 </Button>
             </FormProvider>

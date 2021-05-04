@@ -8,7 +8,7 @@ import ErrorModal from '~/components/SimpleErrorModal';
 import PageLayout from '~/components/PageLayout';
 import PickProvider from './PickProvider';
 import PickName from './PickName/PickName';
-import GeneratePage from './GeneratePage';
+import ExternalIssuance from './ExternalIssuance';
 import FinalPage from './FinalPage';
 
 import styles from './IdentityIssuance.module.scss';
@@ -35,6 +35,7 @@ export default function IdentityIssuancePage(): JSX.Element {
     const [provider, setProvider] = useState<IdentityProvider | undefined>();
     const [initialAccountName, setInitialAccountName] = useState<string>('');
     const [identityName, setIdentityName] = useState<string>('');
+    const { pathname } = useLocation();
 
     const [modalOpen, setModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState<string>('');
@@ -44,10 +45,10 @@ export default function IdentityIssuancePage(): JSX.Element {
         setModalOpen(true);
     }
 
-    function renderGeneratePage() {
+    function renderExternalIssuance() {
         if (provider) {
             return (
-                <GeneratePage
+                <ExternalIssuance
                     identityName={identityName}
                     accountName={initialAccountName}
                     provider={provider}
@@ -73,6 +74,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                 closeRoute={routes.IDENTITIES}
                 padding="both"
                 className={styles.container}
+                disableBack={pathname === routes.IDENTITYISSUANCE_FINAL}
             >
                 <Switch>
                     <Route
@@ -87,7 +89,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                     />
                     <Route
                         path={routes.IDENTITYISSUANCE_EXTERNAL}
-                        render={renderGeneratePage}
+                        render={renderExternalIssuance}
                     />
                     <Route
                         path={routes.IDENTITYISSUANCE_FINAL}
