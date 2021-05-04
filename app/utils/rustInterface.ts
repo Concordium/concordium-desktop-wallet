@@ -406,3 +406,10 @@ export async function createGenesisAccount(
 
     return JSON.parse(credential);
 }
+
+export function getAddressFromCredentialId(credId: string): Promise<string> {
+    return worker.postMessage({
+        command: workerCommands.getAddressFromCredId,
+        credId,
+    });
+}

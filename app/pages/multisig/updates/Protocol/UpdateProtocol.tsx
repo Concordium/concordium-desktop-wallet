@@ -1,7 +1,8 @@
 import React from 'react';
 import { Validate, ValidationRule } from 'react-hook-form';
-import { EqualRecord, ProtocolUpdate } from '../../utils/types';
-import { isHex } from '../../utils/basicHelpers';
+
+import { EqualRecord, ProtocolUpdate } from '~/utils/types';
+import { isHex } from '~/utils/basicHelpers';
 import Form from '~/components/Form';
 import { maxFileSizeKb } from '~/components/Form/FileInput/validation';
 
@@ -34,18 +35,21 @@ export default function UpdateProtocol(): JSX.Element | null {
     return (
         <>
             <Form.TextArea
+                className="body1"
                 name={fieldNames.message}
                 label="Message:"
                 placeholder="Enter you message here"
                 rules={{ required: 'Message is required' }}
             />
             <Form.Input
+                className="body1"
                 name={fieldNames.specificationUrl}
                 label="Specification URL:"
                 placeholder="Enter specification URL"
                 rules={{ required: 'Specification URL is required' }}
             />
             <Form.TextArea
+                className="body1"
                 name={fieldNames.specificationHash}
                 label="Specification Hash:"
                 placeholder="Paste specification hash here"

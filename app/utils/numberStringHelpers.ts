@@ -6,7 +6,7 @@ const fractionRenderSeperator = new Intl.NumberFormat()
     ? '.'
     : ',';
 
-export const isValidBigInt = (value = ''): boolean => {
+export const isValidBigInt = (value: string | number = ''): boolean => {
     try {
         BigInt(value);
         return true;
@@ -15,7 +15,7 @@ export const isValidBigInt = (value = ''): boolean => {
     }
 };
 
-function getPowerOf10(resolution: bigint | number): number {
+export function getPowerOf10(resolution: bigint | number): number {
     return resolution
         .toString()
         .split('')
@@ -322,6 +322,45 @@ export const toFixed = (digits: number) => (value: string): string => {
     return round(digits)(value);
 };
 
+const transformValueWithExponent = (value: string): string => {
+    const { whole, fractions = '', exponent = '0' } = getNumberParts(value);
+    const parsedExponent = Number(exponent);
+
+    if (parsedExponent > 0) {
+        const missing = parsedExponent - fractions.length;
+        const withAppendedZeros =
+            missing > 0 ? fractions + '0'.repeat(missing) : fractions;
+
+        const fractionsToMove = withAppendedZeros.substring(0, parsedExponent);
+        const remainingFractions = withAppendedZeros.substring(parsedExponent);
+
+        const transformedWhole = whole + fractionsToMove;
+
+        return `${transformedWhole}${
+            remainingFractions ? `.${remainingFractions}` : ''
+        }`;
+    }
+
+    const absExponent = Math.abs(parsedExponent);
+    const missing = absExponent - whole.length;
+    const withPrependedZeros =
+        missing > 0 ? '0'.repeat(missing) + whole : whole;
+
+    const wholeToMove = withPrependedZeros.substring(
+        withPrependedZeros.length - absExponent
+    );
+    const remainingWhole = withPrependedZeros.substring(
+        0,
+        withPrependedZeros.length - absExponent
+    );
+
+    const transformedFractions = wholeToMove + fractions;
+
+    return `${remainingWhole || '0'}${
+        transformedFractions ? `.${transformedFractions}` : ''
+    }`;
+};
+
 const fallbackValues = ['', Infinity.toString()];
 
 /**
@@ -343,7 +382,8 @@ const fallbackValues = ['', Infinity.toString()];
  */
 export const formatNumberStringWithDigits = (
     minFractionDigits: number,
-    maxFractionDigits?: number
+    maxFractionDigits?: number,
+    transformExponent?: boolean
 ) => {
     if (
         typeof maxFractionDigits === 'number' &&
@@ -367,11 +407,20 @@ export const formatNumberStringWithDigits = (
             );
         }
 
-        const { fractions = '' } = getNumberParts(value);
+        const { exponent = '0' } = getNumberParts(value);
+
+        let transformedValue = value;
+        const parsedExponent = Number(exponent);
+
+        if (transformExponent && parsedExponent !== 0) {
+            transformedValue = transformValueWithExponent(value);
+        }
+
+        const { fractions = '' } = getNumberParts(transformedValue);
         const valueFractionDigits = fractions.length;
 
         if (valueFractionDigits === 0 && minFractionDigits === 0) {
-            return value;
+            return transformedValue;
         }
 
         const digits =
@@ -382,6 +431,6 @@ export const formatNumberStringWithDigits = (
                       Math.min(maxFractionDigits, valueFractionDigits)
                   );
 
-        return toFixed(digits)(value);
+        return toFixed(digits)(transformedValue);
     };
 };

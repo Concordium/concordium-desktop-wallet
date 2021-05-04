@@ -8,13 +8,17 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
     MultiSignatureTransaction,
+    MultiSignatureTransactionStatus,
+    instanceOfUpdateInstruction,
+    Transaction,
 } from '~/utils/types';
 
 export default class UpdateInstructionHandlerTypeMiddleware<T>
     implements
         UpdateInstructionHandler<
-            UpdateInstruction<UpdateInstructionPayload>,
-            ConcordiumLedgerClient
+            UpdateInstruction,
+            ConcordiumLedgerClient,
+            Transaction
         > {
     base: UpdateInstructionHandler<T, ConcordiumLedgerClient>;
 
@@ -31,8 +35,11 @@ export default class UpdateInstructionHandlerTypeMiddleware<T>
         this.type = base.type;
     }
 
-    confirmType(transaction: UpdateInstruction<UpdateInstructionPayload>) {
-        return transaction;
+    confirmType(transaction: Transaction) {
+        if (instanceOfUpdateInstruction(transaction)) {
+            return transaction;
+        }
+        throw Error('Invalid transaction type was given as input.');
     }
 
     createTransaction(
@@ -55,6 +62,18 @@ export default class UpdateInstructionHandlerTypeMiddleware<T>
         return this.base.signTransaction(
             this.base.confirmType(transaction),
             ledger
+        );
+    }
+
+    print(
+        transaction: Transaction,
+        status: MultiSignatureTransactionStatus,
+        identiconImage?: string
+    ) {
+        return this.base.print(
+            this.confirmType(transaction),
+            status,
+            identiconImage
         );
     }
 

@@ -31,7 +31,7 @@ export async function insertAccount(account: Account | Account[]) {
 
 export async function updateAccount(
     accountName: string,
-    updatedValues: Record<string, unknown>
+    updatedValues: Partial<Account>
 ) {
     return (await knex())(accountsTable)
         .where({ name: accountName })

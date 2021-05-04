@@ -27,6 +27,11 @@ const ensureValidBigInt = (v = ''): string => {
     }
 };
 
+const ensureValue = (v = '') => v;
+
+const isNumber = <T extends unknown>(v: T | number): v is number =>
+    typeof v === 'number';
+
 export interface InlineNumberProps
     extends ClassName,
         Pick<
@@ -48,6 +53,10 @@ export interface InlineNumberProps
      * Whether to work with floats or integers. If set to a number, value is rounded to amount of digits specified. Defaults to `false`.
      */
     allowFractions?: boolean | number;
+    /**
+     * Allow value in the form of f.x. 1e-5. Defaults to false.
+     */
+    allowExponent?: boolean;
     value: string | undefined;
     /**
      * Defaults to `0`. This is the value used if field is unfocused without a value.
@@ -82,29 +91,28 @@ export default function InlineNumber({
     onBlur = noOp,
     onFocus = noOp,
     allowFractions = false,
+    allowExponent = false,
     className,
     isInvalid = false,
     ...inputProps
 }: InlineNumberProps): JSX.Element {
-    const format = useCallback(
-        (v?: string) => {
-            if (customFormatter !== undefined) {
-                return customFormatter(v);
-            }
-            if (allowFractions === false) {
-                return ensureValidBigInt(v);
-            }
-            if (typeof allowFractions === 'number' || ensureDigits !== 0) {
-                return formatNumberStringWithDigits(
-                    ensureDigits,
-                    allowFractions !== true ? allowFractions : undefined
-                )(v);
-            }
+    const format = useMemo(() => {
+        if (customFormatter !== undefined) {
+            return customFormatter;
+        }
+        if (allowFractions === false && !allowExponent) {
+            return ensureValidBigInt;
+        }
+        if (isNumber(allowFractions) || !allowExponent || ensureDigits !== 0) {
+            return formatNumberStringWithDigits(
+                ensureDigits,
+                isNumber(allowFractions) ? allowFractions : undefined,
+                !allowExponent
+            );
+        }
 
-            return v ?? '';
-        },
-        [ensureDigits, allowFractions, customFormatter]
-    );
+        return ensureValue;
+    }, [ensureDigits, allowFractions, customFormatter]);
 
     const initialFormatted = useMemo(
         () => format(value) || format(fallbackValue.toString()),

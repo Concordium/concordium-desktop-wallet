@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import PageLayout from '~/components/PageLayout';
 import Form from '~/components/Form';
-import { importAccount } from '~/features/AccountSlice';
+import { importAccount, loadAccounts } from '~/features/AccountSlice';
 import { insertNewCredential } from '~/features/CredentialSlice';
 import { Account, AccountStatus, GenesisAccount } from '~/utils/types';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
@@ -138,7 +138,7 @@ export default function GenesisAccount(): JSX.Element {
                 );
             }
 
-            const address = credentialContent.credId;
+            const address = credentialContent.credId; // We use the credId as a temporary 'address', which we will use to lookup the actual address after genesis.
 
             const success = await saveFile(
                 JSON.stringify(genesisAccount),
@@ -169,6 +169,7 @@ export default function GenesisAccount(): JSX.Element {
                     credentialContent
                 );
             }
+            loadAccounts(dispatch);
             dispatch(push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY));
         }
 

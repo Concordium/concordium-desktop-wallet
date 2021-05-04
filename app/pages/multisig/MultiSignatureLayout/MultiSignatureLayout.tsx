@@ -3,6 +3,7 @@ import React, { PropsWithChildren } from 'react';
 import PageLayout from '~/components/PageLayout';
 import { PageContainerProps } from '~/components/PageLayout/PageContainer/PageContainer';
 import routes from '~/constants/routes.json';
+import PrintButton from '~/components/PrintButton';
 
 import styles from './MultiSignatureLayout.module.scss';
 
@@ -11,6 +12,7 @@ interface MultiSignatureLayoutProps
     pageTitle: string;
     stepTitle: string;
     delegateScroll?: boolean;
+    print?: JSX.Element;
 }
 
 export default function MultiSignatureLayout({
@@ -20,6 +22,7 @@ export default function MultiSignatureLayout({
     children,
     disableBack,
     delegateScroll = false,
+    print,
 }: PropsWithChildren<MultiSignatureLayoutProps>): JSX.Element {
     return (
         <PageLayout>
@@ -35,6 +38,11 @@ export default function MultiSignatureLayout({
                 padding="vertical"
                 disableBack={disableBack}
             >
+                {print ? (
+                    <PrintButton className={styles.printButton}>
+                        {print}
+                    </PrintButton>
+                ) : null}
                 <h2 className={styles.header}>{stepTitle}</h2>
                 <div className={styles.content}>{children}</div>
             </PageLayout.Container>

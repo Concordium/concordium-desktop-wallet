@@ -106,3 +106,12 @@ export async function updateCredentialIndex(
         .where({ credId })
         .update({ credentialIndex });
 }
+
+export async function updateCredential(
+    credId: string,
+    updatedValues: Partial<Credential>
+) {
+    return (await knex())(credentialsTable)
+        .where({ credId })
+        .update(updatedValues);
+}
