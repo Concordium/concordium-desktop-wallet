@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import { Menu, Card, Button } from 'semantic-ui-react';
 import { confirmedIdentitiesSelector } from '../../features/IdentitySlice';
 import routes from '../../constants/routes.json';
-import IdentityListElement from '../../components/IdentityListElement';
+import IdentityCard from '../../components/IdentityCard';
 import { Identity } from '../../utils/types';
 
 interface Props {
@@ -63,7 +63,7 @@ export default function AccountCreationPickIdentity({
                             onClick={() => chooseIdentity(i)}
                             active={chosenIndex === i}
                         >
-                            <IdentityListElement identity={identity} />
+                            <IdentityCard identity={identity} />
                         </Menu.Item>
                     ))}
                 </Menu>
