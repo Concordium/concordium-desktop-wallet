@@ -15,7 +15,7 @@ import attributeNames from '~/constants/attributeNames.json';
 import SidedRow from '../SidedRow';
 import { formatAttributeValue } from '~/utils/identityHelpers';
 
-import styles from './IdentityListElement.module.scss';
+import styles from './IdentityCard.module.scss';
 
 interface Props {
     identity: Identity;

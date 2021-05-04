@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { chosenIdentitySelector } from '~/features/IdentitySlice';
-import IdentityListElement from '~/components/IdentityListElement';
+import IdentityCard from '~/components/IdentityCard';
 import { IdentityStatus } from '~/utils/types';
 import ChoiceModal from '~/components/ChoiceModal';
 import routes from '~/constants/routes.json';
@@ -42,7 +42,7 @@ export default function IdentityView() {
                     postAction={() => setModalOpen(false)}
                 />
             )}
-            <IdentityListElement identity={identity} expanded />
+            <IdentityCard identity={identity} expanded />
         </>
     );
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import CardList from '~/cross-app-components/CardList';
-import IdentityListElement from '../../components/IdentityListElement';
+import IdentityCard from '../../components/IdentityCard';
 import {
     chooseIdentity,
     identitiesSelector,
@@ -20,7 +20,7 @@ export default function IdentityList() {
     return (
         <CardList>
             {identities.map((identity: Identity) => (
-                <IdentityListElement
+                <IdentityCard
                     identity={identity}
                     key={identity.id}
                     active={chosenIdentity === identity}
