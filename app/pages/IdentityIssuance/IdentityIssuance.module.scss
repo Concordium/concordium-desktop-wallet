@@ -1,4 +1,16 @@
+@import 'config/bundle';
+
 .webview {
     height: 75vh;
     width: 100%;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 'header header';
+    padding-left: 80px;
+    padding-right: 80px;
+    column-gap: 80px;
+    row-gap: 30px;
 }

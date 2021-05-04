@@ -6,3 +6,10 @@
     padding: 20px;
     background-color: $color-white;
 }
+
+.header {
+    margin: 0 -20px;
+    border-bottom: 1px solid $color-grey;
+    font-weight: $font-weight-light;
+    padding: 0 20px 15px;
+}

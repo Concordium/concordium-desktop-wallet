@@ -1,0 +1,17 @@
+@import 'config/bundle';
+
+.header {
+    grid-area: header;
+}
+
+.spanBoth {
+    grid-column: 1 / span 2;
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+.field {
+    margin-left: 50px;
+    margin-right: 50px;
+    font-size: $font-size-body2;
+}
