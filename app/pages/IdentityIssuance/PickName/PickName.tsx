@@ -2,12 +2,14 @@ import React from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import clsx from 'clsx';
+import { FormProvider, useForm } from 'react-hook-form';
 import routes from '~/constants/routes.json';
 import Card from '~/cross-app-components/Card';
 import Form from '~/components/Form';
 import { EqualRecord } from '~/utils/types';
 
 import styles from './PickName.module.scss';
+import Button from '~/cross-app-components/Button';
 
 interface IdentityIssuancePickNameFields {
     account: string;
@@ -32,12 +34,14 @@ export default function IdentityIssuancePickName({
     identity,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
+    const form = useForm<IdentityIssuancePickNameFields>({ mode: 'onTouched' });
+    const { handleSubmit } = form;
 
-    function submit(fields: IdentityIssuancePickNameFields) {
+    const submit = handleSubmit((fields: IdentityIssuancePickNameFields) => {
         setIdentityName(fields.identity);
         setAccountName(fields.account);
         dispatch(push(routes.IDENTITYISSUANCE_PICKPROVIDER));
-    }
+    });
 
     return (
         <>
@@ -50,11 +54,8 @@ export default function IdentityIssuancePickName({
                 the initial account of the identity. After choosing your names,
                 you can continue to select an identity provider.
             </p>
-            <Form<IdentityIssuancePickNameFields>
-                className={styles.spanBoth}
-                onSubmit={submit}
-            >
-                <Card header="Identity summary">
+            <FormProvider {...form}>
+                <Card className={styles.form} header="Identity summary">
                     <p className="mV30">
                         What would you like to name your identity?
                     </p>
@@ -69,7 +70,7 @@ export default function IdentityIssuancePickName({
                         What would you like to name your initial account?
                     </p>
                     <Form.Input
-                        className={clsx(styles.field, 'mB30')}
+                        className={clsx(styles.field, 'mB20')}
                         name={fieldNames.account}
                         defaultValue={account}
                         placeholder="Initial account name"
@@ -77,9 +78,11 @@ export default function IdentityIssuancePickName({
                             required: 'Please specify an initial account name',
                         }}
                     />
-                    <Form.Submit className="mT50">Continue</Form.Submit>
                 </Card>
-            </Form>
+                <Button className={styles.button} onClick={submit}>
+                    Continue
+                </Button>
+            </FormProvider>
         </>
     );
 }

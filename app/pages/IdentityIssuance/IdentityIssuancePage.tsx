@@ -69,43 +69,45 @@ export default function IdentityIssuancePage(): JSX.Element {
                 show={modalOpen}
                 onClick={() => dispatch(push(routes.IDENTITIES))}
             />
-            <PageLayout.Container closeRoute={routes.IDENTITIES} padding="both">
-                <div className={styles.container}>
-                    <Switch>
-                        <Route
-                            path={routes.IDENTITYISSUANCE_PICKPROVIDER}
-                            render={() => (
-                                <PickProvider
-                                    setProvider={setProvider}
-                                    onError={activateModal}
-                                />
-                            )}
-                        />
-                        <Route
-                            path={routes.IDENTITYISSUANCE_EXTERNAL}
-                            render={renderGeneratePage}
-                        />
-                        <Route
-                            path={routes.IDENTITYISSUANCE_FINAL}
-                            render={() => (
-                                <FinalPage
-                                    identityName={identityName}
-                                    accountName={initialAccountName}
-                                />
-                            )}
-                        />
-                        <Route
-                            render={() => (
-                                <PickName
-                                    setIdentityName={setIdentityName}
-                                    setAccountName={setInitialAccountName}
-                                    account={initialAccountName}
-                                    identity={identityName}
-                                />
-                            )}
-                        />
-                    </Switch>
-                </div>
+            <PageLayout.Container
+                closeRoute={routes.IDENTITIES}
+                padding="both"
+                className={styles.container}
+            >
+                <Switch>
+                    <Route
+                        path={routes.IDENTITYISSUANCE_PICKPROVIDER}
+                        render={() => (
+                            <PickProvider
+                                setProvider={setProvider}
+                                onError={activateModal}
+                            />
+                        )}
+                    />
+                    <Route
+                        path={routes.IDENTITYISSUANCE_EXTERNAL}
+                        render={renderGeneratePage}
+                    />
+                    <Route
+                        path={routes.IDENTITYISSUANCE_FINAL}
+                        render={() => (
+                            <FinalPage
+                                identityName={identityName}
+                                accountName={initialAccountName}
+                            />
+                        )}
+                    />
+                    <Route
+                        render={() => (
+                            <PickName
+                                setIdentityName={setIdentityName}
+                                setAccountName={setInitialAccountName}
+                                account={initialAccountName}
+                                identity={identityName}
+                            />
+                        )}
+                    />
+                </Switch>
             </PageLayout.Container>
         </PageLayout>
     );

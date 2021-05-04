@@ -10,8 +10,18 @@
     margin: 0 auto;
 }
 
+.form {
+    composes: spanBoth;
+    align-self: start;
+}
+
 .field {
     margin-left: 50px;
     margin-right: 50px;
     font-size: $font-size-body2;
+}
+
+.button {
+    composes: spanBoth;
+    width: 400px;
 }
