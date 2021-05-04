@@ -81,10 +81,21 @@
     right: 25px;
 }
 
+.identityAttributesOfCredential {
+    &:not(:last-child) {
+        border-bottom: 5px solid $color-light-blue;
+    }
+
+    margin-left: -20px;
+}
+
+.releaseScheduleListHeader,
+.identityAttributesOfCredential,
 .releaseSchedule {
     width: calc(100% + 40px);
 }
 
+.identityAttribute,
 .releaseScheduleElement {
     padding: 10px 20px;
     &:not(:last-child) {
@@ -93,7 +104,6 @@
 }
 
 .releaseScheduleListHeader {
-    width: calc(100% + 40px);
     background-color: $color-light-blue;
     color: $color-pale-blue;
     padding: 2px 20px;

@@ -16,8 +16,13 @@
     width: calc(100% + 40px);
 }
 
+.transactionListHeaderNotChosen,
 .transactionListHeaderChosen {
-    font-weight: $font-weight-bold;
+    font-size: $font-size-button2;
+    font-weight: $font-weight-emphasized;
+}
+
+.transactionListHeaderChosen {
     color: $color-pale-blue;
 }
 

@@ -37,7 +37,7 @@ export default function TransferHistory({ account }: Props) {
                     className={
                         location === locations.listTransactions
                             ? styles.transactionListHeaderChosen
-                            : undefined
+                            : styles.transactionListHeaderNotChosen
                     }
                     disabled={location === locations.listTransactions}
                 >
@@ -48,7 +48,7 @@ export default function TransferHistory({ account }: Props) {
                     className={
                         location === locations.viewIdentityData
                             ? styles.transactionListHeaderChosen
-                            : undefined
+                            : styles.transactionListHeaderNotChosen
                     }
                     onClick={() => setLocation(locations.viewIdentityData)}
                     disabled={location === locations.viewIdentityData}

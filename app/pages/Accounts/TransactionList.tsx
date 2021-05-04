@@ -16,6 +16,14 @@ interface Props {
 function TransactionList({ onTransactionClick }: Props): JSX.Element {
     const transactions = useSelector(transactionsSelector);
 
+    if (transactions.length === 0) {
+        return (
+            <h3 className="flex justifyCenter">
+                This balance has no transactions yet.
+            </h3>
+        );
+    }
+
     return (
         <>
             {transactions.map((transaction: TransferTransaction) => (
