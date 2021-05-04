@@ -23,6 +23,7 @@ enum Sex {
     NotKnown,
     Male,
     Female,
+    NA = 9,
 }
 
 const parseGender = (sex: Sex) => {

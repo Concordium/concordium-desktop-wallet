@@ -51,8 +51,9 @@ function IdentityListElement({
     expanded = false,
 }: Props): JSX.Element {
     const identityProvider = JSON.parse(identity.identityProvider);
-    const identityObject: IdentityObject = JSON.parse(identity.identityObject)
-        .value;
+    const identityObject: IdentityObject | null = JSON.parse(
+        identity.identityObject
+    )?.value;
 
     return (
         <Card
@@ -92,10 +93,10 @@ function IdentityListElement({
                         : undefined}
                 </div>
             </div>
-            {expanded && (
+            {expanded && identityObject && (
                 <div className={styles.details}>
                     {(Object.keys(
-                        identityObject.attributeList.chosenAttributes
+                        identityObject.attributeList.chosenAttributes ?? {}
                     ) as Array<keyof ChosenAttributes>).map((k) => (
                         <SidedRow
                             className={styles.detailsRow}
