@@ -187,6 +187,9 @@ export default function GenerateCredential(): JSX.Element {
                                                             setAccountValidationError={
                                                                 setAccountValidationError
                                                             }
+                                                            accountValidationError={
+                                                                accountValidationError
+                                                            }
                                                             address={address}
                                                             setChosenAttributes={
                                                                 setAttributes

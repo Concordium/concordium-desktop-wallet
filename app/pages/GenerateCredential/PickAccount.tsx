@@ -7,10 +7,12 @@ import AccountListElement from '~/components/AccountListElement';
 import { isValidAddress } from '~/utils/accountHelpers';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
 import Button from '~/cross-app-components/Button';
-import Loading from '~/cross-app-components/Loading';
 import RevealAttributes from './RevealAttributes';
 import routes from '~/constants/routes.json';
 import styles from './GenerateCredential.module.scss';
+import ConnectionStatusComponent, {
+    Status,
+} from '~/components/ConnectionStatusComponent';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -18,6 +20,7 @@ interface Props {
     address: string;
     setChosenAttributes: (attributes: string[]) => void;
     setAccountValidationError: (error?: string) => void;
+    accountValidationError?: string;
     identity: Identity | undefined;
 }
 
@@ -35,6 +38,7 @@ export default function PickAccount({
     address,
     setChosenAttributes,
     setAccountValidationError,
+    accountValidationError,
     identity,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
@@ -44,25 +48,28 @@ export default function PickAccount({
         throw new Error('unexpected missing identity');
     }
 
-    const [loading, setLoading] = useState<boolean>(false);
+    const [status, setStatus] = useState<Status>(Status.Pending);
     const [accountInfo, setAccountInfo] = useState<AccountInfo | undefined>(
         undefined
     );
 
     useEffect(() => {
+        let validAddress = true;
         if (!address || address.length !== addressLength) {
+            validAddress = false;
             setAccountValidationError(undefined);
-            setAccountInfo(undefined);
-            setReady(false);
         } else if (!isValidAddress(address)) {
+            validAddress = false;
             setAccountValidationError(invalidAddres);
-            setAccountInfo(undefined);
-            setReady(false);
-        } else {
-            setLoading(true);
+        }
+
+        if (validAddress) {
+            setStatus(Status.Loading);
             getAccountInfoOfAddress(address)
                 .then((loadedAccountInfo) => {
-                    setLoading(false);
+                    setStatus(
+                        loadedAccountInfo ? Status.Successful : Status.Failed
+                    );
                     setAccountInfo(loadedAccountInfo);
                     setAccountValidationError(
                         loadedAccountInfo ? undefined : mustBeDeployedMessage
@@ -70,10 +77,14 @@ export default function PickAccount({
                     return setReady(Boolean(loadedAccountInfo));
                 })
                 .catch(() => {
-                    setLoading(false);
+                    setStatus(Status.Failed);
                     setAccountValidationError('Unable to reach node');
                     setReady(false);
                 });
+        } else {
+            setAccountInfo(undefined);
+            setReady(false);
+            setStatus(Status.Pending);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [address]);
@@ -89,13 +100,7 @@ export default function PickAccount({
     };
 
     let accountDisplay;
-    if (loading) {
-        accountDisplay = (
-            <div className={styles.accountListElementPlaceholder}>
-                <Loading />
-            </div>
-        );
-    } else if (accountInfo) {
+    if (accountInfo) {
         accountDisplay = (
             <AccountListElement
                 account={fakeAccount}
@@ -105,7 +110,10 @@ export default function PickAccount({
     } else {
         accountDisplay = (
             <div className={styles.accountListElementPlaceholder}>
-                Waiting for Address
+                <ConnectionStatusComponent
+                    failedMessage={accountValidationError}
+                    status={status}
+                />
             </div>
         );
     }
