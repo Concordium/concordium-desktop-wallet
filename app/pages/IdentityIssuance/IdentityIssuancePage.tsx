@@ -81,6 +81,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                             <PickProvider
                                 setProvider={setProvider}
                                 onError={activateModal}
+                                provider={provider}
                             />
                         )}
                     />

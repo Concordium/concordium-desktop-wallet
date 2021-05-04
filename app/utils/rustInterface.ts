@@ -100,11 +100,14 @@ export async function createIdentityRequestObjectLedger(
         signatureIndex: 0,
     };
 
-    displayMessage(`
-Please sign information on device:
+    displayMessage(`Please sign information on device:
+
 Identity Credentials Public (IdCredPub): ${pubInfoForIp.idCredPub}
+
 Registration ID (RegId): ${pubInfoForIp.regId}
+
 Verification Key: ${pubInfoForIp.publicKeys.keys[0].verifyKey}
+
 Threshold: ${pubInfoForIp.publicKeys.threshold}
 `);
     const signature = await ledger.signPublicInformationForIp(

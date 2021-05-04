@@ -1,0 +1,25 @@
+@import 'config/bundle';
+
+.header {
+    grid-area: header;
+    text-align: left;
+    margin-top: 0;
+}
+
+.item {
+    cursor: pointer;
+    height: 100px;
+
+    &:not(:last-child) {
+        margin-bottom: 20px;
+    }
+
+    img {
+        max-height: 100%;
+    }
+}
+
+.active,
+.item:hover {
+    @include shadowBorder($color-pale-blue, 2px);
+}

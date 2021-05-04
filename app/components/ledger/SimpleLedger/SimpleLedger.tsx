@@ -13,9 +13,13 @@ interface Props {
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) => Promise<void>;
+    disabled?: boolean;
 }
 
-export default function SimpleLedger({ ledgerCall }: Props): JSX.Element {
+export default function SimpleLedger({
+    ledgerCall,
+    disabled = false,
+}: Props): JSX.Element {
     return (
         <Card header="Device connection">
             <Ledger ledgerCallback={ledgerCall}>
@@ -25,7 +29,7 @@ export default function SimpleLedger({ ledgerCall }: Props): JSX.Element {
                         <Button
                             className={styles.submit}
                             onClick={submitHandler}
-                            disabled={!isReady}
+                            disabled={!isReady || disabled}
                         >
                             Submit
                         </Button>
