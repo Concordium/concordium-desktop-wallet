@@ -13,9 +13,9 @@ import {
 import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
 import {
     Account,
-    LocalCredential,
     AccountInfo,
     AccountTransaction,
+    CredentialWithIdentityNumber,
     Global,
     instanceOfTransferToPublic,
 } from '~/utils/types';
@@ -50,7 +50,7 @@ async function attachCompletedPayload(
     transaction: AccountTransaction,
     ledger: ConcordiumLedgerClient,
     global: Global,
-    credential: LocalCredential,
+    credential: CredentialWithIdentityNumber,
     accountInfo: AccountInfo
 ) {
     if (instanceOfTransferToPublic(transaction)) {

@@ -6,15 +6,6 @@ import {
     walletTable,
 } from '../constants/databaseNames.json';
 
-function convertBooleans(credentials: Credential[]) {
-    return credentials.map((credential) => {
-        return {
-            ...credential,
-            external: Boolean(credential.external),
-        };
-    });
-}
-
 export async function insertCredential(credential: Credential) {
     return (await knex())(credentialsTable).insert(credential);
 }
@@ -41,7 +32,20 @@ export async function getCredentials(): Promise<Credential[]> {
             `${credentialsTable}.*`,
             `${identitiesTable}.identityNumber as identityNumber`
         );
-    return convertBooleans(credentials);
+    return credentials;
+}
+
+/**
+ * Get all credentials for the given identity id, i.e. exactly those credentials
+ * that refer to a specific identity.
+ */
+export async function getCredentialsForIdentity(
+    identityId: number
+): Promise<Credential[]> {
+    return (await knex())
+        .select()
+        .table(credentialsTable)
+        .where({ identityId });
 }
 
 /**
@@ -75,7 +79,7 @@ export async function getCredentialsOfAccount(
             `${identitiesTable}.identityNumber as identityNumber`,
             `${walletTable}.id as walletId`
         );
-    return convertBooleans(credentials);
+    return credentials;
 }
 
 export async function getNextCredentialNumber(identityId: number) {

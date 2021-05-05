@@ -283,10 +283,9 @@ export interface CredentialDeploymentInformation
 
 export interface Credential {
     accountAddress: string;
-    external: boolean;
     credentialIndex?: number;
-    credentialNumber?: number;
-    identityId?: number;
+    credentialNumber: number;
+    identityId: number;
     identityNumber?: number;
     walletId?: number;
     credId: Hex;
@@ -297,11 +296,8 @@ export interface DeployedCredential extends Credential {
     credentialIndex: number;
 }
 
-export interface LocalCredential extends Credential {
-    external: false;
-    identityId: number;
+export interface CredentialWithIdentityNumber extends Credential {
     identityNumber: number;
-    credentialNumber: number;
 }
 
 export function instanceOfDeployedCredential(
@@ -312,10 +308,13 @@ export function instanceOfDeployedCredential(
     );
 }
 
-export function instanceOfLocalCredential(
+export function instanceOfCredentialWithIdentityNumber(
     object: Credential
-): object is LocalCredential {
-    return !object.external;
+): object is CredentialWithIdentityNumber {
+    return !(
+        object.credentialNumber === undefined ||
+        object.credentialNumber === null
+    );
 }
 
 // 48 bytes containing a group element.
