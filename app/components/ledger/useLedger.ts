@@ -70,19 +70,15 @@ export default function useLedger(
                         // been opened yet.
                         dispatch(pendingAction(OPEN_APP, deviceName));
                     }
-                } else {
+                } else if (event.type === 'remove') {
+                    if (client) {
+                        client.closeTransport();
+                    }
                     dispatch(resetAction());
                 }
             },
         };
-    }, []);
-
-    const listenForLedger = useCallback(() => {
-        if (!ledgerSubscription) {
-            const subscription = TransportNodeHid.listen(ledgerObserver);
-            setLedgerSubscription(subscription);
-        }
-    }, [ledgerSubscription, ledgerObserver]);
+    }, [client]);
 
     const submitHandler: LedgerSubmitHandler = useCallback(async () => {
         dispatch(pendingAction(AWAITING_USER_INPUT));
@@ -109,18 +105,26 @@ export default function useLedger(
     }, [client, ledgerCallback, onSignError]);
 
     useEffect(() => {
-        listenForLedger();
+        if (!ledgerSubscription) {
+            const subscription = TransportNodeHid.listen(ledgerObserver);
+            setLedgerSubscription(subscription);
+        }
         return function cleanup() {
             if (ledgerSubscription !== undefined) {
                 ledgerSubscription.unsubscribe();
+                setLedgerSubscription(undefined);
             }
+        };
+    }, [ledgerSubscription]);
+
+    useEffect(() => {
+        return function cleanup() {
             if (client) {
                 client.closeTransport();
-
                 dispatch(resetAction());
             }
         };
-    }, [ledgerSubscription, listenForLedger, client]);
+    }, [client]);
 
     return {
         isReady: (status === CONNECTED || status === ERROR) && Boolean(client),
