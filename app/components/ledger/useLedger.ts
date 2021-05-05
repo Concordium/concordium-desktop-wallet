@@ -45,40 +45,48 @@ export default function useLedger(
         Subscription | undefined
     >(undefined);
 
-    const ledgerObserver: Observer<DescriptorEvent<string>> = useMemo(() => {
-        return {
-            complete: () => {
-                // This is expected to never trigger.
-            },
-            error: () => {
-                dispatch(errorAction());
-            },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            next: async (event: any) => {
-                if (event.type === 'add') {
-                    const transport = await TransportNodeHid.open(event.path);
-                    const concordiumClient = new ConcordiumLedgerClient(
-                        transport
-                    );
-                    const appAndVersion = await concordiumClient.getAppAndVersion();
-                    const deviceName = event.deviceModel.productName;
+    const ledgerObserver: Observer<DescriptorEvent<string>> = useMemo(
+        () => {
+            return {
+                complete: () => {
+                    // This is expected to never trigger.
+                },
+                error: () => {
+                    dispatch(errorAction());
+                },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                next: async (event: any) => {
+                    if (event.type === 'add') {
+                        const transport = await TransportNodeHid.open(
+                            event.path
+                        );
+                        const concordiumClient = new ConcordiumLedgerClient(
+                            transport
+                        );
+                        const appAndVersion = await concordiumClient.getAppAndVersion();
+                        const deviceName = event.deviceModel.productName;
 
-                    if (isConcordiumApp(appAndVersion)) {
-                        dispatch(connectedAction(deviceName, concordiumClient));
-                    } else {
-                        // The device has been connected, but the Concordium application has not
-                        // been opened yet.
-                        dispatch(pendingAction(OPEN_APP, deviceName));
+                        if (isConcordiumApp(appAndVersion)) {
+                            dispatch(
+                                connectedAction(deviceName, concordiumClient)
+                            );
+                        } else {
+                            // The device has been connected, but the Concordium application has not
+                            // been opened yet.
+                            dispatch(pendingAction(OPEN_APP, deviceName));
+                        }
+                    } else if (event.type === 'remove') {
+                        if (client) {
+                            client.closeTransport();
+                        }
+                        dispatch(resetAction());
                     }
-                } else if (event.type === 'remove') {
-                    if (client) {
-                        client.closeTransport();
-                    }
-                    dispatch(resetAction());
-                }
-            },
-        };
-    }, [client]);
+                },
+            };
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        []
+    );
 
     const submitHandler: LedgerSubmitHandler = useCallback(async () => {
         dispatch(pendingAction(AWAITING_USER_INPUT));
@@ -115,7 +123,7 @@ export default function useLedger(
                 setLedgerSubscription(undefined);
             }
         };
-    }, [ledgerSubscription]);
+    }, [ledgerSubscription, ledgerObserver]);
 
     useEffect(() => {
         return function cleanup() {
