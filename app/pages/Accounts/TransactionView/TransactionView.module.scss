@@ -8,6 +8,7 @@
 
 .errorMessage {
     color: $color-error;
+    padding-bottom: 10px;
 }
 
 .title,
@@ -24,6 +25,7 @@
 
 .title {
     padding-bottom: 20px;
+    margin-bottom: 0;
 }
 
 .listElement {

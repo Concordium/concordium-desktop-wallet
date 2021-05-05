@@ -26,7 +26,7 @@ function TransactionList({ onTransactionClick }: Props): JSX.Element {
 
     return (
         <>
-            {transactions.map((transaction: TransferTransaction) => (
+            {transactions.reverse().map((transaction: TransferTransaction) => (
                 <TransactionListElement
                     onClick={() => onTransactionClick(transaction)}
                     key={transaction.transactionHash}

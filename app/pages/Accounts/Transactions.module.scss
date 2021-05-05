@@ -40,3 +40,18 @@
         border-bottom: 0.5px solid $color-soft-grey;
     }
 }
+
+.failedElement {
+    padding-left: 30px;
+}
+
+.warning {
+    position: absolute;
+    margin: 5px -25px;
+    fill: $color-error;
+}
+
+.checkmark {
+    margin-left: 5px;
+    margin-top: 5px;
+}

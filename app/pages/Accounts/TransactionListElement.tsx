@@ -1,5 +1,8 @@
 import React from 'react';
+import clsx from 'clsx';
 import { useSelector } from 'react-redux';
+import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
+import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
 import { parseTime } from '~/utils/timeHelpers';
 import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
@@ -124,11 +127,11 @@ function parseAmount(
 function displayType(kind: TransactionKindString) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
-            return ' (schedule)';
+            return ' (With schedule)';
         case TransactionKindString.TransferToEncrypted:
-            return ' (Shielded)';
+            return ' Shielded amount';
         case TransactionKindString.TransferToPublic:
-            return ' (Unshielded)';
+            return ' Unshielded amount';
         default:
             return '';
     }
@@ -139,9 +142,11 @@ function statusSymbol(status: TransactionStatus) {
         case TransactionStatus.Pending:
             return '';
         case TransactionStatus.Committed:
-            return '\u2713';
+            return <CheckmarkIcon className={styles.checkmark} height="10" />;
         case TransactionStatus.Finalized:
-            return '\u2713\u2713';
+            return (
+                <DoubleCheckmarkIcon className={styles.checkmark} height="10" />
+            );
         case TransactionStatus.Rejected:
             return '!';
         default:
@@ -172,25 +177,31 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
         isOutgoingTransaction
     );
 
+    const failed = isFailed(transaction);
+
     return (
         <div
-            className={styles.transactionListElement}
+            className={clsx(
+                styles.transactionListElement,
+                !failed || styles.failedElement
+            )}
             onClick={onClick}
             onKeyPress={onClick}
             tabIndex={0}
             role="button"
         >
+            {failed ? <Warning className={styles.warning} height="20" /> : null}
             <SidedRow
-                left={
-                    <>
-                        {isFailed(transaction) ? <Warning /> : null}
-                        {name.concat(displayType(transaction.transactionKind))}
-                    </>
-                }
+                left={name.concat(displayType(transaction.transactionKind))}
                 right={amount}
             />
             <SidedRow
-                left={`${time} ${statusSymbol(transaction.status)}`}
+                className="body4 textFaded"
+                left={
+                    <>
+                        {time} {statusSymbol(transaction.status)}
+                    </>
+                }
                 right={amountFormula.concat(
                     ` ${
                         transaction.status !== TransactionStatus.Finalized
