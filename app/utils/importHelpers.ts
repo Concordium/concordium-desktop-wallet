@@ -13,14 +13,15 @@ export function updateIdentityIdReference<T extends HasIdentityId>(
     insertedIdentityId: number,
     input: T[]
 ) {
-    return input
-        .filter((item) => importedIdentityId === item.identityId)
-        .map((matchingItem) => {
+    return input.map((item) => {
+        if (importedIdentityId === item.identityId) {
             return {
-                ...matchingItem,
+                ...item,
                 identityId: insertedIdentityId,
             };
-        });
+        }
+        return item;
+    });
 }
 
 export function updateWalletIdReference<T extends HasWalletId>(
@@ -28,14 +29,15 @@ export function updateWalletIdReference<T extends HasWalletId>(
     insertedWalletId: number,
     input: T[]
 ) {
-    return input
-        .filter((item) => importedWalletId === item.walletId)
-        .map((matchingItem) => {
+    return input.map((item) => {
+        if (importedWalletId === item.walletId) {
             return {
-                ...matchingItem,
+                ...item,
                 walletId: insertedWalletId,
             };
-        });
+        }
+        return item;
+    });
 }
 
 /**

@@ -152,7 +152,6 @@ async function importNewWallets(
 
     // At this point the accounts and credentials have updated references,
     // and can be directly inserted into the database.
-
     for (let i = 0; i < accountsWithUpdatedReferences.length; i += 1) {
         const accountWithUpdatedReference = accountsWithUpdatedReferences[i];
         await insertAccount(accountWithUpdatedReference);
