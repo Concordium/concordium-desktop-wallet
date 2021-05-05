@@ -173,6 +173,29 @@ export async function createUnshieldAmountTransaction(
     });
 }
 
+export function createRegularIntervalSchedulePerMonth(
+    totalAmount: bigint,
+    releases: number,
+    starting: Date
+): SchedulePoint[] {
+    const releaseAmount = totalAmount / BigInt(releases);
+    const restAmount = totalAmount % BigInt(releases);
+    const schedule = [];
+    const date = new Date(starting.getTime());
+    for (let i = 0; i < releases - 1; i += 1) {
+        schedule.push({
+            amount: releaseAmount.toString(),
+            timestamp: date.getTime().toString(),
+        });
+        date.setMonth(date.getMonth() + 1);
+    }
+    schedule.push({
+        amount: (releaseAmount + restAmount).toString(),
+        timestamp: date.getTime().toString(),
+    });
+    return schedule;
+}
+
 export function createRegularIntervalSchedule(
     totalAmount: bigint,
     releases: number,

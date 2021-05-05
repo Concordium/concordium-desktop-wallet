@@ -6,7 +6,10 @@ import React, {
 } from 'react';
 import { useForm } from 'react-hook-form';
 import { EqualRecord, Schedule } from '~/utils/types';
-import { createRegularIntervalSchedule } from '~/utils/transactionHelpers';
+import {
+    createRegularIntervalSchedule,
+    createRegularIntervalSchedulePerMonth,
+} from '~/utils/transactionHelpers';
 import { TimeConstants } from '~/utils/timeHelpers';
 import Form from '../../Form';
 import { futureDate } from '../../Form/util/validation';
@@ -77,12 +80,21 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         const { handleSubmit, errors } = form;
 
         function createSchedule({ startTime }: FormValues) {
-            const schedule = createRegularIntervalSchedule(
-                amount,
-                releases,
-                startTime.getTime(),
-                chosenInterval.value
-            );
+            let schedule;
+            if (chosenInterval.label === 'Month') {
+                schedule = createRegularIntervalSchedulePerMonth(
+                    amount,
+                    releases,
+                    startTime
+                );
+            } else {
+                schedule = createRegularIntervalSchedule(
+                    amount,
+                    releases,
+                    startTime.getTime(),
+                    chosenInterval.value
+                );
+            }
             const recoverState = {
                 releases,
                 startTime: startTime.getTime(),
