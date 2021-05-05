@@ -1,0 +1,17 @@
+@import 'config/bundle';
+
+.attributesCard {
+    padding: 0;
+}
+
+.checkbox {
+    padding: 20px;
+
+    &:not(:last-child) {
+        border-bottom: 1px solid $color-grey;
+    }
+}
+
+.label {
+    width: 100%;
+}

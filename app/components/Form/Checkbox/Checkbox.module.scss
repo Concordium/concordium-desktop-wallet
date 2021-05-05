@@ -28,6 +28,7 @@
     justify-content: center;
     transition: box-shadow $form-transition;
     flex: 0 0 auto;
+    margin-right: 7px;
 
     &Large {
         width: 26px;
@@ -51,8 +52,4 @@
     .rootInvalid & {
         box-shadow: 0 0 0 2px $color-error inset !important;
     }
-}
-
-.text {
-    margin-left: 7px;
 }

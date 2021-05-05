@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
@@ -10,6 +10,7 @@ import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 
 import styles from './AccountCreation.module.scss';
+import CardList from '~/cross-app-components/CardList';
 
 interface Props {
     setIdentity: (identity: Identity) => void;
@@ -21,11 +22,12 @@ export default function AccountCreationPickIdentity({
     identity,
 }: Props): JSX.Element | null {
     const identities = useSelector(confirmedIdentitiesSelector);
-    const initialIndex = useMemo(
-        () => identities.findIndex((i) => i.id === identity?.id),
-        [identities, identity]
+    const [chosenIndex, chooseIdentity] = useState(() =>
+        Math.max(
+            identities.findIndex((i) => i.id === identity?.id),
+            0
+        )
     );
-    const [chosenIndex, chooseIdentity] = useState(Math.max(initialIndex, 0));
     const dispatch = useDispatch();
 
     if (!identities) {
@@ -83,7 +85,7 @@ export default function AccountCreationPickIdentity({
                 </div>
             </Columns.Column>
             <Columns.Column noResize>
-                <div className={styles.rightColumn}>
+                <CardList className={styles.rightColumn}>
                     {identities.map((id, i) => (
                         <IdentityCard
                             className={styles.identityColumnElement}
@@ -93,7 +95,7 @@ export default function AccountCreationPickIdentity({
                             onClick={() => chooseIdentity(i)}
                         />
                     ))}
-                </div>
+                </CardList>
             </Columns.Column>
         </Columns>
     );

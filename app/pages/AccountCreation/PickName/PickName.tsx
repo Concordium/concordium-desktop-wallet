@@ -56,7 +56,9 @@ export default function IdentityIssuancePickName({
                         placeholder="Account name"
                         rules={{ required: 'Please specify an account name' }}
                     />
-                    <Form.Submit className={generalStyles.button}>
+                    <Form.Submit
+                        className={clsx(generalStyles.button, 'mHauto')}
+                    >
                         Let&apos;s continue
                     </Form.Submit>
                 </Form>

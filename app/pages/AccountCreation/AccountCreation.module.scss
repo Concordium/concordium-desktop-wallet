@@ -23,15 +23,10 @@ $account-creation-padding-horizontal: 50px;
 .button {
     width: 100%;
     max-width: 400px;
-    margin: 0 auto;
 }
 
 .identityColumnElement {
     width: 428px;
-
-    & + & {
-        margin-top: 20px;
-    }
 }
 
 .leftColumn,

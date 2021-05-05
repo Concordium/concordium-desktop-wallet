@@ -55,6 +55,7 @@ export default function AccountCreationPage(): JSX.Element {
                 <PickAttributes
                     identity={identity}
                     setChosenAttributes={setChosenAttributes}
+                    chosenAttributes={chosenAttributes}
                 />
             );
         }

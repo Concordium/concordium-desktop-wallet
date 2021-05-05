@@ -95,16 +95,16 @@ function IdentityListElement({
             </div>
             {expanded && identityObject && (
                 <div className={styles.details}>
-                    {(Object.keys(
+                    {Object.entries(
                         identityObject.attributeList.chosenAttributes ?? {}
-                    ) as Array<keyof ChosenAttributes>).map((k) => (
+                    ).map(([k, v]) => (
                         <SidedRow
                             className={styles.detailsRow}
                             key={k}
                             left={(attributeNames as Record<string, string>)[k]}
                             right={formatAttributeValue(
-                                k,
-                                identityObject.attributeList.chosenAttributes[k]
+                                k as keyof ChosenAttributes,
+                                v
                             )}
                         />
                     ))}
