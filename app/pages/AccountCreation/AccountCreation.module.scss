@@ -1,0 +1,21 @@
+.header {
+    margin-top: 0;
+}
+
+.container {
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.stretchColumn {
+    width: 500px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+}
+
+.button {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}

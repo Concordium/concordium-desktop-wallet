@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
+import { Identity } from '~/utils/types';
+import PageLayout from '~/components/PageLayout';
 import PickName from './PickName';
 import PickIdentity from './PickIdentity';
 import PickAttributes from './PickAttributes';
 import GeneratePage from './GeneratePage';
 import FinalPage from './FinalPage';
-import { Identity } from '../../utils/types';
-import PageLayout from '../../components/PageLayout';
+
+import styles from './AccountCreation.module.scss';
 
 function getSubtitle(location: string) {
     switch (location) {
@@ -63,36 +65,47 @@ export default function AccountCreationPage(): JSX.Element {
             <PageLayout.Header>
                 <h1> New Account | {getSubtitle(useLocation().pathname)}</h1>
             </PageLayout.Header>
-            <Switch>
-                <Route
-                    path={routes.ACCOUNTCREATION_PICKIDENTITY}
-                    render={() => <PickIdentity setIdentity={setIdentity} />}
-                />
-                <Route
-                    path={routes.ACCOUNTCREATION_FINAL}
-                    render={() => <FinalPage accountName={accountName} />}
-                />
-                <Route
-                    path={routes.ACCOUNTCREATION_GENERATE}
-                    render={renderGeneratePage}
-                />
-                <Route
-                    path={routes.ACCOUNTCREATION_PICKATTRIBUTES}
-                    render={renderPickAttributes}
-                />
-                <Route
-                    render={() => (
-                        <PickName
-                            submitName={(name: string) => {
-                                setAccountName(name);
-                                dispatch(
-                                    push(routes.ACCOUNTCREATION_PICKIDENTITY)
-                                );
-                            }}
-                        />
-                    )}
-                />
-            </Switch>
+            <PageLayout.Container
+                className={styles.container}
+                closeRoute={routes.ACCOUNTS}
+                padding="both"
+            >
+                <Switch>
+                    <Route
+                        path={routes.ACCOUNTCREATION_PICKIDENTITY}
+                        render={() => (
+                            <PickIdentity setIdentity={setIdentity} />
+                        )}
+                    />
+                    <Route
+                        path={routes.ACCOUNTCREATION_FINAL}
+                        render={() => <FinalPage accountName={accountName} />}
+                    />
+                    <Route
+                        path={routes.ACCOUNTCREATION_GENERATE}
+                        render={renderGeneratePage}
+                    />
+                    <Route
+                        path={routes.ACCOUNTCREATION_PICKATTRIBUTES}
+                        render={renderPickAttributes}
+                    />
+                    <Route
+                        render={() => (
+                            <PickName
+                                name={accountName}
+                                submitName={(name: string) => {
+                                    setAccountName(name);
+                                    dispatch(
+                                        push(
+                                            routes.ACCOUNTCREATION_PICKIDENTITY
+                                        )
+                                    );
+                                }}
+                            />
+                        )}
+                    />
+                </Switch>
+            </PageLayout.Container>
         </PageLayout>
     );
 }
