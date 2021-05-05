@@ -119,7 +119,6 @@ export default function ExternalIssuance({
     onError,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { state } = useLocation<ExternalIssuanceLocationState>();
 
     const [location, setLocation] = useState<string>();

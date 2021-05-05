@@ -14,6 +14,7 @@ import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
 
 import styles from './PickProvider.module.scss';
 import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
+import CardList from '~/cross-app-components/CardList';
 
 interface Props {
     setProvider(provider: IdentityProvider): void;
@@ -90,7 +91,7 @@ export default function IdentityIssuanceChooseProvider({
                 When you have entered your names on the left, you must sign your
                 submission with your hardware wallet, before you can continue.
             </p>
-            <div className={styles.container}>
+            <CardList className={styles.container}>
                 {providers.map((p) => (
                     <Card
                         key={p.ipInfo.ipIdentity}
@@ -107,9 +108,12 @@ export default function IdentityIssuanceChooseProvider({
                             alt={p.ipInfo.ipDescription.name}
                             src={`data:image/png;base64, ${p.metadata.icon}`}
                         />
+                        <span className="body1 mL20">
+                            {p.ipInfo.ipDescription.name}
+                        </span>
                     </Card>
                 ))}
-            </div>
+            </CardList>
             <div className={styles.container}>
                 <SimpleLedger ledgerCall={withLedger} disabled={!provider} />
             </div>
