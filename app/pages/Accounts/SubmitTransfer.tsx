@@ -117,10 +117,9 @@ export default function SubmitTransfer({ location }: Props) {
             ledger
         );
         if (!credential) {
-            setMessage(
-                'Unable to sign transfer as we were unable to find a deployed credential for the connected wallet.'
+            throw new Error(
+                'Unable to sign transfer as we were unable to find a deployed credential for the connected wallet'
             );
-            return;
         }
 
         transaction = await attachCompletedPayload(
