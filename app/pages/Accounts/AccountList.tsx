@@ -10,7 +10,7 @@ import {
     accountsInfoSelector,
 } from '~/features/AccountSlice';
 import { setViewingShielded } from '~/features/TransactionSlice';
-import AccountListElement from '~/components/AccountListElement';
+import AccountCard from '~/components/AccountCard';
 import { Account, Dispatch } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import CardList from '~/cross-app-components/CardList';
@@ -26,7 +26,6 @@ async function load(dispatch: Dispatch) {
 
 /**
  * Displays the List of local accounts, And allows picking the chosen account.
- * TODO: move the "AccountCreation start button"?
  */
 export default function AccountList() {
     const dispatch = useDispatch();
@@ -45,7 +44,7 @@ export default function AccountList() {
     return (
         <CardList>
             {accounts.map((account: Account, index: number) => (
-                <AccountListElement
+                <AccountCard
                     key={account.address}
                     active={index === chosenIndex}
                     account={account}

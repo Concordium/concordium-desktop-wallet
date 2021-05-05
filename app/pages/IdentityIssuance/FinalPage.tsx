@@ -5,7 +5,7 @@ import { Card, Button, List, Divider } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { accountsSelector } from '../../features/AccountSlice';
 import { identitiesSelector } from '../../features/IdentitySlice';
-import AccountListElement from '../../components/AccountListElement';
+import AccountCard from '../../components/AccountCard';
 import IdentityListElement from '../../components/IdentityListElement';
 
 interface Props {
@@ -45,7 +45,7 @@ export default function IdentityIssuanceFinal({
                         <IdentityListElement identity={identity} />
                     </List.Item>
                     <List.Item>
-                        <AccountListElement account={account} />
+                        <AccountCard account={account} />
                     </List.Item>
                 </List>
                 <Divider />
