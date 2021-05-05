@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
-import { Switch, Route, useLocation } from 'react-router-dom';
+import { Switch, Route, useLocation, Redirect } from 'react-router-dom';
 import routes from '~/constants/routes.json';
 import { Identity } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
@@ -45,7 +45,8 @@ export default function AccountCreationPage(): JSX.Element {
                 />
             );
         }
-        throw new Error('Unexpected missing identity!');
+
+        return <Redirect to={routes.ACCOUNTS} />;
     }
 
     function renderPickAttributes() {
@@ -57,7 +58,8 @@ export default function AccountCreationPage(): JSX.Element {
                 />
             );
         }
-        throw new Error('Unexpected missing identity!');
+
+        return <Redirect to={routes.ACCOUNTS} />;
     }
 
     return (
@@ -73,7 +75,10 @@ export default function AccountCreationPage(): JSX.Element {
                     <Route
                         path={routes.ACCOUNTCREATION_PICKIDENTITY}
                         render={() => (
-                            <PickIdentity setIdentity={setIdentity} />
+                            <PickIdentity
+                                setIdentity={setIdentity}
+                                identity={identity}
+                            />
                         )}
                     />
                     <Route
