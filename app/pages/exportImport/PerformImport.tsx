@@ -131,12 +131,13 @@ async function importNewWallets(
     // Insert the new identities into the database, and use their newly received ids to update the
     // accounts and credentials that reference them.
     for (let i = 0; i < identitiesWithUpdatedReferences.length; i += 1) {
-        const identityWithUpdateReference = identitiesWithUpdatedReferences[i];
-        const importedIdentityId = identityWithUpdateReference.id;
+        const identityWithUpdatedReference = identitiesWithUpdatedReferences[i];
+        const {
+            id: importedIdentityId,
+            ...identWithoutId
+        } = identityWithUpdatedReference;
 
-        const insertedIdentityId = (
-            await insertIdentity(identityWithUpdateReference)
-        )[0];
+        const insertedIdentityId = (await insertIdentity(identWithoutId))[0];
 
         credentialsWithUpdatedReferences = updateIdentityIdReference(
             importedIdentityId,
