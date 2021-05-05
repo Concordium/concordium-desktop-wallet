@@ -1,14 +1,14 @@
 @import 'config/bundle';
 
 .accountBalanceView {
-    background-color: #000;
+    background-color: $color-black;
     text-align: center;
     padding-bottom: 10px;
     height: 250px;
 }
 
-.inverted {
-    filter: invert(100%);
+.blueShield {
+    fill: $color-pale-blue;
 }
 
 .ViewingShielded {
@@ -21,6 +21,7 @@
     font-weight: $font-weight-bold;
 }
 
+.bakerRow,
 .amountRow,
 .ViewingShieldedButton,
 .blueText {
@@ -34,4 +35,17 @@
 
 .amountRow {
     margin: 10px 80px;
+}
+
+.bakerRow {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.bakerImage {
+    margin-right: 10px;
+    g {
+        fill: $color-pale-blue;
+    }
 }

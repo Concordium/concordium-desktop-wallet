@@ -2,6 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
+import BakerImage from '@resources/svg/baker.svg';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
 import { displayAsGTU } from '~/utils/gtu';
@@ -68,7 +69,10 @@ export default function AccountBalanceView(): JSX.Element | null {
                     <>
                         {' '}
                         +{' '}
-                        <ShieldImage className={styles.inverted} height="30" />
+                        <ShieldImage
+                            className={styles.blueShield}
+                            height="30"
+                        />
                     </>
                 )}
             </h1>
@@ -97,6 +101,12 @@ export default function AccountBalanceView(): JSX.Element | null {
                     left="Staked:"
                     right={displayAsGTU(stakedAmount)}
                 />
+                {accountBaker ? (
+                    <div className={styles.bakerRow}>
+                        <BakerImage className={styles.bakerImage} height="18" />
+                        <h3 className="m0">{accountBaker.bakerId}</h3>
+                    </div>
+                ) : null}
             </>
         );
     }

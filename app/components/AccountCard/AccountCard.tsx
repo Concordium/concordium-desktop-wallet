@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import MultiSigIcon from '@resources/svg/multisig.svg';
 import PendingImage from '@resources/svg/pending_old.svg';
 import ShieldImage from '@resources/svg/shield.svg';
+import BakerImage from '@resources/svg/baker.svg';
 import { displayAsGTU } from '~/utils/gtu';
 import { AccountInfo, Account, AccountStatus } from '~/utils/types';
 import { isInitialAccount } from '~/utils/accountHelpers';
@@ -91,7 +92,10 @@ export default function AccountCard({
                         </b>
                         {isInitialAccount(account) ? <>(Initial)</> : undefined}
                         {accountInfo && accountInfo.accountBaker ? (
-                            <>(baker)</>
+                            <BakerImage
+                                height="25"
+                                className={styles.bakerImage}
+                            />
                         ) : undefined}
                     </>
                 }
