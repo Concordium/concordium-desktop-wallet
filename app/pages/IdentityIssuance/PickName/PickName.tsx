@@ -4,7 +4,6 @@ import { useDispatch } from 'react-redux';
 import clsx from 'clsx';
 import { FormProvider, useForm } from 'react-hook-form';
 import routes from '~/constants/routes.json';
-import Card from '~/cross-app-components/Card';
 import Form from '~/components/Form';
 import { EqualRecord } from '~/utils/types';
 import Button from '~/cross-app-components/Button';
@@ -56,7 +55,7 @@ export default function IdentityIssuancePickName({
                 you can continue to select an identity provider.
             </p>
             <FormProvider {...form}>
-                <Card className={styles.form} header="Identity summary">
+                <div className={generalStyles.spanBoth}>
                     <p className="mV30">
                         What would you like to name your identity?
                     </p>
@@ -79,7 +78,7 @@ export default function IdentityIssuancePickName({
                             required: 'Please specify an initial account name',
                         }}
                     />
-                </Card>
+                </div>
                 <Button className={generalStyles.singleButton} onClick={submit}>
                     Continue
                 </Button>
