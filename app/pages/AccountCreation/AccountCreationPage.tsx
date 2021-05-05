@@ -68,7 +68,6 @@ export default function AccountCreationPage(): JSX.Element {
             <PageLayout.Container
                 className={styles.container}
                 closeRoute={routes.ACCOUNTS}
-                padding="both"
             >
                 <Switch>
                     <Route

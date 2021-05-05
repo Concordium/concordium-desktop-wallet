@@ -29,11 +29,11 @@ export default function IdentityIssuancePickName({
     }
 
     return (
-        <>
+        <div className={generalStyles.singleColumn}>
             <h2 className={generalStyles.header}>Naming your new account</h2>
             <div
                 className={clsx(
-                    generalStyles.singleColumn,
+                    generalStyles.singleColumnContent,
                     'flexColumn',
                     'flexChildFill'
                 )}
@@ -61,6 +61,6 @@ export default function IdentityIssuancePickName({
                     </Form.Submit>
                 </Form>
             </div>
-        </>
+        </div>
     );
 }
