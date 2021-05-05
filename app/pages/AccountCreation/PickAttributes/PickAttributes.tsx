@@ -81,7 +81,7 @@ export default function AccountCreationPickAttributes({
                             className={generalStyles.button}
                             onClick={submit}
                         >
-                            Submit with reveaed attributes
+                            Submit with revealed attributes
                         </Button>
                     </div>
                 </div>
