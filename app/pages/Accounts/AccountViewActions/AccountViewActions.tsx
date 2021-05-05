@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import SendImage from '@resources/svg/paperplane.svg';
 import MoreImage from '@resources/svg/more.svg';
+import UnshieldImage from '@resources/svg/unshield.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import SendEncryptedImage from '@resources/svg/shielded-paperplane.svg';
 import routes from '~/constants/routes.json';
@@ -27,9 +28,9 @@ const viewingShieldedbuttons = [
     {
         route: routes.ACCOUNTS_UNSHIELDAMOUNT,
         label: 'Unshield',
-        Image: ShieldImage, // TODO: Replace with unshield image
+        Image: UnshieldImage,
         imageClassName: styles.actionImage,
-        height: '30',
+        height: '40',
     },
     more,
 ];
