@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import MultiSigIcon from '@resources/svg/multisig.svg';
-import PendingImage from '@resources/svg/pending_old.svg';
+import PendingImage from '@resources/svg/pending-small.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
 import { displayAsGTU } from '~/utils/gtu';

@@ -6,7 +6,7 @@ import routes from '../../constants/routes.json';
 import { accountsSelector } from '../../features/AccountSlice';
 import { identitiesSelector } from '../../features/IdentitySlice';
 import AccountCard from '../../components/AccountCard';
-import IdentityListElement from '../../components/IdentityListElement';
+import IdentityCard from '../../components/IdentityCard';
 
 interface Props {
     identityName: string;
@@ -42,7 +42,7 @@ export default function IdentityIssuanceFinal({
                 <Divider />
                 <List horizontal divided>
                     <List.Item>
-                        <IdentityListElement identity={identity} />
+                        <IdentityCard identity={identity} />
                     </List.Item>
                     <List.Item>
                         <AccountCard account={account} />

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -14,14 +14,11 @@ import AccountCard from '~/components/AccountCard';
 import { Account, Dispatch } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import CardList from '~/cross-app-components/CardList';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 async function load(dispatch: Dispatch) {
     const accounts = await loadAccounts(dispatch);
-    try {
-        loadAccountInfos(accounts, dispatch);
-    } catch (e) {
-        throw new Error('Unable to load AccountInfo'); // TODO: Handle the case where we can't reach the node
-    }
+    return loadAccountInfos(accounts, dispatch);
 }
 
 /**
@@ -32,9 +29,11 @@ export default function AccountList() {
     const accounts = useSelector(accountsSelector);
     const accountsInfo = useSelector(accountsInfoSelector);
     const chosenIndex = useSelector(chosenAccountIndexSelector);
+    const [error, setError] = useState<string>();
 
     useEffect(() => {
-        load(dispatch);
+        load(dispatch).catch((e) => setError(e.toString()));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch]);
 
     if (!accounts || !accountsInfo) {
@@ -43,6 +42,12 @@ export default function AccountList() {
 
     return (
         <CardList>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                header="Unable to load Accounts"
+                content={error}
+                onClick={() => dispatch(push(routes.HOME))}
+            />
             {accounts.map((account: Account, index: number) => (
                 <AccountCard
                     key={account.address}

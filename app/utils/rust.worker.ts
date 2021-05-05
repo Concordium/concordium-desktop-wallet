@@ -29,6 +29,7 @@ interface RustInterface {
         idCredSec: string,
         prfKey: string
     ): string;
+    getAddressFromCredId(credId: string): string;
 }
 
 let rustReference: RustInterface;
@@ -107,6 +108,13 @@ function createGenesisAccount(
     );
 }
 
+function getAddressFromCredId(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.getAddressFromCredId(message.credId);
+}
+
 function mapCommand(command: string) {
     switch (command) {
         case workerCommands.buildPublicInformationForIp:
@@ -125,6 +133,8 @@ function mapCommand(command: string) {
             return createTransferToPublicData;
         case workerCommands.createGenesisAccount:
             return createGenesisAccount;
+        case workerCommands.getAddressFromCredId:
+            return getAddressFromCredId;
         default:
             return () => 'unknown command';
     }
