@@ -61,8 +61,6 @@ export function isDuplicate<T>(entry: T, list: T[], fields: (keyof T)[]) {
  * This is determined by equality of the given fields.
  * If the commonFields parameter is given, the function also checks
  * that there are no shared fields, except for those specified in commonFields.
- *
- *
  * @returns true if the entry is not a duplicate
  */
 export function hasNoDuplicate<T>(
