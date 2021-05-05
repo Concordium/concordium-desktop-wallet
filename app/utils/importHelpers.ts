@@ -8,36 +8,19 @@ export interface HasIdentityId {
     identityId?: number;
 }
 
-export function updateIdentityIdReference<T extends HasIdentityId>(
-    importedIdentityId: number,
-    insertedIdentityId: number,
-    input: T[]
-) {
-    return input.map((item) => {
-        if (importedIdentityId === item.identityId) {
-            return {
-                ...item,
-                identityId: insertedIdentityId,
-            };
-        }
-        return item;
-    });
-}
-
 export function updateWalletIdReference<T extends HasWalletId>(
     importedWalletId: number,
     insertedWalletId: number,
     input: T[]
-) {
-    return input.map((item) => {
-        if (importedWalletId === item.walletId) {
+): T[] {
+    return input
+        .filter((item) => importedWalletId === item.walletId)
+        .map((relevantItem) => {
             return {
-                ...item,
+                ...relevantItem,
                 walletId: insertedWalletId,
             };
-        }
-        return item;
-    });
+        });
 }
 
 /**
