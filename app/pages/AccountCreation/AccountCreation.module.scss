@@ -8,7 +8,7 @@
     flex-direction: column;
 }
 
-.stretchColumn {
+.singleColumn {
     width: 500px;
     margin: 0 auto;
     padding-bottom: 80px;
@@ -18,4 +18,17 @@
     width: 100%;
     max-width: 400px;
     margin: 0 auto;
+}
+
+.columns {
+    margin-left: -35px;
+    margin-right: -35px;
+}
+
+.identityColumnElement {
+    width: 428px;
+
+    & + & {
+        margin-top: 20px;
+    }
 }

@@ -33,7 +33,7 @@ export default function IdentityIssuancePickName({
             <h2 className={generalStyles.header}>Naming your new account</h2>
             <div
                 className={clsx(
-                    generalStyles.stretchColumn,
+                    generalStyles.singleColumn,
                     'flexColumn',
                     'flexChildFill'
                 )}
