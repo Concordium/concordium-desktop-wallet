@@ -1159,5 +1159,5 @@ export interface SignedIdRequest {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     idObjectRequest: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    randomness: any;
+    randomness: Hex;
 }
