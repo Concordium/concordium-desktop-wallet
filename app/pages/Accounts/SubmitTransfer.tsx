@@ -175,7 +175,15 @@ export default function SubmitTransfer({ location }: Props) {
             addPendingTransaction(transaction, transactionHash);
             monitorTransactionStatus(transactionHash);
 
-            dispatch(push(confirmed));
+            const confirmedStateWithHash = {
+                transactionHash,
+                ...confirmed.state,
+            };
+            const confirmedWithHash = {
+                ...confirmed,
+                state: confirmedStateWithHash,
+            };
+            dispatch(push(confirmedWithHash));
         } else {
             // TODO: handle rejection from node
         }

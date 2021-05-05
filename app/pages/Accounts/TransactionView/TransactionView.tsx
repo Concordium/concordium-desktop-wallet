@@ -17,7 +17,6 @@ interface CopiableListElementProps {
     title: string;
     value: string;
     note?: string;
-    className?: string;
 }
 
 /**
@@ -27,11 +26,10 @@ function CopiableListElement({
     title,
     value,
     note,
-    className,
 }: CopiableListElementProps): JSX.Element {
     return (
         <SidedRow
-            className={className}
+            className={styles.listElement}
             left={
                 <div className={styles.copiableListElementLeftSide}>
                     <p className={styles.copiableListElementTitle}>{title}</p>
@@ -64,7 +62,7 @@ function displayRejectReason(transaction: TransferTransaction) {
 function TransactionView({ transaction, returnFunction }: Props) {
     return (
         <Card className="relative">
-            <h2 className={styles.title}> Transaction Details </h2>
+            <h3 className={styles.title}> Transaction Details </h3>
             <CloseButton
                 className={styles.closeButton}
                 onClick={returnFunction}
@@ -73,23 +71,21 @@ function TransactionView({ transaction, returnFunction }: Props) {
             {displayRejectReason(transaction)}
             <CopiableListElement
                 title="From Address:"
-                className={styles.listElement}
-                value={`${transaction.fromAddress.substring(0, 8)}...`}
+                value={`${transaction.fromAddress}`}
                 note={transaction.fromAddressName}
             />
+            {transaction.toAddress ? (
+                <CopiableListElement
+                    title="To Address:"
+                    value={`${transaction.toAddress}`}
+                    note={transaction.toAddressName}
+                />
+            ) : null}
             <CopiableListElement
-                title="To Address:"
-                className={styles.listElement}
-                value={`${transaction.toAddress.substring(0, 8)}...`}
-                note={transaction.toAddressName}
-            />
-            <CopiableListElement
-                className={styles.listElement}
                 title="Transaction Hash"
                 value={transaction.transactionHash || 'No Transaction.'}
             />
             <CopiableListElement
-                className={styles.listElement}
                 title="Block Hash"
                 value={transaction.blockHash}
             />
