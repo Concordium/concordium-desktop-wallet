@@ -17,10 +17,8 @@
 .item {
     cursor: pointer;
     height: 100px;
-
-    &:not(:last-child) {
-        margin-bottom: 20px;
-    }
+    display: flex;
+    align-items: center;
 
     img {
         max-height: 100%;
