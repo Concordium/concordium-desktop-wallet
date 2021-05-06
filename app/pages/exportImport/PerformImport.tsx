@@ -69,9 +69,14 @@ async function performImport(
     dispatch: Dispatch
 ) {
     const existingWallets = await getAllWallets();
+    const existingDataWithWallets = {
+        ...existingData,
+        wallets: existingWallets,
+    };
+
     await importWallets(
         existingWallets,
-        existingData,
+        existingDataWithWallets,
         importedData.wallets,
         importedData.identities,
         importedData.accounts,

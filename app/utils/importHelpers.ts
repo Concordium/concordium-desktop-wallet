@@ -387,7 +387,67 @@ async function importDuplicateWallets(
     );
 }
 
+/**
+ * Imports the identities, accounts and credentials for a wallet that already exists in the database,
+ * but with a different logical id. This consists of getting the logical id's that the wallets have
+ * in the database, and updating the identities with this information. When this has been done, this
+ * case has been reduced to the case for having duplicate wallets, which is invoked.
+ */
+async function importExistingWallets(
+    existingWallets: WalletEntry[],
+    existingData: ExportData,
+    importedIdentities: Identity[],
+    importedCredentials: Credential[],
+    importedAccounts: Account[]
+) {
+    const { attachedIdentities } = findAttachedEntities(
+        existingWallets,
+        importedIdentities,
+        importedCredentials,
+        importedAccounts
+    );
+
+    const duplicateWallets: WalletEntry[] = [];
+    let identitiesWithUpdatedWalletIds: Identity[] = [];
+    for (let i = 0; i < existingWallets.length; i += 1) {
+        const existingWallet = existingWallets[i];
+
+        const newWallet = existingData.wallets.find(
+            (wallet) => wallet.identifier === existingWallet.identifier
+        );
+        if (!newWallet) {
+            throw new Error(
+                'Internal error. An existing and matching wallet should have been found, but was not.'
+            );
+        }
+        duplicateWallets.push(newWallet);
+
+        const updatedIdentities = updateWalletIdReference(
+            existingWallet.id,
+            newWallet.id,
+            attachedIdentities
+        );
+        identitiesWithUpdatedWalletIds = updatedIdentities.concat(
+            identitiesWithUpdatedWalletIds
+        );
+    }
+
+    // Now that the identities have had their walletId reference updated, we are in the
+    // same case as if we had duplicate wallet entries, and can re-use that method to
+    // complete the import.
+    await importDuplicateWallets(
+        existingData,
+        duplicateWallets,
+        identitiesWithUpdatedWalletIds,
+        importedCredentials,
+        importedAccounts
+    );
+}
+
 // TODO This method should be a single transaction. Implement this when we change the SQLite dependency.
+/**
+ * Imports wallets, identities, credentials and accounts received from an exported file.
+ */
 export async function importWallets(
     walletsFromDatabase: WalletEntry[],
     existingData: ExportData,
@@ -428,16 +488,13 @@ export async function importWallets(
             ])
     );
 
-    // TODO Add support for this.
-    // It might be possible to re-use the import of duplicate wallets, if the walletId references
-    // on the identities are updated - afterwards it should be an identical case, as we need to check
-    // if the identities already exist or not etc.
-    if (existingWallets.length !== 0) {
-        throw new Error(
-            'Importing of data is only supported for non-conflicting data.'
-        );
-    }
-
+    await importExistingWallets(
+        existingWallets,
+        existingData,
+        importedIdentities,
+        importedCredentials,
+        importedAccounts
+    );
     await importNewWallets(
         newWallets,
         importedIdentities,
