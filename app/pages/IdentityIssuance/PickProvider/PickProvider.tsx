@@ -91,8 +91,9 @@ export default function IdentityIssuanceChooseProvider({
                 out their privacy policies before selecting a provider.
             </p>
             <p className={styles.text}>
-                When you have entered your names on the left, you must sign your
-                submission with your hardware wallet, before you can continue.
+                When you have selected an identity provider on the left, you
+                must sign your submission with your hardware wallet, before you
+                can continue.
             </p>
             <CardList className={styles.container}>
                 {providers.map((p) => (
