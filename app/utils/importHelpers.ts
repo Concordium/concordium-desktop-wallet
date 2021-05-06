@@ -1,4 +1,20 @@
-import { EncryptedData, ExportData } from './types';
+/* eslint-disable no-await-in-loop */
+import { getAccountsOfIdentity, insertAccount } from '~/database/AccountDao';
+import {
+    getCredentialsForIdentity,
+    insertCredential,
+} from '~/database/CredentialDao';
+import { insertIdentity } from '~/database/IdentityDao';
+import { insertWallet } from '~/database/WalletDao';
+import { partition } from './basicHelpers';
+import {
+    Account,
+    Credential,
+    EncryptedData,
+    ExportData,
+    Identity,
+    WalletEntry,
+} from './types';
 
 export interface HasWalletId {
     walletId?: number;
@@ -6,6 +22,12 @@ export interface HasWalletId {
 
 export interface HasIdentityId {
     identityId?: number;
+}
+
+interface AttachedEntities {
+    attachedIdentities: Identity[];
+    attachedCredentials: Credential[];
+    attachedAccounts: Account[];
 }
 
 export function updateWalletIdReference<T extends HasWalletId>(
@@ -39,6 +61,389 @@ export function isDuplicate<T>(entry: T, list: T[], fields: (keyof T)[]) {
             .every(Boolean)
     );
     return !!result;
+}
+
+/**
+ * Finds the accounts and credentials that refer to a specific identityId.
+ */
+function findAccountsAndCredentialsOnIdentity(
+    identityId: number,
+    accounts: Account[],
+    credentials: Credential[]
+) {
+    const accountsOnIdentity = accounts.filter(
+        (account) => identityId === account.identityId
+    );
+    const credentialsOnIdentity = credentials.filter(
+        (credential) => identityId === credential.identityId
+    );
+    return { accountsOnIdentity, credentialsOnIdentity };
+}
+
+/**
+ * Finds the identities, credentials and accounts that are attached to one of the
+ * provided wallets.
+ */
+function findAttachedEntities(
+    wallets: WalletEntry[],
+    importedIdentities: Identity[],
+    importedCredentials: Credential[],
+    importedAccounts: Account[]
+): AttachedEntities {
+    const walletIds = wallets.map((wallet) => wallet.id);
+
+    const attachedIdentities = importedIdentities.filter((identity) =>
+        walletIds.includes(identity.walletId)
+    );
+    const attachedIdentityIds = attachedIdentities.map(
+        (attachedIdent) => attachedIdent.id
+    );
+
+    const attachedCredentials = importedCredentials.filter((credential) =>
+        attachedIdentityIds.includes(credential.identityId)
+    );
+
+    const attachedAccounts = importedAccounts.filter((account) =>
+        attachedIdentityIds.includes(account.identityId)
+    );
+
+    return { attachedIdentities, attachedCredentials, attachedAccounts };
+}
+
+/**
+ * Inserts an array of new identities and its attached accounts and credentials. The identities
+ * must be new identities that did not already exist in the database. The accounts and credentials for
+ * each identity in the array will have their identityId reference updated to point to the
+ * correct id for their identity, before they are also inserted into the database.
+ *
+ * Note that for new identities that there cannot be existing account or credentials, so we
+ * can safely insert them without checking if they already exist.
+ * @param newIdentities an array of new identities to be added to the database
+ * @param attachedAccounts all accounts for the current wallet import, without any changes to their identityId
+ * @param attachedCredentials all credentials for the current wallet import, without any changes to their identityId
+ */
+async function insertNewIdentities(
+    newIdentities: Identity[],
+    attachedAccounts: Account[],
+    attachedCredentials: Credential[]
+) {
+    for (let i = 0; i < newIdentities.length; i += 1) {
+        const { id, ...newIdentity } = newIdentities[i];
+
+        const newIdentityId = (await insertIdentity(newIdentity))[0];
+
+        const {
+            accountsOnIdentity,
+            credentialsOnIdentity,
+        } = findAccountsAndCredentialsOnIdentity(
+            id,
+            attachedAccounts,
+            attachedCredentials
+        );
+        for (let j = 0; j < accountsOnIdentity.length; j += 1) {
+            const newAccountToInsert: Account = {
+                ...accountsOnIdentity[j],
+                identityId: newIdentityId,
+            };
+            await insertAccount(newAccountToInsert);
+        }
+
+        for (let k = 0; k < credentialsOnIdentity.length; k += 1) {
+            const newCredentialToInsert = {
+                ...credentialsOnIdentity[k],
+                identityId: newIdentityId,
+            };
+            // TODO Remove hack, when the identityNumber is not in the export.
+            const { identityNumber, ...other } = newCredentialToInsert;
+            await insertCredential(other);
+        }
+    }
+}
+
+/**
+ * Inserts new accounts and credentials for an identity that has already been inserted into the
+ * database, so that we have its up-to-date id, which can be used to update the identityId
+ * on its accounts and credentials.
+ * @param identityId the id of the identity as set in the database
+ */
+async function insertNewAccountsAndCredentials(
+    identityId: number,
+    accountsOnIdentity: Account[],
+    credentialsOnIdentity: Credential[]
+) {
+    // Only consider accounts that are not already in the database.
+    const existingAccountAddressesInDatabase = (
+        await getAccountsOfIdentity(identityId)
+    ).map((account) => account.address);
+
+    const newAccounts = accountsOnIdentity.filter(
+        (accountOnIdentity) =>
+            !existingAccountAddressesInDatabase.includes(
+                accountOnIdentity.address
+            )
+    );
+    for (let j = 0; j < newAccounts.length; j += 1) {
+        const newAccountToInsert: Account = {
+            ...newAccounts[j],
+            identityId,
+        };
+        await insertAccount(newAccountToInsert);
+    }
+
+    // Only consider credentials that are not already in the database.
+    const existingCredentialIdsInDatabase = (
+        await getCredentialsForIdentity(identityId)
+    ).map((credential) => credential.credId);
+
+    const newCredentials = credentialsOnIdentity.filter(
+        (credentialOnIdentity) =>
+            !existingCredentialIdsInDatabase.includes(
+                credentialOnIdentity.credId
+            )
+    );
+    for (let k = 0; k < newCredentials.length; k += 1) {
+        const newCredentialToInsert = {
+            ...newCredentials[k],
+            identityId,
+        };
+        const { identityNumber, ...other } = newCredentialToInsert;
+        await insertCredential(other);
+    }
+}
+
+/**
+ * Imports a list of completely new wallets, i.e. wallets that cannot be matched with
+ * a wallet entry currently in the database. The logical ids of the wallets and identities
+ * may change when inserted into the database, which means that the references between objects
+ * are also updated as part of the import.
+ * @param newWallets the wallets that are new to this database
+ * @param importedIdentities the total list of identities currently being imported
+ */
+async function importNewWallets(
+    newWallets: WalletEntry[],
+    importedIdentities: Identity[],
+    importedCredentials: Credential[],
+    importedAccounts: Account[]
+) {
+    const {
+        attachedIdentities,
+        attachedCredentials,
+        attachedAccounts,
+    } = findAttachedEntities(
+        newWallets,
+        importedIdentities,
+        importedCredentials,
+        importedAccounts
+    );
+
+    let identitiesWithUpdatedReferences: Identity[] = [];
+
+    // Insert the new wallets into the database, and use their newly received
+    // walletIds to update the identities and credentials that reference them.
+    for (let i = 0; i < newWallets.length; i += 1) {
+        const wallet = newWallets[i];
+
+        const importedWalletId = wallet.id;
+        const insertedWalletId = await insertWallet(
+            wallet.identifier,
+            wallet.type
+        );
+
+        const identitiesWithUpdatedWalletIds = updateWalletIdReference(
+            importedWalletId,
+            insertedWalletId,
+            attachedIdentities
+        );
+        identitiesWithUpdatedReferences = identitiesWithUpdatedReferences.concat(
+            identitiesWithUpdatedWalletIds
+        );
+    }
+
+    await insertNewIdentities(
+        identitiesWithUpdatedReferences,
+        attachedAccounts,
+        attachedCredentials
+    );
+}
+
+/**
+ * Import identities, accounts and credentials for the wallets that already exist in the database
+ * with an identical logical id. This means that the walletId reference on the identities do not
+ * have to be updated, as they are already correct in this special case.
+ */
+async function importDuplicateWallets(
+    existingData: ExportData,
+    duplicateWallets: WalletEntry[],
+    importedIdentities: Identity[],
+    importedCredentials: Credential[],
+    importedAccounts: Account[]
+) {
+    const {
+        attachedIdentities,
+        attachedCredentials,
+        attachedAccounts,
+    } = findAttachedEntities(
+        duplicateWallets,
+        importedIdentities,
+        importedCredentials,
+        importedAccounts
+    );
+
+    // Partition the identities into those that match the existing data, and those that
+    // do not.
+    const [duplicateIdentities, nonDuplicateIdentities] = partition(
+        attachedIdentities,
+        (attachedIdentity) =>
+            // TODO Any reason to not also check on identityObject?
+            isDuplicate(attachedIdentity, existingData.identities, [
+                'id',
+                'identityNumber',
+                'name',
+                'randomness',
+            ])
+    );
+
+    // For the identities that are one-to-one with what is in the database, we still have to
+    // check if there are new accounts or credentials and add them to the database.
+    for (let i = 0; i < duplicateIdentities.length; i += 1) {
+        const identityId = duplicateIdentities[i].id;
+
+        const {
+            accountsOnIdentity,
+            credentialsOnIdentity,
+        } = findAccountsAndCredentialsOnIdentity(
+            identityId,
+            attachedAccounts,
+            attachedCredentials
+        );
+
+        await insertNewAccountsAndCredentials(
+            identityId,
+            accountsOnIdentity,
+            credentialsOnIdentity
+        );
+    }
+
+    // The identities that are not duplicate can be partitioned into the set
+    // of identities that exist in the database, but with separate logical ids,
+    // and those identities that are entirely new to this database.
+    const [
+        existingIdentities,
+        newIdentities,
+    ] = partition(nonDuplicateIdentities, (nonDuplicateIdentity) =>
+        isDuplicate(nonDuplicateIdentity, existingData.identities, [
+            'identityNumber',
+            'name',
+            'randomness',
+        ])
+    );
+
+    // For the existing identities find the identityId that they now have, and update that on the associated
+    // accounts and credentials before inserting them into the database. Note that we only have to insert
+    // new accounts and credentials, as if they already exist in the database, then the import will not
+    // carry new information that was not already present in the database.
+    for (let i = 0; i < existingIdentities.length; i += 1) {
+        const existingIdentity = existingIdentities[i];
+
+        // Find the identity id as it is in the database.
+        const newIdentity = existingData.identities.find((ident) => {
+            if (
+                ident.identityNumber === existingIdentity.identityNumber &&
+                ident.name === existingIdentity.name &&
+                ident.randomness === existingIdentity.randomness
+            ) {
+                return true;
+            }
+            return false;
+        });
+
+        if (!newIdentity) {
+            throw new Error(
+                'Internal error. An existing and matching identity should have been found, but was not.'
+            );
+        }
+
+        const newIdentityId = newIdentity.id;
+        const {
+            accountsOnIdentity,
+            credentialsOnIdentity,
+        } = findAccountsAndCredentialsOnIdentity(
+            existingIdentity.id,
+            attachedAccounts,
+            attachedCredentials
+        );
+
+        await insertNewAccountsAndCredentials(
+            newIdentityId,
+            accountsOnIdentity,
+            credentialsOnIdentity
+        );
+    }
+
+    await insertNewIdentities(
+        newIdentities,
+        attachedAccounts,
+        attachedCredentials
+    );
+}
+
+// TODO This method should be a single transaction. Implement this when we change the SQLite dependency.
+export async function importWallets(
+    walletsFromDatabase: WalletEntry[],
+    existingData: ExportData,
+    importedWallets: WalletEntry[],
+    importedIdentities: Identity[],
+    importedAccounts: Account[],
+    importedCredentials: Credential[]
+) {
+    const [
+        duplicateWalletEntries,
+        nonDuplicateWalletEntries,
+    ] = partition(importedWallets, (importedWallet) =>
+        isDuplicate(importedWallet, walletsFromDatabase, ['id', 'identifier'])
+    );
+
+    // The duplicate wallet entries are the wallets that already exist in the database,
+    // with an exact match on both the id and identifier. Therefore we do not have to
+    // insert those wallets (they are already there), but we have to check if there are
+    // any new identities, accounts or credentials.
+    await importDuplicateWallets(
+        existingData,
+        duplicateWalletEntries,
+        importedIdentities,
+        importedCredentials,
+        importedAccounts
+    );
+
+    // The wallets that are not exact duplicates of what is already present in the database, can
+    // be split into two partitions:
+    //      - Wallets that are in the database (they have equal identifier, which uniquely identifies them),
+    //        but with a separate primary key (id field).
+    //      - Wallets that are completely new to this database.
+    const [existingWallets, newWallets] = partition(
+        nonDuplicateWalletEntries,
+        (nonDuplicateWalletEntry) =>
+            isDuplicate(nonDuplicateWalletEntry, walletsFromDatabase, [
+                'identifier',
+            ])
+    );
+
+    // TODO Add support for this.
+    // It might be possible to re-use the import of duplicate wallets, if the walletId references
+    // on the identities are updated - afterwards it should be an identical case, as we need to check
+    // if the identities already exist or not etc.
+    if (existingWallets.length !== 0) {
+        throw new Error(
+            'Importing of data is only supported for non-conflicting data.'
+        );
+    }
+
+    await importNewWallets(
+        newWallets,
+        importedIdentities,
+        importedCredentials,
+        importedAccounts
+    );
 }
 
 /**
