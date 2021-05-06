@@ -1,0 +1,18 @@
+.card {
+    align-self: center;
+    justify-self: end;
+    width: 100%;
+    max-width: 480px;
+
+    & + & {
+        justify-self: start;
+    }
+}
+
+.button {
+    composes: singleButton from '../IdentityIssuance.module.scss';
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
