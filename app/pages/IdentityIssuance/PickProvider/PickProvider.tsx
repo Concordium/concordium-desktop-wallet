@@ -9,12 +9,13 @@ import Card from '~/cross-app-components/Card';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { globalSelector } from '~/features/GlobalSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { getNextId } from '~/database/IdentityDao';
+import { getNextIdentityNumber } from '~/database/IdentityDao';
 import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
 
 import styles from './PickProvider.module.scss';
 import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
 import CardList from '~/cross-app-components/CardList';
+import pairWallet from '~/utils/WalletPairing';
 
 interface Props {
     setProvider(provider: IdentityProvider): void;
@@ -54,10 +55,11 @@ export default function IdentityIssuanceChooseProvider({
             return;
         }
 
-        const identityId = await getNextId();
+        const walletId = await pairWallet(ledger);
+        const identityNumber = await getNextIdentityNumber(walletId);
 
         const idObj = await createIdentityRequestObjectLedger(
-            identityId,
+            identityNumber,
             provider.ipInfo,
             provider.arsInfos,
             global,
@@ -67,7 +69,8 @@ export default function IdentityIssuanceChooseProvider({
 
         const nextLocationState: ExternalIssuanceLocationState = {
             ...idObj,
-            id: identityId,
+            identityNumber,
+            walletId,
         };
 
         dispatch(

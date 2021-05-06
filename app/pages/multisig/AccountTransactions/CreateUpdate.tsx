@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Account,
-    AccountTransaction,
-    Credential,
-    AddedCredential,
-} from '~/utils/types';
+import { Account, AccountTransaction, AddedCredential } from '~/utils/types';
 import SignTransaction from './SignTransaction';
 import { createUpdateCredentialsTransaction } from '~/utils/transactionHelpers';
 
 interface Props {
     account: Account | undefined;
-    primaryCredential: Credential;
     addedCredentials: AddedCredential[];
     removedCredIds: string[];
     currentCredentialAmount: number;
@@ -22,7 +16,6 @@ interface Props {
  */
 export default function CreateUpdate({
     account,
-    primaryCredential,
     addedCredentials,
     removedCredIds,
     currentCredentialAmount,
@@ -33,7 +26,7 @@ export default function CreateUpdate({
     >();
 
     if (!account) {
-        throw new Error('unexpected missing account');
+        throw new Error('Unexpected missing account');
     }
 
     useEffect(() => {
@@ -57,14 +50,9 @@ export default function CreateUpdate({
     ]);
 
     if (!transaction) {
-        return null; // TODO: show loading;
+        // TODO: Show as loading;
+        return null;
     }
 
-    return (
-        <SignTransaction
-            transaction={transaction}
-            account={account}
-            primaryCredential={primaryCredential}
-        />
-    );
+    return <SignTransaction transaction={transaction} account={account} />;
 }

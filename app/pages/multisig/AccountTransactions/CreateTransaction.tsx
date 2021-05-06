@@ -1,5 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
 import { toMicroUnits } from '~/utils/gtu';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import {
@@ -10,7 +9,6 @@ import {
     TransactionKindId,
     Fraction,
 } from '~/utils/types';
-import { credentialsSelector } from '~/features/CredentialSlice';
 import SignTransaction from './SignTransaction';
 
 interface Props {
@@ -33,7 +31,6 @@ export default function CreateTransaction({
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
     >();
-    const credentials = useSelector(credentialsSelector);
 
     useEffect(() => {
         const handler = findAccountTransactionHandler(transactionKind);
@@ -57,25 +54,9 @@ export default function CreateTransaction({
         estimatedFee,
     ]);
 
-    const credential = useMemo(
-        () =>
-            credentials.find((cred) => cred.accountAddress === account.address),
-        [credentials, account]
-    );
-
-    if (!credential) {
-        throw new Error('Unexpected missing credential');
-    }
-
     if (!transaction) {
         return null; // TODO: show loading;
     }
 
-    return (
-        <SignTransaction
-            transaction={transaction}
-            account={account}
-            primaryCredential={credential}
-        />
-    );
+    return <SignTransaction transaction={transaction} account={account} />;
 }
