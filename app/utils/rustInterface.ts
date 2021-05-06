@@ -411,6 +411,26 @@ export async function createGenesisAccount(
     return JSON.parse(credential);
 }
 
+export type BakerKeys = {
+    electionSecret: string;
+    electionPublic: string;
+    signatureSecret: string;
+    signaturePublic: string;
+    aggregationSecret: string;
+    aggregationPublic: string;
+    proofElection: string;
+    proofSignature: string;
+    proofAggregation: string;
+};
+
+export async function generateBakerKeys(sender: string): Promise<BakerKeys> {
+    const response = await worker.postMessage({
+        command: workerCommands.generateBakerKeys,
+        sender,
+    });
+    return JSON.parse(response);
+}
+
 export function getAddressFromCredentialId(credId: string): Promise<string> {
     return worker.postMessage({
         command: workerCommands.getAddressFromCredId,

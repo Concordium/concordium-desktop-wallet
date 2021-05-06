@@ -12,6 +12,7 @@ import {
     TransactionAccountSignature,
     Signature,
     TransactionCredentialSignature,
+    AddBakerPayload,
 } from './types';
 import {
     encodeWord32,
@@ -24,6 +25,7 @@ import {
     serializeMap,
     serializeList,
     serializeCredentialDeploymentInformation,
+    serializeBoolean,
 } from './serializationHelpers';
 
 function serializeSimpleTransfer(payload: SimpleTransferPayload) {
@@ -160,6 +162,32 @@ export function serializeTransactionHeader(
     return Buffer.from(serialized);
 }
 
+export function serializeAddBakerKeys(payload: AddBakerPayload) {
+    return Buffer.concat([
+        putHexString(payload.electionVerifyKey),
+        putHexString(payload.signatureVerifyKey),
+        putHexString(payload.aggregationVerifyKey),
+    ]);
+}
+
+export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
+    return Buffer.concat([
+        putHexString(payload.proofSignature),
+        putHexString(payload.proofElection),
+        putHexString(payload.proofAggregation),
+        encodeWord64(BigInt(payload.bakingStake)),
+        serializeBoolean(payload.restakeEarnings),
+    ]);
+}
+
+export function serializeAddBaker(payload: AddBakerPayload) {
+    return Buffer.concat([
+        Uint8Array.of(4),
+        serializeAddBakerKeys(payload),
+        serializeAddBakerProofsStakeRestake(payload),
+    ]);
+}
+
 export function serializeTransferPayload(
     kind: TransactionKind,
     payload: TransactionPayload
@@ -183,6 +211,8 @@ export function serializeTransferPayload(
             return serializeTransferToPublic(
                 payload as TransferToPublicPayload
             );
+        case TransactionKind.Add_baker:
+            return serializeAddBaker(payload as AddBakerPayload);
         default:
             throw new Error('Unsupported transactionkind');
     }
