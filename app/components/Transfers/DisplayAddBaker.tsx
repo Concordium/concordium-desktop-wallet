@@ -4,6 +4,7 @@ import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { useAccountName } from '~/utils/hooks';
 import styles from './transferDetails.module.scss';
+import PublicKey from '~/pages/multisig/common/PublicKey/PublicKey';
 
 interface Props {
     transaction: AddBaker;
@@ -28,6 +29,19 @@ export default function DisplayAddBaker({ transaction }: Props) {
             <p className={styles.amount}>
                 {transaction.payload.restakeEarnings ? 'Yes' : 'No'}
             </p>
+            <p className={styles.title}>Public keys:</p>
+            <PublicKey
+                name="Election verify key"
+                publicKey={transaction.payload.electionVerifyKey}
+            />
+            <PublicKey
+                name="Signature verify key"
+                publicKey={transaction.payload.signatureVerifyKey}
+            />
+            <PublicKey
+                name="Aggregation verify key"
+                publicKey={transaction.payload.aggregationVerifyKey}
+            />
         </>
     );
 }
