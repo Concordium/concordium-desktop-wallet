@@ -170,6 +170,57 @@ async function insertNewIdentities(
 }
 
 /**
+ * Inserts new accounts and credentials for an identity that has already been inserted into the
+ * database, so that we have its up-to-date id, which can be used to update the identityId
+ * on its accounts and credentials.
+ * @param identityId the id of the identity as set in the database
+ */
+async function insertNewAccountsAndCredentials(
+    identityId: number,
+    accountsOnIdentity: Account[],
+    credentialsOnIdentity: Credential[]
+) {
+    // Only consider accounts that are not already in the database.
+    const existingAccountAddressesInDatabase = (
+        await getAccountsOfIdentity(identityId)
+    ).map((account) => account.address);
+
+    const newAccounts = accountsOnIdentity.filter(
+        (accountOnIdentity) =>
+            !existingAccountAddressesInDatabase.includes(
+                accountOnIdentity.address
+            )
+    );
+    for (let j = 0; j < newAccounts.length; j += 1) {
+        const newAccountToInsert: Account = {
+            ...newAccounts[j],
+            identityId,
+        };
+        await insertAccount(newAccountToInsert);
+    }
+
+    // Only consider credentials that are not already in the database.
+    const existingCredentialIdsInDatabase = (
+        await getCredentialsForIdentity(identityId)
+    ).map((credential) => credential.credId);
+
+    const newCredentials = credentialsOnIdentity.filter(
+        (credentialOnIdentity) =>
+            !existingCredentialIdsInDatabase.includes(
+                credentialOnIdentity.credId
+            )
+    );
+    for (let k = 0; k < newCredentials.length; k += 1) {
+        const newCredentialToInsert = {
+            ...newCredentials[k],
+            identityId,
+        };
+        const { identityNumber, ...other } = newCredentialToInsert;
+        await insertCredential(other);
+    }
+}
+
+/**
  * Imports a list of completely new wallets, i.e. wallets that cannot be matched with
  * a wallet entry currently in the database. The logical ids of the wallets and identities
  * may change when inserted into the database, which means that the references between objects
@@ -177,7 +228,6 @@ async function insertNewIdentities(
  * @param newWallets the wallets that are new to this database
  * @param importedIdentities the total list of identities currently being imported
  */
-// TODO This method should be a single transaction. Implement this when we change the SQLite dependency.
 async function importNewWallets(
     newWallets: WalletEntry[],
     importedIdentities: Identity[],
@@ -275,38 +325,12 @@ async function importDuplicateWallets(
             attachedAccounts,
             attachedCredentials
         );
-        const existingAccountAddressesInDatabase = (
-            await getAccountsOfIdentity(identityId)
-        ).map((account) => account.address);
-        const existingCredentialIdsInDatabase = (
-            await getCredentialsForIdentity(identityId)
-        ).map((credential) => credential.credId);
 
-        // Find any accounts that do not already exist in the database, and add them if there are any.
-        // The accounts that are already in the database should not be updated by the import, as they
-        // do not carry new information that cannot be gathered from the current entry.
-        const newAccounts = accountsOnIdentity.filter((accountOnIdentity) =>
-            existingAccountAddressesInDatabase.includes(
-                accountOnIdentity.address
-            )
+        await insertNewAccountsAndCredentials(
+            identityId,
+            accountsOnIdentity,
+            credentialsOnIdentity
         );
-        for (let j = 0; j < newAccounts.length; j += 1) {
-            const newAccountToInsert = newAccounts[j];
-            await insertAccount(newAccountToInsert);
-        }
-
-        // Find any credentials that do not already exist in the database, and add them if there are any.
-        // The credentials that are already in the database should not be updated by the import, as they
-        // do not carry new information that cannot be gathered from the current entry.
-        const newCredentials = credentialsOnIdentity.filter(
-            (credentialOnIdentity) =>
-                existingCredentialIdsInDatabase.includes(
-                    credentialOnIdentity.credId
-                )
-        );
-        for (let k = 0; k < newCredentials.length; k += 1) {
-            await insertCredential(newCredentials[k]);
-        }
     }
 
     // The identities that are not duplicate can be partitioned into the set
@@ -324,7 +348,9 @@ async function importDuplicateWallets(
     );
 
     // For the existing identities find the identityId that they now have, and update that on the associated
-    // accounts and credentials before inserting them into the database.
+    // accounts and credentials before inserting them into the database. Note that we only have to insert
+    // new accounts and credentials, as if they already exist in the database, then the import will not
+    // carry new information that was not already present in the database.
     for (let i = 0; i < existingIdentities.length; i += 1) {
         const existingIdentity = existingIdentities[i];
 
@@ -347,9 +373,6 @@ async function importDuplicateWallets(
         }
 
         const newIdentityId = newIdentity.id;
-
-        // TODO Generalize, as this is an almost duplicate of the code above, except that it also updates the identityId (so that could be given as input to a function).
-
         const {
             accountsOnIdentity,
             credentialsOnIdentity,
@@ -358,45 +381,12 @@ async function importDuplicateWallets(
             attachedAccounts,
             attachedCredentials
         );
-        const existingAccountAddressesInDatabase = (
-            await getAccountsOfIdentity(newIdentityId)
-        ).map((account) => account.address);
-        const existingCredentialIdsInDatabase = (
-            await getCredentialsForIdentity(newIdentityId)
-        ).map((credential) => credential.credId);
 
-        // Find any accounts that do not already exist in the database, and add them if there are any.
-        // The accounts that are already in the database should not be updated by the import, as they
-        // do not carry new information that cannot be gathered from the current entry.
-        const newAccounts = accountsOnIdentity.filter((accountOnIdentity) =>
-            existingAccountAddressesInDatabase.includes(
-                accountOnIdentity.address
-            )
+        await insertNewAccountsAndCredentials(
+            newIdentityId,
+            accountsOnIdentity,
+            credentialsOnIdentity
         );
-        for (let j = 0; j < newAccounts.length; j += 1) {
-            const newAccountToInsert: Account = {
-                ...newAccounts[j],
-                identityId: newIdentityId,
-            };
-            await insertAccount(newAccountToInsert);
-        }
-
-        // Find any credentials that do not already exist in the database, and add them if there are any.
-        // The credentials that are already in the database should not be updated by the import, as they
-        // do not carry new information that cannot be gathered from the current entry.
-        const newCredentials = credentialsOnIdentity.filter(
-            (credentialOnIdentity) =>
-                existingCredentialIdsInDatabase.includes(
-                    credentialOnIdentity.credId
-                )
-        );
-        for (let k = 0; k < newCredentials.length; k += 1) {
-            const newCredentialToInsert = {
-                ...newCredentials[k],
-                identityId: newIdentityId,
-            };
-            await insertCredential(newCredentialToInsert);
-        }
     }
 
     await insertNewIdentities(
@@ -406,6 +396,7 @@ async function importDuplicateWallets(
     );
 }
 
+// TODO This method should be a single transaction. Implement this when we change the SQLite dependency.
 async function importWallets(
     walletsFromDatabase: WalletEntry[],
     existingData: ExportData,
