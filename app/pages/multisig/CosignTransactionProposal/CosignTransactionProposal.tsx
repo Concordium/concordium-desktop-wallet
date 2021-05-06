@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { Redirect } from 'react-router';
-import clsx from 'clsx';
 import { parse, stringify } from '~/utils/JSONHelper';
 
 import routes from '~/constants/routes.json';
@@ -14,6 +13,7 @@ import {
     instanceOfUpdateInstruction,
     UpdateInstructionSignature,
     TransactionAccountSignature,
+    MultiSignatureTransactionStatus,
 } from '~/utils/types';
 import { TransactionInput } from '~/utils/transactionTypes';
 import SimpleErrorModal, {
@@ -71,6 +71,7 @@ const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
             | undefined
         >();
         const [transactionHash, setTransactionHash] = useState<string>();
+        const [image, setImage] = useState<string>();
 
         const dispatch = useDispatch();
 
@@ -165,7 +166,15 @@ const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
                 />
                 <MultiSignatureLayout
                     pageTitle={transactionHandler.title}
+                    print={transactionHandler.print(
+                        transactionObject,
+                        isTransactionExpired
+                            ? MultiSignatureTransactionStatus.Expired
+                            : MultiSignatureTransactionStatus.Open,
+                        image
+                    )}
                     stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+                    delegateScroll
                 >
                     <Ledger ledgerCallback={signingFunction}>
                         {({
@@ -174,10 +183,7 @@ const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
                             submitHandler = asyncNoOp,
                         }) => (
                             <Form<CosignTransactionProposalForm>
-                                className={clsx(
-                                    styles.body,
-                                    styles.bodySubtractPadding
-                                )}
+                                className={styles.subtractContainerPadding}
                                 onSubmit={submitHandler}
                             >
                                 <Columns
@@ -191,6 +197,7 @@ const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
                                                 transactionHash={
                                                     transactionHash
                                                 }
+                                                setScreenshot={setImage}
                                             />
                                             {instanceOfUpdateInstruction(
                                                 transactionObject

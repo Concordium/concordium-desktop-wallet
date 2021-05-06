@@ -25,6 +25,7 @@ import ProtocolUpdateHandler from './ProtocolUpdateHandler';
 import TransactionFeeDistributionHandler from './TransactionFeeDistributionHandler';
 import UpdateAccountCredentialsHandler from './UpdateAccountCredentialsHandler';
 import SimpleTransferHandler from './SimpleTransferHandler';
+import ScheduledTransferHandler from './ScheduledTransferHandler';
 import AccountHandlerTypeMiddleware from './AccountTransactionHandlerMiddleware';
 import UpdateInstructionHandlerTypeMiddleware from './UpdateInstructionHandlerMiddleware';
 import UpdateRootKeysHandler from './UpdateRootsKeysHandler';
@@ -36,7 +37,11 @@ import RemoveBakerHandler from './RemoveBakerHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
-): AccountTransactionHandler<AccountTransaction, ConcordiumLedgerClient> {
+): AccountTransactionHandler<
+    AccountTransaction,
+    ConcordiumLedgerClient,
+    Transaction
+> {
     if (transactionKind === TransactionKindId.Update_credentials) {
         return new AccountHandlerTypeMiddleware(
             new UpdateAccountCredentialsHandler()
@@ -54,6 +59,9 @@ export function findAccountTransactionHandler(
     if (transactionKind === TransactionKindId.Remove_baker) {
         return new AccountHandlerTypeMiddleware(new RemoveBakerHandler());
     }
+    if (transactionKind === TransactionKindId.Transfer_with_schedule) {
+        return new AccountHandlerTypeMiddleware(new ScheduledTransferHandler());
+    }
     throw new Error(`Unsupported transaction type: ${transactionKind}`);
 }
 
@@ -61,7 +69,8 @@ export function findUpdateInstructionHandler(
     type: UpdateType
 ): UpdateInstructionHandler<
     UpdateInstruction<UpdateInstructionPayload>,
-    ConcordiumLedgerClient
+    ConcordiumLedgerClient,
+    Transaction
 > {
     switch (type) {
         case UpdateType.UpdateMicroGTUPerEuro:

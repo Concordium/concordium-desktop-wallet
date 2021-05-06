@@ -4,7 +4,6 @@ import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { parse, stringify } from 'json-bigint';
 import { Redirect } from 'react-router';
-import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import {
     AccountTransaction,
@@ -23,15 +22,13 @@ import { BlockSummary } from '~/utils/NodeApiTypes';
 import { findKey } from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
-import Form from '~/components/Form';
 import TransactionDetails from '~/components/TransactionDetails';
 import ExpiredTransactionView from '../ExpiredTransactionView';
 import { ensureProps } from '~/utils/componentHelpers';
 import getTransactionHash from '~/utils/transactionHash';
+import SignTransaction from './SignTransaction';
 
 import styles from './SignTransactionProposal.module.scss';
-import Ledger from '~/components/ledger/Ledger';
-import { asyncNoOp } from '~/utils/basicHelpers';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface SignInput {
@@ -51,7 +48,6 @@ interface Props {
 function SignTransactionProposalView({ location }: Props) {
     const [showValidationError, setShowValidationError] = useState(false);
     const [transactionHash, setTransactionHash] = useState<string>();
-    const [signing, setSigning] = useState(false);
     const dispatch = useDispatch();
 
     const { multiSignatureTransaction, blockSummary }: SignInput = parse(
@@ -128,6 +124,7 @@ function SignTransactionProposalView({ location }: Props) {
         <MultiSignatureLayout
             pageTitle={transactionHandler.title}
             stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+            delegateScroll
         >
             <SimpleErrorModal
                 show={showValidationError}
@@ -136,7 +133,7 @@ function SignTransactionProposalView({ location }: Props) {
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
             <Columns
-                className={clsx(styles.body, styles.bodySubtractPadding)}
+                className={styles.subtractContainerPadding}
                 divider
                 columnClassName={styles.column}
                 columnScroll
@@ -153,45 +150,7 @@ function SignTransactionProposalView({ location }: Props) {
                     header="Signature and Hardware Wallet"
                     className={styles.stretchColumn}
                 >
-                    <Ledger
-                        ledgerCallback={signingFunction}
-                        onSignError={() => setSigning(false)}
-                    >
-                        {({
-                            isReady,
-                            statusView,
-                            submitHandler = asyncNoOp,
-                        }) => (
-                            <section className={styles.signColumnContent}>
-                                <h5>Hardware wallet status</h5>
-                                {statusView}
-                                <Form
-                                    onSubmit={() => {
-                                        setSigning(true);
-                                        submitHandler();
-                                    }}
-                                >
-                                    <Form.Checkbox
-                                        name="check"
-                                        rules={{
-                                            required:
-                                                'Make sure the proposed changes are correct',
-                                        }}
-                                        disabled={signing}
-                                    >
-                                        I am sure that the proposed changes are
-                                        correct
-                                    </Form.Checkbox>
-                                    <Form.Submit
-                                        disabled={signing || !isReady}
-                                        className={styles.submit}
-                                    >
-                                        Generate Transaction
-                                    </Form.Submit>
-                                </Form>
-                            </section>
-                        )}
-                    </Ledger>
+                    <SignTransaction signingFunction={signingFunction} />
                 </Columns.Column>
             </Columns>
         </MultiSignatureLayout>

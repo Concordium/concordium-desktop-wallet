@@ -6,6 +6,7 @@
     "createCredentialDetails": "createCredentialDetails",
     "createCredentialInfo": "createCredentialInfo",
     "decryptAmounts": "decryptAmounts",
-    "createTransferToPublicData": "createTransferToPublicData",
-    "generateBakerKeys": "generateBakerKeys"
+    "generateBakerKeys": "generateBakerKeys",
+    "getAddressFromCredId": "getAddressFromCredId",
+    "createTransferToPublicData": "createTransferToPublicData"
 }

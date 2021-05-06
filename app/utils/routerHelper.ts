@@ -1,5 +1,10 @@
 import routes from '../constants/routes.json';
-import { UpdateType, TransactionKindString, ExportKeyType } from './types';
+import {
+    TransactionTypes,
+    UpdateType,
+    TransactionKindId,
+    ExportKeyType,
+} from './types';
 // eslint-disable-next-line import/no-cycle
 
 export const selectedAddressBookEntryRoute = (address: string) =>
@@ -35,16 +40,20 @@ export const submittedProposalRoute = (proposalId: number) =>
     );
 
 export function createProposalRoute(
-    transactionType: UpdateType | TransactionKindString
+    transactionType: TransactionTypes,
+    specificType: UpdateType | TransactionKindId
 ) {
-    if (transactionType in UpdateType) {
+    if (transactionType === TransactionTypes.UpdateInstruction) {
         return routes.MULTISIGTRANSACTIONS_PROPOSAL.replace(
             ':updateType',
-            `${transactionType}`
+            `${specificType}`
         );
     }
-    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
-        ':transactionKind',
-        `${transactionType}`
-    );
+    if (transactionType === TransactionTypes.AccountTransaction) {
+        return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION.replace(
+            ':transactionKind',
+            `${specificType}`
+        );
+    }
+    throw new Error(`Unknown transactionType given:${transactionType}`);
 }

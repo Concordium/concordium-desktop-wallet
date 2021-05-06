@@ -99,6 +99,8 @@ export default class UpdateLevel1KeysWithLevel1KeysHandler
         );
     }
 
+    print = () => undefined;
+
     update = UpdateLevel1KeysWithLevel1Keys;
 
     title = `Foundation Transaction | ${TYPE}`;

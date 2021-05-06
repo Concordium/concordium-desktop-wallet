@@ -45,44 +45,48 @@ export default function useLedger(
         Subscription | undefined
     >(undefined);
 
-    const ledgerObserver: Observer<DescriptorEvent<string>> = useMemo(() => {
-        return {
-            complete: () => {
-                // This is expected to never trigger.
-            },
-            error: () => {
-                dispatch(errorAction());
-            },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            next: async (event: any) => {
-                if (event.type === 'add') {
-                    const transport = await TransportNodeHid.open(event.path);
-                    const concordiumClient = new ConcordiumLedgerClient(
-                        transport
-                    );
-                    const appAndVersion = await concordiumClient.getAppAndVersion();
-                    const deviceName = event.deviceModel.productName;
+    const ledgerObserver: Observer<DescriptorEvent<string>> = useMemo(
+        () => {
+            return {
+                complete: () => {
+                    // This is expected to never trigger.
+                },
+                error: () => {
+                    dispatch(errorAction());
+                },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                next: async (event: any) => {
+                    if (event.type === 'add') {
+                        const transport = await TransportNodeHid.open(
+                            event.path
+                        );
+                        const concordiumClient = new ConcordiumLedgerClient(
+                            transport
+                        );
+                        const appAndVersion = await concordiumClient.getAppAndVersion();
+                        const deviceName = event.deviceModel.productName;
 
-                    if (isConcordiumApp(appAndVersion)) {
-                        dispatch(connectedAction(deviceName, concordiumClient));
-                    } else {
-                        // The device has been connected, but the Concordium application has not
-                        // been opened yet.
-                        dispatch(pendingAction(OPEN_APP, deviceName));
+                        if (isConcordiumApp(appAndVersion)) {
+                            dispatch(
+                                connectedAction(deviceName, concordiumClient)
+                            );
+                        } else {
+                            // The device has been connected, but the Concordium application has not
+                            // been opened yet.
+                            dispatch(pendingAction(OPEN_APP, deviceName));
+                        }
+                    } else if (event.type === 'remove') {
+                        if (client) {
+                            client.closeTransport();
+                        }
+                        dispatch(resetAction());
                     }
-                } else {
-                    dispatch(resetAction());
-                }
-            },
-        };
-    }, []);
-
-    const listenForLedger = useCallback(() => {
-        if (!ledgerSubscription) {
-            const subscription = TransportNodeHid.listen(ledgerObserver);
-            setLedgerSubscription(subscription);
-        }
-    }, [ledgerSubscription, ledgerObserver]);
+                },
+            };
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        []
+    );
 
     const submitHandler: LedgerSubmitHandler = useCallback(async () => {
         dispatch(pendingAction(AWAITING_USER_INPUT));
@@ -100,9 +104,8 @@ export default function useLedger(
             if (instanceOfTransportStatusError(e)) {
                 errorMessage = getErrorDescription(e.statusCode);
             } else {
-                errorMessage = `An error occurred: ${e}`;
+                errorMessage = `${e}`;
             }
-            errorMessage += ' Please try again.';
             dispatch(errorAction(errorMessage));
 
             onSignError(e);
@@ -110,18 +113,26 @@ export default function useLedger(
     }, [client, ledgerCallback, onSignError]);
 
     useEffect(() => {
-        listenForLedger();
+        if (!ledgerSubscription) {
+            const subscription = TransportNodeHid.listen(ledgerObserver);
+            setLedgerSubscription(subscription);
+        }
         return function cleanup() {
             if (ledgerSubscription !== undefined) {
                 ledgerSubscription.unsubscribe();
+                setLedgerSubscription(undefined);
             }
+        };
+    }, [ledgerSubscription, ledgerObserver]);
+
+    useEffect(() => {
+        return function cleanup() {
             if (client) {
                 client.closeTransport();
-
                 dispatch(resetAction());
             }
         };
-    }, [ledgerSubscription, listenForLedger, client]);
+    }, [client]);
 
     return {
         isReady: (status === CONNECTED || status === ERROR) && Boolean(client),

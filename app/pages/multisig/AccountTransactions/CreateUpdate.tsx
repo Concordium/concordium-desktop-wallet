@@ -1,43 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Account,
-    AccountTransaction,
-    Credential,
-    AddedCredential,
-} from '~/utils/types';
+import { Account, AccountTransaction, AddedCredential } from '~/utils/types';
 import SignTransaction from './SignTransaction';
 import { createUpdateCredentialsTransaction } from '~/utils/transactionHelpers';
 
 interface Props {
-    setReady: (ready: boolean) => void;
     account: Account | undefined;
-    primaryCredential: Credential;
     addedCredentials: AddedCredential[];
     removedCredIds: string[];
     currentCredentialAmount: number;
     newThreshold: number;
-    setProposalId: (id: number) => void;
 }
 
 /**
  * Creates the accountCredentialUpdate, and prompts the user to sign it.
  */
 export default function CreateUpdate({
-    setReady,
     account,
-    primaryCredential,
     addedCredentials,
     removedCredIds,
     currentCredentialAmount,
     newThreshold,
-    setProposalId,
 }: Props): JSX.Element | null {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
     >();
 
     if (!account) {
-        throw new Error('unexpected missing account');
+        throw new Error('Unexpected missing account');
     }
 
     useEffect(() => {
@@ -55,22 +44,15 @@ export default function CreateUpdate({
         setTransaction,
         account,
         addedCredentials,
-        removedCredIds,
         currentCredentialAmount,
+        removedCredIds,
         newThreshold,
     ]);
 
     if (!transaction) {
-        return null; // TODO: show loading;
+        // TODO: Show as loading;
+        return null;
     }
 
-    return (
-        <SignTransaction
-            transaction={transaction}
-            setReady={setReady}
-            account={account}
-            primaryCredential={primaryCredential}
-            setProposalId={setProposalId}
-        />
-    );
+    return <SignTransaction transaction={transaction} account={account} />;
 }

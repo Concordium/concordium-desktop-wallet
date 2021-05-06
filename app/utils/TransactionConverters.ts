@@ -55,10 +55,13 @@ export function convertIncomingTransaction(
 
     let decryptedAmount;
     if (
-        transaction.details.type === TransactionKindString.TransferToEncrypted
+        [
+            TransactionKindString.TransferToEncrypted,
+            TransactionKindString.TransferToPublic,
+        ].includes(transaction.details.type)
     ) {
-        let value = BigInt(subtotal);
-        value = value > 0n ? value : -value;
+        // we flip the sign, because the subtotal is the change in the public balance, and this needs to be the change in the shielded balance.
+        const value = BigInt(-subtotal);
         decryptedAmount = value.toString();
     }
 

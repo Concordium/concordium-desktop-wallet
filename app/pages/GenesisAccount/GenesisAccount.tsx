@@ -1,31 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import PageLayout from '~/components/PageLayout';
 import Form from '~/components/Form';
-import { importAccount } from '~/features/AccountSlice';
+import { importAccount, loadAccounts } from '~/features/AccountSlice';
 import { insertNewCredential } from '~/features/CredentialSlice';
-import {
-    Account,
-    AccountStatus,
-    IdentityStatus,
-    GenesisAccount,
-} from '~/utils/types';
+import { Account, AccountStatus, GenesisAccount } from '~/utils/types';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import { saveFile } from '~/utils/FileHelper';
-import { getCurrentYearMonth } from '~/utils/timeHelpers';
-import routes from '~/constants/routes.json';
-import {
-    identitiesSelector,
-    importIdentities,
-    loadIdentities,
-} from '~/features/IdentitySlice';
 import styles from './GenesisAccount.module.scss';
 import Button from '~/cross-app-components/Button';
 import PrintButton from '~/components/PrintButton';
 import CopiableIdenticon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import CreateCredential from './CreateCredential';
 import Card from '~/cross-app-components/Card';
+import routes from '~/constants/routes.json';
+import { loadIdentities } from '~/features/IdentitySlice';
+
+interface CredentialNumberIdentityId {
+    credentialNumber: number;
+    identityId: number;
+}
 
 interface FileInputForm {
     file: FileInputValue;
@@ -112,51 +107,20 @@ const subtitle = (currentLocation: Locations) => {
             throw new Error('unknown location');
     }
 };
-const defaultId = 0;
 
-// Component to create genesis account;
+/**
+ * Component used to create a genesis account.
+ */
 export default function GenesisAccount(): JSX.Element {
     const dispatch = useDispatch();
-    const identities = useSelector(identitiesSelector);
     const [currentLocation, setLocation] = useState<Locations>(Locations.Name);
     const [accountName, setAccountName] = useState('');
     const [context, setContext] = useState<string | undefined>();
-    const [identityId, setIdentityId] = useState<number>(defaultId);
     const [genesisAccount, setGenesisAccount] = useState<GenesisAccount>();
-    const [credentialNumber, setCredentialNumber] = useState<number>();
-
-    useEffect(() => {
-        if (identities.length === 0) {
-            const createdAt = getCurrentYearMonth();
-            const validTo = (parseInt(createdAt, 10) + 500).toString(); // Should be 5 year after createdAt (Match what will be generated in account)
-            const identityObject = {
-                v: 0,
-                value: {
-                    attributeList: {
-                        chosenAttributes: {},
-                        createdAt,
-                        validTo,
-                    },
-                },
-            };
-
-            const identity = {
-                name: 'Genesis',
-                id: defaultId,
-                identityObject: JSON.stringify(identityObject),
-                status: IdentityStatus.Genesis,
-                detail: '',
-                codeUri: '',
-                identityProvider: '{}',
-                randomness: '',
-            };
-            importIdentities(identity);
-            loadIdentities(dispatch);
-        } else {
-            setIdentityId(identities[0].id);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const [
+        credentialNumberIdentityId,
+        setCredentialNumberIdentityId,
+    ] = useState<CredentialNumberIdentityId>();
 
     function Confirm() {
         const [image, setImage] = useState<string>();
@@ -168,11 +132,13 @@ export default function GenesisAccount(): JSX.Element {
         const publicKey = credentialContent.credentialPublicKeys.keys[0];
 
         async function exportGenesis() {
-            if (credentialNumber === undefined) {
-                throw new Error('Unexpected missing credentialNumber');
+            if (credentialNumberIdentityId === undefined) {
+                throw new Error(
+                    'Credential number and identity id have not been set in time.'
+                );
             }
 
-            const address = credentialContent.credId;
+            const address = credentialContent.credId; // We use the credId as a temporary 'address', which we will use to lookup the actual address after genesis.
 
             const success = await saveFile(JSON.stringify(genesisAccount), {
                 title: 'Save credential',
@@ -187,7 +153,7 @@ export default function GenesisAccount(): JSX.Element {
                     status: AccountStatus.Genesis,
                     address,
                     name: accountName,
-                    identityId,
+                    identityId: credentialNumberIdentityId.identityId,
                     maxTransactionId: 0,
                     isInitial: false,
                 };
@@ -196,12 +162,13 @@ export default function GenesisAccount(): JSX.Element {
                 insertNewCredential(
                     dispatch,
                     address,
-                    credentialNumber,
-                    identityId,
+                    credentialNumberIdentityId.credentialNumber,
+                    credentialNumberIdentityId.identityId,
                     undefined,
                     credentialContent
                 );
             }
+            loadAccounts(dispatch);
             dispatch(push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY));
         }
 
@@ -253,10 +220,18 @@ export default function GenesisAccount(): JSX.Element {
             case Locations.Create:
                 return (
                     <CreateCredential
-                        identityId={identityId}
-                        setCredentialNumber={setCredentialNumber}
                         setGenesisAccount={setGenesisAccount}
-                        onFinish={() => setLocation(Locations.Confirm)}
+                        onFinish={(
+                            credentialNumber: number,
+                            identityId: number
+                        ) => {
+                            setLocation(Locations.Confirm);
+                            setCredentialNumberIdentityId({
+                                credentialNumber,
+                                identityId,
+                            });
+                            loadIdentities(dispatch);
+                        }}
                         context={context}
                     />
                 );
@@ -270,7 +245,7 @@ export default function GenesisAccount(): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1> New Account | Genesis Account </h1>
+                <h1>New Account | Genesis Account</h1>
             </PageLayout.Header>
             <PageLayout.Container>
                 <h2>{subtitle(currentLocation)}</h2>

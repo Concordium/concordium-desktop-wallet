@@ -7,12 +7,12 @@ import {
 } from './NodeApiTypes';
 import {
     MultiSignatureTransaction,
+    MultiSignatureTransactionStatus,
     UpdateInstruction,
-    UpdateInstructionPayload,
     AddressBookEntry,
     HigherLevelKeyUpdate,
     AccountTransaction,
-    TransactionPayload,
+    Schedule,
 } from './types';
 
 export interface TransactionInput {
@@ -46,6 +46,12 @@ export interface TransferState {
 
 export type UpdateComponent = (props: UpdateProps) => JSX.Element | null;
 
+export type PrintComponent<T> = (
+    transaction: T,
+    status: MultiSignatureTransactionStatus,
+    identiconImage?: string
+) => JSX.Element | undefined;
+
 /**
  * Interface definition for a class that handles a specific type
  * of transaction.
@@ -57,15 +63,16 @@ export type TransactionHandler<T, S> =
 /**
  * Interface definition for a class that handles a specific type
  * of update instructions.
+ * T = Instruction type that the handler handles
+ * S = The class which signs the transaction
+ * P = 'Parent' type of the transaction.
  */
-export interface UpdateInstructionHandler<T, S> {
+export interface UpdateInstructionHandler<T, S, P = UpdateInstruction> {
     /**
      * Used to resolve type ambiguity. N.B. If given another type of update than T,
      * this might throw an error.
      */
-    confirmType: (
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ) => T;
+    confirmType: (transaction: P) => T;
     /**
      * Creates a instance of update type T.
      * if the fields are not appropiate, will return undefined
@@ -82,6 +89,10 @@ export interface UpdateInstructionHandler<T, S> {
      * Returns a React element, in which the details of the transaction are displayed
      */
     view: (transaction: T) => JSX.Element;
+    /**
+     * Returns a React element, which contains the details of the transaction for print
+     */
+    print: PrintComponent<P>;
     getAuthorization: (authorizations: Authorizations) => Authorization;
     /**
      * Returns a React element, in which the update's fields can be chosen.
@@ -91,16 +102,27 @@ export interface UpdateInstructionHandler<T, S> {
     title: string;
 }
 
+export interface CreateTransactionInput {
+    sender: string;
+    recipient: string;
+    amount: bigint;
+    schedule: Schedule;
+    signatureAmount: number;
+}
+
 /**
  * Interface definition for a class that handles a specific type
  * of account transaction.
+ * T = Transaction kind that the handler handles
+ * S = The class which signs the transaction
+ * P = 'Parent' type of the transaction.
  */
-export interface AccountTransactionHandler<T, S> {
+export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
     /**
      * Used to resolve type ambiguity. N.B. If given another type of transaction than T,
      * this might throw an error.
      */
-    confirmType: (transaction: AccountTransaction<TransactionPayload>) => T;
+    confirmType: (transaction: P) => T;
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (
         transaction: T,
@@ -111,10 +133,14 @@ export interface AccountTransactionHandler<T, S> {
      * Returns a React element, in which the details of the transaction are displayed
      */
     view: (transaction: T) => JSX.Element;
-    creationLocationHandler: (
-        currentLocation: string,
-        proposalId: number
-    ) => string;
+    /**
+     * Returns a React element, which contains the details of the transaction for print
+     */
+    print: PrintComponent<P>;
+    createTransaction: (
+        informationBlob: Partial<CreateTransactionInput>
+    ) => Promise<T>;
+    creationLocationHandler: (currentLocation: string) => string;
     type: string;
     title: string;
 }

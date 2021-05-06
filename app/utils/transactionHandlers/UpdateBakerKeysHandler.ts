@@ -33,9 +33,8 @@ export default class UpdateBakerKeysHandler
         );
     }
 
-    creationLocationHandler(_currentLocation: string, _proposalId: number) {
+    creationLocationHandler(): string {
         throw new Error('Unimplemented');
-        return '';
     }
 
     async signTransaction(
@@ -49,6 +48,12 @@ export default class UpdateBakerKeysHandler
     view(transaction: TransactionType) {
         return AccountTransactionDetails({ transaction });
     }
+
+    createTransaction(): Promise<UpdateBakerKeys> {
+        throw new Error('Unimplemented');
+    }
+
+    print = () => undefined;
 
     title = `Account Transaction | ${TYPE}`;
 

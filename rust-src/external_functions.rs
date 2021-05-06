@@ -113,3 +113,13 @@ pub fn _generate_baker_keys(
     serde_json::to_string(&generate_baker_keys(&sender, key_variant))
         .unwrap_or_else(|e| format!("unable to serialize baker keys: {}", e))
 }
+
+#[wasm_bindgen(js_name = getAddressFromCredId)]
+pub fn get_address_from_cred_id_ext(
+    cred_id: &str,
+) -> String {
+    match get_address_from_cred_id(cred_id) {
+        Ok(s) => s,
+        Err(e) => format!("unable to create genesis account due to: {}", e),
+    }
+}

@@ -48,7 +48,8 @@ export function useAccountInfo(address: string) {
     return accountInfo;
 }
 
-export function useTransactionCost(
+/** Hook for estimating transaction cost */
+export function useTransactionCostEstimate(
     kind: TransactionKindId,
     signatureAmount?: number,
     payloadSize?: number

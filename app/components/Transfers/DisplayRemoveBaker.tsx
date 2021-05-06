@@ -1,25 +1,22 @@
 import React from 'react';
-import { List, Header } from 'semantic-ui-react';
-import { AddBaker } from '~/utils/types';
+import { RemoveBaker } from '~/utils/types';
+import styles from './transferDetails.module.scss';
 import { useAccountName } from '~/utils/hooks';
 
 interface Props {
-    transaction: AddBaker;
+    transaction: RemoveBaker;
 }
 
 /**
  * Displays an overview of remove baker transaction.
  */
-export default function DisplayRemoveBaker({ transaction }: Props) {
+export default function DisplayAddBaker({ transaction }: Props) {
     const senderName = useAccountName(transaction.sender);
-
     return (
-        <List relaxed="very">
-            <List.Item>
-                From Account:
-                <Header>{senderName}</Header>
-                {transaction.sender}
-            </List.Item>
-        </List>
+        <>
+            <p className={styles.title}>From Account:</p>
+            <p className={styles.name}>{senderName}</p>
+            <p className={styles.address}>{transaction.sender}</p>
+        </>
     );
 }

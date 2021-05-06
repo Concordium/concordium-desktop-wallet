@@ -1,14 +1,13 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import IdentityListElement from '../../components/IdentityListElement';
-// import Button from '~/cross-app-components/Button';
+import CardList from '~/cross-app-components/CardList';
+import IdentityCard from '../../components/IdentityCard';
 import {
     chooseIdentity,
     identitiesSelector,
     chosenIdentitySelector,
 } from '../../features/IdentitySlice';
 import { Identity } from '../../utils/types';
-import styles from './Identities.module.scss';
 
 /**
  * Displays the List of local identities, And allows picking the chosen identity.
@@ -19,16 +18,15 @@ export default function IdentityList() {
     const chosenIdentity = useSelector(chosenIdentitySelector);
 
     return (
-        <>
+        <CardList>
             {identities.map((identity: Identity) => (
-                <IdentityListElement
+                <IdentityCard
                     identity={identity}
                     key={identity.id}
-                    className={styles.listElement}
                     active={chosenIdentity === identity}
                     onClick={() => dispatch(chooseIdentity(identity))}
                 />
             ))}
-        </>
+        </CardList>
     );
 }
