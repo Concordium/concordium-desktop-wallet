@@ -1,3 +1,4 @@
+import * as React from 'react';
 import AccountTransactionDetails from '~/components/Transfers/AccountTransactionDetails';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
@@ -7,8 +8,10 @@ import {
     TransactionPayload,
     instanceOfRemoveBaker,
     RemoveBaker,
+    MultiSignatureTransactionStatus,
 } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
+import PrintFormatRemoveBaker from '~/components/PrintFormat/RemoveBaker';
 
 type TransactionType = RemoveBaker;
 
@@ -49,12 +52,22 @@ export default class RemoveBakerHandler
         return AccountTransactionDetails({ transaction });
     }
 
-    print(): JSX.Element {
+    createTransaction(): Promise<RemoveBaker> {
         throw new Error('Unimplemented');
     }
 
-    createTransaction(): Promise<RemoveBaker> {
-        throw new Error('Unimplemented');
+    print(
+        transaction: AccountTransaction,
+        status: MultiSignatureTransactionStatus,
+        identiconImage?: string
+    ) {
+        return (
+            <PrintFormatRemoveBaker
+                transaction={this.confirmType(transaction)}
+                status={status}
+                image={identiconImage}
+            />
+        );
     }
 
     title = `Account Transaction | ${TYPE}`;

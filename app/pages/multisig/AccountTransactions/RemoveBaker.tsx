@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
@@ -16,68 +16,19 @@ import PickAccount from './PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import SignTransaction from './SignTransaction';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
-import { credentialsSelector } from '~/features/CredentialSlice';
-import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
-import { useTransactionCost } from '~/utils/hooks';
-
-const pageTitle = 'Multi Signature Transactions | Remove Baker';
-
-export default function RemoveBakerPage() {
-    const { path, url } = useRouteMatch();
-    const dispatch = useDispatch();
-
-    return (
-        <Switch>
-            <Route exact path={`${path}`}>
-                <TheProcessDescriptionStep
-                    onContinue={() => dispatch(push(`${url}/proposal`))}
-                />
-            </Route>
-            <Route path={`${path}/proposal`}>
-                <BuildRemoveBakerTransactionProposalStep
-                    onNewProposal={(id) => {
-                        dispatch(push(selectedProposalRoute(id)));
-                    }}
-                />
-            </Route>
-        </Switch>
-    );
-}
-
-type TheProcessDescriptionStepProps = {
-    onContinue: () => void;
-};
-
-function TheProcessDescriptionStep({
-    onContinue,
-}: TheProcessDescriptionStepProps) {
-    return (
-        <MultiSignatureLayout pageTitle={pageTitle} stepTitle="The process">
-            <div className={styles.descriptionStep}>
-                <div style={{ flex: 1 }}>
-                    <p>
-                        Maybe write out the process here, and something about
-                        what happens when a baker is removed.
-                    </p>
-                </div>
-                <Button onClick={onContinue}>Continue</Button>
-            </div>
-        </MultiSignatureLayout>
-    );
-}
+import { useTransactionCostEstimate } from '~/utils/hooks';
+import SignTransaction from './SignTransaction';
 
 const placeholderText = 'To be determined';
 
-type BuildTransactionProposalStepProps = {
-    onNewProposal: (proposalId: number) => void;
-};
+enum SubRoutes {
+    accounts,
+    sign,
+}
 
-function BuildRemoveBakerTransactionProposalStep({
-    onNewProposal,
-}: BuildTransactionProposalStepProps) {
+export default function RemoveBakerPage() {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
@@ -85,7 +36,10 @@ function BuildRemoveBakerTransactionProposalStep({
     const [error, setError] = useState<string>();
     const [transaction, setTransaction] = useState<RemoveBaker>();
 
-    const estimatedFee = useTransactionCost(TransactionKindId.Remove_baker);
+    const estimatedFee = useTransactionCostEstimate(
+        TransactionKindId.Remove_baker,
+        account?.signatureThreshold
+    );
 
     const onCreateTransaction = () => {
         if (account === undefined) {
@@ -98,20 +52,9 @@ function BuildRemoveBakerTransactionProposalStep({
             .catch(() => setError('Failed create transaction'));
     };
 
-    const credentials = useSelector(credentialsSelector);
-    const credential = useMemo(
-        () =>
-            account !== undefined
-                ? credentials.find(
-                      (cred) => cred.accountAddress === account.address
-                  )
-                : undefined,
-        [credentials, account]
-    );
-
     return (
         <MultiSignatureLayout
-            pageTitle={pageTitle}
+            pageTitle="Multi Signature Transactions | Remove Baker"
             stepTitle="Transaction Proposal - Remove Baker"
         >
             <SimpleErrorModal
@@ -134,7 +77,9 @@ function BuildRemoveBakerTransactionProposalStep({
                     <Route exact path={path}>
                         <Columns.Column header="Identities">
                             <div className={styles.descriptionStep}>
-                                <div style={{ flex: 1, alignSelf: 'normal' }}>
+                                <div
+                                    className={`${styles.flex1} ${styles.alignSelfNormal}`}
+                                >
                                     <PickIdentity
                                         setReady={() => {}}
                                         setIdentity={setIdentity}
@@ -144,7 +89,9 @@ function BuildRemoveBakerTransactionProposalStep({
                                 <Button
                                     disabled={identity === undefined}
                                     onClick={() =>
-                                        dispatch(push(`${url}/accounts`))
+                                        dispatch(
+                                            push(`${url}/${SubRoutes.accounts}`)
+                                        )
                                     }
                                 >
                                     Continue
@@ -152,10 +99,10 @@ function BuildRemoveBakerTransactionProposalStep({
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/accounts`}>
+                    <Route path={`${path}/${SubRoutes.accounts}`}>
                         <Columns.Column header="Accounts">
                             <div className={styles.descriptionStep}>
-                                <div style={{ flex: 1 }}>
+                                <div className={styles.flex1}>
                                     <PickAccount
                                         setReady={() => {}}
                                         identity={identity}
@@ -170,7 +117,9 @@ function BuildRemoveBakerTransactionProposalStep({
                                     disabled={account === undefined}
                                     onClick={() => {
                                         onCreateTransaction();
-                                        dispatch(push(`${url}/sign`));
+                                        dispatch(
+                                            push(`${url}/${SubRoutes.sign}`)
+                                        );
                                     }}
                                 >
                                     Continue
@@ -178,17 +127,13 @@ function BuildRemoveBakerTransactionProposalStep({
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/sign`}>
+                    <Route path={`${path}/${SubRoutes.sign}`}>
                         <Columns.Column header="Signature and Hardware Wallet">
                             {transaction !== undefined &&
-                            account !== undefined &&
-                            credential !== undefined ? (
+                            account !== undefined ? (
                                 <SignTransaction
-                                    setReady={() => {}}
-                                    account={account}
-                                    primaryCredential={credential}
                                     transaction={transaction}
-                                    setProposalId={onNewProposal}
+                                    account={account}
                                 />
                             ) : null}
                         </Columns.Column>

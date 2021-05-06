@@ -282,6 +282,9 @@ function BuildAddBakerTransactionProposalStep({
                                         identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
+                                        filter={(_, info) =>
+                                            info?.accountBaker === undefined
+                                        }
                                     />
                                 </div>
                                 <Button
