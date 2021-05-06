@@ -74,7 +74,6 @@ export async function insertNewCredential(
 ) {
     const parsed = {
         credId: credential.credId,
-        external: false,
         policy: JSON.stringify(credential.policy),
         accountAddress,
         credentialNumber,

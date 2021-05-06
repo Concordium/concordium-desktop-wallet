@@ -1,4 +1,4 @@
-import { Credential } from '../utils/types';
+import { Credential, CredentialWithIdentityNumber } from '../utils/types';
 import knex from './knex';
 import {
     credentialsTable,
@@ -18,7 +18,9 @@ export async function removeCredentialsOfAccount(accountAddress: string) {
     return (await knex())(credentialsTable).where({ accountAddress }).del();
 }
 
-export async function getCredentials(): Promise<Credential[]> {
+export async function getCredentials(): Promise<
+    CredentialWithIdentityNumber[]
+> {
     const credentials = await (await knex())
         .select()
         .table(credentialsTable)
@@ -57,7 +59,7 @@ export async function getCredentialsForIdentity(
  */
 export async function getCredentialsOfAccount(
     accountAddress: string
-): Promise<Credential[]> {
+): Promise<CredentialWithIdentityNumber[]> {
     const credentials = await (await knex())
         .select()
         .table(credentialsTable)
