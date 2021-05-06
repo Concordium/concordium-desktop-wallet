@@ -36,6 +36,7 @@ export default function AccountCreationPage(): JSX.Element {
     const [chosenAttributes, setChosenAttributes] = useState<
         Array<keyof ChosenAttributes>
     >([]);
+    const { pathname } = useLocation();
 
     function renderGeneratePage() {
         if (identity) {
@@ -73,6 +74,7 @@ export default function AccountCreationPage(): JSX.Element {
             <PageLayout.Container
                 className={styles.container}
                 closeRoute={routes.ACCOUNTS}
+                disableBack={pathname === routes.ACCOUNTCREATION_FINAL}
             >
                 <Switch>
                     <Route

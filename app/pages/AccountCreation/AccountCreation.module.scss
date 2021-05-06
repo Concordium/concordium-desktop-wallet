@@ -23,6 +23,10 @@ $account-creation-padding-horizontal: 50px;
 .button {
     width: 100%;
     max-width: 400px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .card {
