@@ -13,6 +13,7 @@ import {
     Global,
     AccountEncryptedAmount,
     GenesisAccount,
+    SignedIdRequest,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -53,7 +54,7 @@ export async function createIdentityRequestObjectLedger(
     global: Global,
     displayMessage: (message: string) => void,
     ledger: ConcordiumLedgerClient
-) {
+): Promise<SignedIdRequest> {
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
@@ -100,11 +101,14 @@ export async function createIdentityRequestObjectLedger(
         signatureIndex: 0,
     };
 
-    displayMessage(`
-Please sign information on device:
+    displayMessage(`Please sign information on device:
+
 Identity Credentials Public (IdCredPub): ${pubInfoForIp.idCredPub}
+
 Registration ID (RegId): ${pubInfoForIp.regId}
+
 Verification Key: ${pubInfoForIp.publicKeys.keys[0].verifyKey}
+
 Threshold: ${pubInfoForIp.publicKeys.threshold}
 `);
     const signature = await ledger.signPublicInformationForIp(

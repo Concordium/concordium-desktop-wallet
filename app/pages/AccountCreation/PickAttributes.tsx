@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import { Card, Button, Grid, Checkbox } from 'semantic-ui-react';
 import routes from '../../constants/routes.json';
 import { Identity, IdentityObject } from '../../utils/types';
-import IdentityListElement from '../../components/IdentityListElement';
+import IdentityCard from '../../components/IdentityCard';
 
 interface Props {
     identity: Identity;
@@ -71,7 +71,7 @@ export default function AccountCreationPickAttributes({
             </Grid.Column>
             <Grid.Column>
                 <Card centered>
-                    <IdentityListElement identity={identity} />
+                    <IdentityCard identity={identity} />
                 </Card>
                 <Card centered>
                     {attributes.map((attribute, i) => (

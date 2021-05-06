@@ -47,7 +47,7 @@ export interface Typed<T> {
 
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
-export enum ChosenAttributes {
+export enum ChosenAttributesKeys {
     firstName,
     lastName,
     sex,
@@ -63,12 +63,16 @@ export enum ChosenAttributes {
     taxIdNo,
 }
 
+export type ChosenAttributes = {
+    [P in keyof typeof ChosenAttributesKeys]: string;
+};
+
 // Contains the attributes of an identity.
 export interface AttributeList {
     createdAt: string;
     validTo: string;
     maxAccounts: number;
-    chosenAttributes: Record<string, string>;
+    chosenAttributes: ChosenAttributes;
 }
 
 // Reflects the structure of an identity's IdentityObject
@@ -333,6 +337,7 @@ export interface Policy {
 }
 
 export type YearMonth = string; // "YYYYMM"
+export type YearMonthDate = string; // "YYYYMMDD"
 
 export enum AttributeTag {
     firstName = 0,
@@ -1164,4 +1169,11 @@ export interface PublicKeyExportFormat {
     signature: string;
     type: ExportKeyType;
     note?: string;
+}
+
+export interface SignedIdRequest {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    idObjectRequest: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    randomness: Hex;
 }

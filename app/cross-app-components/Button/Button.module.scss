@@ -16,6 +16,7 @@
 .clear {
     position: relative;
     border: none;
+    font-family: $font-family;
 
     &:hover,
     &:focus {

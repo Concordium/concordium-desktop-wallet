@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Identity } from '~/utils/types';
 import { confirmedIdentitiesSelector } from '~/features/IdentitySlice';
-import IdentityListElement from '~/components/IdentityListElement';
+import IdentityCard from '~/components/IdentityCard';
 import CardList from '~/cross-app-components/CardList';
 
 interface Props {
@@ -37,7 +37,7 @@ export default function PickIdentity({
     return (
         <CardList>
             {identities.map((identity: Identity, index: number) => (
-                <IdentityListElement
+                <IdentityCard
                     identity={identity}
                     key={identity.id}
                     active={chosenIndex === index}

@@ -1,17 +1,25 @@
 import clsx from 'clsx';
-import React, { PropsWithChildren } from 'react';
+import React, { HTMLAttributes, PropsWithChildren } from 'react';
 
 import styles from './Card.module.scss';
 
-export interface CardProps {
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
     className?: string;
+    header?: string;
 }
 
 function Card({
     children,
     className,
+    header,
+    ...props
 }: PropsWithChildren<CardProps>): JSX.Element {
-    return <div className={clsx(styles.root, className)}>{children}</div>;
+    return (
+        <div className={clsx(styles.root, className)} {...props}>
+            {header && <h2 className={styles.header}>{header}</h2>}
+            {children}
+        </div>
+    );
 }
 
 export default Card;
