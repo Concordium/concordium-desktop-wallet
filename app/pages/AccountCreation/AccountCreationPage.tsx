@@ -79,6 +79,9 @@ export default function AccountCreationPage(): JSX.Element {
                         path={routes.ACCOUNTCREATION_PICKIDENTITY}
                         render={() => (
                             <PickIdentity
+                                resetChosenAttributes={() =>
+                                    setChosenAttributes([])
+                                }
                                 setIdentity={setIdentity}
                                 identity={identity}
                             />

@@ -13,11 +13,13 @@ import styles from './AccountCreation.module.scss';
 import CardList from '~/cross-app-components/CardList';
 
 interface Props {
-    setIdentity: (identity: Identity) => void;
     identity: Identity | undefined;
+    resetChosenAttributes(): void;
+    setIdentity(identity: Identity): void;
 }
 
 export default function AccountCreationPickIdentity({
+    resetChosenAttributes,
     setIdentity,
     identity,
 }: Props): JSX.Element | null {
@@ -74,9 +76,10 @@ export default function AccountCreationPickIdentity({
                             <br />
                             <Button
                                 className={clsx(styles.button, 'mT50')}
-                                onClick={() =>
-                                    submit(routes.ACCOUNTCREATION_GENERATE)
-                                }
+                                onClick={() => {
+                                    resetChosenAttributes();
+                                    submit(routes.ACCOUNTCREATION_GENERATE);
+                                }}
                             >
                                 Submit without revealing attributes
                             </Button>
