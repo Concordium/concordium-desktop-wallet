@@ -19,6 +19,27 @@ import SidedRow from '~/components/SidedRow';
 import { isFailed } from '~/utils/transactionHelpers';
 import styles from './Transactions.module.scss';
 
+const isInternalTransfer = (transaction: TransferTransaction) =>
+    [
+        TransactionKindString.TransferToEncrypted,
+        TransactionKindString.TransferToPublic,
+    ].includes(transaction.transactionKind);
+
+const isGreen = (
+    transaction: TransferTransaction,
+    viewingShielded: boolean,
+    isOutgoingTransaction: boolean
+) => {
+    const kind = transaction.transactionKind;
+    if (TransactionKindString.TransferToEncrypted === kind) {
+        return viewingShielded;
+    }
+    if (TransactionKindString.TransferToPublic === kind) {
+        return !viewingShielded && BigInt(transaction.total) > 0n;
+    }
+    return !isOutgoingTransaction;
+};
+
 function determineOutgoing(transaction: TransferTransaction, account: Account) {
     return transaction.fromAddress === account.address;
 }
@@ -27,6 +48,9 @@ function getName(
     transaction: TransferTransaction,
     isOutgoingTransaction: boolean
 ) {
+    if (isInternalTransfer(transaction)) {
+        return '';
+    }
     if (isOutgoingTransaction) {
         // Current Account is the sender
         if (transaction.toAddressName !== undefined) {
@@ -66,12 +90,7 @@ function parseShieldedAmount(
     isOutgoingTransaction: boolean
 ) {
     if (transaction.decryptedAmount) {
-        if (
-            transaction.transactionKind ===
-                TransactionKindString.TransferToEncrypted ||
-            transaction.transactionKind ===
-                TransactionKindString.TransferToPublic
-        ) {
+        if (isInternalTransfer(transaction)) {
             return buildCostFreeAmountString(
                 BigInt(transaction.decryptedAmount)
             );
@@ -127,11 +146,11 @@ function parseAmount(
 function displayType(kind: TransactionKindString) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
-            return ' (With schedule)';
+            return <i className="mL10">(With schedule)</i>;
         case TransactionKindString.TransferToEncrypted:
-            return ' Shielded amount';
+            return <i>Shielded amount</i>;
         case TransactionKindString.TransferToPublic:
-            return ' Unshielded amount';
+            return <i>Unshielded amount</i>;
         default:
             return '';
     }
@@ -192,8 +211,27 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
         >
             {failed ? <Warning className={styles.warning} height="20" /> : null}
             <SidedRow
-                left={name.concat(displayType(transaction.transactionKind))}
-                right={amount}
+                left={
+                    <>
+                        {name}
+                        {displayType(transaction.transactionKind)}
+                    </>
+                }
+                right={
+                    <p
+                        className={
+                            isGreen(
+                                transaction,
+                                viewingShielded,
+                                isOutgoingTransaction
+                            )
+                                ? styles.greenText
+                                : undefined
+                        }
+                    >
+                        {amount}
+                    </p>
+                }
             />
             <SidedRow
                 className="body4 textFaded"
