@@ -185,11 +185,15 @@ export default function PerformImport({ location }: Props) {
                                 <h2 className={styles.title}>
                                     Import successful
                                 </h2>
-                                <CheckmarkIcon className={styles.checkmark} />
-                                <p>
-                                    That’s it! Your import completed
-                                    successfully.
-                                </p>
+                                <div>
+                                    <CheckmarkIcon
+                                        className={styles.checkmark}
+                                    />
+                                    <p>
+                                        That’s it! Your import completed
+                                        successfully.
+                                    </p>
+                                </div>
                                 <Button
                                     onClick={() =>
                                         dispatch(push(routes.EXPORTIMPORT))
