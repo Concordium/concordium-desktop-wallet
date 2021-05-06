@@ -202,7 +202,7 @@ export default function AccountCreationGenerate({
                                 name: accountName,
                                 address: '',
                                 isInitial: false,
-                                status: AccountStatus.Pending,
+                                status: AccountStatus.Confirmed,
                                 identityId: -1,
                                 maxTransactionId: -1,
                                 identityName: identity.name,
