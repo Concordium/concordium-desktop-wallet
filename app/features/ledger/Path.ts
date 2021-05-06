@@ -38,16 +38,19 @@ export function getAccountPath(accountPath: AccountPathInput): number[] {
 
 /**
  * Constructs the path for the public-key that is used to pair a hardware
- * wallet with the desktop wallet.
+ * wallet with the desktop wallet. The path used is the root path of the
+ * derivation scheme used.
  *
- * - m/purpose'/coin_type'/0'/
+ * - m/purpose'/coin_type'/
+ *
+ * Note that this results in an empty path, as the purpose and coin_type
+ * are globally defined and automatically inserted when serializing the path.
  *
  * @returns the derivation path used to retrieve the public-key used for pairing
  * the hardware wallet with the desktop wallet.
  */
 export function getPairingPath(): number[] {
-    // TODO This path has not been finally decided. Awaiting input on what to use as the pairing path.
-    return [0];
+    return [];
 }
 
 /**
@@ -90,7 +93,7 @@ export default function pathAsBuffer(keyDerivationPath: number[]): Buffer {
     const buffer = Buffer.alloc(1 + (2 + keyDerivationPath.length) * 4);
 
     const subtree = keyDerivationPath[0];
-    if (validSubtrees.indexOf(subtree) === -1) {
+    if (subtree !== undefined && validSubtrees.indexOf(subtree) === -1) {
         throw new Error(`An invalid subtree was provided: ${subtree}`);
     }
 
