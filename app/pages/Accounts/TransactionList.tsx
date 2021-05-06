@@ -18,7 +18,7 @@ function TransactionList({ onTransactionClick }: Props): JSX.Element {
 
     if (transactions.length === 0) {
         return (
-            <h3 className="flex justifyCenter">
+            <h3 className="flex justifyCenter pB20">
                 This balance has no transactions yet.
             </h3>
         );

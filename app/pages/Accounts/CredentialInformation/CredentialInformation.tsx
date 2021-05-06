@@ -39,7 +39,7 @@ export default function CredentialInformation({
         });
 
     return (
-        <Card className="relative">
+        <Card className="relative pB0">
             <div className={styles.header}>
                 <p>
                     Credentials on this account: {credentialsOfAccount.length}

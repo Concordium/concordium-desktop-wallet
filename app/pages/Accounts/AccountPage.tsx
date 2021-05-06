@@ -85,7 +85,8 @@ export default function AccountsPage() {
     return (
         <MasterDetailPageLayout>
             <Header>
-                <h1 className="mR20">Accounts | </h1>
+                <h1>Accounts</h1>
+                <h1 className="mH40">|</h1>
                 <h3 className="mR20">
                     Wallet Total:{' '}
                     <b>

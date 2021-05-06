@@ -52,7 +52,7 @@ async function exportTransactions(account: Account, openModal: () => void) {
 export default function ExportTransactions({ account, returnFunction }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     return (
-        <Card className="relative">
+        <Card className="relative flexColumn justifyCenter">
             <ErrorModal
                 show={modalOpen}
                 header="Export failed"
@@ -62,8 +62,9 @@ export default function ExportTransactions({ account, returnFunction }: Props) {
                 className={styles.closeButton}
                 onClick={returnFunction}
             />
-            <h3 className="textCenter">Export Transactions</h3>
+            <h3 className="textCenter mT0">Export Transactions</h3>
             <Button
+                className="mT20"
                 onClick={() =>
                     exportTransactions(account, () => setModalOpen(true))
                 }

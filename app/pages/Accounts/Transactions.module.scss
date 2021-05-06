@@ -1,19 +1,16 @@
 @import 'config/bundle';
+@import './common';
 
 .transactionListHeader {
+    composes: thickBlueSeparator;
+    composes: fillCardPadding;
+    composes: cardPadding;
     margin-top: -20px;
-    width: 100%;
 
     button {
         width: 50%;
         padding: 10px;
     }
-}
-
-.transactionListHeader::after,
-.transactionListElement {
-    margin: 0 -20px;
-    width: calc(100% + 40px);
 }
 
 .transactionListHeaderNotChosen,
@@ -26,14 +23,8 @@
     color: $color-pale-blue;
 }
 
-.transactionListHeader::after {
-    display: block;
-    content: '';
-    background-color: $color-light-blue;
-    height: 10px;
-}
-
 .transactionListElement {
+    composes: fillCardPadding;
     padding: 10px 20px;
 
     &:not(:last-child) {

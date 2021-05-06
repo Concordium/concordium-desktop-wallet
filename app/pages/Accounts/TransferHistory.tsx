@@ -64,7 +64,7 @@ export default function TransferHistory({ account }: Props) {
             case locations.listTransactions:
                 if (!viewingShielded || account.allDecrypted) {
                     return (
-                        <Card>
+                        <Card className="pB0">
                             <Header />
                             <TransactionList
                                 onTransactionClick={(transaction) => {
@@ -91,7 +91,7 @@ export default function TransferHistory({ account }: Props) {
                 );
             case locations.viewIdentityData:
                 return (
-                    <Card>
+                    <Card className="pB0">
                         <Header />
                         <DisplayIdentityAttributes />
                     </Card>

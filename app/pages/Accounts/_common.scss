@@ -1,12 +1,12 @@
 .fillCardPadding {
-    margin-left: -20px;
-    margin-right: -20px;
-    width: calc(100% + 40px);
+    margin-left: -19px;
+    margin-right: -19px;
+    width: calc(100% + 38px);
 }
 
 .cardPadding {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 19px;
+    padding-right: 19px;
 }
 
 .greySeparator {
@@ -18,6 +18,12 @@
 .blueSeparator {
     &:not(:last-child) {
         border-bottom: 5px solid $color-light-blue;
+    }
+}
+
+.thickBlueSeparator {
+    &:not(:last-child) {
+        border-bottom: 10px solid $color-light-blue;
     }
 }
 

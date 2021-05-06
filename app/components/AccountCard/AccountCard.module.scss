@@ -43,14 +43,10 @@ $horizontal-padding: 30px;
     margin-left: calc(-1 * #{$horizontal-padding});
 }
 
-.firstRow {
-    margin: 0;
-}
-
 .row {
     margin: 10px 0;
 
-    :last-of-type {
+    &:last-of-type {
         margin-bottom: 0;
     }
 }

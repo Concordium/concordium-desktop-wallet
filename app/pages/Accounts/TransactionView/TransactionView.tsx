@@ -61,7 +61,7 @@ function displayRejectReason(transaction: TransferTransaction) {
  */
 function TransactionView({ transaction, returnFunction }: Props) {
     return (
-        <Card className="relative">
+        <Card className="relative pB10">
             <h3 className={styles.title}> Transaction Details </h3>
             <CloseButton
                 className={styles.closeButton}

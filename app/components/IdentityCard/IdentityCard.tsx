@@ -33,7 +33,7 @@ function statusImage(status: IdentityStatus) {
         case IdentityStatus.Rejected:
             return <RejectedImage />;
         case IdentityStatus.Pending:
-            return <PendingImage />;
+            return <PendingImage height="20" />;
         default:
             return undefined;
     }

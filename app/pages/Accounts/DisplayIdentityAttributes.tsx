@@ -45,16 +45,14 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
                         key={credential.value.contents.credId}
                         className={styles.identityAttributesOfCredential}
                     >
-                        {attributeKeys.map((attributeKey: string) => {
-                            return (
-                                <SidedRow
-                                    className={styles.identityAttribute}
-                                    key={attributeKey}
-                                    left={attributeNames[attributeKey]}
-                                    right={attributes[attributeKey]}
-                                />
-                            );
-                        })}
+                        {attributeKeys.map((attributeKey: string) => (
+                            <SidedRow
+                                className={styles.identityAttribute}
+                                key={attributeKey}
+                                left={attributeNames[attributeKey]}
+                                right={attributes[attributeKey]}
+                            />
+                        ))}
                     </div>
                 );
             })}

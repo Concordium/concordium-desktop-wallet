@@ -81,16 +81,16 @@ export default function AccountCard({
             role="button"
         >
             <SidedRow
-                className={styles.firstRow}
                 left={
                     <>
-                        <b className={styles.inline}>
-                            {account.name}
-                            {account.status === AccountStatus.Pending ? (
-                                <PendingImage />
-                            ) : undefined}
-                        </b>
-                        {isInitialAccount(account) ? <>(Initial)</> : undefined}
+                        <b className={styles.inline}>{account.name}</b>
+                        {isInitialAccount(account) ? '(Initial)' : undefined}
+                        {account.status === AccountStatus.Pending ? (
+                            <PendingImage
+                                height="20"
+                                className={styles.bakerImage}
+                            />
+                        ) : undefined}
                         {accountInfo && accountInfo.accountBaker ? (
                             <BakerImage
                                 height="25"

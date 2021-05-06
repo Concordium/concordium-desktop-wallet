@@ -20,8 +20,10 @@ export default function ShowReleaseSchedule({
     accountInfo,
     returnFunction,
 }: Props) {
+    const { schedule } = accountInfo.accountReleaseSchedule;
+
     return (
-        <Card className="flexColumn alignCenter relative">
+        <Card className="flexColumn alignCenter relative pB0">
             <CloseButton
                 className={styles.closeButton}
                 onClick={returnFunction}
@@ -39,8 +41,13 @@ export default function ShowReleaseSchedule({
                 showIndex={false}
                 className={styles.releaseSchedule}
                 elementClassName={styles.releaseScheduleElement}
-                schedule={accountInfo.accountReleaseSchedule.schedule}
+                schedule={schedule}
             />
+            {schedule.length === 0 ? (
+                <h3 className="flex justifyCenter pB20 mT10">
+                    This account has no future releases.
+                </h3>
+            ) : null}
         </Card>
     );
 }

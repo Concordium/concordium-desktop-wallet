@@ -16,10 +16,10 @@
 }
 
 .releaseScheduleElement {
-    padding-top: 10px;
-    padding-bottom: 10px;
     composes: cardPadding;
     composes: greySeparator;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .releaseSchedule {
