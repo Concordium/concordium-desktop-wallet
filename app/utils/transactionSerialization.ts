@@ -189,7 +189,7 @@ export function serializeAddBaker(payload: AddBakerPayload) {
 }
 
 export function serializeRemoveBaker() {
-    return Buffer.from(Uint8Array.of(5));
+    return Buffer.from(Uint8Array.of(TransactionKindId.Remove_baker));
 }
 
 export function serializeTransferPayload(
