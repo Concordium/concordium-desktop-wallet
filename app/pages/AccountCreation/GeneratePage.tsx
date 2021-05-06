@@ -28,6 +28,7 @@ import { insertNewCredential } from '../../features/CredentialSlice';
 import { globalSelector } from '../../features/GlobalSlice';
 import SimpleLedger from '../../components/ledger/SimpleLedger';
 import ErrorModal from '../../components/SimpleErrorModal';
+import pairWallet from '~/utils/WalletPairing';
 
 interface Props {
     accountName: string;
@@ -120,6 +121,14 @@ export default function AccountCreationGenerate({
             onError(`Unexpected missing global object`);
             return;
         }
+
+        const walletId = await pairWallet(ledger);
+        if (walletId !== identity.walletId) {
+            throw new Error(
+                'The chosen identity was not created using the connected wallet.'
+            );
+        }
+
         try {
             credentialNumber = await getNextCredentialNumber(identity.id);
         } catch (e) {

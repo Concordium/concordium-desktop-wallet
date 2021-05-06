@@ -1,11 +1,15 @@
 import * as Knex from 'knex';
-import { identitiesTable } from '../../constants/databaseNames.json';
+import {
+    walletTable,
+    identitiesTable,
+} from '../../constants/databaseNames.json';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
         identitiesTable,
         (table: Knex.TableBuilder) => {
             table.increments('id');
+            table.integer('identityNumber');
             table.string('name');
             table.string('status');
             table.string('detail');
@@ -13,6 +17,11 @@ export async function up(knex: Knex): Promise<void> {
             table.string('identityProvider');
             table.string('identityObject');
             table.string('randomness');
+            table
+                .integer('walletId')
+                .references('id')
+                .inTable(walletTable)
+                .notNullable();
         }
     );
 }

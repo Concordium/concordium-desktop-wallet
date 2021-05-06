@@ -2,9 +2,8 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Card, Button, Divider } from 'semantic-ui-react';
-
-import routes from '../../constants/routes.json';
-import { accountsSelector } from '../../features/AccountSlice';
+import routes from '~/constants/routes.json';
+import { accountsSelector } from '~/features/AccountSlice';
 import AccountCard from '~/components/AccountCard';
 
 interface Props {

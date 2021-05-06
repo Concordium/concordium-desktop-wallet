@@ -95,6 +95,7 @@ export enum IdentityStatus {
  */
 export interface Identity {
     id: number;
+    identityNumber: number;
     name: string;
     identityObject: string;
     status: IdentityStatus;
@@ -102,6 +103,7 @@ export interface Identity {
     codeUri: string;
     identityProvider: string;
     randomness: string;
+    walletId: number;
 }
 
 // Statuses that an account can have.
@@ -121,6 +123,7 @@ export interface Account {
     address: Hex;
     identityId: number;
     identityName?: string;
+    identityNumber?: number;
     status: AccountStatus;
     signatureThreshold?: number;
     totalDecrypted?: string;
@@ -288,6 +291,8 @@ export interface Credential {
     credentialIndex?: number;
     credentialNumber?: number;
     identityId?: number;
+    identityNumber?: number;
+    walletId?: number;
     credId: Hex;
     policy: JSONString;
 }
@@ -299,6 +304,7 @@ export interface DeployedCredential extends Credential {
 export interface LocalCredential extends Credential {
     external: false;
     identityId: number;
+    identityNumber: number;
     credentialNumber: number;
 }
 
@@ -989,6 +995,16 @@ export interface IncomingTransaction {
     cost?: Hex;
 }
 
+export enum WalletType {
+    LedgerNanoS = 'ledgernanos',
+}
+
+export interface WalletEntry {
+    id: number;
+    identifier: string;
+    type: WalletType;
+}
+
 /**
  * The basic color types supported by Semantic UI components color property.
  */
@@ -1042,6 +1058,7 @@ export interface ExportData {
     identities: Identity[];
     addressBook: AddressBookEntry[];
     credentials: Credential[];
+    wallets: WalletEntry[];
 }
 
 interface EventResult {
@@ -1153,4 +1170,11 @@ export interface PublicKeyExportFormat {
     signature: string;
     type: ExportKeyType;
     note?: string;
+}
+
+export interface SignedIdRequest {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    idObjectRequest: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    randomness: Hex;
 }

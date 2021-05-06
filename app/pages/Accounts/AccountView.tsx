@@ -36,7 +36,8 @@ export default function AccountView() {
     }
 
     if (accountInfo === undefined) {
-        return null; // TODO: Handle AccountInfo not available, either the account is not confirmed, or we can't reach the node.
+        // TODO: Handle AccountInfo not available, either the account is not confirmed, or we can't reach the node.
+        return null;
     }
 
     return (
