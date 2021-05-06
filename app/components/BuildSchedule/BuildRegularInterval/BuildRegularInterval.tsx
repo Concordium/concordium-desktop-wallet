@@ -73,7 +73,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         ref
     ) => {
         const [chosenInterval, setChosenInterval] = useState<Interval>(
-            intervals[defaults?.chosenInterval || 0]
+            intervals[defaults?.chosenInterval || intervals.length - 1]
         );
         const form = useForm<FormValues>({ mode: 'onTouched' });
         const releases = form.watch(fieldNames.releases);
