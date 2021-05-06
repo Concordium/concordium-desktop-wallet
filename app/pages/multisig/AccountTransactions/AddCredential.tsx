@@ -128,7 +128,7 @@ export default function AddCredential({
             </h3>
             <p>
                 You can add new credentials to the proposal by dropping the
-                below, or by browsing to the file on your compuiter.
+                below, or by browsing to the file on your computer.
             </p>
             {body}
         </>

@@ -56,21 +56,26 @@ export async function loadIdentities(dispatch: Dispatch) {
 }
 
 export async function addPendingIdentity(
+    identityNumber: number,
     dispatch: Dispatch,
     identityName: string,
     codeUri: string,
     identityProvider: IdentityProvider,
-    randomness: string
+    randomness: string,
+    walletId: number
 ) {
     const identity = {
+        identityNumber,
         name: identityName,
         status: IdentityStatus.Pending,
         codeUri,
         identityProvider: JSON.stringify(identityProvider),
         randomness,
+        walletId,
     };
-    await insertIdentity(identity);
-    return loadIdentities(dispatch);
+    const identityId = await insertIdentity(identity);
+    loadIdentities(dispatch);
+    return identityId[0];
 }
 
 export async function confirmIdentity(
@@ -90,7 +95,9 @@ export async function rejectIdentity(dispatch: Dispatch, identityName: string) {
     await loadIdentities(dispatch);
 }
 
-export async function importIdentities(identities: Identity | Identity[]) {
+export async function importIdentities(
+    identities: Identity | Identity[] | Partial<Identity>
+) {
     await insertIdentity(identities);
 }
 

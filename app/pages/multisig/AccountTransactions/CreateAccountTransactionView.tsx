@@ -4,6 +4,7 @@ import { TransactionKindId } from '~/utils/types';
 import CreateTransferProposal from './CreateTransferProposal';
 
 import UpdateCredentialPage from './UpdateCredentialsPage';
+import AddBaker from './AddBaker';
 import ErrorBoundary from '~/components/ErrorBoundary';
 import routes from '~/constants/routes.json';
 
@@ -23,6 +24,9 @@ function AccountTransactionRoutes(): JSX.Element {
         ].includes(transactionKind)
     ) {
         return <CreateTransferProposal transactionKind={transactionKind} />;
+    }
+    if (transactionKind === TransactionKindId.Add_baker) {
+        return <AddBaker />;
     }
     throw new Error(`unsupported transaction type: ${transactionKind}`);
 }

@@ -10,6 +10,7 @@ type Word64 = bigint;
 type Word32 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
+export type Amount = bigint;
 
 export interface Fraction {
     numerator: Word64;
@@ -95,6 +96,7 @@ export enum IdentityStatus {
  */
 export interface Identity {
     id: number;
+    identityNumber: number;
     name: string;
     identityObject: string;
     status: IdentityStatus;
@@ -102,6 +104,7 @@ export interface Identity {
     codeUri: string;
     identityProvider: string;
     randomness: string;
+    walletId: number;
 }
 
 // Statuses that an account can have.
@@ -121,6 +124,7 @@ export interface Account {
     address: Hex;
     identityId: number;
     identityName?: string;
+    identityNumber?: number;
     status: AccountStatus;
     signatureThreshold?: number;
     totalDecrypted?: string;
@@ -209,12 +213,24 @@ export interface UpdateAccountCredentialsPayload {
     threshold: number;
 }
 
+export interface AddBakerPayload {
+    electionVerifyKey: Hex;
+    signatureVerifyKey: Hex;
+    aggregationVerifyKey: Hex;
+    proofElection: Hex;
+    proofSignature: Hex;
+    proofAggregation: Hex;
+    bakingStake: Amount;
+    restakeEarnings: boolean;
+}
+
 export type TransactionPayload =
     | UpdateAccountCredentialsPayload
     | TransferToPublicPayload
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
-    | SimpleTransferPayload;
+    | SimpleTransferPayload
+    | AddBakerPayload;
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
@@ -236,6 +252,7 @@ export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
+export type AddBaker = AccountTransaction<AddBakerPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -288,6 +305,8 @@ export interface Credential {
     credentialIndex?: number;
     credentialNumber?: number;
     identityId?: number;
+    identityNumber?: number;
+    walletId?: number;
     credId: Hex;
     policy: JSONString;
 }
@@ -299,6 +318,7 @@ export interface DeployedCredential extends Credential {
 export interface LocalCredential extends Credential {
     external: false;
     identityId: number;
+    identityNumber: number;
     credentialNumber: number;
 }
 
@@ -481,6 +501,7 @@ export interface AccountInfo {
         number,
         Versioned<TypedCredentialDeploymentInformation>
     >;
+    accountIndex: number;
 }
 
 // Reflects the type, which the account Release Schedule is comprised of.
@@ -737,6 +758,12 @@ export function instanceOfUpdateAccountCredentials(
     return object.transactionKind === TransactionKindId.Update_credentials;
 }
 
+export function instanceOfAddBaker(
+    object: AccountTransaction<TransactionPayload>
+): object is AddBaker {
+    return object.transactionKind === TransactionKindId.Add_baker;
+}
+
 export function isExchangeRate(
     transaction: UpdateInstruction<UpdateInstructionPayload>
 ): transaction is UpdateInstruction<ExchangeRate> {
@@ -989,6 +1016,16 @@ export interface IncomingTransaction {
     cost?: Hex;
 }
 
+export enum WalletType {
+    LedgerNanoS = 'ledgernanos',
+}
+
+export interface WalletEntry {
+    id: number;
+    identifier: string;
+    type: WalletType;
+}
+
 /**
  * The basic color types supported by Semantic UI components color property.
  */
@@ -1042,6 +1079,7 @@ export interface ExportData {
     identities: Identity[];
     addressBook: AddressBookEntry[];
     credentials: Credential[];
+    wallets: WalletEntry[];
 }
 
 interface EventResult {
@@ -1153,4 +1191,11 @@ export interface PublicKeyExportFormat {
     signature: string;
     type: ExportKeyType;
     note?: string;
+}
+
+export interface SignedIdRequest {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    idObjectRequest: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    randomness: Hex;
 }

@@ -13,6 +13,7 @@ import {
     Global,
     AccountEncryptedAmount,
     GenesisAccount,
+    SignedIdRequest,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -31,10 +32,10 @@ async function getSecretsFromLedger(
     displayMessage: (message: string) => void,
     identityNumber: number
 ) {
-    displayMessage('Please confirm exporting prf key on device');
+    displayMessage('Please confirm exporting PRF key on device');
     const prfKeySeed = await ledger.getPrfKey(identityNumber);
 
-    displayMessage('Please confirm exporting id cred sec on device');
+    displayMessage('Please confirm exporting IdCredSec on device');
     const idCredSecSeed = await ledger.getIdCredSec(identityNumber);
 
     const prfKey = prfKeySeed.toString('hex');
@@ -53,7 +54,7 @@ export async function createIdentityRequestObjectLedger(
     global: Global,
     displayMessage: (message: string) => void,
     ledger: ConcordiumLedgerClient
-) {
+): Promise<SignedIdRequest> {
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
@@ -100,11 +101,14 @@ export async function createIdentityRequestObjectLedger(
         signatureIndex: 0,
     };
 
-    displayMessage(`
-Please sign information on device:
+    displayMessage(`Please sign information on device:
+
 Identity Credentials Public (IdCredPub): ${pubInfoForIp.idCredPub}
+
 Registration ID (RegId): ${pubInfoForIp.regId}
+
 Verification Key: ${pubInfoForIp.publicKeys.keys[0].verifyKey}
+
 Threshold: ${pubInfoForIp.publicKeys.threshold}
 `);
     const signature = await ledger.signPublicInformationForIp(
@@ -137,7 +141,7 @@ async function createUnsignedCredentialInfo(
     address?: string
 ) {
     const path = getAccountPath({
-        identityIndex: identity.id,
+        identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
@@ -145,7 +149,7 @@ async function createUnsignedCredentialInfo(
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identity.id
+        identity.identityNumber
     );
     displayMessage('Please confirm exporting public key on device');
     const publicKey = await ledger.getPublicKey(path);
@@ -195,8 +199,10 @@ async function createUnsignedCredentialInfo(
 }
 
 /**
- *  This function creates a CredentialDeploymentInfo using the ledger, given the nesessary information and the account number.
- * N.B. This function is to construct a credential for an existing account.
+ * Used to construct a credential for an existing account.
+ *
+ * This function creates a CredentialDeploymentInfo using the hardware wallet, using the necessary information
+ * and the account number. The hardware wallet is used, as part of the constructed data has to be signed.
  */
 export async function createCredentialInfo(
     identity: Identity,
@@ -221,7 +227,7 @@ export async function createCredentialInfo(
     displayMessage(`Please sign details on device.`);
     // Adding credential on an existing account
     const path = getAccountPath({
-        identityIndex: identity.id,
+        identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
@@ -269,7 +275,7 @@ export async function createCredentialDetails(
     // Adding credential on a new account
     const expiry = getDefaultExpiry();
     const path = getAccountPath({
-        identityIndex: identity.id,
+        identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
@@ -355,7 +361,7 @@ export async function makeTransferToPublicData(
 
 export async function createGenesisAccount(
     ledger: ConcordiumLedgerClient,
-    identityId: number,
+    identityNumber: number,
     credentialNumber: number,
     ipInfo: Versioned<IpInfo>,
     arInfo: Versioned<ArInfo>,
@@ -364,7 +370,7 @@ export async function createGenesisAccount(
     displayMessage: (message: string) => void
 ): Promise<GenesisAccount> {
     const path = getAccountPath({
-        identityIndex: identityId,
+        identityIndex: identityNumber,
         accountIndex: credentialNumber,
         signatureIndex: 0,
     });
@@ -372,9 +378,9 @@ export async function createGenesisAccount(
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
         displayMessage,
-        identityId
+        identityNumber
     );
-    displayMessage('Please confirm exporting public key on device');
+    displayMessage('Please confirm exporting public-key on device');
     const publicKey = await ledger.getPublicKey(path);
     displayMessage('Please wait');
 
@@ -403,6 +409,26 @@ export async function createGenesisAccount(
     });
 
     return JSON.parse(credential);
+}
+
+export type BakerKeys = {
+    electionSecret: string;
+    electionPublic: string;
+    signatureSecret: string;
+    signaturePublic: string;
+    aggregationSecret: string;
+    aggregationPublic: string;
+    proofElection: string;
+    proofSignature: string;
+    proofAggregation: string;
+};
+
+export async function generateBakerKeys(sender: string): Promise<BakerKeys> {
+    const response = await worker.postMessage({
+        command: workerCommands.generateBakerKeys,
+        sender,
+    });
+    return JSON.parse(response);
 }
 
 export function getAddressFromCredentialId(credId: string): Promise<string> {
