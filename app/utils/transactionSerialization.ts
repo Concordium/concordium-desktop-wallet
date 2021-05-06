@@ -206,7 +206,7 @@ export function serializeUpdateBakerKeys(payload: UpdateBakerKeysPayload) {
 }
 
 export function serializeRemoveBaker() {
-    return Buffer.from(Uint8Array.of(5));
+    return Buffer.from(Uint8Array.of(TransactionKind.Remove_baker));
 }
 
 export function serializeTransferPayload(
