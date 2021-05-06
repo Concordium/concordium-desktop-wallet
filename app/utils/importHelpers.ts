@@ -1,11 +1,11 @@
 /* eslint-disable no-await-in-loop */
-import { getAccountsOfIdentity, insertAccount } from '~/database/AccountDao';
+import { getAccountsOfIdentity, insertAccount } from '../database/AccountDao';
 import {
     getCredentialsForIdentity,
     insertCredential,
-} from '~/database/CredentialDao';
-import { insertIdentity } from '~/database/IdentityDao';
-import { insertWallet } from '~/database/WalletDao';
+} from '../database/CredentialDao';
+import { insertIdentity } from '../database/IdentityDao';
+import { insertWallet } from '../database/WalletDao';
 import { partition } from './basicHelpers';
 import {
     Account,
