@@ -1,4 +1,3 @@
-import * as React from 'react';
 import AccountTransactionDetails from '~/components/Transfers/AccountTransactionDetails';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
@@ -6,24 +5,22 @@ import { AccountTransactionHandler } from '~/utils/transactionTypes';
 import {
     AccountTransaction,
     TransactionPayload,
-    instanceOfRemoveBaker,
-    RemoveBaker,
-    MultiSignatureTransactionStatus,
+    AddBaker,
+    instanceOfAddBaker,
 } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
-import PrintFormatRemoveBaker from '~/components/PrintFormat/RemoveBaker';
 
-type TransactionType = RemoveBaker;
+type TransactionType = AddBaker;
 
-const TYPE = 'Remove Baker';
+const TYPE = 'Add Baker';
 
-export default class RemoveBakerHandler
+export default class AddBakerHandler
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: AccountTransaction<TransactionPayload>
     ): TransactionType {
-        if (instanceOfRemoveBaker(transaction)) {
+        if (instanceOfAddBaker(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -52,23 +49,11 @@ export default class RemoveBakerHandler
         return AccountTransactionDetails({ transaction });
     }
 
-    createTransaction(): Promise<RemoveBaker> {
+    createTransaction(): Promise<AddBaker> {
         throw new Error('Unimplemented');
     }
 
-    print(
-        transaction: AccountTransaction,
-        status: MultiSignatureTransactionStatus,
-        identiconImage?: string
-    ) {
-        return (
-            <PrintFormatRemoveBaker
-                transaction={this.confirmType(transaction)}
-                status={status}
-                image={identiconImage}
-            />
-        );
-    }
+    print = () => undefined;
 
     title = `Account Transaction | ${TYPE}`;
 

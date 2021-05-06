@@ -1,4 +1,3 @@
-import * as React from 'react';
 import AccountTransactionDetails from '~/components/Transfers/AccountTransactionDetails';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
@@ -6,24 +5,22 @@ import { AccountTransactionHandler } from '~/utils/transactionTypes';
 import {
     AccountTransaction,
     TransactionPayload,
-    AddBaker,
-    instanceOfAddBaker,
-    MultiSignatureTransactionStatus,
+    instanceOfRemoveBaker,
+    RemoveBaker,
 } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
-import PrintFormatAddBaker from '~/components/PrintFormat/AddBaker';
 
-type TransactionType = AddBaker;
+type TransactionType = RemoveBaker;
 
-const TYPE = 'Add Baker';
+const TYPE = 'Remove Baker';
 
-export default class AddBakerHandler
+export default class RemoveBakerHandler
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: AccountTransaction<TransactionPayload>
     ): TransactionType {
-        if (instanceOfAddBaker(transaction)) {
+        if (instanceOfRemoveBaker(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -52,23 +49,11 @@ export default class AddBakerHandler
         return AccountTransactionDetails({ transaction });
     }
 
-    createTransaction(): Promise<AddBaker> {
+    createTransaction(): Promise<RemoveBaker> {
         throw new Error('Unimplemented');
     }
 
-    print(
-        transaction: AccountTransaction,
-        status: MultiSignatureTransactionStatus,
-        identiconImage?: string
-    ) {
-        return (
-            <PrintFormatAddBaker
-                transaction={this.confirmType(transaction)}
-                status={status}
-                image={identiconImage}
-            />
-        );
-    }
+    print = () => undefined;
 
     title = `Account Transaction | ${TYPE}`;
 
