@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { Account, AccountInfo, Fraction } from '~/utils/types';
 import AccountCard from '~/components/AccountCard';
-import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
+import { Account, Fraction } from '~/utils/types';
 import { validateAmount } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { getGTUSymbol } from '~/utils/gtu';
 import InlineNumber from '~/components/Form/InlineNumber';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import styles from './PickAmount.module.scss';
+import { useAccountInfo } from '~/utils/hooks';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -34,13 +34,7 @@ export default function PickAmount({
     }
 
     const [error, setError] = useState<string>();
-    const [accountInfo, setAccountInfo] = useState<AccountInfo>();
-
-    useEffect(() => {
-        getAccountInfoOfAddress(account.address)
-            .then((loadedAccountInfo) => setAccountInfo(loadedAccountInfo))
-            .catch(() => {});
-    }, [account, setAccountInfo]);
+    const accountInfo = useAccountInfo(account.address);
 
     useEffect(() => {
         const validation = validateAmount(

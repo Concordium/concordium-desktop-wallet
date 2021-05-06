@@ -140,14 +140,13 @@ export default function GenesisAccount(): JSX.Element {
 
             const address = credentialContent.credId; // We use the credId as a temporary 'address', which we will use to lookup the actual address after genesis.
 
-            const success = await saveFile(
-                JSON.stringify(genesisAccount),
-                'Save credential',
-                `${accountName}_${credentialContent.credId.substring(
-                    0,
-                    8
-                )}.json`
-            );
+            const success = await saveFile(JSON.stringify(genesisAccount), {
+                title: 'Save credential',
+                defaultPath: `${accountName.replace(
+                    /\s/g,
+                    '_'
+                )}_${credentialContent.credId.substring(0, 8)}.json`,
+            });
 
             if (success) {
                 const account: Account = {

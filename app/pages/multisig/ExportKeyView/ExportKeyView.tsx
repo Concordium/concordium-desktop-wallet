@@ -88,7 +88,9 @@ export default function ExportKeyView(): JSX.Element {
     ) {
         const publicKeyExport = buildExportFormat(sPublicKey, exportKeyType);
         const publicKeyExportJson = JSON.stringify(publicKeyExport);
-        await saveFile(publicKeyExportJson, 'Save exported public-key');
+        await saveFile(publicKeyExportJson, {
+            title: 'Save exported public-key',
+        });
     }
 
     let exportComponent;

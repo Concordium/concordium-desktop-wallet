@@ -43,7 +43,7 @@ async function exportTransactions(account: Account, openModal: () => void) {
         exportedFields.map(getLabel)
     );
     try {
-        await saveFile(csv, 'Export Transactions');
+        await saveFile(csv, { title: 'Export Transactions' });
     } catch (e) {
         openModal();
     }
