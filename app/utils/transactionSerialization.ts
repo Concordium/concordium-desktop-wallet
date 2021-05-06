@@ -182,14 +182,14 @@ export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
 
 export function serializeAddBaker(payload: AddBakerPayload) {
     return Buffer.concat([
-        Uint8Array.of(4),
+        Uint8Array.of(TransactionKind.Add_baker),
         serializeAddBakerKeys(payload),
         serializeAddBakerProofsStakeRestake(payload),
     ]);
 }
 
 export function serializeRemoveBaker() {
-    return Buffer.from(Uint8Array.of(TransactionKindId.Remove_baker));
+    return Buffer.from(Uint8Array.of(TransactionKind.Remove_baker));
 }
 
 export function serializeTransferPayload(
