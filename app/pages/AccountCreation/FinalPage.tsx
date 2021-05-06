@@ -3,9 +3,9 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Card, Button, Divider } from 'semantic-ui-react';
 
-import routes from '../../constants/routes.json';
-import { accountsSelector } from '../../features/AccountSlice';
-import AccountListElement from '../../components/AccountListElement';
+import routes from '~/constants/routes.json';
+import { accountsSelector } from '~/features/AccountSlice';
+import AccountListElement from '~/components/AccountListElement';
 
 interface Props {
     accountName: string;

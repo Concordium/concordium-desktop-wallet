@@ -14,7 +14,7 @@
     "ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER": "/accounts/more/create-scheduled-transfer",
     "ACCOUNTS_MORE_EXPORT_TRANSACTIONS": "/accounts/more/export-transactions",
     "ACCOUNTS_MORE_CREDENTIAL_INFORMATION": "/accounts/more/credential-information",
-    "IDENTITIES": "/identity/listview",
+    "IDENTITIES": "/identity",
     "ADDRESSBOOK": "/addressbook",
     "ADDRESSBOOK_SELECTED": "/addressbook/:address",
     "EXPORTIMPORT": "/export_import",
