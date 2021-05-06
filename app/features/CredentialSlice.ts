@@ -192,22 +192,6 @@ export async function updateCredentialsStatus(
             }
         }
     });
-
-    // Check if any external credentials have been added to the account. If so, then add them.
-    const newCredentials = onChainCredentials.filter(
-        ([onChainCredential]) =>
-            !localCredentials.some(
-                (cred) => cred.credId === onChainCredential.credId
-            )
-    );
-    newCredentials.forEach(([onChainCredential, index]) =>
-        insertExternalCredential(
-            dispatch,
-            accountAddress,
-            index,
-            onChainCredential
-        )
-    );
 }
 
 export default credentialSlice.reducer;

@@ -5,6 +5,7 @@ import Button from '~/cross-app-components/Button';
 import { CredentialBlob } from './types';
 import { insertNewCredential } from '~/features/CredentialSlice';
 import { addExternalAccount } from '~/features/AccountSlice';
+import { findAccounts } from '~/database/AccountDao';
 
 interface Props {
     credentialBlob: CredentialBlob | undefined;
@@ -38,12 +39,20 @@ export default function ExportCredential({
                 undefined,
                 credentialBlob.credential
             );
-            addExternalAccount(
-                dispatch,
-                credentialBlob.address,
-                credentialBlob.identityId,
-                1
-            );
+
+            // The account may already exists, if the credential being exported is for an
+            // internal account in the database. In that case a new one should not be created.
+            const accountExists =
+                (await findAccounts({ address: credentialBlob.address }))
+                    .length > 0;
+            if (!accountExists) {
+                addExternalAccount(
+                    dispatch,
+                    credentialBlob.address,
+                    credentialBlob.identityId,
+                    1
+                );
+            }
             setReady(true);
         }
     }

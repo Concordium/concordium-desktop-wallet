@@ -54,16 +54,18 @@ async function handleIdentityProviderLocation(
 async function generateIdentity(
     idObjectRequest: string,
     randomness: string,
-    identityId: number,
+    identityNumber: number,
     setLocation: (location: string) => void,
     dispatch: Dispatch,
     provider: IdentityProvider,
     accountName: string,
     identityName: string,
+    walletId: number,
     iframeRef: RefObject<HTMLIFrameElement>,
     onError: (message: string) => void
 ) {
     let identityObjectLocation;
+    let identityId;
     try {
         const IdentityProviderLocation = await performIdObjectRequest(
             provider.metadata.issuanceStart,
@@ -74,13 +76,16 @@ async function generateIdentity(
         identityObjectLocation = await handleIdentityProviderLocation(
             iframeRef
         );
+
         // TODO: Handle the case where the app closes before we are able to save pendingIdentity
-        await addPendingIdentity(
+        identityId = await addPendingIdentity(
+            identityNumber,
             dispatch,
             identityName,
             identityObjectLocation,
             provider,
-            randomness
+            randomness,
+            walletId
         );
         await addPendingAccount(dispatch, accountName, identityId, true); // TODO: can we add the address already here?
     } catch (e) {
@@ -102,7 +107,8 @@ async function generateIdentity(
 }
 
 export interface ExternalIssuanceLocationState extends SignedIdRequest {
-    id: number;
+    identityNumber: number;
+    walletId: number;
 }
 
 interface Props {
@@ -129,17 +135,18 @@ export default function ExternalIssuance({
             return;
         }
 
-        const { idObjectRequest, randomness, id } = state;
+        const { idObjectRequest, randomness, identityNumber, walletId } = state;
 
         generateIdentity(
             idObjectRequest,
             randomness,
-            id,
+            identityNumber,
             setLocation,
             dispatch,
             provider,
             accountName,
             identityName,
+            walletId,
             iframeRef,
             onError
         );
