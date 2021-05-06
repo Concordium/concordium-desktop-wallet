@@ -88,7 +88,7 @@ export default function AccountCreationPickIdentity({
                 <CardList className={styles.rightColumn}>
                     {identities.map((id, i) => (
                         <IdentityCard
-                            className={styles.identityColumnElement}
+                            className={styles.card}
                             identity={id}
                             key={id.id}
                             active={chosenIndex === i}

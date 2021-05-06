@@ -3,12 +3,12 @@ import { push } from 'connected-react-router';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation, Redirect } from 'react-router-dom';
 import routes from '~/constants/routes.json';
-import { Identity } from '~/utils/types';
+import { ChosenAttributes, Identity } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
 import PickName from './PickName';
 import PickIdentity from './PickIdentity';
 import PickAttributes from './PickAttributes';
-import GeneratePage from './GeneratePage';
+import GeneratePage from './GeneratePage/GeneratePage';
 import FinalPage from './FinalPage';
 
 import styles from './AccountCreation.module.scss';
@@ -33,7 +33,9 @@ export default function AccountCreationPage(): JSX.Element {
     const dispatch = useDispatch();
     const [accountName, setAccountName] = useState('');
     const [identity, setIdentity] = useState<Identity | undefined>();
-    const [chosenAttributes, setChosenAttributes] = useState<string[]>([]);
+    const [chosenAttributes, setChosenAttributes] = useState<
+        Array<keyof ChosenAttributes>
+    >([]);
 
     function renderGeneratePage() {
         if (identity) {

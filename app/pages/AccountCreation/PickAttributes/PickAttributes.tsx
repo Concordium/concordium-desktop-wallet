@@ -3,29 +3,39 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import routes from '~/constants/routes.json';
-import attributeNames from '~/constants/attributeNames.json';
-import { ChosenAttributes, Identity, IdentityObject } from '~/utils/types';
+import { Identity, IdentityObject } from '~/utils/types';
 import IdentityCard from '~/components/IdentityCard';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import CardList from '~/cross-app-components/CardList';
 import Checkbox from '~/components/Form/Checkbox';
 import Card from '~/cross-app-components/Card';
-import { formatAttributeValue } from '~/utils/identityHelpers';
+import {
+    AttributeKey,
+    attributeNamesMap,
+    formatAttributeValue,
+} from '~/utils/identityHelpers';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './PickAttributes.module.scss';
 
-interface Props {
-    identity: Identity;
-    setChosenAttributes: (attributes: string[]) => void;
-    chosenAttributes: string[] | undefined;
-}
+const revealableAttributes: AttributeKey[] = [
+    'countryOfResidence',
+    'nationality',
+    'idDocType',
+    'idDocIssuer',
+];
 
 interface Attribute {
-    tag: string;
+    tag: AttributeKey;
     value: string;
     isChecked: boolean;
+}
+
+interface Props {
+    identity: Identity;
+    setChosenAttributes: (attributes: AttributeKey[]) => void;
+    chosenAttributes: AttributeKey[] | undefined;
 }
 
 export default function AccountCreationPickAttributes({
@@ -42,9 +52,9 @@ export default function AccountCreationPickAttributes({
         return Object.entries(
             identityObject.attributeList.chosenAttributes
         ).map(([tag, value]) => ({
-            tag,
+            tag: tag as AttributeKey,
             value,
-            isChecked: Boolean(chosenAttributes?.includes(tag)),
+            isChecked: Boolean(chosenAttributes?.includes(tag as AttributeKey)),
         }));
     });
 
@@ -89,42 +99,37 @@ export default function AccountCreationPickAttributes({
             <Columns.Column noResize>
                 <CardList className={generalStyles.rightColumn}>
                     <IdentityCard
-                        className={generalStyles.identityColumnElement}
+                        className={generalStyles.card}
                         identity={identity}
                         active
                     />
                     <Card
                         className={clsx(
-                            generalStyles.identityColumnElement,
+                            generalStyles.card,
                             styles.attributesCard
                         )}
                     >
-                        {attributes.map((a) => (
-                            <Checkbox
-                                className={styles.checkbox}
-                                key={a.tag}
-                                size="large"
-                                checked={a.isChecked}
-                                onClick={() => toggleAttribute(a.tag)}
-                            >
-                                <div className="flexChildFill flex justifySpaceBetween">
-                                    <span>
-                                        {
-                                            (attributeNames as Record<
-                                                string,
-                                                string
-                                            >)[a.tag]
-                                        }
-                                    </span>
-                                    <span>
-                                        {formatAttributeValue(
-                                            a.tag as keyof ChosenAttributes,
-                                            a.value
-                                        )}
-                                    </span>
-                                </div>
-                            </Checkbox>
-                        ))}
+                        {attributes
+                            .filter((a) => revealableAttributes.includes(a.tag))
+                            .map((a) => (
+                                <Checkbox
+                                    className={styles.checkbox}
+                                    key={a.tag}
+                                    size="large"
+                                    checked={a.isChecked}
+                                    onClick={() => toggleAttribute(a.tag)}
+                                >
+                                    <div className="flexChildFill flex justifySpaceBetween mL10">
+                                        <span>{attributeNamesMap[a.tag]}</span>
+                                        <span>
+                                            {formatAttributeValue(
+                                                a.tag,
+                                                a.value
+                                            )}
+                                        </span>
+                                    </div>
+                                </Checkbox>
+                            ))}
                     </Card>
                 </CardList>
             </Columns.Column>
