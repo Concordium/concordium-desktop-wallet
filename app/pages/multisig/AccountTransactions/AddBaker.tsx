@@ -183,12 +183,7 @@ function BuildAddBakerTransactionProposalStep({
             throw new Error('unexpected missing bakerKeys');
         }
 
-        const proposal = await signUsingLedger(
-            ledger,
-            transaction,
-            account,
-            credential
-        );
+        const proposal = await signUsingLedger(ledger, transaction, account);
         if (proposal.id === undefined) {
             throw new Error('unexpected undefined proposal id');
         }
