@@ -8,7 +8,7 @@ import {
     TransactionEvent,
     TransactionStatus,
     ScheduledTransfer,
-    SchedulePoint,
+    Schedule,
     TransferToEncrypted,
     instanceOfUpdateInstruction,
     Transaction,
@@ -173,11 +173,17 @@ export async function createUnshieldAmountTransaction(
     });
 }
 
+/**
+ *  Creates a schedule, with the assumption that each release is
+ *  the starting date's day and time in the subsequent months.
+ * N.B. The days will shift if the release includes a month with less
+ * days than the chosen day.
+ */
 export function createRegularIntervalSchedulePerMonth(
     totalAmount: bigint,
     releases: number,
     starting: Date
-): SchedulePoint[] {
+): Schedule {
     const releaseAmount = totalAmount / BigInt(releases);
     const restAmount = totalAmount % BigInt(releases);
     const schedule = [];
@@ -201,7 +207,7 @@ export function createRegularIntervalSchedule(
     releases: number,
     starting: number,
     interval: number
-): SchedulePoint[] {
+): Schedule {
     const releaseAmount = totalAmount / BigInt(releases);
     const restAmount = totalAmount % BigInt(releases);
     const schedule = [];
@@ -227,7 +233,7 @@ export function createRegularIntervalSchedule(
 export async function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
-    schedule: SchedulePoint[],
+    schedule: Schedule,
     signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
 ) {
