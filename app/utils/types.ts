@@ -48,7 +48,7 @@ export interface Typed<T> {
 
 // Reflects the attributes of an Identity, which describes
 // the owner of the identity.
-export enum ChosenAttributes {
+export enum ChosenAttributesKeys {
     firstName,
     lastName,
     sex,
@@ -64,12 +64,16 @@ export enum ChosenAttributes {
     taxIdNo,
 }
 
+export type ChosenAttributes = {
+    [P in keyof typeof ChosenAttributesKeys]: string;
+};
+
 // Contains the attributes of an identity.
 export interface AttributeList {
     createdAt: string;
     validTo: string;
     maxAccounts: number;
-    chosenAttributes: Record<string, string>;
+    chosenAttributes: ChosenAttributes;
 }
 
 // Reflects the structure of an identity's IdentityObject
@@ -92,6 +96,7 @@ export enum IdentityStatus {
  */
 export interface Identity {
     id: number;
+    identityNumber: number;
     name: string;
     identityObject: string;
     status: IdentityStatus;
@@ -99,6 +104,7 @@ export interface Identity {
     codeUri: string;
     identityProvider: string;
     randomness: string;
+    walletId: number;
 }
 
 // Statuses that an account can have.
@@ -118,6 +124,7 @@ export interface Account {
     address: Hex;
     identityId: number;
     identityName?: string;
+    identityNumber?: number;
     status: AccountStatus;
     signatureThreshold?: number;
     totalDecrypted?: string;
@@ -263,6 +270,7 @@ export interface ChainArData {
 }
 
 export interface CredentialDeploymentValues {
+    regId?: Hex;
     credId: Hex;
     ipIdentity: IpIdentity;
     revocationThreshold: Threshold;
@@ -301,6 +309,8 @@ export interface Credential {
     credentialIndex?: number;
     credentialNumber?: number;
     identityId?: number;
+    identityNumber?: number;
+    walletId?: number;
     credId: Hex;
     policy: JSONString;
 }
@@ -312,6 +322,7 @@ export interface DeployedCredential extends Credential {
 export interface LocalCredential extends Credential {
     external: false;
     identityId: number;
+    identityNumber: number;
     credentialNumber: number;
 }
 
@@ -345,6 +356,7 @@ export interface Policy {
 }
 
 export type YearMonth = string; // "YYYYMM"
+export type YearMonthDate = string; // "YYYYMMDD"
 
 export enum AttributeTag {
     firstName = 0,
@@ -485,10 +497,14 @@ interface AccountBakerDetails {
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
+    accountThreshold: number;
     accountReleaseSchedule: AccountReleaseSchedule;
     accountBaker?: AccountBakerDetails;
     accountEncryptedAmount: AccountEncryptedAmount;
-    accountCredentials: Versioned<TypedCredentialDeploymentInformation>[];
+    accountCredentials: Record<
+        number,
+        Versioned<TypedCredentialDeploymentInformation>
+    >;
     accountIndex: number;
 }
 
@@ -1010,6 +1026,16 @@ export interface IncomingTransaction {
     cost?: Hex;
 }
 
+export enum WalletType {
+    LedgerNanoS = 'ledgernanos',
+}
+
+export interface WalletEntry {
+    id: number;
+    identifier: string;
+    type: WalletType;
+}
+
 /**
  * The basic color types supported by Semantic UI components color property.
  */
@@ -1063,6 +1089,7 @@ export interface ExportData {
     identities: Identity[];
     addressBook: AddressBookEntry[];
     credentials: Credential[];
+    wallets: WalletEntry[];
 }
 
 interface EventResult {
@@ -1141,6 +1168,11 @@ export type PolymorphicComponentProps<
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
 
+export enum TransactionTypes {
+    UpdateInstruction,
+    AccountTransaction,
+}
+
 interface AccountCredentialWithoutProofs extends CredentialDeploymentValues {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     commitments: any;
@@ -1169,4 +1201,11 @@ export interface PublicKeyExportFormat {
     signature: string;
     type: ExportKeyType;
     note?: string;
+}
+
+export interface SignedIdRequest {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    idObjectRequest: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    randomness: Hex;
 }

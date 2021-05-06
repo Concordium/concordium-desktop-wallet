@@ -6,7 +6,7 @@ const fractionRenderSeperator = new Intl.NumberFormat()
     ? '.'
     : ',';
 
-export const isValidBigInt = (value = ''): boolean => {
+export const isValidBigInt = (value: string | number = ''): boolean => {
     try {
         BigInt(value);
         return true;
@@ -15,7 +15,7 @@ export const isValidBigInt = (value = ''): boolean => {
     }
 };
 
-function getPowerOf10(resolution: bigint): number {
+export function getPowerOf10(resolution: bigint | number): number {
     return resolution
         .toString()
         .split('')
@@ -32,7 +32,7 @@ function getPowerOf10(resolution: bigint): number {
  * isPowerOf10(10) => true
  * isPowerOf10(105) => false
  */
-export function isPowOf10(resolution: bigint): boolean {
+export function isPowOf10(resolution: bigint | number): boolean {
     return pow10Format.test(resolution.toString());
 }
 
@@ -60,10 +60,10 @@ const isValidNumberString = (
     const fractionPart =
         allowFractionDigits === true
             ? '(\\.\\d*)?'
-            : `(\\.\\d{1,${allowFractionDigits}})?`;
+            : `(\\.\\d{1,${allowFractionDigits}})?(0)*`;
     const exponentPart = '(e[+,-]?\\d*)?';
 
-    re = new RegExp(`^${signedPart}${intPart}${exponentPart}$`);
+    re = new RegExp(`^${signedPart}${intPart}\\.?(0)*${exponentPart}$`);
 
     if (allowFractionDigits !== 0) {
         re = new RegExp(
@@ -91,15 +91,15 @@ const isValidNumberString = (
  * isValidResolutionString(100)('0.008') => false
  */
 export const isValidResolutionString = (
-    resolution: bigint,
+    resolution: bigint | number,
     allowNegative = false
 ) => isValidNumberString(allowNegative, getPowerOf10(resolution));
 
 const withValidResolution = <TReturn>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    f: (resolution: bigint) => TReturn
+    f: (resolution: bigint | number) => TReturn
 ): typeof f => {
-    return (resolution: bigint) => {
+    return (resolution: bigint | number) => {
         if (!isPowOf10(resolution)) {
             throw new Error('Resolution must be a power of 10');
         }
@@ -115,10 +115,10 @@ const withValidResolution = <TReturn>(
  *
  * @example toNumberString(100n)(10n) => '0.1'
  */
-export const toFraction = withValidResolution((resolution: bigint) => {
+export const toFraction = withValidResolution((resolution: bigint | number) => {
     const zeros = getPowerOf10(resolution);
 
-    return (value?: bigint | string): string | undefined => {
+    return (value?: bigint | number | string): string | undefined => {
         if (value === undefined) {
             return undefined;
         }
@@ -126,9 +126,9 @@ export const toFraction = withValidResolution((resolution: bigint) => {
         const numberValue = BigInt(value);
         const isNegative = numberValue < 0;
         const absolute = isNegative ? -numberValue : numberValue;
-        const whole = absolute / resolution;
+        const whole = absolute / BigInt(resolution);
 
-        const fractions = absolute % resolution;
+        const fractions = absolute % BigInt(resolution);
         const fractionsFormatted =
             fractions === 0n
                 ? ''
@@ -172,7 +172,13 @@ export const parseSubNumber = (powOf10: number) => (
     fraction: string
 ): string => {
     let result = fraction;
-    result += '0'.repeat(Math.max(0, powOf10 - fraction.toString().length));
+
+    if (fraction.length < powOf10) {
+        result += '0'.repeat(Math.max(0, powOf10 - fraction.length));
+    } else {
+        result = fraction.substr(0, powOf10);
+    }
+
     return result;
 };
 
@@ -183,31 +189,33 @@ export const parseSubNumber = (powOf10: number) => (
  *
  * @example toResolution(100n)('0.1') => 10n
  */
-export const toResolution = withValidResolution((resolution: bigint) => {
-    const isValid = isValidResolutionString(resolution);
-    const parseFraction = parseSubNumber(getPowerOf10(resolution));
+export const toResolution = withValidResolution(
+    (resolution: bigint | number) => {
+        const isValid = isValidResolutionString(resolution);
+        const parseFraction = parseSubNumber(getPowerOf10(resolution));
 
-    return (value?: string): bigint | undefined => {
-        if (value === undefined) {
-            return undefined;
-        }
+        return (value?: string): bigint | undefined => {
+            if (value === undefined) {
+                return undefined;
+            }
 
-        if (!isValid(value)) {
-            throw new Error(
-                `Given string cannot be parsed to resolution: ${resolution}`
-            );
-        }
+            if (!isValid(value)) {
+                throw new Error(
+                    `Given string cannot be parsed to resolution: ${resolution}`
+                );
+            }
 
-        if (!value.includes(numberSeparator)) {
-            return BigInt(value) * resolution;
-        }
+            if (!value.includes(numberSeparator)) {
+                return BigInt(value) * BigInt(resolution);
+            }
 
-        const separatorIndex = value.indexOf(numberSeparator);
-        const whole = value.slice(0, separatorIndex);
-        const fractions = parseFraction(value.slice(separatorIndex + 1));
-        return BigInt(whole) * resolution + BigInt(fractions);
-    };
-});
+            const separatorIndex = value.indexOf(numberSeparator);
+            const whole = value.slice(0, separatorIndex);
+            const fractions = parseFraction(value.slice(separatorIndex + 1));
+            return BigInt(whole) * BigInt(resolution) + BigInt(fractions);
+        };
+    }
+);
 
 const replaceCharAt = (
     value: string,
@@ -314,6 +322,45 @@ export const toFixed = (digits: number) => (value: string): string => {
     return round(digits)(value);
 };
 
+const transformValueWithExponent = (value: string): string => {
+    const { whole, fractions = '', exponent = '0' } = getNumberParts(value);
+    const parsedExponent = Number(exponent);
+
+    if (parsedExponent > 0) {
+        const missing = parsedExponent - fractions.length;
+        const withAppendedZeros =
+            missing > 0 ? fractions + '0'.repeat(missing) : fractions;
+
+        const fractionsToMove = withAppendedZeros.substring(0, parsedExponent);
+        const remainingFractions = withAppendedZeros.substring(parsedExponent);
+
+        const transformedWhole = whole + fractionsToMove;
+
+        return `${transformedWhole}${
+            remainingFractions ? `.${remainingFractions}` : ''
+        }`;
+    }
+
+    const absExponent = Math.abs(parsedExponent);
+    const missing = absExponent - whole.length;
+    const withPrependedZeros =
+        missing > 0 ? '0'.repeat(missing) + whole : whole;
+
+    const wholeToMove = withPrependedZeros.substring(
+        withPrependedZeros.length - absExponent
+    );
+    const remainingWhole = withPrependedZeros.substring(
+        0,
+        withPrependedZeros.length - absExponent
+    );
+
+    const transformedFractions = wholeToMove + fractions;
+
+    return `${remainingWhole || '0'}${
+        transformedFractions ? `.${transformedFractions}` : ''
+    }`;
+};
+
 const fallbackValues = ['', Infinity.toString()];
 
 /**
@@ -335,7 +382,8 @@ const fallbackValues = ['', Infinity.toString()];
  */
 export const formatNumberStringWithDigits = (
     minFractionDigits: number,
-    maxFractionDigits?: number
+    maxFractionDigits?: number,
+    transformExponent?: boolean
 ) => {
     if (
         typeof maxFractionDigits === 'number' &&
@@ -359,11 +407,20 @@ export const formatNumberStringWithDigits = (
             );
         }
 
-        const { fractions = '' } = getNumberParts(value);
+        const { exponent = '0' } = getNumberParts(value);
+
+        let transformedValue = value;
+        const parsedExponent = Number(exponent);
+
+        if (transformExponent && parsedExponent !== 0) {
+            transformedValue = transformValueWithExponent(value);
+        }
+
+        const { fractions = '' } = getNumberParts(transformedValue);
         const valueFractionDigits = fractions.length;
 
         if (valueFractionDigits === 0 && minFractionDigits === 0) {
-            return value;
+            return transformedValue;
         }
 
         const digits =
@@ -374,6 +431,6 @@ export const formatNumberStringWithDigits = (
                       Math.min(maxFractionDigits, valueFractionDigits)
                   );
 
-        return toFixed(digits)(value);
+        return toFixed(digits)(transformedValue);
     };
 };

@@ -3,7 +3,7 @@ import {
     UnsignedCredentialDeploymentInformation,
     IdOwnershipProofs,
     CredentialDeploymentValues,
-    ChosenAttributes,
+    ChosenAttributesKeys,
 } from '../../utils/types';
 import {
     putBase58Check,
@@ -89,7 +89,7 @@ export async function signCredentialValues(
     const revealedAttributeTags: [number, string][] = Object.entries(
         credentialDeployment.policy.revealedAttributes
     ).map(([tagName, value]) => [
-        ChosenAttributes[tagName as keyof typeof ChosenAttributes],
+        ChosenAttributesKeys[tagName as keyof typeof ChosenAttributesKeys],
         value,
     ]);
     revealedAttributeTags.sort((a, b) => a[0] - b[0]);

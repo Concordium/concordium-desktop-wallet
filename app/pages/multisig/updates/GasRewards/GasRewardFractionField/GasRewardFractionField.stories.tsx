@@ -26,27 +26,20 @@ const Template: Story<GasRewardFractionFieldProps> = (args) => {
 
 export const Primary = Template.bind({});
 Primary.args = {
-    label: 'New euro pr. energy rate',
+    label: 'Finalization Proof',
     value: 25000,
 };
 
 export const Invalid = Template.bind({});
 Invalid.args = {
-    label: 'New euro pr. energy rate',
+    label: 'Finalization Proof',
     isInvalid: true,
-    value: 25000,
-};
-
-export const ReadOnly = Template.bind({});
-ReadOnly.args = {
-    label: 'New euro pr. energy rate',
-    readOnly: true,
     value: 25000,
 };
 
 export const Disabled = Template.bind({});
 Disabled.args = {
-    label: 'New euro pr. energy rate',
+    label: 'Finalization Proof',
     disabled: true,
     value: 25000,
 };

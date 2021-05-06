@@ -7,11 +7,10 @@ import {
     AccountTransaction,
     TransactionPayload,
     instanceOfUpdateAccountCredentials,
-    TransactionKindString,
+    TransactionKindId,
 } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
 import routes from '~/constants/routes.json';
-import { selectedProposalRoute } from '~/utils/routerHelper';
 
 const TYPE = 'Update Account Credentials';
 
@@ -36,7 +35,7 @@ export default class UpdateAccountCredentialsHandler
         );
     }
 
-    creationLocationHandler(currentLocation: string, proposalId: number) {
+    creationLocationHandler(currentLocation: string) {
         const getNewLocation = () => {
             switch (currentLocation) {
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
@@ -47,15 +46,21 @@ export default class UpdateAccountCredentialsHandler
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-                    return selectedProposalRoute(proposalId);
                 default:
                     throw new Error('unknown location');
             }
         };
         return getNewLocation().replace(
             ':transactionKind',
-            TransactionKindString.UpdateCredentials
+            `${TransactionKindId.Update_credentials}`
+        );
+    }
+
+    createTransaction() {
+        return Promise.reject(
+            new Error(
+                'Unsupported function: UpdateAccountCredentials transactions should be created explicitly and not through handler.'
+            )
         );
     }
 
@@ -73,6 +78,8 @@ export default class UpdateAccountCredentialsHandler
     view(transaction: TransactionType) {
         return AccountTransactionDetails({ transaction });
     }
+
+    print = () => undefined;
 
     title = `Account Transaction | ${TYPE}`;
 

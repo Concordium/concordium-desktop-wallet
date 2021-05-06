@@ -1,17 +1,26 @@
 import { AccountPathInput } from '~/features/ledger/Path';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { AccountTransactionHandler } from '~/utils/transactionTypes';
-import { AccountTransaction } from '~/utils/types';
+import {
+    CreateTransactionInput,
+    AccountTransactionHandler,
+} from '~/utils/transactionTypes';
+import {
+    MultiSignatureTransactionStatus,
+    AccountTransaction,
+    instanceOfAccountTransaction,
+    Transaction,
+} from '~/utils/types';
 
-export default class AccountHandlerTypeMiddleware<T>
+export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
     implements
-        AccountTransactionHandler<AccountTransaction, ConcordiumLedgerClient> {
+        AccountTransactionHandler<
+            AccountTransaction,
+            ConcordiumLedgerClient,
+            Transaction
+        > {
     base: AccountTransactionHandler<T, ConcordiumLedgerClient>;
 
-    creationLocationHandler: (
-        currentLocation: string,
-        proposalId: number
-    ) => string;
+    creationLocationHandler: (currentLocation: string) => string;
 
     title: string;
 
@@ -24,8 +33,11 @@ export default class AccountHandlerTypeMiddleware<T>
         this.type = base.type;
     }
 
-    confirmType(transaction: AccountTransaction) {
-        return transaction;
+    confirmType(transaction: Transaction) {
+        if (instanceOfAccountTransaction(transaction)) {
+            return transaction;
+        }
+        throw Error('Invalid transaction type was given as input.');
     }
 
     serializePayload(transaction: AccountTransaction) {
@@ -44,7 +56,23 @@ export default class AccountHandlerTypeMiddleware<T>
         );
     }
 
+    createTransaction(input: Partial<CreateTransactionInput>) {
+        return this.base.createTransaction(input);
+    }
+
     view(transaction: AccountTransaction) {
         return this.base.view(this.base.confirmType(transaction));
+    }
+
+    print(
+        transaction: Transaction,
+        status: MultiSignatureTransactionStatus,
+        identiconImage?: string
+    ) {
+        return this.base.print(
+            this.confirmType(transaction),
+            status,
+            identiconImage
+        );
     }
 }

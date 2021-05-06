@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import React, { forwardRef, InputHTMLAttributes } from 'react';
+import Label from '~/components/Label';
 
 import { CommonInputProps } from '../common';
 import ErrorMessage from '../ErrorMessage';
@@ -20,7 +21,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     ) => {
         return (
             <label className={clsx(styles.root, className)}>
-                <span className={styles.label}>{label}</span>
+                <Label>{label}</Label>
                 <input
                     className={clsx(
                         styles.field,

@@ -21,7 +21,6 @@ import {
     AccountInfo,
     AddBaker,
     AddBakerPayload,
-    Amount,
     RemoveBaker,
 } from './types';
 import {
@@ -209,6 +208,7 @@ export async function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: SchedulePoint[],
+    signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
 ) {
     const payload = {
@@ -221,6 +221,7 @@ export async function createScheduledTransferTransaction(
         expiry,
         transactionKind: TransactionKindId.Transfer_with_schedule,
         payload,
+        signatureAmount,
     });
 }
 
@@ -396,7 +397,7 @@ export function validateAmount(
     estimatedFee: bigint | undefined
 ): string | undefined {
     if (!isValidGTUString(amountToValidate)) {
-        return 'Invalid input';
+        return 'Value is not a valid GTU amount';
     }
     if (
         accountInfo &&
@@ -405,31 +406,8 @@ export function validateAmount(
     ) {
         return 'Insufficient funds';
     }
-    return undefined;
-}
-
-/** Converts an amount to a GTU string and adds microGTU if needed
- *
- * Example: amountToString(1000000n) === "1"
- * Example: amountToString(1000100n) === "1.000100"
- */
-export function amountToString(amount: Amount) {
-    const padded = amount.toString().padStart(7, '0');
-    const containsMicroGTU = amount % 1000000n !== 0n;
-    return containsMicroGTU
-        ? `${padded.slice(0, -6)}.${padded.slice(-6)}`
-        : padded.slice(0, -6);
-}
-
-/** Parse a GTU string into an amount
- *
- * Example: parseGTUString("123.456789") === 123456789n
- */
-export function parseGTUString(str: string): Amount {
-    const [gtu, microGtu, ...rest] = str.split('.');
-    if (rest.length !== 0) {
-        throw new Error('Invalid GTU string');
+    if (toMicroUnits(amountToValidate) === 0n) {
+        return 'Amount may not be zero';
     }
-
-    return 1000000n * BigInt(gtu) + BigInt(microGtu ?? '0');
+    return undefined;
 }

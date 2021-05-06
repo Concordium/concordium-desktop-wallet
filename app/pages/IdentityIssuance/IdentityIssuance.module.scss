@@ -1,4 +1,38 @@
-.webview {
-    height: 75vh;
-    width: 100%;
+@import 'config/bundle';
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas: 'header header';
+    padding-left: 80px;
+    padding-right: 80px;
+    padding-bottom: 80px;
+    column-gap: 80px;
+    row-gap: 30px;
+
+    > h2,
+    > p {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}
+
+.header {
+    grid-area: header;
+}
+
+.spanBoth {
+    grid-column: span 2;
+    margin: 0 auto;
+}
+
+.textRow {
+    composes: spanBoth;
+    max-width: 650px;
+}
+
+.singleButton {
+    composes: spanBoth;
+    width: 400px;
 }

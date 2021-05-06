@@ -33,9 +33,8 @@ export default class RemoveBakerHandler
         );
     }
 
-    creationLocationHandler() {
+    creationLocationHandler(): string {
         throw new Error('Unimplemented');
-        return '';
     }
 
     async signTransaction(
@@ -48,6 +47,14 @@ export default class RemoveBakerHandler
 
     view(transaction: TransactionType) {
         return AccountTransactionDetails({ transaction });
+    }
+
+    print(): JSX.Element {
+        throw new Error('Unimplemented');
+    }
+
+    createTransaction(): Promise<RemoveBaker> {
+        throw new Error('Unimplemented');
     }
 
     title = `Account Transaction | ${TYPE}`;

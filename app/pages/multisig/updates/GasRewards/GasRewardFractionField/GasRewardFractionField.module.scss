@@ -1,0 +1,32 @@
+@import 'config/bundle';
+
+.root {
+    font-size: $font-size-body1;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    text-align: left;
+}
+
+.disabled {
+    color: $color-text-faded;
+}
+
+.value {
+    color: $color-pale-blue;
+    white-space: nowrap;
+    align-self: flex-end;
+    text-align: right;
+
+    .disabled & {
+        color: inherit;
+    }
+
+    .invalid & {
+        color: $color-error;
+    }
+
+    .readOnly & {
+        color: $color-text;
+    }
+}

@@ -91,6 +91,8 @@ export default class MintDistributionHandler
         return authorizations.mintDistribution;
     }
 
+    print = () => undefined;
+
     update = UpdateMintDistribution;
 
     title = `Foundation Transaction | ${TYPE}`;
