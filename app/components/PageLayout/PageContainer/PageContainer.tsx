@@ -33,7 +33,7 @@ export default function PageContainer({
 }: PropsWithChildren<PageContainerProps>): JSX.Element {
     const dispatch = useDispatch();
     return (
-        <section
+        <div
             className={clsx(
                 styles.root,
                 padding === 'horizontal' && styles.paddingHorizontal,
@@ -55,6 +55,6 @@ export default function PageContainer({
                     onClick={() => dispatch(routerActions.push(closeRoute))}
                 />
             )}
-        </section>
+        </div>
     );
 }

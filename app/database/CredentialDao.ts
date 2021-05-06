@@ -1,6 +1,10 @@
 import { Credential } from '../utils/types';
 import knex from './knex';
-import { credentialsTable } from '../constants/databaseNames.json';
+import {
+    credentialsTable,
+    identitiesTable,
+    walletTable,
+} from '../constants/databaseNames.json';
 
 function convertBooleans(credentials: Credential[]) {
     return credentials.map((credential) => {
@@ -24,17 +28,53 @@ export async function removeCredentialsOfAccount(accountAddress: string) {
 }
 
 export async function getCredentials(): Promise<Credential[]> {
-    const credentials = await (await knex()).select().table(credentialsTable);
+    const credentials = await (await knex())
+        .select()
+        .table(credentialsTable)
+        .join(
+            identitiesTable,
+            `${credentialsTable}.identityId`,
+            '=',
+            `${identitiesTable}.id`
+        )
+        .select(
+            `${credentialsTable}.*`,
+            `${identitiesTable}.identityNumber as identityNumber`
+        );
     return convertBooleans(credentials);
 }
 
+/**
+ * Get all credentials for the account with the given account address. The identity
+ * number is joined in from the identity table, and the walletId is joined from
+ * the wallet table and augmented into the credential object.
+ * @param accountAddress address of the account to get the credentials for
+ * @returns an array of credentials for the given account, augmented with the identityNumber and walletId
+ */
 export async function getCredentialsOfAccount(
     accountAddress: string
 ): Promise<Credential[]> {
     const credentials = await (await knex())
         .select()
         .table(credentialsTable)
-        .where({ accountAddress });
+        .join(
+            identitiesTable,
+            `${credentialsTable}.identityId`,
+            '=',
+            `${identitiesTable}.id`
+        )
+        .join(
+            walletTable,
+            `${identitiesTable}.walletId`,
+            '=',
+            `${walletTable}.id`
+        )
+        .where({ accountAddress })
+        .select(
+            `${credentialsTable}.*`,
+            `${identitiesTable}.identityNumber as identityNumber`,
+            `${walletTable}.id as walletId`
+        );
     return convertBooleans(credentials);
 }
 
@@ -65,4 +105,13 @@ export async function updateCredentialIndex(
     return (await knex())(credentialsTable)
         .where({ credId })
         .update({ credentialIndex });
+}
+
+export async function updateCredential(
+    credId: string,
+    updatedValues: Partial<Credential>
+) {
+    return (await knex())(credentialsTable)
+        .where({ credId })
+        .update(updatedValues);
 }

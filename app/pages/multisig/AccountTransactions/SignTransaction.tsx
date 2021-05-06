@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
     Account,
     AccountTransaction,
-    Credential,
     MultiSignatureTransactionStatus,
     MultiSignatureTransaction,
 } from '~/utils/types';
@@ -17,33 +16,33 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 import { selectedProposalRoute } from '~/utils/routerHelper';
+import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 
 interface Props {
     transaction: AccountTransaction;
     account: Account | undefined;
-    primaryCredential: Credential;
 }
 
 export async function signUsingLedger(
     ledger: ConcordiumLedgerClient,
     transaction: AccountTransaction,
-    account: Account,
-    primaryCredential: Credential
+    account: Account
 ) {
     const signatureIndex = 0;
 
-    if (
-        primaryCredential.identityId === undefined ||
-        primaryCredential.credentialNumber === undefined ||
-        primaryCredential.credentialIndex === undefined
-    ) {
+    const credential = await findLocalDeployedCredentialWithWallet(
+        account.address,
+        ledger
+    );
+    if (!credential) {
         throw new Error(
-            'Unable to sign transaction, because given credential was not local and deployed.'
+            'Unable to sign the account transaction, as you do not currently have a matching credential deployed on the given account for the connected wallet.'
         );
     }
+
     const path = {
-        identityIndex: primaryCredential.identityId,
-        accountIndex: primaryCredential.credentialNumber,
+        identityIndex: credential.identityNumber,
+        accountIndex: credential.credentialNumber,
         signatureIndex,
     };
 
@@ -55,7 +54,7 @@ export async function signUsingLedger(
         transaction: stringify({
             ...transaction,
             signatures: buildTransactionAccountSignature(
-                primaryCredential.credentialIndex,
+                credential.credentialIndex,
                 signatureIndex,
                 signature
             ),
@@ -74,30 +73,32 @@ export async function signUsingLedger(
     return multiSignatureTransaction;
 }
 
+interface Props {
+    transaction: AccountTransaction;
+    account: Account | undefined;
+}
+
 /**
- * Prompts the user to sign the transaction.
+ * Prompts the user to sign the account transaction.
  */
 export default function SignTransaction({
     transaction,
     account,
-    primaryCredential,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
 
     async function sign(ledger: ConcordiumLedgerClient) {
         if (!account || !global) {
-            throw new Error('unexpected missing global/account');
+            throw new Error('Unexpected missing account or global');
         }
-        const proposal = await signUsingLedger(
-            ledger,
-            transaction,
-            account,
-            primaryCredential
-        );
+
+        const proposal = await signUsingLedger(ledger, transaction, account);
+
         if (proposal.id === undefined) {
             throw new Error('unexpected missing proposal id');
         }
+
         // Set the current proposal in the state to the one that was just generated.
         dispatch(addProposal(proposal));
         dispatch(push(selectedProposalRoute(proposal.id)));
