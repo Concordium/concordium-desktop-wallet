@@ -11,6 +11,7 @@ import InputModal from '../../components/InputModal';
 import MessageModal from '../../components/MessageModal';
 import Button from '~/cross-app-components/Button';
 import styles from './ExportImport.module.scss';
+import { getAllWallets } from '~/database/WalletDao';
 
 /**
  * Component for exporting identities/account/addressBook.
@@ -35,25 +36,33 @@ export default function Export() {
     }
 
     async function exportData(password: string) {
-        // We strip the identityName, as it is superfluous.
+        // We strip the identityName and identityNumber as it is superfluous.
         // We strip the maxTransactionId, because the transactions are not exported
         const cleanAccounts = accounts.map((acc) => {
-            const { identityName, maxTransactionId, ...other } = acc;
+            const {
+                identityName,
+                identityNumber,
+                maxTransactionId,
+                ...other
+            } = acc;
             return other;
         });
+
+        const wallets = await getAllWallets();
+
         const data = {
             accounts: cleanAccounts,
             identities,
             addressBook,
             credentials,
+            wallets,
         };
         const encrypted = encrypt(JSON.stringify(data), password);
 
         try {
-            const completed = await saveFile(
-                JSON.stringify(encrypted),
-                'Export your data'
-            );
+            const completed = await saveFile(JSON.stringify(encrypted), {
+                title: 'Export your data',
+            });
             if (completed) {
                 setModalMessage('Export was successful');
                 setOpenConfirmationModal(true);
@@ -77,7 +86,7 @@ export default function Export() {
                     validatePassword(password) ? undefined : 'Invalid password'
                 }
                 buttonOnClick={exportData}
-                placeholder="password"
+                placeholder="Enter your password"
                 onClose={() => setOpenPasswordModal(false)}
                 type="password"
                 open={openPasswordModal}

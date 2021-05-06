@@ -97,6 +97,11 @@ const accountTransactionTypes: [
         TransactionKind.Transfer_with_schedule,
         'Send GTU with a schedule',
     ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Add_baker,
+        'Add Baker',
+    ],
 ];
 
 /**

@@ -31,6 +31,7 @@ import UpdateInstructionHandlerTypeMiddleware from './UpdateInstructionHandlerMi
 import UpdateRootKeysHandler from './UpdateRootsKeysHandler';
 import UpdateLevel1KeysWithRootKeysHandler from './UpdateLevel1KeysWithRootKeysHandler';
 import UpdateLevel1KeysWithLevel1KeysHandler from './UpdateLevel1KeysWithLevel1KeysHandler';
+import AddBakerHandler from './AddBakerHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -46,6 +47,9 @@ export function findAccountTransactionHandler(
     }
     if (transactionKind === TransactionKindId.Simple_transfer) {
         return new AccountHandlerTypeMiddleware(new SimpleTransferHandler());
+    }
+    if (transactionKind === TransactionKindId.Add_baker) {
+        return new AccountHandlerTypeMiddleware(new AddBakerHandler());
     }
     if (transactionKind === TransactionKindId.Transfer_with_schedule) {
         return new AccountHandlerTypeMiddleware(new ScheduledTransferHandler());

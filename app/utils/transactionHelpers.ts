@@ -19,6 +19,8 @@ import {
     TransactionAccountSignature,
     TransactionCredentialSignature,
     AccountInfo,
+    AddBaker,
+    AddBakerPayload,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -279,6 +281,21 @@ export async function createUpdateCredentialsTransaction(
             currentCredentialAmount,
             signatureAmount
         ),
+    });
+}
+
+export function createAddBakerTransaction(
+    fromAddress: string,
+    payload: AddBakerPayload,
+    signatureAmount = 1,
+    expiry: bigint = getDefaultExpiry()
+): Promise<AddBaker> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Add_baker,
+        payload,
+        signatureAmount,
     });
 }
 
