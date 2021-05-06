@@ -107,13 +107,6 @@ export default function PerformImport({ location }: Props) {
     const addressBook = useSelector(addressBookSelector);
     const credentials = useSelector(credentialsSelector);
 
-    const [duplicateIdentities, setDuplicateIdentities] = useState<Identity[]>(
-        []
-    );
-    const [duplicateAccounts, setDuplicateAccounts] = useState<Account[]>([]);
-    const [duplicateEntries, setDuplicateEntries] = useState<
-        AddressBookEntry[]
-    >([]);
     const [open, setOpen] = useState(false);
     const [started, setStarted] = useState(false);
 
@@ -138,9 +131,6 @@ export default function PerformImport({ location }: Props) {
         accounts,
         credentials,
         addressBook,
-        setDuplicateEntries,
-        setDuplicateAccounts,
-        setDuplicateIdentities,
         dispatch,
         started,
     ]);
@@ -149,19 +139,13 @@ export default function PerformImport({ location }: Props) {
         importedData.accounts
             .filter((account: Account) => account.identityId === identity.id)
             .map((account: Account) => (
-                <p key={account.address}>
-                    {account.name}
-                    {duplicateAccounts.includes(account)
-                        ? ' (Already existed)'
-                        : ''}
-                </p>
+                <p key={account.address}>{account.name}</p>
             ));
 
     const AddressBookList = importedData.addressBook.map(
         (entry: AddressBookEntry) => (
             <p key={entry.address} className={styles.importedAddress}>
                 {entry.name}
-                {duplicateEntries.includes(entry) ? ' (Already existed)' : ''}
             </p>
         )
     );
@@ -206,17 +190,12 @@ export default function PerformImport({ location }: Props) {
                         <Columns.Column className={styles.importedList}>
                             {importedData.identities.map(
                                 (identity: Identity) => (
-                                    <>
-                                        <h2
-                                            className={styles.importedIdentity}
-                                            key={identity.id}
-                                        >
+                                    <div
+                                        key={identity.id}
+                                        className={styles.importedIdentity}
+                                    >
+                                        <h2>
                                             <b>ID:</b> {identity.name}
-                                            {duplicateIdentities.includes(
-                                                identity
-                                            )
-                                                ? ' (Already existed)'
-                                                : ''}
                                         </h2>
                                         <div
                                             className={styles.importedAccounts}
@@ -226,11 +205,11 @@ export default function PerformImport({ location }: Props) {
                                             </p>
                                             {accountList(identity)}
                                         </div>
-                                    </>
+                                    </div>
                                 )
                             )}
                             <h2 className={styles.AddressBookHeader}>
-                                Address Book
+                                Address book
                             </h2>
                             <p
                                 className={clsx(
