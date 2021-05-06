@@ -75,7 +75,6 @@ async function performImport(
     };
 
     await importWallets(
-        existingWallets,
         existingDataWithWallets,
         importedData.wallets,
         importedData.identities,

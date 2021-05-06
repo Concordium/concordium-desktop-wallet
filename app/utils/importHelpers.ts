@@ -153,9 +153,7 @@ async function insertNewIdentities(
                 ...credentialsOnIdentity[k],
                 identityId: newIdentityId,
             };
-            // TODO Remove hack, when the identityNumber is not in the export.
-            const { identityNumber, ...other } = newCredentialToInsert;
-            await insertCredential(other);
+            await insertCredential(newCredentialToInsert);
         }
     }
 }
@@ -206,8 +204,7 @@ async function insertNewAccountsAndCredentials(
             ...newCredentials[k],
             identityId,
         };
-        const { identityNumber, ...other } = newCredentialToInsert;
-        await insertCredential(other);
+        await insertCredential(newCredentialToInsert);
     }
 }
 
@@ -449,7 +446,6 @@ async function importExistingWallets(
  * Imports wallets, identities, credentials and accounts received from an exported file.
  */
 export async function importWallets(
-    walletsFromDatabase: WalletEntry[],
     existingData: ExportData,
     importedWallets: WalletEntry[],
     importedIdentities: Identity[],
@@ -460,7 +456,7 @@ export async function importWallets(
         duplicateWalletEntries,
         nonDuplicateWalletEntries,
     ] = partition(importedWallets, (importedWallet) =>
-        isDuplicate(importedWallet, walletsFromDatabase, ['id', 'identifier'])
+        isDuplicate(importedWallet, existingData.wallets, ['id', 'identifier'])
     );
 
     // The duplicate wallet entries are the wallets that already exist in the database,
@@ -483,7 +479,7 @@ export async function importWallets(
     const [existingWallets, newWallets] = partition(
         nonDuplicateWalletEntries,
         (nonDuplicateWalletEntry) =>
-            isDuplicate(nonDuplicateWalletEntry, walletsFromDatabase, [
+            isDuplicate(nonDuplicateWalletEntry, existingData.wallets, [
                 'identifier',
             ])
     );
