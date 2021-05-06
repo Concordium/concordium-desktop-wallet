@@ -173,33 +173,48 @@ export async function createUnshieldAmountTransaction(
     });
 }
 
+function createRegularIntervalScheduleInner(
+    totalAmount: bigint,
+    releases: number,
+    getTimestamp: (index: number) => string
+): Schedule {
+    const releaseAmount = totalAmount / BigInt(releases);
+    const restAmount = totalAmount % BigInt(releases);
+    const schedule = [];
+    for (let i = 0; i < releases - 1; i += 1) {
+        schedule.push({
+            amount: releaseAmount.toString(),
+            timestamp: getTimestamp(i),
+        });
+    }
+    schedule.push({
+        amount: (releaseAmount + restAmount).toString(),
+        timestamp: getTimestamp(releases - 1),
+    });
+    return schedule;
+}
+
 /**
  *  Creates a schedule, with the assumption that each release is
  *  the starting date's day and time in the subsequent months.
  * N.B. The days will shift if the release includes a month with less
- * days than the chosen day.
+ * days than the chosen starting day.
  */
 export function createRegularIntervalSchedulePerMonth(
     totalAmount: bigint,
     releases: number,
     starting: Date
 ): Schedule {
-    const releaseAmount = totalAmount / BigInt(releases);
-    const restAmount = totalAmount % BigInt(releases);
-    const schedule = [];
-    const date = new Date(starting.getTime());
-    for (let i = 0; i < releases - 1; i += 1) {
-        schedule.push({
-            amount: releaseAmount.toString(),
-            timestamp: date.getTime().toString(),
-        });
-        date.setMonth(date.getMonth() + 1);
+    function getTimestamp(i: number) {
+        const date = new Date(starting.getTime());
+        date.setMonth(date.getMonth() + i);
+        return date.getTime().toString();
     }
-    schedule.push({
-        amount: (releaseAmount + restAmount).toString(),
-        timestamp: date.getTime().toString(),
-    });
-    return schedule;
+    return createRegularIntervalScheduleInner(
+        totalAmount,
+        releases,
+        getTimestamp
+    );
 }
 
 export function createRegularIntervalSchedule(
@@ -208,22 +223,12 @@ export function createRegularIntervalSchedule(
     starting: number,
     interval: number
 ): Schedule {
-    const releaseAmount = totalAmount / BigInt(releases);
-    const restAmount = totalAmount % BigInt(releases);
-    const schedule = [];
-    let timestamp = starting;
-    for (let i = 0; i < releases - 1; i += 1) {
-        schedule.push({
-            amount: releaseAmount.toString(),
-            timestamp: timestamp.toString(),
-        });
-        timestamp += interval;
-    }
-    schedule.push({
-        amount: (releaseAmount + restAmount).toString(),
-        timestamp: timestamp.toString(),
-    });
-    return schedule;
+    const getTimestamp = (i: number) => (starting + interval * i).toString();
+    return createRegularIntervalScheduleInner(
+        totalAmount,
+        releases,
+        getTimestamp
+    );
 }
 
 /**
