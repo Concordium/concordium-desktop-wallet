@@ -14,14 +14,12 @@ import {
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
 import { useTransactionCostEstimate } from '~/utils/hooks';
 import SignTransaction from './SignTransaction';
-
-const placeholderText = 'To be determined';
+import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
 
 enum SubRoutes {
     accounts,
@@ -65,13 +63,11 @@ export default function RemoveBakerPage() {
             />
             <Columns divider columnScroll>
                 <Columns.Column header="Transaction Details">
-                    <div className={styles.details}>
-                        <b>Identity:</b>
-                        <h2>{identity ? identity.name : placeholderText}</h2>
-                        <b>Account:</b>
-                        <h2>{account ? account.name : placeholderText}</h2>
-                        <DisplayEstimatedFee estimatedFee={estimatedFee} />
-                    </div>
+                    <RemoveBakerProposalDetails
+                        identity={identity}
+                        account={account}
+                        estimatedFee={estimatedFee}
+                    />
                 </Columns.Column>
                 <Switch>
                     <Route exact path={path}>

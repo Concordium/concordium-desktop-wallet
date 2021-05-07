@@ -18,7 +18,7 @@ import routes from '~/constants/routes.json';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '../PickAccount';
 import Button from '~/cross-app-components/Button';
-import TransactionProposalDetails from '../TransactionProposalDetails';
+import TransactionProposalDetails from '../proposal-details/TransferProposalDetails';
 import { isValidGTUString } from '~/utils/gtu';
 import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
@@ -55,7 +55,9 @@ function subTitle(currentLocation: string) {
 }
 
 interface Props {
-    transactionKind: TransactionKindId;
+    transactionKind:
+        | TransactionKindId.Simple_transfer
+        | TransactionKindId.Transfer_with_schedule;
 }
 /**
  * This component controls the flow of creating a multisignature account transaction.

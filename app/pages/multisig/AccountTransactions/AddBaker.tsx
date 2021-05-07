@@ -15,8 +15,7 @@ import {
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import { getGTUSymbol, toMicroUnits } from '~/utils/gtu';
+import { toMicroUnits } from '~/utils/gtu';
 import PickAmount from './PickAmount';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
@@ -31,7 +30,7 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { signUsingLedger } from './SignTransaction';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
-import PublicKey from '../common/PublicKey/PublicKey';
+import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
@@ -79,8 +78,6 @@ export default function AddBakerPage() {
         </Switch>
     );
 }
-
-const placeholderText = 'To be determined';
 
 type BuildTransactionProposalStepProps = {
     onNewProposal: (
@@ -156,8 +153,6 @@ function BuildAddBakerTransactionProposalStep({
             .catch(() => setError('Failed create transaction'));
     };
 
-    const formatRestakeEnabled = restakeEnabled ? 'Yes' : 'No';
-
     const signingFunction = async (ledger: ConcordiumLedgerClient) => {
         if (!account) {
             throw new Error('unexpected missing account');
@@ -192,44 +187,25 @@ function BuildAddBakerTransactionProposalStep({
             />
             <Columns divider columnScroll>
                 <Columns.Column header="Transaction Details">
-                    <div className={styles.details}>
-                        <b>Identity:</b>
-                        <h2>{identity ? identity.name : placeholderText}</h2>
-                        <b>Account:</b>
-                        <h2>{account ? account.name : placeholderText}</h2>
-                        <b>Amount to stake:</b>
-                        <h2>
-                            {stake
-                                ? `${getGTUSymbol()} ${stake}`
-                                : placeholderText}
-                        </h2>
-                        <DisplayEstimatedFee estimatedFee={estimatedFee} />
-                        <b>Restake earnings</b>
-                        <h2>
-                            {restakeEnabled === undefined
-                                ? placeholderText
-                                : formatRestakeEnabled}
-                        </h2>
-                        <b>Public keys</b>
-                        {bakerKeys === undefined ? (
-                            'To be generated'
-                        ) : (
-                            <>
-                                <PublicKey
-                                    name="Election verify key"
-                                    publicKey={bakerKeys.electionPublic}
-                                />
-                                <PublicKey
-                                    name="Signature verify key"
-                                    publicKey={bakerKeys.signaturePublic}
-                                />
-                                <PublicKey
-                                    name="Aggregation verify key"
-                                    publicKey={bakerKeys.aggregationPublic}
-                                />
-                            </>
-                        )}
-                    </div>
+                    <AddBakerProposalDetails
+                        identity={identity}
+                        account={account}
+                        stake={stake}
+                        estimatedFee={estimatedFee}
+                        restakeEarnings={restakeEnabled}
+                        bakerVerifyKeys={
+                            bakerKeys === undefined
+                                ? undefined
+                                : {
+                                      electionVerifyKey:
+                                          bakerKeys.electionPublic,
+                                      signatureVerifyKey:
+                                          bakerKeys.signaturePublic,
+                                      aggregationVerifyKey:
+                                          bakerKeys.aggregationPublic,
+                                  }
+                        }
+                    />
                 </Columns.Column>
                 <Switch>
                     <Route exact path={path}>

@@ -15,7 +15,6 @@ import {
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import { signUsingLedger } from './SignTransaction';
@@ -28,7 +27,7 @@ import { useTransactionCostEstimate } from '~/utils/hooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import { DownloadBakerCredentialsStep } from './AddBaker';
-import PublicKey from '../common/PublicKey/PublicKey';
+import UpdateBakerKeysProposalDetails from './proposal-details/UpdateBakerKeysProposalDetails';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
@@ -76,8 +75,6 @@ export default function AddBakerPage() {
         </Switch>
     );
 }
-
-const placeholderText = 'To be determined';
 
 type BuildTransactionProposalStepProps = {
     onNewProposal: (
@@ -178,32 +175,23 @@ function BuildAddBakerTransactionProposalStep({
             />
             <Columns divider columnScroll>
                 <Columns.Column header="Transaction Details">
-                    <div className={styles.details}>
-                        <b>Identity:</b>
-                        <h2>{identity ? identity.name : placeholderText}</h2>
-                        <b>Account:</b>
-                        <h2>{account ? account.name : placeholderText}</h2>
-                        <DisplayEstimatedFee estimatedFee={estimatedFee} />
-                        <b>Public keys</b>
-                        {bakerKeys === undefined ? (
-                            'To be generated'
-                        ) : (
-                            <>
-                                <PublicKey
-                                    name="Election verify key"
-                                    publicKey={bakerKeys.electionPublic}
-                                />
-                                <PublicKey
-                                    name="Signature verify key"
-                                    publicKey={bakerKeys.signaturePublic}
-                                />
-                                <PublicKey
-                                    name="Aggregation verify key"
-                                    publicKey={bakerKeys.aggregationPublic}
-                                />
-                            </>
-                        )}
-                    </div>
+                    <UpdateBakerKeysProposalDetails
+                        identity={identity}
+                        account={account}
+                        estimatedFee={estimatedFee}
+                        bakerVerifyKeys={
+                            bakerKeys === undefined
+                                ? undefined
+                                : {
+                                      electionVerifyKey:
+                                          bakerKeys.electionPublic,
+                                      signatureVerifyKey:
+                                          bakerKeys.signaturePublic,
+                                      aggregationVerifyKey:
+                                          bakerKeys.aggregationPublic,
+                                  }
+                        }
+                    />
                 </Columns.Column>
                 <Switch>
                     <Route exact path={path}>
