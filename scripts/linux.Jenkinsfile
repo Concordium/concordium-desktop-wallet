@@ -18,19 +18,18 @@ pipeline {
             agent { label 'jenkins-worker' }
             steps {
                 sh '''\
-                    # Extract version number if not set as parameter
-                    CARGO_VERSION=$(awk '/version = / { print substr($3, 2, length($3)-2); exit }' Cargo.toml)
-                    [ -z "$VERSION" ] && VERSION=$CARGO_VERSION
+                    # Extract version number
+                    VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
                     # Prepare filenames
-                    FILENAME_DEB="concordium-desktop-wallet_${CARGO_VERSION}_amd64.deb"
-                    OUT_FILENAME_DEB="${FILENAME_DEB/$CARGO_VERSION/$VERSION}"
+                    FILENAME_DEB="concordium-desktop-wallet_${VERSION}_amd64.deb"
+                    OUT_FILENAME_DEB="${FILENAME_DEB/$VERSION}"
 
-                    FILENAME_RPM="concordium-desktop-wallet-${CARGO_VERSION}.x86_64.rpm"
-                    OUT_FILENAME_RPM="${FILENAME_RPM/$CARGO_VERSION/$VERSION}"
+                    FILENAME_RPM="concordium-desktop-wallet-${VERSION}.x86_64.rpm"
+                    OUT_FILENAME_RPM="${FILENAME_RPM/$VERSION}"
 
-                    FILENAME_APPIMAGE="Concordium Wallet-${CARGO_VERSION}.AppImage"
-                    OUT_FILENAME_APPIMAGE="${FILENAME_APPIMAGE/$CARGO_VERSION/$VERSION}"
+                    FILENAME_APPIMAGE="Concordium Wallet-${VERSION}.AppImage"
+                    OUT_FILENAME_APPIMAGE="${FILENAME_APPIMAGE/$VERSION}"
 
                     check_uniqueness() {
                         # Fail if file already exists
@@ -90,19 +89,18 @@ pipeline {
             steps {
                 unstash 'release'
                 sh '''\
-                    # Extract version number if not set as parameter
-                    CARGO_VERSION=$(awk '/version = / { print substr($3, 2, length($3)-2); exit }' Cargo.toml)
-                    [ -z "$VERSION" ] && VERSION=$CARGO_VERSION
+                    # Extract version number
+                    VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
                     
                     # Prepare filenames
-                    FILENAME_DEB="concordium-desktop-wallet_${CARGO_VERSION}_amd64.deb"
-                    OUT_FILENAME_DEB="${FILENAME_DEB/$CARGO_VERSION/$VERSION}"
+                    FILENAME_DEB="concordium-desktop-wallet_${VERSION}_amd64.deb"
+                    OUT_FILENAME_DEB="${FILENAME_DEB/$VERSION}"
 
-                    FILENAME_RPM="concordium-desktop-wallet-${CARGO_VERSION}.x86_64.rpm"
-                    OUT_FILENAME_RPM="${FILENAME_RPM/$CARGO_VERSION/$VERSION}"
+                    FILENAME_RPM="concordium-desktop-wallet-${VERSION}.x86_64.rpm"
+                    OUT_FILENAME_RPM="${FILENAME_RPM/$VERSION}"
 
-                    FILENAME_APPIMAGE="Concordium Wallet-${CARGO_VERSION}.AppImage"
-                    OUT_FILENAME_APPIMAGE="${FILENAME_APPIMAGE/$CARGO_VERSION/$VERSION}"
+                    FILENAME_APPIMAGE="Concordium Wallet-${VERSION}.AppImage"
+                    OUT_FILENAME_APPIMAGE="${FILENAME_APPIMAGE/$VERSION}"
                     
                     # Push to s3
                     aws s3 cp "release/${FILENAME_DEB}" "${S3_BUCKET}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers

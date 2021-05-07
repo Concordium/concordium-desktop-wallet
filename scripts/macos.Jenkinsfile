@@ -8,8 +8,8 @@ pipeline {
             agent { label 'jenkins-worker' }
             steps {
                 sh '''\
-                    # Extract version number if not set as parameter
-                    [ -z "$VERSION" ] && VERSION=$(awk '/version = / { print substr($3, 2, length($3)-2); exit }' Cargo.toml)
+                    # Extract version number
+                    VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
                     FILENAME_DMG="Concordium Wallet-${VERSION}.dmg"
                     
                     # Fail if file already exists
@@ -52,13 +52,12 @@ pipeline {
             steps {
                 unstash 'releaseDMG'
                 sh '''\
-                    # Extract version number if not set as parameter
-                    CARGO_VERSION=$(awk '/version = / { print substr($3, 2, length($3)-2); exit }' Cargo.toml)
-                    [ -z "$VERSION" ] && VERSION=$CARGO_VERSION
+                    # Extract version number
+                    VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
                     #Prepare filenames
-                    FILENAME_DMG="Concordium Wallet-${CARGO_VERSION}.dmg"
-                    OUT_FILENAME_DMG="${FILENAME_DMG/$CARGO_VERSION/$VERSION}"
+                    FILENAME_DMG="Concordium Wallet-${VERSION}.dmg"
+                    OUT_FILENAME_DMG="${FILENAME_DMG/$VERSION}"
                     
                     # Push to s3
                     aws s3 cp "release/${FILENAME_DMG}" "${S3_BUCKET}/${OUT_FILENAME_DMG}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
