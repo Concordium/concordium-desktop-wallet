@@ -2,7 +2,7 @@ import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router';
 import Button from '~/cross-app-components/Button';
 import routes from '~/constants/routes.json';
-// import ExportCredential from '../ExportCredential';
+import ExportCredential from '../ExportCredential';
 
 function getHeader(currentLocation: string) {
     switch (currentLocation) {
@@ -35,7 +35,9 @@ export default function SingleColumnRouter({
             <h2>{getHeader(location.pathname)}</h2>
             <p>{getDescription(location.pathname)}</p>
             <Switch>
-                <Route>{/* <ExportCredential /> */}</Route>
+                <Route>
+                    <ExportCredential />
+                </Route>
             </Switch>
             <Button onClick={onNext}>Finish</Button>
         </div>

@@ -1,34 +1,26 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { Identity } from '~/utils/types';
 import { createCredentialInfo } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { globalSelector } from '~/features/GlobalSlice';
-import { CredentialBlob } from './types';
 import pairWallet from '~/utils/WalletPairing';
-
-interface Props {
-    identity: Identity | undefined;
-    address: string;
-    attributes: string[];
-    setReady: (ready: boolean) => void;
-    setCredential: (cred: CredentialBlob) => void;
-}
+import generateCredentialContext from './GenerateCredentialContext';
 
 /**
  * Component for creating the credential information. The user is prompted to sign
  * the necessary information to create it as part of the flow.
  */
-export default function SignCredential({
-    identity,
-    address,
-    setCredential,
-    setReady,
-    attributes,
-}: Props): JSX.Element {
+export default function SignCredential(): JSX.Element {
     const global = useSelector(globalSelector);
+    const {
+        identity: [identity],
+        attributes: [attributes],
+        address: [address],
+        isReady: [, setReady],
+        credential: [, setCredential],
+    } = useContext(generateCredentialContext);
 
     async function sign(
         ledger: ConcordiumLedgerClient,

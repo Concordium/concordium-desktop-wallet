@@ -2,19 +2,13 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
-// import Button from '~/cross-app-components/Button';
 import { Identity } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
-// import PickIdentity from '~/components/PickIdentity';
-// import ExportCredential from './ExportCredential';
-// import PickAccount from './PickAccount';
-// import SignCredential from './SignCredential';
 import routes from '~/constants/routes.json';
-// import AccountCredentialSummary from './AccountCredentialSummary';
 import { CredentialBlob } from './types';
-// import styles from './GenerateCredential.module.scss';
-import { Provider } from './GenerateCredentialContext';
+import generateCredentialContext from './GenerateCredentialContext';
 import SingleColumnRouter from './SingleColumnRouter';
+import SplitViewRouter from './SplitViewRouter';
 
 function nextLocation(currentLocation: string) {
     switch (currentLocation) {
@@ -33,42 +27,6 @@ function nextLocation(currentLocation: string) {
     }
 }
 
-// function getHeader(currentLocation: string) {
-//     switch (currentLocation) {
-//         case routes.GENERATE_CREDENTIAL:
-//         case routes.GENERATE_CREDENTIAL_PICKIDENTITY:
-//             return 'Choose which identity';
-//         case routes.GENERATE_CREDENTIAL_PICKACCOUNT:
-//             return 'Insert account address';
-//         case routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES:
-//             return 'Reveal attributes';
-//         case routes.GENERATE_CREDENTIAL_SIGN:
-//             return 'Generate your credentials';
-//         case routes.GENERATE_CREDENTIAL_EXPORT:
-//             return 'Export your credentials';
-//         default:
-//             return '';
-//     }
-// }
-
-// function getDescription(currentLocation: string) {
-//     switch (currentLocation) {
-//         case routes.GENERATE_CREDENTIAL:
-//         case routes.GENERATE_CREDENTIAL_PICKIDENTITY:
-//             return 'To generate new credentials, you must first choose an identity.';
-//         case routes.GENERATE_CREDENTIAL_PICKACCOUNT:
-//             return 'Insert the account address for the account you want to generate credentials for. You will be able to see some information on the account to the right.';
-//         case routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES:
-//             return 'You can choose to reveal one or more attributes on your credential. This is not necessary, and you can continue without doing so.';
-//         case routes.GENERATE_CREDENTIAL_SIGN:
-//             return 'Generate your credentials';
-//         case routes.GENERATE_CREDENTIAL_EXPORT:
-//             return 'Export your credentials';
-//         default:
-//             return '';
-//     }
-// }
-
 /**
  * Controls the flow of generating a credential. Contains the logic of the left
  * column, where the parameters are displayed, and the address is entered.
@@ -79,27 +37,9 @@ export default function GenerateCredential(): JSX.Element {
 
     const credential = useState<CredentialBlob | undefined>();
     const isReady = useState(false);
-
     const address = useState<string>('');
     const attributes = useState<string[]>([]);
     const identity = useState<Identity | undefined>();
-    // const [
-    //     accountValidationError,
-    //     setAccountValidationError,
-    // ] = useState<string>();
-
-    // const continueButton = (text: string) => (
-    //     <Button
-    //         className={styles.continueButton}
-    //         disabled={!isReady[0]}
-    //         onClick={() => {
-    //             isReady[1](false);
-    //             dispatch(push(nextLocation(location)));
-    //         }}
-    //     >
-    //         {text}
-    //     </Button>
-    // );
 
     const nextPage = () => {
         isReady[1](false);
@@ -114,7 +54,7 @@ export default function GenerateCredential(): JSX.Element {
             <PageLayout.Container
                 closeRoute={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
             >
-                <Provider
+                <generateCredentialContext.Provider
                     value={{
                         credential,
                         address,
@@ -133,133 +73,15 @@ export default function GenerateCredential(): JSX.Element {
                                 />
                             )}
                         />
+                        <Route
+                            path={routes.GENERATE_CREDENTIAL_EXPORT}
+                            render={(props) => (
+                                <SplitViewRouter {...props} onNext={nextPage} />
+                            )}
+                        />
                     </Switch>
-                </Provider>
+                </generateCredentialContext.Provider>
             </PageLayout.Container>
         </PageLayout>
     );
-
-    // return (
-    //     <PageLayout>
-    //         <PageLayout.Header>
-    //             <h1>Generate Account Credentials</h1>
-    //         </PageLayout.Header>
-    //         <PageLayout.Container
-    //             closeRoute={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
-    //         >
-    //             <Grid columns="equal" centered>
-    //                 <Grid.Row>
-    //                     <h2>{getHeader(location)}</h2>
-    //                 </Grid.Row>
-    //                 <Grid.Row>{getDescription(location)}</Grid.Row>
-    //                 <Grid.Row>
-    //                     <Switch>
-    //                         <Route
-    //                             path={routes.GENERATE_CREDENTIAL_EXPORT}
-    //                             render={() => (
-    //                                 <List>
-    //                                     <AccountCredentialSummary
-    //                                         identity={identity}
-    //                                         address={address}
-    //                                         setAddress={setAddress}
-    //                                         credential={
-    //                                             credentialBlob?.credential
-    //                                         }
-    //                                         Button={() => (
-    //                                             <ExportCredential
-    //                                                 credentialBlob={
-    //                                                     credentialBlob
-    //                                                 }
-    //                                                 setReady={setReady}
-    //                                             />
-    //                                         )}
-    //                                     />
-    //                                     {continueButton('Finish')}
-    //                                 </List>
-    //                             )}
-    //                         />
-    //                         <Route
-    //                             render={() => (
-    //                                 <>
-    //                                     <Grid.Column>
-    //                                         <AccountCredentialSummary
-    //                                             identity={identity}
-    //                                             address={address}
-    //                                             setAddress={setAddress}
-    //                                             credential={
-    //                                                 credentialBlob?.credential
-    //                                             }
-    //                                             accountValidationError={
-    //                                                 accountValidationError
-    //                                             }
-    //                                         />
-    //                                         {continueButton('Continue')}
-    //                                     </Grid.Column>
-    //                                     <Grid.Column>
-    //                                         <Switch>
-    //                                             <Route
-    //                                                 path={
-    //                                                     routes.GENERATE_CREDENTIAL_SIGN
-    //                                                 }
-    //                                                 render={() => (
-    //                                                     <SignCredential
-    //                                                         setReady={setReady}
-    //                                                         identity={identity}
-    //                                                         address={address}
-    //                                                         setCredential={
-    //                                                             setCredential
-    //                                                         }
-    //                                                         attributes={
-    //                                                             attributes
-    //                                                         }
-    //                                                     />
-    //                                                 )}
-    //                                             />
-    //                                             <Route
-    //                                                 path={[
-    //                                                     routes.GENERATE_CREDENTIAL_PICKACCOUNT,
-    //                                                     routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES,
-    //                                                 ]}
-    //                                                 render={() => (
-    //                                                     <PickAccount
-    //                                                         isReady={isReady}
-    //                                                         setReady={setReady}
-    //                                                         setAccountValidationError={
-    //                                                             setAccountValidationError
-    //                                                         }
-    //                                                         accountValidationError={
-    //                                                             accountValidationError
-    //                                                         }
-    //                                                         address={address}
-    //                                                         setChosenAttributes={
-    //                                                             setAttributes
-    //                                                         }
-    //                                                         identity={identity}
-    //                                                     />
-    //                                                 )}
-    //                                             />
-    //                                             <Route
-    //                                                 path={
-    //                                                     routes.GENERATE_CREDENTIAL
-    //                                                 }
-    //                                                 render={() => (
-    //                                                     <PickIdentity
-    //                                                         setReady={setReady}
-    //                                                         setIdentity={
-    //                                                             setIdentity
-    //                                                         }
-    //                                                     />
-    //                                                 )}
-    //                                             />
-    //                                         </Switch>
-    //                                     </Grid.Column>
-    //                                 </>
-    //                             )}
-    //                         />
-    //                     </Switch>
-    //                 </Grid.Row>
-    //             </Grid>
-    //         </PageLayout.Container>
-    //     </PageLayout>
-    // );
 }

@@ -13,7 +13,7 @@ interface GenerateCredentialState {
     identity: StateTuple<Identity | undefined>;
 }
 
-const context = createContext<GenerateCredentialState>({
+const generateCredentialContext = createContext<GenerateCredentialState>({
     address: ['', noOp],
     credential: [undefined, noOp],
     identity: [undefined, noOp],
@@ -21,4 +21,4 @@ const context = createContext<GenerateCredentialState>({
     isReady: [false, noOp],
 });
 
-export const { Consumer, Provider } = context;
+export default generateCredentialContext;

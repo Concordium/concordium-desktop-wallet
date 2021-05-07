@@ -1,19 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { List } from 'semantic-ui-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
-import { Identity, CredentialDeploymentInformation } from '~/utils/types';
 import Form from '~/components/Form';
 import routes from '~/constants/routes.json';
 import { commonAddressValidators } from '~/utils/accountHelpers';
 import styles from './GenerateCredential.module.scss';
+import generateCredentialContext from './GenerateCredentialContext';
 
 interface Props {
-    identity: Identity | undefined;
-    address: string;
-    setAddress: (address: string) => void;
-    credential: CredentialDeploymentInformation | undefined;
     Button?: () => JSX.Element | null;
     accountValidationError?: string;
 }
@@ -21,14 +17,16 @@ interface Props {
 const addressForm = 'address';
 
 export default function AccountCredentialSummary({
-    identity,
-    address,
-    setAddress,
-    credential,
     Button = () => null,
     accountValidationError,
 }: Props) {
     const location = useLocation().pathname;
+    const {
+        address: [address, setAddress],
+        identity: [identity],
+        credential: [credentialBlob],
+    } = useContext(generateCredentialContext);
+
     const form = useForm({ mode: 'onTouched' });
     const { watch, setError } = form;
     const addressWatcher = watch(addressForm);
@@ -77,8 +75,8 @@ export default function AccountCredentialSummary({
                 <h2> {address || 'To be determined'} </h2>
             )}
             <b>Identicon:</b>
-            {credential ? (
-                <Identicon data={JSON.stringify(credential)} />
+            {credentialBlob?.credential ? (
+                <Identicon data={JSON.stringify(credentialBlob?.credential)} />
             ) : (
                 <h2>To be generated</h2>
             )}

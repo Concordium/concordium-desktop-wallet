@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
-import { Account, AccountInfo, AccountStatus, Identity } from '~/utils/types';
+import { Account, AccountInfo, AccountStatus } from '~/utils/types';
 import AccountListElement from '~/components/AccountListElement';
 import { isValidAddress } from '~/utils/accountHelpers';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
@@ -13,36 +13,33 @@ import styles from './GenerateCredential.module.scss';
 import ConnectionStatusComponent, {
     Status,
 } from '~/components/ConnectionStatusComponent';
-
-interface Props {
-    setReady: (ready: boolean) => void;
-    isReady: boolean;
-    address: string;
-    setChosenAttributes: (attributes: string[]) => void;
-    setAccountValidationError: (error?: string) => void;
-    accountValidationError?: string;
-    identity: Identity | undefined;
-}
+import generateCredentialContext from './GenerateCredentialContext';
 
 const addressLength = 50;
 const mustBeDeployedMessage = 'Address must belong to an deployed account';
 const invalidAddres = 'Address format is invalid';
+
+interface Props {
+    setAccountValidationError: (error?: string) => void;
+    accountValidationError?: string;
+}
 
 /**
  * Displays the currently chosen account's information.
  * Allows the user to reveal attributes.
  */
 export default function PickAccount({
-    isReady,
-    setReady,
-    address,
-    setChosenAttributes,
-    setAccountValidationError,
     accountValidationError,
-    identity,
+    setAccountValidationError,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
+    const {
+        address: [address],
+        identity: [identity],
+        isReady: [isReady, setReady],
+        attributes: [, setChosenAttributes],
+    } = useContext(generateCredentialContext);
 
     if (!identity) {
         throw new Error('unexpected missing identity');
