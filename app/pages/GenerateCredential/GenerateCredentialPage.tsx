@@ -106,7 +106,9 @@ export default function GenerateCredential(): JSX.Element {
             <PageLayout.Header>
                 <h1>Generate Account Credentials</h1>
             </PageLayout.Header>
-            <PageLayout.Container>
+            <PageLayout.Container
+                closeRoute={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
+            >
                 <Grid columns="equal" centered>
                     <Grid.Row>
                         <h2>{getHeader(location)}</h2>
