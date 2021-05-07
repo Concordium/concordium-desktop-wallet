@@ -103,12 +103,7 @@ export default function AccountCreationPickAttributes({
                         identity={identity}
                         active
                     />
-                    <Card
-                        className={clsx(
-                            generalStyles.card,
-                            styles.attributesCard
-                        )}
-                    >
+                    <Card className={clsx(generalStyles.card, 'p0')}>
                         {attributes
                             .filter((a) => revealableAttributes.includes(a.tag))
                             .map((a) => (
