@@ -15,7 +15,6 @@ function AccountTransactionRoutes(): JSX.Element {
     }>();
     const transactionKind: TransactionKindId = parseInt(transactionKindRaw, 10);
 
-    // eslint-disable-next-line default-case
     switch (transactionKind) {
         case TransactionKindId.Update_credentials:
             return <UpdateCredentialPage />;

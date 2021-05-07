@@ -78,7 +78,7 @@ export default function RemoveBakerPage() {
                         <Columns.Column header="Identities">
                             <div className={styles.descriptionStep}>
                                 <div
-                                    className={`${styles.flex1} ${styles.alignSelfNormal}`}
+                                    className={clsx(styles.flex1, styles.alignSelfNormal)}
                                 >
                                     <PickIdentity
                                         setReady={() => {}}
