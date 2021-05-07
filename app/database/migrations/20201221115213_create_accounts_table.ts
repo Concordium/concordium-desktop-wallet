@@ -5,16 +5,14 @@ export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
         accountsTable,
         (table: Knex.TableBuilder) => {
+            table
+                .integer('identityId')
+                .references('id')
+                .inTable(identitiesTable)
+                .notNullable();
             table.string('name');
             table.string('status');
             table.string('address');
-            table
-                .integer('identityId')
-                .unsigned()
-                .notNullable()
-                .references('id')
-                .inTable(identitiesTable)
-                .index();
             table.integer('signatureThreshold');
             table.string('incomingAmounts').defaultTo('[]');
             table.string('selfAmounts').defaultTo('');

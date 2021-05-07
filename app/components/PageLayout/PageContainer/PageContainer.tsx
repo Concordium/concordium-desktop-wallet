@@ -33,7 +33,7 @@ export default function PageContainer({
 }: PropsWithChildren<PageContainerProps>): JSX.Element {
     const dispatch = useDispatch();
     return (
-        <section
+        <div
             className={clsx(
                 styles.root,
                 padding === 'horizontal' && styles.paddingHorizontal,
@@ -42,19 +42,19 @@ export default function PageContainer({
                 className
             )}
         >
+            {children}
             {!disableBack && (
                 <BackButton
                     className={styles.back}
                     onClick={() => dispatch(routerActions.goBack())}
                 />
             )}
-            {children}
             {closeRoute && (
                 <CloseButton
                     className={styles.close}
                     onClick={() => dispatch(routerActions.push(closeRoute))}
                 />
             )}
-        </section>
+        </div>
     );
 }

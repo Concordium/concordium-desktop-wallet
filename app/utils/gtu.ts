@@ -69,6 +69,7 @@ export function toMicroUnits(amount: string): bigint {
  */
 export function displayAsGTU(microGTUAmount: bigint | string) {
     const amount: bigint = toBigInt(microGTUAmount);
-    const negative = amount < 0 ? '-' : '';
-    return `${negative}${getGTUSymbol()}${toGTUString(amount)}`;
+    const negative = amount < 0n ? '-' : '';
+    const abs = amount < 0n ? -amount : amount;
+    return `${negative}${getGTUSymbol()}${toGTUString(abs)}`;
 }

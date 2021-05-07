@@ -1,0 +1,9 @@
+@import 'config/bundle';
+
+.checkbox {
+    padding: 20px;
+
+    &:not(:last-child) {
+        border-bottom: 1px solid $color-grey;
+    }
+}

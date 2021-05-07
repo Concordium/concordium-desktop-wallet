@@ -1,33 +1,42 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import CloseButton from '~/cross-app-components/CloseButton';
-import { credentialsSelector } from '~/features/CredentialSlice';
-import { Credential, Account } from '~/utils/types';
+import {
+    Account,
+    AccountInfo,
+    CredentialDeploymentInformation,
+} from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
 import CopyButton from '~/components/CopyButton';
 import Card from '~/cross-app-components/Card';
 import SidedRow from '~/components/SidedRow';
-
 import styles from './CredentialInformation.module.scss';
 
 interface Props {
     account: Account;
+    accountInfo: AccountInfo;
     returnFunction(): void;
 }
 /**
- * Displays the account's credentails' information,
- * and the signature threshold of the account.
+ * Displays the account's deployed credential information and the
+ * signature threshold for the account.
  */
 export default function CredentialInformation({
     account,
+    accountInfo,
     returnFunction,
 }: Props) {
-    const credentials = useSelector(credentialsSelector);
-    const credentialsOfAccount = credentials.filter(
-        (credential: Credential) =>
-            credential.accountAddress === account.address &&
-            credential.credentialIndex !== undefined
-    );
+    const credentialsOfAccount = Object.values(accountInfo.accountCredentials)
+        .map((o) => o.value.contents)
+        .map((cred) => {
+            // The node returns the credId in the regId field for
+            // initial accounts, so we have to hack it a bit here.
+            // This can safely be removed, if the node is updated to
+            // be consistent and always use the credId field.
+            if (cred.regId) {
+                return { ...cred, credId: cred.regId };
+            }
+            return cred;
+        });
 
     return (
         <Card>
@@ -39,36 +48,38 @@ export default function CredentialInformation({
                 <CloseButton onClick={returnFunction} />
             </div>
             <div className={styles.credentialList}>
-                {credentialsOfAccount.map((credential: Credential) => {
-                    const policy = JSON.parse(credential.policy);
-                    return (
-                        <div
-                            className={styles.listElement}
-                            key={credential.credId}
-                        >
-                            <SidedRow
-                                left="Credential ID:"
-                                right={
-                                    <>
-                                        <CopyButton
-                                            className={styles.copy}
-                                            value={credential.credId}
-                                        />
-                                        {credential.credId.substring(0, 8)}
-                                    </>
-                                }
-                            />
-                            <SidedRow
-                                left="Date of Creation:"
-                                right={formatDate(policy.createdAt)}
-                            />
-                            <SidedRow
-                                left="Valid to:"
-                                right={formatDate(policy.validTo)}
-                            />
-                        </div>
-                    );
-                })}
+                {credentialsOfAccount.map(
+                    (credential: CredentialDeploymentInformation) => {
+                        const { policy } = credential;
+                        return (
+                            <div
+                                className={styles.listElement}
+                                key={credential.credId}
+                            >
+                                <SidedRow
+                                    left="Credential ID:"
+                                    right={
+                                        <>
+                                            <CopyButton
+                                                className={styles.copy}
+                                                value={credential.credId}
+                                            />
+                                            {credential.credId.substring(0, 8)}
+                                        </>
+                                    }
+                                />
+                                <SidedRow
+                                    left="Date of Creation:"
+                                    right={formatDate(policy.createdAt)}
+                                />
+                                <SidedRow
+                                    left="Valid to:"
+                                    right={formatDate(policy.validTo)}
+                                />
+                            </div>
+                        );
+                    }
+                )}
             </div>
         </Card>
     );

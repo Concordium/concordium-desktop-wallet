@@ -21,6 +21,7 @@ import {
     modalReducer,
     openAction,
 } from './modalReducer';
+import { noOp } from '~/utils/basicHelpers';
 
 const transition: Transition = {
     ease: 'easeOut',
@@ -58,8 +59,8 @@ export interface ModalProps<TTrigger extends WithOnClick = WithOnClick> {
      * Control whether modal is open or not.
      */
     open: boolean;
-    onOpen(): void;
-    onClose(): void;
+    onOpen?(): void;
+    onClose?(): void;
 }
 
 /**
@@ -76,8 +77,8 @@ export default function Modal<TTrigger extends WithOnClick = WithOnClick>({
     closeOnEscape = true,
     disableClose = false,
     open: isOpenOverride,
-    onOpen,
-    onClose,
+    onOpen = noOp,
+    onClose = noOp,
     children,
 }: PropsWithChildren<ModalProps<TTrigger>>): JSX.Element | null {
     const [{ isOpen, isExiting }, dispatch] = useReducer(modalReducer, {

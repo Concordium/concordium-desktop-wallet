@@ -2,7 +2,12 @@ import { createSlice } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
 // eslint-disable-next-line import/no-cycle
-import { updateCredentialsStatus } from './CredentialSlice';
+import {
+    initializeGenesisCredential,
+    updateCredentialsStatus,
+} from './CredentialSlice';
+// eslint-disable-next-line import/no-cycle
+import { addToAddressBook } from './AddressBookSlice';
 import {
     getAllAccounts,
     insertAccount,
@@ -10,7 +15,11 @@ import {
     confirmInitialAccount as confirmInitialAccountInDatabase,
     removeAccount as removeAccountFromDatabase,
 } from '../database/AccountDao';
-import { decryptAmounts } from '../utils/rustInterface';
+import { getCredentialsOfAccount } from '~/database/CredentialDao';
+import {
+    decryptAmounts,
+    getAddressFromCredentialId,
+} from '../utils/rustInterface';
 import {
     AccountStatus,
     TransactionStatus,
@@ -24,6 +33,7 @@ import {
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
+
 import { getAccountInfos } from '../utils/nodeHelpers';
 
 interface AccountState {
@@ -70,12 +80,15 @@ const accountsSlice = createSlice({
             state.accountsInfo = map.payload;
         },
         updateAccountFields: (state, update) => {
-            const { address, ...fields } = update.payload;
+            const { address, updatedFields } = update.payload;
             const index = state.accounts.findIndex(
                 (account) => account.address === address
             );
             if (index > -1) {
-                state.accounts[index] = { ...state.accounts[index], ...fields };
+                state.accounts[index] = {
+                    ...state.accounts[index],
+                    ...updatedFields,
+                };
             }
             if (
                 state.chosenAccount &&
@@ -142,6 +155,49 @@ function updateAccountEncryptedAmount(
     return Promise.resolve();
 }
 
+/** Generates the actual address of the account, and updates the account address, status, signatureThreshold,
+ *   and the associated credentials' address and credentialIndex
+ *  Also adds the account to the address book.
+ *  N.B. A Genesis account's does not know its actual address, and account.address is a placeholder (a credId), and therefore we have to update it here.
+ *  @return, returns the generated address.
+ * */
+async function initializeGenesisAccount(
+    dispatch: Dispatch,
+    account: Account,
+    accountInfo: AccountInfo
+) {
+    const localCredentials = await getCredentialsOfAccount(account.address);
+    const firstCredential = accountInfo.accountCredentials[0].value.contents;
+    const address = await getAddressFromCredentialId(
+        firstCredential.regId || firstCredential.credId
+    );
+    const accountUpdate = {
+        address,
+        status: AccountStatus.Confirmed,
+        signatureThreshold: accountInfo.accountThreshold,
+    };
+    await updateAccount(account.name, accountUpdate);
+    await Promise.all(
+        localCredentials.map((cred) =>
+            initializeGenesisCredential(dispatch, address, cred, accountInfo)
+        )
+    ).catch((e) => {
+        throw e;
+    });
+    await dispatch(
+        updateAccountFields({
+            address: account.address,
+            updatedFields: accountUpdate,
+        })
+    );
+    await addToAddressBook(dispatch, {
+        name: account.name,
+        address,
+        readOnly: true,
+    });
+    return address;
+}
+
 export async function updateSignatureThreshold(
     dispatch: Dispatch,
     address: string,
@@ -160,8 +216,9 @@ export async function loadAccountInfos(
     const map: Record<string, AccountInfo> = {};
     const confirmedAccounts = accounts.filter(
         (account) =>
-            isValidAddress(account.address) &&
-            account.status === AccountStatus.Confirmed
+            (isValidAddress(account.address) &&
+                account.status === AccountStatus.Confirmed) ||
+            AccountStatus.Genesis === account.status // We don't check that the address is valid for genesis account, because they have a credId as placeholder. The lookup for accountInfo will still suceed, because the node will, given an invalid address, interpret it as a credId, and return the associated accounts's info. // TODO Remove this.
     );
     if (confirmedAccounts.length === 0) {
         return Promise.resolve();
@@ -169,6 +226,25 @@ export async function loadAccountInfos(
     const accountInfos = await getAccountInfos(confirmedAccounts);
     const updateEncryptedAmountsPromises = accountInfos.map(
         ({ account, accountInfo }) => {
+            if (account.status === AccountStatus.Genesis) {
+                if (!accountInfo) {
+                    throw new Error(
+                        `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}` // account.address contains the placeholder credId
+                    );
+                }
+                return new Promise<void>((resolve, reject) => {
+                    return initializeGenesisAccount(
+                        dispatch,
+                        account,
+                        accountInfo
+                    )
+                        .then((address) => {
+                            map[address] = accountInfo;
+                            return resolve();
+                        })
+                        .catch(reject);
+                });
+            }
             map[account.address] = accountInfo;
 
             if (

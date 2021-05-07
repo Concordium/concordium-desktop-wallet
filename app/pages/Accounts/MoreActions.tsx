@@ -44,7 +44,6 @@ const items = [
 /**
  * Lists additional actions, for the account.
  * And controls the flow of those actions' pages.
- * TODO: Find a better name?
  */
 export default function MoreActions({ account, accountInfo }: Props) {
     const dispatch = useDispatch();
@@ -121,6 +120,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 render={() => (
                     <CredentialInformation
                         account={account}
+                        accountInfo={accountInfo}
                         returnFunction={() =>
                             dispatch(push(routes.ACCOUNTS_MORE))
                         }

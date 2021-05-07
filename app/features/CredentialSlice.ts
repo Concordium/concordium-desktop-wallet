@@ -5,6 +5,7 @@ import {
     insertCredential,
     getCredentials,
     updateCredentialIndex as updateCredentialIndexInDatabase,
+    updateCredential as updateCredentialInDatabase,
     getCredentialsOfAccount,
 } from '~/database/CredentialDao';
 import {
@@ -113,6 +114,39 @@ export async function updateCredentialIndex(
     updateCredentialIndexInDatabase(credId, credentialIndex);
     return dispatch(updateCredential({ credId, credentialIndex }));
 }
+/**
+ * Adds the credential's credentialIndex and updates the account address (Because previously this was a credId acting as a placeholder).
+ */
+export async function initializeGenesisCredential(
+    dispatch: Dispatch,
+    accountAddress: string,
+    credential: Credential,
+    accountInfo: AccountInfo
+) {
+    const credentialOnChain = Object.entries(
+        accountInfo.accountCredentials
+    ).find(([, cred]) => cred.value.contents.credId === credential.credId);
+    if (!credentialOnChain) {
+        throw new Error(
+            `Unexpected missing reference to genesis credential on chain, with credId: ${credential.credId}`
+        );
+    }
+
+    const credentialIndex = parseInt(credentialOnChain[0], 10);
+
+    await updateCredentialInDatabase(credential.credId, {
+        accountAddress,
+        credentialIndex,
+    });
+
+    return dispatch(
+        updateCredential({
+            credId: credential.credId,
+            credentialIndex,
+            accountAddress,
+        })
+    );
+}
 
 export async function updateCredentialsStatus(
     dispatch: Dispatch,
@@ -158,22 +192,6 @@ export async function updateCredentialsStatus(
             }
         }
     });
-
-    // Check if any external credentials have been added to the account. If so, then add them.
-    const newCredentials = onChainCredentials.filter(
-        ([onChainCredential]) =>
-            !localCredentials.some(
-                (cred) => cred.credId === onChainCredential.credId
-            )
-    );
-    newCredentials.forEach(([onChainCredential, index]) =>
-        insertExternalCredential(
-            dispatch,
-            accountAddress,
-            index,
-            onChainCredential
-        )
-    );
 }
 
 export default credentialSlice.reducer;

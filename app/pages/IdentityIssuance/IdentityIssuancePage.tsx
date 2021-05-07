@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Switch, Route, useLocation } from 'react-router-dom';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
+import { IdentityProvider } from '~/utils/types';
+import ErrorModal from '~/components/SimpleErrorModal';
+import PageLayout from '~/components/PageLayout';
 import PickProvider from './PickProvider';
-import PickName from './PickName';
-import GeneratePage from './GeneratePage';
+import PickName from './PickName/PickName';
+import ExternalIssuance from './ExternalIssuance';
 import FinalPage from './FinalPage';
-import { IdentityProvider } from '../../utils/types';
-import ErrorModal from '../../components/SimpleErrorModal';
-import PageLayout from '../../components/PageLayout';
+
+import styles from './IdentityIssuance.module.scss';
 
 function getSubtitle(location: string) {
     switch (location) {
@@ -33,6 +35,7 @@ export default function IdentityIssuancePage(): JSX.Element {
     const [provider, setProvider] = useState<IdentityProvider | undefined>();
     const [initialAccountName, setInitialAccountName] = useState<string>('');
     const [identityName, setIdentityName] = useState<string>('');
+    const { pathname } = useLocation();
 
     const [modalOpen, setModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState<string>('');
@@ -42,10 +45,10 @@ export default function IdentityIssuancePage(): JSX.Element {
         setModalOpen(true);
     }
 
-    function renderGeneratePage() {
+    function renderExternalIssuance() {
         if (provider) {
             return (
-                <GeneratePage
+                <ExternalIssuance
                     identityName={identityName}
                     accountName={initialAccountName}
                     provider={provider}
@@ -67,38 +70,48 @@ export default function IdentityIssuancePage(): JSX.Element {
                 show={modalOpen}
                 onClick={() => dispatch(push(routes.IDENTITIES))}
             />
-            <Switch>
-                <Route
-                    path={routes.IDENTITYISSUANCE_PICKPROVIDER}
-                    render={() => (
-                        <PickProvider
-                            setProvider={setProvider}
-                            onError={activateModal}
-                        />
-                    )}
-                />
-                <Route
-                    path={routes.IDENTITYISSUANCE_EXTERNAL}
-                    render={renderGeneratePage}
-                />
-                <Route
-                    path={routes.IDENTITYISSUANCE_FINAL}
-                    render={() => (
-                        <FinalPage
-                            identityName={identityName}
-                            accountName={initialAccountName}
-                        />
-                    )}
-                />
-                <Route
-                    render={() => (
-                        <PickName
-                            setIdentityName={setIdentityName}
-                            setAccountName={setInitialAccountName}
-                        />
-                    )}
-                />
-            </Switch>
+            <PageLayout.Container
+                closeRoute={routes.IDENTITIES}
+                padding="both"
+                className={styles.container}
+                disableBack={pathname === routes.IDENTITYISSUANCE_FINAL}
+            >
+                <Switch>
+                    <Route
+                        path={routes.IDENTITYISSUANCE_PICKPROVIDER}
+                        render={() => (
+                            <PickProvider
+                                setProvider={setProvider}
+                                onError={activateModal}
+                                provider={provider}
+                            />
+                        )}
+                    />
+                    <Route
+                        path={routes.IDENTITYISSUANCE_EXTERNAL}
+                        render={renderExternalIssuance}
+                    />
+                    <Route
+                        path={routes.IDENTITYISSUANCE_FINAL}
+                        render={() => (
+                            <FinalPage
+                                identityName={identityName}
+                                accountName={initialAccountName}
+                            />
+                        )}
+                    />
+                    <Route
+                        render={() => (
+                            <PickName
+                                setIdentityName={setIdentityName}
+                                setAccountName={setInitialAccountName}
+                                account={initialAccountName}
+                                identity={identityName}
+                            />
+                        )}
+                    />
+                </Switch>
+            </PageLayout.Container>
         </PageLayout>
     );
 }

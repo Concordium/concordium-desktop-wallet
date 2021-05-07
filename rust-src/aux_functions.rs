@@ -20,6 +20,8 @@ use serde_json::{from_str, Value as SerdeValue};
 use std::{cmp::max, collections::BTreeMap, convert::TryInto};
 type ExampleCurve = G1;
 use ed25519_dalek as ed25519;
+use eddsa_ed25519::dlog_ed25519;
+use random_oracle::RandomOracle;
 use sha2::{Digest, Sha256};
 
 use rand::thread_rng;
@@ -405,4 +407,63 @@ pub fn create_sec_to_pub_aux(
         });
 
     Ok(response.to_string())
+}
+
+#[derive(SerdeSerialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BakerKeys {
+    #[serde(serialize_with = "base16_encode")]
+    election_secret: ed25519::SecretKey,
+    #[serde(serialize_with = "base16_encode")]
+    election_public: ed25519::PublicKey,
+    #[serde(serialize_with = "base16_encode")]
+    signature_secret: ed25519::SecretKey,
+    #[serde(serialize_with = "base16_encode")]
+    signature_public: ed25519::PublicKey,
+    #[serde(serialize_with = "base16_encode")]
+    aggregation_secret: aggregate_sig::SecretKey<Bls12>,
+    #[serde(serialize_with = "base16_encode")]
+    aggregation_public: aggregate_sig::PublicKey<Bls12>,
+    #[serde(serialize_with = "base16_encode")]
+    proof_election: dlog_ed25519::Ed25519DlogProof,
+    #[serde(serialize_with = "base16_encode")]
+    proof_signature: dlog_ed25519::Ed25519DlogProof,
+    #[serde(serialize_with = "base16_encode")]
+    proof_aggregation: aggregate_sig::Proof<Bls12>
+}
+
+pub fn generate_baker_keys(sender: &AccountAddress) -> BakerKeys {
+    let mut csprng = thread_rng();
+    let election = ed25519::Keypair::generate(&mut csprng);
+    let signature = ed25519::Keypair::generate(&mut csprng);
+    let aggregation_secret = aggregate_sig::SecretKey::<Bls12>::generate(&mut csprng);
+    let aggregation_public = aggregate_sig::PublicKey::<Bls12>::from_secret(aggregation_secret);
+
+
+    let mut challenge = b"addBaker".to_vec();
+    sender.serial(&mut challenge);
+    election.public.serial(&mut challenge);
+    signature.public.serial(&mut challenge);
+    aggregation_public.serial(&mut challenge);
+
+    let proof_election = dlog_ed25519::prove_dlog_ed25519(&mut RandomOracle::domain(&challenge), &election.public, &election.secret);
+    let proof_signature = dlog_ed25519::prove_dlog_ed25519(&mut RandomOracle::domain(&challenge), &signature.public, &signature.secret);
+    let proof_aggregation = aggregation_secret.prove(&mut csprng, &mut RandomOracle::domain(&challenge));
+
+    BakerKeys {
+        election_secret: election.secret,
+        election_public: election.public,
+        signature_secret: signature.secret,
+        signature_public: signature.public,
+        aggregation_secret,
+        aggregation_public,
+        proof_election,
+        proof_signature,
+        proof_aggregation
+    }
+}
+
+pub fn get_address_from_cred_id(cred_id: &str) -> Fallible<String> {
+    let cred_id_parsed: ExampleCurve = base16_decode_string(cred_id)?;
+    Ok(AccountAddress::new(&cred_id_parsed).to_string())
 }
