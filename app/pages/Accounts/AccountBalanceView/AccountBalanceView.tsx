@@ -63,19 +63,22 @@ export default function AccountBalanceView(): JSX.Element | null {
         const totalDecrypted = account.totalDecrypted || 0n;
 
         main = (
-            <h1 className={styles.blueText}>
-                {displayAsGTU(totalDecrypted)}
-                {account.allDecrypted ? null : (
-                    <>
-                        {' '}
-                        +{' '}
-                        <ShieldImage
-                            className={styles.blueShield}
-                            height="30"
-                        />
-                    </>
-                )}
-            </h1>
+            <>
+                <ShieldImage className={styles.backgroundImage} />
+                <h1 className={styles.shieldedAmount}>
+                    {displayAsGTU(totalDecrypted)}
+                    {account.allDecrypted || (
+                        <>
+                            {' '}
+                            +{' '}
+                            <ShieldImage
+                                className={styles.blueShield}
+                                height="30"
+                            />
+                        </>
+                    )}
+                </h1>
+            </>
         );
     } else {
         const accountBaker = accountInfo?.accountBaker;
@@ -101,12 +104,12 @@ export default function AccountBalanceView(): JSX.Element | null {
                     left="Staked:"
                     right={displayAsGTU(stakedAmount)}
                 />
-                {accountBaker ? (
+                {accountBaker && (
                     <div className={styles.bakerRow}>
                         <BakerImage className={styles.bakerImage} height="18" />
                         <h3 className="m0">{accountBaker.bakerId}</h3>
                     </div>
-                ) : null}
+                )}
             </>
         );
     }

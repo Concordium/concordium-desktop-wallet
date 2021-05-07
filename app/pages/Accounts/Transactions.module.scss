@@ -39,7 +39,10 @@
 .warning {
     position: absolute;
     margin: 5px -25px;
-    fill: $color-error;
+
+    :global(.warning_svg__boundary) {
+        fill: $color-error;
+    }
 }
 
 .checkmark {
