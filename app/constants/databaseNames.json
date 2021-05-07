@@ -1,9 +1,10 @@
 {
-    "identitiesTable": "identities",
     "accountsTable": "accounts",
     "addressBookTable": "addressBook",
-    "multiSignatureProposalTable": "multi_signature_proposal",
-    "transactionTable": "transactions",
+    "credentialsTable": "credentials",
     "globalTable": "global",
-    "credentialsTable": "credentials"
+    "identitiesTable": "identities",
+    "multiSignatureProposalTable": "multi_signature_proposal",
+    "walletTable": "wallet",
+    "transactionTable": "transactions"
 }

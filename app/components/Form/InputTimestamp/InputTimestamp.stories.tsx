@@ -38,3 +38,11 @@ WithInitialValue.args = {
     value: new Date(),
     isInvalid: false,
 };
+
+export const Invalid = Template.bind({});
+Invalid.args = {
+    label: 'Timestamp',
+    error: 'Must be at least 5 minutes in the future',
+    value: new Date(),
+    isInvalid: true,
+};

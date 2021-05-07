@@ -53,13 +53,11 @@ export async function openFile(title: string): Promise<string> {
  */
 export async function saveFile(
     data: string,
-    title: string,
-    defaultPath?: string
+    opts: Electron.SaveDialogOptions
 ): Promise<boolean> {
     const saveFileDialog: Electron.SaveDialogReturnValue = await ipcRenderer.invoke(
         ipcCommands.saveFileDialog,
-        title,
-        defaultPath?.replace(/\s/g, '_')
+        opts
     );
 
     if (saveFileDialog.canceled) {

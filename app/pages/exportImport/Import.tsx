@@ -99,7 +99,7 @@ export default function Import() {
                     validatePassword(password) ? undefined : 'Invalid password'
                 }
                 buttonOnClick={decryptAndParseData}
-                placeholder="password"
+                placeholder="Enter your password"
                 onClose={() => setPasswordModalOpen(false)}
                 type="password"
                 open={passwordModalOpen}
