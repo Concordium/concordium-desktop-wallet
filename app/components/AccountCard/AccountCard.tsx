@@ -2,6 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import MultiSigIcon from '@resources/svg/multisig.svg';
 import PendingImage from '@resources/svg/pending-small.svg';
+import RejectedImage from '@resources/svg/warning.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
 import { displayAsGTU } from '~/utils/gtu';
@@ -87,8 +88,14 @@ export default function AccountCard({
                         {isInitialAccount(account) && '(Initial)'}
                         {account.status === AccountStatus.Pending && (
                             <PendingImage
-                                height="20"
-                                className={styles.bakerImage}
+                                height="24"
+                                className={styles.statusImage}
+                            />
+                        )}
+                        {account.status === AccountStatus.Rejected && (
+                            <RejectedImage
+                                height="28"
+                                className={styles.statusImage}
                             />
                         )}
                         {accountInfo && accountInfo.accountBaker && (
