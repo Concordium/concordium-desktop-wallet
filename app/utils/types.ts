@@ -423,7 +423,7 @@ export interface TransferTransaction {
     fromAddress: Hex;
     toAddress: Hex;
     status: TransactionStatus;
-    rejectReason?: RejectReason;
+    rejectReason?: RejectReason | string;
     fromAddressName?: string;
     toAddressName?: string;
     decryptedAmount?: string;

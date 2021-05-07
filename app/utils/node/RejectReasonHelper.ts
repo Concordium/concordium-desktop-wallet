@@ -50,7 +50,6 @@ export enum RejectReason {
     NotAllowedMultipleCredentials = 'NotAllowedMultipleCredentials',
     NotAllowedToReceiveEncrypted = 'NotAllowedToReceiveEncrypted',
     NotAllowedToHandleEncrypted = 'NotAllowedToHandleEncrypted',
-    Unknown = 'Unknown',
 }
 
 /**
@@ -59,7 +58,19 @@ export enum RejectReason {
  * @param rejectReason reason for rejection
  * @returns a displayable version of the rejection
  */
-export function rejectReasonToDisplayText(rejectReason?: RejectReason) {
+export function rejectReasonToDisplayText(
+    rejectReason?: RejectReason | string
+) {
+    // A rejection reason might not have been received yet, and so we show that
+    // to the user.
+    if (!rejectReason) {
+        return 'Rejection reason is missing';
+    }
+
+    if (typeof rejectReason === 'string') {
+        return rejectReason;
+    }
+
     switch (rejectReason) {
         case RejectReason.ModuleNotWF:
             return 'Smart contract module failed to typecheck';

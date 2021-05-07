@@ -201,7 +201,8 @@ export async function confirmTransaction(
                 failure.result.rejectReason.tag as keyof typeof RejectReason
             ];
         if (rejectReason === undefined) {
-            rejectReason = RejectReason.Unknown;
+            // If the reject reason was not known, then just store it directly as a string anyway.
+            rejectReason = failure.result.rejectReason.tag;
         }
     }
     return updateTransaction(

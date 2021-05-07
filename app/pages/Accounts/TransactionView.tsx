@@ -2,7 +2,7 @@ import React from 'react';
 import { List, Button, Header, Divider } from 'semantic-ui-react';
 import TransactionListElement from './TransactionListElement';
 import CopiableListElement from '../../components/CopiableListElement';
-import { TransferTransaction } from '../../utils/types';
+import { TransactionStatus, TransferTransaction } from '../../utils/types';
 import { isFailed } from '../../utils/transactionHelpers';
 import { rejectReasonToDisplayText } from '~/utils/node/RejectReasonHelper';
 
@@ -17,7 +17,9 @@ function displayRejectReason(transaction: TransferTransaction) {
             <List.Item>
                 <Header color="red" textAlign="center">
                     Failed:{' '}
-                    {rejectReasonToDisplayText(transaction.rejectReason)}
+                    {transaction.status === TransactionStatus.Rejected
+                        ? 'Transaction was rejected'
+                        : rejectReasonToDisplayText(transaction.rejectReason)}
                 </Header>
                 <Divider />
             </List.Item>
