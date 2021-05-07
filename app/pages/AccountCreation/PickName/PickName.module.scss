@@ -1,0 +1,10 @@
+@import 'config/bundle';
+
+.field,
+.label {
+    width: 400px;
+}
+
+.field {
+    font-size: $font-size-body2;
+}

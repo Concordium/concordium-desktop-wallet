@@ -1,39 +1,48 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Card } from 'semantic-ui-react';
-import routes from '../../constants/routes.json';
-import { createCredentialDetails } from '../../utils/rustInterface';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
+import clsx from 'clsx';
+import routes from '~/constants/routes.json';
+import { createCredentialDetails } from '~/utils/rustInterface';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     Identity,
     CredentialDeploymentDetails,
     Dispatch,
-} from '../../utils/types';
-import { sendTransaction } from '../../utils/nodeRequests';
+    AccountStatus,
+} from '~/utils/types';
+import { sendTransaction } from '~/utils/nodeRequests';
 import {
     addPendingAccount,
     confirmAccount,
     removeAccount,
-} from '../../features/AccountSlice';
+} from '~/features/AccountSlice';
 import {
     addToAddressBook,
     removeFromAddressBook,
-} from '../../features/AddressBookSlice';
+} from '~/features/AddressBookSlice';
 import {
     removeCredentialsOfAccount,
     getNextCredentialNumber,
-} from '../../database/CredentialDao';
-import { insertNewCredential } from '../../features/CredentialSlice';
-import { globalSelector } from '../../features/GlobalSlice';
-import SimpleLedger from '../../components/ledger/SimpleLedger';
-import ErrorModal from '../../components/SimpleErrorModal';
+} from '~/database/CredentialDao';
+import { insertNewCredential } from '~/features/CredentialSlice';
+import { globalSelector } from '~/features/GlobalSlice';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
+import ErrorModal from '~/components/SimpleErrorModal';
 import pairWallet from '~/utils/WalletPairing';
+import Columns from '~/components/Columns';
+import IdentityCard from '~/components/IdentityCard';
+import AccountListElement from '~/components/AccountListElement';
+import CardList from '~/cross-app-components/CardList';
+import { AttributeKey } from '~/utils/identityHelpers';
+
+import generalStyles from '../AccountCreation.module.scss';
+import styles from './GeneratePage.module.scss';
 
 interface Props {
     accountName: string;
     identity: Identity;
-    attributes: string[];
+    attributes: AttributeKey[];
 }
 
 function removeFailed(dispatch: Dispatch, accountAddress: string) {
@@ -160,19 +169,54 @@ export default function AccountCreationGenerate({
     }
 
     return (
-        <Card fluid centered>
+        <div className={generalStyles.singleColumn}>
             <ErrorModal
                 header="Unable to create account"
                 content={modalContent}
                 show={modalOpen}
                 onClick={() => dispatch(push(routes.ACCOUNTS))}
             />
-            <Card.Content textAlign="center">
-                <Card.Header>Generating the Account Credentials</Card.Header>
-                <Card.Content textAlign="center">
-                    <SimpleLedger ledgerCall={createAccount} />
-                </Card.Content>
-            </Card.Content>
-        </Card>
+            <h2 className={styles.header}>Confirm and sign account creation</h2>
+            <p className={styles.description}>
+                The following shows a summary of the data used to create your
+                new account. Please confirm that this looks correct before
+                signing and creating the account.
+            </p>
+            <Columns className="mT50">
+                <Columns.Column>
+                    <CardList>
+                        <IdentityCard
+                            className={clsx(
+                                generalStyles.card,
+                                styles.alignRight
+                            )}
+                            identity={identity}
+                            showAttributes={attributes}
+                        />
+                        <AccountListElement
+                            className={clsx(
+                                generalStyles.card,
+                                styles.alignRight
+                            )}
+                            account={{
+                                name: accountName,
+                                address: '',
+                                isInitial: false,
+                                status: AccountStatus.Confirmed,
+                                identityId: -1,
+                                maxTransactionId: -1,
+                                identityName: identity.name,
+                            }}
+                        />
+                    </CardList>
+                </Columns.Column>
+                <Columns.Column>
+                    <SimpleLedger
+                        className={generalStyles.card}
+                        ledgerCall={createAccount}
+                    />
+                </Columns.Column>
+            </Columns>
+        </div>
     );
 }
