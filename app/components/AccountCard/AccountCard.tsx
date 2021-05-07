@@ -58,7 +58,7 @@ export default function AccountCard({
         accountInfo && accountInfo.accountReleaseSchedule
             ? BigInt(accountInfo.accountReleaseSchedule.total)
             : 0n;
-    const hidden = account.allDecrypted ? null : (
+    const hidden = account.allDecrypted || (
         <>
             {' '}
             + <ShieldImage height="15" />
@@ -84,19 +84,19 @@ export default function AccountCard({
                 left={
                     <>
                         <b className={styles.inline}>{account.name}</b>
-                        {isInitialAccount(account) ? '(Initial)' : undefined}
-                        {account.status === AccountStatus.Pending ? (
+                        {isInitialAccount(account) && '(Initial)'}
+                        {account.status === AccountStatus.Pending && (
                             <PendingImage
                                 height="20"
                                 className={styles.bakerImage}
                             />
-                        ) : undefined}
-                        {accountInfo && accountInfo.accountBaker ? (
+                        )}
+                        {accountInfo && accountInfo.accountBaker && (
                             <BakerImage
                                 height="25"
                                 className={styles.bakerImage}
                             />
-                        ) : undefined}
+                        )}
                     </>
                 }
                 right={displayIdentity(account, accountInfo)}
@@ -129,7 +129,7 @@ export default function AccountCard({
             />
             <div className={styles.dividingLine} />
             <SidedRow
-                className={styles.row}
+                className={clsx(styles.row, 'mB0')}
                 left={<h3>Shielded Balance:</h3>}
                 right={
                     <h3>

@@ -219,15 +219,14 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
                 }
                 right={
                     <p
-                        className={
+                        className={clsx(
+                            'mV0',
                             isGreen(
                                 transaction,
                                 viewingShielded,
                                 isOutgoingTransaction
-                            )
-                                ? styles.greenText
-                                : undefined
-                        }
+                            ) && styles.greenText
+                        )}
                     >
                         {amount}
                     </p>
