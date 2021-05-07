@@ -235,9 +235,7 @@ function BuildAddBakerTransactionProposalStep({
                     <Route exact path={path}>
                         <Columns.Column header="Identities">
                             <div className={styles.descriptionStep}>
-                                <div
-                                    className={`${styles.flex1} ${styles.alignSelfNormal}`}
-                                >
+                                <div className={styles.flex1}>
                                     <PickIdentity
                                         setReady={() => {}}
                                         setIdentity={setIdentity}
