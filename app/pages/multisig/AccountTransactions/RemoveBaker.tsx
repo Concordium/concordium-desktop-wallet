@@ -62,7 +62,7 @@ export default function RemoveBakerPage() {
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
             <Columns divider columnScroll>
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction Details" verticalPadding>
                     <RemoveBakerProposalDetails
                         identity={identity}
                         account={account}

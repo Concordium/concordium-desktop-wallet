@@ -174,7 +174,7 @@ function BuildAddBakerTransactionProposalStep({
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
             <Columns divider columnScroll>
-                <Columns.Column header="Transaction Details">
+                <Columns.Column header="Transaction Details" verticalPadding>
                     <UpdateBakerKeysProposalDetails
                         identity={identity}
                         account={account}
