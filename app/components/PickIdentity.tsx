@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Identity } from '~/utils/types';
+import { ClassName, Identity } from '~/utils/types';
 import { confirmedIdentitiesSelector } from '~/features/IdentitySlice';
 import IdentityCard from '~/components/IdentityCard';
 import CardList from '~/cross-app-components/CardList';
 
-interface Props {
+interface Props extends ClassName {
     chosenIdentity?: Identity;
     setReady: (ready: boolean) => void;
     setIdentity: (identity: Identity) => void;
@@ -18,6 +18,7 @@ export default function PickIdentity({
     chosenIdentity,
     setReady,
     setIdentity,
+    className,
 }: Props): JSX.Element {
     const identities = useSelector(confirmedIdentitiesSelector);
     const [chosenIndex, setChosenIndex] = useState<number | undefined>();
@@ -35,7 +36,7 @@ export default function PickIdentity({
     }, []);
 
     return (
-        <CardList>
+        <CardList className={className}>
             {identities.map((identity: Identity, index: number) => (
                 <IdentityCard
                     identity={identity}

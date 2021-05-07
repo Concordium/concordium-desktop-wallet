@@ -74,7 +74,6 @@ export default function GenerateCredential(): JSX.Element {
                             )}
                         />
                         <Route
-                            path={routes.GENERATE_CREDENTIAL_EXPORT}
                             render={(props) => (
                                 <SplitViewRouter {...props} onNext={nextPage} />
                             )}

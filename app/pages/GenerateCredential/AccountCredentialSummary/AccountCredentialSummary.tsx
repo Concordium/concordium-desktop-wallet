@@ -1,15 +1,19 @@
 import React, { useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { List } from 'semantic-ui-react';
 import { FormProvider, useForm } from 'react-hook-form';
+import clsx from 'clsx';
 import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import Form from '~/components/Form';
 import routes from '~/constants/routes.json';
 import { commonAddressValidators } from '~/utils/accountHelpers';
-import styles from './GenerateCredential.module.scss';
-import generateCredentialContext from './GenerateCredentialContext';
+import { ClassName } from '~/utils/types';
+import Label from '~/components/Label';
+import Card from '~/cross-app-components/Card';
+import generateCredentialContext from '../GenerateCredentialContext';
 
-interface Props {
+import styles from './AccountCredentialSummary.module.scss';
+
+interface Props extends ClassName {
     Button?: () => JSX.Element | null;
     accountValidationError?: string;
 }
@@ -19,6 +23,7 @@ const addressForm = 'address';
 export default function AccountCredentialSummary({
     Button = () => null,
     accountValidationError,
+    className,
 }: Props) {
     const location = useLocation().pathname;
     const {
@@ -48,15 +53,17 @@ export default function AccountCredentialSummary({
     }, [setAddress, addressWatcher, location]);
 
     return (
-        <div className={styles.accountCredentialSummary}>
-            <h2>Account Credential Summary</h2>
-            <b>Identity:</b>
+        <Card
+            className={clsx(styles.root, className)}
+            header="Account Credential Summary"
+        >
+            <Label className="mT30">Identity:</Label>
             {identity ? (
-                <h2>{identity.name}</h2>
+                <h2 className={styles.value}>{identity.name}</h2>
             ) : (
                 <h2 className={styles.blueText}>Choose an ID on the right</h2>
             )}
-            <List.Item>Account:</List.Item>
+            <Label>Account:</Label>
             {location === routes.GENERATE_CREDENTIAL_PICKACCOUNT ? (
                 <FormProvider {...form}>
                     <Form.TextArea
@@ -72,15 +79,18 @@ export default function AccountCredentialSummary({
                     />
                 </FormProvider>
             ) : (
-                <h2> {address || 'To be determined'} </h2>
+                <h2 className={styles.value}>
+                    {' '}
+                    {address || 'To be determined'}{' '}
+                </h2>
             )}
-            <b>Identicon:</b>
+            <Label>Identicon:</Label>
             {credentialBlob?.credential ? (
                 <Identicon data={JSON.stringify(credentialBlob?.credential)} />
             ) : (
-                <h2>To be generated</h2>
+                <h2 className={styles.value}>To be generated</h2>
             )}
             <Button />
-        </div>
+        </Card>
     );
 }

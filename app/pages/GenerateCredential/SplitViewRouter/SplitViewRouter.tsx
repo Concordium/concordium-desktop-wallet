@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router';
+import clsx from 'clsx';
 import Button from '~/cross-app-components/Button';
 import routes from '~/constants/routes.json';
 import AccountCredentialSummary from '../AccountCredentialSummary';
@@ -7,6 +8,8 @@ import SignCredential from '../SignCredential';
 import PickAccount from '../PickAccount';
 import PickIdentity from '~/components/PickIdentity';
 import generateCredentialContext from '../GenerateCredentialContext';
+
+import styles from './SplitViewRouter.module.scss';
 
 function getHeader(currentLocation: string) {
     switch (currentLocation) {
@@ -40,6 +43,32 @@ function getDescription(currentLocation: string) {
     }
 }
 
+function ScrollContainer({ children }: PropsWithChildren<unknown>) {
+    const [overflowing, setOverflowing] = useState(false);
+    const outer = useRef<HTMLDivElement>(null);
+    const inner = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const onResize = () => {
+            setOverflowing(
+                (inner.current?.clientHeight ?? 0) >
+                    (outer.current?.clientHeight ?? 0)
+            );
+        };
+        window.addEventListener('resize', onResize);
+
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    return (
+        <div className={styles.scrollContainer}>
+            <div className={clsx(!overflowing && styles.centered)} ref={outer}>
+                <div ref={inner}>{children}</div>
+            </div>
+        </div>
+    );
+}
+
 interface Props extends RouteComponentProps {
     onNext(): void;
 }
@@ -54,10 +83,13 @@ export default function SplitViewRouter({
     ] = useState<string>();
 
     return (
-        <div>
-            <h2>{getHeader(location.pathname)}</h2>
-            <p>{getDescription(location.pathname)}</p>
+        <div className={styles.grid}>
+            <h2 className={styles.header}>{getHeader(location.pathname)}</h2>
+            <p className={styles.description}>
+                {getDescription(location.pathname)}
+            </p>
             <AccountCredentialSummary
+                className={styles.summary}
                 accountValidationError={accountValidationError}
             />
             <Switch>
@@ -82,17 +114,24 @@ export default function SplitViewRouter({
                             isReady: [, setReady],
                             identity: [, setIdentity],
                         }) => (
-                            <PickIdentity
-                                setReady={setReady}
-                                setIdentity={setIdentity}
-                            />
+                            <ScrollContainer>
+                                <PickIdentity
+                                    className={styles.pickIdentity}
+                                    setReady={setReady}
+                                    setIdentity={setIdentity}
+                                />
+                            </ScrollContainer>
                         )}
                     </generateCredentialContext.Consumer>
                 </Route>
             </Switch>
             <generateCredentialContext.Consumer>
                 {({ isReady: [isReady] }) => (
-                    <Button disabled={!isReady} onClick={onNext}>
+                    <Button
+                        className={styles.button}
+                        disabled={!isReady}
+                        onClick={onNext}
+                    >
                         Continue
                     </Button>
                 )}
