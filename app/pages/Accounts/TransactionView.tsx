@@ -4,6 +4,7 @@ import TransactionListElement from './TransactionListElement';
 import CopiableListElement from '../../components/CopiableListElement';
 import { TransferTransaction } from '../../utils/types';
 import { isFailed } from '../../utils/transactionHelpers';
+import { rejectReasonToDisplayText } from '~/utils/node/RejectReasonHelper';
 
 interface Props {
     transaction: TransferTransaction;
@@ -16,7 +17,7 @@ function displayRejectReason(transaction: TransferTransaction) {
             <List.Item>
                 <Header color="red" textAlign="center">
                     Failed:{' '}
-                    {transaction.rejectReason || 'Unknown reason for failure'}
+                    {rejectReasonToDisplayText(transaction.rejectReason)}
                 </Header>
                 <Divider />
             </List.Item>

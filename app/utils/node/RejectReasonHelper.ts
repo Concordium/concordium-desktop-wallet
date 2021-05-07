@@ -4,49 +4,53 @@
  *
  * This should be kept in sync with the list of reject reasons
  * found here: https://github.com/Concordium/concordium-base/blob/main/haskell-src/Concordium/Types/Execution.hs
+ *
+ * The 'Unknown' rejection is a local rejection reason, and not shared
+ * with the node.
  */
 export enum RejectReason {
-    ModuleNotWF,
-    ModuleHashAlreadyExists,
-    InvalidAccountReference,
-    InvalidInitMethod,
-    InvalidReceiveMethod,
-    InvalidModuleReference,
-    InvalidContractAddress,
-    RuntimeFailure,
-    AmountTooLarge,
-    SerializationFailure,
-    OutOfEnergy,
-    RejectedInit,
-    RejectedReceive,
-    NonExistentRewardAccount,
-    InvalidProof,
-    AlreadyABaker,
-    NotABaker,
-    InsufficientBalanceForBakerStake,
-    StakeUnderMinimumThresholdForBaking,
-    BakerInCooldown,
-    DuplicateAggregationKey,
-    NonExistentCredentialID,
-    KeyIndexAlreadyInUse,
-    InvalidAccountThreshold,
-    InvalidCredentialKeySignThreshold,
-    InvalidEncryptedAmountTransferProof,
-    InvalidTransferToPublicProof,
-    EncryptedAmountSelfTransfer,
-    InvalidIndexOnEncryptedTransfer,
-    ZeroScheduledAmount,
-    NonIncreasingSchedule,
-    FirstScheduledReleaseExpired,
-    ScheduledSelfTransfer,
-    InvalidCredentials,
-    DuplicateCredIDs,
-    NonExistentCredIDs,
-    RemoveFirstCredential,
-    CredentialHolderDidNotSign,
-    NotAllowedMultipleCredentials,
-    NotAllowedToReceiveEncrypted,
-    NotAllowedToHandleEncrypted,
+    ModuleNotWF = 'ModuleNotWF',
+    ModuleHashAlreadyExists = 'ModuleHashAlreadyExists',
+    InvalidAccountReference = 'InvalidAccountReference',
+    InvalidInitMethod = 'InvalidInitMethod',
+    InvalidReceiveMethod = 'InvalidReceiveMethod',
+    InvalidModuleReference = 'InvalidModuleReference',
+    InvalidContractAddress = 'InvalidContractAddress',
+    RuntimeFailure = 'RuntimeFailure',
+    AmountTooLarge = 'AmountTooLarge',
+    SerializationFailure = 'SerializationFailure',
+    OutOfEnergy = 'OutOfEnergy',
+    RejectedInit = 'RejectedInit',
+    RejectedReceive = 'RejectedReceive',
+    NonExistentRewardAccount = 'NonExistentRewardAccount',
+    InvalidProof = 'InvalidProof',
+    AlreadyABaker = 'AlreadyABaker',
+    NotABaker = 'NotABaker',
+    InsufficientBalanceForBakerStake = 'InsufficientBalanceForBakerStake',
+    StakeUnderMinimumThresholdForBaking = 'StakeUnderMinimumThresholdForBaking',
+    BakerInCooldown = 'BakerInCooldown',
+    DuplicateAggregationKey = 'DuplicateAggregationKey',
+    NonExistentCredentialID = 'NonExistentCredentialID',
+    KeyIndexAlreadyInUse = 'KeyIndexAlreadyInUse',
+    InvalidAccountThreshold = 'InvalidAccountThreshold',
+    InvalidCredentialKeySignThreshold = 'InvalidCredentialKeySignThreshold',
+    InvalidEncryptedAmountTransferProof = 'InvalidEncryptedAmountTransferProof',
+    InvalidTransferToPublicProof = 'InvalidTransferToPublicProof',
+    EncryptedAmountSelfTransfer = 'EncryptedAmountSelfTransfer',
+    InvalidIndexOnEncryptedTransfer = 'InvalidIndexOnEncryptedTransfer',
+    ZeroScheduledAmount = 'ZeroScheduledAmount',
+    NonIncreasingSchedule = 'NonIncreasingSchedule',
+    FirstScheduledReleaseExpired = 'FirstScheduledReleaseExpired',
+    ScheduledSelfTransfer = 'ScheduledSelfTransfer',
+    InvalidCredentials = 'InvalidCredentials',
+    DuplicateCredIDs = 'DuplicateCredIDs',
+    NonExistentCredIDs = 'NonExistentCredIDs',
+    RemoveFirstCredential = 'RemoveFirstCredential',
+    CredentialHolderDidNotSign = 'CredentialHolderDidNotSign',
+    NotAllowedMultipleCredentials = 'NotAllowedMultipleCredentials',
+    NotAllowedToReceiveEncrypted = 'NotAllowedToReceiveEncrypted',
+    NotAllowedToHandleEncrypted = 'NotAllowedToHandleEncrypted',
+    Unknown = 'Unknown',
 }
 
 /**
@@ -55,7 +59,7 @@ export enum RejectReason {
  * @param rejectReason reason for rejection
  * @returns a displayable version of the rejection
  */
-export function rejectReasonToDisplayText(rejectReason: RejectReason) {
+export function rejectReasonToDisplayText(rejectReason?: RejectReason) {
     switch (rejectReason) {
         case RejectReason.ModuleNotWF:
             return 'Smart contract module failed to typecheck';
@@ -122,7 +126,7 @@ export function rejectReasonToDisplayText(rejectReason: RejectReason) {
         case RejectReason.FirstScheduledReleaseExpired:
             return 'The first scheduled release is in the past';
         case RejectReason.ScheduledSelfTransfer:
-            return 'Attempt to transfer from account A to A with schedule';
+            return 'Attempt to transfer from an account to itself with a schedule';
         case RejectReason.InvalidCredentials:
             return 'One or more of the credentials';
         case RejectReason.DuplicateCredIDs:
@@ -140,6 +144,6 @@ export function rejectReasonToDisplayText(rejectReason: RejectReason) {
         case RejectReason.NotAllowedToHandleEncrypted:
             return 'Account is not allowed to handle encrypted transfers because it has multiple credentials';
         default:
-            return 'Unknown';
+            return 'Unknown rejection reason';
     }
 }
