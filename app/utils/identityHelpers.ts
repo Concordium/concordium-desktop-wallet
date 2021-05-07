@@ -1,8 +1,10 @@
 import { formatDate } from './timeHelpers';
 import { ChosenAttributes } from './types';
 
+export type AttributeKey = keyof ChosenAttributes;
+
 export const attributeNamesMap: {
-    [P in keyof ChosenAttributes]: string;
+    [P in AttributeKey]: string;
 } = {
     countryOfResidence: 'Country of residence',
     firstName: 'First name',
@@ -63,7 +65,7 @@ const parseDocType = (docType: DocumentType) => {
 };
 
 export const formatAttributeValue = (
-    key: keyof ChosenAttributes,
+    key: AttributeKey,
     value: ChosenAttributes[typeof key]
 ): string => {
     switch (key) {
