@@ -1,0 +1,18 @@
+.accountWrapper {
+    grid-column: end;
+    grid-row: 3;
+}
+
+.button {
+    grid-column: end;
+    grid-row: end;
+}
+
+.accountListElementPlaceholder {
+    composes: accountListElement from '../../../components/AccountListElement/AccountListElement.module';
+    min-height: 252px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
