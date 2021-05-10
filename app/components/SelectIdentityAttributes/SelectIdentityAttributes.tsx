@@ -57,9 +57,9 @@ export default function SelectIdentityAttributes({
                         className={styles.checkbox}
                         key={tag as AttributeKey}
                         size="large"
-                        checked={chosenAttributes?.includes(
-                            tag as AttributeKey
-                        )}
+                        checked={
+                            !!chosenAttributes?.includes(tag as AttributeKey)
+                        }
                         onChange={() => toggleAttribute(tag as AttributeKey)}
                     >
                         <div className="flexChildFill flex justifySpaceBetween mL10">

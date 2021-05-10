@@ -1,4 +1,10 @@
-import { CredentialDeploymentInformation } from '~/utils/types';
+import { AttributeKey } from '~/utils/identityHelpers';
+import {
+    AccountInfo,
+    CredentialDeploymentInformation,
+    EqualRecord,
+    Identity,
+} from '~/utils/types';
 
 export interface CredentialBlob {
     credential: CredentialDeploymentInformation;
@@ -6,3 +12,21 @@ export interface CredentialBlob {
     credentialNumber: number;
     address: string;
 }
+
+export interface AccountForm {
+    identity: Identity;
+    address: string;
+    accountInfo: AccountInfo;
+    accountName: string;
+    chosenAttributes: AttributeKey[];
+    credential: CredentialBlob;
+}
+
+export const fieldNames: EqualRecord<AccountForm> = {
+    identity: 'identity',
+    address: 'address',
+    accountInfo: 'accountInfo',
+    accountName: 'accountName',
+    chosenAttributes: 'chosenAttributes',
+    credential: 'credential',
+};

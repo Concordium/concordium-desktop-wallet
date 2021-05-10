@@ -1,6 +1,6 @@
-import React, { useContext, useEffect } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { FormProvider, useForm } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import clsx from 'clsx';
 import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import Form from '~/components/Form';
@@ -9,48 +9,21 @@ import { commonAddressValidators } from '~/utils/accountHelpers';
 import { ClassName } from '~/utils/types';
 import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
-import generateCredentialContext from '../GenerateCredentialContext';
 
 import styles from './AccountCredentialSummary.module.scss';
+import { AccountForm, fieldNames } from '../types';
 
 interface Props extends ClassName {
     Button?: () => JSX.Element | null;
-    accountValidationError?: string;
 }
-
-const addressForm = 'address';
 
 export default function AccountCredentialSummary({
     Button = () => null,
-    accountValidationError,
     className,
 }: Props) {
     const location = useLocation().pathname;
-    const {
-        address: [address, setAddress],
-        identity: [identity],
-        credential: [credentialBlob],
-    } = useContext(generateCredentialContext);
-
-    const form = useForm({ mode: 'onTouched' });
-    const { watch, setError } = form;
-    const addressWatcher = watch(addressForm);
-
-    useEffect(() => {
-        if (accountValidationError) {
-            setError(addressForm, {
-                type: 'manual',
-                message: accountValidationError,
-            });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [accountValidationError]);
-
-    useEffect(() => {
-        if (location === routes.GENERATE_CREDENTIAL_PICKACCOUNT) {
-            setAddress(addressWatcher);
-        }
-    }, [setAddress, addressWatcher, location]);
+    const { watch } = useFormContext<AccountForm>();
+    const { address, accountName, identity, credential } = watch();
 
     return (
         <Card
@@ -64,31 +37,44 @@ export default function AccountCredentialSummary({
                 <h2 className={styles.blueText}>Choose an ID on the right</h2>
             )}
             <Label>Account:</Label>
-            {location === routes.GENERATE_CREDENTIAL_PICKACCOUNT ? (
-                <FormProvider {...form}>
-                    <Form.TextArea
-                        className={clsx('body1', styles.value)}
-                        defaultValue={address}
-                        name={addressForm}
-                        placeholder="Paste the account address here"
-                        rules={{
-                            required: 'Please enter address',
-                            ...commonAddressValidators,
-                            validate: {
-                                accountValidation: () => accountValidationError,
-                            },
-                        }}
-                    />
-                </FormProvider>
+            {identity && location === routes.GENERATE_CREDENTIAL_PICKACCOUNT ? (
+                <Form.TextArea
+                    className={clsx('body1', styles.value)}
+                    defaultValue={address}
+                    name={fieldNames.address}
+                    placeholder="Paste the account address here"
+                    rules={{
+                        required: 'Please enter address',
+                        ...commonAddressValidators,
+                    }}
+                />
             ) : (
                 <h2 className={styles.value}>
                     {' '}
                     {address || 'To be determined'}{' '}
                 </h2>
             )}
+            <Label>Account name:</Label>
+            {identity && location === routes.GENERATE_CREDENTIAL_PICKACCOUNT ? (
+                <Form.Input
+                    className={clsx('body1', styles.value)}
+                    defaultValue={accountName}
+                    name={fieldNames.accountName}
+                    placeholder="Name of account"
+                    rules={{
+                        required: 'Please enter account name',
+                    }}
+                />
+            ) : (
+                <h2 className={styles.value}>
+                    {' '}
+                    {accountName || 'To be determined'}{' '}
+                </h2>
+            )}
+
             <Label>Identicon:</Label>
-            {credentialBlob?.credential ? (
-                <Identicon data={JSON.stringify(credentialBlob?.credential)} />
+            {credential?.credential ? (
+                <Identicon data={JSON.stringify(credential?.credential)} />
             ) : (
                 <h2 className={styles.value}>To be generated</h2>
             )}

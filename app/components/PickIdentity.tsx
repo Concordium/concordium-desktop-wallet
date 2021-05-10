@@ -4,11 +4,12 @@ import { ClassName, Identity } from '~/utils/types';
 import { confirmedIdentitiesSelector } from '~/features/IdentitySlice';
 import IdentityCard from '~/components/IdentityCard';
 import CardList from '~/cross-app-components/CardList';
+import { noOp } from '~/utils/basicHelpers';
 
 interface Props extends ClassName {
     chosenIdentity?: Identity;
-    setReady: (ready: boolean) => void;
-    setIdentity: (identity: Identity) => void;
+    setReady?(ready: boolean): void;
+    setIdentity(identity: Identity): void;
 }
 
 /**
@@ -16,7 +17,7 @@ interface Props extends ClassName {
  */
 export default function PickIdentity({
     chosenIdentity,
-    setReady,
+    setReady = noOp,
     setIdentity,
     className,
 }: Props): JSX.Element {

@@ -1,15 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
-import { Identity } from '~/utils/types';
+import { FormProvider, useForm } from 'react-hook-form';
 import PageLayout from '~/components/PageLayout';
 import routes from '~/constants/routes.json';
-import { CredentialBlob } from './types';
-import generateCredentialContext from './GenerateCredentialContext';
+import { AccountForm } from './types';
 import SingleColumnRouter from './SingleColumnRouter';
 import SplitViewRouter from './SplitViewRouter';
-import { AttributeKey } from '~/utils/identityHelpers';
 
 function nextLocation(currentLocation: string) {
     switch (currentLocation) {
@@ -36,14 +34,12 @@ export default function GenerateCredential(): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
 
-    const credential = useState<CredentialBlob | undefined>();
-    const isReady = useState(false);
-    const address = useState<string>('');
-    const attributes = useState<AttributeKey[]>([]);
-    const identity = useState<Identity | undefined>();
+    const form = useForm<AccountForm>({
+        mode: 'onChange',
+        shouldUnregister: false,
+    });
 
     const nextPage = () => {
-        isReady[1](false);
         dispatch(push(nextLocation(location)));
     };
 
@@ -55,15 +51,7 @@ export default function GenerateCredential(): JSX.Element {
             <PageLayout.Container
                 closeRoute={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
             >
-                <generateCredentialContext.Provider
-                    value={{
-                        credential,
-                        address,
-                        attributes,
-                        isReady,
-                        identity,
-                    }}
-                >
+                <FormProvider {...form}>
                     <Switch>
                         <Route
                             path={routes.GENERATE_CREDENTIAL_EXPORT}
@@ -80,7 +68,7 @@ export default function GenerateCredential(): JSX.Element {
                             )}
                         />
                     </Switch>
-                </generateCredentialContext.Provider>
+                </FormProvider>
             </PageLayout.Container>
         </PageLayout>
     );

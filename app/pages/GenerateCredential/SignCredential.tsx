@@ -1,12 +1,15 @@
-import React, { useContext } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useFormContext } from 'react-hook-form';
+import { Redirect } from 'react-router';
+import routes from '~/constants/routes.json';
 import { createCredentialInfo } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { globalSelector } from '~/features/GlobalSlice';
 import pairWallet from '~/utils/WalletPairing';
-import generateCredentialContext from './GenerateCredentialContext';
+import { AccountForm, CredentialBlob, fieldNames } from './types';
 
 /**
  * Component for creating the credential information. The user is prompted to sign
@@ -14,13 +17,21 @@ import generateCredentialContext from './GenerateCredentialContext';
  */
 export default function SignCredential(): JSX.Element {
     const global = useSelector(globalSelector);
-    const {
-        identity: [identity],
-        attributes: [attributes],
-        address: [address],
-        isReady: [, setReady],
-        credential: [, setCredential],
-    } = useContext(generateCredentialContext);
+    const { getValues, register, setValue } = useFormContext<AccountForm>();
+
+    const { address, identity, chosenAttributes } = getValues();
+    const shouldRedirect = !address || !identity;
+
+    useEffect(() => {
+        if (!shouldRedirect) {
+            register(fieldNames.credential, { required: true });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    if (shouldRedirect) {
+        return <Redirect to={routes.GENERATE_CREDENTIAL_PICKIDENTITY} />;
+    }
 
     async function sign(
         ledger: ConcordiumLedgerClient,
@@ -48,19 +59,22 @@ export default function SignCredential(): JSX.Element {
             identity,
             credentialNumber,
             global,
-            attributes,
+            chosenAttributes,
             setMessage,
             ledger,
             address
         );
-        setCredential({
+        const blob: CredentialBlob = {
             credential,
             address,
             credentialNumber,
             identityId: identity.id,
+        };
+        setValue(fieldNames.credential, blob, {
+            shouldDirty: true,
+            shouldValidate: true,
         });
         setMessage('Credential generated succesfully!');
-        setReady(true);
     }
 
     return <SimpleLedger ledgerCall={sign} />;

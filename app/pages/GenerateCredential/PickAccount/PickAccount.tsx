@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Redirect, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
+import { Controller, useFormContext } from 'react-hook-form';
 import { Account, AccountInfo, AccountStatus } from '~/utils/types';
 import AccountCard from '~/components/AccountCard';
-import { isValidAddress } from '~/utils/accountHelpers';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
 import Button from '~/cross-app-components/Button';
 import routes from '~/constants/routes.json';
@@ -14,87 +14,87 @@ import ConnectionStatusComponent, {
 } from '~/components/ConnectionStatusComponent';
 import SelectIdentityAttributes from '~/components/SelectIdentityAttributes';
 import CardList from '~/cross-app-components/CardList';
-import generateCredentialContext from '../GenerateCredentialContext';
 
 import generalStyles from '../GenerateCredential.module.scss';
 import styles from './PickAccount.module.scss';
+import { AccountForm, fieldNames } from '../types';
 
-const addressLength = 50;
-const mustBeDeployedMessage = 'Address must belong to an deployed account';
-const invalidAddres = 'Address format is invalid';
-
-interface Props {
-    setAccountValidationError: (error?: string) => void;
-    accountValidationError?: string;
-}
+const mustBeDeployedMessage = 'Address must belong to a deployed account';
 
 /**
  * Displays the currently chosen account's information.
  * Allows the user to reveal attributes.
  */
-export default function PickAccount({
-    accountValidationError,
-    setAccountValidationError,
-}: Props): JSX.Element {
+export default function PickAccount(): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname;
     const {
-        address: [address],
-        identity: [identity],
-        isReady: [isReady, setReady],
-        attributes: [chosenAttributes, setChosenAttributes],
-    } = useContext(generateCredentialContext);
+        getValues,
+        register,
+        errors,
+        setValue,
+        trigger,
+        clearErrors,
+        control,
+        formState,
+        watch,
+    } = useFormContext<AccountForm>();
+    const { identity } = getValues();
+    const { address, accountName, accountInfo } = watch();
+    const shouldRedirect = !identity;
 
     const [status, setStatus] = useState<Status>(Status.Pending);
-    const [accountInfo, setAccountInfo] = useState<AccountInfo | undefined>(
-        undefined
-    );
+
+    function setAccountInfo(info: AccountInfo | undefined): void {
+        setValue(fieldNames.accountInfo, info, {
+            shouldDirty: true,
+            shouldValidate: true,
+        });
+    }
 
     useEffect(() => {
-        let validAddress = true;
-        if (!address || address.length !== addressLength) {
-            validAddress = false;
-            setAccountValidationError(undefined);
-        } else if (!isValidAddress(address)) {
-            validAddress = false;
-            setAccountValidationError(invalidAddres);
+        if (!shouldRedirect) {
+            register(fieldNames.accountInfo, {
+                required: true,
+            });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-        if (validAddress) {
+    useEffect(() => {
+        if (!errors.address && address) {
             setStatus(Status.Loading);
             getAccountInfoOfAddress(address)
                 .then((loadedAccountInfo) => {
-                    setStatus(
-                        loadedAccountInfo ? Status.Successful : Status.Failed
-                    );
+                    // eslint-disable-next-line promise/always-return
+                    if (!loadedAccountInfo) {
+                        throw new Error();
+                    }
+
+                    setStatus(Status.Successful);
                     setAccountInfo(loadedAccountInfo);
-                    setAccountValidationError(
-                        loadedAccountInfo ? undefined : mustBeDeployedMessage
-                    );
-                    return setReady(Boolean(loadedAccountInfo));
                 })
                 .catch(() => {
                     setStatus(Status.Failed);
-                    setAccountValidationError('Unable to reach node');
-                    setReady(false);
+                    trigger(fieldNames.accountInfo);
                 });
         } else {
             setAccountInfo(undefined);
-            setReady(false);
             setStatus(Status.Pending);
+            clearErrors(fieldNames.accountInfo);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [address]);
 
-    if (!identity) {
+    if (shouldRedirect) {
         return <Redirect to={routes.GENERATE_CREDENTIAL_PICKIDENTITY} />;
     }
 
     const fakeAccount: Account = {
         status: AccountStatus.Confirmed,
-        identityName: '',
+        identityName: identity.name,
         address,
-        name: 'Account',
+        name: accountName || 'Name pending',
         identityId: -1,
         maxTransactionId: -1,
         isInitial: false,
@@ -118,7 +118,9 @@ export default function PickAccount({
                 )}
             >
                 <ConnectionStatusComponent
-                    failedMessage={accountValidationError}
+                    failedMessage={
+                        errors.accountInfo ? mustBeDeployedMessage : undefined
+                    }
                     status={status}
                 />
             </div>
@@ -133,11 +135,20 @@ export default function PickAccount({
             <CardList className={styles.accountWrapper}>
                 {accountDisplay}
                 {isRevealAttributesRoute && (
-                    <SelectIdentityAttributes
-                        className={generalStyles.card}
-                        chosenAttributes={chosenAttributes}
-                        setChosenAttributes={setChosenAttributes}
-                        identity={identity}
+                    <Controller
+                        name={fieldNames.chosenAttributes}
+                        control={control}
+                        render={({ onBlur, onChange, value }) => (
+                            <SelectIdentityAttributes
+                                className={generalStyles.card}
+                                identity={identity}
+                                chosenAttributes={value}
+                                setChosenAttributes={(a) => {
+                                    onChange(a);
+                                    onBlur();
+                                }}
+                            />
+                        )}
                     />
                 )}
             </CardList>
@@ -145,7 +156,7 @@ export default function PickAccount({
                 <Button
                     className={styles.button}
                     inverted
-                    disabled={!isReady}
+                    disabled={!formState.isValid}
                     onClick={() =>
                         dispatch(
                             push(routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES)

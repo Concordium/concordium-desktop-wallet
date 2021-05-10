@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router';
 import Button from '~/cross-app-components/Button';
 import routes from '~/constants/routes.json';
@@ -30,16 +30,20 @@ export default function SingleColumnRouter({
     onNext,
     location,
 }: Props): JSX.Element {
+    const [canContinue, setCanContinue] = useState(false);
+
     return (
         <div>
             <h2>{getHeader(location.pathname)}</h2>
             <p>{getDescription(location.pathname)}</p>
             <Switch>
                 <Route>
-                    <ExportCredential />
+                    <ExportCredential onExported={setCanContinue} />
                 </Route>
             </Switch>
-            <Button onClick={onNext}>Finish</Button>
+            <Button disabled={!canContinue} onClick={onNext}>
+                Finish
+            </Button>
         </div>
     );
 }
