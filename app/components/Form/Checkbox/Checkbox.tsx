@@ -62,7 +62,7 @@ const Checkbox = forwardRef<HTMLInputElement, PropsWithChildren<CheckboxProps>>(
                     >
                         <Checkmark />
                     </div>
-                    {children && <div className={styles.text}>{children}</div>}
+                    {children}
                 </label>
                 <ErrorMessage>{error}</ErrorMessage>
             </div>

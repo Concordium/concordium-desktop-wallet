@@ -74,28 +74,10 @@ export async function insertNewCredential(
 ) {
     const parsed = {
         credId: credential.credId,
-        external: false,
         policy: JSON.stringify(credential.policy),
         accountAddress,
         credentialNumber,
         identityId,
-        credentialIndex,
-    };
-    await insertCredential(parsed);
-    return dispatch(addCredential(parsed));
-}
-
-export async function insertExternalCredential(
-    dispatch: Dispatch,
-    accountAddress: string,
-    credentialIndex: number | undefined,
-    credential: Pick<CredentialDeploymentInformation, 'credId' | 'policy'>
-) {
-    const parsed = {
-        credId: credential.credId,
-        external: true,
-        policy: JSON.stringify(credential.policy),
-        accountAddress,
         credentialIndex,
     };
     await insertCredential(parsed);

@@ -46,7 +46,7 @@ export function parseTime(
         timeStyle: 'short',
     }
 ) {
-    const dtFormat = new Intl.DateTimeFormat('en-GB', formatOptions);
+    const dtFormat = new Intl.DateTimeFormat('en-ZA', formatOptions);
 
     const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
     return dtFormat.format(new Date(timeStampCorrectUnit));
