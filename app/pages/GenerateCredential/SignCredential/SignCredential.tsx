@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useFormContext } from 'react-hook-form';
 import { Redirect } from 'react-router';
+import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import { createCredentialInfo } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -9,7 +10,10 @@ import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { globalSelector } from '~/features/GlobalSlice';
 import pairWallet from '~/utils/WalletPairing';
-import { AccountForm, CredentialBlob, fieldNames } from './types';
+import { AccountForm, CredentialBlob, fieldNames } from '../types';
+
+import generalStyles from '../GenerateCredential.module.scss';
+import styles from './SignCredential.module.scss';
 
 /**
  * Component for creating the credential information. The user is prompted to sign
@@ -77,5 +81,9 @@ export default function SignCredential(): JSX.Element {
         setMessage('Credential generated succesfully!');
     }
 
-    return <SimpleLedger ledgerCall={sign} />;
+    return (
+        <div className={clsx(generalStyles.card, styles.root)}>
+            <SimpleLedger ledgerCall={sign} />
+        </div>
+    );
 }
