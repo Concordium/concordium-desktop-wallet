@@ -15,7 +15,7 @@ import {
  * This method works on the assumption that there will never be multiple
  * credentials deployed on the same account using the same wallet.
  */
-async function findLocalDeployedCredential(
+export async function findLocalDeployedCredential(
     walletId: number,
     accountAddress: string
 ): Promise<(LocalCredential & DeployedCredential) | undefined> {
