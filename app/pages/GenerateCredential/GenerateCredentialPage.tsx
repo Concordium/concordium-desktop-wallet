@@ -9,6 +9,7 @@ import { CredentialBlob } from './types';
 import generateCredentialContext from './GenerateCredentialContext';
 import SingleColumnRouter from './SingleColumnRouter';
 import SplitViewRouter from './SplitViewRouter';
+import { AttributeKey } from '~/utils/identityHelpers';
 
 function nextLocation(currentLocation: string) {
     switch (currentLocation) {
@@ -38,7 +39,7 @@ export default function GenerateCredential(): JSX.Element {
     const credential = useState<CredentialBlob | undefined>();
     const isReady = useState(false);
     const address = useState<string>('');
-    const attributes = useState<string[]>([]);
+    const attributes = useState<AttributeKey[]>([]);
     const identity = useState<Identity | undefined>();
 
     const nextPage = () => {

@@ -8,11 +8,12 @@ import AccountCard from '~/components/AccountCard';
 import { isValidAddress } from '~/utils/accountHelpers';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
 import Button from '~/cross-app-components/Button';
-import RevealAttributes from '../RevealAttributes';
 import routes from '~/constants/routes.json';
 import ConnectionStatusComponent, {
     Status,
 } from '~/components/ConnectionStatusComponent';
+import SelectIdentityAttributes from '~/components/SelectIdentityAttributes';
+import CardList from '~/cross-app-components/CardList';
 import generateCredentialContext from '../GenerateCredentialContext';
 
 import generalStyles from '../GenerateCredential.module.scss';
@@ -41,7 +42,7 @@ export default function PickAccount({
         address: [address],
         identity: [identity],
         isReady: [isReady, setReady],
-        attributes: [, setChosenAttributes],
+        attributes: [chosenAttributes, setChosenAttributes],
     } = useContext(generateCredentialContext);
 
     const [status, setStatus] = useState<Status>(Status.Pending);
@@ -129,15 +130,17 @@ export default function PickAccount({
 
     return (
         <>
-            <div className={styles.accountWrapper}>
+            <CardList className={styles.accountWrapper}>
                 {accountDisplay}
                 {isRevealAttributesRoute && (
-                    <RevealAttributes
+                    <SelectIdentityAttributes
+                        className={generalStyles.card}
+                        chosenAttributes={chosenAttributes}
                         setChosenAttributes={setChosenAttributes}
                         identity={identity}
                     />
                 )}
-            </div>
+            </CardList>
             {!isRevealAttributesRoute && accountInfo && (
                 <Button
                     className={styles.button}
