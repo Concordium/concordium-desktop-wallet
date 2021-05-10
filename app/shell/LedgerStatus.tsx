@@ -13,14 +13,19 @@ import { getId } from '~/database/WalletDao';
 export default function ConnectedSidebar(): JSX.Element {
     const dispatch = useDispatch();
     const [hasBeenDisconnected, setDisconnected] = useState(true);
+    const [statusText, setStatusText] = useState('');
 
     const callback = useCallback(
         async (ledger: ConcordiumLedgerClient) => {
-            const walletIdentifier = await ledger.getPublicKeySilent(
-                getPairingPath()
-            );
-            const walletId = await getId(walletIdentifier.toString('hex'));
-            await dispatch(setCurrentWalletId(walletId));
+            try {
+                const walletIdentifier = await ledger.getPublicKeySilent(
+                    getPairingPath()
+                );
+                const walletId = await getId(walletIdentifier.toString('hex'));
+                await dispatch(setCurrentWalletId(walletId));
+            } catch (e) {
+                setStatusText('Pairing Failed');
+            }
         },
         [dispatch]
     );
@@ -41,9 +46,16 @@ export default function ConnectedSidebar(): JSX.Element {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status]);
 
+    useEffect(() => {
+        if (hasBeenDisconnected) {
+            setStatusText(isReady ? 'Device Ready' : 'Waiting for device');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [status]);
+
     return (
         <div className={clsx(styles.body, isReady && styles.greenText)}>
-            {isReady ? 'Device Ready' : 'Waiting for device'}
+            {statusText}
         </div>
     );
 }
