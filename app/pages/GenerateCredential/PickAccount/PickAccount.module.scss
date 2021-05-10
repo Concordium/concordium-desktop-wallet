@@ -1,11 +1,12 @@
 .accountWrapper {
-    grid-column: end;
+    grid-column: 2;
     grid-row: 3;
+    align-self: center;
 }
 
 .button {
-    grid-column: end;
-    grid-row: end;
+    composes: button from '../SplitViewRouter/SplitViewRouter.module.scss';
+    grid-column: 2;
 }
 
 .accountListElementPlaceholder {

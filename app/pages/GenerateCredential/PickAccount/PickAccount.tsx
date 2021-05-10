@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { useLocation } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
+import clsx from 'clsx';
 import { Account, AccountInfo, AccountStatus } from '~/utils/types';
 import AccountCard from '~/components/AccountCard';
 import { isValidAddress } from '~/utils/accountHelpers';
@@ -13,6 +14,8 @@ import ConnectionStatusComponent, {
     Status,
 } from '~/components/ConnectionStatusComponent';
 import generateCredentialContext from '../GenerateCredentialContext';
+
+import generalStyles from '../GenerateCredential.module.scss';
 import styles from './PickAccount.module.scss';
 
 const addressLength = 50;
@@ -40,10 +43,6 @@ export default function PickAccount({
         isReady: [isReady, setReady],
         attributes: [, setChosenAttributes],
     } = useContext(generateCredentialContext);
-
-    if (!identity) {
-        throw new Error('unexpected missing identity');
-    }
 
     const [status, setStatus] = useState<Status>(Status.Pending);
     const [accountInfo, setAccountInfo] = useState<AccountInfo | undefined>(
@@ -86,6 +85,10 @@ export default function PickAccount({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [address]);
 
+    if (!identity) {
+        return <Redirect to={routes.GENERATE_CREDENTIAL_PICKIDENTITY} />;
+    }
+
     const fakeAccount: Account = {
         status: AccountStatus.Confirmed,
         identityName: '',
@@ -99,11 +102,20 @@ export default function PickAccount({
     let accountDisplay;
     if (accountInfo) {
         accountDisplay = (
-            <AccountCard account={fakeAccount} accountInfo={accountInfo} />
+            <AccountCard
+                className={generalStyles.card}
+                account={fakeAccount}
+                accountInfo={accountInfo}
+            />
         );
-    } else {
+    } else if (address) {
         accountDisplay = (
-            <div className={styles.accountListElementPlaceholder}>
+            <div
+                className={clsx(
+                    generalStyles.card,
+                    styles.accountListElementPlaceholder
+                )}
+            >
                 <ConnectionStatusComponent
                     failedMessage={accountValidationError}
                     status={status}
@@ -126,7 +138,7 @@ export default function PickAccount({
                     />
                 )}
             </div>
-            {!isRevealAttributesRoute && (
+            {!isRevealAttributesRoute && accountInfo && (
                 <Button
                     className={styles.button}
                     inverted

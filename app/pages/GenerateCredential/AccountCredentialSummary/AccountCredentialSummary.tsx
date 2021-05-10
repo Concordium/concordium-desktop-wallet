@@ -67,6 +67,8 @@ export default function AccountCredentialSummary({
             {location === routes.GENERATE_CREDENTIAL_PICKACCOUNT ? (
                 <FormProvider {...form}>
                     <Form.TextArea
+                        className={clsx('body1', styles.value)}
+                        defaultValue={address}
                         name={addressForm}
                         placeholder="Paste the account address here"
                         rules={{
