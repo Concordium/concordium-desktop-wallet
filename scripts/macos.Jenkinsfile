@@ -10,7 +10,7 @@ pipeline {
                 sh '''\
                     # Extract version number
                     VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
-                    FILENAME_DMG="concordium-wallet-${VERSION}.dmg"
+                    FILENAME_DMG="${VERSION}/concordium-wallet-${VERSION}.dmg"
                     
                     # Fail if file already exists
                     check_uniqueness() {
@@ -44,7 +44,7 @@ pipeline {
                     # Build
                     yarn package
                 '''.stripIndent()
-                stash includes: 'release/Concordium Wallet-*.dmg', name: 'releaseDMG'
+                stash includes: 'release/concordium-wallet-*.dmg', name: 'releaseDMG'
             }
         }
         stage('Publish') {
@@ -57,7 +57,7 @@ pipeline {
 
                     #Prepare filenames
                     FILENAME_DMG="concordium-wallet-${VERSION}.dmg"
-                    OUT_FILENAME_DMG="${FILENAME_DMG}"
+                    OUT_FILENAME_DMG="${FILENAME_DMG}/${VERSION}"
                     
                     # Push to s3
                     aws s3 cp "release/${FILENAME_DMG}" "${S3_BUCKET}/${OUT_FILENAME_DMG}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
