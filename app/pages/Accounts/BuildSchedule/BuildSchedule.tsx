@@ -14,7 +14,7 @@ import { BuildScheduleDefaults } from '~/components/BuildSchedule/util';
 import { scheduledTransferCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import TransferView from '~/components/Transfers/TransferView';
-import styles from './Accounts.module.scss';
+import styles from './BuildSchedule.module.scss';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ButtonGroup from '~/components/ButtonGroup';
 
@@ -141,8 +141,8 @@ export default function BuildSchedule({ location }: Props) {
                     {' '}
                     Send fund with a release schedule{' '}
                 </h3>
-                <div className={styles.scheduleAmount}>
-                    <h2>
+                <div className="body3">
+                    <h2 className="m0">
                         {displayAsGTU(amount)} to {recipient.name}
                     </h2>
                     <DisplayEstimatedFee estimatedFee={estimatedFee} />

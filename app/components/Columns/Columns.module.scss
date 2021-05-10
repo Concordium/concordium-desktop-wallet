@@ -20,7 +20,7 @@ $columns-header-height: 28px;
 
 .column {
     position: relative;
-    flex: 0 1 100%;
+    flex-basis: 100%;
     display: flex;
     flex-direction: column;
 
@@ -33,7 +33,7 @@ $columns-header-height: 28px;
     }
 
     .rootVariableSize & {
-        flex: 1 0 auto;
+        flex: 1;
 
         &NoResize {
             flex-grow: 0;
