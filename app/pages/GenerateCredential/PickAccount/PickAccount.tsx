@@ -3,17 +3,17 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
 import { Account, AccountInfo, AccountStatus } from '~/utils/types';
-import AccountListElement from '~/components/AccountListElement';
+import AccountCard from '~/components/AccountCard';
 import { isValidAddress } from '~/utils/accountHelpers';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
 import Button from '~/cross-app-components/Button';
 import RevealAttributes from '../RevealAttributes';
 import routes from '~/constants/routes.json';
-import styles from './PickAccount.module.scss';
 import ConnectionStatusComponent, {
     Status,
 } from '~/components/ConnectionStatusComponent';
 import generateCredentialContext from '../GenerateCredentialContext';
+import styles from './PickAccount.module.scss';
 
 const addressLength = 50;
 const mustBeDeployedMessage = 'Address must belong to an deployed account';
@@ -99,10 +99,7 @@ export default function PickAccount({
     let accountDisplay;
     if (accountInfo) {
         accountDisplay = (
-            <AccountListElement
-                account={fakeAccount}
-                accountInfo={accountInfo}
-            />
+            <AccountCard account={fakeAccount} accountInfo={accountInfo} />
         );
     } else {
         accountDisplay = (

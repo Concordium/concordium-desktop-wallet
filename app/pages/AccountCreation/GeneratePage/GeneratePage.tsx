@@ -32,7 +32,7 @@ import ErrorModal from '~/components/SimpleErrorModal';
 import pairWallet from '~/utils/WalletPairing';
 import Columns from '~/components/Columns';
 import IdentityCard from '~/components/IdentityCard';
-import AccountListElement from '~/components/AccountListElement';
+import AccountCard from '~/components/AccountCard';
 import CardList from '~/cross-app-components/CardList';
 import { AttributeKey } from '~/utils/identityHelpers';
 
@@ -193,7 +193,7 @@ export default function AccountCreationGenerate({
                             identity={identity}
                             showAttributes={attributes}
                         />
-                        <AccountListElement
+                        <AccountCard
                             className={clsx(
                                 generalStyles.card,
                                 styles.alignRight

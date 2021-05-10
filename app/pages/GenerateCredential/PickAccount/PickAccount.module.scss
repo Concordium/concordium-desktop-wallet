@@ -9,7 +9,7 @@
 }
 
 .accountListElementPlaceholder {
-    composes: accountListElement from '../../../components/AccountListElement/AccountListElement.module';
+    composes: accountListElement from '../../../components/AccountCard/AccountCard.module.scss';
     min-height: 252px;
     position: relative;
     display: flex;
