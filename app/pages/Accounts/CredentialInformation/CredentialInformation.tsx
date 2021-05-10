@@ -39,13 +39,16 @@ export default function CredentialInformation({
         });
 
     return (
-        <Card>
+        <Card className="relative pB0">
             <div className={styles.header}>
                 <p>
                     Credentials on this account: {credentialsOfAccount.length}
                 </p>
                 <p>Signature threshold: {account.signatureThreshold}</p>
-                <CloseButton onClick={returnFunction} />
+                <CloseButton
+                    className={styles.closeButton}
+                    onClick={returnFunction}
+                />
             </div>
             <div className={styles.credentialList}>
                 {credentialsOfAccount.map(
@@ -57,6 +60,7 @@ export default function CredentialInformation({
                                 key={credential.credId}
                             >
                                 <SidedRow
+                                    className={styles.listElementRow}
                                     left="Credential ID:"
                                     right={
                                         <>
@@ -69,10 +73,12 @@ export default function CredentialInformation({
                                     }
                                 />
                                 <SidedRow
+                                    className={styles.listElementRow}
                                     left="Date of Creation:"
                                     right={formatDate(policy.createdAt)}
                                 />
                                 <SidedRow
+                                    className={styles.listElementRow}
                                     left="Valid to:"
                                     right={formatDate(policy.validTo)}
                                 />

@@ -86,14 +86,14 @@ h6,
     text-align: right;
 }
 
+.textCenter {
+    text-align: center;
+}
+
 .textFaded {
     color: $color-text-faded;
 }
 
 .textError {
     color: $color-error;
-}
-
-.textCenter {
-    text-align: center;
 }
