@@ -55,12 +55,11 @@ export function updateWalletIdReference<T extends HasWalletId>(
  * @returns true if the entry is a duplicate of an element in the existing list
  */
 export function isDuplicate<T>(entry: T, list: T[], fields: (keyof T)[]) {
-    const result = list.find((listElement) =>
+    return list.some((listElement) =>
         fields
             .map((field) => listElement[field] === entry[field])
             .every(Boolean)
     );
-    return !!result;
 }
 
 /**
@@ -210,9 +209,10 @@ async function insertNewAccountsAndCredentials(
 
 /**
  * Imports a list of completely new wallets, i.e. wallets that cannot be matched with
- * a wallet entry currently in the database. The logical ids of the wallets and identities
- * may change when inserted into the database, which means that the references between objects
- * are also updated as part of the import.
+ * a wallet entry currently in the database. This will also import the associated identities,
+ * credentials and accounts.
+ * The logical ids of the wallets and identities may change when inserted into the database,
+ * which means that the references between objects are also updated as part of the import.
  * @param newWallets the wallets that are new to this database
  * @param importedIdentities the total list of identities currently being imported
  */
@@ -236,7 +236,7 @@ async function importNewWallets(
     let identitiesWithUpdatedReferences: Identity[] = [];
 
     // Insert the new wallets into the database, and use their newly received
-    // walletIds to update the identities and credentials that reference them.
+    // walletIds to update the identities.
     for (let i = 0; i < newWallets.length; i += 1) {
         const wallet = newWallets[i];
 
@@ -288,16 +288,17 @@ async function importDuplicateWallets(
 
     // Partition the identities into those that match the existing data, and those that
     // do not.
-    const [duplicateIdentities, nonDuplicateIdentities] = partition(
-        attachedIdentities,
-        (attachedIdentity) =>
-            // TODO Any reason to not also check on identityObject?
-            isDuplicate(attachedIdentity, existingData.identities, [
-                'id',
-                'identityNumber',
-                'name',
-                'randomness',
-            ])
+    const [
+        duplicateIdentities,
+        nonDuplicateIdentities,
+    ] = partition(attachedIdentities, (attachedIdentity) =>
+        isDuplicate(attachedIdentity, existingData.identities, [
+            'id',
+            'identityNumber',
+            'identityObject',
+            'name',
+            'randomness',
+        ])
     );
 
     // For the identities that are one-to-one with what is in the database, we still have to
@@ -330,6 +331,7 @@ async function importDuplicateWallets(
     ] = partition(nonDuplicateIdentities, (nonDuplicateIdentity) =>
         isDuplicate(nonDuplicateIdentity, existingData.identities, [
             'identityNumber',
+            'identityObject',
             'name',
             'randomness',
         ])
@@ -512,13 +514,7 @@ export function hasNoDuplicate<T>(
     fields: (keyof T)[],
     commonFields: (keyof T)[] | undefined = undefined
 ) {
-    const allEqual = list.find((listElement) =>
-        fields
-            .map((field) => listElement[field] === entry[field])
-            .every(Boolean)
-    );
-
-    if (allEqual) {
+    if (isDuplicate(entry, list, fields)) {
         return false;
     }
 
