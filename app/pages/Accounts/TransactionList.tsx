@@ -1,9 +1,8 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Menu } from 'semantic-ui-react';
 import TransactionListElement from './TransactionListElement';
-import { TransferTransaction } from '../../utils/types';
-import { transactionsSelector } from '../../features/TransactionSlice';
+import { TransferTransaction } from '~/utils/types';
+import { transactionsSelector } from '~/features/TransactionSlice';
 
 interface Props {
     onTransactionClick: (transaction: TransferTransaction) => void;
@@ -17,17 +16,24 @@ interface Props {
 function TransactionList({ onTransactionClick }: Props): JSX.Element {
     const transactions = useSelector(transactionsSelector);
 
+    if (transactions.length === 0) {
+        return (
+            <h3 className="flex justifyCenter pB20">
+                This balance has no transactions yet.
+            </h3>
+        );
+    }
+
     return (
-        <Menu vertical fluid>
-            {transactions.map((transaction: TransferTransaction) => (
-                <Menu.Item
+        <>
+            {transactions.reverse().map((transaction: TransferTransaction) => (
+                <TransactionListElement
                     onClick={() => onTransactionClick(transaction)}
                     key={transaction.transactionHash || transaction.id}
-                >
-                    <TransactionListElement transaction={transaction} />
-                </Menu.Item>
+                    transaction={transaction}
+                />
             ))}
-        </Menu>
+        </>
     );
 }
 

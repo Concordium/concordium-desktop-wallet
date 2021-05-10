@@ -2,10 +2,9 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
-
 import routes from '~/constants/routes.json';
 import { accountsSelector } from '~/features/AccountSlice';
-import AccountListElement from '~/components/AccountListElement';
+import AccountCard from '~/components/AccountCard';
 
 import styles from './AccountCreation.module.scss';
 import Button from '~/cross-app-components/Button';
@@ -46,7 +45,7 @@ export default function AccountCreationFinal({
                     be finalized on the block-chain.
                 </p>
                 <div className="mT50 flexChildFill flexColumn justifySpaceBetween">
-                    <AccountListElement
+                    <AccountCard
                         account={account}
                         className={clsx(styles.card, 'marginCenter')}
                     />

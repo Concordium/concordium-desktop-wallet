@@ -1,20 +1,20 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-import { push } from 'connected-react-router';
-import { Button } from 'semantic-ui-react';
+import { useSelector } from 'react-redux';
 import SendImage from '@resources/svg/paperplane.svg';
 import MoreImage from '@resources/svg/more.svg';
+import UnshieldImage from '@resources/svg/unshield.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import SendEncryptedImage from '@resources/svg/shielded-paperplane.svg';
-import styles from './Accounts.module.scss';
 import routes from '~/constants/routes.json';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
+import ButtonNavLink from '~/components/ButtonNavLink';
+import styles from './AccountViewAction.module.scss';
 
 const more = {
     route: routes.ACCOUNTS_MORE,
     label: 'More',
     Image: MoreImage,
+    imageClassName: 'mB15',
     height: '10',
 };
 const viewingShieldedbuttons = [
@@ -22,13 +22,15 @@ const viewingShieldedbuttons = [
         route: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
         label: 'Send',
         Image: SendEncryptedImage,
+        imageClassName: styles.actionImage,
         height: '35',
     },
     {
         route: routes.ACCOUNTS_UNSHIELDAMOUNT,
         label: 'Unshield',
-        Image: ShieldImage, // TODO: Replace with unshield image
-        height: '30',
+        Image: UnshieldImage,
+        imageClassName: styles.actionImage,
+        height: '40',
     },
     more,
 ];
@@ -37,12 +39,14 @@ const viewingUnshieldedbuttons = [
         route: routes.ACCOUNTS_SIMPLETRANSFER,
         label: 'Send',
         Image: SendImage,
+        imageClassName: styles.actionImage,
         height: '30',
     },
     {
         route: routes.ACCOUNTS_SHIELDAMOUNT,
         label: 'Shield',
         Image: ShieldImage,
+        imageClassName: styles.actionImage,
         height: '30',
     },
     more,
@@ -50,8 +54,6 @@ const viewingUnshieldedbuttons = [
 
 export default function AccountViewActions() {
     const viewingShielded = useSelector(viewingShieldedSelector);
-    const location = useLocation();
-    const dispatch = useDispatch();
 
     let buttons = [];
     if (viewingShielded) {
@@ -61,18 +63,17 @@ export default function AccountViewActions() {
     }
 
     return (
-        <Button.Group>
-            {buttons.map(({ route, label, Image, height }) => (
-                <Button
-                    key={route + label}
-                    onClick={() => dispatch(push(route))}
-                    className={styles.accountActionButton}
-                    disabled={location.pathname.startsWith(route)}
+        <div className={styles.actionButtonsCard}>
+            {buttons.map(({ route, label, Image, imageClassName, height }) => (
+                <ButtonNavLink
+                    key={route}
+                    className={styles.actionButton}
+                    to={route}
                 >
-                    <Image height={height} className={styles.actionImage} />
+                    <Image height={height} className={imageClassName} />
                     {label}
-                </Button>
+                </ButtonNavLink>
             ))}
-        </Button.Group>
+        </div>
     );
 }

@@ -1,19 +1,44 @@
 import React from 'react';
+import clsx from 'clsx';
 import { useSelector } from 'react-redux';
-import { Grid, Icon } from 'semantic-ui-react';
-import { parseTime } from '../../utils/timeHelpers';
-import { getGTUSymbol, displayAsGTU } from '../../utils/gtu';
+import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
+import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
+import Warning from '@resources/svg/warning.svg';
+import { parseTime } from '~/utils/timeHelpers';
+import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import {
     TransferTransaction,
     TransactionStatus,
     OriginType,
     TransactionKindString,
     Account,
-} from '../../utils/types';
-import { chosenAccountSelector } from '../../features/AccountSlice';
-import { viewingShieldedSelector } from '../../features/TransactionSlice';
-import SidedRow from '~/components/SemanticSidedRow';
-import { isFailed } from '../../utils/transactionHelpers';
+} from '~/utils/types';
+import { chosenAccountSelector } from '~/features/AccountSlice';
+import { viewingShieldedSelector } from '~/features/TransactionSlice';
+import SidedRow from '~/components/SidedRow';
+import { isFailed } from '~/utils/transactionHelpers';
+import styles from './Transactions.module.scss';
+
+const isInternalTransfer = (transaction: TransferTransaction) =>
+    [
+        TransactionKindString.TransferToEncrypted,
+        TransactionKindString.TransferToPublic,
+    ].includes(transaction.transactionKind);
+
+const isGreen = (
+    transaction: TransferTransaction,
+    viewingShielded: boolean,
+    isOutgoingTransaction: boolean
+) => {
+    const kind = transaction.transactionKind;
+    if (TransactionKindString.TransferToEncrypted === kind) {
+        return viewingShielded;
+    }
+    if (TransactionKindString.TransferToPublic === kind) {
+        return !viewingShielded && BigInt(transaction.total) > 0n;
+    }
+    return !isOutgoingTransaction;
+};
 
 function determineOutgoing(transaction: TransferTransaction, account: Account) {
     return transaction.fromAddress === account.address;
@@ -23,6 +48,9 @@ function getName(
     transaction: TransferTransaction,
     isOutgoingTransaction: boolean
 ) {
+    if (isInternalTransfer(transaction)) {
+        return '';
+    }
     if (isOutgoingTransaction) {
         // Current Account is the sender
         if (transaction.toAddressName !== undefined) {
@@ -62,12 +90,7 @@ function parseShieldedAmount(
     isOutgoingTransaction: boolean
 ) {
     if (transaction.decryptedAmount) {
-        if (
-            transaction.transactionKind ===
-                TransactionKindString.TransferToEncrypted ||
-            transaction.transactionKind ===
-                TransactionKindString.TransferToPublic
-        ) {
+        if (isInternalTransfer(transaction)) {
             return buildCostFreeAmountString(
                 BigInt(transaction.decryptedAmount)
             );
@@ -125,17 +148,17 @@ function parseAmount(
 function displayType(kind: TransactionKindString) {
     switch (kind) {
         case TransactionKindString.TransferWithSchedule:
-            return ' (schedule)';
+            return <i className="mL10">(With schedule)</i>;
         case TransactionKindString.TransferToEncrypted:
-            return ' (Shielded)';
+            return <i>Shielded amount</i>;
         case TransactionKindString.TransferToPublic:
-            return ' (Unshielded)';
+            return <i>Unshielded amount</i>;
         case TransactionKindString.BakingReward:
-            return 'Baker reward';
+            return <i>Baker reward</i>;
         case TransactionKindString.BlockReward:
-            return 'Block reward';
+            return <i>Block reward</i>;
         case TransactionKindString.FinalizationReward:
-            return 'Finalization reward';
+            return <i>Finalization reward</i>;
         default:
             return '';
     }
@@ -146,9 +169,11 @@ function statusSymbol(status: TransactionStatus) {
         case TransactionStatus.Pending:
             return '';
         case TransactionStatus.Committed:
-            return '\u2713';
+            return <CheckmarkIcon className={styles.checkmark} height="10" />;
         case TransactionStatus.Finalized:
-            return '\u2713\u2713';
+            return (
+                <DoubleCheckmarkIcon className={styles.checkmark} height="10" />
+            );
         case TransactionStatus.Rejected:
             return '!';
         default:
@@ -158,12 +183,13 @@ function statusSymbol(status: TransactionStatus) {
 
 interface Props {
     transaction: TransferTransaction;
+    onClick?: () => void;
 }
 
 /**
  * Displays the given transaction basic information.
  */
-function TransactionListElement({ transaction }: Props): JSX.Element {
+function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
     const account = useSelector(chosenAccountSelector);
     const viewingShielded = useSelector(viewingShieldedSelector);
     if (!account) {
@@ -178,21 +204,49 @@ function TransactionListElement({ transaction }: Props): JSX.Element {
         isOutgoingTransaction
     );
 
+    const failed = isFailed(transaction);
+
     return (
-        <Grid container columns={2}>
+        <div
+            className={clsx(
+                styles.transactionListElement,
+                !failed || styles.failedElement
+            )}
+            onClick={onClick}
+            onKeyPress={onClick}
+            tabIndex={0}
+            role="button"
+        >
+            {failed ? <Warning className={styles.warning} height="20" /> : null}
             <SidedRow
                 left={
                     <>
-                        {isFailed(transaction) ? (
-                            <Icon name="warning circle" color="red" />
-                        ) : null}
-                        {name.concat(displayType(transaction.transactionKind))}
+                        {name}
+                        {displayType(transaction.transactionKind)}
                     </>
                 }
-                right={amount}
+                right={
+                    <p
+                        className={clsx(
+                            'mV0',
+                            isGreen(
+                                transaction,
+                                viewingShielded,
+                                isOutgoingTransaction
+                            ) && styles.greenText
+                        )}
+                    >
+                        {amount}
+                    </p>
+                }
             />
             <SidedRow
-                left={`${time} ${statusSymbol(transaction.status)}`}
+                className="body4 textFaded"
+                left={
+                    <>
+                        {time} {statusSymbol(transaction.status)}
+                    </>
+                }
                 right={amountFormula.concat(
                     ` ${
                         transaction.status !== TransactionStatus.Finalized
@@ -201,7 +255,7 @@ function TransactionListElement({ transaction }: Props): JSX.Element {
                     }`
                 )}
             />
-        </Grid>
+        </div>
     );
 }
 

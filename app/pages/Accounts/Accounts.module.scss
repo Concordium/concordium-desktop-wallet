@@ -1,63 +1,19 @@
 @import 'config/bundle';
+@import './common';
 
-.listElement {
-    margin-bottom: 20px;
+.identityAttributesOfCredential {
+    composes: blueSeparator;
+    margin-left: -20px;
 }
 
-.accountActionButton {
-    height: 100px;
-    width: 30%;
+.releaseScheduleListHeader,
+.identityAttributesOfCredential,
+.releaseSchedule {
+    width: calc(100% + 40px);
 }
 
-.accountBalanceView {
-    background-color: #000;
-    text-align: center;
-    padding-bottom: 10px;
-}
-
-.accountBalanceView button {
-    margin-left: 20%;
-    margin-right: 20%;
-    margin-top: 20px;
-}
-
-.actionImage {
-    width: 100%;
-}
-
-.inverted {
-    filter: invert(100%);
-}
-
-.buildSchedule {
-    min-height: 850px;
-    text-align: center;
-    position: relative;
-
-    > div {
-        margin-bottom: 40px;
-    }
-
-    h2 {
-        margin-top: 0;
-    }
-}
-
-.buildScheduleCommon {
-    .title {
-        margin-top: 20px;
-        margin-bottom: 50px;
-    }
-
-    > * {
-        margin-bottom: 40px;
-    }
-}
-
-.scheduleAmount {
-    font-size: $font-size-body3;
-
-    h2 {
-        margin: 0;
-    }
+.identityAttribute,
+.releaseScheduleElement {
+    composes: greySeparator;
+    padding: 10px 20px;
 }

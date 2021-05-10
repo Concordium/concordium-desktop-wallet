@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import { useLocation } from 'react-router-dom';
 import { Segment } from 'semantic-ui-react';
 import { Account, AccountInfo, AccountStatus, Identity } from '~/utils/types';
-import AccountListElement from '~/components/AccountListElement';
+import AccountCard from '~/components/AccountCard';
 import { isValidAddress } from '~/utils/accountHelpers';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
 import Button from '~/cross-app-components/Button';
@@ -68,10 +68,7 @@ export default function PickAccount({
     return (
         <>
             <Segment textAlign="center" secondary loading={!accountInfo}>
-                <AccountListElement
-                    account={fakeAccount}
-                    accountInfo={accountInfo}
-                />
+                <AccountCard account={fakeAccount} accountInfo={accountInfo} />
             </Segment>
             {location === routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES ? (
                 <RevealAttributes

@@ -2,13 +2,15 @@ import React from 'react';
 import clsx from 'clsx';
 import MultiSigIcon from '@resources/svg/multisig.svg';
 import PendingImage from '@resources/svg/pending-small.svg';
+import RejectedImage from '@resources/svg/warning.svg';
 import ShieldImage from '@resources/svg/shield.svg';
+import BakerImage from '@resources/svg/baker.svg';
 import { displayAsGTU } from '~/utils/gtu';
 import { AccountInfo, Account, AccountStatus } from '~/utils/types';
 import { isInitialAccount } from '~/utils/accountHelpers';
 import SidedRow from '~/components/SidedRow';
 
-import styles from './AccountListElement.module.scss';
+import styles from './AccountCard.module.scss';
 
 function displayIdentity(
     account: Account,
@@ -42,7 +44,7 @@ interface Props {
  * the shielded balance (with argument true)
  * or the public balances (with argument false)
  */
-export default function AccountListElement({
+export default function AccountCard({
     account,
     accountInfo,
     onClick,
@@ -57,7 +59,7 @@ export default function AccountListElement({
         accountInfo && accountInfo.accountReleaseSchedule
             ? BigInt(accountInfo.accountReleaseSchedule.total)
             : 0n;
-    const hidden = account.allDecrypted ? null : (
+    const hidden = account.allDecrypted || (
         <>
             {' '}
             + <ShieldImage height="15" />
@@ -80,19 +82,28 @@ export default function AccountListElement({
             role="button"
         >
             <SidedRow
-                className={styles.firstRow}
                 left={
                     <>
-                        <b className={styles.inline}>
-                            {account.name}
-                            {account.status === AccountStatus.Pending ? (
-                                <PendingImage />
-                            ) : undefined}
-                        </b>
-                        {isInitialAccount(account) ? <>(Initial)</> : undefined}
-                        {accountInfo && accountInfo.accountBaker ? (
-                            <>(baker)</>
-                        ) : undefined}
+                        <b className={styles.inline}>{account.name}</b>
+                        {isInitialAccount(account) && '(Initial)'}
+                        {account.status === AccountStatus.Pending && (
+                            <PendingImage
+                                height="24"
+                                className={styles.statusImage}
+                            />
+                        )}
+                        {account.status === AccountStatus.Rejected && (
+                            <RejectedImage
+                                height="28"
+                                className={styles.statusImage}
+                            />
+                        )}
+                        {accountInfo && accountInfo.accountBaker && (
+                            <BakerImage
+                                height="25"
+                                className={styles.bakerImage}
+                            />
+                        )}
                     </>
                 }
                 right={displayIdentity(account, accountInfo)}
@@ -125,7 +136,7 @@ export default function AccountListElement({
             />
             <div className={styles.dividingLine} />
             <SidedRow
-                className={styles.row}
+                className={clsx(styles.row, 'mB0')}
                 left={<h3>Shielded Balance:</h3>}
                 right={
                     <h3>
