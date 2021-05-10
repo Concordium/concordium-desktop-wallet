@@ -23,13 +23,13 @@ pipeline {
 
                     # Prepare filenames
                     FILENAME_DEB="concordium-wallet-${VERSION}.deb"
-                    OUT_FILENAME_DEB="${FILENAME_DEB}/${VERSION}"
+                    OUT_FILENAME_DEB="${VERSION}/${FILENAME_DEB}"
 
                     FILENAME_RPM="concordium-wallet-${VERSION}.rpm"
-                    OUT_FILENAME_RPM="${FILENAME_RPM}/${VERSION}"
+                    OUT_FILENAME_RPM="${VERSION}/${FILENAME_RPM}"
 
                     FILENAME_APPIMAGE="concordium-wallet-${VERSION}.AppImage"
-                    OUT_FILENAME_APPIMAGE="${FILENAME_APPIMAGE}/${VERSION}"
+                    OUT_FILENAME_APPIMAGE="${VERSION}/${FILENAME_APPIMAGE}"
 
                     check_uniqueness() {
                         # Fail if file already exists
@@ -94,13 +94,13 @@ pipeline {
                     
                     # Prepare filenames
                     FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
-                    OUT_FILENAME_DEB="${FILENAME_DEB}/${VERSION}"
+                    OUT_FILENAME_DEB="${VERSION}/${FILENAME_DEB}"
 
                     FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
-                    OUT_FILENAME_RPM="${FILENAME_RPM}/${VERSION}"
+                    OUT_FILENAME_RPM="${VERSION}/${FILENAME_RPM}"
 
                     FILENAME_APPIMAGE="concordium-wallet-${VERSION}.AppImage"
-                    OUT_FILENAME_APPIMAGE="${FILENAME_APPIMAGE}/${VERSION}"
+                    OUT_FILENAME_APPIMAGE="${VERSION}/${FILENAME_APPIMAGE}"
                     
                     # Push to s3
                     aws s3 cp "release/${FILENAME_DEB}" "${S3_BUCKET}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
