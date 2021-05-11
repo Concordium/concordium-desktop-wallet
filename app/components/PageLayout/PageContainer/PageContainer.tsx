@@ -42,13 +42,13 @@ export default function PageContainer({
                 className
             )}
         >
+            {children}
             {!disableBack && (
                 <BackButton
                     className={styles.back}
                     onClick={() => dispatch(routerActions.goBack())}
                 />
             )}
-            {children}
             {closeRoute && (
                 <CloseButton
                     className={styles.close}

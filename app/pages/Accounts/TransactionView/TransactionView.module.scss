@@ -1,0 +1,45 @@
+@import 'config/bundle';
+@import '../common';
+
+.errorMessage,
+.title {
+    text-align: center;
+}
+
+.errorMessage {
+    color: $color-error;
+    padding-bottom: 10px;
+}
+
+.title,
+.errorMessage,
+.listElement {
+    composes: fillCardPadding;
+    composes: cardPadding;
+    composes: greySeparator;
+
+    &:not(:last-child) {
+        border-bottom: 0.5px solid $color-soft-grey;
+    }
+}
+
+.title {
+    padding-bottom: 20px;
+    margin-bottom: 0;
+}
+
+.listElement {
+    padding-top: 10px;
+}
+
+.copiableListElementLeftSide {
+    display: flex;
+    flex-direction: column;
+    word-break: break-word;
+}
+
+.copiableListElementTitle {
+    font-size: $font-size-body3;
+    color: $color-text-faded;
+    margin: 0;
+}

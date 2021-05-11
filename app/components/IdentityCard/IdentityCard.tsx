@@ -3,17 +3,15 @@ import clsx from 'clsx';
 import PendingImage from '@resources/svg/pending-small.svg';
 import SuccessImage from '@resources/svg/success-small.svg';
 import RejectedImage from '@resources/svg/warning-small.svg';
-import {
-    ChosenAttributes,
-    Identity,
-    IdentityObject,
-    IdentityStatus,
-} from '~/utils/types';
+import { Identity, IdentityObject, IdentityStatus } from '~/utils/types';
 import { formatDate } from '~/utils/timeHelpers';
 import Card from '~/cross-app-components/Card';
-import attributeNames from '~/constants/attributeNames.json';
 import SidedRow from '../SidedRow';
-import { formatAttributeValue } from '~/utils/identityHelpers';
+import {
+    AttributeKey,
+    attributeNamesMap,
+    formatAttributeValue,
+} from '~/utils/identityHelpers';
 
 import styles from './IdentityCard.module.scss';
 
@@ -22,7 +20,7 @@ interface Props {
     className?: string;
     onClick?: () => void;
     active?: boolean;
-    expanded?: boolean;
+    showAttributes?: boolean | AttributeKey[];
 }
 
 // Returns the image corresponding to the given status.
@@ -33,7 +31,7 @@ function statusImage(status: IdentityStatus) {
         case IdentityStatus.Rejected:
             return <RejectedImage />;
         case IdentityStatus.Pending:
-            return <PendingImage />;
+            return <PendingImage height="20" />;
         default:
             return undefined;
     }
@@ -48,7 +46,7 @@ function IdentityListElement({
     onClick,
     className,
     active = false,
-    expanded = false,
+    showAttributes = false,
 }: Props): JSX.Element {
     const identityProvider = JSON.parse(identity.identityProvider);
     const identityObject: IdentityObject | null = JSON.parse(
@@ -93,21 +91,27 @@ function IdentityListElement({
                         : undefined}
                 </div>
             </div>
-            {expanded && identityObject && (
+            {showAttributes && identityObject && (
                 <div className={styles.details}>
-                    {(Object.keys(
+                    {Object.entries(
                         identityObject.attributeList.chosenAttributes ?? {}
-                    ) as Array<keyof ChosenAttributes>).map((k) => (
-                        <SidedRow
-                            className={styles.detailsRow}
-                            key={k}
-                            left={(attributeNames as Record<string, string>)[k]}
-                            right={formatAttributeValue(
-                                k,
-                                identityObject.attributeList.chosenAttributes[k]
-                            )}
-                        />
-                    ))}
+                    )
+                        .filter(
+                            ([k]) =>
+                                showAttributes === true ||
+                                showAttributes.includes(k as AttributeKey)
+                        )
+                        .map(([k, v]) => (
+                            <SidedRow
+                                className={styles.detailsRow}
+                                key={k}
+                                left={attributeNamesMap[k as AttributeKey]}
+                                right={formatAttributeValue(
+                                    k as AttributeKey,
+                                    v
+                                )}
+                            />
+                        ))}
                 </div>
             )}
         </Card>

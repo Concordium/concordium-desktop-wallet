@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Identity, Account, AccountInfo } from '~/utils/types';
-import AccountListElement from '~/components/AccountListElement';
+import AccountCard from '~/components/AccountCard';
 import {
     accountsOfIdentitySelector,
     accountsInfoSelector,
@@ -62,7 +62,7 @@ export default function PickAccount({
             {accounts
                 .filter((a) => filter?.(a, accountsInfo[a.address]) ?? true)
                 .map((account: Account, index: number) => (
-                    <AccountListElement
+                    <AccountCard
                         key={account.address}
                         active={index === chosenIndex}
                         account={account}

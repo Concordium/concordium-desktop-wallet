@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as http from 'http';
+import * as https from 'https';
 import urls from '../constants/urls.json';
 import { walletProxytransactionLimit } from '../constants/externalConstants.json';
 import { TransferTransaction, IncomingTransaction } from './types';
@@ -7,6 +8,8 @@ import { TransferTransaction, IncomingTransaction } from './types';
 const walletProxy = axios.create({
     baseURL: urls.walletProxy,
 });
+
+const defaultTimeout = 60000;
 
 /**
  * This performs a http get Request, returning a Promise on the response.
@@ -24,9 +27,10 @@ export function getPromise(
         hostname: url.hostname,
         port: url.port,
         path: `${url.pathname}?${searchParams.toString()}`,
+        timeout: defaultTimeout,
     };
     return new Promise((resolve) => {
-        http.get(options, (res) => resolve(res));
+        https.get(options, (res) => resolve(res));
     });
 }
 
@@ -80,6 +84,7 @@ export async function performIdObjectRequest(
     idObjectRequest: string
 ) {
     const parameters = {
+        scope: 'identity',
         response_type: 'code',
         redirect_uri: redirectUri,
         state: JSON.stringify({
@@ -92,7 +97,11 @@ export async function performIdObjectRequest(
         if (!loc) {
             throw new Error('Unexpected no location in Response');
         }
-        return loc.substring(loc.indexOf('=') + 1);
+        if (loc[0] === '/') {
+            const urlObject = new URL(url);
+            return `https://${urlObject.hostname}${loc}`;
+        }
+        return loc;
     }
     const message = await getResponseBody(response);
     throw new Error(`Request failed: ${message}`);
