@@ -10,6 +10,7 @@ import RemoveBaker from './RemoveBaker';
 import ErrorBoundary from '~/components/ErrorBoundary';
 import routes from '~/constants/routes.json';
 import UpdateBakerStake from './UpdateBakerStake';
+import UpdateBakerRestakeEarnings from './UpdateBakerRestakeEarnings';
 
 function AccountTransactionRoutes(): JSX.Element {
     const { transactionKind: transactionKindRaw } = useParams<{
@@ -31,6 +32,8 @@ function AccountTransactionRoutes(): JSX.Element {
             return <RemoveBaker />;
         case TransactionKindId.Update_baker_stake:
             return <UpdateBakerStake />;
+        case TransactionKindId.Update_baker_restake_earnings:
+            return <UpdateBakerRestakeEarnings />;
         default:
             throw new Error(`unsupported transaction type: ${transactionKind}`);
     }

@@ -18,6 +18,8 @@ import {
     UpdateBakerKeys,
     UpdateBakerStake,
     instanceOfUpdateBakerStake,
+    instanceOfUpdateBakerRestakeEarnings,
+    UpdateBakerRestakeEarnings,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -32,6 +34,7 @@ import {
     serializeUpdateBakerKeys,
     serializeBakerKeyProofs,
     serializeUpdateBakerStake,
+    serializeUpdateBakerRestakeEarnings,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import { encodeWord16 } from '~/utils/serializationHelpers';
@@ -44,6 +47,7 @@ const INS_TRANSFER_WITH_SCHEDULE = 0x03;
 const INS_ADD_OR_UPDATE_BAKER = 0x13;
 const INS_REMOVE_BAKER = 0x14;
 const INS_UPDATE_BAKER_STAKE = 0x15;
+const INS_UPDATE_BAKER_RESTAKE_EARNINGS = 0x16;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -383,6 +387,37 @@ async function signUpdateBakerStake(
     return response.slice(0, 64);
 }
 
+async function signUpdateBakerRestakeEarnings(
+    transport: Transport,
+    path: number[],
+    transaction: UpdateBakerRestakeEarnings
+): Promise<Buffer> {
+    const payload = serializeUpdateBakerRestakeEarnings(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const cdata = Buffer.concat([pathAsBuffer(path), header, payload]);
+
+    const p1 = 0x00;
+    const p2 = 0x00;
+
+    const response = await transport.send(
+        0xe0,
+        INS_UPDATE_BAKER_RESTAKE_EARNINGS,
+        p1,
+        p2,
+        cdata
+    );
+
+    return response.slice(0, 64);
+}
+
 export default async function signTransfer(
     transport: Transport,
     path: number[],
@@ -411,6 +446,9 @@ export default async function signTransfer(
     }
     if (instanceOfUpdateBakerStake(transaction)) {
         return signUpdateBakerStake(transport, path, transaction);
+    }
+    if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
+        return signUpdateBakerRestakeEarnings(transport, path, transaction);
     }
     throw new Error(
         `The received transaction was not a supported transaction type`

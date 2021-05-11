@@ -10,6 +10,7 @@ import {
     instanceOfRemoveBaker,
     instanceOfUpdateBakerKeys,
     instanceOfUpdateBakerStake,
+    instanceOfUpdateBakerRestakeEarnings,
 } from '../../utils/types';
 import { lookupName } from '../../utils/transactionHelpers';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
@@ -20,6 +21,7 @@ import DisplayUpdateBakerKeys from './DisplayUpdateBakerKeys';
 import DisplayRemoveBaker from './DisplayRemoveBaker';
 import DisplayAccountCredentialsUpdate from '../DisplayAccountCredentialUpdate';
 import DisplayUpdateBakerStake from './DisplayUpdateBakerStake';
+import DisplayUpdateBakerRestakeEarnings from './DisplayUpdateBakerRestakeEarnings';
 
 interface Props {
     transaction: AccountTransaction;
@@ -61,6 +63,9 @@ export default function AccountTransactionDetails({ transaction }: Props) {
     }
     if (instanceOfUpdateBakerStake(transaction)) {
         return <DisplayUpdateBakerStake transaction={transaction} />;
+    }
+    if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
+        return <DisplayUpdateBakerRestakeEarnings transaction={transaction} />;
     }
     if (instanceOfRemoveBaker(transaction)) {
         return <DisplayRemoveBaker transaction={transaction} />;

@@ -17,6 +17,7 @@ import {
     BakerVerifyKeys,
     BakerKeyProofs,
     UpdateBakerStakePayload,
+    UpdateBakerRestakeEarningsPayload,
 } from './types';
 import {
     encodeWord32,
@@ -217,6 +218,15 @@ export function serializeUpdateBakerStake(payload: UpdateBakerStakePayload) {
     ]);
 }
 
+export function serializeUpdateBakerRestakeEarnings(
+    payload: UpdateBakerRestakeEarningsPayload
+) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Update_baker_restake_earnings),
+        serializeBoolean(payload.restakeEarnings),
+    ]);
+}
+
 export function serializeTransferPayload(
     kind: TransactionKind,
     payload: TransactionPayload
@@ -250,6 +260,10 @@ export function serializeTransferPayload(
         case TransactionKind.Update_baker_stake:
             return serializeUpdateBakerStake(
                 payload as UpdateBakerStakePayload
+            );
+        case TransactionKind.Update_baker_restake_earnings:
+            return serializeUpdateBakerRestakeEarnings(
+                payload as UpdateBakerRestakeEarningsPayload
             );
         default:
             throw new Error('Unsupported transaction kind');

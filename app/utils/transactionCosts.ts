@@ -25,6 +25,7 @@ export const energyConstants = {
     UpdateBakerKeys: 4050n,
     RemoveBaker: 300n,
     UpdateBakerStake: 300n,
+    UpdateBakerRestakeEarnings: 300n,
 };
 
 /**
@@ -41,6 +42,7 @@ export const payloadSizeEstimate = {
     UpdateBakerKeys: 353, // TransactionKind (Word8) + keys (160 bytes) + proofs(192 bytes)
     RemoveBaker: 1, // TransactionKind (Word8)
     UpdateBakerStake: 1 + 8, // TransactionKind (Word8) + staked amount (8 bytes)
+    UpdateBakerRestakeEarnings: 1 + 1, // TransactionKind (Word8) + restake earnings (1 byte)
 };
 
 /**
@@ -92,6 +94,8 @@ function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
             return payloadSizeEstimate.RemoveBaker;
         case TransactionKindId.Update_baker_stake:
             return payloadSizeEstimate.UpdateBakerStake;
+        case TransactionKindId.Update_baker_restake_earnings:
+            return payloadSizeEstimate.UpdateBakerStake;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
@@ -114,6 +118,8 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
         case TransactionKindId.Remove_baker:
             return energyConstants.RemoveBaker;
         case TransactionKindId.Update_baker_stake:
+            return energyConstants.UpdateBakerStake;
+        case TransactionKindId.Update_baker_restake_earnings:
             return energyConstants.UpdateBakerStake;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);

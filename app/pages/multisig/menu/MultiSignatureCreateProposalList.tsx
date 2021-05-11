@@ -117,6 +117,11 @@ const accountTransactionTypes: [
         TransactionKind.Update_baker_stake,
         'Update Baker Stake',
     ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_restake_earnings,
+        'Update Baker Restake Earnings',
+    ],
 ];
 
 /**

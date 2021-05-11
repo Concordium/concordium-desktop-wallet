@@ -10,6 +10,7 @@ import {
     instanceOfRemoveBaker,
     instanceOfUpdateBakerKeys,
     instanceOfUpdateBakerStake,
+    instanceOfUpdateBakerRestakeEarnings,
 } from '~/utils/types';
 import ChainUpdateProposalStatus from './ChainUpdateProposalStatus';
 import GtuTransferProposalStatus from './GtuTransferProposalStatus';
@@ -19,6 +20,7 @@ import AddBakerProposalStatus from './AddBakerStatus';
 import UpdateBakerKeysProposalStatus from './UpdateBakerKeysStatus';
 import RemoveBakerProposalStatus from './RemoveBakerStatus';
 import UpdateBakerStakeProposalStatus from './UpdateBakerStake';
+import UpdateBakerRestakeEarningsProposalStatus from './UpdateBakerRestakeEarnings';
 
 interface ProposalStatusProps
     extends Pick<ProposalStatusViewProps, 'className'> {
@@ -88,6 +90,16 @@ export default function ProposalStatus({
     if (instanceOfUpdateBakerStake(parsed)) {
         return (
             <UpdateBakerStakeProposalStatus
+                {...proposalStatusProps}
+                transaction={parsed}
+                status={status}
+            />
+        );
+    }
+
+    if (instanceOfUpdateBakerRestakeEarnings(parsed)) {
+        return (
+            <UpdateBakerRestakeEarningsProposalStatus
                 {...proposalStatusProps}
                 transaction={parsed}
                 status={status}
