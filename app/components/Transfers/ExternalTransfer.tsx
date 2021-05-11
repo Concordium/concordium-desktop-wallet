@@ -13,6 +13,7 @@ interface Props {
     exitFunction(): void;
     estimatedFee?: Fraction;
     amountHeader: string;
+    senderAddress: string;
 }
 
 /**
@@ -23,6 +24,7 @@ export default function ExternalTransfer({
     amountHeader,
     estimatedFee,
     exitFunction,
+    senderAddress,
 }: Props) {
     const location = useLocation<TransferState>();
 
@@ -62,7 +64,12 @@ export default function ExternalTransfer({
                     />
                 );
             case locations.pickRecipient:
-                return <PickRecipient pickRecipient={chooseRecipientOnClick} />;
+                return (
+                    <PickRecipient
+                        pickRecipient={chooseRecipientOnClick}
+                        senderAddress={senderAddress}
+                    />
+                );
             case locations.transferSubmitted: {
                 return <FinalPage location={location} />;
             }

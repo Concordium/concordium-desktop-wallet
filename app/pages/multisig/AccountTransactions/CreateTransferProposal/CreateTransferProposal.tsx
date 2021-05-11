@@ -286,6 +286,7 @@ export default function CreateTransferProposal({
                                             setReady={setReady}
                                             setRecipient={setRecipient}
                                             recipient={recipient}
+                                            senderAddress={account?.address}
                                         />
                                     </div>
                                 )}
