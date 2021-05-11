@@ -1,0 +1,18 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    max-width: 600px;
+    min-height: 100%;
+    padding: 35px 0 80px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 0;
+}
+
+.description {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}

@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { useFormContext } from 'react-hook-form';
+import { Redirect } from 'react-router';
 import { saveFile } from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
 import { insertNewCredential } from '~/features/CredentialSlice';
 import { addExternalAccount } from '~/features/AccountSlice';
 import { findAccounts } from '~/database/AccountDao';
+import routes from '~/constants/routes.json';
 import AccountCredentialSummary from './AccountCredentialSummary';
-import { AccountForm } from './types';
+import savedStateContext from './savedStateContext';
 
 interface Props {
     onExported(didExport: boolean): void;
@@ -18,8 +19,7 @@ interface Props {
  */
 export default function ExportCredential({ onExported }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const { getValues } = useFormContext<AccountForm>();
-    const { credential } = getValues();
+    const { credential, accountName } = useContext(savedStateContext);
 
     useEffect(() => {
         onExported(false);
@@ -53,12 +53,17 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
                 addExternalAccount(
                     dispatch,
                     credential.address,
+                    accountName || credential.address.substr(0, 8),
                     credential.identityId,
                     1
                 );
             }
             onExported(true);
         }
+    }
+
+    if (!credential) {
+        return <Redirect to={routes.GENERATE_CREDENTIAL_PICKIDENTITY} />;
     }
 
     return (

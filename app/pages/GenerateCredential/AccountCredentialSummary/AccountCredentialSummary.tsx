@@ -82,11 +82,13 @@ export default function AccountCredentialSummary({
                 </h2>
             )}
 
-            <Label>Identicon:</Label>
             {credential?.credential ? (
                 <Identicon data={JSON.stringify(credential?.credential)} />
             ) : (
-                <h2 className={styles.value}>To be generated</h2>
+                <>
+                    <Label>Identicon:</Label>
+                    <h2 className={styles.value}>To be generated</h2>
+                </>
             )}
             <Button />
         </Card>

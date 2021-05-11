@@ -41,14 +41,14 @@ export default function GenerateCredential(): JSX.Element {
     });
     const { getValues } = form;
 
-    const nextPage = (path: string = nextLocation(pathname)) => {
-        const formValues = getValues();
-        setSavedState((saved) => {
-            console.log(formValues);
-            return { ...saved, ...formValues };
-        });
+    function nextPage(path: string = nextLocation(pathname)): void {
+        setSavedState((saved) => ({ ...saved, ...getValues() }));
         dispatch(push(path));
-    };
+    }
+
+    function resetChosenAttributes(): void {
+        setSavedState(({ chosenAttributes, ...saved }) => saved);
+    }
 
     return (
         <PageLayout>
@@ -57,6 +57,7 @@ export default function GenerateCredential(): JSX.Element {
             </PageLayout.Header>
             <PageLayout.Container
                 closeRoute={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
+                disableBack={pathname === routes.GENERATE_CREDENTIAL_EXPORT}
             >
                 <savedStateContext.Provider value={savedState}>
                     <FormProvider {...form}>
@@ -75,6 +76,9 @@ export default function GenerateCredential(): JSX.Element {
                                     <SplitViewRouter
                                         {...props}
                                         onNext={nextPage}
+                                        resetChosenAttributes={
+                                            resetChosenAttributes
+                                        }
                                     />
                                 )}
                             />

@@ -30,8 +30,8 @@ export default function SimpleLedger({
         >
             <Ledger ledgerCallback={ledgerCall}>
                 {({ isReady, statusView, submitHandler = asyncNoOp }) => (
-                    <div className={styles.content}>
-                        {statusView}
+                    <>
+                        <div className={styles.status}>{statusView}</div>
                         <Button
                             className={styles.submit}
                             onClick={submitHandler}
@@ -39,7 +39,7 @@ export default function SimpleLedger({
                         >
                             Submit
                         </Button>
-                    </div>
+                    </>
                 )}
             </Ledger>
         </Card>

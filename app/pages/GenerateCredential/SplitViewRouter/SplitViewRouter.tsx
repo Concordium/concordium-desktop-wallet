@@ -1,6 +1,7 @@
 import React from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router';
+import { Route, RouteComponentProps, Switch, useLocation } from 'react-router';
 import { useFormContext } from 'react-hook-form';
+import clsx from 'clsx';
 import Button from '~/cross-app-components/Button';
 import routes from '~/constants/routes.json';
 import AccountCredentialSummary from '../AccountCredentialSummary';
@@ -8,6 +9,7 @@ import SignCredential from '../SignCredential';
 import PickAccount from '../PickAccount';
 import PickIdentity from '../PickIdentity';
 
+import generalStyles from '../GenerateCredential.module.scss';
 import styles from './SplitViewRouter.module.scss';
 
 function getHeader(currentLocation: string) {
@@ -44,13 +46,24 @@ function getDescription(currentLocation: string) {
 
 interface Props extends RouteComponentProps {
     onNext(): void;
+    resetChosenAttributes(): void;
 }
 
 export default function SplitViewRouter({
     onNext,
+    resetChosenAttributes,
     location,
 }: Props): JSX.Element {
     const { formState } = useFormContext();
+    const { pathname } = useLocation();
+
+    function nextPage(): void {
+        if (pathname === routes.GENERATE_CREDENTIAL_PICKACCOUNT) {
+            resetChosenAttributes();
+        }
+
+        onNext();
+    }
     return (
         <div className={styles.grid}>
             <h2 className={styles.header}>{getHeader(location.pathname)}</h2>
@@ -77,9 +90,9 @@ export default function SplitViewRouter({
                 />
             </Switch>
             <Button
-                className={styles.button}
+                className={clsx(generalStyles.continueButton, styles.button)}
                 disabled={!formState.isValid}
-                onClick={() => onNext()}
+                onClick={nextPage}
             >
                 Continue
             </Button>

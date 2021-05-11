@@ -4,6 +4,9 @@ import Button from '~/cross-app-components/Button';
 import routes from '~/constants/routes.json';
 import ExportCredential from '../ExportCredential';
 
+import generalStyles from '../GenerateCredential.module.scss';
+import styles from './SingleColumnRouter.module.scss';
+
 function getHeader(currentLocation: string) {
     switch (currentLocation) {
         case routes.GENERATE_CREDENTIAL_EXPORT:
@@ -33,15 +36,25 @@ export default function SingleColumnRouter({
     const [canContinue, setCanContinue] = useState(false);
 
     return (
-        <div>
-            <h2>{getHeader(location.pathname)}</h2>
-            <p>{getDescription(location.pathname)}</p>
-            <Switch>
-                <Route>
-                    <ExportCredential onExported={setCanContinue} />
-                </Route>
-            </Switch>
-            <Button disabled={!canContinue} onClick={() => onNext()}>
+        <div className={styles.root}>
+            <div>
+                <h2 className={styles.header}>
+                    {getHeader(location.pathname)}
+                </h2>
+                <p className={styles.description}>
+                    {getDescription(location.pathname)}
+                </p>
+                <Switch>
+                    <Route>
+                        <ExportCredential onExported={setCanContinue} />
+                    </Route>
+                </Switch>
+            </div>
+            <Button
+                className={generalStyles.continueButton}
+                disabled={!canContinue}
+                onClick={() => onNext()}
+            >
                 Finish
             </Button>
         </div>

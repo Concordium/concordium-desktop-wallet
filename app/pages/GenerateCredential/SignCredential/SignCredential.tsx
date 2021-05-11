@@ -13,6 +13,7 @@ import pairWallet from '~/utils/WalletPairing';
 import { AccountForm, CredentialBlob, fieldNames } from '../types';
 
 import generalStyles from '../GenerateCredential.module.scss';
+import splitViewStyles from '../SplitViewRouter/SplitViewRouter.module.scss';
 import styles from './SignCredential.module.scss';
 import savedStateContext from '../savedStateContext';
 
@@ -91,8 +92,13 @@ export default function SignCredential(): JSX.Element {
     }
 
     return (
-        <div className={clsx(generalStyles.card, styles.root)}>
-            <SimpleLedger ledgerCall={sign} />
-        </div>
+        <SimpleLedger
+            className={clsx(
+                generalStyles.card,
+                splitViewStyles.sign,
+                styles.root
+            )}
+            ledgerCall={sign}
+        />
     );
 }
