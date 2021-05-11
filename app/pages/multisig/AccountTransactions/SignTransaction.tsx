@@ -17,6 +17,7 @@ import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
+import errorMessages from '~/constants/errorMessages.json';
 
 interface Props {
     transaction: AccountTransaction;
@@ -89,8 +90,12 @@ export default function SignTransaction({
     const global = useSelector(globalSelector);
 
     async function sign(ledger: ConcordiumLedgerClient) {
-        if (!account || !global) {
-            throw new Error('Unexpected missing account or global');
+        if (!global) {
+            throw new Error(errorMessages.missingGlobal);
+        }
+
+        if (!account) {
+            throw new Error('Unexpected missing account');
         }
 
         const proposal = await signUsingLedger(ledger, transaction, account);
