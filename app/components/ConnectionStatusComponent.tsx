@@ -17,7 +17,7 @@ interface Props {
 }
 
 /**
- * A component for display connection status.
+ * A component for displaying the status of the connection to the node.
  */
 export default function ConnectionStatusComponent({
     status,
