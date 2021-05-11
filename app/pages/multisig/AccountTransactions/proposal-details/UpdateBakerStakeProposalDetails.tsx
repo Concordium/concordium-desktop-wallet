@@ -14,27 +14,7 @@ import {
     useStakedAmount,
 } from '~/utils/hooks';
 import { displayAsGTU, toGTUString } from '~/utils/gtu';
-
-/** Calculates the epoch index from a given date */
-export function getEpochIndexAt(
-    epochAtDate: Date,
-    epochDurationMillis: number,
-    genesisTime: Date
-) {
-    const genesis = genesisTime.getTime();
-    const now = epochAtDate.getTime();
-    const millisSinceGenesis = now - genesis;
-    return Math.floor(millisSinceGenesis / epochDurationMillis);
-}
-
-/** Calculates the start date of an epoch index */
-function epochDate(
-    epochIndex: number,
-    epochDurationMillis: number,
-    genesisTime: Date
-): Date {
-    return new Date(genesisTime.getTime() + epochIndex * epochDurationMillis);
-}
+import { epochDate, getEpochIndexAt } from '~/utils/basicHelpers';
 
 interface Props {
     identity?: Identity;
@@ -85,47 +65,51 @@ function StakedAmountNote({ accountAddress, stake }: StakedAmountNoteProps) {
     const difference = stake - stakedAlready;
 
     if (difference > 0) {
-        return <>{formatNote(`Increase of ${displayAsGTU(difference)}`)}</>;
+        return (
+            <>
+                {formatNote(
+                    `Increase of ${displayAsGTU(
+                        difference
+                    )} from ${displayAsGTU(stakedAlready)}`
+                )}
+            </>
+        );
     }
     const message = formatNote(
-        `Decrease of ${displayAsGTU(difference)}, this will result in the stake`
+        `Decrease of ${displayAsGTU(difference * -1n)} from ${displayAsGTU(
+            stakedAlready
+        )}`
     );
 
     if (lastFinalizedBlockSummary === undefined) {
         return <>{message}</>;
     }
+
+    const { consensusStatus } = lastFinalizedBlockSummary;
     const {
         chainParameters,
     } = lastFinalizedBlockSummary.lastFinalizedBlockSummary.updates;
-
-    if (chainParameters.minimumThresholdForBaking > stake) {
-        return (
-            <>
-                {message}
-                {formatNote('New stake is below the minimum threshold')}
-            </>
-        );
-    }
-    const { consensusStatus } = lastFinalizedBlockSummary;
+    const genesisTime = new Date(consensusStatus.genesisTime);
     const currentEpochIndex = getEpochIndexAt(
         now,
         consensusStatus.epochDuration,
-        new Date(consensusStatus.genesisTime)
+        genesisTime
     );
+    const nextEpochIndex = currentEpochIndex + 1;
 
     const cooldownUntilEpochIndex =
-        currentEpochIndex + chainParameters.bakerCooldownEpochs;
+        nextEpochIndex + chainParameters.bakerCooldownEpochs;
 
     const cooldownUntil = epochDate(
-        Number(cooldownUntilEpochIndex),
+        cooldownUntilEpochIndex,
         consensusStatus.epochDuration,
-        new Date(consensusStatus.genesisTime)
+        genesisTime
     );
     return (
         <>
             {message}
             {formatNote(
-                `The staked amount will be frozen until ${cooldownUntil}`
+                `The baker stake will be frozen until ${cooldownUntil} where the actual decrease will take effect.`
             )}
         </>
     );

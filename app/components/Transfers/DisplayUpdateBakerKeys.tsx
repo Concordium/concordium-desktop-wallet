@@ -10,9 +10,9 @@ interface Props {
 }
 
 /**
- * Displays an overview of an Add-Baker-Transaction.
+ * Displays an overview of an Update-Baker-Keys-Transaction.
  */
-export default function DisplayAddBaker({ transaction }: Props) {
+export default function DisplayUpdateBakerKeys({ transaction }: Props) {
     const senderName = useAccountName(transaction.sender);
     return (
         <>

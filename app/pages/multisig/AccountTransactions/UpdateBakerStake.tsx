@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { push } from 'connected-react-router';
@@ -15,13 +15,20 @@ import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-import { createUpdateBakerStakeTransaction } from '~/utils/transactionHelpers';
+import {
+    createUpdateBakerStakeTransaction,
+    validateBakerStake,
+} from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
-import { useTransactionCostEstimate } from '~/utils/hooks';
+import {
+    useLastFinalizedBlockSummary,
+    useStakedAmount,
+    useTransactionCostEstimate,
+} from '~/utils/hooks';
 import SignTransaction from './SignTransaction';
 import PickAmount from './PickAmount';
 import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';
-import { toMicroUnits } from '~/utils/gtu';
+import { toGTUString, toMicroUnits } from '~/utils/gtu';
 
 enum SubRoutes {
     accounts,
@@ -29,7 +36,10 @@ enum SubRoutes {
     sign,
 }
 
-function toMicroUnitsSafe(str: string) {
+function toMicroUnitsSafe(str: string | undefined) {
+    if (str === undefined) {
+        return undefined;
+    }
     try {
         return toMicroUnits(str);
     } catch (error) {
@@ -42,7 +52,7 @@ export default function UpdateBakerStakePage() {
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account>();
-    const [stake, setStake] = useState('0');
+    const [stake, setStake] = useState<string>();
     const [error, setError] = useState<string>();
     const [transaction, setTransaction] = useState<RemoveBaker>();
 
@@ -54,6 +64,11 @@ export default function UpdateBakerStakePage() {
     const onCreateTransaction = () => {
         if (account === undefined) {
             setError('Account is needed to make transaction');
+            return;
+        }
+
+        if (stake === undefined) {
+            setError('Stake is needed to make transaction');
             return;
         }
 
@@ -116,9 +131,8 @@ export default function UpdateBakerStakePage() {
                                         identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={
-                                            () => true
-                                            // (_, info) => info?.accountBaker !== undefined
+                                        filter={(_, info) =>
+                                            info?.accountBaker !== undefined
                                         }
                                     />
                                 </div>
@@ -139,12 +153,12 @@ export default function UpdateBakerStakePage() {
                         <Columns.Column header="New staked amount">
                             <div className={styles.descriptionStep}>
                                 <div className={styles.flex1}>
-                                    <PickAmount
-                                        setReady={() => {}}
-                                        account={account}
-                                        amount={stake}
-                                        setAmount={setStake}
-                                    />
+                                    {account !== undefined ? (
+                                        <PickNewStake
+                                            account={account}
+                                            setNewStake={setStake}
+                                        />
+                                    ) : null}
                                     <p>Enter your new stake here</p>
                                 </div>
                                 <Button
@@ -175,5 +189,47 @@ export default function UpdateBakerStakePage() {
                 </Switch>
             </Columns>
         </MultiSignatureLayout>
+    );
+}
+
+type PickNewStakeProps = {
+    account: Account;
+    setNewStake: (s: string | undefined) => void;
+};
+
+function useChainParameters() {
+    const lastFinalizedBlock = useLastFinalizedBlockSummary();
+    return lastFinalizedBlock?.lastFinalizedBlockSummary.updates
+        .chainParameters;
+}
+
+function PickNewStake({ account, setNewStake }: PickNewStakeProps) {
+    const stakedAlready = useStakedAmount(account.address);
+    const chainParameters = useChainParameters();
+    const minimumThresholdForBaking =
+        chainParameters !== undefined
+            ? BigInt(chainParameters.minimumThresholdForBaking)
+            : undefined;
+
+    const [stake, setStake] = useState<string>();
+
+    useEffect(() => {
+        // Hack to set the initial value to the staked amount
+        setStake((s) => (s === '0.00' ? toGTUString(stakedAlready) : s));
+    }, [stakedAlready]);
+
+    const onNewAmount = (ready: boolean) =>
+        setNewStake(ready ? stake : undefined);
+
+    return (
+        <PickAmount
+            setReady={onNewAmount}
+            account={account}
+            amount={stake ?? toGTUString(stakedAlready) ?? '0'}
+            setAmount={setStake}
+            validateAmount={(...args) =>
+                validateBakerStake(minimumThresholdForBaking, ...args)
+            }
+        />
     );
 }

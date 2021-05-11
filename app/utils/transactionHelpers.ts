@@ -458,7 +458,7 @@ function amountAtDisposal(accountInfo: AccountInfo): bigint {
     return unShielded - scheduled - stakedAmount;
 }
 
-export function validateAmount(
+export function validateTransferAmount(
     amountToValidate: string,
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
@@ -476,5 +476,36 @@ export function validateAmount(
     if (toMicroUnits(amountToValidate) === 0n) {
         return 'Amount may not be zero';
     }
+    return undefined;
+}
+
+function amountToStakeAtDisposal(accountInfo: AccountInfo): bigint {
+    const unShielded = BigInt(accountInfo.accountAmount);
+    const scheduled = accountInfo.accountReleaseSchedule
+        ? BigInt(accountInfo.accountReleaseSchedule.total)
+        : 0n;
+    return unShielded - scheduled;
+}
+
+export function validateBakerStake(
+    bakerStakeThreshold: bigint | undefined,
+    amountToValidate: string,
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (!isValidGTUString(amountToValidate)) {
+        return 'Value is not a valid GTU amount';
+    }
+    const amount = toMicroUnits(amountToValidate);
+    if (bakerStakeThreshold && bakerStakeThreshold > amount) {
+        return 'Stake is below the threshold for baking';
+    }
+    if (
+        accountInfo &&
+        amountToStakeAtDisposal(accountInfo) < amount + (estimatedFee || 0n)
+    ) {
+        return 'Insufficient funds';
+    }
+
     return undefined;
 }

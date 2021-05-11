@@ -34,6 +34,7 @@ import UpdateLevel1KeysWithLevel1KeysHandler from './UpdateLevel1KeysWithLevel1K
 import AddBakerHandler from './AddBakerHandler';
 import UpdateBakerKeysHandler from './UpdateBakerKeysHandler';
 import RemoveBakerHandler from './RemoveBakerHandler';
+import UpdateBakerStakeHandler from './UpdateBakerStakeHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -58,6 +59,9 @@ export function findAccountTransactionHandler(
     }
     if (transactionKind === TransactionKindId.Remove_baker) {
         return new AccountHandlerTypeMiddleware(new RemoveBakerHandler());
+    }
+    if (transactionKind === TransactionKindId.Update_baker_stake) {
+        return new AccountHandlerTypeMiddleware(new UpdateBakerStakeHandler());
     }
     if (transactionKind === TransactionKindId.Transfer_with_schedule) {
         return new AccountHandlerTypeMiddleware(new ScheduledTransferHandler());

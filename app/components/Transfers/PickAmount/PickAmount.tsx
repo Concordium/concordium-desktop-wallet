@@ -8,7 +8,7 @@ import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import { validateAmount } from '~/utils/transactionHelpers';
+import { validateTransferAmount } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
@@ -50,7 +50,7 @@ export default function PickAmount({
     );
 
     function validate(amount: string) {
-        return validateAmount(
+        return validateTransferAmount(
             amount,
             accountInfo,
             estimatedFee && collapseFraction(estimatedFee)

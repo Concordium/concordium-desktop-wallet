@@ -20,8 +20,8 @@ export interface ConsensusStatus {
     blockArriveLatencyEMSD: number;
     blockArrivePeriodEMA: number;
     blockArrivePeriodEMSD: number;
-    blockLastArrivedTime: number;
-    blockLastReceivedTime: number | null;
+    blockLastArrivedTime: string;
+    blockLastReceivedTime: string | null;
     blockReceiveLatencyEMA: number;
     blockReceiveLatencyEMSD: number;
     blockReceivePeriodEMA: number;
@@ -33,10 +33,10 @@ export interface ConsensusStatus {
     finalizationPeriodEMA: number;
     finalizationPeriodEMSD: number;
     genesisBlock: string;
-    genesisTime: number;
+    genesisTime: string;
     lastFinalizedBlock: string;
     lastFinalizedBlockHeight: number;
-    lastFinalizedTime: number | null;
+    lastFinalizedTime: string | null;
     slotDuration: number;
     transactionsPerBlockEMA: number;
     transactionsPerBlockEMSD: number;
