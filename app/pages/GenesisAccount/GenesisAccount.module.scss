@@ -1,15 +1,17 @@
 $width: 600px;
 
+.exportPage,
 .fileForm,
 .pickName,
 .ledgerCard,
 .confirmCard {
     flex-direction: column;
     justify-content: center;
-    max-width: $width;
+    width: $width;
     margin: 20px auto;
 }
 
+.exportPage,
 .fileForm,
 .pickName {
     display: flex;
@@ -24,8 +26,9 @@ $width: 600px;
 .nameInput {
     margin-top: 40px;
 }
+
 .submitButton {
-    margin-top: auto;
+    margin: auto auto 0;
 }
 
 .printButton {
@@ -47,4 +50,20 @@ $width: 600px;
 
 .exportButton {
     margin-top: 20px;
+    max-width: 400px;
+}
+
+.firstCheckbox,
+.checkbox,
+.finalButton {
+    margin: 10px auto;
+}
+
+.firstCheckbox {
+    margin-top: auto;
+}
+
+.submitButton,
+.finalButton {
+    width: 400px;
 }

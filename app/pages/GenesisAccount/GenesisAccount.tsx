@@ -8,7 +8,6 @@ import { insertNewCredential } from '~/features/CredentialSlice';
 import { Account, AccountStatus, GenesisAccount } from '~/utils/types';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import { saveFile } from '~/utils/FileHelper';
-import styles from './GenesisAccount.module.scss';
 import Button from '~/cross-app-components/Button';
 import PrintButton from '~/components/PrintButton';
 import CopiableIdenticon from '~/components/CopiableIdenticon/CopiableIdenticon';
@@ -16,6 +15,7 @@ import CreateCredential from './CreateCredential';
 import Card from '~/cross-app-components/Card';
 import routes from '~/constants/routes.json';
 import { loadIdentities } from '~/features/IdentitySlice';
+import styles from './GenesisAccount.module.scss';
 
 interface CredentialNumberIdentityId {
     credentialNumber: number;
@@ -124,6 +124,9 @@ export default function GenesisAccount(): JSX.Element {
 
     function Confirm() {
         const [image, setImage] = useState<string>();
+        const [haveExported, setHaveExported] = useState(false);
+        const [havePrinted, setHavePrinted] = useState(false);
+
         if (!genesisAccount) {
             throw new Error('Unexpected missing genesis account');
         }
@@ -148,7 +151,7 @@ export default function GenesisAccount(): JSX.Element {
                 )}_${credentialContent.credId.substring(0, 8)}.json`,
             });
 
-            if (success) {
+            if (!haveExported && success) {
                 const account: Account = {
                     status: AccountStatus.Genesis,
                     address,
@@ -167,37 +170,73 @@ export default function GenesisAccount(): JSX.Element {
                     undefined,
                     credentialContent
                 );
+                loadAccounts(dispatch);
+                setHaveExported(true);
             }
-            loadAccounts(dispatch);
-            dispatch(push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY));
         }
 
         return (
-            <Card className={styles.confirmCard}>
-                <PrintButton className={styles.printButton}>
-                    <h1>Genesis Account</h1>
-                    <h3>Account Name</h3>
+            <Form
+                className={styles.exportPage}
+                onSubmit={() =>
+                    dispatch(push(routes.MULTISIGTRANSACTIONS_EXPORT_KEY))
+                }
+            >
+                <p>
+                    Please export and print the account details. You will not be
+                    able to do either after leaving this page.
+                </p>
+                <Card className={styles.confirmCard}>
+                    <PrintButton
+                        className={styles.printButton}
+                        onPrint={() => setHavePrinted(true)}
+                    >
+                        <h1>Genesis Account</h1>
+                        <h3>Account Name</h3>
+                        <p>{accountName}</p>
+                        <h3>Credential Id</h3>
+                        <p>{credentialContent.credId}</p>
+                        <h3>Public key</h3>
+                        <p>{publicKey.verifyKey}</p>
+                        <img src={image} alt="" />
+                    </PrintButton>
+                    <h3>Account Name:</h3>
                     <p>{accountName}</p>
-                    <h3>Credential Id</h3>
+                    <h3>Credential Id: </h3>
                     <p>{credentialContent.credId}</p>
-                    <h3>Public key</h3>
+                    <h3>Public key: </h3>
                     <p>{publicKey.verifyKey}</p>
-                    <img src={image} alt="" />
-                </PrintButton>
-                <h3>Account Name:</h3>
-                <p>{accountName}</p>
-                <h3>Credential Id: </h3>
-                <p>{credentialContent.credId}</p>
-                <h3>Public key: </h3>
-                <p>{publicKey.verifyKey}</p>
-                <CopiableIdenticon
-                    data={publicKey.verifyKey}
-                    setScreenshot={setImage}
-                />
-                <Button className={styles.exportButton} onClick={exportGenesis}>
-                    Export
-                </Button>
-            </Card>
+                    <CopiableIdenticon
+                        data={publicKey.verifyKey}
+                        setScreenshot={setImage}
+                    />
+                    <Button
+                        className={styles.exportButton}
+                        onClick={exportGenesis}
+                    >
+                        Export
+                    </Button>
+                </Card>
+                <Form.Checkbox
+                    className={styles.firstCheckbox}
+                    name="exported"
+                    checked={haveExported}
+                    rules={{ required: true }}
+                >
+                    {' '}
+                    Exported{' '}
+                </Form.Checkbox>
+                <Form.Checkbox
+                    className={styles.checkbox}
+                    name="printed"
+                    checked={havePrinted}
+                    rules={{ required: true }}
+                >
+                    {' '}
+                    Printed{' '}
+                </Form.Checkbox>
+                <Form.Submit className={styles.finalButton}>Finish</Form.Submit>
+            </Form>
         );
     }
 
@@ -248,7 +287,7 @@ export default function GenesisAccount(): JSX.Element {
                 <h1>New Account | Genesis Account</h1>
             </PageLayout.Header>
             <PageLayout.Container>
-                <h2>{subtitle(currentLocation)}</h2>
+                <h2 className="pT30">{subtitle(currentLocation)}</h2>
                 <Current />
             </PageLayout.Container>
         </PageLayout>
