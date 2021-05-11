@@ -3,10 +3,10 @@ import { getId } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import {
+    CredentialWithIdentityNumber,
     DeployedCredential,
+    instanceOfCredentialWithIdentityNumber,
     instanceOfDeployedCredential,
-    instanceOfLocalCredential,
-    LocalCredential,
 } from './types';
 
 /**
@@ -18,20 +18,20 @@ import {
 export async function findLocalDeployedCredential(
     walletId: number,
     accountAddress: string
-): Promise<(LocalCredential & DeployedCredential) | undefined> {
+): Promise<(CredentialWithIdentityNumber & DeployedCredential) | undefined> {
     if (walletId === undefined) {
         throw new Error('Invalid input. A wallet id has to be supplied');
     }
 
     const result = (await getCredentialsOfAccount(accountAddress))
-        .filter(instanceOfLocalCredential)
         .filter(instanceOfDeployedCredential)
+        .filter(instanceOfCredentialWithIdentityNumber)
         .find((credential) => credential.walletId === walletId);
 
     if (
         result === undefined ||
-        !instanceOfLocalCredential(result) ||
-        !instanceOfDeployedCredential(result)
+        !instanceOfDeployedCredential(result) ||
+        !instanceOfCredentialWithIdentityNumber(result)
     ) {
         return undefined;
     }
@@ -47,7 +47,7 @@ export async function findLocalDeployedCredential(
 export default async function findLocalDeployedCredentialWithWallet(
     accountAddress: string,
     ledger: ConcordiumLedgerClient
-): Promise<(LocalCredential & DeployedCredential) | undefined> {
+): Promise<(CredentialWithIdentityNumber & DeployedCredential) | undefined> {
     const walletIdentifier = await ledger.getPublicKeySilent(getPairingPath());
     const walletId = await getId(walletIdentifier.toString('hex'));
     if (walletId === undefined) {

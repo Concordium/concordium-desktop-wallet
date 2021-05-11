@@ -1,7 +1,7 @@
 {
   "name": "concordium-desktop-wallet",
-  "productName": "DesktopWallet",
-  "description": "Concordium desktop wallet",
+  "productName": "concordium-desktop-wallet",
+  "description": "concordium-desktop-wallet",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.js --colors",
@@ -84,12 +84,13 @@
       "sign": false
     },
     "win": {
+      "artifactName": "concordium-wallet-${version}.${ext}",
       "target": [
-        "nsis",
-        "msi"
+        "nsis"
       ]
     },
     "linux": {
+      "artifactName": "concordium-wallet-${version}.${ext}",
       "target": [
         "deb",
         "rpm",
@@ -98,6 +99,7 @@
       "category": "Development"
     },
     "mac": {
+      "artifactName": "concordium-wallet-${version}.${ext}",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",

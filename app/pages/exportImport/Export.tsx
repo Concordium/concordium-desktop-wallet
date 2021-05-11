@@ -14,8 +14,8 @@ import styles from './ExportImport.module.scss';
 import { getAllWallets } from '~/database/WalletDao';
 
 /**
- * Component for exporting identities/account/addressBook.
- * TODO: allow partial export
+ * Component for exporting wallets, identities, credentials, accounts and
+ * the address book.
  */
 export default function Export() {
     const accounts = useSelector(accountsSelector);
@@ -48,13 +48,20 @@ export default function Export() {
             return other;
         });
 
+        // We strip the identityNumber as it is not part of the database
+        // model for credentials, but is joined into the object in memory.
+        const cleanCredentials = credentials.map((cred) => {
+            const { identityNumber, ...other } = cred;
+            return other;
+        });
+
         const wallets = await getAllWallets();
 
         const data = {
             accounts: cleanAccounts,
             identities,
             addressBook,
-            credentials,
+            credentials: cleanCredentials,
             wallets,
         };
         const encrypted = encrypt(JSON.stringify(data), password);
