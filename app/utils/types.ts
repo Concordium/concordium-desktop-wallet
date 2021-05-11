@@ -235,6 +235,10 @@ export type UpdateBakerKeysPayload = BakerVerifyKeys & BakerKeyProofs;
 
 export type RemoveBakerPayload = {};
 
+export type UpdateBakerStakePayload = {
+    stake: Amount;
+};
+
 export type TransactionPayload =
     | UpdateAccountCredentialsPayload
     | TransferToPublicPayload
@@ -243,7 +247,8 @@ export type TransactionPayload =
     | SimpleTransferPayload
     | AddBakerPayload
     | UpdateBakerKeysPayload
-    | RemoveBakerPayload;
+    | RemoveBakerPayload
+    | UpdateBakerStakePayload;
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
@@ -268,6 +273,7 @@ export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 export type AddBaker = AccountTransaction<AddBakerPayload>;
 export type UpdateBakerKeys = AccountTransaction<UpdateBakerKeysPayload>;
 export type RemoveBaker = AccountTransaction<RemoveBakerPayload>;
+export type UpdateBakerStake = AccountTransaction<UpdateBakerStakePayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -789,6 +795,12 @@ export function instanceOfRemoveBaker(
     object: AccountTransaction<TransactionPayload>
 ): object is AddBaker {
     return object.transactionKind === TransactionKindId.Remove_baker;
+}
+
+export function instanceOfUpdateBakerStake(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateBakerStake {
+    return object.transactionKind === TransactionKindId.Update_baker_stake;
 }
 
 export function isExchangeRate(

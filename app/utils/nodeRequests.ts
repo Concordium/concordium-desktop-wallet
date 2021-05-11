@@ -87,6 +87,17 @@ export function getConsensusStatus(): Promise<ConsensusStatus> {
 }
 
 /**
+ * Retrieves the BirkParameters at the time of the blockhash from the node.
+ */
+export function getBirkParameters(
+    blockHashValue: string
+): Promise<ConsensusStatus> {
+    return sendPromiseParseResult(grpcMethods.getBirkParameters, {
+        blockHashValue,
+    });
+}
+
+/**
  * Retrieves the block summary for the provided block hash from the node.
  * @param blockHashValue the block hash to retrieve the block summary for
  */

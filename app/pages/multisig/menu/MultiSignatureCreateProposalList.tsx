@@ -112,6 +112,11 @@ const accountTransactionTypes: [
         TransactionKind.Remove_baker,
         'Remove Baker',
     ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_stake,
+        'Update Baker Stake',
+    ],
 ];
 
 /**

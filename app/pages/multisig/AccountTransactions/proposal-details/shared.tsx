@@ -6,7 +6,9 @@ import styles from './ProposalDetails.module.scss';
 const placeholder = <p className={styles.placeholder}>To be determined</p>;
 
 const formatValue = (text: ReactNode) => <p className={styles.value}>{text}</p>;
-const formatNote = (text: ReactNode) => <p className={styles.note}>{text}</p>;
+export const formatNote = (text: ReactNode) => (
+    <p className={styles.note}>{text}</p>
+);
 const formatAccount = (account: Account | AddressBookEntry) => (
     <>
         {formatValue(account.name)}

@@ -16,6 +16,8 @@ import {
     RemoveBaker,
     instanceOfUpdateBakerKeys,
     UpdateBakerKeys,
+    UpdateBakerStake,
+    instanceOfUpdateBakerStake,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -29,6 +31,7 @@ import {
     serializeRemoveBaker,
     serializeUpdateBakerKeys,
     serializeBakerKeyProofs,
+    serializeUpdateBakerStake,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import { encodeWord16 } from '~/utils/serializationHelpers';
@@ -40,6 +43,7 @@ const INS_TRANSFER_TO_PUBLIC = 0x12;
 const INS_TRANSFER_WITH_SCHEDULE = 0x03;
 const INS_ADD_OR_UPDATE_BAKER = 0x13;
 const INS_REMOVE_BAKER = 0x14;
+const INS_UPDATE_BAKER_STAKE = 0x15;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -348,6 +352,37 @@ async function signRemoveBaker(
     return response.slice(0, 64);
 }
 
+async function signUpdateBakerStake(
+    transport: Transport,
+    path: number[],
+    transaction: UpdateBakerStake
+): Promise<Buffer> {
+    const payload = serializeUpdateBakerStake(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const cdata = Buffer.concat([pathAsBuffer(path), header, payload]);
+
+    const p1 = 0x00;
+    const p2 = 0x00;
+
+    const response = await transport.send(
+        0xe0,
+        INS_UPDATE_BAKER_STAKE,
+        p1,
+        p2,
+        cdata
+    );
+
+    return response.slice(0, 64);
+}
+
 export default async function signTransfer(
     transport: Transport,
     path: number[],
@@ -373,6 +408,9 @@ export default async function signTransfer(
     }
     if (instanceOfRemoveBaker(transaction)) {
         return signRemoveBaker(transport, path, transaction);
+    }
+    if (instanceOfUpdateBakerStake(transaction)) {
+        return signUpdateBakerStake(transport, path, transaction);
     }
     throw new Error(
         `The received transaction was not a supported transaction type`

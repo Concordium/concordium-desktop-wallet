@@ -24,6 +24,7 @@ import {
     RemoveBaker,
     UpdateBakerKeysPayload,
     UpdateBakerKeys,
+    UpdateBakerStakePayload,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -298,6 +299,21 @@ export function createRemoveBakerTransaction(
         expiry,
         transactionKind: TransactionKindId.Remove_baker,
         payload: {},
+        signatureAmount,
+    });
+}
+
+export function createUpdateBakerStakeTransaction(
+    fromAddress: string,
+    payload: UpdateBakerStakePayload,
+    signatureAmount = 1,
+    expiry: bigint = getDefaultExpiry()
+): Promise<RemoveBaker> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_baker_stake,
+        payload,
         signatureAmount,
     });
 }

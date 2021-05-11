@@ -136,6 +136,12 @@ function getNodeInfo() {
     return sendPromise(client.nodeInfo, new Empty());
 }
 
+function getBirkParameters(blockHashValue: string) {
+    const blockHash = new BlockHash();
+    blockHash.setBlockHash(blockHashValue);
+    return sendPromise(client.getBirkParameters, blockHash);
+}
+
 function getCryptographicParameters(blockHashValue: string) {
     const blockHash = new BlockHash();
     blockHash.setBlockHash(blockHashValue);
@@ -174,6 +180,10 @@ export function grpcCall(name: string, input: Record<string, string>) {
         case grpcMethods.getAccountInfo: {
             const { address, blockHash } = input;
             return getAccountInfo(address, blockHash);
+        }
+        case grpcMethods.getBirkParameters: {
+            const { blockHash } = input;
+            return getBirkParameters(blockHash);
         }
         default: {
             throw new Error('unknown GRPC call');
