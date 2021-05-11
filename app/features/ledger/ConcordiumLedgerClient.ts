@@ -1,5 +1,5 @@
-import type Transport from '@ledgerhq/hw-transport';
-import { Transport as localTransportType, TransportImpl } from './Transport';
+import type HwTransport from '@ledgerhq/hw-transport';
+import { Transport, TransportImpl } from './Transport';
 import {
     getPublicKey,
     getPublicKeySilent,
@@ -44,9 +44,9 @@ import signUpdateCredentialTransaction from './SignUpdateCredentials';
  * const client = new ConcordiumLedgerClient(transport);
  */
 export default class ConcordiumLedgerClient {
-    transport: localTransportType;
+    transport: Transport;
 
-    constructor(transport: Transport) {
+    constructor(transport: HwTransport) {
         this.transport = new TransportImpl(transport);
     }
 

@@ -10,7 +10,7 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import { getId } from '~/database/WalletDao';
 
-export default function ConnectedSidebar(): JSX.Element {
+export default function LedgerStatus(): JSX.Element {
     const dispatch = useDispatch();
     const [hasBeenDisconnected, setDisconnected] = useState(true);
     const [statusText, setStatusText] = useState('');
