@@ -23,8 +23,12 @@ export default function LedgerStatus(): JSX.Element {
                 );
                 const walletId = await getId(walletIdentifier.toString('hex'));
                 await dispatch(setCurrentWalletId(walletId));
+
+                if (!walletId) {
+                    setStatusText('New device detected');
+                }
             } catch (e) {
-                setStatusText('Pairing Failed');
+                setStatusText('Pairing failed');
             }
         },
         [dispatch]
@@ -48,7 +52,7 @@ export default function LedgerStatus(): JSX.Element {
 
     useEffect(() => {
         if (hasBeenDisconnected) {
-            setStatusText(isReady ? 'Device Ready' : 'Waiting for device');
+            setStatusText(isReady ? 'Device ready' : 'Waiting for device');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status]);

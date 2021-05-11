@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Identity } from '~/utils/types';
 import { createCredentialInfo } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -29,6 +29,7 @@ export default function SignCredential({
     attributes,
 }: Props): JSX.Element {
     const global = useSelector(globalSelector);
+    const dispatch = useDispatch();
 
     async function sign(
         ledger: ConcordiumLedgerClient,
@@ -44,7 +45,7 @@ export default function SignCredential({
             );
         }
 
-        const walletId = await pairWallet(ledger);
+        const walletId = await pairWallet(ledger, dispatch);
         if (walletId !== identity.walletId) {
             throw new Error(
                 'The chosen identity was not created using the connected wallet.'
