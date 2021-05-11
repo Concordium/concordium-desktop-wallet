@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
+import React, { useState, useEffect, useContext } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useController, useFormContext } from 'react-hook-form';
 import { Account, AccountInfo, AccountStatus } from '~/utils/types';
 import AccountCard from '~/components/AccountCard';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
@@ -18,50 +16,62 @@ import CardList from '~/cross-app-components/CardList';
 import generalStyles from '../GenerateCredential.module.scss';
 import styles from './PickAccount.module.scss';
 import { AccountForm, fieldNames } from '../types';
+import savedStateContext from '../savedStateContext';
 
 const mustBeDeployedMessage = 'Address must belong to a deployed account';
+
+interface Props {
+    onNext(path: string): void;
+}
 
 /**
  * Displays the currently chosen account's information.
  * Allows the user to reveal attributes.
  */
-export default function PickAccount(): JSX.Element {
-    const dispatch = useDispatch();
+export default function PickAccount({ onNext }: Props): JSX.Element {
     const location = useLocation().pathname;
     const {
-        getValues,
-        register,
+        identity,
+        accountName: savedAccountName,
+        accountInfo: savedAccountInfo,
+        chosenAttributes = [],
+    } = useContext(savedStateContext);
+    const {
         errors,
-        setValue,
         trigger,
         clearErrors,
-        control,
         formState,
         watch,
+        control,
     } = useFormContext<AccountForm>();
-    const { identity } = getValues();
-    const { address, accountName, accountInfo } = watch();
-    const shouldRedirect = !identity;
+
+    const {
+        address,
+        accountName = savedAccountName,
+        accountInfo = savedAccountInfo,
+    } = watch();
+    const {
+        field: { onChange: onAccountChange, onBlur: onAccountBlur },
+    } = useController({
+        name: fieldNames.accountInfo,
+        control,
+        defaultValue: savedAccountInfo ?? null,
+    });
 
     const [status, setStatus] = useState<Status>(Status.Pending);
+    const isRevealAttributesRoute =
+        location === routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES;
 
     function setAccountInfo(info: AccountInfo | undefined): void {
-        setValue(fieldNames.accountInfo, info, {
-            shouldDirty: true,
-            shouldValidate: true,
-        });
+        onAccountChange(info);
+        onAccountBlur();
     }
 
     useEffect(() => {
-        if (!shouldRedirect) {
-            register(fieldNames.accountInfo, {
-                required: true,
-            });
+        if (isRevealAttributesRoute) {
+            return;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
-    useEffect(() => {
         if (!errors.address && address) {
             setStatus(Status.Loading);
             getAccountInfoOfAddress(address)
@@ -86,13 +96,13 @@ export default function PickAccount(): JSX.Element {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [address]);
 
-    if (shouldRedirect) {
+    if (!identity) {
         return <Redirect to={routes.GENERATE_CREDENTIAL_PICKIDENTITY} />;
     }
 
     const fakeAccount: Account = {
         status: AccountStatus.Confirmed,
-        identityName: identity.name,
+        identityName: identity?.name,
         address,
         name: accountName || 'Name pending',
         identityId: -1,
@@ -127,15 +137,13 @@ export default function PickAccount(): JSX.Element {
         );
     }
 
-    const isRevealAttributesRoute =
-        location === routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES;
-
     return (
         <>
             <CardList className={styles.accountWrapper}>
                 {accountDisplay}
                 {isRevealAttributesRoute && (
                     <Controller
+                        defaultValue={chosenAttributes}
                         name={fieldNames.chosenAttributes}
                         control={control}
                         render={({ onBlur, onChange, value }) => (
@@ -158,9 +166,7 @@ export default function PickAccount(): JSX.Element {
                     inverted
                     disabled={!formState.isValid}
                     onClick={() =>
-                        dispatch(
-                            push(routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES)
-                        )
+                        onNext(routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES)
                     }
                 >
                     Reveal Attributes

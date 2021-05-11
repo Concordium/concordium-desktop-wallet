@@ -32,11 +32,11 @@ function getDescription(currentLocation: string) {
         case routes.GENERATE_CREDENTIAL_PICKIDENTITY:
             return 'To generate new credentials, you must first choose an identity.';
         case routes.GENERATE_CREDENTIAL_PICKACCOUNT:
-            return 'Insert the account address for the account you want to generate credentials for. You will be able to see some information on the account to the right.';
+            return 'Insert the account address for the account you want to generate credentials for and give it a name. You will be able to see some information on the account to the right.';
         case routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES:
             return 'You can choose to reveal one or more attributes on your credential. This is not necessary, and you can continue without doing so.';
         case routes.GENERATE_CREDENTIAL_SIGN:
-            return 'Generate your credentials';
+            return 'Finish the process on your hardware wallet.';
         default:
             return '';
     }
@@ -68,8 +68,9 @@ export default function SplitViewRouter({
                         routes.GENERATE_CREDENTIAL_PICKACCOUNT,
                         routes.GENERATE_CREDENTIAL_REVEALATTRIBUTES,
                     ]}
-                    component={PickAccount}
-                />
+                >
+                    <PickAccount onNext={onNext} />
+                </Route>
                 <Route
                     path={routes.GENERATE_CREDENTIAL}
                     component={PickIdentity}
@@ -78,7 +79,7 @@ export default function SplitViewRouter({
             <Button
                 className={styles.button}
                 disabled={!formState.isValid}
-                onClick={onNext}
+                onClick={() => onNext()}
             >
                 Continue
             </Button>

@@ -41,7 +41,7 @@ export default function SingleColumnRouter({
                     <ExportCredential onExported={setCanContinue} />
                 </Route>
             </Switch>
-            <Button disabled={!canContinue} onClick={onNext}>
+            <Button disabled={!canContinue} onClick={() => onNext()}>
                 Finish
             </Button>
         </div>

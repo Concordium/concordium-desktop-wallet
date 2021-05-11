@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -8,6 +8,7 @@ import routes from '~/constants/routes.json';
 import { AccountForm } from './types';
 import SingleColumnRouter from './SingleColumnRouter';
 import SplitViewRouter from './SplitViewRouter';
+import savedStateContext from './savedStateContext';
 
 function nextLocation(currentLocation: string) {
     switch (currentLocation) {
@@ -32,15 +33,21 @@ function nextLocation(currentLocation: string) {
  */
 export default function GenerateCredential(): JSX.Element {
     const dispatch = useDispatch();
-    const location = useLocation().pathname;
+    const { pathname } = useLocation();
+    const [savedState, setSavedState] = useState<Partial<AccountForm>>({});
 
     const form = useForm<AccountForm>({
         mode: 'onChange',
-        shouldUnregister: false,
     });
+    const { getValues } = form;
 
-    const nextPage = () => {
-        dispatch(push(nextLocation(location)));
+    const nextPage = (path: string = nextLocation(pathname)) => {
+        const formValues = getValues();
+        setSavedState((saved) => {
+            console.log(formValues);
+            return { ...saved, ...formValues };
+        });
+        dispatch(push(path));
     };
 
     return (
@@ -51,24 +58,29 @@ export default function GenerateCredential(): JSX.Element {
             <PageLayout.Container
                 closeRoute={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
             >
-                <FormProvider {...form}>
-                    <Switch>
-                        <Route
-                            path={routes.GENERATE_CREDENTIAL_EXPORT}
-                            render={(props) => (
-                                <SingleColumnRouter
-                                    {...props}
-                                    onNext={nextPage}
-                                />
-                            )}
-                        />
-                        <Route
-                            render={(props) => (
-                                <SplitViewRouter {...props} onNext={nextPage} />
-                            )}
-                        />
-                    </Switch>
-                </FormProvider>
+                <savedStateContext.Provider value={savedState}>
+                    <FormProvider {...form}>
+                        <Switch>
+                            <Route
+                                path={routes.GENERATE_CREDENTIAL_EXPORT}
+                                render={(props) => (
+                                    <SingleColumnRouter
+                                        {...props}
+                                        onNext={nextPage}
+                                    />
+                                )}
+                            />
+                            <Route
+                                render={(props) => (
+                                    <SplitViewRouter
+                                        {...props}
+                                        onNext={nextPage}
+                                    />
+                                )}
+                            />
+                        </Switch>
+                    </FormProvider>
+                </savedStateContext.Provider>
             </PageLayout.Container>
         </PageLayout>
     );

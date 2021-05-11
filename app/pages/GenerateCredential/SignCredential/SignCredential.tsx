@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { useFormContext } from 'react-hook-form';
+import { useController, useFormContext } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
 import routes from '~/constants/routes.json';
@@ -14,6 +14,7 @@ import { AccountForm, CredentialBlob, fieldNames } from '../types';
 
 import generalStyles from '../GenerateCredential.module.scss';
 import styles from './SignCredential.module.scss';
+import savedStateContext from '../savedStateContext';
 
 /**
  * Component for creating the credential information. The user is prompted to sign
@@ -21,17 +22,23 @@ import styles from './SignCredential.module.scss';
  */
 export default function SignCredential(): JSX.Element {
     const global = useSelector(globalSelector);
-    const { getValues, register, setValue } = useFormContext<AccountForm>();
+    const { control } = useFormContext<AccountForm>();
+    const {
+        address,
+        identity,
+        chosenAttributes,
+        credential: savedCredential,
+    } = useContext(savedStateContext);
+    const {
+        field: { onChange, onBlur },
+    } = useController({
+        name: fieldNames.credential,
+        rules: { required: true },
+        defaultValue: savedCredential ?? null,
+        control,
+    });
 
-    const { address, identity, chosenAttributes } = getValues();
     const shouldRedirect = !address || !identity;
-
-    useEffect(() => {
-        if (!shouldRedirect) {
-            register(fieldNames.credential, { required: true });
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     if (shouldRedirect) {
         return <Redirect to={routes.GENERATE_CREDENTIAL_PICKIDENTITY} />;
@@ -44,6 +51,10 @@ export default function SignCredential(): JSX.Element {
         if (!identity) {
             throw new Error(
                 'An identity has to be supplied. This is an internal error.'
+            );
+        } else if (!address) {
+            throw new Error(
+                'An account adress has to be supplied. This is an internal error.'
             );
         } else if (!global) {
             throw new Error(
@@ -63,7 +74,7 @@ export default function SignCredential(): JSX.Element {
             identity,
             credentialNumber,
             global,
-            chosenAttributes,
+            chosenAttributes as string[],
             setMessage,
             ledger,
             address
@@ -74,10 +85,8 @@ export default function SignCredential(): JSX.Element {
             credentialNumber,
             identityId: identity.id,
         };
-        setValue(fieldNames.credential, blob, {
-            shouldDirty: true,
-            shouldValidate: true,
-        });
+        onChange(blob);
+        onBlur();
         setMessage('Credential generated succesfully!');
     }
 
