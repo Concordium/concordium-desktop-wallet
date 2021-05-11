@@ -6,6 +6,7 @@ import {
     TimeStampUnit,
 } from '~/utils/types';
 import {
+    withHeaderAndFooter,
     timestamp,
     table,
     sender,
@@ -43,10 +44,9 @@ function PrintFormatScheduledTransfer({
     toName,
 }: Props) {
     const amount = getScheduledTransferAmount(transaction);
-    return (
+    const body = (
         <>
             <h1>Transaction - Send GTU with a schedule</h1>
-            {timestamp()}
             {table(
                 standardHeader,
                 <tbody>
@@ -97,6 +97,7 @@ function PrintFormatScheduledTransfer({
             )}
         </>
     );
+    return withHeaderAndFooter(body, undefined, timestamp());
 }
 
 export default withNames(PrintFormatScheduledTransfer);

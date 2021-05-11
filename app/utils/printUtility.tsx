@@ -117,7 +117,7 @@ export const displayExpiry = (expiry: bigint) => (
 );
 
 export const timestamp = () => (
-    <p style={{ position: 'absolute', right: '10px', bottom: '0px' }}>
+    <p style={{ textAlign: 'right' }}>
         Printed on:{' '}
         {parseTime(
             getNow(TimeStampUnit.seconds).toString(),
@@ -142,3 +142,60 @@ export const table = (header: JSX.Element, body: JSX.Element) => (
         {body}
     </table>
 );
+
+const headerFooterSize = '50px';
+export const withHeaderAndFooter = (
+    content: JSX.Element,
+    header?: JSX.Element,
+    footer?: JSX.Element
+) => {
+    const headerSize = header ? headerFooterSize : '0';
+    const footerSize = footer ? headerFooterSize : '0';
+    return (
+        <>
+            <div
+                style={{
+                    width: '100%',
+                    height: headerSize,
+                    position: 'fixed',
+                    top: '0',
+                }}
+            >
+                {header}
+            </div>
+            <div
+                style={{
+                    width: '100%',
+                    height: footerSize,
+                    position: 'fixed',
+                    bottom: '0',
+                }}
+            >
+                {footer}
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <td>
+                            <div style={{ height: headerSize }}>&nbsp;</div>
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div>{content}</div>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>
+                            <div style={{ height: footerSize }}>&nbsp;</div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </>
+    );
+};

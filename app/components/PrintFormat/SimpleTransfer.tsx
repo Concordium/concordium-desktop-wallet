@@ -1,6 +1,7 @@
 import React from 'react';
 import { MultiSignatureTransactionStatus, SimpleTransfer } from '~/utils/types';
 import {
+    withHeaderAndFooter,
     timestamp,
     table,
     sender,
@@ -35,10 +36,9 @@ function PrintFormatSimpleTransfer({
     toName,
 }: Props) {
     const { amount } = transaction.payload;
-    return (
+    const body = (
         <>
             <h1>Transaction - Send GTU</h1>
-            {timestamp()}
             {table(
                 standardHeader,
                 <tbody>
@@ -59,6 +59,7 @@ function PrintFormatSimpleTransfer({
             <img src={image} alt="" />
         </>
     );
+    return withHeaderAndFooter(body, undefined, timestamp());
 }
 
 export default withNames(PrintFormatSimpleTransfer);
