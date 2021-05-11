@@ -81,7 +81,7 @@ export async function insertNewCredential(
         credentialIndex,
     };
     await insertCredential(parsed);
-    return dispatch(addCredential(parsed));
+    return loadCredentials(dispatch);
 }
 
 /**
