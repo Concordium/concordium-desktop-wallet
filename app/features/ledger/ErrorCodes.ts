@@ -1,4 +1,6 @@
 enum StatusCodes {
+    // Locked code on 1.6.1 firmware
+    DeviceLocked161 = 0x6804,
     UserRejection = 0x6985,
     InvalidState = 0x6b01,
     InvalidPath = 0x6b02,
@@ -7,6 +9,8 @@ enum StatusCodes {
     DeviceLocked = 0x6b0c,
 }
 
+const lockedText =
+    'The device is locked. Please unlock the device before submitting again.';
 const incompatibleText =
     'The desktop application is incompatible with the Ledger application.';
 
@@ -28,10 +32,8 @@ errorCodeMap.set(
     StatusCodes.InvalidTransaction,
     `Invalid transaction. ${incompatibleText}`
 );
-errorCodeMap.set(
-    StatusCodes.DeviceLocked,
-    'The device is locked. Please unlock the device before submitting again.'
-);
+errorCodeMap.set(StatusCodes.DeviceLocked, lockedText);
+errorCodeMap.set(StatusCodes.DeviceLocked161, lockedText);
 
 /**
  * Maps a non-successful status code from the Ledger device to a human readable error description.
