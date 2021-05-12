@@ -35,6 +35,7 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
             toConfirmTransfer={toBuildSchedule}
             exitFunction={returnFunction}
             amountHeader="Send GTU with a schedule"
+            senderAddress={account.address}
         />
     );
 }

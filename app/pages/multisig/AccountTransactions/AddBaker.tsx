@@ -21,6 +21,7 @@ import PickAmount from './PickAmount';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
+import errorMessages from '~/constants/errorMessages.json';
 
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { credentialsSelector } from '~/features/CredentialSlice';
@@ -170,8 +171,11 @@ function BuildAddBakerTransactionProposalStep({
     const formatRestakeEnabled = restakeEnabled ? 'Yes' : 'No';
 
     const signingFunction = async (ledger: ConcordiumLedgerClient) => {
-        if (!account || !global) {
-            throw new Error('unexpected missing global/account');
+        if (!global) {
+            throw new Error(errorMessages.missingGlobal);
+        }
+        if (!account) {
+            throw new Error('Unexpected missing account');
         }
         if (transaction === undefined) {
             throw new Error('unexpected missing transaction');

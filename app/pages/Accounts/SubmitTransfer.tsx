@@ -29,6 +29,7 @@ import { makeTransferToPublicData } from '~/utils/rustInterface';
 import PageLayout from '~/components/PageLayout';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
+import errorMessages from '~/constants/errorMessages.json';
 
 interface Location {
     pathname: string;
@@ -108,7 +109,7 @@ export default function SubmitTransfer({ location }: Props) {
         const signatureIndex = 0;
 
         if (!global) {
-            setMessage('Missing global object.');
+            setMessage(errorMessages.missingGlobal);
             return;
         }
 
