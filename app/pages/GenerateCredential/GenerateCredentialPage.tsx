@@ -83,6 +83,10 @@ export default function GenerateCredential(): JSX.Element {
     const [address, setAddress] = useState('');
     const [attributes, setAttributes] = useState<string[]>([]);
     const [identity, setIdentity] = useState<Identity | undefined>();
+    const [
+        accountValidationError,
+        setAccountValidationError,
+    ] = useState<string>();
 
     const continueButton = (text: string) => (
         <Button
@@ -129,7 +133,6 @@ export default function GenerateCredential(): JSX.Element {
                                                     setReady={setReady}
                                                 />
                                             )}
-                                            isReady={isReady}
                                         />
                                         {continueButton('Finish')}
                                     </List>
@@ -146,7 +149,9 @@ export default function GenerateCredential(): JSX.Element {
                                                 credential={
                                                     credentialBlob?.credential
                                                 }
-                                                isReady={isReady}
+                                                accountValidationError={
+                                                    accountValidationError
+                                                }
                                             />
                                             {continueButton('Continue')}
                                         </Grid.Column>
@@ -179,6 +184,12 @@ export default function GenerateCredential(): JSX.Element {
                                                         <PickAccount
                                                             isReady={isReady}
                                                             setReady={setReady}
+                                                            setAccountValidationError={
+                                                                setAccountValidationError
+                                                            }
+                                                            accountValidationError={
+                                                                accountValidationError
+                                                            }
                                                             address={address}
                                                             setChosenAttributes={
                                                                 setAttributes

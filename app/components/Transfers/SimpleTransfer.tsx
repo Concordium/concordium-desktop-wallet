@@ -93,6 +93,7 @@ export default function SimpleTransfer({ account }: Props) {
                 toConfirmTransfer={toConfirmTransfer}
                 exitFunction={() => dispatch(push(routes.ACCOUNTS))}
                 amountHeader="Send funds"
+                senderAddress={account.address}
             />
         </>
     );

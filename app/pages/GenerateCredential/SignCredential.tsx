@@ -8,6 +8,7 @@ import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { globalSelector } from '~/features/GlobalSlice';
 import { CredentialBlob } from './types';
 import pairWallet from '~/utils/WalletPairing';
+import errorMessages from '~/constants/errorMessages.json';
 
 interface Props {
     identity: Identity | undefined;
@@ -39,9 +40,7 @@ export default function SignCredential({
                 'An identity has to be supplied. This is an internal error.'
             );
         } else if (!global) {
-            throw new Error(
-                'The global information is missing. Make sure that you have previously connected to a node.'
-            );
+            throw new Error(errorMessages.missingGlobal);
         }
 
         const walletId = await pairWallet(ledger);

@@ -35,6 +35,7 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
             toConfirmTransfer={toBuildSchedule}
             exitFunction={returnFunction}
             amountHeader="Send funds with a release schedule"
+            senderAddress={account.address}
         />
     );
 }

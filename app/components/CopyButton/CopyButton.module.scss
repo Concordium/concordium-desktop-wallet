@@ -2,4 +2,10 @@
 
 .copyIcon {
     fill: $color-grey;
+    transition: transform $anim-easing $anim-timing;
+
+    &:hover {
+        transform: scale(1.1);
+        fill: darken($color-grey, 3);
+    }
 }

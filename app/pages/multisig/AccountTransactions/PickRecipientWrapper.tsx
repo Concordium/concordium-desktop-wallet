@@ -6,6 +6,7 @@ interface Props {
     setReady(ready: boolean): void;
     setRecipient(recipient: AddressBookEntry): void;
     recipient: AddressBookEntry | undefined;
+    senderAddress?: string;
 }
 
 /**
@@ -15,11 +16,17 @@ export default function PickRecipientWrapper({
     setReady,
     setRecipient,
     recipient,
+    senderAddress,
 }: Props) {
     useEffect(() => {
         setReady(Boolean(recipient));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [recipient]);
 
-    return <PickRecipient pickRecipient={setRecipient} />;
+    return (
+        <PickRecipient
+            pickRecipient={setRecipient}
+            senderAddress={senderAddress}
+        />
+    );
 }

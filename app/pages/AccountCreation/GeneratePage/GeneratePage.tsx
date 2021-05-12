@@ -35,6 +35,7 @@ import IdentityCard from '~/components/IdentityCard';
 import AccountCard from '~/components/AccountCard';
 import CardList from '~/cross-app-components/CardList';
 import { AttributeKey } from '~/utils/identityHelpers';
+import errorMessages from '~/constants/errorMessages.json';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
@@ -127,7 +128,7 @@ export default function AccountCreationGenerate({
     ) {
         let credentialNumber;
         if (!global) {
-            onError(`Unexpected missing global object`);
+            onError(errorMessages.missingGlobal);
             return;
         }
 
