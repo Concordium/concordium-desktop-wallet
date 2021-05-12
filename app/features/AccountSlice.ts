@@ -289,10 +289,13 @@ export async function updateAccountInfoOfAddress(
  */
 export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
     const accountInfo = await getAccountInfoOfAddress(account.address);
-    await updateAccountFromAccountInfo(dispatch, account, accountInfo);
-    return dispatch(
-        updateAccountInfoEntry({ address: account.address, accountInfo })
-    );
+    if (accountInfo && account.status === AccountStatus.Confirmed) {
+        await updateAccountFromAccountInfo(dispatch, account, accountInfo);
+        return dispatch(
+            updateAccountInfoEntry({ address: account.address, accountInfo })
+        );
+    }
+    return Promise.resolve();
 }
 
 // Load accounts into state, and updates their infos

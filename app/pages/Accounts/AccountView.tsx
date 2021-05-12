@@ -42,7 +42,7 @@ export default function AccountView() {
         }
         return noOp;
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address]);
+    }, [account?.address, account?.status]);
 
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
