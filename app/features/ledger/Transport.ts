@@ -37,7 +37,11 @@ export class TransportImpl implements Transport {
         this.closed = false;
         try {
             const response = await this.transport.send(cla, ins, p1, p2, data);
-            return response;
+            if (this.closed) {
+                throw new ClosedWhileSendingError();
+            } else {
+                return response;
+            }
         } catch (e) {
             if (this.closed) {
                 throw new ClosedWhileSendingError();
