@@ -25,6 +25,7 @@
 
 .transactionListElement {
     composes: fillCardPadding;
+    position: relative;
     padding: 10px 20px;
 
     &:not(:last-child) {

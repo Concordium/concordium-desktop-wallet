@@ -448,7 +448,6 @@ export interface TransferTransaction {
     id?: number; // only remote transactions have ids.
     blockHash: Hex;
     blockTime: string;
-    total: string;
     success?: boolean;
     transactionHash: Hex;
     subtotal?: string;
