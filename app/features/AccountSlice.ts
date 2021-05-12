@@ -273,6 +273,20 @@ export async function loadAccountInfos(
     return dispatch(setAccountInfos(map));
 }
 
+/**
+ * Updates the account info, of the account with the given address, in the state.
+ */
+export async function updateAccountInfoOfAddress(
+    address: string,
+    dispatch: Dispatch
+) {
+    const accountInfo = await getAccountInfoOfAddress(address);
+    return dispatch(updateAccountInfoEntry({ address, accountInfo }));
+}
+
+/**
+ * Updates the given account's accountInfo, in the state, and check if there is updates to the account.
+ */
 export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
     const accountInfo = await getAccountInfoOfAddress(account.address);
     await updateAccountFromAccountInfo(dispatch, account, accountInfo);

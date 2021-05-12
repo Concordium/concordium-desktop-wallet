@@ -152,7 +152,11 @@ export default function SubmitTransfer({ location }: Props) {
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
             await addPendingTransaction(transaction, transactionHash);
-            monitorTransactionStatus(dispatch, transactionHash);
+            monitorTransactionStatus(
+                dispatch,
+                transactionHash,
+                account.address
+            );
 
             const confirmedStateWithHash = {
                 transactionHash,
