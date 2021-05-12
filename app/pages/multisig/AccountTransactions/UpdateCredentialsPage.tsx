@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
+import clsx from 'clsx';
 import Button from '~/cross-app-components/Button';
 import {
     Account,
@@ -296,15 +297,27 @@ export default function UpdateCredentialPage(): JSX.Element {
             .map(({ credentialIndex }) => credentialIndex || 0);
 
         return (
-            <CreateUpdate
-                account={account}
-                addedCredentials={assignIndices(newCredentials, usedIndices)}
-                removedCredIds={credentialIds
-                    .filter(([, status]) => status === CredentialStatus.Removed)
-                    .map(([id]) => id)}
-                newThreshold={newThreshold}
-                currentCredentialAmount={currentCredentials.length}
-            />
+            <div
+                className={clsx(
+                    styles.createUpdateWrapper,
+                    'flexColumn flexChildFill'
+                )}
+            >
+                <CreateUpdate
+                    account={account}
+                    addedCredentials={assignIndices(
+                        newCredentials,
+                        usedIndices
+                    )}
+                    removedCredIds={credentialIds
+                        .filter(
+                            ([, status]) => status === CredentialStatus.Removed
+                        )
+                        .map(([id]) => id)}
+                    newThreshold={newThreshold}
+                    currentCredentialAmount={currentCredentials.length}
+                />
+            </div>
         );
     }
 
