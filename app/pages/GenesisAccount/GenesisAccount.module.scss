@@ -14,8 +14,8 @@ $width: 600px;
 .exportPage,
 .fileForm,
 .pickName {
+    composes: flexChildFill from global;
     display: flex;
-    height: 90%;
 }
 
 .fileInput {
@@ -28,7 +28,7 @@ $width: 600px;
 }
 
 .submitButton {
-    margin: auto auto 0;
+    margin: auto auto 20px;
 }
 
 .printButton {
@@ -56,7 +56,7 @@ $width: 600px;
 .firstCheckbox,
 .checkbox,
 .finalButton {
-    margin: 10px auto;
+    margin: 10px auto 20px;
 }
 
 .firstCheckbox {
