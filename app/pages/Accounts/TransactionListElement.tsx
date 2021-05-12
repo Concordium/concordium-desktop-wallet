@@ -70,7 +70,7 @@ function getName(
 function buildOutgoingAmountStrings(subtotal: bigint, fee: bigint) {
     return {
         amount: `${displayAsGTU(-(subtotal + fee))}`,
-        amountFormula: `${displayAsGTU(BigInt(subtotal))} +${displayAsGTU(
+        amountFormula: `${displayAsGTU(BigInt(subtotal))} + ${displayAsGTU(
             fee
         )} Fee`,
     };
