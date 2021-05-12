@@ -12,11 +12,11 @@ import ConnectionStatusComponent, {
 } from '~/components/ConnectionStatusComponent';
 import SelectIdentityAttributes from '~/components/SelectIdentityAttributes';
 import CardList from '~/cross-app-components/CardList';
+import { AccountForm, fieldNames } from '../types';
+import savedStateContext from '../savedStateContext';
 
 import generalStyles from '../GenerateCredential.module.scss';
 import styles from './PickAccount.module.scss';
-import { AccountForm, fieldNames } from '../types';
-import savedStateContext from '../savedStateContext';
 
 const mustBeDeployedMessage = 'Address must belong to a deployed account';
 
@@ -162,7 +162,10 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
             </CardList>
             {!isRevealAttributesRoute && accountInfo && (
                 <Button
-                    className={styles.button}
+                    className={clsx(
+                        generalStyles.continueButton,
+                        styles.button
+                    )}
                     inverted
                     disabled={!formState.isValid}
                     onClick={() =>

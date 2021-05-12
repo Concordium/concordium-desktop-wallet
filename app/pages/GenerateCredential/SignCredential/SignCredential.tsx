@@ -18,11 +18,15 @@ import splitViewStyles from '../SplitViewRouter/SplitViewRouter.module.scss';
 import styles from './SignCredential.module.scss';
 import savedStateContext from '../savedStateContext';
 
+interface Props {
+    onSigned(): void;
+}
+
 /**
  * Component for creating the credential information. The user is prompted to sign
  * the necessary information to create it as part of the flow.
  */
-export default function SignCredential(): JSX.Element {
+export default function SignCredential({ onSigned }: Props): JSX.Element {
     const global = useSelector(globalSelector);
     const { control } = useFormContext<AccountForm>();
     const {
@@ -88,6 +92,7 @@ export default function SignCredential(): JSX.Element {
         onChange(blob);
         onBlur();
         setMessage('Credential generated succesfully!');
+        onSigned();
     }
 
     return (

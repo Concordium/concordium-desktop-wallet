@@ -72,10 +72,9 @@ export default function SplitViewRouter({
             </p>
             <AccountCredentialSummary className={styles.summary} />
             <Switch>
-                <Route
-                    path={routes.GENERATE_CREDENTIAL_SIGN}
-                    component={SignCredential}
-                />
+                <Route path={routes.GENERATE_CREDENTIAL_SIGN}>
+                    <SignCredential onSigned={onNext} />
+                </Route>
                 <Route
                     path={[
                         routes.GENERATE_CREDENTIAL_PICKACCOUNT,
@@ -89,13 +88,18 @@ export default function SplitViewRouter({
                     component={PickIdentity}
                 />
             </Switch>
-            <Button
-                className={clsx(generalStyles.continueButton, styles.button)}
-                disabled={!formState.isValid}
-                onClick={nextPage}
-            >
-                Continue
-            </Button>
+            {pathname !== routes.GENERATE_CREDENTIAL_SIGN && (
+                <Button
+                    className={clsx(
+                        generalStyles.continueButton,
+                        styles.button
+                    )}
+                    disabled={!formState.isValid}
+                    onClick={nextPage}
+                >
+                    Continue
+                </Button>
+            )}
         </div>
     );
 }
