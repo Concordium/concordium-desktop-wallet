@@ -6,7 +6,9 @@ import {
     useReducer,
     Dispatch,
 } from 'react';
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-singleton';
 import type {
     Observer,
     DescriptorEvent,
@@ -66,9 +68,7 @@ function useLedger(): {
                 next: async (event: any) => {
                     if (event.type === 'add') {
                         const deviceName = event.deviceModel.productName;
-                        const transport = await TransportNodeHid.open(
-                            event.path
-                        );
+                        const transport = await TransportNodeHid.open();
                         const concordiumClient = new ConcordiumLedgerClient(
                             transport
                         );
