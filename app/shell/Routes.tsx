@@ -31,14 +31,14 @@ export default function Routes(): JSX.Element {
             <Route path={routes.IMPORT} component={PerformImport} />
             <Route path={routes.EXPORTIMPORT} component={ExportImport} />
             <Route
+                path={routes.GENERATE_CREDENTIAL}
+                component={GenerateCredential}
+            />
+            <Route
                 path={routes.MULTISIGTRANSACTIONS}
                 component={MultiSignatureRouter}
             />
             <Route path={routes.SETTINGS} component={SettingsPage} />
-            <Route
-                path={routes.GENERATE_CREDENTIAL}
-                component={GenerateCredential}
-            />
             <Route path={routes.HOME} component={HomePage} />
         </Switch>
     );

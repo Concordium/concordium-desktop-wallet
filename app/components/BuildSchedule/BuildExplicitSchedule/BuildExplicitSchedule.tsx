@@ -15,7 +15,7 @@ import {
     isValidGTUString,
     toMicroUnits,
 } from '~/utils/gtu';
-import { getNow, TimeConstants } from '~/utils/timeHelpers';
+import { getDefaultScheduledStartTime } from '~/utils/timeHelpers';
 import Form from '../../Form';
 import { futureDate } from '../../Form/util/validation';
 import ScheduleList from '../../ScheduleList';
@@ -41,10 +41,6 @@ interface Props extends ScheduledTransferBuilderBaseProps {
     amount: bigint;
     defaults?: ExplicitScheduleDefaults;
     setScheduleLength: (scheduleLength: number) => void;
-}
-
-function getDefaultTimestamp() {
-    return new Date(getNow() + 5 * TimeConstants.Minute);
 }
 
 interface AddSchedulePointForm {
@@ -172,7 +168,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                         required: 'Timestamp required',
                         validate: futureDate('Must be future date'),
                     }}
-                    defaultValue={getDefaultTimestamp()}
+                    defaultValue={getDefaultScheduledStartTime()}
                 />
                 <Form.Submit size="small">Add</Form.Submit>
             </Form>
