@@ -4,6 +4,7 @@ enum StatusCodes {
     InvalidPath = 0x6b02,
     InvalidParam = 0x6b03,
     InvalidTransaction = 0x6b04,
+    DeviceLocked = 0x6b0c,
 }
 
 const incompatibleText =
@@ -26,6 +27,10 @@ errorCodeMap.set(
 errorCodeMap.set(
     StatusCodes.InvalidTransaction,
     `Invalid transaction. ${incompatibleText}`
+);
+errorCodeMap.set(
+    StatusCodes.DeviceLocked,
+    'The device is locked. Please unlock the device before submitting again.'
 );
 
 /**
