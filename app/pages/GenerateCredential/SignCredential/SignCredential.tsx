@@ -11,6 +11,7 @@ import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { globalSelector } from '~/features/GlobalSlice';
 import pairWallet from '~/utils/WalletPairing';
 import { AccountForm, CredentialBlob, fieldNames } from '../types';
+import errorMessages from '~/constants/errorMessages.json';
 
 import generalStyles from '../GenerateCredential.module.scss';
 import splitViewStyles from '../SplitViewRouter/SplitViewRouter.module.scss';
@@ -58,9 +59,7 @@ export default function SignCredential(): JSX.Element {
                 'An account adress has to be supplied. This is an internal error.'
             );
         } else if (!global) {
-            throw new Error(
-                'The global information is missing. Make sure that you have previously connected to a node.'
-            );
+            throw new Error(errorMessages.missingGlobal);
         }
 
         const walletId = await pairWallet(ledger);

@@ -3,10 +3,10 @@
     grid-column: 2;
     grid-row: 1 / 5;
     align-self: center;
-    height: calc(100% + 80px);
+    height: calc(100% + 60px);
     width: calc(100% + 80px);
     margin-right: -80px;
-    margin-bottom: -80px;
+    margin-bottom: -60px;
 
     > * {
         min-width: calc(428px + 80px);
