@@ -316,27 +316,30 @@ export default function UpdateCredentialPage(): JSX.Element {
         <MultiSignatureLayout
             pageTitle="Multi Signature Transactions | Update Account Credentials"
             stepTitle="Transaction Proposal - Update Account Credentials"
+            delegateScroll
         >
-            <Columns columnScroll divider="inset">
-                <Columns.Column verticalPadding header="Transaction Details">
-                    {displayIdentity(identity)}
-                    {displayAccount(account)}
-                    {displaySignatureThreshold(
-                        account?.signatureThreshold,
-                        newThreshold
-                    )}
-                    {displayCredentialCount(
-                        currentCredentials.length,
-                        credentialIds.length
-                    )}
-                    {listCredentials(
-                        credentialIds,
-                        updateCredentialStatus,
-                        location ===
-                            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
-                    )}
+            <Columns className={styles.columns} columnScroll divider>
+                <Columns.Column header="Transaction Details">
+                    <div className={styles.columnContainer}>
+                        {displayIdentity(identity)}
+                        {displayAccount(account)}
+                        {displaySignatureThreshold(
+                            account?.signatureThreshold,
+                            newThreshold
+                        )}
+                        {displayCredentialCount(
+                            currentCredentials.length,
+                            credentialIds.length
+                        )}
+                        {listCredentials(
+                            credentialIds,
+                            updateCredentialStatus,
+                            location ===
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
+                        )}
+                    </div>
                 </Columns.Column>
-                <Columns.Column verticalPadding header={subTitle(location)}>
+                <Columns.Column header={subTitle(location)}>
                     <div className={styles.rightColumnContainer}>
                         <Switch>
                             <Route
@@ -416,7 +419,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                         {showButton && (
                             <Button
                                 disabled={!isReady}
-                                size="big"
                                 className={styles.continueButton}
                                 onClick={() => {
                                     setReady(false);

@@ -88,17 +88,19 @@ export default function AddCredential({
         body = (
             <Card className={styles.addingCard}>
                 <div className={styles.addingCardHeader}>
-                    <h2>New Credential:</h2>
+                    <h2 className="mB0">New Credential:</h2>
                     <CloseButton
                         onClick={() => setCurrentCredential(undefined)}
                     />
                 </div>
                 <p>{currentCredential.credId}</p>
                 <h3>Identicon:</h3>
-                <Identicon
-                    size={128}
-                    string={JSON.stringify(currentCredential)}
-                />
+                <div className="mB20">
+                    <Identicon
+                        size={128}
+                        string={JSON.stringify(currentCredential)}
+                    />
+                </div>
                 <Button onClick={() => addCurrentCredential(currentCredential)}>
                     Add Credential to Proposal
                 </Button>

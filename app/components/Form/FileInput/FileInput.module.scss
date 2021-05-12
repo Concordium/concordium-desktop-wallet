@@ -22,8 +22,9 @@
 }
 
 .wrapper {
-    width: 100%;
+    flex: 1;
     height: 100%;
+    width: 100%;
     padding: 20px 30px;
     position: relative;
     border: 2px dashed $color-grey;
