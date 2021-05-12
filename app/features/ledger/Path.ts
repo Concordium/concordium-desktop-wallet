@@ -55,11 +55,11 @@ export function getPairingPath(): number[] {
  * Constructs a path to a governance signature key. The governance key derivation path structure
  * is given by:
  *
- *  - m/purpose'/coin_type'/2'/gov_purpose’/key_index'/
+ *  - m/purpose'/coin_type'/1'/gov_purpose’/key_index'/
  * @param governancePath
  */
 export function getGovernancePath(governancePath: GovernancePathInput) {
-    return [2, governancePath.purpose, governancePath.keyIndex];
+    return [1, governancePath.purpose, governancePath.keyIndex];
 }
 
 /**
