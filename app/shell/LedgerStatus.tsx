@@ -62,19 +62,14 @@ export default function LedgerStatus(): JSX.Element {
         if (status === LedgerStatusType.LOADING) {
             setDisconnected(true);
             dispatch(setCurrentWalletId(undefined));
+            setStatusText('No wallet');
         } else if (
             hasBeenDisconnected &&
             status === LedgerStatusType.CONNECTED
         ) {
             setDisconnected(false);
+            setStatusText('Wallet connected');
             submitHandler();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status]);
-
-    useEffect(() => {
-        if (hasBeenDisconnected) {
-            setStatusText(isReady ? 'Wallet connected' : 'No wallet');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status]);
