@@ -32,7 +32,7 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
     const {
         address,
         identity,
-        chosenAttributes,
+        chosenAttributes = [],
         credential: savedCredential,
     } = useContext(savedStateContext);
     const {
