@@ -19,7 +19,7 @@ function getHeader(currentLocation: string) {
 function getDescription(currentLocation: string) {
     switch (currentLocation) {
         case routes.GENERATE_CREDENTIAL_EXPORT:
-            return 'The last step is to export and send your credentials to the proposing owner of the account. They will then be able propose you as a new owner of the account.';
+            return 'The last step is to export and send your credentials to the proposing owner of the account. They will then be able to propose you as a new owner of the account.';
         default:
             return '';
     }
