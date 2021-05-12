@@ -1,9 +1,7 @@
 const validSubtrees = [0, 1, 2];
 
-// TODO[MAINNET]: A Concordium specific purpose and coin type has to be decided before mainnet.
-// TODO: Probably move this into the Ledger device as we will be restricting it anyway.
-const concordiumPurpose = 583;
-const concordiumCoinType = 691;
+const concordiumPurpose = 1105;
+const concordiumCoinType = 0;
 
 export interface AccountPathInput {
     identityIndex: number;
