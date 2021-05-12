@@ -145,31 +145,30 @@ function listCredentials(
         let right = null;
         if (status === CredentialStatus.Added) {
             leftText = 'Remove';
-            right = <h2 className={styles.green}>Added</h2>;
+            right = <h2 className={clsx(styles.green, 'mB0')}>Added</h2>;
         } else if (status === CredentialStatus.Unchanged) {
             leftText = 'Remove';
-            right = <h2 className={styles.gray}>Unchanged</h2>;
+            right = <h2 className={clsx(styles.gray, 'mB0')}>Unchanged</h2>;
         } else if (status === CredentialStatus.Removed) {
             leftText = 'Revert';
-            right = <h2 className={styles.red}>Removed</h2>;
+            right = <h2 className={clsx(styles.red, 'mB0')}>Removed</h2>;
         } else if (status === CredentialStatus.Original) {
-            right = <h2>Original</h2>;
+            right = <h2 className="mB0">Original</h2>;
         }
         return (
             <div key={credId} className={styles.credentialListElement}>
-                <div>
-                    {leftText && isEditing ? (
+                <div className="mR20">
+                    {leftText && isEditing && (
                         <Button
+                            size="small"
                             onClick={() => updateCredential([credId, status])}
                         >
                             {leftText}
                         </Button>
-                    ) : null}
+                    )}
                 </div>
-                <div>
-                    <h5>{credId}</h5>
-                </div>
-                {right}
+                <h5>{credId}</h5>
+                <div className="mL20">{right}</div>
             </div>
         );
     });

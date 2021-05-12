@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Identicon from 'react-identicons';
+import clsx from 'clsx';
 import Card from '~/cross-app-components/Card';
 import { CredentialDeploymentInformation } from '~/utils/types';
 import FileInput from '~/components/Form/FileInput';
@@ -118,7 +119,7 @@ export default function AddCredential({
         );
     }
     return (
-        <>
+        <div className={clsx(!currentCredential && 'flexColumn flexChildFill')}>
             <SimpleErrorModal
                 show={showError.show}
                 header={showError.header}
@@ -133,6 +134,6 @@ export default function AddCredential({
                 below, or by browsing to the file on your computer.
             </p>
             {body}
-        </>
+        </div>
     );
 }
