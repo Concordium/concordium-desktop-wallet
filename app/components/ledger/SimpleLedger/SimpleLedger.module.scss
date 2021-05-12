@@ -1,11 +1,15 @@
-.submit,
-.content {
-    margin-top: 40px;
-}
-
-.content {
-    display: inline-flex;
+.root {
+    text-align: center;
+    display: flex;
     flex-direction: column;
     justify-content: space-between;
-    align-items: center;
+}
+
+.status,
+.submit {
+    margin: 40px 30px 20px;
+}
+
+.status {
+    margin-bottom: 0;
 }

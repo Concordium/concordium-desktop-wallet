@@ -363,11 +363,12 @@ export async function decryptAccountBalance(
 export async function addExternalAccount(
     dispatch: Dispatch,
     accountAddress: string,
+    accountName: string,
     identityId: number,
     signatureThreshold: number
 ) {
     const account: Account = {
-        name: accountAddress.substring(0, 8),
+        name: accountName,
         identityId,
         status: AccountStatus.Confirmed,
         address: accountAddress,
