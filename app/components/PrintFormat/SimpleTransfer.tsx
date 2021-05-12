@@ -2,16 +2,16 @@ import React from 'react';
 import { MultiSignatureTransactionStatus, SimpleTransfer } from '~/utils/types';
 import {
     withHeaderAndFooter,
-    timestamp,
     table,
     sender,
     recipient,
     totalWithdrawn,
     displayAmount,
     fee,
+    standardPageFooter,
     displayStatus,
-    hash,
-    standardHeader,
+    hashRow,
+    standardTableHeader,
     displayExpiry,
 } from '~/utils/printUtility';
 import withNames from '~/components/Transfers/withNames';
@@ -40,7 +40,7 @@ function PrintFormatSimpleTransfer({
         <>
             <h1>Transaction - Send GTU</h1>
             {table(
-                standardHeader,
+                standardTableHeader,
                 <tbody>
                     {sender(transaction.sender, fromName)}
                     {recipient(transaction.payload.toAddress, toName)}
@@ -50,7 +50,7 @@ function PrintFormatSimpleTransfer({
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}
-                    {hash(transaction)}
+                    {hashRow(transaction)}
                     <tr>
                         <td>Identicon:</td>
                     </tr>
@@ -59,7 +59,11 @@ function PrintFormatSimpleTransfer({
             <img src={image} alt="" />
         </>
     );
-    return withHeaderAndFooter(body, undefined, timestamp());
+    return withHeaderAndFooter(
+        body,
+        undefined,
+        standardPageFooter(transaction)
+    );
 }
 
 export default withNames(PrintFormatSimpleTransfer);

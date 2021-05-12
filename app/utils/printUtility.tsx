@@ -68,7 +68,7 @@ export const fee = (estimatedFee?: Fraction) => (
     </tr>
 );
 
-export const hash = (transaction: AccountTransaction) => (
+export const hashRow = (transaction: AccountTransaction) => (
     <tr>
         <td>Signing hash</td>
         <td>
@@ -116,8 +116,18 @@ export const displayExpiry = (expiry: bigint) => (
     </tr>
 );
 
-export const timestamp = () => (
-    <p style={{ textAlign: 'right' }}>
+const hashHeader = (transaction: AccountTransaction) => (
+    <p style={{ textAlign: 'right', paddingLeft: '10px' }}>
+        Hash:{' '}
+        {getAccountTransactionHash(transaction, () => [])
+            .toString('hex')
+            .substring(0, 8)}
+        ...
+    </p>
+);
+
+const timestamp = () => (
+    <p style={{ textAlign: 'left', paddingRight: '10px' }}>
         Printed on:{' '}
         {parseTime(
             getNow(TimeStampUnit.seconds).toString(),
@@ -127,7 +137,13 @@ export const timestamp = () => (
     </p>
 );
 
-export const standardHeader = (
+export const standardPageFooter = (transaction: AccountTransaction) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        {hashHeader(transaction)} {timestamp()}
+    </div>
+);
+
+export const standardTableHeader = (
     <thead>
         <tr>
             <th>Property</th>

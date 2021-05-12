@@ -7,7 +7,6 @@ import {
 } from '~/utils/types';
 import {
     withHeaderAndFooter,
-    timestamp,
     table,
     sender,
     recipient,
@@ -15,8 +14,9 @@ import {
     displayAmount,
     fee,
     displayStatus,
-    hash,
-    standardHeader,
+    standardPageFooter,
+    hashRow,
+    standardTableHeader,
     timeFormat,
     displayExpiry,
 } from '~/utils/printUtility';
@@ -48,7 +48,7 @@ function PrintFormatScheduledTransfer({
         <>
             <h1>Transaction - Send GTU with a schedule</h1>
             {table(
-                standardHeader,
+                standardTableHeader,
                 <tbody>
                     {sender(transaction.sender, fromName)}
                     {recipient(transaction.payload.toAddress, toName)}
@@ -58,7 +58,7 @@ function PrintFormatScheduledTransfer({
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}
-                    {hash(transaction)}
+                    {hashRow(transaction)}
                     <tr>
                         <td>Identicon:</td>
                     </tr>
@@ -97,7 +97,11 @@ function PrintFormatScheduledTransfer({
             )}
         </>
     );
-    return withHeaderAndFooter(body, undefined, timestamp());
+    return withHeaderAndFooter(
+        body,
+        undefined,
+        standardPageFooter(transaction)
+    );
 }
 
 export default withNames(PrintFormatScheduledTransfer);
