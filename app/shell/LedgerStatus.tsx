@@ -10,28 +10,50 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
 import { getId } from '~/database/WalletDao';
 
+const listenerTimeout = 5000;
+
 export default function LedgerStatus(): JSX.Element {
     const dispatch = useDispatch();
     const [hasBeenDisconnected, setDisconnected] = useState(true);
     const [statusText, setStatusText] = useState('');
 
-    const callback = useCallback(
-        async (ledger: ConcordiumLedgerClient) => {
+    const onWalletIdentifier = useCallback(
+        async (walletIdentifier: string) => {
+            const walletId = await getId(walletIdentifier);
+            dispatch(setCurrentWalletId(walletId));
+            if (!walletId) {
+                setStatusText('New device detected');
+            }
+        },
+        [dispatch]
+    );
+
+    const listen = useCallback(
+        async (
+            ledger: ConcordiumLedgerClient,
+            onWallet: (walletIdentifier: string) => void
+        ) => {
             try {
                 const walletIdentifier = await ledger.getPublicKeySilent(
                     getPairingPath()
                 );
-                const walletId = await getId(walletIdentifier.toString('hex'));
-                await dispatch(setCurrentWalletId(walletId));
-
-                if (!walletId) {
-                    setStatusText('New device detected');
-                }
+                onWallet(walletIdentifier.toString('hex'));
+                return;
             } catch (e) {
-                setStatusText('Pairing failed');
+                setTimeout(
+                    () => listen(ledger, onWalletIdentifier),
+                    listenerTimeout
+                );
             }
         },
-        [dispatch]
+        [onWalletIdentifier]
+    );
+
+    const callback = useCallback(
+        async (ledger: ConcordiumLedgerClient) => {
+            listen(ledger, onWalletIdentifier);
+        },
+        [listen, onWalletIdentifier]
     );
 
     const { isReady, status, submitHandler } = useLedger(callback, asyncNoOp);
@@ -52,7 +74,7 @@ export default function LedgerStatus(): JSX.Element {
 
     useEffect(() => {
         if (hasBeenDisconnected) {
-            setStatusText(isReady ? 'Device ready' : 'Waiting for device');
+            setStatusText(isReady ? 'Wallet connected' : 'No wallet');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status]);
