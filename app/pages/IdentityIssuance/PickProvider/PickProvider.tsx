@@ -56,7 +56,7 @@ export default function IdentityIssuanceChooseProvider({
             return;
         }
 
-        const walletId = await pairWallet(ledger);
+        const walletId = await pairWallet(ledger, dispatch);
         const identityNumber = await getNextIdentityNumber(walletId);
 
         const idObj = await createIdentityRequestObjectLedger(

@@ -1,4 +1,4 @@
-import type Transport from '@ledgerhq/hw-transport';
+import { Transport } from './Transport';
 
 export interface AppAndVersion {
     name: string;

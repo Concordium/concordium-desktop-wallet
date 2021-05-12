@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useController, useFormContext } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
@@ -27,6 +27,7 @@ interface Props {
  * the necessary information to create it as part of the flow.
  */
 export default function SignCredential({ onSigned }: Props): JSX.Element {
+    const dispatch = useDispatch();
     const global = useSelector(globalSelector);
     const { control } = useFormContext<AccountForm>();
     const {
@@ -66,7 +67,7 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
             throw new Error(errorMessages.missingGlobal);
         }
 
-        const walletId = await pairWallet(ledger);
+        const walletId = await pairWallet(ledger, dispatch);
         if (walletId !== identity.walletId) {
             throw new Error(
                 'The chosen identity was not created using the connected wallet.'

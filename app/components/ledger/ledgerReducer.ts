@@ -142,7 +142,11 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
                 text: a.message || getStatusMessage(LedgerStatusType.ERROR),
             };
         case LedgerActionType.FINISHED:
-            return { ...s, status: LedgerStatusType.CONNECTED };
+            return {
+                ...s,
+                status: LedgerStatusType.CONNECTED,
+                text: getStatusMessage(LedgerStatusType.CONNECTED, deviceName),
+            };
         default:
             return s;
     }

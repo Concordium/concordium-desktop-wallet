@@ -132,7 +132,7 @@ export default function AccountCreationGenerate({
             return;
         }
 
-        const walletId = await pairWallet(ledger);
+        const walletId = await pairWallet(ledger, dispatch);
         if (walletId !== identity.walletId) {
             throw new Error(
                 'The chosen identity was not created using the connected wallet.'

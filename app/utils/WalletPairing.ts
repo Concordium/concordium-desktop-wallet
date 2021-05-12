@@ -1,7 +1,8 @@
 import { getId, insertWallet } from '~/database/WalletDao';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getPairingPath } from '~/features/ledger/Path';
-import { WalletType } from './types';
+import { setCurrentWalletId } from '~/features/WalletSlice';
+import { WalletType, Dispatch } from './types';
 
 /**
  * Pairs a (hardware) wallet with the desktop wallet. If the (hardware) wallet was already
@@ -10,14 +11,16 @@ import { WalletType } from './types';
  * @returns the id of the inserted wallet, or the already paired wallet
  */
 export default async function pairWallet(
-    ledger: ConcordiumLedgerClient
+    ledger: ConcordiumLedgerClient,
+    dispatch: Dispatch
 ): Promise<number> {
     const pairingKey = (
         await ledger.getPublicKeySilent(getPairingPath())
     ).toString('hex');
-    const walletId = await getId(pairingKey);
+    let walletId = await getId(pairingKey);
     if (walletId === undefined) {
-        return insertWallet(pairingKey, WalletType.LedgerNanoS);
+        walletId = await insertWallet(pairingKey, WalletType.LedgerNanoS);
+        dispatch(setCurrentWalletId(walletId));
     }
     return walletId;
 }
