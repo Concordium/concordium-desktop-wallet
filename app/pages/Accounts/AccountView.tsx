@@ -41,12 +41,14 @@ export default function AccountView() {
             };
         }
         return noOp;
-    }, [account]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account?.address]);
 
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
             updateTransactions(dispatch, account);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [account?.address, accountInfo?.accountAmount]);
 
     if (account === undefined) {
