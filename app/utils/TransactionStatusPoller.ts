@@ -91,14 +91,17 @@ export async function getMultiSignatureTransactionStatus(
 /**
  * Wait for the transaction to be finalized (or rejected) and update accordingly
  */
-export async function monitorTransactionStatus(transactionHash: string) {
+export async function monitorTransactionStatus(
+    dispatch: Dispatch,
+    transactionHash: string
+) {
     const response = await getStatus(transactionHash);
     switch (response.status) {
         case TransactionStatus.Rejected:
-            rejectTransaction(transactionHash);
+            rejectTransaction(dispatch, transactionHash);
             break;
         case TransactionStatus.Finalized: {
-            confirmTransaction(transactionHash, response.outcomes);
+            confirmTransaction(dispatch, transactionHash, response.outcomes);
             break;
         }
         default:
@@ -113,7 +116,7 @@ export async function monitorTransactionStatus(transactionHash: string) {
 export default async function listenForTransactionStatus(dispatch: Dispatch) {
     const transfers = await getPendingTransactions();
     transfers.forEach((transfer) =>
-        monitorTransactionStatus(transfer.transactionHash)
+        monitorTransactionStatus(dispatch, transfer.transactionHash)
     );
 
     const allProposals = await getAll();

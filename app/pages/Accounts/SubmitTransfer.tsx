@@ -151,8 +151,8 @@ export default function SubmitTransfer({ location }: Props) {
         ).toString('hex');
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
-            addPendingTransaction(transaction, transactionHash);
-            monitorTransactionStatus(transactionHash);
+            await addPendingTransaction(transaction, transactionHash);
+            monitorTransactionStatus(dispatch, transactionHash);
 
             const confirmedStateWithHash = {
                 transactionHash,
