@@ -13,7 +13,7 @@ interface Props {
  */
 export default function UnshieldAmount({ account }: Props) {
     const specific = {
-        amountHeader: 'Unshield Amount',
+        amountHeader: 'Unshield GTU',
         createTransaction: createUnshieldAmountTransaction,
         location: routes.ACCOUNTS_UNSHIELDAMOUNT,
         transactionKind: TransactionKindId.Transfer_to_public,

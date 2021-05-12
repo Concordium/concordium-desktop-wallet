@@ -34,7 +34,7 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
         <ExternalTransfer
             toConfirmTransfer={toBuildSchedule}
             exitFunction={returnFunction}
-            amountHeader="Send funds with a release schedule"
+            amountHeader="Send GTU with a schedule"
         />
     );
 }
