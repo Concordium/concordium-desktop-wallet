@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
+import { Prompt } from 'react-router-dom';
 import routes from '~/constants/routes.json';
 import { getIdentityProviders } from '~/utils/httpRequests';
 import { IdentityProvider } from '~/utils/types';
@@ -32,6 +33,7 @@ export default function IdentityIssuanceChooseProvider({
     const dispatch = useDispatch();
     const [providers, setProviders] = useState<IdentityProvider[]>([]);
     const global = useSelector(globalSelector);
+    const [warnWhenNavigate, setWarnWhenNavigate] = useState(true);
 
     useEffect(() => {
         getIdentityProviders()
@@ -74,6 +76,7 @@ export default function IdentityIssuanceChooseProvider({
             walletId,
         };
 
+        setWarnWhenNavigate(false);
         dispatch(
             push({
                 pathname: routes.IDENTITYISSUANCE_EXTERNAL,
@@ -96,6 +99,10 @@ export default function IdentityIssuanceChooseProvider({
                 must sign your submission with your hardware wallet, before you
                 can continue.
             </p>
+            <Prompt
+                when={warnWhenNavigate}
+                message="You are about to abort creating an identity. Are you sure?"
+            />
             <CardList className={styles.container}>
                 {providers.map((p) => (
                     <Card

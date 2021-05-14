@@ -1,7 +1,7 @@
 import React, { useState, useRef, RefObject, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Redirect, useLocation } from 'react-router';
+import { Prompt, Redirect, useLocation } from 'react-router';
 import { addPendingIdentity } from '~/features/IdentitySlice';
 import { addPendingAccount } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
@@ -92,18 +92,13 @@ async function generateIdentity(
         onError(`Failed to create identity due to ${e}`);
         return;
     }
-    try {
-        confirmIdentityAndInitialAccount(
-            dispatch,
-            identityName,
-            identityId,
-            accountName,
-            identityObjectLocation
-        );
-        dispatch(push(routes.IDENTITYISSUANCE_FINAL));
-    } catch (e) {
-        onError(`Failed to confirm identity`);
-    }
+    confirmIdentityAndInitialAccount(
+        dispatch,
+        identityName,
+        identityId,
+        accountName,
+        identityObjectLocation
+    ).catch(() => onError(`Failed to confirm identity`));
 }
 
 export interface ExternalIssuanceLocationState extends SignedIdRequest {
@@ -129,6 +124,7 @@ export default function ExternalIssuance({
 
     const [location, setLocation] = useState<string>();
     const iframeRef = useRef<HTMLIFrameElement>(null);
+    const [warnWhenNavigate, setWarnWhenNavigate] = useState(true);
 
     useLayoutEffect(() => {
         if (!state) {
@@ -149,7 +145,12 @@ export default function ExternalIssuance({
             walletId,
             iframeRef,
             onError
-        );
+        )
+            .then(() => {
+                setWarnWhenNavigate(false);
+                return dispatch(push(routes.IDENTITYISSUANCE_FINAL));
+            })
+            .catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -157,12 +158,25 @@ export default function ExternalIssuance({
         return <Redirect to={routes.IDENTITIES} />;
     }
 
+    const navigationWarning = (
+        <Prompt
+            when={warnWhenNavigate}
+            message="You are about to abort creating an identity. Are you sure?"
+        />
+    );
+
     if (!location) {
-        return <Loading text="Generating your identity" />;
+        return (
+            <>
+                {navigationWarning}
+                <Loading text="Generating your identity" />
+            </>
+        );
     }
 
     return (
         <>
+            {navigationWarning}
             <h2 className={generalStyles.header}>Generating the Identity</h2>
             <webview
                 ref={iframeRef}
