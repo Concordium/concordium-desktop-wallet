@@ -67,10 +67,6 @@ export function rejectReasonToDisplayText(
         return 'Rejection reason is missing';
     }
 
-    if (typeof rejectReason === 'string') {
-        return rejectReason;
-    }
-
     switch (rejectReason) {
         case RejectReason.ModuleNotWF:
             return 'Smart contract module failed to typecheck';
