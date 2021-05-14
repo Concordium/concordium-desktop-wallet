@@ -59,7 +59,7 @@ export default function SignTransaction({
                             Generate and sign
                         </Form.Submit>
                         <Form.Submit
-                            disabled={signing || !isReady}
+                            disabled={signing}
                             className="mT10"
                             onClick={() => setSkipping(true)}
                         >
