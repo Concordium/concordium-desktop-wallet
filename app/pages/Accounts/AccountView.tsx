@@ -4,6 +4,7 @@ import { Switch, Route } from 'react-router-dom';
 import {
     chosenAccountSelector,
     chosenAccountInfoSelector,
+    updateAccountInfo,
 } from '~/features/AccountSlice';
 import { updateTransactions } from '~/features/TransactionSlice';
 import routes from '~/constants/routes.json';
@@ -15,6 +16,10 @@ import TransferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
 import AccountViewActions from './AccountViewActions';
 import { AccountStatus } from '~/utils/types';
+import { noOp } from '~/utils/basicHelpers';
+
+// milliseconds between updates of the accountInfo
+const accountInfoUpdateInterval = 30000;
 
 /**
  * Detailed view of the chosen account and its transactions.
@@ -26,10 +31,25 @@ export default function AccountView() {
     const accountInfo = useSelector(chosenAccountInfoSelector);
 
     useEffect(() => {
+        if (account) {
+            updateAccountInfo(account, dispatch);
+            const interval = setInterval(async () => {
+                updateAccountInfo(account, dispatch);
+            }, accountInfoUpdateInterval);
+            return () => {
+                clearInterval(interval);
+            };
+        }
+        return noOp;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account?.address, account?.status]);
+
+    useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
             updateTransactions(dispatch, account);
         }
-    }, [dispatch, account]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account?.address, accountInfo?.accountAmount]);
 
     if (account === undefined) {
         return null;
