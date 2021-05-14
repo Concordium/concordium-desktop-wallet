@@ -32,7 +32,6 @@ import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import getTransactionHash from '~/utils/transactionHash';
 
 import ExpiredTransactionView from '../ExpiredTransactionView';
-import withChainData, { ChainData } from '../common/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import styles from './CosignTransactionProposal.module.scss';
 import { signUpdateInstruction, signAccountTransaction } from './util';
@@ -52,7 +51,7 @@ const fieldNames: EqualRecord<CosignTransactionProposalForm> = {
     hashMatch: 'hashMatch',
 };
 
-interface CosignTransactionProposalProps extends ChainData {
+interface CosignTransactionProposalProps {
     location: LocationDescriptorObject<TransactionInput>;
 }
 
@@ -60,263 +59,229 @@ interface CosignTransactionProposalProps extends ChainData {
  * Component that displays an overview of an imported multi signature transaction proposal
  * that is to be signed.
  */
-const CosignTransactionProposal = withChainData<CosignTransactionProposalProps>(
-    ({ location, blockSummary }) => {
-        const [showError, setShowError] = useState<ModalErrorInput>({
-            show: false,
-        });
-        const [signature, setSignature] = useState<
-            | UpdateInstructionSignature[]
-            | TransactionAccountSignature
-            | undefined
-        >();
-        const [transactionHash, setTransactionHash] = useState<string>();
-        const [image, setImage] = useState<string>();
+function CosignTransactionProposal({
+    location,
+}: CosignTransactionProposalProps) {
+    const [showError, setShowError] = useState<ModalErrorInput>({
+        show: false,
+    });
+    const [signature, setSignature] = useState<
+        UpdateInstructionSignature[] | TransactionAccountSignature | undefined
+    >();
+    const [transactionHash, setTransactionHash] = useState<string>();
+    const [image, setImage] = useState<string>();
 
-        const dispatch = useDispatch();
+    const dispatch = useDispatch();
 
-        const { transaction } = location.state as TransactionInput;
-        const [transactionObject] = useState(parse(transaction));
+    const { transaction } = location.state as TransactionInput;
+    const [transactionObject] = useState(parse(transaction));
 
-        const [transactionHandler] = useState(() =>
-            findHandler(transactionObject)
-        );
+    const [transactionHandler] = useState(() => findHandler(transactionObject));
 
-        useEffect(() => {
-            setTransactionHash(getTransactionHash(transactionObject));
-        }, [setTransactionHash, transactionObject]);
+    useEffect(() => {
+        setTransactionHash(getTransactionHash(transactionObject));
+    }, [setTransactionHash, transactionObject]);
 
-        const signingFunction: LedgerCallback = async (
-            ledger: ConcordiumLedgerClient,
-            setStatusText
-        ) => {
-            let sig;
-            if (instanceOfUpdateInstruction(transactionObject)) {
-                if (blockSummary) {
-                    try {
-                        sig = await signUpdateInstruction(
-                            transactionObject,
-                            ledger,
-                            blockSummary
-                        );
-                    } catch (e) {
-                        setShowError({
-                            show: true,
-                            header: 'Unauthorized key',
-                            content:
-                                'Your key is not authorized to sign this update type.',
-                        });
-                        return;
-                    }
-                } else {
-                    return;
-                }
-            } else {
-                try {
-                    sig = await signAccountTransaction(
-                        transactionObject,
-                        ledger
-                    );
-                } catch (e) {
-                    setShowError({
-                        show: true,
-                        header: 'Unable to sign transaction',
-                        content: e.message,
-                    });
-                    return;
-                }
-            }
-            setSignature(sig);
-            setStatusText('Proposal signed successfully');
-        };
-
-        async function exportSignedTransaction() {
-            const signedTransaction = {
-                ...transactionObject,
-                signatures: signature,
-            };
-            const signedTransactionJson = stringify(signedTransaction);
-
+    const signingFunction: LedgerCallback = async (
+        ledger: ConcordiumLedgerClient,
+        setStatusText
+    ) => {
+        let sig;
+        if (instanceOfUpdateInstruction(transactionObject)) {
             try {
-                const fileSaved = await saveFile(signedTransactionJson, {
-                    title: 'Export signed transaction',
+                sig = await signUpdateInstruction(transactionObject, ledger);
+            } catch (e) {
+                setShowError({
+                    show: true,
+                    header: 'Unable to sign update',
+                    content: e.message,
                 });
-
-                if (fileSaved) {
-                    dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
-                }
-            } catch (err) {
-                // TODO Handle error by showing it to the user.
+                return;
+            }
+        } else {
+            try {
+                sig = await signAccountTransaction(transactionObject, ledger);
+            } catch (e) {
+                setShowError({
+                    show: true,
+                    header: 'Unable to sign transaction',
+                    content: e.message,
+                });
+                return;
             }
         }
+        setSignature(sig);
+        setStatusText('Proposal signed successfully');
+    };
 
-        if (!transactionHash) {
-            return null;
+    async function exportSignedTransaction() {
+        const signedTransaction = {
+            ...transactionObject,
+            signatures: signature,
+        };
+        const signedTransactionJson = stringify(signedTransaction);
+
+        try {
+            const fileSaved = await saveFile(signedTransactionJson, {
+                title: 'Export signed transaction',
+            });
+
+            if (fileSaved) {
+                dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
+            }
+        } catch (err) {
+            // TODO Handle error by showing it to the user.
         }
+    }
 
-        const isTransactionExpired = isExpired(transactionObject);
+    if (!transactionHash) {
+        return null;
+    }
 
-        return (
-            <>
-                <SimpleErrorModal
-                    show={showError.show}
-                    header={showError.header}
-                    content={showError.content}
-                    onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
-                />
-                <MultiSignatureLayout
-                    pageTitle={transactionHandler.title}
-                    print={transactionHandler.print(
-                        transactionObject,
-                        isTransactionExpired
-                            ? MultiSignatureTransactionStatus.Expired
-                            : MultiSignatureTransactionStatus.Open,
-                        image
-                    )}
-                    stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
-                    delegateScroll
-                >
-                    <Ledger ledgerCallback={signingFunction}>
-                        {({
-                            isReady,
-                            statusView,
-                            submitHandler = asyncNoOp,
-                        }) => (
-                            <Form<CosignTransactionProposalForm>
-                                className={styles.subtractContainerPadding}
-                                onSubmit={submitHandler}
+    const isTransactionExpired = isExpired(transactionObject);
+
+    return (
+        <>
+            <SimpleErrorModal
+                show={showError.show}
+                header={showError.header}
+                content={showError.content}
+                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+            />
+            <MultiSignatureLayout
+                pageTitle={transactionHandler.title}
+                print={transactionHandler.print(
+                    transactionObject,
+                    isTransactionExpired
+                        ? MultiSignatureTransactionStatus.Expired
+                        : MultiSignatureTransactionStatus.Open,
+                    image
+                )}
+                stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
+                delegateScroll
+            >
+                <Ledger ledgerCallback={signingFunction}>
+                    {({ isReady, statusView, submitHandler = asyncNoOp }) => (
+                        <Form<CosignTransactionProposalForm>
+                            className={styles.subtractContainerPadding}
+                            onSubmit={submitHandler}
+                        >
+                            <Columns
+                                divider
+                                columnClassName={styles.column}
+                                columnScroll
                             >
-                                <Columns
-                                    divider
-                                    columnClassName={styles.column}
-                                    columnScroll
-                                >
-                                    <Columns.Column header="Security & Submission Details">
-                                        <div className={styles.columnContent}>
-                                            <TransactionHashView
-                                                transactionHash={
-                                                    transactionHash
-                                                }
-                                                setScreenshot={setImage}
+                                <Columns.Column header="Security & Submission Details">
+                                    <div className={styles.columnContent}>
+                                        <TransactionHashView
+                                            transactionHash={transactionHash}
+                                            setScreenshot={setImage}
+                                        />
+                                        {instanceOfUpdateInstruction(
+                                            transactionObject
+                                        ) && (
+                                            <TransactionExpirationDetails
+                                                title="Transaction must be submitted to the chain by the  proposer before:"
+                                                expirationDate={dateFromTimeStamp(
+                                                    transactionObject.header
+                                                        .timeout
+                                                )}
                                             />
-                                            {instanceOfUpdateInstruction(
-                                                transactionObject
-                                            ) && (
-                                                <TransactionExpirationDetails
-                                                    title="Transaction must be submitted to the chain by the  proposer before:"
-                                                    expirationDate={dateFromTimeStamp(
-                                                        transactionObject.header
-                                                            .timeout
-                                                    )}
-                                                />
-                                            )}
-                                        </div>
-                                    </Columns.Column>
-                                    <Columns.Column header="Transaction Details">
-                                        <div className={styles.columnContent}>
-                                            <TransactionDetails
+                                        )}
+                                    </div>
+                                </Columns.Column>
+                                <Columns.Column header="Transaction Details">
+                                    <div className={styles.columnContent}>
+                                        <TransactionDetails
+                                            transaction={transactionObject}
+                                        />
+                                        {instanceOfUpdateInstruction(
+                                            transactionObject
+                                        ) && (
+                                            <ExpiredTransactionView
                                                 transaction={transactionObject}
                                             />
-                                            {instanceOfUpdateInstruction(
-                                                transactionObject
-                                            ) && (
-                                                <ExpiredTransactionView
-                                                    transaction={
-                                                        transactionObject
+                                        )}
+                                    </div>
+                                </Columns.Column>
+                                <Columns.Column
+                                    header="Signature and Hardware Wallet"
+                                    className={styles.stretchColumn}
+                                >
+                                    <div className={styles.columnContent}>
+                                        <h5>Hardware wallet status</h5>
+                                        <div>{statusView}</div>
+                                        <div>
+                                            <div className={styles.checkboxes}>
+                                                <Form.Checkbox
+                                                    name={
+                                                        fieldNames.transactionDetailsMatch
                                                     }
-                                                />
-                                            )}
-                                        </div>
-                                    </Columns.Column>
-                                    <Columns.Column
-                                        header="Signature and Hardware Wallet"
-                                        className={styles.stretchColumn}
-                                    >
-                                        <div className={styles.columnContent}>
-                                            <h5>Hardware wallet status</h5>
-                                            <div>{statusView}</div>
-                                            <div>
-                                                <div
-                                                    className={
-                                                        styles.checkboxes
+                                                    rules={{
+                                                        required:
+                                                            'Please review transaction details',
+                                                    }}
+                                                    disabled={!!signature}
+                                                >
+                                                    The transaction details are
+                                                    correct
+                                                </Form.Checkbox>
+                                                <Form.Checkbox
+                                                    name={
+                                                        fieldNames.identiconMatch
+                                                    }
+                                                    rules={{
+                                                        required:
+                                                            'Make sure identicons match.',
+                                                    }}
+                                                    disabled={!!signature}
+                                                >
+                                                    The identicon matches the
+                                                    one received exactly
+                                                </Form.Checkbox>
+                                                <Form.Checkbox
+                                                    name={fieldNames.hashMatch}
+                                                    rules={{
+                                                        required:
+                                                            'Make sure hashes match',
+                                                    }}
+                                                    disabled={!!signature}
+                                                >
+                                                    The hash matches the one
+                                                    received exactly
+                                                </Form.Checkbox>
+                                            </div>
+                                            {signature ? (
+                                                <Button
+                                                    className={styles.submit}
+                                                    onClick={
+                                                        exportSignedTransaction
                                                     }
                                                 >
-                                                    <Form.Checkbox
-                                                        name={
-                                                            fieldNames.transactionDetailsMatch
-                                                        }
-                                                        rules={{
-                                                            required:
-                                                                'Please review transaction details',
-                                                        }}
-                                                        disabled={!!signature}
-                                                    >
-                                                        The transaction details
-                                                        are correct
-                                                    </Form.Checkbox>
-                                                    <Form.Checkbox
-                                                        name={
-                                                            fieldNames.identiconMatch
-                                                        }
-                                                        rules={{
-                                                            required:
-                                                                'Make sure identicons match.',
-                                                        }}
-                                                        disabled={!!signature}
-                                                    >
-                                                        The identicon matches
-                                                        the one received exactly
-                                                    </Form.Checkbox>
-                                                    <Form.Checkbox
-                                                        name={
-                                                            fieldNames.hashMatch
-                                                        }
-                                                        rules={{
-                                                            required:
-                                                                'Make sure hashes match',
-                                                        }}
-                                                        disabled={!!signature}
-                                                    >
-                                                        The hash matches the one
-                                                        received exactly
-                                                    </Form.Checkbox>
-                                                </div>
-                                                {signature ? (
-                                                    <Button
-                                                        className={
-                                                            styles.submit
-                                                        }
-                                                        onClick={
-                                                            exportSignedTransaction
-                                                        }
-                                                    >
-                                                        Export Signature
-                                                    </Button>
-                                                ) : (
-                                                    <Form.Submit
-                                                        className={
-                                                            styles.submit
-                                                        }
-                                                        disabled={
-                                                            !isReady ||
-                                                            isTransactionExpired
-                                                        }
-                                                    >
-                                                        Sign Proposal
-                                                    </Form.Submit>
-                                                )}
-                                            </div>
+                                                    Export Signature
+                                                </Button>
+                                            ) : (
+                                                <Form.Submit
+                                                    className={styles.submit}
+                                                    disabled={
+                                                        !isReady ||
+                                                        isTransactionExpired
+                                                    }
+                                                >
+                                                    Sign Proposal
+                                                </Form.Submit>
+                                            )}
                                         </div>
-                                    </Columns.Column>
-                                </Columns>
-                            </Form>
-                        )}
-                    </Ledger>
-                </MultiSignatureLayout>
-            </>
-        );
-    }
-);
+                                    </div>
+                                </Columns.Column>
+                            </Columns>
+                        </Form>
+                    )}
+                </Ledger>
+            </MultiSignatureLayout>
+        </>
+    );
+}
 
 export default ensureProps(
     CosignTransactionProposal,

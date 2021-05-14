@@ -14,12 +14,9 @@ import {
 } from '~/utils/types';
 import { UpdateInstructionHandler } from '~/utils/transactionTypes';
 import { createUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
-import { insert } from '~/database/MultiSignatureProposalDao';
-import { addProposal } from '~/features/MultiSignatureSlice';
+import { updateCurrentProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
-import { BlockSummary } from '~/utils/NodeApiTypes';
-import { findKey } from '~/utils/updates/AuthorizationHelper';
+import { getUpdateKey } from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
@@ -33,7 +30,6 @@ import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface SignInput {
     multiSignatureTransaction: MultiSignatureTransaction;
-    blockSummary: BlockSummary;
 }
 
 interface Props {
@@ -46,11 +42,10 @@ interface Props {
  * to the database.
  */
 function SignTransactionProposalView({ location }: Props) {
-    const [showValidationError, setShowValidationError] = useState(false);
     const [transactionHash, setTransactionHash] = useState<string>();
     const dispatch = useDispatch();
 
-    const { multiSignatureTransaction, blockSummary }: SignInput = parse(
+    const { multiSignatureTransaction }: SignInput = parse(
         location.state ?? ''
     );
     const { transaction } = multiSignatureTransaction;
@@ -73,16 +68,7 @@ function SignTransactionProposalView({ location }: Props) {
     }, [setTransactionHash, updateInstruction]);
 
     async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const authorizationKey = await findKey(
-            ledger,
-            blockSummary.updates.keys,
-            updateInstruction,
-            transactionHandler
-        );
-        if (!authorizationKey) {
-            setShowValidationError(true);
-            return;
-        }
+        const publicKey = await getUpdateKey(ledger, updateInstruction);
 
         const signatureBytes = await transactionHandler.signTransaction(
             updateInstruction,
@@ -92,7 +78,7 @@ function SignTransactionProposalView({ location }: Props) {
         // Set signature
         const signature: UpdateInstructionSignature = {
             signature: signatureBytes.toString('hex'),
-            authorizationKeyIndex: authorizationKey.index,
+            authorizationPublicKey: publicKey,
         };
         updateInstruction.signatures = [signature];
 
@@ -101,15 +87,10 @@ function SignTransactionProposalView({ location }: Props) {
             transaction: stringify(updateInstruction),
         };
 
-        // Save to database and use the assigned id to update the local object.
-        const entryId = (await insert(updatedMultiSigTransaction))[0];
-        updatedMultiSigTransaction.id = entryId;
-
-        // Set the current proposal in the state to the one that was just generated.
-        dispatch(addProposal(updatedMultiSigTransaction));
+        updateCurrentProposal(dispatch, updatedMultiSigTransaction);
 
         // Navigate to the page that displays the current proposal from the state.
-        dispatch(push(selectedProposalRoute(entryId)));
+        dispatch(push(selectedProposalRoute(multiSignatureTransaction.id)));
     }
 
     if (!transactionHash) {
@@ -126,12 +107,6 @@ function SignTransactionProposalView({ location }: Props) {
             stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
             delegateScroll
         >
-            <SimpleErrorModal
-                show={showValidationError}
-                header="Unauthorized key"
-                content="Your key is not authorized to sign this update type."
-                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
-            />
             <Columns
                 className={styles.subtractContainerPadding}
                 divider
