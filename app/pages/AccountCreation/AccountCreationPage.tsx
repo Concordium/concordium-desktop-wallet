@@ -91,7 +91,7 @@ export default function AccountCreationPage(): JSX.Element {
                     />
                     <Route
                         path={routes.ACCOUNTCREATION_FINAL}
-                        render={() => <FinalPage accountName={accountName} />}
+                        component={FinalPage}
                     />
                     <Route
                         path={routes.ACCOUNTCREATION_GENERATE}

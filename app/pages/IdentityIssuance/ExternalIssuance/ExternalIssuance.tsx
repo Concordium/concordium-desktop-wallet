@@ -100,7 +100,9 @@ async function generateIdentity(
             accountName,
             identityObjectLocation
         );
-        dispatch(push(routes.IDENTITYISSUANCE_FINAL));
+        dispatch(
+            push({ pathname: routes.IDENTITYISSUANCE_FINAL, state: identityId })
+        );
     } catch (e) {
         onError(`Failed to confirm identity`);
     }

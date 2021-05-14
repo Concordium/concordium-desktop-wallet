@@ -163,7 +163,12 @@ export default function AccountCreationGenerate({
                 credentialDeploymentDetails.accountAddress,
                 credentialDeploymentDetails.transactionId
             );
-            dispatch(push(routes.ACCOUNTCREATION_FINAL));
+            dispatch(
+                push({
+                    pathname: routes.ACCOUNTCREATION_FINAL,
+                    state: credentialDeploymentDetails.accountAddress,
+                })
+            );
         } catch (e) {
             onError(`Unable to create account due to ${e}`);
         }
