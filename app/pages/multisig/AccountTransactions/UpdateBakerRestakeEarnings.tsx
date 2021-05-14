@@ -17,7 +17,7 @@ import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
-import { useTransactionCostEstimate } from '~/utils/hooks';
+import { useAccountInfo, useTransactionCostEstimate } from '~/utils/hooks';
 import SignTransaction from './SignTransaction';
 import ButtonGroup from '~/components/ButtonGroup';
 import UpdateBakerRestakeEarningsProposalDetails from './proposal-details/UpdateBakerRestakeEarnings';
@@ -136,26 +136,13 @@ export default function UpdateBakerRestakeEarningsPage() {
                         <Columns.Column header="Restake earnings">
                             <div className={styles.descriptionStep}>
                                 <div className={styles.flex1}>
-                                    <ButtonGroup
-                                        title="Enable restake earnings"
-                                        name="restake"
-                                        buttons={[
-                                            {
-                                                label: 'Yes, restake',
-                                                value: true,
-                                            },
-                                            {
-                                                label: 'No, don’t restake',
-                                                value: false,
-                                            },
-                                        ]}
-                                        isSelected={({ value }) =>
-                                            value === restakeEarnings
-                                        }
-                                        onClick={({ value }) =>
-                                            setRestakeEarnings(value)
-                                        }
-                                    />
+                                    {account !== undefined ? (
+                                        <RestakeEarnings
+                                            enable={restakeEarnings}
+                                            accountAddress={account?.address}
+                                            onChanged={setRestakeEarnings}
+                                        />
+                                    ) : null}
                                 </div>
                                 <Button
                                     disabled={restakeEarnings === undefined}
@@ -185,5 +172,38 @@ export default function UpdateBakerRestakeEarningsPage() {
                 </Switch>
             </Columns>
         </MultiSignatureLayout>
+    );
+}
+
+type RestakeEarningsProps = {
+    accountAddress: string;
+    enable?: boolean;
+    onChanged: (enable: boolean) => void;
+};
+
+function RestakeEarnings({
+    accountAddress,
+    enable,
+    onChanged,
+}: RestakeEarningsProps) {
+    const accountInfo = useAccountInfo(accountAddress);
+    const selected = enable ?? accountInfo?.accountBaker?.restakeEarnings;
+    return (
+        <ButtonGroup
+            title="Enable restake earnings"
+            name="restake"
+            buttons={[
+                {
+                    label: 'Yes, restake',
+                    value: true,
+                },
+                {
+                    label: 'No, don’t restake',
+                    value: false,
+                },
+            ]}
+            isSelected={({ value }) => value === selected}
+            onClick={({ value }) => onChanged(value)}
+        />
     );
 }

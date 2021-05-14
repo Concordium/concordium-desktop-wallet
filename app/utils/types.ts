@@ -513,6 +513,7 @@ type AccountReleaseSchedule = any; // TODO
 interface AccountBakerDetails {
     stakedAmount: string;
     bakerId: string;
+    restakeEarnings: boolean;
 }
 
 // Reflects the structure given by the node,
