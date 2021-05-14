@@ -1,0 +1,72 @@
+@import 'config/bundle';
+
+$horizontal-padding: 30px;
+
+.accountListElement {
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    background-color: $color-white;
+    color: $color-text;
+    box-shadow: 0 0 0 1px $color-text inset;
+    padding: 15px $horizontal-padding;
+
+    &:focus {
+        outline: none;
+    }
+
+    h3 {
+        margin-bottom: 0;
+    }
+}
+
+.active {
+    box-shadow: 0 0 0 2px $color-pale-blue inset;
+}
+
+.clickable {
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+        box-shadow: 0 0 0 2px $color-pale-blue inset;
+    }
+}
+
+.inline {
+    display: inline;
+    padding-right: 10px;
+}
+
+.dividingLine {
+    content: '';
+    background: $color-grey;
+    width: calc(100% + 2 * #{$horizontal-padding});
+    height: 1px;
+    display: block;
+    margin-left: calc(-1 * #{$horizontal-padding});
+}
+
+.row {
+    margin: 10px 0;
+
+    &:last-of-type {
+        margin-bottom: 0;
+    }
+}
+
+.multisig {
+    padding-left: 5px;
+    height: $font-size-body3;
+}
+
+.bakerImage {
+    margin-left: 10px;
+    margin-top: -10px;
+}
+
+.statusImage {
+    margin-left: 10px;
+    margin-top: -6px;
+    margin-bottom: -6px;
+}

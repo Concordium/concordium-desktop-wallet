@@ -39,7 +39,7 @@ export default function ChangeThreshold({
     }, [setReady, newThreshold, newCredentialAmount]);
 
     return (
-        <>
+        <div>
             <h3 className={styles.bold}>
                 Propose new signature threshold for the account?
             </h3>
@@ -79,6 +79,6 @@ export default function ChangeThreshold({
                 max={newCredentialAmount}
                 step={1}
             />
-        </>
+        </div>
     );
 }

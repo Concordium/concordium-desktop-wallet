@@ -13,9 +13,9 @@ import {
 import { monitorTransactionStatus } from '~/utils/TransactionStatusPoller';
 import {
     Account,
-    LocalCredential,
     AccountInfo,
     AccountTransaction,
+    CredentialWithIdentityNumber,
     Global,
     instanceOfTransferToPublic,
 } from '~/utils/types';
@@ -29,6 +29,7 @@ import { makeTransferToPublicData } from '~/utils/rustInterface';
 import PageLayout from '~/components/PageLayout';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
+import errorMessages from '~/constants/errorMessages.json';
 
 interface Location {
     pathname: string;
@@ -50,7 +51,7 @@ async function attachCompletedPayload(
     transaction: AccountTransaction,
     ledger: ConcordiumLedgerClient,
     global: Global,
-    credential: LocalCredential,
+    credential: CredentialWithIdentityNumber,
     accountInfo: AccountInfo
 ) {
     if (instanceOfTransferToPublic(transaction)) {
@@ -108,7 +109,7 @@ export default function SubmitTransfer({ location }: Props) {
         const signatureIndex = 0;
 
         if (!global) {
-            setMessage('Missing global object.');
+            setMessage(errorMessages.missingGlobal);
             return;
         }
 
@@ -151,10 +152,22 @@ export default function SubmitTransfer({ location }: Props) {
         ).toString('hex');
         const response = await sendTransaction(serializedTransaction);
         if (response.getValue()) {
-            addPendingTransaction(transaction, transactionHash);
-            monitorTransactionStatus(transactionHash);
+            await addPendingTransaction(transaction, transactionHash);
+            monitorTransactionStatus(
+                dispatch,
+                transactionHash,
+                account.address
+            );
 
-            dispatch(push(confirmed));
+            const confirmedStateWithHash = {
+                transactionHash,
+                ...confirmed.state,
+            };
+            const confirmedWithHash = {
+                ...confirmed,
+                state: confirmedStateWithHash,
+            };
+            dispatch(push(confirmedWithHash));
         } else {
             // TODO: Handle rejection from node
         }

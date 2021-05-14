@@ -9,6 +9,7 @@ import IdentityIcon from '../../resources/svg/identity.svg';
 import ImportExportIcon from '../../resources/svg/import-export.svg';
 import MultiSigIcon from '../../resources/svg/multisig.svg';
 import SettingsIcon from '../../resources/svg/settings.svg';
+import LedgerStatus from './LedgerStatus';
 
 const links: SidebarLink[] = [
     {
@@ -44,5 +45,7 @@ const links: SidebarLink[] = [
 ];
 
 export default function ConnectedSidebar() {
-    return <Sidebar links={links} version={pkg.version} />;
+    return (
+        <Sidebar links={links} version={pkg.version} child={<LedgerStatus />} />
+    );
 }

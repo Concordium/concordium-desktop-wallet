@@ -1,4 +1,5 @@
-import type Transport from '@ledgerhq/hw-transport';
+import type HwTransport from '@ledgerhq/hw-transport';
+import { Transport, TransportImpl } from './Transport';
 import {
     getPublicKey,
     getPublicKeySilent,
@@ -45,20 +46,8 @@ import signUpdateCredentialTransaction from './SignUpdateCredentials';
 export default class ConcordiumLedgerClient {
     transport: Transport;
 
-    constructor(transport: Transport) {
-        this.transport = transport;
-
-        transport.decorateAppAPIMethods(
-            this,
-            [
-                'getPublicKey',
-                'getIdCredSec',
-                'getPrfKey',
-                'signTransfer',
-                'signAccountChallenge',
-            ],
-            'GTU'
-        );
+    constructor(transport: HwTransport) {
+        this.transport = new TransportImpl(transport);
     }
 
     closeTransport(): Promise<void> {

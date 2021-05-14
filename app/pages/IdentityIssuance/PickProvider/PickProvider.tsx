@@ -11,6 +11,7 @@ import { globalSelector } from '~/features/GlobalSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getNextIdentityNumber } from '~/database/IdentityDao';
 import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
+import errorMessages from '~/constants/errorMessages.json';
 
 import styles from './PickProvider.module.scss';
 import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
@@ -51,11 +52,11 @@ export default function IdentityIssuanceChooseProvider({
         }
 
         if (!global) {
-            onError(`Unexpected missing global object`);
+            onError(errorMessages.missingGlobal);
             return;
         }
 
-        const walletId = await pairWallet(ledger);
+        const walletId = await pairWallet(ledger, dispatch);
         const identityNumber = await getNextIdentityNumber(walletId);
 
         const idObj = await createIdentityRequestObjectLedger(

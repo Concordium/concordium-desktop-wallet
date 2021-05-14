@@ -31,12 +31,17 @@ import { updateAccount } from '../database/AccountDao';
 import { loadAccounts } from './AccountSlice';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 
+interface State {
+    transactions: TransferTransaction[];
+    viewingShielded: boolean;
+}
+
 const transactionSlice = createSlice({
     name: 'transactions',
     initialState: {
         transactions: [],
         viewingShielded: false,
-    },
+    } as State,
     reducers: {
         setTransactions(state, transactions) {
             state.transactions = transactions.payload;
@@ -44,12 +49,24 @@ const transactionSlice = createSlice({
         setViewingShielded(state, viewingShielded) {
             state.viewingShielded = viewingShielded.payload;
         },
+        updateTransactionFields(state, update) {
+            const { hash, updatedFields } = update.payload;
+            const index = state.transactions.findIndex(
+                (transaction) => transaction.transactionHash === hash
+            );
+            if (index > -1) {
+                state.transactions[index] = {
+                    ...state.transactions[index],
+                    ...updatedFields,
+                };
+            }
+        },
     },
 });
 
 export const { setViewingShielded } = transactionSlice.actions;
 
-const { setTransactions } = transactionSlice.actions;
+const { setTransactions, updateTransactionFields } = transactionSlice.actions;
 
 // Decrypts the encrypted transfers in the given transacion list, using the prfKey.
 // This function expects the prfKey to match the account's prfKey,
@@ -172,6 +189,7 @@ export async function addPendingTransaction(
 // Set the transaction's status to confirmed, update the cost and whether it succeded.
 // TODO: update Total to reflect change in cost.
 export async function confirmTransaction(
+    dispatch: Dispatch,
     transactionHash: string,
     outcomeRecord: Record<string, TransactionEvent>
 ) {
@@ -205,22 +223,34 @@ export async function confirmTransaction(
             rejectReason = failure.result.rejectReason.tag;
         }
     }
-    return updateTransaction(
-        { transactionHash },
-        {
-            status: TransactionStatus.Finalized,
-            cost: cost.toString(),
-            success,
-            rejectReason,
-        }
+
+    const update = {
+        status: TransactionStatus.Finalized,
+        cost: cost.toString(),
+        success,
+        rejectReason,
+    };
+    updateTransaction({ transactionHash }, update);
+    return dispatch(
+        updateTransactionFields({
+            hash: transactionHash,
+            updatedFields: update,
+        })
     );
 }
 
 // Set the transaction's status to rejected.
-export async function rejectTransaction(transactionHash: string) {
-    return updateTransaction(
-        { transactionHash },
-        { status: TransactionStatus.Rejected }
+export async function rejectTransaction(
+    dispatch: Dispatch,
+    transactionHash: string
+) {
+    const status = { status: TransactionStatus.Rejected };
+    updateTransaction({ transactionHash }, status);
+    return dispatch(
+        updateTransactionFields({
+            hash: transactionHash,
+            updatedFields: status,
+        })
     );
 }
 

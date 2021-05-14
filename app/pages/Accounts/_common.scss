@@ -1,0 +1,34 @@
+.fillCardPadding {
+    margin-left: -19px;
+    margin-right: -19px;
+    width: calc(100% + 38px);
+}
+
+.cardPadding {
+    padding-left: 19px;
+    padding-right: 19px;
+}
+
+.greySeparator {
+    &:not(:last-child) {
+        border-bottom: 0.5px solid $color-soft-grey;
+    }
+}
+
+.blueSeparator {
+    &:not(:last-child) {
+        border-bottom: 5px solid $color-light-blue;
+    }
+}
+
+.thickBlueSeparator {
+    &:not(:last-child) {
+        border-bottom: 10px solid $color-light-blue;
+    }
+}
+
+.closeButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}

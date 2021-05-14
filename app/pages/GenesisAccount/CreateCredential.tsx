@@ -1,4 +1,5 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { createGenesisAccount } from '~/utils/rustInterface';
@@ -77,6 +78,8 @@ export default function CreateCredential({
     onFinish,
     context,
 }: Props) {
+    const dispatch = useDispatch();
+
     async function createAccount(
         ledger: ConcordiumLedgerClient,
         displayMessage: (message: string) => void
@@ -85,7 +88,7 @@ export default function CreateCredential({
             throw new Error('Missing context.');
         }
 
-        const walletId = await pairWallet(ledger);
+        const walletId = await pairWallet(ledger, dispatch);
         const identityId = await createGenesisIdentity(walletId);
         const nextCredentialNumber = await getNextCredentialNumber(identityId);
         const { ipInfo, arInfo, global } = JSON.parse(context);

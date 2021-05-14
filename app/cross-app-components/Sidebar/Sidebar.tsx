@@ -18,6 +18,7 @@ export interface SidebarProps<THasSwitch extends boolean>
     extends ClassNameAndStyle {
     links: SidebarLink[];
     version?: string;
+    child?: JSX.Element;
     hasThemeSwitch?: THasSwitch;
     isDark?: THasSwitch extends true ? boolean : undefined;
     onThemeChange?: THasSwitch extends true
@@ -32,6 +33,7 @@ export default function Sidebar<THasSwitch extends boolean = false>({
     version,
     hasThemeSwitch,
     isDark = false,
+    child,
     onThemeChange,
 }: SidebarProps<THasSwitch>) {
     const handleSwitchToggle: ChangeEventHandler<HTMLInputElement> = useCallback(
@@ -70,6 +72,7 @@ export default function Sidebar<THasSwitch extends boolean = false>({
                     </NavLink>
                 ))}
             </div>
+            {child}
             <section className={styles.bottom}>
                 {hasThemeSwitch && (
                     <Switch checked={isDark} onChange={handleSwitchToggle} />

@@ -8,12 +8,12 @@ import {
     chooseAccount,
     chosenAccountIndexSelector,
     accountsInfoSelector,
-} from '../../features/AccountSlice';
-import { setViewingShielded } from '../../features/TransactionSlice';
-import AccountListElement from '../../components/AccountListElement';
-import { Account, Dispatch } from '../../utils/types';
-import routes from '../../constants/routes.json';
-import styles from './Accounts.module.scss';
+} from '~/features/AccountSlice';
+import { setViewingShielded } from '~/features/TransactionSlice';
+import AccountCard from '~/components/AccountCard';
+import { Account, Dispatch } from '~/utils/types';
+import routes from '~/constants/routes.json';
+import CardList from '~/cross-app-components/CardList';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 async function load(dispatch: Dispatch) {
@@ -23,7 +23,6 @@ async function load(dispatch: Dispatch) {
 
 /**
  * Displays the List of local accounts, And allows picking the chosen account.
- * TODO: move the "AccountCreation start button"?
  */
 export default function AccountList() {
     const dispatch = useDispatch();
@@ -42,7 +41,7 @@ export default function AccountList() {
     }
 
     return (
-        <>
+        <CardList>
             <SimpleErrorModal
                 show={Boolean(error)}
                 header="Unable to load Accounts"
@@ -50,9 +49,8 @@ export default function AccountList() {
                 onClick={() => dispatch(push(routes.HOME))}
             />
             {accounts.map((account: Account, index: number) => (
-                <AccountListElement
+                <AccountCard
                     key={account.address}
-                    className={styles.listElement}
                     active={index === chosenIndex}
                     account={account}
                     accountInfo={accountsInfo[account.address]}
@@ -63,6 +61,6 @@ export default function AccountList() {
                     }}
                 />
             ))}
-        </>
+        </CardList>
     );
 }

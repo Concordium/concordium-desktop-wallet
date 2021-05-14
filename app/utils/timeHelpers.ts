@@ -46,7 +46,7 @@ export function parseTime(
         timeStyle: 'short',
     }
 ) {
-    const dtFormat = new Intl.DateTimeFormat('en-GB', formatOptions);
+    const dtFormat = new Intl.DateTimeFormat('en-ZA', formatOptions);
 
     const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
     return dtFormat.format(new Date(timeStampCorrectUnit));
@@ -80,6 +80,28 @@ export function getDefaultExpiry(): bigint {
     return BigInt(
         Math.floor((new Date().getTime() + TimeConstants.Hour) / 1000)
     );
+}
+
+/**
+ * Given a date, return a new date, which is the next whole hour, i.e. f(13.14) = 14.00.
+ * N.B. if the given date is already the whole hour, the same date is returned. i.e. f(13.00:00) = 13.00:00.
+ *  @param baseline the date from which to get the next whole hour.
+ *  @param hoursToIncrease optional parameter, increases the output by the given number of hours. i.e. f(13.14, 2) = 16.
+ */
+export function getNextWholeHour(baseline: Date, hoursToIncrease = 0) {
+    const date = new Date(baseline.getTime());
+    if (date.getSeconds() === 0 && date.getMinutes() === 0) {
+        date.setHours(date.getHours() + hoursToIncrease);
+    } else {
+        date.setSeconds(0);
+        date.setMinutes(0);
+        date.setHours(date.getHours() + hoursToIncrease + 1);
+    }
+    return date;
+}
+
+export function getDefaultScheduledStartTime() {
+    return getNextWholeHour(new Date(), 2);
 }
 
 export function getNow(

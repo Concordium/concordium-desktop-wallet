@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Identicon from 'react-identicons';
+import clsx from 'clsx';
 import Card from '~/cross-app-components/Card';
 import { CredentialDeploymentInformation } from '~/utils/types';
 import FileInput from '~/components/Form/FileInput';
@@ -88,17 +89,19 @@ export default function AddCredential({
         body = (
             <Card className={styles.addingCard}>
                 <div className={styles.addingCardHeader}>
-                    <h2>New Credential:</h2>
+                    <h2 className="mB0">New Credential:</h2>
                     <CloseButton
                         onClick={() => setCurrentCredential(undefined)}
                     />
                 </div>
                 <p>{currentCredential.credId}</p>
                 <h3>Identicon:</h3>
-                <Identicon
-                    size={128}
-                    string={JSON.stringify(currentCredential)}
-                />
+                <div className="mB20">
+                    <Identicon
+                        size={128}
+                        string={JSON.stringify(currentCredential)}
+                    />
+                </div>
                 <Button onClick={() => addCurrentCredential(currentCredential)}>
                     Add Credential to Proposal
                 </Button>
@@ -116,7 +119,7 @@ export default function AddCredential({
         );
     }
     return (
-        <>
+        <div className={clsx(!currentCredential && 'flexColumn flexChildFill')}>
             <SimpleErrorModal
                 show={showError.show}
                 header={showError.header}
@@ -131,6 +134,6 @@ export default function AddCredential({
                 below, or by browsing to the file on your computer.
             </p>
             {body}
-        </>
+        </div>
     );
 }

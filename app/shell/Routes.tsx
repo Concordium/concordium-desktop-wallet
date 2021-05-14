@@ -23,22 +23,22 @@ export default function Routes(): JSX.Element {
                 component={genesisAccount}
             />
             <Route path={routes.SUBMITTRANSFER} component={SubmitTransfer} />
+            <Route path={routes.ACCOUNTCREATION} component={AccountCreation} />
             <Route path={routes.ACCOUNTS} component={AccountPage} />
             <Route path={routes.IDENTITYISSUANCE} component={IssuancePage} />
-            <Route path={routes.ACCOUNTCREATION} component={AccountCreation} />
             <Route path={routes.IDENTITIES} component={IdentityPage} />
             <Route path={routes.ADDRESSBOOK} component={AddressBookPage} />
             <Route path={routes.IMPORT} component={PerformImport} />
             <Route path={routes.EXPORTIMPORT} component={ExportImport} />
             <Route
+                path={routes.GENERATE_CREDENTIAL}
+                component={GenerateCredential}
+            />
+            <Route
                 path={routes.MULTISIGTRANSACTIONS}
                 component={MultiSignatureRouter}
             />
             <Route path={routes.SETTINGS} component={SettingsPage} />
-            <Route
-                path={routes.GENERATE_CREDENTIAL}
-                component={GenerateCredential}
-            />
             <Route path={routes.HOME} component={HomePage} />
         </Switch>
     );

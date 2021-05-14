@@ -1,0 +1,53 @@
+$account-creation-padding-horizontal: 50px;
+
+.header {
+    margin-top: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.singleColumn {
+    composes: flexColumn from global;
+    padding: 35px $account-creation-padding-horizontal 80px;
+    min-height: 100%;
+}
+
+.singleColumnContent {
+    width: 500px;
+    margin: 0 auto;
+}
+
+.button {
+    width: 100%;
+    max-width: 400px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    width: 428px;
+}
+
+.leftColumn,
+.rightColumn {
+    padding-top: 35px;
+}
+
+.leftColumn {
+    text-align: left;
+    padding-left: $account-creation-padding-horizontal;
+    padding-bottom: 60px;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.rightColumn {
+    padding-bottom: 35px;
+    padding-right: $account-creation-padding-horizontal;
+}

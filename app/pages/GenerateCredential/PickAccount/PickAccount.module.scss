@@ -1,0 +1,20 @@
+.accountWrapper {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: center;
+    width: 100%;
+}
+
+.button {
+    composes: button from '../SplitViewRouter/SplitViewRouter.module.scss';
+    grid-column: 2;
+}
+
+.accountListElementPlaceholder {
+    composes: accountListElement from '../../../components/AccountCard/AccountCard.module.scss';
+    min-height: 252px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

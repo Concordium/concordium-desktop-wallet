@@ -1,4 +1,4 @@
-import type Transport from '@ledgerhq/hw-transport';
+import { Transport } from './Transport';
 import {
     UnsignedCredentialDeploymentInformation,
     IdOwnershipProofs,
