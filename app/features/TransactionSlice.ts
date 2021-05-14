@@ -146,7 +146,7 @@ export async function updateTransactions(dispatch: Dispatch, account: Account) {
                 convertIncomingTransaction(transaction, account.address)
             )
         );
-        await updateAccount(account.name, {
+        await updateAccount(account.address, {
             maxTransactionId: transactions.reduce(
                 (id, t) => Math.max(id, t.id),
                 0

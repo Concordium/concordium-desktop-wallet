@@ -24,7 +24,7 @@ export async function confirmIdentityAndInitialAccount(
     try {
         token = await getIdObject(location);
         if (!token) {
-            await rejectIdentity(dispatch, identityName);
+            await rejectIdentity(dispatch, identityId);
         } else {
             const { accountAddress } = token;
             const credential = token.credential.value.credential.contents;
@@ -32,8 +32,8 @@ export async function confirmIdentityAndInitialAccount(
                 credId: credential.credId || credential.regId,
                 policy: credential.policy,
             };
-            await confirmIdentity(dispatch, identityName, token.identityObject);
-            await confirmInitialAccount(dispatch, accountName, accountAddress);
+            await confirmIdentity(dispatch, identityId, token.identityObject);
+            await confirmInitialAccount(dispatch, identityId, accountAddress);
             insertNewCredential(
                 dispatch,
                 accountAddress,
@@ -50,7 +50,7 @@ export async function confirmIdentityAndInitialAccount(
             });
         }
     } catch (err) {
-        await rejectIdentity(dispatch, identityName);
+        await rejectIdentity(dispatch, identityId);
     }
 }
 
