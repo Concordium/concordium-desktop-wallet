@@ -37,7 +37,8 @@ export default class GasRewardsHandler
     async createTransaction(
         blockSummary: BlockSummary,
         gasRewards: UpdateGasRewardsFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -54,7 +55,8 @@ export default class GasRewardsHandler
             UpdateType.UpdateGASRewards,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

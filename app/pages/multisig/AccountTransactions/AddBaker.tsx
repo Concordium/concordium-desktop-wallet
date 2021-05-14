@@ -34,6 +34,8 @@ import { signUsingLedger } from './SignTransaction';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import PublicKey from '../common/PublicKey/PublicKey';
+import { getDefaultExpiry, getFormattedDateString } from '~/utils/timeHelpers';
+import InputTimestamp from '~/components/Form/InputTimestamp';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
@@ -95,6 +97,7 @@ enum BuildSubRoutes {
     accounts = 'accounts',
     stake = 'stake',
     keys = 'keys',
+    expiry = 'expiry',
     sign = 'sign',
 }
 
@@ -112,6 +115,9 @@ function BuildAddBakerTransactionProposalStep({
     const [transaction, setTransaction] = useState<
         AccountTransaction<AddBakerPayload>
     >();
+    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
+        getDefaultExpiry()
+    );
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Add_baker,
@@ -137,6 +143,10 @@ function BuildAddBakerTransactionProposalStep({
             setError('Account is needed to make transaction');
             return;
         }
+        if (expiryTime === undefined) {
+            setError('Expiry time is needed to make transaction');
+            return;
+        }
 
         const payload: AddBakerPayload = {
             electionVerifyKey: bakerKeys.electionPublic,
@@ -151,7 +161,8 @@ function BuildAddBakerTransactionProposalStep({
         createAddBakerTransaction(
             account.address,
             payload,
-            account.signatureThreshold
+            account.signatureThreshold,
+            expiryTime
         )
             .then(setTransaction)
             .catch(() => setError('Failed create transaction'));
@@ -227,6 +238,12 @@ function BuildAddBakerTransactionProposalStep({
                             {restakeEnabled === undefined
                                 ? placeholderText
                                 : formatRestakeEnabled}
+                        </h2>
+                        <b>Transaction expiry time</b>
+                        <h2>
+                            {expiryTime === undefined
+                                ? placeholderText
+                                : getFormattedDateString(expiryTime)}
                         </h2>
                         <b>Public keys</b>
                         {bakerKeys === undefined ? (
@@ -351,6 +368,38 @@ function BuildAddBakerTransactionProposalStep({
                                 </div>
                                 <Button
                                     onClick={() => {
+                                        dispatch(
+                                            push(
+                                                `${url}/${BuildSubRoutes.expiry}`
+                                            )
+                                        );
+                                    }}
+                                >
+                                    Generate keys
+                                </Button>
+                            </div>
+                        </Columns.Column>
+                    </Route>
+                    <Route path={`${path}/${BuildSubRoutes.expiry}`}>
+                        <Columns.Column header="Transaction expiry time">
+                            <div className={styles.descriptionStep}>
+                                <div className={styles.flex1}>
+                                    <p>
+                                        Choose the expiry date for the
+                                        transaction.
+                                    </p>
+                                    <InputTimestamp
+                                        value={expiryTime}
+                                        onChange={setExpiryTime}
+                                    />
+                                    <p>
+                                        Commiting the transaction after this
+                                        date, will be rejected.
+                                    </p>
+                                </div>
+                                <Button
+                                    disabled={expiryTime === undefined}
+                                    onClick={() => {
                                         onGenerateKeys();
                                         dispatch(
                                             push(
@@ -359,7 +408,7 @@ function BuildAddBakerTransactionProposalStep({
                                         );
                                     }}
                                 >
-                                    Generate keys
+                                    Continue
                                 </Button>
                             </div>
                         </Columns.Column>
@@ -394,6 +443,7 @@ function BuildAddBakerTransactionProposalStep({
                             </div>
                         </Columns.Column>
                     </Route>
+
                     <Route path={`${path}/${BuildSubRoutes.sign}`}>
                         <Columns.Column header="Signature and Hardware Wallet">
                             {transaction !== undefined &&

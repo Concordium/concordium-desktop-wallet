@@ -76,10 +76,13 @@ export enum TimeConstants {
 }
 
 // default expiry on transactions (1 hour from now), given in seconds.
-export function getDefaultExpiry(): bigint {
-    return BigInt(
-        Math.floor((new Date().getTime() + TimeConstants.Hour) / 1000)
-    );
+export function getDefaultExpiry() {
+    return new Date(Date.now() + TimeConstants.Hour);
+}
+
+/** Convert a date to seconds since epoch */
+export function secondsSinceEpoch(date: Date) {
+    return Math.floor(date.getTime() / 1000);
 }
 
 /**

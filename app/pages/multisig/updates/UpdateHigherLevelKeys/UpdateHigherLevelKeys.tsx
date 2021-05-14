@@ -24,6 +24,7 @@ interface Props {
     type: UpdateType;
     handleKeySubmit(
         effectiveTime: Date,
+        expiryTime: Date,
         higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
     ): Promise<void>;
 }
@@ -85,6 +86,9 @@ export default function UpdateHigherLevelKeys({
     const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
         new Date(getNow() + 5 * TimeConstants.Minute)
     );
+    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
+        new Date(getNow() + 2 * TimeConstants.Hour)
+    );
 
     function addNewKey(publicKey: PublicKeyExportFormat) {
         const addedKey = {
@@ -132,12 +136,15 @@ export default function UpdateHigherLevelKeys({
         if (!effectiveTime) {
             return;
         }
+        if (!expiryTime) {
+            return;
+        }
         const higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate> = {
             threshold,
             updateKeys: newKeys,
         };
 
-        handleKeySubmit(effectiveTime, higherLevelKeyUpdate);
+        handleKeySubmit(effectiveTime, expiryTime, higherLevelKeyUpdate);
     }
 
     return (
@@ -173,9 +180,15 @@ export default function UpdateHigherLevelKeys({
                             );
                         })}
                     </ul>
+                    <h5>Effective time</h5>
                     <InputTimestamp
                         value={effectiveTime}
                         onChange={setEffectiveTime}
+                    />
+                    <h5>Transaction expiry time</h5>
+                    <InputTimestamp
+                        value={expiryTime}
+                        onChange={setExpiryTime}
                     />
                 </div>
             </Columns.Column>

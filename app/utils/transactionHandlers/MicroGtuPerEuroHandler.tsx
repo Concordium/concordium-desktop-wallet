@@ -38,7 +38,8 @@ export default class MicroGtuPerEuroHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { microGtuPerEuroRate }: UpdateMicroGtuPerEuroRateFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -61,7 +62,8 @@ export default class MicroGtuPerEuroHandler
             UpdateType.UpdateMicroGTUPerEuro,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

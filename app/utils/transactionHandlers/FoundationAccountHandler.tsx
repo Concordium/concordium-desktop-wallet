@@ -37,7 +37,8 @@ export default class FoundationAccountHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { foundationAccount }: UpdateFoundationAccountFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -55,7 +56,8 @@ export default class FoundationAccountHandler
             UpdateType.UpdateFoundationAccount,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

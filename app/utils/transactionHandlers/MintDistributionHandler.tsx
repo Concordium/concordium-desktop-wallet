@@ -38,7 +38,8 @@ export default class MintDistributionHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { mintPerSlot, rewardDistribution }: UpdateMintDistributionFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         const parsedMintPerSlot = parseMintPerSlot(mintPerSlot);
         if (!blockSummary || !parsedMintPerSlot) {
@@ -63,7 +64,8 @@ export default class MintDistributionHandler
             UpdateType.UpdateMintDistribution,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

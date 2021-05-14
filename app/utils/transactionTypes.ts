@@ -29,6 +29,7 @@ export interface UpdateProps {
     consensusStatus: ConsensusStatus;
     handleKeySubmit?(
         effectiveTime: Date,
+        expiryTime: Date,
         higherLevelKeyUpdate: HigherLevelKeyUpdate
     ): Promise<void>;
 }
@@ -81,7 +82,8 @@ export interface UpdateInstructionHandler<T, S, P = UpdateInstruction> {
         blockSummary: BlockSummary,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: any,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ) => Promise<Partial<MultiSignatureTransaction> | undefined>;
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
@@ -108,6 +110,7 @@ export interface CreateTransactionInput {
     amount: bigint;
     schedule: Schedule;
     signatureAmount: number;
+    expiryTime: Date;
 }
 
 /**

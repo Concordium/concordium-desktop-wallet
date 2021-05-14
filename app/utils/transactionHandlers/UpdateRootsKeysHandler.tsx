@@ -36,7 +36,8 @@ export default class UpdateRootKeysHandler
     async createTransaction(
         blockSummary: BlockSummary,
         higherLevelKeyUpdate: HigherLevelKeyUpdate,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -51,7 +52,8 @@ export default class UpdateRootKeysHandler
             UpdateType.UpdateRootKeys,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

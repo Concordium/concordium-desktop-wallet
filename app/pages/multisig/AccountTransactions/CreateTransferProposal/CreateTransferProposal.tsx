@@ -34,6 +34,8 @@ import {
 } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import styles from './CreateTransferProposal.module.scss';
+import InputTimestamp from '~/components/Form/InputTimestamp';
+import { getDefaultExpiry } from '~/utils/timeHelpers';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -45,6 +47,8 @@ function subTitle(currentLocation: string) {
             return 'Input amount';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
             return 'Select recipient';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
+            return 'Select transaction expiry time';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
             return 'Signature and Hardware Wallet';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
@@ -79,6 +83,15 @@ export default function CreateTransferProposal({
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [amount, setAmount] = useState<string>('0.00'); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
+    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
+        getDefaultExpiry()
+    );
+
+    const onSetExpiryTime = (date: Date | undefined) => {
+        setReady(date !== undefined);
+        setExpiryTime(date);
+        console.log({ date });
+    };
 
     const [schedule, setSchedule] = useState<Schedule>();
     const [
@@ -118,8 +131,10 @@ export default function CreateTransferProposal({
     }
 
     function renderSignTransaction() {
-        if (!account || !recipient) {
-            throw new Error('Unexpected missing account and/or recipient');
+        if (!account || !recipient || !expiryTime) {
+            throw new Error(
+                'Unexpected missing account and/or recipient and/or expiry time'
+            );
         }
         return (
             <CreateTransaction
@@ -129,15 +144,23 @@ export default function CreateTransferProposal({
                 account={account}
                 schedule={schedule}
                 estimatedFee={estimatedFee}
+                expiryTime={expiryTime}
             />
         );
     }
 
     function continueAction() {
-        setReady(false);
+        const nextLocation = handler.creationLocationHandler(location);
+        const isPickExpiry =
+            nextLocation ===
+            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY.replace(
+                ':transactionKind',
+                `${transactionKind}`
+            );
+        setReady(isPickExpiry);
         dispatch(
             push({
-                pathname: handler.creationLocationHandler(location),
+                pathname: nextLocation,
                 state: transactionKind,
             })
         );
@@ -205,6 +228,7 @@ export default function CreateTransferProposal({
                                 recipient={recipient}
                                 schedule={schedule}
                                 estimatedFee={estimatedFee}
+                                expiryTime={expiryTime}
                             />
                             {showButton && (
                                 <Button
@@ -288,6 +312,27 @@ export default function CreateTransferProposal({
                                             recipient={recipient}
                                             senderAddress={account?.address}
                                         />
+                                    </div>
+                                )}
+                            />
+                            <Route
+                                path={
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY
+                                }
+                                render={() => (
+                                    <div className={styles.columnContent}>
+                                        <p>
+                                            Choose the expiry date for the
+                                            transaction.
+                                        </p>
+                                        <InputTimestamp
+                                            value={expiryTime}
+                                            onChange={onSetExpiryTime}
+                                        />
+                                        <p>
+                                            Commiting the transaction after this
+                                            date, will be rejected.
+                                        </p>
                                     </div>
                                 )}
                             />

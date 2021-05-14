@@ -28,6 +28,7 @@ import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
+    expiryTime: Date;
 }
 
 /**
@@ -95,15 +96,19 @@ function MultiSignatureCreateProposal({
             return;
         }
 
-        const { effectiveTime, ...dynamicFields } = fields;
-        const timeInSeconds = BigInt(
+        const { effectiveTime, expiryTime, ...dynamicFields } = fields;
+        const effectiveTimeInSeconds = BigInt(
             Math.round(effectiveTime.getTime() / 1000)
+        );
+        const expiryTimeInSeconds = BigInt(
+            Math.round(expiryTime.getTime() / 1000)
         );
 
         const proposal = await handler.createTransaction(
             blockSummary,
             dynamicFields,
-            timeInSeconds
+            effectiveTimeInSeconds,
+            expiryTimeInSeconds
         );
 
         if (proposal) {
@@ -118,18 +123,23 @@ function MultiSignatureCreateProposal({
      */
     async function handleKeySubmit(
         effectiveTime: Date,
+        expiryTime: Date,
         higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
     ) {
         if (!blockSummary) {
             return;
         }
-        const timeInSeconds = BigInt(
+        const effectiveTimeInSeconds = BigInt(
             Math.round(effectiveTime.getTime() / 1000)
+        );
+        const expiryTimeInSeconds = BigInt(
+            Math.round(expiryTime.getTime() / 1000)
         );
         const proposal = await handler.createTransaction(
             blockSummary,
             higherLevelKeyUpdate,
-            timeInSeconds
+            effectiveTimeInSeconds,
+            expiryTimeInSeconds
         );
 
         if (proposal) {
@@ -202,6 +212,22 @@ function MultiSignatureCreateProposal({
                                         required: 'Effective time is required',
                                         validate: futureDate(
                                             'Effective time must be in the future'
+                                        ),
+                                    }}
+                                />
+                                <Form.Timestamp
+                                    name="expiryTime"
+                                    label="Transaction Expiration Time"
+                                    defaultValue={
+                                        new Date(
+                                            getNow() + 2 * TimeConstants.Hour
+                                        )
+                                    }
+                                    rules={{
+                                        required:
+                                            'Transaction expiration time is required',
+                                        validate: futureDate(
+                                            'Transaction expiration time must be in the future'
                                         ),
                                     }}
                                 />
