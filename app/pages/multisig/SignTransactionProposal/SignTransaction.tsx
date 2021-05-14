@@ -56,14 +56,14 @@ export default function SignTransaction({
                             className="mT10"
                             onClick={() => setSkipping(false)}
                         >
-                            Generate Transaction
+                            Generate and sign
                         </Form.Submit>
                         <Form.Submit
                             disabled={signing || !isReady}
                             className="mT10"
                             onClick={() => setSkipping(true)}
                         >
-                            Skip Signing
+                            Generate without signing
                         </Form.Submit>
                     </Form>
                 </section>
