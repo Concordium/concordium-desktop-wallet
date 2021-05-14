@@ -1166,3 +1166,8 @@ export interface SignedIdRequest {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     randomness: Hex;
 }
+
+export interface CredentialExportFormat {
+    credential: CredentialDeploymentInformation;
+    address: string;
+}
