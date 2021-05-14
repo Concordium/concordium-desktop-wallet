@@ -30,7 +30,10 @@ import routes from '~/constants/routes.json';
 import { saveFile } from '~/utils/FileHelper';
 import { useAccountInfo, useTransactionCostEstimate } from '~/utils/hooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { signUsingLedger } from './SignTransaction';
+import {
+    signUsingLedger,
+    createMultisignatureTransaction,
+} from './SignTransaction';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import PublicKey from '../common/PublicKey/PublicKey';
@@ -170,7 +173,7 @@ function BuildAddBakerTransactionProposalStep({
 
     const formatRestakeEnabled = restakeEnabled ? 'Yes' : 'No';
 
-    const signingFunction = async (ledger: ConcordiumLedgerClient) => {
+    const signingFunction = async (ledger?: ConcordiumLedgerClient) => {
         if (!global) {
             throw new Error(errorMessages.missingGlobal);
         }
@@ -187,7 +190,16 @@ function BuildAddBakerTransactionProposalStep({
             throw new Error('unexpected missing bakerKeys');
         }
 
-        const proposal = await signUsingLedger(ledger, transaction, account);
+        let signatures = {};
+        if (ledger) {
+            signatures = await signUsingLedger(ledger, transaction, account);
+        }
+        const proposal = await createMultisignatureTransaction(
+            transaction,
+            signatures,
+            account.signatureThreshold
+        );
+
         if (proposal.id === undefined) {
             throw new Error('unexpected undefined proposal id');
         }
@@ -402,6 +414,7 @@ function BuildAddBakerTransactionProposalStep({
                             bakerKeys !== undefined ? (
                                 <SignTransactionColumn
                                     signingFunction={signingFunction}
+                                    onSkip={() => signingFunction()}
                                 />
                             ) : null}
                         </Columns.Column>

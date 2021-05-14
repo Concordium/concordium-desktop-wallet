@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from 'json-bigint';
 import { useParams } from 'react-router';
+
 import { FieldValues } from 'react-hook-form';
 import {
     HigherLevelKeyUpdate,
@@ -15,7 +16,7 @@ import routes from '~/constants/routes.json';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import Loading from '~/cross-app-components/Loading';
 import Modal from '~/cross-app-components/Modal';
-import { proposalsSelector, addProposal } from '~/features/MultiSignatureSlice';
+import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { parse } from '~/utils/JSONHelper';
 import Form from '~/components/Form';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
@@ -24,9 +25,6 @@ import { futureDate } from '~/components/Form/util/validation';
 import styles from './MultiSignatureCreateProposal.module.scss';
 import withChainData, { ChainData } from '../common/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
-
-import { insert } from '~/database/MultiSignatureProposalDao';
-import { selectedProposalRoute } from '~/utils/routerHelper';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
@@ -45,7 +43,6 @@ function MultiSignatureCreateProposal({
 }: ChainData) {
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
-    const [toSign, setToSign] = useState(false);
     const dispatch = useDispatch();
 
     // TODO Add support for account transactions.
@@ -63,28 +60,18 @@ function MultiSignatureCreateProposal({
     async function forwardTransactionToSigningPage(
         multiSignatureTransaction: Partial<MultiSignatureTransaction>
     ) {
-        // Save to database and use the assigned id to update the local object.
-        const entryId = (await insert(multiSignatureTransaction))[0];
-        multiSignatureTransaction.id = entryId;
+        const signInput = {
+            multiSignatureTransaction,
+            blockSummary,
+        };
 
-        // Set the current proposal in the state to the one that was just generated.
-        dispatch(addProposal(multiSignatureTransaction));
-
-        if (toSign) {
-            const signInput = {
-                multiSignatureTransaction,
-            };
-
-            // Forward the transaction under creation to the signing page.
-            dispatch(
-                push({
-                    pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
-                    state: stringify(signInput),
-                })
-            );
-        } else {
-            dispatch(push(selectedProposalRoute(entryId)));
-        }
+        // Forward the transaction under creation to the signing page.
+        dispatch(
+            push({
+                pathname: routes.MULTISIGTRANSACTIONS_SIGN_TRANSACTION,
+                state: stringify(signInput),
+            })
+        );
     }
 
     function openDuplicateTypeExists(): boolean {
@@ -223,18 +210,7 @@ function MultiSignatureCreateProposal({
                             <Loading text="Getting current settings from chain" />
                         )}
                     </div>
-                    <div className="flex">
-                        <Form.Submit
-                            className="mR10"
-                            onClick={() => setToSign(true)}
-                            disabled={!blockSummary}
-                        >
-                            Sign Transaction
-                        </Form.Submit>
-                        <Form.Submit className="mL10" disabled={!blockSummary}>
-                            Skip signing
-                        </Form.Submit>
-                    </div>
+                    <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
                 </Form>
             </>
         );

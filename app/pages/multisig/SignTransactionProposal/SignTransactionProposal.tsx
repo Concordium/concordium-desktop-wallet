@@ -14,7 +14,8 @@ import {
 } from '~/utils/types';
 import { UpdateInstructionHandler } from '~/utils/transactionTypes';
 import { createUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
-import { updateCurrentProposal } from '~/features/MultiSignatureSlice';
+import { insert } from '~/database/MultiSignatureProposalDao';
+import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getUpdateKey } from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
@@ -67,30 +68,39 @@ function SignTransactionProposalView({ location }: Props) {
         setTransactionHash(getTransactionHash(updateInstruction));
     }, [setTransactionHash, updateInstruction]);
 
-    async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const publicKey = await getUpdateKey(ledger, updateInstruction);
+    async function signingFunction(ledger?: ConcordiumLedgerClient) {
+        const signatures = [];
+        if (ledger) {
+            const publicKey = await getUpdateKey(ledger, updateInstruction);
 
-        const signatureBytes = await transactionHandler.signTransaction(
-            updateInstruction,
-            ledger
-        );
+            const signatureBytes = await transactionHandler.signTransaction(
+                updateInstruction,
+                ledger
+            );
 
-        // Set signature
-        const signature: UpdateInstructionSignature = {
-            signature: signatureBytes.toString('hex'),
-            authorizationPublicKey: publicKey,
-        };
-        updateInstruction.signatures = [signature];
+            // Set signature
+            const signature: UpdateInstructionSignature = {
+                signature: signatureBytes.toString('hex'),
+                authorizationPublicKey: publicKey,
+            };
+            signatures.push(signature);
+        }
+        updateInstruction.signatures = signatures;
 
         const updatedMultiSigTransaction = {
             ...multiSignatureTransaction,
             transaction: stringify(updateInstruction),
         };
 
-        updateCurrentProposal(dispatch, updatedMultiSigTransaction);
+        // Save to database and use the assigned id to update the local object.
+        const entryId = (await insert(updatedMultiSigTransaction))[0];
+        updatedMultiSigTransaction.id = entryId;
+
+        // Set the current proposal in the state to the one that was just generated.
+        dispatch(addProposal(updatedMultiSigTransaction));
 
         // Navigate to the page that displays the current proposal from the state.
-        dispatch(push(selectedProposalRoute(multiSignatureTransaction.id)));
+        dispatch(push(selectedProposalRoute(entryId)));
     }
 
     if (!transactionHash) {
@@ -125,7 +135,10 @@ function SignTransactionProposalView({ location }: Props) {
                     header="Signature and Hardware Wallet"
                     className={styles.stretchColumn}
                 >
-                    <SignTransaction signingFunction={signingFunction} />
+                    <SignTransaction
+                        signingFunction={signingFunction}
+                        onSkip={() => signingFunction()}
+                    />
                 </Columns.Column>
             </Columns>
         </MultiSignatureLayout>

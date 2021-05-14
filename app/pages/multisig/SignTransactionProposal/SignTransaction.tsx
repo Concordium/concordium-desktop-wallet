@@ -12,9 +12,15 @@ interface Props extends ClassName {
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) => Promise<void>;
+    onSkip: () => void;
 }
 
-export default function SignTransaction({ signingFunction, className }: Props) {
+export default function SignTransaction({
+    signingFunction,
+    onSkip,
+    className,
+}: Props) {
+    const [skipping, setSkipping] = useState(false);
     const [signing, setSigning] = useState(false);
     return (
         <Ledger
@@ -27,8 +33,12 @@ export default function SignTransaction({ signingFunction, className }: Props) {
                     {statusView}
                     <Form
                         onSubmit={() => {
-                            setSigning(true);
-                            submitHandler();
+                            if (skipping) {
+                                onSkip();
+                            } else {
+                                setSigning(true);
+                                submitHandler();
+                            }
                         }}
                     >
                         <Form.Checkbox
@@ -44,8 +54,16 @@ export default function SignTransaction({ signingFunction, className }: Props) {
                         <Form.Submit
                             disabled={signing || !isReady}
                             className="mT10"
+                            onClick={() => setSkipping(false)}
                         >
                             Generate Transaction
+                        </Form.Submit>
+                        <Form.Submit
+                            disabled={signing || !isReady}
+                            className="mT10"
+                            onClick={() => setSkipping(true)}
+                        >
+                            Skip Signing
                         </Form.Submit>
                     </Form>
                 </section>

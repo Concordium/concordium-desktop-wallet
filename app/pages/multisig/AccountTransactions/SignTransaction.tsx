@@ -6,6 +6,7 @@ import {
     AccountTransaction,
     MultiSignatureTransactionStatus,
     MultiSignatureTransaction,
+    TransactionAccountSignature,
 } from '~/utils/types';
 import { stringify } from '~/utils/JSONHelper';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -49,20 +50,27 @@ export async function signUsingLedger(
 
     const handler = findAccountTransactionHandler(transaction.transactionKind);
     const signature = await handler.signTransaction(transaction, ledger, path);
+    return buildTransactionAccountSignature(
+        credential.credentialIndex,
+        signatureIndex,
+        signature
+    );
+}
 
+export async function createMultisignatureTransaction(
+    transaction: AccountTransaction,
+    signatures: TransactionAccountSignature,
+    signatureThreshold?: number
+) {
     const multiSignatureTransaction: Partial<MultiSignatureTransaction> = {
         // The JSON serialization of the transaction
         transaction: stringify({
             ...transaction,
-            signatures: buildTransactionAccountSignature(
-                credential.credentialIndex,
-                signatureIndex,
-                signature
-            ),
+            signatures,
         }),
         // The minimum required signatures for the transaction
         // to be accepted on chain.
-        threshold: account.signatureThreshold,
+        threshold: signatureThreshold,
         // The current state of the proposal
         status: MultiSignatureTransactionStatus.Open,
     };
@@ -89,7 +97,7 @@ export default function SignTransaction({
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
 
-    async function sign(ledger: ConcordiumLedgerClient) {
+    async function sign(ledger?: ConcordiumLedgerClient) {
         if (!global) {
             throw new Error(errorMessages.missingGlobal);
         }
@@ -97,8 +105,15 @@ export default function SignTransaction({
         if (!account) {
             throw new Error('Unexpected missing account');
         }
-
-        const proposal = await signUsingLedger(ledger, transaction, account);
+        let signatures = {};
+        if (ledger) {
+            signatures = await signUsingLedger(ledger, transaction, account);
+        }
+        const proposal = await createMultisignatureTransaction(
+            transaction,
+            signatures,
+            account.signatureThreshold
+        );
 
         if (proposal.id === undefined) {
             throw new Error('unexpected missing proposal id');
@@ -109,5 +124,7 @@ export default function SignTransaction({
         dispatch(push(selectedProposalRoute(proposal.id)));
     }
 
-    return <SignTransactionColumn signingFunction={sign} />;
+    return (
+        <SignTransactionColumn signingFunction={sign} onSkip={() => sign()} />
+    );
 }
