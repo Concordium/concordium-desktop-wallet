@@ -10,7 +10,7 @@ interface Props {
     currentThreshold: number;
     maxThreshold: number;
     setThreshold: React.Dispatch<React.SetStateAction<number>>;
-    submitFunction(toSignPage: boolean): void;
+    submitFunction(): void;
 }
 
 function isInvalid(
@@ -38,8 +38,6 @@ export default function KeySetThreshold({
     const [threshold, setLocalThreshold] = useState<string | undefined>(
         currentThreshold.toString()
     );
-
-    const buttonDisabled = isInvalid(threshold, maxThreshold);
 
     return (
         <>
@@ -69,22 +67,12 @@ export default function KeySetThreshold({
                     fallbackValue={1}
                 />
             </div>
-            <div className="flex justifyCenter">
-                <Button
-                    className="mR10"
-                    disabled={buttonDisabled}
-                    onClick={() => submitFunction(true)}
-                >
-                    Sign Transaction
-                </Button>
-                <Button
-                    className="mL10"
-                    disabled={buttonDisabled}
-                    onClick={() => submitFunction(false)}
-                >
-                    Skip signing
-                </Button>
-            </div>
+            <Button
+                disabled={isInvalid(threshold, maxThreshold)}
+                onClick={submitFunction}
+            >
+                Continue
+            </Button>
         </>
     );
 }

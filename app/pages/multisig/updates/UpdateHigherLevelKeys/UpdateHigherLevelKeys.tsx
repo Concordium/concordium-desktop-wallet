@@ -24,8 +24,7 @@ interface Props {
     type: UpdateType;
     handleKeySubmit(
         effectiveTime: Date,
-        higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>,
-        toSignPage: boolean
+        higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
     ): Promise<void>;
 }
 
@@ -129,7 +128,7 @@ export default function UpdateHigherLevelKeys({
         setNewKeys(updatedKeys);
     }
 
-    function submitFunction(toSignPage: boolean) {
+    function submitFunction() {
         if (!effectiveTime) {
             return;
         }
@@ -138,7 +137,7 @@ export default function UpdateHigherLevelKeys({
             updateKeys: newKeys,
         };
 
-        handleKeySubmit(effectiveTime, higherLevelKeyUpdate, toSignPage);
+        handleKeySubmit(effectiveTime, higherLevelKeyUpdate);
     }
 
     return (

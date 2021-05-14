@@ -145,8 +145,8 @@ export async function findKey(
 }
 
 /**
- * Attempts to find the key index of the given public key in the authorization . If the public-key
- * is not authorization on chain, then undefined will be returned.
+ * Attempts to find the key index of the given public key in the authorization.
+ * If the public-key is not in the authorization on chain, then undefined will be returned.
  */
 async function findKeyIndex(
     publicKey: string,
@@ -195,7 +195,7 @@ export async function attachKeyIndex(
 }
 
 /**
- * Attempts to find the authorized key for the connected hardware wallet.
+ * Attempts to find the authorized key, which is appropiate for the update, from the connected hardware wallet.
  *
  * The type of authorization key (root, level 1 or level 2) is derived directly from
  * the update type, as the type of key used to sign a given update is determined by its type.
@@ -206,17 +206,11 @@ export async function getUpdateKey(
 ): Promise<string> {
     let publicKey;
     if (isUpdateUsingRootKeys(transaction)) {
-        publicKey = (
-            await ledger.getPublicKeySilent(getGovernanceRootPath())
-        ).toString('hex');
+        publicKey = await ledger.getPublicKeySilent(getGovernanceRootPath());
     } else if (isUpdateUsingLevel1Keys(transaction)) {
-        publicKey = (
-            await ledger.getPublicKeySilent(getGovernanceLevel1Path())
-        ).toString('hex');
+        publicKey = await ledger.getPublicKeySilent(getGovernanceLevel1Path());
     } else {
-        publicKey = (
-            await ledger.getPublicKeySilent(getGovernanceLevel2Path())
-        ).toString('hex');
+        publicKey = await ledger.getPublicKeySilent(getGovernanceLevel2Path());
     }
-    return publicKey;
+    return publicKey.toString('hex');
 }

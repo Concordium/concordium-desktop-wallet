@@ -12,10 +12,8 @@ import {
 } from '~/utils/types';
 import { parse, stringify } from '~/utils/JSONHelper';
 import { ModalErrorInput } from '~/components/SimpleErrorModal';
-import { BlockSummary } from '~/utils/NodeApiTypes';
 import { updateCurrentProposal } from '~/features/MultiSignatureSlice';
 import getTransactionHash from '~/utils/transactionHash';
-import { findKeySet } from '~/utils/updates/AuthorizationHelper';
 
 async function HandleAccountTransactionSignatureFile(
     dispatch: Dispatch,
@@ -77,22 +75,6 @@ async function isSignatureValid(
         signature.signature,
         transactionHash,
         signature.authorizationPublicKey
-    );
-}
-
-/**
- * Returns whether or not the given signature is valid for the proposal. The signature is valid if
- * one of the authorized verification keys can verify the signature successfully on the hash
- * of the serialized transaction.
- */
-export async function isAuthorizedKey(
-    proposal: UpdateInstruction,
-    signature: UpdateInstructionSignature,
-    blockSummary: BlockSummary
-): Promise<boolean> {
-    const keySet = findKeySet(proposal.type, blockSummary.updates.keys);
-    return keySet.some(
-        (verifyKey) => verifyKey.verifyKey === signature.authorizationPublicKey
     );
 }
 
