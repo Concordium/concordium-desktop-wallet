@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import { Knex } from 'knex';
 import { SettingTypeEnum } from '../../utils/types';
 import settingKeys from '../../constants/settingKeys.json';
 

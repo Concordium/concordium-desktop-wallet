@@ -30,6 +30,7 @@ export default async function getKnexConfiguration(environment: string) {
             },
             pool: {
                 afterCreate: (conn: any, cb: any) => {
+                    conn.run("PRAGMA KEY = 'secret'");
                     conn.run('PRAGMA foreign_keys = ON', cb);
                 },
             },
@@ -47,6 +48,7 @@ export default async function getKnexConfiguration(environment: string) {
             },
             pool: {
                 afterCreate: (conn: any, cb: any) => {
+                    conn.run("PRAGMA KEY = 'secret'");
                     conn.run('PRAGMA foreign_keys = ON', cb);
                 },
             },
@@ -61,6 +63,7 @@ export default async function getKnexConfiguration(environment: string) {
             useNullAsDefault: true,
             pool: {
                 afterCreate: (conn: any, cb: any) => {
+                    conn.run("PRAGMA KEY = 'secret'");
                     conn.run('PRAGMA foreign_keys = ON', cb);
                 },
             },

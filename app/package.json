@@ -14,10 +14,11 @@
         "postinstall": "yarn electron-rebuild install-app-deps"
     },
     "dependencies": {
+        "@journeyapps/sqlcipher": "^5.2.0",
         "@ledgerhq/hw-transport-node-hid-singleton": "^5.51.1",
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
-        "knex": "^0.21.13",
         "node-abi": "^2.19.3",
-        "sqlite3": "5.0.0"
+        "sequelize": "^6.6.2",
+        "knex": "0.95.5"
     }
 }

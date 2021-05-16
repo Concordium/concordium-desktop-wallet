@@ -1,4 +1,4 @@
-import Knex from 'knex';
+import { Knex, knex } from 'knex'
 import config from './knexfile';
 
 const environment = process.env.NODE_ENV;
@@ -17,7 +17,7 @@ export default async function getKnex(): Promise<Knex> {
 
     if (!knexSingleton) {
         const configuration = await config(environment);
-        knexSingleton = Knex(configuration);
+        knexSingleton = knex(configuration);
     }
     return knexSingleton;
 }
