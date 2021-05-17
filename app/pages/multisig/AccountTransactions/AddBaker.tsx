@@ -173,6 +173,9 @@ function BuildAddBakerTransactionProposalStep({
 
     const formatRestakeEnabled = restakeEnabled ? 'Yes' : 'No';
 
+    /** Creates the transaction, and if the ledger parameter is provided, also
+     *  adds a signature on the transaction.
+     */
     const signingFunction = async (ledger?: ConcordiumLedgerClient) => {
         if (!global) {
             throw new Error(errorMessages.missingGlobal);

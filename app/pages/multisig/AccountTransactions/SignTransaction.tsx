@@ -97,6 +97,9 @@ export default function SignTransaction({
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
 
+    /** Creates the transaction, and if the ledger parameter is provided, also
+     *  adds a signature on the transaction.
+     */
     async function sign(ledger?: ConcordiumLedgerClient) {
         if (!global) {
             throw new Error(errorMessages.missingGlobal);

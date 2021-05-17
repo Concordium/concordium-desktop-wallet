@@ -68,6 +68,9 @@ function SignTransactionProposalView({ location }: Props) {
         setTransactionHash(getTransactionHash(updateInstruction));
     }, [setTransactionHash, updateInstruction]);
 
+    /** Creates the transaction, and if the ledger parameter is provided, also
+     *  adds a signature on the transaction.
+     */
     async function signingFunction(ledger?: ConcordiumLedgerClient) {
         const signatures = [];
         if (ledger) {
