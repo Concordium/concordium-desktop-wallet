@@ -60,7 +60,6 @@ export default function AddCredential({
             const rawCredential = Buffer.from(await file[0].arrayBuffer());
 
             let credentialExport: CredentialExportFormat;
-            // TODO Validate the structure of the file
             try {
                 credentialExport = JSON.parse(rawCredential.toString());
             } catch (e) {
