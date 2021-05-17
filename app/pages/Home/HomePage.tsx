@@ -137,30 +137,38 @@ export default function HomePage() {
         return (
             <PageLayout.Container disableBack>
                 <div className={styles.content}>
-                    <h2 className={styles.title}>Hi, there!</h2>
-                    <p>
-                        Before you can start using the Concordium Desktop
-                        Wallet, you have to set up a few security measures.
-                        Press Continue to be guided through the setup process.
-                    </p>
-                    <Button
-                        onClick={() =>
-                            dispatch(
-                                push({ pathname: routes.HOME_SELECT_PASSWORD })
-                            )
-                        }
-                    >
-                        Continue
-                    </Button>
+                    <div className={styles.relative}>
+                        <div>
+                            <h2 className={styles.title}>Hi, there!</h2>
+                            <p>
+                                Before you can start using the Concordium
+                                Desktop Wallet, you have to set up a few
+                                security measures. Press Continue to be guided
+                                through the setup process.
+                            </p>
+                        </div>
+                        <Button
+                            onClick={() =>
+                                dispatch(
+                                    push({
+                                        pathname: routes.HOME_SELECT_PASSWORD,
+                                    })
+                                )
+                            }
+                        >
+                            Continue
+                        </Button>
+                    </div>
                 </div>
             </PageLayout.Container>
         );
     }
 
+    // TODO Add validation that the repassword === password.
     function SelectPassword() {
         return (
             <PageLayout.Container disableBack>
-                <div>
+                <div className={styles.password}>
                     <h2>Select a wallet password</h2>
                     <p>
                         The first step is to set up a password for the wallet.
@@ -168,22 +176,26 @@ export default function HomePage() {
                         application. It is very important that you do not lose
                         this password, as it cannot be retrieved if lost.
                     </p>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Input
-                            className={styles.input}
-                            name="password"
-                            rules={{ required: 'Password is required' }}
-                            placeholder="Enter password"
-                        />
-                        <Form.Input
-                            className={styles.input}
-                            name="repassword"
-                            rules={{
-                                required:
-                                    'Re-entering your password is required',
-                            }}
-                            placeholder="Re-enter password"
-                        />
+                    <Form className={styles.enter} onSubmit={handleSubmit}>
+                        <div>
+                            <Form.Input
+                                type="password"
+                                className={styles.input}
+                                name="password"
+                                rules={{ required: 'Password is required' }}
+                                placeholder="Enter password"
+                            />
+                            <Form.Input
+                                type="password"
+                                className={styles.input}
+                                name="repassword"
+                                rules={{
+                                    required:
+                                        'Re-entering your password is required',
+                                }}
+                                placeholder="Re-enter password"
+                            />
+                        </div>
                         <Form.Submit>Continue</Form.Submit>
                     </Form>
                 </div>
@@ -194,13 +206,18 @@ export default function HomePage() {
     function PasswordHasBeenSet() {
         return (
             <PageLayout.Container disableBack>
-                <div>
-                    <h2>Wallet password created!</h2>
-                    <p>
-                        Your wallet password has been set! Please remember to
-                        keep it safe, as you will need it later if you want to
-                        reset it. Lost passwords cannot be recreated or reset.
-                    </p>
+                <div className={styles.content}>
+                    <div>
+                        <h2 className={styles.title}>
+                            Wallet password created!
+                        </h2>
+                        <p>
+                            Your wallet password has been set! Please remember
+                            to keep it safe, as you will need it later if you
+                            want to reset it. Lost passwords cannot be recreated
+                            or reset.
+                        </p>
+                    </div>
                     <Button
                         onClick={() =>
                             dispatch(push({ pathname: routes.ACCOUNTS }))
@@ -219,6 +236,7 @@ export default function HomePage() {
                 <Form className={styles.enter} onSubmit={handleUnlock}>
                     <h3>Enter wallet password</h3>
                     <Form.Input
+                        className={styles.input}
                         name="password"
                         placeholder="Enter your wallet password"
                         type="password"

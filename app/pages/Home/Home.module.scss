@@ -1,8 +1,25 @@
 @import 'config/bundle';
 
-.content {
+.relative {
     position: relative;
-    height: 300px;
+}
+
+.content {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 645px;
+    padding-top: 30px;
+}
+
+.input {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: $font-size-body2;
 }
 
 .title {
@@ -12,15 +29,18 @@
     margin-top: 240px;
 }
 
-.input {
-    display: block;
-    width: 70%;
-    font-size: $font-size-body3;
-}
-
 .card {
     position: absolute;
-    top: 50%;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 645px;
+    padding-top: 30px;
+}
+
+.password {
+    position: absolute;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 645px;
