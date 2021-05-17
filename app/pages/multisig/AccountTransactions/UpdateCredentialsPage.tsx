@@ -383,6 +383,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 render={() => (
                                     <AddCredential
                                         setReady={setReady}
+                                        accountAddress={account?.address}
                                         credentialIds={credentialIds}
                                         addCredentialId={(newId) =>
                                             setCredentialIds(
