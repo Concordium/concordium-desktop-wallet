@@ -115,7 +115,7 @@ export default function AccountCard({
                                 className={styles.statusImage}
                             />
                         )}
-                        {accountInfo && accountInfo.accountBaker && (
+                        {accountInfo?.accountBaker?.bakerId !== undefined && (
                             <BakerImage
                                 height="25"
                                 className={styles.bakerImage}

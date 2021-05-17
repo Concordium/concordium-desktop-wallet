@@ -3,12 +3,13 @@
 $horizontal-padding: 30px;
 
 .accountListElement {
+    @include shadowBorder($color-grey);
+
     display: flex;
     flex-direction: column;
     border-radius: 10px;
     background-color: $color-white;
     color: $color-text;
-    box-shadow: 0 0 0 1px $color-text inset;
     padding: 15px $horizontal-padding;
 
     &:focus {
