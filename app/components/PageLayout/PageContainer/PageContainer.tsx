@@ -38,10 +38,9 @@ export default function PageContainer({
     const dispatch = useDispatch();
     const backAction = () => {
         if (backRoute) {
-            routerActions.push(backRoute as any);
-        } else {
-            routerActions.goBack();
+            return routerActions.push(backRoute as any);
         }
+        return routerActions.goBack();
     };
 
     return (
