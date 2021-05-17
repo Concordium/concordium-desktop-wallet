@@ -19,7 +19,6 @@
         "@types/ledgerhq__hw-transport-node-hid": "^4.22.2",
         "knex": "0.95.5",
         "node-abi": "^2.19.3",
-        "sequelize": "^6.6.2",
         "sqlite3": "5.0.0"
     }
 }

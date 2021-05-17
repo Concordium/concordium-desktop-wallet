@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import getPath from './UserDataPathAccessor';
 
-const Dialect = require(`knex/lib/dialects/sqlite3/index.js`);
-Dialect.prototype._driver = () => require('@journeyapps/sqlcipher');
+// https://github.com/knex/knex/blob/master/CONTRIBUTING.md#i-would-like-to-add-support-for-new-dialect-to-knex-is-it-possible
+// @ts-ignore
+import SQLCipherDialect from `knex/lib/dialects/sqlite3/index.js`;
+SQLCipherDialect.prototype._driver = () => require('@journeyapps/sqlcipher');
 
 async function getProductionFilename(): Promise<string> {
     const userDataPath = await getPath();
@@ -25,7 +27,7 @@ export default async function getKnexConfiguration(environment: string) {
     // correct directory.
     if (!environment) {
         return {
-            client: Dialect,
+            client: SQLCipherDialect,
             useNullAsDefault: true,
             connection: {
                 filename: fetchDevelopmentFilename(),
@@ -43,7 +45,7 @@ export default async function getKnexConfiguration(environment: string) {
     }
     if (environment === 'development') {
         return {
-            client: Dialect,
+            client: SQLCipherDialect,
             connection: {
                 filename: fetchDevelopmentFilename(),
             },
@@ -61,7 +63,7 @@ export default async function getKnexConfiguration(environment: string) {
     }
     if (environment === 'production') {
         return {
-            client: Dialect,
+            client: SQLCipherDialect,
             connection: {
                 filename: await getProductionFilename(),
             },
