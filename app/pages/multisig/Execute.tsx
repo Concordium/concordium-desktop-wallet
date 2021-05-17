@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button } from 'semantic-ui-react';
+import Button from '~/cross-app-components/Button';
+import Modal from '~/cross-app-components/Modal';
 
 interface Props<T> {
     onError: () => void;
     onSuccess: (arg: T) => void;
     execution: () => Promise<T>;
-    title: string;
-    content: string;
+    errorTitle: string;
+    errorContent: string;
 }
 
 /**
@@ -18,12 +19,12 @@ interface Props<T> {
  * Note: this component has only been verified to work in the case where the
  * onError function navigates away from where this component was placed.
  */
-export default function DynamicModal<T>({
+export default function Execute<T>({
     onError,
     onSuccess,
     execution,
-    title,
-    content,
+    errorTitle,
+    errorContent,
 }: Props<T>) {
     const [open, setOpen] = useState(false);
     const [started, setStarted] = useState(false);
@@ -46,17 +47,15 @@ export default function DynamicModal<T>({
 
     return (
         <Modal open={open} closeOnEscape>
-            <Modal.Header>{title}</Modal.Header>
-            <Modal.Content>{content}</Modal.Content>
-            <Modal.Actions>
-                <Button
-                    onClick={() => {
-                        onError();
-                    }}
-                >
-                    Okay
-                </Button>
-            </Modal.Actions>
+            <h2>{errorTitle}</h2>
+            <p>{errorContent}</p>
+            <Button
+                onClick={() => {
+                    onError();
+                }}
+            >
+                Okay
+            </Button>
         </Modal>
     );
 }
