@@ -294,6 +294,7 @@ function BuildAddBakerTransactionProposalStep({
                             </div>
                         </Columns.Column>
                     </Route>
+
                     <Route path={`${path}/${BuildSubRoutes.accounts}`}>
                         <Columns.Column header="Accounts">
                             <div className={styles.descriptionStep}>
@@ -320,6 +321,7 @@ function BuildAddBakerTransactionProposalStep({
                             </div>
                         </Columns.Column>
                     </Route>
+
                     <Route path={`${path}/${BuildSubRoutes.stake}`}>
                         <Columns.Column header="Stake">
                             <div className={styles.descriptionStep}>
@@ -375,11 +377,12 @@ function BuildAddBakerTransactionProposalStep({
                                         );
                                     }}
                                 >
-                                    Generate keys
+                                    Continue
                                 </Button>
                             </div>
                         </Columns.Column>
                     </Route>
+
                     <Route path={`${path}/${BuildSubRoutes.expiry}`}>
                         <Columns.Column header="Transaction expiry time">
                             <div className={styles.descriptionStep}>
@@ -408,11 +411,12 @@ function BuildAddBakerTransactionProposalStep({
                                         );
                                     }}
                                 >
-                                    Continue
+                                    Generate keys
                                 </Button>
                             </div>
                         </Columns.Column>
                     </Route>
+
                     <Route path={`${path}/${BuildSubRoutes.keys}`}>
                         <Columns.Column header="Baker keys">
                             <div className={styles.descriptionStep}>

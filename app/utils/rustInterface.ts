@@ -17,7 +17,7 @@ import {
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
-import { getDefaultExpiry, secondsSinceEpoch } from './timeHelpers';
+import { getDefaultExpiry, secondsSinceUnixEpoch } from './timeHelpers';
 import { getAccountPath } from '~/features/ledger/Path';
 import { stringify, parse } from './JSONHelper';
 
@@ -273,7 +273,7 @@ export async function createCredentialDetails(
     // TODO: Display the appropiate details
     displayMessage(`Please sign details on device.`);
     // Adding credential on a new account
-    const expiry = BigInt(secondsSinceEpoch(getDefaultExpiry()));
+    const expiry = BigInt(secondsSinceUnixEpoch(getDefaultExpiry()));
     const path = getAccountPath({
         identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,

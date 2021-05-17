@@ -1,6 +1,6 @@
 import { findEntries } from '../database/AddressBookDao';
 import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
-import { getDefaultExpiry, getNow, secondsSinceEpoch } from './timeHelpers';
+import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -100,7 +100,7 @@ async function createAccountTransaction<T extends TransactionPayload>({
     const transaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
-        expiry: BigInt(secondsSinceEpoch(expiry)),
+        expiry: BigInt(secondsSinceUnixEpoch(expiry)),
         energyAmount: '',
         transactionKind,
         payload,

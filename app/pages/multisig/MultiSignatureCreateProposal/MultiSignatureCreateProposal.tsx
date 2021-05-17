@@ -19,7 +19,12 @@ import Modal from '~/cross-app-components/Modal';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { parse } from '~/utils/JSONHelper';
 import Form from '~/components/Form';
-import { getNow, TimeConstants } from '~/utils/timeHelpers';
+import {
+    getDefaultExpiry,
+    getNow,
+    secondsSinceUnixEpoch,
+    TimeConstants,
+} from '~/utils/timeHelpers';
 import { futureDate } from '~/components/Form/util/validation';
 
 import styles from './MultiSignatureCreateProposal.module.scss';
@@ -98,11 +103,9 @@ function MultiSignatureCreateProposal({
 
         const { effectiveTime, expiryTime, ...dynamicFields } = fields;
         const effectiveTimeInSeconds = BigInt(
-            Math.round(effectiveTime.getTime() / 1000)
+            secondsSinceUnixEpoch(effectiveTime)
         );
-        const expiryTimeInSeconds = BigInt(
-            Math.round(expiryTime.getTime() / 1000)
-        );
+        const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
 
         const proposal = await handler.createTransaction(
             blockSummary,
@@ -217,17 +220,13 @@ function MultiSignatureCreateProposal({
                                 />
                                 <Form.Timestamp
                                     name="expiryTime"
-                                    label="Transaction Expiration Time"
-                                    defaultValue={
-                                        new Date(
-                                            getNow() + 2 * TimeConstants.Hour
-                                        )
-                                    }
+                                    label="Transaction Expiry Time"
+                                    defaultValue={getDefaultExpiry()}
                                     rules={{
                                         required:
-                                            'Transaction expiration time is required',
+                                            'Transaction expiry time is required',
                                         validate: futureDate(
-                                            'Transaction expiration time must be in the future'
+                                            'Transaction expiry time must be in the future'
                                         ),
                                     }}
                                 />

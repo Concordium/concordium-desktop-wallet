@@ -75,13 +75,13 @@ export enum TimeConstants {
     Month = 30 * Day,
 }
 
-// default expiry on transactions (1 hour from now), given in seconds.
+// default expiry on transactions (1 hour from now).
 export function getDefaultExpiry() {
     return new Date(Date.now() + TimeConstants.Hour);
 }
 
-/** Convert a date to seconds since epoch */
-export function secondsSinceEpoch(date: Date) {
+/** Convert a date to seconds since Unix epoch */
+export function secondsSinceUnixEpoch(date: Date) {
     return Math.floor(date.getTime() / 1000);
 }
 

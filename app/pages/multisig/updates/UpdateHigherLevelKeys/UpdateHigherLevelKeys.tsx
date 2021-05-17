@@ -15,7 +15,7 @@ import {
 } from '~/utils/types';
 import KeySetThreshold from './KeySetThreshold';
 import InputTimestamp from '~/components/Form/InputTimestamp';
-import { getNow, TimeConstants } from '~/utils/timeHelpers';
+import { getDefaultExpiry, getNow, TimeConstants } from '~/utils/timeHelpers';
 import KeyUpdateEntry from './KeyUpdateEntry';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 
@@ -87,7 +87,7 @@ export default function UpdateHigherLevelKeys({
         new Date(getNow() + 5 * TimeConstants.Minute)
     );
     const [expiryTime, setExpiryTime] = useState<Date | undefined>(
-        new Date(getNow() + 2 * TimeConstants.Hour)
+        getDefaultExpiry()
     );
 
     function addNewKey(publicKey: PublicKeyExportFormat) {
