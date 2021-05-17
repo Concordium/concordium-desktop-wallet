@@ -68,18 +68,27 @@ This way, you can get quicker reloads, because you only need to restart start:de
 as the renderer thread will recompile in the background. N.B. This doesn't apply for changes in the rust code,
 which is only recompiled with a full restart.
 
+## Targeting specific Network
+
+To build the app for a specific network, supply the `TARGET_NET` environment variable.
+Currently works with `staging` and `testnet`, if the variable is set to something else, or nothing,
+it will default to stagenet. For production this variable must be supplied.
+
+```bash
+TARGET_NET=staging yarn start
+```
+
+```bash
+export TARGET_NET=testnet
+yarn build-main-dev && yarn start-renderer-dev
+```
+
 ## Packaging for Production
 
 To package apps for the local platform:
 
 ```bash
-TARGET_NET=staging yarn package
-```
-
-targeted towards staging, and in order to target testnet:
-
-```bash
-TARGET_NET=testnet yarn package
+TARGET_NET=$NET yarn package
 ```
 
 ### Mac specific code signing and notarizing
