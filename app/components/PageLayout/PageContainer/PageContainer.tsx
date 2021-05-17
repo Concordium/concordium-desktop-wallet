@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import clsx from 'clsx';
 import { routerActions } from 'connected-react-router';
 import React, { PropsWithChildren } from 'react';
 import { useDispatch } from 'react-redux';
+import { LocationDescriptorObject } from 'history';
 import CloseButton from '~/cross-app-components/CloseButton';
 import BackButton from '~/cross-app-components/BackButton';
 import styles from './PageContainer.module.scss';
@@ -9,7 +11,8 @@ import styles from './PageContainer.module.scss';
 export interface PageContainerProps {
     className?: string;
     disableBack?: boolean;
-    closeRoute?: string;
+    closeRoute?: string | LocationDescriptorObject;
+    backRoute?: string | LocationDescriptorObject;
     padding?: 'vertical' | 'horizontal' | 'both';
 }
 
@@ -28,10 +31,19 @@ export default function PageContainer({
     children,
     disableBack = false,
     closeRoute,
+    backRoute,
     padding,
     className,
 }: PropsWithChildren<PageContainerProps>): JSX.Element {
     const dispatch = useDispatch();
+    const backAction = () => {
+        if (backRoute) {
+            routerActions.push(backRoute as any);
+        } else {
+            routerActions.goBack();
+        }
+    };
+
     return (
         <div
             className={clsx(
@@ -46,13 +58,15 @@ export default function PageContainer({
             {!disableBack && (
                 <BackButton
                     className={styles.back}
-                    onClick={() => dispatch(routerActions.goBack())}
+                    onClick={() => dispatch(backAction())}
                 />
             )}
             {closeRoute && (
                 <CloseButton
                     className={styles.close}
-                    onClick={() => dispatch(routerActions.push(closeRoute))}
+                    onClick={() =>
+                        dispatch(routerActions.push(closeRoute as any))
+                    }
                 />
             )}
         </div>
