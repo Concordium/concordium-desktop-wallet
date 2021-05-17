@@ -61,7 +61,7 @@ export default function PickAmount({
 
     return (
         <>
-            <h2 className={transferStyles.header}>{header}</h2>
+            <h3 className={transferStyles.header}>{header}</h3>
             <Form formMethods={form} onSubmit={handleSubmit}>
                 <div className={styles.amountInputWrapper}>
                     {getGTUSymbol()}
