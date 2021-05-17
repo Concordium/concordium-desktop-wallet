@@ -62,16 +62,14 @@ export default function PickAmount({
             <h2 className={transferStyles.header}>{header}</h2>
             <Form formMethods={form} onSubmit={handleSubmit}>
                 <div className={styles.amountInputWrapper}>
-                    <p>{getGTUSymbol()}</p>
-                    <Form.Input
+                    {getGTUSymbol()}
+                    <Form.InlineNumber
                         name="amount"
-                        placeholder="Enter Amount"
+                        ensureDigits={2}
                         defaultValue={defaultAmount}
                         rules={{
                             required: 'Amount Required',
-                            validate: {
-                                validate,
-                            },
+                            validate,
                         }}
                     />
                 </div>
