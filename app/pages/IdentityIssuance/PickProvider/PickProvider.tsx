@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
-import { Prompt } from 'react-router-dom';
 import routes from '~/constants/routes.json';
 import { getIdentityProviders } from '~/utils/httpRequests';
 import { IdentityProvider } from '~/utils/types';
@@ -32,14 +31,29 @@ export default function IdentityIssuanceChooseProvider({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [providers, setProviders] = useState<IdentityProvider[]>([]);
+    const [
+        nextLocationState,
+        setNextLocationState,
+    ] = useState<ExternalIssuanceLocationState>();
     const global = useSelector(globalSelector);
-    const [warnWhenNavigate, setWarnWhenNavigate] = useState(true);
 
     useEffect(() => {
         getIdentityProviders()
             .then((loadedProviders) => setProviders(loadedProviders))
             .catch(() => onError('Unable to load identity providers'));
     }, [dispatch, onError]);
+
+    // This is run in an effect, to prevent navigation if the component is unmounted
+    useEffect(() => {
+        if (nextLocationState !== undefined) {
+            dispatch(
+                push({
+                    pathname: routes.IDENTITYISSUANCE_EXTERNAL,
+                    state: nextLocationState,
+                })
+            );
+        }
+    }, [dispatch, nextLocationState]);
 
     function onClick(p: IdentityProvider) {
         setProvider(p);
@@ -70,19 +84,11 @@ export default function IdentityIssuanceChooseProvider({
             ledger
         );
 
-        const nextLocationState: ExternalIssuanceLocationState = {
+        setNextLocationState({
             ...idObj,
             identityNumber,
             walletId,
-        };
-
-        setWarnWhenNavigate(false);
-        dispatch(
-            push({
-                pathname: routes.IDENTITYISSUANCE_EXTERNAL,
-                state: nextLocationState,
-            })
-        );
+        });
     }
 
     return (
@@ -99,10 +105,6 @@ export default function IdentityIssuanceChooseProvider({
                 must sign your submission with your hardware wallet, before you
                 can continue.
             </p>
-            <Prompt
-                when={warnWhenNavigate}
-                message="You are about to abort creating an identity. Are you sure?"
-            />
             <CardList className={styles.container}>
                 {providers.map((p) => (
                     <Card

@@ -1,7 +1,7 @@
 import React, { useState, useRef, RefObject, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Prompt, Redirect, useLocation } from 'react-router';
+import { Redirect, useLocation } from 'react-router';
 import { addPendingIdentity } from '~/features/IdentitySlice';
 import { addPendingAccount } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
@@ -124,7 +124,6 @@ export default function ExternalIssuance({
 
     const [location, setLocation] = useState<string>();
     const iframeRef = useRef<HTMLIFrameElement>(null);
-    const [warnWhenNavigate, setWarnWhenNavigate] = useState(true);
 
     useLayoutEffect(() => {
         if (!state) {
@@ -147,7 +146,6 @@ export default function ExternalIssuance({
             onError
         )
             .then(() => {
-                setWarnWhenNavigate(false);
                 return dispatch(push(routes.IDENTITYISSUANCE_FINAL));
             })
             .catch(() => {});
@@ -158,17 +156,9 @@ export default function ExternalIssuance({
         return <Redirect to={routes.IDENTITIES} />;
     }
 
-    const navigationWarning = (
-        <Prompt
-            when={warnWhenNavigate}
-            message="You are about to abort creating an identity. Are you sure?"
-        />
-    );
-
     if (!location) {
         return (
             <>
-                {navigationWarning}
                 <Loading text="Generating your identity" />
             </>
         );
@@ -176,7 +166,6 @@ export default function ExternalIssuance({
 
     return (
         <>
-            {navigationWarning}
             <h2 className={generalStyles.header}>Generating the Identity</h2>
             <webview
                 ref={iframeRef}
