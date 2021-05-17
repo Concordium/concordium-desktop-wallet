@@ -1,0 +1,42 @@
+@import 'config/bundle';
+
+.content {
+    position: relative;
+    height: 300px;
+}
+
+.title {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 240px;
+}
+
+.input {
+    display: block;
+    width: 70%;
+    font-size: $font-size-body3;
+}
+
+.card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 645px;
+    padding-top: 30px;
+}
+
+.enter {
+    composes: flexColumn from global, justifySpaceBetween from global, textCenter from global;
+    height: 385px;
+}
+
+.error {
+    color: $color-salmon-red;
+}
+
+.button {
+    flex: 1;
+    margin: 0 20px;
+}

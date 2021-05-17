@@ -1,7 +1,7 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import routes from '../constants/routes.json';
-import HomePage from '../pages/HomePage';
+import HomePage from '../pages/Home/HomePage';
 import AccountPage from '../pages/Accounts/AccountPage';
 import IdentityPage from '../pages/Identities/IdentityPage';
 import AddressBookPage from '../pages/AddressBook/AddressBookPage';

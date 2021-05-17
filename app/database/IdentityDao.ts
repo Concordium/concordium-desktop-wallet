@@ -1,5 +1,5 @@
 import { Identity } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import { identitiesTable } from '../constants/databaseNames.json';
 
 /**

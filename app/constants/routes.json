@@ -1,5 +1,9 @@
 {
     "HOME": "/",
+    "HOME_NEW_USER": "/home/newuser",
+    "HOME_SELECT_PASSWORD": "/home/selectpassword",
+    "HOME_PASSWORD_SET": "/home/passwordset",
+    "HOME_ENTER_PASSWORD": "/home/enterpassword",
     "DEFAULT": "/",
     "ACCOUNTS": "/accounts",
     "ACCOUNTS_SCHEDULED_TRANSFER": "/accounts/scheduledTransfer/init",
