@@ -30,6 +30,7 @@ import {
 } from '../utils/TransactionConverters';
 // eslint-disable-next-line import/no-cycle
 import { updateMaxTransactionId } from './AccountSlice';
+import AbortController from '~/utils/AbortController';
 
 const transactionSlice = createSlice({
     name: 'transactions',
@@ -156,28 +157,57 @@ export async function loadTransactions(account: Account, dispatch: Dispatch) {
     dispatch(setTransactions(transactions));
 }
 
+async function fetchTransactions(address: string, currentMaxId: number) {
+    const { transactions, full } = await getTransactions(address, currentMaxId);
+
+    const newMaxId = transactions.reduce((id, t) => Math.max(id, t.id), 0);
+    const isFinished = !full;
+
+    await insertTransactions(
+        transactions.map((transaction) =>
+            convertIncomingTransaction(transaction, address)
+        )
+    );
+    return { newMaxId, isFinished };
+}
+
 // Update the transaction from remote source.
-export async function updateTransactions(dispatch: Dispatch, account: Account) {
+export async function updateTransactions(
+    dispatch: Dispatch,
+    account: Account,
+    controller: AbortController
+) {
     await loadTransactions(account, dispatch);
-    const fromId = account.maxTransactionId || 0;
-    const transactions = await getTransactions(account.address, fromId);
-    if (transactions.length > 0) {
-        await insertTransactions(
-            transactions.map((transaction) =>
-                convertIncomingTransaction(transaction, account.address)
-            )
-        );
-        const maxTransactionId = transactions.reduce(
-            (id, t) => Math.max(id, t.id),
-            0
-        );
-        await updateMaxTransactionId(
-            dispatch,
-            account.address,
-            maxTransactionId
-        );
-        loadTransactions(account, dispatch);
+    let maxId = account.maxTransactionId || 0;
+    let finished = false;
+
+    console.log('start');
+    console.log(maxId);
+
+    let result = await fetchTransactions(account.address, maxId);
+    maxId = result.newMaxId;
+    await updateMaxTransactionId(dispatch, account.address, maxId);
+    await loadTransactions(account, dispatch);
+
+    if (result.isFinished) {
+        return;
     }
+
+    const interval = setInterval(async () => {
+        if (finished || controller.isAborted) {
+            console.log(maxId);
+            console.log('done');
+            clearInterval(interval);
+        } else {
+            console.log(maxId);
+            console.log('one last ride');
+            result = await fetchTransactions(account.address, maxId);
+            maxId = result.newMaxId;
+            finished = result.isFinished;
+            await updateMaxTransactionId(dispatch, account.address, maxId);
+            await loadTransactions(account, dispatch);
+        }
+    }, 10000);
 }
 
 // Add a pending transaction to storage

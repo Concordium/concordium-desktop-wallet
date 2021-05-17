@@ -84,12 +84,16 @@ const accountsSlice = createSlice({
             const index = state.accounts.findIndex(
                 (account) => account.address === address
             );
+            console.log(index);
             if (index > -1) {
                 state.accounts[index] = {
                     ...state.accounts[index],
                     ...updatedFields,
                 };
             }
+            console.log(
+                state.chosenAccount && state.chosenAccount.address === address
+            );
             if (
                 state.chosenAccount &&
                 state.chosenAccount.address === address
@@ -412,6 +416,8 @@ export async function updateMaxTransactionId(
     address: string,
     maxTransactionId: number
 ) {
+    console.log('updating');
+    console.log(maxTransactionId);
     updateAccount(address, { maxTransactionId });
     return dispatch(updateAccountFields({ address, maxTransactionId }));
 }

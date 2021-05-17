@@ -27,7 +27,8 @@ function convertBooleans(transactions: TransferTransaction[]) {
 export async function getTransactionsOfAccount(
     account: Account,
     orderBy = 'id',
-    filter: (transaction: TransferTransaction) => boolean = () => true
+    filter: (transaction: TransferTransaction) => boolean = () => true,
+    limit = 100
 ): Promise<TransferTransaction[]> {
     const { address } = account;
     const transactions = await (await knex())
@@ -35,7 +36,8 @@ export async function getTransactionsOfAccount(
         .table(transactionTable)
         .where({ toAddress: address })
         .orWhere({ fromAddress: address })
-        .orderBy(orderBy);
+        .orderBy(orderBy)
+        .limit(limit);
     return convertBooleans(transactions).filter(filter);
 }
 

@@ -15,6 +15,7 @@ import TransferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
 import AccountViewActions from './AccountViewActions';
 import { AccountStatus } from '~/utils/types';
+import AbortController from '~/utils/AbortController';
 
 /**
  * Detailed view of the chosen account and its transactions.
@@ -26,9 +27,11 @@ export default function AccountView() {
     const accountInfo = useSelector(chosenAccountInfoSelector);
 
     useEffect(() => {
+        const controller = new AbortController();
         if (account && account.status === AccountStatus.Confirmed) {
-            updateTransactions(dispatch, account);
+            updateTransactions(dispatch, account, controller);
         }
+        return () => controller.abort();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dispatch, account?.address, account?.status, account?.rewardFilter]);
 

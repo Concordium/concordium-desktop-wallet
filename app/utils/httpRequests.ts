@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as https from 'https';
 import urls from '../constants/urls.json';
 import { walletProxytransactionLimit } from '../constants/externalConstants.json';
-import { TransferTransaction, IncomingTransaction } from './types';
+import { IncomingTransaction } from './types';
 
 const walletProxy = axios.create({
     baseURL: urls.walletProxy,
@@ -49,26 +49,20 @@ export function getResponseBody(
     });
 }
 
-function getHighestId(transactions: TransferTransaction[]) {
-    return transactions.reduce((id, t) => Math.max(id, t.id || 0), 0);
+interface GetTransactionsOutput {
+    transactions: IncomingTransaction[];
+    full: boolean;
 }
 
 export async function getTransactions(
     address: string,
     id = 0
-): Promise<IncomingTransaction[]> {
+): Promise<GetTransactionsOutput> {
     const response = await walletProxy.get(
         `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}`
     );
     const { transactions, count, limit } = response.data;
-    if (count === limit) {
-        const additionalTransactions = await getTransactions(
-            address,
-            getHighestId(transactions)
-        );
-        return [...transactions, ...additionalTransactions];
-    }
-    return transactions;
+    return { transactions, full: count === limit };
 }
 
 export async function getIdentityProviders() {
