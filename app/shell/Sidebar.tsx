@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router';
 import Sidebar, { SidebarLink } from '../cross-app-components/Sidebar';
 import routes from '../constants/routes.json';
 import pkg from '../package.json';
@@ -45,7 +46,15 @@ const links: SidebarLink[] = [
 ];
 
 export default function ConnectedSidebar() {
+    const location = useLocation();
+    const disableSidebar = location.pathname.startsWith(routes.HOME_PASSWORD);
+
     return (
-        <Sidebar links={links} version={pkg.version} child={<LedgerStatus />} />
+        <Sidebar
+            disabled={disableSidebar}
+            links={links}
+            version={pkg.version}
+            child={<LedgerStatus />}
+        />
     );
 }

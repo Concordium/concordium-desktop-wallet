@@ -14,6 +14,7 @@ import PerformImport from '../pages/exportImport/PerformImport';
 import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
 import GenerateCredential from '../pages/GenerateCredential/GenerateCredentialPage';
 import genesisAccount from '../pages/GenesisAccount/GenesisAccount';
+import DefaultPage from '~/pages/Home/DefaultPage';
 
 export default function Routes(): JSX.Element {
     return (
@@ -40,6 +41,7 @@ export default function Routes(): JSX.Element {
             />
             <Route path={routes.SETTINGS} component={SettingsPage} />
             <Route path={routes.HOME} component={HomePage} />
+            <Route path="/" component={DefaultPage} />
         </Switch>
     );
 }

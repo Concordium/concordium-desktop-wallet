@@ -271,7 +271,12 @@ export default function HomePage() {
                     path={routes.HOME_NEW_USER}
                     render={() => <NewUserInit />}
                 />
-                <Route path={routes.HOME} render={() => null} />
+                <Route
+                    path={routes.HOME}
+                    render={() => {
+                        return null;
+                    }}
+                />
             </Switch>
         </PageLayout>
     );
