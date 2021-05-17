@@ -13,7 +13,6 @@ import Form from '~/components/Form';
 import WebpackMigrationSource from '~/database/WebpackMigrationSource';
 import {
     invalidateKnexSingleton,
-    isPasswordSet,
     knex,
     setPassword,
 } from '../../database/knex';
@@ -248,17 +247,23 @@ export default function HomePage() {
     }
 
     useEffect(() => {
-        if (isPasswordSet()) {
-            dispatch(push({ pathname: routes.HOME }));
-            return;
-        }
-
         databaseExists()
-            .then((exists) => {
+            .then(async (exists) => {
                 if (!exists) {
                     dispatch(push({ pathname: routes.HOME_NEW_USER }));
                 } else {
-                    dispatch(push({ pathname: routes.HOME_ENTER_PASSWORD }));
+                    try {
+                        await loadAllSettings();
+                    } catch (error) {
+                        // Either an invalid password has been set, or not password has been set
+                        // yet, so let the user input a password.
+                        dispatch(
+                            push({ pathname: routes.HOME_ENTER_PASSWORD })
+                        );
+                        return exists;
+                    }
+                    // A valid password is in memory, so go to base page.
+                    dispatch(push({ pathname: routes.HOME }));
                 }
                 return exists;
             })

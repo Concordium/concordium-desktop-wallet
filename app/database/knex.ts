@@ -18,10 +18,11 @@ export function setPassword(dbPassword: string) {
     password = dbPassword;
 }
 
-export function isPasswordSet() {
-    return password !== undefined;
-}
-
+/**
+ * Invalidates the current knex singleton. This is required whenever
+ * the password is changed, so that the singleton containing the invalid
+ * password is removed.
+ */
 export function invalidateKnexSingleton() {
     knexSingleton = undefined;
 }
