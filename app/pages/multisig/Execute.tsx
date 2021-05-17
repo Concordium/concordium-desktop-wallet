@@ -47,7 +47,7 @@ export default function Execute<T>({
 
     return (
         <Modal open={open} closeOnEscape>
-            <h2>{errorTitle}</h2>
+            <h3>{errorTitle}</h3>
             <p>{errorContent}</p>
             <Button
                 onClick={() => {

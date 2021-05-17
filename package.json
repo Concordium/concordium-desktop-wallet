@@ -268,8 +268,6 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
-    "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^2.0.2",
     "source-map-support": "^0.5.19",
     "use-react-screenshot": "^1.0.2"
   },
