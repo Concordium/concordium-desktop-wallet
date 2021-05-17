@@ -4,9 +4,21 @@ import * as https from 'https';
 import urls from '../constants/urls.json';
 import { walletProxytransactionLimit } from '../constants/externalConstants.json';
 import { TransferTransaction, IncomingTransaction } from './types';
+import { getTargetNet, Net } from './ConfigHelper';
+
+function getWalletProxy() {
+    const targetNet = getTargetNet();
+    if (targetNet === Net.Staging) {
+        return urls.walletProxyStaging;
+    }
+    if (targetNet === Net.Testnet) {
+        return urls.walletProxyTestnet;
+    }
+    throw new Error('Unknown target network');
+}
 
 const walletProxy = axios.create({
-    baseURL: urls.walletProxy,
+    baseURL: getWalletProxy(),
 });
 
 const defaultTimeout = 60000;

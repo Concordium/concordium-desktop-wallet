@@ -73,7 +73,13 @@ which is only recompiled with a full restart.
 To package apps for the local platform:
 
 ```bash
-yarn package
+TARGET_NET=staging yarn package
+```
+
+targeted towards staging, and in order to target testnet:
+
+```bash
+TARGET_NET=testnet yarn package
 ```
 
 ### Mac specific code signing and notarizing
@@ -83,7 +89,7 @@ As the software is distributed outside of the Mac App Store, it needs to be sign
 Running
 
 ```bash
-yarn package
+TARGET_NET=$NET yarn package
 ```
 
 on a machine with MacOS will trigger the signing and notarizing processes. This requires a valid [Developer ID Application Certificate](https://developer.apple.com/support/certificates/) in the Keychain of the machine used for building, and a valid Apple Developer ID has to be logged into Xcode on the same machine.
@@ -101,5 +107,5 @@ For the APPLEIDPASS, setting up an [app-specific password](https://support.apple
 The notarizing process can take a while, and for testing purposes it can be skipped by running:
 
 ```bash
-yarn package-mac-no-notarize
+TARGET_NET=$NET yarn package-mac-no-notarize
 ```

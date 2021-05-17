@@ -1,6 +1,6 @@
 {
   "name": "concordium-desktop-wallet",
-  "productName": "concordium-desktop-wallet",
+  "productName": "Concordium Wallet",
   "description": "concordium-desktop-wallet",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -19,13 +19,14 @@
     "lint-fix": "yarn --silent lint --fix; exit 0",
     "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
     "lint-styles-fix": "yarn --silent lint-styles --fix; exit 0",
-    "package": "yarn build && electron-builder build --publish never",
-    "package-all": "yarn build && electron-builder build -mwl",
-    "package-ci": "yarn postinstall && yarn build && electron-builder --publish always",
-    "package-mac": "yarn build && electron-builder build --mac",
-    "package-mac-no-notarize": "export NOTARIZE=skip && yarn build && electron-builder build --mac",
-    "package-linux": "yarn build && electron-builder build --linux",
-    "package-win": "yarn build && electron-builder build --win --x64",
+    "name": "echo $npm_package_productName-$TARGET_NET",
+    "package": "yarn build && electron-builder build --publish never --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
+    "package-all": "yarn build && electron-builder build -mwl  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
+    "package-ci": "yarn postinstall && yarn build && electron-builder --publish always  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
+    "package-mac": "yarn build && electron-builder build --mac  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
+    "package-mac-no-notarize": "export NOTARIZE=skip && yarn build && electron-builder build --mac  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
+    "package-linux": "yarn build && electron-builder build --linux  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
+    "package-win": "yarn build && electron-builder build --win --x64  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
     "postinstall": "node internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall  && sh ./internals/scripts/build_protos.sh",
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{ts,tsx,js,jsx,json,html,yml}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
@@ -57,8 +58,7 @@
       "prettier --ignore-path .eslintignore --single-quote --write"
     ]
   },
-  "build": {
-    "productName": "Concordium Wallet",
+    "build": {
     "appId": "org.Concordium.DesktopWallet",
     "files": [
       "dist/",
@@ -84,13 +84,13 @@
       "sign": false
     },
     "win": {
-      "artifactName": "concordium-wallet-${version}.${ext}",
+      "artifactName": "concordium-wallet-${env.TARGET_NET}-${version}.${ext}",
       "target": [
         "nsis"
       ]
     },
     "linux": {
-      "artifactName": "concordium-wallet-${version}.${ext}",
+      "artifactName": "concordium-wallet-${env.TARGET_NET}-${version}.${ext}",
       "target": [
         "deb",
         "rpm",
@@ -99,7 +99,7 @@
       "category": "Development"
     },
     "mac": {
-      "artifactName": "concordium-wallet-${version}.${ext}",
+      "artifactName": "concordium-wallet-${env.TARGET_NET}-${version}.${ext}",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",

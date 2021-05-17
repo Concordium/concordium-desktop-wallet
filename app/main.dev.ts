@@ -93,6 +93,7 @@ const createWindow = async () => {
     }
 
     mainWindow = new BrowserWindow({
+        title: `Concordium Wallet ${process.env.TARGET_NET}`,
         show: false,
         width: 4096,
         height: 2912,
