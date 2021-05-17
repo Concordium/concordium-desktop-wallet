@@ -45,6 +45,7 @@ interface Location {
 interface State {
     transaction: string;
     account: Account;
+    cancelled: Location;
     confirmed: Location;
 }
 
@@ -94,7 +95,12 @@ export default function SubmitTransfer({ location }: Props) {
         return <Redirect to={routes.ACCOUNTS} />;
     }
 
-    const { account, transaction: transactionJSON, confirmed } = location.state;
+    const {
+        account,
+        transaction: transactionJSON,
+        cancelled,
+        confirmed,
+    } = location.state;
 
     let transaction: AccountTransaction = parse(transactionJSON);
 
@@ -183,7 +189,8 @@ export default function SubmitTransfer({ location }: Props) {
                 <h1>Accounts | Submit Transfer</h1>
             </PageLayout.Header>
             <PageLayout.Container
-                closeRoute={routes.ACCOUNTS}
+                closeRoute={cancelled}
+                backRoute={cancelled}
                 padding="vertical"
             >
                 <SimpleErrorModal
