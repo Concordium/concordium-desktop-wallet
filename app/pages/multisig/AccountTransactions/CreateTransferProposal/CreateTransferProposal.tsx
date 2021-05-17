@@ -90,7 +90,6 @@ export default function CreateTransferProposal({
     const onSetExpiryTime = (date: Date | undefined) => {
         setReady(date !== undefined);
         setExpiryTime(date);
-        console.log({ date });
     };
 
     const [schedule, setSchedule] = useState<Schedule>();
