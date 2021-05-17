@@ -243,6 +243,8 @@ app.on('activate', () => {
 });
 
 // The default changed after Electron 8, this sets the value
-// equal to the Electron 8 value to avoid having to rework what 
-// is broken by the change in value.
+// equal to the Electron 8 value to avoid having to rework what
+// is broken by the change in value. 
+// Note that in future Electron releases we will not have the option
+// to set this to false.
 app.allowRendererProcessReuse = false;
