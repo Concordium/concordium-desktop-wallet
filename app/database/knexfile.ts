@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import getPath from './UserDataPathAccessor';
 
+const Dialect = require(`knex/lib/dialects/sqlite3/index.js`);
+Dialect.prototype._driver = () => require('@journeyapps/sqlcipher');
+
 async function getProductionFilename(): Promise<string> {
     const userDataPath = await getPath();
     const productionDatabaseName = 'concordium-desktop-wallet-database.sqlite3';
@@ -14,13 +17,15 @@ function fetchDevelopmentFilename(): string {
     return `./${developmentDatabaseName}`;
 }
 
+// TODO The secret key has to be input from the user.
+
 export default async function getKnexConfiguration(environment: string) {
     // Environment is undefined when running knex migrate:make from the CLI, so
     // this configuration is only used to ensure that migrations end up in the
     // correct directory.
     if (!environment) {
         return {
-            client: 'sqlite3',
+            client: Dialect,
             useNullAsDefault: true,
             connection: {
                 filename: fetchDevelopmentFilename(),
@@ -38,7 +43,7 @@ export default async function getKnexConfiguration(environment: string) {
     }
     if (environment === 'development') {
         return {
-            client: 'sqlite3',
+            client: Dialect,
             connection: {
                 filename: fetchDevelopmentFilename(),
             },
@@ -56,7 +61,7 @@ export default async function getKnexConfiguration(environment: string) {
     }
     if (environment === 'production') {
         return {
-            client: 'sqlite3',
+            client: Dialect,
             connection: {
                 filename: await getProductionFilename(),
             },

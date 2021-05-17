@@ -7,10 +7,10 @@ const { dependencies } = require('../../app/package.json');
 
 const nodeModulesPath = path.join(__dirname, '..', '..', 'app', 'node_modules');
 
-const modules = remove(
-    Object.keys(dependencies || {}),
-    (module) => module === '@journeyapps/sqlcipher' || module === 'knex' || module === sequelize
-  );
+// We should not rebuild the sqlcipher dependency (https://github.com/journeyapps/node-sqlcipher#usage-with-electron-forge--electron-rebuild)
+const modules = Object.keys(dependencies || {}).filter(dep => {
+    return (dep !== '@journeyapps/sqlcipher' && dep !== 'sqlite3');
+});
 
 if (
     Object.keys(dependencies || {}).length > 0 &&
@@ -18,7 +18,8 @@ if (
 ) {
     const electronRebuildCmd = `../node_modules/.bin/electron-rebuild --parallel --force --only ${modules.join(
         ','
-      )} --module-dir .`;
+    )} --module-dir .`;
+
     const cmd =
         process.platform === 'win32'
             ? electronRebuildCmd.replace(/\//g, '\\')

@@ -14,11 +14,10 @@ import path from 'path';
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-// import knex from './database/knex';
-// import WebpackMigrationSource from './database/WebpackMigrationSource';
+import knex from './database/knex';
+import WebpackMigrationSource from './database/WebpackMigrationSource';
 import ipcCommands from './constants/ipcCommands.json';
 import { setClientLocation, grpcCall } from './main/GRPCClient';
-import { stuff } from './database/dialect';
 
 /**
  * Runs the knex migrations for the embedded sqlite database. This ensures that the
@@ -26,29 +25,25 @@ import { stuff } from './database/dialect';
  * an error prompt is displayed to the user, and the application is terminated.
  */
 async function migrate() {
-    console.log('');
-    await stuff();
-    // const config = {
-    //     migrationSource: new WebpackMigrationSource(
-    //         require.context('./database/migrations', false, /.ts$/)
-    //     ),
-    // };
+    const config = {
+        migrationSource: new WebpackMigrationSource(
+            require.context('./database/migrations', false, /.ts$/)
+        ),
+    };
 
-    // knex()
-    //     .then((db) => {
-    //         console.log(db);
-    //         console.log(config);
-    //         // return db.migrate.latest(config);
-    //     })
-    //     .catch((error: Error) => {
-    //         dialog.showErrorBox(
-    //             'Migration error',
-    //             `An unexpected error occurred while attempting to migrate the database. ${error}`
-    //         );
-    //         process.nextTick(() => {
-    //             process.exit(0);
-    //         });
-    //     });
+    knex()
+        .then((db) => {
+            return db.migrate.latest(config);
+        })
+        .catch((error: Error) => {
+            dialog.showErrorBox(
+                'Migration error',
+                `An unexpected error occurred while attempting to migrate the database. ${error}`
+            );
+            process.nextTick(() => {
+                process.exit(0);
+            });
+        });
 }
 
 export default class AppUpdater {
@@ -246,3 +241,7 @@ app.on('activate', () => {
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) createWindow();
 });
+
+// The default changed after Electron 8, this sets the value
+// equal to the Electron 8 value.
+app.allowRendererProcessReuse = false;
