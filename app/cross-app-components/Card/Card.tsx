@@ -5,7 +5,7 @@ import styles from './Card.module.scss';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
     className?: string;
-    header?: string;
+    header?: string | JSX.Element;
 }
 
 function Card({
