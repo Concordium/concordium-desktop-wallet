@@ -12,6 +12,7 @@ import { validateAmount } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
+import ErrorMessage from '~/components/Form/ErrorMessage';
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
@@ -40,6 +41,7 @@ export default function PickAmount({
 }: Props) {
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const form = useForm<PickAmountForm>({ mode: 'onTouched' });
+    const { errors } = form;
 
     const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
         (values) => {
@@ -66,6 +68,7 @@ export default function PickAmount({
                     <Form.InlineNumber
                         name="amount"
                         ensureDigits={2}
+                        allowFractions
                         defaultValue={defaultAmount}
                         rules={{
                             required: 'Amount Required',
@@ -73,6 +76,9 @@ export default function PickAmount({
                         }}
                     />
                 </div>
+                <span className="textCenter">
+                    <ErrorMessage>{errors.amount?.message}</ErrorMessage>
+                </span>
                 <DisplayEstimatedFee
                     className={styles.estimatedFee}
                     estimatedFee={estimatedFee}

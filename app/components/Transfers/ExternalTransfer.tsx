@@ -65,10 +65,12 @@ export default function ExternalTransfer({
                 );
             case locations.pickRecipient:
                 return (
-                    <PickRecipient
-                        pickRecipient={chooseRecipientOnClick}
-                        senderAddress={senderAddress}
-                    />
+                    <div className="mH30">
+                        <PickRecipient
+                            pickRecipient={chooseRecipientOnClick}
+                            senderAddress={senderAddress}
+                        />
+                    </div>
                 );
             case locations.transferSubmitted: {
                 return <FinalPage location={location} />;
