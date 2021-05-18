@@ -1,32 +1,16 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import fs from 'fs';
 import { Route, Switch } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { SubmitHandler } from 'react-hook-form';
 import routes from '../../constants/routes.json';
 import { getDatabaseFilename } from '~/database/knexfile';
 import PageLayout from '~/components/PageLayout/PageLayout';
-import Button from '~/cross-app-components/Button';
-import styles from './Home.module.scss';
-import Form from '~/components/Form';
-import { invalidateKnexSingleton, setPassword } from '../../database/knex';
 import { loadAllSettings } from '~/database/SettingsDao';
-import Card from '~/cross-app-components/Card';
-import migrate from '~/database/migration';
-import initApplication from '~/utils/initialize';
-
-interface PasswordInput {
-    password: string;
-    repassword: string;
-}
-
-interface PasswordSingleInput {
-    password: string;
-}
-
-type PasswordForm = PasswordInput;
-type PasswordSingleForm = PasswordSingleInput;
+import NewUserInit from './NewUserInit';
+import SelectPassword from './SelectPassword';
+import PasswordHasBeenSet from './PasswordHasBeenSet';
+import EnterWalletPassword from './EnterWalletPassword';
 
 /**
  * Checks whether the database has already been created or not.
@@ -45,156 +29,6 @@ async function databaseExists(): Promise<boolean> {
 
 export default function HomePage() {
     const dispatch = useDispatch();
-    const [validationError, setValidationError] = useState<string>();
-
-    const handleSubmit: SubmitHandler<PasswordForm> = useCallback(
-        async (values) => {
-            if (values.password !== values.repassword) {
-                setValidationError('The two passwords must be equal');
-                return;
-            }
-
-            setPassword(values.password);
-            await migrate();
-            await initApplication(dispatch);
-            dispatch(push({ pathname: routes.HOME_PASSWORD_SET }));
-        },
-        [dispatch]
-    );
-
-    const handleUnlock: SubmitHandler<PasswordSingleForm> = useCallback(
-        async (values) => {
-            setPassword(values.password);
-            invalidateKnexSingleton();
-            try {
-                await loadAllSettings();
-                await migrate();
-                await initApplication(dispatch);
-                dispatch(push({ pathname: routes.ACCOUNTS }));
-            } catch (error) {
-                // The password was incorrect.
-                setValidationError('Invalid password');
-            }
-        },
-        [dispatch]
-    );
-
-    function NewUserInit() {
-        return (
-            <PageLayout.Container disableBack>
-                <div className={styles.content}>
-                    <div>
-                        <div>
-                            <h2 className={styles.title}>Hi, there!</h2>
-                            <p>
-                                Before you can start using the Concordium
-                                Desktop Wallet, you have to set up a few
-                                security measures. Press Continue to be guided
-                                through the setup process.
-                            </p>
-                        </div>
-                        <Button
-                            onClick={() =>
-                                dispatch(
-                                    push({
-                                        pathname: routes.HOME_SELECT_PASSWORD,
-                                    })
-                                )
-                            }
-                        >
-                            Continue
-                        </Button>
-                    </div>
-                </div>
-            </PageLayout.Container>
-        );
-    }
-
-    function SelectPassword() {
-        return (
-            <PageLayout.Container disableBack>
-                <div className={styles.card}>
-                    <h2>Select a wallet password</h2>
-                    <p>
-                        The first step is to set up a password for the wallet.
-                        This password will be used when you open the
-                        application. It is very important that you do not lose
-                        this password, as it cannot be retrieved if lost.
-                    </p>
-                    <Form className={styles.enter} onSubmit={handleSubmit}>
-                        <div>
-                            <Form.Input
-                                type="password"
-                                className={styles.input}
-                                name="password"
-                                rules={{ required: 'Password is required' }}
-                                placeholder="Enter password"
-                            />
-                            <Form.Input
-                                type="password"
-                                className={styles.input}
-                                name="repassword"
-                                rules={{
-                                    required:
-                                        'Re-entering your password is required',
-                                }}
-                                placeholder="Re-enter password"
-                            />
-                            <p className={styles.error}>{validationError}</p>
-                        </div>
-                        <Form.Submit>Continue</Form.Submit>
-                    </Form>
-                </div>
-            </PageLayout.Container>
-        );
-    }
-
-    function PasswordHasBeenSet() {
-        return (
-            <PageLayout.Container disableBack>
-                <div className={styles.content}>
-                    <div>
-                        <h2 className={styles.title}>
-                            Wallet password created!
-                        </h2>
-                        <p>
-                            Your wallet password has been set! Please remember
-                            to keep it safe, as you will need it later if you
-                            want to reset it. Lost passwords cannot be recreated
-                            or reset.
-                        </p>
-                    </div>
-                    <Button
-                        onClick={() =>
-                            dispatch(push({ pathname: routes.ACCOUNTS }))
-                        }
-                    >
-                        Continue to the application
-                    </Button>
-                </div>
-            </PageLayout.Container>
-        );
-    }
-
-    function EnterWalletPassword() {
-        return (
-            <Card className={styles.card}>
-                <Form className={styles.enter} onSubmit={handleUnlock}>
-                    <h3>Enter wallet password</h3>
-                    <div>
-                        <Form.Input
-                            className={styles.input}
-                            name="password"
-                            placeholder="Enter your wallet password"
-                            type="password"
-                        />
-                        <p className={styles.error}>{validationError}</p>
-                    </div>
-                    <Form.Submit>Unlock</Form.Submit>
-                </Form>
-            </Card>
-        );
-    }
 
     useEffect(() => {
         databaseExists()
