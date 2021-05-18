@@ -583,8 +583,13 @@ export interface UpdateHeader {
 }
 
 export interface UpdateInstructionSignature {
-    authorizationKeyIndex: number;
+    authorizationPublicKey: string;
     signature: string;
+}
+
+export interface UpdateInstructionSignatureWithIndex {
+    signature: string;
+    authorizationKeyIndex: number;
 }
 
 export interface UpdateInstruction<
@@ -680,7 +685,7 @@ export function instanceOfUpdateInstruction(
 export function instanceOfUpdateInstructionSignature(
     object: TransactionCredentialSignature | UpdateInstructionSignature
 ): object is UpdateInstructionSignature {
-    return 'signature' in object && 'authorizationKeyIndex' in object;
+    return 'signature' in object && 'authorizationPublicKey' in object;
 }
 
 export function instanceOfAccountTransactionWithSignature(

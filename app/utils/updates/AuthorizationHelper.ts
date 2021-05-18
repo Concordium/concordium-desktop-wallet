@@ -7,6 +7,7 @@ import {
 import {
     Authorization,
     Authorizations,
+    BlockSummary,
     Key,
     Keys,
     KeysWithThreshold,
@@ -17,6 +18,8 @@ import {
     isUpdateUsingRootKeys,
     UpdateInstruction,
     UpdateInstructionPayload,
+    UpdateInstructionSignature,
+    UpdateInstructionSignatureWithIndex,
     UpdateType,
     VerifyKey,
 } from '../types';
@@ -139,4 +142,75 @@ export async function findKey(
         await ledger.getPublicKeySilent(getGovernanceLevel2Path())
     ).toString('hex');
     return findAuthorizationKey(publicKey, transactionHandler, keys.level2Keys);
+}
+
+/**
+ * Attempts to find the key index of the given public key in the authorization.
+ * If the public-key is not in the authorization on chain, then undefined will be returned.
+ */
+async function findKeyIndex(
+    publicKey: string,
+    keys: Keys,
+    transaction: UpdateInstruction<UpdateInstructionPayload>,
+    transactionHandler: UpdateInstructionHandler<
+        UpdateInstruction<UpdateInstructionPayload>,
+        ConcordiumLedgerClient
+    >
+): Promise<number | undefined> {
+    if (isUpdateUsingRootKeys(transaction)) {
+        return findHigherLevelKey(publicKey, keys.rootKeys)?.index;
+    }
+    if (isUpdateUsingLevel1Keys(transaction)) {
+        return findHigherLevelKey(publicKey, keys.level1Keys)?.index;
+    }
+    return findAuthorizationKey(publicKey, transactionHandler, keys.level2Keys)
+        ?.index;
+}
+
+/**
+ * Attaches the signature's key's index in the authorization to the signature.
+ * If the key on the signature is not in the authorization, the function will throw an error.
+ */
+export async function attachKeyIndex(
+    signature: UpdateInstructionSignature,
+    blockSummary: BlockSummary,
+    transaction: UpdateInstruction<UpdateInstructionPayload>,
+    transactionHandler: UpdateInstructionHandler<
+        UpdateInstruction<UpdateInstructionPayload>,
+        ConcordiumLedgerClient
+    >
+): Promise<UpdateInstructionSignatureWithIndex> {
+    const index = await findKeyIndex(
+        signature.authorizationPublicKey,
+        blockSummary.updates.keys,
+        transaction,
+        transactionHandler
+    );
+    if (index === undefined) {
+        throw new Error(
+            'Public key associated with signature not found in authorized key list.'
+        );
+    }
+    return { ...signature, authorizationKeyIndex: index };
+}
+
+/**
+ * Attempts to find the authorized key, which is appropiate for the update, from the connected hardware wallet.
+ *
+ * The type of authorization key (root, level 1 or level 2) is derived directly from
+ * the update type, as the type of key used to sign a given update is determined by its type.
+ */
+export async function getUpdateKey(
+    ledger: ConcordiumLedgerClient,
+    transaction: UpdateInstruction<UpdateInstructionPayload>
+): Promise<string> {
+    let publicKey;
+    if (isUpdateUsingRootKeys(transaction)) {
+        publicKey = await ledger.getPublicKeySilent(getGovernanceRootPath());
+    } else if (isUpdateUsingLevel1Keys(transaction)) {
+        publicKey = await ledger.getPublicKeySilent(getGovernanceLevel1Path());
+    } else {
+        publicKey = await ledger.getPublicKeySilent(getGovernanceLevel2Path());
+    }
+    return publicKey.toString('hex');
 }
