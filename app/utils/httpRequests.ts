@@ -14,8 +14,8 @@ function getWalletProxy() {
     if (targetNet === Net.Testnet) {
         return urls.walletProxyTestnet;
     }
-    if (targetNet === Net.Staging) {
-        return urls.walletProxyStaging;
+    if (targetNet === Net.Stagenet) {
+        return urls.walletProxyStagenet;
     }
     throw new Error('Unknown target network');
 }
