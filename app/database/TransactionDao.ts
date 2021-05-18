@@ -25,12 +25,17 @@ function convertBooleans(transactions: TransferTransaction[]) {
     });
 }
 
+interface GetTransactionsOutput {
+    transactions: TransferTransaction[];
+    more: boolean;
+}
+
 export async function getTransactionsOfAccount(
     account: Account,
     orderBy = 'id',
     filteredTypes: TransactionKindString[] = [],
     limit = 100
-): Promise<TransferTransaction[]> {
+): Promise<GetTransactionsOutput> {
     const { address } = account;
     const transactions = await (await knex())
         .select()
@@ -39,8 +44,11 @@ export async function getTransactionsOfAccount(
         .orWhere({ fromAddress: address })
         .orderBy(orderBy, 'desc')
         .whereNotIn('transactionKind', filteredTypes)
-        .limit(limit);
-    return convertBooleans(transactions);
+        .limit(limit + 1);
+    return {
+        transactions: convertBooleans(transactions).slice(0, limit),
+        more: transactions.length > limit,
+    };
 }
 
 export async function updateTransaction(

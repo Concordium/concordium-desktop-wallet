@@ -32,11 +32,12 @@ import { updateMaxTransactionId } from './AccountSlice';
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 
-const updateTransactionInterval: 5000;
+const updateTransactionInterval = 5000;
 
 interface State {
     transactions: TransferTransaction[];
     viewingShielded: boolean;
+    moreTransactions: boolean;
 }
 
 const transactionSlice = createSlice({
@@ -44,10 +45,12 @@ const transactionSlice = createSlice({
     initialState: {
         transactions: [],
         viewingShielded: false,
+        moreTransactions: false,
     } as State,
     reducers: {
-        setTransactions(state, transactions) {
-            state.transactions = transactions.payload;
+        setTransactions(state, update) {
+            state.transactions = update.payload.transactions;
+            state.moreTransactions = update.payload.more;
         },
         setViewingShielded(state, viewingShielded) {
             state.viewingShielded = viewingShielded.payload;
@@ -164,14 +167,14 @@ export async function loadTransactions(account: Account, dispatch: Dispatch) {
         ];
     }
 
-    let transactions = await getTransactionsOfAccount(
+    const { transactions, more } = await getTransactionsOfAccount(
         account,
         'id',
         filteredTypes
     );
 
-    transactions = await attachNames(transactions);
-    dispatch(setTransactions(transactions));
+    const namedTransactions = await attachNames(transactions);
+    dispatch(setTransactions({ transactions: namedTransactions, more }));
 }
 
 async function fetchTransactions(address: string, currentMaxId: number) {
@@ -314,5 +317,8 @@ export const transactionsSelector = (state: RootState) => {
 
 export const viewingShieldedSelector = (state: RootState) =>
     state.transactions.viewingShielded;
+
+export const moreTransactionsSelector = (state: RootState) =>
+    state.transactions.moreTransactions;
 
 export default transactionSlice.reducer;

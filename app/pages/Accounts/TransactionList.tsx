@@ -2,7 +2,10 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import TransactionListElement from './TransactionListElement';
 import { TransferTransaction } from '~/utils/types';
-import { transactionsSelector } from '~/features/TransactionSlice';
+import {
+    transactionsSelector,
+    moreTransactionsSelector,
+} from '~/features/TransactionSlice';
 
 interface Props {
     onTransactionClick: (transaction: TransferTransaction) => void;
@@ -15,6 +18,7 @@ interface Props {
  */
 function TransactionList({ onTransactionClick }: Props): JSX.Element {
     const transactions = useSelector(transactionsSelector);
+    const more = useSelector(moreTransactionsSelector);
 
     if (transactions.length === 0) {
         return (
@@ -33,6 +37,11 @@ function TransactionList({ onTransactionClick }: Props): JSX.Element {
                     transaction={transaction}
                 />
             ))}
+            {more && (
+                <h3 className="flex justifyCenter mT10 pB10">
+                    Export to see older transactions
+                </h3>
+            )}
         </>
     );
 }
