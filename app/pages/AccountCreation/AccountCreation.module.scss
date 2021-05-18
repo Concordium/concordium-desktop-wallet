@@ -12,6 +12,7 @@ $account-creation-padding-horizontal: 50px;
 .singleColumn {
     composes: flexColumn from global;
     padding: 35px $account-creation-padding-horizontal 60px;
+    flex: 1;
 }
 
 .singleColumnContent {
@@ -29,7 +30,8 @@ $account-creation-padding-horizontal: 50px;
 }
 
 .card {
-    width: 428px;
+    width: 100%;
+    max-width: 428px;
 }
 
 .leftColumn,
