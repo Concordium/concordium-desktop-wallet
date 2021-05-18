@@ -60,7 +60,6 @@ module.exports = merge(baseConfig, {
          */
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'development',
-            TARGET_NET: 'test',
         }),
 
         new webpack.LoaderOptionsPlugin({
