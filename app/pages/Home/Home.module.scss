@@ -1,9 +1,5 @@
 @import 'config/bundle';
 
-.relative {
-    position: relative;
-}
-
 .content {
     position: absolute;
     display: flex;
@@ -38,15 +34,6 @@
     padding-top: 30px;
 }
 
-.password {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 645px;
-    padding-top: 30px;
-}
-
 .enter {
     composes: flexColumn from global, justifySpaceBetween from global, textCenter from global;
     height: 385px;
@@ -54,9 +41,4 @@
 
 .error {
     color: $color-salmon-red;
-}
-
-.button {
-    flex: 1;
-    margin: 0 20px;
 }

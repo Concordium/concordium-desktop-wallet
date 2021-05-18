@@ -113,7 +113,7 @@ export default function HomePage() {
     function SelectPassword() {
         return (
             <PageLayout.Container disableBack>
-                <div className={styles.password}>
+                <div className={styles.card}>
                     <h2>Select a wallet password</h2>
                     <p>
                         The first step is to set up a password for the wallet.
@@ -207,7 +207,7 @@ export default function HomePage() {
                     try {
                         await loadAllSettings();
                     } catch (error) {
-                        // Either an invalid password has been set, or not password has been set
+                        // Either an invalid password has been set, or no password has been set
                         // yet, so let the user input a password.
                         dispatch(
                             push({ pathname: routes.HOME_ENTER_PASSWORD })

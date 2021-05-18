@@ -22,7 +22,6 @@ export async function getDatabaseFilename() {
     return getProductionFilename();
 }
 
-// TODO The secret key has to be input from the user.
 export default async function getKnexConfiguration(
     environment: string,
     password: string
