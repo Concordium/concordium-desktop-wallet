@@ -16,7 +16,6 @@ import {
     AccountTransaction,
     Dispatch,
     TransactionEvent,
-    RejectReason,
     Global,
 } from '../utils/types';
 import {
@@ -30,6 +29,7 @@ import {
 import { updateAccount } from '../database/AccountDao';
 // eslint-disable-next-line import/no-cycle
 import { loadAccounts } from './AccountSlice';
+import { RejectReason } from '~/utils/node/RejectReasonHelper';
 
 interface State {
     transactions: TransferTransaction[];
@@ -205,12 +205,23 @@ export async function confirmTransaction(
             (event) => event.result.outcome !== 'success'
         );
         if (!failure) {
-            throw new Error('unexpected missing failure, when not successful');
+            throw new Error('Missing failure for unsuccessful transaction');
         }
+        if (!failure.result) {
+            throw new Error('Missing failure result');
+        }
+        if (!failure.result.rejectReason) {
+            throw new Error('Missing rejection reason in failure result');
+        }
+
         rejectReason =
             RejectReason[
-                failure.result.rejectReason as keyof typeof RejectReason
+                failure.result.rejectReason.tag as keyof typeof RejectReason
             ];
+        if (rejectReason === undefined) {
+            // If the reject reason was not known, then just store it directly as a string anyway.
+            rejectReason = failure.result.rejectReason.tag;
+        }
     }
 
     const update = {
