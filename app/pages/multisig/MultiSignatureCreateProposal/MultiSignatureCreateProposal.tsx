@@ -180,7 +180,7 @@ function MultiSignatureCreateProposal({
                     onSubmit={handleSubmit}
                 >
                     <div className={styles.proposal}>
-                        <p>
+                        <p className="mT0">
                             Add all the details for the {displayType}{' '}
                             transaction below.
                         </p>

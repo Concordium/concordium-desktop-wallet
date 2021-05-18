@@ -11,8 +11,7 @@ $account-creation-padding-horizontal: 50px;
 
 .singleColumn {
     composes: flexColumn from global;
-    padding: 35px $account-creation-padding-horizontal 80px;
-    min-height: 100%;
+    padding: 35px $account-creation-padding-horizontal 60px;
 }
 
 .singleColumnContent {
