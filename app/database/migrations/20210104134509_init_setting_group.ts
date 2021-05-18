@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<void> {
         .insert([
             { name: settingKeys.multiSignatureSettings },
             { name: settingKeys.nodeSettings },
+            { name: settingKeys.passwordSettings },
         ]);
 }
 

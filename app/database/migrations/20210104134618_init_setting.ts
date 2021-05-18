@@ -19,6 +19,12 @@ export async function up(knex: Knex): Promise<void> {
             }),
             group: '2',
         },
+        {
+            name: settingKeys.password,
+            type: SettingTypeEnum.Password,
+            value: '',
+            group: '3',
+        },
     ]);
 }
 

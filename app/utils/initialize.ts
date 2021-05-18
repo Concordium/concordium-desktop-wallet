@@ -22,6 +22,7 @@ async function loadSettingsIntoStore(dispatch: Dispatch) {
     } else {
         throw new Error('Unable to find node location setting.');
     }
+
     return dispatch(updateSettings(settings));
 }
 
