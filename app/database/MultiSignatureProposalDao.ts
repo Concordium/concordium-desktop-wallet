@@ -1,5 +1,5 @@
 import { MultiSignatureTransaction } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import { multiSignatureProposalTable } from '../constants/databaseNames.json';
 
 /**

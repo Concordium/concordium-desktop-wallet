@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Segment, Header, Grid, Button } from 'semantic-ui-react';
+import { Redirect } from 'react-router';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { sendTransaction } from '~/utils/nodeRequests';
@@ -18,6 +18,7 @@ import {
     CredentialWithIdentityNumber,
     Global,
     instanceOfTransferToPublic,
+    MultiSignatureTransactionStatus,
 } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addPendingTransaction } from '~/features/TransactionSlice';
@@ -30,6 +31,13 @@ import PageLayout from '~/components/PageLayout';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 import errorMessages from '~/constants/errorMessages.json';
+import routes from '~/constants/routes.json';
+
+import styles from './SubmitTransfer.module.scss';
+import Card from '~/cross-app-components/Card';
+import PrintButton from '~/components/PrintButton';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 
 interface Location {
     pathname: string;
@@ -83,9 +91,10 @@ export default function SubmitTransfer({ location }: Props) {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
     const accountInfoMap = useSelector(accountsInfoSelector);
+    const [rejected, setRejected] = useState(false);
 
     if (!location.state) {
-        throw new Error('Unexpected missing state.');
+        return <Redirect to={routes.ACCOUNTS} />;
     }
 
     const {
@@ -96,6 +105,7 @@ export default function SubmitTransfer({ location }: Props) {
     } = location.state;
 
     let transaction: AccountTransaction = parse(transactionJSON);
+    const handler = findHandler(transaction);
 
     /**
      * Builds the transaction, signs it, sends it to the node, saves it and
@@ -151,6 +161,7 @@ export default function SubmitTransfer({ location }: Props) {
             () => signatureStructured
         ).toString('hex');
         const response = await sendTransaction(serializedTransaction);
+
         if (response.getValue()) {
             await addPendingTransaction(transaction, transactionHash);
             monitorTransactionStatus(
@@ -169,41 +180,62 @@ export default function SubmitTransfer({ location }: Props) {
             };
             dispatch(push(confirmedWithHash));
         } else {
-            // TODO: Handle rejection from node
+            setRejected(true);
         }
     }
+
+    const printOutput = handler.print(
+        transaction,
+        MultiSignatureTransactionStatus.Open
+    );
 
     return (
         <PageLayout>
             <PageLayout.Header>
                 <h1>Accounts | Submit Transfer</h1>
             </PageLayout.Header>
-            <Container>
-                <Segment>
-                    <Button onClick={() => dispatch(push(cancelled))}>
-                        {'<--'}
-                    </Button>
-                    <Header textAlign="center">
+            <PageLayout.Container
+                closeRoute={cancelled}
+                backRoute={cancelled}
+                padding="vertical"
+            >
+                <SimpleErrorModal
+                    show={rejected}
+                    header="Transfer rejected"
+                    content="Your transfer was rejected by the node."
+                    onClick={() => setRejected(false)}
+                />
+                <div className={styles.grid}>
+                    <h2 className={styles.header}>
                         Submit the transaction with your hardware wallet
-                    </Header>
-                    <Container text>
-                        <p>
-                            Choose your hardware wallet on the right. Be sure to
-                            verify that all the information below is exactly the
-                            same on your hardware wallet, before submitting the
-                            transaction.
-                        </p>
-                    </Container>
-                    <Grid columns={2} divided textAlign="center" padded>
-                        <Grid.Column>
-                            <TransactionDetails transaction={transaction} />
-                        </Grid.Column>
-                        <Grid.Column>
-                            <SimpleLedger ledgerCall={ledgerSignTransfer} />
-                        </Grid.Column>
-                    </Grid>
-                </Segment>
-            </Container>
+                    </h2>
+                    <p>
+                        Choose your hardware wallet on the right. Be sure to
+                        verify that{' '}
+                        <b>all the information below is exactly the same</b> on
+                        your hardware wallet, before submitting the transaction.
+                    </p>
+                    <Card
+                        header={
+                            <span className={styles.summaryHeader}>
+                                Transaction details
+                                {Boolean(printOutput) && (
+                                    <PrintButton className={styles.print}>
+                                        {printOutput}
+                                    </PrintButton>
+                                )}
+                            </span>
+                        }
+                        className={styles.summary}
+                    >
+                        <TransactionDetails transaction={transaction} />
+                    </Card>
+                    <SimpleLedger
+                        className={styles.ledger}
+                        ledgerCall={ledgerSignTransfer}
+                    />
+                </div>
+            </PageLayout.Container>
         </PageLayout>
     );
 }

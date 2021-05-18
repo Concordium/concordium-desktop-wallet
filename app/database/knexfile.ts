@@ -14,30 +14,28 @@ function fetchDevelopmentFilename(): string {
     return `./${developmentDatabaseName}`;
 }
 
-export default async function getKnexConfiguration(environment: string) {
-    // Environment is undefined when running knex migrate:make from the CLI, so
-    // this configuration is only used to ensure that migrations end up in the
-    // correct directory.
-    if (!environment) {
-        return {
-            client: 'sqlite3',
-            useNullAsDefault: true,
-            connection: {
-                filename: fetchDevelopmentFilename(),
-            },
-            migrations: {
-                directory: './migrations',
-            },
-            pool: {
-                afterCreate: (conn: any, cb: any) => {
-                    conn.run('PRAGMA foreign_keys = ON', cb);
-                },
-            },
-        };
+export async function getDatabaseFilename() {
+    const environment = process.env.NODE_ENV;
+    if (environment === 'development') {
+        return fetchDevelopmentFilename();
     }
+    return getProductionFilename();
+}
+
+export default async function getKnexConfiguration(
+    environment: string,
+    password: string
+) {
+    // https://github.com/knex/knex/blob/master/CONTRIBUTING.md#i-would-like-to-add-support-for-new-dialect-to-knex-is-it-possible
+    // eslint-disable-next-line
+    const SQLCipherDialect = require(`knex/lib/dialects/sqlite3/index.js`);
+    // eslint-disable-next-line
+    SQLCipherDialect.prototype._driver = () =>
+        require('@journeyapps/sqlcipher');
+
     if (environment === 'development') {
         return {
-            client: 'sqlite3',
+            client: SQLCipherDialect,
             connection: {
                 filename: fetchDevelopmentFilename(),
             },
@@ -47,6 +45,7 @@ export default async function getKnexConfiguration(environment: string) {
             },
             pool: {
                 afterCreate: (conn: any, cb: any) => {
+                    conn.run(`PRAGMA KEY = '${password}'`);
                     conn.run('PRAGMA foreign_keys = ON', cb);
                 },
             },
@@ -54,13 +53,14 @@ export default async function getKnexConfiguration(environment: string) {
     }
     if (environment === 'production') {
         return {
-            client: 'sqlite3',
+            client: SQLCipherDialect,
             connection: {
                 filename: await getProductionFilename(),
             },
             useNullAsDefault: true,
             pool: {
                 afterCreate: (conn: any, cb: any) => {
+                    conn.run(`PRAGMA KEY = '${password}'`);
                     conn.run('PRAGMA foreign_keys = ON', cb);
                 },
             },

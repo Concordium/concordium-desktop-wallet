@@ -63,7 +63,7 @@ async function generateIdentity(
     walletId: number,
     iframeRef: RefObject<HTMLIFrameElement>,
     onError: (message: string) => void
-) {
+): Promise<number> {
     let identityObjectLocation;
     let identityId;
     try {
@@ -90,7 +90,8 @@ async function generateIdentity(
         await addPendingAccount(dispatch, accountName, identityId, true); // TODO: can we add the address already here?
     } catch (e) {
         onError(`Failed to create identity due to ${e}`);
-        return;
+        // Rethrow this to avoid redirection;
+        throw e;
     }
     confirmIdentityAndInitialAccount(
         dispatch,
@@ -99,6 +100,7 @@ async function generateIdentity(
         accountName,
         identityObjectLocation
     ).catch(() => onError(`Failed to confirm identity`));
+    return identityId;
 }
 
 export interface ExternalIssuanceLocationState extends SignedIdRequest {
@@ -145,8 +147,13 @@ export default function ExternalIssuance({
             iframeRef,
             onError
         )
-            .then(() => {
-                return dispatch(push(routes.IDENTITYISSUANCE_FINAL));
+            .then((identityId) => {
+                return dispatch(
+                    push({
+                        pathname: routes.IDENTITYISSUANCE_FINAL,
+                        state: identityId,
+                    })
+                );
             })
             .catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps

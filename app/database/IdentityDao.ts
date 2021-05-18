@@ -1,5 +1,5 @@
 import { Identity } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import { identitiesTable } from '../constants/databaseNames.json';
 
 /**
@@ -25,12 +25,10 @@ export async function insertIdentity(identity: Partial<Identity> | Identity[]) {
 }
 
 export async function updateIdentity(
-    identityName: string,
+    id: number,
     updatedValues: Record<string, unknown>
 ) {
-    return (await knex())(identitiesTable)
-        .where({ name: identityName })
-        .update(updatedValues);
+    return (await knex())(identitiesTable).where({ id }).update(updatedValues);
 }
 
 /**

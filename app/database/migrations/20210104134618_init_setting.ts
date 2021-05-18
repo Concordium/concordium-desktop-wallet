@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import { Knex } from 'knex';
 import { SettingTypeEnum } from '../../utils/types';
 import settingKeys from '../../constants/settingKeys.json';
 
@@ -18,6 +18,12 @@ export async function up(knex: Knex): Promise<void> {
                 port: '10000',
             }),
             group: '2',
+        },
+        {
+            name: settingKeys.password,
+            type: SettingTypeEnum.Password,
+            value: '',
+            group: '3',
         },
     ]);
 }

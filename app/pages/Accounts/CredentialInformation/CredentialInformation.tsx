@@ -41,7 +41,7 @@ export default function CredentialInformation({
     return (
         <Card className="relative pB0">
             <div className={styles.header}>
-                <p>
+                <p className="mT0">
                     Credentials on this account: {credentialsOfAccount.length}
                 </p>
                 <p>Signature threshold: {account.signatureThreshold}</p>
