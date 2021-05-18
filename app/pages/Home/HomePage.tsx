@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import fs from 'fs';
 import { Route, Switch } from 'react-router';
 import { useDispatch } from 'react-redux';
@@ -45,9 +45,15 @@ async function databaseExists(): Promise<boolean> {
 
 export default function HomePage() {
     const dispatch = useDispatch();
+    const [validationError, setValidationError] = useState<string>();
 
     const handleSubmit: SubmitHandler<PasswordForm> = useCallback(
         async (values) => {
+            if (values.password !== values.repassword) {
+                setValidationError('The two passwords must be equal');
+                return;
+            }
+
             setPassword(values.password);
             await migrate();
             await initApplication(dispatch);
@@ -67,7 +73,7 @@ export default function HomePage() {
                 dispatch(push({ pathname: routes.ACCOUNTS }));
             } catch (error) {
                 // The password was incorrect.
-                // TODO Tell the user that the password was incorrect.
+                setValidationError('Invalid password');
             }
         },
         [dispatch]
@@ -104,7 +110,6 @@ export default function HomePage() {
         );
     }
 
-    // TODO Add validation that the repassword === password.
     function SelectPassword() {
         return (
             <PageLayout.Container disableBack>
@@ -135,6 +140,7 @@ export default function HomePage() {
                                 }}
                                 placeholder="Re-enter password"
                             />
+                            <p className={styles.error}>{validationError}</p>
                         </div>
                         <Form.Submit>Continue</Form.Submit>
                     </Form>
@@ -175,12 +181,15 @@ export default function HomePage() {
             <Card className={styles.card}>
                 <Form className={styles.enter} onSubmit={handleUnlock}>
                     <h3>Enter wallet password</h3>
-                    <Form.Input
-                        className={styles.input}
-                        name="password"
-                        placeholder="Enter your wallet password"
-                        type="password"
-                    />
+                    <div>
+                        <Form.Input
+                            className={styles.input}
+                            name="password"
+                            placeholder="Enter your wallet password"
+                            type="password"
+                        />
+                        <p className={styles.error}>{validationError}</p>
+                    </div>
                     <Form.Submit>Unlock</Form.Submit>
                 </Form>
             </Card>
@@ -190,6 +199,8 @@ export default function HomePage() {
     useEffect(() => {
         databaseExists()
             .then(async (exists) => {
+                // Determine which page to show, based on whether we have database
+                // access or not.
                 if (!exists) {
                     dispatch(push({ pathname: routes.HOME_NEW_USER }));
                 } else {
