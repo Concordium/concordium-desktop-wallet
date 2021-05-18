@@ -1038,7 +1038,7 @@ export interface EncryptionMetaData {
 
 export interface EncryptedData {
     cipherText: string;
-    metaData: EncryptionMetaData;
+    metadata: EncryptionMetaData;
 }
 
 export interface ExportData {
