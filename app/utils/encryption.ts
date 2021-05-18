@@ -12,7 +12,7 @@ const keyDerivationMethod = 'PBKDF2';
 const hashAlgorithmInternal = 'sha256';
 
 /**
- * The naming of the encryption method across different crypto libraries are different,
+ * The naming of the encryption methods across different crypto libraries are different,
  * so this method is required to output in the format expected by external tools.
  */
 function getEncryptionMethodExport(method: string) {
@@ -30,7 +30,7 @@ function getEncryptionMethodImport(method: string) {
 }
 
 /**
- * The naming of the encryption method across different crypto libraries are different,
+ * The naming of the key derivation methods across different crypto libraries are different,
  * so this method is required to output in the format expected by external tools.
  */
 function getKeyDerivationAlgorithmExport(algorithm: string) {
