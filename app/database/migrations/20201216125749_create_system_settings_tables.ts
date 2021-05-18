@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import { Knex } from 'knex';
 
 // TODO: Add unique constrains on name for both tables, so that we cannot get clashes.
 

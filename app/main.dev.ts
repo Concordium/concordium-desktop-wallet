@@ -14,37 +14,8 @@ import path from 'path';
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import knex from './database/knex';
-import WebpackMigrationSource from './database/WebpackMigrationSource';
 import ipcCommands from './constants/ipcCommands.json';
 import { setClientLocation, grpcCall } from './main/GRPCClient';
-
-/**
- * Runs the knex migrations for the embedded sqlite database. This ensures that the
- * database is up-to-date before the application opens. If a migration fails, then
- * an error prompt is displayed to the user, and the application is terminated.
- */
-async function migrate() {
-    const config = {
-        migrationSource: new WebpackMigrationSource(
-            require.context('./database/migrations', false, /.ts$/)
-        ),
-    };
-
-    knex()
-        .then((db) => {
-            return db.migrate.latest(config);
-        })
-        .catch((error: Error) => {
-            dialog.showErrorBox(
-                'Migration error',
-                `An unexpected error occurred while attempting to migrate the database. ${error}`
-            );
-            process.nextTick(() => {
-                process.exit(0);
-            });
-        });
-}
 
 export default class AppUpdater {
     constructor() {
@@ -145,10 +116,6 @@ const createWindow = async () => {
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line
     new AppUpdater();
-
-    // Migrate database to ensure it is always up-to-date before opening the
-    // application.
-    migrate();
 };
 
 // Provides access to the userData path from renderer processes.
@@ -241,3 +208,10 @@ app.on('activate', () => {
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) createWindow();
 });
+
+// The default changed after Electron 8, this sets the value
+// equal to the Electron 8 value to avoid having to rework what
+// is broken by the change in value.
+// Note that in future Electron releases we will not have the option
+// to set this to false.
+app.allowRendererProcessReuse = false;

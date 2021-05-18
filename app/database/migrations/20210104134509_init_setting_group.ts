@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import { Knex } from 'knex';
 import settingKeys from '../../constants/settingKeys.json';
 
 export async function up(knex: Knex): Promise<void> {
@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<void> {
         .insert([
             { name: settingKeys.multiSignatureSettings },
             { name: settingKeys.nodeSettings },
+            { name: settingKeys.passwordSettings },
         ]);
 }
 

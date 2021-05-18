@@ -107,7 +107,7 @@ export default function AccountView() {
                     render={() => <UnshieldAmount account={account} />}
                 />
                 <Route
-                    path={routes.DEFAULT}
+                    path={routes.ACCOUNTS}
                     render={() => <TransferHistory account={account} />}
                 />
             </Switch>

@@ -7,6 +7,7 @@ import LogoIcon from '../../../resources/svg/logo.svg';
 
 import styles from './Sidebar.module.scss';
 import Switch from '../Switch';
+import routes from '../../constants/routes.json';
 
 export interface SidebarLink {
     route: string;
@@ -19,6 +20,7 @@ export interface SidebarProps<THasSwitch extends boolean>
     links: SidebarLink[];
     version?: string;
     child?: JSX.Element;
+    disabled: boolean;
     hasThemeSwitch?: THasSwitch;
     isDark?: THasSwitch extends true ? boolean : undefined;
     onThemeChange?: THasSwitch extends true
@@ -30,6 +32,7 @@ export default function Sidebar<THasSwitch extends boolean = false>({
     links,
     className,
     style,
+    disabled = false,
     version,
     hasThemeSwitch,
     isDark = false,
@@ -42,17 +45,24 @@ export default function Sidebar<THasSwitch extends boolean = false>({
                 onThemeChange(e.target.checked);
             }
         },
+
         [onThemeChange]
     );
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (disabled) {
+            e.preventDefault();
+        }
+    };
 
     return (
         <nav className={clsx(styles.root, className)} style={style}>
             <div className={styles.items}>
                 <NavLink
                     className={styles.item}
-                    to="/"
+                    to={routes.HOME}
+                    onClick={handleClick}
                     activeClassName={styles.itemActive}
-                    exact
                 >
                     <span className={styles.itemContent}>
                         <LogoIcon height="57" />
@@ -61,8 +71,12 @@ export default function Sidebar<THasSwitch extends boolean = false>({
                 {links.map((l) => (
                     <NavLink
                         key={l.route}
-                        className={styles.item}
+                        className={clsx(
+                            styles.item,
+                            disabled && styles.disabled
+                        )}
                         to={l.route}
+                        onClick={handleClick}
                         activeClassName={styles.itemActive}
                     >
                         <span className={styles.itemContent}>

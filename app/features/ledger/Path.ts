@@ -96,7 +96,7 @@ export default function pathAsBuffer(keyDerivationPath: number[]): Buffer {
     }
 
     // Governance subtree has a depth of exactly 3.
-    if (subtree === 2 && keyDerivationPath.length !== 3) {
+    if (subtree === 1 && keyDerivationPath.length !== 3) {
         throw new Error(
             `A governance derivation path was supplied, but the path does not have length 3: ${keyDerivationPath.length}`
         );

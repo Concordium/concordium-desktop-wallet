@@ -181,7 +181,7 @@ async function initializeGenesisAccount(
         status: AccountStatus.Confirmed,
         signatureThreshold: accountInfo.accountThreshold,
     };
-    await updateAccount(account.name, accountUpdate);
+    await updateAccount(account.address, accountUpdate);
     await Promise.all(
         localCredentials.map((cred) =>
             initializeGenesisCredential(dispatch, address, cred, accountInfo)

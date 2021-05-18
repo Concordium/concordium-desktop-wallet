@@ -53,7 +53,7 @@ export async function getMultiSignatureTransactionStatus(
 ) {
     const transaction: Transaction = parse(proposal.transaction);
 
-    const transactionHash = getTransactionSubmissionId(transaction);
+    const transactionHash = await getTransactionSubmissionId(transaction);
 
     const response = await getStatus(transactionHash);
 

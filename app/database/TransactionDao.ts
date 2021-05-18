@@ -4,7 +4,7 @@ import {
     TransactionStatus,
     TransactionKindString,
 } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import { transactionTable } from '../constants/databaseNames.json';
 import { partition, chunkArray } from '../utils/basicHelpers';
 

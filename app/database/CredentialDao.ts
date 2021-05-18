@@ -1,5 +1,5 @@
 import { Credential, CredentialWithIdentityNumber } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import {
     credentialsTable,
     identitiesTable,

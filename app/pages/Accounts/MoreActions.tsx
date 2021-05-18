@@ -54,7 +54,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
 
     function MoreActionsMenu() {
         return (
-            <Card className="relative flexColumn">
+            <Card className="relative flexColumn pH50">
                 <h3 className="textCenter">More Actions</h3>
                 <CloseButton
                     className={styles.closeButton}
@@ -64,7 +64,8 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     <ButtonNavLink
                         to={item.location}
                         key={item.location}
-                        className="h3 m10"
+                        className="h3 mV10"
+                        size="big"
                     >
                         {item.name}
                     </ButtonNavLink>
