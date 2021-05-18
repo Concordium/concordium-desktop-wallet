@@ -116,12 +116,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                     />
                     <Route
                         path={routes.IDENTITYISSUANCE_FINAL}
-                        render={() => (
-                            <FinalPage
-                                identityName={identityName}
-                                accountName={initialAccountName}
-                            />
-                        )}
+                        component={FinalPage}
                     />
                     <Route
                         render={() => (
