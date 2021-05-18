@@ -18,6 +18,7 @@ import {
     CredentialWithIdentityNumber,
     Global,
     instanceOfTransferToPublic,
+    MultiSignatureTransactionStatus,
 } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addPendingTransaction } from '~/features/TransactionSlice';
@@ -36,6 +37,7 @@ import styles from './SubmitTransfer.module.scss';
 import Card from '~/cross-app-components/Card';
 import PrintButton from '~/components/PrintButton';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
+import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 
 interface Location {
     pathname: string;
@@ -103,6 +105,7 @@ export default function SubmitTransfer({ location }: Props) {
     } = location.state;
 
     let transaction: AccountTransaction = parse(transactionJSON);
+    const handler = findHandler(transaction);
 
     /**
      * Builds the transaction, signs it, sends it to the node, saves it and
@@ -181,7 +184,10 @@ export default function SubmitTransfer({ location }: Props) {
         }
     }
 
-    const summary = <TransactionDetails transaction={transaction} />;
+    const printOutput = handler.print(
+        transaction,
+        MultiSignatureTransactionStatus.Open
+    );
 
     return (
         <PageLayout>
@@ -213,14 +219,16 @@ export default function SubmitTransfer({ location }: Props) {
                         header={
                             <span className={styles.summaryHeader}>
                                 Transaction details
-                                <PrintButton className={styles.print}>
-                                    {summary}
-                                </PrintButton>
+                                {Boolean(printOutput) && (
+                                    <PrintButton className={styles.print}>
+                                        {printOutput}
+                                    </PrintButton>
+                                )}
                             </span>
                         }
                         className={styles.summary}
                     >
-                        {summary}
+                        <TransactionDetails transaction={transaction} />
                     </Card>
                     <SimpleLedger
                         className={styles.ledger}
