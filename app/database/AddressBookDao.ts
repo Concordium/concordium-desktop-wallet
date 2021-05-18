@@ -1,5 +1,5 @@
 import { AddressBookEntry } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import { addressBookTable } from '../constants/databaseNames.json';
 
 function sanitizeAddressBookEntry(e: AddressBookEntry): AddressBookEntry {
