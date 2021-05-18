@@ -25,7 +25,7 @@
     "package-mac": "yarn build && electron-builder build --mac  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
     "package-mac-no-notarize": "export NOTARIZE=skip && yarn build && electron-builder build --mac  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
     "package-linux": "yarn build && electron-builder build --linux  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
-    "package-win": "yarn build && electron-builder build --win --x64  --config.extraMetadata.name=\"%npm_package_name%-%TARGET_NET%\" --config.extraMetadata.productName=\"%npm_package_productName% %TARGET_NET%\"",
+    "package-win": "yarn build && electron-builder build --publish never --win --x64  --config.extraMetadata.name=\"%npm_package_name%-%TARGET_NET%\" --config.extraMetadata.productName=\"%npm_package_productName% %TARGET_NET%\"",
     "postinstall": "node internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall  && sh ./internals/scripts/build_protos.sh",
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{ts,tsx,js,jsx,json,html,yml}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
@@ -115,13 +115,7 @@
     "extraResources": [
       "./resources/**",
       "./app/database/migrations/*"
-    ],
-    "publish": {
-      "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate",
-      "private": false
-    }
+    ]
   },
   "repository": {
     "type": "git",
