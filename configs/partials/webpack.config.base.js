@@ -75,7 +75,7 @@ module.exports = {
     plugins: [
         new webpack.EnvironmentPlugin({
             NODE_ENV: 'production',
-            TARGET_NET: JSON.stringify(process.env.TARGET_NET),
+            TARGET_NET: '',
         }),
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, '.'),

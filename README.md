@@ -71,15 +71,16 @@ which is only recompiled with a full restart.
 ## Targeting specific Network
 
 To build the app for a specific network, supply the `TARGET_NET` environment variable.
-Currently works with `staging` and `testnet`, if the variable is set to something else, or nothing,
-it will default to stagenet. For production this variable must be supplied.
+Currently works with `staging` and `testnet`.
+Otherwise the app will be targeted Mainnet.
+When using this variable when packaging, this variable will also be appended to the application name.
 
 ```bash
 TARGET_NET=staging yarn start
 ```
 
 ```bash
-export TARGET_NET=testnet
+export TARGET_NET=staging
 yarn build-main-dev && yarn start-renderer-dev
 ```
 
@@ -88,7 +89,7 @@ yarn build-main-dev && yarn start-renderer-dev
 To package apps for the local platform:
 
 ```bash
-TARGET_NET=$NET yarn package
+yarn package
 ```
 
 ### Mac specific code signing and notarizing
@@ -98,7 +99,7 @@ As the software is distributed outside of the Mac App Store, it needs to be sign
 Running
 
 ```bash
-TARGET_NET=$NET yarn package
+yarn package
 ```
 
 on a machine with MacOS will trigger the signing and notarizing processes. This requires a valid [Developer ID Application Certificate](https://developer.apple.com/support/certificates/) in the Keychain of the machine used for building, and a valid Apple Developer ID has to be logged into Xcode on the same machine.

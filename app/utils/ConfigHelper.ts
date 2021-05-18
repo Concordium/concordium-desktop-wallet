@@ -1,4 +1,5 @@
 export enum Net {
+    Mainnet,
     Staging,
     Testnet,
 }
@@ -9,6 +10,6 @@ export function getTargetNet() {
             return Net.Testnet;
         case 'staging':
         default:
-            return Net.Staging;
+            return Net.Mainnet;
     }
 }

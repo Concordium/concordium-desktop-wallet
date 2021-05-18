@@ -8,11 +8,14 @@ import { getTargetNet, Net } from './ConfigHelper';
 
 function getWalletProxy() {
     const targetNet = getTargetNet();
-    if (targetNet === Net.Staging) {
-        return urls.walletProxyStaging;
+    if (targetNet === Net.Mainnet) {
+        return urls.walletProxyMainnet;
     }
     if (targetNet === Net.Testnet) {
         return urls.walletProxyTestnet;
+    }
+    if (targetNet === Net.Staging) {
+        return urls.walletProxyStaging;
     }
     throw new Error('Unknown target network');
 }
