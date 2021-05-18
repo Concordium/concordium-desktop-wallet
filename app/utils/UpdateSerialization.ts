@@ -13,8 +13,8 @@ import {
     UpdateHeader,
     UpdateInstruction,
     UpdateInstructionPayload,
-    UpdateInstructionSignature,
     UpdateType,
+    UpdateInstructionSignatureWithIndex,
 } from './types';
 
 /**
@@ -294,7 +294,7 @@ export function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
  * @param signatures list of update instruction signatures, i.e. pairs of (key index, signature)
  */
 function serializeUpdateSignatures(
-    signatures: UpdateInstructionSignature[]
+    signatures: UpdateInstructionSignatureWithIndex[]
 ): Buffer {
     // To ensure a unique serialization, the signatures must be serialized in order of their index.
     const sortedSignatures = signatures.sort((sig1, sig2) => {
@@ -398,6 +398,7 @@ export function serializeUpdateInstructionHeaderAndPayload(
  */
 export function serializeUpdateInstruction(
     updateInstruction: UpdateInstruction<UpdateInstructionPayload>,
+    signaturesWithIndices: UpdateInstructionSignatureWithIndex[],
     serializedPayload: Buffer
 ) {
     const serializedHeaderAndPayload = serializeUpdateInstructionHeaderAndPayload(
@@ -405,7 +406,7 @@ export function serializeUpdateInstruction(
         serializedPayload
     );
     const serializedSignatures = serializeUpdateSignatures(
-        updateInstruction.signatures
+        signaturesWithIndices
     );
 
     const blockItemKind = Buffer.alloc(1);
@@ -426,6 +427,7 @@ export function serializeUpdateInstruction(
  */
 export function serializeForSubmission(
     updateInstruction: UpdateInstruction<UpdateInstructionPayload>,
+    signaturesWithIndices: UpdateInstructionSignatureWithIndex[],
     serializedPayload: Buffer
 ) {
     // Currently versioning is hardcoded to 0. This value might be changed if
@@ -435,6 +437,7 @@ export function serializeForSubmission(
 
     const serializedTransaction = serializeUpdateInstruction(
         updateInstruction,
+        signaturesWithIndices,
         serializedPayload
     );
     return Buffer.concat([version, serializedTransaction]);

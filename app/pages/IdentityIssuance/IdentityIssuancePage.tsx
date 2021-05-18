@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Switch, Route, useLocation } from 'react-router-dom';
+import {
+    Switch,
+    Route,
+    useLocation,
+    Prompt,
+    useRouteMatch,
+} from 'react-router-dom';
+import { Location } from 'history';
 import routes from '~/constants/routes.json';
 import { IdentityProvider } from '~/utils/types';
 import ErrorModal from '~/components/SimpleErrorModal';
@@ -32,6 +39,8 @@ function getSubtitle(location: string) {
 export default function IdentityIssuancePage(): JSX.Element {
     const dispatch = useDispatch();
 
+    const { path } = useRouteMatch();
+
     const [provider, setProvider] = useState<IdentityProvider | undefined>();
     const [initialAccountName, setInitialAccountName] = useState<string>('');
     const [identityName, setIdentityName] = useState<string>('');
@@ -59,6 +68,19 @@ export default function IdentityIssuancePage(): JSX.Element {
         throw new Error('Unexpected missing identity Provider!');
     }
 
+    function checkNavigation(location: Location) {
+        // Allow navigation from the final page
+        if (pathname === routes.IDENTITYISSUANCE_FINAL) {
+            return true;
+        }
+
+        const isSubRoute = location.pathname.startsWith(path);
+
+        return isSubRoute
+            ? true
+            : 'You are about to abort creating an identity. Are you sure?';
+    }
+
     return (
         <PageLayout>
             <PageLayout.Header>
@@ -70,6 +92,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                 show={modalOpen}
                 onClick={() => dispatch(push(routes.IDENTITIES))}
             />
+            <Prompt message={checkNavigation} />
             <PageLayout.Container
                 closeRoute={routes.IDENTITIES}
                 padding="both"
@@ -93,12 +116,7 @@ export default function IdentityIssuancePage(): JSX.Element {
                     />
                     <Route
                         path={routes.IDENTITYISSUANCE_FINAL}
-                        render={() => (
-                            <FinalPage
-                                identityName={identityName}
-                                accountName={initialAccountName}
-                            />
-                        )}
+                        component={FinalPage}
                     />
                     <Route
                         render={() => (

@@ -1,4 +1,5 @@
 import React from 'react';
+import { LocationDescriptorObject } from 'history';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import routes from '~/constants/routes.json';
@@ -12,19 +13,19 @@ import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './FinalPage.module.scss';
 
 interface Props {
-    identityName: string;
-    accountName: string;
+    location: LocationDescriptorObject<number>;
 }
 
 export default function IdentityIssuanceFinal({
-    identityName,
-    accountName,
+    location,
 }: Props): JSX.Element | null {
+    const id = location.state;
+
     const accounts = useSelector(accountsSelector);
     const identities = useSelector(identitiesSelector);
 
-    const account = accounts.find((acc) => acc.name === accountName);
-    const identity = identities.find((id) => id.name === identityName);
+    const account = accounts.find((acc) => acc.identityId === id);
+    const identity = identities.find((candidate) => candidate.id === id);
 
     if (account === undefined || identity === undefined) {
         return null;

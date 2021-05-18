@@ -1,4 +1,5 @@
 import React from 'react';
+import { LocationDescriptorObject } from 'history';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
@@ -10,19 +11,21 @@ import styles from './AccountCreation.module.scss';
 import Button from '~/cross-app-components/Button';
 
 interface Props {
-    accountName: string;
+    location: LocationDescriptorObject<string>;
 }
 
 export default function AccountCreationFinal({
-    accountName,
+    location,
 }: Props): JSX.Element | null {
+    const address = location.state;
+
     const accounts = useSelector(accountsSelector);
 
     if (accounts === undefined) {
         return null;
     }
 
-    const account = accounts.find((acc) => acc.name === accountName);
+    const account = accounts.find((acc) => acc.address === address);
 
     if (account === undefined) {
         throw new Error(

@@ -16,7 +16,7 @@ interface Props {
  */
 export default function ShowAccountAddress({ account, returnFunction }: Props) {
     return (
-        <Card className="flexColumn alignCenter relative">
+        <Card className="flexColumn alignCenter relative pH50">
             <CloseButton
                 className={styles.closeButton}
                 onClick={returnFunction}
