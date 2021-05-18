@@ -10,24 +10,11 @@ import PageLayout from '~/components/PageLayout/PageLayout';
 import Button from '~/cross-app-components/Button';
 import styles from './Home.module.scss';
 import Form from '~/components/Form';
-import WebpackMigrationSource from '~/database/WebpackMigrationSource';
-import {
-    invalidateKnexSingleton,
-    knex,
-    setPassword,
-} from '../../database/knex';
+import { invalidateKnexSingleton, setPassword } from '../../database/knex';
 import { loadAllSettings } from '~/database/SettingsDao';
-import { findSetting, updateSettings } from '~/features/SettingsSlice';
-import settingKeys from '../../constants/settingKeys.json';
-import startClient from '~/utils/nodeConnector';
-import { loadAccounts } from '~/features/AccountSlice';
-import { loadAddressBook } from '~/features/AddressBookSlice';
-import { loadCredentials } from '~/features/CredentialSlice';
-import { loadIdentities } from '~/features/IdentitySlice';
-import { loadProposals } from '~/features/MultiSignatureSlice';
-import listenForIdentityStatus from '~/utils/IdentityStatusPoller';
-import { Dispatch } from '../../utils/types';
 import Card from '~/cross-app-components/Card';
+import migrate from '~/database/migration';
+import initApplication from '~/utils/initialize';
 
 interface PasswordInput {
     password: string;
@@ -40,33 +27,6 @@ interface PasswordSingleInput {
 
 type PasswordForm = PasswordInput;
 type PasswordSingleForm = PasswordSingleInput;
-
-/**
- * Loads settings from the database into the store.
- */
-async function loadSettingsIntoStore(dispatch: Dispatch) {
-    const settings = await loadAllSettings();
-    const nodeLocationSetting = findSetting(settingKeys.nodeLocation, settings);
-    if (nodeLocationSetting) {
-        const { address, port } = JSON.parse(nodeLocationSetting.value);
-        startClient(dispatch, address, port);
-    } else {
-        throw new Error('Unable to find node location setting.');
-    }
-    return dispatch(updateSettings(settings));
-}
-
-async function onLoad(dispatch: Dispatch) {
-    await loadSettingsIntoStore(dispatch);
-
-    loadAddressBook(dispatch);
-    loadAccounts(dispatch);
-    loadIdentities(dispatch);
-    loadProposals(dispatch);
-    loadCredentials(dispatch);
-
-    listenForIdentityStatus(dispatch);
-}
 
 /**
  * Checks whether the database has already been created or not.
@@ -86,34 +46,14 @@ async function databaseExists(): Promise<boolean> {
 export default function HomePage() {
     const dispatch = useDispatch();
 
-    /**
-     * Runs the knex migrations for the embedded sqlite database.
-     */
-    const migrate = useCallback(async () => {
-        const config = {
-            migrationSource: new WebpackMigrationSource(
-                require.context('../../database/migrations', false, /.ts$/)
-            ),
-        };
-
-        try {
-            await (await knex()).migrate.latest(config);
-        } catch (error) {
-            process.nextTick(() => {
-                process.exit(0);
-            });
-        }
-        // Load all the required data into the application.
-        await onLoad(dispatch);
-    }, [dispatch]);
-
     const handleSubmit: SubmitHandler<PasswordForm> = useCallback(
         async (values) => {
             setPassword(values.password);
             await migrate();
+            await initApplication(dispatch);
             dispatch(push({ pathname: routes.HOME_PASSWORD_SET }));
         },
-        [migrate, dispatch]
+        [dispatch]
     );
 
     const handleUnlock: SubmitHandler<PasswordSingleForm> = useCallback(
@@ -123,20 +63,21 @@ export default function HomePage() {
             try {
                 await loadAllSettings();
                 await migrate();
+                await initApplication(dispatch);
                 dispatch(push({ pathname: routes.ACCOUNTS }));
             } catch (error) {
                 // The password was incorrect.
                 // TODO Tell the user that the password was incorrect.
             }
         },
-        [migrate, dispatch]
+        [dispatch]
     );
 
     function NewUserInit() {
         return (
             <PageLayout.Container disableBack>
                 <div className={styles.content}>
-                    <div className={styles.relative}>
+                    <div>
                         <div>
                             <h2 className={styles.title}>Hi, there!</h2>
                             <p>
