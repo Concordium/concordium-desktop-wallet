@@ -34,7 +34,11 @@ import { signUsingLedger } from './SignTransaction';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import PublicKey from '../common/PublicKey/PublicKey';
-import { getDefaultExpiry, getFormattedDateString } from '~/utils/timeHelpers';
+import {
+    getDefaultExpiry,
+    getFormattedDateString,
+    isFutureDate,
+} from '~/utils/timeHelpers';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
@@ -117,6 +121,14 @@ function BuildAddBakerTransactionProposalStep({
     >();
     const [expiryTime, setExpiryTime] = useState<Date | undefined>(
         getDefaultExpiry()
+    );
+
+    const expiryTimeError = useMemo(
+        () =>
+            expiryTime === undefined || isFutureDate(expiryTime)
+                ? undefined
+                : 'Transaction expiry time must be in the future',
+        [expiryTime]
     );
 
     const estimatedFee = useTransactionCostEstimate(
@@ -392,6 +404,12 @@ function BuildAddBakerTransactionProposalStep({
                                         transaction.
                                     </p>
                                     <InputTimestamp
+                                        label="Transaction expiry time"
+                                        name="expiry"
+                                        isInvalid={
+                                            expiryTimeError !== undefined
+                                        }
+                                        error={expiryTimeError}
                                         value={expiryTime}
                                         onChange={setExpiryTime}
                                     />
@@ -401,7 +419,10 @@ function BuildAddBakerTransactionProposalStep({
                                     </p>
                                 </div>
                                 <Button
-                                    disabled={expiryTime === undefined}
+                                    disabled={
+                                        expiryTime === undefined ||
+                                        expiryTimeError !== undefined
+                                    }
                                     onClick={() => {
                                         onGenerateKeys();
                                         dispatch(

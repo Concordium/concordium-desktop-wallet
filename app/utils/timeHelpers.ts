@@ -216,3 +216,10 @@ export const getFormattedDateString = (date: Date): string => {
 
     return `${year}-${month}-${d} at ${hours}:${minutes}:${seconds}`;
 };
+
+/** Predicates whether a date is in the future based on the current time,
+ * sampled at time of call */
+export function isFutureDate(date: Date) {
+    const now = new Date();
+    return now < date;
+}

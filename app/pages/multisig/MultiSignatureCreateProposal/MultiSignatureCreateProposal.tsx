@@ -25,7 +25,7 @@ import {
     secondsSinceUnixEpoch,
     TimeConstants,
 } from '~/utils/timeHelpers';
-import { futureDate } from '~/components/Form/util/validation';
+import { futureDate, maxDate } from '~/components/Form/util/validation';
 
 import styles from './MultiSignatureCreateProposal.module.scss';
 import withChainData, { ChainData } from '../common/withChainData';
@@ -50,6 +50,9 @@ function MultiSignatureCreateProposal({
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const dispatch = useDispatch();
+    const [effective, setEffective] = useState<Date | undefined>(
+        new Date(getNow() + 5 * TimeConstants.Minute)
+    );
 
     // TODO Add support for account transactions.
     const { updateType } = useParams<{ updateType: string }>();
@@ -133,11 +136,9 @@ function MultiSignatureCreateProposal({
             return;
         }
         const effectiveTimeInSeconds = BigInt(
-            Math.round(effectiveTime.getTime() / 1000)
+            secondsSinceUnixEpoch(effectiveTime)
         );
-        const expiryTimeInSeconds = BigInt(
-            Math.round(expiryTime.getTime() / 1000)
-        );
+        const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
         const proposal = await handler.createTransaction(
             blockSummary,
             higherLevelKeyUpdate,
@@ -206,11 +207,8 @@ function MultiSignatureCreateProposal({
                                 <Form.Timestamp
                                     name="effectiveTime"
                                     label="Effective Time"
-                                    defaultValue={
-                                        new Date(
-                                            getNow() + 5 * TimeConstants.Minute
-                                        )
-                                    }
+                                    defaultValue={effective}
+                                    onChange={setEffective}
                                     rules={{
                                         required: 'Effective time is required',
                                         validate: futureDate(
@@ -225,9 +223,19 @@ function MultiSignatureCreateProposal({
                                     rules={{
                                         required:
                                             'Transaction expiry time is required',
-                                        validate: futureDate(
-                                            'Transaction expiry time must be in the future'
-                                        ),
+                                        validate: {
+                                            ...(effective !== undefined
+                                                ? {
+                                                      beforeEffective: maxDate(
+                                                          effective,
+                                                          'Transaction expiry time must be before the effective time'
+                                                      ),
+                                                  }
+                                                : undefined),
+                                            future: futureDate(
+                                                'Transaction expiry time must be in the future'
+                                            ),
+                                        },
                                     }}
                                 />
                             </>

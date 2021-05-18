@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -34,8 +34,8 @@ import {
 } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import styles from './CreateTransferProposal.module.scss';
+import { getDefaultExpiry, isFutureDate } from '~/utils/timeHelpers';
 import InputTimestamp from '~/components/Form/InputTimestamp';
-import { getDefaultExpiry } from '~/utils/timeHelpers';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -86,10 +86,17 @@ export default function CreateTransferProposal({
     const [expiryTime, setExpiryTime] = useState<Date | undefined>(
         getDefaultExpiry()
     );
+    const expiryTimeError = useMemo(
+        () =>
+            expiryTime === undefined || isFutureDate(expiryTime)
+                ? undefined
+                : 'Transaction expiry time must be in the future',
+        [expiryTime]
+    );
 
-    const onSetExpiryTime = (date: Date | undefined) => {
-        setReady(date !== undefined);
+    const onSetExpiryTime = async (date: Date | undefined) => {
         setExpiryTime(date);
+        setReady(date !== undefined && expiryTimeError === undefined);
     };
 
     const [schedule, setSchedule] = useState<Schedule>();
@@ -320,17 +327,23 @@ export default function CreateTransferProposal({
                                 }
                                 render={() => (
                                     <div className={styles.columnContent}>
-                                        <p>
-                                            Choose the expiry date for the
-                                            transaction.
-                                        </p>
                                         <InputTimestamp
+                                            label="Transaction expiry time"
+                                            name="expiry"
+                                            isInvalid={
+                                                expiryTimeError !== undefined
+                                            }
+                                            error={expiryTimeError}
                                             value={expiryTime}
                                             onChange={onSetExpiryTime}
                                         />
                                         <p>
-                                            Commiting the transaction after this
-                                            date, will be rejected.
+                                            Choose the expiry date for the
+                                            transaction.
+                                        </p>
+                                        <p>
+                                            Committing the transaction after
+                                            this date, will be rejected.
                                         </p>
                                     </div>
                                 )}

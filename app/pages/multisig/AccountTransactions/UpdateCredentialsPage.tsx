@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -22,6 +22,12 @@ import UpdateAccountCredentialsHandler from '~/utils/transactionHandlers/UpdateA
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
+import {
+    getDefaultExpiry,
+    getFormattedDateString,
+    isFutureDate,
+} from '~/utils/timeHelpers';
+import InputTimestamp from '~/components/Form/InputTimestamp';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -55,6 +61,8 @@ function subTitle(currentLocation: string) {
             return 'New Credentials';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
             return ' ';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
+            return 'Transaction expiry time';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
             return 'Signature and Hardware Wallet';
         default:
@@ -79,6 +87,19 @@ function displayAccount(account: Account | undefined) {
             <h5 className={styles.PropertyName}>Account:</h5>
             <h2 className={styles.LargePropertyValue}>
                 {account ? account.name : 'Choose an account on the right'}
+            </h2>
+        </>
+    );
+}
+
+function displayExpiry(date: Date | undefined) {
+    return (
+        <>
+            <h5 className={styles.PropertyName}>Transaction expiry time:</h5>
+            <h2 className={styles.LargePropertyValue}>
+                {date
+                    ? getFormattedDateString(date)
+                    : 'Choose an account on the right'}
             </h2>
         </>
     );
@@ -207,6 +228,20 @@ export default function UpdateCredentialPage(): JSX.Element {
     const [newCredentials, setNewCredentials] = useState<
         CredentialDeploymentInformation[]
     >([]);
+    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
+        getDefaultExpiry()
+    );
+    const expiryTimeError = useMemo(
+        () =>
+            expiryTime === undefined || isFutureDate(expiryTime)
+                ? undefined
+                : 'Transaction expiry time must be in the future',
+        [expiryTime]
+    );
+    const onSetExpiryTime = (date: Date | undefined) => {
+        setExpiryTime(date);
+        setReady(expiryTime !== undefined && expiryTimeError === undefined);
+    };
 
     /**
      * Loads the credential information for the given account, and updates
@@ -282,6 +317,9 @@ export default function UpdateCredentialPage(): JSX.Element {
         if (!newThreshold) {
             throw new Error('Unexpected missing threshold');
         }
+        if (!expiryTime) {
+            throw new Error('Unexpected missing expiry');
+        }
         const usedIndices: number[] = currentCredentials
             .filter(({ credential }) => {
                 const { credId } = credential;
@@ -315,8 +353,26 @@ export default function UpdateCredentialPage(): JSX.Element {
                         .map(([id]) => id)}
                     newThreshold={newThreshold}
                     currentCredentialAmount={currentCredentials.length}
+                    expiry={expiryTime}
                 />
             </div>
+        );
+    }
+
+    function onContinue() {
+        const nextLocation = handler.creationLocationHandler(location);
+        const isPickExpiry =
+            nextLocation ===
+            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY.replace(
+                ':transactionKind',
+                `${transactionKind}`
+            );
+        setReady(isPickExpiry);
+        dispatch(
+            push({
+                pathname: nextLocation,
+                state: TransactionKindId.Update_credentials,
+            })
         );
     }
 
@@ -343,6 +399,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                             currentCredentials.length,
                             credentialIds.length
                         )}
+                        {displayExpiry(expiryTime)}
                         {listCredentials(
                             credentialIds,
                             updateCredentialStatus,
@@ -411,6 +468,33 @@ export default function UpdateCredentialPage(): JSX.Element {
                             />
                             <Route
                                 path={
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY
+                                }
+                                render={() => (
+                                    <div>
+                                        <InputTimestamp
+                                            label="Transaction expiry time"
+                                            name="expiry"
+                                            isInvalid={
+                                                expiryTimeError !== undefined
+                                            }
+                                            error={expiryTimeError}
+                                            value={expiryTime}
+                                            onChange={onSetExpiryTime}
+                                        />
+                                        <p>
+                                            Choose the expiry date for the
+                                            transaction.
+                                        </p>
+                                        <p>
+                                            Committing the transaction after
+                                            this date, will result in rejection.
+                                        </p>
+                                    </div>
+                                )}
+                            />
+                            <Route
+                                path={
                                     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION
                                 }
                                 render={renderCreateUpdate}
@@ -432,18 +516,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                             <Button
                                 disabled={!isReady}
                                 className={styles.continueButton}
-                                onClick={() => {
-                                    setReady(false);
-                                    dispatch(
-                                        push({
-                                            pathname: handler.creationLocationHandler(
-                                                location
-                                            ),
-                                            state:
-                                                TransactionKindId.Update_credentials,
-                                        })
-                                    );
-                                }}
+                                onClick={onContinue}
                             >
                                 Continue
                             </Button>
