@@ -92,18 +92,13 @@ async function generateIdentity(
         onError(`Failed to create identity due to ${e}`);
         return;
     }
-    try {
-        confirmIdentityAndInitialAccount(
-            dispatch,
-            identityName,
-            identityId,
-            accountName,
-            identityObjectLocation
-        );
-        dispatch(push(routes.IDENTITYISSUANCE_FINAL));
-    } catch (e) {
-        onError(`Failed to confirm identity`);
-    }
+    confirmIdentityAndInitialAccount(
+        dispatch,
+        identityName,
+        identityId,
+        accountName,
+        identityObjectLocation
+    ).catch(() => onError(`Failed to confirm identity`));
 }
 
 export interface ExternalIssuanceLocationState extends SignedIdRequest {
@@ -149,7 +144,11 @@ export default function ExternalIssuance({
             walletId,
             iframeRef,
             onError
-        );
+        )
+            .then(() => {
+                return dispatch(push(routes.IDENTITYISSUANCE_FINAL));
+            })
+            .catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -158,7 +157,11 @@ export default function ExternalIssuance({
     }
 
     if (!location) {
-        return <Loading text="Generating your identity" />;
+        return (
+            <>
+                <Loading text="Generating your identity" />
+            </>
+        );
     }
 
     return (
