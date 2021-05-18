@@ -20,7 +20,7 @@
     "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
     "lint-styles-fix": "yarn --silent lint-styles --fix; exit 0",
     "name": "echo $npm_package_productName-$TARGET_NET",
-    "package": "yarn build && electron-builder build --publish never --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
+    "package": "yarn build && electron-builder build --publish never --config.extraMetadata.name=\"$npm_package_name$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
     "package-all": "yarn build && electron-builder build -mwl  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
     "package-ci": "yarn postinstall && yarn build && electron-builder --publish always  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
     "package-mac": "yarn build && electron-builder build --mac  --config.extraMetadata.name=\"$npm_package_name-$TARGET_NET\" --config.extraMetadata.productName=\"$npm_package_productName $TARGET_NET\"",
@@ -84,13 +84,13 @@
       "sign": false
     },
     "win": {
-      "artifactName": "concordium-wallet-${env.TARGET_NET}-${version}.${ext}",
+      "artifactName": "${name}-${version}.${ext}",
       "target": [
         "nsis"
       ]
     },
     "linux": {
-      "artifactName": "concordium-wallet-${env.TARGET_NET}-${version}.${ext}",
+      "artifactName": "${name}-${version}.${ext}",
       "target": [
         "deb",
         "rpm",
@@ -99,7 +99,7 @@
       "category": "Development"
     },
     "mac": {
-      "artifactName": "concordium-wallet-${env.TARGET_NET}-${version}.${ext}",
+      "artifactName": "${name}-${version}.${ext}",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
