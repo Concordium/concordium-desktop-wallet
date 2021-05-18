@@ -12,6 +12,7 @@ import { validateAmount } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
+import ErrorMessage from '~/components/Form/ErrorMessage';
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
@@ -40,6 +41,7 @@ export default function PickAmount({
 }: Props) {
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const form = useForm<PickAmountForm>({ mode: 'onTouched' });
+    const { errors } = form;
 
     const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
         (values) => {
@@ -59,22 +61,24 @@ export default function PickAmount({
 
     return (
         <>
-            <h2 className={transferStyles.header}>{header}</h2>
+            <h3 className={transferStyles.header}>{header}</h3>
             <Form formMethods={form} onSubmit={handleSubmit}>
                 <div className={styles.amountInputWrapper}>
-                    <p>{getGTUSymbol()}</p>
-                    <Form.Input
+                    {getGTUSymbol()}
+                    <Form.InlineNumber
                         name="amount"
-                        placeholder="Enter Amount"
+                        ensureDigits={2}
+                        allowFractions
                         defaultValue={defaultAmount}
                         rules={{
                             required: 'Amount Required',
-                            validate: {
-                                validate,
-                            },
+                            validate,
                         }}
                     />
                 </div>
+                <span className="textCenter">
+                    <ErrorMessage>{errors.amount?.message}</ErrorMessage>
+                </span>
                 <DisplayEstimatedFee
                     className={styles.estimatedFee}
                     estimatedFee={estimatedFee}

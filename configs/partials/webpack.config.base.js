@@ -80,5 +80,6 @@ module.exports = {
         new WasmPackPlugin({
             crateDirectory: path.resolve(__dirname, '.'),
         }),
+        new webpack.NormalModuleReplacementPlugin(/\.\.\/migrations/, '../util/noop.js'),
     ],
 };

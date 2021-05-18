@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import { Knex } from 'knex';
 import { walletTable } from '~/constants/databaseNames.json';
 
 export async function up(knex: Knex): Promise<void> {

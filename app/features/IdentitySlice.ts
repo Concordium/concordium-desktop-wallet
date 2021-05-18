@@ -80,18 +80,18 @@ export async function addPendingIdentity(
 
 export async function confirmIdentity(
     dispatch: Dispatch,
-    identityName: string,
+    identityId: number,
     identityObject: IdentityObject
 ) {
-    await updateIdentity(identityName, {
+    await updateIdentity(identityId, {
         status: IdentityStatus.Confirmed,
         identityObject: JSON.stringify(identityObject),
     });
     await loadIdentities(dispatch);
 }
 
-export async function rejectIdentity(dispatch: Dispatch, identityName: string) {
-    await updateIdentity(identityName, { status: IdentityStatus.Rejected });
+export async function rejectIdentity(dispatch: Dispatch, identityId: number) {
+    await updateIdentity(identityId, { status: IdentityStatus.Rejected });
     await loadIdentities(dispatch);
 }
 
