@@ -54,6 +54,8 @@ interface GetTransactionsOutput {
     full: boolean;
 }
 
+// TODO Add query parameter includeRawRejectReason and parse the structured
+// reject reason.
 export async function getTransactions(
     address: string,
     id = 0

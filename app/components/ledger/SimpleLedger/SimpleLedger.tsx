@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React from 'react';
 
 import Button from '~/cross-app-components/Button';
@@ -23,11 +24,14 @@ export default function SimpleLedger({
     className,
 }: Props): JSX.Element {
     return (
-        <Card header="Device connection" className={className}>
+        <Card
+            header="Device connection"
+            className={clsx(styles.root, className)}
+        >
             <Ledger ledgerCallback={ledgerCall}>
                 {({ isReady, statusView, submitHandler = asyncNoOp }) => (
-                    <div className={styles.content}>
-                        {statusView}
+                    <>
+                        <div className={styles.status}>{statusView}</div>
                         <Button
                             className={styles.submit}
                             onClick={submitHandler}
@@ -35,7 +39,7 @@ export default function SimpleLedger({
                         >
                             Submit
                         </Button>
-                    </div>
+                    </>
                 )}
             </Ledger>
         </Card>

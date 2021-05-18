@@ -2,6 +2,7 @@ import {
     Account,
     TransferTransaction,
     TransactionStatus,
+    TransactionKindString,
 } from '../utils/types';
 import knex from './knex';
 import { transactionTable } from '../constants/databaseNames.json';
@@ -27,7 +28,7 @@ function convertBooleans(transactions: TransferTransaction[]) {
 export async function getTransactionsOfAccount(
     account: Account,
     orderBy = 'id',
-    filter: (transaction: TransferTransaction) => boolean = () => true,
+    filteredTypes: TransactionKindString[] = [],
     limit = 100
 ): Promise<TransferTransaction[]> {
     const { address } = account;
@@ -36,9 +37,10 @@ export async function getTransactionsOfAccount(
         .table(transactionTable)
         .where({ toAddress: address })
         .orWhere({ fromAddress: address })
-        .orderBy(orderBy)
+        .orderBy(orderBy, 'desc')
+        .whereNotIn('transactionKind', filteredTypes)
         .limit(limit);
-    return convertBooleans(transactions).filter(filter);
+    return convertBooleans(transactions);
 }
 
 export async function updateTransaction(

@@ -48,11 +48,19 @@ export function convertIncomingTransaction(
         encrypted = JSON.stringify(transaction.encrypted);
     }
 
+    const success = transaction.details.outcome === 'success';
+
     let { subtotal } = transaction;
-    if (!subtotal) {
+
+    if (!success) {
+        subtotal = subtotal || '0';
+    } else if (!subtotal) {
         subtotal = (
             BigInt(transaction.total) - BigInt(transaction.cost || '0')
         ).toString();
+    }
+    if (BigInt(subtotal) < 0n) {
+        subtotal = (-BigInt(subtotal)).toString();
     }
 
     let decryptedAmount;
@@ -74,13 +82,12 @@ export function convertIncomingTransaction(
         id: transaction.id,
         blockHash: transaction.blockHash,
         blockTime: transaction.blockTime,
-        total: transaction.total,
-        success: transaction.details.outcome === 'success',
+        success,
         transactionHash: transaction.transactionHash,
         subtotal,
         cost: transaction.cost,
         origin: JSON.stringify(transaction.origin),
-        rejectReason: transaction.details.rejectReason,
+        details: JSON.stringify(transaction.details),
         encrypted,
         decryptedAmount,
         fromAddress,
@@ -93,7 +100,6 @@ export function convertIncomingTransaction(
 type TypeSpecific = Pick<
     TransferTransaction,
     | 'transactionKind'
-    | 'total'
     | 'subtotal'
     | 'schedule'
     | 'toAddress'
@@ -102,17 +108,12 @@ type TypeSpecific = Pick<
 
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a simple transfer, which cannot be converted by the generic function .
-function convertSimpleTransfer(
-    transaction: SimpleTransfer,
-    cost: bigint
-): TypeSpecific {
+function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
-    const estimatedTotal = amount + cost;
 
     return {
         transactionKind: TransactionKindString.Transfer,
-        total: (-estimatedTotal).toString(),
-        subtotal: (-amount).toString(),
+        subtotal: amount.toString(),
         toAddress: transaction.payload.toAddress,
     };
 }
@@ -120,16 +121,13 @@ function convertSimpleTransfer(
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a transfer to encrypted, which cannot be converted by the generic function .
 function convertTransferToEncrypted(
-    transaction: TransferToEncrypted,
-    cost: bigint
+    transaction: TransferToEncrypted
 ): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
-    const estimatedTotal = amount + cost;
 
     return {
         transactionKind: TransactionKindString.TransferToEncrypted,
-        total: (-estimatedTotal).toString(),
-        subtotal: (-amount).toString(),
+        subtotal: amount.toString(),
         decryptedAmount: amount.toString(),
         toAddress: transaction.sender,
     };
@@ -137,16 +135,11 @@ function convertTransferToEncrypted(
 
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a transfer to public, which cannot be converted by the generic function .
-function convertTransferToPublic(
-    transaction: TransferToPublic,
-    cost: bigint
-): TypeSpecific {
+function convertTransferToPublic(transaction: TransferToPublic): TypeSpecific {
     const amount = BigInt(transaction.payload.transferAmount);
-    const estimatedTotal = amount - cost;
 
     return {
         transactionKind: TransactionKindString.TransferToPublic,
-        total: estimatedTotal.toString(),
         subtotal: amount.toString(),
         decryptedAmount: (-amount).toString(),
         toAddress: transaction.sender,
@@ -156,16 +149,13 @@ function convertTransferToPublic(
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a scheduled transfer, which cannot be converted by the generic function .
 function convertScheduledTransfer(
-    transaction: ScheduledTransfer,
-    cost: bigint
+    transaction: ScheduledTransfer
 ): TypeSpecific {
     const amount = getScheduledTransferAmount(transaction);
-    const estimatedTotal = amount + cost;
 
     return {
         transactionKind: TransactionKindString.TransferWithSchedule,
-        total: (-estimatedTotal).toString(),
-        subtotal: (-amount).toString(),
+        subtotal: amount.toString(),
         schedule: JSON.stringify(transaction.payload.schedule),
         toAddress: transaction.payload.toAddress,
     };
@@ -185,13 +175,13 @@ export async function convertAccountTransaction(
 
     let typeSpecific;
     if (instanceOfSimpleTransfer(transaction)) {
-        typeSpecific = convertSimpleTransfer(transaction, cost);
+        typeSpecific = convertSimpleTransfer(transaction);
     } else if (instanceOfScheduledTransfer(transaction)) {
-        typeSpecific = convertScheduledTransfer(transaction, cost);
+        typeSpecific = convertScheduledTransfer(transaction);
     } else if (instanceOfTransferToEncrypted(transaction)) {
-        typeSpecific = convertTransferToEncrypted(transaction, cost);
+        typeSpecific = convertTransferToEncrypted(transaction);
     } else if (instanceOfTransferToPublic(transaction)) {
-        typeSpecific = convertTransferToPublic(transaction, cost);
+        typeSpecific = convertTransferToPublic(transaction);
     } else {
         throw new Error('unsupported transaction type - please implement');
     }

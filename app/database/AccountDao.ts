@@ -5,12 +5,22 @@ import {
     identitiesTable,
 } from '../constants/databaseNames.json';
 
+function convertBooleans(accounts: Account[]) {
+    return accounts.map((account) => {
+        return {
+            ...account,
+            allDecrypted: Boolean(account.allDecrypted),
+            isInitial: Boolean(account.isInitial),
+        };
+    });
+}
+
 /**
  * Returns all stored accounts
  *  - Attaches the identityName unto the account object.
  */
 export async function getAllAccounts(): Promise<Account[]> {
-    return (await knex())
+    const accounts = await (await knex())
         .table(accountsTable)
         .join(
             identitiesTable,
@@ -23,6 +33,7 @@ export async function getAllAccounts(): Promise<Account[]> {
             `${identitiesTable}.name as identityName`,
             `${identitiesTable}.identityNumber as identityNumber`
         );
+    return convertBooleans(accounts);
 }
 
 export async function insertAccount(account: Account | Account[]) {
@@ -39,7 +50,11 @@ export async function updateAccount(
 }
 
 export async function findAccounts(condition: Record<string, unknown>) {
-    return (await knex()).select().table(accountsTable).where(condition);
+    const accounts = await (await knex())
+        .select()
+        .table(accountsTable)
+        .where(condition);
+    return convertBooleans(accounts);
 }
 
 /**

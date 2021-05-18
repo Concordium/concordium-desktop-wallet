@@ -1,14 +1,13 @@
 import React from 'react';
 import { AddBaker, MultiSignatureTransactionStatus } from '~/utils/types';
 import {
-    timestamp,
     table,
     sender,
     totalWithdrawn,
     fee,
     displayStatus,
-    hash,
-    standardHeader,
+    hashRow,
+    standardTableHeader,
     displayExpiry,
 } from '~/utils/printUtility';
 import withNames from '~/components/Transfers/withNames';
@@ -28,9 +27,8 @@ function PrintFormatAddBaker({ transaction, image, status, fromName }: Props) {
     return (
         <>
             <h1>Transaction - Add Baker</h1>
-            {timestamp()}
             {table(
-                standardHeader,
+                standardTableHeader,
                 <tbody>
                     {sender(transaction.sender, fromName)}
                     {totalWithdrawn('0', transaction.estimatedFee)}
@@ -38,7 +36,7 @@ function PrintFormatAddBaker({ transaction, image, status, fromName }: Props) {
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}
-                    {hash(transaction)}
+                    {hashRow(transaction)}
                     <tr>
                         <td>Identicon:</td>
                     </tr>

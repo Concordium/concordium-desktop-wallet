@@ -34,7 +34,7 @@ import {
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
 
-import { getAccountInfos } from '../utils/nodeHelpers';
+import { getAccountInfos, getAccountInfoOfAddress } from '../utils/nodeHelpers';
 
 interface AccountState {
     accounts: Account[];
@@ -79,21 +79,21 @@ const accountsSlice = createSlice({
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
         },
+        updateAccountInfoEntry: (state, update) => {
+            const { address, accountInfo } = update.payload;
+            state.accountsInfo[address] = accountInfo;
+        },
         updateAccountFields: (state, update) => {
             const { address, updatedFields } = update.payload;
             const index = state.accounts.findIndex(
                 (account) => account.address === address
             );
-            console.log(index);
             if (index > -1) {
                 state.accounts[index] = {
                     ...state.accounts[index],
                     ...updatedFields,
                 };
             }
-            console.log(
-                state.chosenAccount && state.chosenAccount.address === address
-            );
             if (
                 state.chosenAccount &&
                 state.chosenAccount.address === address
@@ -131,6 +131,7 @@ export const {
     chooseAccount,
     updateAccounts,
     setAccountInfos,
+    updateAccountInfoEntry,
     updateAccountFields,
 } = accountsSlice.actions;
 
@@ -207,8 +208,31 @@ export async function updateSignatureThreshold(
     address: string,
     signatureThreshold: number
 ) {
-    updateAccount(address, { signatureThreshold });
-    return dispatch(updateAccountFields({ address, signatureThreshold }));
+    const updatedFields = { signatureThreshold };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
+}
+
+function updateAccountFromAccountInfo(
+    dispatch: Dispatch,
+    account: Account,
+    accountInfo: AccountInfo
+) {
+    if (
+        accountInfo.accountThreshold &&
+        account.signatureThreshold !== accountInfo.accountThreshold
+    ) {
+        updateSignatureThreshold(
+            dispatch,
+            account.address,
+            accountInfo.accountThreshold
+        );
+    }
+    updateCredentialsStatus(dispatch, account.address, accountInfo);
+    return updateAccountEncryptedAmount(
+        account,
+        accountInfo.accountEncryptedAmount
+    );
 }
 
 // Loads the given accounts' infos from the node, then updates the
@@ -250,26 +274,36 @@ export async function loadAccountInfos(
                 });
             }
             map[account.address] = accountInfo;
-
-            if (
-                accountInfo.accountThreshold &&
-                account.signatureThreshold !== accountInfo.accountThreshold
-            ) {
-                updateSignatureThreshold(
-                    dispatch,
-                    account.address,
-                    accountInfo.accountThreshold
-                );
-            }
-            updateCredentialsStatus(dispatch, account.address, accountInfo);
-            return updateAccountEncryptedAmount(
-                account,
-                accountInfo.accountEncryptedAmount
-            );
+            return updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
     );
     await Promise.all(updateEncryptedAmountsPromises);
     return dispatch(setAccountInfos(map));
+}
+
+/**
+ * Updates the account info, of the account with the given address, in the state.
+ */
+export async function updateAccountInfoOfAddress(
+    address: string,
+    dispatch: Dispatch
+) {
+    const accountInfo = await getAccountInfoOfAddress(address);
+    return dispatch(updateAccountInfoEntry({ address, accountInfo }));
+}
+
+/**
+ * Updates the given account's accountInfo, in the state, and check if there is updates to the account.
+ */
+export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
+    const accountInfo = await getAccountInfoOfAddress(account.address);
+    if (accountInfo && account.status === AccountStatus.Confirmed) {
+        await updateAccountFromAccountInfo(dispatch, account, accountInfo);
+        return dispatch(
+            updateAccountInfoEntry({ address: account.address, accountInfo })
+        );
+    }
+    return Promise.resolve();
 }
 
 // Load accounts into state, and updates their infos
@@ -374,11 +408,12 @@ export async function decryptAccountBalance(
 export async function addExternalAccount(
     dispatch: Dispatch,
     accountAddress: string,
+    accountName: string,
     identityId: number,
     signatureThreshold: number
 ) {
     const account: Account = {
-        name: accountAddress.substring(0, 8),
+        name: accountName,
         identityId,
         status: AccountStatus.Confirmed,
         address: accountAddress,
@@ -407,8 +442,9 @@ export async function updateRewardFilter(
     address: string,
     rewardFilter: RewardFilter
 ) {
-    updateAccount(address, { rewardFilter });
-    return dispatch(updateAccountFields({ address, rewardFilter }));
+    const updatedFields = { rewardFilter };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
 export async function updateMaxTransactionId(
@@ -416,10 +452,9 @@ export async function updateMaxTransactionId(
     address: string,
     maxTransactionId: number
 ) {
-    console.log('updating');
-    console.log(maxTransactionId);
-    updateAccount(address, { maxTransactionId });
-    return dispatch(updateAccountFields({ address, maxTransactionId }));
+    const updatedFields = { maxTransactionId };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
 export default accountsSlice.reducer;

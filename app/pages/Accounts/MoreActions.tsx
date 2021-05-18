@@ -27,7 +27,7 @@ const items = [
         location: routes.ACCOUNTS_MORE_INSPECTRELEASESCHEDULE,
     },
     {
-        name: 'Send funds with a release schedule',
+        name: 'Send GTU with a schedule',
         location: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
     },
     {

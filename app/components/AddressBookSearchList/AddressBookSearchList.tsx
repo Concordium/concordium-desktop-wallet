@@ -12,11 +12,13 @@ interface Props extends ClassName {
      * @param entry AddressBookEntry to be mapped to element.
      */
     children(entry: AddressBookEntry): JSX.Element;
+    filter?: (entry: AddressBookEntry) => boolean;
 }
 
 export default function AddressBookSearchList({
     className,
     children,
+    filter = () => true,
 }: Props): JSX.Element {
     const [query, setQuery] = useState('');
     const addressBook = useSelector(addressBookSelector);
@@ -38,7 +40,7 @@ export default function AddressBookSearchList({
                     placeholder="Search recipients"
                 />
             </div>
-            {addressBook.filter(filterByQuery).map(children)}
+            {addressBook.filter(filter).filter(filterByQuery).map(children)}
         </>
     );
 }
