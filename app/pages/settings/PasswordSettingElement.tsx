@@ -32,6 +32,7 @@ export default function PasswordSettingElement({ displayText }: Props) {
 
             if (values.password !== values.repassword) {
                 setValidationError('Passwords do not match');
+                setSuccess(undefined);
                 setKeyingDatabase(false);
                 return;
             }
@@ -62,6 +63,7 @@ export default function PasswordSettingElement({ displayText }: Props) {
                 setKeyingDatabase(false);
             } catch (error) {
                 setKeyingDatabase(false);
+                setSuccess(undefined);
                 setValidationError('Invalid password');
             }
         },
