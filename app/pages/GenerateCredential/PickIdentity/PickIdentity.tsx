@@ -22,6 +22,7 @@ export default function PickIdentity(): JSX.Element {
                 rules={{ required: true }}
                 render={({ value, onChange, onBlur }) => (
                     <PickIdentityView
+                        withGenesisIdentities={false}
                         className={clsx(generalStyles.card, styles.root)}
                         chosenIdentity={value}
                         setIdentity={(i) => {
