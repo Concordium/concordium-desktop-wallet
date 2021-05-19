@@ -31,19 +31,23 @@ export default function AddressBookElementView() {
             <div className={styles.content}>
                 <header className={styles.header}>
                     <h2 className={styles.heading}>{chosenEntry.name}</h2>
-                    {!chosenEntry.readOnly && (
-                        <span className={styles.actions}>
-                            <UpsertAddress initialValues={chosenEntry} clear>
-                                <EditIcon width="22" className={styles.icon} />
-                            </UpsertAddress>
+                    <span className={styles.actions}>
+                        <UpsertAddress
+                            initialValues={chosenEntry}
+                            clear
+                            readOnly={chosenEntry.readOnly}
+                        >
+                            <EditIcon width="22" className={styles.icon} />
+                        </UpsertAddress>
+                        {!chosenEntry.readOnly && (
                             <DeleteAddress
                                 entry={chosenEntry}
                                 onRemove={(entry) =>
                                     removeFromAddressBook(dispatch, entry)
                                 }
                             />
-                        </span>
-                    )}
+                        )}
+                    </span>
                 </header>
                 <div className={styles.address}>
                     {chosenEntry.address}
