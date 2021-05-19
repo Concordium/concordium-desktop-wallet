@@ -40,10 +40,10 @@ export async function getTransactionsOfAccount(
     const transactions = await (await knex())
         .select()
         .table(transactionTable)
-        .where({ toAddress: address })
+        .whereNotIn('transactionKind', filteredTypes)
+        .andWhere({ toAddress: address })
         .orWhere({ fromAddress: address })
         .orderBy(orderBy, 'desc')
-        .whereNotIn('transactionKind', filteredTypes)
         .limit(limit + 1);
     return {
         transactions: convertBooleans(transactions).slice(0, limit),
