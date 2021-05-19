@@ -90,6 +90,7 @@ export function convertIncomingTransaction(
         decryptedAmount,
         fromAddress,
         toAddress,
+        rejectReason: transaction.details.rawRejectReason?.tag,
         status: TransactionStatus.Finalized,
     };
 }
