@@ -15,6 +15,7 @@ import {
     removeAccount as removeAccountFromDatabase,
     updateSignatureThreshold as updateSignatureThresholdInDatabase,
     confirmInitialAccount as confirmInitialAccountInDatabase,
+    findAccounts,
 } from '../database/AccountDao';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import {
@@ -129,6 +130,13 @@ export const {
     updateAccountFields,
 } = accountsSlice.actions;
 
+// Load accounts into state, and updates their infos
+export async function loadAccounts(dispatch: Dispatch) {
+    const accounts: Account[] = await getAllAccounts();
+    dispatch(updateAccounts(accounts.reverse()));
+    return accounts;
+}
+
 // given an account and the accountEncryptedAmount from the accountInfo
 // determine whether the account has received or sent new funds,
 // and in that case update the state of the account to reflect that.
@@ -154,6 +162,14 @@ function updateAccountEncryptedAmount(
     return Promise.resolve();
 }
 
+export async function removeAccount(
+    dispatch: Dispatch,
+    accountAddress: string
+) {
+    await removeAccountFromDatabase(accountAddress);
+    return loadAccounts(dispatch);
+}
+
 /** Generates the actual address of the account, and updates the account address, status, signatureThreshold,
  *   and the associated credentials' address and credentialIndex
  *  Also adds the account to the address book.
@@ -175,24 +191,31 @@ async function initializeGenesisAccount(
         status: AccountStatus.Confirmed,
         signatureThreshold: accountInfo.accountThreshold,
     };
-    await updateAccount(account.address, accountUpdate);
+    if ((await findAccounts({ address })).length > 0) {
+        // The account already exists, so we should merge with it.
+        removeAccount(dispatch, account.address); // Remove this instance of the account, which still has the credId as placeholder for the address.
+    } else {
+        // The account does not already exists, so we can update the current entry.
+        await updateAccount(account.address, accountUpdate);
+        await dispatch(
+            updateAccountFields({
+                address: account.address,
+                updatedFields: accountUpdate,
+            })
+        );
+        await addToAddressBook(dispatch, {
+            name: account.name,
+            address,
+            readOnly: true,
+        });
+    }
+
     await Promise.all(
         localCredentials.map((cred) =>
             initializeGenesisCredential(dispatch, address, cred, accountInfo)
         )
     ).catch((e) => {
         throw e;
-    });
-    await dispatch(
-        updateAccountFields({
-            address: account.address,
-            updatedFields: accountUpdate,
-        })
-    );
-    await addToAddressBook(dispatch, {
-        name: account.name,
-        address,
-        readOnly: true,
     });
     return address;
 }
@@ -297,13 +320,6 @@ export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
         );
     }
     return Promise.resolve();
-}
-
-// Load accounts into state, and updates their infos
-export async function loadAccounts(dispatch: Dispatch) {
-    const accounts: Account[] = await getAllAccounts();
-    dispatch(updateAccounts(accounts.reverse()));
-    return accounts;
 }
 
 // Add an account with pending status..
@@ -420,14 +436,6 @@ export async function addExternalAccount(
 
 export async function importAccount(account: Account | Account[]) {
     await insertAccount(account);
-}
-
-export async function removeAccount(
-    dispatch: Dispatch,
-    accountAddress: string
-) {
-    await removeAccountFromDatabase(accountAddress);
-    return loadAccounts(dispatch);
 }
 
 export default accountsSlice.reducer;
