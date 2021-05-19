@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import { AddressBookEntry, Fraction } from '~/utils/types';
+import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
 import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
 import TransferView from './TransferView';
@@ -14,6 +14,7 @@ interface Props {
     estimatedFee?: Fraction;
     amountHeader: string;
     senderAddress: string;
+    transactionKind: TransactionKindId;
 }
 
 /**
@@ -25,6 +26,7 @@ export default function ExternalTransfer({
     estimatedFee,
     exitFunction,
     senderAddress,
+    transactionKind,
 }: Props) {
     const location = useLocation<TransferState>();
 
@@ -57,6 +59,7 @@ export default function ExternalTransfer({
                     header={amountHeader}
                     defaultAmount={amount}
                     estimatedFee={estimatedFee}
+                    transactionKind={transactionKind}
                     toPickRecipient={(currentAmount: string) => {
                         setAmount(currentAmount);
                         setSubLocation(locations.pickRecipient);

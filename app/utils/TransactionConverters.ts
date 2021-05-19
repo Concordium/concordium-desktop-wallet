@@ -25,15 +25,18 @@ export function convertIncomingTransaction(
     transaction: IncomingTransaction,
     accountAddress: string
 ): TransferTransaction {
+    const transactionKind = transaction.details.type;
+    const originType = transaction.origin.type;
+
     let fromAddress = '';
     if (transaction.details.transferSource) {
         fromAddress = transaction.details.transferSource;
     } else if (
-        transaction.origin.type === OriginType.Account &&
+        originType === OriginType.Account &&
         transaction.origin.address
     ) {
         fromAddress = transaction.origin.address;
-    } else if (transaction.origin.type === OriginType.Self) {
+    } else if (originType === OriginType.Self) {
         fromAddress = accountAddress;
     }
 
@@ -66,17 +69,24 @@ export function convertIncomingTransaction(
         [
             TransactionKindString.TransferToEncrypted,
             TransactionKindString.TransferToPublic,
-        ].includes(transaction.details.type)
+        ].includes(transactionKind)
     ) {
-        // we flip the sign, because the subtotal is the change in the public balance, and this needs to be the change in the shielded balance.
-        const value = BigInt(-subtotal);
-        decryptedAmount = value.toString();
+        // The subtotal is always non-negative;
+        const value = BigInt(subtotal);
+        if (transactionKind === TransactionKindString.TransferToEncrypted) {
+            // transfer to encrypted increases the decryptedAmount;
+            decryptedAmount = value.toString();
+        }
+        if (transactionKind === TransactionKindString.TransferToPublic) {
+            // transfer to encrypted decreases the decryptedAmount;
+            decryptedAmount = (-value).toString();
+        }
     }
 
     return {
         remote: true,
-        originType: transaction.origin.type,
-        transactionKind: transaction.details.type,
+        originType,
+        transactionKind,
         id: transaction.id,
         blockHash: transaction.blockHash,
         blockTime: transaction.blockTime,

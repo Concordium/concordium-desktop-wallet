@@ -111,6 +111,7 @@ export default function InternalTransfer<
                         defaultAmount={location?.state?.amount ?? ''}
                         toPickRecipient={undefined}
                         toConfirmTransfer={toConfirmTransfer}
+                        transactionKind={specific.transactionKind}
                     />
                 )}
                 {subLocation === locations.transferSubmitted && (
