@@ -361,11 +361,7 @@ export async function confirmAccount(
                 status: AccountStatus.Confirmed,
             });
             // eslint-disable-next-line no-case-declarations
-            const account = await getAccount(address);
-
-            if (!account) {
-                break;
-            }
+            const account = (await getAccount(address)) as Account;
 
             addToAddressBook(dispatch, {
                 name: account.name,

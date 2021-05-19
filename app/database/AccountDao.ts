@@ -39,7 +39,7 @@ export async function getAllAccounts(): Promise<Account[]> {
 export async function getAccount(
     address: string
 ): Promise<Account | undefined> {
-    const account = await (await knex())
+    const accounts = await (await knex())
         .table(accountsTable)
         .join(
             identitiesTable,
@@ -54,7 +54,7 @@ export async function getAccount(
             `${identitiesTable}.identityNumber as identityNumber`
         );
 
-    return account[0];
+    return convertBooleans(accounts)[0];
 }
 
 export async function insertAccount(account: Account | Account[]) {
