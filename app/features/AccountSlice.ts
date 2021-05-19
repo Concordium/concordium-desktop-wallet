@@ -370,7 +370,7 @@ export async function confirmAccount(
             addToAddressBook(dispatch, {
                 name: account.name,
                 address,
-                note: `Account for credential ${account.identityNumber} of ${account.identityName}`, // TODO: have better note
+                note: `Account of identity: ${account.identityName}`,
                 readOnly: true,
             });
             break;
