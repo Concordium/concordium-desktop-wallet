@@ -63,7 +63,7 @@ async function generateIdentity(
     walletId: number,
     iframeRef: RefObject<HTMLIFrameElement>,
     onError: (message: string) => void
-) {
+): Promise<number> {
     let identityObjectLocation;
     let identityId;
     try {
@@ -90,20 +90,17 @@ async function generateIdentity(
         await addPendingAccount(dispatch, accountName, identityId, true); // TODO: can we add the address already here?
     } catch (e) {
         onError(`Failed to create identity due to ${e}`);
-        return;
+        // Rethrow this to avoid redirection;
+        throw e;
     }
-    try {
-        confirmIdentityAndInitialAccount(
-            dispatch,
-            identityName,
-            identityId,
-            accountName,
-            identityObjectLocation
-        );
-        dispatch(push(routes.IDENTITYISSUANCE_FINAL));
-    } catch (e) {
-        onError(`Failed to confirm identity`);
-    }
+    confirmIdentityAndInitialAccount(
+        dispatch,
+        identityName,
+        identityId,
+        accountName,
+        identityObjectLocation
+    ).catch(() => onError(`Failed to confirm identity`));
+    return identityId;
 }
 
 export interface ExternalIssuanceLocationState extends SignedIdRequest {
@@ -149,7 +146,16 @@ export default function ExternalIssuance({
             walletId,
             iframeRef,
             onError
-        );
+        )
+            .then((identityId) => {
+                return dispatch(
+                    push({
+                        pathname: routes.IDENTITYISSUANCE_FINAL,
+                        state: identityId,
+                    })
+                );
+            })
+            .catch(() => {});
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -158,7 +164,11 @@ export default function ExternalIssuance({
     }
 
     if (!location) {
-        return <Loading text="Generating your identity" />;
+        return (
+            <>
+                <Loading text="Generating your identity" />
+            </>
+        );
     }
 
     return (

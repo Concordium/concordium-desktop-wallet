@@ -73,10 +73,8 @@ export default function DecryptComponent({ account }: Props) {
     return (
         <Ledger ledgerCallback={ledgerCall}>
             {({ isReady, statusView, submitHandler = asyncNoOp }) => (
-                <Card className="flexColumn">
-                    <h3 className="textCenter mB40">
-                        Decrypt shielded balance
-                    </h3>
+                <Card className="flexColumn textCenter">
+                    <h3 className="mB40">Decrypt shielded balance</h3>
                     {statusView}
                     <Button
                         size="big"

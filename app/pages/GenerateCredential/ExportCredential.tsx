@@ -9,6 +9,7 @@ import { findAccounts } from '~/database/AccountDao';
 import routes from '~/constants/routes.json';
 import AccountCredentialSummary from './AccountCredentialSummary';
 import savedStateContext from './savedStateContext';
+import { CredentialExportFormat } from '~/utils/types';
 
 interface Props {
     onExported(didExport: boolean): void;
@@ -31,7 +32,12 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
             throw new Error('unexpected missing credential');
         }
 
-        const success = await saveFile(JSON.stringify(credential.credential), {
+        const exportData: CredentialExportFormat = {
+            credential: credential.credential,
+            address: credential.address,
+        };
+
+        const success = await saveFile(JSON.stringify(exportData), {
             title: 'Save credential',
         });
         if (success) {

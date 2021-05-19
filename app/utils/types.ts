@@ -542,6 +542,7 @@ export interface SettingGroup {
 export enum SettingTypeEnum {
     Boolean = 'boolean',
     Connection = 'connection',
+    Password = 'password',
 }
 
 // Contains an CredentialDeployment, and all the necessary extra details to complete the deployment
@@ -583,8 +584,13 @@ export interface UpdateHeader {
 }
 
 export interface UpdateInstructionSignature {
-    authorizationKeyIndex: number;
+    authorizationPublicKey: string;
     signature: string;
+}
+
+export interface UpdateInstructionSignatureWithIndex {
+    signature: string;
+    authorizationKeyIndex: number;
 }
 
 export interface UpdateInstruction<
@@ -680,7 +686,7 @@ export function instanceOfUpdateInstruction(
 export function instanceOfUpdateInstructionSignature(
     object: TransactionCredentialSignature | UpdateInstructionSignature
 ): object is UpdateInstructionSignature {
-    return 'signature' in object && 'authorizationKeyIndex' in object;
+    return 'signature' in object && 'authorizationPublicKey' in object;
 }
 
 export function instanceOfAccountTransactionWithSignature(
@@ -1032,7 +1038,7 @@ export interface EncryptionMetaData {
 
 export interface EncryptedData {
     cipherText: string;
-    metaData: EncryptionMetaData;
+    metadata: EncryptionMetaData;
 }
 
 export interface ExportData {
@@ -1165,4 +1171,9 @@ export interface SignedIdRequest {
     idObjectRequest: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     randomness: Hex;
+}
+
+export interface CredentialExportFormat {
+    credential: CredentialDeploymentInformation;
+    address: string;
 }
