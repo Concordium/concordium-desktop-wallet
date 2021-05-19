@@ -102,7 +102,9 @@ export default function AccountCard({
                 left={
                     <>
                         <b className={styles.inline}>{account.name}</b>
-                        {isInitialAccount(account) && '(Initial)'}
+                        {isInitialAccount(account) && (
+                            <span className="mL10">(Initial)</span>
+                        )}
                         {account.status === AccountStatus.Pending && (
                             <PendingImage
                                 height="24"
@@ -115,7 +117,7 @@ export default function AccountCard({
                                 className={styles.statusImage}
                             />
                         )}
-                        {accountInfo && accountInfo.accountBaker && (
+                        {accountInfo?.accountBaker && (
                             <BakerImage
                                 height="25"
                                 className={styles.bakerImage}
