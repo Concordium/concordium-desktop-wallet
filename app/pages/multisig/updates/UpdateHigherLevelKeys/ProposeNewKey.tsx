@@ -144,7 +144,7 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
                     />
                 )}
                 {loadedKey && (
-                    <Card className="mB40 relative">
+                    <Card className="mB40 pH50 relative">
                         <CloseButton
                             className={styles.close}
                             onClick={() => setLoadedKey(undefined)}
