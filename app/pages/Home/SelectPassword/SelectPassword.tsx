@@ -1,6 +1,6 @@
 import { push } from 'connected-react-router';
-import React, { useCallback } from 'react';
-import { SubmitHandler } from 'react-hook-form';
+import React, { useCallback, useEffect } from 'react';
+import { SubmitHandler, useForm, Validate } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import Form from '~/components/Form/Form';
 import PageLayout from '~/components/PageLayout/PageLayout';
@@ -18,6 +18,8 @@ type PasswordForm = PasswordInput;
 
 export default function SelectPassword() {
     const dispatch = useDispatch();
+    const form = useForm<PasswordForm>({ mode: 'onTouched' });
+    const { password } = form.watch(['password']);
 
     const handleSubmit: SubmitHandler<PasswordForm> = useCallback(
         async (values) => {
@@ -28,6 +30,18 @@ export default function SelectPassword() {
         },
         [dispatch]
     );
+
+    const passwordsAreEqual: Validate = useCallback(
+        (value: string) => value === password || 'Passwords are not equal',
+        [password]
+    );
+
+    useEffect(() => {
+        if (form.formState.dirtyFields.repassword) {
+            form.trigger('repassword');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [password]);
 
     return (
         <PageLayout.Container className="pB0" disableBack padding="both">
@@ -40,6 +54,7 @@ export default function SelectPassword() {
                     cannot be retrieved if lost.
                 </p>
                 <Form
+                    formMethods={form}
                     className="flexChildFill flexColumn justifySpaceBetween"
                     onSubmit={handleSubmit}
                 >
@@ -48,7 +63,14 @@ export default function SelectPassword() {
                             type="password"
                             className={styles.field}
                             name="password"
-                            rules={{ required: 'Password is required' }}
+                            rules={{
+                                required: 'Password is required',
+                                minLength: {
+                                    value: 6,
+                                    message:
+                                        'Password has to be minimin 6 characters',
+                                },
+                            }}
                             placeholder="Enter password"
                         />
                         <Form.Input
@@ -58,7 +80,7 @@ export default function SelectPassword() {
                             rules={{
                                 required:
                                     'Re-entering your password is required',
-                                validate: undefined, // TODO: add is equal validation.
+                                validate: passwordsAreEqual,
                             }}
                             placeholder="Re-enter password"
                         />
