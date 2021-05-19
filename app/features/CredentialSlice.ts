@@ -107,7 +107,11 @@ export async function initializeGenesisCredential(
 ) {
     const credentialOnChain = Object.entries(
         accountInfo.accountCredentials
-    ).find(([, cred]) => cred.value.contents.credId === credential.credId);
+    ).find(
+        ([, cred]) =>
+            (cred.value.contents.credId || cred.value.contents.regId) ===
+            credential.credId
+    );
     if (!credentialOnChain) {
         throw new Error(
             `Unexpected missing reference to genesis credential on chain, with credId: ${credential.credId}`
