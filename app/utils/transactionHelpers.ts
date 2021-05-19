@@ -18,6 +18,7 @@ import {
     TimeStampUnit,
     TransactionAccountSignature,
     TransactionCredentialSignature,
+    Account,
     AccountInfo,
     AddBaker,
     AddBakerPayload,
@@ -408,6 +409,27 @@ function amountAtDisposal(accountInfo: AccountInfo): bigint {
         ? BigInt(accountInfo.accountReleaseSchedule.total)
         : 0n;
     return unShielded - scheduled - stakedAmount;
+}
+
+export function validateShieldedAmount(
+    amountToValidate: string,
+    account: Account | undefined,
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (!isValidGTUString(amountToValidate)) {
+        return 'Value is not a valid GTU amount';
+    }
+    if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
+        return 'Insufficient public funds to cover fee';
+    }
+    if (
+        account?.totalDecrypted &&
+        BigInt(account.totalDecrypted) < toMicroUnits(amountToValidate)
+    ) {
+        return 'Insufficient shielded funds';
+    }
+    return undefined;
 }
 
 export function validateAmount(

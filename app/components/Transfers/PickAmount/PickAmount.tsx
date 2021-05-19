@@ -1,14 +1,20 @@
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { chosenAccountInfoSelector } from '~/features/AccountSlice';
-import { AddressBookEntry, Fraction } from '~/utils/types';
+import {
+    chosenAccountSelector,
+    chosenAccountInfoSelector,
+} from '~/features/AccountSlice';
+import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import { validateAmount } from '~/utils/transactionHelpers';
+import {
+    validateAmount,
+    validateShieldedAmount,
+} from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
@@ -21,6 +27,7 @@ interface Props {
     estimatedFee?: Fraction | undefined;
     toPickRecipient?(currentAmount: string): void;
     toConfirmTransfer(amount: string): void;
+    transactionKind: TransactionKindId;
 }
 
 interface PickAmountForm {
@@ -38,7 +45,9 @@ export default function PickAmount({
     defaultAmount,
     toPickRecipient,
     toConfirmTransfer,
+    transactionKind,
 }: Props) {
+    const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const form = useForm<PickAmountForm>({ mode: 'onTouched' });
     const { errors } = form;
@@ -52,6 +61,19 @@ export default function PickAmount({
     );
 
     function validate(amount: string) {
+        if (
+            [
+                TransactionKindId.Transfer_to_public,
+                TransactionKindId.Encrypted_transfer,
+            ].includes(transactionKind)
+        ) {
+            return validateShieldedAmount(
+                amount,
+                account,
+                accountInfo,
+                estimatedFee && collapseFraction(estimatedFee)
+            );
+        }
         return validateAmount(
             amount,
             accountInfo,
