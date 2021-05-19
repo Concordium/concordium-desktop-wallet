@@ -2,12 +2,14 @@ import { push } from 'connected-react-router';
 import React, { useCallback, useEffect } from 'react';
 import { SubmitHandler, useForm, Validate } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
-import Form from '~/components/Form/Form';
-import PageLayout from '~/components/PageLayout/PageLayout';
+import Form from '~/components/Form';
+import PageLayout from '~/components/PageLayout';
 import { setPassword } from '~/database/knex';
 import migrate from '~/database/migration';
 import initApplication from '~/utils/initialize';
-import routes from '../../../constants/routes.json';
+import routes from '~/constants/routes.json';
+
+import homeStyles from '../Home.module.scss';
 import styles from './SelectPassword.module.scss';
 
 interface PasswordInput {
@@ -85,7 +87,7 @@ export default function SelectPassword() {
                             placeholder="Re-enter password"
                         />
                     </div>
-                    <Form.Submit className={styles.button}>
+                    <Form.Submit className={homeStyles.button}>
                         Continue
                     </Form.Submit>
                 </Form>

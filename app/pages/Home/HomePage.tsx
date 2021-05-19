@@ -3,13 +3,13 @@ import fs from 'fs';
 import { Route, Switch } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
 import { getDatabaseFilename } from '~/database/knexfile';
-import PageLayout from '~/components/PageLayout/PageLayout';
+import PageLayout from '~/components/PageLayout';
 import { loadAllSettings } from '~/database/SettingsDao';
 import NewUserInit from './NewUserInit';
-import SelectPassword from './SelectPassword';
 import PasswordHasBeenSet from './PasswordHasBeenSet';
+import SelectPassword from './SelectPassword';
 import Unlock from './Unlock';
 
 /**

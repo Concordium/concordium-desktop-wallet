@@ -7,10 +7,10 @@ import migrate from '~/database/migration';
 import { loadAllSettings } from '~/database/SettingsDao';
 import initApplication from '~/utils/initialize';
 import routes from '~/constants/routes.json';
-import styles from './Unlock.module.scss';
 import Input from '~/components/Form/Input';
-import ErrorMessage from '~/components/Form/ErrorMessage';
 import Button from '~/cross-app-components/Button';
+
+import styles from './Unlock.module.scss';
 
 export default function Unlock() {
     const dispatch = useDispatch();
@@ -45,17 +45,16 @@ export default function Unlock() {
     return (
         <Card className={styles.card}>
             <h3>Enter wallet password</h3>
-            <div>
-                <Input
-                    className="body2"
-                    name="password"
-                    placeholder="Enter your wallet password"
-                    type="password"
-                    value={pw}
-                    onChange={(e) => setPw(e.target.value)}
-                />
-                <ErrorMessage>{validationError}</ErrorMessage>
-            </div>
+            <Input
+                className="body2"
+                name="password"
+                placeholder="Enter your wallet password"
+                type="password"
+                value={pw}
+                onChange={(e) => setPw(e.target.value)}
+                error={validationError}
+                isInvalid={Boolean(validationError)}
+            />
             <Button onClick={unlock}>Unlock</Button>
         </Card>
     );

@@ -1,9 +1,11 @@
 import { push } from 'connected-react-router';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import PageLayout from '~/components/PageLayout/PageLayout';
-import Button from '~/cross-app-components/Button/Button';
+import PageLayout from '~/components/PageLayout';
+import Button from '~/cross-app-components/Button';
 import routes from '~/constants/routes.json';
+
+import homeStyles from '../Home.module.scss';
 import styles from './NewUserInit.module.scss';
 
 export default function NewUserInit() {
@@ -21,7 +23,7 @@ export default function NewUserInit() {
                     </p>
                 </div>
                 <Button
-                    className={styles.button}
+                    className={homeStyles.button}
                     onClick={() =>
                         dispatch(
                             push({
