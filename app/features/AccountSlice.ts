@@ -15,6 +15,7 @@ import {
     removeAccount as removeAccountFromDatabase,
     updateSignatureThreshold as updateSignatureThresholdInDatabase,
     confirmInitialAccount as confirmInitialAccountInDatabase,
+    removeInitialAccount as removeInitialAccountInDatabase,
     findAccounts,
 } from '../database/AccountDao';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
@@ -354,6 +355,14 @@ export async function confirmInitialAccount(
         status: AccountStatus.Confirmed,
         address: accountAddress,
     });
+    return loadAccounts(dispatch);
+}
+
+export async function removeInitialAccount(
+    dispatch: Dispatch,
+    identityId: number
+) {
+    await removeInitialAccountInDatabase(identityId);
     return loadAccounts(dispatch);
 }
 

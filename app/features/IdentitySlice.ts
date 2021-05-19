@@ -44,7 +44,14 @@ export const identitiesSelector = (state: RootState) =>
 
 export const confirmedIdentitiesSelector = (state: RootState) =>
     state.identities.identities.filter(
-        (identity: Identity) => identity.status === IdentityStatus.Confirmed
+        (identity: Identity) => IdentityStatus.Confirmed === identity.status
+    );
+
+export const confirmedAndGenesisIdentitiesSelector = (state: RootState) =>
+    state.identities.identities.filter((identity: Identity) =>
+        [IdentityStatus.Confirmed, IdentityStatus.Genesis].includes(
+            identity.status
+        )
     );
 
 export const chosenIdentitySelector = (state: RootState) =>

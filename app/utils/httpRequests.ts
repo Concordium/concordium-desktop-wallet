@@ -68,14 +68,12 @@ function getHighestId(transactions: TransferTransaction[]) {
     return transactions.reduce((id, t) => Math.max(id, t.id || 0), 0);
 }
 
-// TODO Add query parameter includeRawRejectReason and parse the structured
-// reject reason.
 export async function getTransactions(
     address: string,
     id = 0
 ): Promise<IncomingTransaction[]> {
     const response = await walletProxy.get(
-        `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}`
+        `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`
     );
     const { transactions, count, limit } = response.data;
     if (count === limit) {
