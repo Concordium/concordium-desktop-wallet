@@ -1,5 +1,5 @@
 import { Account } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import {
     accountsTable,
     identitiesTable,
@@ -36,7 +36,9 @@ export async function getAllAccounts(): Promise<Account[]> {
     return convertBooleans(accounts);
 }
 
-export async function getAccount(name: string): Promise<Account | undefined> {
+export async function getAccount(
+    address: string
+): Promise<Account | undefined> {
     const account = await (await knex())
         .table(accountsTable)
         .join(
@@ -45,7 +47,7 @@ export async function getAccount(name: string): Promise<Account | undefined> {
             '=',
             `${identitiesTable}.id`
         )
-        .where({ name })
+        .where({ address })
         .select(
             `${accountsTable}.*`,
             `${identitiesTable}.name as identityName`,
@@ -60,11 +62,11 @@ export async function insertAccount(account: Account | Account[]) {
 }
 
 export async function updateAccount(
-    accountName: string,
+    address: string,
     updatedValues: Partial<Account>
 ) {
     return (await knex())(accountsTable)
-        .where({ name: accountName })
+        .where({ address })
         .update(updatedValues);
 }
 
@@ -100,4 +102,16 @@ export async function updateSignatureThreshold(
     return (await knex())(accountsTable)
         .where({ address })
         .update({ signatureThreshold });
+}
+
+export async function confirmInitialAccount(
+    identityId: number,
+    updatedValues: Partial<Account>
+) {
+    return (await knex())
+        .select()
+        .table(accountsTable)
+        .where({ identityId, isInitial: 1 })
+        .first()
+        .update(updatedValues);
 }

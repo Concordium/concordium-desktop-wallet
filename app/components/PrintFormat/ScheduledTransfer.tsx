@@ -59,12 +59,14 @@ function PrintFormatScheduledTransfer({
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}
                     {hashRow(transaction)}
-                    <tr>
-                        <td>Identicon:</td>
-                    </tr>
+                    {Boolean(image) && (
+                        <tr>
+                            <td>Identicon:</td>
+                        </tr>
+                    )}
                 </tbody>
             )}
-            <img src={image} alt="" />
+            {Boolean(image) && <img src={image} alt="" />}
             {table(
                 <thead>
                     <tr>

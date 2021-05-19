@@ -15,6 +15,7 @@ import {
     removeAccount as removeAccountFromDatabase,
     updateSignatureThreshold as updateSignatureThresholdInDatabase,
     getAccount,
+    confirmInitialAccount as confirmInitialAccountInDatabase,
 } from '../database/AccountDao';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import {
@@ -145,7 +146,7 @@ function updateAccountEncryptedAmount(
             account.selfAmounts === selfAmounts
         )
     ) {
-        return updateAccount(account.name, {
+        return updateAccount(account.address, {
             incomingAmounts: incomingAmountsString,
             selfAmounts,
             allDecrypted: false,
@@ -175,7 +176,7 @@ async function initializeGenesisAccount(
         status: AccountStatus.Confirmed,
         signatureThreshold: accountInfo.accountThreshold,
     };
-    await updateAccount(account.name, accountUpdate);
+    await updateAccount(account.address, accountUpdate);
     await Promise.all(
         localCredentials.map((cred) =>
             initializeGenesisCredential(dispatch, address, cred, accountInfo)
@@ -331,10 +332,10 @@ export async function addPendingAccount(
 
 export async function confirmInitialAccount(
     dispatch: Dispatch,
-    accountName: string,
+    identityId: number,
     accountAddress: string
 ) {
-    await updateAccount(accountName, {
+    await confirmInitialAccountInDatabase(identityId, {
         status: AccountStatus.Confirmed,
         address: accountAddress,
     });
@@ -345,30 +346,30 @@ export async function confirmInitialAccount(
 // (Which is assumed to be of the credentialdeployment)
 export async function confirmAccount(
     dispatch: Dispatch,
-    accountName: string,
+    address: string,
     transactionId: string
 ) {
     const response = await getStatus(transactionId);
     switch (response.status) {
         case TransactionStatus.Rejected:
-            await updateAccount(accountName, {
+            await updateAccount(address, {
                 status: AccountStatus.Rejected,
             });
             break;
         case TransactionStatus.Finalized:
-            await updateAccount(accountName, {
+            await updateAccount(address, {
                 status: AccountStatus.Confirmed,
             });
             // eslint-disable-next-line no-case-declarations
-            const account = await getAccount(accountName);
+            const account = await getAccount(address);
 
             if (!account) {
                 break;
             }
 
             addToAddressBook(dispatch, {
-                name: accountName,
-                address: account.address,
+                name: account.name,
+                address,
                 note: `Account for credential ${account.identityNumber} of ${account.identityName}`, // TODO: have better note
                 readOnly: true,
             });
@@ -404,7 +405,7 @@ export async function decryptAccountBalance(
         .reduce((acc, amount) => acc + BigInt(amount), 0n)
         .toString();
 
-    return updateAccount(account.name, {
+    return updateAccount(account.address, {
         totalDecrypted,
         allDecrypted: true,
     });

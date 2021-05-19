@@ -32,7 +32,7 @@ export default function ExternalTransfer({
         location?.state?.initialPage || locations.pickAmount
     );
 
-    const [amount, setAmount] = useState<string>(location?.state?.amount); // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string>(location?.state?.amount ?? ''); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
         location?.state?.recipient
     );
@@ -40,44 +40,6 @@ export default function ExternalTransfer({
     function chooseRecipientOnClick(entry: AddressBookEntry) {
         setRecipient(entry);
         setSubLocation(locations.pickAmount);
-    }
-
-    function ChosenComponent() {
-        switch (subLocation) {
-            case locations.pickAmount:
-                return (
-                    <PickAmount
-                        recipient={recipient}
-                        header={amountHeader}
-                        defaultAmount={amount}
-                        estimatedFee={estimatedFee}
-                        toPickRecipient={(currentAmount: string) => {
-                            setAmount(currentAmount);
-                            setSubLocation(locations.pickRecipient);
-                        }}
-                        toConfirmTransfer={(currentAmount: string) => {
-                            if (!recipient) {
-                                throw new Error('Unexpected missing recipient');
-                            }
-                            toConfirmTransfer(currentAmount, recipient);
-                        }}
-                    />
-                );
-            case locations.pickRecipient:
-                return (
-                    <div className="mH30">
-                        <PickRecipient
-                            pickRecipient={chooseRecipientOnClick}
-                            senderAddress={senderAddress}
-                        />
-                    </div>
-                );
-            case locations.transferSubmitted: {
-                return <FinalPage location={location} />;
-            }
-            default:
-                throw new Error('Unexpected location');
-        }
     }
 
     return (
@@ -89,7 +51,35 @@ export default function ExternalTransfer({
             exitOnClick={exitFunction}
             backOnClick={() => setSubLocation(locations.pickAmount)}
         >
-            <ChosenComponent />
+            {subLocation === locations.pickAmount && (
+                <PickAmount
+                    recipient={recipient}
+                    header={amountHeader}
+                    defaultAmount={amount}
+                    estimatedFee={estimatedFee}
+                    toPickRecipient={(currentAmount: string) => {
+                        setAmount(currentAmount);
+                        setSubLocation(locations.pickRecipient);
+                    }}
+                    toConfirmTransfer={(currentAmount: string) => {
+                        if (!recipient) {
+                            throw new Error('Unexpected missing recipient');
+                        }
+                        toConfirmTransfer(currentAmount, recipient);
+                    }}
+                />
+            )}
+            {subLocation === locations.pickRecipient && (
+                <div className="mH30">
+                    <PickRecipient
+                        pickRecipient={chooseRecipientOnClick}
+                        senderAddress={senderAddress}
+                    />
+                </div>
+            )}
+            {subLocation === locations.transferSubmitted && (
+                <FinalPage location={location} />
+            )}
         </TransferView>
     );
 }

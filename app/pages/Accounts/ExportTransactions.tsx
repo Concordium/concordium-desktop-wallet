@@ -52,7 +52,7 @@ async function exportTransactions(account: Account, openModal: () => void) {
 export default function ExportTransactions({ account, returnFunction }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     return (
-        <Card className="relative flexColumn justifyCenter">
+        <Card className="relative flexColumn justifyCenter pH50">
             <ErrorModal
                 show={modalOpen}
                 header="Export failed"

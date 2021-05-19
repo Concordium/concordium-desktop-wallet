@@ -92,26 +92,6 @@ export default function InternalTransfer<
         [specific, account, estimatedFee, dispatch]
     );
 
-    function ChosenComponent() {
-        switch (subLocation) {
-            case locations.pickAmount:
-                return (
-                    <PickAmount
-                        header={specific.amountHeader}
-                        estimatedFee={estimatedFee}
-                        defaultAmount={location?.state?.amount}
-                        toPickRecipient={undefined}
-                        toConfirmTransfer={toConfirmTransfer}
-                    />
-                );
-            case locations.transferSubmitted: {
-                return <FinalPage location={location} />;
-            }
-            default:
-                throw new Error('Unexpected location');
-        }
-    }
-
     return (
         <>
             <SimpleErrorModal
@@ -124,7 +104,18 @@ export default function InternalTransfer<
                 exitOnClick={() => dispatch(push(routes.ACCOUNTS))}
                 backOnClick={() => setSubLocation(locations.pickAmount)}
             >
-                <ChosenComponent />
+                {subLocation === locations.pickAmount && (
+                    <PickAmount
+                        header={specific.amountHeader}
+                        estimatedFee={estimatedFee}
+                        defaultAmount={location?.state?.amount ?? ''}
+                        toPickRecipient={undefined}
+                        toConfirmTransfer={toConfirmTransfer}
+                    />
+                )}
+                {subLocation === locations.transferSubmitted && (
+                    <FinalPage location={location} />
+                )}
             </TransferView>
         </>
     );
