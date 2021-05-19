@@ -68,6 +68,22 @@ This way, you can get quicker reloads, because you only need to restart start:de
 as the renderer thread will recompile in the background. N.B. This doesn't apply for changes in the rust code,
 which is only recompiled with a full restart.
 
+## Targeting specific Network
+
+To build the app for a specific network, supply the `TARGET_NET` environment variable.
+Currently works with `staging` and `testnet`.
+Otherwise the app will be targeted Mainnet.
+When using this variable when packaging, this variable will also be appended to the application name.
+
+```bash
+TARGET_NET=staging yarn start
+```
+
+```bash
+export TARGET_NET=staging
+yarn build-main-dev && yarn start-renderer-dev
+```
+
 ## Packaging for Production
 
 To package apps for the local platform:
@@ -101,5 +117,5 @@ For the APPLEIDPASS, setting up an [app-specific password](https://support.apple
 The notarizing process can take a while, and for testing purposes it can be skipped by running:
 
 ```bash
-yarn package-mac-no-notarize
+TARGET_NET=$NET yarn package-mac-no-notarize
 ```

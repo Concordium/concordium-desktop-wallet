@@ -1,3 +1,5 @@
 {
-    "walletProxy": "http://wallet-proxy.eu.staging.concordium.com/"
+    "walletProxyMainnet": "http://wallet-proxy.concordium.software/",
+    "walletProxyStagenet": "http://wallet-proxy.eu.staging.concordium.com/",
+    "walletProxyTestnet": "http://wallet-proxy.testnet.concordium.com/"
 }

@@ -63,7 +63,10 @@ const createWindow = async () => {
         await installExtensions();
     }
 
+    const titleSuffix = process.env.TARGET_NET || '';
+
     mainWindow = new BrowserWindow({
+        title: `Concordium Wallet ${titleSuffix}`,
         show: false,
         width: 4096,
         height: 2912,
