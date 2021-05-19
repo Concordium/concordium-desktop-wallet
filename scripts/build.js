@@ -6,8 +6,6 @@ const fs = require('fs');
 
 const builder = require('electron-builder');
 
-const publish = process.env.NODE_ENV;
-
 const targetNet = process.env.TARGET_NET;
 
 let name;

@@ -49,7 +49,7 @@ pipeline {
                     # Build
                     yarn package
                 '''.stripIndent()
-                stash includes: 'release/concordium-wallet-*.dmg', name: 'releaseDMG'
+                stash includes: 'release/concordium-desktop-wallet-*.dmg', name: 'releaseDMG'
             }
         }
         stage('Publish') {
