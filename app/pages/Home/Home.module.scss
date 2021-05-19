@@ -8,7 +8,7 @@
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 645px;
+    flex: 1;
     padding-top: 30px;
 }
 
@@ -26,17 +26,18 @@
 }
 
 .card {
+    composes: flexColumn from global;
     position: absolute;
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 645px;
+    width: 460px;
+    height: 400px;
     padding-top: 30px;
 }
 
 .enter {
-    composes: flexColumn from global, justifySpaceBetween from global, textCenter from global;
-    height: 385px;
+    composes: flexChildFill from global, flexColumn from global, justifySpaceBetween from global, textCenter from global;
 }
 
 .error {

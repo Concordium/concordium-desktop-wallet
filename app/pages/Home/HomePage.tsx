@@ -10,7 +10,7 @@ import { loadAllSettings } from '~/database/SettingsDao';
 import NewUserInit from './NewUserInit';
 import SelectPassword from './SelectPassword';
 import PasswordHasBeenSet from './PasswordHasBeenSet';
-import EnterWalletPassword from './EnterWalletPassword';
+import Unlock from './Unlock';
 
 /**
  * Checks whether the database has already been created or not.
@@ -66,7 +66,7 @@ export default function HomePage() {
             <Switch>
                 <Route
                     path={routes.HOME_ENTER_PASSWORD}
-                    render={() => <EnterWalletPassword />}
+                    render={() => <Unlock />}
                 />
                 <Route
                     path={routes.HOME_PASSWORD_SET}
