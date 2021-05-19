@@ -12,6 +12,11 @@
         font-size: $font-size-body2;
     }
 }
+
+.successfulImport {
+    justify-content: space-between;
+}
+
 .exportButton {
     margin-top: auto;
     margin-bottom: 40px;
@@ -38,18 +43,26 @@
     margin: 0;
 }
 
-.AddressBookHeader,
-.importedIdentity {
-    margin-top: 60px;
+.importSection {
     font-size: $font-size-body2;
+
+    &:not(:first-child) {
+        margin-top: 60px;
+    }
 }
 
 .importedList {
-    > div {
-        padding: 80px 20%;
-    }
-    div {
-        text-align: left;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    width: 100%;
+    max-width: 325px;
+    margin: 0 auto;
+    padding: 40px 0;
+    justify-content: center;
+
+    p {
+        font-size: $font-size-body2;
     }
 }
 
