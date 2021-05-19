@@ -210,7 +210,11 @@ export async function updateTransactions(
         const result = await fetchTransactions(account.address, maxId);
 
         if (maxId !== result.newMaxId) {
-            await updateMaxTransactionId(dispatch, account.address, maxId);
+            await updateMaxTransactionId(
+                dispatch,
+                account.address,
+                result.newMaxId
+            );
             await loadTransactions(account, dispatch);
             if (!result.isFinished) {
                 setTimeout(
