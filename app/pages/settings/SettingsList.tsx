@@ -9,6 +9,7 @@ import styles from './SettingsList.module.scss';
 const settingsName = new Map<string, string>([
     [settingKeys.multiSignatureSettings, 'Multi signature settings'],
     [settingKeys.nodeSettings, 'Node settings'],
+    [settingKeys.passwordSettings, 'Change wallet password'],
 ]);
 
 export default function SettingsList() {

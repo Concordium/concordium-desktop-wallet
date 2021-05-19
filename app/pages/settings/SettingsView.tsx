@@ -6,6 +6,7 @@ import settingKeys from '../../constants/settingKeys.json';
 import { Setting, SettingTypeEnum } from '~/utils/types';
 import BooleanSetting from './BooleanSettingElement';
 import ConnectionSettingElement from './ConnectionSettingElement';
+import PasswordSettingElement from './PasswordSettingElement';
 
 // A static definition of warning messages, where the key matches the
 // setting name that the warning is for.
@@ -19,6 +20,7 @@ const warningMessages = new Map<string, string>([
 const settingDisplayTexts = new Map<string, string>([
     [settingKeys.foundationTransactionsEnabled, 'Foundation transactions'],
     [settingKeys.nodeLocation, 'Node connection settings'],
+    [settingKeys.password, 'Change wallet password'],
 ]);
 
 export default function SettingsView() {
@@ -60,6 +62,13 @@ export default function SettingsView() {
                                 displayText={settingDisplayText}
                                 setting={childSetting}
                                 key={childSetting.name}
+                            />
+                        );
+                    case SettingTypeEnum.Password:
+                        return (
+                            <PasswordSettingElement
+                                key={childSetting.name}
+                                displayText={settingDisplayText}
                             />
                         );
                     default:

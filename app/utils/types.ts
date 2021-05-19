@@ -542,6 +542,7 @@ export interface SettingGroup {
 export enum SettingTypeEnum {
     Boolean = 'boolean',
     Connection = 'connection',
+    Password = 'password',
 }
 
 // Contains an CredentialDeployment, and all the necessary extra details to complete the deployment
@@ -1037,7 +1038,7 @@ export interface EncryptionMetaData {
 
 export interface EncryptedData {
     cipherText: string;
-    metaData: EncryptionMetaData;
+    metadata: EncryptionMetaData;
 }
 
 export interface ExportData {

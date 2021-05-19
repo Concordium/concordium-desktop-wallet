@@ -1,17 +1,51 @@
 import * as crypto from 'crypto';
 import { EncryptedData } from './types';
 
-const encryptionMethod = 'aes-256-cbc';
+const encoding = 'base64';
+
+const aes256EncryptionMethodExternal = 'AES-256';
+const aes256EncryptionMethod = 'AES-256-CBC';
+
+const keyDerivationMethodExternal = 'PBKDF2WithHmacSHA256';
 const keyDerivationMethod = 'PBKDF2';
-const hashAlgorithm = 'sha256';
-const cipherEncoding = 'hex';
+
+const hashAlgorithmInternal = 'sha256';
 
 /**
- * Encrypts the data using
- * pbkdf2 to generate a key from the password
- * and AES256 in cbc mode.
- * return the ciphertext and the parameters needed
- * to decrypt.
+ * The naming of the encryption methods across different crypto libraries are different,
+ * so this method is required to output in the format expected by external tools.
+ */
+function getEncryptionMethodExport(method: string) {
+    if (method === aes256EncryptionMethod) {
+        return aes256EncryptionMethodExternal;
+    }
+    throw new Error(`An unsupported encryption method was used: ${method}`);
+}
+
+function getEncryptionMethodImport(method: string) {
+    if (method === aes256EncryptionMethodExternal) {
+        return aes256EncryptionMethod;
+    }
+    throw new Error(`An unsupported encryption method was used: " ${method}`);
+}
+
+/**
+ * The naming of the key derivation methods across different crypto libraries are different,
+ * so this method is required to output in the format expected by external tools.
+ */
+function getKeyDerivationAlgorithmExport(algorithm: string) {
+    if (algorithm === keyDerivationMethod) {
+        return keyDerivationMethodExternal;
+    }
+    throw new Error(
+        `An unsupported key derivation algorithm was used: ${algorithm}`
+    );
+}
+
+/**
+ * Encrypts the data using PBKDF2 to generate a key from the password, and
+ * AES-256 in CBC mode. The cipher text is returned along with the parameters
+ * required to decrypt the file.
  */
 export function encrypt(data: string, password: string): EncryptedData {
     const keyLen = 32;
@@ -22,56 +56,64 @@ export function encrypt(data: string, password: string): EncryptedData {
         salt,
         iterations,
         keyLen,
-        hashAlgorithm
+        hashAlgorithmInternal
     );
     const initializationVector = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(
-        encryptionMethod,
+        aes256EncryptionMethod,
         key,
         initializationVector
     );
-    let cipherText = cipher.update(data, 'utf8', cipherEncoding);
-    cipherText += cipher.final(cipherEncoding);
+    let cipherText = cipher.update(data, 'utf8', encoding);
+    cipherText += cipher.final(encoding);
     return {
         cipherText,
-        metaData: {
+        metadata: {
             keyLen,
             iterations,
-            salt: salt.toString('hex'),
-            initializationVector: initializationVector.toString('hex'),
-            encryptionMethod,
-            keyDerivationMethod,
-            hashAlgorithm,
+            salt: salt.toString(encoding),
+            initializationVector: initializationVector.toString(encoding),
+            encryptionMethod: getEncryptionMethodExport(aes256EncryptionMethod),
+            keyDerivationMethod: getKeyDerivationAlgorithmExport(
+                keyDerivationMethod
+            ),
+            hashAlgorithm: hashAlgorithmInternal,
         },
     };
 }
 
 /**
- * Decrypts the data using
- * pbkdf2 to generate a key from the password
- * and AES256 in cbc mode.
- * First parameter should mirror the output of encrypt.
- * Second parameter must be the same password used
- * during encryption, otherwise the method will fail.
+ * Decrypts the data using the metadata in the file that was given as input
+ * and the provided password.
  */
 export function decrypt(
-    { cipherText, metaData }: EncryptedData,
+    { cipherText, metadata }: EncryptedData,
     password: string
 ): string {
-    const { keyLen, iterations, salt, initializationVector } = metaData;
+    const {
+        keyLen,
+        iterations,
+        salt,
+        initializationVector,
+        encryptionMethod,
+        hashAlgorithm,
+    } = metadata;
+    const internalEncryptionMethod = getEncryptionMethodImport(
+        encryptionMethod
+    );
     const key = crypto.pbkdf2Sync(
         password,
-        Buffer.from(salt, 'hex'),
+        Buffer.from(salt, encoding),
         iterations,
         keyLen,
         hashAlgorithm
     );
     const decipher = crypto.createDecipheriv(
-        encryptionMethod,
+        internalEncryptionMethod,
         key,
-        Buffer.from(initializationVector, 'hex')
+        Buffer.from(initializationVector, encoding)
     );
-    let data = decipher.update(cipherText, cipherEncoding, 'utf8');
+    let data = decipher.update(cipherText, encoding, 'utf8');
     data += decipher.final('utf8');
     return data;
 }

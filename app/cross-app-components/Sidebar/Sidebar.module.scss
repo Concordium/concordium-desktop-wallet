@@ -74,3 +74,8 @@ $sidebar-link-height: $page-header-height;
         margin-top: 18px;
     }
 }
+
+.disabled {
+    color: $color-grey;
+    opacity: 0.5;
+}
