@@ -14,6 +14,7 @@ import {
     updateAccount,
     removeAccount as removeAccountFromDatabase,
     updateSignatureThreshold as updateSignatureThresholdInDatabase,
+    getAccount,
 } from '../database/AccountDao';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import {
@@ -358,6 +359,19 @@ export async function confirmAccount(
             await updateAccount(accountName, {
                 status: AccountStatus.Confirmed,
             });
+            // eslint-disable-next-line no-case-declarations
+            const account = await getAccount(accountName);
+
+            if (!account) {
+                break;
+            }
+
+            addToAddressBook(dispatch, {
+                name: accountName,
+                address: account.address,
+                note: `Account for credential ${account.identityNumber} of ${account.identityName}`, // TODO: have better note
+                readOnly: true,
+            });
             break;
         default:
             throw new Error('Unexpected status was returned by the poller!');
@@ -414,6 +428,13 @@ export async function addExternalAccount(
         isInitial: false,
     };
     await insertAccount(account);
+    addToAddressBook(dispatch, {
+        readOnly: true,
+        name: accountName,
+        address: accountAddress,
+        note: 'Shared account',
+    });
+
     return loadAccounts(dispatch);
 }
 

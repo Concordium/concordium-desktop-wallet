@@ -36,6 +36,25 @@ export async function getAllAccounts(): Promise<Account[]> {
     return convertBooleans(accounts);
 }
 
+export async function getAccount(name: string): Promise<Account | undefined> {
+    const account = await (await knex())
+        .table(accountsTable)
+        .join(
+            identitiesTable,
+            `${accountsTable}.identityId`,
+            '=',
+            `${identitiesTable}.id`
+        )
+        .where({ name })
+        .select(
+            `${accountsTable}.*`,
+            `${identitiesTable}.name as identityName`,
+            `${identitiesTable}.identityNumber as identityNumber`
+        );
+
+    return account[0];
+}
+
 export async function insertAccount(account: Account | Account[]) {
     return (await knex())(accountsTable).insert(account);
 }
