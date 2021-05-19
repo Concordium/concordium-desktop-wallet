@@ -269,32 +269,27 @@ export async function loadAccountInfos(
         return Promise.resolve();
     }
     const accountInfos = await getAccountInfos(confirmedAccounts);
-    const updateEncryptedAmountsPromises = accountInfos.map(
-        ({ account, accountInfo }) => {
-            if (account.status === AccountStatus.Genesis) {
-                if (!accountInfo) {
-                    throw new Error(
-                        `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}` // account.address contains the placeholder credId
-                    );
-                }
-                return new Promise<void>((resolve, reject) => {
-                    return initializeGenesisAccount(
-                        dispatch,
-                        account,
-                        accountInfo
-                    )
-                        .then((address) => {
-                            map[address] = accountInfo;
-                            return resolve();
-                        })
-                        .catch(reject);
-                });
+    for (let i = 0; i < accountInfos.length; i += 1) {
+        const { account, accountInfo } = accountInfos[i];
+        if (account.status === AccountStatus.Genesis) {
+            if (!accountInfo) {
+                throw new Error(
+                    `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}` // account.address contains the placeholder credId
+                );
             }
+            // eslint-disable-next-line no-await-in-loop
+            const address = await initializeGenesisAccount(
+                dispatch,
+                account,
+                accountInfo
+            );
+            map[address] = accountInfo;
+        } else {
             map[account.address] = accountInfo;
-            return updateAccountFromAccountInfo(dispatch, account, accountInfo);
+            // eslint-disable-next-line no-await-in-loop
+            await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
-    );
-    await Promise.all(updateEncryptedAmountsPromises);
+    }
     return dispatch(setAccountInfos(map));
 }
 
