@@ -152,8 +152,10 @@ function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
     }
 }
 
-// Load transactions from storage.
-// Filters according to viewingShielded parameter
+/**
+ * Load transactions from storage.
+ * Filters out reward transactions based on the account's rewardFilter.
+ */
 export async function loadTransactions(account: Account, dispatch: Dispatch) {
     let filteredTypes: TransactionKindString[] = [];
 
@@ -199,33 +201,30 @@ export async function updateTransactions(
     account: Account,
     controller: AbortController
 ) {
-    let maxId = account.maxTransactionId || 0;
-    let finished = false;
+    async function updateSubroutine(maxId: number) {
+        if (controller.isAborted) {
+            controller.onAborted();
+            return;
+        }
 
-    let result = await fetchTransactions(account.address, maxId);
+        const result = await fetchTransactions(account.address, maxId);
 
-    if (maxId !== result.newMaxId) {
-        maxId = result.newMaxId;
-        await updateMaxTransactionId(dispatch, account.address, maxId);
-        await loadTransactions(account, dispatch);
-    }
-
-    if (result.isFinished) {
-        return;
-    }
-
-    const interval = setInterval(async () => {
-        if (finished || controller.isAborted) {
-            controller.finish();
-            clearInterval(interval);
-        } else {
-            result = await fetchTransactions(account.address, maxId);
-            maxId = result.newMaxId;
-            finished = result.isFinished;
+        if (maxId !== result.newMaxId) {
             await updateMaxTransactionId(dispatch, account.address, maxId);
             await loadTransactions(account, dispatch);
+            if (!result.isFinished) {
+                setTimeout(
+                    updateSubroutine,
+                    updateTransactionInterval,
+                    result.newMaxId
+                );
+                return;
+            }
         }
-    }, updateTransactionInterval);
+        controller.finish();
+    }
+
+    updateSubroutine(account.maxTransactionId || 0);
 }
 
 // Add a pending transaction to storage

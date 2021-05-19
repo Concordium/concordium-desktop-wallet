@@ -33,8 +33,7 @@ export default function AccountView() {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
-    const [count, setCount] = useState(0);
-    const [controller] = useState(new AbortController(setCount));
+    const [controller] = useState(new AbortController());
 
     useEffect(() => {
         if (account) {
@@ -54,7 +53,8 @@ export default function AccountView() {
         if (
             account &&
             account.status === AccountStatus.Confirmed &&
-            controller.isReady
+            controller.isReady &&
+            !controller.isAborted
         ) {
             controller.start();
             updateTransactions(dispatch, account, controller);
@@ -62,7 +62,12 @@ export default function AccountView() {
         }
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address, accountInfo?.accountAmount, account?.status, count]);
+    }, [
+        account?.address,
+        accountInfo?.accountAmount,
+        account?.status,
+        controller.isAborted,
+    ]);
 
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
