@@ -128,9 +128,9 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
                     setLoadedKey(undefined);
                 }}
             />
-            <div>
+            <div className="flexColumn flexChildFill">
                 <h3>Do you want to propose a new key?</h3>
-                <p>
+                <p className="m0">
                     You can add a new key by dropping it below. If you do not
                     want to make changes to the keys, then you can continue to
                     change the signature threshold.
@@ -144,7 +144,7 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
                     />
                 )}
                 {loadedKey && (
-                    <Card>
+                    <Card className="mB40 relative">
                         <CloseButton
                             className={styles.close}
                             onClick={() => setLoadedKey(undefined)}
@@ -161,8 +161,10 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
                                         'You must confirm that the keys match',
                                 }}
                             >
-                                The key and identicons matches those of the new
-                                custodian <b>exactly</b>.
+                                <span>
+                                    The key and identicons matches those of the
+                                    new custodian <b>exactly</b>.
+                                </span>
                             </Form.Checkbox>
                             <Form.Submit>Add key</Form.Submit>
                         </Form>
