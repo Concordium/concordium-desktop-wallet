@@ -69,7 +69,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
             const entry: AddressBookEntry = { ...values, readOnly: false };
 
             if (isEditMode && initialValues) {
-                updateAddressBookEntry(dispatch, initialValues.name, entry);
+                updateAddressBookEntry(dispatch, initialValues.address, entry);
             } else {
                 addToAddressBook(dispatch, entry);
             }
