@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import SearchIcon from '@resources/svg/search.svg';
-import { addressBookConfirmedSelector } from '~/features/AddressBookSlice';
+import { addressBookSelector } from '~/features/AddressBookSlice';
 import { AddressBookEntry, ClassName } from '~/utils/types';
 import styles from './AddressBookSearchList.module.scss';
 
@@ -21,7 +21,7 @@ export default function AddressBookSearchList({
     filter = () => true,
 }: Props): JSX.Element {
     const [query, setQuery] = useState('');
-    const addressBook = useSelector(addressBookConfirmedSelector);
+    const addressBook = useSelector(addressBookSelector);
 
     const filterByQuery = useCallback(
         (e: AddressBookEntry) =>

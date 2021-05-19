@@ -7,7 +7,7 @@ import {
     updateEntry,
     removeEntry,
 } from '../database/AddressBookDao';
-import { AccountStatus, AddressBookEntry, Dispatch } from '../utils/types';
+import { AddressBookEntry, Dispatch } from '../utils/types';
 
 interface AddressBookState {
     addressBook: AddressBookEntry[];
@@ -67,16 +67,5 @@ export async function importAddressBookEntry(
 
 export const addressBookSelector = (state: RootState) =>
     state.addressBook.addressBook;
-
-export const addressBookConfirmedSelector = (state: RootState) => {
-    const { accounts, addressBook } = state;
-
-    return addressBook.addressBook.filter((e) =>
-        [AccountStatus.Confirmed, AccountStatus.Genesis].includes(
-            accounts.accounts.find((a) => a.address === e.address)?.status ??
-                AccountStatus.Confirmed
-        )
-    );
-};
 
 export default addressBookSlice.reducer;
