@@ -17,3 +17,7 @@
     composes: greySeparator;
     padding: 10px 20px;
 }
+
+.disabledAction {
+    background-color: $color-soft-grey;
+}

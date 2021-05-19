@@ -5,7 +5,12 @@ import Button, { ButtonProps } from '../../cross-app-components/Button';
 
 import styles from './ButtonNavLink.module.scss';
 
-type ButtonNavLinkProps = Omit<ButtonProps<NavLink>, 'as'> & NavLinkProps;
+type ButtonNavLinkProps = Omit<ButtonProps<NavLink>, 'as'> &
+    NavLinkProps & { disabled?: boolean };
+
+const suppressClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+};
 
 /**
  * @description
@@ -14,6 +19,7 @@ type ButtonNavLinkProps = Omit<ButtonProps<NavLink>, 'as'> & NavLinkProps;
 export default function ButtonNavLink({
     className,
     inverted = true,
+    disabled = false,
     size = 'huge',
     ...props
 }: ButtonNavLinkProps): JSX.Element {
@@ -22,6 +28,7 @@ export default function ButtonNavLink({
             as={NavLink}
             activeClassName="active"
             className={clsx(styles.root, className)}
+            onClick={disabled ? suppressClick : undefined}
             inverted={inverted}
             size={size}
             {...props}
