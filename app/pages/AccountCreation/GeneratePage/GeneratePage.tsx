@@ -9,6 +9,7 @@ import {
     Identity,
     CredentialDeploymentDetails,
     Dispatch,
+    RewardFilter,
     AccountStatus,
 } from '~/utils/types';
 import { sendTransaction } from '~/utils/nodeRequests';
@@ -212,6 +213,7 @@ export default function AccountCreationGenerate({
                                 identityId: -1,
                                 maxTransactionId: -1,
                                 identityName: identity.name,
+                                rewardFilter: RewardFilter.All,
                             }}
                         />
                     </CardList>

@@ -2,7 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Redirect, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import { Controller, useController, useFormContext } from 'react-hook-form';
-import { Account, AccountInfo, AccountStatus } from '~/utils/types';
+import {
+    Account,
+    AccountInfo,
+    AccountStatus,
+    RewardFilter,
+} from '~/utils/types';
 import AccountCard from '~/components/AccountCard';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
 import Button from '~/cross-app-components/Button';
@@ -108,6 +113,7 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
         identityId: -1,
         maxTransactionId: -1,
         isInitial: false,
+        rewardFilter: RewardFilter.All,
     };
 
     let accountDisplay;

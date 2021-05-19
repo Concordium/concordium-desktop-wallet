@@ -331,6 +331,7 @@ export async function addPendingAccount(
         maxTransactionId: 0,
         isInitial,
         deploymentTransactionId,
+        rewardFilter: RewardFilter.All,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -420,6 +421,7 @@ export async function addExternalAccount(
         signatureThreshold,
         maxTransactionId: 0,
         isInitial: false,
+        rewardFilter: RewardFilter.All,
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
