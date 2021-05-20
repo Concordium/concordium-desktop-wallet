@@ -30,7 +30,7 @@ function TransactionList({ onTransactionClick }: Props): JSX.Element {
 
     return (
         <>
-            {transactions.reverse().map((transaction: TransferTransaction) => (
+            {transactions.map((transaction: TransferTransaction) => (
                 <TransactionListElement
                     onClick={() => onTransactionClick(transaction)}
                     key={transaction.transactionHash || transaction.id}
