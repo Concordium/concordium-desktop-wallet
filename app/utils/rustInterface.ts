@@ -14,6 +14,7 @@ import {
     AccountEncryptedAmount,
     GenesisAccount,
     SignedIdRequest,
+    UnsignedCredentialDeploymentInformation,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -189,7 +190,9 @@ async function createUnsignedCredentialInfo(
     try {
         return {
             raw: unsignedCredentialDeploymentInfoString,
-            parsed: JSON.parse(unsignedCredentialDeploymentInfoString),
+            parsed: JSON.parse(
+                unsignedCredentialDeploymentInfoString
+            ) as UnsignedCredentialDeploymentInformation,
         };
     } catch (e) {
         throw new Error(
@@ -258,8 +261,11 @@ export async function createCredentialDetails(
     credentialNumber: number,
     global: Global,
     attributes: string[],
-    displayMessage: (message: string) => void,
-    ledger: ConcordiumLedgerClient
+    displayMessage: (message: string | JSX.Element) => void,
+    ledger: ConcordiumLedgerClient,
+    credInfoDetailsView: (
+        credInfo: UnsignedCredentialDeploymentInformation
+    ) => JSX.Element
 ): Promise<CredentialDeploymentDetails> {
     const { raw, parsed } = await createUnsignedCredentialInfo(
         identity,
@@ -270,8 +276,8 @@ export async function createCredentialDetails(
         ledger
     );
 
-    // TODO: Display the appropiate details
-    displayMessage(`Please sign details on device.`);
+    displayMessage(credInfoDetailsView(parsed));
+
     // Adding credential on a new account
     const expiry = getDefaultExpiry();
     const path = getAccountPath({
@@ -290,6 +296,7 @@ export async function createCredentialDetails(
         unsignedInfo: raw,
         expiry: stringify(expiry),
     });
+
     displayMessage('Please wait');
 
     try {

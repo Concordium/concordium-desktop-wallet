@@ -10,6 +10,7 @@ import {
     CredentialDeploymentDetails,
     Dispatch,
     AccountStatus,
+    UnsignedCredentialDeploymentInformation,
 } from '~/utils/types';
 import { sendTransaction } from '~/utils/nodeRequests';
 import {
@@ -39,6 +40,36 @@ import errorMessages from '~/constants/errorMessages.json';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
+
+const CredentialInfoDetails = (
+    credInfo: UnsignedCredentialDeploymentInformation
+) => (
+    <div className="textLeft">
+        <p className="mT0">
+            <b>Verification key:</b>{' '}
+            {credInfo.credentialPublicKeys.keys[0].verifyKey}
+        </p>
+        <p>
+            <b>Signature threshold:</b>{' '}
+            {credInfo.credentialPublicKeys.threshold}
+        </p>
+        <p>
+            <b>RegIdCred:</b> {credInfo.credId}
+        </p>
+        <p>
+            <b>Identity provider:</b> {credInfo.ipIdentity}
+        </p>
+        <p>
+            <b>Revocation threshold:</b> {credInfo.revocationThreshold}
+        </p>
+        <p>
+            <b>Valid to:</b> {credInfo.policy.validTo}
+        </p>
+        <p>
+            <b>Created at:</b> {credInfo.policy.createdAt}
+        </p>
+    </div>
+);
 
 interface Props {
     accountName: string;
@@ -124,7 +155,7 @@ export default function AccountCreationGenerate({
 
     async function createAccount(
         ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
+        setMessage: (message: string | JSX.Element) => void
     ) {
         let credentialNumber;
         if (!global) {
@@ -152,7 +183,8 @@ export default function AccountCreationGenerate({
             global,
             attributes,
             setMessage,
-            ledger
+            ledger,
+            CredentialInfoDetails
         );
 
         try {
