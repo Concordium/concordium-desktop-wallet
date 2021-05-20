@@ -7,9 +7,9 @@ import routes from '~/constants/routes.json';
 import { getDatabaseFilename } from '~/database/knexfile';
 import PageLayout from '~/components/PageLayout';
 import { loadAllSettings } from '~/database/SettingsDao';
+import SelectPassword from './SelectPassword';
 import NewUserInit from './NewUserInit';
 import PasswordHasBeenSet from './PasswordHasBeenSet';
-import SelectPassword from './SelectPassword';
 import Unlock from './Unlock';
 
 /**
