@@ -12,11 +12,8 @@ import {
 } from '~/utils/types';
 import { parse, stringify } from '~/utils/JSONHelper';
 import { ModalErrorInput } from '~/components/SimpleErrorModal';
-import { getBlockSummary, getConsensusStatus } from '~/utils/nodeRequests';
-import { BlockSummary, ConsensusStatus } from '~/utils/NodeApiTypes';
 import { updateCurrentProposal } from '~/features/MultiSignatureSlice';
 import getTransactionHash from '~/utils/transactionHash';
-import { findKeySet } from '~/utils/updates/AuthorizationHelper';
 
 async function HandleAccountTransactionSignatureFile(
     dispatch: Dispatch,
@@ -66,21 +63,18 @@ async function HandleAccountTransactionSignatureFile(
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
- * one of the authorized verification keys can verify the signature successfully on the hash
+ * the verification key in the signature can verify the signature successfully on the hash
  * of the serialized transaction.
  */
 async function isSignatureValid(
     proposal: UpdateInstruction,
-    signature: UpdateInstructionSignature,
-    blockSummary: BlockSummary
+    signature: UpdateInstructionSignature
 ): Promise<boolean> {
     const transactionHash = getTransactionHash(proposal);
-    const keySet = findKeySet(proposal.type, blockSummary.updates.keys);
-    const matchingKey = keySet[signature.authorizationKeyIndex];
     return ed.verify(
         signature.signature,
         transactionHash,
-        matchingKey.verifyKey
+        signature.authorizationPublicKey
     );
 }
 
@@ -120,25 +114,7 @@ async function HandleUpdateInstructionSignatureFile(
     }
 
     let validSignature = false;
-    try {
-        const consensusStatus: ConsensusStatus = await getConsensusStatus();
-        const blockSummary = await getBlockSummary(
-            consensusStatus.lastFinalizedBlock
-        );
-        validSignature = await isSignatureValid(
-            proposal,
-            signature,
-            blockSummary
-        );
-    } catch (error) {
-        // Can happen if the node is not reachable.
-        return {
-            show: true,
-            header: 'Unable to reach node',
-            content:
-                'It was not possible to reach the node, which is required to validate that the loaded signature verifies against an authorization key.',
-        };
-    }
+    validSignature = await isSignatureValid(proposal, signature);
 
     // Prevent the user from adding an invalid signature.
     if (!validSignature) {

@@ -1,6 +1,6 @@
 # Database migrations
 
-## Adding a new migration
+## Adding a new migration (Currently broken)
 
 To generate a new migration file use the following command (from the `app` directory):
 

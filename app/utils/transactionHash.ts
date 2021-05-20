@@ -11,17 +11,30 @@ import {
 } from './UpdateSerialization';
 import { getAccountTransactionHash } from './transactionSerialization';
 import { hashSha256 } from './serializationHelpers';
+import { getBlockSummary, getConsensusStatus } from '~/utils/nodeRequests';
+import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
 
 /**
  * Given an update instruction, return the submissionId, which is the hash, that contains the signature.
  */
-export function getUpdateInstructionSubmissionId(
+export async function getUpdateInstructionSubmissionId(
     updateInstruction: UpdateInstruction
 ) {
     const handler = findUpdateInstructionHandler(updateInstruction.type);
+    const consensusStatus = await getConsensusStatus();
+    const blockSummary = await getBlockSummary(
+        consensusStatus.lastFinalizedBlock
+    );
+
+    const signatures = await Promise.all(
+        updateInstruction.signatures.map((sig) =>
+            attachKeyIndex(sig, blockSummary, updateInstruction, handler)
+        )
+    );
 
     const serializedUpdateInstruction = serializeUpdateInstruction(
         updateInstruction,
+        signatures,
         handler.serializePayload(updateInstruction)
     );
 

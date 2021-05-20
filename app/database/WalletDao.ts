@@ -1,5 +1,5 @@
 import { Hex, WalletEntry, WalletType } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import { walletTable } from '../constants/databaseNames.json';
 
 /**

@@ -31,6 +31,10 @@ export default function IdentityIssuanceChooseProvider({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [providers, setProviders] = useState<IdentityProvider[]>([]);
+    const [
+        nextLocationState,
+        setNextLocationState,
+    ] = useState<ExternalIssuanceLocationState>();
     const global = useSelector(globalSelector);
 
     useEffect(() => {
@@ -38,6 +42,18 @@ export default function IdentityIssuanceChooseProvider({
             .then((loadedProviders) => setProviders(loadedProviders))
             .catch(() => onError('Unable to load identity providers'));
     }, [dispatch, onError]);
+
+    // This is run in an effect, to prevent navigation if the component is unmounted
+    useEffect(() => {
+        if (nextLocationState !== undefined) {
+            dispatch(
+                push({
+                    pathname: routes.IDENTITYISSUANCE_EXTERNAL,
+                    state: nextLocationState,
+                })
+            );
+        }
+    }, [dispatch, nextLocationState]);
 
     function onClick(p: IdentityProvider) {
         setProvider(p);
@@ -68,18 +84,11 @@ export default function IdentityIssuanceChooseProvider({
             ledger
         );
 
-        const nextLocationState: ExternalIssuanceLocationState = {
+        setNextLocationState({
             ...idObj,
             identityNumber,
             walletId,
-        };
-
-        dispatch(
-            push({
-                pathname: routes.IDENTITYISSUANCE_EXTERNAL,
-                state: nextLocationState,
-            })
-        );
+        });
     }
 
     return (

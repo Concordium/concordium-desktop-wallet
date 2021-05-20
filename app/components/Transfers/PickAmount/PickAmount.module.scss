@@ -1,12 +1,16 @@
+@import 'config/bundle';
+
 .pickRecipient {
     width: 100%;
 }
 
 .estimatedFee {
     width: 100%;
+    margin-bottom: 50px;
 }
 
 .amountInputWrapper {
     display: flex;
     justify-content: center;
+    font-size: $font-size-h1;
 }

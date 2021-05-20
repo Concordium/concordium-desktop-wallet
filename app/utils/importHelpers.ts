@@ -550,8 +550,8 @@ export function validateEncryptedStructure(
     if (!encryptedData.cipherText) {
         return { isValid: false, reason: 'missing cipherText field.' };
     }
-    if (!encryptedData.metaData) {
-        return { isValid: false, reason: 'missing metaData field.' };
+    if (!encryptedData.metadata) {
+        return { isValid: false, reason: 'missing metadata field.' };
     }
     const metaDataFields = [
         'keyLen',
@@ -564,12 +564,12 @@ export function validateEncryptedStructure(
     ];
 
     // Check that metaData is an object, so we don't crash when checking it's fields.
-    if (typeof encryptedData.metaData !== 'object') {
+    if (typeof encryptedData.metadata !== 'object') {
         return { isValid: false, reason: 'malformed metaData.' };
     }
 
     const missingField = metaDataFields.find(
-        (field) => !(field in encryptedData.metaData)
+        (field) => !(field in encryptedData.metadata)
     );
     if (missingField) {
         return {

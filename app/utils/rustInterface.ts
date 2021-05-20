@@ -107,7 +107,7 @@ Identity Credentials Public (IdCredPub): ${pubInfoForIp.idCredPub}
 
 Registration ID (RegId): ${pubInfoForIp.regId}
 
-Verification Key: ${pubInfoForIp.publicKeys.keys[0].verifyKey}
+Public-key: ${pubInfoForIp.publicKeys.keys[0].verifyKey}
 
 Threshold: ${pubInfoForIp.publicKeys.threshold}
 `);

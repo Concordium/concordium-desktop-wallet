@@ -10,8 +10,12 @@ pipeline {
                 sh '''\
                     # Extract version number
                     VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
-                    
-                    FILENAME_EXE="concordium-wallet-${VERSION}.exe"
+
+                    if [ -z $TARGET_NET ]; then
+                      FILENAME_EXE="concordium-desktop-wallet-${VERSION}.exe"
+                    else
+                       FILENAME_EXE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.exe"
+                    fi
                     OUT_FILENAME_EXE="${VERSION}/${FILENAME_EXE}"
 
                     check_uniqueness() {

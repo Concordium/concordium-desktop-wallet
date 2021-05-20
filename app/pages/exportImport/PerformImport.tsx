@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import CheckmarkIcon from '@resources/svg/logo-checkmark.svg';
+import { Redirect } from 'react-router';
 import Button from '~/cross-app-components/Button';
 import {
     AddressBookEntry,
@@ -10,25 +11,22 @@ import {
     Identity,
     ExportData,
     Dispatch,
-} from '../../utils/types';
-import routes from '../../constants/routes.json';
-import {
-    loadIdentities,
-    identitiesSelector,
-} from '../../features/IdentitySlice';
-import { loadAccounts, accountsSelector } from '../../features/AccountSlice';
+} from '~/utils/types';
+import routes from '~/constants/routes.json';
+import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
+import { loadAccounts, accountsSelector } from '~/features/AccountSlice';
 import {
     loadAddressBook,
     importAddressBookEntry,
     addressBookSelector,
-} from '../../features/AddressBookSlice';
+} from '~/features/AddressBookSlice';
 import {
     credentialsSelector,
     loadCredentials,
-} from '../../features/CredentialSlice';
-import MessageModal from '../../components/MessageModal';
-import { hasNoDuplicate, importWallets } from '../../utils/importHelpers';
-import { partition } from '../../utils/basicHelpers';
+} from '~/features/CredentialSlice';
+import MessageModal from '~/components/MessageModal';
+import { hasNoDuplicate, importWallets } from '~/utils/importHelpers';
+import { partition } from '~/utils/basicHelpers';
 import PageLayout from '~/components/PageLayout';
 import Columns from '~/components/Columns';
 import styles from './ExportImport.module.scss';
@@ -111,7 +109,7 @@ export default function PerformImport({ location }: Props) {
     const [started, setStarted] = useState(false);
 
     useEffect(() => {
-        if (!started) {
+        if (!started && importedData) {
             setStarted(true);
             performImport(
                 importedData,
@@ -134,6 +132,10 @@ export default function PerformImport({ location }: Props) {
         dispatch,
         started,
     ]);
+
+    if (!importedData) {
+        return <Redirect to={routes.EXPORTIMPORT} />;
+    }
 
     const accountList = (identity: Identity) =>
         importedData.accounts
@@ -187,39 +189,45 @@ export default function PerformImport({ location }: Props) {
                                 </Button>
                             </div>
                         </Columns.Column>
-                        <Columns.Column className={styles.importedList}>
-                            {importedData.identities.map(
-                                (identity: Identity) => (
-                                    <div
-                                        key={identity.id}
-                                        className={styles.importedIdentity}
-                                    >
-                                        <h2>
-                                            <b>ID:</b> {identity.name}
-                                        </h2>
-                                        <div
-                                            className={styles.importedAccounts}
+                        <Columns.Column>
+                            <div className={styles.importedList}>
+                                <div className="flexChildFill flexColumn justifyCenter">
+                                    {importedData.identities.map(
+                                        (identity: Identity) => (
+                                            <div
+                                                key={identity.id}
+                                                className={styles.importSection}
+                                            >
+                                                <h3>
+                                                    <b>ID:</b> {identity.name}
+                                                </h3>
+                                                <div
+                                                    className={
+                                                        styles.importedAccounts
+                                                    }
+                                                >
+                                                    <p className={styles.bold}>
+                                                        Accounts:
+                                                    </p>
+                                                    {accountList(identity)}
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
+                                    <div className={styles.importSection}>
+                                        <h3>Address book</h3>
+                                        <p
+                                            className={clsx(
+                                                styles.bold,
+                                                styles.importedAddress
+                                            )}
                                         >
-                                            <p className={styles.bold}>
-                                                Accounts:
-                                            </p>
-                                            {accountList(identity)}
-                                        </div>
+                                            Recipient accounts:
+                                        </p>
+                                        {AddressBookList}
                                     </div>
-                                )
-                            )}
-                            <h2 className={styles.AddressBookHeader}>
-                                Address book
-                            </h2>
-                            <p
-                                className={clsx(
-                                    styles.bold,
-                                    styles.importedAddress
-                                )}
-                            >
-                                Recipient accounts:
-                            </p>
-                            {AddressBookList}
+                                </div>
+                            </div>
                         </Columns.Column>
                     </Columns>
                 </PageLayout.Container>
