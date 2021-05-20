@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
@@ -23,7 +23,7 @@ import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
 import ExpiredTransactionView from '../ExpiredTransactionView';
 import { ensureProps } from '~/utils/componentHelpers';
-import getTransactionHash from '~/utils/transactionHash';
+import getTransactionSignDigest from '~/utils/transactionHash';
 import SignTransaction from './SignTransaction';
 
 import styles from './SignTransactionProposal.module.scss';
@@ -43,7 +43,6 @@ interface Props {
  * to the database.
  */
 function SignTransactionProposalView({ location }: Props) {
-    const [transactionHash, setTransactionHash] = useState<string>();
     const dispatch = useDispatch();
 
     const { multiSignatureTransaction }: SignInput = parse(
@@ -64,9 +63,10 @@ function SignTransactionProposalView({ location }: Props) {
         transaction
     );
 
-    useEffect(() => {
-        setTransactionHash(getTransactionHash(updateInstruction));
-    }, [setTransactionHash, updateInstruction]);
+    const transactionSignDigest = useMemo(
+        () => getTransactionSignDigest(updateInstruction),
+        [updateInstruction]
+    );
 
     /** Creates the transaction, and if the ledger parameter is provided, also
      *  adds a signature on the transaction.
@@ -106,7 +106,7 @@ function SignTransactionProposalView({ location }: Props) {
         dispatch(push(selectedProposalRoute(entryId)));
     }
 
-    if (!transactionHash) {
+    if (!transactionSignDigest) {
         return null;
     }
 
