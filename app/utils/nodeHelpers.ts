@@ -38,9 +38,12 @@ export async function getAccountInfoOfAddress(
     return getAccountInfo(address, blockHash);
 }
 
-export async function fetchGlobal(): Promise<Global> {
-    const consensusStatus = await getConsensusStatus();
-    const blockHash = consensusStatus.lastFinalizedBlock;
+export async function fetchGlobal(specificBlockHash?: string): Promise<Global> {
+    let blockHash = specificBlockHash;
+    if (!blockHash) {
+        const consensusStatus = await getConsensusStatus();
+        blockHash = consensusStatus.lastFinalizedBlock;
+    }
     const versioned = await getCryptographicParameters(blockHash);
     return versioned.value;
 }
