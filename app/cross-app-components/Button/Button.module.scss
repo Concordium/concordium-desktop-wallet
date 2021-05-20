@@ -93,10 +93,12 @@
             color: $color-text-faded;
         }
 
-        &:hover,
-        &:focus,
-        &:global(.active) {
-            box-shadow: 0 0 0 2px $color-pale-blue inset;
+        &:not(:disabled) {
+            &:hover,
+            &:focus,
+            &:global(.active) {
+                box-shadow: 0 0 0 2px $color-pale-blue inset;
+            }
         }
 
         &.rootNegative:not(:disabled) {

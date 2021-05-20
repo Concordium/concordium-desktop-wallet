@@ -19,7 +19,9 @@
 }
 
 .disabledActionButton {
-    background-color: $color-soft-grey;
+    > * {
+        opacity: 0.3;
+    }
 }
 
 .actionImage {

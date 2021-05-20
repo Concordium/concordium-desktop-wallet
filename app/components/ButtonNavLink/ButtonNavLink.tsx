@@ -8,10 +8,6 @@ import styles from './ButtonNavLink.module.scss';
 type ButtonNavLinkProps = Omit<ButtonProps<NavLink>, 'as'> &
     NavLinkProps & { disabled?: boolean };
 
-const suppressClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-};
-
 /**
  * @description
  * Render \<NavLink /\> as button with active state.
@@ -25,10 +21,10 @@ export default function ButtonNavLink({
 }: ButtonNavLinkProps): JSX.Element {
     return (
         <Button
-            as={NavLink}
+            as={disabled ? undefined : NavLink}
             activeClassName="active"
             className={clsx(styles.root, className)}
-            onClick={disabled ? suppressClick : undefined}
+            disabled={disabled}
             inverted={inverted}
             size={size}
             {...props}
