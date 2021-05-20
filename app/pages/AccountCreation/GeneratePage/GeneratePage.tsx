@@ -40,6 +40,7 @@ import errorMessages from '~/constants/errorMessages.json';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
+import { formatDate } from '~/utils/timeHelpers';
 
 const CredentialInfoDetails = (
     credInfo: UnsignedCredentialDeploymentInformation
@@ -54,7 +55,7 @@ const CredentialInfoDetails = (
             {credInfo.credentialPublicKeys.threshold}
         </p>
         <p>
-            <b>RegIdCred:</b> {credInfo.credId}
+            <b>Registration ID credential (RegIdCred):</b> {credInfo.credId}
         </p>
         <p>
             <b>Identity provider:</b> {credInfo.ipIdentity}
@@ -63,10 +64,10 @@ const CredentialInfoDetails = (
             <b>Revocation threshold:</b> {credInfo.revocationThreshold}
         </p>
         <p>
-            <b>Valid to:</b> {credInfo.policy.validTo}
+            <b>Valid to:</b> {formatDate(credInfo.policy.validTo)}
         </p>
         <p>
-            <b>Created at:</b> {credInfo.policy.createdAt}
+            <b>Created at:</b> {formatDate(credInfo.policy.createdAt)}
         </p>
     </div>
 );

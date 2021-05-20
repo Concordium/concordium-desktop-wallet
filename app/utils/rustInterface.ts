@@ -53,8 +53,9 @@ export async function createIdentityRequestObjectLedger(
     ipInfo: IpInfo,
     arsInfos: Record<string, ArInfo>,
     global: Global,
-    displayMessage: (message: string) => void,
-    ledger: ConcordiumLedgerClient
+    displayMessage: (message: string | JSX.Element) => void,
+    ledger: ConcordiumLedgerClient,
+    signDetailsView: (info: PublicInformationForIp) => JSX.Element
 ): Promise<SignedIdRequest> {
     const { prfKey, idCredSec } = await getSecretsFromLedger(
         ledger,
@@ -102,16 +103,18 @@ export async function createIdentityRequestObjectLedger(
         signatureIndex: 0,
     };
 
-    displayMessage(`Please sign information on device:
+    displayMessage(signDetailsView(pubInfoForIp));
 
-Identity Credentials Public (IdCredPub): ${pubInfoForIp.idCredPub}
+    //     displayMessage(`Please sign information on device:
 
-Registration ID (RegId): ${pubInfoForIp.regId}
+    // Identity Credentials Public (IdCredPub): ${pubInfoForIp.idCredPub}
 
-Public-key: ${pubInfoForIp.publicKeys.keys[0].verifyKey}
+    // Registration ID (RegId): ${pubInfoForIp.regId}
 
-Threshold: ${pubInfoForIp.publicKeys.threshold}
-`);
+    // Public-key: ${pubInfoForIp.publicKeys.keys[0].verifyKey}
+
+    // Threshold: ${pubInfoForIp.publicKeys.threshold}
+    // `);
     const signature = await ledger.signPublicInformationForIp(
         pubInfoForIp,
         path
