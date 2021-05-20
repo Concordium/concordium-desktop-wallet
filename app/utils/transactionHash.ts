@@ -15,7 +15,7 @@ import { getBlockSummary, getConsensusStatus } from '~/utils/nodeRequests';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
 
 /**
- * Given an update instruction, return the submissionId, which is the hash, that contains the signature.
+ * Given an update instruction, return the transaction hash.
  */
 export async function getUpdateInstructionTransactionHash(
     updateInstruction: UpdateInstruction
