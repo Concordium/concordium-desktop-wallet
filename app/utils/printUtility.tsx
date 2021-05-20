@@ -70,7 +70,7 @@ export const fee = (estimatedFee?: Fraction) => (
 
 export const hashRow = (transaction: AccountTransaction) => (
     <tr>
-        <td>Signing hash</td>
+        <td>Digest to sign</td>
         <td>
             {getAccountTransactionHash(transaction, () => []).toString('hex')}
         </td>
