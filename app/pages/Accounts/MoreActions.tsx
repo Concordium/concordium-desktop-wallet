@@ -1,5 +1,6 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import clsx from 'clsx';
+import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Switch, Route } from 'react-router-dom';
 import { Account, AccountInfo } from '../../utils/types';
@@ -13,6 +14,7 @@ import CloseButton from '~/cross-app-components/CloseButton';
 import Card from '~/cross-app-components/Card';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import styles from './Accounts.module.scss';
+import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 
 interface Props {
     account: Account;
@@ -28,6 +30,7 @@ const items = [
     {
         name: 'Send GTU with a schedule',
         location: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+        requiresCredentials: true,
     },
     {
         name: 'Export Transactions',
@@ -45,6 +48,9 @@ const items = [
  */
 export default function MoreActions({ account, accountInfo }: Props) {
     const dispatch = useDispatch();
+    const accountHasDeployedCredentials = useSelector(
+        accountHasDeployedCredentialsSelector(account)
+    );
 
     function MoreActionsMenu() {
         return (
@@ -54,16 +60,25 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     className={styles.closeButton}
                     onClick={() => dispatch(push(routes.ACCOUNTS))}
                 />
-                {items.map((item) => (
-                    <ButtonNavLink
-                        to={item.location}
-                        key={item.location}
-                        className="h3 mV10"
-                        size="big"
-                    >
-                        {item.name}
-                    </ButtonNavLink>
-                ))}
+                {items.map((item) => {
+                    const isDisabled =
+                        item.requiresCredentials &&
+                        !accountHasDeployedCredentials;
+                    return (
+                        <ButtonNavLink
+                            to={item.location}
+                            key={item.location}
+                            disabled={isDisabled}
+                            className={clsx(
+                                'h3 mV10',
+                                isDisabled && styles.disabledAction
+                            )}
+                            size="big"
+                        >
+                            {item.name}
+                        </ButtonNavLink>
+                    );
+                })}
             </Card>
         );
     }

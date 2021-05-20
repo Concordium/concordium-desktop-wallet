@@ -5,7 +5,8 @@ import Button, { ButtonProps } from '../../cross-app-components/Button';
 
 import styles from './ButtonNavLink.module.scss';
 
-type ButtonNavLinkProps = Omit<ButtonProps<NavLink>, 'as'> & NavLinkProps;
+type ButtonNavLinkProps = Omit<ButtonProps<NavLink>, 'as'> &
+    NavLinkProps & { disabled?: boolean };
 
 /**
  * @description
@@ -14,14 +15,16 @@ type ButtonNavLinkProps = Omit<ButtonProps<NavLink>, 'as'> & NavLinkProps;
 export default function ButtonNavLink({
     className,
     inverted = true,
+    disabled = false,
     size = 'huge',
     ...props
 }: ButtonNavLinkProps): JSX.Element {
     return (
         <Button
-            as={NavLink}
+            as={disabled ? undefined : NavLink}
             activeClassName="active"
             className={clsx(styles.root, className)}
+            disabled={disabled}
             inverted={inverted}
             size={size}
             {...props}
