@@ -13,7 +13,9 @@ import {
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
 import AddCredential from './AddCredential';
-import ChangeSignatureThreshold from './ChangeSignatureThreshold';
+import ChangeSignatureThreshold, {
+    validateThreshold,
+} from './ChangeSignatureThreshold';
 import routes from '~/constants/routes.json';
 import CreateUpdate from './CreateUpdate';
 import { CredentialStatus } from './CredentialStatus';
@@ -212,7 +214,7 @@ export default function UpdateCredentialPage(): JSX.Element {
         ':transactionKind'
     );
 
-    const [isReady, setReady] = useState(false);
+    // const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [currentCredentials, setCurrentCredentials] = useState<
@@ -238,10 +240,40 @@ export default function UpdateCredentialPage(): JSX.Element {
                 : 'Transaction expiry time must be in the future',
         [expiryTime]
     );
-    const onSetExpiryTime = (date: Date | undefined) => {
-        setExpiryTime(date);
-        setReady(expiryTime !== undefined && expiryTimeError === undefined);
-    };
+
+    const newCredentialAmount = credentialIds.filter(
+        ([, status]) => status !== CredentialStatus.Removed
+    ).length;
+
+    const isReady = useMemo(() => {
+        switch (location) {
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
+                return identity !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
+                return account !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
+                return currentCredentials !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
+                return newThreshold !== undefined
+                    ? validateThreshold(newThreshold, newCredentialAmount)
+                    : false;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
+                return (
+                    expiryTime !== undefined && expiryTimeError === undefined
+                );
+            default:
+                return false;
+        }
+    }, [
+        account,
+        currentCredentials,
+        expiryTime,
+        expiryTimeError,
+        identity,
+        location,
+        newCredentialAmount,
+        newThreshold,
+    ]);
 
     /**
      * Loads the credential information for the given account, and updates
@@ -361,13 +393,6 @@ export default function UpdateCredentialPage(): JSX.Element {
 
     function onContinue() {
         const nextLocation = handler.creationLocationHandler(location);
-        const isPickExpiry =
-            nextLocation ===
-            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY.replace(
-                ':transactionKind',
-                `${transactionKind}`
-            );
-        setReady(isPickExpiry);
         dispatch(
             push({
                 pathname: nextLocation,
@@ -417,16 +442,12 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 }
                                 render={() => (
                                     <ChangeSignatureThreshold
-                                        setReady={setReady}
+                                        setReady={() => {}}
                                         currentThreshold={
                                             account?.signatureThreshold || 1
                                         }
                                         newCredentialAmount={
-                                            credentialIds.filter(
-                                                ([, status]) =>
-                                                    status !==
-                                                    CredentialStatus.Removed
-                                            ).length
+                                            newCredentialAmount
                                         }
                                         newThreshold={newThreshold}
                                         setNewThreshold={setNewThreshold}
@@ -439,7 +460,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 }
                                 render={() => (
                                     <AddCredential
-                                        setReady={setReady}
+                                        setReady={() => {}}
                                         accountAddress={account?.address}
                                         credentialIds={credentialIds}
                                         addCredentialId={(newId) =>
@@ -460,7 +481,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 }
                                 render={() => (
                                     <PickAccount
-                                        setReady={setReady}
+                                        setReady={() => {}}
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         identity={identity}
@@ -481,7 +502,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                             }
                                             error={expiryTimeError}
                                             value={expiryTime}
-                                            onChange={onSetExpiryTime}
+                                            onChange={setExpiryTime}
                                         />
                                         <p>
                                             Choose the expiry date for the
@@ -507,7 +528,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 render={() => (
                                     <PickIdentity
                                         chosenIdentity={identity}
-                                        setReady={setReady}
+                                        setReady={() => {}}
                                         setIdentity={setIdentity}
                                     />
                                 )}

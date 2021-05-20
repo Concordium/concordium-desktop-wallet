@@ -10,7 +10,7 @@ interface Props {
     setNewThreshold: (threshold: number | undefined) => void;
 }
 
-function validateThreshold(threshold: number, max: number) {
+export function validateThreshold(threshold: number, max: number) {
     if (!threshold) {
         return false;
     }

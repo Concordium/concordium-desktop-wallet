@@ -78,7 +78,6 @@ export default function CreateTransferProposal({
 
     const handler = findAccountTransactionHandler(transactionKind);
 
-    const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [amount, setAmount] = useState<string>('0.00'); // This is a string, to allows user input in GTU
@@ -94,11 +93,6 @@ export default function CreateTransferProposal({
         [expiryTime]
     );
 
-    const onSetExpiryTime = async (date: Date | undefined) => {
-        setExpiryTime(date);
-        setReady(date !== undefined && expiryTimeError === undefined);
-    };
-
     const [schedule, setSchedule] = useState<Schedule>();
     const [
         scheduleDefaults,
@@ -107,6 +101,36 @@ export default function CreateTransferProposal({
 
     const [estimatedFee, setFee] = useState<Fraction>();
     const [error, setError] = useState<string>();
+
+    const isReady = useMemo(() => {
+        switch (location) {
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
+                return identity !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
+                return schedule !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
+                return account !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
+                return amount !== undefined && isValidGTUString(amount);
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
+                return recipient !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
+                return (
+                    expiryTime !== undefined && expiryTimeError === undefined
+                );
+            default:
+                return false;
+        }
+    }, [
+        account,
+        amount,
+        expiryTime,
+        expiryTimeError,
+        identity,
+        location,
+        recipient,
+        schedule,
+    ]);
 
     useEffect(() => {
         if (account) {
@@ -129,13 +153,6 @@ export default function CreateTransferProposal({
         }
     }, [account, transactionKind, setFee, schedule]);
 
-    function updateAmount(newAmount: string) {
-        if (isValidGTUString(newAmount)) {
-            setReady(true);
-        }
-        setAmount(newAmount);
-    }
-
     function renderSignTransaction() {
         if (!account || !recipient || !expiryTime) {
             throw new Error(
@@ -157,13 +174,6 @@ export default function CreateTransferProposal({
 
     function continueAction() {
         const nextLocation = handler.creationLocationHandler(location);
-        const isPickExpiry =
-            nextLocation ===
-            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY.replace(
-                ':transactionKind',
-                `${transactionKind}`
-            );
-        setReady(isPickExpiry);
         dispatch(
             push({
                 pathname: nextLocation,
@@ -189,7 +199,7 @@ export default function CreateTransferProposal({
                 }}
                 amount={amount}
                 ref={scheduleBuilderRef}
-                setReady={setReady}
+                setReady={() => {}}
                 defaults={scheduleDefaults}
             />
         );
@@ -276,7 +286,7 @@ export default function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickAccount
-                                            setReady={setReady}
+                                            setReady={() => {}}
                                             setAccount={setAccount}
                                             identity={identity}
                                             chosenAccount={account}
@@ -297,10 +307,10 @@ export default function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickAmount
-                                            setReady={setReady}
+                                            setReady={() => {}}
                                             account={account}
                                             amount={amount}
-                                            setAmount={updateAmount}
+                                            setAmount={setAmount}
                                             estimatedFee={estimatedFee}
                                         />
                                     </div>
@@ -313,7 +323,7 @@ export default function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickRecipient
-                                            setReady={setReady}
+                                            setReady={() => {}}
                                             setRecipient={setRecipient}
                                             recipient={recipient}
                                             senderAddress={account?.address}
@@ -335,7 +345,7 @@ export default function CreateTransferProposal({
                                             }
                                             error={expiryTimeError}
                                             value={expiryTime}
-                                            onChange={onSetExpiryTime}
+                                            onChange={setExpiryTime}
                                         />
                                         <p>
                                             Choose the expiry date for the
@@ -355,7 +365,7 @@ export default function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickIdentity
-                                            setReady={setReady}
+                                            setReady={() => {}}
                                             setIdentity={setIdentity}
                                             chosenIdentity={identity}
                                         />
