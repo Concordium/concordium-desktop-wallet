@@ -48,13 +48,17 @@ const links: SidebarLink[] = [
 export default function ConnectedSidebar() {
     const location = useLocation();
     const disableSidebar = location.pathname.startsWith(routes.HOME_PASSWORD);
+    let ledgerStatus;
+    if (!disableSidebar) {
+        ledgerStatus = <LedgerStatus />;
+    }
 
     return (
         <Sidebar
             disabled={disableSidebar}
             links={links}
             version={pkg.version}
-            child={<LedgerStatus />}
+            child={ledgerStatus}
         />
     );
 }

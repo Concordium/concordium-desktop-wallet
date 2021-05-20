@@ -69,14 +69,12 @@ interface GetTransactionsOutput {
     full: boolean;
 }
 
-// TODO Add query parameter includeRawRejectReason and parse the structured
-// reject reason.
 export async function getTransactions(
     address: string,
     id = 0
 ): Promise<GetTransactionsOutput> {
     const response = await walletProxy.get(
-        `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}`
+        `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`
     );
     const { transactions, count, limit } = response.data;
     return { transactions, full: count === limit };

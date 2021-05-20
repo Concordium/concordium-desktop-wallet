@@ -22,13 +22,20 @@ pipeline {
                     VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
                     # Prepare filenames
-                    FILENAME_DEB="concordium-wallet-${VERSION}.deb"
+                    if [ -z $TARGET_NET ]; then
+                       FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
+                       FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
+                       FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
+                    else
+                       FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
+                       FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
+                       FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
+                    fi
+
                     OUT_FILENAME_DEB="${VERSION}/${FILENAME_DEB}"
 
-                    FILENAME_RPM="concordium-wallet-${VERSION}.rpm"
                     OUT_FILENAME_RPM="${VERSION}/${FILENAME_RPM}"
 
-                    FILENAME_APPIMAGE="concordium-wallet-${VERSION}.AppImage"
                     OUT_FILENAME_APPIMAGE="${VERSION}/${FILENAME_APPIMAGE}"
 
                     check_uniqueness() {
@@ -93,13 +100,20 @@ pipeline {
                     VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
                     
                     # Prepare filenames
-                    FILENAME_DEB="concordium-wallet-${VERSION}.deb"
+                    if [ -z $TARGET_NET ]; then
+                       FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
+                       FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
+                       FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
+                    else
+                       FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
+                       FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
+                       FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
+                    fi
+
                     OUT_FILENAME_DEB="${VERSION}/${FILENAME_DEB}"
 
-                    FILENAME_RPM="concordium-wallet-${VERSION}.rpm"
                     OUT_FILENAME_RPM="${VERSION}/${FILENAME_RPM}"
 
-                    FILENAME_APPIMAGE="concordium-wallet-${VERSION}.AppImage"
                     OUT_FILENAME_APPIMAGE="${VERSION}/${FILENAME_APPIMAGE}"
                     
                     # Push to s3
