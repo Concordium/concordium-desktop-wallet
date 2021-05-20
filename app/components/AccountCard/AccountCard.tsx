@@ -128,12 +128,13 @@ export default function AccountCard({
                                 className={styles.bakerImage}
                             />
                         )}
-                        {!accountHasDeployedCredentials && (
-                            <ReadonlyImage
-                                height="15"
-                                className={styles.statusImage}
-                            />
-                        )}
+                        {account.status === AccountStatus.Confirmed &&
+                            !accountHasDeployedCredentials && (
+                                <ReadonlyImage
+                                    height="15"
+                                    className={styles.statusImage}
+                                />
+                            )}
                     </>
                 }
                 right={
