@@ -10,7 +10,6 @@ import {
     CredentialDeploymentDetails,
     Dispatch,
     AccountStatus,
-    UnsignedCredentialDeploymentInformation,
 } from '~/utils/types';
 import { sendTransaction } from '~/utils/nodeRequests';
 import {
@@ -40,37 +39,6 @@ import errorMessages from '~/constants/errorMessages.json';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
-import { formatDate } from '~/utils/timeHelpers';
-
-const CredentialInfoDetails = (
-    credInfo: UnsignedCredentialDeploymentInformation
-) => (
-    <div className="textLeft">
-        <p className="mT0">
-            <b>Verification key:</b>{' '}
-            {credInfo.credentialPublicKeys.keys[0].verifyKey}
-        </p>
-        <p>
-            <b>Signature threshold:</b>{' '}
-            {credInfo.credentialPublicKeys.threshold}
-        </p>
-        <p>
-            <b>Registration ID credential (RegIdCred):</b> {credInfo.credId}
-        </p>
-        <p>
-            <b>Identity provider:</b> {credInfo.ipIdentity}
-        </p>
-        <p>
-            <b>Revocation threshold:</b> {credInfo.revocationThreshold}
-        </p>
-        <p>
-            <b>Valid to:</b> {formatDate(credInfo.policy.validTo)}
-        </p>
-        <p>
-            <b>Created at:</b> {formatDate(credInfo.policy.createdAt)}
-        </p>
-    </div>
-);
 
 interface Props {
     accountName: string;
@@ -184,8 +152,7 @@ export default function AccountCreationGenerate({
             global,
             attributes,
             setMessage,
-            ledger,
-            CredentialInfoDetails
+            ledger
         );
 
         try {

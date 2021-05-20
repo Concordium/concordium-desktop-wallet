@@ -53,7 +53,7 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
 
     async function sign(
         ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
+        setMessage: (message: string | JSX.Element) => void
     ) {
         if (!identity) {
             throw new Error(

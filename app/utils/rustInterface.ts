@@ -21,6 +21,7 @@ import workerCommands from '../constants/workerCommands.json';
 import { getDefaultExpiry } from './timeHelpers';
 import { getAccountPath } from '~/features/ledger/Path';
 import { stringify, parse } from './JSONHelper';
+import CredentialInfoLedgerDetails from '~/components/ledger/CredentialInfoLedgerDetails';
 
 const rawWorker = new RustWorker();
 const worker = new PromiseWorker(rawWorker);
@@ -215,7 +216,7 @@ export async function createCredentialInfo(
     credentialNumber: number,
     global: Global,
     attributes: string[],
-    displayMessage: (message: string) => void,
+    displayMessage: (message: string | JSX.Element) => void,
     ledger: ConcordiumLedgerClient,
     address: string
 ): Promise<CredentialDeploymentInformation> {
@@ -229,8 +230,7 @@ export async function createCredentialInfo(
         address
     );
 
-    // TODO: Display the appropiate details
-    displayMessage(`Please sign details on device.`);
+    displayMessage(CredentialInfoLedgerDetails({ ...parsed, address }));
     // Adding credential on an existing account
     const path = getAccountPath({
         identityIndex: identity.identityNumber,
@@ -265,10 +265,7 @@ export async function createCredentialDetails(
     global: Global,
     attributes: string[],
     displayMessage: (message: string | JSX.Element) => void,
-    ledger: ConcordiumLedgerClient,
-    credInfoDetailsView: (
-        credInfo: UnsignedCredentialDeploymentInformation
-    ) => JSX.Element
+    ledger: ConcordiumLedgerClient
 ): Promise<CredentialDeploymentDetails> {
     const { raw, parsed } = await createUnsignedCredentialInfo(
         identity,
@@ -279,7 +276,7 @@ export async function createCredentialDetails(
         ledger
     );
 
-    displayMessage(credInfoDetailsView(parsed));
+    displayMessage(CredentialInfoLedgerDetails(parsed));
 
     // Adding credential on a new account
     const expiry = getDefaultExpiry();
