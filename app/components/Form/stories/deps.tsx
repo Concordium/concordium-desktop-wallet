@@ -56,7 +56,7 @@ export const decorators = [
     ),
 ];
 
-export const Template: Story<FormProps<unknown>> = (args) => (
+export const Template: Story<FormProps> = (args) => (
     <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
         <Form.Input type="email" name="email" placeholder="Email" />
@@ -66,7 +66,7 @@ export const Template: Story<FormProps<unknown>> = (args) => (
     </Form>
 );
 
-export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
+export const ValidationTemplate: Story<FormProps> = (args) => (
     <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
         <Form.Input
@@ -109,7 +109,7 @@ export const ValidationTemplate: Story<FormProps<unknown>> = (args) => (
     </Form>
 );
 
-export const AllFieldsTemplate: Story<FormProps<unknown>> = (args) => (
+export const AllFieldsTemplate: Story<FormProps> = (args) => (
     <Form {...args}>
         <Form.Input name="name" placeholder="Name" />
         <Form.TextArea name="comment" placeholder="Comment" />

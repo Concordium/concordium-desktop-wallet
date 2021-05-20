@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
@@ -22,14 +22,14 @@ import SimpleErrorModal, {
 import { ensureProps } from '~/utils/componentHelpers';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
-import TransactionHashView from '~/components/TransactionHashView';
+import TransactionSignDigestView from '~/components/TransactionSignatureDigestView';
 import Form from '~/components/Form';
 import Ledger from '~/components/ledger/Ledger';
 import { asyncNoOp } from '~/utils/basicHelpers';
 import { isExpired } from '~/utils/transactionHelpers';
 import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
-import getTransactionHash from '~/utils/transactionHash';
+import getTransactionSignDigest from '~/utils/transactionHash';
 
 import ExpiredTransactionView from '../ExpiredTransactionView';
 import MultiSignatureLayout from '../MultiSignatureLayout';
@@ -68,7 +68,6 @@ function CosignTransactionProposal({
     const [signature, setSignature] = useState<
         UpdateInstructionSignature[] | TransactionAccountSignature | undefined
     >();
-    const [transactionHash, setTransactionHash] = useState<string>();
     const [image, setImage] = useState<string>();
 
     const dispatch = useDispatch();
@@ -78,9 +77,10 @@ function CosignTransactionProposal({
 
     const [transactionHandler] = useState(() => findHandler(transactionObject));
 
-    useEffect(() => {
-        setTransactionHash(getTransactionHash(transactionObject));
-    }, [setTransactionHash, transactionObject]);
+    const transactionSignDigest = useMemo(
+        () => getTransactionSignDigest(transactionObject),
+        [transactionObject]
+    );
 
     const signingFunction: LedgerCallback = async (
         ledger: ConcordiumLedgerClient,
@@ -134,7 +134,7 @@ function CosignTransactionProposal({
         }
     }
 
-    if (!transactionHash) {
+    if (!transactionSignDigest) {
         return null;
     }
 
@@ -173,8 +173,10 @@ function CosignTransactionProposal({
                             >
                                 <Columns.Column header="Security & Submission Details">
                                     <div className={styles.columnContent}>
-                                        <TransactionHashView
-                                            transactionHash={transactionHash}
+                                        <TransactionSignDigestView
+                                            transactionSignDigest={
+                                                transactionSignDigest
+                                            }
                                             setScreenshot={setImage}
                                         />
                                         {instanceOfUpdateInstruction(
