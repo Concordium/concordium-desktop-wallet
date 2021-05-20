@@ -52,12 +52,12 @@ export default function AccountCreationPickAttributes({
             <Columns.Column noResize>
                 <CardList className={styles.rightColumn}>
                     <IdentityCard
-                        className={styles.card}
+                        className={styles.identityListItem}
                         identity={identity}
                         active
                     />
                     <SelectIdentityAttributes
-                        className={styles.card}
+                        className={styles.identityListItem}
                         identity={identity}
                         chosenAttributes={chosenAttributes}
                         setChosenAttributes={setChosenAttributes}
