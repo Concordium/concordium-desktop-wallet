@@ -74,6 +74,12 @@ export async function removeAccount(accountAddress: string) {
         .del();
 }
 
+export async function removeInitialAccount(identityId: number) {
+    return (await knex())(accountsTable)
+        .where({ identityId, isInitial: 1 })
+        .del();
+}
+
 export async function updateSignatureThreshold(
     address: string,
     signatureThreshold: number

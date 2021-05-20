@@ -77,7 +77,7 @@ export function rejectReasonToDisplayText(
         case RejectReason.ModuleHashAlreadyExists:
             return 'A module with the same hash already exists';
         case RejectReason.InvalidAccountReference:
-            return 'The reference account does not exist';
+            return 'The referenced account does not exist';
         case RejectReason.InvalidInitMethod:
             return 'Invalid Initial method, no such contract found in module';
         case RejectReason.InvalidReceiveMethod:

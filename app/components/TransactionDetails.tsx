@@ -7,9 +7,6 @@ import {
 import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
 import UpdateInstructionDetails from './UpdateInstructionDetails';
 
-// TODO Implement a proper view of the supported transaction types, including account
-// transactions.
-
 interface Props {
     transaction: Transaction;
 }

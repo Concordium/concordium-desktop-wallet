@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { updateSettingEntry } from '../../features/SettingsSlice';
-import { Setting } from '../../utils/types';
-import { getNodeInfo } from '../../utils/nodeRequests';
-import startClient from '../../utils/nodeConnector';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateSettingEntry } from '~/features/SettingsSlice';
+import { loadGlobal, globalSelector } from '~/features/GlobalSlice';
+import { Setting } from '~/utils/types';
+import { getConsensusStatus } from '~/utils/nodeRequests';
+import startClient from '~/utils/nodeConnector';
 import Card from '~/cross-app-components/Card';
 import Form from '~/components/Form';
 import styles from './ConnectionSettingElement.module.scss';
@@ -25,6 +26,7 @@ const portRangeMax = 65535;
 export default function ConnectionSetting({ displayText, setting }: Props) {
     const dispatch = useDispatch();
     const startValues = JSON.parse(setting.value);
+    const global = useSelector(globalSelector);
     const [address, setAddress] = useState(startValues.address);
     const [port, setPort] = useState(startValues.port);
     const [connected, setConnected] = useState<boolean>();
@@ -48,7 +50,11 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
     async function testConnection() {
         setTestingConnection(true);
         try {
-            await getNodeInfo();
+            const consensusStatus = await getConsensusStatus();
+            if (!global) {
+                const blockHash = consensusStatus.lastFinalizedBlock;
+                await loadGlobal(dispatch, blockHash);
+            }
             setConnected(true);
         } catch (e) {
             setConnected(false);

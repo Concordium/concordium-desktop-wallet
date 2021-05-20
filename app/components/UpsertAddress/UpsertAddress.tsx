@@ -29,6 +29,7 @@ import styles from './UpsertAddress.module.scss';
 
 type Props = PropsWithChildren<{
     initialValues?: AddressBookEntryForm;
+    readOnly?: boolean;
     onSubmit?(name: string, address: string, note?: string): void;
 }>;
 
@@ -49,6 +50,7 @@ const noteMaxLength = 255;
 export default function UpsertAddress<TAs extends ElementType = typeof Button>({
     onSubmit,
     initialValues,
+    readOnly = false,
     as,
     ...asProps
 }: UpsertAddressProps<TAs>) {
@@ -66,7 +68,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
 
     const upsertAddress = useCallback(
         (values: AddressBookEntryForm) => {
-            const entry: AddressBookEntry = { ...values, readOnly: false };
+            const entry: AddressBookEntry = { ...values, readOnly };
 
             if (isEditMode && initialValues) {
                 updateAddressBookEntry(dispatch, initialValues.name, entry);
@@ -74,7 +76,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                 addToAddressBook(dispatch, entry);
             }
         },
-        [isEditMode, initialValues, dispatch]
+        [isEditMode, initialValues, dispatch, readOnly]
     );
 
     const addressUnique: Validate = useCallback(
@@ -125,6 +127,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                             rules={{ required: 'Name required' }}
                             placeholder="Recipient Name"
                             defaultValue={initialValues?.name}
+                            readOnly={readOnly}
                         />
                         <Form.TextArea
                             className={styles.input}
@@ -139,6 +142,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                             }}
                             placeholder="Paste the account address here"
                             defaultValue={initialValues?.address}
+                            readOnly={readOnly}
                         />
                         <Form.Input
                             className={styles.input}

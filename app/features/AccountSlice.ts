@@ -15,6 +15,8 @@ import {
     removeAccount as removeAccountFromDatabase,
     updateSignatureThreshold as updateSignatureThresholdInDatabase,
     confirmInitialAccount as confirmInitialAccountInDatabase,
+    removeInitialAccount as removeInitialAccountInDatabase,
+    findAccounts,
 } from '../database/AccountDao';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import {
@@ -129,6 +131,13 @@ export const {
     updateAccountFields,
 } = accountsSlice.actions;
 
+// Load accounts into state, and updates their infos
+export async function loadAccounts(dispatch: Dispatch) {
+    const accounts: Account[] = await getAllAccounts();
+    dispatch(updateAccounts(accounts.reverse()));
+    return accounts;
+}
+
 // given an account and the accountEncryptedAmount from the accountInfo
 // determine whether the account has received or sent new funds,
 // and in that case update the state of the account to reflect that.
@@ -154,6 +163,14 @@ function updateAccountEncryptedAmount(
     return Promise.resolve();
 }
 
+export async function removeAccount(
+    dispatch: Dispatch,
+    accountAddress: string
+) {
+    await removeAccountFromDatabase(accountAddress);
+    return loadAccounts(dispatch);
+}
+
 /** Generates the actual address of the account, and updates the account address, status, signatureThreshold,
  *   and the associated credentials' address and credentialIndex
  *  Also adds the account to the address book.
@@ -175,24 +192,31 @@ async function initializeGenesisAccount(
         status: AccountStatus.Confirmed,
         signatureThreshold: accountInfo.accountThreshold,
     };
-    await updateAccount(account.address, accountUpdate);
+    if ((await findAccounts({ address })).length > 0) {
+        // The account already exists, so we should merge with it.
+        removeAccount(dispatch, account.address); // Remove this instance of the account, which still has the credId as placeholder for the address.
+    } else {
+        // The account does not already exists, so we can update the current entry.
+        await updateAccount(account.address, accountUpdate);
+        await dispatch(
+            updateAccountFields({
+                address: account.address,
+                updatedFields: accountUpdate,
+            })
+        );
+        await addToAddressBook(dispatch, {
+            name: account.name,
+            address,
+            readOnly: true,
+        });
+    }
+
     await Promise.all(
         localCredentials.map((cred) =>
             initializeGenesisCredential(dispatch, address, cred, accountInfo)
         )
     ).catch((e) => {
         throw e;
-    });
-    await dispatch(
-        updateAccountFields({
-            address: account.address,
-            updatedFields: accountUpdate,
-        })
-    );
-    await addToAddressBook(dispatch, {
-        name: account.name,
-        address,
-        readOnly: true,
     });
     return address;
 }
@@ -245,32 +269,27 @@ export async function loadAccountInfos(
         return Promise.resolve();
     }
     const accountInfos = await getAccountInfos(confirmedAccounts);
-    const updateEncryptedAmountsPromises = accountInfos.map(
-        ({ account, accountInfo }) => {
-            if (account.status === AccountStatus.Genesis) {
-                if (!accountInfo) {
-                    throw new Error(
-                        `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}` // account.address contains the placeholder credId
-                    );
-                }
-                return new Promise<void>((resolve, reject) => {
-                    return initializeGenesisAccount(
-                        dispatch,
-                        account,
-                        accountInfo
-                    )
-                        .then((address) => {
-                            map[address] = accountInfo;
-                            return resolve();
-                        })
-                        .catch(reject);
-                });
+    for (let i = 0; i < accountInfos.length; i += 1) {
+        const { account, accountInfo } = accountInfos[i];
+        if (account.status === AccountStatus.Genesis) {
+            if (!accountInfo) {
+                throw new Error(
+                    `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}` // account.address contains the placeholder credId
+                );
             }
+            // eslint-disable-next-line no-await-in-loop
+            const address = await initializeGenesisAccount(
+                dispatch,
+                account,
+                accountInfo
+            );
+            map[address] = accountInfo;
+        } else {
             map[account.address] = accountInfo;
-            return updateAccountFromAccountInfo(dispatch, account, accountInfo);
+            // eslint-disable-next-line no-await-in-loop
+            await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
-    );
-    await Promise.all(updateEncryptedAmountsPromises);
+    }
     return dispatch(setAccountInfos(map));
 }
 
@@ -297,13 +316,6 @@ export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
         );
     }
     return Promise.resolve();
-}
-
-// Load accounts into state, and updates their infos
-export async function loadAccounts(dispatch: Dispatch) {
-    const accounts: Account[] = await getAllAccounts();
-    dispatch(updateAccounts(accounts.reverse()));
-    return accounts;
 }
 
 // Add an account with pending status..
@@ -338,6 +350,14 @@ export async function confirmInitialAccount(
         status: AccountStatus.Confirmed,
         address: accountAddress,
     });
+    return loadAccounts(dispatch);
+}
+
+export async function removeInitialAccount(
+    dispatch: Dispatch,
+    identityId: number
+) {
+    await removeInitialAccountInDatabase(identityId);
     return loadAccounts(dispatch);
 }
 
@@ -420,14 +440,6 @@ export async function addExternalAccount(
 
 export async function importAccount(account: Account | Account[]) {
     await insertAccount(account);
-}
-
-export async function removeAccount(
-    dispatch: Dispatch,
-    accountAddress: string
-) {
-    await removeAccountFromDatabase(accountAddress);
-    return loadAccounts(dispatch);
 }
 
 export default accountsSlice.reducer;
