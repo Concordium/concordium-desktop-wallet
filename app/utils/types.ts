@@ -131,7 +131,7 @@ export interface Account {
     totalDecrypted?: string;
     allDecrypted?: boolean;
     incomingAmounts?: string;
-    rewardFilter: RewardFilter;
+    rewardFilter: string;
     selfAmounts?: string;
     maxTransactionId: number;
     deploymentTransactionId?: string;

@@ -17,7 +17,6 @@ import {
     Dispatch,
     TransactionEvent,
     Global,
-    RewardFilter,
 } from '../utils/types';
 import {
     attachNames,
@@ -157,22 +156,10 @@ function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
  * Filters out reward transactions based on the account's rewardFilter.
  */
 export async function loadTransactions(account: Account, dispatch: Dispatch) {
-    let filteredTypes: TransactionKindString[] = [];
-
-    if (account.rewardFilter === RewardFilter.AllButFinalization) {
-        filteredTypes = [TransactionKindString.FinalizationReward];
-    } else if (account.rewardFilter === RewardFilter.None) {
-        filteredTypes = [
-            TransactionKindString.BakingReward,
-            TransactionKindString.BlockReward,
-            TransactionKindString.FinalizationReward,
-        ];
-    }
-
     const { transactions, more } = await getTransactionsOfAccount(
         account,
         'id',
-        filteredTypes
+        JSON.parse(account.rewardFilter)
     );
 
     const namedTransactions = await attachNames(transactions);

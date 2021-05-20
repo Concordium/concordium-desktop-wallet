@@ -5,12 +5,7 @@ import PageLayout from '~/components/PageLayout';
 import Form from '~/components/Form';
 import { importAccount, loadAccounts } from '~/features/AccountSlice';
 import { insertNewCredential } from '~/features/CredentialSlice';
-import {
-    Account,
-    AccountStatus,
-    GenesisAccount,
-    RewardFilter,
-} from '~/utils/types';
+import { Account, AccountStatus, GenesisAccount } from '~/utils/types';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import { saveFile } from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
@@ -161,7 +156,7 @@ function ConfirmAndExport({
                 identityId: credentialNumberIdentityId.identityId,
                 maxTransactionId: 0,
                 isInitial: false,
-                rewardFilter: RewardFilter.All,
+                rewardFilter: '[]',
             };
 
             importAccount(account);

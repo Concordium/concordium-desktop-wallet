@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Account, RewardFilter } from '~/utils/types';
+import { Account, TransactionKindString } from '~/utils/types';
 import Checkbox from '~/components/Form/Checkbox';
 import TransferView from '~/components/Transfers/TransferView';
 import routes from '~/constants/routes.json';
@@ -18,9 +18,20 @@ interface Props {
  */
 export default function TransferLogFilters({ account, returnFunction }: Props) {
     const dispatch = useDispatch();
+    const rewardFilter = JSON.parse(account.rewardFilter);
 
-    const setRewardFilter = (filterStatus: RewardFilter) =>
-        updateRewardFilter(dispatch, account.address, filterStatus);
+    const setRewardFilter = (updatedKind: TransactionKindString) => {
+        if (rewardFilter.includes(updatedKind)) {
+            const withoutKind = [...rewardFilter];
+            withoutKind.splice(withoutKind.indexOf(updatedKind), 1);
+            updateRewardFilter(dispatch, account.address, withoutKind);
+        } else {
+            updateRewardFilter(dispatch, account.address, [
+                ...rewardFilter,
+                updatedKind,
+            ]);
+        }
+    };
 
     return (
         <TransferView
@@ -32,28 +43,34 @@ export default function TransferLogFilters({ account, returnFunction }: Props) {
             <Checkbox
                 className={styles.checkbox}
                 checked={
-                    account.rewardFilter !== undefined &&
-                    [
-                        RewardFilter.All,
-                        RewardFilter.AllButFinalization,
-                    ].includes(account.rewardFilter)
+                    !rewardFilter.includes(TransactionKindString.BakingReward)
                 }
                 onChange={() =>
-                    account.rewardFilter === undefined ||
-                    account.rewardFilter === RewardFilter.None
-                        ? setRewardFilter(RewardFilter.AllButFinalization)
-                        : setRewardFilter(RewardFilter.None)
+                    setRewardFilter(TransactionKindString.BakingReward)
                 }
             >
                 Show baker rewards
             </Checkbox>
             <Checkbox
                 className={styles.checkbox}
-                checked={account.rewardFilter === RewardFilter.All}
+                checked={
+                    !rewardFilter.includes(TransactionKindString.BlockReward)
+                }
                 onChange={() =>
-                    account.rewardFilter === RewardFilter.All
-                        ? setRewardFilter(RewardFilter.AllButFinalization)
-                        : setRewardFilter(RewardFilter.All)
+                    setRewardFilter(TransactionKindString.BlockReward)
+                }
+            >
+                Show block rewards
+            </Checkbox>
+            <Checkbox
+                className={styles.checkbox}
+                checked={
+                    !rewardFilter.includes(
+                        TransactionKindString.FinalizationReward
+                    )
+                }
+                onChange={() =>
+                    setRewardFilter(TransactionKindString.FinalizationReward)
                 }
             >
                 Show finalization rewards

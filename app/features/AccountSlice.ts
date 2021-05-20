@@ -29,7 +29,7 @@ import {
     Dispatch,
     Global,
     Identity,
-    RewardFilter,
+    TransactionKindString,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
@@ -331,7 +331,7 @@ export async function addPendingAccount(
         maxTransactionId: 0,
         isInitial,
         deploymentTransactionId,
-        rewardFilter: RewardFilter.All,
+        rewardFilter: '[]',
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -421,7 +421,7 @@ export async function addExternalAccount(
         signatureThreshold,
         maxTransactionId: 0,
         isInitial: false,
-        rewardFilter: RewardFilter.All,
+        rewardFilter: '[]',
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -442,9 +442,9 @@ export async function removeAccount(
 export async function updateRewardFilter(
     dispatch: Dispatch,
     address: string,
-    rewardFilter: RewardFilter
+    rewardFilter: TransactionKindString[]
 ) {
-    const updatedFields = { rewardFilter };
+    const updatedFields = { rewardFilter: JSON.stringify(rewardFilter) };
     updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
 }

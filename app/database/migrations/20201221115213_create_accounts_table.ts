@@ -21,7 +21,7 @@ export async function up(knex: Knex): Promise<void> {
             table.integer('maxTransactionId').defaultTo(0);
             table.string('deploymentTransactionId');
             table.boolean('isInitial').defaultTo(false);
-            table.integer('rewardFilter');
+            table.string('rewardFilter');
         }
     );
 }
