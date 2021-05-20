@@ -20,6 +20,7 @@ import {
 } from '../utils/types';
 import {
     attachNames,
+    extractTransactionCost,
     isSuccessfulTransaction,
 } from '../utils/transactionHelpers';
 import {
@@ -195,10 +196,7 @@ export async function confirmTransaction(
 ) {
     const outcomes = Object.values(outcomeRecord);
     const success = isSuccessfulTransaction(outcomes);
-    const cost = outcomes.reduce(
-        (accu, event) => accu + parseInt(event.cost, 10),
-        0
-    );
+    const cost = extractTransactionCost(outcomes);
     let rejectReason;
     if (!success) {
         const failure = outcomes.find(

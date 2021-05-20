@@ -397,6 +397,10 @@ export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
     );
 }
 
+export function extractTransactionCost(outcomes: TransactionEvent[]) {
+    return outcomes.reduce((accu, event) => accu + parseInt(event.cost, 10), 0);
+}
+
 export const isExpired = (transaction: Transaction) =>
     getTimeout(transaction) <= getNow(TimeStampUnit.seconds);
 

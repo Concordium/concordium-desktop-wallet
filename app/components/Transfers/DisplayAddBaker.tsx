@@ -1,7 +1,7 @@
 import React from 'react';
 import { AddBaker } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import DisplayFee from '~/components/DisplayFee';
 import { useAccountName } from '~/utils/hooks';
 import styles from './transferDetails.module.scss';
 import PublicKey from '~/pages/multisig/common/PublicKey/PublicKey';
@@ -24,7 +24,7 @@ export default function DisplayAddBaker({ transaction }: Props) {
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.bakingStake)}
             </p>
-            <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            <DisplayFee transaction={transaction} />
             <p className={styles.title}>Restake earnings:</p>
             <p className={styles.amount}>
                 {transaction.payload.restakeEarnings ? 'Yes' : 'No'}

@@ -3,7 +3,6 @@ import {
     MultiSignatureTransactionStatus,
     AccountTransaction,
     TimeStampUnit,
-    Fraction,
 } from '~/utils/types';
 import { getAccountTransactionHash } from './transactionSerialization';
 import { displayAsGTU } from '~/utils/gtu';
@@ -37,18 +36,34 @@ export const recipient = (address: string, name?: string) =>
 
 export const totalWithdrawn = (
     microGTUAmount: string | bigint,
-    estimatedFee: Fraction | undefined
-) => (
-    <tr>
-        <td>Est. total amount withdrawn</td>
-        <td>
-            {displayAsGTU(
-                BigInt(microGTUAmount) +
-                    (estimatedFee ? collapseFraction(estimatedFee) : 0n)
-            )}
-        </td>
-    </tr>
-);
+    transaction: AccountTransaction
+) => {
+    if (transaction.cost) {
+        return (
+            <tr>
+                <td>Total amount withdrawn</td>
+                <td>
+                    {displayAsGTU(
+                        BigInt(microGTUAmount) + BigInt(transaction.cost)
+                    )}
+                </td>
+            </tr>
+        );
+    }
+    return (
+        <tr>
+            <td>Est. total amount withdrawn</td>
+            <td>
+                {displayAsGTU(
+                    BigInt(microGTUAmount) +
+                        (transaction.estimatedFee
+                            ? collapseFraction(transaction.estimatedFee)
+                            : 0n)
+                )}
+            </td>
+        </tr>
+    );
+};
 
 export const displayAmount = (microGTUAmount: string | bigint) => (
     <tr>
@@ -57,16 +72,26 @@ export const displayAmount = (microGTUAmount: string | bigint) => (
     </tr>
 );
 
-export const fee = (estimatedFee?: Fraction) => (
-    <tr>
-        <td>Estimated fee</td>
-        <td>
-            {estimatedFee
-                ? displayAsGTU(collapseFraction(estimatedFee))
-                : 'unknown'}
-        </td>
-    </tr>
-);
+export const fee = (transaction: AccountTransaction) => {
+    if (transaction.cost) {
+        return (
+            <tr>
+                <td>Fee</td>
+                <td>{displayAsGTU(transaction.cost)}</td>
+            </tr>
+        );
+    }
+    return (
+        <tr>
+            <td>Estimated fee</td>
+            <td>
+                {transaction.estimatedFee
+                    ? displayAsGTU(collapseFraction(transaction.estimatedFee))
+                    : 'unknown'}
+            </td>
+        </tr>
+    );
+};
 
 export const hashRow = (transaction: AccountTransaction) => (
     <tr>

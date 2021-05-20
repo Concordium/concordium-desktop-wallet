@@ -2,7 +2,7 @@ import React from 'react';
 import { ScheduledTransfer } from '~/utils/types';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import { displayAsGTU } from '~/utils/gtu';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import DisplayFee from '~/components/DisplayFee';
 import styles from './transferDetails.module.scss';
 import ScheduleList from '~/components/ScheduleList';
 
@@ -31,7 +31,7 @@ export default function DisplayScheduledTransfer({
             <p className={styles.address}>{transaction.payload.toAddress}</p>
             <p className={styles.title}>Amount:</p>
             <p className={styles.amount}>{displayAsGTU(amount)}</p>
-            <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            <DisplayFee transaction={transaction} />
             <p className={styles.title}>Individual Releases:</p>
             <ScheduleList schedule={transaction.payload.schedule} />
         </>

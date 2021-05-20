@@ -52,9 +52,9 @@ function PrintFormatScheduledTransfer({
                 <tbody>
                     {sender(transaction.sender, fromName)}
                     {recipient(transaction.payload.toAddress, toName)}
-                    {totalWithdrawn(amount, transaction.estimatedFee)}
+                    {totalWithdrawn(amount, transaction)}
                     {displayAmount(amount)}
-                    {fee(transaction.estimatedFee)}
+                    {fee(transaction)}
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}

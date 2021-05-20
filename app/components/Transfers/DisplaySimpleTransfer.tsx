@@ -1,7 +1,7 @@
 import React from 'react';
 import { SimpleTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import DisplayFee from '~/components/DisplayFee';
 import styles from './transferDetails.module.scss';
 
 interface Props {
@@ -30,7 +30,7 @@ export default function DisplaySimpleTransfer({
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.amount)}
             </p>
-            <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            <DisplayFee transaction={transaction} />
         </>
     );
 }
