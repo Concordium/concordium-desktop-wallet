@@ -3,14 +3,14 @@ import fs from 'fs';
 import { Route, Switch } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
 import { getDatabaseFilename } from '~/database/knexfile';
-import PageLayout from '~/components/PageLayout/PageLayout';
+import PageLayout from '~/components/PageLayout';
 import { loadAllSettings } from '~/database/SettingsDao';
-import NewUserInit from './NewUserInit';
 import SelectPassword from './SelectPassword';
+import NewUserInit from './NewUserInit';
 import PasswordHasBeenSet from './PasswordHasBeenSet';
-import EnterWalletPassword from './EnterWalletPassword';
+import Unlock from './Unlock';
 
 /**
  * Checks whether the database has already been created or not.
@@ -66,7 +66,7 @@ export default function HomePage() {
             <Switch>
                 <Route
                     path={routes.HOME_ENTER_PASSWORD}
-                    render={() => <EnterWalletPassword />}
+                    render={() => <Unlock />}
                 />
                 <Route
                     path={routes.HOME_PASSWORD_SET}

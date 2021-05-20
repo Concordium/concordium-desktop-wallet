@@ -1,6 +1,5 @@
-import { push } from 'connected-react-router';
-import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { Redirect } from 'react-router';
 import routes from '../../constants/routes.json';
 
 /**
@@ -8,9 +7,5 @@ import routes from '../../constants/routes.json';
  * forwards directly to the home page.
  */
 export default function DefaultPage() {
-    const dispatch = useDispatch();
-    useEffect(() => {
-        dispatch(push({ pathname: routes.HOME }));
-    }, [dispatch]);
-    return null;
+    return <Redirect to={routes.HOME} />;
 }

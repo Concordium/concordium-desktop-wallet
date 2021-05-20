@@ -34,11 +34,13 @@ async function loadSettingsIntoStore(dispatch: Dispatch) {
 export default async function initApplication(dispatch: Dispatch) {
     await loadSettingsIntoStore(dispatch);
 
-    loadAddressBook(dispatch);
-    loadAccounts(dispatch);
-    loadIdentities(dispatch);
-    loadProposals(dispatch);
-    loadCredentials(dispatch);
+    await Promise.all([
+        loadAddressBook(dispatch),
+        loadAccounts(dispatch),
+        loadIdentities(dispatch),
+        loadProposals(dispatch),
+        loadCredentials(dispatch),
+    ]);
 
     listenForIdentityStatus(dispatch);
 }
