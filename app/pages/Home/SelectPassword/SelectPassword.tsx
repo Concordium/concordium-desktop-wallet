@@ -70,7 +70,7 @@ export default function SelectPassword() {
                                 minLength: {
                                     value: 6,
                                     message:
-                                        'Password has to be minimin 6 characters',
+                                        'Password has to be at least 6 characters',
                                 },
                             }}
                             placeholder="Enter password"
