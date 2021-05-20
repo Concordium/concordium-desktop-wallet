@@ -13,7 +13,7 @@ import {
 import { parse, stringify } from '~/utils/JSONHelper';
 import { ModalErrorInput } from '~/components/SimpleErrorModal';
 import { updateCurrentProposal } from '~/features/MultiSignatureSlice';
-import getTransactionHash from '~/utils/transactionHash';
+import getTransactionSignDigest from '~/utils/transactionHash';
 
 async function HandleAccountTransactionSignatureFile(
     dispatch: Dispatch,
@@ -70,10 +70,10 @@ async function isSignatureValid(
     proposal: UpdateInstruction,
     signature: UpdateInstructionSignature
 ): Promise<boolean> {
-    const transactionHash = getTransactionHash(proposal);
+    const transactionSignatureDigest = getTransactionSignDigest(proposal);
     return ed.verify(
         signature.signature,
-        transactionHash,
+        transactionSignatureDigest,
         signature.authorizationPublicKey
     );
 }

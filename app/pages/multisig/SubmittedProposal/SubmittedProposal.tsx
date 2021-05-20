@@ -33,6 +33,7 @@ import { serializeTransaction } from '~/utils/transactionSerialization';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
 
 import withChainData, { ChainData } from '../common/withChainData';
+import TransactionHashView from '~/components/TransactionHash';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS;
 
@@ -163,6 +164,7 @@ const SubmittedProposalView = withChainData<Props>(
                     <div className={styles.status}>
                         {getStatusIcon(status)}
                         {getStatusText(status)}
+                        <TransactionHashView transaction={transaction} />
                     </div>
                     <Button
                         className={styles.button}
