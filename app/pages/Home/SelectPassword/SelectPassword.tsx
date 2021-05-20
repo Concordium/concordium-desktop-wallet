@@ -47,7 +47,7 @@ export default function SelectPassword() {
 
     return (
         <PageLayout.Container className="pB0" disableBack padding="both">
-            <div className={styles.container}>
+            <div className={homeStyles.content}>
                 <h2>Select a wallet password</h2>
                 <p>
                     The first step is to set up a password for the wallet. This

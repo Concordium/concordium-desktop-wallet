@@ -5,8 +5,7 @@ import PageLayout from '~/components/PageLayout';
 import Button from '~/cross-app-components/Button';
 import routes from '~/constants/routes.json';
 
-import homeStyles from '../Home.module.scss';
-import styles from './NewUserInit.module.scss';
+import styles from './Home.module.scss';
 
 export default function NewUserInit() {
     const dispatch = useDispatch();
@@ -23,7 +22,7 @@ export default function NewUserInit() {
                     </p>
                 </div>
                 <Button
-                    className={homeStyles.button}
+                    className={styles.button}
                     onClick={() =>
                         dispatch(
                             push({

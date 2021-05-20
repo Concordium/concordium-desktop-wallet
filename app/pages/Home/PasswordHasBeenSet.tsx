@@ -6,8 +6,7 @@ import PageLayout from '~/components/PageLayout';
 import Button from '~/cross-app-components/Button';
 import routes from '~/constants/routes.json';
 
-import homeStyles from '../Home.module.scss';
-import styles from './PasswordHasBeenSet.module.scss';
+import styles from './Home.module.scss';
 
 export default function PasswordHasBeenSet() {
     const dispatch = useDispatch();
@@ -25,7 +24,7 @@ export default function PasswordHasBeenSet() {
                     </p>
                 </div>
                 <Button
-                    className={clsx(homeStyles.button, 'mT100')}
+                    className={clsx(styles.button, 'mT100')}
                     onClick={() =>
                         dispatch(push({ pathname: routes.ACCOUNTS }))
                     }
