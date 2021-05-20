@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 import {
     Account,
     Identity,
@@ -30,7 +31,9 @@ const showAccount = (account: Account | AddressBookEntry) => (
     </>
 );
 
-const title = (text: string) => <p className={styles.title}>{text}</p>;
+const title = (text: string, first = false) => (
+    <p className={clsx(styles.title, first && 'mT0')}>{text}</p>
+);
 const value = (text: string) => <p className={styles.value}>{text}</p>;
 
 export default function TransactionProposalDetails({
@@ -47,7 +50,7 @@ export default function TransactionProposalDetails({
 
     return (
         <div className={styles.details}>
-            {title('Identity:')}
+            {title('Identity:', true)}
             {identity ? value(identity.name) : placeholder}
             {title('Account:')}
             {account ? showAccount(account) : placeholder}

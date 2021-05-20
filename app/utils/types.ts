@@ -953,7 +953,7 @@ export interface HigherLevelKeyUpdate {
 
 export interface TransactionDetails {
     events: string[];
-    rejectReason?: RejectReason;
+    rawRejectReason: RejectReasonWithContents;
     transferSource?: Hex;
     transferDestination?: Hex;
     type: TransactionKindString;
@@ -970,6 +970,9 @@ export interface EncryptedInfo {
     incomingAmounts: EncryptedAmount[];
 }
 
+/**
+ * The transaction format that is returned by the wallet proxy.
+ */
 export interface IncomingTransaction {
     id: number;
     blockHash: Hex;

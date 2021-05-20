@@ -1,7 +1,6 @@
 @import 'config/bundle';
 
 .buildSchedule {
-    min-height: 850px;
     text-align: center;
     position: relative;
 
@@ -16,7 +15,7 @@
 }
 
 .buildScheduleCommon {
-    > * {
+    > *:not(:last-child) {
         margin-bottom: 40px;
     }
 }

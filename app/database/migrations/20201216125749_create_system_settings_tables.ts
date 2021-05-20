@@ -1,7 +1,5 @@
 import { Knex } from 'knex';
 
-// TODO: Add unique constrains on name for both tables, so that we cannot get clashes.
-
 export async function up(knex: Knex): Promise<void> {
     return knex.schema
         .createTable('setting_group', (table: Knex.TableBuilder) => {

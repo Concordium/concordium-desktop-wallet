@@ -1,7 +1,7 @@
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import { accountsSelector } from '~/features/AccountSlice';
@@ -28,9 +28,7 @@ export default function AccountCreationFinal({
     const account = accounts.find((acc) => acc.address === address);
 
     if (account === undefined) {
-        throw new Error(
-            'Newly created account not found. This should not happen'
-        );
+        return <Redirect to={routes.ACCOUNTS} />;
     }
 
     return (
