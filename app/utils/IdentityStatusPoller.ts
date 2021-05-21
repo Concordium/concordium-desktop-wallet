@@ -49,7 +49,7 @@ export async function confirmIdentityAndInitialAccount(
             addToAddressBook(dispatch, {
                 name: accountName,
                 address: accountAddress,
-                note: `Initial account of ${identityName}`,
+                note: `Initial account of identity: ${identityName}`,
                 readOnly: true,
             });
         }

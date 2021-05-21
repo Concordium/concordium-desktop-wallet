@@ -14,6 +14,7 @@ import {
     updateAccount,
     removeAccount as removeAccountFromDatabase,
     updateSignatureThreshold as updateSignatureThresholdInDatabase,
+    getAccount,
     confirmInitialAccount as confirmInitialAccountInDatabase,
     removeInitialAccount as removeInitialAccountInDatabase,
     findAccounts,
@@ -392,6 +393,15 @@ export async function confirmAccount(
             await updateAccount(address, {
                 status: AccountStatus.Confirmed,
             });
+            // eslint-disable-next-line no-case-declarations
+            const account = (await getAccount(address)) as Account;
+
+            addToAddressBook(dispatch, {
+                name: account.name,
+                address,
+                note: `Account of identity: ${account.identityName}`,
+                readOnly: true,
+            });
             break;
         default:
             throw new Error('Unexpected status was returned by the poller!');
@@ -448,6 +458,13 @@ export async function addExternalAccount(
         isInitial: false,
     };
     await insertAccount(account);
+    addToAddressBook(dispatch, {
+        readOnly: true,
+        name: accountName,
+        address: accountAddress,
+        note: 'Shared account',
+    });
+
     return loadAccounts(dispatch);
 }
 
