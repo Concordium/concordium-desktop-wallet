@@ -164,7 +164,11 @@ function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
  * Load transactions from storage.
  * Filters out reward transactions based on the account's rewardFilter.
  */
-export async function loadTransactions(account: Account, dispatch: Dispatch) {
+export async function loadTransactions(
+    account: Account,
+    dispatch: Dispatch,
+    controller?: AbortController
+) {
     await dispatch(setLoadingTransactions(true));
     const { transactions, more } = await getTransactionsOfAccount(
         account,
@@ -173,8 +177,10 @@ export async function loadTransactions(account: Account, dispatch: Dispatch) {
     );
 
     const namedTransactions = await attachNames(transactions);
-    await dispatch(setLoadingTransactions(false));
-    return dispatch(setTransactions({ transactions: namedTransactions, more }));
+    if (!controller?.isAborted) {
+        await dispatch(setLoadingTransactions(false));
+        dispatch(setTransactions({ transactions: namedTransactions, more }));
+    }
 }
 
 async function fetchTransactions(address: string, currentMaxId: number) {

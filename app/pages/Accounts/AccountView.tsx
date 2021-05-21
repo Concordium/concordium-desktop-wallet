@@ -73,8 +73,11 @@ export default function AccountView() {
 
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
-            loadTransactions(account, dispatch);
+            const loadController = new AbortController();
+            loadTransactions(account, dispatch, loadController);
+            return () => loadController.abort();
         }
+        return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [account?.address, account?.rewardFilter]);
 
