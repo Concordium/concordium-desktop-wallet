@@ -21,8 +21,9 @@ import { CommonFieldProps } from '../common';
 
 import styles from './InlineNumber.module.scss';
 
-const withTrimLeadingZeros = (f: (v: string) => string) => (v = '') =>
-    f(trimLeadingZerosHelper(v));
+const withTrimLeadingZeros = (f: (v: string | undefined) => string) => (
+    v = ''
+) => f(trimLeadingZerosHelper(v));
 
 const ensureValidBigInt = (v = ''): string => {
     try {
@@ -119,7 +120,7 @@ export default function InlineNumber({
             !allowExponent ||
             ensureDigits !== 0
         ) {
-            return formatNumberStringWithDigits(
+            f = formatNumberStringWithDigits(
                 ensureDigits,
                 isNumber(allowFractions) ? allowFractions : undefined,
                 !allowExponent

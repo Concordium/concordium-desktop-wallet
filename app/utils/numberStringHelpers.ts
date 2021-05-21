@@ -439,13 +439,5 @@ export const formatNumberStringWithDigits = (
  * Trims leading zeros from number string. Returns input value if valid number string cannot be parsed.
  */
 export const trimLeadingZeros = (value = ''): string => {
-    const trimmed = /^(?:0*)((?:0|(?:[1-9]\d*?))?(?:\.\d*)?(?:e[+-]?\d*)?)$/.exec(
-        value
-    );
-
-    if (!trimmed) {
-        return value;
-    }
-
-    return trimmed[1] || value;
+    return value.replace(/^0+(?=\d)/, '');
 };

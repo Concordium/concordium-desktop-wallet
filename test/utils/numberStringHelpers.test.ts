@@ -193,6 +193,9 @@ describe(formatNumberStringWithDigits, () => {
 
 describe(trimLeadingZeros, () => {
     test('Trims leading zeros from number string', () => {
+        expect(trimLeadingZeros('0')).toBe('0');
+        expect(trimLeadingZeros('0.00')).toBe('0.00');
+        expect(trimLeadingZeros('00.00')).toBe('0.00');
         expect(trimLeadingZeros('01')).toBe('1');
         expect(trimLeadingZeros('01.')).toBe('1.');
         expect(trimLeadingZeros('1.1')).toBe('1.1');
@@ -204,12 +207,5 @@ describe(trimLeadingZeros, () => {
         expect(trimLeadingZeros('012.1e+12')).toBe('12.1e+12');
         expect(trimLeadingZeros('012.1e-12')).toBe('12.1e-12');
         expect(trimLeadingZeros('012.1e12')).toBe('12.1e12');
-    });
-
-    test('Falls back to input value for invalid input', () => {
-        expect(trimLeadingZeros('test')).toBe('test');
-        expect(trimLeadingZeros('')).toBe('');
-        expect(trimLeadingZeros('1.2e12.3')).toBe('1.2e12.3');
-        expect(trimLeadingZeros('..2e12')).toBe('..2e12');
     });
 });
