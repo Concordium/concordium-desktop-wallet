@@ -18,10 +18,6 @@ import {
     removeAccount,
 } from '~/features/AccountSlice';
 import {
-    addToAddressBook,
-    removeFromAddressBook,
-} from '~/features/AddressBookSlice';
-import {
     removeCredentialsOfAccount,
     getNextCredentialNumber,
 } from '~/database/CredentialDao';
@@ -49,7 +45,6 @@ interface Props {
 function removeFailed(dispatch: Dispatch, accountAddress: string) {
     removeAccount(dispatch, accountAddress);
     removeCredentialsOfAccount(accountAddress);
-    removeFromAddressBook(dispatch, { address: accountAddress });
 }
 
 export default function AccountCreationGenerate({
@@ -109,12 +104,6 @@ export default function AccountCreationGenerate({
             0, // credentialIndex = 0 on original
             credentialDeploymentInfo
         );
-        addToAddressBook(dispatch, {
-            name: accountName,
-            address: accountAddress,
-            note: `Account for credential ${credentialNumber} of ${identity.name}`, // TODO: have better note
-            readOnly: true,
-        });
     }
 
     function onError(message: string) {
@@ -124,7 +113,7 @@ export default function AccountCreationGenerate({
 
     async function createAccount(
         ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
+        setMessage: (message: string | JSX.Element) => void
     ) {
         let credentialNumber;
         if (!global) {

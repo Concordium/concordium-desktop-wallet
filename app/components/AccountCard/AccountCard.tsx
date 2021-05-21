@@ -6,6 +6,7 @@ import PendingImage from '@resources/svg/pending-small.svg';
 import RejectedImage from '@resources/svg/warning.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
+import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
 import { displayAsGTU } from '~/utils/gtu';
 import { AccountInfo, Account, AccountStatus } from '~/utils/types';
@@ -13,6 +14,7 @@ import { isInitialAccount } from '~/utils/accountHelpers';
 import SidedRow from '~/components/SidedRow';
 import { walletIdSelector } from '~/features/WalletSlice';
 import { findLocalDeployedCredential } from '~/utils/credentialHelper';
+import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 
 import styles from './AccountCard.module.scss';
 
@@ -57,6 +59,9 @@ export default function AccountCard({
 }: Props): JSX.Element {
     const walletId = useSelector(walletIdSelector);
     const [connected, setConnected] = useState(false);
+    const accountHasDeployedCredentials = useSelector(
+        accountHasDeployedCredentialsSelector(account)
+    );
 
     useEffect(() => {
         if (walletId) {
@@ -123,6 +128,13 @@ export default function AccountCard({
                                 className={styles.bakerImage}
                             />
                         )}
+                        {account.status === AccountStatus.Confirmed &&
+                            !accountHasDeployedCredentials && (
+                                <ReadonlyImage
+                                    height="15"
+                                    className={styles.statusImage}
+                                />
+                            )}
                     </>
                 }
                 right={

@@ -27,11 +27,11 @@ const globalSlice = createSlice({
 export const globalSelector = (state: RootState) => state.global.globalObject;
 const { setGlobal: setGlobalInState } = globalSlice.actions;
 
-export async function loadGlobal(dispatch: Dispatch) {
+export async function loadGlobal(dispatch: Dispatch, blockHash?: string) {
     let global: Global | undefined = await getGlobal(); // load from storage
     if (!global) {
         try {
-            global = await fetchGlobal(); // fetch remote
+            global = await fetchGlobal(blockHash); // fetch remote
             setGlobalInDatabase(global); // store locally
         } catch (e) {
             return;

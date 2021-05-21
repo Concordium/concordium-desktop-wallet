@@ -21,6 +21,7 @@ interface Props {
     clear?: boolean;
     negative?: boolean;
     icon?: JSX.Element;
+    disabled?: boolean;
 }
 
 export type ButtonProps<

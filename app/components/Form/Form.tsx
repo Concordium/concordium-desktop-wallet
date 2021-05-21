@@ -1,5 +1,6 @@
 import React, { FC, FormHTMLAttributes, PropsWithChildren } from 'react';
 import {
+    FieldValues,
     FormProvider,
     SubmitHandler,
     useForm,
@@ -22,7 +23,7 @@ import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
 
-export type FormProps<TFormValues> = Omit<
+export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
     'onSubmit'
 > & {
@@ -58,7 +59,7 @@ export type FormProps<TFormValues> = Omit<
  *   <Form.Submit>Submit</Form.Submit>
  * </Form>
  */
-function Form<TFormValues>({
+function Form<TFormValues extends FieldValues = FieldValues>({
     children,
     formMethods,
     onSubmit,

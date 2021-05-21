@@ -1,26 +1,30 @@
 import { push } from 'connected-react-router';
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import PageLayout from '~/components/PageLayout/PageLayout';
+import clsx from 'clsx';
+import PageLayout from '~/components/PageLayout';
 import Button from '~/cross-app-components/Button';
-import routes from '../../constants/routes.json';
+import routes from '~/constants/routes.json';
+
 import styles from './Home.module.scss';
 
 export default function PasswordHasBeenSet() {
     const dispatch = useDispatch();
 
     return (
-        <PageLayout.Container disableBack>
+        <PageLayout.Container className="pB0" disableBack padding="both">
             <div className={styles.content}>
+                <h2>Wallet password created!</h2>
                 <div>
-                    <h2 className={styles.title}>Wallet password created!</h2>
+                    <p>Your wallet password has been set!</p>
                     <p>
-                        Your wallet password has been set! Please remember to
-                        keep it safe, as you will need it later if you want to
-                        reset it. Lost passwords cannot be recreated or reset.
+                        Please remember to keep it safe, as you will need it
+                        later if you want to reset it. Lost passwords cannot be
+                        recreated or reset.
                     </p>
                 </div>
                 <Button
+                    className={clsx(styles.button, 'mT100')}
                     onClick={() =>
                         dispatch(push({ pathname: routes.ACCOUNTS }))
                     }

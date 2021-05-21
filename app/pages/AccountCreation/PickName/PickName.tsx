@@ -43,7 +43,7 @@ export default function IdentityIssuancePickName({
                     name.
                 </p>
                 <p className={clsx(styles.label, 'mT100', 'marginCenter')}>
-                    What would you like to name your identity?
+                    What would you like to name your account?
                 </p>
                 <Form<Fields>
                     className="flexChildFill flexColumn justifySpaceBetween mT50 marginCenter"

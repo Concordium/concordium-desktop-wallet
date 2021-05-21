@@ -12,6 +12,7 @@ import {
     getAllAccounts,
     insertAccount,
     updateAccount,
+    getAccount,
     confirmInitialAccount as confirmInitialAccountInDatabase,
     removeAccount as removeAccountFromDatabase,
     removeInitialAccount as removeInitialAccountInDatabase,
@@ -146,11 +147,11 @@ export async function loadAccounts(dispatch: Dispatch) {
 
 // given an account and the accountEncryptedAmount from the accountInfo
 // determine whether the account has received or sent new funds,
-// and in that case update the state of the account to reflect that.
+// and in that case return the the state of the account that should be updated to reflect that.
 function updateAccountEncryptedAmount(
     account: Account,
     accountEncryptedAmount: AccountEncryptedAmount
-): Promise<void | number> {
+): Partial<Account> {
     const { incomingAmounts } = accountEncryptedAmount;
     const selfAmounts = accountEncryptedAmount.selfAmount;
     const incomingAmountsString = JSON.stringify(incomingAmounts);
@@ -160,13 +161,13 @@ function updateAccountEncryptedAmount(
             account.selfAmounts === selfAmounts
         )
     ) {
-        return updateAccount(account.address, {
+        return {
             incomingAmounts: incomingAmountsString,
             selfAmounts,
             allDecrypted: false,
-        });
+        };
     }
-    return Promise.resolve();
+    return {};
 }
 
 export async function removeAccount(
@@ -237,26 +238,37 @@ export async function updateSignatureThreshold(
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
-function updateAccountFromAccountInfo(
+async function updateAccountFromAccountInfo(
     dispatch: Dispatch,
     account: Account,
     accountInfo: AccountInfo
 ) {
+    let accountUpdate: Partial<Account> = {};
     if (
         accountInfo.accountThreshold &&
         account.signatureThreshold !== accountInfo.accountThreshold
     ) {
-        updateSignatureThreshold(
-            dispatch,
-            account.address,
-            accountInfo.accountThreshold
-        );
+        accountUpdate.signatureThreshold = accountInfo.accountThreshold;
     }
-    updateCredentialsStatus(dispatch, account.address, accountInfo);
-    return updateAccountEncryptedAmount(
+
+    const encryptedAmountsUpdate = updateAccountEncryptedAmount(
         account,
         accountInfo.accountEncryptedAmount
     );
+
+    accountUpdate = { ...encryptedAmountsUpdate, ...accountUpdate };
+
+    if (Object.keys(accountUpdate).length > 0) {
+        await updateAccount(account.address, accountUpdate);
+        await dispatch(
+            updateAccountFields({
+                address: account.address,
+                updatedFields: accountUpdate,
+            })
+        );
+    }
+
+    return updateCredentialsStatus(dispatch, account.address, accountInfo);
 }
 
 // Loads the given accounts' infos from the node, then updates the
@@ -387,6 +399,15 @@ export async function confirmAccount(
             await updateAccount(accountAddress, {
                 status: AccountStatus.Confirmed,
             });
+            // eslint-disable-next-line no-case-declarations
+            const account = (await getAccount(accountAddress)) as Account;
+
+            addToAddressBook(dispatch, {
+                name: account.name,
+                address: accountAddress,
+                note: `Account of identity: ${account.identityName}`,
+                readOnly: true,
+            });
             break;
         default:
             throw new Error('Unexpected status was returned by the poller!');
@@ -444,6 +465,13 @@ export async function addExternalAccount(
         rewardFilter: '[]',
     };
     await insertAccount(account);
+    addToAddressBook(dispatch, {
+        readOnly: true,
+        name: accountName,
+        address: accountAddress,
+        note: 'Shared account',
+    });
+
     return loadAccounts(dispatch);
 }
 
