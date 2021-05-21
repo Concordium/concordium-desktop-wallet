@@ -113,7 +113,7 @@ export default function AccountCreationGenerate({
 
     async function createAccount(
         ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
+        setMessage: (message: string | JSX.Element) => void
     ) {
         let credentialNumber;
         if (!global) {

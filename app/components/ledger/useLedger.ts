@@ -41,7 +41,7 @@ const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
 function useLedger(): {
     isReady: boolean;
     status: LedgerStatusType;
-    statusText: string;
+    statusText: string | JSX.Element;
     client?: ConcordiumLedgerClient;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dispatch: Dispatch<any>;
@@ -146,7 +146,7 @@ export default function ExternalHook(
 ): {
     isReady: boolean;
     status: LedgerStatusType;
-    statusText: string;
+    statusText: string | JSX.Element;
     submitHandler: LedgerSubmitHandler;
 } {
     const { isReady, status, statusText, client, dispatch } = hook();
