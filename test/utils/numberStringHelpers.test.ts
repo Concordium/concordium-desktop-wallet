@@ -36,6 +36,9 @@ describe(isValidResolutionString, () => {
         expect(isValidResolutionString(BigInt(100), true)('0.20')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('-0.22')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('0.0100')).toBe(true);
+        expect(isValidResolutionString(BigInt(100), true)('01.0100')).toBe(
+            true
+        );
     });
 
     test('Invalidates invalid fraction values', () => {
@@ -46,6 +49,9 @@ describe(isValidResolutionString, () => {
         );
         expect(isValidResolutionString(BigInt(100), true)('0.202')).toBe(false);
         expect(isValidResolutionString(BigInt(100), true)('0.2233')).toBe(
+            false
+        );
+        expect(isValidResolutionString(BigInt(100), true, false)('01.2')).toBe(
             false
         );
     });

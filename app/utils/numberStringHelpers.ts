@@ -52,11 +52,12 @@ export function isPowOf10(resolution: bigint | number): boolean {
  */
 const isValidNumberString = (
     allowNegative = false,
-    allowFractionDigits: number | true = true
+    allowFractionDigits: number | true = true,
+    allowLeadingZeros = true
 ) => {
     let re: RegExp;
     const signedPart = allowNegative ? '(-)?' : '';
-    const intPart = '(0|[1-9]\\d*)';
+    const intPart = allowLeadingZeros ? '(\\d+)' : '(0|[1-9]\\d*)';
     const fractionPart =
         allowFractionDigits === true
             ? '(\\.\\d*)?'
@@ -82,7 +83,8 @@ const isValidNumberString = (
  * Generates a function that validates values according to given resolution.
  *
  * @param resolution power of 10 resolution the value can be described as fractions of (e.g. 0.01 is valid with resolution 100, however 0.001 is not)
- * @param allowNegative whether or not to allow negative values in the validation.
+ * @param allowNegative whether or not to allow negative values in the validation. Defaults to false.
+ * @param allowLeadingZeros whether or not to allow leading zeros ("01.0") validation. Defaults to true.
  * @returns function validating a value according to the params.
  *
  * @example
@@ -92,8 +94,14 @@ const isValidNumberString = (
  */
 export const isValidResolutionString = (
     resolution: bigint | number,
-    allowNegative = false
-) => isValidNumberString(allowNegative, getPowerOf10(resolution));
+    allowNegative = false,
+    allowLeadingZeros = true
+) =>
+    isValidNumberString(
+        allowNegative,
+        getPowerOf10(resolution),
+        allowLeadingZeros
+    );
 
 const withValidResolution = <TReturn>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -30,7 +30,11 @@ function toBigInt(input: bigint | string): bigint {
 }
 
 // Checks that the input is a valid GTU string.
-export const isValidGTUString = isValidResolutionString(microGTUPerGTU);
+export const isValidGTUString = isValidResolutionString(
+    microGTUPerGTU,
+    false,
+    false
+);
 
 /**
  * expects the fractional part of the a GTU string.
