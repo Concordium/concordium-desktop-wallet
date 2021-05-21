@@ -41,7 +41,6 @@ $sidebar-link-height: $page-header-height;
 
     &:focus,
     &:hover {
-        color: inherit;
         outline: none;
     }
 }
@@ -50,14 +49,13 @@ $sidebar-link-height: $page-header-height;
     transform: scale(1);
     transition: transform ease-in 0.1s;
 
-    .item:not(.itemActive):hover &,
-    .item:not(.itemActive):focus & {
+    .item:not(.itemActive):not(.disabled):hover &,
+    .item:not(.itemActive):not(.disabled):focus & {
         transform: scale(1.1);
     }
 
     &:focus,
     &:hover {
-        color: inherit;
         outline: none;
     }
 }
@@ -73,4 +71,10 @@ $sidebar-link-height: $page-header-height;
     > * + * {
         margin-top: 18px;
     }
+}
+
+.disabled {
+    color: $color-grey;
+    opacity: 0.5;
+    cursor: default;
 }

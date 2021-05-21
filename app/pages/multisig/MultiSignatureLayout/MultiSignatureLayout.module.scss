@@ -1,15 +1,33 @@
-.container {
-    display: flex;
-    flex-direction: column;
-}
+$multi-sig-layout-header-height: 42px;
 
-.content {
-    margin-top: 10px;
-    flex: 1 1 100%;
+.container {
     display: flex;
     flex-direction: column;
 }
 
 .header {
     margin-top: 0;
+
+    .delegatedScroll & {
+        margin-bottom: 0;
+        height: $multi-sig-layout-header-height;
+    }
+}
+
+.content {
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 100%;
+
+    .delegatedScroll & {
+        flex: initial;
+        height: calc(100% - #{$multi-sig-layout-header-height});
+    }
+}
+
+.printButton {
+    position: absolute;
+    top: 35px;
+    right: 75px;
 }

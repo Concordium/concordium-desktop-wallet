@@ -25,6 +25,13 @@ interface RustInterface {
     decrypt_amounts_ext(amounts: string): string;
     createTransferToPublicData(inputblob: string): string;
     createEncryptedTransferData(inputblob: string): string;
+    createGenesisAccount(
+        context: string,
+        idCredSec: string,
+        prfKey: string
+    ): string;
+    generateBakerKeys(sender: string): string;
+    getAddressFromCredId(credId: string): string;
 }
 
 let rustReference: RustInterface;
@@ -99,6 +106,31 @@ function createEncryptedTransferData(
     return rust.createEncryptedTransferData(message.input);
 }
 
+function createGenesisAccount(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.createGenesisAccount(
+        message.context,
+        message.idCredSec,
+        message.prfKey
+    );
+}
+
+function generateBakerKeys(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.generateBakerKeys(message.sender);
+}
+
+function getAddressFromCredId(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.getAddressFromCredId(message.credId);
+}
+
 function mapCommand(command: string) {
     switch (command) {
         case workerCommands.buildPublicInformationForIp:
@@ -117,6 +149,12 @@ function mapCommand(command: string) {
             return createTransferToPublicData;
         case workerCommands.createEncryptedTransferData:
             return createEncryptedTransferData;
+        case workerCommands.createGenesisAccount:
+            return createGenesisAccount;
+        case workerCommands.generateBakerKeys:
+            return generateBakerKeys;
+        case workerCommands.getAddressFromCredId:
+            return getAddressFromCredId;
         default:
             return () => 'unknown command';
     }

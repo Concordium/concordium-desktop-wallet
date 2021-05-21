@@ -1,4 +1,4 @@
-import type Transport from '@ledgerhq/hw-transport';
+import { Transport } from './Transport';
 import pathAsBuffer from './Path';
 
 const INS_SIGN_CHALLENGE = 0x30;

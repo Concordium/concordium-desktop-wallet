@@ -2,6 +2,7 @@ $sidebar-width: 147px;
 $page-header-height: 94px;
 $page-height: calc(100vh - #{$page-header-height});
 $page-gutter: 48px;
+$page-max-width: 1600px;
 
 $page-container-padding-vertical: 35px;
 $page-container-padding-horizontal: 35px;
@@ -11,4 +12,3 @@ $anim-easing: ease-out;
 
 $form-color-focus: $color-pale-blue;
 $form-transition: $anim-easing $anim-timing;
-$form-transition: linear 0.1s;

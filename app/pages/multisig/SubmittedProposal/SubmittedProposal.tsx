@@ -1,15 +1,16 @@
 import { push } from 'connected-react-router';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, useParams } from 'react-router';
 import ErrorIcon from '@resources/svg/logo-error.svg';
 import CheckmarkIcon from '@resources/svg/logo-checkmark.svg';
-import { parse } from 'json-bigint';
+import { parse } from '~/utils/JSONHelper';
 import {
+    instanceOfAccountTransactionWithSignature,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
-    UpdateInstruction,
-    UpdateInstructionPayload,
+    instanceOfUpdateInstruction,
+    Transaction,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import MultiSignatureLayout from '../MultiSignatureLayout';
@@ -22,12 +23,21 @@ import {
 import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
 import styles from './SubmittedProposal.module.scss';
 import { sendTransaction } from '~/utils/nodeRequests';
-import findHandler from '~/utils/updates/HandlerFinder';
+import findHandler, {
+    findUpdateInstructionHandler,
+} from '~/utils/transactionHandlers/HandlerFinder';
 import { serializeForSubmission } from '~/utils/UpdateSerialization';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+
+import { serializeTransaction } from '~/utils/transactionSerialization';
+import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
+
+import withChainData, { ChainData } from '../common/withChainData';
+import TransactionHashView from '~/components/TransactionHash';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS;
 
-interface Props {
+interface Props extends ChainData {
     proposal: MultiSignatureTransaction;
 }
 
@@ -61,66 +71,115 @@ function getStatusText(status: MultiSignatureTransactionStatus): string {
  * Component that displays a multi signature transaction that has been submitted
  * to a node.
  */
-function SubmittedProposalView({ proposal }: Props) {
-    const dispatch = useDispatch();
-    const { status, transaction } = proposal;
-    const instruction: UpdateInstruction<UpdateInstructionPayload> = parse(
-        transaction
-    );
-    const handler = findHandler(instruction.type);
-    const serializedPayload = handler.serializePayload(instruction);
 
-    const isPending = [...ERROR_STATUSES, ...SUCCESS_STATUSES].every(
-        (s) => s !== status
-    );
+const SubmittedProposalView = withChainData<Props>(
+    ({ proposal, blockSummary }) => {
+        const dispatch = useDispatch();
+        const [validationError, setValidationError] = useState<string>();
 
-    const init = useCallback(async () => {
-        const payload = serializeForSubmission(instruction, serializedPayload);
-        const submitted = (await sendTransaction(payload)).getValue();
+        const { status, transaction: transactionJSON } = proposal;
+        const transaction: Transaction = parse(transactionJSON);
 
-        const modifiedProposal: MultiSignatureTransaction = {
-            ...proposal,
-        };
-        if (submitted) {
-            modifiedProposal.status = MultiSignatureTransactionStatus.Submitted;
-            updateCurrentProposal(dispatch, modifiedProposal);
-            getMultiSignatureTransactionStatus(modifiedProposal, dispatch);
-        } else {
-            modifiedProposal.status = MultiSignatureTransactionStatus.Failed;
-            updateCurrentProposal(dispatch, modifiedProposal);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        const handler = findHandler(transaction);
 
-    useEffect(() => {
-        init();
-    }, [init]);
+        const isPending = [...ERROR_STATUSES, ...SUCCESS_STATUSES].every(
+            (s) => s !== status
+        );
 
-    return (
-        <MultiSignatureLayout
-            pageTitle={handler.title}
-            stepTitle={`Transaction Proposal - ${handler.type}`}
-            disableBack
-        >
-            <div className={styles.body}>
-                <div />
-                <div className={styles.status}>
-                    {getStatusIcon(status)}
-                    {getStatusText(status)}
+        // eslint-disable-next-line no-shadow
+        const init = useCallback(async (blockSummary) => {
+            let payload;
+            if (instanceOfUpdateInstruction(transaction)) {
+                const updateHandler = findUpdateInstructionHandler(
+                    transaction.type
+                );
+                const serializedPayload = updateHandler.serializePayload(
+                    transaction
+                );
+                try {
+                    const signatures = await Promise.all(
+                        transaction.signatures.map((sig) =>
+                            attachKeyIndex(
+                                sig,
+                                blockSummary,
+                                transaction,
+                                updateHandler
+                            )
+                        )
+                    );
+                    payload = serializeForSubmission(
+                        transaction,
+                        signatures,
+                        serializedPayload
+                    );
+                } catch (error) {
+                    setValidationError(error.message);
+                    return;
+                }
+            } else if (instanceOfAccountTransactionWithSignature(transaction)) {
+                payload = serializeTransaction(
+                    transaction,
+                    () => transaction.signatures
+                );
+            } else {
+                throw new Error(`Unexpected Transaction type: ${transaction}`);
+            }
+            const submitted = (await sendTransaction(payload)).getValue();
+            const modifiedProposal: MultiSignatureTransaction = {
+                ...proposal,
+            };
+            if (submitted) {
+                modifiedProposal.status =
+                    MultiSignatureTransactionStatus.Submitted;
+                updateCurrentProposal(dispatch, modifiedProposal);
+                getMultiSignatureTransactionStatus(modifiedProposal, dispatch);
+            } else {
+                modifiedProposal.status =
+                    MultiSignatureTransactionStatus.Failed;
+                updateCurrentProposal(dispatch, modifiedProposal);
+            }
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, []);
+
+        useEffect(() => {
+            if (blockSummary) {
+                init(blockSummary);
+            }
+        }, [init, blockSummary]);
+
+        return (
+            <MultiSignatureLayout
+                pageTitle={handler.title}
+                stepTitle={`Transaction Proposal - ${handler.type}`}
+                disableBack
+            >
+                <SimpleErrorModal
+                    show={Boolean(validationError)}
+                    header="Unauthorized key"
+                    content={validationError}
+                    onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+                />
+                <div className={styles.body}>
+                    <div />
+                    <div className={styles.status}>
+                        {getStatusIcon(status)}
+                        {getStatusText(status)}
+                        <TransactionHashView transaction={transaction} />
+                    </div>
+                    <Button
+                        className={styles.button}
+                        disabled={isPending}
+                        onClick={() => {
+                            dispatch(push({ pathname: CLOSE_ROUTE }));
+                        }}
+                    >
+                        Finish
+                    </Button>
                 </div>
-                <Button
-                    className={styles.button}
-                    disabled={isPending}
-                    onClick={() => {
-                        dispatch(push({ pathname: CLOSE_ROUTE }));
-                    }}
-                >
-                    Finish
-                </Button>
-            </div>
-        </MultiSignatureLayout>
-    );
-}
+            </MultiSignatureLayout>
+        );
+    }
+);
 
 export default function SubmittedProposal(
     props: Omit<Props, 'proposal'>

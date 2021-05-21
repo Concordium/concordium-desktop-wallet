@@ -9,22 +9,27 @@ import {
     TransactionStatus,
     ScheduledTransfer,
     EncryptedTransfer,
-    SchedulePoint,
+    Schedule,
     TransferToEncrypted,
+    instanceOfUpdateInstruction,
+    Transaction,
+    AddedCredential,
     AccountTransaction,
     TransactionPayload,
-    UpdateInstruction,
-    UpdateInstructionPayload,
     TimeStampUnit,
-} from './types';
-import {
     TransactionAccountSignature,
     TransactionCredentialSignature,
-} from './transactionTypes';
+    Account,
+    AccountInfo,
+    AddBaker,
+    AddBakerPayload,
+} from './types';
 import {
     getTransactionEnergyCost,
     getTransactionKindEnergy,
+    getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
+import { toMicroUnits, isValidGTUString } from './gtu';
 
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
@@ -67,20 +72,34 @@ export async function attachNames(
     return Promise.all(transactions.map(attachName));
 }
 
+interface CreateAccountTransactionInput<T> {
+    fromAddress: string;
+    expiry: bigint;
+    transactionKind: TransactionKindId;
+    payload: T;
+    estimatedEnergyAmount?: bigint;
+    signatureAmount?: number;
+}
+
 /**
- *  Constructs a, simple transfer, transaction object,
- * Given the fromAddress, toAddress and the amount.
+ *  Constructs an account transaction object,
+ * @param fromAddress, the sender's address.
+ * @param expiry, expiry of the transaction, is given as an unix timestamp.
+ * @param transactionKind, the id of the TransactionKind of the transaction.
+ * @param payload, the payload of the transaction.
  * @param estimatedEnergyAmount, is the energyAmount on the transaction. Should be used to overwrite the, internally calculated, energy amount, in case of incomplete payloads.
+ * @param signatureAmount, is the number of signature, which will be put on the transaction. Is only used to generate energyAmount, and is ignored if estimatedEnergyAmount is given.
  */
-async function createTransferTransaction<T extends TransactionPayload>(
-    fromAddress: string,
-    expiry: bigint = getDefaultExpiry(),
-    transactionKind: number,
-    payload: T,
-    estimatedEnergyAmount?: bigint
-): Promise<AccountTransaction<T>> {
+async function createAccountTransaction<T extends TransactionPayload>({
+    fromAddress,
+    expiry,
+    transactionKind,
+    payload,
+    estimatedEnergyAmount,
+    signatureAmount,
+}: CreateAccountTransactionInput<T>): Promise<AccountTransaction<T>> {
     const { nonce } = await getNextAccountNonce(fromAddress);
-    const transferTransaction: AccountTransaction<T> = {
+    const transaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
         expiry,
@@ -89,13 +108,14 @@ async function createTransferTransaction<T extends TransactionPayload>(
         payload,
     };
     if (!estimatedEnergyAmount) {
-        transferTransaction.energyAmount = getTransactionEnergyCost(
-            transferTransaction
+        transaction.energyAmount = getTransactionEnergyCost(
+            transaction,
+            signatureAmount
         ).toString();
     } else {
-        transferTransaction.energyAmount = estimatedEnergyAmount.toString();
+        transaction.energyAmount = estimatedEnergyAmount.toString();
     }
-    return transferTransaction;
+    return transaction;
 }
 
 /**
@@ -106,18 +126,20 @@ export function createSimpleTransferTransaction(
     fromAddress: string,
     amount: BigInt,
     toAddress: string,
+    signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
 ): Promise<SimpleTransfer> {
     const payload = {
         toAddress,
         amount: amount.toString(),
     };
-    return createTransferTransaction(
+    return createAccountTransaction({
         fromAddress,
         expiry,
-        TransactionKindId.Simple_transfer,
-        payload
-    );
+        transactionKind: TransactionKindId.Simple_transfer,
+        payload,
+        signatureAmount,
+    });
 }
 
 /**
@@ -144,35 +166,81 @@ export function createEncryptedTransferTransaction(
 }
 
 export function createShieldAmountTransaction(
-    address: string,
+    fromAddress: string,
     amount: bigint,
     expiry: bigint = getDefaultExpiry()
 ): Promise<TransferToEncrypted> {
     const payload = {
         amount: amount.toString(),
     };
-    return createTransferTransaction(
-        address,
+    return createAccountTransaction({
+        fromAddress,
         expiry,
-        TransactionKindId.Transfer_to_encrypted,
-        payload
-    );
+        transactionKind: TransactionKindId.Transfer_to_encrypted,
+        payload,
+    });
 }
 
 export async function createUnshieldAmountTransaction(
-    address: string,
+    fromAddress: string,
     amount: BigInt,
     expiry: bigint = getDefaultExpiry()
 ) {
     const payload = {
         transferAmount: amount.toString(),
     };
-    return createTransferTransaction(
-        address,
+    return createAccountTransaction({
+        fromAddress,
         expiry,
-        TransactionKindId.Transfer_to_public,
+        transactionKind: TransactionKindId.Transfer_to_public,
         payload,
-        getTransactionKindEnergy(TransactionKindId.Transfer_to_public) // Supply the energy, so that the cost is not computed using the incomplete payload.
+        estimatedEnergyAmount: getTransactionKindEnergy(
+            TransactionKindId.Transfer_to_public
+        ), // Supply the energy, so that the cost is not computed using the incomplete payload.
+    });
+}
+
+function createRegularIntervalScheduleInner(
+    totalAmount: bigint,
+    releases: number,
+    getTimestamp: (index: number) => string
+): Schedule {
+    const releaseAmount = totalAmount / BigInt(releases);
+    const restAmount = totalAmount % BigInt(releases);
+    const schedule = [];
+    for (let i = 0; i < releases - 1; i += 1) {
+        schedule.push({
+            amount: releaseAmount.toString(),
+            timestamp: getTimestamp(i),
+        });
+    }
+    schedule.push({
+        amount: (releaseAmount + restAmount).toString(),
+        timestamp: getTimestamp(releases - 1),
+    });
+    return schedule;
+}
+
+/**
+ *  Creates a schedule, with the assumption that each release is
+ *  the starting date's day and time in the subsequent months.
+ * N.B. The days will shift if the release includes a month with less
+ * days than the chosen starting day.
+ */
+export function createRegularIntervalSchedulePerMonth(
+    totalAmount: bigint,
+    releases: number,
+    starting: Date
+): Schedule {
+    function getTimestamp(i: number) {
+        const date = new Date(starting.getTime());
+        date.setMonth(date.getMonth() + i);
+        return date.getTime().toString();
+    }
+    return createRegularIntervalScheduleInner(
+        totalAmount,
+        releases,
+        getTimestamp
     );
 }
 
@@ -181,23 +249,13 @@ export function createRegularIntervalSchedule(
     releases: number,
     starting: number,
     interval: number
-): SchedulePoint[] {
-    const releaseAmount = totalAmount / BigInt(releases);
-    const restAmount = totalAmount % BigInt(releases);
-    const schedule = [];
-    let timestamp = starting;
-    for (let i = 0; i < releases - 1; i += 1) {
-        schedule.push({
-            amount: releaseAmount.toString(),
-            timestamp: timestamp.toString(),
-        });
-        timestamp += interval;
-    }
-    schedule.push({
-        amount: (releaseAmount + restAmount).toString(),
-        timestamp: timestamp.toString(),
-    });
-    return schedule;
+): Schedule {
+    const getTimestamp = (i: number) => (starting + interval * i).toString();
+    return createRegularIntervalScheduleInner(
+        totalAmount,
+        releases,
+        getTimestamp
+    );
 }
 
 /**
@@ -207,7 +265,8 @@ export function createRegularIntervalSchedule(
 export async function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
-    schedule: SchedulePoint[],
+    schedule: Schedule,
+    signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
 ) {
     const payload = {
@@ -215,22 +274,64 @@ export async function createScheduledTransferTransaction(
         schedule,
     };
 
-    return createTransferTransaction(
+    return createAccountTransaction({
         fromAddress,
         expiry,
-        TransactionKindId.Transfer_with_schedule,
-        payload
-    );
+        transactionKind: TransactionKindId.Transfer_with_schedule,
+        payload,
+        signatureAmount,
+    });
 }
 
-export async function getDataObject(
-    transactionHash: string
-): Promise<Record<string, TransactionEvent>> {
-    const data = (await getTransactionStatus(transactionHash)).getValue();
-    if (data === 'null') {
-        throw new Error('Unexpected missing data object!');
-    }
-    return JSON.parse(data);
+/**
+ *  Constructs an account credential update transaction,
+ */
+export async function createUpdateCredentialsTransaction(
+    fromAddress: string,
+    addedCredentials: AddedCredential[],
+    removedCredIds: string[],
+    threshold: number,
+    currentCredentialAmount: number,
+    signatureAmount = 1,
+    expiry: bigint = getDefaultExpiry()
+) {
+    const payload = {
+        addedCredentials,
+        removedCredIds,
+        threshold,
+    };
+
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_credentials,
+        payload,
+        estimatedEnergyAmount: getUpdateAccountCredentialEnergy(
+            payload,
+            currentCredentialAmount,
+            signatureAmount
+        ),
+    });
+}
+
+export function createAddBakerTransaction(
+    fromAddress: string,
+    payload: AddBakerPayload,
+    signatureAmount = 1,
+    expiry: bigint = getDefaultExpiry()
+): Promise<AddBaker> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Add_baker,
+        payload,
+        signatureAmount,
+    });
+}
+
+export interface StatusResponse {
+    status: TransactionStatus;
+    outcomes: Record<string, TransactionEvent>;
 }
 
 /**
@@ -242,7 +343,7 @@ export async function getDataObject(
 export async function getStatus(
     transactionHash: string,
     pollingIntervalMs = 20000
-): Promise<TransactionStatus> {
+): Promise<StatusResponse> {
     return new Promise((resolve) => {
         const interval = setInterval(async () => {
             let response;
@@ -257,14 +358,14 @@ export async function getStatus(
             }
             if (response === 'null') {
                 clearInterval(interval);
-                resolve(TransactionStatus.Rejected);
+                resolve({ status: TransactionStatus.Rejected, outcomes: {} });
                 return;
             }
 
-            const { status } = JSON.parse(response);
-            if (status === 'finalized') {
+            const parsedResponse = JSON.parse(response);
+            if (parsedResponse.status === 'finalized') {
                 clearInterval(interval);
-                resolve(TransactionStatus.Finalized);
+                resolve(parsedResponse);
             }
         }, pollingIntervalMs);
     });
@@ -285,6 +386,19 @@ export function isFailed(transaction: TransferTransaction) {
         transaction.status === TransactionStatus.Rejected
     );
 }
+
+/**
+ * Get the timeout/expiry of a transaction.
+ * For an update instruction this is the timeout.
+ * For an account transation this is the expiry.
+ */
+export function getTimeout(transaction: Transaction) {
+    if (instanceOfUpdateInstruction(transaction)) {
+        return transaction.header.timeout;
+    }
+    return transaction.expiry;
+}
+
 /** Used to build a simple TransactionAccountSignature, with only a single signature. */
 export function buildTransactionAccountSignature(
     credentialAccountIndex: number,
@@ -292,7 +406,7 @@ export function buildTransactionAccountSignature(
     signature: Buffer
 ): TransactionAccountSignature {
     const transactionCredentialSignature: TransactionCredentialSignature = {};
-    transactionCredentialSignature[signatureIndex] = signature;
+    transactionCredentialSignature[signatureIndex] = signature.toString('hex');
     const transactionAccountSignature: TransactionAccountSignature = {};
     transactionAccountSignature[
         credentialAccountIndex
@@ -300,6 +414,65 @@ export function buildTransactionAccountSignature(
     return transactionAccountSignature;
 }
 
-export const isExpired = (
-    transaction: UpdateInstruction<UpdateInstructionPayload>
-) => transaction.header.timeout <= getNow(TimeStampUnit.seconds);
+export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
+    return outcomes.reduce(
+        (accu, event) => accu && event.result.outcome === 'success',
+        true
+    );
+}
+
+export const isExpired = (transaction: Transaction) =>
+    getTimeout(transaction) <= getNow(TimeStampUnit.seconds);
+
+function amountAtDisposal(accountInfo: AccountInfo): bigint {
+    const unShielded = BigInt(accountInfo.accountAmount);
+    const stakedAmount = accountInfo.accountBaker
+        ? BigInt(accountInfo.accountBaker.stakedAmount)
+        : 0n;
+    const scheduled = accountInfo.accountReleaseSchedule
+        ? BigInt(accountInfo.accountReleaseSchedule.total)
+        : 0n;
+    return unShielded - scheduled - stakedAmount;
+}
+
+export function validateShieldedAmount(
+    amountToValidate: string,
+    account: Account | undefined,
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (!isValidGTUString(amountToValidate)) {
+        return 'Value is not a valid GTU amount';
+    }
+    if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
+        return 'Insufficient public funds to cover fee';
+    }
+    if (
+        account?.totalDecrypted &&
+        BigInt(account.totalDecrypted) < toMicroUnits(amountToValidate)
+    ) {
+        return 'Insufficient shielded funds';
+    }
+    return undefined;
+}
+
+export function validateAmount(
+    amountToValidate: string,
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (!isValidGTUString(amountToValidate)) {
+        return 'Value is not a valid GTU amount';
+    }
+    if (
+        accountInfo &&
+        amountAtDisposal(accountInfo) <
+            toMicroUnits(amountToValidate) + (estimatedFee || 0n)
+    ) {
+        return 'Insufficient funds';
+    }
+    if (toMicroUnits(amountToValidate) === 0n) {
+        return 'Amount may not be zero';
+    }
+    return undefined;
+}

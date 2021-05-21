@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation } from 'react-router';
 import Sidebar, { SidebarLink } from '../cross-app-components/Sidebar';
 import routes from '../constants/routes.json';
 import pkg from '../package.json';
@@ -9,6 +10,7 @@ import IdentityIcon from '../../resources/svg/identity.svg';
 import ImportExportIcon from '../../resources/svg/import-export.svg';
 import MultiSigIcon from '../../resources/svg/multisig.svg';
 import SettingsIcon from '../../resources/svg/settings.svg';
+import LedgerStatus from './LedgerStatus';
 
 const links: SidebarLink[] = [
     {
@@ -44,5 +46,19 @@ const links: SidebarLink[] = [
 ];
 
 export default function ConnectedSidebar() {
-    return <Sidebar links={links} version={pkg.version} />;
+    const location = useLocation();
+    const disableSidebar = location.pathname.startsWith(routes.HOME_PASSWORD);
+    let ledgerStatus;
+    if (!disableSidebar) {
+        ledgerStatus = <LedgerStatus />;
+    }
+
+    return (
+        <Sidebar
+            disabled={disableSidebar}
+            links={links}
+            version={pkg.version}
+            child={ledgerStatus}
+        />
+    );
 }

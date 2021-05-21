@@ -3,6 +3,7 @@ import {
     Fraction,
     instanceOfScheduledTransfer,
     TransactionKindId,
+    UpdateAccountCredentialsPayload,
 } from './types';
 import { getEnergyToMicroGtuRate } from './nodeHelpers';
 import { serializeTransferPayload } from './transactionSerialization';
@@ -17,6 +18,10 @@ export const energyConstants = {
     TransferToEncryptedCost: 600n,
     TransferToPublicCost: 14850n,
     ScheduledTransferPerRelease: 300n + 64n,
+    UpdateCredentialsBaseCost: 500n,
+    UpdateCredentialsCostPerCurrentCredential: 500n,
+    UpdateCredentialsCostPerNewCredential: 54000n + 100n * 1n, // TODO: remove assumption that a credential has 1 key.
+    AddBaker: 4050n,
 };
 
 /**
@@ -29,6 +34,7 @@ export const payloadSizeEstimate = {
     EncryptedTransfer: 2617, // AccountAddress (FBS 32) + EncryptedRemainingAmount (192 bytes) + TransactionKind (Word8) + EncryptedTransferAmount (192 bytes) + index (Word64) + Proofs (Assumed 2192 bytes)
     TransferToEncrypted: 9, // Amount (Word64) + TransactionKind (Word8)
     TransferToPublic: 1405, // Amount (Word64) + TransactionKind (Word8) + EncryptedAmount (192 bytes) + index (Word64) + Proofs (Assumed 1189 bytes)
+    AddBaker: 362, // TransactionKind (Word8) + keys (160 bytes) + proofs(192 bytes) + stakedAmount (8 bytes) + restake_earnings (1 byte)
 };
 
 /**
@@ -72,6 +78,8 @@ function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
             return payloadSizeEstimate.TransferToEncrypted;
         case TransactionKindId.Transfer_to_public:
             return payloadSizeEstimate.TransferToPublic;
+        case TransactionKindId.Add_baker:
+            return payloadSizeEstimate.AddBaker;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
@@ -87,6 +95,8 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
             return energyConstants.TransferToEncryptedCost;
         case TransactionKindId.Transfer_to_public:
             return energyConstants.TransferToPublicCost;
+        case TransactionKindId.Add_baker:
+            return energyConstants.AddBaker;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
@@ -160,6 +170,31 @@ export function getTransactionKindEnergy(
     );
 }
 
+export function getUpdateAccountCredentialEnergy(
+    payload: UpdateAccountCredentialsPayload,
+    currentCredentialAmount: number,
+    signatureAmount = 1
+) {
+    const payloadSize = serializeTransferPayload(
+        TransactionKindId.Update_credentials,
+        payload
+    ).length;
+
+    const newCredentialAmount = BigInt(payload.addedCredentials.length);
+
+    const variableCost =
+        energyConstants.UpdateCredentialsCostPerNewCredential *
+            newCredentialAmount +
+        energyConstants.UpdateCredentialsCostPerCurrentCredential *
+            BigInt(currentCredentialAmount);
+
+    return calculateCost(
+        BigInt(signatureAmount),
+        BigInt(payloadSize),
+        energyConstants.UpdateCredentialsBaseCost + variableCost
+    );
+}
+
 function energyToCost(energy: bigint, exchangeRate: Fraction): Fraction {
     return {
         numerator: energy * exchangeRate.numerator,
@@ -172,8 +207,8 @@ function energyToCost(energy: bigint, exchangeRate: Fraction): Fraction {
  */
 export async function getTransactionKindCost(
     transactionKind: TransactionKindId,
-    payloadSize: number = getPayloadSizeEstimate(transactionKind),
-    signatureAmount = 1
+    signatureAmount = 1,
+    payloadSize: number = getPayloadSizeEstimate(transactionKind)
 ): Promise<Fraction> {
     const energyToMicroGtu = await getEnergyToMicroGtuRate();
     const energy = getTransactionKindEnergy(

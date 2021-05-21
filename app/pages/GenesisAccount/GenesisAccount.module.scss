@@ -1,0 +1,69 @@
+$width: 600px;
+
+.exportPage,
+.fileForm,
+.pickName,
+.ledgerCard,
+.confirmCard {
+    flex-direction: column;
+    justify-content: center;
+    width: $width;
+    margin: 20px auto;
+}
+
+.exportPage,
+.fileForm,
+.pickName {
+    composes: flexChildFill from global;
+    display: flex;
+}
+
+.fileInput {
+    height: 400px;
+}
+
+.fileInput,
+.nameInput {
+    margin-top: 40px;
+}
+
+.submitButton {
+    margin: auto auto 20px;
+}
+
+.printButton {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    margin-top: 0;
+}
+
+.ledgerButton {
+    margin: auto;
+    margin-top: 50px;
+    display: block;
+}
+
+.confirmCard {
+    position: relative;
+}
+
+.exportButton {
+    margin-top: 20px;
+    max-width: 400px;
+}
+
+.firstCheckbox,
+.checkbox,
+.finalButton {
+    margin: 10px auto 20px;
+}
+
+.firstCheckbox {
+    margin-top: auto;
+}
+
+.submitButton,
+.finalButton {
+    width: 400px;
+}

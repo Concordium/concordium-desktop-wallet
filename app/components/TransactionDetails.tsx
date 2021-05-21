@@ -1,28 +1,17 @@
 import React from 'react';
 import {
-    AccountTransaction,
+    Transaction,
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
-    UpdateInstruction,
-    UpdateInstructionPayload,
 } from '../utils/types';
 import AccountTransactionDetails from './Transfers/AccountTransactionDetails';
 import UpdateInstructionDetails from './UpdateInstructionDetails';
 
-// TODO Implement a proper view of the supported transaction types, including account
-// transactions.
-
 interface Props {
-    transaction:
-        | UpdateInstruction<UpdateInstructionPayload>
-        | AccountTransaction;
+    transaction: Transaction;
 }
 
-function generateView(
-    transaction:
-        | UpdateInstruction<UpdateInstructionPayload>
-        | AccountTransaction
-) {
+function generateView(transaction: Transaction) {
     if (instanceOfUpdateInstruction(transaction)) {
         return <UpdateInstructionDetails transaction={transaction} />;
     }

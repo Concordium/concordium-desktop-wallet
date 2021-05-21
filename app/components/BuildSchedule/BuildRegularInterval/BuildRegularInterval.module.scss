@@ -1,0 +1,21 @@
+@import 'config/bundle';
+
+.regularInterval {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    height: 100%;
+
+    > *:not(:last-child) {
+        margin-bottom: 40px;
+    }
+}
+
+.releasesInputWrapper {
+    font-size: $font-size-body1;
+}
+
+.submitButton {
+    margin-top: auto;
+    margin-bottom: 20px;
+}

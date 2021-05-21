@@ -1,0 +1,20 @@
+.row {
+    display: flex;
+
+    .left,
+    .right {
+        width: 50%;
+    }
+}
+
+.left {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.right {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+}

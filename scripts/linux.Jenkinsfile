@@ -18,19 +18,25 @@ pipeline {
             agent { label 'jenkins-worker' }
             steps {
                 sh '''\
-                    # Extract version number if not set as parameter
-                    CARGO_VERSION=$(awk '/version = / { print substr($3, 2, length($3)-2); exit }' Cargo.toml)
-                    [ -z "$VERSION" ] && VERSION=$CARGO_VERSION
+                    # Extract version number
+                    VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
                     # Prepare filenames
-                    FILENAME_DEB="concordium-desktop-wallet_${CARGO_VERSION}_amd64.deb"
-                    OUT_FILENAME_DEB="${FILENAME_DEB/$CARGO_VERSION/$VERSION}"
+                    if [ -z $TARGET_NET ]; then
+                       FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
+                       FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
+                       FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
+                    else
+                       FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
+                       FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
+                       FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
+                    fi
 
-                    FILENAME_RPM="concordium-desktop-wallet-${CARGO_VERSION}.x86_64.rpm"
-                    OUT_FILENAME_RPM="${FILENAME_RPM/$CARGO_VERSION/$VERSION}"
+                    OUT_FILENAME_DEB="${VERSION}/${FILENAME_DEB}"
 
-                    FILENAME_APPIMAGE="Concordium Wallet-${CARGO_VERSION}.AppImage"
-                    OUT_FILENAME_APPIMAGE="${FILENAME_APPIMAGE/$CARGO_VERSION/$VERSION}"
+                    OUT_FILENAME_RPM="${VERSION}/${FILENAME_RPM}"
+
+                    OUT_FILENAME_APPIMAGE="${VERSION}/${FILENAME_APPIMAGE}"
 
                     check_uniqueness() {
                         # Fail if file already exists
@@ -90,19 +96,25 @@ pipeline {
             steps {
                 unstash 'release'
                 sh '''\
-                    # Extract version number if not set as parameter
-                    CARGO_VERSION=$(awk '/version = / { print substr($3, 2, length($3)-2); exit }' Cargo.toml)
-                    [ -z "$VERSION" ] && VERSION=$CARGO_VERSION
+                    # Extract version number
+                    VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
                     
                     # Prepare filenames
-                    FILENAME_DEB="concordium-desktop-wallet_${CARGO_VERSION}_amd64.deb"
-                    OUT_FILENAME_DEB="${FILENAME_DEB/$CARGO_VERSION/$VERSION}"
+                    if [ -z $TARGET_NET ]; then
+                       FILENAME_DEB="concordium-desktop-wallet-${VERSION}.deb"
+                       FILENAME_RPM="concordium-desktop-wallet-${VERSION}.rpm"
+                       FILENAME_APPIMAGE="concordium-desktop-wallet-${VERSION}.AppImage"
+                    else
+                       FILENAME_DEB="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.deb"
+                       FILENAME_RPM="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.rpm"
+                       FILENAME_APPIMAGE="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.AppImage"
+                    fi
 
-                    FILENAME_RPM="concordium-desktop-wallet-${CARGO_VERSION}.x86_64.rpm"
-                    OUT_FILENAME_RPM="${FILENAME_RPM/$CARGO_VERSION/$VERSION}"
+                    OUT_FILENAME_DEB="${VERSION}/${FILENAME_DEB}"
 
-                    FILENAME_APPIMAGE="Concordium Wallet-${CARGO_VERSION}.AppImage"
-                    OUT_FILENAME_APPIMAGE="${FILENAME_APPIMAGE/$CARGO_VERSION/$VERSION}"
+                    OUT_FILENAME_RPM="${VERSION}/${FILENAME_RPM}"
+
+                    OUT_FILENAME_APPIMAGE="${VERSION}/${FILENAME_APPIMAGE}"
                     
                     # Push to s3
                     aws s3 cp "release/${FILENAME_DEB}" "${S3_BUCKET}/${OUT_FILENAME_DEB}" --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers

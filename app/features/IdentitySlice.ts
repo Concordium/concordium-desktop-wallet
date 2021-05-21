@@ -44,7 +44,14 @@ export const identitiesSelector = (state: RootState) =>
 
 export const confirmedIdentitiesSelector = (state: RootState) =>
     state.identities.identities.filter(
-        (identity: Identity) => identity.status === IdentityStatus.Confirmed
+        (identity: Identity) => IdentityStatus.Confirmed === identity.status
+    );
+
+export const confirmedAndGenesisIdentitiesSelector = (state: RootState) =>
+    state.identities.identities.filter((identity: Identity) =>
+        [IdentityStatus.Confirmed, IdentityStatus.Genesis].includes(
+            identity.status
+        )
     );
 
 export const chosenIdentitySelector = (state: RootState) =>
@@ -56,41 +63,48 @@ export async function loadIdentities(dispatch: Dispatch) {
 }
 
 export async function addPendingIdentity(
+    identityNumber: number,
     dispatch: Dispatch,
     identityName: string,
     codeUri: string,
     identityProvider: IdentityProvider,
-    randomness: string
+    randomness: string,
+    walletId: number
 ) {
     const identity = {
+        identityNumber,
         name: identityName,
         status: IdentityStatus.Pending,
         codeUri,
         identityProvider: JSON.stringify(identityProvider),
         randomness,
+        walletId,
     };
-    await insertIdentity(identity);
-    return loadIdentities(dispatch);
+    const identityId = await insertIdentity(identity);
+    loadIdentities(dispatch);
+    return identityId[0];
 }
 
 export async function confirmIdentity(
     dispatch: Dispatch,
-    identityName: string,
+    identityId: number,
     identityObject: IdentityObject
 ) {
-    await updateIdentity(identityName, {
+    await updateIdentity(identityId, {
         status: IdentityStatus.Confirmed,
         identityObject: JSON.stringify(identityObject),
     });
     await loadIdentities(dispatch);
 }
 
-export async function rejectIdentity(dispatch: Dispatch, identityName: string) {
-    await updateIdentity(identityName, { status: IdentityStatus.Rejected });
+export async function rejectIdentity(dispatch: Dispatch, identityId: number) {
+    await updateIdentity(identityId, { status: IdentityStatus.Rejected });
     await loadIdentities(dispatch);
 }
 
-export async function importIdentities(identities: Identity | Identity[]) {
+export async function importIdentities(
+    identities: Identity | Identity[] | Partial<Identity>
+) {
     await insertIdentity(identities);
 }
 

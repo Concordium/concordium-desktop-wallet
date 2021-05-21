@@ -40,7 +40,8 @@ The following are the most important props to work with `TextArea`:
     <Story name="No Auto Scale" args={{
         placeholder: 'Address',
         name: 'address',
-        autoScale: false
+        noAutoScale: true,
+        rows: 1,
     }}>
         {Template.bind({})}
     </Story>
@@ -52,7 +53,34 @@ The following are the most important props to work with `TextArea`:
     <Story name="Invalid" args={{
         placeholder: 'Address',
         name: 'address',
-        error: 'Address is required'
+        error: 'Address is required',
+        isInvalid: true,
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Disabled
+
+<Canvas>
+    <Story name="Disabled" args={{
+        placeholder: 'Address',
+        name: 'address',
+        value: 'Text message....',
+        disabled: true,
+    }}>
+        {Template.bind({})}
+    </Story>
+</Canvas>
+
+## Read Only
+
+<Canvas>
+    <Story name="Read Only" args={{
+        placeholder: 'Address',
+        name: 'address',
+        value: 'Text message....',
+        readOnly: true,
     }}>
         {Template.bind({})}
     </Story>

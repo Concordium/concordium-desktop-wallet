@@ -4,11 +4,11 @@ import { isInitialAccount } from './accountHelpers';
 import { getAllAccounts } from '../database/AccountDao';
 
 function resumeAccountStatusPolling(account: Account, dispatch: Dispatch) {
-    const { name, deploymentTransactionId } = account;
+    const { address, deploymentTransactionId } = account;
     if (!deploymentTransactionId) {
         throw new Error('Unexpected missing deploymentTransactionId');
     }
-    return confirmAccount(dispatch, name, deploymentTransactionId);
+    return confirmAccount(dispatch, address, deploymentTransactionId);
 }
 
 export default async function listenForAccountStatus(dispatch: Dispatch) {

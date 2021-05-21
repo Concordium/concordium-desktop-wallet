@@ -1,0 +1,20 @@
+@import 'config/bundle';
+
+.root {
+    display: inline-block;
+    text-align: center;
+}
+
+.exponent {
+    vertical-align: super;
+    font-size: $font-size-body4;
+}
+
+.field:disabled {
+    color: $color-text;
+}
+
+.description {
+    composes: textFaded from global, body4 from global;
+    margin-top: 5px;
+}

@@ -90,6 +90,19 @@ export function chunkBuffer(buffer: Buffer, chunkSize: number): Buffer[] {
     return chunks;
 }
 
+/** Partitions a string into chunks of a certain size, where the last chunk
+ * being possibly smaller */
+export function chunkString(str: string, chunkSize: number) {
+    const totalChunks = Math.ceil(str.length / chunkSize);
+    const chunks = new Array(totalChunks);
+
+    for (let i = 0, o = 0; i < totalChunks; i += 1, o += chunkSize) {
+        chunks[i] = str.substr(o, chunkSize);
+    }
+
+    return chunks;
+}
+
 export function isDefined<T>(v?: T): v is T {
     return v !== undefined;
 }
@@ -103,6 +116,9 @@ export function noOp(): void {
 export async function asyncNoOp(): Promise<void> {
     return new Promise((resolve) => resolve());
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const valueNoOp = <V>(v: V) => v;
 
 export const ensureNumberLength = (length: number) => (
     value?: string

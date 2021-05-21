@@ -1,19 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import clsx from 'clsx';
 import { routerActions } from 'connected-react-router';
 import React, { PropsWithChildren } from 'react';
 import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-
-import BackIcon from '@resources/svg/back-arrow.svg';
-import CloseIcon from '@resources/svg/cross.svg';
-import Button from '~/cross-app-components/Button';
-
+import { LocationDescriptorObject } from 'history';
+import CloseButton from '~/cross-app-components/CloseButton';
+import BackButton from '~/cross-app-components/BackButton';
 import styles from './PageContainer.module.scss';
 
 export interface PageContainerProps {
     className?: string;
     disableBack?: boolean;
-    closeRoute?: string;
+    closeRoute?: string | LocationDescriptorObject;
+    backRoute?: string | LocationDescriptorObject;
     padding?: 'vertical' | 'horizontal' | 'both';
 }
 
@@ -32,12 +31,20 @@ export default function PageContainer({
     children,
     disableBack = false,
     closeRoute,
+    backRoute,
     padding,
     className,
 }: PropsWithChildren<PageContainerProps>): JSX.Element {
     const dispatch = useDispatch();
+    const backAction = () => {
+        if (backRoute) {
+            return routerActions.push(backRoute as any);
+        }
+        return routerActions.goBack();
+    };
+
     return (
-        <section
+        <div
             className={clsx(
                 styles.root,
                 padding === 'horizontal' && styles.paddingHorizontal,
@@ -46,21 +53,21 @@ export default function PageContainer({
                 className
             )}
         >
-            {!disableBack && (
-                <Button
-                    className={styles.back}
-                    clear
-                    onClick={() => dispatch(routerActions.goBack())}
-                >
-                    <BackIcon />
-                </Button>
-            )}
             {children}
-            {closeRoute && (
-                <Link className={styles.close} to={closeRoute}>
-                    <CloseIcon />
-                </Link>
+            {!disableBack && (
+                <BackButton
+                    className={styles.back}
+                    onClick={() => dispatch(backAction())}
+                />
             )}
-        </section>
+            {closeRoute && (
+                <CloseButton
+                    className={styles.close}
+                    onClick={() =>
+                        dispatch(routerActions.push(closeRoute as any))
+                    }
+                />
+            )}
+        </div>
     );
 }

@@ -21,7 +21,7 @@ wasm-bindgen = { version = "0.2.68", features = ["serde-serialize"] }
 libc = "0.2"
 pairing = "0.15"
 failure = "0.1"
-ed25519-dalek = "=1.0.0"
+ed25519-dalek = {version = "=1.0.0", features = ["serde"] }
 hex = "0.4"
 ff = "0.5"
 either = "1.6"
@@ -68,6 +68,18 @@ version = "0"
 
 [dependencies.elgamal]
 path = "deps/concordium-base/rust-src/elgamal"
+version = "0"
+
+[dependencies.eddsa_ed25519]
+path = "deps/concordium-base/rust-src/eddsa_ed25519"
+version = "0"
+
+[dependencies.random_oracle]
+path = "deps/concordium-base/rust-src/random_oracle"
+version = "0"
+
+[dependencies.aggregate_sig]
+path = "deps/concordium-base/rust-src/aggregate_sig"
 version = "0"
 
 [lib]

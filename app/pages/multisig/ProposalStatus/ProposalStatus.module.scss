@@ -58,6 +58,13 @@ $proposal-status-color-pending: $color-dark-blue;
 .header {
     font-size: $font-size-body2;
     font-weight: $font-weight-light;
+
+    > * {
+        max-width: 50%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 
 .footer {

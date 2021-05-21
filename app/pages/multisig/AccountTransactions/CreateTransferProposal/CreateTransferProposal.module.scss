@@ -1,0 +1,12 @@
+@import '../../common/MultiSignatureFlowPage.module.scss';
+
+.submitButton {
+    margin-top: auto;
+}
+
+.transactionDetailsColumn {
+    > div {
+        display: flex;
+        flex-direction: column;
+    }
+}

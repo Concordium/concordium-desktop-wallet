@@ -1,0 +1,76 @@
+@import 'config/bundle';
+
+.import,
+.export,
+.successfulImport {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 40px;
+
+    p {
+        font-size: $font-size-body2;
+    }
+}
+
+.successfulImport {
+    justify-content: space-between;
+}
+
+.exportButton {
+    margin-top: auto;
+    margin-bottom: 40px;
+}
+
+.bold,
+.title {
+    font-weight: $font-weight-bold;
+}
+
+.title {
+    margin-bottom: 40px;
+}
+
+.importedAccounts {
+    font-size: $font-size-body3;
+    p {
+        margin: 0;
+    }
+}
+
+.importedAddress {
+    font-size: $font-size-body3;
+    margin: 0;
+}
+
+.importSection {
+    font-size: $font-size-body2;
+
+    &:not(:first-child) {
+        margin-top: 60px;
+    }
+}
+
+.importedList {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    width: 100%;
+    max-width: 325px;
+    margin: 0 auto;
+    padding: 40px 0;
+    justify-content: center;
+
+    p {
+        font-size: $font-size-body2;
+    }
+}
+
+.checkmark {
+    height: 100px;
+    margin: 40px 0;
+}
+
+.fileInput {
+    height: calc(100% - 200px);
+}

@@ -1,10 +1,13 @@
 {
+    "createGenesisAccount": "createGenesisAccount",
     "createIdRequest": "'createIdRequest'",
     "buildPublicInformationForIp": "buildPubInfo",
     "createUnsignedCredential": "createUnsignedCredential",
     "createCredentialDetails": "createCredentialDetails",
     "createCredentialInfo": "createCredentialInfo",
     "decryptAmounts": "decryptAmounts",
-    "createTransferToPublicData": "createTransferToPublicData",
-    "createEncryptedTransferData": "createEncryptedTransferData"
+    "createEncryptedTransferData": "createEncryptedTransferData",
+    "generateBakerKeys": "generateBakerKeys",
+    "getAddressFromCredId": "getAddressFromCredId",
+    "createTransferToPublicData": "createTransferToPublicData"
 }

@@ -1,10 +1,18 @@
-import { Authorization, Authorizations, BlockSummary } from './NodeApiTypes';
+import { AccountPathInput } from '~/features/ledger/Path';
+import {
+    Authorization,
+    Authorizations,
+    BlockSummary,
+    ConsensusStatus,
+} from './NodeApiTypes';
 import {
     MultiSignatureTransaction,
+    MultiSignatureTransactionStatus,
     UpdateInstruction,
-    UpdateInstructionPayload,
     AddressBookEntry,
-    Word8,
+    HigherLevelKeyUpdate,
+    AccountTransaction,
+    Schedule,
 } from './types';
 
 export interface TransactionInput {
@@ -18,6 +26,11 @@ export interface TransactionInput {
  */
 export interface UpdateProps {
     blockSummary: BlockSummary;
+    consensusStatus: ConsensusStatus;
+    handleKeySubmit?(
+        effectiveTime: Date,
+        higherLevelKeyUpdate: HigherLevelKeyUpdate
+    ): Promise<void>;
 }
 
 /**
@@ -33,16 +46,37 @@ export interface TransferState {
 
 export type UpdateComponent = (props: UpdateProps) => JSX.Element | null;
 
+export type PrintComponent<T> = (
+    transaction: T,
+    status: MultiSignatureTransactionStatus,
+    identiconImage?: string
+) => JSX.Element | undefined;
+
 /**
  * Interface definition for a class that handles a specific type
- * of transaction. The handler can serialize and sign the transaction,
- * and generate a view of the transaction.
- * TODO: Decide whether this handler is only for updateInstruction, or make it support account transactions
+ * of transaction.
  */
-export interface TransactionHandler<T, S> {
-    confirmType: (
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ) => T;
+export type TransactionHandler<T, S> =
+    | UpdateInstructionHandler<T, S>
+    | AccountTransactionHandler<T, S>;
+
+/**
+ * Interface definition for a class that handles a specific type
+ * of update instructions.
+ * T = Instruction type that the handler handles
+ * S = The class which signs the transaction
+ * P = 'Parent' type of the transaction.
+ */
+export interface UpdateInstructionHandler<T, S, P = UpdateInstruction> {
+    /**
+     * Used to resolve type ambiguity. N.B. If given another type of update than T,
+     * this might throw an error.
+     */
+    confirmType: (transaction: P) => T;
+    /**
+     * Creates a instance of update type T.
+     * if the fields are not appropiate, will return undefined
+     */
     createTransaction: (
         blockSummary: BlockSummary,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,23 +85,62 @@ export interface TransactionHandler<T, S> {
     ) => Promise<Partial<MultiSignatureTransaction> | undefined>;
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
+    /**
+     * Returns a React element, in which the details of the transaction are displayed
+     */
     view: (transaction: T) => JSX.Element;
+    /**
+     * Returns a React element, which contains the details of the transaction for print
+     */
+    print: PrintComponent<P>;
     getAuthorization: (authorizations: Authorizations) => Authorization;
+    /**
+     * Returns a React element, in which the update's fields can be chosen.
+     */
     update: UpdateComponent;
     type: string;
     title: string;
 }
 
-// An actual signature, which goes into an account transaction.
-export type Signature = Buffer;
+export interface CreateTransactionInput {
+    sender: string;
+    recipient: string;
+    amount: bigint;
+    schedule: Schedule;
+    signatureAmount: number;
+}
 
-type KeyIndex = Word8;
-// Signatures from a single credential, for an AccountTransaction
-export type TransactionCredentialSignature = Record<KeyIndex, Signature>;
-
-type CredentialIndex = Word8;
-// The signature of an account transaction.
-export type TransactionAccountSignature = Record<
-    CredentialIndex,
-    TransactionCredentialSignature
->;
+/**
+ * Interface definition for a class that handles a specific type
+ * of account transaction.
+ * T = Transaction kind that the handler handles
+ * S = The class which signs the transaction
+ * P = 'Parent' type of the transaction.
+ */
+export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
+    /**
+     * Used to resolve type ambiguity. N.B. If given another type of transaction than T,
+     * this might throw an error.
+     */
+    confirmType: (transaction: P) => T;
+    serializePayload: (transaction: T) => Buffer;
+    signTransaction: (
+        transaction: T,
+        signer: S,
+        path: AccountPathInput
+    ) => Promise<Buffer>;
+    /**
+     * Returns a React element, in which the details of the transaction are displayed
+     */
+    view: (transaction: T) => JSX.Element;
+    /**
+     * Returns a React element, which contains the details of the transaction for print
+     */
+    print: PrintComponent<P>;
+    createTransaction: (
+        informationBlob: Partial<CreateTransactionInput>
+    ) => Promise<T>;
+    creationLocationHandler: (currentLocation: string) => string;
+    type: string;
+    title: string;
+}

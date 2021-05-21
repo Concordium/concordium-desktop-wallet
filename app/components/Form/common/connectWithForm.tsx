@@ -1,4 +1,4 @@
-import React, { ComponentType, FC, RefAttributes } from 'react';
+import React, { ComponentType, FC, RefAttributes, useCallback } from 'react';
 import {
     ControllerRenderProps,
     FieldError,
@@ -7,6 +7,7 @@ import {
     UseControllerOptions,
     useFormContext,
 } from 'react-hook-form';
+import { noOp } from '~/utils/basicHelpers';
 import { CommonFieldProps } from '.';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,34 +103,50 @@ export function connectWithFormControlled<
 ): (
     props: Omit<
         TProps,
-        'error' | 'onChange' | 'onBlur' | 'value' | 'isInvalid'
+        'error' | 'value' | 'isInvalid' | 'onChange' | 'onBlur'
     > &
+        Partial<Pick<TProps, 'onChange' | 'onBlur'>> &
         ControlledConnectorProps<TValue>
 ) => JSX.Element {
     const Connected: ReturnType<typeof connectWithFormControlled> = ({
         name,
         rules,
         defaultValue,
+        onBlur = noOp,
+        onChange = noOp,
         ...props
     }) => {
         const { control, errors } = useFormContext();
         const {
-            field: { ref, ...fieldProps },
+            field: { ref, onBlur: cBlur, onChange: cChange, ...fieldProps },
             meta: { invalid },
         } = useController({ name, rules, defaultValue, control });
+
+        const handleBlur = useCallback(() => {
+            onBlur();
+            cBlur();
+        }, [onBlur, cBlur]);
+
+        const handleChange: typeof onChange = useCallback(
+            (...e) => {
+                onChange(...e);
+                cChange(...e);
+            },
+            [onChange, cChange]
+        );
 
         const error: FieldError | undefined = errors[name];
         const p: TProps = {
             isInvalid: invalid,
             error: error?.message,
+            onBlur: handleBlur,
+            onChange: handleChange,
             ...fieldProps,
             ...props,
         } as TProps;
 
         return <Field {...p} />;
     };
-
-    (Connected as FC).displayName = getDisplayName(Field);
 
     return Connected;
 }

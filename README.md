@@ -68,10 +68,54 @@ This way, you can get quicker reloads, because you only need to restart start:de
 as the renderer thread will recompile in the background. N.B. This doesn't apply for changes in the rust code,
 which is only recompiled with a full restart.
 
+## Targeting specific Network
+
+To build the app for a specific network, supply the `TARGET_NET` environment variable.
+Currently works with `staging` and `testnet`.
+Otherwise the app will be targeted Mainnet.
+When using this variable when packaging, this variable will also be appended to the application name.
+
+```bash
+TARGET_NET=staging yarn start
+```
+
+```bash
+export TARGET_NET=staging
+yarn build-main-dev && yarn start-renderer-dev
+```
+
 ## Packaging for Production
 
 To package apps for the local platform:
 
 ```bash
 yarn package
+```
+
+### Mac specific code signing and notarizing
+
+As the software is distributed outside of the Mac App Store, it needs to be signed _and_ notarized.
+
+Running
+
+```bash
+yarn package
+```
+
+on a machine with MacOS will trigger the signing and notarizing processes. This requires a valid [Developer ID Application Certificate](https://developer.apple.com/support/certificates/) in the Keychain of the machine used for building, and a valid Apple Developer ID has to be logged into Xcode on the same machine.
+
+When the build has finished, the signing process will be triggered, and if it succeeds it will continue with the notarizing process.
+
+For the notarizing process to succeed, the Apple ID and it's password also needs to be available as the following
+environment variables:
+
+-   APPLEID=<example@e-mail.com>
+-   APPLEIDPASS=The password for the Apple ID
+
+For the APPLEIDPASS, setting up an [app-specific password](https://support.apple.com/en-us/HT204397) for the Apple ID is recommended.
+
+The notarizing process can take a while, and for testing purposes it can be skipped by running:
+
+```bash
+TARGET_NET=$NET yarn package-mac-no-notarize
 ```

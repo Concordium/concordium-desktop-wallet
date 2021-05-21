@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Button, Header, Segment, Divider } from 'semantic-ui-react';
 import { encrypt } from '../../utils/encryption';
 import { validatePassword } from '../../utils/importHelpers';
 import { saveFile } from '../../utils/FileHelper';
@@ -10,10 +9,13 @@ import { addressBookSelector } from '../../features/AddressBookSlice';
 import { credentialsSelector } from '../../features/CredentialSlice';
 import InputModal from '../../components/InputModal';
 import MessageModal from '../../components/MessageModal';
+import Button from '~/cross-app-components/Button';
+import styles from './ExportImport.module.scss';
+import { getAllWallets } from '~/database/WalletDao';
 
 /**
- * Component for exporting identities/account/addressBook.
- * TODO: allow partial export
+ * Component for exporting wallets, identities, credentials, accounts and
+ * the address book.
  */
 export default function Export() {
     const accounts = useSelector(accountsSelector);
@@ -34,25 +36,40 @@ export default function Export() {
     }
 
     async function exportData(password: string) {
-        // We strip the identityName, as it is superfluous.
+        // We strip the identityName and identityNumber as it is superfluous.
         // We strip the maxTransactionId, because the transactions are not exported
         const cleanAccounts = accounts.map((acc) => {
-            const { identityName, maxTransactionId, ...other } = acc;
+            const {
+                identityName,
+                identityNumber,
+                maxTransactionId,
+                ...other
+            } = acc;
             return other;
         });
+
+        // We strip the identityNumber as it is not part of the database
+        // model for credentials, but is joined into the object in memory.
+        const cleanCredentials = credentials.map((cred) => {
+            const { identityNumber, ...other } = cred;
+            return other;
+        });
+
+        const wallets = await getAllWallets();
+
         const data = {
             accounts: cleanAccounts,
             identities,
             addressBook,
-            credentials,
+            credentials: cleanCredentials,
+            wallets,
         };
         const encrypted = encrypt(JSON.stringify(data), password);
 
         try {
-            const completed = await saveFile(
-                JSON.stringify(encrypted),
-                'Export your data'
-            );
+            const completed = await saveFile(JSON.stringify(encrypted), {
+                title: 'Export your data',
+            });
             if (completed) {
                 setModalMessage('Export was successful');
                 setOpenConfirmationModal(true);
@@ -69,9 +86,12 @@ export default function Export() {
     return (
         <>
             <InputModal
-                title="Choose a password"
-                buttonText="Export"
-                validValue={(password) => validatePassword(password)}
+                title="Enter a password"
+                text="Please enter a password for your export"
+                buttonText="Continue"
+                validValue={(password) =>
+                    validatePassword(password) ? undefined : 'Invalid password'
+                }
                 buttonOnClick={exportData}
                 placeholder="Enter your password"
                 onClose={() => setOpenPasswordModal(false)}
@@ -84,21 +104,16 @@ export default function Export() {
                 onClose={() => setOpenConfirmationModal(false)}
                 open={openConfirmationModal}
             />
-            <Segment basic textAlign="center">
-                <Header textAlign="center" size="large">
-                    Export
-                </Header>
-                Here you can choose to export all your identities, accounts and
-                the address book.
-                <Divider hidden />
+            <div className={styles.export}>
+                <h2 className={styles.title}>Export</h2>
+                <p>Export your accounts, ID’s and address book.</p>
                 <Button
-                    primary
+                    className={styles.exportButton}
                     onClick={() => setOpenPasswordModal(true)}
-                    fluid
                 >
                     Export
                 </Button>
-            </Segment>
+            </div>
         </>
     );
 }

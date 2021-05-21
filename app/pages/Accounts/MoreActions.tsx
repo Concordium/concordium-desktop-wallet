@@ -1,14 +1,20 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
+import clsx from 'clsx';
+import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Switch, Route, Link } from 'react-router-dom';
-import { Menu, Button } from 'semantic-ui-react';
+import { Switch, Route } from 'react-router-dom';
 import { Account, AccountInfo } from '../../utils/types';
 import routes from '../../constants/routes.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
 import ScheduleTransfer from './ScheduleTransfer';
 import ExportTransactions from './ExportTransactions';
+import CredentialInformation from './CredentialInformation';
+import CloseButton from '~/cross-app-components/CloseButton';
+import Card from '~/cross-app-components/Card';
+import ButtonNavLink from '~/components/ButtonNavLink';
+import styles from './Accounts.module.scss';
+import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 
 interface Props {
     account: Account;
@@ -22,40 +28,58 @@ const items = [
         location: routes.ACCOUNTS_MORE_INSPECTRELEASESCHEDULE,
     },
     {
-        name: 'Send funds with a release schedule',
+        name: 'Send GTU with a schedule',
         location: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
+        requiresCredentials: true,
     },
     {
         name: 'Export Transactions',
         location: routes.ACCOUNTS_MORE_EXPORT_TRANSACTIONS,
+    },
+    {
+        name: 'Credential Information',
+        location: routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION,
     },
 ];
 
 /**
  * Lists additional actions, for the account.
  * And controls the flow of those actions' pages.
- * TODO: Find a better name?
  */
 export default function MoreActions({ account, accountInfo }: Props) {
     const dispatch = useDispatch();
+    const accountHasDeployedCredentials = useSelector(
+        accountHasDeployedCredentialsSelector(account)
+    );
 
     function MoreActionsMenu() {
         return (
-            <>
-                <Button as={Link} to={routes.ACCOUNTS}>
-                    x
-                </Button>
-                <Menu vertical>
-                    {items.map((item) => (
-                        <Menu.Item
-                            onClick={() => dispatch(push(item.location))}
+            <Card className="relative flexColumn pH50">
+                <h3 className="textCenter">More Actions</h3>
+                <CloseButton
+                    className={styles.closeButton}
+                    onClick={() => dispatch(push(routes.ACCOUNTS))}
+                />
+                {items.map((item) => {
+                    const isDisabled =
+                        item.requiresCredentials &&
+                        !accountHasDeployedCredentials;
+                    return (
+                        <ButtonNavLink
+                            to={item.location}
                             key={item.location}
+                            disabled={isDisabled}
+                            className={clsx(
+                                'h3 mV10',
+                                isDisabled && styles.disabledAction
+                            )}
+                            size="big"
                         >
                             {item.name}
-                        </Menu.Item>
-                    ))}
-                </Menu>
-            </>
+                        </ButtonNavLink>
+                    );
+                })}
+            </Card>
         );
     }
     return (
@@ -98,6 +122,18 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 render={() => (
                     <ExportTransactions
                         account={account}
+                        returnFunction={() =>
+                            dispatch(push(routes.ACCOUNTS_MORE))
+                        }
+                    />
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION}
+                render={() => (
+                    <CredentialInformation
+                        account={account}
+                        accountInfo={accountInfo}
                         returnFunction={() =>
                             dispatch(push(routes.ACCOUNTS_MORE))
                         }

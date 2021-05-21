@@ -1,15 +1,24 @@
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { chosenAccountInfoSelector } from '~/features/AccountSlice';
-import { AddressBookEntry, AccountInfo, Fraction } from '~/utils/types';
-import { toMicroUnits, getGTUSymbol, isValidGTUString } from '~/utils/gtu';
+import {
+    chosenAccountSelector,
+    chosenAccountInfoSelector,
+} from '~/features/AccountSlice';
+import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
+import { getGTUSymbol } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import {
+    validateAmount,
+    validateShieldedAmount,
+} from '~/utils/transactionHelpers';
+import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
+import ErrorMessage from '~/components/Form/ErrorMessage';
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
@@ -18,15 +27,7 @@ interface Props {
     estimatedFee?: Fraction | undefined;
     toPickRecipient?(currentAmount: string): void;
     toConfirmTransfer(amount: string): void;
-}
-
-// TODO: Take staked amount into consideration
-function atDisposal(accountInfo: AccountInfo): bigint {
-    const unShielded = BigInt(accountInfo.accountAmount);
-    const scheduled = accountInfo.accountReleaseSchedule
-        ? BigInt(accountInfo.accountReleaseSchedule.total)
-        : 0n;
-    return unShielded - scheduled;
+    transactionKind: TransactionKindId;
 }
 
 interface PickAmountForm {
@@ -44,23 +45,12 @@ export default function PickAmount({
     defaultAmount,
     toPickRecipient,
     toConfirmTransfer,
+    transactionKind,
 }: Props) {
+    const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
-    const fee = 5900n; // TODO: Add cost calculator
     const form = useForm<PickAmountForm>({ mode: 'onTouched' });
-
-    function validateAmount(amountToValidate: string): string | undefined {
-        if (!isValidGTUString(amountToValidate)) {
-            return 'Invalid input';
-        }
-        if (
-            accountInfo &&
-            atDisposal(accountInfo) < toMicroUnits(amountToValidate) + fee
-        ) {
-            return 'Insufficient funds';
-        }
-        return undefined;
-    }
+    const { errors } = form;
 
     const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
         (values) => {
@@ -70,24 +60,47 @@ export default function PickAmount({
         [toConfirmTransfer]
     );
 
+    function validate(amount: string) {
+        if (
+            [
+                TransactionKindId.Transfer_to_public,
+                TransactionKindId.Encrypted_transfer,
+            ].includes(transactionKind)
+        ) {
+            return validateShieldedAmount(
+                amount,
+                account,
+                accountInfo,
+                estimatedFee && collapseFraction(estimatedFee)
+            );
+        }
+        return validateAmount(
+            amount,
+            accountInfo,
+            estimatedFee && collapseFraction(estimatedFee)
+        );
+    }
+
     return (
         <>
-            <h2 className={transferStyles.header}>{header}</h2>
+            <h3 className={transferStyles.header}>{header}</h3>
             <Form formMethods={form} onSubmit={handleSubmit}>
                 <div className={styles.amountInputWrapper}>
-                    <p>{getGTUSymbol()}</p>
-                    <Form.Input
+                    {getGTUSymbol()}
+                    <Form.InlineNumber
                         name="amount"
-                        placeholder="Enter Amount"
+                        ensureDigits={2}
+                        allowFractions
                         defaultValue={defaultAmount}
                         rules={{
                             required: 'Amount Required',
-                            validate: {
-                                validateAmount,
-                            },
+                            validate,
                         }}
                     />
                 </div>
+                <span className="textCenter">
+                    <ErrorMessage>{errors.amount?.message}</ErrorMessage>
+                </span>
                 <DisplayEstimatedFee
                     className={styles.estimatedFee}
                     estimatedFee={estimatedFee}

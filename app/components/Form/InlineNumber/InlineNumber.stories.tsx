@@ -61,6 +61,15 @@ Disabled.args = {
     disabled: true,
 };
 
+export const ReadOnly = LabelTemplate.bind({});
+ReadOnly.args = {
+    allowFractions: true,
+    ensureDigits: 2,
+    fallbackValue: 0,
+    step: 0.01,
+    readOnly: true,
+};
+
 export const Invalid = LabelTemplate.bind({});
 Invalid.args = {
     allowFractions: true,

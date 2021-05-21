@@ -1,4 +1,4 @@
-import type Transport from '@ledgerhq/hw-transport';
+import { Transport } from './Transport';
 import {
     AccountTransaction,
     TransactionKindId,
@@ -12,6 +12,8 @@ import {
     TransferToPublic,
     instanceOfTransferToPublic,
     instanceOfEncryptedTransfer,
+    instanceOfAddBaker,
+    AddBaker,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -19,6 +21,9 @@ import {
     serializeSchedulePoint,
     serializeScheduledTransferPayloadBase,
     serializeTransferToPublicData,
+    serializeAddBaker,
+    serializeAddBakerKeys,
+    serializeAddBakerProofsStakeRestake,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import {
@@ -33,6 +38,7 @@ const INS_TRANSFER_TO_ENCRYPTED = 0x11;
 const INS_TRANSFER_TO_PUBLIC = 0x12;
 const INS_TRANSFER_WITH_SCHEDULE = 0x03;
 const INS_ENCRYPTED_TRANSFER = 0x10;
+const INS_ADD_BAKER = 0x13;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -313,6 +319,42 @@ async function signTransferWithSchedule(
     return signature;
 }
 
+async function signAddBaker(
+    transport: Transport,
+    path: number[],
+    transaction: AddBaker
+): Promise<Buffer> {
+    const payload = serializeAddBaker(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const part1 = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        Uint8Array.of(TransactionKindId.Add_baker),
+    ]);
+
+    const part2 = serializeAddBakerKeys(transaction.payload);
+    const part3 = serializeAddBakerProofsStakeRestake(transaction.payload);
+
+    let p1 = 0x00;
+    const p2 = 0x00;
+
+    await transport.send(0xe0, INS_ADD_BAKER, p1, p2, part1);
+    p1 = 0x01;
+    await transport.send(0xe0, INS_ADD_BAKER, p1, p2, part2);
+    p1 = 0x02;
+    const response = await transport.send(0xe0, INS_ADD_BAKER, p1, p2, part3);
+
+    return response.slice(0, 64);
+}
+
 export default async function signTransfer(
     transport: Transport,
     path: number[],
@@ -332,6 +374,9 @@ export default async function signTransfer(
     }
     if (instanceOfEncryptedTransfer(transaction)) {
         return signEncryptedTransfer(transport, path, transaction);
+    }
+    if (instanceOfAddBaker(transaction)) {
+        return signAddBaker(transport, path, transaction);
     }
     throw new Error(
         `The received transaction was not a supported transaction type`

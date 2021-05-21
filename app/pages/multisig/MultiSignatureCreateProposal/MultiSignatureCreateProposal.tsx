@@ -6,13 +6,14 @@ import { useParams } from 'react-router';
 
 import { FieldValues } from 'react-hook-form';
 import {
+    HigherLevelKeyUpdate,
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateType,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
-import findHandler from '~/utils/updates/HandlerFinder';
+import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import Loading from '~/cross-app-components/Loading';
 import Modal from '~/cross-app-components/Modal';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
@@ -22,10 +23,10 @@ import { getNow, TimeConstants } from '~/utils/timeHelpers';
 import { futureDate } from '~/components/Form/util/validation';
 
 import styles from './MultiSignatureCreateProposal.module.scss';
-import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
+import withChainData, { ChainData } from '../common/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 
-interface MultiSignatureCreateProposalForm {
+export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
 }
 
@@ -36,8 +37,10 @@ interface MultiSignatureCreateProposalForm {
  * The component retrieves the block summary of the last finalized block, which
  * is used to get the threshold and sequence number required for update instructions.
  */
-function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
-    const loading = !blockSummary;
+function MultiSignatureCreateProposal({
+    blockSummary,
+    consensusStatus,
+}: ChainData) {
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const dispatch = useDispatch();
@@ -48,7 +51,7 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
 
     const displayType = UpdateType[type];
 
-    const handler = findHandler(type);
+    const handler = findUpdateInstructionHandler(type);
     const UpdateComponent = handler.update;
 
     /**
@@ -108,6 +111,32 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
         }
     }
 
+    /**
+     * Form submit function used for the higher level keys updates. They do not
+     * use Form element to input all the keys, so therefore it cannot use the
+     * regular handleSubmit function.
+     */
+    async function handleKeySubmit(
+        effectiveTime: Date,
+        higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
+    ) {
+        if (!blockSummary) {
+            return;
+        }
+        const timeInSeconds = BigInt(
+            Math.round(effectiveTime.getTime() / 1000)
+        );
+        const proposal = await handler.createTransaction(
+            blockSummary,
+            higherLevelKeyUpdate,
+            timeInSeconds
+        );
+
+        if (proposal) {
+            forwardTransactionToSigningPage(proposal);
+        }
+    }
+
     const RestrictionModal = (
         <Modal
             open={restrictionModalOpen}
@@ -123,6 +152,35 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
         setRestrictionModalOpen(true);
     }
 
+    if (
+        [
+            UpdateType.UpdateRootKeys,
+            UpdateType.UpdateLevel1KeysUsingRootKeys,
+            UpdateType.UpdateLevel1KeysUsingLevel1Keys,
+        ].includes(type)
+    ) {
+        return (
+            <MultiSignatureLayout
+                pageTitle={handler.title}
+                stepTitle={`Transaction Proposal - ${handler.type}`}
+                delegateScroll
+            >
+                {RestrictionModal}
+                {!blockSummary || !consensusStatus ? (
+                    <Loading text="Getting current settings from chain" />
+                ) : (
+                    <div className={styles.subtractContainerPadding}>
+                        <UpdateComponent
+                            blockSummary={blockSummary}
+                            consensusStatus={consensusStatus}
+                            handleKeySubmit={handleKeySubmit}
+                        />
+                    </div>
+                )}
+            </MultiSignatureLayout>
+        );
+    }
+
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
@@ -135,16 +193,16 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                 onSubmit={handleSubmit}
             >
                 <div className={styles.proposal}>
-                    <p>
+                    <p className="mT0">
                         Add all the details for the {displayType} transaction
                         below.
                     </p>
-                    {loading && (
-                        <Loading text="Getting current settings from chain" />
-                    )}
-                    {blockSummary && (
+                    {blockSummary && consensusStatus ? (
                         <>
-                            <UpdateComponent blockSummary={blockSummary} />
+                            <UpdateComponent
+                                blockSummary={blockSummary}
+                                consensusStatus={consensusStatus}
+                            />
                             <Form.Timestamp
                                 name="effectiveTime"
                                 label="Effective Time"
@@ -161,6 +219,8 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                                 }}
                             />
                         </>
+                    ) : (
+                        <Loading text="Getting current settings from chain" />
                     )}
                 </div>
                 <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
@@ -169,4 +229,4 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
     );
 }
 
-export default withBlockSummary(MultiSignatureCreateProposal);
+export default withChainData(MultiSignatureCreateProposal);

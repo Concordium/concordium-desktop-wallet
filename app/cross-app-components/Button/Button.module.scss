@@ -16,6 +16,7 @@
 .clear {
     position: relative;
     border: none;
+    font-family: $font-family;
 
     &:hover,
     &:focus {
@@ -78,8 +79,8 @@
         border-color: $color-grey;
     }
 
-    &Danger {
-        @include button($color-danger);
+    &Negative {
+        @include button($color-salmon-red);
     }
 
     &Inverted {
@@ -92,20 +93,22 @@
             color: $color-text-faded;
         }
 
-        &:hover,
-        &:focus,
-        &:global(.active) {
-            box-shadow: 0 0 0 2px $color-pale-blue inset;
+        &:not(:disabled) {
+            &:hover,
+            &:focus,
+            &:global(.active) {
+                box-shadow: 0 0 0 2px $color-pale-blue inset;
+            }
         }
 
-        &.rootDanger:not(:disabled) {
-            color: $color-danger;
-            box-shadow: 0 0 0 1px $color-danger inset;
+        &.rootNegative:not(:disabled) {
+            color: $color-salmon-red;
+            box-shadow: 0 0 0 1px $color-salmon-red inset;
 
             &:hover,
             &:focus,
             &:global(.active) {
-                box-shadow: 0 0 0 2px $color-danger inset;
+                box-shadow: 0 0 0 2px $color-salmon-red inset;
             }
         }
     }
