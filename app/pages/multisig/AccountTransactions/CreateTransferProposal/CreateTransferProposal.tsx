@@ -12,7 +12,6 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAmount from '../PickAmount';
-import PickRecipient from '../PickRecipientWrapper';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
 import PickIdentity from '~/components/PickIdentity';
@@ -36,6 +35,7 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import styles from './CreateTransferProposal.module.scss';
 import { getDefaultExpiry, isFutureDate } from '~/utils/timeHelpers';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+import PickRecipient from '~/components/Transfers/PickRecipient';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -98,6 +98,7 @@ export default function CreateTransferProposal({
         scheduleDefaults,
         setScheduleDefaults,
     ] = useState<BuildScheduleDefaults>();
+    const [isScheduleReady, setScheduleReady] = useState(true);
 
     const [estimatedFee, setFee] = useState<Fraction>();
     const [error, setError] = useState<string>();
@@ -106,8 +107,8 @@ export default function CreateTransferProposal({
         switch (location) {
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
                 return identity !== undefined;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
-                return schedule !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
+                return isScheduleReady;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
                 return account !== undefined;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
@@ -127,9 +128,9 @@ export default function CreateTransferProposal({
         expiryTime,
         expiryTimeError,
         identity,
+        isScheduleReady,
         location,
         recipient,
-        schedule,
     ]);
 
     useEffect(() => {
@@ -199,7 +200,7 @@ export default function CreateTransferProposal({
                 }}
                 amount={amount}
                 ref={scheduleBuilderRef}
-                setReady={() => {}}
+                setReady={setScheduleReady}
                 defaults={scheduleDefaults}
             />
         );
@@ -286,7 +287,6 @@ export default function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickAccount
-                                            setReady={() => {}}
                                             setAccount={setAccount}
                                             identity={identity}
                                             chosenAccount={account}
@@ -307,7 +307,6 @@ export default function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickAmount
-                                            setReady={() => {}}
                                             account={account}
                                             amount={amount}
                                             setAmount={setAmount}
@@ -323,9 +322,7 @@ export default function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickRecipient
-                                            setReady={() => {}}
-                                            setRecipient={setRecipient}
-                                            recipient={recipient}
+                                            pickRecipient={setRecipient}
                                             senderAddress={account?.address}
                                         />
                                     </div>
@@ -365,7 +362,6 @@ export default function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickIdentity
-                                            setReady={() => {}}
                                             setIdentity={setIdentity}
                                             chosenIdentity={identity}
                                         />

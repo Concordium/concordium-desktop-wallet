@@ -442,7 +442,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 }
                                 render={() => (
                                     <ChangeSignatureThreshold
-                                        setReady={() => {}}
                                         currentThreshold={
                                             account?.signatureThreshold || 1
                                         }
@@ -460,7 +459,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 }
                                 render={() => (
                                     <AddCredential
-                                        setReady={() => {}}
                                         accountAddress={account?.address}
                                         credentialIds={credentialIds}
                                         addCredentialId={(newId) =>
@@ -481,7 +479,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 }
                                 render={() => (
                                     <PickAccount
-                                        setReady={() => {}}
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         identity={identity}
@@ -528,7 +525,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 render={() => (
                                     <PickIdentity
                                         chosenIdentity={identity}
-                                        setReady={() => {}}
                                         setIdentity={setIdentity}
                                     />
                                 )}

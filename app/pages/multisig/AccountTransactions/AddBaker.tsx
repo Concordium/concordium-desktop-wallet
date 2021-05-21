@@ -301,7 +301,6 @@ function BuildAddBakerTransactionProposalStep({
                                     className={`${styles.flex1} ${styles.alignSelfNormal}`}
                                 >
                                     <PickIdentity
-                                        setReady={() => {}}
                                         setIdentity={setIdentity}
                                         chosenIdentity={identity}
                                     />
@@ -327,7 +326,6 @@ function BuildAddBakerTransactionProposalStep({
                             <div className={styles.descriptionStep}>
                                 <div className={styles.flex1}>
                                     <PickAccount
-                                        setReady={() => {}}
                                         identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
@@ -361,7 +359,6 @@ function BuildAddBakerTransactionProposalStep({
                                         for transactions.{' '}
                                     </p>
                                     <PickAmount
-                                        setReady={() => {}}
                                         amount={stake.toString() ?? '0'}
                                         account={account}
                                         estimatedFee={estimatedFee}

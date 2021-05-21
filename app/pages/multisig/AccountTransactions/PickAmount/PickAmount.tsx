@@ -11,7 +11,6 @@ import styles from './PickAmount.module.scss';
 import { useAccountInfo } from '~/utils/hooks';
 
 interface Props {
-    setReady: (ready: boolean) => void;
     account: Account | undefined;
     estimatedFee?: Fraction;
     amount: string;
@@ -27,7 +26,6 @@ export default function PickAmount({
     setAmount,
     amount,
     estimatedFee,
-    setReady,
 }: Props): JSX.Element {
     if (!account) {
         throw new Error('Unexpected missing account');
@@ -43,8 +41,7 @@ export default function PickAmount({
             estimatedFee && collapseFraction(estimatedFee)
         );
         setError(validation);
-        setReady(!validation);
-    }, [amount, setReady, accountInfo, estimatedFee]);
+    }, [amount, accountInfo, estimatedFee]);
 
     return (
         <div className="flexColumn">
