@@ -1136,12 +1136,6 @@ export type PolymorphicComponentProps<
     Props = {}
 > = InheritableElementProps<C, Props & AsProp<C>>;
 
-export enum RewardFilter {
-    None,
-    AllButFinalization,
-    All,
-}
-
 export enum TransactionTypes {
     UpdateInstruction,
     AccountTransaction,
