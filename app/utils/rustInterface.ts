@@ -106,16 +106,6 @@ export async function createIdentityRequestObjectLedger(
 
     displayMessage(signDetailsView(pubInfoForIp));
 
-    //     displayMessage(`Please sign information on device:
-
-    // Identity Credentials Public (IdCredPub): ${pubInfoForIp.idCredPub}
-
-    // Registration ID (RegId): ${pubInfoForIp.regId}
-
-    // Public-key: ${pubInfoForIp.publicKeys.keys[0].verifyKey}
-
-    // Threshold: ${pubInfoForIp.publicKeys.threshold}
-    // `);
     const signature = await ledger.signPublicInformationForIp(
         pubInfoForIp,
         path
