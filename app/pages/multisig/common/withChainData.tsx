@@ -2,8 +2,8 @@
 import { push } from 'connected-react-router';
 import React, { ComponentType, useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { BlockSummary, ConsensusStatus } from '~/utils/NodeApiTypes';
-import { getConsensusStatus, getBlockSummary } from '~/utils/nodeRequests';
+import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
+import { getConsensusStatus, getBlockSummary } from '~/node/nodeRequests';
 import routes from '~/constants/routes.json';
 import Execute from '../Execute';
 

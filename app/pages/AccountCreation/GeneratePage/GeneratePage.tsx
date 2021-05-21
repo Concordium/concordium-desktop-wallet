@@ -11,7 +11,7 @@ import {
     Dispatch,
     AccountStatus,
 } from '~/utils/types';
-import { sendTransaction } from '~/utils/nodeRequests';
+import { sendTransaction } from '~/node/nodeRequests';
 import {
     addPendingAccount,
     confirmAccount,

@@ -4,7 +4,7 @@ import {
     RewardFraction,
     TransactionFeeDistribution,
     VerifyKey,
-} from './types';
+} from '../utils/types';
 
 // This file contains interfaces that matches what is returned
 // from the Concordium Node using GRPC.

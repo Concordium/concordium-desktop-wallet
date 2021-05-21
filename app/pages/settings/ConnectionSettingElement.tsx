@@ -4,8 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { updateSettingEntry } from '~/features/SettingsSlice';
 import { loadGlobal, globalSelector } from '~/features/GlobalSlice';
 import { Setting } from '~/utils/types';
-import { getConsensusStatus } from '~/utils/nodeRequests';
-import startClient from '~/utils/nodeConnector';
+import { getConsensusStatus } from '~/node/nodeRequests';
+import startClient from '~/node/nodeConnector';
 import Card from '~/cross-app-components/Card';
 import Form from '~/components/Form';
 import styles from './ConnectionSettingElement.module.scss';
@@ -14,7 +14,7 @@ import ConnectionStatusComponent, {
 } from '~/components/ConnectionStatusComponent';
 import ipcCommands from '../../constants/ipcCommands.json';
 import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
-import { ConsensusStatus } from '~/utils/NodeApiTypes';
+import { ConsensusStatus } from '~/node/NodeApiTypes';
 import { getGenesis, setGenesis } from '~/database/GenesisDao';
 
 interface Props {

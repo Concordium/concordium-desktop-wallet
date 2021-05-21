@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getAccountInfoOfAddress } from './nodeHelpers';
+import { getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
 import { lookupName } from './transactionHelpers';
 import { AccountInfo, Fraction, TransactionKindId } from './types';

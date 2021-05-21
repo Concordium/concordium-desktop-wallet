@@ -22,7 +22,7 @@ import {
 } from '~/features/MultiSignatureSlice';
 import { getMultiSignatureTransactionStatus } from '~/utils/TransactionStatusPoller';
 import styles from './SubmittedProposal.module.scss';
-import { sendTransaction } from '~/utils/nodeRequests';
+import { sendTransaction } from '~/node/nodeRequests';
 import findHandler, {
     findUpdateInstructionHandler,
 } from '~/utils/transactionHandlers/HandlerFinder';

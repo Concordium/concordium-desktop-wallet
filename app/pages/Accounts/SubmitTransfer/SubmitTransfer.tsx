@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
-import { sendTransaction } from '~/utils/nodeRequests';
+import { sendTransaction } from '~/node/nodeRequests';
 import {
     serializeTransaction,
     getAccountTransactionHash,

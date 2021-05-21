@@ -1,7 +1,17 @@
 import { credentials, Metadata, ServiceError } from '@grpc/grpc-js';
 import { P2PClient } from '~/proto/concordium_p2p_rpc_grpc_pb';
-import { BlockHash, Empty } from '~/proto/concordium_p2p_rpc_pb';
-import { GRPCClient } from './GRPCClient';
+import {
+    AccountAddress,
+    BlockHash,
+    Empty,
+    GetAddressInfoRequest,
+    SendTransactionRequest,
+    TransactionHash,
+} from '~/proto/concordium_p2p_rpc_pb';
+
+interface GRPCClient extends P2PClient {
+    waitForReady?(date: Date, cb: (error: ServiceError) => void): void;
+}
 
 type Command<T, Response> = (
     input: T,
@@ -15,9 +25,10 @@ interface Serializable {
 
 /**
  * A concordium-node specific GRPC client for communicating with nodes on
- * the network.
+ * the network. This GRPC client should be used on the main thread, and
+ * invoked using IPC from a renderer thread.
  */
-export default class ConcordiumGrpcClient {
+export default class ConcordiumNodeClient {
     client: GRPCClient;
 
     address: string;
@@ -42,6 +53,22 @@ export default class ConcordiumGrpcClient {
         );
     }
 
+    buildMetaData(): Metadata {
+        const meta = new Metadata();
+        meta.add('authentication', 'rpcadmin');
+        return meta;
+    }
+
+    buildSendTransactionRequest(
+        payload: Uint8Array,
+        networkId: number
+    ): SendTransactionRequest {
+        const request = new SendTransactionRequest();
+        request.setNetworkId(networkId);
+        request.setPayload(payload);
+        return request;
+    }
+
     getCryptographicParameters(blockHashValue: string) {
         const blockHash = new BlockHash();
         blockHash.setBlockHash(blockHashValue);
@@ -55,10 +82,51 @@ export default class ConcordiumGrpcClient {
         return this.sendRequest(this.client.getConsensusStatus, new Empty());
     }
 
-    buildMetaData(): Metadata {
-        const meta = new Metadata();
-        meta.add('authentication', 'rpcadmin');
-        return meta;
+    sendTransaction(transactionPayload: Uint8Array, networkId = 100) {
+        const request = this.buildSendTransactionRequest(
+            transactionPayload,
+            networkId
+        );
+        return this.sendRequest(this.client.sendTransaction, request);
+    }
+
+    getTransactionStatus(transactionId: string) {
+        const transactionHash = new TransactionHash();
+        transactionHash.setTransactionHash(transactionId);
+        return this.sendRequest(
+            this.client.getTransactionStatus,
+            transactionHash
+        );
+    }
+
+    getNextAccountNonce(address: string) {
+        const accountAddress = new AccountAddress();
+        accountAddress.setAccountAddress(address);
+        return this.sendRequest(
+            this.client.getNextAccountNonce,
+            accountAddress
+        );
+    }
+
+    /**
+     * Retrieves the block summary for the provided block hash from the node.
+     * @param blockHashValue the block hash to retrieve the block summary for
+     */
+    getBlockSummary(blockHashValue: string) {
+        const blockHash = new BlockHash();
+        blockHash.setBlockHash(blockHashValue);
+        return this.sendRequest(this.client.getBlockSummary, blockHash);
+    }
+
+    getAccountInfo(address: string, blockHash: string) {
+        const requestData = new GetAddressInfoRequest();
+        requestData.setAddress(address);
+        requestData.setBlockHash(blockHash);
+        return this.sendRequest(this.client.getAccountInfo, requestData);
+    }
+
+    getNodeInfo() {
+        return this.sendRequest(this.client.nodeInfo, new Empty());
     }
 
     sendRequest<T, Response extends Serializable>(

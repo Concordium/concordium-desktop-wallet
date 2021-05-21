@@ -2,7 +2,7 @@ import {
     BlockSummary,
     ConsensusStatus,
     MintDistributionNode,
-} from '~/utils/NodeApiTypes';
+} from '~/node/NodeApiTypes';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 import { RewardDistributionValue } from '../../common/RewardDistribution';
 

@@ -21,7 +21,7 @@ import styles from './UpdateAccountCredentials.module.scss';
 import UpdateAccountCredentialsHandler from '~/utils/transactionHandlers/UpdateAccountCredentialsHandler';
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
+import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
