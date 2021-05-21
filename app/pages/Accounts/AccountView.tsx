@@ -58,7 +58,9 @@ export default function AccountView() {
         ) {
             controller.start();
             updateTransactions(dispatch, account, controller);
-            return () => controller.abort();
+            return () => {
+                controller.abort();
+            };
         }
         return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps

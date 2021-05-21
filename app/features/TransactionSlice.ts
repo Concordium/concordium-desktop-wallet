@@ -37,6 +37,7 @@ interface State {
     transactions: TransferTransaction[];
     viewingShielded: boolean;
     moreTransactions: boolean;
+    loadingTransactions: boolean;
 }
 
 const transactionSlice = createSlice({
@@ -45,6 +46,7 @@ const transactionSlice = createSlice({
         transactions: [],
         viewingShielded: false,
         moreTransactions: false,
+        loadingTransactions: false,
     } as State,
     reducers: {
         setTransactions(state, update) {
@@ -53,6 +55,9 @@ const transactionSlice = createSlice({
         },
         setViewingShielded(state, viewingShielded) {
             state.viewingShielded = viewingShielded.payload;
+        },
+        setLoadingTransactions(state, loading) {
+            state.loadingTransactions = loading.payload;
         },
         updateTransactionFields(state, update) {
             const { hash, updatedFields } = update.payload;
@@ -71,7 +76,11 @@ const transactionSlice = createSlice({
 
 export const { setViewingShielded } = transactionSlice.actions;
 
-const { setTransactions, updateTransactionFields } = transactionSlice.actions;
+const {
+    setTransactions,
+    updateTransactionFields,
+    setLoadingTransactions,
+} = transactionSlice.actions;
 
 // Decrypts the encrypted transfers in the given transacion list, using the prfKey.
 // This function expects the prfKey to match the account's prfKey,
@@ -156,6 +165,7 @@ function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
  * Filters out reward transactions based on the account's rewardFilter.
  */
 export async function loadTransactions(account: Account, dispatch: Dispatch) {
+    await dispatch(setLoadingTransactions(true));
     const { transactions, more } = await getTransactionsOfAccount(
         account,
         'id',
@@ -163,7 +173,8 @@ export async function loadTransactions(account: Account, dispatch: Dispatch) {
     );
 
     const namedTransactions = await attachNames(transactions);
-    dispatch(setTransactions({ transactions: namedTransactions, more }));
+    await dispatch(setLoadingTransactions(false));
+    return dispatch(setTransactions({ transactions: namedTransactions, more }));
 }
 
 async function fetchTransactions(address: string, currentMaxId: number) {
@@ -193,7 +204,6 @@ export async function updateTransactions(
             controller.onAborted();
             return;
         }
-
         const result = await fetchTransactions(account.address, maxId);
 
         if (maxId !== result.newMaxId) {
@@ -202,6 +212,13 @@ export async function updateTransactions(
                 account.address,
                 result.newMaxId
             );
+        }
+
+        if (controller.isAborted) {
+            controller.onAborted();
+            return;
+        }
+        if (maxId !== result.newMaxId) {
             await loadTransactions(account, dispatch);
             if (!result.isFinished) {
                 setTimeout(
@@ -310,5 +327,8 @@ export const viewingShieldedSelector = (state: RootState) =>
 
 export const moreTransactionsSelector = (state: RootState) =>
     state.transactions.moreTransactions;
+
+export const loadingTransactionsSelector = (state: RootState) =>
+    state.transactions.loadingTransactions;
 
 export default transactionSlice.reducer;
