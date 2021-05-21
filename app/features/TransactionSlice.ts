@@ -167,9 +167,12 @@ function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
 export async function loadTransactions(
     account: Account,
     dispatch: Dispatch,
+    showLoading = false,
     controller?: AbortController
 ) {
-    await dispatch(setLoadingTransactions(true));
+    if (showLoading) {
+        await dispatch(setLoadingTransactions(true));
+    }
     const { transactions, more } = await getTransactionsOfAccount(
         account,
         'id',
@@ -178,7 +181,9 @@ export async function loadTransactions(
 
     const namedTransactions = await attachNames(transactions);
     if (!controller?.isAborted) {
-        await dispatch(setLoadingTransactions(false));
+        if (showLoading) {
+            await dispatch(setLoadingTransactions(false));
+        }
         dispatch(setTransactions({ transactions: namedTransactions, more }));
     }
 }

@@ -74,7 +74,7 @@ export default function AccountView() {
     useEffect(() => {
         if (account && account.status === AccountStatus.Confirmed) {
             const loadController = new AbortController();
-            loadTransactions(account, dispatch, loadController);
+            loadTransactions(account, dispatch, true, loadController);
             return () => loadController.abort();
         }
         return () => {};
