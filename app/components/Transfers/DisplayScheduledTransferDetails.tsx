@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScheduledTransfer } from '~/utils/types';
+import { AddressBookEntry, ScheduledTransfer } from '~/utils/types';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
@@ -9,7 +9,7 @@ import ScheduleList from '~/components/ScheduleList';
 interface Props {
     transaction: ScheduledTransfer;
     fromName?: string;
-    toName?: string;
+    to?: AddressBookEntry;
 }
 
 /**
@@ -18,22 +18,26 @@ interface Props {
 export default function DisplayScheduledTransfer({
     transaction,
     fromName,
-    toName,
+    to,
 }: Props) {
     const amount = getScheduledTransferAmount(transaction);
     return (
-        <>
-            <p className={styles.title}>From Account:</p>
+        <div>
+            <h5 className={styles.title}>From Account:</h5>
             <p className={styles.name}>{fromName}</p>
             <p className={styles.address}>{transaction.sender}</p>
-            <p className={styles.title}>To Account:</p>
-            <p className={styles.name}>{toName}</p>
+            <h5 className={styles.title}>To Account:</h5>
+            <p className={styles.name}>{to?.name}</p>
             <p className={styles.address}>{transaction.payload.toAddress}</p>
-            <p className={styles.title}>Amount:</p>
+            {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
+            <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>{displayAsGTU(amount)}</p>
-            <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
-            <p className={styles.title}>Individual Releases:</p>
+            <DisplayEstimatedFee
+                className={styles.fee}
+                estimatedFee={transaction.estimatedFee}
+            />
+            <h5 className={styles.title}>Individual Releases:</h5>
             <ScheduleList schedule={transaction.payload.schedule} />
-        </>
+        </div>
     );
 }
