@@ -12,11 +12,17 @@ import React, {
 import { noOp } from '~/utils/basicHelpers';
 import { useUpdateEffect } from '~/utils/hooks';
 import { scaleFieldWidth } from '~/utils/htmlHelpers';
-import { formatNumberStringWithDigits } from '~/utils/numberStringHelpers';
+import {
+    formatNumberStringWithDigits,
+    trimLeadingZeros as trimLeadingZerosHelper,
+} from '~/utils/numberStringHelpers';
 import { ClassName } from '~/utils/types';
 import { CommonFieldProps } from '../common';
 
 import styles from './InlineNumber.module.scss';
+
+const withTrimLeadingZeros = (f: (v: string) => string) => (v = '') =>
+    f(trimLeadingZerosHelper(v));
 
 const ensureValidBigInt = (v = ''): string => {
     try {
@@ -66,6 +72,10 @@ export interface InlineNumberProps
      * If true, falls back to `fallbackValue` when fields `isInvalid` prop is set to `true` on blur. Defaults to `false`.
      */
     fallbackOnInvalid?: boolean;
+    /**
+     * Trims leading zeros from value ("01" => "1").
+     */
+    trimLeadingZeros?: boolean;
     customFormatter?(v?: string): string;
     onChange?(v?: string): void;
     /**
@@ -94,25 +104,32 @@ export default function InlineNumber({
     allowExponent = false,
     className,
     isInvalid = false,
+    trimLeadingZeros = false,
     ...inputProps
 }: InlineNumberProps): JSX.Element {
     const format = useMemo(() => {
+        let f: (v: string | undefined) => string;
+
         if (customFormatter !== undefined) {
-            return customFormatter;
-        }
-        if (allowFractions === false && !allowExponent) {
-            return ensureValidBigInt;
-        }
-        if (isNumber(allowFractions) || !allowExponent || ensureDigits !== 0) {
+            f = customFormatter;
+        } else if (allowFractions === false && !allowExponent) {
+            f = ensureValidBigInt;
+        } else if (
+            isNumber(allowFractions) ||
+            !allowExponent ||
+            ensureDigits !== 0
+        ) {
             return formatNumberStringWithDigits(
                 ensureDigits,
                 isNumber(allowFractions) ? allowFractions : undefined,
                 !allowExponent
             );
+        } else {
+            f = ensureValue;
         }
 
-        return ensureValue;
-    }, [ensureDigits, allowFractions, customFormatter]);
+        return trimLeadingZeros ? withTrimLeadingZeros(f) : f;
+    }, [ensureDigits, allowFractions, customFormatter, trimLeadingZeros]);
 
     const initialFormatted = useMemo(
         () => format(value) || format(fallbackValue.toString()),

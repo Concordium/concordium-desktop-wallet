@@ -6,6 +6,7 @@ import {
     toFixed,
     toFraction,
     toResolution,
+    trimLeadingZeros,
 } from '../../app/utils/numberStringHelpers';
 
 describe(isPowOf10, () => {
@@ -187,5 +188,28 @@ describe(formatNumberStringWithDigits, () => {
     test('Throws when given incorrect values', () => {
         expect(() => formatNumberStringWithDigits(3, 2)('-10')).toThrow(); // min digits > max digits.
         expect(() => formatNumberStringWithDigits(3)('text')).toThrow();
+    });
+});
+
+describe(trimLeadingZeros, () => {
+    test('Trims leading zeros from number string', () => {
+        expect(trimLeadingZeros('01')).toBe('1');
+        expect(trimLeadingZeros('01.')).toBe('1.');
+        expect(trimLeadingZeros('1.1')).toBe('1.1');
+        expect(trimLeadingZeros('.1')).toBe('.1');
+        expect(trimLeadingZeros('1.1e')).toBe('1.1e');
+        expect(trimLeadingZeros('012.1e')).toBe('12.1e');
+        expect(trimLeadingZeros('012.1e1')).toBe('12.1e1');
+        expect(trimLeadingZeros('012.1e12')).toBe('12.1e12');
+        expect(trimLeadingZeros('012.1e+12')).toBe('12.1e+12');
+        expect(trimLeadingZeros('012.1e-12')).toBe('12.1e-12');
+        expect(trimLeadingZeros('012.1e12')).toBe('12.1e12');
+    });
+
+    test('Falls back to input value for invalid input', () => {
+        expect(trimLeadingZeros('test')).toBe('test');
+        expect(trimLeadingZeros('')).toBe('');
+        expect(trimLeadingZeros('1.2e12.3')).toBe('1.2e12.3');
+        expect(trimLeadingZeros('..2e12')).toBe('..2e12');
     });
 });
