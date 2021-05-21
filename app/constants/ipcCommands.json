@@ -4,5 +4,6 @@
     "openFileDialog": "OPEN_FILE_DIALOG",
     "saveFileDialog": "SAVE_FILE_DIALOG",
     "grpcSetLocation": "GRPC_SET_LOCATION",
-    "grpcCall": "GRPC_CALL"
+    "grpcCall": "GRPC_CALL",
+    "grpcNodeConsensusStatus": "GRPC_NODE_CONSENSUS_STATUS"
 }

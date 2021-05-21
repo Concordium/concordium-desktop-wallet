@@ -18,6 +18,7 @@ import {
 export interface ConsensusStatus {
     slotDuration: number;
     lastFinalizedBlock: string;
+    genesisBlock: string;
 }
 
 interface UpdateQueue {

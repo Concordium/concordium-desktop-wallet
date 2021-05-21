@@ -15,7 +15,7 @@ import grpcMethods from '../constants/grpcMethods.json';
  * N.B. This file belongs to the main thread, and should not be used directly from the renderer thread.
  */
 
-interface GRPCClient extends P2PClient {
+export interface GRPCClient extends P2PClient {
     waitForReady?(date: Date, cb: (error: ServiceError) => void): void;
 }
 

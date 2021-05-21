@@ -8,6 +8,5 @@ export async function getGlobal(): Promise<Global> {
 
 export async function setGlobal(global: Global) {
     const table = (await knex())(globalTable);
-    await table.del(); // reset;
     return table.insert(global);
 }

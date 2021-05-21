@@ -16,6 +16,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ipcCommands from './constants/ipcCommands.json';
 import { setClientLocation, grpcCall } from './main/GRPCClient';
+import ConcordiumGrpcClient from './main/ConcordiumGrpcClient';
 
 export default class AppUpdater {
     constructor() {
@@ -151,6 +152,28 @@ ipcMain.handle(
         try {
             const response = await grpcCall(command, input);
             return { successful: true, response };
+        } catch (error) {
+            return { successful: false, error };
+        }
+    }
+);
+
+// Creates a standalone GRPC client for testing the connection
+// to a node. This is used to verify that when changing connection
+// that the new node is on the same blockchain as the wallet was previously connected to.
+ipcMain.handle(
+    ipcCommands.grpcNodeConsensusStatus,
+    async (_event, address: string, port: string) => {
+        try {
+            const nodeClient = new ConcordiumGrpcClient(
+                address,
+                Number.parseInt(port, 10)
+            );
+            const consensusStatusSerialized = await nodeClient.getConsensusStatus();
+            return {
+                successful: true,
+                response: consensusStatusSerialized,
+            };
         } catch (error) {
             return { successful: false, error };
         }
