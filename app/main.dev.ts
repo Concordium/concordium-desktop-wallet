@@ -15,8 +15,10 @@ import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ipcCommands from './constants/ipcCommands.json';
-import { setClientLocation, grpcCall } from './main/GRPCClient';
-import ConcordiumGrpcClient from './main/ConcordiumGrpcClient';
+import { setClientLocation, grpcCall } from './node/GRPCClient';
+import ConcordiumNodeClient from './node/ConcordiumNodeClient';
+import { ConsensusStatus } from './node/NodeApiTypes';
+import { JsonResponse } from './proto/concordium_p2p_rpc_pb';
 
 export default class AppUpdater {
     constructor() {
@@ -165,14 +167,25 @@ ipcMain.handle(
     ipcCommands.grpcNodeConsensusStatus,
     async (_event, address: string, port: string) => {
         try {
-            const nodeClient = new ConcordiumGrpcClient(
+            const nodeClient = new ConcordiumNodeClient(
                 address,
                 Number.parseInt(port, 10)
             );
             const consensusStatusSerialized = await nodeClient.getConsensusStatus();
+            const consensusStatus: ConsensusStatus = JSON.parse(
+                JsonResponse.deserializeBinary(
+                    consensusStatusSerialized
+                ).getValue()
+            );
+            const globalSerialized = await nodeClient.getCryptographicParameters(
+                consensusStatus.lastFinalizedBlock
+            );
             return {
                 successful: true,
-                response: consensusStatusSerialized,
+                response: {
+                    consensus: consensusStatusSerialized,
+                    global: globalSerialized,
+                },
             };
         } catch (error) {
             return { successful: false, error };

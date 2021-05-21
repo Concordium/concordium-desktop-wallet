@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { ipcRenderer } from 'electron';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSettingEntry } from '~/features/SettingsSlice';
-import { loadGlobal, globalSelector } from '~/features/GlobalSlice';
-import { Setting } from '~/utils/types';
-import { getConsensusStatus } from '~/node/nodeRequests';
+import { globalSelector } from '~/features/GlobalSlice';
+import { Global, Setting, Versioned } from '~/utils/types';
 import startClient from '~/node/nodeConnector';
 import Card from '~/cross-app-components/Card';
 import Form from '~/components/Form';
@@ -15,7 +14,7 @@ import ConnectionStatusComponent, {
 import ipcCommands from '../../constants/ipcCommands.json';
 import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
 import { ConsensusStatus } from '~/node/NodeApiTypes';
-import { getGenesis, setGenesis } from '~/database/GenesisDao';
+import { getGenesis, setGenesisAndGlobal } from '~/database/GenesisDao';
 
 interface Props {
     displayText: string;
@@ -23,6 +22,34 @@ interface Props {
 }
 
 const portRangeMax = 65535;
+
+/**
+ * Retrieves the consesus status and global cryptographic parameters from the
+ * node with the given address and port.
+ */
+async function getConsensusAndGlobalFromNode(address: string, port: string) {
+    const result = await ipcRenderer.invoke(
+        ipcCommands.grpcNodeConsensusStatus,
+        address,
+        port
+    );
+    if (!result.successful) {
+        throw new Error(
+            'The node consensus status and cryptographic parameters could not be retrieved'
+        );
+    }
+
+    const consensusStatus: ConsensusStatus = JSON.parse(
+        JsonResponse.deserializeBinary(result.response.consensus).getValue()
+    );
+
+    const nodeVersionedGlobal: Versioned<Global> = JSON.parse(
+        JsonResponse.deserializeBinary(result.response.global).getValue()
+    );
+    const nodeGlobal = nodeVersionedGlobal.value;
+
+    return { consensusStatus, nodeGlobal };
+}
 
 /**
  * A component for connection settings that are updated automatically on changes.
@@ -53,29 +80,16 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
     async function setConnection() {
         setTestingConnection(true);
         try {
+            const {
+                consensusStatus,
+                nodeGlobal,
+            } = await getConsensusAndGlobalFromNode(address, port);
             const genesis = await getGenesis();
             if (genesis) {
-                const result = await ipcRenderer.invoke(
-                    ipcCommands.grpcNodeConsensusStatus,
-                    address,
-                    port
-                );
-                if (result.successful) {
-                    const consensusStatus: ConsensusStatus = JSON.parse(
-                        JsonResponse.deserializeBinary(
-                            result.response
-                        ).getValue()
+                if (consensusStatus.genesisBlock !== genesis.genesisBlock) {
+                    setFailedMessage(
+                        'Connecting to a node running on a separate blockchain is not allowed'
                     );
-                    if (consensusStatus.genesisBlock !== genesis.genesisBlock) {
-                        setFailedMessage(
-                            'Connecting to a node running on a separate blockchain is not allowed'
-                        );
-                        setConnected(false);
-                        setHasBeenTested(true);
-                        setTestingConnection(false);
-                        return;
-                    }
-                } else {
                     setConnected(false);
                     setHasBeenTested(true);
                     setTestingConnection(false);
@@ -83,15 +97,13 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
                 }
             }
 
+            if (!global && !genesis) {
+                await setGenesisAndGlobal(
+                    consensusStatus.genesisBlock,
+                    nodeGlobal
+                );
+            }
             await updateValues(address, port);
-            const consensusStatus = await getConsensusStatus();
-            if (!global) {
-                const blockHash = consensusStatus.lastFinalizedBlock;
-                await loadGlobal(dispatch, blockHash);
-            }
-            if (!genesis) {
-                await setGenesis(consensusStatus.genesisBlock);
-            }
             setConnected(true);
         } catch (e) {
             setConnected(false);
