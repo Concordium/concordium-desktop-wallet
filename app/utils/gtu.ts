@@ -1,4 +1,5 @@
 import {
+    formatNumberStringWithDigits,
     isValidResolutionString,
     parseSubNumber,
     toFraction,
@@ -43,7 +44,7 @@ const parseSubGTU = parseSubNumber(6);
  * N.B. Gives the absolute value of the amount.
  * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
  */
-export const toGTUString = toFraction(microGTUPerGTU);
+export const microGtuToGtu = toFraction(microGTUPerGTU);
 
 /**
  * Given a GTU string, convert to microGTU
@@ -61,6 +62,8 @@ export function toMicroUnits(amount: string): bigint {
     return BigInt(amount) * microGTUPerGTU;
 }
 
+const formatGtuString = formatNumberStringWithDigits(2);
+
 /**
  * Given a microGTU amount, returns the same amount in GTU
  * in a displayable format.
@@ -71,5 +74,5 @@ export function displayAsGTU(microGTUAmount: bigint | string) {
     const amount: bigint = toBigInt(microGTUAmount);
     const negative = amount < 0n ? '-' : '';
     const abs = amount < 0n ? -amount : amount;
-    return `${negative}${getGTUSymbol()}${toGTUString(abs)}`;
+    return `${negative}${getGTUSymbol()}${formatGtuString(microGtuToGtu(abs))}`;
 }
