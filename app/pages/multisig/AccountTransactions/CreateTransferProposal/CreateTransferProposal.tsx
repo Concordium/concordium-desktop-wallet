@@ -18,7 +18,6 @@ import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '../PickAccount';
 import Button from '~/cross-app-components/Button';
 import TransactionProposalDetails from '../TransactionProposalDetails';
-import { isValidGTUString } from '~/utils/gtu';
 import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
