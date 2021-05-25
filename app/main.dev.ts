@@ -164,7 +164,7 @@ ipcMain.handle(
 // to a node. This is used to verify that when changing connection
 // that the new node is on the same blockchain as the wallet was previously connected to.
 ipcMain.handle(
-    ipcCommands.grpcNodeConsensusStatus,
+    ipcCommands.grpcNodeConsensusAndGlobal,
     async (_event, address: string, port: string) => {
         try {
             const nodeClient = new ConcordiumNodeClient(

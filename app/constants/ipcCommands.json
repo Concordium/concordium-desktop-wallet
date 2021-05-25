@@ -5,5 +5,5 @@
     "saveFileDialog": "SAVE_FILE_DIALOG",
     "grpcSetLocation": "GRPC_SET_LOCATION",
     "grpcCall": "GRPC_CALL",
-    "grpcNodeConsensusStatus": "GRPC_NODE_CONSENSUS_STATUS"
+    "grpcNodeConsensusAndGlobal": "GRPC_NODE_CONSENSUS_GLOBAL"
 }

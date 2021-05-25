@@ -30,7 +30,7 @@ const portRangeMax = 65535;
  */
 async function getConsensusAndGlobalFromNode(address: string, port: string) {
     const result = await ipcRenderer.invoke(
-        ipcCommands.grpcNodeConsensusStatus,
+        ipcCommands.grpcNodeConsensusAndGlobal,
         address,
         port
     );
