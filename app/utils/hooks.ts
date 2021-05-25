@@ -62,3 +62,14 @@ export function useTransactionCostEstimate(
     }, [kind, payloadSize, signatureAmount]);
     return fee;
 }
+
+/** Hook for getting the current time, optionally taking a refresh frequency in
+ * milliseconds defaulting to 1 second */
+export function useCurrentTime(refreshRate = 1000) {
+    const [now, setNow] = useState(new Date());
+    useEffect(() => {
+        const interval = setInterval(() => setNow(new Date()), refreshRate);
+        return () => clearInterval(interval);
+    }, [refreshRate]);
+    return now;
+}
