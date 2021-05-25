@@ -202,6 +202,7 @@ export default function AccountCreationGenerate({
                                 maxTransactionId: -1,
                                 identityName: identity.name,
                             }}
+                            preview
                         />
                     </CardList>
                 </Columns.Column>

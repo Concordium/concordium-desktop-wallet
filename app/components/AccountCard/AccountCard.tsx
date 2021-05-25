@@ -42,6 +42,7 @@ interface Props {
     onClick?(shielded: boolean): void;
     active?: boolean;
     className?: string;
+    preview?: boolean;
 }
 
 /**
@@ -56,6 +57,7 @@ export default function AccountCard({
     onClick,
     className,
     active = false,
+    preview = false,
 }: Props): JSX.Element {
     const walletId = useSelector(walletIdSelector);
     const [connected, setConnected] = useState(false);
@@ -107,9 +109,8 @@ export default function AccountCard({
                 left={
                     <>
                         <b className={styles.inline}>{account.name}</b>
-                        {isInitialAccount(account) && (
-                            <span className="mL10">(Initial)</span>
-                        )}
+                        {isInitialAccount(account) && <>&nbsp;(Initial)</>}
+                        {preview && <>&nbsp;(Preview)</>}
                         {account.status === AccountStatus.Pending && (
                             <PendingImage
                                 height="24"
@@ -128,7 +129,8 @@ export default function AccountCard({
                                 className={styles.bakerImage}
                             />
                         )}
-                        {account.status === AccountStatus.Confirmed &&
+                        {!preview &&
+                            account.status === AccountStatus.Confirmed &&
                             !accountHasDeployedCredentials && (
                                 <ReadonlyImage
                                     height="15"
