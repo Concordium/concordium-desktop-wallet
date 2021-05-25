@@ -37,12 +37,9 @@ import {
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import PublicKey from '../common/PublicKey/PublicKey';
-import {
-    getDefaultExpiry,
-    getFormattedDateString,
-    isFutureDate,
-} from '~/utils/timeHelpers';
+import { getDefaultExpiry, isFutureDate } from '~/utils/timeHelpers';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
@@ -270,12 +267,10 @@ function BuildAddBakerTransactionProposalStep({
                                 ? placeholderText
                                 : formatRestakeEnabled}
                         </h2>
-                        <b>Transaction expiry time</b>
-                        <h2>
-                            {expiryTime === undefined
-                                ? placeholderText
-                                : getFormattedDateString(expiryTime)}
-                        </h2>
+                        <DisplayTransactionExpiryTime
+                            expiryTime={expiryTime}
+                            placeholder={placeholderText}
+                        />
                         <b>Public keys</b>
                         {bakerKeys === undefined ? (
                             'To be generated'
