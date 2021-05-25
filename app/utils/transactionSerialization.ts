@@ -178,7 +178,7 @@ function serializeEncryptedTransfer(payload: EncryptedTransferPayload) {
     serialized[0] = TransactionKind.Encrypted_transfer;
     put(serialized, 1, data);
     put(serialized, 1 + data.length, proof);
-    return serialized;
+    return Buffer.from(serialized);
 }
 
 export function serializeTransactionHeader(

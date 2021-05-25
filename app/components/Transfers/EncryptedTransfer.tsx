@@ -93,6 +93,8 @@ export default function EncryptedTransfer({ account }: Props) {
                 toConfirmTransfer={toConfirmTransfer}
                 exitFunction={() => dispatch(push(routes.ACCOUNTS))}
                 amountHeader="Send shielded funds"
+                senderAddress={account.address}
+                transactionKind={TransactionKindId.Encrypted_transfer}
             />
         </>
     );

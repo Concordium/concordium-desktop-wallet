@@ -156,13 +156,15 @@ export function createEncryptedTransferTransaction(
         toAddress,
         plainTransferAmount: amount.toString(),
     };
-    return createTransferTransaction(
+    return createAccountTransaction({
         fromAddress,
         expiry,
-        TransactionKindId.Encrypted_transfer,
+        transactionKind: TransactionKindId.Encrypted_transfer,
         payload,
-        getTransactionKindEnergy(TransactionKindId.Encrypted_transfer) // Supply the energy, so that the cost is not computed using the incomplete payload.
-    );
+        estimatedEnergyAmount: getTransactionKindEnergy(
+            TransactionKindId.Encrypted_transfer
+        ), // Supply the energy, so that the cost is not computed using the incomplete payload.
+    });
 }
 
 export function createShieldAmountTransaction(

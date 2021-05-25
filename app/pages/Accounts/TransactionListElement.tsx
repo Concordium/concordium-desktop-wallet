@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
+import { abs } from '~/utils/basicHelpers';
 import { parseTime } from '~/utils/timeHelpers';
 import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import {

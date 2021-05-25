@@ -416,7 +416,7 @@ pub fn create_encrypted_transfer_aux(
     let v: SerdeValue = from_str(input)?;
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let account_number: u8 = try_get(&v, "accountNumber")?;
 

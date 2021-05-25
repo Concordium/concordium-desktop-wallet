@@ -1,7 +1,8 @@
 import React from 'react';
-import { List, Header } from 'semantic-ui-react';
 import { EncryptedTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import styles from './transferDetails.module.scss';
 
 interface Props {
     transaction: EncryptedTransfer;
@@ -10,31 +11,26 @@ interface Props {
 }
 
 /**
- * Displays an overview of a encrypted transfer.
+ * Displays an overview of a simple transfer.
  */
-export default function DisplayEncryptedTransfer({
+export default function DisplaySimpleTransfer({
     transaction,
     fromName,
     toName,
 }: Props) {
     return (
-        <List relaxed="very">
-            <List.Item>
-                From Account:
-                <Header>{fromName}</Header>
-                {transaction.sender}
-            </List.Item>
-            <List.Item>
-                To Account:
-                <Header>{toName} </Header>
-                {transaction.payload.toAddress}
-            </List.Item>
-            <List.Item>
-                Amount:
-                <Header>
-                    {displayAsGTU(transaction.payload.plainTransferAmount)}
-                </Header>
-            </List.Item>
-        </List>
+        <>
+            <p className={styles.title}>From Account:</p>
+            <p className={styles.name}>{fromName}</p>
+            <p className={styles.address}>{transaction.sender}</p>
+            <p className={styles.title}>To Account:</p>
+            <p className={styles.name}>{toName}</p>
+            <p className={styles.address}>{transaction.payload.toAddress}</p>
+            <p className={styles.title}>Amount:</p>
+            <p className={styles.amount}>
+                {displayAsGTU(transaction.payload.plainTransferAmount)}
+            </p>
+            <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+        </>
     );
 }
