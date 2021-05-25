@@ -17,7 +17,6 @@ import {
     instanceOfTransferToPublic,
     TimeStampUnit,
 } from '~/utils/types';
-import { formatNumberStringWithDigits } from '~/utils/numberStringHelpers';
 
 interface State {
     transaction: string;
@@ -66,12 +65,14 @@ function getSpecificsHandler(transaction: AccountTransaction) {
 
 function displayRecipient(recipient: AddressBookEntry) {
     if (recipient) {
-        return <h3 className="textCenter mT10">To: {recipient.name}</h3>;
+        return (
+            <h3 className="textCenter mT10">
+                <b>To:</b> {recipient.name}
+            </h3>
+        );
     }
     return null;
 }
-
-const formatGtuString = formatNumberStringWithDigits(2);
 
 /**
  * Displays details of a submitted transaction.
@@ -93,7 +94,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
         <>
             <h3 className="textCenter mB0">{handler.title}</h3>
             <h1 className="textCenter mT10 mB0">
-                {formatGtuString(displayAsGTU(handler.amount))}
+                {displayAsGTU(handler.amount)}
             </h1>
             <DisplayEstimatedFee
                 className="mT0"
@@ -102,7 +103,7 @@ export default function FinalPage({ location }: Props): JSX.Element {
             {handler.note}
             {displayRecipient(recipient)}
             <h3 className="textCenter mT10">
-                Transaction hash: {transactionHash}
+                <b>Transaction hash:</b> {transactionHash}
             </h3>
             <ButtonNavLink
                 className="m20"
