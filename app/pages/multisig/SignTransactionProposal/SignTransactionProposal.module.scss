@@ -4,7 +4,7 @@
 .detailsColumnContent,
 .signColumnContent {
     composes: columnContent;
-    height: 100%;
+    min-height: 100%;
     max-width: 450px;
     margin: 0 auto;
 }
