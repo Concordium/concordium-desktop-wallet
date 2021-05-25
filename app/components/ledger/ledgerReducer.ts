@@ -3,7 +3,7 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { LedgerStatusType } from './util';
 
 interface LedgerReducerState {
-    text: string;
+    text: string | JSX.Element;
     status: LedgerStatusType;
     deviceName?: string;
     client?: ConcordiumLedgerClient;
@@ -53,19 +53,21 @@ export const resetAction = (): ResetAction => ({
 });
 
 interface ErrorAction extends Action<LedgerActionType.ERROR> {
-    message?: string;
+    message?: string | JSX.Element;
 }
 
-export const errorAction = (message?: string): ErrorAction => ({
+export const errorAction = (message?: string | JSX.Element): ErrorAction => ({
     type: LedgerActionType.ERROR,
     message,
 });
 
 interface SetStatusTextAction extends Action<LedgerActionType.SET_STATUS_TEXT> {
-    text: string;
+    text: string | JSX.Element;
 }
 
-export const setStatusTextAction = (text: string): SetStatusTextAction => ({
+export const setStatusTextAction = (
+    text: string | JSX.Element
+): SetStatusTextAction => ({
     type: LedgerActionType.SET_STATUS_TEXT,
     text,
 });

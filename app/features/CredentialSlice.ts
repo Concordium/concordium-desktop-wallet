@@ -11,6 +11,7 @@ import {
 import {
     Credential,
     CredentialDeploymentInformation,
+    Account,
     AccountInfo,
     instanceOfDeployedCredential,
 } from '~/utils/types';
@@ -48,6 +49,15 @@ const credentialSlice = createSlice({
 
 export const credentialsSelector = (state: RootState) =>
     state.credentials.credentials;
+
+export const accountHasDeployedCredentialsSelector = (account: Account) => (
+    state: RootState
+) =>
+    state.credentials.credentials.some(
+        (cred) =>
+            cred.accountAddress === account.address &&
+            instanceOfDeployedCredential(cred)
+    );
 
 export const {
     updateCredentials,

@@ -17,19 +17,19 @@ export default function DisplayAddBaker({ transaction }: Props) {
     const senderName = useAccountName(transaction.sender);
     return (
         <>
-            <p className={styles.title}>From Account:</p>
+            <h5 className={styles.title}>From Account:</h5>
             <p className={styles.name}>{senderName}</p>
             <p className={styles.address}>{transaction.sender}</p>
-            <p className={styles.title}>Staked amount:</p>
+            <h5 className={styles.title}>Staked amount:</h5>
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.bakingStake)}
             </p>
-            <DisplayFee transaction={transaction} />
-            <p className={styles.title}>Restake earnings:</p>
+            <DisplayFee className={styles.fee} transaction={transaction} />
+            <h5 className={styles.title}>Restake earnings:</h5>
             <p className={styles.amount}>
                 {transaction.payload.restakeEarnings ? 'Yes' : 'No'}
             </p>
-            <p className={styles.title}>Public keys:</p>
+            <h5 className={styles.title}>Public keys:</h5>
             <PublicKey
                 name="Election verify key"
                 publicKey={transaction.payload.electionVerifyKey}

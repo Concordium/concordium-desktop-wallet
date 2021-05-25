@@ -8,8 +8,8 @@ const { dependencies } = require('../../app/package.json');
 const nodeModulesPath = path.join(__dirname, '..', '..', 'app', 'node_modules');
 
 // We should not rebuild the sqlcipher dependency (https://github.com/journeyapps/node-sqlcipher#usage-with-electron-forge--electron-rebuild)
-const modules = Object.keys(dependencies || {}).filter(dep => {
-    return (dep !== '@journeyapps/sqlcipher' && dep !== 'sqlite3');
+const modules = Object.keys(dependencies || {}).filter((dep) => {
+    return dep !== '@journeyapps/sqlcipher' && dep !== 'sqlite3';
 });
 
 if (

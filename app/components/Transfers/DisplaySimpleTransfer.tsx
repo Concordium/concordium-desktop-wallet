@@ -1,5 +1,5 @@
 import React from 'react';
-import { SimpleTransfer } from '~/utils/types';
+import { AddressBookEntry, SimpleTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
 import styles from './transferDetails.module.scss';
@@ -7,7 +7,7 @@ import styles from './transferDetails.module.scss';
 interface Props {
     transaction: SimpleTransfer;
     fromName?: string;
-    toName?: string;
+    to?: AddressBookEntry;
 }
 
 /**
@@ -16,21 +16,22 @@ interface Props {
 export default function DisplaySimpleTransfer({
     transaction,
     fromName,
-    toName,
+    to,
 }: Props) {
     return (
         <>
-            <p className={styles.title}>From Account:</p>
+            <h5 className={styles.title}>From Account:</h5>
             <p className={styles.name}>{fromName}</p>
             <p className={styles.address}>{transaction.sender}</p>
-            <p className={styles.title}>To Account:</p>
-            <p className={styles.name}>{toName}</p>
+            <h5 className={styles.title}>To Account:</h5>
+            <p className={styles.name}>{to?.name}</p>
             <p className={styles.address}>{transaction.payload.toAddress}</p>
-            <p className={styles.title}>Amount:</p>
+            {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
+            <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.amount)}
             </p>
-            <DisplayFee transaction={transaction} />
+            <DisplayFee className={styles.fee} transaction={transaction} />
         </>
     );
 }
