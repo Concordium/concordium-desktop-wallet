@@ -8,7 +8,7 @@ import styles from './LedgerStatus.module.scss';
 
 export interface LedgerStatusProps {
     status: LedgerStatusType;
-    statusText: string;
+    statusText: string | JSX.Element;
 }
 
 export default function LedgerStatus({

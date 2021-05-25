@@ -13,7 +13,7 @@ import styles from './SimpleLedger.module.scss';
 interface Props extends ClassName {
     ledgerCall: (
         ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
+        setMessage: (message: string | JSX.Element) => void
     ) => Promise<void>;
     disabled?: boolean;
 }

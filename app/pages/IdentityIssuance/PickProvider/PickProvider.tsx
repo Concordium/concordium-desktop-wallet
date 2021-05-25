@@ -4,7 +4,7 @@ import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import { getIdentityProviders } from '~/utils/httpRequests';
-import { IdentityProvider } from '~/utils/types';
+import { IdentityProvider, PublicInformationForIp } from '~/utils/types';
 import Card from '~/cross-app-components/Card';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { globalSelector } from '~/features/GlobalSlice';
@@ -17,6 +17,23 @@ import styles from './PickProvider.module.scss';
 import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
 import CardList from '~/cross-app-components/CardList';
 import pairWallet from '~/utils/WalletPairing';
+
+const IPDetails = (info: PublicInformationForIp) => (
+    <div className="textLeft">
+        <p className="mT0">
+            <b>Identity Credentials Public (IdCredPub):</b> {info.idCredPub}
+        </p>
+        <p>
+            <b>Registration ID (RegId):</b> {info.regId}
+        </p>
+        <p>
+            <b>Verification key:</b> {info.publicKeys.keys[0].verifyKey}
+        </p>
+        <p>
+            <b>Threshold:</b> {info.publicKeys.threshold}
+        </p>
+    </div>
+);
 
 interface Props {
     setProvider(provider: IdentityProvider): void;
@@ -61,7 +78,7 @@ export default function IdentityIssuanceChooseProvider({
 
     async function withLedger(
         ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
+        setMessage: (message: string | JSX.Element) => void
     ) {
         if (!provider) {
             return;
@@ -81,7 +98,8 @@ export default function IdentityIssuanceChooseProvider({
             provider.arsInfos,
             global,
             setMessage,
-            ledger
+            ledger,
+            IPDetails
         );
 
         setNextLocationState({
