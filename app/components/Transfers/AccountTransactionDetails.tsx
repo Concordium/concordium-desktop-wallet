@@ -39,7 +39,7 @@ export default function AccountTransactionDetails({ transaction }: Props) {
         if ('toAddress' in transaction.payload) {
             lookupAddressBookEntry(transaction.payload.toAddress)
                 .then((entry) => setTo(entry))
-                .catch(() => {}); // lookupEntry will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
+                .catch(() => {}); // lookupAddressBookEntry will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
         }
     });
 
