@@ -80,7 +80,7 @@ export default function CreateTransferProposal({
 
     const [account, setAccount] = useState<Account | undefined>();
     const [identity, setIdentity] = useState<Identity | undefined>();
-    const [amount, setAmount] = useState<string>('0.00'); // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string | undefined>();
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
     const [expiryTime, setExpiryTime] = useState<Date | undefined>(
         getDefaultExpiry()
@@ -112,7 +112,7 @@ export default function CreateTransferProposal({
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
                 return account !== undefined;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
-                return amount !== undefined && isValidGTUString(amount);
+                return amount !== undefined;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
                 return recipient !== undefined;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
@@ -155,9 +155,9 @@ export default function CreateTransferProposal({
     }, [account, transactionKind, setFee, schedule]);
 
     function renderSignTransaction() {
-        if (!account || !recipient || !expiryTime) {
+        if (!account || !recipient || !expiryTime || !amount) {
             throw new Error(
-                'Unexpected missing account and/or recipient and/or expiry time'
+                'Unexpected missing account, amount, recipient and/or expiry time'
             );
         }
         return (
@@ -188,8 +188,10 @@ export default function CreateTransferProposal({
     }
 
     function renderBuildSchedule() {
-        if (!account || !recipient) {
-            throw new Error('Unexpected missing account and/or recipient');
+        if (!account || !recipient || !amount) {
+            throw new Error(
+                'Unexpected missing account, amount and/or recipient'
+            );
         }
         return (
             <BuildSchedule

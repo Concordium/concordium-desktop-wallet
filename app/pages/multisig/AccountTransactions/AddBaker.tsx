@@ -115,7 +115,7 @@ function BuildAddBakerTransactionProposalStep({
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account>();
-    const [stake, setStake] = useState<string>('0');
+    const [stake, setStake] = useState<string>();
     const [restakeEnabled, setRestakeEnabled] = useState(true);
     const [error, setError] = useState<string>();
     const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
@@ -160,6 +160,10 @@ function BuildAddBakerTransactionProposalStep({
         }
         if (expiryTime === undefined) {
             setError('Expiry time is needed to make transaction');
+            return;
+        }
+        if (stake === undefined) {
+            setError('Baker stake is needed to make transaction');
             return;
         }
 
@@ -359,7 +363,7 @@ function BuildAddBakerTransactionProposalStep({
                                         for transactions.{' '}
                                     </p>
                                     <PickAmount
-                                        amount={stake.toString() ?? '0'}
+                                        amount={stake}
                                         account={account}
                                         estimatedFee={estimatedFee}
                                         setAmount={(gtuString) =>
@@ -393,6 +397,7 @@ function BuildAddBakerTransactionProposalStep({
                                     />
                                 </div>
                                 <Button
+                                    disabled={stake === undefined}
                                     onClick={() => {
                                         dispatch(
                                             push(
