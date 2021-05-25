@@ -24,12 +24,9 @@ import UpdateAccountCredentialsHandler from '~/utils/transactionHandlers/UpdateA
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
-import {
-    getDefaultExpiry,
-    getFormattedDateString,
-    isFutureDate,
-} from '~/utils/timeHelpers';
+import { getDefaultExpiry, isFutureDate } from '~/utils/timeHelpers';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -89,19 +86,6 @@ function displayAccount(account: Account | undefined) {
             <h5 className={styles.PropertyName}>Account:</h5>
             <h2 className={styles.LargePropertyValue}>
                 {account ? account.name : 'Choose an account on the right'}
-            </h2>
-        </>
-    );
-}
-
-function displayExpiry(date: Date | undefined) {
-    return (
-        <>
-            <h5 className={styles.PropertyName}>Transaction expiry time:</h5>
-            <h2 className={styles.LargePropertyValue}>
-                {date
-                    ? getFormattedDateString(date)
-                    : 'Choose an account on the right'}
             </h2>
         </>
     );
@@ -424,7 +408,10 @@ export default function UpdateCredentialPage(): JSX.Element {
                             currentCredentials.length,
                             credentialIds.length
                         )}
-                        {displayExpiry(expiryTime)}
+                        <DisplayTransactionExpiryTime
+                            expiryTime={expiryTime}
+                            placeholder="To be determined"
+                        />
                         {listCredentials(
                             credentialIds,
                             updateCredentialStatus,

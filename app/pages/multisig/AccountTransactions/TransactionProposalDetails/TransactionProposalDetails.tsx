@@ -12,7 +12,7 @@ import { getGTUSymbol } from '~/utils/gtu';
 import styles from './TransactionProposalDetails.module.scss';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ScheduleList from '~/components/ScheduleList';
-import { getFormattedDateString } from '~/utils/timeHelpers';
+import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 interface Props {
     transactionType: TransactionKindId;
@@ -65,10 +65,10 @@ export default function TransactionProposalDetails({
             {recipient && recipient.note ? (
                 <p className={styles.note}>Note: {recipient.note}</p>
             ) : null}
-            {title('Transaction expiry time:')}
-            {expiryTime
-                ? value(getFormattedDateString(expiryTime))
-                : placeholder}
+            <DisplayTransactionExpiryTime
+                expiryTime={expiryTime}
+                placeholder={placeholder}
+            />
             {isScheduledTransfer ? (
                 <>
                     {title('Release Schedule:')}

@@ -223,3 +223,10 @@ export function isFutureDate(date: Date) {
     const now = new Date();
     return now < date;
 }
+
+/** Subtract a number of hours from a date */
+export function subtractHours(hours: number, date: Date) {
+    const before = new Date(date);
+    before.setHours(before.getHours() - hours);
+    return before;
+}
