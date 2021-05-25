@@ -11,6 +11,7 @@ import {
     TransactionKindId,
     AccountTransaction,
     AddBakerPayload,
+    Fraction,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
@@ -37,7 +38,7 @@ import {
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import PublicKey from '../common/PublicKey/PublicKey';
-
+import withExchangeRate from '~/components/Transfers/withExchangeRate';
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
 enum SubRoutes {
@@ -45,7 +46,11 @@ enum SubRoutes {
     downloadKeys = 'download-keys',
 }
 
-export default function AddBakerPage() {
+interface WithExchangeRate {
+    exchangeRate: Fraction;
+}
+
+function AddBakerPage({ exchangeRate }: WithExchangeRate) {
     const { path, url } = useRouteMatch();
     const dispatch = useDispatch();
     const [proposalId, setProposalId] = useState<number>();
@@ -65,24 +70,27 @@ export default function AddBakerPage() {
                         setSenderAddress(address);
                         dispatch(push(`${url}/${SubRoutes.downloadKeys}`));
                     }}
+                    exchangeRate={exchangeRate}
                 />
             </Route>
             <Route path={`${path}/${SubRoutes.downloadKeys}`}>
                 {bakerKeys !== undefined &&
-                proposalId !== undefined &&
-                senderAddress !== undefined ? (
-                    <DownloadBakerCredentialsStep
-                        bakerKeys={bakerKeys}
-                        accountAddress={senderAddress}
-                        onContinue={() => {
-                            dispatch(push(selectedProposalRoute(proposalId)));
-                        }}
-                    />
-                ) : null}
+                 proposalId !== undefined &&
+                 senderAddress !== undefined ? (
+                     <DownloadBakerCredentialsStep
+                         bakerKeys={bakerKeys}
+                         accountAddress={senderAddress}
+                         onContinue={() => {
+                             dispatch(push(selectedProposalRoute(proposalId)));
+                         }}
+                     />
+                 ) : null}
             </Route>
         </Switch>
     );
 }
+
+export default withExchangeRate(AddBakerPage);
 
 const placeholderText = 'To be determined';
 
@@ -92,6 +100,7 @@ type BuildTransactionProposalStepProps = {
         keys: BakerKeys,
         accountAddress: string
     ) => void;
+    exchangeRate: Fraction;
 };
 
 enum BuildSubRoutes {
@@ -103,6 +112,7 @@ enum BuildSubRoutes {
 
 function BuildAddBakerTransactionProposalStep({
     onNewProposal,
+    exchangeRate
 }: BuildTransactionProposalStepProps) {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
@@ -118,6 +128,7 @@ function BuildAddBakerTransactionProposalStep({
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Add_baker,
+        exchangeRate,
         account?.signatureThreshold
     );
 
@@ -151,13 +162,12 @@ function BuildAddBakerTransactionProposalStep({
             bakingStake: toMicroUnits(stake),
             restakeEarnings: restakeEnabled,
         };
-        createAddBakerTransaction(
+        setTransaction(createAddBakerTransaction(
             account.address,
             payload,
+            "nonce", // TODO FIXME PLEASE FIX THIS
             account.signatureThreshold
-        )
-            .then(setTransaction)
-            .catch(() => setError('Failed create transaction'));
+        ));
     };
 
     const credentials = useSelector(credentialsSelector);

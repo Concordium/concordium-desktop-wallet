@@ -108,6 +108,7 @@ export interface CreateTransactionInput {
     amount: bigint;
     schedule: Schedule;
     signatureAmount: number;
+    nonce: string;
 }
 
 /**
@@ -139,7 +140,7 @@ export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
     print: PrintComponent<P>;
     createTransaction: (
         informationBlob: Partial<CreateTransactionInput>
-    ) => Promise<T>;
+    ) => T;
     creationLocationHandler: (currentLocation: string) => string;
     type: string;
     title: string;

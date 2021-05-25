@@ -15,7 +15,6 @@ import {
     TransferToPublic,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
-import getTransactionCost from './transactionCosts';
 import { collapseFraction } from './basicHelpers';
 
 /*
@@ -178,9 +177,12 @@ export async function convertAccountTransaction(
     transaction: AccountTransaction,
     hash: string
 ): Promise<TransferTransaction> {
-    const cost = collapseFraction(
-        transaction.estimatedFee || (await getTransactionCost(transaction))
-    );
+
+    if (!transaction.estimatedFee) {
+        throw new Error('unexpected estimated fee');
+    }
+
+    const cost = collapseFraction(transaction.estimatedFee);
 
     let typeSpecific;
     if (instanceOfSimpleTransfer(transaction)) {

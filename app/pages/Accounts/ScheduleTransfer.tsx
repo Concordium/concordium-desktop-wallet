@@ -1,20 +1,23 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { TransactionKindId, Account, AddressBookEntry } from '~/utils/types';
+import { TransactionKindId, Account, AddressBookEntry, Fraction } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import { toMicroUnits } from '~/utils/gtu';
+import { stringify } from '~/utils/JSONHelper';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
+import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
 
 interface Props {
     account: Account;
     returnFunction(): void;
+    exchangeRate: Fraction;
 }
 
 /**
  * Controls the flow of creating a scheduled transfer.
  */
-export default function ScheduleTransfer({ account, returnFunction }: Props) {
+function ScheduleTransfer({ account, returnFunction, exchangeRate }: Props) {
     const dispatch = useDispatch();
 
     function toBuildSchedule(amount: string, recipient: AddressBookEntry) {
@@ -25,6 +28,7 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
                     account,
                     amount: toMicroUnits(amount).toString(),
                     recipient,
+                    exchangeRate: stringify(exchangeRate)
                 },
             })
         );
@@ -40,3 +44,5 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
         />
     );
 }
+
+export default ensureExchangeRateAndNonce(ScheduleTransfer);

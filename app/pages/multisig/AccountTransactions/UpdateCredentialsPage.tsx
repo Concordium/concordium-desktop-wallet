@@ -282,6 +282,11 @@ export default function UpdateCredentialPage(): JSX.Element {
         if (!newThreshold) {
             throw new Error('Unexpected missing threshold');
         }
+
+        if (!account) {
+            throw new Error('Unexpected missing account');
+        }
+
         const usedIndices: number[] = currentCredentials
             .filter(({ credential }) => {
                 const { credId } = credential;

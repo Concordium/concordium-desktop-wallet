@@ -1,5 +1,5 @@
 import { findEntries } from '../database/AddressBookDao';
-import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
+import { getTransactionStatus } from './nodeRequests';
 import { getDefaultExpiry, getNow } from './timeHelpers';
 import {
     TransactionKindId,
@@ -78,6 +78,7 @@ interface CreateAccountTransactionInput<T> {
     payload: T;
     estimatedEnergyAmount?: bigint;
     signatureAmount?: number;
+    nonce: string;
 }
 
 /**
@@ -88,16 +89,17 @@ interface CreateAccountTransactionInput<T> {
  * @param payload, the payload of the transaction.
  * @param estimatedEnergyAmount, is the energyAmount on the transaction. Should be used to overwrite the, internally calculated, energy amount, in case of incomplete payloads.
  * @param signatureAmount, is the number of signature, which will be put on the transaction. Is only used to generate energyAmount, and is ignored if estimatedEnergyAmount is given.
+ * @param nonce, the next nonce on the sending account.
  */
-async function createAccountTransaction<T extends TransactionPayload>({
+function createAccountTransaction<T extends TransactionPayload>({
     fromAddress,
     expiry,
     transactionKind,
     payload,
     estimatedEnergyAmount,
     signatureAmount,
-}: CreateAccountTransactionInput<T>): Promise<AccountTransaction<T>> {
-    const { nonce } = await getNextAccountNonce(fromAddress);
+    nonce
+}: CreateAccountTransactionInput<T>): AccountTransaction<T> {
     const transaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
@@ -125,9 +127,10 @@ export function createSimpleTransferTransaction(
     fromAddress: string,
     amount: BigInt,
     toAddress: string,
+    nonce: string,
     signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
-): Promise<SimpleTransfer> {
+): SimpleTransfer {
     const payload = {
         toAddress,
         amount: amount.toString(),
@@ -138,14 +141,16 @@ export function createSimpleTransferTransaction(
         transactionKind: TransactionKindId.Simple_transfer,
         payload,
         signatureAmount,
+        nonce,
     });
 }
 
 export function createShieldAmountTransaction(
     fromAddress: string,
     amount: bigint,
+    nonce: string,
     expiry: bigint = getDefaultExpiry()
-): Promise<TransferToEncrypted> {
+): TransferToEncrypted  {
     const payload = {
         amount: amount.toString(),
     };
@@ -154,12 +159,15 @@ export function createShieldAmountTransaction(
         expiry,
         transactionKind: TransactionKindId.Transfer_to_encrypted,
         payload,
+        nonce,
+
     });
 }
 
-export async function createUnshieldAmountTransaction(
+export function createUnshieldAmountTransaction(
     fromAddress: string,
     amount: BigInt,
+    nonce: string,
     expiry: bigint = getDefaultExpiry()
 ) {
     const payload = {
@@ -170,6 +178,7 @@ export async function createUnshieldAmountTransaction(
         expiry,
         transactionKind: TransactionKindId.Transfer_to_public,
         payload,
+        nonce,
         estimatedEnergyAmount: getTransactionKindEnergy(
             TransactionKindId.Transfer_to_public
         ), // Supply the energy, so that the cost is not computed using the incomplete payload.
@@ -238,10 +247,11 @@ export function createRegularIntervalSchedule(
  *  Constructs a, simple transfer, transaction object,
  * Given the fromAddress, toAddress and the amount.
  */
-export async function createScheduledTransferTransaction(
+export function createScheduledTransferTransaction(
     fromAddress: string,
     toAddress: string,
     schedule: Schedule,
+    nonce: string,
     signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
 ) {
@@ -255,6 +265,7 @@ export async function createScheduledTransferTransaction(
         expiry,
         transactionKind: TransactionKindId.Transfer_with_schedule,
         payload,
+        nonce,
         signatureAmount,
     });
 }
@@ -262,12 +273,13 @@ export async function createScheduledTransferTransaction(
 /**
  *  Constructs an account credential update transaction,
  */
-export async function createUpdateCredentialsTransaction(
+export function createUpdateCredentialsTransaction(
     fromAddress: string,
     addedCredentials: AddedCredential[],
     removedCredIds: string[],
     threshold: number,
     currentCredentialAmount: number,
+    nonce: string,
     signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
 ) {
@@ -282,6 +294,7 @@ export async function createUpdateCredentialsTransaction(
         expiry,
         transactionKind: TransactionKindId.Update_credentials,
         payload,
+        nonce,
         estimatedEnergyAmount: getUpdateAccountCredentialEnergy(
             payload,
             currentCredentialAmount,
@@ -293,14 +306,16 @@ export async function createUpdateCredentialsTransaction(
 export function createAddBakerTransaction(
     fromAddress: string,
     payload: AddBakerPayload,
+    nonce: string,
     signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
-): Promise<AddBaker> {
+): AddBaker  {
     return createAccountTransaction({
         fromAddress,
         expiry,
         transactionKind: TransactionKindId.Add_baker,
         payload,
+        nonce,
         signatureAmount,
     });
 }

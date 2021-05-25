@@ -19,10 +19,11 @@ import { TransferState } from '~/utils/transactionTypes';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import TransferView from './TransferView';
+import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
 
 interface Specific<T> {
     amountHeader: string;
-    createTransaction: (address: string, amount: bigint) => Promise<T>;
+    createTransaction: (address: string, amount: bigint, nonce: string) => T;
     location: string;
     transactionKind: TransactionKindId;
 }
@@ -30,14 +31,16 @@ interface Specific<T> {
 interface Props<T> {
     account: Account;
     specific: Specific<T>;
+    exchangeRate: Fraction;
+    nonce: string;
 }
 
 /**
  * Controls the flow of creating a TransferToEncrypted/TransferToPublic transfer.
  */
-export default function InternalTransfer<
-    T extends TransferToPublic | TransferToEncrypted
->({ account, specific }: Props<T>) {
+function InternalTransfer<
+T extends TransferToPublic | TransferToEncrypted
+>({ account, specific, exchangeRate, nonce }: Props<T>) {
     const dispatch = useDispatch();
     const location = useLocation<TransferState>();
 
@@ -45,7 +48,7 @@ export default function InternalTransfer<
     const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
 
     useEffect(() => {
-        getTransactionKindCost(specific.transactionKind)
+        getTransactionKindCost(specific.transactionKind, exchangeRate)
             .then((transferCost) => setEstimatedFee(transferCost))
             .catch((e) =>
                 setError(`Unable to get transaction cost due to: ${e}`)
@@ -60,7 +63,8 @@ export default function InternalTransfer<
         async (amount: string) => {
             const transaction = await specific.createTransaction(
                 account.address,
-                toMicroUnits(amount)
+                toMicroUnits(amount),
+                nonce
             );
             transaction.estimatedFee = estimatedFee;
 
@@ -121,3 +125,5 @@ export default function InternalTransfer<
         </>
     );
 }
+
+export default ensureExchangeRateAndNonce(InternalTransfer);

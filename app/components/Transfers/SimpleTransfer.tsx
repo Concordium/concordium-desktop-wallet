@@ -16,22 +16,25 @@ import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 
 import { getTransactionKindCost } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
+import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
 
 interface Props {
     account: Account;
+    exchangeRate: Fraction;
+    nonce: string;
 }
 
 /**
  * Controls the flow of creating a simple transfer.
  */
-export default function SimpleTransfer({ account }: Props) {
+function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
     const dispatch = useDispatch();
 
     const [error, setError] = useState<string | undefined>();
     const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
 
     useEffect(() => {
-        getTransactionKindCost(TransactionKindId.Simple_transfer)
+        getTransactionKindCost(TransactionKindId.Simple_transfer, exchangeRate)
             .then((transferCost) => setEstimatedFee(transferCost))
             .catch((e) =>
                 setError(`Unable to get transaction cost due to: ${e}`)
@@ -47,7 +50,8 @@ export default function SimpleTransfer({ account }: Props) {
             const transaction = await createSimpleTransferTransaction(
                 account.address,
                 toMicroUnits(amount),
-                recipient.address
+                recipient.address,
+                nonce
             );
             transaction.estimatedFee = estimatedFee;
 
@@ -99,3 +103,5 @@ export default function SimpleTransfer({ account }: Props) {
         </>
     );
 }
+
+export default ensureExchangeRateAndNonce(SimpleTransfer);

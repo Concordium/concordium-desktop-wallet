@@ -5,7 +5,6 @@ import {
     TransactionKindId,
     UpdateAccountCredentialsPayload,
 } from './types';
-import { getEnergyToMicroGtuRate } from './nodeHelpers';
 import { serializeTransferPayload } from './transactionSerialization';
 
 /**
@@ -207,10 +206,10 @@ function energyToCost(energy: bigint, exchangeRate: Fraction): Fraction {
  */
 export async function getTransactionKindCost(
     transactionKind: TransactionKindId,
+    energyToMicroGtu: Fraction,
     signatureAmount = 1,
     payloadSize: number = getPayloadSizeEstimate(transactionKind)
 ): Promise<Fraction> {
-    const energyToMicroGtu = await getEnergyToMicroGtuRate();
     const energy = getTransactionKindEnergy(
         transactionKind,
         payloadSize,
@@ -225,9 +224,9 @@ export async function getTransactionKindCost(
  */
 export default async function getTransactionCost(
     transaction: AccountTransaction,
+    energyToMicroGtu: Fraction,
     signatureAmount = 1
 ): Promise<Fraction> {
-    const energyToMicroGtu = await getEnergyToMicroGtuRate();
     const energy = getTransactionEnergyCost(transaction, signatureAmount);
     return energyToCost(energy, energyToMicroGtu);
 }
@@ -237,9 +236,9 @@ export default async function getTransactionCost(
  * will return the estimated MicroGTU cost of a scheduled transfer.
  */
 export async function scheduledTransferCost(
+    energyToMicroGtu: Fraction,
     signatureAmount = 1
 ): Promise<(scheduleLength: number) => Fraction> {
-    const energyToMicroGtu = await getEnergyToMicroGtuRate();
     return (scheduleLength: number) => {
         const energy = getScheduledTransferEnergy(
             scheduleLength,

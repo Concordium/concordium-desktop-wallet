@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
-import { stringify } from '~/utils/JSONHelper';
+import { stringify, parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { Account, AddressBookEntry, Schedule, Fraction } from '~/utils/types';
 import { displayAsGTU, toGTUString } from '~/utils/gtu';
@@ -22,6 +22,8 @@ interface State {
     account: Account;
     amount: string;
     recipient: AddressBookEntry;
+    exchangeRate: string;
+    nonce: string;
     defaults?: BuildScheduleDefaults;
 }
 
@@ -42,6 +44,8 @@ export default function BuildSchedule({ location }: Props) {
         throw new Error('Unexpected missing state.');
     }
 
+    const { account, amount, recipient, nonce, exchangeRate, defaults } = location.state;
+
     const [error, setError] = useState<string | undefined>();
     const [scheduleLength, setScheduleLength] = useState<number>(0);
     const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
@@ -49,7 +53,7 @@ export default function BuildSchedule({ location }: Props) {
         ((scheduleLength: number) => Fraction) | undefined
     >();
     useEffect(() => {
-        scheduledTransferCost()
+        scheduledTransferCost(parse(exchangeRate))
             .then((calculator) => setFeeCalculator(() => calculator))
             .catch((e) =>
                 setError(`Unable to get transaction cost due to: ${e}`)
@@ -64,14 +68,13 @@ export default function BuildSchedule({ location }: Props) {
         }
     }, [scheduleLength, setEstimatedFee, feeCalculator]);
 
-    const { account, amount, recipient, defaults } = location.state;
-
     const createTransaction = useCallback(
-        async (schedule: Schedule, recoverState: unknown) => {
-            const transaction = await createScheduledTransferTransaction(
+        (schedule: Schedule, recoverState: unknown) => {
+            const transaction = createScheduledTransferTransaction(
                 account.address,
                 recipient.address,
-                schedule
+                schedule,
+                nonce
             );
             transaction.estimatedFee = estimatedFee;
             const transactionJSON = stringify(transaction);

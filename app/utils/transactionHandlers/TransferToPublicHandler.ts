@@ -31,7 +31,7 @@ export default class TransferToPublicHandler
         );
     }
 
-    createTransaction(): Promise<TransactionType> {
+    createTransaction(): TransactionType {
         throw new Error(
             'Not Supported - This transaction type does not use createTransaction'
         );

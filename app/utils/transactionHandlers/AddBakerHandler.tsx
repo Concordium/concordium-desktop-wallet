@@ -52,7 +52,7 @@ export default class AddBakerHandler
         return AccountTransactionDetails({ transaction });
     }
 
-    createTransaction(): Promise<AddBaker> {
+    createTransaction(): AddBaker {
         throw new Error('Unimplemented');
     }
 

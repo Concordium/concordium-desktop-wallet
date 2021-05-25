@@ -34,6 +34,8 @@ import {
 } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import styles from './CreateTransferProposal.module.scss';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
+import LoadingComponent from '../LoadingComponent';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -56,13 +58,15 @@ function subTitle(currentLocation: string) {
 
 interface Props {
     transactionKind: TransactionKindId;
+    exchangeRate: Fraction;
 }
 /**
  * This component controls the flow of creating a multisignature account transaction.
  * It contains the logic for displaying the current parameters.
  */
-export default function CreateTransferProposal({
+function CreateTransferProposal({
     transactionKind,
+    exchangeRate,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname.replace(
@@ -93,15 +97,16 @@ export default function CreateTransferProposal({
         if (account) {
             if (transactionKind === TransactionKindId.Transfer_with_schedule) {
                 if (schedule) {
-                    scheduledTransferCost(account.signatureThreshold)
-                        .then((feeCalculator) =>
-                            setFee(feeCalculator(schedule.length))
+                    scheduledTransferCost(exchangeRate, account.signatureThreshold)
+                            .then((feeCalculator) =>
+                                setFee(feeCalculator(schedule.length))
                         )
                         .catch(() => setError('Unable to reach Node.'));
                 }
             } else {
                 getTransactionKindCost(
                     transactionKind,
+                    exchangeRate,
                     account.signatureThreshold
                 )
                     .then((fee) => setFee(fee))
@@ -312,3 +317,5 @@ export default function CreateTransferProposal({
         </MultiSignatureLayout>
     );
 }
+
+export default ensureExchangeRate(CreateTransferProposal, LoadingComponent);
