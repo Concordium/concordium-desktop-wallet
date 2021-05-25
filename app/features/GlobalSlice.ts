@@ -1,11 +1,7 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '../store/store';
-import { fetchGlobal } from '../node/nodeHelpers';
-import {
-    getGlobal,
-    setGlobal as setGlobalInDatabase,
-} from '../database/GlobalDao';
+import { getGlobal } from '../database/GlobalDao';
 import { Global } from '../utils/types';
 
 interface GlobalState {
@@ -27,16 +23,13 @@ const globalSlice = createSlice({
 export const globalSelector = (state: RootState) => state.global.globalObject;
 const { setGlobal: setGlobalInState } = globalSlice.actions;
 
-export async function loadGlobal(dispatch: Dispatch, blockHash?: string) {
-    let global: Global | undefined = await getGlobal();
-    if (!global) {
-        try {
-            global = await fetchGlobal(blockHash);
-            setGlobalInDatabase(global);
-        } catch (e) {
-            return;
-        }
-    }
+/**
+ * Loads the global cryptographic parameters from the database into the
+ * redux state. If the parameters have not yet been loaded from a node,
+ * then the value will be undefined.
+ */
+export async function loadGlobal(dispatch: Dispatch) {
+    const global: Global | undefined = await getGlobal();
     dispatch(setGlobalInState(global));
 }
 

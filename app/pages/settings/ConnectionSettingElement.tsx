@@ -14,7 +14,8 @@ import ConnectionStatusComponent, {
 import ipcCommands from '../../constants/ipcCommands.json';
 import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
 import { ConsensusStatus } from '~/node/NodeApiTypes';
-import { getGenesis, setGenesisAndGlobal } from '~/database/GenesisDao';
+import { getGenesis } from '~/database/GenesisDao';
+import setGenesisAndGlobal from '~/database/DatabaseHelpers';
 
 interface Props {
     displayText: string;
