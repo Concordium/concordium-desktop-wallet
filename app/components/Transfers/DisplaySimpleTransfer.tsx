@@ -3,6 +3,8 @@ import { SimpleTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import styles from './transferDetails.module.scss';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: SimpleTransfer;
@@ -31,6 +33,9 @@ export default function DisplaySimpleTransfer({
                 {displayAsGTU(transaction.payload.amount)}
             </p>
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
         </>
     );
 }
