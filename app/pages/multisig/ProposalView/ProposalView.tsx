@@ -226,12 +226,13 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                 />
                                 <br />
                                 <Button
-                                    size="small"
+                                    size="tiny"
+                                    inverted
                                     className={styles.closeProposalButton}
                                     onClick={() => setShowCloseModal(true)}
                                     disabled={!isOpen}
                                 >
-                                    Close proposal
+                                    Cancel proposal
                                 </Button>
                             </div>
                             <div className={styles.actions}>

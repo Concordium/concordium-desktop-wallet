@@ -11,7 +11,7 @@ export enum LedgerStatusType {
 
 export type LedgerCallback = (
     client: ConcordiumLedgerClient,
-    setStatusText: (message: string) => void
+    setStatusText: (message: string | JSX.Element) => void
 ) => Promise<void>;
 
 export type LedgerSubmitHandler = () => Promise<void>;

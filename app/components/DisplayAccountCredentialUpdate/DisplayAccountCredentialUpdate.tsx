@@ -17,8 +17,8 @@ export default function DisplayAccountCredentialUpdate({
     const { addedCredentials, removedCredIds } = transaction.payload;
     return (
         <>
-            <h5>Account:</h5>
-            <h3>{fromName}</h3>
+            <h5 className="mB0">Account:</h5>
+            <h3 className="mV10">{fromName}</h3>
             <p className={styles.address}>{transaction.sender}</p>
             <h5>
                 New Threshold: <b>{transaction.payload.threshold}</b>

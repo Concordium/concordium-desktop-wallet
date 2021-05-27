@@ -5,7 +5,7 @@ import { LocationDescriptorObject } from 'history';
 import { stringify } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
 import { Account, AddressBookEntry, Schedule, Fraction } from '~/utils/types';
-import { displayAsGTU, toGTUString } from '~/utils/gtu';
+import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
 import { createScheduledTransferTransaction } from '~/utils/transactionHelpers';
 import locations from '~/constants/transferLocations.json';
 import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
@@ -131,7 +131,7 @@ export default function BuildSchedule({ location }: Props) {
                 dispatch(
                     push({
                         pathname: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
-                        state: { amount: toGTUString(amount), recipient },
+                        state: { amount: microGtuToGtu(amount), recipient },
                     })
                 )
             }

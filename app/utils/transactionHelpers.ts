@@ -25,6 +25,7 @@ import {
     AccountInfo,
     AddBaker,
     AddBakerPayload,
+    AddressBookEntry,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -33,16 +34,19 @@ import {
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString } from './gtu';
 
+export async function lookupAddressBookEntry(
+    address: string
+): Promise<AddressBookEntry | undefined> {
+    const entries = await findEntries({ address });
+    return entries[0];
+}
+
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
  * If the address is found, return the name, otherwise returns undefined;
  */
 export async function lookupName(address: string): Promise<string | undefined> {
-    const entries = await findEntries({ address });
-    if (entries.length > 0) {
-        return entries[0].name;
-    }
-    return undefined;
+    return (await lookupAddressBookEntry(address))?.name;
 }
 
 /**
