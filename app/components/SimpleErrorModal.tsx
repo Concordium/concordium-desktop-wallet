@@ -23,10 +23,12 @@ export default function SimpleErrorModal({
     onClick,
 }: Props) {
     return (
-        <Modal open={show} onOpen={() => {}} onClose={() => {}} disableClose>
-            <h3>{header}</h3>
+        <Modal open={show} disableClose>
+            <h2>{header}</h2>
             <p>{content}</p>
-            <Button onClick={onClick}>Okay</Button>
+            <Button className="mT40" onClick={onClick}>
+                Okay
+            </Button>
         </Modal>
     );
 }
