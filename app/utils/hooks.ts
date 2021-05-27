@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { getAccountInfoOfAddress } from './nodeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
 import { lookupName } from './transactionHelpers';
@@ -62,3 +62,23 @@ export function useTransactionCostEstimate(
     }, [kind, payloadSize, signatureAmount]);
     return fee;
 }
+
+/**
+ * Like a regular useState hook, but resets to initial value after given timeout (in MS).
+ */
+export const useTimeoutState = <TValue>(
+    initial: TValue,
+    timeoutMS?: number
+): [TValue, Dispatch<SetStateAction<TValue>>] => {
+    const [value, setValue] = useState<TValue>(initial);
+
+    const set: typeof setValue = (v) => {
+        setValue(v);
+
+        if (v !== initial) {
+            setTimeout(() => setValue(initial), timeoutMS);
+        }
+    };
+
+    return [value, set];
+};
