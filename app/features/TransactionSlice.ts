@@ -171,18 +171,17 @@ export async function loadTransactions(
     controller?: AbortController
 ) {
     if (showLoading) {
-        await dispatch(setLoadingTransactions(true));
+        dispatch(setLoadingTransactions(true));
     }
     const { transactions, more } = await getTransactionsOfAccount(
         account,
-        'id',
         JSON.parse(account.rewardFilter)
     );
 
     const namedTransactions = await attachNames(transactions);
     if (!controller?.isAborted) {
         if (showLoading) {
-            await dispatch(setLoadingTransactions(false));
+            dispatch(setLoadingTransactions(false));
         }
         dispatch(setTransactions({ transactions: namedTransactions, more }));
     }
