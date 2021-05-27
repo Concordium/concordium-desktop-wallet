@@ -22,11 +22,18 @@ import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 import errorMessages from '~/constants/errorMessages.json';
 
-import { createAddBakerTransaction } from '~/utils/transactionHelpers';
+import {
+    createAddBakerTransaction,
+    validateBakerStake,
+} from '~/utils/transactionHelpers';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
 import { saveFile } from '~/utils/FileHelper';
-import { useAccountInfo, useTransactionCostEstimate } from '~/utils/hooks';
+import {
+    useAccountInfo,
+    useChainParameters,
+    useTransactionCostEstimate,
+} from '~/utils/hooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     signUsingLedger,
@@ -112,6 +119,11 @@ function BuildAddBakerTransactionProposalStep({
     const [transaction, setTransaction] = useState<
         AccountTransaction<AddBakerPayload>
     >();
+    const chainParameters = useChainParameters();
+    const minimumThresholdForBaking =
+        chainParameters === undefined
+            ? undefined
+            : BigInt(chainParameters.minimumThresholdForBaking);
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Add_baker,
@@ -297,6 +309,12 @@ function BuildAddBakerTransactionProposalStep({
                                         amount={stake.toString() ?? '0'}
                                         account={account}
                                         estimatedFee={estimatedFee}
+                                        validateAmount={(...args) =>
+                                            validateBakerStake(
+                                                minimumThresholdForBaking,
+                                                ...args
+                                            )
+                                        }
                                         setAmount={(gtuString) =>
                                             setStake(gtuString)
                                         }

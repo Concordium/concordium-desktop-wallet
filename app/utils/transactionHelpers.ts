@@ -34,7 +34,7 @@ import {
     getTransactionKindEnergy,
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
-import { toMicroUnits, isValidGTUString } from './gtu';
+import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 
 export async function lookupAddressBookEntry(
     address: string
@@ -540,7 +540,9 @@ export function validateBakerStake(
     }
     const amount = toMicroUnits(amountToValidate);
     if (bakerStakeThreshold && bakerStakeThreshold > amount) {
-        return 'Stake is below the threshold for baking';
+        return `Stake is below the threshold (${displayAsGTU(
+            bakerStakeThreshold
+        )}) for baking `;
     }
     if (
         accountInfo &&

@@ -127,3 +127,10 @@ export const useTimeoutState = <TValue>(
 
     return [value, set];
 };
+
+/** Hook for accessing chain parameters of the last finalized block */
+export function useChainParameters() {
+    const lastFinalizedBlock = useLastFinalizedBlockSummary();
+    return lastFinalizedBlock?.lastFinalizedBlockSummary.updates
+        .chainParameters;
+}

@@ -21,7 +21,7 @@ import {
 } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
 import {
-    useLastFinalizedBlockSummary,
+    useChainParameters,
     useStakedAmount,
     useTransactionCostEstimate,
 } from '~/utils/hooks';
@@ -196,12 +196,6 @@ type PickNewStakeProps = {
     account: Account;
     setNewStake: (s: string | undefined) => void;
 };
-
-function useChainParameters() {
-    const lastFinalizedBlock = useLastFinalizedBlockSummary();
-    return lastFinalizedBlock?.lastFinalizedBlockSummary.updates
-        .chainParameters;
-}
 
 function PickNewStake({ account, setNewStake }: PickNewStakeProps) {
     const stakedAlready = useStakedAmount(account.address);
