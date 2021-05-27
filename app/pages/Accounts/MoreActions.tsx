@@ -9,6 +9,7 @@ import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
 import ScheduleTransfer from './ScheduleTransfer';
 import ExportTransactions from './ExportTransactions';
+import TransferLogFilters from './TransferLogFilters';
 import CredentialInformation from './CredentialInformation';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Card from '~/cross-app-components/Card';
@@ -37,6 +38,10 @@ const items = [
         location: routes.ACCOUNTS_MORE_EXPORT_TRANSACTIONS,
     },
     {
+        name: 'Transfer Log Filters',
+        location: routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS,
+    },
+    {
         name: 'Credential Information',
         location: routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION,
     },
@@ -48,6 +53,8 @@ const items = [
  */
 export default function MoreActions({ account, accountInfo }: Props) {
     const dispatch = useDispatch();
+    const returnFunction = () => dispatch(push(routes.ACCOUNTS_MORE));
+
     const accountHasDeployedCredentials = useSelector(
         accountHasDeployedCredentialsSelector(account)
     );
@@ -89,9 +96,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 render={() => (
                     <ShowAccountAddress
                         account={account}
-                        returnFunction={() =>
-                            dispatch(push(routes.ACCOUNTS_MORE))
-                        }
+                        returnFunction={returnFunction}
                     />
                 )}
             />
@@ -100,9 +105,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 render={() => (
                     <ShowReleaseSchedule
                         accountInfo={accountInfo}
-                        returnFunction={() =>
-                            dispatch(push(routes.ACCOUNTS_MORE))
-                        }
+                        returnFunction={returnFunction}
                     />
                 )}
             />
@@ -111,9 +114,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 render={() => (
                     <ScheduleTransfer
                         account={account}
-                        returnFunction={() =>
-                            dispatch(push(routes.ACCOUNTS_MORE))
-                        }
+                        returnFunction={returnFunction}
                     />
                 )}
             />
@@ -122,9 +123,16 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 render={() => (
                     <ExportTransactions
                         account={account}
-                        returnFunction={() =>
-                            dispatch(push(routes.ACCOUNTS_MORE))
-                        }
+                        returnFunction={returnFunction}
+                    />
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS}
+                render={() => (
+                    <TransferLogFilters
+                        account={account}
+                        returnFunction={returnFunction}
                     />
                 )}
             />
@@ -134,9 +142,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     <CredentialInformation
                         account={account}
                         accountInfo={accountInfo}
-                        returnFunction={() =>
-                            dispatch(push(routes.ACCOUNTS_MORE))
-                        }
+                        returnFunction={returnFunction}
                     />
                 )}
             />

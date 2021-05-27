@@ -19,7 +19,7 @@ interface UnlockForm extends FieldValues {
 
 export default function Unlock() {
     const dispatch = useDispatch();
-    const form = useForm<UnlockForm>({ mode: 'onTouched' });
+    const form = useForm<UnlockForm>({ mode: 'onSubmit' });
     const { password: pwField } = form.watch();
     const [validationError, setValidationError] = useState<
         string | undefined
@@ -64,12 +64,12 @@ export default function Unlock() {
                 <Form.Input
                     className="body2"
                     name="password"
-                    placeholder="Enter your wallet password"
                     type="password"
                     rules={{
                         required: 'Please enter your wallet password',
                         validate: () => validationError,
                     }}
+                    autoFocus
                 />
                 <Form.Submit>Unlock</Form.Submit>
             </Card>

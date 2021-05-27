@@ -1,4 +1,5 @@
 import {
+    getPowerOf10,
     formatNumberStringWithDigits,
     isValidResolutionString,
     parseSubNumber,
@@ -9,7 +10,7 @@ export function getGTUSymbol(): string {
     return '\u01E4';
 }
 
-const microGTUPerGTU = 1000000n;
+export const microGTUPerGTU = 1000000n;
 const separator = '.';
 
 /**
@@ -30,13 +31,17 @@ function toBigInt(input: bigint | string): bigint {
 }
 
 // Checks that the input is a valid GTU string.
-export const isValidGTUString = isValidResolutionString(microGTUPerGTU);
+export const isValidGTUString = isValidResolutionString(
+    microGTUPerGTU,
+    false,
+    false
+);
 
 /**
  * expects the fractional part of the a GTU string.
  * i.e. from an amount of 10.001, the subGTU string is 001.
  */
-const parseSubGTU = parseSubNumber(6);
+const parseSubGTU = parseSubNumber(getPowerOf10(microGTUPerGTU));
 
 /**
  * Convert a microGTU amount to a gtu string.

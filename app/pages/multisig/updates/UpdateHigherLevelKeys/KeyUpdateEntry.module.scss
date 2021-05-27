@@ -1,18 +1,10 @@
 @import 'config/bundle';
 
 .listItem {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     list-style-type: none;
     padding-bottom: 14px;
     margin-bottom: 14px;
     border-bottom: 1px solid #dcdcdc;
-
-    > * {
-        flex: 0 0 auto;
-        margin: 0 5px;
-    }
 }
 
 ul {
@@ -27,17 +19,18 @@ ul {
 
 .button {
     flex: 0 0 85px;
+    margin-right: 10px;
 }
 
 .keyText {
     line-height: 1em;
-    height: 3em;
     overflow: hidden;
     flex: 0 1 auto;
+    margin: 0;
 }
 
 .status {
-    flex: 0 0 125px;
+    margin-bottom: 5px;
 }
 
 .removed {

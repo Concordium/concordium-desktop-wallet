@@ -35,7 +35,12 @@ function parseTransaction(transaction: TransferTransaction) {
 
 // Updates transactions of the account, converts them to csv and saves the file.
 async function exportTransactions(account: Account, openModal: () => void) {
-    let transactions = await getTransactionsOfAccount(account); // load from database
+    let { transactions } = await getTransactionsOfAccount(
+        account,
+        'id',
+        [],
+        1000000
+    ); // load from database TODO: Create a getter without a limit
     transactions = await attachNames(transactions);
 
     const csv = toCSV(
