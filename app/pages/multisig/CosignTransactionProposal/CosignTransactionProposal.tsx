@@ -38,6 +38,7 @@ import { signUpdateInstruction, signAccountTransaction } from './util';
 import { saveFile } from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
 import { LedgerCallback } from '~/components/ledger/util';
+import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 
 interface CosignTransactionProposalForm {
     transactionDetailsMatch: boolean;
@@ -88,27 +89,26 @@ function CosignTransactionProposal({
     ) => {
         let sig;
         if (instanceOfUpdateInstruction(transactionObject)) {
-            try {
-                sig = await signUpdateInstruction(transactionObject, ledger);
-            } catch (e) {
-                setShowError({
-                    show: true,
-                    header: 'Unable to sign update',
-                    content: e.message,
-                });
-                return;
-            }
+            sig = await signUpdateInstruction(transactionObject, ledger);
         } else {
-            try {
-                sig = await signAccountTransaction(transactionObject, ledger);
-            } catch (e) {
+            const credential = await findLocalDeployedCredentialWithWallet(
+                transactionObject.sender,
+                ledger
+            );
+            if (!credential) {
                 setShowError({
                     show: true,
                     header: 'Unable to sign transaction',
-                    content: e.message,
+                    content:
+                        'Unable to sign the account transaction, as you do not currently have a matching credential deployed on the given account for the connected wallet.',
                 });
                 return;
             }
+            sig = await signAccountTransaction(
+                transactionObject,
+                ledger,
+                credential
+            );
         }
         setSignature(sig);
         setStatusText('Proposal signed successfully');
