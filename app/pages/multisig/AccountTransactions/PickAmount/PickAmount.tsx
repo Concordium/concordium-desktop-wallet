@@ -6,9 +6,10 @@ import { validateAmount } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { getGTUSymbol } from '~/utils/gtu';
 import ErrorMessage from '~/components/Form/ErrorMessage';
-import styles from './PickAmount.module.scss';
 import { useAccountInfo } from '~/utils/hooks';
 import GtuInput from '~/components/Form/GtuInput';
+
+import styles from './PickAmount.module.scss';
 
 interface Props {
     setReady: (ready: boolean) => void;
