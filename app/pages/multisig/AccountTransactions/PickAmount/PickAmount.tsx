@@ -5,10 +5,10 @@ import { Account, Fraction } from '~/utils/types';
 import { validateAmount } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { getGTUSymbol } from '~/utils/gtu';
-import InlineNumber from '~/components/Form/InlineNumber';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import styles from './PickAmount.module.scss';
 import { useAccountInfo } from '~/utils/hooks';
+import GtuInput from '~/components/Form/GtuInput';
 
 interface Props {
     setReady: (ready: boolean) => void;
@@ -52,11 +52,9 @@ export default function PickAmount({
             <h5 className="mB0">Amount:</h5>
             <div className={clsx(styles.inputWrapper)}>
                 {getGTUSymbol()}{' '}
-                <InlineNumber
+                <GtuInput
                     value={amount}
                     onChange={setAmount}
-                    allowFractions
-                    ensureDigits={2}
                     isInvalid={Boolean(error)}
                 />
             </div>

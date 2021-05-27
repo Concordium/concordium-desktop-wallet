@@ -9,8 +9,6 @@ export type GtuInputProps = Omit<
     | 'fallbackOnInvalid'
     | 'trimLeadingZeros'
     | 'customFormatter'
-    | 'step'
-    | 'min'
 >;
 
 export default function GtuInput(props: GtuInputProps): JSX.Element {

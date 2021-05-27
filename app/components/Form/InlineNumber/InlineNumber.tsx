@@ -84,7 +84,7 @@ export interface InlineNumberProps
  * Number input that aligns with surrouding content in an inline fashion. Is also available as sub-component on \<Form /\>
  *
  * @example
- * I would like to submit the transaction in <InlineNumber value={value} onChange={setValue} label=" Releases" />.
+ * I would like to submit the transaction in <InlineNumber value={value} onChange={setValue} /> releases.
  */
 export default function InlineNumber({
     ensureDigits = 0,
