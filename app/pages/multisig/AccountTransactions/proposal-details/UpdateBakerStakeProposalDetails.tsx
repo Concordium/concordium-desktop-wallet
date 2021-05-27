@@ -14,8 +14,11 @@ import {
     useStakedAmount,
 } from '~/utils/hooks';
 import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
-import { epochDate, getEpochIndexAt } from '~/utils/basicHelpers';
-import { getFormattedDateString } from '~/utils/timeHelpers';
+import {
+    getFormattedDateString,
+    epochDate,
+    getEpochIndexAt,
+} from '~/utils/timeHelpers';
 
 interface Props {
     identity?: Identity;

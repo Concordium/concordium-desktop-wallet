@@ -150,24 +150,3 @@ export function collapseFraction({ numerator, denominator }: Fraction): bigint {
     }
     return 1n + quotient;
 }
-
-/** Calculates the epoch index from a given date */
-export function getEpochIndexAt(
-    epochAtDate: Date,
-    epochDurationMillis: number,
-    genesisTime: Date
-) {
-    const genesis = genesisTime.getTime();
-    const now = epochAtDate.getTime();
-    const millisSinceGenesis = now - genesis;
-    return Math.floor(millisSinceGenesis / epochDurationMillis);
-}
-
-/** Calculates the start date of an epoch index */
-export function epochDate(
-    epochIndex: number,
-    epochDurationMillis: number,
-    genesisTime: Date
-): Date {
-    return new Date(genesisTime.getTime() + epochIndex * epochDurationMillis);
-}
