@@ -36,10 +36,10 @@ export async function loadAddressBook(dispatch: Dispatch) {
 
 export async function updateAddressBookEntry(
     dispatch: Dispatch,
-    name: string,
+    address: string,
     newEntry: AddressBookEntry
 ) {
-    await updateEntry(name, newEntry);
+    await updateEntry(address, newEntry);
     loadAddressBook(dispatch);
 }
 

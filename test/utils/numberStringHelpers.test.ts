@@ -6,6 +6,7 @@ import {
     toFixed,
     toFraction,
     toResolution,
+    trimLeadingZeros,
 } from '../../app/utils/numberStringHelpers';
 
 describe(isPowOf10, () => {
@@ -35,6 +36,9 @@ describe(isValidResolutionString, () => {
         expect(isValidResolutionString(BigInt(100), true)('0.20')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('-0.22')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('0.0100')).toBe(true);
+        expect(isValidResolutionString(BigInt(100), true)('01.0100')).toBe(
+            true
+        );
     });
 
     test('Invalidates invalid fraction values', () => {
@@ -45,6 +49,9 @@ describe(isValidResolutionString, () => {
         );
         expect(isValidResolutionString(BigInt(100), true)('0.202')).toBe(false);
         expect(isValidResolutionString(BigInt(100), true)('0.2233')).toBe(
+            false
+        );
+        expect(isValidResolutionString(BigInt(100), true, false)('01.2')).toBe(
             false
         );
     });
@@ -187,5 +194,24 @@ describe(formatNumberStringWithDigits, () => {
     test('Throws when given incorrect values', () => {
         expect(() => formatNumberStringWithDigits(3, 2)('-10')).toThrow(); // min digits > max digits.
         expect(() => formatNumberStringWithDigits(3)('text')).toThrow();
+    });
+});
+
+describe(trimLeadingZeros, () => {
+    test('Trims leading zeros from number string', () => {
+        expect(trimLeadingZeros('0')).toBe('0');
+        expect(trimLeadingZeros('0.00')).toBe('0.00');
+        expect(trimLeadingZeros('00.00')).toBe('0.00');
+        expect(trimLeadingZeros('01')).toBe('1');
+        expect(trimLeadingZeros('01.')).toBe('1.');
+        expect(trimLeadingZeros('1.1')).toBe('1.1');
+        expect(trimLeadingZeros('.1')).toBe('.1');
+        expect(trimLeadingZeros('1.1e')).toBe('1.1e');
+        expect(trimLeadingZeros('012.1e')).toBe('12.1e');
+        expect(trimLeadingZeros('012.1e1')).toBe('12.1e1');
+        expect(trimLeadingZeros('012.1e12')).toBe('12.1e12');
+        expect(trimLeadingZeros('012.1e+12')).toBe('12.1e+12');
+        expect(trimLeadingZeros('012.1e-12')).toBe('12.1e-12');
+        expect(trimLeadingZeros('012.1e12')).toBe('12.1e12');
     });
 });

@@ -46,12 +46,12 @@ export default function IdentityIssuancePage(): JSX.Element {
     const [identityName, setIdentityName] = useState<string>('');
     const { pathname } = useLocation();
 
-    const [modalOpen, setModalOpen] = useState(false);
+    const [errorModalOpen, setErrorModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState<string>('');
 
     function activateModal(message: string) {
         setModalMessage(message);
-        setModalOpen(true);
+        setErrorModalOpen(true);
     }
 
     function renderExternalIssuance() {
@@ -69,8 +69,8 @@ export default function IdentityIssuancePage(): JSX.Element {
     }
 
     function checkNavigation(location: Location) {
-        // Allow navigation from the final page
-        if (pathname === routes.IDENTITYISSUANCE_FINAL) {
+        // Allow navigation from the final page or if error is shown
+        if (pathname === routes.IDENTITYISSUANCE_FINAL || errorModalOpen) {
             return true;
         }
 
@@ -89,7 +89,7 @@ export default function IdentityIssuancePage(): JSX.Element {
             <ErrorModal
                 header="Unable to create identity"
                 content={modalMessage}
-                show={modalOpen}
+                show={errorModalOpen}
                 onClick={() => dispatch(push(routes.IDENTITIES))}
             />
             <Prompt message={checkNavigation} />

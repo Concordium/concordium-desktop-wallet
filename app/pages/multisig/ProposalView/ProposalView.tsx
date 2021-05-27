@@ -9,7 +9,7 @@ import {
     updateCurrentProposal,
 } from '~/features/MultiSignatureSlice';
 import TransactionDetails from '~/components/TransactionDetails';
-import TransactionHashView from '~/components/TransactionHashView';
+import TransactionSignDigestView from '~/components/TransactionSignatureDigestView';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
@@ -38,7 +38,7 @@ import SignatureCheckboxes from './SignatureCheckboxes';
 import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { getCheckboxName } from './SignatureCheckboxes/SignatureCheckboxes';
 import { submittedProposalRoute } from '~/utils/routerHelper';
-import getTransactionHash from '~/utils/transactionHash';
+import getTransactionSignDigest from '~/utils/transactionHash';
 import { HandleSignatureFile, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
 
@@ -46,6 +46,7 @@ import styles from './ProposalView.module.scss';
 import { dateFromTimeStamp, subtractHours } from '~/utils/timeHelpers';
 import { getTimeout } from '~/utils/transactionHelpers';
 import { useCurrentTime } from '~/utils/hooks';
+import TransactionHashView from '~/components/TransactionHash';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING;
 
@@ -115,7 +116,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
     }, [signatures]);
 
     const handler = findHandler(transaction);
-    const transactionHash = getTransactionHash(transaction);
+    const transactionSignDigest = getTransactionSignDigest(transaction);
 
     function submitTransaction() {
         dispatch(
@@ -215,22 +216,30 @@ function ProposalView({ proposal }: ProposalViewProps) {
                         <div className={styles.columnContent}>
                             <div>
                                 <ProposalViewStatusText {...proposal} />
-                                <TransactionHashView
-                                    transactionHash={transactionHash}
+                                <TransactionSignDigestView
+                                    transactionSignDigest={
+                                        transactionSignDigest
+                                    }
                                     setScreenshot={setImage}
                                 />
+                                {missingSignatures ? null : (
+                                    <TransactionHashView
+                                        transaction={transaction}
+                                    />
+                                )}
                                 <TransactionExpirationDetails
                                     title="Transaction must be submitted before:"
                                     expirationDate={expiry}
                                 />
                                 <br />
                                 <Button
-                                    size="small"
+                                    size="tiny"
+                                    inverted
                                     className={styles.closeProposalButton}
                                     onClick={() => setShowCloseModal(true)}
                                     disabled={!isOpen}
                                 >
-                                    Close proposal
+                                    Cancel proposal
                                 </Button>
                             </div>
                             <div className={styles.actions}>
