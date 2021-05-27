@@ -43,10 +43,6 @@
     transition: opacity $anim-easing $anim-timing,
         transform $anim-easing $anim-timing;
 
-    & + :global(.identicon) {
-        z-index: 0;
-    }
-
     &Visible {
         opacity: 1;
         transform: scale(1);

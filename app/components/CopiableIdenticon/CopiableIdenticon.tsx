@@ -59,6 +59,7 @@ export default function CopiableIdenticon({
                 type="button"
                 disabled={showCopied}
             >
+                <Identicon string={data} size={imageWidth} />
                 <div
                     className={clsx(
                         styles.copied,
@@ -68,7 +69,6 @@ export default function CopiableIdenticon({
                     <CheckmarkIcon />
                     Copied!
                 </div>
-                <Identicon string={data} size={imageWidth} />
             </button>
         </>
     );
