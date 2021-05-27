@@ -75,9 +75,6 @@ export default function ChangeThreshold({
                 value={
                     newThreshold !== undefined ? newThreshold.toString() : ''
                 }
-                min={1}
-                max={newCredentialAmount}
-                step={1}
             />
         </div>
     );

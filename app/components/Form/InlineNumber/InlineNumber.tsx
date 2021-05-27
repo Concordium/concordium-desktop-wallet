@@ -43,13 +43,7 @@ export interface InlineNumberProps
     extends ClassName,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            | 'step'
-            | 'min'
-            | 'max'
-            | 'disabled'
-            | 'autoFocus'
-            | 'readOnly'
-            | 'title'
+            'disabled' | 'autoFocus' | 'readOnly' | 'title'
         >,
         Pick<CommonFieldProps, 'isInvalid'> {
     /**
@@ -189,7 +183,7 @@ export default function InlineNumber({
                 isInvalid && styles.invalid,
                 className
             )}
-            type="number"
+            type="text"
             value={innerValue}
             onChange={(e) => setInnerValue(e.target.value)}
             onBlur={handleBlur}
