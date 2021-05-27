@@ -13,7 +13,7 @@ import styles from './CopiableIdenticon.module.scss';
 
 const imageWidth = 128;
 
-export interface CopiableIdenticonProps {
+interface Props {
     data: string;
     setScreenshot?: (dataUrl: string) => void;
 }
@@ -22,10 +22,7 @@ export interface CopiableIdenticonProps {
  * Component that displays a copiable identicon. Clicking the identicon will
  * copy the identicon to the clipboard as a PNG file.
  */
-export default function CopiableIdenticon({
-    data,
-    setScreenshot,
-}: CopiableIdenticonProps) {
+export default function CopiableIdenticon({ data, setScreenshot }: Props) {
     const ref = useRef(null);
     const [image, takeScreenshot] = useScreenshot();
     const [showCopied, setShowCopied] = useTimeoutState<boolean>(false, 2000);
