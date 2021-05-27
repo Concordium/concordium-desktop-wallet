@@ -18,6 +18,12 @@
     box-shadow: 0 0 0 1px $color-grey inset;
 }
 
+.disabledActionButton {
+    > * {
+        opacity: 0.3;
+    }
+}
+
 .actionImage {
     margin-bottom: 5px;
 }

@@ -1,44 +1,14 @@
-@import 'config/bundle';
-
 .content {
-    position: absolute;
+    width: 600px;
+    margin: 0 auto;
+    padding-bottom: 80px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 645px;
-    padding-top: 30px;
+    height: 100%;
 }
 
-.input {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    font-size: $font-size-body2;
-}
-
-.title {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-top: 240px;
-}
-
-.card {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 645px;
-    padding-top: 30px;
-}
-
-.enter {
-    composes: flexColumn from global, justifySpaceBetween from global, textCenter from global;
-    height: 385px;
-}
-
-.error {
-    color: $color-salmon-red;
+.button {
+    width: 400px;
+    margin: 100px auto 0;
 }

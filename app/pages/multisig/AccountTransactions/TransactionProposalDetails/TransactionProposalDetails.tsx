@@ -59,7 +59,7 @@ export default function TransactionProposalDetails({
             {account ? showAccount(account) : placeholder}
             {title('Amount:')}
             {amount ? value(`${getGTUSymbol()} ${amount}`) : placeholder}
-            <DisplayEstimatedFee estimatedFee={estimatedFee} />
+            <DisplayEstimatedFee className="mT5" estimatedFee={estimatedFee} />
             {title('Recipient:')}
             {recipient ? showAccount(recipient) : placeholder}
             {recipient && recipient.note ? (

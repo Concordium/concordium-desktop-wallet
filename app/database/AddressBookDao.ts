@@ -20,11 +20,11 @@ export async function insertEntry(
 }
 
 export async function updateEntry(
-    name: string,
+    address: string,
     updatedValues: Partial<AddressBookEntry>
 ) {
     return (await knex())(addressBookTable)
-        .where({ name })
+        .where({ address })
         .update(updatedValues);
 }
 

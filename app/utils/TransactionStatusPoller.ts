@@ -17,7 +17,7 @@ import {
 } from '~/features/TransactionSlice';
 import { getPendingTransactions } from '~/database/TransactionDao';
 import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
-import { getTransactionSubmissionId } from './transactionHash';
+import { getTransactionHash } from './transactionHash';
 import {
     updateAccountInfoOfAddress,
     updateSignatureThreshold,
@@ -53,7 +53,7 @@ export async function getMultiSignatureTransactionStatus(
 ) {
     const transaction: Transaction = parse(proposal.transaction);
 
-    const transactionHash = await getTransactionSubmissionId(transaction);
+    const transactionHash = await getTransactionHash(transaction);
 
     const response = await getStatus(transactionHash);
 

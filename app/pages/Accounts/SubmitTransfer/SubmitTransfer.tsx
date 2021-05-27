@@ -228,7 +228,9 @@ export default function SubmitTransfer({ location }: Props) {
                         }
                         className={styles.summary}
                     >
-                        <TransactionDetails transaction={transaction} />
+                        <div className="mT40">
+                            <TransactionDetails transaction={transaction} />
+                        </div>
                     </Card>
                     <SimpleLedger
                         className={styles.ledger}

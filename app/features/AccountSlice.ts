@@ -12,9 +12,9 @@ import {
     getAllAccounts,
     insertAccount,
     updateAccount,
-    removeAccount as removeAccountFromDatabase,
-    updateSignatureThreshold as updateSignatureThresholdInDatabase,
+    getAccount,
     confirmInitialAccount as confirmInitialAccountInDatabase,
+    removeAccount as removeAccountFromDatabase,
     removeInitialAccount as removeInitialAccountInDatabase,
     findAccounts,
 } from '../database/AccountDao';
@@ -32,6 +32,7 @@ import {
     Dispatch,
     Global,
     Identity,
+    TransactionKindString,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
@@ -96,6 +97,12 @@ const accountsSlice = createSlice({
                     ...updatedFields,
                 };
             }
+            if (
+                state.chosenAccount &&
+                state.chosenAccount.address === address
+            ) {
+                state.chosenAccount = state.accounts[index];
+            }
         },
     },
 });
@@ -140,11 +147,11 @@ export async function loadAccounts(dispatch: Dispatch) {
 
 // given an account and the accountEncryptedAmount from the accountInfo
 // determine whether the account has received or sent new funds,
-// and in that case update the state of the account to reflect that.
+// and in that case return the the state of the account that should be updated to reflect that.
 function updateAccountEncryptedAmount(
     account: Account,
     accountEncryptedAmount: AccountEncryptedAmount
-): Promise<void | number> {
+): Partial<Account> {
     const { incomingAmounts } = accountEncryptedAmount;
     const selfAmounts = accountEncryptedAmount.selfAmount;
     const incomingAmountsString = JSON.stringify(incomingAmounts);
@@ -154,13 +161,13 @@ function updateAccountEncryptedAmount(
             account.selfAmounts === selfAmounts
         )
     ) {
-        return updateAccount(account.address, {
+        return {
             incomingAmounts: incomingAmountsString,
             selfAmounts,
             allDecrypted: false,
-        });
+        };
     }
-    return Promise.resolve();
+    return {};
 }
 
 export async function removeAccount(
@@ -226,30 +233,42 @@ export async function updateSignatureThreshold(
     address: string,
     signatureThreshold: number
 ) {
-    updateSignatureThresholdInDatabase(address, signatureThreshold);
-    return dispatch(updateAccountFields({ address, signatureThreshold }));
+    const updatedFields = { signatureThreshold };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
-function updateAccountFromAccountInfo(
+async function updateAccountFromAccountInfo(
     dispatch: Dispatch,
     account: Account,
     accountInfo: AccountInfo
 ) {
+    let accountUpdate: Partial<Account> = {};
     if (
         accountInfo.accountThreshold &&
         account.signatureThreshold !== accountInfo.accountThreshold
     ) {
-        updateSignatureThreshold(
-            dispatch,
-            account.address,
-            accountInfo.accountThreshold
-        );
+        accountUpdate.signatureThreshold = accountInfo.accountThreshold;
     }
-    updateCredentialsStatus(dispatch, account.address, accountInfo);
-    return updateAccountEncryptedAmount(
+
+    const encryptedAmountsUpdate = updateAccountEncryptedAmount(
         account,
         accountInfo.accountEncryptedAmount
     );
+
+    accountUpdate = { ...encryptedAmountsUpdate, ...accountUpdate };
+
+    if (Object.keys(accountUpdate).length > 0) {
+        await updateAccount(account.address, accountUpdate);
+        await dispatch(
+            updateAccountFields({
+                address: account.address,
+                updatedFields: accountUpdate,
+            })
+        );
+    }
+
+    return updateCredentialsStatus(dispatch, account.address, accountInfo);
 }
 
 // Loads the given accounts' infos from the node, then updates the
@@ -336,6 +355,7 @@ export async function addPendingAccount(
         maxTransactionId: 0,
         isInitial,
         deploymentTransactionId,
+        rewardFilter: '[]',
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -365,19 +385,28 @@ export async function removeInitialAccount(
 // (Which is assumed to be of the credentialdeployment)
 export async function confirmAccount(
     dispatch: Dispatch,
-    address: string,
+    accountAddress: string,
     transactionId: string
 ) {
     const response = await getStatus(transactionId);
     switch (response.status) {
         case TransactionStatus.Rejected:
-            await updateAccount(address, {
+            await updateAccount(accountAddress, {
                 status: AccountStatus.Rejected,
             });
             break;
         case TransactionStatus.Finalized:
-            await updateAccount(address, {
+            await updateAccount(accountAddress, {
                 status: AccountStatus.Confirmed,
+            });
+            // eslint-disable-next-line no-case-declarations
+            const account = (await getAccount(accountAddress)) as Account;
+
+            addToAddressBook(dispatch, {
+                name: account.name,
+                address: accountAddress,
+                note: `Account of identity: ${account.identityName}`,
+                readOnly: true,
             });
             break;
         default:
@@ -433,13 +462,41 @@ export async function addExternalAccount(
         signatureThreshold,
         maxTransactionId: 0,
         isInitial: false,
+        rewardFilter: '[]',
     };
     await insertAccount(account);
+    addToAddressBook(dispatch, {
+        readOnly: true,
+        name: accountName,
+        address: accountAddress,
+        note: 'Shared account',
+    });
+
     return loadAccounts(dispatch);
 }
 
 export async function importAccount(account: Account | Account[]) {
     await insertAccount(account);
+}
+
+export async function updateRewardFilter(
+    dispatch: Dispatch,
+    address: string,
+    rewardFilter: TransactionKindString[]
+) {
+    const updatedFields = { rewardFilter: JSON.stringify(rewardFilter) };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
+}
+
+export async function updateMaxTransactionId(
+    dispatch: Dispatch,
+    address: string,
+    maxTransactionId: number
+) {
+    const updatedFields = { maxTransactionId };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
 export default accountsSlice.reducer;

@@ -108,6 +108,7 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
         identityId: -1,
         maxTransactionId: -1,
         isInitial: false,
+        rewardFilter: '[]',
     };
 
     let accountDisplay;

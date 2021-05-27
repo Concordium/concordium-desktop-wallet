@@ -19,7 +19,7 @@ export default function AddressBookList(): JSX.Element {
                     }
                     to={selectedAddressBookEntryRoute(e.address)}
                 >
-                    {e.name}
+                    <span className={styles.name}>{e.name}</span>
                 </ButtonNavLink>
             )}
         </AddressBookSearchList>

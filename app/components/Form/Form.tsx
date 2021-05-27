@@ -1,5 +1,6 @@
 import React, { FC, FormHTMLAttributes, PropsWithChildren } from 'react';
 import {
+    FieldValues,
     FormProvider,
     SubmitHandler,
     useForm,
@@ -21,8 +22,9 @@ import InputTimestamp, {
 import FileInput from './FileInput';
 import { FileInputProps, FileInputValue } from './FileInput/FileInput';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
+import GtuInput, { GtuInputProps } from './GtuInput';
 
-export type FormProps<TFormValues> = Omit<
+export type FormProps<TFormValues extends FieldValues = FieldValues> = Omit<
     FormHTMLAttributes<HTMLFormElement>,
     'onSubmit'
 > & {
@@ -58,7 +60,7 @@ export type FormProps<TFormValues> = Omit<
  *   <Form.Submit>Submit</Form.Submit>
  * </Form>
  */
-function Form<TFormValues>({
+function Form<TFormValues extends FieldValues = FieldValues>({
     children,
     formMethods,
     onSubmit,
@@ -100,6 +102,9 @@ Form.InlineNumber = connectWithFormControlled<string, InlineNumberProps>(
     InlineNumber
 );
 (Form.InlineNumber as FC).displayName = 'Form.InlineNumber';
+
+Form.GtuInput = connectWithFormControlled<string, GtuInputProps>(GtuInput);
+(Form.GtuInput as FC).displayName = 'Form.GtuInput';
 
 Form.Timestamp = connectWithFormControlled<Date, InputTimestampProps>(
     InputTimestamp
