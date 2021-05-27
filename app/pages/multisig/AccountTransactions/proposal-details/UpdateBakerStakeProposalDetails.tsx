@@ -15,6 +15,7 @@ import {
 } from '~/utils/hooks';
 import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
 import { epochDate, getEpochIndexAt } from '~/utils/basicHelpers';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 
 interface Props {
     identity?: Identity;
@@ -112,7 +113,9 @@ function StakedAmountNote({ accountAddress, stake }: StakedAmountNoteProps) {
         <>
             {message}
             {formatNote(
-                `The baker stake will be frozen until ${cooldownUntil} where the actual decrease will take effect.`
+                `The baker stake will be frozen until ${getFormattedDateString(
+                    cooldownUntil
+                )} where the actual decrease will take effect.`
             )}
         </>
     );
