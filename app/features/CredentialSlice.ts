@@ -103,9 +103,10 @@ export async function updateCredentialIndex(
     credId: string,
     credentialIndex: number | undefined
 ) {
-    updateCredentialIndexInDatabase(credId, credentialIndex);
+    await updateCredentialIndexInDatabase(credId, credentialIndex);
     return dispatch(updateCredential({ credId, credentialIndex }));
 }
+
 /**
  * Adds the credential's credentialIndex and updates the account address (Because previously this was a credId acting as a placeholder).
  */
@@ -171,12 +172,13 @@ export async function updateCredentialsStatus(
                     cred.credId === onChainCredential.credId
             )
     );
-    removed.forEach((cred) =>
-        updateCredentialIndex(dispatch, cred.credId, undefined)
-    );
+
+    for (const cred of removed) {
+        await updateCredentialIndex(dispatch, cred.credId, undefined);
+    }
 
     // Find any local credentials, which have been deployed on the account, and attach their index.
-    localCredentials.forEach((cred) => {
+    for (const cred of localCredentials) {
         if (!instanceOfDeployedCredential(cred)) {
             const onChainReference = onChainCredentials.find(
                 ([onChainCredential]) =>
@@ -184,10 +186,14 @@ export async function updateCredentialsStatus(
             );
             if (onChainReference) {
                 const [, credentialIndex] = onChainReference;
-                updateCredentialIndex(dispatch, cred.credId, credentialIndex);
+                await updateCredentialIndex(
+                    dispatch,
+                    cred.credId,
+                    credentialIndex
+                );
             }
         }
-    });
+    }
 }
 
 export default credentialSlice.reducer;
