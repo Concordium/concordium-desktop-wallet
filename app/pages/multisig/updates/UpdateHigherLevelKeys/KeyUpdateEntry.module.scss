@@ -1,15 +1,23 @@
 @import 'config/bundle';
 
 .listItem {
-    columns: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     list-style-type: none;
     padding-bottom: 14px;
     margin-bottom: 14px;
     border-bottom: 1px solid #dcdcdc;
+
+    > * {
+        flex: 0 0 auto;
+        margin: 0 5px;
+    }
 }
 
 ul {
     margin-top: 36px;
+    padding: 0;
 }
 
 /* No border-bottom for the final key entry in the list. */
@@ -17,19 +25,32 @@ ul {
     border-bottom: none;
 }
 
+.button {
+    flex: 0 0 85px;
+}
+
 .keyText {
     line-height: 1em;
     height: 3em;
+    overflow: hidden;
+    flex: 0 1 auto;
+}
+
+.status {
+    flex: 0 0 125px;
 }
 
 .removed {
+    composes: status;
     color: $color-danger;
 }
 
 .unchanged {
+    composes: status;
     color: $color-text-faded;
 }
 
 .added {
+    composes: status;
     color: #2caa00;
 }

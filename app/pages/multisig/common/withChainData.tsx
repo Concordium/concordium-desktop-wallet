@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import { BlockSummary, ConsensusStatus } from '~/utils/NodeApiTypes';
 import { getConsensusStatus, getBlockSummary } from '~/utils/nodeRequests';
 import routes from '~/constants/routes.json';
-import DynamicModal from '../DynamicModal';
+import Execute from '../Execute';
 
 export interface ChainData {
     consensusStatus: ConsensusStatus | undefined;
@@ -36,7 +36,7 @@ export default function withChainData<TProps extends ChainData>(
 
         return (
             <>
-                <DynamicModal
+                <Execute
                     execution={init}
                     onError={() =>
                         dispatch(
@@ -44,8 +44,8 @@ export default function withChainData<TProps extends ChainData>(
                         )
                     }
                     onSuccess={setChainData}
-                    title="Error communicating with node"
-                    content="We were unable to retrieve the block summary from the
+                    errorTitle="Error communicating with node"
+                    errorContent="We were unable to retrieve the block summary from the
             configured node. Verify your node settings, and check that
             the node is running."
                 />

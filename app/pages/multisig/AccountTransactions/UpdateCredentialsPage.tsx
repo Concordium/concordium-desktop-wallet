@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
+import clsx from 'clsx';
 import Button from '~/cross-app-components/Button';
 import {
     Account,
@@ -144,31 +145,30 @@ function listCredentials(
         let right = null;
         if (status === CredentialStatus.Added) {
             leftText = 'Remove';
-            right = <h2 className={styles.green}>Added</h2>;
+            right = <h2 className={clsx(styles.green, 'mB0')}>Added</h2>;
         } else if (status === CredentialStatus.Unchanged) {
             leftText = 'Remove';
-            right = <h2 className={styles.gray}>Unchanged</h2>;
+            right = <h2 className={clsx(styles.gray, 'mB0')}>Unchanged</h2>;
         } else if (status === CredentialStatus.Removed) {
             leftText = 'Revert';
-            right = <h2 className={styles.red}>Removed</h2>;
+            right = <h2 className={clsx(styles.red, 'mB0')}>Removed</h2>;
         } else if (status === CredentialStatus.Original) {
-            right = <h2>Original</h2>;
+            right = <h2 className="mB0">Original</h2>;
         }
         return (
             <div key={credId} className={styles.credentialListElement}>
-                <div>
-                    {leftText && isEditing ? (
+                <div className="mR20">
+                    {leftText && isEditing && (
                         <Button
+                            size="small"
                             onClick={() => updateCredential([credId, status])}
                         >
                             {leftText}
                         </Button>
-                    ) : null}
+                    )}
                 </div>
-                <div>
-                    <h5>{credId}</h5>
-                </div>
-                {right}
+                <h5>{credId}</h5>
+                <div className="mL20">{right}</div>
             </div>
         );
     });
@@ -296,15 +296,27 @@ export default function UpdateCredentialPage(): JSX.Element {
             .map(({ credentialIndex }) => credentialIndex || 0);
 
         return (
-            <CreateUpdate
-                account={account}
-                addedCredentials={assignIndices(newCredentials, usedIndices)}
-                removedCredIds={credentialIds
-                    .filter(([, status]) => status === CredentialStatus.Removed)
-                    .map(([id]) => id)}
-                newThreshold={newThreshold}
-                currentCredentialAmount={currentCredentials.length}
-            />
+            <div
+                className={clsx(
+                    styles.createUpdateWrapper,
+                    'flexColumn flexChildFill'
+                )}
+            >
+                <CreateUpdate
+                    account={account}
+                    addedCredentials={assignIndices(
+                        newCredentials,
+                        usedIndices
+                    )}
+                    removedCredIds={credentialIds
+                        .filter(
+                            ([, status]) => status === CredentialStatus.Removed
+                        )
+                        .map(([id]) => id)}
+                    newThreshold={newThreshold}
+                    currentCredentialAmount={currentCredentials.length}
+                />
+            </div>
         );
     }
 
@@ -316,27 +328,30 @@ export default function UpdateCredentialPage(): JSX.Element {
         <MultiSignatureLayout
             pageTitle="Multi Signature Transactions | Update Account Credentials"
             stepTitle="Transaction Proposal - Update Account Credentials"
+            delegateScroll
         >
-            <Columns columnScroll divider="inset">
-                <Columns.Column verticalPadding header="Transaction Details">
-                    {displayIdentity(identity)}
-                    {displayAccount(account)}
-                    {displaySignatureThreshold(
-                        account?.signatureThreshold,
-                        newThreshold
-                    )}
-                    {displayCredentialCount(
-                        currentCredentials.length,
-                        credentialIds.length
-                    )}
-                    {listCredentials(
-                        credentialIds,
-                        updateCredentialStatus,
-                        location ===
-                            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
-                    )}
+            <Columns className={styles.columns} columnScroll divider>
+                <Columns.Column header="Transaction Details">
+                    <div className={styles.columnContainer}>
+                        {displayIdentity(identity)}
+                        {displayAccount(account)}
+                        {displaySignatureThreshold(
+                            account?.signatureThreshold,
+                            newThreshold
+                        )}
+                        {displayCredentialCount(
+                            currentCredentials.length,
+                            credentialIds.length
+                        )}
+                        {listCredentials(
+                            credentialIds,
+                            updateCredentialStatus,
+                            location ===
+                                routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL
+                        )}
+                    </div>
                 </Columns.Column>
-                <Columns.Column verticalPadding header={subTitle(location)}>
+                <Columns.Column header={subTitle(location)}>
                     <div className={styles.rightColumnContainer}>
                         <Switch>
                             <Route
@@ -368,6 +383,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                                 render={() => (
                                     <AddCredential
                                         setReady={setReady}
+                                        accountAddress={account?.address}
                                         credentialIds={credentialIds}
                                         addCredentialId={(newId) =>
                                             setCredentialIds(
@@ -416,7 +432,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                         {showButton && (
                             <Button
                                 disabled={!isReady}
-                                size="big"
                                 className={styles.continueButton}
                                 onClick={() => {
                                     setReady(false);

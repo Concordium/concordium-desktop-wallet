@@ -18,6 +18,7 @@ import {
     TimeStampUnit,
     TransactionAccountSignature,
     TransactionCredentialSignature,
+    Account,
     AccountInfo,
     AddBaker,
     AddBakerPayload,
@@ -26,6 +27,7 @@ import {
     UpdateBakerKeys,
     UpdateBakerStakePayload,
     UpdateBakerRestakeEarningsPayload,
+    AddressBookEntry,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -34,16 +36,19 @@ import {
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString } from './gtu';
 
+export async function lookupAddressBookEntry(
+    address: string
+): Promise<AddressBookEntry | undefined> {
+    const entries = await findEntries({ address });
+    return entries[0];
+}
+
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
  * If the address is found, return the name, otherwise returns undefined;
  */
 export async function lookupName(address: string): Promise<string | undefined> {
-    const entries = await findEntries({ address });
-    if (entries.length > 0) {
-        return entries[0].name;
-    }
-    return undefined;
+    return (await lookupAddressBookEntry(address))?.name;
 }
 
 /**
@@ -472,6 +477,27 @@ function amountAtDisposal(accountInfo: AccountInfo): bigint {
         ? BigInt(accountInfo.accountReleaseSchedule.total)
         : 0n;
     return unShielded - scheduled - stakedAmount;
+}
+
+export function validateShieldedAmount(
+    amountToValidate: string,
+    account: Account | undefined,
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (!isValidGTUString(amountToValidate)) {
+        return 'Value is not a valid GTU amount';
+    }
+    if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
+        return 'Insufficient public funds to cover fee';
+    }
+    if (
+        account?.totalDecrypted &&
+        BigInt(account.totalDecrypted) < toMicroUnits(amountToValidate)
+    ) {
+        return 'Insufficient shielded funds';
+    }
+    return undefined;
 }
 
 export function validateTransferAmount(

@@ -1,5 +1,4 @@
 {
     "listTransactions": "list-transactions",
-    "viewTransaction": "view-transaction",
     "viewIdentityData": "view-identity-data"
 }

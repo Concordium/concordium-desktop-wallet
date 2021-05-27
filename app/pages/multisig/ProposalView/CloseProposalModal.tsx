@@ -27,7 +27,7 @@ export default function CloseProposalModal({
                     <Button onClick={onClose}>No, cancel</Button>
                 </Columns.Column>
                 <Columns.Column>
-                    <Button onClick={onConfirm} danger>
+                    <Button onClick={onConfirm} negative>
                         Yes, close
                     </Button>
                 </Columns.Column>

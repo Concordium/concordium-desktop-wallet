@@ -1,11 +1,12 @@
 import React from 'react';
 import TransactionListElement from '../TransactionListElement';
-import { TransferTransaction } from '~/utils/types';
+import { TransferTransaction, TransactionStatus } from '~/utils/types';
 import { isFailed } from '~/utils/transactionHelpers';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Card from '~/cross-app-components/Card';
 import SidedRow from '~/components/SidedRow';
 import CopyButton from '~/components/CopyButton';
+import { rejectReasonToDisplayText } from '~/utils/node/RejectReasonHelper';
 import styles from './TransactionView.module.scss';
 
 interface Props {
@@ -49,7 +50,9 @@ function displayRejectReason(transaction: TransferTransaction) {
         return (
             <p className={styles.errorMessage}>
                 Failed:{' '}
-                {transaction.rejectReason || 'Unknown reason for failure'}
+                {transaction.status === TransactionStatus.Rejected
+                    ? 'Transaction was rejected'
+                    : rejectReasonToDisplayText(transaction.rejectReason)}
             </p>
         );
     }

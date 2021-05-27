@@ -1,11 +1,21 @@
-import { useState, useEffect, useCallback, useMemo, useReducer } from 'react';
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
+import {
+    useState,
+    useEffect,
+    useCallback,
+    useMemo,
+    useReducer,
+    Dispatch,
+} from 'react';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-singleton';
 import type {
     Observer,
     DescriptorEvent,
     Subscription,
 } from '@ledgerhq/hw-transport';
 
+import { singletonHook } from 'react-singleton-hook';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import getErrorDescription from '~/features/ledger/ErrorCodes';
 import ledgerReducer, {
@@ -24,17 +34,17 @@ import {
     LedgerSubmitHandler,
     LedgerCallback,
 } from './util';
+import { instanceOfClosedWhileSendingError } from '~/features/ledger/ClosedWhileSendingError';
 
 const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
 
-export default function useLedger(
-    ledgerCallback: LedgerCallback,
-    onSignError: (e: unknown) => void
-): {
+function useLedger(): {
     isReady: boolean;
     status: LedgerStatusType;
-    statusText: string;
-    submitHandler: LedgerSubmitHandler;
+    statusText: string | JSX.Element;
+    client?: ConcordiumLedgerClient;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dispatch: Dispatch<any>;
 } {
     const [{ status, text, client }, dispatch] = useReducer(
         ledgerReducer,
@@ -57,14 +67,12 @@ export default function useLedger(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 next: async (event: any) => {
                     if (event.type === 'add') {
-                        const transport = await TransportNodeHid.open(
-                            event.path
-                        );
+                        const deviceName = event.deviceModel.productName;
+                        const transport = await TransportNodeHid.open();
                         const concordiumClient = new ConcordiumLedgerClient(
                             transport
                         );
                         const appAndVersion = await concordiumClient.getAppAndVersion();
-                        const deviceName = event.deviceModel.productName;
 
                         if (isConcordiumApp(appAndVersion)) {
                             dispatch(
@@ -87,30 +95,6 @@ export default function useLedger(
         // eslint-disable-next-line react-hooks/exhaustive-deps
         []
     );
-
-    const submitHandler: LedgerSubmitHandler = useCallback(async () => {
-        dispatch(pendingAction(AWAITING_USER_INPUT));
-
-        try {
-            if (client) {
-                await ledgerCallback(client, (t) =>
-                    dispatch(setStatusTextAction(t))
-                );
-
-                dispatch(finishedAction());
-            }
-        } catch (e) {
-            let errorMessage;
-            if (instanceOfTransportStatusError(e)) {
-                errorMessage = getErrorDescription(e.statusCode);
-            } else {
-                errorMessage = `${e}`;
-            }
-            dispatch(errorAction(errorMessage));
-
-            onSignError(e);
-        }
-    }, [client, ledgerCallback, onSignError]);
 
     useEffect(() => {
         if (!ledgerSubscription) {
@@ -138,6 +122,75 @@ export default function useLedger(
         isReady: (status === CONNECTED || status === ERROR) && Boolean(client),
         status,
         statusText: text,
+        client,
+        dispatch,
+    };
+}
+
+const init = () => {
+    const { status, text, client } = getInitialState();
+    return {
+        isReady: false,
+        status,
+        statusText: text,
+        client,
+        dispatch: () => {},
+    };
+};
+
+const hook = singletonHook(init, useLedger);
+
+export default function ExternalHook(
+    ledgerCallback: LedgerCallback,
+    onSignError: (e: unknown) => void
+): {
+    isReady: boolean;
+    status: LedgerStatusType;
+    statusText: string | JSX.Element;
+    submitHandler: LedgerSubmitHandler;
+} {
+    const { isReady, status, statusText, client, dispatch } = hook();
+
+    useEffect(() => {
+        return function cleanup() {
+            if (client) {
+                client.closeTransport();
+            }
+        };
+    }, [client]);
+
+    const submitHandler: LedgerSubmitHandler = useCallback(async () => {
+        dispatch(pendingAction(AWAITING_USER_INPUT));
+
+        try {
+            if (client) {
+                await ledgerCallback(client, (t) =>
+                    dispatch(setStatusTextAction(t))
+                );
+
+                dispatch(finishedAction());
+            }
+        } catch (e) {
+            if (instanceOfClosedWhileSendingError(e)) {
+                dispatch(finishedAction());
+            } else {
+                let errorMessage;
+                if (instanceOfTransportStatusError(e)) {
+                    errorMessage = getErrorDescription(e.statusCode);
+                } else {
+                    errorMessage = `${e}`;
+                }
+                dispatch(errorAction(errorMessage));
+            }
+            onSignError(e);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [client, ledgerCallback, onSignError]);
+
+    return {
+        isReady,
+        status,
+        statusText,
         submitHandler,
     };
 }

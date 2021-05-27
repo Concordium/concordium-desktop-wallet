@@ -10,7 +10,10 @@ import {
     createRegularIntervalSchedule,
     createRegularIntervalSchedulePerMonth,
 } from '~/utils/transactionHelpers';
-import { TimeConstants } from '~/utils/timeHelpers';
+import {
+    TimeConstants,
+    getDefaultScheduledStartTime,
+} from '~/utils/timeHelpers';
 import Form from '../../Form';
 import { futureDate } from '../../Form/util/validation';
 import ButtonGroup from '../../ButtonGroup';
@@ -73,7 +76,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         ref
     ) => {
         const [chosenInterval, setChosenInterval] = useState<Interval>(
-            intervals[defaults?.chosenInterval || intervals.length - 1]
+            intervals[defaults?.chosenInterval ?? intervals.length - 1]
         );
         const form = useForm<FormValues>({ mode: 'onTouched' });
         const releases = form.watch(fieldNames.releases);
@@ -175,7 +178,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                         defaultValue={
                             new Date(
                                 defaults?.startTime ||
-                                    Date.now() + 5 * TimeConstants.Minute
+                                    getDefaultScheduledStartTime()
                             )
                         }
                         rules={{

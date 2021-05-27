@@ -35,7 +35,12 @@ function parseTransaction(transaction: TransferTransaction) {
 
 // Updates transactions of the account, converts them to csv and saves the file.
 async function exportTransactions(account: Account, openModal: () => void) {
-    let transactions = await getTransactionsOfAccount(account); // load from database
+    let { transactions } = await getTransactionsOfAccount(
+        account,
+        'id',
+        [],
+        1000000
+    ); // load from database TODO: Create a getter without a limit
     transactions = await attachNames(transactions);
 
     const csv = toCSV(
@@ -52,7 +57,7 @@ async function exportTransactions(account: Account, openModal: () => void) {
 export default function ExportTransactions({ account, returnFunction }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     return (
-        <Card className="relative flexColumn justifyCenter">
+        <Card className="relative flexColumn justifyCenter pH50">
             <ErrorModal
                 show={modalOpen}
                 header="Export failed"

@@ -11,6 +11,7 @@ import {
 import {
     Credential,
     CredentialDeploymentInformation,
+    Account,
     AccountInfo,
     instanceOfDeployedCredential,
 } from '~/utils/types';
@@ -49,6 +50,15 @@ const credentialSlice = createSlice({
 export const credentialsSelector = (state: RootState) =>
     state.credentials.credentials;
 
+export const accountHasDeployedCredentialsSelector = (account: Account) => (
+    state: RootState
+) =>
+    state.credentials.credentials.some(
+        (cred) =>
+            cred.accountAddress === account.address &&
+            instanceOfDeployedCredential(cred)
+    );
+
 export const {
     updateCredentials,
     addCredential,
@@ -81,7 +91,7 @@ export async function insertNewCredential(
         credentialIndex,
     };
     await insertCredential(parsed);
-    return dispatch(addCredential(parsed));
+    return loadCredentials(dispatch);
 }
 
 /**
@@ -107,7 +117,11 @@ export async function initializeGenesisCredential(
 ) {
     const credentialOnChain = Object.entries(
         accountInfo.accountCredentials
-    ).find(([, cred]) => cred.value.contents.credId === credential.credId);
+    ).find(
+        ([, cred]) =>
+            (cred.value.contents.credId || cred.value.contents.regId) ===
+            credential.credId
+    );
     if (!credentialOnChain) {
         throw new Error(
             `Unexpected missing reference to genesis credential on chain, with credId: ${credential.credId}`

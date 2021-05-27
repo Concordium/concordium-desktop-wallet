@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React, { ReactNode } from 'react';
 import { getGTUSymbol } from '~/utils/gtu';
 import { AddressBookEntry, Account } from '~/utils/types';
@@ -31,16 +32,18 @@ export type DetailProps<A> = {
     title: ReactNode;
     value?: A;
     format?: (a: A) => ReactNode;
+    first?: boolean;
 };
 
 export function PlainDetail<A>({
     title,
     value,
     format = formatValue,
+    first = false,
 }: DetailProps<A>) {
     return (
         <>
-            <p className={styles.title}>{title}:</p>
+            <p className={clsx(styles.title, first && 'mT0')}>{title}:</p>
             {value !== undefined ? format(value) : placeholder}
         </>
     );

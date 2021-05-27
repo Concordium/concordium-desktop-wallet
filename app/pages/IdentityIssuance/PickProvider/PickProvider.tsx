@@ -4,18 +4,36 @@ import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import { getIdentityProviders } from '~/utils/httpRequests';
-import { IdentityProvider } from '~/utils/types';
+import { IdentityProvider, PublicInformationForIp } from '~/utils/types';
 import Card from '~/cross-app-components/Card';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { globalSelector } from '~/features/GlobalSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getNextIdentityNumber } from '~/database/IdentityDao';
 import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
+import errorMessages from '~/constants/errorMessages.json';
 
 import styles from './PickProvider.module.scss';
 import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
 import CardList from '~/cross-app-components/CardList';
 import pairWallet from '~/utils/WalletPairing';
+
+const IPDetails = (info: PublicInformationForIp) => (
+    <div className="textLeft">
+        <p className="mT0">
+            <b>Identity Credentials Public (IdCredPub):</b> {info.idCredPub}
+        </p>
+        <p>
+            <b>Registration ID (RegId):</b> {info.regId}
+        </p>
+        <p>
+            <b>Verification key:</b> {info.publicKeys.keys[0].verifyKey}
+        </p>
+        <p>
+            <b>Threshold:</b> {info.publicKeys.threshold}
+        </p>
+    </div>
+);
 
 interface Props {
     setProvider(provider: IdentityProvider): void;
@@ -30,6 +48,10 @@ export default function IdentityIssuanceChooseProvider({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const [providers, setProviders] = useState<IdentityProvider[]>([]);
+    const [
+        nextLocationState,
+        setNextLocationState,
+    ] = useState<ExternalIssuanceLocationState>();
     const global = useSelector(globalSelector);
 
     useEffect(() => {
@@ -38,24 +60,36 @@ export default function IdentityIssuanceChooseProvider({
             .catch(() => onError('Unable to load identity providers'));
     }, [dispatch, onError]);
 
+    // This is run in an effect, to prevent navigation if the component is unmounted
+    useEffect(() => {
+        if (nextLocationState !== undefined) {
+            dispatch(
+                push({
+                    pathname: routes.IDENTITYISSUANCE_EXTERNAL,
+                    state: nextLocationState,
+                })
+            );
+        }
+    }, [dispatch, nextLocationState]);
+
     function onClick(p: IdentityProvider) {
         setProvider(p);
     }
 
     async function withLedger(
         ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
+        setMessage: (message: string | JSX.Element) => void
     ) {
         if (!provider) {
             return;
         }
 
         if (!global) {
-            onError(`Unexpected missing global object`);
+            onError(errorMessages.missingGlobal);
             return;
         }
 
-        const walletId = await pairWallet(ledger);
+        const walletId = await pairWallet(ledger, dispatch);
         const identityNumber = await getNextIdentityNumber(walletId);
 
         const idObj = await createIdentityRequestObjectLedger(
@@ -64,21 +98,15 @@ export default function IdentityIssuanceChooseProvider({
             provider.arsInfos,
             global,
             setMessage,
-            ledger
+            ledger,
+            IPDetails
         );
 
-        const nextLocationState: ExternalIssuanceLocationState = {
+        setNextLocationState({
             ...idObj,
             identityNumber,
             walletId,
-        };
-
-        dispatch(
-            push({
-                pathname: routes.IDENTITYISSUANCE_EXTERNAL,
-                state: nextLocationState,
-            })
-        );
+        });
     }
 
     return (

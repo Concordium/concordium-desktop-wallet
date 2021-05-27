@@ -12,8 +12,11 @@ import {
     getAllAccounts,
     insertAccount,
     updateAccount,
+    getAccount,
+    confirmInitialAccount as confirmInitialAccountInDatabase,
     removeAccount as removeAccountFromDatabase,
-    updateSignatureThreshold as updateSignatureThresholdInDatabase,
+    removeInitialAccount as removeInitialAccountInDatabase,
+    findAccounts,
 } from '../database/AccountDao';
 import { getCredentialsOfAccount } from '~/database/CredentialDao';
 import {
@@ -29,11 +32,12 @@ import {
     Dispatch,
     Global,
     Identity,
+    TransactionKindString,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
 
-import { getAccountInfos } from '../utils/nodeHelpers';
+import { getAccountInfos, getAccountInfoOfAddress } from '../utils/nodeHelpers';
 
 interface AccountState {
     accounts: Account[];
@@ -78,6 +82,10 @@ const accountsSlice = createSlice({
         setAccountInfos: (state, map) => {
             state.accountsInfo = map.payload;
         },
+        updateAccountInfoEntry: (state, update) => {
+            const { address, accountInfo } = update.payload;
+            state.accountsInfo[address] = accountInfo;
+        },
         updateAccountFields: (state, update) => {
             const { address, updatedFields } = update.payload;
             const index = state.accounts.findIndex(
@@ -88,6 +96,12 @@ const accountsSlice = createSlice({
                     ...state.accounts[index],
                     ...updatedFields,
                 };
+            }
+            if (
+                state.chosenAccount &&
+                state.chosenAccount.address === address
+            ) {
+                state.chosenAccount = state.accounts[index];
             }
         },
     },
@@ -120,16 +134,24 @@ export const {
     chooseAccount,
     updateAccounts,
     setAccountInfos,
+    updateAccountInfoEntry,
     updateAccountFields,
 } = accountsSlice.actions;
 
+// Load accounts into state, and updates their infos
+export async function loadAccounts(dispatch: Dispatch) {
+    const accounts: Account[] = await getAllAccounts();
+    dispatch(updateAccounts(accounts.reverse()));
+    return accounts;
+}
+
 // given an account and the accountEncryptedAmount from the accountInfo
 // determine whether the account has received or sent new funds,
-// and in that case update the state of the account to reflect that.
+// and in that case return the the state of the account that should be updated to reflect that.
 function updateAccountEncryptedAmount(
     account: Account,
     accountEncryptedAmount: AccountEncryptedAmount
-): Promise<void | number> {
+): Partial<Account> {
     const { incomingAmounts } = accountEncryptedAmount;
     const selfAmounts = accountEncryptedAmount.selfAmount;
     const incomingAmountsString = JSON.stringify(incomingAmounts);
@@ -139,13 +161,21 @@ function updateAccountEncryptedAmount(
             account.selfAmounts === selfAmounts
         )
     ) {
-        return updateAccount(account.name, {
+        return {
             incomingAmounts: incomingAmountsString,
             selfAmounts,
             allDecrypted: false,
-        });
+        };
     }
-    return Promise.resolve();
+    return {};
+}
+
+export async function removeAccount(
+    dispatch: Dispatch,
+    accountAddress: string
+) {
+    await removeAccountFromDatabase(accountAddress);
+    return loadAccounts(dispatch);
 }
 
 /** Generates the actual address of the account, and updates the account address, status, signatureThreshold,
@@ -169,24 +199,31 @@ async function initializeGenesisAccount(
         status: AccountStatus.Confirmed,
         signatureThreshold: accountInfo.accountThreshold,
     };
-    await updateAccount(account.name, accountUpdate);
+    if ((await findAccounts({ address })).length > 0) {
+        // The account already exists, so we should merge with it.
+        removeAccount(dispatch, account.address); // Remove this instance of the account, which still has the credId as placeholder for the address.
+    } else {
+        // The account does not already exists, so we can update the current entry.
+        await updateAccount(account.address, accountUpdate);
+        await dispatch(
+            updateAccountFields({
+                address: account.address,
+                updatedFields: accountUpdate,
+            })
+        );
+        await addToAddressBook(dispatch, {
+            name: account.name,
+            address,
+            readOnly: true,
+        });
+    }
+
     await Promise.all(
         localCredentials.map((cred) =>
             initializeGenesisCredential(dispatch, address, cred, accountInfo)
         )
     ).catch((e) => {
         throw e;
-    });
-    await dispatch(
-        updateAccountFields({
-            address: account.address,
-            updatedFields: accountUpdate,
-        })
-    );
-    await addToAddressBook(dispatch, {
-        name: account.name,
-        address,
-        readOnly: true,
     });
     return address;
 }
@@ -196,8 +233,42 @@ export async function updateSignatureThreshold(
     address: string,
     signatureThreshold: number
 ) {
-    updateSignatureThresholdInDatabase(address, signatureThreshold);
-    return dispatch(updateAccountFields({ address, signatureThreshold }));
+    const updatedFields = { signatureThreshold };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
+}
+
+async function updateAccountFromAccountInfo(
+    dispatch: Dispatch,
+    account: Account,
+    accountInfo: AccountInfo
+) {
+    let accountUpdate: Partial<Account> = {};
+    if (
+        accountInfo.accountThreshold &&
+        account.signatureThreshold !== accountInfo.accountThreshold
+    ) {
+        accountUpdate.signatureThreshold = accountInfo.accountThreshold;
+    }
+
+    const encryptedAmountsUpdate = updateAccountEncryptedAmount(
+        account,
+        accountInfo.accountEncryptedAmount
+    );
+
+    accountUpdate = { ...encryptedAmountsUpdate, ...accountUpdate };
+
+    if (Object.keys(accountUpdate).length > 0) {
+        await updateAccount(account.address, accountUpdate);
+        await dispatch(
+            updateAccountFields({
+                address: account.address,
+                updatedFields: accountUpdate,
+            })
+        );
+    }
+
+    return updateCredentialsStatus(dispatch, account.address, accountInfo);
 }
 
 // Loads the given accounts' infos from the node, then updates the
@@ -217,55 +288,53 @@ export async function loadAccountInfos(
         return Promise.resolve();
     }
     const accountInfos = await getAccountInfos(confirmedAccounts);
-    const updateEncryptedAmountsPromises = accountInfos.map(
-        ({ account, accountInfo }) => {
-            if (account.status === AccountStatus.Genesis) {
-                if (!accountInfo) {
-                    throw new Error(
-                        `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}` // account.address contains the placeholder credId
-                    );
-                }
-                return new Promise<void>((resolve, reject) => {
-                    return initializeGenesisAccount(
-                        dispatch,
-                        account,
-                        accountInfo
-                    )
-                        .then((address) => {
-                            map[address] = accountInfo;
-                            return resolve();
-                        })
-                        .catch(reject);
-                });
-            }
-            map[account.address] = accountInfo;
-
-            if (
-                accountInfo.accountThreshold &&
-                account.signatureThreshold !== accountInfo.accountThreshold
-            ) {
-                updateSignatureThreshold(
-                    dispatch,
-                    account.address,
-                    accountInfo.accountThreshold
+    for (let i = 0; i < accountInfos.length; i += 1) {
+        const { account, accountInfo } = accountInfos[i];
+        if (account.status === AccountStatus.Genesis) {
+            if (!accountInfo) {
+                throw new Error(
+                    `Genesis Account '${account.name}' not found on chain. Associated credId: ${account.address}` // account.address contains the placeholder credId
                 );
             }
-            updateCredentialsStatus(dispatch, account.address, accountInfo);
-            return updateAccountEncryptedAmount(
+            // eslint-disable-next-line no-await-in-loop
+            const address = await initializeGenesisAccount(
+                dispatch,
                 account,
-                accountInfo.accountEncryptedAmount
+                accountInfo
             );
+            map[address] = accountInfo;
+        } else {
+            map[account.address] = accountInfo;
+            // eslint-disable-next-line no-await-in-loop
+            await updateAccountFromAccountInfo(dispatch, account, accountInfo);
         }
-    );
-    await Promise.all(updateEncryptedAmountsPromises);
+    }
     return dispatch(setAccountInfos(map));
 }
 
-// Load accounts into state, and updates their infos
-export async function loadAccounts(dispatch: Dispatch) {
-    const accounts: Account[] = await getAllAccounts();
-    dispatch(updateAccounts(accounts.reverse()));
-    return accounts;
+/**
+ * Updates the account info, of the account with the given address, in the state.
+ */
+export async function updateAccountInfoOfAddress(
+    address: string,
+    dispatch: Dispatch
+) {
+    const accountInfo = await getAccountInfoOfAddress(address);
+    return dispatch(updateAccountInfoEntry({ address, accountInfo }));
+}
+
+/**
+ * Updates the given account's accountInfo, in the state, and check if there is updates to the account.
+ */
+export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
+    const accountInfo = await getAccountInfoOfAddress(account.address);
+    if (accountInfo && account.status === AccountStatus.Confirmed) {
+        await updateAccountFromAccountInfo(dispatch, account, accountInfo);
+        return dispatch(
+            updateAccountInfoEntry({ address: account.address, accountInfo })
+        );
+    }
+    return Promise.resolve();
 }
 
 // Add an account with pending status..
@@ -286,6 +355,7 @@ export async function addPendingAccount(
         maxTransactionId: 0,
         isInitial,
         deploymentTransactionId,
+        rewardFilter: '[]',
     };
     await insertAccount(account);
     return loadAccounts(dispatch);
@@ -293,13 +363,21 @@ export async function addPendingAccount(
 
 export async function confirmInitialAccount(
     dispatch: Dispatch,
-    accountName: string,
+    identityId: number,
     accountAddress: string
 ) {
-    await updateAccount(accountName, {
+    await confirmInitialAccountInDatabase(identityId, {
         status: AccountStatus.Confirmed,
         address: accountAddress,
     });
+    return loadAccounts(dispatch);
+}
+
+export async function removeInitialAccount(
+    dispatch: Dispatch,
+    identityId: number
+) {
+    await removeInitialAccountInDatabase(identityId);
     return loadAccounts(dispatch);
 }
 
@@ -307,19 +385,28 @@ export async function confirmInitialAccount(
 // (Which is assumed to be of the credentialdeployment)
 export async function confirmAccount(
     dispatch: Dispatch,
-    accountName: string,
+    accountAddress: string,
     transactionId: string
 ) {
     const response = await getStatus(transactionId);
     switch (response.status) {
         case TransactionStatus.Rejected:
-            await updateAccount(accountName, {
+            await updateAccount(accountAddress, {
                 status: AccountStatus.Rejected,
             });
             break;
         case TransactionStatus.Finalized:
-            await updateAccount(accountName, {
+            await updateAccount(accountAddress, {
                 status: AccountStatus.Confirmed,
+            });
+            // eslint-disable-next-line no-case-declarations
+            const account = (await getAccount(accountAddress)) as Account;
+
+            addToAddressBook(dispatch, {
+                name: account.name,
+                address: accountAddress,
+                note: `Account of identity: ${account.identityName}`,
+                readOnly: true,
             });
             break;
         default:
@@ -353,7 +440,7 @@ export async function decryptAccountBalance(
         .reduce((acc, amount) => acc + BigInt(amount), 0n)
         .toString();
 
-    return updateAccount(account.name, {
+    return updateAccount(account.address, {
         totalDecrypted,
         allDecrypted: true,
     });
@@ -363,19 +450,28 @@ export async function decryptAccountBalance(
 export async function addExternalAccount(
     dispatch: Dispatch,
     accountAddress: string,
+    accountName: string,
     identityId: number,
     signatureThreshold: number
 ) {
     const account: Account = {
-        name: accountAddress.substring(0, 8),
+        name: accountName,
         identityId,
         status: AccountStatus.Confirmed,
         address: accountAddress,
         signatureThreshold,
         maxTransactionId: 0,
         isInitial: false,
+        rewardFilter: '[]',
     };
     await insertAccount(account);
+    addToAddressBook(dispatch, {
+        readOnly: true,
+        name: accountName,
+        address: accountAddress,
+        note: 'Shared account',
+    });
+
     return loadAccounts(dispatch);
 }
 
@@ -383,12 +479,24 @@ export async function importAccount(account: Account | Account[]) {
     await insertAccount(account);
 }
 
-export async function removeAccount(
+export async function updateRewardFilter(
     dispatch: Dispatch,
-    accountAddress: string
+    address: string,
+    rewardFilter: TransactionKindString[]
 ) {
-    await removeAccountFromDatabase(accountAddress);
-    return loadAccounts(dispatch);
+    const updatedFields = { rewardFilter: JSON.stringify(rewardFilter) };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
+}
+
+export async function updateMaxTransactionId(
+    dispatch: Dispatch,
+    address: string,
+    maxTransactionId: number
+) {
+    const updatedFields = { maxTransactionId };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
 export default accountsSlice.reducer;

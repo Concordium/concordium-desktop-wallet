@@ -1,0 +1,49 @@
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    padding-left: 80px;
+    padding-right: 80px;
+    padding-bottom: 60px;
+    column-gap: 80px;
+    row-gap: 20px;
+    min-height: 100%;
+    text-align: left;
+    justify-items: center;
+}
+
+.centered {
+    justify-content: center;
+}
+
+.header,
+.description {
+    margin-bottom: 0;
+    width: 100%;
+}
+
+.header {
+    margin-top: 35px !important;
+}
+
+.description {
+    margin-top: 0;
+    grid-row: 2;
+}
+
+.summary,
+.sign {
+    grid-row: 3;
+    align-self: center;
+    min-height: 520px;
+}
+
+.button {
+    grid-row: 4;
+}
+
+.pickIdentity {
+    width: 428px;
+    padding-top: 35px;
+    padding-bottom: 60px;
+}

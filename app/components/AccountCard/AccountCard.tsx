@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import clsx from 'clsx';
 import MultiSigIcon from '@resources/svg/multisig.svg';
 import PendingImage from '@resources/svg/pending-small.svg';
 import RejectedImage from '@resources/svg/warning.svg';
 import ShieldImage from '@resources/svg/shield.svg';
 import BakerImage from '@resources/svg/baker.svg';
+import ReadonlyImage from '@resources/svg/read-only.svg';
+import LedgerImage from '@resources/svg/ledger.svg';
 import { displayAsGTU } from '~/utils/gtu';
 import { AccountInfo, Account, AccountStatus } from '~/utils/types';
 import { isInitialAccount } from '~/utils/accountHelpers';
 import SidedRow from '~/components/SidedRow';
+import { walletIdSelector } from '~/features/WalletSlice';
+import { findLocalDeployedCredential } from '~/utils/credentialHelper';
+import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 
 import styles from './AccountCard.module.scss';
 
@@ -51,6 +57,22 @@ export default function AccountCard({
     className,
     active = false,
 }: Props): JSX.Element {
+    const walletId = useSelector(walletIdSelector);
+    const [connected, setConnected] = useState(false);
+    const accountHasDeployedCredentials = useSelector(
+        accountHasDeployedCredentialsSelector(account)
+    );
+
+    useEffect(() => {
+        if (walletId) {
+            findLocalDeployedCredential(walletId, account.address)
+                .then((cred) => setConnected(Boolean(cred)))
+                .catch(() => setConnected(false));
+        } else {
+            setConnected(false);
+        }
+    }, [walletId, account.address]);
+
     const shielded = account.totalDecrypted
         ? BigInt(account.totalDecrypted)
         : 0n;
@@ -85,7 +107,9 @@ export default function AccountCard({
                 left={
                     <>
                         <b className={styles.inline}>{account.name}</b>
-                        {isInitialAccount(account) && '(Initial)'}
+                        {isInitialAccount(account) && (
+                            <span className="mL10">(Initial)</span>
+                        )}
                         {account.status === AccountStatus.Pending && (
                             <PendingImage
                                 height="24"
@@ -98,15 +122,27 @@ export default function AccountCard({
                                 className={styles.statusImage}
                             />
                         )}
-                        {accountInfo && accountInfo.accountBaker && (
+                        {accountInfo?.accountBaker && (
                             <BakerImage
                                 height="25"
                                 className={styles.bakerImage}
                             />
                         )}
+                        {account.status === AccountStatus.Confirmed &&
+                            !accountHasDeployedCredentials && (
+                                <ReadonlyImage
+                                    height="15"
+                                    className={styles.statusImage}
+                                />
+                            )}
                     </>
                 }
-                right={displayIdentity(account, accountInfo)}
+                right={
+                    <>
+                        {connected && <LedgerImage className="mR20" />}
+                        {displayIdentity(account, accountInfo)}
+                    </>
+                }
             />
             <SidedRow
                 className={styles.row}

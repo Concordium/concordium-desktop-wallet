@@ -3,10 +3,25 @@ import * as http from 'http';
 import * as https from 'https';
 import urls from '../constants/urls.json';
 import { walletProxytransactionLimit } from '../constants/externalConstants.json';
-import { TransferTransaction, IncomingTransaction } from './types';
+import { IncomingTransaction } from './types';
+import { getTargetNet, Net } from './ConfigHelper';
+
+function getWalletProxy() {
+    const targetNet = getTargetNet();
+    if (targetNet === Net.Mainnet) {
+        return urls.walletProxyMainnet;
+    }
+    if (targetNet === Net.Testnet) {
+        return urls.walletProxyTestnet;
+    }
+    if (targetNet === Net.Stagenet) {
+        return urls.walletProxyStagenet;
+    }
+    throw new Error('Unknown target network');
+}
 
 const walletProxy = axios.create({
-    baseURL: urls.walletProxy,
+    baseURL: getWalletProxy(),
 });
 
 const defaultTimeout = 60000;
@@ -49,24 +64,20 @@ export function getResponseBody(
     });
 }
 
-function getHighestId(transactions: TransferTransaction[]) {
-    return transactions.reduce((id, t) => Math.max(id, t.id || 0), 0);
+interface GetTransactionsOutput {
+    transactions: IncomingTransaction[];
+    full: boolean;
 }
 
 export async function getTransactions(
     address: string,
     id = 0
-): Promise<IncomingTransaction[]> {
+): Promise<GetTransactionsOutput> {
     const response = await walletProxy.get(
-        `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}`
+        `/v0/accTransactions/${address}?limit=${walletProxytransactionLimit}&from=${id}&includeRawRejectReason`
     );
     const { transactions, count, limit } = response.data;
-    if (count === limit) {
-        return transactions.push(
-            getTransactions(address, getHighestId(transactions))
-        );
-    }
-    return transactions;
+    return { transactions, full: count === limit };
 }
 
 export async function getIdentityProviders() {

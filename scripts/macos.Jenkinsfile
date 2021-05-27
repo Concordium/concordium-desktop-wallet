@@ -10,8 +10,13 @@ pipeline {
                 sh '''\
                     # Extract version number
                     VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
-                    FILENAME_DMG="${VERSION}/concordium-wallet-${VERSION}.dmg"
-                    
+
+                    if [ -z $TARGET_NET ]; then
+                       FILENAME_DMG="{VERSION}/concordium-desktop-wallet-${VERSION}.dmg"
+                    else
+                       FILENAME_DMG="{VERSION}/concordium-desktop-wallet-${TARGET_NET}-${VERSION}.dmg"
+                    fi
+
                     # Fail if file already exists
                     check_uniqueness() {
                         # Fail if file already exists
@@ -44,7 +49,7 @@ pipeline {
                     # Build
                     yarn package
                 '''.stripIndent()
-                stash includes: 'release/concordium-wallet-*.dmg', name: 'releaseDMG'
+                stash includes: 'release/concordium-desktop-wallet-*.dmg', name: 'releaseDMG'
             }
         }
         stage('Publish') {
@@ -56,7 +61,11 @@ pipeline {
                     VERSION=$(awk '/"version":/ { print substr($2, 2, length($2)-3); exit }' app/package.json)
 
                     #Prepare filenames
-                    FILENAME_DMG="concordium-wallet-${VERSION}.dmg"
+                    if [ -z $TARGET_NET ]; then
+                       FILENAME_DMG="concordium-desktop-wallet-${VERSION}.dmg"
+                    else
+                       FILENAME_DMG="concordium-desktop-wallet-${TARGET_NET}-${VERSION}.dmg"
+                    fi
                     OUT_FILENAME_DMG="${VERSION}/${FILENAME_DMG}"
                     
                     # Push to s3

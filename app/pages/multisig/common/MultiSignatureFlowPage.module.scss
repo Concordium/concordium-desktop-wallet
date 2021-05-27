@@ -13,6 +13,8 @@
     padding-top: 40px;
     padding-bottom: 40px;
     word-break: break-word;
+    max-width: 450px;
+    margin: 0 auto;
 
     .stretchColumn & {
         display: flex;

@@ -1,17 +1,24 @@
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { chosenAccountInfoSelector } from '~/features/AccountSlice';
-import { AddressBookEntry, Fraction } from '~/utils/types';
+import {
+    chosenAccountSelector,
+    chosenAccountInfoSelector,
+} from '~/features/AccountSlice';
+import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
 import { getGTUSymbol } from '~/utils/gtu';
 import AddressBookEntryButton from '~/components/AddressBookEntryButton';
 import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import { validateTransferAmount } from '~/utils/transactionHelpers';
+import {
+    validateTransferAmount,
+    validateShieldedAmount,
+} from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import transferStyles from '../Transfers.module.scss';
 import styles from './PickAmount.module.scss';
+import ErrorMessage from '~/components/Form/ErrorMessage';
 
 interface Props {
     recipient?: AddressBookEntry | undefined;
@@ -20,6 +27,7 @@ interface Props {
     estimatedFee?: Fraction | undefined;
     toPickRecipient?(currentAmount: string): void;
     toConfirmTransfer(amount: string): void;
+    transactionKind: TransactionKindId;
 }
 
 interface PickAmountForm {
@@ -37,9 +45,12 @@ export default function PickAmount({
     defaultAmount,
     toPickRecipient,
     toConfirmTransfer,
+    transactionKind,
 }: Props) {
+    const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
     const form = useForm<PickAmountForm>({ mode: 'onTouched' });
+    const { errors } = form;
 
     const handleSubmit: SubmitHandler<PickAmountForm> = useCallback(
         (values) => {
@@ -50,6 +61,19 @@ export default function PickAmount({
     );
 
     function validate(amount: string) {
+        if (
+            [
+                TransactionKindId.Transfer_to_public,
+                TransactionKindId.Encrypted_transfer,
+            ].includes(transactionKind)
+        ) {
+            return validateShieldedAmount(
+                amount,
+                account,
+                accountInfo,
+                estimatedFee && collapseFraction(estimatedFee)
+            );
+        }
         return validateTransferAmount(
             amount,
             accountInfo,
@@ -59,22 +83,22 @@ export default function PickAmount({
 
     return (
         <>
-            <h2 className={transferStyles.header}>{header}</h2>
+            <h3 className={transferStyles.header}>{header}</h3>
             <Form formMethods={form} onSubmit={handleSubmit}>
                 <div className={styles.amountInputWrapper}>
-                    <p>{getGTUSymbol()}</p>
-                    <Form.Input
+                    {getGTUSymbol()}
+                    <Form.GtuInput
                         name="amount"
-                        placeholder="Enter Amount"
                         defaultValue={defaultAmount}
                         rules={{
                             required: 'Amount Required',
-                            validate: {
-                                validate,
-                            },
+                            validate,
                         }}
                     />
                 </div>
+                <span className="textCenter">
+                    <ErrorMessage>{errors.amount?.message}</ErrorMessage>
+                </span>
                 <DisplayEstimatedFee
                     className={styles.estimatedFee}
                     estimatedFee={estimatedFee}

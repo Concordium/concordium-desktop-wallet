@@ -18,10 +18,6 @@ import {
     removeAccount,
 } from '~/features/AccountSlice';
 import {
-    addToAddressBook,
-    removeFromAddressBook,
-} from '~/features/AddressBookSlice';
-import {
     removeCredentialsOfAccount,
     getNextCredentialNumber,
 } from '~/database/CredentialDao';
@@ -35,6 +31,7 @@ import IdentityCard from '~/components/IdentityCard';
 import AccountCard from '~/components/AccountCard';
 import CardList from '~/cross-app-components/CardList';
 import { AttributeKey } from '~/utils/identityHelpers';
+import errorMessages from '~/constants/errorMessages.json';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
@@ -48,7 +45,6 @@ interface Props {
 function removeFailed(dispatch: Dispatch, accountAddress: string) {
     removeAccount(dispatch, accountAddress);
     removeCredentialsOfAccount(accountAddress);
-    removeFromAddressBook(dispatch, { address: accountAddress });
 }
 
 export default function AccountCreationGenerate({
@@ -108,12 +104,6 @@ export default function AccountCreationGenerate({
             0, // credentialIndex = 0 on original
             credentialDeploymentInfo
         );
-        addToAddressBook(dispatch, {
-            name: accountName,
-            address: accountAddress,
-            note: `Account for credential ${credentialNumber} of ${identity.name}`, // TODO: have better note
-            readOnly: true,
-        });
     }
 
     function onError(message: string) {
@@ -123,15 +113,15 @@ export default function AccountCreationGenerate({
 
     async function createAccount(
         ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
+        setMessage: (message: string | JSX.Element) => void
     ) {
         let credentialNumber;
         if (!global) {
-            onError(`Unexpected missing global object`);
+            onError(errorMessages.missingGlobal);
             return;
         }
 
-        const walletId = await pairWallet(ledger);
+        const walletId = await pairWallet(ledger, dispatch);
         if (walletId !== identity.walletId) {
             throw new Error(
                 'The chosen identity was not created using the connected wallet.'
@@ -159,10 +149,15 @@ export default function AccountCreationGenerate({
             await sendCredential(credentialDeploymentDetails);
             confirmAccount(
                 dispatch,
-                accountName,
+                credentialDeploymentDetails.accountAddress,
                 credentialDeploymentDetails.transactionId
             );
-            dispatch(push(routes.ACCOUNTCREATION_FINAL));
+            dispatch(
+                push({
+                    pathname: routes.ACCOUNTCREATION_FINAL,
+                    state: credentialDeploymentDetails.accountAddress,
+                })
+            );
         } catch (e) {
             onError(`Unable to create account due to ${e}`);
         }
@@ -206,6 +201,7 @@ export default function AccountCreationGenerate({
                                 identityId: -1,
                                 maxTransactionId: -1,
                                 identityName: identity.name,
+                                rewardFilter: '[]',
                             }}
                         />
                     </CardList>

@@ -36,6 +36,8 @@ import UpdateBakerKeysHandler from './UpdateBakerKeysHandler';
 import RemoveBakerHandler from './RemoveBakerHandler';
 import UpdateBakerStakeHandler from './UpdateBakerStakeHandler';
 import UpdateBakerRestakeEarningsHandler from './UpdateBakerRestakeEarningsHandler';
+import TransferToEncryptedHandler from './TransferToEncryptedHandler';
+import TransferToPublicHandler from './TransferToPublicHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -71,6 +73,14 @@ export function findAccountTransactionHandler(
     }
     if (transactionKind === TransactionKindId.Transfer_with_schedule) {
         return new AccountHandlerTypeMiddleware(new ScheduledTransferHandler());
+    }
+    if (transactionKind === TransactionKindId.Transfer_to_encrypted) {
+        return new AccountHandlerTypeMiddleware(
+            new TransferToEncryptedHandler()
+        );
+    }
+    if (transactionKind === TransactionKindId.Transfer_to_public) {
+        return new AccountHandlerTypeMiddleware(new TransferToPublicHandler());
     }
     throw new Error(`Unsupported transaction type: ${transactionKind}`);
 }

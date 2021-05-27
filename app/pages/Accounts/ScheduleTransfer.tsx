@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { Account, AddressBookEntry } from '~/utils/types';
+import { TransactionKindId, Account, AddressBookEntry } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import { toMicroUnits } from '~/utils/gtu';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
@@ -34,7 +34,9 @@ export default function ScheduleTransfer({ account, returnFunction }: Props) {
         <ExternalTransfer
             toConfirmTransfer={toBuildSchedule}
             exitFunction={returnFunction}
-            amountHeader="Send funds with a release schedule"
+            amountHeader="Send GTU with a schedule"
+            senderAddress={account.address}
+            transactionKind={TransactionKindId.Simple_transfer}
         />
     );
 }

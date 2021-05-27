@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
@@ -17,15 +17,13 @@ import { createUpdateInstructionHandler } from '~/utils/transactionHandlers/Hand
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
-import { BlockSummary } from '~/utils/NodeApiTypes';
-import { findKey } from '~/utils/updates/AuthorizationHelper';
+import { getUpdateKey } from '~/utils/updates/AuthorizationHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import Columns from '~/components/Columns';
 import TransactionDetails from '~/components/TransactionDetails';
 import ExpiredTransactionView from '../ExpiredTransactionView';
 import { ensureProps } from '~/utils/componentHelpers';
-import getTransactionHash from '~/utils/transactionHash';
+import getTransactionSignDigest from '~/utils/transactionHash';
 import SignTransaction from './SignTransaction';
 
 import styles from './SignTransactionProposal.module.scss';
@@ -33,7 +31,6 @@ import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface SignInput {
     multiSignatureTransaction: MultiSignatureTransaction;
-    blockSummary: BlockSummary;
 }
 
 interface Props {
@@ -46,11 +43,9 @@ interface Props {
  * to the database.
  */
 function SignTransactionProposalView({ location }: Props) {
-    const [showValidationError, setShowValidationError] = useState(false);
-    const [transactionHash, setTransactionHash] = useState<string>();
     const dispatch = useDispatch();
 
-    const { multiSignatureTransaction, blockSummary }: SignInput = parse(
+    const { multiSignatureTransaction }: SignInput = parse(
         location.state ?? ''
     );
     const { transaction } = multiSignatureTransaction;
@@ -68,33 +63,32 @@ function SignTransactionProposalView({ location }: Props) {
         transaction
     );
 
-    useEffect(() => {
-        setTransactionHash(getTransactionHash(updateInstruction));
-    }, [setTransactionHash, updateInstruction]);
+    const transactionSignDigest = useMemo(
+        () => getTransactionSignDigest(updateInstruction),
+        [updateInstruction]
+    );
 
-    async function signingFunction(ledger: ConcordiumLedgerClient) {
-        const authorizationKey = await findKey(
-            ledger,
-            blockSummary.updates.keys,
-            updateInstruction,
-            transactionHandler
-        );
-        if (!authorizationKey) {
-            setShowValidationError(true);
-            return;
+    /** Creates the transaction, and if the ledger parameter is provided, also
+     *  adds a signature on the transaction.
+     */
+    async function signingFunction(ledger?: ConcordiumLedgerClient) {
+        const signatures = [];
+        if (ledger) {
+            const publicKey = await getUpdateKey(ledger, updateInstruction);
+
+            const signatureBytes = await transactionHandler.signTransaction(
+                updateInstruction,
+                ledger
+            );
+
+            // Set signature
+            const signature: UpdateInstructionSignature = {
+                signature: signatureBytes.toString('hex'),
+                authorizationPublicKey: publicKey,
+            };
+            signatures.push(signature);
         }
-
-        const signatureBytes = await transactionHandler.signTransaction(
-            updateInstruction,
-            ledger
-        );
-
-        // Set signature
-        const signature: UpdateInstructionSignature = {
-            signature: signatureBytes.toString('hex'),
-            authorizationKeyIndex: authorizationKey.index,
-        };
-        updateInstruction.signatures = [signature];
+        updateInstruction.signatures = signatures;
 
         const updatedMultiSigTransaction = {
             ...multiSignatureTransaction,
@@ -112,7 +106,7 @@ function SignTransactionProposalView({ location }: Props) {
         dispatch(push(selectedProposalRoute(entryId)));
     }
 
-    if (!transactionHash) {
+    if (!transactionSignDigest) {
         return null;
     }
 
@@ -126,12 +120,6 @@ function SignTransactionProposalView({ location }: Props) {
             stepTitle={`Transaction signing confirmation - ${transactionHandler.type}`}
             delegateScroll
         >
-            <SimpleErrorModal
-                show={showValidationError}
-                header="Unauthorized key"
-                content="Your key is not authorized to sign this update type."
-                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
-            />
             <Columns
                 className={styles.subtractContainerPadding}
                 divider
@@ -150,7 +138,10 @@ function SignTransactionProposalView({ location }: Props) {
                     header="Signature and Hardware Wallet"
                     className={styles.stretchColumn}
                 >
-                    <SignTransaction signingFunction={signingFunction} />
+                    <SignTransaction
+                        signingFunction={signingFunction}
+                        onSkip={() => signingFunction()}
+                    />
                 </Columns.Column>
             </Columns>
         </MultiSignatureLayout>

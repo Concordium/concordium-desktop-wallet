@@ -37,10 +37,10 @@ export default function TransferProposalDetails({
 
     return (
         <Details>
-            <PlainDetail title="Identity" value={identity?.name} />
+            <PlainDetail title="Identity" value={identity?.name} first />
             <AccountDetail title="Account" value={account} />
             <AmountDetail title="Amount" value={amount} />
-            <DisplayEstimatedFee estimatedFee={estimatedFee} />
+            <DisplayEstimatedFee className="mT5" estimatedFee={estimatedFee} />
             <AccountDetail title="Recipient" value={recipient} />
             {isScheduledTransfer ? (
                 <PlainDetail

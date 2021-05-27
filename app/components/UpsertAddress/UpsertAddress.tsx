@@ -29,6 +29,7 @@ import styles from './UpsertAddress.module.scss';
 
 type Props = PropsWithChildren<{
     initialValues?: AddressBookEntryForm;
+    readOnly?: boolean;
     onSubmit?(name: string, address: string, note?: string): void;
 }>;
 
@@ -44,11 +45,12 @@ const fieldNames: NotOptional<EqualRecord<AddressBookEntryForm>> = {
     note: 'note',
 };
 
-const noteMaxLength = 255;
+const noteMaxLength = 100;
 
 export default function UpsertAddress<TAs extends ElementType = typeof Button>({
     onSubmit,
     initialValues,
+    readOnly = false,
     as,
     ...asProps
 }: UpsertAddressProps<TAs>) {
@@ -66,15 +68,15 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
 
     const upsertAddress = useCallback(
         (values: AddressBookEntryForm) => {
-            const entry: AddressBookEntry = { ...values, readOnly: false };
+            const entry: AddressBookEntry = { ...values, readOnly };
 
             if (isEditMode && initialValues) {
-                updateAddressBookEntry(dispatch, initialValues.name, entry);
+                updateAddressBookEntry(dispatch, initialValues.address, entry);
             } else {
                 addToAddressBook(dispatch, entry);
             }
         },
-        [isEditMode, initialValues, dispatch]
+        [isEditMode, initialValues, dispatch, readOnly]
     );
 
     const addressUnique: Validate = useCallback(
@@ -122,9 +124,17 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                         <Form.Input
                             className={styles.name}
                             name={fieldNames.name}
-                            rules={{ required: 'Name required' }}
+                            rules={{
+                                required: 'Name required',
+                                maxLength: {
+                                    value: 40,
+                                    message:
+                                        'Name cannot exceed 40 characters.',
+                                },
+                            }}
                             placeholder="Recipient Name"
                             defaultValue={initialValues?.name}
+                            readOnly={readOnly}
                         />
                         <Form.TextArea
                             className={styles.input}
@@ -139,16 +149,16 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                             }}
                             placeholder="Paste the account address here"
                             defaultValue={initialValues?.address}
+                            readOnly={readOnly}
                         />
-                        <Form.Input
+                        <Form.TextArea
                             className={styles.input}
                             name={fieldNames.note}
                             label={<span className="h3">Notes</span>}
                             rules={{
                                 maxLength: {
                                     value: noteMaxLength,
-                                    message:
-                                        'Message cannot be longer than 255 characters',
+                                    message: `Message cannot be longer than ${noteMaxLength} characters`,
                                 },
                             }}
                             placeholder="You can add a note here"

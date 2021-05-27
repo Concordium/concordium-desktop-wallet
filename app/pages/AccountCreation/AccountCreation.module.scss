@@ -11,8 +11,8 @@ $account-creation-padding-horizontal: 50px;
 
 .singleColumn {
     composes: flexColumn from global;
-    padding: 35px $account-creation-padding-horizontal 80px;
-    min-height: 100%;
+    padding: 35px $account-creation-padding-horizontal 60px;
+    flex: 1;
 }
 
 .singleColumnContent {
@@ -30,6 +30,11 @@ $account-creation-padding-horizontal: 50px;
 }
 
 .card {
+    width: 100%;
+    max-width: 428px;
+}
+
+.identityListItem {
     width: 428px;
 }
 
@@ -41,7 +46,7 @@ $account-creation-padding-horizontal: 50px;
 .leftColumn {
     text-align: left;
     padding-left: $account-creation-padding-horizontal;
-    padding-bottom: 80px;
+    padding-bottom: 60px;
     min-height: 100%;
     display: flex;
     flex-direction: column;

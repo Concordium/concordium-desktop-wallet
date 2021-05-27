@@ -20,6 +20,7 @@ import PickAmount from './PickAmount';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
+import errorMessages from '~/constants/errorMessages.json';
 
 import { createAddBakerTransaction } from '~/utils/transactionHelpers';
 import { selectedProposalRoute } from '~/utils/routerHelper';
@@ -27,7 +28,10 @@ import routes from '~/constants/routes.json';
 import { saveFile } from '~/utils/FileHelper';
 import { useAccountInfo, useTransactionCostEstimate } from '~/utils/hooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { signUsingLedger } from './SignTransaction';
+import {
+    signUsingLedger,
+    createMultisignatureTransaction,
+} from './SignTransaction';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
@@ -153,9 +157,15 @@ function BuildAddBakerTransactionProposalStep({
             .catch(() => setError('Failed create transaction'));
     };
 
-    const signingFunction = async (ledger: ConcordiumLedgerClient) => {
+    /** Creates the transaction, and if the ledger parameter is provided, also
+     *  adds a signature on the transaction.
+     */
+    const signingFunction = async (ledger?: ConcordiumLedgerClient) => {
+        if (!global) {
+            throw new Error(errorMessages.missingGlobal);
+        }
         if (!account) {
-            throw new Error('unexpected missing account');
+            throw new Error('Unexpected missing account');
         }
         if (transaction === undefined) {
             throw new Error('unexpected missing transaction');
@@ -164,7 +174,16 @@ function BuildAddBakerTransactionProposalStep({
             throw new Error('unexpected missing bakerKeys');
         }
 
-        const proposal = await signUsingLedger(ledger, transaction, account);
+        let signatures = {};
+        if (ledger) {
+            signatures = await signUsingLedger(ledger, transaction, account);
+        }
+        const proposal = await createMultisignatureTransaction(
+            transaction,
+            signatures,
+            account.signatureThreshold
+        );
+
         if (proposal.id === undefined) {
             throw new Error('unexpected undefined proposal id');
         }
@@ -357,6 +376,7 @@ function BuildAddBakerTransactionProposalStep({
                         <Columns.Column header="Signature and Hardware Wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}
+                                onSkip={() => signingFunction()}
                             />
                         </Columns.Column>
                     </Route>

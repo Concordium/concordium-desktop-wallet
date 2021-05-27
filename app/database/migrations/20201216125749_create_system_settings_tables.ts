@@ -1,6 +1,4 @@
-import * as Knex from 'knex';
-
-// TODO: Add unique constrains on name for both tables, so that we cannot get clashes.
+import { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
     return knex.schema

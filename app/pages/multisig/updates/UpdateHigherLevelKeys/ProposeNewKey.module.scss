@@ -3,18 +3,14 @@
 /* TODO: How to do this in a proper way? */
 .close {
     position: absolute;
-    right: 65px;
+    right: 20px;
 }
 
 .checkbox {
-    width: 250px;
     margin-bottom: 20px;
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .fileInput {
-    height: 400px;
+    flex: 1 0 200px;
     margin: 40px 0;
 }

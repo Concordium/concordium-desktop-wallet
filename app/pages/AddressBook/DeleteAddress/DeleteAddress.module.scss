@@ -10,14 +10,14 @@
     transition: transform $anim-easing $anim-timing;
 
     path {
-        fill: $color-danger;
+        fill: $color-salmon-red;
     }
 
     &:hover {
         transform: scale(1.1);
 
         path {
-            fill: darken($color-danger, 3);
+            fill: darken($color-salmon-red, 3);
         }
     }
 }

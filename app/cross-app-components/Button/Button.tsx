@@ -19,8 +19,9 @@ interface Props {
     size?: ButtonSize;
     inverted?: boolean;
     clear?: boolean;
-    danger?: boolean;
+    negative?: boolean;
     icon?: JSX.Element;
+    disabled?: boolean;
 }
 
 export type ButtonProps<
@@ -36,7 +37,7 @@ export default function Button<TAs extends ElementType = 'button'>({
     size = 'regular',
     inverted = false,
     clear = false,
-    danger = false,
+    negative = false,
     icon,
     className,
     as,
@@ -51,7 +52,7 @@ export default function Button<TAs extends ElementType = 'button'>({
               styles.root,
               size && sizeStyleMap[size],
               inverted && styles.rootInverted,
-              danger && styles.rootDanger,
+              negative && styles.rootNegative,
               icon && styles.rootWithIcon,
               className
           );

@@ -152,7 +152,6 @@ function MultiSignatureCreateProposal({
         setRestrictionModalOpen(true);
     }
 
-    let component;
     if (
         [
             UpdateType.UpdateRootKeys,
@@ -160,59 +159,25 @@ function MultiSignatureCreateProposal({
             UpdateType.UpdateLevel1KeysUsingLevel1Keys,
         ].includes(type)
     ) {
-        if (!blockSummary || !consensusStatus) {
-            component = <Loading text="Getting current settings from chain" />;
-        } else {
-            component = (
-                <UpdateComponent
-                    blockSummary={blockSummary}
-                    consensusStatus={consensusStatus}
-                    handleKeySubmit={handleKeySubmit}
-                />
-            );
-        }
-    } else {
-        component = (
-            <>
-                <h3 className={styles.subHeader}>Transaction details</h3>
-                <Form<FieldValues & MultiSignatureCreateProposalForm>
-                    className={styles.details}
-                    onSubmit={handleSubmit}
-                >
-                    <div className={styles.proposal}>
-                        <p>
-                            Add all the details for the {displayType}{' '}
-                            transaction below.
-                        </p>
-                        {blockSummary && consensusStatus ? (
-                            <>
-                                <UpdateComponent
-                                    blockSummary={blockSummary}
-                                    consensusStatus={consensusStatus}
-                                />
-                                <Form.Timestamp
-                                    name="effectiveTime"
-                                    label="Effective Time"
-                                    defaultValue={
-                                        new Date(
-                                            getNow() + 5 * TimeConstants.Minute
-                                        )
-                                    }
-                                    rules={{
-                                        required: 'Effective time is required',
-                                        validate: futureDate(
-                                            'Effective time must be in the future'
-                                        ),
-                                    }}
-                                />
-                            </>
-                        ) : (
-                            <Loading text="Getting current settings from chain" />
-                        )}
+        return (
+            <MultiSignatureLayout
+                pageTitle={handler.title}
+                stepTitle={`Transaction Proposal - ${handler.type}`}
+                delegateScroll
+            >
+                {RestrictionModal}
+                {!blockSummary || !consensusStatus ? (
+                    <Loading text="Getting current settings from chain" />
+                ) : (
+                    <div className={styles.subtractContainerPadding}>
+                        <UpdateComponent
+                            blockSummary={blockSummary}
+                            consensusStatus={consensusStatus}
+                            handleKeySubmit={handleKeySubmit}
+                        />
                     </div>
-                    <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
-                </Form>
-            </>
+                )}
+            </MultiSignatureLayout>
         );
     }
 
@@ -222,7 +187,44 @@ function MultiSignatureCreateProposal({
             stepTitle={`Transaction Proposal - ${handler.type}`}
         >
             {RestrictionModal}
-            {component}
+            <h3 className={styles.subHeader}>Transaction details</h3>
+            <Form<FieldValues & MultiSignatureCreateProposalForm>
+                className={styles.details}
+                onSubmit={handleSubmit}
+            >
+                <div className={styles.proposal}>
+                    <p className="mT0">
+                        Add all the details for the {displayType} transaction
+                        below.
+                    </p>
+                    {blockSummary && consensusStatus ? (
+                        <>
+                            <UpdateComponent
+                                blockSummary={blockSummary}
+                                consensusStatus={consensusStatus}
+                            />
+                            <Form.Timestamp
+                                name="effectiveTime"
+                                label="Effective Time"
+                                defaultValue={
+                                    new Date(
+                                        getNow() + 5 * TimeConstants.Minute
+                                    )
+                                }
+                                rules={{
+                                    required: 'Effective time is required',
+                                    validate: futureDate(
+                                        'Effective time must be in the future'
+                                    ),
+                                }}
+                            />
+                        </>
+                    ) : (
+                        <Loading text="Getting current settings from chain" />
+                    )}
+                </div>
+                <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
+            </Form>
         </MultiSignatureLayout>
     );
 }

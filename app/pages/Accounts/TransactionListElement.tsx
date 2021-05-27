@@ -35,7 +35,10 @@ const isGreen = (
         return viewingShielded;
     }
     if (TransactionKindString.TransferToPublic === kind) {
-        return !viewingShielded && BigInt(transaction.total) > 0n;
+        return (
+            !viewingShielded &&
+            BigInt(transaction.subtotal) > BigInt(transaction.cost)
+        );
     }
     return !isOutgoingTransaction;
 };
@@ -64,14 +67,10 @@ function getName(
     return transaction.fromAddress.slice(0, 6);
 }
 
-function buildOutgoingAmountStrings(
-    total: bigint,
-    subtotal: bigint,
-    fee: bigint
-) {
+function buildOutgoingAmountStrings(subtotal: bigint, fee: bigint) {
     return {
-        amount: `${displayAsGTU(total)}`,
-        amountFormula: `${displayAsGTU(-BigInt(subtotal))} +${displayAsGTU(
+        amount: `${displayAsGTU(-(subtotal + fee))}`,
+        amountFormula: `${displayAsGTU(BigInt(subtotal))} + ${displayAsGTU(
             fee
         )} Fee`,
     };
@@ -126,8 +125,19 @@ function parseAmount(
         case OriginType.Account:
             if (isOutgoingTransaction) {
                 const cost = BigInt(transaction.cost || '0');
+
+                if (
+                    TransactionKindString.TransferToPublic ===
+                    transaction.transactionKind
+                ) {
+                    // A transfer to public is the only transaction, where we pay a cost and receive gtu on the public balance.
+                    return buildOutgoingAmountStrings(
+                        -BigInt(transaction.subtotal),
+                        cost
+                    );
+                }
+
                 return buildOutgoingAmountStrings(
-                    BigInt(transaction.total),
                     BigInt(transaction.subtotal),
                     cost
                 );
@@ -135,6 +145,8 @@ function parseAmount(
             // incoming transaction:
             return buildCostFreeAmountString(BigInt(transaction.subtotal));
 
+        case OriginType.Reward:
+            return buildCostFreeAmountString(BigInt(transaction.subtotal));
         default:
             return {
                 amount: `${getGTUSymbol()} ?`,
@@ -151,6 +163,12 @@ function displayType(kind: TransactionKindString) {
             return <i>Shielded amount</i>;
         case TransactionKindString.TransferToPublic:
             return <i>Unshielded amount</i>;
+        case TransactionKindString.BakingReward:
+            return <i>Baker reward</i>;
+        case TransactionKindString.BlockReward:
+            return <i>Block reward</i>;
+        case TransactionKindString.FinalizationReward:
+            return <i>Finalization reward</i>;
         default:
             return '';
     }

@@ -1,5 +1,5 @@
 import { Setting, SettingGroup, Settings } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 
 const settingsTable = 'setting';
 const settingsGroupTable = 'setting_group';

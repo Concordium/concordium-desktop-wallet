@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import ErrorIcon from '@resources/svg/logo-error.svg';
-import SuccessIcon from '@resources/svg/logo-checkmark.svg';
-import { updateSettingEntry } from '../../features/SettingsSlice';
-import { Setting } from '../../utils/types';
-import { getNodeInfo } from '../../utils/nodeRequests';
-import startClient from '../../utils/nodeConnector';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateSettingEntry } from '~/features/SettingsSlice';
+import { loadGlobal, globalSelector } from '~/features/GlobalSlice';
+import { Setting } from '~/utils/types';
+import { getConsensusStatus } from '~/utils/nodeRequests';
+import startClient from '~/utils/nodeConnector';
 import Card from '~/cross-app-components/Card';
 import Form from '~/components/Form';
 import styles from './ConnectionSettingElement.module.scss';
-import Loading from '~/cross-app-components/Loading';
+import ConnectionStatusComponent, {
+    Status,
+} from '~/components/ConnectionStatusComponent';
 
 interface Props {
     displayText: string;
@@ -25,6 +26,7 @@ const portRangeMax = 65535;
 export default function ConnectionSetting({ displayText, setting }: Props) {
     const dispatch = useDispatch();
     const startValues = JSON.parse(setting.value);
+    const global = useSelector(globalSelector);
     const [address, setAddress] = useState(startValues.address);
     const [port, setPort] = useState(startValues.port);
     const [connected, setConnected] = useState<boolean>();
@@ -48,7 +50,11 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
     async function testConnection() {
         setTestingConnection(true);
         try {
-            await getNodeInfo();
+            const consensusStatus = await getConsensusStatus();
+            if (!global) {
+                const blockHash = consensusStatus.lastFinalizedBlock;
+                await loadGlobal(dispatch, blockHash);
+            }
             setConnected(true);
         } catch (e) {
             setConnected(false);
@@ -57,23 +63,13 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
         setTestingConnection(false);
     }
 
-    let statusComponent;
+    let status = Status.Pending;
     if (!connected && hasBeenTested && !testingConnection) {
-        statusComponent = (
-            <div>
-                <ErrorIcon className={styles.icon} />
-                <div className={styles.error}>Connection failed</div>
-            </div>
-        );
+        status = Status.Failed;
     } else if (testingConnection) {
-        statusComponent = <Loading inline text="Connecting to node" />;
+        status = Status.Loading;
     } else if (!testingConnection && connected) {
-        statusComponent = (
-            <div>
-                <SuccessIcon className={styles.icon} />
-                <div className={styles.success}>Successfully connected</div>
-            </div>
-        );
+        status = Status.Successful;
     }
 
     return (
@@ -114,7 +110,9 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
                         max: portRangeMax,
                     }}
                 />
-                <div className={styles.status}>{statusComponent}</div>
+                <div className={styles.status}>
+                    <ConnectionStatusComponent status={status} />
+                </div>
                 <Form.Submit className={styles.submit}>
                     Test connection
                 </Form.Submit>

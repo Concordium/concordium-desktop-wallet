@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import PickRecipient from './PickRecipient';
 import PickAmount from './PickAmount';
 import FinalPage from './FinalPage';
-import { AddressBookEntry, Fraction } from '~/utils/types';
+import { TransactionKindId, AddressBookEntry, Fraction } from '~/utils/types';
 import locations from '~/constants/transferLocations.json';
 import { TransferState } from '~/utils/transactionTypes';
 import TransferView from './TransferView';
@@ -13,6 +13,8 @@ interface Props {
     exitFunction(): void;
     estimatedFee?: Fraction;
     amountHeader: string;
+    senderAddress: string;
+    transactionKind: TransactionKindId;
 }
 
 /**
@@ -23,6 +25,8 @@ export default function ExternalTransfer({
     amountHeader,
     estimatedFee,
     exitFunction,
+    senderAddress,
+    transactionKind,
 }: Props) {
     const location = useLocation<TransferState>();
 
@@ -30,7 +34,9 @@ export default function ExternalTransfer({
         location?.state?.initialPage || locations.pickAmount
     );
 
-    const [amount, setAmount] = useState<string>(location?.state?.amount); // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string>(
+        location?.state?.amount ?? '0.00'
+    ); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
         location?.state?.recipient
     );
@@ -38,37 +44,6 @@ export default function ExternalTransfer({
     function chooseRecipientOnClick(entry: AddressBookEntry) {
         setRecipient(entry);
         setSubLocation(locations.pickAmount);
-    }
-
-    function ChosenComponent() {
-        switch (subLocation) {
-            case locations.pickAmount:
-                return (
-                    <PickAmount
-                        recipient={recipient}
-                        header={amountHeader}
-                        defaultAmount={amount}
-                        estimatedFee={estimatedFee}
-                        toPickRecipient={(currentAmount: string) => {
-                            setAmount(currentAmount);
-                            setSubLocation(locations.pickRecipient);
-                        }}
-                        toConfirmTransfer={(currentAmount: string) => {
-                            if (!recipient) {
-                                throw new Error('Unexpected missing recipient');
-                            }
-                            toConfirmTransfer(currentAmount, recipient);
-                        }}
-                    />
-                );
-            case locations.pickRecipient:
-                return <PickRecipient pickRecipient={chooseRecipientOnClick} />;
-            case locations.transferSubmitted: {
-                return <FinalPage location={location} />;
-            }
-            default:
-                throw new Error('Unexpected location');
-        }
     }
 
     return (
@@ -80,7 +55,36 @@ export default function ExternalTransfer({
             exitOnClick={exitFunction}
             backOnClick={() => setSubLocation(locations.pickAmount)}
         >
-            <ChosenComponent />
+            {subLocation === locations.pickAmount && (
+                <PickAmount
+                    recipient={recipient}
+                    header={amountHeader}
+                    defaultAmount={amount}
+                    estimatedFee={estimatedFee}
+                    transactionKind={transactionKind}
+                    toPickRecipient={(currentAmount: string) => {
+                        setAmount(currentAmount);
+                        setSubLocation(locations.pickRecipient);
+                    }}
+                    toConfirmTransfer={(currentAmount: string) => {
+                        if (!recipient) {
+                            throw new Error('Unexpected missing recipient');
+                        }
+                        toConfirmTransfer(currentAmount, recipient);
+                    }}
+                />
+            )}
+            {subLocation === locations.pickRecipient && (
+                <div className="mH30">
+                    <PickRecipient
+                        pickRecipient={chooseRecipientOnClick}
+                        senderAddress={senderAddress}
+                    />
+                </div>
+            )}
+            {subLocation === locations.transferSubmitted && (
+                <FinalPage location={location} />
+            )}
         </TransferView>
     );
 }

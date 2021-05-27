@@ -6,7 +6,7 @@ import {
     TimeStampUnit,
 } from '~/utils/types';
 import {
-    timestamp,
+    withHeaderAndFooter,
     table,
     sender,
     recipient,
@@ -14,8 +14,9 @@ import {
     displayAmount,
     fee,
     displayStatus,
-    hash,
-    standardHeader,
+    standardPageFooter,
+    hashRow,
+    standardTableHeader,
     timeFormat,
     displayExpiry,
 } from '~/utils/printUtility';
@@ -43,12 +44,11 @@ function PrintFormatScheduledTransfer({
     toName,
 }: Props) {
     const amount = getScheduledTransferAmount(transaction);
-    return (
+    const body = (
         <>
             <h1>Transaction - Send GTU with a schedule</h1>
-            {timestamp()}
             {table(
-                standardHeader,
+                standardTableHeader,
                 <tbody>
                     {sender(transaction.sender, fromName)}
                     {recipient(transaction.payload.toAddress, toName)}
@@ -58,13 +58,15 @@ function PrintFormatScheduledTransfer({
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}
-                    {hash(transaction)}
-                    <tr>
-                        <td>Identicon:</td>
-                    </tr>
+                    {hashRow(transaction)}
+                    {Boolean(image) && (
+                        <tr>
+                            <td>Identicon:</td>
+                        </tr>
+                    )}
                 </tbody>
             )}
-            <img src={image} alt="" />
+            {Boolean(image) && <img src={image} alt="" />}
             {table(
                 <thead>
                     <tr>
@@ -96,6 +98,11 @@ function PrintFormatScheduledTransfer({
                 </tbody>
             )}
         </>
+    );
+    return withHeaderAndFooter(
+        body,
+        undefined,
+        standardPageFooter(transaction)
     );
 }
 

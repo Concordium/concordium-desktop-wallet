@@ -17,8 +17,11 @@ import {
 } from '~/features/TransactionSlice';
 import { getPendingTransactions } from '~/database/TransactionDao';
 import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
-import { getTransactionSubmissionId } from './transactionHash';
-import { updateSignatureThreshold } from '~/features/AccountSlice';
+import { getTransactionHash } from './transactionHash';
+import {
+    updateAccountInfoOfAddress,
+    updateSignatureThreshold,
+} from '~/features/AccountSlice';
 
 /**
  * Given an UpdateAccountCredentials transaction, update the local state
@@ -50,7 +53,7 @@ export async function getMultiSignatureTransactionStatus(
 ) {
     const transaction: Transaction = parse(proposal.transaction);
 
-    const transactionHash = getTransactionSubmissionId(transaction);
+    const transactionHash = await getTransactionHash(transaction);
 
     const response = await getStatus(transactionHash);
 
@@ -91,19 +94,24 @@ export async function getMultiSignatureTransactionStatus(
 /**
  * Wait for the transaction to be finalized (or rejected) and update accordingly
  */
-export async function monitorTransactionStatus(transactionHash: string) {
+export async function monitorTransactionStatus(
+    dispatch: Dispatch,
+    transactionHash: string,
+    senderAddress: string
+) {
     const response = await getStatus(transactionHash);
     switch (response.status) {
         case TransactionStatus.Rejected:
-            rejectTransaction(transactionHash);
+            rejectTransaction(dispatch, transactionHash);
             break;
         case TransactionStatus.Finalized: {
-            confirmTransaction(transactionHash, response.outcomes);
+            confirmTransaction(dispatch, transactionHash, response.outcomes);
             break;
         }
         default:
             throw new Error('Unexpected status was returned by the poller!');
     }
+    updateAccountInfoOfAddress(senderAddress, dispatch);
 }
 
 /**
@@ -113,7 +121,11 @@ export async function monitorTransactionStatus(transactionHash: string) {
 export default async function listenForTransactionStatus(dispatch: Dispatch) {
     const transfers = await getPendingTransactions();
     transfers.forEach((transfer) =>
-        monitorTransactionStatus(transfer.transactionHash)
+        monitorTransactionStatus(
+            dispatch,
+            transfer.transactionHash,
+            transfer.fromAddress
+        )
     );
 
     const allProposals = await getAll();

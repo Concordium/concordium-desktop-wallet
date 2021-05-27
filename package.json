@@ -1,40 +1,35 @@
 {
   "name": "concordium-desktop-wallet",
-  "productName": "concordium-desktop-wallet",
+  "productName": "Concordium Wallet",
   "description": "concordium-desktop-wallet",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.js --colors",
     "build-e2e": "cross-env E2E_BUILD=true yarn build",
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.js --colors",
-    "build-main-dev": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.main.dev.js --colors --progress",
+    "build-main-dev": "cross-env TARGET_NET=stagenet NODE_ENV=development webpack --config ./configs/webpack.config.main.dev.js --colors --progress",
     "build-proto": "sh ./internals/scripts/build_protos.sh",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.js --colors",
-    "build-renderer-dev": "cross-env NODE_ENV=development webpack --config configs/webpack.config.renderer.dev.js --colors --progress",
+    "build-renderer-dev": "cross-env TARGET_NET=stagenet NODE_ENV=development webpack --config configs/webpack.config.renderer.dev.js --colors --progress",
     "build-storybook": "build-storybook",
     "clean": "yarn clean-scss-modules",
     "clean-scss-modules": "rimraf ./**/*.module.scss.d.ts",
-    "electron-rebuild": "electron-rebuild --parallel --force --types prod,dev,optional --module-dir app",
     "lint": "eslint . --cache --ext .ts,.tsx --max-warnings 0",
     "lint-fix": "yarn --silent lint --fix; exit 0",
     "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
     "lint-styles-fix": "yarn --silent lint-styles --fix; exit 0",
-    "package": "yarn build && electron-builder build --publish never",
-    "package-all": "yarn build && electron-builder build -mwl",
-    "package-ci": "yarn postinstall && yarn build && electron-builder --publish always",
-    "package-mac": "yarn build && electron-builder build --mac",
-    "package-mac-no-notarize": "export NOTARIZE=skip && yarn build && electron-builder build --mac",
-    "package-linux": "yarn build && electron-builder build --linux",
-    "package-win": "yarn build && electron-builder build --win --x64",
+    "name": "echo $npm_package_productName-$TARGET_NET",
+    "package": "yarn build && node ./scripts/build.js",
+    "package-mac-no-notarize": "export NOTARIZE=skip && yarn build && node ./scripts/build.js",
     "postinstall": "node internals/scripts/CheckNativeDep.js && electron-builder install-app-deps && yarn build-dll && opencollective-postinstall  && sh ./internals/scripts/build_protos.sh",
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{ts,tsx,js,jsx,json,html,yml}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
     "preinstall": "node ./internals/scripts/CheckYarn.js",
     "start": "node ./internals/scripts/CheckPortInUse.js && yarn build-main-dev && cross-env START_HOT=1 yarn start-renderer-dev",
-    "start:prod": "cross-env NODE_ENV=production electron ./app/main.prod.js",
-    "start:dev": "cross-env START_HOT=1 NODE_ENV=development electron ./app/main.dev.js",
-    "start:dev-debug": "yarn start:dev --inspect=5858 --remote-debugging-port=9223",
-    "start-renderer-dev": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.renderer.dev.js --colors --progress",
+    "start:prod": "cross-env TARGET_NET=stagenet NODE_ENV=production electron ./app/main.prod.js",
+    "start:dev": "cross-env TARGET_NET=stagenet cross-env START_HOT=1 NODE_ENV=development electron ./app/main.dev.js",
+    "start:dev-debug": "cross-env TARGET_NET=stagenet yarn start:dev --inspect=5858 --remote-debugging-port=9223",
+    "start-renderer-dev": "cross-env TARGET_NET=stagenet NODE_ENV=development webpack-dev-server --config configs/webpack.config.renderer.dev.js --colors --progress",
     "storybook": "start-storybook -p 6006",
     "test": "cross-env jest",
     "test-tsc": "yarn tsc --noEmit",
@@ -57,8 +52,7 @@
       "prettier --ignore-path .eslintignore --single-quote --write"
     ]
   },
-  "build": {
-    "productName": "Concordium Wallet",
+    "build": {
     "appId": "org.Concordium.DesktopWallet",
     "files": [
       "dist/",
@@ -84,13 +78,13 @@
       "sign": false
     },
     "win": {
-      "artifactName": "concordium-wallet-${version}.${ext}",
+      "artifactName": "${name}-${version}.${ext}",
       "target": [
         "nsis"
       ]
     },
     "linux": {
-      "artifactName": "concordium-wallet-${version}.${ext}",
+      "artifactName": "${name}-${version}.${ext}",
       "target": [
         "deb",
         "rpm",
@@ -99,7 +93,7 @@
       "category": "Development"
     },
     "mac": {
-      "artifactName": "concordium-wallet-${version}.${ext}",
+      "artifactName": "${name}-${version}.${ext}",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
@@ -116,13 +110,7 @@
     "extraResources": [
       "./resources/**",
       "./app/database/migrations/*"
-    ],
-    "publish": {
-      "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate",
-      "private": false
-    }
+    ]
   },
   "repository": {
     "type": "git",
@@ -173,11 +161,11 @@
     "cross-env": "^7.0.2",
     "css-loader": "^3.6.0",
     "detect-port": "^1.3.0",
-    "electron": "^8",
-    "electron-builder": "^22.3.6",
-    "electron-devtools-installer": "^2.2.4",
+    "electron": "11.0.1",
+    "electron-builder": "^22.10.5",
+    "electron-devtools-installer": "3.2.0",
     "electron-notarize": "^1.0.0",
-    "electron-rebuild": "^1.10.0",
+    "electron-rebuild": "2.3.2",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.3",
     "enzyme-to-json": "^3.5.0",
@@ -203,6 +191,7 @@
     "husky": "^4.2.5",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^26.6.3",
+    "knex": "0.95.5",
     "lint-staged": "^10.2.11",
     "mini-css-extract-plugin": "^0.9.0",
     "node-sass": "^4.14.1",
@@ -251,7 +240,6 @@
     "history": "^4.7.2",
     "html2canvas": "^1.0.0-rc.7",
     "json-bigint": "^1.0.0",
-    "knex": "^0.21.13",
     "noble-ed25519": "^1.0.3",
     "promise-worker": "^2.0.1",
     "qrcode.react": "^1.0.1",
@@ -263,12 +251,11 @@
     "react-modal": "^3.12.1",
     "react-redux": "^7.2.1",
     "react-router-dom": "^5.2.0",
+    "react-singleton-hook": "^3.1.1",
     "react-to-print": "^2.12.4",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
-    "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^2.0.2",
     "source-map-support": "^0.5.19",
     "use-react-screenshot": "^1.0.2"
   },

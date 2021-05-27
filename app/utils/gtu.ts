@@ -1,4 +1,6 @@
 import {
+    getPowerOf10,
+    formatNumberStringWithDigits,
     isValidResolutionString,
     parseSubNumber,
     toFraction,
@@ -8,7 +10,7 @@ export function getGTUSymbol(): string {
     return '\u01E4';
 }
 
-const microGTUPerGTU = 1000000n;
+export const microGTUPerGTU = 1000000n;
 const separator = '.';
 
 /**
@@ -29,13 +31,17 @@ function toBigInt(input: bigint | string): bigint {
 }
 
 // Checks that the input is a valid GTU string.
-export const isValidGTUString = isValidResolutionString(microGTUPerGTU);
+export const isValidGTUString = isValidResolutionString(
+    microGTUPerGTU,
+    false,
+    false
+);
 
 /**
  * expects the fractional part of the a GTU string.
  * i.e. from an amount of 10.001, the subGTU string is 001.
  */
-const parseSubGTU = parseSubNumber(6);
+const parseSubGTU = parseSubNumber(getPowerOf10(microGTUPerGTU));
 
 /**
  * Convert a microGTU amount to a gtu string.
@@ -43,7 +49,7 @@ const parseSubGTU = parseSubNumber(6);
  * N.B. Gives the absolute value of the amount.
  * N.B. In case the input is a string, it is assumed that it represents the value in microGTU.
  */
-export const toGTUString = toFraction(microGTUPerGTU);
+export const microGtuToGtu = toFraction(microGTUPerGTU);
 
 /**
  * Given a GTU string, convert to microGTU
@@ -61,6 +67,8 @@ export function toMicroUnits(amount: string): bigint {
     return BigInt(amount) * microGTUPerGTU;
 }
 
+const formatGtuString = formatNumberStringWithDigits(2);
+
 /**
  * Given a microGTU amount, returns the same amount in GTU
  * in a displayable format.
@@ -71,5 +79,5 @@ export function displayAsGTU(microGTUAmount: bigint | string) {
     const amount: bigint = toBigInt(microGTUAmount);
     const negative = amount < 0n ? '-' : '';
     const abs = amount < 0n ? -amount : amount;
-    return `${negative}${getGTUSymbol()}${toGTUString(abs)}`;
+    return `${negative}${getGTUSymbol()}${formatGtuString(microGtuToGtu(abs))}`;
 }

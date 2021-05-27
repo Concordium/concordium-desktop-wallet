@@ -1,0 +1,17 @@
+@import 'config/bundle';
+
+.body {
+    composes: body4 from global;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+    margin-bottom: 40px;
+    border: 1px solid $color-grey;
+    padding: 10px;
+    border-radius: 7px;
+}
+
+.greenText {
+    color: $color-success;
+}

@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import type Transport from '@ledgerhq/hw-transport';
+import { Transport } from './Transport';
 import { ProtocolUpdate, UpdateInstruction } from '../../utils/types';
 import pathAsBuffer from './Path';
 import {

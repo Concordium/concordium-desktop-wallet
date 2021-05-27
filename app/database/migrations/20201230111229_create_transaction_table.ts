@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import { Knex } from 'knex';
 import { transactionTable } from '../../constants/databaseNames.json';
 
 export async function up(knex: Knex): Promise<void> {
@@ -13,7 +13,6 @@ export async function up(knex: Knex): Promise<void> {
             table.integer('id').unique();
             table.string('blockHash');
             table.string('blockTime');
-            table.string('total');
             table.boolean('success'); // outcome: success/reject
             // Optionals
             table.string('transactionHash');

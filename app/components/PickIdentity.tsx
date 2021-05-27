@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Identity } from '~/utils/types';
-import { confirmedIdentitiesSelector } from '~/features/IdentitySlice';
+import { ClassName, Identity } from '~/utils/types';
+import {
+    confirmedIdentitiesSelector,
+    confirmedAndGenesisIdentitiesSelector,
+} from '~/features/IdentitySlice';
 import IdentityCard from '~/components/IdentityCard';
 import CardList from '~/cross-app-components/CardList';
+import { noOp } from '~/utils/basicHelpers';
 
-interface Props {
+interface Props extends ClassName {
     chosenIdentity?: Identity;
-    setReady: (ready: boolean) => void;
-    setIdentity: (identity: Identity) => void;
+    setReady?(ready: boolean): void;
+    setIdentity(identity: Identity): void;
+    withGenesisIdentities?: boolean;
 }
 
 /**
@@ -16,10 +21,16 @@ interface Props {
  */
 export default function PickIdentity({
     chosenIdentity,
-    setReady,
+    setReady = noOp,
     setIdentity,
+    className,
+    withGenesisIdentities = true,
 }: Props): JSX.Element {
-    const identities = useSelector(confirmedIdentitiesSelector);
+    const selector = withGenesisIdentities
+        ? confirmedAndGenesisIdentitiesSelector
+        : confirmedIdentitiesSelector;
+    const identities = useSelector(selector);
+
     const [chosenIndex, setChosenIndex] = useState<number | undefined>();
 
     useEffect(() => {
@@ -35,7 +46,7 @@ export default function PickIdentity({
     }, []);
 
     return (
-        <CardList>
+        <CardList className={className}>
             {identities.map((identity: Identity, index: number) => (
                 <IdentityCard
                     identity={identity}

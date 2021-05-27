@@ -21,6 +21,7 @@
     flex: 1 1 100%;
     max-height: calc(100% - #{$page-header-height});
     margin: 0 auto;
+    position: relative;
 
     &:not(.noMaxWidth) {
         max-width: $page-max-width;

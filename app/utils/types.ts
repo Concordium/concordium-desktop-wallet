@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
+import { RejectReason } from './node/RejectReasonHelper';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -130,6 +131,7 @@ export interface Account {
     totalDecrypted?: string;
     allDecrypted?: boolean;
     incomingAmounts?: string;
+    rewardFilter: string;
     selfAmounts?: string;
     maxTransactionId: number;
     deploymentTransactionId?: string;
@@ -148,6 +150,8 @@ export enum TransactionKindString {
     UpdateBakerKeys = 'updateBakerKeys',
     UpdateCredentialKeys = 'updateCredentialKeys',
     BakingReward = 'bakingReward',
+    BlockReward = 'blockReward',
+    FinalizationReward = 'finalizationReward',
     EncryptedAmountTransfer = 'encryptedAmountTransfer',
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
@@ -427,44 +431,6 @@ export enum OriginType {
     None = 'none',
 }
 
-// Possible Reasons for a transaction to fail on the blockchain.
-// Should be kept in sync with `RejectReason` found in
-// <https://gitlab.com/Concordium/concordium-base/-/blob/master/haskell-src/Concordium/Types/Execution.hs#L653>
-export enum RejectReason {
-    ModuleNotWF = 'Smart contract module failed to typecheck',
-    ModuleHashAlreadyExists = 'A module with this hash already exists',
-    InvalidAccountReference = 'Referenced account does not exists',
-    InvalidModuleReference = 'Referenced module does not exists',
-    InvalidContractAddress = 'No smart contract instance exists with the given contract address ',
-    ReceiverAccountNoCredential = 'The receiving account has no valid credential',
-    ReceiverContractNoCredential = 'The receiving smart contract instance has no valid credential',
-    AmountTooLarge = 'Insufficient funds',
-    SerializationFailure = 'The transaction body was malformed',
-    OutOfEnergy = 'The transaction ran out of energy',
-    Rejected = 'Rejected by contract logic',
-    NonExistentRewardAccount = 'The designated reward account does not exist',
-    InvalidProof = 'Proof that the baker owns relevant private keys is not valid',
-    InvalidInitMethod = 'Invalid Initial method, no such contract found in module ',
-    InvalidReceiveMethod = 'Invalid receive function in module, missing receive function in contract',
-    RuntimeFailure = 'Runtime failure when executing smart contract',
-    DuplicateAggregationKey = 'Duplicate aggregation key',
-    NonExistentAccountKey = 'Encountered index to which no account key belongs when removing or updating keys',
-    KeyIndexAlreadyInUse = 'The requested key index is already in use',
-    InvalidAccountKeySignThreshold = 'The requested sign threshold would exceed the number of keys on the account',
-    InvalidEncryptedAmountTransferProof = 'The shielded amount transfer has an invalid proof',
-    EncryptedAmountSelfTransfer = 'An shielded amount transfer from the account to itself is not allowed',
-    InvalidTransferToPublicProof = 'The shielding has an invalid proof',
-    InvalidIndexOnEncryptedTransfer = 'The provided shielded transfer index is out of bounds',
-    ZeroScheduledAmount = 'Attempt to transfer 0 GTU with schedule',
-    NonIncreasingSchedule = 'Attempt to transfer amount with non-increasing schedule',
-    FirstScheduledReleaseExpired = 'The first scheduled release is in the past',
-    ScheduledSelfTransfer = 'Attempt to transfer from account A to A with schedule',
-    AlreadyABaker = 'Baker with ID  already exists',
-    NotABaker = 'Account is not a baker',
-    InsufficientBalanceForBakerStake = 'Sender account has insufficient balance to cover the requested stake',
-    BakerInCooldown = 'Request to make change to the baker while the baker is in the cooldown period',
-}
-
 /**
  * This Interface models the structure of the transfer transactions stored in the database
  */
@@ -475,7 +441,6 @@ export interface TransferTransaction {
     id?: number; // only remote transactions have ids.
     blockHash: Hex;
     blockTime: string;
-    total: string;
     success?: boolean;
     transactionHash: Hex;
     subtotal?: string;
@@ -486,7 +451,7 @@ export interface TransferTransaction {
     fromAddress: Hex;
     toAddress: Hex;
     status: TransactionStatus;
-    rejectReason?: string;
+    rejectReason?: RejectReason | string;
     fromAddressName?: string;
     toAddressName?: string;
     decryptedAmount?: string;
@@ -608,6 +573,7 @@ export interface SettingGroup {
 export enum SettingTypeEnum {
     Boolean = 'boolean',
     Connection = 'connection',
+    Password = 'password',
 }
 
 // Contains an CredentialDeployment, and all the necessary extra details to complete the deployment
@@ -649,8 +615,13 @@ export interface UpdateHeader {
 }
 
 export interface UpdateInstructionSignature {
-    authorizationKeyIndex: number;
+    authorizationPublicKey: string;
     signature: string;
+}
+
+export interface UpdateInstructionSignatureWithIndex {
+    signature: string;
+    authorizationKeyIndex: number;
 }
 
 export interface UpdateInstruction<
@@ -730,7 +701,6 @@ export enum Level1KeysUpdateTypes {
     Level1KeysLevel1Update,
     Level2KeysLevel1Update,
 }
-
 export function instanceOfAccountTransaction(
     object: Transaction
 ): object is AccountTransaction {
@@ -746,7 +716,7 @@ export function instanceOfUpdateInstruction(
 export function instanceOfUpdateInstructionSignature(
     object: TransactionCredentialSignature | UpdateInstructionSignature
 ): object is UpdateInstructionSignature {
-    return 'signature' in object && 'authorizationKeyIndex' in object;
+    return 'signature' in object && 'authorizationPublicKey' in object;
 }
 
 export function instanceOfAccountTransactionWithSignature(
@@ -1040,7 +1010,7 @@ export interface HigherLevelKeyUpdate {
 
 export interface TransactionDetails {
     events: string[];
-    rejectReason?: string;
+    rawRejectReason: RejectReasonWithContents;
     transferSource?: Hex;
     transferDestination?: Hex;
     type: TransactionKindString;
@@ -1057,6 +1027,9 @@ export interface EncryptedInfo {
     incomingAmounts: EncryptedAmount[];
 }
 
+/**
+ * The transaction format that is returned by the wallet proxy.
+ */
 export interface IncomingTransaction {
     id: number;
     blockHash: Hex;
@@ -1125,7 +1098,7 @@ export interface EncryptionMetaData {
 
 export interface EncryptedData {
     cipherText: string;
-    metaData: EncryptionMetaData;
+    metadata: EncryptionMetaData;
 }
 
 export interface ExportData {
@@ -1136,9 +1109,15 @@ export interface ExportData {
     wallets: WalletEntry[];
 }
 
+interface RejectReasonWithContents {
+    tag: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    contents: any;
+}
+
 interface EventResult {
     outcome: string;
-    rejectReason?: string;
+    rejectReason?: RejectReasonWithContents;
 }
 
 export interface TransactionEvent {
@@ -1252,4 +1231,9 @@ export interface SignedIdRequest {
     idObjectRequest: any;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     randomness: Hex;
+}
+
+export interface CredentialExportFormat {
+    credential: CredentialDeploymentInformation;
+    address: string;
 }

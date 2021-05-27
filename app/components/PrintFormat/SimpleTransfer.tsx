@@ -1,16 +1,17 @@
 import React from 'react';
 import { MultiSignatureTransactionStatus, SimpleTransfer } from '~/utils/types';
 import {
-    timestamp,
+    withHeaderAndFooter,
     table,
     sender,
     recipient,
     totalWithdrawn,
     displayAmount,
     fee,
+    standardPageFooter,
     displayStatus,
-    hash,
-    standardHeader,
+    hashRow,
+    standardTableHeader,
     displayExpiry,
 } from '~/utils/printUtility';
 import withNames from '~/components/Transfers/withNames';
@@ -35,12 +36,11 @@ function PrintFormatSimpleTransfer({
     toName,
 }: Props) {
     const { amount } = transaction.payload;
-    return (
+    const body = (
         <>
             <h1>Transaction - Send GTU</h1>
-            {timestamp()}
             {table(
-                standardHeader,
+                standardTableHeader,
                 <tbody>
                     {sender(transaction.sender, fromName)}
                     {recipient(transaction.payload.toAddress, toName)}
@@ -50,14 +50,21 @@ function PrintFormatSimpleTransfer({
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}
-                    {hash(transaction)}
-                    <tr>
-                        <td>Identicon:</td>
-                    </tr>
+                    {hashRow(transaction)}
+                    {Boolean(image) && (
+                        <tr>
+                            <td>Identicon:</td>
+                        </tr>
+                    )}
                 </tbody>
             )}
-            <img src={image} alt="" />
+            {Boolean(image) && <img src={image} alt="" />}
         </>
+    );
+    return withHeaderAndFooter(
+        body,
+        undefined,
+        standardPageFooter(transaction)
     );
 }
 

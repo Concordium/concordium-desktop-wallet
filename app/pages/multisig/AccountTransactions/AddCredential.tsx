@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Identicon from 'react-identicons';
+import clsx from 'clsx';
 import Card from '~/cross-app-components/Card';
-import { CredentialDeploymentInformation } from '~/utils/types';
+import {
+    CredentialDeploymentInformation,
+    CredentialExportFormat,
+} from '~/utils/types';
 import FileInput from '~/components/Form/FileInput';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import Button from '~/cross-app-components/Button';
@@ -14,6 +18,7 @@ import styles from './UpdateAccountCredentials.module.scss';
 
 interface Props {
     setReady: (ready: boolean) => void;
+    accountAddress?: string;
     credentialIds: [string, CredentialStatus][];
     addCredentialId: (id: [string, CredentialStatus]) => void;
     setNewCredentials: (
@@ -30,6 +35,7 @@ interface Props {
  */
 export default function AddCredential({
     setReady,
+    accountAddress,
     credentialIds,
     addCredentialId,
     setNewCredentials,
@@ -45,34 +51,61 @@ export default function AddCredential({
         setReady(currentCredential === undefined);
     }, [setReady, currentCredential]);
 
+    if (!accountAddress) {
+        throw new Error('Unexpected missing account');
+    }
+
     async function loadCredential(file: FileInputValue) {
         if (file) {
             const rawCredential = Buffer.from(await file[0].arrayBuffer());
 
-            let credential: CredentialDeploymentInformation;
-            // TODO Validate the structure of the file
+            let credentialExport: CredentialExportFormat;
             try {
-                credential = JSON.parse(rawCredential.toString());
+                credentialExport = JSON.parse(rawCredential.toString());
             } catch (e) {
                 setShowError({
                     show: true,
                     header: 'Invalid Credential',
-                    content:
-                        'unable to parse the file contents as a credential',
+                    content: 'Unable to parse the file contents',
                 });
                 return;
             }
             if (
-                credentialIds.find(([credId]) => credId === credential.credId)
+                !(
+                    credentialExport.address &&
+                    credentialExport.credential &&
+                    credentialExport.credential.credId
+                )
+            ) {
+                setShowError({
+                    show: true,
+                    header: 'Invalid Credential',
+                    content:
+                        'The file contents does not have the correct format',
+                });
+                return;
+            }
+            if (accountAddress !== credentialExport.address) {
+                setShowError({
+                    show: true,
+                    header: 'Invalid Credential',
+                    content:
+                        'The imported credential has not been generated for the current account',
+                });
+                return;
+            }
+            if (
+                credentialIds.find(
+                    ([credId]) => credId === credentialExport.credential.credId
+                )
             ) {
                 setShowError({
                     show: true,
                     header: 'Invalid Credential',
                     content: 'No duplicate credentials allowed',
                 });
-                // TODO Add check that the credential belongs to this address.
             } else {
-                setCurrentCredential(credential);
+                setCurrentCredential(credentialExport.credential);
             }
         }
     }
@@ -88,17 +121,19 @@ export default function AddCredential({
         body = (
             <Card className={styles.addingCard}>
                 <div className={styles.addingCardHeader}>
-                    <h2>New Credential:</h2>
+                    <h2 className="mB0">New Credential:</h2>
                     <CloseButton
                         onClick={() => setCurrentCredential(undefined)}
                     />
                 </div>
                 <p>{currentCredential.credId}</p>
                 <h3>Identicon:</h3>
-                <Identicon
-                    size={128}
-                    string={JSON.stringify(currentCredential)}
-                />
+                <div className="mB20">
+                    <Identicon
+                        size={128}
+                        string={JSON.stringify(currentCredential)}
+                    />
+                </div>
                 <Button onClick={() => addCurrentCredential(currentCredential)}>
                     Add Credential to Proposal
                 </Button>
@@ -116,7 +151,7 @@ export default function AddCredential({
         );
     }
     return (
-        <>
+        <div className={clsx(!currentCredential && 'flexColumn flexChildFill')}>
             <SimpleErrorModal
                 show={showError.show}
                 header={showError.header}
@@ -131,6 +166,6 @@ export default function AddCredential({
                 below, or by browsing to the file on your computer.
             </p>
             {body}
-        </>
+        </div>
     );
 }

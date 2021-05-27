@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
@@ -27,6 +27,10 @@ export default function TransferHistory({ account }: Props) {
     const [chosenTransaction, setChosenTransaction] = useState<
         TransferTransaction | undefined
     >(undefined);
+
+    useEffect(() => {
+        setChosenTransaction(undefined);
+    }, [account.address]);
 
     function Header() {
         return (
@@ -62,6 +66,16 @@ export default function TransferHistory({ account }: Props) {
     function ChosenComponent() {
         switch (location) {
             case locations.listTransactions:
+                if (chosenTransaction) {
+                    return (
+                        <TransactionView
+                            transaction={chosenTransaction}
+                            returnFunction={() =>
+                                setChosenTransaction(undefined)
+                            }
+                        />
+                    );
+                }
                 if (!viewingShielded || account.allDecrypted) {
                     return (
                         <Card className="pB0">
@@ -69,26 +83,12 @@ export default function TransferHistory({ account }: Props) {
                             <TransactionList
                                 onTransactionClick={(transaction) => {
                                     setChosenTransaction(transaction);
-                                    setLocation(locations.viewTransaction);
                                 }}
                             />
                         </Card>
                     );
                 }
                 return <DecryptComponent account={account} />;
-
-            case locations.viewTransaction:
-                if (chosenTransaction === undefined) {
-                    return null;
-                }
-                return (
-                    <TransactionView
-                        transaction={chosenTransaction}
-                        returnFunction={() =>
-                            setLocation(locations.listTransactions)
-                        }
-                    />
-                );
             case locations.viewIdentityData:
                 return (
                     <Card className="pB0">

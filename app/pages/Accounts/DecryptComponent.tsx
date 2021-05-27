@@ -14,6 +14,7 @@ import { asyncNoOp } from '~/utils/basicHelpers';
 import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
+import errorMessages from '~/constants/errorMessages.json';
 
 interface Props {
     account: Account;
@@ -33,7 +34,7 @@ export default function DecryptComponent({ account }: Props) {
         setMessage: (message: string) => void
     ) {
         if (!global) {
-            throw new Error('Unexpected missing global object');
+            throw new Error(errorMessages.missingGlobal);
         }
 
         if (account.identityNumber === undefined) {
@@ -72,10 +73,8 @@ export default function DecryptComponent({ account }: Props) {
     return (
         <Ledger ledgerCallback={ledgerCall}>
             {({ isReady, statusView, submitHandler = asyncNoOp }) => (
-                <Card className="flexColumn">
-                    <h3 className="textCenter mB40">
-                        Decrypt shielded balance
-                    </h3>
+                <Card className="flexColumn textCenter">
+                    <h3 className="mB40">Decrypt shielded balance</h3>
                     {statusView}
                     <Button
                         size="big"
