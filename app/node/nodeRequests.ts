@@ -5,7 +5,7 @@ import {
     NodeInfoResponse,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
-import { AccountInfo, Global, Versioned } from './types';
+import { AccountInfo, Global, Versioned } from '../utils/types';
 import grpcMethods from '../constants/grpcMethods.json';
 import ipcCommands from '../constants/ipcCommands.json';
 

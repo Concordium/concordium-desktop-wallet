@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
+import { ipcRenderer } from 'electron';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSettingEntry } from '~/features/SettingsSlice';
-import { loadGlobal, globalSelector } from '~/features/GlobalSlice';
-import { Setting } from '~/utils/types';
-import { getConsensusStatus } from '~/utils/nodeRequests';
-import startClient from '~/utils/nodeConnector';
+import { globalSelector } from '~/features/GlobalSlice';
+import { Global, Setting, Versioned } from '~/utils/types';
+import startClient from '~/node/nodeConnector';
 import Card from '~/cross-app-components/Card';
 import Form from '~/components/Form';
 import styles from './ConnectionSettingElement.module.scss';
 import ConnectionStatusComponent, {
     Status,
 } from '~/components/ConnectionStatusComponent';
+import ipcCommands from '../../constants/ipcCommands.json';
+import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
+import { ConsensusStatus } from '~/node/NodeApiTypes';
+import { getGenesis } from '~/database/GenesisDao';
+import setGenesisAndGlobal from '~/database/DatabaseHelpers';
 
 interface Props {
     displayText: string;
@@ -20,8 +25,36 @@ interface Props {
 const portRangeMax = 65535;
 
 /**
+ * Retrieves the consesus status and global cryptographic parameters from the
+ * node with the given address and port.
+ */
+async function getConsensusAndGlobalFromNode(address: string, port: string) {
+    const result = await ipcRenderer.invoke(
+        ipcCommands.grpcNodeConsensusAndGlobal,
+        address,
+        port
+    );
+    if (!result.successful) {
+        throw new Error(
+            'The node consensus status and cryptographic parameters could not be retrieved'
+        );
+    }
+
+    const consensusStatus: ConsensusStatus = JSON.parse(
+        JsonResponse.deserializeBinary(result.response.consensus).getValue()
+    );
+
+    const nodeVersionedGlobal: Versioned<Global> = JSON.parse(
+        JsonResponse.deserializeBinary(result.response.global).getValue()
+    );
+    const nodeGlobal = nodeVersionedGlobal.value;
+
+    return { consensusStatus, nodeGlobal };
+}
+
+/**
  * A component for connection settings that are updated automatically on changes.
- *  N.B. right now is fixed to node location setting.
+ * N.B. right now is fixed to node location setting.
  */
 export default function ConnectionSetting({ displayText, setting }: Props) {
     const dispatch = useDispatch();
@@ -32,12 +65,10 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
     const [connected, setConnected] = useState<boolean>();
     const [hasBeenTested, setHasBeenTested] = useState<boolean>(false);
     const [testingConnection, setTestingConnection] = useState<boolean>(false);
+    const [failedMessage, setFailedMessage] = useState<string>();
 
-    // Ideally this should have a debounce, so that we wait a little before actually
-    // storing to the database. As we are uncertain if there will be a submit button
-    // or not, we will keep it as is for now.
-    function updateValues(newAddress: string, newPort: string) {
-        startClient(dispatch, newAddress, newPort); // TODO: generalize
+    async function updateValues(newAddress: string, newPort: string) {
+        startClient(dispatch, newAddress, newPort);
         updateSettingEntry(dispatch, {
             ...setting,
             value: JSON.stringify({
@@ -47,14 +78,33 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
         });
     }
 
-    async function testConnection() {
+    async function setConnection() {
         setTestingConnection(true);
         try {
-            const consensusStatus = await getConsensusStatus();
-            if (!global) {
-                const blockHash = consensusStatus.lastFinalizedBlock;
-                await loadGlobal(dispatch, blockHash);
+            const {
+                consensusStatus,
+                nodeGlobal,
+            } = await getConsensusAndGlobalFromNode(address, port);
+            const genesis = await getGenesis();
+            if (genesis) {
+                if (consensusStatus.genesisBlock !== genesis.genesisBlock) {
+                    setFailedMessage(
+                        'Connecting to a node running on a separate blockchain is not allowed'
+                    );
+                    setConnected(false);
+                    setHasBeenTested(true);
+                    setTestingConnection(false);
+                    return;
+                }
             }
+
+            if (!global && !genesis) {
+                await setGenesisAndGlobal(
+                    consensusStatus.genesisBlock,
+                    nodeGlobal
+                );
+            }
+            await updateValues(address, port);
             setConnected(true);
         } catch (e) {
             setConnected(false);
@@ -78,7 +128,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
             <Form
                 onSubmit={() => {
                     if (!testingConnection) {
-                        testConnection();
+                        setConnection();
                     }
                 }}
             >
@@ -91,7 +141,6 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
                     onChange={(event) => {
                         const newAddress = event.target.value;
                         setAddress(newAddress);
-                        updateValues(newAddress, port);
                     }}
                 />
                 <Form.Input
@@ -103,7 +152,6 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
                     onChange={(event) => {
                         const newPort = event.target.value;
                         setPort(newPort);
-                        updateValues(address, newPort);
                     }}
                     rules={{
                         min: 1,
@@ -111,10 +159,13 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
                     }}
                 />
                 <div className={styles.status}>
-                    <ConnectionStatusComponent status={status} />
+                    <ConnectionStatusComponent
+                        status={status}
+                        failedMessage={failedMessage}
+                    />
                 </div>
                 <Form.Submit className={styles.submit}>
-                    Test connection
+                    Set connection
                 </Form.Submit>
             </Form>
         </Card>

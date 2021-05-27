@@ -7,7 +7,7 @@ import UpdateMintDistribution, {
 } from '~/pages/multisig/updates/MintDistribution/UpdateMintDistribution';
 import { parseMintPerSlot } from '../mintDistributionHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isMintDistribution,

@@ -37,7 +37,7 @@ import {
 import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
 
-import { getAccountInfos, getAccountInfoOfAddress } from '../utils/nodeHelpers';
+import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 
 interface AccountState {
     accounts: Account[];

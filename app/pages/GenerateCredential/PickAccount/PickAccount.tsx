@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { Controller, useController, useFormContext } from 'react-hook-form';
 import { Account, AccountInfo, AccountStatus } from '~/utils/types';
 import AccountCard from '~/components/AccountCard';
-import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
+import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import Button from '~/cross-app-components/Button';
 import routes from '~/constants/routes.json';
 import ConnectionStatusComponent, {

@@ -1,6 +1,6 @@
 import React from 'react';
 import Loading from '~/cross-app-components/Loading';
-import { BlockSummary } from '~/utils/NodeApiTypes';
+import { BlockSummary } from '~/node/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
 import { RelativeRateField } from '../../common/RelativeRateField';
 import { fromExchangeRate } from '../../common/RelativeRateField/util';
