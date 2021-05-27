@@ -156,6 +156,7 @@ function ConfirmAndExport({
                 identityId: credentialNumberIdentityId.identityId,
                 maxTransactionId: 0,
                 isInitial: false,
+                rewardFilter: '[]',
             };
 
             importAccount(account);

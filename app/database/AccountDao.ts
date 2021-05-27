@@ -101,15 +101,6 @@ export async function removeInitialAccount(identityId: number) {
         .del();
 }
 
-export async function updateSignatureThreshold(
-    address: string,
-    signatureThreshold: number
-) {
-    return (await knex())(accountsTable)
-        .where({ address })
-        .update({ signatureThreshold });
-}
-
 export async function confirmInitialAccount(
     identityId: number,
     updatedValues: Partial<Account>

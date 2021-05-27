@@ -201,6 +201,7 @@ export default function AccountCreationGenerate({
                                 identityId: -1,
                                 maxTransactionId: -1,
                                 identityName: identity.name,
+                                rewardFilter: '[]',
                             }}
                             preview
                         />
