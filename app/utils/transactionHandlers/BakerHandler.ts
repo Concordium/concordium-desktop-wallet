@@ -2,31 +2,27 @@ import AccountTransactionDetails from '~/components/Transfers/AccountTransaction
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
 import { AccountTransactionHandler } from '~/utils/transactionTypes';
-import {
-    AccountTransaction,
-    TransactionPayload,
-    UpdateBakerRestakeEarnings,
-    instanceOfUpdateBakerRestakeEarnings,
-} from '../types';
+import { AccountTransaction, TransactionPayload } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
 
-type TransactionType = UpdateBakerRestakeEarnings;
+export default class BakerHandler<
+    A extends AccountTransaction<TransactionPayload>
+> implements AccountTransactionHandler<A, ConcordiumLedgerClient> {
+    constructor(
+        public type: string,
+        private instanceOf: (
+            obj: AccountTransaction<TransactionPayload>
+        ) => obj is A
+    ) {}
 
-const TYPE = 'Update Baker Restake Earnings';
-
-export default class UpdateBakerRestakeEarningsHandler
-    implements
-        AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: AccountTransaction<TransactionPayload>
-    ): TransactionType {
-        if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
+    confirmType(transaction: AccountTransaction<TransactionPayload>) {
+        if (this.instanceOf(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
     }
 
-    serializePayload(transaction: TransactionType) {
+    serializePayload(transaction: A) {
         return serializeTransferPayload(
             transaction.transactionKind,
             transaction.payload
@@ -38,24 +34,22 @@ export default class UpdateBakerRestakeEarningsHandler
     }
 
     async signTransaction(
-        transaction: TransactionType,
+        transaction: A,
         ledger: ConcordiumLedgerClient,
         path: AccountPathInput
     ) {
         return ledger.signTransfer(transaction, getAccountPath(path));
     }
 
-    view(transaction: TransactionType) {
+    view(transaction: A) {
         return AccountTransactionDetails({ transaction });
     }
 
-    createTransaction(): Promise<UpdateBakerRestakeEarnings> {
+    createTransaction(): Promise<A> {
         throw new Error('Unimplemented');
     }
 
     print = () => undefined;
 
-    title = `Account Transaction | ${TYPE}`;
-
-    type = TYPE;
+    title = `Account Transaction | ${this.type}`;
 }
