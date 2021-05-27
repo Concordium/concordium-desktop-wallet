@@ -28,7 +28,7 @@ import {
 import SignTransaction from './SignTransaction';
 import PickAmount from './PickAmount';
 import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';
-import { toGTUString, toMicroUnits } from '~/utils/gtu';
+import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 
 enum SubRoutes {
     accounts,
@@ -215,7 +215,7 @@ function PickNewStake({ account, setNewStake }: PickNewStakeProps) {
 
     useEffect(() => {
         // Hack to set the initial value to the staked amount
-        setStake((s) => (s === '0.00' ? toGTUString(stakedAlready) : s));
+        setStake((s) => (s === '0.00' ? microGtuToGtu(stakedAlready) : s));
     }, [stakedAlready]);
 
     const onNewAmount = (ready: boolean) =>
@@ -225,7 +225,7 @@ function PickNewStake({ account, setNewStake }: PickNewStakeProps) {
         <PickAmount
             setReady={onNewAmount}
             account={account}
-            amount={stake ?? toGTUString(stakedAlready) ?? '0'}
+            amount={stake ?? microGtuToGtu(stakedAlready) ?? '0'}
             setAmount={setStake}
             validateAmount={(...args) =>
                 validateBakerStake(minimumThresholdForBaking, ...args)

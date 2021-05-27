@@ -13,7 +13,7 @@ import {
     useLastFinalizedBlockSummary,
     useStakedAmount,
 } from '~/utils/hooks';
-import { displayAsGTU, toGTUString } from '~/utils/gtu';
+import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
 import { epochDate, getEpochIndexAt } from '~/utils/basicHelpers';
 
 interface Props {
@@ -33,7 +33,10 @@ export default function UpdateBakerStakeProposalDetails({
         <Details>
             <PlainDetail title="Identity" value={identity?.name} />
             <AccountDetail title="Account" value={account} />
-            <AmountDetail title="Amount to stake" value={toGTUString(stake)} />
+            <AmountDetail
+                title="Amount to stake"
+                value={microGtuToGtu(stake)}
+            />
             {account !== undefined && stake !== undefined ? (
                 <StakedAmountNote
                     accountAddress={account.address}

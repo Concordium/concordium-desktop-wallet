@@ -17,7 +17,10 @@ import PickAccount from './PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
-import { signUsingLedger } from './SignTransaction';
+import {
+    createMultisignatureTransaction,
+    signUsingLedger,
+} from './SignTransaction';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
@@ -141,7 +144,7 @@ function BuildAddBakerTransactionProposalStep({
             );
     };
 
-    const signingFunction = async (ledger: ConcordiumLedgerClient) => {
+    const signingFunction = async (ledger?: ConcordiumLedgerClient) => {
         if (!account) {
             throw new Error('unexpected missing account');
         }
@@ -152,7 +155,15 @@ function BuildAddBakerTransactionProposalStep({
             throw new Error('unexpected missing bakerKeys');
         }
 
-        const proposal = await signUsingLedger(ledger, transaction, account);
+        let signatures = {};
+        if (ledger) {
+            signatures = await signUsingLedger(ledger, transaction, account);
+        }
+        const proposal = await createMultisignatureTransaction(
+            transaction,
+            signatures,
+            account.signatureThreshold
+        );
         if (proposal.id === undefined) {
             throw new Error('unexpected undefined proposal id');
         }
@@ -283,6 +294,7 @@ function BuildAddBakerTransactionProposalStep({
                         <Columns.Column header="Signature and Hardware Wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}
+                                onSkip={() => signingFunction()}
                             />
                         </Columns.Column>
                     </Route>
