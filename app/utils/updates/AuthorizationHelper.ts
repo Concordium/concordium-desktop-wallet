@@ -11,7 +11,7 @@ import {
     Key,
     Keys,
     KeysWithThreshold,
-} from '../NodeApiTypes';
+} from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isUpdateUsingLevel1Keys,

@@ -1,5 +1,8 @@
 import { findEntries } from '../database/AddressBookDao';
-import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
+import {
+    getNextAccountNonce,
+    getTransactionStatus,
+} from '../node/nodeRequests';
 import { getDefaultExpiry, getNow } from './timeHelpers';
 import {
     TransactionKindId,

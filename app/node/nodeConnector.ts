@@ -1,7 +1,7 @@
 import { loadGlobal } from '../features/GlobalSlice';
-import listenForAccountStatus from './AccountStatusPoller';
-import listenForTransactionStatus from './TransactionStatusPoller';
-import { Dispatch } from './types';
+import listenForAccountStatus from '../utils/AccountStatusPoller';
+import listenForTransactionStatus from '../utils/TransactionStatusPoller';
+import { Dispatch } from '../utils/types';
 import { setClientLocation } from './nodeRequests';
 
 export default async function startClient(

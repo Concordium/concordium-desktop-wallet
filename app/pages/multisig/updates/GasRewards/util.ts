@@ -1,4 +1,4 @@
-import { BlockSummary } from '~/utils/NodeApiTypes';
+import { BlockSummary } from '~/node/NodeApiTypes';
 import { GasRewards } from '~/utils/types';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 

@@ -4,7 +4,7 @@ import {
     Authorizations,
     BlockSummary,
     ConsensusStatus,
-} from './NodeApiTypes';
+} from '../node/NodeApiTypes';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
