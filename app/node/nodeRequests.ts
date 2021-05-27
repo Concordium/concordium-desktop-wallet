@@ -38,7 +38,7 @@ async function sendPromise(
     if (result.successful) {
         return result.response;
     }
-    throw new Error(result.error);
+    throw result.error;
 }
 
 /**
