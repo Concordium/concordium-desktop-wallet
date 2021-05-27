@@ -6,7 +6,7 @@ import UpdateFoundationAccount, {
     UpdateFoundationAccountFields,
 } from '~/pages/multisig/updates/FoundationAccount/UpdateFoundationAccount';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     FoundationAccount,

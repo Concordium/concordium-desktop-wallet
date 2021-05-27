@@ -5,7 +5,7 @@ import {
     TransactionKindId,
     UpdateAccountCredentialsPayload,
 } from './types';
-import { getEnergyToMicroGtuRate } from './nodeHelpers';
+import { getEnergyToMicroGtuRate } from '../node/nodeHelpers';
 import { serializeTransferPayload } from './transactionSerialization';
 
 /**

@@ -6,7 +6,7 @@ import UpdateGasRewards, {
     UpdateGasRewardsFields,
 } from '~/pages/multisig/updates/GasRewards/UpdateGasRewards';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     GasRewards,
