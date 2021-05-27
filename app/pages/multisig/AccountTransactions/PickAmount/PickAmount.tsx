@@ -8,7 +8,7 @@ import { getGTUSymbol } from '~/utils/gtu';
 import InlineNumber from '~/components/Form/InlineNumber';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import styles from './PickAmount.module.scss';
-import { useAccountInfo } from '~/utils/hooks';
+import { useAccountInfo } from '~/utils/dataHooks';
 
 interface Props {
     setReady: (ready: boolean) => void;

@@ -28,6 +28,11 @@ module.exports = {
       ...assetsConfig.module.rules
     ];
 
+    config.optimization = {
+      ...config.optimization,
+      usedExports: true,
+    };
+
     return config;
   },
 }
