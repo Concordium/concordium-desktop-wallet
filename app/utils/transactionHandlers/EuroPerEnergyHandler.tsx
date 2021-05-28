@@ -7,7 +7,7 @@ import UpdateEuroPerEnergy, {
 } from '~/pages/multisig/updates/EuroPerEnergy/UpdateEuroPerEnergy';
 import { getReducedExchangeRate } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isExchangeRate,
@@ -38,7 +38,8 @@ export default class EuroPerEnergyHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { euroPerEnergyRate }: UpdateEuroPerEnergyFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -60,7 +61,8 @@ export default class EuroPerEnergyHandler
             UpdateType.UpdateEuroPerEnergy,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

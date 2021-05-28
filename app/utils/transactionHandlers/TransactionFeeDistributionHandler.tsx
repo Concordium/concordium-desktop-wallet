@@ -7,7 +7,7 @@ import UpdateTransactionFeeDistribution, {
     UpdateTransactionFeeDistributionFields,
 } from '../../pages/multisig/updates/TransactionFee/UpdateTransactionFeeDistribution';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isTransactionFeeDistribution,
@@ -38,7 +38,8 @@ export default class TransactionFeeDistributionHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { rewardDistribution }: UpdateTransactionFeeDistributionFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -61,7 +62,8 @@ export default class TransactionFeeDistributionHandler
             UpdateType.UpdateTransactionFeeDistribution,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

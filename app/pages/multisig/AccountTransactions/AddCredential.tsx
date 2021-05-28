@@ -20,7 +20,6 @@ import SimpleErrorModal, {
 import styles from './UpdateAccountCredentials.module.scss';
 
 interface Props {
-    setReady: (ready: boolean) => void;
     accountAddress?: string;
     credentialIds: [string, CredentialStatus][];
     addCredentialId: (id: [string, CredentialStatus]) => void;
@@ -37,7 +36,6 @@ interface Props {
  * TODO: Add a checkbox, which must be checked before the user can add the credential.
  */
 export default function AddCredential({
-    setReady,
     accountAddress,
     credentialIds,
     addCredentialId,
@@ -50,10 +48,6 @@ export default function AddCredential({
     const [currentCredential, setCurrentCredential] = useState<
         CredentialDeploymentInformation | undefined
     >();
-
-    useEffect(() => {
-        setReady(currentCredential === undefined);
-    }, [setReady, currentCredential]);
 
     useEffect(() => {
         if (showError) {

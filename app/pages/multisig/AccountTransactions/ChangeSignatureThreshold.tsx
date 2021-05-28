@@ -1,16 +1,15 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import InlineNumber from '~/components/Form/InlineNumber';
 import styles from './UpdateAccountCredentials.module.scss';
 
 interface Props {
-    setReady: (ready: boolean) => void;
     currentThreshold: number;
-    newCredentialAmount: number;
+    // newCredentialAmount: number;
     newThreshold: number | undefined;
     setNewThreshold: (threshold: number | undefined) => void;
 }
 
-function validateThreshold(threshold: number, max: number) {
+export function validateThreshold(threshold: number, max: number) {
     if (!threshold) {
         return false;
     }
@@ -24,20 +23,11 @@ function validateThreshold(threshold: number, max: number) {
  * Allows the user to change the signature threshold.
  */
 export default function ChangeThreshold({
-    setReady,
     currentThreshold,
-    newCredentialAmount,
+    // newCredentialAmount,
     newThreshold,
     setNewThreshold,
 }: Props): JSX.Element {
-    useEffect(() => {
-        setReady(
-            newThreshold
-                ? validateThreshold(newThreshold, newCredentialAmount)
-                : false
-        );
-    }, [setReady, newThreshold, newCredentialAmount]);
-
     return (
         <div>
             <h3 className={styles.bold}>
@@ -61,14 +51,7 @@ export default function ChangeThreshold({
                     if (v) {
                         proposedThreshold = parseInt(v, 10);
                         setNewThreshold(proposedThreshold);
-                        setReady(
-                            validateThreshold(
-                                proposedThreshold,
-                                newCredentialAmount
-                            )
-                        );
                     } else {
-                        setReady(false);
                         setNewThreshold(undefined);
                     }
                 }}

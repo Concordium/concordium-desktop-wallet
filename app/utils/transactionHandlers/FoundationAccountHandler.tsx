@@ -6,7 +6,7 @@ import UpdateFoundationAccount, {
     UpdateFoundationAccountFields,
 } from '~/pages/multisig/updates/FoundationAccount/UpdateFoundationAccount';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     FoundationAccount,
@@ -37,7 +37,8 @@ export default class FoundationAccountHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { foundationAccount }: UpdateFoundationAccountFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -55,7 +56,8 @@ export default class FoundationAccountHandler
             UpdateType.UpdateFoundationAccount,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 
