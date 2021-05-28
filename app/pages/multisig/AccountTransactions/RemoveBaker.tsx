@@ -75,7 +75,6 @@ export default function RemoveBakerPage() {
                             <div className={styles.descriptionStep}>
                                 <div className={styles.flex1}>
                                     <PickIdentity
-                                        setReady={() => {}}
                                         setIdentity={setIdentity}
                                         chosenIdentity={identity}
                                     />
@@ -98,7 +97,6 @@ export default function RemoveBakerPage() {
                             <div className={styles.descriptionStep}>
                                 <div className={styles.flex1}>
                                     <PickAccount
-                                        setReady={() => {}}
                                         identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}

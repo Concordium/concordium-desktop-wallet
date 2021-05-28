@@ -5,7 +5,7 @@ import UpdateProtocol, {
     UpdateProtocolFields,
 } from '~/pages/multisig/updates/Protocol/UpdateProtocol';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isProtocolUpdate,
@@ -36,7 +36,8 @@ export default class ProtocolUpdateHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { specificationAuxiliaryData: files, ...fields }: UpdateProtocolFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -64,7 +65,8 @@ export default class ProtocolUpdateHandler
             UpdateType.UpdateProtocol,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

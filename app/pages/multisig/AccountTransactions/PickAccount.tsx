@@ -12,7 +12,6 @@ import CardList from '~/cross-app-components/CardList';
 interface Props {
     chosenAccount?: Account;
     identity: Identity | undefined;
-    setReady: (ready: boolean) => void;
     setAccount: (account: Account) => void;
     filter?: (account: Account, info?: AccountInfo) => boolean;
 }
@@ -21,7 +20,6 @@ interface Props {
  * Allows the user to pick an account of the given identity.
  */
 export default function PickAccount({
-    setReady,
     chosenAccount,
     setAccount,
     identity,
@@ -40,7 +38,6 @@ export default function PickAccount({
 
     useEffect(() => {
         if (chosenAccount) {
-            setReady(true);
             setChosenIndex(
                 accounts.findIndex(
                     (acc) => acc.address === chosenAccount.address
@@ -68,7 +65,6 @@ export default function PickAccount({
                         account={account}
                         accountInfo={accountsInfo[account.address]}
                         onClick={() => {
-                            setReady(true);
                             setChosenIndex(index);
                             setAccount(account);
                         }}

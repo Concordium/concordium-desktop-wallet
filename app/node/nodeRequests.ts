@@ -5,7 +5,7 @@ import {
     NodeInfoResponse,
 } from '../proto/concordium_p2p_rpc_pb';
 import { BlockSummary, ConsensusStatus, AccountNonce } from './NodeApiTypes';
-import { AccountInfo, Global, Versioned } from './types';
+import { AccountInfo, Global, Versioned } from '../utils/types';
 import grpcMethods from '../constants/grpcMethods.json';
 import ipcCommands from '../constants/ipcCommands.json';
 
@@ -38,7 +38,7 @@ async function sendPromise(
     if (result.successful) {
         return result.response;
     }
-    throw new Error(result.error);
+    throw result.error;
 }
 
 /**
@@ -84,17 +84,6 @@ export function getNextAccountNonce(address: string): Promise<AccountNonce> {
  */
 export function getConsensusStatus(): Promise<ConsensusStatus> {
     return sendPromiseParseResult(grpcMethods.getConsensusStatus);
-}
-
-/**
- * Retrieves the BirkParameters at the time of the blockhash from the node.
- */
-export function getBirkParameters(
-    blockHashValue: string
-): Promise<ConsensusStatus> {
-    return sendPromiseParseResult(grpcMethods.getBirkParameters, {
-        blockHashValue,
-    });
 }
 
 /**

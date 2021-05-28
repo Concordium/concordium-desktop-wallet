@@ -9,6 +9,7 @@ import {
     PlainDetail,
 } from './shared';
 import PublicKey from '../../common/PublicKey/PublicKey';
+import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 interface Props {
     account?: Account;
@@ -16,6 +17,7 @@ interface Props {
     stake?: string;
     estimatedFee?: Fraction;
     restakeEarnings?: boolean;
+    expiryTime?: Date;
     bakerVerifyKeys?: BakerVerifyKeys;
 }
 
@@ -25,6 +27,7 @@ export default function AddBakerProposalDetails({
     stake,
     estimatedFee,
     restakeEarnings,
+    expiryTime,
     bakerVerifyKeys,
 }: Props) {
     return (
@@ -34,6 +37,7 @@ export default function AddBakerProposalDetails({
             <AmountDetail title="Amount to stake" value={stake} />
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <EnabledDetail title="Restake earnings" value={restakeEarnings} />
+            <DisplayTransactionExpiryTime expiryTime={expiryTime} />
             <PlainDetail
                 title="Public keys"
                 value={bakerVerifyKeys}

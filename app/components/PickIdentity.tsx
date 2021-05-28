@@ -7,11 +7,9 @@ import {
 } from '~/features/IdentitySlice';
 import IdentityCard from '~/components/IdentityCard';
 import CardList from '~/cross-app-components/CardList';
-import { noOp } from '~/utils/basicHelpers';
 
 interface Props extends ClassName {
     chosenIdentity?: Identity;
-    setReady?(ready: boolean): void;
     setIdentity(identity: Identity): void;
     withGenesisIdentities?: boolean;
 }
@@ -21,7 +19,6 @@ interface Props extends ClassName {
  */
 export default function PickIdentity({
     chosenIdentity,
-    setReady = noOp,
     setIdentity,
     className,
     withGenesisIdentities = true,
@@ -35,7 +32,6 @@ export default function PickIdentity({
 
     useEffect(() => {
         if (chosenIdentity) {
-            setReady(true);
             setChosenIndex(
                 identities.findIndex(
                     (identity) => identity.id === chosenIdentity.id
@@ -53,7 +49,6 @@ export default function PickIdentity({
                     key={identity.id}
                     active={chosenIndex === index}
                     onClick={() => {
-                        setReady(true);
                         setChosenIndex(index);
                         setIdentity(identity);
                     }}

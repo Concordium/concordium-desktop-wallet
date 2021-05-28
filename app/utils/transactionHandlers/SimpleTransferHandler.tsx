@@ -44,6 +44,8 @@ export default class SimpleTransferHandler
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
                 default:
                     throw new Error('unknown location');
@@ -60,6 +62,7 @@ export default class SimpleTransferHandler
         amount,
         recipient,
         signatureAmount,
+        expiryTime,
     }: Partial<CreateTransactionInput>) {
         if (!sender || !recipient || amount === undefined) {
             throw new Error(
@@ -70,7 +73,8 @@ export default class SimpleTransferHandler
             sender,
             amount,
             recipient,
-            signatureAmount
+            signatureAmount,
+            expiryTime
         );
     }
 

@@ -11,9 +11,9 @@ export default function createUpdateInstruction<
     updatePayload: T,
     updateType: UpdateType,
     sequenceNumber: bigint,
-    effectiveTime: bigint
+    effectiveTime: bigint,
+    expiry: bigint
 ) {
-    const expiry = effectiveTime - 1n;
     const updateHeader: UpdateHeader = {
         effectiveTime,
         sequenceNumber,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { push } from 'connected-react-router';
@@ -104,7 +104,6 @@ export default function UpdateBakerStakePage() {
                             <div className={styles.descriptionStep}>
                                 <div className={styles.flex1}>
                                     <PickIdentity
-                                        setReady={() => {}}
                                         setIdentity={setIdentity}
                                         chosenIdentity={identity}
                                     />
@@ -127,7 +126,6 @@ export default function UpdateBakerStakePage() {
                             <div className={styles.descriptionStep}>
                                 <div className={styles.flex1}>
                                     <PickAccount
-                                        setReady={() => {}}
                                         identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
@@ -205,22 +203,11 @@ function PickNewStake({ account, setNewStake }: PickNewStakeProps) {
             ? BigInt(chainParameters.minimumThresholdForBaking)
             : undefined;
 
-    const [stake, setStake] = useState<string>();
-
-    useEffect(() => {
-        // Hack to set the initial value to the staked amount
-        setStake((s) => (s === '0.00' ? microGtuToGtu(stakedAlready) : s));
-    }, [stakedAlready]);
-
-    const onNewAmount = (ready: boolean) =>
-        setNewStake(ready ? stake : undefined);
-
     return (
         <PickAmount
-            setReady={onNewAmount}
             account={account}
-            amount={stake ?? microGtuToGtu(stakedAlready) ?? '0'}
-            setAmount={setStake}
+            amount={microGtuToGtu(stakedAlready)}
+            setAmount={setNewStake}
             validateAmount={(...args) =>
                 validateBakerStake(minimumThresholdForBaking, ...args)
             }

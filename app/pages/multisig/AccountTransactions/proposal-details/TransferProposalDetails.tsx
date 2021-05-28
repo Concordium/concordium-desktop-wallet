@@ -10,6 +10,7 @@ import {
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ScheduleList from '~/components/ScheduleList';
 import { AccountDetail, AmountDetail, Details, PlainDetail } from './shared';
+import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 interface Props {
     transactionType:
@@ -21,6 +22,7 @@ interface Props {
     recipient?: AddressBookEntry;
     schedule?: Schedule;
     estimatedFee?: Fraction;
+    expiryTime?: Date;
 }
 
 export default function TransferProposalDetails({
@@ -31,6 +33,7 @@ export default function TransferProposalDetails({
     schedule,
     transactionType,
     estimatedFee,
+    expiryTime,
 }: Props) {
     const isScheduledTransfer =
         transactionType === TransactionKindId.Transfer_with_schedule;
@@ -49,6 +52,7 @@ export default function TransferProposalDetails({
                     format={(s) => <ScheduleList schedule={s} />}
                 />
             ) : null}
+            <DisplayTransactionExpiryTime expiryTime={expiryTime} />
             <br />
         </Details>
     );

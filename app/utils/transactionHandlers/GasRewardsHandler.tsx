@@ -6,7 +6,7 @@ import UpdateGasRewards, {
     UpdateGasRewardsFields,
 } from '~/pages/multisig/updates/GasRewards/UpdateGasRewards';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     GasRewards,
@@ -37,7 +37,8 @@ export default class GasRewardsHandler
     async createTransaction(
         blockSummary: BlockSummary,
         gasRewards: UpdateGasRewardsFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -54,7 +55,8 @@ export default class GasRewardsHandler
             UpdateType.UpdateGASRewards,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

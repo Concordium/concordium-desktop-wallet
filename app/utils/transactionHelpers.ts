@@ -1,6 +1,5 @@
 import { findEntries } from '../database/AddressBookDao';
-import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
-import { getDefaultExpiry, getNow } from './timeHelpers';
+import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -35,6 +34,10 @@ import {
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
+import {
+    getNextAccountNonce,
+    getTransactionStatus,
+} from '../node/nodeRequests';
 
 export async function lookupAddressBookEntry(
     address: string
@@ -82,7 +85,7 @@ export async function attachNames(
 
 interface CreateAccountTransactionInput<T> {
     fromAddress: string;
-    expiry: bigint;
+    expiry: Date;
     transactionKind: TransactionKindId;
     payload: T;
     estimatedEnergyAmount?: bigint;
@@ -110,7 +113,7 @@ async function createAccountTransaction<T extends TransactionPayload>({
     const transaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
-        expiry,
+        expiry: BigInt(secondsSinceUnixEpoch(expiry)),
         energyAmount: '',
         transactionKind,
         payload,
@@ -135,7 +138,7 @@ export function createSimpleTransferTransaction(
     amount: BigInt,
     toAddress: string,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): Promise<SimpleTransfer> {
     const payload = {
         toAddress,
@@ -153,7 +156,7 @@ export function createSimpleTransferTransaction(
 export function createShieldAmountTransaction(
     fromAddress: string,
     amount: bigint,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): Promise<TransferToEncrypted> {
     const payload = {
         amount: amount.toString(),
@@ -169,7 +172,7 @@ export function createShieldAmountTransaction(
 export async function createUnshieldAmountTransaction(
     fromAddress: string,
     amount: BigInt,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ) {
     const payload = {
         transferAmount: amount.toString(),
@@ -252,7 +255,7 @@ export async function createScheduledTransferTransaction(
     toAddress: string,
     schedule: Schedule,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ) {
     const payload = {
         toAddress,
@@ -278,7 +281,7 @@ export async function createUpdateCredentialsTransaction(
     threshold: number,
     currentCredentialAmount: number,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ) {
     const payload = {
         addedCredentials,
@@ -303,7 +306,7 @@ export function createAddBakerTransaction(
     fromAddress: string,
     payload: AddBakerPayload,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): Promise<AddBaker> {
     return createAccountTransaction({
         fromAddress,
@@ -318,7 +321,7 @@ export function createUpdateBakerKeysTransaction(
     fromAddress: string,
     payload: UpdateBakerKeysPayload,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): Promise<UpdateBakerKeys> {
     return createAccountTransaction({
         fromAddress,
@@ -332,7 +335,7 @@ export function createUpdateBakerKeysTransaction(
 export function createRemoveBakerTransaction(
     fromAddress: string,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): Promise<RemoveBaker> {
     return createAccountTransaction({
         fromAddress,
@@ -347,7 +350,7 @@ export function createUpdateBakerStakeTransaction(
     fromAddress: string,
     payload: UpdateBakerStakePayload,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): Promise<RemoveBaker> {
     return createAccountTransaction({
         fromAddress,
@@ -362,7 +365,7 @@ export function createUpdateBakerRestakeEarningsTransaction(
     fromAddress: string,
     payload: UpdateBakerRestakeEarningsPayload,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): Promise<RemoveBaker> {
     return createAccountTransaction({
         fromAddress,
@@ -458,11 +461,8 @@ export function buildTransactionAccountSignature(
     return transactionAccountSignature;
 }
 
-export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
-    return outcomes.reduce(
-        (accu, event) => accu && event.result.outcome === 'success',
-        true
-    );
+export function isSuccessfulTransaction(event: TransactionEvent) {
+    return event.result.outcome === 'success';
 }
 
 export const isExpired = (transaction: Transaction) =>

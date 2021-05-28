@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import clsx from 'clsx';
 import AccountCard from '~/components/AccountCard';
 import { Account, AccountInfo, Fraction } from '~/utils/types';
@@ -11,11 +11,10 @@ import styles from './PickAmount.module.scss';
 import { useAccountInfo } from '~/utils/hooks';
 
 interface Props {
-    setReady: (ready: boolean) => void;
     account: Account | undefined;
     estimatedFee?: Fraction;
-    amount: string;
-    setAmount: (amount: string) => void;
+    amount: string | undefined;
+    setAmount: (amount: string | undefined) => void;
     validateAmount?: (
         amountToValidate: string,
         accountInfo: AccountInfo | undefined,
@@ -32,25 +31,29 @@ export default function PickAmount({
     setAmount,
     amount,
     estimatedFee,
-    setReady,
     validateAmount = validateTransferAmount,
 }: Props): JSX.Element {
     if (!account) {
         throw new Error('Unexpected missing account');
     }
 
-    const [error, setError] = useState<string>();
     const accountInfo = useAccountInfo(account.address);
+    const [error, setError] = useState<string>();
+    const [state, setState] = useState<string | undefined>(amount);
 
-    useEffect(() => {
-        const validation = validateAmount(
-            amount,
-            accountInfo,
-            estimatedFee && collapseFraction(estimatedFee)
-        );
-        setError(validation);
-        setReady(!validation);
-    }, [amount, setReady, accountInfo, estimatedFee, validateAmount]);
+    const onChange = useCallback(
+        (newState: string) => {
+            setState(newState);
+            const validation = validateAmount(
+                newState,
+                accountInfo,
+                estimatedFee && collapseFraction(estimatedFee)
+            );
+            setError(validation);
+            setAmount(validation === undefined ? newState : undefined);
+        },
+        [accountInfo, estimatedFee, setAmount, validateAmount]
+    );
 
     return (
         <div className="flexColumn">
@@ -59,8 +62,8 @@ export default function PickAmount({
             <div className={clsx(styles.inputWrapper)}>
                 {getGTUSymbol()}{' '}
                 <InlineNumber
-                    value={amount}
-                    onChange={setAmount}
+                    value={state}
+                    onChange={onChange}
                     allowFractions
                     ensureDigits={2}
                     isInvalid={Boolean(error)}

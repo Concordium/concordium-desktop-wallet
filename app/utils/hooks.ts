@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
-import { BlockSummary, ConsensusStatus } from './NodeApiTypes';
+import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import {
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
-} from './nodeHelpers';
+} from '../node/nodeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
 import { lookupName } from './transactionHelpers';
 import { AccountInfo, Amount, Fraction, TransactionKindId } from './types';

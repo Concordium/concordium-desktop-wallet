@@ -11,7 +11,7 @@ import {
 } from './UpdateSerialization';
 import { getAccountTransactionHash } from './transactionSerialization';
 import { hashSha256 } from './serializationHelpers';
-import { getBlockSummary, getConsensusStatus } from '~/utils/nodeRequests';
+import { getBlockSummary, getConsensusStatus } from '~/node/nodeRequests';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
 
 /**

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router';
 import { push } from 'connected-react-router';
@@ -42,6 +42,8 @@ import {
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
+import { getDefaultExpiry, isFutureDate } from '~/utils/timeHelpers';
+import InputTimestamp from '~/components/Form/InputTimestamp';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
@@ -102,6 +104,7 @@ enum BuildSubRoutes {
     accounts = 'accounts',
     stake = 'stake',
     keys = 'keys',
+    expiry = 'expiry',
     sign = 'sign',
 }
 
@@ -112,7 +115,7 @@ function BuildAddBakerTransactionProposalStep({
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account>();
-    const [stake, setStake] = useState<string>('0');
+    const [stake, setStake] = useState<string>();
     const [restakeEnabled, setRestakeEnabled] = useState(true);
     const [error, setError] = useState<string>();
     const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
@@ -124,6 +127,17 @@ function BuildAddBakerTransactionProposalStep({
         chainParameters === undefined
             ? undefined
             : BigInt(chainParameters.minimumThresholdForBaking);
+    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
+        getDefaultExpiry()
+    );
+
+    const expiryTimeError = useMemo(
+        () =>
+            expiryTime === undefined || isFutureDate(expiryTime)
+                ? undefined
+                : 'Transaction expiry time must be in the future',
+        [expiryTime]
+    );
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Add_baker,
@@ -149,6 +163,14 @@ function BuildAddBakerTransactionProposalStep({
             setError('Account is needed to make transaction');
             return;
         }
+        if (expiryTime === undefined) {
+            setError('Expiry time is needed to make transaction');
+            return;
+        }
+        if (stake === undefined) {
+            setError('Baker stake is needed to make transaction');
+            return;
+        }
 
         const payload: AddBakerPayload = {
             electionVerifyKey: bakerKeys.electionPublic,
@@ -163,7 +185,8 @@ function BuildAddBakerTransactionProposalStep({
         createAddBakerTransaction(
             account.address,
             payload,
-            account.signatureThreshold
+            account.signatureThreshold,
+            expiryTime
         )
             .then(setTransaction)
             .catch(() => setError('Failed create transaction'));
@@ -224,6 +247,7 @@ function BuildAddBakerTransactionProposalStep({
                         stake={stake}
                         estimatedFee={estimatedFee}
                         restakeEarnings={restakeEnabled}
+                        expiryTime={expiryTime}
                         bakerVerifyKeys={
                             bakerKeys === undefined
                                 ? undefined
@@ -244,7 +268,6 @@ function BuildAddBakerTransactionProposalStep({
                             <div className={styles.descriptionStep}>
                                 <div className={styles.flex1}>
                                     <PickIdentity
-                                        setReady={() => {}}
                                         setIdentity={setIdentity}
                                         chosenIdentity={identity}
                                     />
@@ -264,12 +287,12 @@ function BuildAddBakerTransactionProposalStep({
                             </div>
                         </Columns.Column>
                     </Route>
+
                     <Route path={`${path}/${BuildSubRoutes.accounts}`}>
                         <Columns.Column header="Accounts">
                             <div className={styles.descriptionStep}>
                                 <div className={styles.flex1}>
                                     <PickAccount
-                                        setReady={() => {}}
                                         identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
@@ -293,6 +316,7 @@ function BuildAddBakerTransactionProposalStep({
                             </div>
                         </Columns.Column>
                     </Route>
+
                     <Route path={`${path}/${BuildSubRoutes.stake}`}>
                         <Columns.Column header="Stake">
                             <div className={styles.descriptionStep}>
@@ -305,8 +329,7 @@ function BuildAddBakerTransactionProposalStep({
                                         for transactions.{' '}
                                     </p>
                                     <PickAmount
-                                        setReady={() => {}}
-                                        amount={stake.toString() ?? '0'}
+                                        amount={stake}
                                         account={account}
                                         estimatedFee={estimatedFee}
                                         validateAmount={(...args) =>
@@ -346,6 +369,49 @@ function BuildAddBakerTransactionProposalStep({
                                     />
                                 </div>
                                 <Button
+                                    disabled={stake === undefined}
+                                    onClick={() => {
+                                        dispatch(
+                                            push(
+                                                `${url}/${BuildSubRoutes.expiry}`
+                                            )
+                                        );
+                                    }}
+                                >
+                                    Continue
+                                </Button>
+                            </div>
+                        </Columns.Column>
+                    </Route>
+
+                    <Route path={`${path}/${BuildSubRoutes.expiry}`}>
+                        <Columns.Column header="Transaction expiry time">
+                            <div className={styles.descriptionStep}>
+                                <div className={styles.flex1}>
+                                    <p>
+                                        Choose the expiry date for the
+                                        transaction.
+                                    </p>
+                                    <InputTimestamp
+                                        label="Transaction expiry time"
+                                        name="expiry"
+                                        isInvalid={
+                                            expiryTimeError !== undefined
+                                        }
+                                        error={expiryTimeError}
+                                        value={expiryTime}
+                                        onChange={setExpiryTime}
+                                    />
+                                    <p>
+                                        Commiting the transaction after this
+                                        date, will be rejected.
+                                    </p>
+                                </div>
+                                <Button
+                                    disabled={
+                                        expiryTime === undefined ||
+                                        expiryTimeError !== undefined
+                                    }
                                     onClick={() => {
                                         onGenerateKeys();
                                         dispatch(
@@ -360,6 +426,7 @@ function BuildAddBakerTransactionProposalStep({
                             </div>
                         </Columns.Column>
                     </Route>
+
                     <Route path={`${path}/${BuildSubRoutes.keys}`}>
                         <Columns.Column header="Baker keys">
                             <div className={styles.descriptionStep}>
@@ -390,6 +457,7 @@ function BuildAddBakerTransactionProposalStep({
                             </div>
                         </Columns.Column>
                     </Route>
+
                     <Route path={`${path}/${BuildSubRoutes.sign}`}>
                         <Columns.Column header="Signature and Hardware Wallet">
                             <SignTransactionColumn
