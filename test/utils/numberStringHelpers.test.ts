@@ -235,4 +235,11 @@ describe(addThousandSeparators, () => {
         expect(addThousandSeparators('-12345.123')).toBe('-12,345.123');
         expect(addThousandSeparators('-12345.123e-12')).toBe('-12,345.123e-12');
     });
+
+    test('Returns input value when given invalid values', () => {
+        expect(addThousandSeparators('')).toBe('');
+        expect(addThousandSeparators('test')).toBe('test');
+        expect(addThousandSeparators('-test')).toBe('-test');
+        expect(addThousandSeparators('I am a horse')).toBe('I am a horse');
+    });
 });
