@@ -198,7 +198,7 @@ export async function convertAccountTransaction(
     }
 
     return {
-        blockHash: 'pending',
+        blockHash: '',
         remote: false,
         originType: OriginType.Self,
         transactionHash: hash,

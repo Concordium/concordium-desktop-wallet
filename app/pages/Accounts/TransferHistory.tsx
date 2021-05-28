@@ -9,7 +9,10 @@ import locations from '~/constants/transactionLocations.json';
 import { Account, TransferTransaction } from '~/utils/types';
 import DecryptComponent from './DecryptComponent';
 import styles from './Transactions.module.scss';
-import { viewingShieldedSelector } from '~/features/TransactionSlice';
+import {
+    transactionsSelector,
+    viewingShieldedSelector,
+} from '~/features/TransactionSlice';
 
 interface Props {
     account: Account;
@@ -19,14 +22,27 @@ interface Props {
  * Contains view of the account's transactions,
  * detailed view of a chosen one, and
  * display of the account's revealedAttributes.
- * TODO Rename this.
  */
 export default function TransferHistory({ account }: Props) {
+    const transactions = useSelector(transactionsSelector);
     const [location, setLocation] = useState(locations.listTransactions);
     const viewingShielded = useSelector(viewingShieldedSelector);
     const [chosenTransaction, setChosenTransaction] = useState<
         TransferTransaction | undefined
     >(undefined);
+
+    useEffect(() => {
+        if (chosenTransaction) {
+            const upToDateChosenTransaction = transactions.find(
+                (transaction) =>
+                    transaction.transactionHash ===
+                    chosenTransaction.transactionHash
+            );
+            if (upToDateChosenTransaction) {
+                setChosenTransaction(upToDateChosenTransaction);
+            }
+        }
+    }, [transactions, chosenTransaction, setChosenTransaction]);
 
     useEffect(() => {
         setChosenTransaction(undefined);
@@ -81,6 +97,7 @@ export default function TransferHistory({ account }: Props) {
                         <Card className="pB0">
                             <Header />
                             <TransactionList
+                                transactions={transactions}
                                 onTransactionClick={(transaction) => {
                                     setChosenTransaction(transaction);
                                 }}

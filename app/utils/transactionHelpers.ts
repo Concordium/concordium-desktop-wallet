@@ -397,11 +397,8 @@ export function buildTransactionAccountSignature(
     return transactionAccountSignature;
 }
 
-export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
-    return outcomes.reduce(
-        (accu, event) => accu && event.result.outcome === 'success',
-        true
-    );
+export function isSuccessfulTransaction(event: TransactionEvent) {
+    return event.result.outcome === 'success';
 }
 
 export const isExpired = (transaction: Transaction) =>
