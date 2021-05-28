@@ -17,15 +17,21 @@ import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createUpdateBakerRestakeEarningsTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
-import { useAccountInfo, useTransactionCostEstimate } from '~/utils/hooks';
+import {
+    useAccountInfo,
+    useTransactionCostEstimate,
+    useTransactionExpiryState,
+} from '~/utils/hooks';
 import SignTransaction from './SignTransaction';
 import ButtonGroup from '~/components/ButtonGroup';
 import UpdateBakerRestakeEarningsProposalDetails from './proposal-details/UpdateBakerRestakeEarnings';
+import InputTimestamp from '~/components/Form/InputTimestamp';
 
 enum SubRoutes {
     accounts,
     restake,
     sign,
+    expiry,
 }
 
 export default function UpdateBakerRestakeEarningsPage() {
@@ -41,6 +47,12 @@ export default function UpdateBakerRestakeEarningsPage() {
         TransactionKindId.Update_baker_stake,
         account?.signatureThreshold
     );
+
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState();
 
     const onCreateTransaction = () => {
         if (account === undefined) {
@@ -79,6 +91,7 @@ export default function UpdateBakerRestakeEarningsPage() {
                         account={account}
                         estimatedFee={estimatedFee}
                         restakeEarnings={restakeEarnings}
+                        expiryTime={expiryTime}
                     />
                 </Columns.Column>
                 <Switch>
@@ -144,6 +157,46 @@ export default function UpdateBakerRestakeEarningsPage() {
                                 </div>
                                 <Button
                                     disabled={restakeEarnings === undefined}
+                                    onClick={() => {
+                                        dispatch(
+                                            push(`${url}/${SubRoutes.expiry}`)
+                                        );
+                                    }}
+                                >
+                                    Continue
+                                </Button>
+                            </div>
+                        </Columns.Column>
+                    </Route>
+
+                    <Route path={`${path}/${SubRoutes.expiry}`}>
+                        <Columns.Column header="Transaction expiry time">
+                            <div className={styles.descriptionStep}>
+                                <div className={styles.flex1}>
+                                    <p>
+                                        Choose the expiry date for the
+                                        transaction.
+                                    </p>
+                                    <InputTimestamp
+                                        label="Transaction expiry time"
+                                        name="expiry"
+                                        isInvalid={
+                                            expiryTimeError !== undefined
+                                        }
+                                        error={expiryTimeError}
+                                        value={expiryTime}
+                                        onChange={setExpiryTime}
+                                    />
+                                    <p>
+                                        Committing the transaction after this
+                                        date, will be rejected.
+                                    </p>
+                                </div>
+                                <Button
+                                    disabled={
+                                        expiryTime === undefined ||
+                                        expiryTimeError !== undefined
+                                    }
                                     onClick={() => {
                                         onCreateTransaction();
                                         dispatch(

@@ -24,16 +24,19 @@ import {
     useChainParameters,
     useStakedAmount,
     useTransactionCostEstimate,
+    useTransactionExpiryState,
 } from '~/utils/hooks';
 import SignTransaction from './SignTransaction';
 import PickAmount from './PickAmount';
 import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';
 import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
+import InputTimestamp from '~/components/Form/InputTimestamp';
 
 enum SubRoutes {
     accounts,
     stake,
     sign,
+    expiry,
 }
 
 function toMicroUnitsSafe(str: string | undefined) {
@@ -60,6 +63,11 @@ export default function UpdateBakerStakePage() {
         TransactionKindId.Update_baker_stake,
         account?.signatureThreshold
     );
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState();
 
     const onCreateTransaction = () => {
         if (account === undefined) {
@@ -96,6 +104,7 @@ export default function UpdateBakerStakePage() {
                         account={account}
                         estimatedFee={estimatedFee}
                         stake={toMicroUnitsSafe(stake)}
+                        expiryTime={expiryTime}
                     />
                 </Columns.Column>
                 <Switch>
@@ -161,6 +170,45 @@ export default function UpdateBakerStakePage() {
                                 </div>
                                 <Button
                                     disabled={stake === undefined}
+                                    onClick={() => {
+                                        dispatch(
+                                            push(`${url}/${SubRoutes.expiry}`)
+                                        );
+                                    }}
+                                >
+                                    Continue
+                                </Button>
+                            </div>
+                        </Columns.Column>
+                    </Route>
+                    <Route path={`${path}/${SubRoutes.expiry}`}>
+                        <Columns.Column header="Transaction expiry time">
+                            <div className={styles.descriptionStep}>
+                                <div className={styles.flex1}>
+                                    <p>
+                                        Choose the expiry date for the
+                                        transaction.
+                                    </p>
+                                    <InputTimestamp
+                                        label="Transaction expiry time"
+                                        name="expiry"
+                                        isInvalid={
+                                            expiryTimeError !== undefined
+                                        }
+                                        error={expiryTimeError}
+                                        value={expiryTime}
+                                        onChange={setExpiryTime}
+                                    />
+                                    <p>
+                                        Committing the transaction after this
+                                        date, will be rejected.
+                                    </p>
+                                </div>
+                                <Button
+                                    disabled={
+                                        expiryTime === undefined ||
+                                        expiryTimeError !== undefined
+                                    }
                                     onClick={() => {
                                         onCreateTransaction();
                                         dispatch(

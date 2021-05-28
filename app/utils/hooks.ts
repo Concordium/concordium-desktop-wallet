@@ -1,9 +1,17 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import {
+    Dispatch,
+    SetStateAction,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import {
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
 } from '../node/nodeHelpers';
+import { getDefaultExpiry, isFutureDate } from './timeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
 import { lookupName } from './transactionHelpers';
 import { AccountInfo, Amount, Fraction, TransactionKindId } from './types';
@@ -133,4 +141,22 @@ export function useChainParameters() {
     const lastFinalizedBlock = useLastFinalizedBlockSummary();
     return lastFinalizedBlock?.lastFinalizedBlockSummary.updates
         .chainParameters;
+}
+
+/** Hook for creating transaction exiry state and error */
+export function useTransactionExpiryState(
+    validation?: (expiry: Date | undefined) => string | undefined
+) {
+    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
+        getDefaultExpiry()
+    );
+
+    const expiryTimeError = useMemo(
+        () =>
+            expiryTime === undefined || isFutureDate(expiryTime)
+                ? validation?.(expiryTime)
+                : 'Transaction expiry time must be in the future',
+        [expiryTime, validation]
+    );
+    return [expiryTime, setExpiryTime, expiryTimeError] as const;
 }

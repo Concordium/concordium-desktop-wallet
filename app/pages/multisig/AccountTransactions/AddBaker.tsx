@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router';
 import { push } from 'connected-react-router';
@@ -33,6 +33,7 @@ import {
     useAccountInfo,
     useChainParameters,
     useTransactionCostEstimate,
+    useTransactionExpiryState,
 } from '~/utils/hooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
@@ -42,7 +43,6 @@ import {
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
-import { getDefaultExpiry, isFutureDate } from '~/utils/timeHelpers';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
@@ -127,17 +127,11 @@ function BuildAddBakerTransactionProposalStep({
         chainParameters === undefined
             ? undefined
             : BigInt(chainParameters.minimumThresholdForBaking);
-    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
-        getDefaultExpiry()
-    );
-
-    const expiryTimeError = useMemo(
-        () =>
-            expiryTime === undefined || isFutureDate(expiryTime)
-                ? undefined
-                : 'Transaction expiry time must be in the future',
-        [expiryTime]
-    );
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState();
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Add_baker,
@@ -403,7 +397,7 @@ function BuildAddBakerTransactionProposalStep({
                                         onChange={setExpiryTime}
                                     />
                                     <p>
-                                        Commiting the transaction after this
+                                        Committing the transaction after this
                                         date, will be rejected.
                                     </p>
                                 </div>

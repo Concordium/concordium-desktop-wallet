@@ -26,11 +26,15 @@ import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 import { createUpdateBakerKeysTransaction } from '~/utils/transactionHelpers';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
-import { useTransactionCostEstimate } from '~/utils/hooks';
+import {
+    useTransactionCostEstimate,
+    useTransactionExpiryState,
+} from '~/utils/hooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import { DownloadBakerCredentialsStep } from './AddBaker';
 import UpdateBakerKeysProposalDetails from './proposal-details/UpdateBakerKeysProposalDetails';
+import InputTimestamp from '~/components/Form/InputTimestamp';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
@@ -91,6 +95,7 @@ enum BuildSubRoutes {
     accounts = 'accounts',
     keys = 'keys',
     sign = 'sign',
+    expiry = 'expiry',
 }
 
 function BuildAddBakerTransactionProposalStep({
@@ -108,6 +113,12 @@ function BuildAddBakerTransactionProposalStep({
         TransactionKindId.Remove_baker,
         account?.signatureThreshold
     );
+
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState();
 
     const onGenerateKeys = () => {
         if (account === undefined) {
@@ -202,6 +213,7 @@ function BuildAddBakerTransactionProposalStep({
                                           bakerKeys.aggregationPublic,
                                   }
                         }
+                        expiryTime={expiryTime}
                     />
                 </Columns.Column>
                 <Switch>
@@ -244,6 +256,47 @@ function BuildAddBakerTransactionProposalStep({
                                 </div>
                                 <Button
                                     disabled={account === undefined}
+                                    onClick={() => {
+                                        dispatch(
+                                            push(
+                                                `${url}/${BuildSubRoutes.expiry}`
+                                            )
+                                        );
+                                    }}
+                                >
+                                    Generate keys
+                                </Button>
+                            </div>
+                        </Columns.Column>
+                    </Route>
+                    <Route path={`${path}/${BuildSubRoutes.expiry}`}>
+                        <Columns.Column header="Transaction expiry time">
+                            <div className={styles.descriptionStep}>
+                                <div className={styles.flex1}>
+                                    <p>
+                                        Choose the expiry date for the
+                                        transaction.
+                                    </p>
+                                    <InputTimestamp
+                                        label="Transaction expiry time"
+                                        name="expiry"
+                                        isInvalid={
+                                            expiryTimeError !== undefined
+                                        }
+                                        error={expiryTimeError}
+                                        value={expiryTime}
+                                        onChange={setExpiryTime}
+                                    />
+                                    <p>
+                                        Committing the transaction after this
+                                        date, will be rejected.
+                                    </p>
+                                </div>
+                                <Button
+                                    disabled={
+                                        expiryTime === undefined ||
+                                        expiryTimeError !== undefined
+                                    }
                                     onClick={() => {
                                         onGenerateKeys();
                                         dispatch(

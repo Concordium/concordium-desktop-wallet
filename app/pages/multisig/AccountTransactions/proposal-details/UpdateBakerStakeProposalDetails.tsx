@@ -19,12 +19,14 @@ import {
     epochDate,
     getEpochIndexAt,
 } from '~/utils/timeHelpers';
+import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 interface Props {
     identity?: Identity;
     account?: Account;
     stake?: Amount;
     estimatedFee?: Fraction;
+    expiryTime?: Date;
 }
 
 export default function UpdateBakerStakeProposalDetails({
@@ -32,6 +34,7 @@ export default function UpdateBakerStakeProposalDetails({
     account,
     stake,
     estimatedFee,
+    expiryTime,
 }: Props) {
     return (
         <Details>
@@ -48,6 +51,7 @@ export default function UpdateBakerStakeProposalDetails({
                 />
             ) : null}
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
+            <DisplayTransactionExpiryTime expiryTime={expiryTime} />
         </Details>
     );
 }

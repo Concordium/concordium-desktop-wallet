@@ -17,13 +17,18 @@ import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
-import { useTransactionCostEstimate } from '~/utils/hooks';
+import {
+    useTransactionCostEstimate,
+    useTransactionExpiryState,
+} from '~/utils/hooks';
 import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
+import InputTimestamp from '~/components/Form/InputTimestamp';
 
 enum SubRoutes {
     accounts,
     sign,
+    expiry,
 }
 
 export default function RemoveBakerPage() {
@@ -38,6 +43,11 @@ export default function RemoveBakerPage() {
         TransactionKindId.Remove_baker,
         account?.signatureThreshold
     );
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState();
 
     const onCreateTransaction = () => {
         if (account === undefined) {
@@ -67,6 +77,7 @@ export default function RemoveBakerPage() {
                         identity={identity}
                         account={account}
                         estimatedFee={estimatedFee}
+                        expiryTime={expiryTime}
                     />
                 </Columns.Column>
                 <Switch>
@@ -107,6 +118,45 @@ export default function RemoveBakerPage() {
                                 </div>
                                 <Button
                                     disabled={account === undefined}
+                                    onClick={() => {
+                                        dispatch(
+                                            push(`${url}/${SubRoutes.sign}`)
+                                        );
+                                    }}
+                                >
+                                    Continue
+                                </Button>
+                            </div>
+                        </Columns.Column>
+                    </Route>
+                    <Route path={`${path}/${SubRoutes.expiry}`}>
+                        <Columns.Column header="Transaction expiry time">
+                            <div className={styles.descriptionStep}>
+                                <div className={styles.flex1}>
+                                    <p>
+                                        Choose the expiry date for the
+                                        transaction.
+                                    </p>
+                                    <InputTimestamp
+                                        label="Transaction expiry time"
+                                        name="expiry"
+                                        isInvalid={
+                                            expiryTimeError !== undefined
+                                        }
+                                        error={expiryTimeError}
+                                        value={expiryTime}
+                                        onChange={setExpiryTime}
+                                    />
+                                    <p>
+                                        Committing the transaction after this
+                                        date, will be rejected.
+                                    </p>
+                                </div>
+                                <Button
+                                    disabled={
+                                        expiryTime === undefined ||
+                                        expiryTimeError !== undefined
+                                    }
                                     onClick={() => {
                                         onCreateTransaction();
                                         dispatch(
