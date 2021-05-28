@@ -213,8 +213,8 @@ export default function UpdateHigherLevelKeys({
                     />
                     {expiryTime !== undefined ? (
                         <p>
-                            Note: A transaction can only be submitted 2 hours
-                            before expiry <br /> (
+                            Note: A transaction can only be submitted in the 2
+                            hours before the expiry <br /> (
                             {getFormattedDateString(
                                 subtractHours(2, expiryTime)
                             )}
