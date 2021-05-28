@@ -49,8 +49,8 @@ export default function KeySetThreshold({
                 <p>
                     If you want to update the amount of required{' '}
                     {typeToDisplay(type)} key signatures to make transactions,
-                    then you can do so below. If you do not want to make any c
-                    hanges to the threshold, then you can just leave it as is.
+                    then you can do so below. If you do not want to make any
+                    changes to the threshold, then you can just leave it as is.
                 </p>
                 <h2>Current signature threshold</h2>
                 <h1>{currentThreshold}</h1>

@@ -4,7 +4,7 @@ import {
     RewardFraction,
     TransactionFeeDistribution,
     VerifyKey,
-} from './types';
+} from '../utils/types';
 
 // This file contains interfaces that matches what is returned
 // from the Concordium Node using GRPC.
@@ -18,6 +18,7 @@ import {
 export interface ConsensusStatus {
     slotDuration: number;
     lastFinalizedBlock: string;
+    genesisBlock: string;
 }
 
 interface UpdateQueue {

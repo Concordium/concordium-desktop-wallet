@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
-import { BlockSummary, KeysWithThreshold } from '~/utils/NodeApiTypes';
+import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
 import routes from '~/constants/routes.json';
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
 import ProposeNewKey from './ProposeNewKey';
@@ -213,8 +213,8 @@ export default function UpdateHigherLevelKeys({
                     />
                     {expiryTime !== undefined ? (
                         <p>
-                            Note: A transaction can only be submitted 2 hours
-                            before expiry <br /> (
+                            Note: A transaction can only be submitted in the 2
+                            hours before the expiry <br /> (
                             {getFormattedDateString(
                                 subtractHours(2, expiryTime)
                             )}

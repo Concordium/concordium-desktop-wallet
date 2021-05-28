@@ -19,7 +19,7 @@ interface UnlockForm extends FieldValues {
 
 export default function Unlock() {
     const dispatch = useDispatch();
-    const form = useForm<UnlockForm>({ mode: 'onTouched' });
+    const form = useForm<UnlockForm>({ mode: 'onSubmit' });
     const { password: pwField } = form.watch();
     const [validationError, setValidationError] = useState<
         string | undefined

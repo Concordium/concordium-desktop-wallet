@@ -71,16 +71,16 @@ which is only recompiled with a full restart.
 ## Targeting specific Network
 
 To build the app for a specific network, supply the `TARGET_NET` environment variable.
-Currently works with `staging` and `testnet`.
+Currently works with `stagenet` and `testnet`.
 Otherwise the app will be targeted Mainnet.
 When using this variable when packaging, this variable will also be appended to the application name.
 
 ```bash
-TARGET_NET=staging yarn start
+TARGET_NET=stagenet yarn start
 ```
 
 ```bash
-export TARGET_NET=staging
+export TARGET_NET=stagenet
 yarn build-main-dev && yarn start-renderer-dev
 ```
 

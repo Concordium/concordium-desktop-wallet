@@ -1,5 +1,5 @@
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { Authorizations, BlockSummary } from '~/utils/NodeApiTypes';
+import { Authorizations, BlockSummary } from '~/node/NodeApiTypes';
 import {
     UpdateComponent,
     UpdateInstructionHandler,
