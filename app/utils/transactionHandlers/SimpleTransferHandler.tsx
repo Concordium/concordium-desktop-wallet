@@ -60,11 +60,16 @@ export default class SimpleTransferHandler
         amount,
         recipient,
         signatureAmount,
-        nonce
+        nonce,
     }: Partial<CreateTransactionInput>) {
         if (!sender || !recipient || amount === undefined || !nonce) {
             throw new Error(
-                `Unexpected Missing input: ${{ sender, amount, recipient, nonce }}`
+                `Unexpected Missing input: ${{
+                    sender,
+                    amount,
+                    recipient,
+                    nonce,
+                }}`
             );
         }
         return createSimpleTransferTransaction(

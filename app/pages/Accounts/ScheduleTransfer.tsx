@@ -1,7 +1,12 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { TransactionKindId, Account, AddressBookEntry, Fraction } from '~/utils/types';
+import {
+    TransactionKindId,
+    Account,
+    AddressBookEntry,
+    Fraction,
+} from '~/utils/types';
 import routes from '~/constants/routes.json';
 import { toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
@@ -28,7 +33,7 @@ function ScheduleTransfer({ account, returnFunction, exchangeRate }: Props) {
                     account,
                     amount: toMicroUnits(amount).toString(),
                     recipient,
-                    exchangeRate: stringify(exchangeRate)
+                    exchangeRate: stringify(exchangeRate),
                 },
             })
         );

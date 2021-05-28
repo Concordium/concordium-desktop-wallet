@@ -97,9 +97,12 @@ function CreateTransferProposal({
         if (account) {
             if (transactionKind === TransactionKindId.Transfer_with_schedule) {
                 if (schedule) {
-                    scheduledTransferCost(exchangeRate, account.signatureThreshold)
-                            .then((feeCalculator) =>
-                                setFee(feeCalculator(schedule.length))
+                    scheduledTransferCost(
+                        exchangeRate,
+                        account.signatureThreshold
+                    )
+                        .then((feeCalculator) =>
+                            setFee(feeCalculator(schedule.length))
                         )
                         .catch(() => setError('Unable to reach Node.'));
                 }

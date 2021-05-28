@@ -30,7 +30,7 @@ function CreateTransaction({
     amount,
     schedule,
     estimatedFee,
-    nonce
+    nonce,
 }: Props) {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
@@ -38,15 +38,14 @@ function CreateTransaction({
 
     useEffect(() => {
         const handler = findAccountTransactionHandler(transactionKind);
-        const t = handler
-            .createTransaction({
-                sender: account.address,
-                amount: toMicroUnits(amount),
-                recipient: recipient.address,
-                signatureAmount: account.signatureThreshold,
-                schedule,
-                nonce,
-            });
+        const t = handler.createTransaction({
+            sender: account.address,
+            amount: toMicroUnits(amount),
+            recipient: recipient.address,
+            signatureAmount: account.signatureThreshold,
+            schedule,
+            nonce,
+        });
         setTransaction({ ...t, estimatedFee });
     }, [
         setTransaction,

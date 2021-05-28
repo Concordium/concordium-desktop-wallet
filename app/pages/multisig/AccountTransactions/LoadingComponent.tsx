@@ -6,9 +6,9 @@ export default function LoadingComponent() {
     return (
         <MultiSignatureLayout
             pageTitle="Create transfer"
-            stepTitle={`Transaction Proposal - loading`}
+            stepTitle="Transaction Proposal - loading"
         >
-            <Loading text="Fetching information from the node"/>
+            <Loading text="Fetching information from the node" />
         </MultiSignatureLayout>
-    )
+    );
 }

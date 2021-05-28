@@ -17,28 +17,30 @@ interface Props {
 /**
  * Creates the accountCredentialUpdate, and prompts the user to sign it.
  */
-function CreateUpdate({ 
-   account,
+function CreateUpdate({
+    account,
     addedCredentials,
     removedCredIds,
     currentCredentialAmount,
     newThreshold,
-    nonce
+    nonce,
 }: Props): JSX.Element | null {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
     >();
 
     useEffect(() => {
-        setTransaction(createUpdateCredentialsTransaction(
-            account.address,
-            addedCredentials,
-            removedCredIds,
-            newThreshold,
-            currentCredentialAmount,
-            nonce,
-            account.signatureThreshold
-        ));
+        setTransaction(
+            createUpdateCredentialsTransaction(
+                account.address,
+                addedCredentials,
+                removedCredIds,
+                newThreshold,
+                currentCredentialAmount,
+                nonce,
+                account.signatureThreshold
+            )
+        );
     }, [
         setTransaction,
         account,

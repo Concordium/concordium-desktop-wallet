@@ -38,9 +38,12 @@ interface Props<T> {
 /**
  * Controls the flow of creating a TransferToEncrypted/TransferToPublic transfer.
  */
-function InternalTransfer<
-T extends TransferToPublic | TransferToEncrypted
->({ account, specific, exchangeRate, nonce }: Props<T>) {
+function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
+    account,
+    specific,
+    exchangeRate,
+    nonce,
+}: Props<T>) {
     const dispatch = useDispatch();
     const location = useLocation<TransferState>();
 

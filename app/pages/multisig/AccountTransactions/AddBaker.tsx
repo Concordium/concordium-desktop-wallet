@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router';
 import { push } from 'connected-react-router';
@@ -39,6 +39,9 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import PublicKey from '../common/PublicKey/PublicKey';
 import withExchangeRate from '~/components/Transfers/withExchangeRate';
+
+import { getNextAccountNonce } from '~/node/nodeRequests';
+
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
 enum SubRoutes {
@@ -75,16 +78,16 @@ function AddBakerPage({ exchangeRate }: WithExchangeRate) {
             </Route>
             <Route path={`${path}/${SubRoutes.downloadKeys}`}>
                 {bakerKeys !== undefined &&
-                 proposalId !== undefined &&
-                 senderAddress !== undefined ? (
-                     <DownloadBakerCredentialsStep
-                         bakerKeys={bakerKeys}
-                         accountAddress={senderAddress}
-                         onContinue={() => {
-                             dispatch(push(selectedProposalRoute(proposalId)));
-                         }}
-                     />
-                 ) : null}
+                proposalId !== undefined &&
+                senderAddress !== undefined ? (
+                    <DownloadBakerCredentialsStep
+                        bakerKeys={bakerKeys}
+                        accountAddress={senderAddress}
+                        onContinue={() => {
+                            dispatch(push(selectedProposalRoute(proposalId)));
+                        }}
+                    />
+                ) : null}
             </Route>
         </Switch>
     );
@@ -112,7 +115,7 @@ enum BuildSubRoutes {
 
 function BuildAddBakerTransactionProposalStep({
     onNewProposal,
-    exchangeRate
+    exchangeRate,
 }: BuildTransactionProposalStepProps) {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
@@ -142,7 +145,7 @@ function BuildAddBakerTransactionProposalStep({
             .catch(() => setError('Failed generating baker keys'));
     };
 
-    const onCreateTransaction = () => {
+    const onCreateTransaction = useCallback(async () => {
         if (bakerKeys === undefined) {
             setError('Baker keys are needed to make transaction');
             return;
@@ -162,13 +165,23 @@ function BuildAddBakerTransactionProposalStep({
             bakingStake: toMicroUnits(stake),
             restakeEarnings: restakeEnabled,
         };
-        setTransaction(createAddBakerTransaction(
-            account.address,
-            payload,
-            "nonce", // TODO FIXME PLEASE FIX THIS
-            account.signatureThreshold
-        ));
-    };
+        const accountNonce = await getNextAccountNonce(account.address);
+        setTransaction(
+            createAddBakerTransaction(
+                account.address,
+                payload,
+                accountNonce.nonce,
+                account.signatureThreshold
+            )
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        account?.address,
+        account?.signatureThreshold,
+        bakerKeys,
+        stake,
+        restakeEnabled,
+    ]);
 
     const credentials = useSelector(credentialsSelector);
     const credential = useMemo(
@@ -406,12 +419,19 @@ function BuildAddBakerTransactionProposalStep({
                                 <Button
                                     disabled={bakerKeys === undefined}
                                     onClick={() => {
-                                        onCreateTransaction();
-                                        dispatch(
-                                            push(
-                                                `${url}/${BuildSubRoutes.sign}`
-                                            )
-                                        );
+                                        onCreateTransaction()
+                                            .then(() => {
+                                                dispatch(
+                                                    push(
+                                                        `${url}/${BuildSubRoutes.sign}`
+                                                    )
+                                                );
+                                            })
+                                            .catch(() =>
+                                                setError(
+                                                    errorMessages.unableToReachNode
+                                                )
+                                            );
                                     }}
                                 >
                                     Continue

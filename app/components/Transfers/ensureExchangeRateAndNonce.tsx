@@ -11,21 +11,30 @@ interface Extra {
     account: Account;
 }
 
-function ensureExchangeRateAndNonce<TProps extends Extra >(
+function ensureExchangeRateAndNonce<TProps extends Extra>(
     Component: ComponentType<TProps>
 ): ComponentType<TProps> {
     return (props) => {
-        const {exchangeRate, nonce} = props;
+        const { exchangeRate, nonce } = props;
 
         if (!exchangeRate || !nonce) {
-            return <Card className="flex pV50"><Loading inline className="marginCenter" text="Loading information for creating transaction." /></Card>;
+            return (
+                <Card className="flex pV50">
+                    <Loading
+                        inline
+                        className="marginCenter"
+                        text="Loading information for creating transaction."
+                    />
+                </Card>
+            );
         }
 
         return <Component {...props} />;
-
     };
 }
 
-export default function withExchangeRateAndNonce<TProps extends Extra>(comp: ComponentType<TProps>) {
+export default function withExchangeRateAndNonce<TProps extends Extra>(
+    comp: ComponentType<TProps>
+) {
     return withNonce(withExchangeRate(ensureExchangeRateAndNonce(comp)));
-};
+}
