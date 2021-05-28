@@ -126,10 +126,14 @@ export default function InlineNumber({
         return trimLeadingZeros ? withTrimLeadingZeros(f) : f;
     }, [ensureDigits, allowFractions, customFormatter, trimLeadingZeros]);
 
-    const initialFormatted = useMemo(
-        () => format(value) || format(fallbackValue.toString()),
-        []
-    );
+    const formattedFallback = format(fallbackValue.toString());
+    const initialFormatted = useMemo(() => {
+        try {
+            return format(value) || formattedFallback;
+        } catch {
+            return formattedFallback;
+        }
+    }, []);
     const [innerValue, setInnerValue] = useState<string>(initialFormatted);
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
@@ -141,7 +145,7 @@ export default function InlineNumber({
     const handleBlur = useCallback(() => {
         // Basically ensure correct formatting of field and that field has a value (otherwise it'll be invisible on screen)
         if (!innerValue || (fallbackOnInvalid && isInvalid)) {
-            setInnerValue(format(fallbackValue.toString()));
+            setInnerValue(formattedFallback);
         } else {
             const formatted = format(value);
             if (formatted !== '') {
@@ -155,7 +159,7 @@ export default function InlineNumber({
         format,
         onBlur,
         innerValue,
-        fallbackValue,
+        formattedFallback,
         value,
         fallbackOnInvalid,
         isInvalid,
