@@ -1,5 +1,7 @@
 import React from 'react';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import { UpdateAccountCredentials } from '~/utils/types';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import styles from './DisplayAccountCredentialUpdate.module.scss';
 
 interface Props {
@@ -46,6 +48,9 @@ export default function DisplayAccountCredentialUpdate({
                     ))}
                 </>
             ) : null}
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
         </>
     );
 }
