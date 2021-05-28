@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Switch, useRouteMatch } from 'react-router';
 import { push } from 'connected-react-router';
@@ -238,7 +238,16 @@ function RestakeEarnings({
     onChanged,
 }: RestakeEarningsProps) {
     const accountInfo = useAccountInfo(accountAddress);
-    const selected = enable ?? accountInfo?.accountBaker?.restakeEarnings;
+
+    useEffect(() => {
+        if (
+            enable === undefined &&
+            accountInfo?.accountBaker?.restakeEarnings !== undefined
+        ) {
+            onChanged(accountInfo?.accountBaker?.restakeEarnings);
+        }
+    }, [accountInfo, enable, onChanged]);
+
     return (
         <ButtonGroup
             title="Enable restake earnings"
@@ -253,7 +262,7 @@ function RestakeEarnings({
                     value: false,
                 },
             ]}
-            isSelected={({ value }) => value === selected}
+            isSelected={({ value }) => value === enable}
             onClick={({ value }) => onChanged(value)}
         />
     );
