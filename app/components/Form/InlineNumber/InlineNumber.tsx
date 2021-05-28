@@ -147,9 +147,13 @@ export default function InlineNumber({
         if (!innerValue || (fallbackOnInvalid && isInvalid)) {
             setInnerValue(formattedFallback);
         } else {
-            const formatted = format(value);
-            if (formatted !== '') {
-                setInnerValue(formatted);
+            try {
+                const formatted = format(value);
+                if (formatted !== '') {
+                    setInnerValue(formatted);
+                }
+            } catch {
+                // Do nothing..
             }
         }
 
