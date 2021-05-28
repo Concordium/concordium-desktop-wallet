@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Redirect, Route, Switch, useRouteMatch } from 'react-router';
+import { Route, Switch, useRouteMatch } from 'react-router';
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
@@ -38,59 +38,6 @@ import InputTimestamp from '~/components/Form/InputTimestamp';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
-enum SubRoutes {
-    proposal = 'proposal',
-    downloadKeys = 'download-keys',
-}
-
-export default function AddBakerPage() {
-    const { path, url } = useRouteMatch();
-    const dispatch = useDispatch();
-    const [proposalId, setProposalId] = useState<number>();
-    const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
-    const [senderAddress, setSenderAddress] = useState<string>();
-
-    return (
-        <Switch>
-            <Route path={path} exact>
-                <Redirect to={`${url}/${SubRoutes.proposal}`} />
-            </Route>
-            <Route path={`${path}/${SubRoutes.proposal}`}>
-                <BuildAddBakerTransactionProposalStep
-                    onNewProposal={(id, keys, address) => {
-                        setProposalId(id);
-                        setBakerKeys(keys);
-                        setSenderAddress(address);
-                        dispatch(push(`${url}/${SubRoutes.downloadKeys}`));
-                    }}
-                />
-            </Route>
-            <Route path={`${path}/${SubRoutes.downloadKeys}`}>
-                {bakerKeys !== undefined &&
-                proposalId !== undefined &&
-                senderAddress !== undefined ? (
-                    <DownloadBakerCredentialsStep
-                        bakerKeys={bakerKeys}
-                        pageTitle={pageTitle}
-                        accountAddress={senderAddress}
-                        onContinue={() => {
-                            dispatch(push(selectedProposalRoute(proposalId)));
-                        }}
-                    />
-                ) : null}
-            </Route>
-        </Switch>
-    );
-}
-
-type BuildTransactionProposalStepProps = {
-    onNewProposal: (
-        proposalId: number,
-        keys: BakerKeys,
-        accountAddress: string
-    ) => void;
-};
-
 enum BuildSubRoutes {
     accounts = 'accounts',
     keys = 'keys',
@@ -98,9 +45,7 @@ enum BuildSubRoutes {
     expiry = 'expiry',
 }
 
-function BuildAddBakerTransactionProposalStep({
-    onNewProposal,
-}: BuildTransactionProposalStepProps) {
+export default function UpdateBakerKeysPage() {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
@@ -181,7 +126,7 @@ function BuildAddBakerTransactionProposalStep({
 
         // Set the current proposal in the state to the one that was just generated.
         dispatch(addProposal(proposal));
-        onNewProposal(proposal.id, bakerKeys, account.address);
+        dispatch(push(selectedProposalRoute(proposal.id)));
     };
 
     return (
@@ -264,7 +209,7 @@ function BuildAddBakerTransactionProposalStep({
                                         );
                                     }}
                                 >
-                                    Generate keys
+                                    Continue
                                 </Button>
                             </div>
                         </Columns.Column>
@@ -313,21 +258,12 @@ function BuildAddBakerTransactionProposalStep({
                     </Route>
                     <Route path={`${path}/${BuildSubRoutes.keys}`}>
                         <Columns.Column header="Baker keys">
-                            <div className={styles.descriptionStep}>
-                                <div className={styles.flex1}>
-                                    {bakerKeys === undefined ? (
-                                        <p>Generating keys...</p>
-                                    ) : (
-                                        <p>
-                                            Your baker keys have been generated,
-                                            and the public keys can be seen to
-                                            the left.
-                                        </p>
-                                    )}
-                                </div>
-                                <Button
-                                    disabled={bakerKeys === undefined}
-                                    onClick={() => {
+                            {bakerKeys !== undefined &&
+                            account !== undefined ? (
+                                <DownloadBakerCredentialsStep
+                                    accountAddress={account.address}
+                                    bakerKeys={bakerKeys}
+                                    onContinue={() => {
                                         onCreateTransaction();
                                         dispatch(
                                             push(
@@ -335,10 +271,10 @@ function BuildAddBakerTransactionProposalStep({
                                             )
                                         );
                                     }}
-                                >
-                                    Continue
-                                </Button>
-                            </div>
+                                />
+                            ) : (
+                                <p>Generating keys...</p>
+                            )}
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${BuildSubRoutes.sign}`}>
