@@ -328,7 +328,6 @@ pub fn decrypt_amounts_aux(
     let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
 
     let amounts: Vec<Amount> = encrypted_amounts.iter().map(|encrypted_amount| {
-        log(&json!({"sk": secret_key, "amount": encrypted_amount, "prf_key": prf_key}).to_string());
         encrypted_transfers::decrypt_amount::<ExampleCurve>(
             &table,
             &secret_key,

@@ -13,7 +13,7 @@ interface Props {
 }
 
 /**
- * Displays an overview of a simple transfer.
+ * Displays an overview of an encrypted transfer.
  */
 export default function DisplayEncryptedTransfer({
     transaction,

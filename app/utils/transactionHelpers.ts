@@ -150,8 +150,9 @@ export function createSimpleTransferTransaction(
 }
 
 /**
- *  Constructs a, simple transfer, transaction object,
+ *  Constructs an encrypted transfer object,
  * Given the fromAddress, toAddress and the amount.
+ * N.B. Does not contain the actual payload, as this is done without access to the decryption key.
  */
 export function createEncryptedTransferTransaction(
     fromAddress: string,
@@ -168,9 +169,10 @@ export function createEncryptedTransferTransaction(
         expiry,
         transactionKind: TransactionKindId.Encrypted_transfer,
         payload,
+        // Supply the energy, so that the cost is not computed using the incomplete payload.
         estimatedEnergyAmount: getTransactionKindEnergy(
             TransactionKindId.Encrypted_transfer
-        ), // Supply the energy, so that the cost is not computed using the incomplete payload.
+        ),
     });
 }
 
