@@ -7,7 +7,7 @@ import UpdateTransactionFeeDistribution, {
     UpdateTransactionFeeDistributionFields,
 } from '../../pages/multisig/updates/TransactionFee/UpdateTransactionFeeDistribution';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isTransactionFeeDistribution,

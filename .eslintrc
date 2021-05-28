@@ -22,11 +22,18 @@
             }
         ],
         "global-require": "off",
+        "no-restricted-syntax": [
+            "error",
+            "ForInStatement",
+            "LabeledStatement",
+            "WithStatement"
+        ],
         "@typescript-eslint/explicit-module-boundary-types": "off",
         "react/jsx-props-no-spreading": "off",
         "react/require-default-props": "off",
         "class-methods-use-this": "off",
         "react/prop-types": "off",
+        "no-await-in-loop": "off",
         "curly": "error"
     },
     "parserOptions": {

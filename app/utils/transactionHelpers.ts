@@ -1,5 +1,5 @@
 import { findEntries } from '../database/AddressBookDao';
-import { getTransactionStatus } from './nodeRequests';
+import { getTransactionStatus } from '../node/nodeRequests';
 import { getDefaultExpiry, getNow } from './timeHelpers';
 import {
     TransactionKindId,
@@ -22,6 +22,7 @@ import {
     AccountInfo,
     AddBaker,
     AddBakerPayload,
+    AddressBookEntry,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -30,16 +31,19 @@ import {
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString } from './gtu';
 
+export async function lookupAddressBookEntry(
+    address: string
+): Promise<AddressBookEntry | undefined> {
+    const entries = await findEntries({ address });
+    return entries[0];
+}
+
 /**
  * Attempts to find the address in the accounts, and then AddressBookEntries
  * If the address is found, return the name, otherwise returns undefined;
  */
 export async function lookupName(address: string): Promise<string | undefined> {
-    const entries = await findEntries({ address });
-    if (entries.length > 0) {
-        return entries[0].name;
-    }
-    return undefined;
+    return (await lookupAddressBookEntry(address))?.name;
 }
 
 /**
@@ -98,7 +102,7 @@ function createAccountTransaction<T extends TransactionPayload>({
     payload,
     estimatedEnergyAmount,
     signatureAmount,
-    nonce
+    nonce,
 }: CreateAccountTransactionInput<T>): AccountTransaction<T> {
     const transaction: AccountTransaction<T> = {
         sender: fromAddress,
@@ -150,7 +154,7 @@ export function createShieldAmountTransaction(
     amount: bigint,
     nonce: string,
     expiry: bigint = getDefaultExpiry()
-): TransferToEncrypted  {
+): TransferToEncrypted {
     const payload = {
         amount: amount.toString(),
     };
@@ -160,7 +164,6 @@ export function createShieldAmountTransaction(
         transactionKind: TransactionKindId.Transfer_to_encrypted,
         payload,
         nonce,
-
     });
 }
 
@@ -309,7 +312,7 @@ export function createAddBakerTransaction(
     nonce: string,
     signatureAmount = 1,
     expiry: bigint = getDefaultExpiry()
-): AddBaker  {
+): AddBaker {
     return createAccountTransaction({
         fromAddress,
         expiry,

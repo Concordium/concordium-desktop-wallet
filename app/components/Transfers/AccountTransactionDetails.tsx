@@ -7,8 +7,12 @@ import {
     instanceOfScheduledTransfer,
     instanceOfUpdateAccountCredentials,
     instanceOfAddBaker,
+    AddressBookEntry,
 } from '../../utils/types';
-import { lookupName } from '../../utils/transactionHelpers';
+import {
+    lookupAddressBookEntry,
+    lookupName,
+} from '../../utils/transactionHelpers';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
 import DisplayInternalTransfer from './DisplayInternalTransfer';
 import DisplaySimpleTransfer from './DisplaySimpleTransfer';
@@ -25,16 +29,17 @@ interface Props {
  */
 export default function AccountTransactionDetails({ transaction }: Props) {
     const [fromName, setFromName] = useState<string | undefined>();
-    const [toName, setToName] = useState<string | undefined>();
+    const [to, setTo] = useState<AddressBookEntry | undefined>();
 
     useEffect(() => {
         lookupName(transaction.sender)
             .then((name) => setFromName(name))
             .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
+
         if ('toAddress' in transaction.payload) {
-            lookupName(transaction.payload.toAddress)
-                .then((name) => setToName(name))
-                .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
+            lookupAddressBookEntry(transaction.payload.toAddress)
+                .then((entry) => setTo(entry))
+                .catch(() => {}); // lookupAddressBookEntry will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
         }
     });
 
@@ -42,7 +47,7 @@ export default function AccountTransactionDetails({ transaction }: Props) {
         return (
             <DisplaySimpleTransfer
                 transaction={transaction}
-                toName={toName}
+                to={to}
                 fromName={fromName}
             />
         );
@@ -65,7 +70,7 @@ export default function AccountTransactionDetails({ transaction }: Props) {
         return (
             <DisplayScheduleTransfer
                 transaction={transaction}
-                toName={toName}
+                to={to}
                 fromName={fromName}
             />
         );

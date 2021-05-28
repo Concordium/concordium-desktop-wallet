@@ -1,4 +1,4 @@
-import { BlockSummary } from '~/utils/NodeApiTypes';
+import { BlockSummary } from '~/node/NodeApiTypes';
 import { ExchangeRate } from '~/utils/types';
 import { RelativeRateFieldProps } from '../../common/RelativeRateField';
 

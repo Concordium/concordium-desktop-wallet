@@ -21,7 +21,7 @@ import styles from './UpdateAccountCredentials.module.scss';
 import UpdateAccountCredentialsHandler from '~/utils/transactionHandlers/UpdateAccountCredentialsHandler';
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
+import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -141,34 +141,36 @@ function listCredentials(
         return null;
     }
     return credentialIds.map(([credId, status]) => {
-        let leftText = null;
-        let right = null;
+        let buttonText = 'Remove';
+        let statusText = null;
         if (status === CredentialStatus.Added) {
-            leftText = 'Remove';
-            right = <h2 className={clsx(styles.green, 'mB0')}>Added</h2>;
+            statusText = <h2 className={clsx(styles.green, 'mB0')}>Added</h2>;
         } else if (status === CredentialStatus.Unchanged) {
-            leftText = 'Remove';
-            right = <h2 className={clsx(styles.gray, 'mB0')}>Unchanged</h2>;
+            statusText = (
+                <h2 className={clsx(styles.gray, 'mB0')}>Unchanged</h2>
+            );
         } else if (status === CredentialStatus.Removed) {
-            leftText = 'Revert';
-            right = <h2 className={clsx(styles.red, 'mB0')}>Removed</h2>;
+            buttonText = 'Revert';
+            statusText = <h2 className={clsx(styles.red, 'mB0')}>Removed</h2>;
         } else if (status === CredentialStatus.Original) {
-            right = <h2 className="mB0">Original</h2>;
+            statusText = <h2 className="mB0">Original</h2>;
         }
+
         return (
             <div key={credId} className={styles.credentialListElement}>
                 <div className="mR20">
-                    {leftText && isEditing && (
+                    {buttonText && isEditing && (
                         <Button
-                            size="small"
+                            size="tiny"
                             onClick={() => updateCredential([credId, status])}
+                            disabled={status === CredentialStatus.Original}
                         >
-                            {leftText}
+                            {buttonText}
                         </Button>
                     )}
                 </div>
                 <h5>{credId}</h5>
-                <div className="mL20">{right}</div>
+                <div className="mL20">{statusText}</div>
             </div>
         );
     });

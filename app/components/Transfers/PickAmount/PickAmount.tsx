@@ -87,10 +87,8 @@ export default function PickAmount({
             <Form formMethods={form} onSubmit={handleSubmit}>
                 <div className={styles.amountInputWrapper}>
                     {getGTUSymbol()}
-                    <Form.InlineNumber
+                    <Form.GtuInput
                         name="amount"
-                        ensureDigits={2}
-                        allowFractions
                         defaultValue={defaultAmount}
                         rules={{
                             required: 'Amount Required',

@@ -17,11 +17,17 @@
 
 .value,
 .placeholder {
-    font-size: $font-size-body1;
+    font-size: $font-size-body2;
     margin: 0;
 }
 
 .note,
 .placeholder {
     composes: textFaded from global;
+}
+
+.note {
+    font-size: $font-size-body4;
+    margin-top: 5px;
+    margin-bottom: 0;
 }

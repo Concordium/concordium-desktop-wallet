@@ -4,7 +4,7 @@ import {
     Authorizations,
     BlockSummary,
     ConsensusStatus,
-} from './NodeApiTypes';
+} from '../node/NodeApiTypes';
 import {
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
@@ -138,9 +138,7 @@ export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
      * Returns a React element, which contains the details of the transaction for print
      */
     print: PrintComponent<P>;
-    createTransaction: (
-        informationBlob: Partial<CreateTransactionInput>
-    ) => T;
+    createTransaction: (informationBlob: Partial<CreateTransactionInput>) => T;
     creationLocationHandler: (currentLocation: string) => string;
     type: string;
     title: string;
