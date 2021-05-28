@@ -86,7 +86,7 @@ async function attachCompletedPayload(
         return { ...transaction, payload };
     }
     if (instanceOfEncryptedTransfer(transaction)) {
-        const prfKeySeed = await ledger.getPrfKey(credential.identityId);
+        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
         const receiverAccountInfo = await getAccountInfoOfAddress(
             transaction.payload.toAddress
         );
