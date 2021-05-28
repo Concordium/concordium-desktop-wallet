@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
-import { BlockSummary, KeysWithThreshold } from '~/utils/NodeApiTypes';
+import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
 import routes from '~/constants/routes.json';
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
 import ProposeNewKey from './ProposeNewKey';

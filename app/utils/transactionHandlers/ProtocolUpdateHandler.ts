@@ -5,7 +5,7 @@ import UpdateProtocol, {
     UpdateProtocolFields,
 } from '~/pages/multisig/updates/Protocol/UpdateProtocol';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isProtocolUpdate,

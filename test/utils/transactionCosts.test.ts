@@ -13,7 +13,7 @@ import {
     createRegularIntervalSchedule,
     createScheduledTransferTransaction,
 } from '../../app/utils/transactionHelpers';
-import * as NodeRequests from '../../app/utils/nodeRequests';
+import * as NodeRequests from '../../app/node/nodeRequests';
 import {
     serializeTransactionHeader,
     serializeTransferPayload,

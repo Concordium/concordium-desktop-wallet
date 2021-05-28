@@ -4,7 +4,11 @@ import UpdateRootKeys from '~/pages/multisig/updates/UpdateHigherLevelKeys/Updat
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorization, Authorizations, BlockSummary } from '../NodeApiTypes';
+import {
+    Authorization,
+    Authorizations,
+    BlockSummary,
+} from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,

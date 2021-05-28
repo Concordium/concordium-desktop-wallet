@@ -7,7 +7,7 @@ import UpdateEuroPerEnergy, {
 } from '~/pages/multisig/updates/EuroPerEnergy/UpdateEuroPerEnergy';
 import { getReducedExchangeRate } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     isExchangeRate,

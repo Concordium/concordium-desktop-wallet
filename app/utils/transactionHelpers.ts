@@ -1,5 +1,4 @@
 import { findEntries } from '../database/AddressBookDao';
-import { getNextAccountNonce, getTransactionStatus } from './nodeRequests';
 import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
 import {
     TransactionKindId,
@@ -30,6 +29,7 @@ import {
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString } from './gtu';
+import { getNextAccountNonce, getTransactionStatus } from '~/node/nodeRequests';
 
 export async function lookupAddressBookEntry(
     address: string
@@ -394,11 +394,8 @@ export function buildTransactionAccountSignature(
     return transactionAccountSignature;
 }
 
-export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
-    return outcomes.reduce(
-        (accu, event) => accu && event.result.outcome === 'success',
-        true
-    );
+export function isSuccessfulTransaction(event: TransactionEvent) {
+    return event.result.outcome === 'success';
 }
 
 export const isExpired = (transaction: Transaction) =>

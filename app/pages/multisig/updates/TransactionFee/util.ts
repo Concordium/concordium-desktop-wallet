@@ -1,4 +1,4 @@
-import { BlockSummary } from '~/utils/NodeApiTypes';
+import { BlockSummary } from '~/node/NodeApiTypes';
 import { rewardFractionResolution } from '~/constants/updateConstants.json';
 import { RewardDistributionValue } from '../../common/RewardDistribution';
 

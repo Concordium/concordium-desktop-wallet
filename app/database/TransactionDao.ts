@@ -32,7 +32,6 @@ interface GetTransactionsOutput {
 
 export async function getTransactionsOfAccount(
     account: Account,
-    orderBy = 'id',
     filteredTypes: TransactionKindString[] = [],
     limit = 100
 ): Promise<GetTransactionsOutput> {
@@ -43,7 +42,8 @@ export async function getTransactionsOfAccount(
         .whereNotIn('transactionKind', filteredTypes)
         .andWhere({ toAddress: address })
         .orWhere({ fromAddress: address })
-        .orderBy(orderBy, 'desc')
+        .orderBy('blockTime', 'desc')
+        .orderBy('id', 'desc')
         .limit(limit + 1);
     return {
         transactions: convertBooleans(transactions).slice(0, limit),

@@ -1,4 +1,4 @@
-import { Keys } from '../NodeApiTypes';
+import { Keys } from '../../node/NodeApiTypes';
 import {
     HigherLevelKeyUpdate,
     HigherLevelKeyUpdateType,

@@ -1,4 +1,4 @@
-import { BlockSummary } from '~/utils/NodeApiTypes';
+import { BlockSummary } from '~/node/NodeApiTypes';
 
 // TODO We should not get the current foundation address from this field, as it is
 // kind of hacky. The current API does not support a better solution, but when it does

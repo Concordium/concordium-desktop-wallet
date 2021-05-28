@@ -257,13 +257,18 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
                         {time} {statusSymbol(transaction.status)}
                     </>
                 }
-                right={amountFormula.concat(
-                    ` ${
-                        transaction.status !== TransactionStatus.Finalized
-                            ? ' (Estimated)'
-                            : ''
-                    }`
-                )}
+                right={
+                    amountFormula
+                        ? amountFormula.concat(
+                              ` ${
+                                  transaction.status !==
+                                  TransactionStatus.Finalized
+                                      ? ' (Estimated)'
+                                      : ''
+                              }`
+                          )
+                        : ''
+                }
             />
         </div>
     );
