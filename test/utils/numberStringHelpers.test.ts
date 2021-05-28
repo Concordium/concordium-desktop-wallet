@@ -34,6 +34,7 @@ describe(isValidResolutionString, () => {
         expect(isValidResolutionString(BigInt(10), true)('0.1')).toBe(true);
         expect(isValidResolutionString(BigInt(10), true)('-0.3')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('0.1')).toBe(true);
+        expect(isValidResolutionString(BigInt(100), true)('0.1e-1')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('0.20')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('-0.22')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('0.0100')).toBe(true);
@@ -55,6 +56,7 @@ describe(isValidResolutionString, () => {
         expect(isValidResolutionString(BigInt(100), true, false)('01.2')).toBe(
             false
         );
+        expect(isValidResolutionString(BigInt(100))('1.2e')).toBe(false);
     });
 
     test('Invalidates negative values when not allowed', () => {
