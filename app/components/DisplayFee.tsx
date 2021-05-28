@@ -17,7 +17,7 @@ export default function DisplayFee({ className, transaction }: Props) {
         return (
             <p className={clsx('body4', className)}>
                 {' '}
-                fee: {displayAsGTU(transaction.cost)}{' '}
+                Fee: {displayAsGTU(transaction.cost)}{' '}
             </p>
         );
     }
