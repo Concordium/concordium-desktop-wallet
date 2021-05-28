@@ -22,14 +22,12 @@
     max-width: 428px;
     text-align: center;
     position: relative;
-}
-
-.ledger {
     max-height: 600px;
 }
 
 .summary {
     padding-bottom: 50px;
+    overflow: overlay;
 }
 
 .summaryHeader {

@@ -5,7 +5,7 @@ import UpdateBakerStakeThreshold, {
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     UpdateInstruction,
@@ -36,7 +36,8 @@ export default class EuroPerEnergyHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { threshold: bakerStakeThreshold }: UpdateBakerStakeThresholdFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -54,7 +55,8 @@ export default class EuroPerEnergyHandler
             UpdateType.UpdateBakerStakeThreshold,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

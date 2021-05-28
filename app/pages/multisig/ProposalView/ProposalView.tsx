@@ -35,11 +35,8 @@ import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import CloseProposalModal from './CloseProposalModal';
 import { fileListToFileArray } from '~/components/Form/FileInput/util';
 import SignatureCheckboxes from './SignatureCheckboxes';
-import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
-import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import { getCheckboxName } from './SignatureCheckboxes/SignatureCheckboxes';
 import { submittedProposalRoute } from '~/utils/routerHelper';
-import { getTimeout } from '~/utils/transactionHelpers';
 import getTransactionSignDigest from '~/utils/transactionHash';
 import { HandleSignatureFile, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
@@ -218,20 +215,15 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                         transaction={transaction}
                                     />
                                 )}
-                                <TransactionExpirationDetails
-                                    title="Transaction must be submitted before:"
-                                    expirationDate={dateFromTimeStamp(
-                                        getTimeout(transaction)
-                                    )}
-                                />
                                 <br />
                                 <Button
-                                    size="small"
+                                    size="tiny"
+                                    inverted
                                     className={styles.closeProposalButton}
                                     onClick={() => setShowCloseModal(true)}
                                     disabled={!isOpen}
                                 >
-                                    Close proposal
+                                    Cancel proposal
                                 </Button>
                             </div>
                             <div className={styles.actions}>

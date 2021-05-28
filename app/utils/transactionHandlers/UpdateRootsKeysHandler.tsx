@@ -4,7 +4,11 @@ import UpdateRootKeys from '~/pages/multisig/updates/UpdateHigherLevelKeys/Updat
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorization, Authorizations, BlockSummary } from '../NodeApiTypes';
+import {
+    Authorization,
+    Authorizations,
+    BlockSummary,
+} from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -36,7 +40,8 @@ export default class UpdateRootKeysHandler
     async createTransaction(
         blockSummary: BlockSummary,
         higherLevelKeyUpdate: HigherLevelKeyUpdate,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -51,7 +56,8 @@ export default class UpdateRootKeysHandler
             UpdateType.UpdateRootKeys,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

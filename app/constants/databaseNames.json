@@ -2,6 +2,7 @@
     "accountsTable": "accounts",
     "addressBookTable": "addressBook",
     "credentialsTable": "credentials",
+    "genesisTable": "genesis",
     "globalTable": "global",
     "identitiesTable": "identities",
     "multiSignatureProposalTable": "multi_signature_proposal",

@@ -8,7 +8,7 @@ import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import ElectionDifficultyView from '../../pages/multisig/updates/ElectionDifficulty/ElectionDifficultyView';
 import UpdateElectionDifficulty from '../../pages/multisig/updates/ElectionDifficulty/UpdateElectionDifficulty';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     ElectionDifficulty,
@@ -39,7 +39,8 @@ export default class ElectionDifficultyHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { electionDifficulty }: ElectionDifficultyField,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -66,7 +67,8 @@ export default class ElectionDifficultyHandler
             UpdateType.UpdateElectionDifficulty,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

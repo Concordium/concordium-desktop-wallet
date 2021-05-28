@@ -158,6 +158,8 @@ function parseAmount(
                 true
             );
 
+        case OriginType.Reward:
+            return buildCostFreeAmountString(BigInt(transaction.subtotal));
         default:
             return {
                 amount: `${getGTUSymbol()} ?`,
@@ -176,6 +178,12 @@ function displayType(kind: TransactionKindString) {
             return <i>Unshielded amount</i>;
         case TransactionKindString.EncryptedAmountTransfer:
             return <i className="mL10">(Encrypted)</i>;
+        case TransactionKindString.BakingReward:
+            return <i>Baker reward</i>;
+        case TransactionKindString.BlockReward:
+            return <i>Block reward</i>;
+        case TransactionKindString.FinalizationReward:
+            return <i>Finalization reward</i>;
         default:
             return '';
     }
@@ -264,13 +272,18 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
                         {time} {statusSymbol(transaction.status)}
                     </>
                 }
-                right={amountFormula.concat(
-                    ` ${
-                        transaction.status !== TransactionStatus.Finalized
-                            ? ' (Estimated)'
-                            : ''
-                    }`
-                )}
+                right={
+                    amountFormula
+                        ? amountFormula.concat(
+                              ` ${
+                                  transaction.status !==
+                                  TransactionStatus.Finalized
+                                      ? ' (Estimated)'
+                                      : ''
+                              }`
+                          )
+                        : ''
+                }
             />
         </div>
     );

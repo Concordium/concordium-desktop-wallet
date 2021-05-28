@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route } from 'react-router-dom';
 import {
@@ -6,7 +6,10 @@ import {
     chosenAccountInfoSelector,
     updateAccountInfo,
 } from '~/features/AccountSlice';
-import { updateTransactions } from '~/features/TransactionSlice';
+import {
+    updateTransactions,
+    loadTransactions,
+} from '~/features/TransactionSlice';
 import routes from '~/constants/routes.json';
 import MoreActions from './MoreActions';
 import EncryptedTransfer from '~/components/Transfers/EncryptedTransfer';
@@ -17,6 +20,7 @@ import TransferHistory from './TransferHistory';
 import AccountBalanceView from './AccountBalanceView';
 import AccountViewActions from './AccountViewActions';
 import { AccountStatus } from '~/utils/types';
+import AbortController from '~/utils/AbortController';
 import { noOp } from '~/utils/basicHelpers';
 
 // milliseconds between updates of the accountInfo
@@ -30,6 +34,7 @@ export default function AccountView() {
     const dispatch = useDispatch();
     const account = useSelector(chosenAccountSelector);
     const accountInfo = useSelector(chosenAccountInfoSelector);
+    const [controller] = useState(new AbortController());
 
     useEffect(() => {
         if (account) {
@@ -46,11 +51,36 @@ export default function AccountView() {
     }, [account?.address, account?.status]);
 
     useEffect(() => {
-        if (account && account.status === AccountStatus.Confirmed) {
-            updateTransactions(dispatch, account);
+        if (
+            account &&
+            account.status === AccountStatus.Confirmed &&
+            controller.isReady &&
+            !controller.isAborted
+        ) {
+            controller.start();
+            updateTransactions(dispatch, account, controller);
+            return () => {
+                controller.abort();
+            };
         }
+        return () => {};
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address, accountInfo?.accountAmount]);
+    }, [
+        account?.address,
+        accountInfo?.accountAmount,
+        account?.status,
+        controller.isAborted,
+    ]);
+
+    useEffect(() => {
+        if (account && account.status === AccountStatus.Confirmed) {
+            const loadController = new AbortController();
+            loadTransactions(account, dispatch, true, loadController);
+            return () => loadController.abort();
+        }
+        return () => {};
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account?.address, account?.rewardFilter]);
 
     if (account === undefined) {
         return null;

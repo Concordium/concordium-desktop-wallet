@@ -45,6 +45,8 @@ export function convertIncomingTransaction(
     let toAddress = '';
     if (transaction.details.transferDestination) {
         toAddress = transaction.details.transferDestination;
+    } else if (transaction.origin.type === OriginType.Reward) {
+        toAddress = accountAddress;
     }
     let encrypted;
     if (transaction.encrypted) {
@@ -215,7 +217,7 @@ export async function convertAccountTransaction(
     }
 
     return {
-        blockHash: 'pending',
+        blockHash: '',
         remote: false,
         originType: OriginType.Self,
         transactionHash: hash,

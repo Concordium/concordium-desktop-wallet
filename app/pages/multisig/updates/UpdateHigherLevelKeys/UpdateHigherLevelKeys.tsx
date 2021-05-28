@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
-import { BlockSummary, KeysWithThreshold } from '~/utils/NodeApiTypes';
+import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
 import routes from '~/constants/routes.json';
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
 import ProposeNewKey from './ProposeNewKey';
@@ -15,7 +15,13 @@ import {
 } from '~/utils/types';
 import KeySetThreshold from './KeySetThreshold';
 import InputTimestamp from '~/components/Form/InputTimestamp';
-import { getNow, TimeConstants } from '~/utils/timeHelpers';
+import {
+    getDefaultExpiry,
+    getFormattedDateString,
+    isFutureDate,
+    subtractHours,
+    TimeConstants,
+} from '~/utils/timeHelpers';
 import KeyUpdateEntry from './KeyUpdateEntry';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 
@@ -24,6 +30,7 @@ interface Props {
     type: UpdateType;
     handleKeySubmit(
         effectiveTime: Date,
+        expiryTime: Date,
         higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
     ): Promise<void>;
 }
@@ -83,8 +90,24 @@ export default function UpdateHigherLevelKeys({
 
     const [threshold, setThreshold] = useState<number>(currentThreshold);
     const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
-        new Date(getNow() + 5 * TimeConstants.Minute)
+        new Date(getDefaultExpiry().getTime() + 5 * TimeConstants.Minute)
     );
+    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
+        getDefaultExpiry()
+    );
+
+    const expiryTimeError = useMemo(() => {
+        if (expiryTime === undefined) {
+            return undefined;
+        }
+        if (!isFutureDate(expiryTime)) {
+            return 'Transaction expiry time must be in the future';
+        }
+        if (effectiveTime !== undefined && effectiveTime < expiryTime) {
+            return 'Expiry must be before the effective time';
+        }
+        return undefined;
+    }, [effectiveTime, expiryTime]);
 
     function addNewKey(publicKey: PublicKeyExportFormat) {
         const addedKey = {
@@ -132,12 +155,15 @@ export default function UpdateHigherLevelKeys({
         if (!effectiveTime) {
             return;
         }
+        if (!expiryTime) {
+            return;
+        }
         const higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate> = {
             threshold,
             updateKeys: newKeys,
         };
 
-        handleKeySubmit(effectiveTime, higherLevelKeyUpdate);
+        handleKeySubmit(effectiveTime, expiryTime, higherLevelKeyUpdate);
     }
 
     return (
@@ -173,10 +199,28 @@ export default function UpdateHigherLevelKeys({
                             );
                         })}
                     </ul>
+                    <h5>Effective time</h5>
                     <InputTimestamp
                         value={effectiveTime}
                         onChange={setEffectiveTime}
                     />
+                    <h5>Transaction expiry time</h5>
+                    <InputTimestamp
+                        value={expiryTime}
+                        onChange={setExpiryTime}
+                        isInvalid={expiryTimeError !== undefined}
+                        error={expiryTimeError}
+                    />
+                    {expiryTime !== undefined ? (
+                        <p>
+                            Note: A transaction can only be submitted in the 2
+                            hours before the expiry <br /> (
+                            {getFormattedDateString(
+                                subtractHours(2, expiryTime)
+                            )}
+                            )
+                        </p>
+                    ) : undefined}
                 </div>
             </Columns.Column>
             <Columns.Column className={styles.stretchColumn} header={' '}>

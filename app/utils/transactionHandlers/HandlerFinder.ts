@@ -34,6 +34,7 @@ import UpdateLevel1KeysWithLevel1KeysHandler from './UpdateLevel1KeysWithLevel1K
 import AddBakerHandler from './AddBakerHandler';
 import TransferToEncryptedHandler from './TransferToEncryptedHandler';
 import TransferToPublicHandler from './TransferToPublicHandler';
+import EncryptedTransferHandler from './EncryptedTransferHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -52,6 +53,9 @@ export function findAccountTransactionHandler(
     }
     if (transactionKind === TransactionKindId.Add_baker) {
         return new AccountHandlerTypeMiddleware(new AddBakerHandler());
+    }
+    if (transactionKind === TransactionKindId.Encrypted_transfer) {
+        return new AccountHandlerTypeMiddleware(new EncryptedTransferHandler());
     }
     if (transactionKind === TransactionKindId.Transfer_with_schedule) {
         return new AccountHandlerTypeMiddleware(new ScheduledTransferHandler());

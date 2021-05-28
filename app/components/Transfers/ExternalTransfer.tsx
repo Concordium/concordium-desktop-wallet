@@ -34,7 +34,9 @@ export default function ExternalTransfer({
         location?.state?.initialPage || locations.pickAmount
     );
 
-    const [amount, setAmount] = useState<string>(location?.state?.amount ?? ''); // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string>(
+        location?.state?.amount ?? '0.00'
+    ); // This is a string, to allows user input in GTU
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>(
         location?.state?.recipient
     );

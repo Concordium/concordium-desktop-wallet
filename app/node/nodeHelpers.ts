@@ -4,7 +4,7 @@ import {
     getCryptographicParameters,
     getBlockSummary,
 } from './nodeRequests';
-import { AccountInfo, Account, Global, Fraction } from './types';
+import { AccountInfo, Account, Global, Fraction } from '../utils/types';
 
 export interface AccountInfoPair {
     account: Account;

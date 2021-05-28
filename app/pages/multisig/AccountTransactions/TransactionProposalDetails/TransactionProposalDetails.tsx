@@ -12,6 +12,7 @@ import { getGTUSymbol } from '~/utils/gtu';
 import styles from './TransactionProposalDetails.module.scss';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import ScheduleList from '~/components/ScheduleList';
+import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 interface Props {
     transactionType: TransactionKindId;
@@ -21,6 +22,7 @@ interface Props {
     recipient?: AddressBookEntry;
     schedule?: Schedule;
     estimatedFee?: Fraction;
+    expiryTime?: Date;
 }
 
 const placeholder = <p className={styles.placeholder}>To be determined</p>;
@@ -44,6 +46,7 @@ export default function TransactionProposalDetails({
     schedule,
     transactionType,
     estimatedFee,
+    expiryTime,
 }: Props) {
     const isScheduledTransfer =
         transactionType === TransactionKindId.Transfer_with_schedule;
@@ -56,12 +59,16 @@ export default function TransactionProposalDetails({
             {account ? showAccount(account) : placeholder}
             {title('Amount:')}
             {amount ? value(`${getGTUSymbol()} ${amount}`) : placeholder}
-            <DisplayEstimatedFee estimatedFee={estimatedFee} />
+            <DisplayEstimatedFee className="mT5" estimatedFee={estimatedFee} />
             {title('Recipient:')}
             {recipient ? showAccount(recipient) : placeholder}
             {recipient && recipient.note ? (
                 <p className={styles.note}>Note: {recipient.note}</p>
             ) : null}
+            <DisplayTransactionExpiryTime
+                expiryTime={expiryTime}
+                placeholder={placeholder}
+            />
             {isScheduledTransfer ? (
                 <>
                     {title('Release Schedule:')}

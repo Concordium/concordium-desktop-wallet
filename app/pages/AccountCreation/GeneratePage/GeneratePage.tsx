@@ -11,7 +11,7 @@ import {
     Dispatch,
     AccountStatus,
 } from '~/utils/types';
-import { sendTransaction } from '~/utils/nodeRequests';
+import { sendTransaction } from '~/node/nodeRequests';
 import {
     addPendingAccount,
     confirmAccount,
@@ -201,6 +201,7 @@ export default function AccountCreationGenerate({
                                 identityId: -1,
                                 maxTransactionId: -1,
                                 identityName: identity.name,
+                                rewardFilter: '[]',
                             }}
                         />
                     </CardList>

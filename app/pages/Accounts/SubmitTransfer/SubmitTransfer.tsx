@@ -3,10 +3,10 @@ import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
-import { getAccountInfoOfAddress } from '~/utils/nodeHelpers';
+import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
-import { sendTransaction } from '~/utils/nodeRequests';
+import { sendTransaction } from '~/node/nodeRequests';
 import {
     serializeTransaction,
     getAccountTransactionHash,
@@ -256,7 +256,9 @@ export default function SubmitTransfer({ location }: Props) {
                         }
                         className={styles.summary}
                     >
-                        <TransactionDetails transaction={transaction} />
+                        <div className="mT40">
+                            <TransactionDetails transaction={transaction} />
+                        </div>
                     </Card>
                     <SimpleLedger
                         className={styles.ledger}

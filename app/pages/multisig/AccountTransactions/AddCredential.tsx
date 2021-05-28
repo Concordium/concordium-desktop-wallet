@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Identicon from 'react-identicons';
 import clsx from 'clsx';
 import Card from '~/cross-app-components/Card';
@@ -7,7 +7,10 @@ import {
     CredentialExportFormat,
 } from '~/utils/types';
 import FileInput from '~/components/Form/FileInput';
-import { FileInputValue } from '~/components/Form/FileInput/FileInput';
+import {
+    FileInputRef,
+    FileInputValue,
+} from '~/components/Form/FileInput/FileInput';
 import Button from '~/cross-app-components/Button';
 import CloseButton from '~/cross-app-components/CloseButton';
 import { CredentialStatus } from './CredentialStatus';
@@ -17,7 +20,6 @@ import SimpleErrorModal, {
 import styles from './UpdateAccountCredentials.module.scss';
 
 interface Props {
-    setReady: (ready: boolean) => void;
     accountAddress?: string;
     credentialIds: [string, CredentialStatus][];
     addCredentialId: (id: [string, CredentialStatus]) => void;
@@ -34,12 +36,12 @@ interface Props {
  * TODO: Add a checkbox, which must be checked before the user can add the credential.
  */
 export default function AddCredential({
-    setReady,
     accountAddress,
     credentialIds,
     addCredentialId,
     setNewCredentials,
 }: Props): JSX.Element {
+    const fileInputRef = useRef<FileInputRef>(null);
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
@@ -48,8 +50,10 @@ export default function AddCredential({
     >();
 
     useEffect(() => {
-        setReady(currentCredential === undefined);
-    }, [setReady, currentCredential]);
+        if (showError) {
+            fileInputRef.current?.reset();
+        }
+    }, [showError]);
 
     if (!accountAddress) {
         throw new Error('Unexpected missing account');
@@ -147,6 +151,7 @@ export default function AddCredential({
                 placeholder="Drag and drop the credentials here"
                 buttonTitle="Or browse to file"
                 onChange={loadCredential}
+                ref={fileInputRef}
             />
         );
     }

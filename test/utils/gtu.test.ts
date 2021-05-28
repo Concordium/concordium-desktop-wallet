@@ -63,7 +63,7 @@ test('Invalid GTU string throws exception', () => {
 });
 
 test('A non-fractional µGTU amount is displayed correctly', () => {
-    expect(displayAsGTU(BigInt(1000000))).toBe(`${getGTUSymbol()}1`);
+    expect(displayAsGTU(BigInt(1000000))).toBe(`${getGTUSymbol()}1.00`);
 });
 
 test('A fractional µGTU amount is displayed correctly', () => {
@@ -71,11 +71,11 @@ test('A fractional µGTU amount is displayed correctly', () => {
 });
 
 test('A zero µGTU amount is displayed correctly', () => {
-    expect(displayAsGTU(BigInt(0))).toBe(`${getGTUSymbol()}0`);
+    expect(displayAsGTU(BigInt(0))).toBe(`${getGTUSymbol()}0.00`);
 });
 
 test('A non-fractional µGTU string is displayed correctly', () => {
-    expect(displayAsGTU('1000000')).toBe(`${getGTUSymbol()}1`);
+    expect(displayAsGTU('1000000')).toBe(`${getGTUSymbol()}1.00`);
 });
 
 test('A fractional µGTU string is displayed correctly', () => {
@@ -83,7 +83,7 @@ test('A fractional µGTU string is displayed correctly', () => {
 });
 
 test('A zero µGTU string is displayed correctly', () => {
-    expect(displayAsGTU('0')).toBe(`${getGTUSymbol()}0`);
+    expect(displayAsGTU('0')).toBe(`${getGTUSymbol()}0.00`);
 });
 
 test('a fractional GTU string throws exception', () => {

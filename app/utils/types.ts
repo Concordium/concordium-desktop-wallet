@@ -131,6 +131,7 @@ export interface Account {
     totalDecrypted?: string;
     allDecrypted?: boolean;
     incomingAmounts?: string;
+    rewardFilter: string;
     selfAmounts?: string;
     maxTransactionId: number;
     deploymentTransactionId?: string;
@@ -149,6 +150,8 @@ export enum TransactionKindString {
     UpdateBakerKeys = 'updateBakerKeys',
     UpdateCredentialKeys = 'updateCredentialKeys',
     BakingReward = 'bakingReward',
+    BlockReward = 'blockReward',
+    FinalizationReward = 'finalizationReward',
     EncryptedAmountTransfer = 'encryptedAmountTransfer',
     TransferToEncrypted = 'transferToEncrypted',
     TransferToPublic = 'transferToPublic',
@@ -682,7 +685,6 @@ export enum Level1KeysUpdateTypes {
     Level1KeysLevel1Update,
     Level2KeysLevel1Update,
 }
-
 export function instanceOfAccountTransaction(
     object: Transaction
 ): object is AccountTransaction {

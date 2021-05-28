@@ -1,22 +1,24 @@
 import React from 'react';
-import { EncryptedTransfer } from '~/utils/types';
+import { AddressBookEntry, EncryptedTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import styles from './transferDetails.module.scss';
 
 interface Props {
     transaction: EncryptedTransfer;
+    to?: AddressBookEntry;
     fromName?: string;
-    toName?: string;
 }
 
 /**
  * Displays an overview of a simple transfer.
  */
-export default function DisplaySimpleTransfer({
+export default function DisplayEncryptedTransfer({
     transaction,
     fromName,
-    toName,
+    to,
 }: Props) {
     return (
         <>
@@ -24,13 +26,17 @@ export default function DisplaySimpleTransfer({
             <p className={styles.name}>{fromName}</p>
             <p className={styles.address}>{transaction.sender}</p>
             <p className={styles.title}>To Account:</p>
-            <p className={styles.name}>{toName}</p>
+            <p className={styles.name}>{to?.name}</p>
             <p className={styles.address}>{transaction.payload.toAddress}</p>
+            {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
             <p className={styles.title}>Amount:</p>
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.plainTransferAmount)}
             </p>
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
         </>
     );
 }
