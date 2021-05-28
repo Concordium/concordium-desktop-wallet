@@ -3,6 +3,8 @@ import { AddressBookEntry, SimpleTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
 import styles from './transferDetails.module.scss';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: SimpleTransfer;
@@ -32,6 +34,9 @@ export default function DisplaySimpleTransfer({
                 {displayAsGTU(transaction.payload.amount)}
             </p>
             <DisplayFee className={styles.fee} transaction={transaction} />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
         </>
     );
 }

@@ -38,7 +38,8 @@ export default class TransactionFeeDistributionHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { rewardDistribution }: UpdateTransactionFeeDistributionFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -61,7 +62,8 @@ export default class TransactionFeeDistributionHandler
             UpdateType.UpdateTransactionFeeDistribution,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

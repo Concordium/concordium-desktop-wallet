@@ -16,11 +16,7 @@ import {
     rejectTransaction,
 } from '~/features/TransactionSlice';
 import { getPendingTransactions } from '~/database/TransactionDao';
-import {
-    extractTransactionCost,
-    getStatus,
-    isSuccessfulTransaction,
-} from './transactionHelpers';
+import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
 import { getTransactionHash } from './transactionHash';
 import {
     updateAccountInfoOfAddress,
@@ -70,8 +66,9 @@ export async function getMultiSignatureTransactionStatus(
             updatedProposal.status = MultiSignatureTransactionStatus.Rejected;
             break;
         case TransactionStatus.Finalized: {
-            const outcomes = Object.values(response.outcomes);
-            if (isSuccessfulTransaction(outcomes)) {
+            // A finalized transaction will always have exactly one outcome.
+            const outcome = Object.values(response.outcomes)[0];
+            if (isSuccessfulTransaction(outcome)) {
                 if (
                     instanceOfAccountTransaction(transaction) &&
                     instanceOfUpdateAccountCredentials(transaction)
@@ -89,7 +86,7 @@ export async function getMultiSignatureTransactionStatus(
             if (instanceOfAccountTransaction(transaction)) {
                 updatedProposal.transaction = stringify({
                     ...transaction,
-                    cost: extractTransactionCost(outcomes).toString(),
+                    cost: outcome.cost,
                 });
             }
             break;
@@ -117,7 +114,11 @@ export async function monitorTransactionStatus(
             rejectTransaction(dispatch, transactionHash);
             break;
         case TransactionStatus.Finalized: {
-            confirmTransaction(dispatch, transactionHash, response.outcomes);
+            // A finalized transaction will always result in exactly one outcome,
+            // which we can extract directly here.
+            const blockHash = Object.keys(response.outcomes)[0];
+            const event = Object.values(response.outcomes)[0];
+            confirmTransaction(dispatch, transactionHash, blockHash, event);
             break;
         }
         default:

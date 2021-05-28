@@ -46,9 +46,15 @@ export default class UpdateInstructionHandlerTypeMiddleware<T>
         blockSummary: BlockSummary,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: any,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
-        return this.base.createTransaction(blockSummary, fields, effectiveTime);
+        return this.base.createTransaction(
+            blockSummary,
+            fields,
+            effectiveTime,
+            expiryTime
+        );
     }
 
     serializePayload(transaction: UpdateInstruction<UpdateInstructionPayload>) {
