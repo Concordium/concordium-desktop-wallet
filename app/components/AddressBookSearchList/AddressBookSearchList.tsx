@@ -40,7 +40,11 @@ export default function AddressBookSearchList({
                     placeholder="Search recipients"
                 />
             </div>
-            {addressBook.filter(filter).filter(filterByQuery).map(children)}
+            {addressBook
+                .filter(filter)
+                .filter(filterByQuery)
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map(children)}
         </>
     );
 }
