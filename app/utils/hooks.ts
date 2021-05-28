@@ -1,4 +1,11 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import {
+    Dispatch,
+    SetStateAction,
+    useEffect,
+    useRef,
+    useState,
+    useMemo,
+} from 'react';
 import { getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
 import { lookupName } from './transactionHelpers';
@@ -55,13 +62,16 @@ export function useTransactionCostEstimate(
     signatureAmount?: number,
     payloadSize?: number
 ) {
-    const [fee, setFee] = useState<Fraction>();
-    useEffect(() => {
-        getTransactionKindCost(kind, exchangeRate, signatureAmount, payloadSize)
-            .then(setFee)
-            .catch(() => {});
-    }, [kind, exchangeRate, payloadSize, signatureAmount]);
-    return fee;
+    return useMemo(
+        () =>
+            getTransactionKindCost(
+                kind,
+                exchangeRate,
+                signatureAmount,
+                payloadSize
+            ),
+        [kind, exchangeRate, payloadSize, signatureAmount]
+    );
 }
 
 /**

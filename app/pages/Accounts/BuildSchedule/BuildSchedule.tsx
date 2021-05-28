@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
 import { stringify, parse } from '~/utils/JSONHelper';
 import routes from '~/constants/routes.json';
-import { Account, AddressBookEntry, Schedule, Fraction } from '~/utils/types';
+import { Account, AddressBookEntry, Schedule } from '~/utils/types';
 import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
 import { createScheduledTransferTransaction } from '~/utils/transactionHelpers';
 import locations from '~/constants/transferLocations.json';
@@ -12,7 +12,6 @@ import RegularInterval from '~/components/BuildSchedule/BuildRegularInterval';
 import ExplicitSchedule from '~/components/BuildSchedule/BuildExplicitSchedule';
 import { BuildScheduleDefaults } from '~/components/BuildSchedule/util';
 import { scheduledTransferCost } from '~/utils/transactionCosts';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
 import TransferView from '~/components/Transfers/TransferView';
 import styles from './BuildSchedule.module.scss';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
@@ -53,27 +52,16 @@ export default function BuildSchedule({ location }: Props) {
         defaults,
     } = location.state;
 
-    const [error, setError] = useState<string | undefined>();
     const [scheduleLength, setScheduleLength] = useState<number>(0);
-    const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
-    const [feeCalculator, setFeeCalculator] = useState<
-        ((scheduleLength: number) => Fraction) | undefined
-    >();
-    useEffect(() => {
-        scheduledTransferCost(parse(exchangeRate))
-            .then((calculator) => setFeeCalculator(() => calculator))
-            .catch((e) =>
-                setError(`Unable to get transaction cost due to: ${e}`)
-            );
-    }, []);
 
-    useEffect(() => {
-        if (feeCalculator && scheduleLength) {
-            setEstimatedFee(feeCalculator(scheduleLength));
-        } else {
-            setEstimatedFee(undefined);
-        }
-    }, [scheduleLength, setEstimatedFee, feeCalculator]);
+    const feeCalculator = useMemo(
+        () => scheduledTransferCost(parse(exchangeRate)),
+        [exchangeRate]
+    );
+    const estimatedFee = useMemo(
+        () => (scheduleLength ? feeCalculator(scheduleLength) : undefined),
+        [feeCalculator, scheduleLength]
+    );
 
     const createTransaction = useCallback(
         (schedule: Schedule, recoverState: unknown) => {
@@ -119,18 +107,6 @@ export default function BuildSchedule({ location }: Props) {
     );
 
     const BuildComponent = explicit ? ExplicitSchedule : RegularInterval;
-
-    if (!feeCalculator) {
-        return (
-            <>
-                <SimpleErrorModal
-                    show={Boolean(error)}
-                    content={error}
-                    onClick={() => dispatch(push(routes.ACCOUNTS))}
-                />
-            </>
-        );
-    }
 
     return (
         <TransferView

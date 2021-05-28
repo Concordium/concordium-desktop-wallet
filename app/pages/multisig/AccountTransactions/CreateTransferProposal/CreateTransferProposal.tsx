@@ -32,7 +32,6 @@ import {
     scheduledTransferCost,
     getTransactionKindCost,
 } from '~/utils/transactionCosts';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
 import styles from './CreateTransferProposal.module.scss';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import LoadingComponent from '../LoadingComponent';
@@ -91,29 +90,28 @@ function CreateTransferProposal({
     ] = useState<BuildScheduleDefaults>();
 
     const [estimatedFee, setFee] = useState<Fraction>();
-    const [error, setError] = useState<string>();
 
     useEffect(() => {
         if (account) {
             if (transactionKind === TransactionKindId.Transfer_with_schedule) {
                 if (schedule) {
-                    scheduledTransferCost(
+                    setFee(
+                        scheduledTransferCost(
+                            exchangeRate,
+                            account.signatureThreshold
+                        )(schedule.length)
+                    );
+                } else {
+                    setFee(undefined);
+                }
+            } else {
+                setFee(
+                    getTransactionKindCost(
+                        transactionKind,
                         exchangeRate,
                         account.signatureThreshold
                     )
-                        .then((feeCalculator) =>
-                            setFee(feeCalculator(schedule.length))
-                        )
-                        .catch(() => setError('Unable to reach Node.'));
-                }
-            } else {
-                getTransactionKindCost(
-                    transactionKind,
-                    exchangeRate,
-                    account.signatureThreshold
-                )
-                    .then((fee) => setFee(fee))
-                    .catch(() => setError('Unable to reach Node.'));
+                );
             }
         }
     }, [account, transactionKind, setFee, schedule]);
@@ -189,12 +187,6 @@ function CreateTransferProposal({
             stepTitle={`Transaction Proposal - ${handler.type}`}
             delegateScroll
         >
-            <SimpleErrorModal
-                show={Boolean(error)}
-                header="Unable to perform transfer"
-                content={error}
-                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
-            />
             <div className={styles.subtractContainerPadding}>
                 <Columns divider columnScroll columnClassName={styles.column}>
                     <Columns.Column
