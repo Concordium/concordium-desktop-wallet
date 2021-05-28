@@ -29,7 +29,10 @@ import {
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString } from './gtu';
-import { getNextAccountNonce, getTransactionStatus } from '~/node/nodeRequests';
+import {
+    getNextAccountNonce,
+    getTransactionStatus,
+} from '../node/nodeRequests';
 
 export async function lookupAddressBookEntry(
     address: string
