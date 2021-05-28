@@ -14,7 +14,7 @@ export async function getAddressBook(): Promise<AddressBookEntry[]> {
     return (await knex())
         .select()
         .table(addressBookTable)
-        .orderBy('name', 'asc')
+        .orderByRaw('name COLLATE NOCASE ASC')
         .then((e) => e.map(sanitizeAddressBookEntry));
 }
 
