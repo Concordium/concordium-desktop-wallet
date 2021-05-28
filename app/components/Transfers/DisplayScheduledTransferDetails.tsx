@@ -5,6 +5,8 @@ import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import styles from './transferDetails.module.scss';
 import ScheduleList from '~/components/ScheduleList';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: ScheduledTransfer;
@@ -38,6 +40,9 @@ export default function DisplayScheduledTransfer({
             />
             <h5 className={styles.title}>Individual Releases:</h5>
             <ScheduleList schedule={transaction.payload.schedule} />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
         </div>
     );
 }

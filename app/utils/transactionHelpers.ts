@@ -1,9 +1,5 @@
 import { findEntries } from '../database/AddressBookDao';
-import {
-    getNextAccountNonce,
-    getTransactionStatus,
-} from '../node/nodeRequests';
-import { getDefaultExpiry, getNow } from './timeHelpers';
+import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -33,6 +29,10 @@ import {
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
 import { toMicroUnits, isValidGTUString } from './gtu';
+import {
+    getNextAccountNonce,
+    getTransactionStatus,
+} from '../node/nodeRequests';
 
 export async function lookupAddressBookEntry(
     address: string
@@ -80,7 +80,7 @@ export async function attachNames(
 
 interface CreateAccountTransactionInput<T> {
     fromAddress: string;
-    expiry: bigint;
+    expiry: Date;
     transactionKind: TransactionKindId;
     payload: T;
     estimatedEnergyAmount?: bigint;
@@ -108,7 +108,7 @@ async function createAccountTransaction<T extends TransactionPayload>({
     const transaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
-        expiry,
+        expiry: BigInt(secondsSinceUnixEpoch(expiry)),
         energyAmount: '',
         transactionKind,
         payload,
@@ -133,7 +133,7 @@ export function createSimpleTransferTransaction(
     amount: BigInt,
     toAddress: string,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): Promise<SimpleTransfer> {
     const payload = {
         toAddress,
@@ -151,7 +151,7 @@ export function createSimpleTransferTransaction(
 export function createShieldAmountTransaction(
     fromAddress: string,
     amount: bigint,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): Promise<TransferToEncrypted> {
     const payload = {
         amount: amount.toString(),
@@ -167,7 +167,7 @@ export function createShieldAmountTransaction(
 export async function createUnshieldAmountTransaction(
     fromAddress: string,
     amount: BigInt,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ) {
     const payload = {
         transferAmount: amount.toString(),
@@ -250,7 +250,7 @@ export async function createScheduledTransferTransaction(
     toAddress: string,
     schedule: Schedule,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ) {
     const payload = {
         toAddress,
@@ -276,7 +276,7 @@ export async function createUpdateCredentialsTransaction(
     threshold: number,
     currentCredentialAmount: number,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ) {
     const payload = {
         addedCredentials,
@@ -301,7 +301,7 @@ export function createAddBakerTransaction(
     fromAddress: string,
     payload: AddBakerPayload,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): Promise<AddBaker> {
     return createAccountTransaction({
         fromAddress,

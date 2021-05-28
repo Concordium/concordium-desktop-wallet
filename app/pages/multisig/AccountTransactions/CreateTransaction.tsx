@@ -18,6 +18,7 @@ interface Props {
     estimatedFee?: Fraction;
     amount: string;
     schedule?: Schedule;
+    expiryTime: Date;
 }
 
 export default function CreateTransaction({
@@ -27,6 +28,7 @@ export default function CreateTransaction({
     amount,
     schedule,
     estimatedFee,
+    expiryTime,
 }: Props) {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
@@ -40,6 +42,7 @@ export default function CreateTransaction({
                 amount: toMicroUnits(amount),
                 recipient: recipient.address,
                 signatureAmount: account.signatureThreshold,
+                expiryTime,
                 schedule,
             })
             .then((t) => setTransaction({ ...t, estimatedFee }))
@@ -52,6 +55,7 @@ export default function CreateTransaction({
         schedule,
         transactionKind,
         estimatedFee,
+        expiryTime,
     ]);
 
     if (!transaction) {

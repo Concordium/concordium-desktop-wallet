@@ -36,7 +36,8 @@ export default class EuroPerEnergyHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { threshold: bakerStakeThreshold }: UpdateBakerStakeThresholdFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -54,7 +55,8 @@ export default class EuroPerEnergyHandler
             UpdateType.UpdateBakerStakeThreshold,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 
