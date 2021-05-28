@@ -76,10 +76,13 @@ test('A zero µGTU amount is displayed correctly', () => {
 
 test('A non-fractional µGTU string is displayed correctly', () => {
     expect(displayAsGTU('1000000')).toBe(`${getGTUSymbol()}1.00`);
+    expect(displayAsGTU('1000000000')).toBe(`${getGTUSymbol()}1,000.00`);
+    expect(displayAsGTU('1000000000000')).toBe(`${getGTUSymbol()}1,000,000.00`);
 });
 
 test('A fractional µGTU string is displayed correctly', () => {
     expect(displayAsGTU('450000')).toBe(`${getGTUSymbol()}0.45`);
+    expect(displayAsGTU('1234450000')).toBe(`${getGTUSymbol()}1,234.45`);
 });
 
 test('A zero µGTU string is displayed correctly', () => {

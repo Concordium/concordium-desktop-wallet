@@ -1,4 +1,5 @@
 import {
+    addThousandSeparators,
     formatNumberStringWithDigits,
     isPowOf10,
     isValidResolutionString,
@@ -205,13 +206,33 @@ describe(trimLeadingZeros, () => {
         expect(trimLeadingZeros('01')).toBe('1');
         expect(trimLeadingZeros('01.')).toBe('1.');
         expect(trimLeadingZeros('1.1')).toBe('1.1');
+        expect(trimLeadingZeros('-1.1')).toBe('-1.1');
         expect(trimLeadingZeros('.1')).toBe('.1');
         expect(trimLeadingZeros('1.1e')).toBe('1.1e');
         expect(trimLeadingZeros('012.1e')).toBe('12.1e');
         expect(trimLeadingZeros('012.1e1')).toBe('12.1e1');
         expect(trimLeadingZeros('012.1e12')).toBe('12.1e12');
+        expect(trimLeadingZeros('-012.1e12')).toBe('-12.1e12');
         expect(trimLeadingZeros('012.1e+12')).toBe('12.1e+12');
         expect(trimLeadingZeros('012.1e-12')).toBe('12.1e-12');
         expect(trimLeadingZeros('012.1e12')).toBe('12.1e12');
+    });
+});
+
+describe(addThousandSeparators, () => {
+    test('Adds thousand separators correctly', () => {
+        expect(addThousandSeparators('0')).toBe('0');
+        expect(addThousandSeparators('10')).toBe('10');
+        expect(addThousandSeparators('100')).toBe('100');
+        expect(addThousandSeparators('1000')).toBe('1,000');
+        expect(addThousandSeparators('12345')).toBe('12,345');
+        expect(addThousandSeparators('123456')).toBe('123,456');
+        expect(addThousandSeparators('1234567890')).toBe('1,234,567,890');
+        expect(addThousandSeparators('12345.123')).toBe('12,345.123');
+        expect(addThousandSeparators('123456789.123')).toBe('123,456,789.123');
+        expect(addThousandSeparators('-12345')).toBe('-12,345');
+        expect(addThousandSeparators('-123456')).toBe('-123,456');
+        expect(addThousandSeparators('-12345.123')).toBe('-12,345.123');
+        expect(addThousandSeparators('-12345.123e-12')).toBe('-12,345.123e-12');
     });
 });

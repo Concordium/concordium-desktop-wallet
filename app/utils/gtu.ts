@@ -4,6 +4,7 @@ import {
     isValidResolutionString,
     parseSubNumber,
     toFraction,
+    addThousandSeparators,
 } from './numberStringHelpers';
 
 export function getGTUSymbol(): string {
@@ -79,5 +80,8 @@ export function displayAsGTU(microGTUAmount: bigint | string) {
     const amount: bigint = toBigInt(microGTUAmount);
     const negative = amount < 0n ? '-' : '';
     const abs = amount < 0n ? -amount : amount;
-    return `${negative}${getGTUSymbol()}${formatGtuString(microGtuToGtu(abs))}`;
+    const formatted = addThousandSeparators(
+        formatGtuString(microGtuToGtu(abs))
+    );
+    return `${negative}${getGTUSymbol()}${formatted}`;
 }
