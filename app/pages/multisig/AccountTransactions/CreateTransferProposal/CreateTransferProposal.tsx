@@ -114,7 +114,7 @@ function CreateTransferProposal({
                 );
             }
         }
-    }, [account, transactionKind, setFee, schedule]);
+    }, [account, transactionKind, setFee, schedule, exchangeRate]);
 
     function updateAmount(newAmount: string) {
         if (isValidGTUString(newAmount)) {

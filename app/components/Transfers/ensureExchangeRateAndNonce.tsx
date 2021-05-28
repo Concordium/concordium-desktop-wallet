@@ -14,7 +14,7 @@ interface Extra {
 function ensureExchangeRateAndNonce<TProps extends Extra>(
     Component: ComponentType<TProps>
 ): ComponentType<TProps> {
-    return (props) => {
+    const ensurer = (props) => {
         const { exchangeRate, nonce } = props;
 
         if (!exchangeRate || !nonce) {
@@ -31,6 +31,7 @@ function ensureExchangeRateAndNonce<TProps extends Extra>(
 
         return <Component {...props} />;
     };
+    return ensurer;
 }
 
 export default function withExchangeRateAndNonce<TProps extends Extra>(

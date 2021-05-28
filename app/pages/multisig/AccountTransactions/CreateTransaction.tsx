@@ -55,6 +55,7 @@ function CreateTransaction({
         schedule,
         transactionKind,
         estimatedFee,
+        nonce,
     ]);
 
     if (!transaction) {

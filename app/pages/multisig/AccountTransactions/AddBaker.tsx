@@ -420,13 +420,13 @@ function BuildAddBakerTransactionProposalStep({
                                     disabled={bakerKeys === undefined}
                                     onClick={() => {
                                         onCreateTransaction()
-                                            .then(() => {
+                                            .then(() =>
                                                 dispatch(
                                                     push(
                                                         `${url}/${BuildSubRoutes.sign}`
                                                     )
-                                                );
-                                            })
+                                                )
+                                            )
                                             .catch(() =>
                                                 setError(
                                                     errorMessages.unableToReachNode

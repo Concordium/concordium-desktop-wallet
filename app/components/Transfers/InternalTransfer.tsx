@@ -89,7 +89,7 @@ function InternalTransfer<T extends TransferToPublic | TransferToEncrypted>({
                 })
             );
         },
-        [specific, account, estimatedFee, dispatch]
+        [specific, account, estimatedFee, dispatch, nonce]
     );
 
     return (
