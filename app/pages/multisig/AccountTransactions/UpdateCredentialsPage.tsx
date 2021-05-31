@@ -26,7 +26,7 @@ import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
-import { useTransactionExpiryState } from '~/utils/hooks';
+import { useTransactionExpiryState } from '~/utils/dataHooks';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>

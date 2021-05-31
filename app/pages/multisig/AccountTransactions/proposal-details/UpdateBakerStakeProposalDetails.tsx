@@ -9,10 +9,9 @@ import {
     PlainDetail,
 } from './shared';
 import {
-    useCurrentTime,
     useLastFinalizedBlockSummary,
     useStakedAmount,
-} from '~/utils/hooks';
+} from '~/utils/dataHooks';
 import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
 import {
     getFormattedDateString,
@@ -20,6 +19,7 @@ import {
     getEpochIndexAt,
 } from '~/utils/timeHelpers';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { useCurrentTime } from '~/utils/hooks';
 
 interface Props {
     identity?: Identity;
