@@ -23,7 +23,7 @@ import {
 } from '~/utils/timeHelpers';
 import KeyUpdateEntry from './KeyUpdateEntry';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
-import { useTransactionExpiryState } from '~/utils/hooks';
+import { useTransactionExpiryState } from '~/utils/dataHooks';
 
 interface Props {
     blockSummary: BlockSummary;

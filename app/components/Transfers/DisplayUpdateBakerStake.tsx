@@ -1,7 +1,7 @@
 import React from 'react';
 import { UpdateBakerStake } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import { useAccountName } from '~/utils/hooks';
+import { useAccountName } from '~/utils/dataHooks';
 import styles from './transferDetails.module.scss';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';

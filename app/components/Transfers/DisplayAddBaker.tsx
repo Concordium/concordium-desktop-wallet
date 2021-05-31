@@ -2,7 +2,7 @@ import React from 'react';
 import { AddBaker } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
-import { useAccountName } from '~/utils/hooks';
+import { useAccountName } from '~/utils/dataHooks';
 import styles from './transferDetails.module.scss';
 import PublicKey from '~/pages/multisig/common/PublicKey/PublicKey';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';

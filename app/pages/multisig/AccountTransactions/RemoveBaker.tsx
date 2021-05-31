@@ -20,7 +20,7 @@ import routes from '~/constants/routes.json';
 import {
     useTransactionCostEstimate,
     useTransactionExpiryState,
-} from '~/utils/hooks';
+} from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';

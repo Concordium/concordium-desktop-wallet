@@ -1,7 +1,7 @@
 import React from 'react';
 import { UpdateBakerRestakeEarnings } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import { useAccountName } from '~/utils/hooks';
+import { useAccountName } from '~/utils/dataHooks';
 import styles from './transferDetails.module.scss';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
