@@ -78,7 +78,7 @@ export default function EncryptedTransfer({ account }: Props) {
             );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [JSON.stringify(account)]
+        [JSON.stringify(account), estimatedFee]
     );
 
     return (
