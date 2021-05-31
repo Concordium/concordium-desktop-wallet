@@ -13,6 +13,11 @@ import {
     Signature,
     TransactionCredentialSignature,
     AddBakerPayload,
+    UpdateBakerKeysPayload,
+    BakerVerifyKeys,
+    BakerKeyProofs,
+    UpdateBakerStakePayload,
+    UpdateBakerRestakeEarningsPayload,
 } from './types';
 import {
     encodeWord32,
@@ -162,7 +167,7 @@ export function serializeTransactionHeader(
     return Buffer.from(serialized);
 }
 
-export function serializeAddBakerKeys(payload: AddBakerPayload) {
+export function serializeBakerVerifyKeys(payload: BakerVerifyKeys) {
     return Buffer.concat([
         putHexString(payload.electionVerifyKey),
         putHexString(payload.signatureVerifyKey),
@@ -170,11 +175,17 @@ export function serializeAddBakerKeys(payload: AddBakerPayload) {
     ]);
 }
 
-export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
+export function serializeBakerKeyProofs(payload: BakerKeyProofs) {
     return Buffer.concat([
         putHexString(payload.proofSignature),
         putHexString(payload.proofElection),
         putHexString(payload.proofAggregation),
+    ]);
+}
+
+export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
+    return Buffer.concat([
+        serializeBakerKeyProofs(payload),
         encodeWord64(BigInt(payload.bakingStake)),
         serializeBoolean(payload.restakeEarnings),
     ]);
@@ -182,9 +193,37 @@ export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
 
 export function serializeAddBaker(payload: AddBakerPayload) {
     return Buffer.concat([
-        Uint8Array.of(4),
-        serializeAddBakerKeys(payload),
+        Uint8Array.of(TransactionKind.Add_baker),
+        serializeBakerVerifyKeys(payload),
         serializeAddBakerProofsStakeRestake(payload),
+    ]);
+}
+
+export function serializeUpdateBakerKeys(payload: UpdateBakerKeysPayload) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Update_baker_keys),
+        serializeBakerVerifyKeys(payload),
+        serializeBakerKeyProofs(payload),
+    ]);
+}
+
+export function serializeRemoveBaker() {
+    return Buffer.from(Uint8Array.of(TransactionKind.Remove_baker));
+}
+
+export function serializeUpdateBakerStake(payload: UpdateBakerStakePayload) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Update_baker_stake),
+        encodeWord64(BigInt(payload.stake)),
+    ]);
+}
+
+export function serializeUpdateBakerRestakeEarnings(
+    payload: UpdateBakerRestakeEarningsPayload
+) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Update_baker_restake_earnings),
+        serializeBoolean(payload.restakeEarnings),
     ]);
 }
 
@@ -213,8 +252,21 @@ export function serializeTransferPayload(
             );
         case TransactionKind.Add_baker:
             return serializeAddBaker(payload as AddBakerPayload);
+        case TransactionKind.Update_baker_keys:
+            return serializeUpdateBakerKeys(payload as UpdateBakerKeysPayload);
+
+        case TransactionKind.Remove_baker:
+            return serializeRemoveBaker();
+        case TransactionKind.Update_baker_stake:
+            return serializeUpdateBakerStake(
+                payload as UpdateBakerStakePayload
+            );
+        case TransactionKind.Update_baker_restake_earnings:
+            return serializeUpdateBakerRestakeEarnings(
+                payload as UpdateBakerRestakeEarningsPayload
+            );
         default:
-            throw new Error('Unsupported transactionkind');
+            throw new Error('Unsupported transaction kind');
     }
 }
 

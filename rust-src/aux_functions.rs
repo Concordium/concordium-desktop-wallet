@@ -1,3 +1,4 @@
+use crate::external_functions::BakerKeyVariant;
 use crate::{
     helpers::*,
     types::*,
@@ -432,15 +433,18 @@ pub struct BakerKeys {
     proof_aggregation: aggregate_sig::Proof<Bls12>
 }
 
-pub fn generate_baker_keys(sender: &AccountAddress) -> BakerKeys {
+pub fn generate_baker_keys(sender: &AccountAddress, key_variant: BakerKeyVariant) -> BakerKeys {
     let mut csprng = thread_rng();
     let election = ed25519::Keypair::generate(&mut csprng);
     let signature = ed25519::Keypair::generate(&mut csprng);
     let aggregation_secret = aggregate_sig::SecretKey::<Bls12>::generate(&mut csprng);
     let aggregation_public = aggregate_sig::PublicKey::<Bls12>::from_secret(aggregation_secret);
 
+    let mut challenge = match key_variant {
+        BakerKeyVariant::ADD => b"addBaker".to_vec(),
+        BakerKeyVariant::UPDATE => b"updateBakerKeys".to_vec()
+    };
 
-    let mut challenge = b"addBaker".to_vec();
     sender.serial(&mut challenge);
     election.public.serial(&mut challenge);
     signature.public.serial(&mut challenge);

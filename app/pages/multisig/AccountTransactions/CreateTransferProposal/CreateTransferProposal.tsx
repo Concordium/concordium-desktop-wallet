@@ -17,7 +17,7 @@ import routes from '~/constants/routes.json';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '../PickAccount';
 import Button from '~/cross-app-components/Button';
-import TransactionProposalDetails from '../TransactionProposalDetails';
+import TransactionProposalDetails from '../proposal-details/TransferProposalDetails';
 import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
@@ -32,9 +32,9 @@ import {
 } from '~/utils/transactionCosts';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import styles from './CreateTransferProposal.module.scss';
-import { getDefaultExpiry, isFutureDate } from '~/utils/timeHelpers';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
+import { useTransactionExpiryState } from '~/utils/hooks';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -58,7 +58,9 @@ function subTitle(currentLocation: string) {
 }
 
 interface Props {
-    transactionKind: TransactionKindId;
+    transactionKind:
+        | TransactionKindId.Simple_transfer
+        | TransactionKindId.Transfer_with_schedule;
 }
 /**
  * This component controls the flow of creating a multisignature account transaction.
@@ -81,16 +83,11 @@ export default function CreateTransferProposal({
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [amount, setAmount] = useState<string | undefined>();
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
-    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
-        getDefaultExpiry()
-    );
-    const expiryTimeError = useMemo(
-        () =>
-            expiryTime === undefined || isFutureDate(expiryTime)
-                ? undefined
-                : 'Transaction expiry time must be in the future',
-        [expiryTime]
-    );
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState();
 
     const [schedule, setSchedule] = useState<Schedule>();
     const [

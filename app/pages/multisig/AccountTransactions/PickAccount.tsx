@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Identity, Account } from '~/utils/types';
+import { Identity, Account, AccountInfo } from '~/utils/types';
 import AccountCard from '~/components/AccountCard';
 import {
     accountsOfIdentitySelector,
@@ -13,6 +13,7 @@ interface Props {
     chosenAccount?: Account;
     identity: Identity | undefined;
     setAccount: (account: Account) => void;
+    filter?: (account: Account, info?: AccountInfo) => boolean;
 }
 
 /**
@@ -22,6 +23,7 @@ export default function PickAccount({
     chosenAccount,
     setAccount,
     identity,
+    filter,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
 
@@ -54,18 +56,20 @@ export default function PickAccount({
 
     return (
         <CardList>
-            {accounts.map((account: Account, index: number) => (
-                <AccountCard
-                    key={account.address}
-                    active={index === chosenIndex}
-                    account={account}
-                    accountInfo={accountsInfo[account.address]}
-                    onClick={() => {
-                        setChosenIndex(index);
-                        setAccount(account);
-                    }}
-                />
-            ))}
+            {accounts
+                .filter((a) => filter?.(a, accountsInfo[a.address]) ?? true)
+                .map((account: Account, index: number) => (
+                    <AccountCard
+                        key={account.address}
+                        active={index === chosenIndex}
+                        account={account}
+                        accountInfo={accountsInfo[account.address]}
+                        onClick={() => {
+                            setChosenIndex(index);
+                            setAccount(account);
+                        }}
+                    />
+                ))}
         </CardList>
     );
 }
