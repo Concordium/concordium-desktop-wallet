@@ -450,8 +450,8 @@ export function DownloadBakerCredentialsStep({
                 </p>
                 <p>
                     Baker credentials are used by the concordium node for baking
-                    and contains private keys, which should only transferred on
-                    a secure channel.
+                    and contains private keys, which should only be transferred
+                    on a secure channel.
                 </p>
                 <p>
                     If the Baker Credentials are lost or compromised, new ones

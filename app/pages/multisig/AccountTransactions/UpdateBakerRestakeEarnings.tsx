@@ -238,32 +238,37 @@ function RestakeEarnings({
     onChanged,
 }: RestakeEarningsProps) {
     const accountInfo = useAccountInfo(accountAddress);
+    const restake = accountInfo?.accountBaker?.restakeEarnings;
 
     useEffect(() => {
-        if (
-            enable === undefined &&
-            accountInfo?.accountBaker?.restakeEarnings !== undefined
-        ) {
-            onChanged(accountInfo?.accountBaker?.restakeEarnings);
+        if (enable === undefined && restake !== undefined) {
+            onChanged(restake);
         }
-    }, [accountInfo, enable, onChanged]);
+    }, [restake, enable, onChanged]);
 
     return (
-        <ButtonGroup
-            title="Enable restake earnings"
-            name="restake"
-            buttons={[
-                {
-                    label: 'Yes, restake',
-                    value: true,
-                },
-                {
-                    label: 'No, don’t restake',
-                    value: false,
-                },
-            ]}
-            isSelected={({ value }) => value === enable}
-            onClick={({ value }) => onChanged(value)}
-        />
+        <>
+            <p>
+                Currently restake is{' '}
+                {restake ? <b>enabled</b> : <b>disabled</b>}.
+            </p>
+            <p>Select whether to restake earnings.</p>
+            <ButtonGroup
+                title="Enable restake earnings"
+                name="restake"
+                buttons={[
+                    {
+                        label: 'Yes, restake',
+                        value: true,
+                    },
+                    {
+                        label: 'No, don’t restake',
+                        value: false,
+                    },
+                ]}
+                isSelected={({ value }) => value === enable}
+                onClick={({ value }) => onChanged(value)}
+            />
+        </>
     );
 }
