@@ -95,7 +95,7 @@ function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
         case TransactionKindId.Update_baker_stake:
             return payloadSizeEstimate.UpdateBakerStake;
         case TransactionKindId.Update_baker_restake_earnings:
-            return payloadSizeEstimate.UpdateBakerStake;
+            return payloadSizeEstimate.UpdateBakerRestakeEarnings;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
@@ -120,7 +120,7 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
         case TransactionKindId.Update_baker_stake:
             return energyConstants.UpdateBakerStake;
         case TransactionKindId.Update_baker_restake_earnings:
-            return energyConstants.UpdateBakerStake;
+            return energyConstants.UpdateBakerRestakeEarnings;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }

@@ -68,7 +68,12 @@ export default function UpdateBakerRestakeEarningsPage() {
         }
 
         const payload = { restakeEarnings };
-        createUpdateBakerRestakeEarningsTransaction(account.address, payload)
+        createUpdateBakerRestakeEarningsTransaction(
+            account.address,
+            payload,
+            account?.signatureThreshold,
+            expiryTime
+        )
             .then(setTransaction)
             .catch((err) => setError(`Failed create transaction ${err}`));
     };

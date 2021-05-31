@@ -83,7 +83,12 @@ export default function UpdateBakerStakePage() {
         }
 
         const payload = { stake: toMicroUnits(stake) };
-        createUpdateBakerStakeTransaction(account.address, payload)
+        createUpdateBakerStakeTransaction(
+            account.address,
+            payload,
+            account?.signatureThreshold,
+            expiryTime
+        )
             .then(setTransaction)
             .catch((err) => setError(`Failed create transaction ${err}`));
     };

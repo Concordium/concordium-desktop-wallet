@@ -59,7 +59,11 @@ export default function RemoveBakerPage() {
             return;
         }
 
-        createRemoveBakerTransaction(account.address)
+        createRemoveBakerTransaction(
+            account.address,
+            account?.signatureThreshold,
+            expiryTime
+        )
             .then(setTransaction)
             .catch(() => setError('Failed create transaction'));
     };
