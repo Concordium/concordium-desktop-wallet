@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import Card from '~/cross-app-components/Card';
-import Switch from '../../cross-app-components/Switch';
-import { updateSettingEntry } from '../../features/SettingsSlice';
-import { Setting } from '../../utils/types';
+import Switch from '~/cross-app-components/Switch';
+import { updateSettingEntry } from '~/features/SettingsSlice';
+import { Setting } from '~/utils/types';
+
+import styles from './BooleanSettingElement.module.scss';
 
 interface Props {
     displayText: string;
@@ -37,7 +39,7 @@ export default function BooleanSetting({
 
     const toggleCheckbox = (
         <Switch defaultChecked={setting.value === '1'} onClick={handleClick}>
-            <h3>{displayText}</h3>
+            <span className="body1">{displayText}</span>
         </Switch>
     );
 
@@ -51,7 +53,7 @@ export default function BooleanSetting({
     );
 
     return (
-        <Card>
+        <Card className={styles.root}>
             {enableWarningModal}
             {toggleCheckbox}
         </Card>

@@ -430,9 +430,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                                         currentThreshold={
                                             account?.signatureThreshold || 1
                                         }
-                                        newCredentialAmount={
-                                            newCredentialAmount
-                                        }
                                         newThreshold={newThreshold}
                                         setNewThreshold={setNewThreshold}
                                     />

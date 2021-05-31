@@ -63,7 +63,7 @@ export default function AccountCreationPickIdentity({
                         </div>
                         <div>
                             <Button
-                                className={styles.button}
+                                className={clsx('bgOffWhite', styles.button)}
                                 inverted
                                 onClick={() =>
                                     submit(

@@ -18,12 +18,14 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { createRemoveBakerTransaction } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
 import {
+    useCalcBakerStakeCooldownUntil,
     useTransactionCostEstimate,
     useTransactionExpiryState,
 } from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 
 enum SubRoutes {
     accounts,
@@ -38,6 +40,8 @@ export default function RemoveBakerPage() {
     const [account, setAccount] = useState<Account>();
     const [error, setError] = useState<string>();
     const [transaction, setTransaction] = useState<RemoveBaker>();
+
+    const cooldownUntil = useCalcBakerStakeCooldownUntil();
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Remove_baker,
@@ -172,6 +176,19 @@ export default function RemoveBakerPage() {
                                         Committing the transaction after this
                                         date, will be rejected.
                                     </p>
+                                    {cooldownUntil !== undefined ? (
+                                        <p>
+                                            Remove a baker will result in the
+                                            baker stake being frozen until
+                                            <br />
+                                            {getFormattedDateString(
+                                                cooldownUntil
+                                            )}
+                                            <br />
+                                            where the actual removing of the
+                                            baker will take effect.
+                                        </p>
+                                    ) : null}
                                 </div>
                                 <Button
                                     className="mT40"

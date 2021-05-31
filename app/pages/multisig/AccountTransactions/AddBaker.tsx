@@ -285,7 +285,7 @@ export default function AddBakerPage() {
                                         to stake on the account. The staked
                                         amount will be part of the balance, but
                                         while staked the amount is unavailable
-                                        for transactions.{' '}
+                                        for transactions.
                                     </p>
                                     <PickAmount
                                         amount={stake}
