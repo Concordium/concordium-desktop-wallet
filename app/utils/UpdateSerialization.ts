@@ -15,6 +15,8 @@ import {
     UpdateInstructionPayload,
     UpdateType,
     UpdateInstructionSignatureWithIndex,
+    AuthorizationKeysUpdate,
+    AccessStructure,
 } from './types';
 
 /**
@@ -53,6 +55,81 @@ export interface SerializedProtocolUpdate {
     specificationUrl: SerializedString;
     transactionHash: Buffer;
     auxiliaryData: Buffer;
+}
+
+function serializeAccessStructure(accessStructure: AccessStructure) {
+    const seralizedAccessStructure = Buffer.alloc(2);
+    seralizedAccessStructure.writeUInt16BE(
+        accessStructure.publicKeyIndicies.length,
+        0
+    );
+
+    // The indicies must be sorted in ascending order to ensure that the serialization
+    // is unique.
+    const sortedIndicies = accessStructure.publicKeyIndicies.sort(
+        (index1, index2) => {
+            return index1 - index2;
+        }
+    );
+    const serializedIndicies = Buffer.concat(
+        sortedIndicies.map((index) => {
+            const serializedIndex = Buffer.alloc(2);
+            serializedIndex.writeUInt16BE(index, 0);
+            return serializedIndex;
+        })
+    );
+
+    const threshold = Buffer.alloc(2);
+    threshold.writeUInt16BE(accessStructure.threshold, 0);
+
+    return Buffer.concat([
+        seralizedAccessStructure,
+        serializedIndicies,
+        threshold,
+    ]);
+}
+
+/**
+ * Serializes an AuthorizationKeysUpdate to the byte format
+ * expected by the chain.
+ */
+export function serializeAuthorizationKeysUpdate(
+    authorizationKeysUpdate: AuthorizationKeysUpdate
+) {
+    const serializedAuthorizationKeysUpdate = Buffer.alloc(3);
+    // TODO Uncertain if this prefix is still required.
+    serializedAuthorizationKeysUpdate.writeInt8(2, 0);
+    serializedAuthorizationKeysUpdate.writeUInt16BE(
+        authorizationKeysUpdate.keys.length,
+        1
+    );
+
+    const serializedKeys = Buffer.concat(
+        authorizationKeysUpdate.keys.map((key) => serializeVerifyKey(key))
+    );
+
+    const serializedAccessStructures: Buffer = Buffer.concat([
+        serializeAccessStructure(authorizationKeysUpdate.emergency),
+        serializeAccessStructure(authorizationKeysUpdate.protocol),
+        serializeAccessStructure(authorizationKeysUpdate.electionDifficulty),
+        serializeAccessStructure(authorizationKeysUpdate.euroPerEnergy),
+        serializeAccessStructure(authorizationKeysUpdate.microGtuPerEuro),
+        serializeAccessStructure(authorizationKeysUpdate.foundationAccount),
+        serializeAccessStructure(authorizationKeysUpdate.mintDistribution),
+        serializeAccessStructure(
+            authorizationKeysUpdate.transactionFeeDistribution
+        ),
+        serializeAccessStructure(authorizationKeysUpdate.gasRewards),
+        serializeAccessStructure(authorizationKeysUpdate.bakerStakeThreshold),
+        serializeAccessStructure(authorizationKeysUpdate.addAnonymityRevoker),
+        serializeAccessStructure(authorizationKeysUpdate.addIdentityProvider),
+    ]);
+
+    return Buffer.concat([
+        serializedAuthorizationKeysUpdate,
+        serializedKeys,
+        serializedAccessStructures,
+    ]);
 }
 
 /**

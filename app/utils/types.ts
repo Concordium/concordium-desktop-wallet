@@ -9,6 +9,7 @@ export type Hex = string;
 type Proofs = Hex;
 type Word64 = bigint;
 type Word32 = number;
+type Word16 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 export type Amount = bigint;
@@ -954,6 +955,27 @@ export interface HigherLevelKeyUpdate {
     threshold: number;
 }
 
+export interface AccessStructure {
+    publicKeyIndicies: Word16[];
+    threshold: Word16;
+}
+
+export interface AuthorizationKeysUpdate {
+    keys: VerifyKey[];
+    emergency: AccessStructure;
+    protocol: AccessStructure;
+    electionDifficulty: AccessStructure;
+    euroPerEnergy: AccessStructure;
+    microGtuPerEuro: AccessStructure;
+    foundationAccount: AccessStructure;
+    mintDistribution: AccessStructure;
+    transactionFeeDistribution: AccessStructure;
+    gasRewards: AccessStructure;
+    bakerStakeThreshold: AccessStructure;
+    addAnonymityRevoker: AccessStructure;
+    addIdentityProvider: AccessStructure;
+}
+
 export interface TransactionDetails {
     events: string[];
     rawRejectReason: RejectReasonWithContents;
@@ -997,25 +1019,6 @@ export interface WalletEntry {
     id: number;
     identifier: string;
     type: WalletType;
-}
-
-/**
- * The basic color types supported by Semantic UI components color property.
- */
-export enum ColorType {
-    Blue = 'blue',
-    Olive = 'olive',
-    Green = 'green',
-    Red = 'red',
-    Grey = 'grey',
-    Orange = 'orange',
-    Yellow = 'yellow',
-    Teal = 'teal',
-    Violet = 'violet',
-    Purple = 'purple',
-    Pink = 'pink',
-    Brown = 'brown',
-    Black = 'black',
 }
 
 // Makes all properties of type T non-optional.
