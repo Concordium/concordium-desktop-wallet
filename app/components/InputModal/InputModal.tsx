@@ -52,7 +52,7 @@ function InputModal({
                     placeholder={placeholder}
                     type={type}
                 />
-                <Form.Submit>{buttonText}</Form.Submit>
+                <Form.Submit className="mT100">{buttonText}</Form.Submit>
             </Form>
         </Modal>
     );
