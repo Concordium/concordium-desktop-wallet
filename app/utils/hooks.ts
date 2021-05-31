@@ -33,8 +33,9 @@ export function useInterval(fn: () => void, rate: number, enable = true) {
     }, [enable, fn, rate]);
 }
 
-/** Hook for reading the current time, given a refresh rate. */
-export function useCurrentTime(refreshRate: number) {
+/** Hook for getting the current time, optionally taking a refresh frequency in
+ * milliseconds defaulting to 1 second */
+export function useCurrentTime(refreshRate = 1000) {
     const [time, setTime] = useState(new Date());
     useInterval(() => setTime(new Date()), refreshRate);
     return time;

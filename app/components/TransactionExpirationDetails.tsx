@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React from 'react';
-import { getFormattedDateString, getNow } from '~/utils/timeHelpers';
-import { TimeStampUnit } from '~/utils/types';
+import { useCurrentTime } from '~/utils/hooks';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 
 interface TransactionExpirationDetailsProps {
     title: string;
@@ -12,12 +12,12 @@ export default function TransactionExpirationDetails({
     title,
     expirationDate,
 }: TransactionExpirationDetailsProps): JSX.Element | null {
+    const now = useCurrentTime();
     if (!expirationDate) {
         return null;
     }
 
-    const hasExpired =
-        expirationDate.valueOf() < getNow(TimeStampUnit.milliSeconds);
+    const hasExpired = expirationDate < now;
     return (
         <>
             <h5>{title}</h5>
