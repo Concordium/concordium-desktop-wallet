@@ -120,7 +120,7 @@ export default function RemoveBakerPage() {
                                     disabled={account === undefined}
                                     onClick={() => {
                                         dispatch(
-                                            push(`${url}/${SubRoutes.sign}`)
+                                            push(`${url}/${SubRoutes.expiry}`)
                                         );
                                     }}
                                 >
