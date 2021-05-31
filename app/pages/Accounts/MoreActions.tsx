@@ -61,7 +61,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
 
     function MoreActionsMenu() {
         return (
-            <Card className="relative flexColumn pH50">
+            <Card className="relative flexColumn pH50 bgOffWhite">
                 <h3 className="textCenter">More Actions</h3>
                 <CloseButton
                     className={styles.closeButton}
