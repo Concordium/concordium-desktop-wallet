@@ -168,9 +168,9 @@ export const displayExpiry = (expiry: bigint) => (
     </tr>
 );
 
-const hashHeader = (transaction: AccountTransaction) => (
+const digestToSignFooter = (transaction: AccountTransaction) => (
     <p style={{ textAlign: 'right', paddingLeft: '10px' }}>
-        Hash:{' '}
+        Digest to sign:{' '}
         {getAccountTransactionHash(transaction, () => [])
             .toString('hex')
             .substring(0, 8)}
@@ -191,7 +191,7 @@ const timestamp = () => (
 
 export const standardPageFooter = (transaction: AccountTransaction) => (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        {hashHeader(transaction)} {timestamp()}
+        {digestToSignFooter(transaction)} {timestamp()}
     </div>
 );
 
