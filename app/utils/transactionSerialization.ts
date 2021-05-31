@@ -84,7 +84,7 @@ function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
     transactionType.writeUInt8(TransactionKind.Update_credentials, 0);
 
     const serializedNewCredentials = serializeList(
-        payload.addedCredentials.sort(({ index }) => index),
+        payload.addedCredentials,
         putInt8,
         ({ index, value }) =>
             Buffer.concat([

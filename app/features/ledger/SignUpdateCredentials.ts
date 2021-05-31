@@ -39,10 +39,10 @@ export default async function signUpdateCredentials(
     const addedCredentials: [
         number,
         CredentialDeploymentInformation
-    ][] = transaction.payload.addedCredentials
-        .sort(({ index }) => index)
-        .map(({ index, value }) => [index, value]);
-    addedCredentials.sort();
+    ][] = transaction.payload.addedCredentials.map(({ index, value }) => [
+        index,
+        value,
+    ]);
 
     const addedCredentialsLength = addedCredentials.length;
     const removedCredentialsLength = transaction.payload.removedCredIds.length;
