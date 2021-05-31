@@ -31,8 +31,8 @@ function PrintFormatAddBaker({ transaction, image, status, fromName }: Props) {
                 standardTableHeader,
                 <tbody>
                     {sender(transaction.sender, fromName)}
-                    {totalWithdrawn('0', transaction.estimatedFee)}
-                    {fee(transaction.estimatedFee)}
+                    {totalWithdrawn('0', transaction)}
+                    {fee(transaction)}
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}

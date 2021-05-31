@@ -1,31 +1,31 @@
 /* eslint-disable promise/catch-or-return */
 import React from 'react';
 import { useAccountName } from '~/utils/dataHooks';
-import { AddBaker, MultiSignatureTransactionStatus } from '~/utils/types';
+import { RemoveBaker, MultiSignatureTransactionStatus } from '~/utils/types';
 import ProposalStatusView, {
     ProposalStatusViewProps,
 } from './ProposalStatusView';
 
-interface AddBakerProposalStatusProps
+interface RemoveBakerProposalStatusProps
     extends Pick<ProposalStatusViewProps, 'className'> {
-    transaction: AddBaker;
+    transaction: RemoveBaker;
     status: MultiSignatureTransactionStatus;
 }
 
-export default function AddBakerProposalStatus({
+export default function RemoveBakerProposalStatus({
     transaction,
     status,
     ...proposalStatusViewProps
-}: AddBakerProposalStatusProps): JSX.Element {
+}: RemoveBakerProposalStatusProps): JSX.Element {
     const senderName = useAccountName(transaction.sender);
 
     return (
         <ProposalStatusView
             {...proposalStatusViewProps}
             headerLeft={senderName ?? transaction.sender}
-            headerRight="Add Baker"
+            headerRight="Remove Baker"
             status={status}
-            title="Add Baker"
+            title="Remove Baker"
         >
             <span className="textFaded">
                 Account: {senderName ? `${senderName} ` : ''} (

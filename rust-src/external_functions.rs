@@ -104,16 +104,23 @@ pub fn create_genesis_account_ext(
     }
 }
 
+#[wasm_bindgen]
+pub enum BakerKeyVariant {
+    ADD,
+    UPDATE
+}
+
 #[wasm_bindgen(js_name = generateBakerKeys)]
 pub fn _generate_baker_keys(
-    input: &str
+    sender: &str,
+    key_variant: BakerKeyVariant
 ) -> String {
-    let sender = match input.parse() {
+    let sender = match sender.parse() {
         Ok(sender) => sender,
         Err(e) => return format!("unable to parse sender account address: {}.", e)
     };
 
-    serde_json::to_string(&generate_baker_keys(&sender))
+    serde_json::to_string(&generate_baker_keys(&sender, key_variant))
         .unwrap_or_else(|e| format!("unable to serialize baker keys: {}", e))
 }
 

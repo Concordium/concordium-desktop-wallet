@@ -23,10 +23,10 @@ import styles from './UpdateAccountCredentials.module.scss';
 import UpdateAccountCredentialsHandler from '~/utils/transactionHandlers/UpdateAccountCredentialsHandler';
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import { getDefaultExpiry, isFutureDate } from '~/utils/timeHelpers';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
+import { useTransactionExpiryState } from '~/utils/dataHooks';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -216,16 +216,11 @@ export default function UpdateCredentialPage(): JSX.Element {
     const [newCredentials, setNewCredentials] = useState<
         CredentialDeploymentInformation[]
     >([]);
-    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
-        getDefaultExpiry()
-    );
-    const expiryTimeError = useMemo(
-        () =>
-            expiryTime === undefined || isFutureDate(expiryTime)
-                ? undefined
-                : 'Transaction expiry time must be in the future',
-        [expiryTime]
-    );
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState();
 
     const newCredentialAmount = credentialIds.filter(
         ([, status]) => status !== CredentialStatus.Removed

@@ -1,20 +1,25 @@
 import React, { useState, useCallback } from 'react';
 import clsx from 'clsx';
 import AccountCard from '~/components/AccountCard';
-import { Account, Fraction } from '~/utils/types';
-import { validateAmount } from '~/utils/transactionHelpers';
+import { Account, AccountInfo, Fraction } from '~/utils/types';
+import { validateTransferAmount } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { getGTUSymbol } from '~/utils/gtu';
 import InlineNumber from '~/components/Form/InlineNumber';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 import styles from './PickAmount.module.scss';
-import { useAccountInfo } from '~/utils/hooks';
+import { useAccountInfo } from '~/utils/dataHooks';
 
 interface Props {
     account: Account | undefined;
     estimatedFee?: Fraction;
     amount: string | undefined;
     setAmount: (amount: string | undefined) => void;
+    validateAmount?: (
+        amountToValidate: string,
+        accountInfo: AccountInfo | undefined,
+        estimatedFee: bigint | undefined
+    ) => string | undefined;
 }
 
 /**
@@ -26,6 +31,7 @@ export default function PickAmount({
     setAmount,
     amount,
     estimatedFee,
+    validateAmount = validateTransferAmount,
 }: Props): JSX.Element {
     if (!account) {
         throw new Error('Unexpected missing account');
@@ -46,7 +52,7 @@ export default function PickAmount({
             setError(validation);
             setAmount(validation === undefined ? newState : undefined);
         },
-        [accountInfo, estimatedFee, setAmount]
+        [accountInfo, estimatedFee, setAmount, validateAmount]
     );
 
     return (

@@ -1,7 +1,7 @@
 import PromiseWorker from 'promise-worker';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error : has no default export.
-import RustWorker from './rust.worker';
+import RustWorker, { BakerKeyVariants } from './rust.worker';
 import {
     PublicInformationForIp,
     Identity,
@@ -447,10 +447,14 @@ export type BakerKeys = {
     proofAggregation: string;
 };
 
-export async function generateBakerKeys(sender: string): Promise<BakerKeys> {
+export async function generateBakerKeys(
+    sender: string,
+    keyVariant: BakerKeyVariants
+): Promise<BakerKeys> {
     const response = await worker.postMessage({
         command: workerCommands.generateBakerKeys,
         sender,
+        keyVariant,
     });
     return JSON.parse(response);
 }

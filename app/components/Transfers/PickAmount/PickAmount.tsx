@@ -12,7 +12,7 @@ import Button from '~/cross-app-components/Button';
 import Form from '~/components/Form';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import {
-    validateAmount,
+    validateTransferAmount,
     validateShieldedAmount,
 } from '~/utils/transactionHelpers';
 import { collapseFraction } from '~/utils/basicHelpers';
@@ -74,7 +74,7 @@ export default function PickAmount({
                 estimatedFee && collapseFraction(estimatedFee)
             );
         }
-        return validateAmount(
+        return validateTransferAmount(
             amount,
             accountInfo,
             estimatedFee && collapseFraction(estimatedFee)
