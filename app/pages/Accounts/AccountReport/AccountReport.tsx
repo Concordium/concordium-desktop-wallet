@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { LocationDescriptorObject } from 'history';
 import AdmZip from 'adm-zip';
+import PlusIcon from '@resources/svg/plus.svg';
 import { Account, TransactionKindString } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
 import AccountPageHeader from '../AccountPageHeader';
@@ -8,6 +9,7 @@ import routes from '~/constants/routes.json';
 import { getNow, TimeConstants } from '~/utils/timeHelpers';
 
 import Columns from '~/components/Columns';
+import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Timestamp from '~/components/Form/InputTimestamp';
@@ -162,9 +164,12 @@ export default function AccountReport({ location }: Props) {
         }
         return (
             <div className={styles.rightColumn}>
-                <Button onClick={() => setAdding(true)}>
-                    Add another account
-                </Button>
+                <Card className={styles.AddAnotherAccountButton}>
+                    <Button clear onClick={() => setAdding(true)}>
+                        <span>Add another account</span>
+                        <PlusIcon />
+                    </Button>
+                </Card>
                 <div className={styles.accountList}>
                     {accounts.map((account) => (
                         <div
@@ -178,7 +183,10 @@ export default function AccountReport({ location }: Props) {
                                     {account.address}
                                 </p>
                             </div>
-                            <Button onClick={() => removeAccount(account)}>
+                            <Button
+                                size="small"
+                                onClick={() => removeAccount(account)}
+                            >
                                 Remove
                             </Button>
                         </div>
@@ -186,6 +194,7 @@ export default function AccountReport({ location }: Props) {
                 </div>
                 <Button
                     size="big"
+                    className={styles.makeReportButton}
                     disabled={accounts.length === 0}
                     onClick={makeReport}
                 >

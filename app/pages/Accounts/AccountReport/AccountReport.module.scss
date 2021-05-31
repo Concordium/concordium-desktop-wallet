@@ -10,10 +10,10 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+}
 
-    :last-child {
-        margin-top: auto;
-    }
+.makeReportButton {
+    margin-top: auto;
 }
 
 .accountList {
@@ -26,6 +26,7 @@
     display: flex;
     flex-direction: row;
     margin-bottom: 20px;
+    align-items: center;
     text-align: left;
     p {
         margin: 0;
@@ -62,4 +63,32 @@
     position: absolute;
     right: -40px;
     top: 0;
+}
+
+.AddAnotherAccountButton {
+    position: relative;
+    padding: 10px;
+    margin: 10px 40px;
+
+    button {
+        display: flex;
+        justify-content: center;
+        align-items: baseline;
+        width: 100%;
+        margin-bottom: 0;
+
+        span {
+            font-size: $font-size-body3;
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
+        * {
+            margin-left: auto;
+        }
+
+        svg {
+            height: $font-size-body3;
+        }
+    }
 }
