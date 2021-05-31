@@ -19,6 +19,7 @@ import { serializeAuthorizationKeysUpdate } from '../UpdateSerialization';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import AuthorizationKeysView from '~/pages/multisig/updates/UpdateGovernanceKeys/AuthorizationKeysView';
 import UpdateLevel2KeysWithRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/UpdateLevel2KeysWithRootKeys';
+import { removeRemovedKeys } from '~/pages/multisig/updates/UpdateGovernanceKeys/util';
 
 const TYPE = 'Update Level 2 Governance Keys using root keys';
 
@@ -62,11 +63,10 @@ export default class UpdateLevel2KeysUsingRootKeysHandler
     }
 
     serializePayload(transaction: TransactionType) {
-        // TODO We have to remove the 'removed' keys.
-        // const payloadWithoutRemovedKeys = removeRemovedKeys(
-        //     transaction.payload
-        // );
-        return serializeAuthorizationKeysUpdate(transaction.payload);
+        const payloadWithoutRemovedKeys = removeRemovedKeys(
+            transaction.payload
+        );
+        return serializeAuthorizationKeysUpdate(payloadWithoutRemovedKeys);
     }
 
     signTransaction(
@@ -74,17 +74,16 @@ export default class UpdateLevel2KeysUsingRootKeysHandler
         ledger: ConcordiumLedgerClient
     ) {
         const path: number[] = getGovernanceRootPath();
-        // const payloadWithoutRemovedKeys = removeRemovedKeys(
-        //     transaction.payload
-        // );
-        // const transactionWithoutRemoved: TransactionType = {
-        //     ...transaction,
-        //     payload: payloadWithoutRemovedKeys,
-        // };
-        // TODO Remove 'removed' when that is implemented here.
+        const payloadWithoutRemovedKeys = removeRemovedKeys(
+            transaction.payload
+        );
+        const transactionWithoutRemoved: TransactionType = {
+            ...transaction,
+            payload: payloadWithoutRemovedKeys,
+        };
 
         return ledger.signAuthorizationKeysUpdate(
-            transaction,
+            transactionWithoutRemoved,
             this.serializePayload(transaction),
             path,
             0x2a

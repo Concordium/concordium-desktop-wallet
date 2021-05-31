@@ -7,6 +7,106 @@ import {
     KeyUpdateEntryStatus,
 } from '~/utils/types';
 
+/**
+ * Checks whether there are any references left to key with the provided index
+ * in any access structure.
+ */
+function keyIsInUse(keyIndex: number, accessStructures: AccessStructure[]) {
+    const result = accessStructures.find((accessStructure) => {
+        const found = accessStructure.publicKeyIndicies.find(
+            (publicKeyIndex) => publicKeyIndex.index === keyIndex
+        );
+        return found !== undefined;
+    });
+    if (result) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Reduces the indices of all keys in all access structures that have a
+ * current index higher than the provided index.
+ */
+function reduceIndicesByOne(
+    accessStructures: AccessStructure[],
+    index: number
+): AccessStructure[] {
+    const updatedAccessStructures: AccessStructure[] = accessStructures.map(
+        (accessStructure) => {
+            const updatedIndices = accessStructure.publicKeyIndicies.map(
+                (publicKeyIndex) => {
+                    if (publicKeyIndex.index > index) {
+                        return {
+                            ...publicKeyIndex,
+                            index: publicKeyIndex.index - 1,
+                        };
+                    }
+                    return publicKeyIndex;
+                }
+            );
+            return {
+                ...accessStructure,
+                publicKeyIndicies: updatedIndices,
+            };
+        }
+    );
+    return updatedAccessStructures;
+}
+
+/**
+ * Removes any indices marked as removed. If no indices point to a key anymore, then the
+ * key is removed from the list of keys, as this means all its rights have been revoked,
+ * and therefore it should be removed entirely.
+ *
+ * The algorithm goes as follows:
+ *
+ * - Naively remove indices marked as removed.
+ * - For each key check if there is an index pointing to it
+ *   - If there is, then just skip to next key.
+ *   - If there is not, then remove the key and update all
+ *     later indices to be (currentIndex - 1).
+ */
+
+// TODO Consider if this really works. I am not certain that it does.
+export function removeRemovedKeys(
+    payload: AuthorizationKeysUpdate
+): AuthorizationKeysUpdate {
+    const accessStructuresWithoutRemovedIndices = payload.accessStructures.map(
+        (accessStructure) => {
+            const updatedIndices = accessStructure.publicKeyIndicies.filter(
+                (publicKeyIndex) =>
+                    publicKeyIndex.status !== KeyUpdateEntryStatus.Removed
+            );
+            return { ...accessStructure, publicKeyIndicies: updatedIndices };
+        }
+    );
+
+    let currentAccessStructures = accessStructuresWithoutRemovedIndices;
+    const keysToRemove: number[] = [];
+    for (let i = 0; i < payload.keys.length; i += 1) {
+        if (!keyIsInUse(i, currentAccessStructures)) {
+            currentAccessStructures = reduceIndicesByOne(
+                currentAccessStructures,
+                i
+            );
+            keysToRemove.push(i);
+            i = -1;
+        }
+    }
+
+    // Remove all the keys that are no longer referenced.
+    const updatedKeys = payload.keys.filter(
+        (_, index) => !keysToRemove.includes(index)
+    );
+
+    return {
+        ...payload,
+        keys: updatedKeys,
+        accessStructures: currentAccessStructures,
+    };
+}
+
 export function getAccessStructureTitle(
     accessStructureType: AccessStructureEnum
 ) {
