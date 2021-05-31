@@ -12,6 +12,14 @@ import {
     instanceOfTransferToPublic,
     instanceOfAddBaker,
     AddBaker,
+    instanceOfRemoveBaker,
+    RemoveBaker,
+    instanceOfUpdateBakerKeys,
+    UpdateBakerKeys,
+    UpdateBakerStake,
+    instanceOfUpdateBakerStake,
+    instanceOfUpdateBakerRestakeEarnings,
+    UpdateBakerRestakeEarnings,
 } from '~/utils/types';
 import {
     serializeTransactionHeader,
@@ -20,8 +28,13 @@ import {
     serializeScheduledTransferPayloadBase,
     serializeTransferToPublicData,
     serializeAddBaker,
-    serializeAddBakerKeys,
+    serializeBakerVerifyKeys,
     serializeAddBakerProofsStakeRestake,
+    serializeRemoveBaker,
+    serializeUpdateBakerKeys,
+    serializeBakerKeyProofs,
+    serializeUpdateBakerStake,
+    serializeUpdateBakerRestakeEarnings,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
 import { encodeWord16 } from '~/utils/serializationHelpers';
@@ -31,7 +44,10 @@ const INS_SIMPLE_TRANSFER = 0x02;
 const INS_TRANSFER_TO_ENCRYPTED = 0x11;
 const INS_TRANSFER_TO_PUBLIC = 0x12;
 const INS_TRANSFER_WITH_SCHEDULE = 0x03;
-const INS_ADD_BAKER = 0x13;
+const INS_ADD_OR_UPDATE_BAKER = 0x13;
+const INS_REMOVE_BAKER = 0x14;
+const INS_UPDATE_BAKER_STAKE = 0x15;
+const INS_UPDATE_BAKER_RESTAKE_EARNINGS = 0x16;
 
 async function signSimpleTransfer(
     transport: Transport,
@@ -243,17 +259,161 @@ async function signAddBaker(
         Uint8Array.of(TransactionKindId.Add_baker),
     ]);
 
-    const part2 = serializeAddBakerKeys(transaction.payload);
+    const part2 = serializeBakerVerifyKeys(transaction.payload);
     const part3 = serializeAddBakerProofsStakeRestake(transaction.payload);
 
     let p1 = 0x00;
     const p2 = 0x00;
 
-    await transport.send(0xe0, INS_ADD_BAKER, p1, p2, part1);
+    await transport.send(0xe0, INS_ADD_OR_UPDATE_BAKER, p1, p2, part1);
     p1 = 0x01;
-    await transport.send(0xe0, INS_ADD_BAKER, p1, p2, part2);
+    await transport.send(0xe0, INS_ADD_OR_UPDATE_BAKER, p1, p2, part2);
     p1 = 0x02;
-    const response = await transport.send(0xe0, INS_ADD_BAKER, p1, p2, part3);
+    const response = await transport.send(
+        0xe0,
+        INS_ADD_OR_UPDATE_BAKER,
+        p1,
+        p2,
+        part3
+    );
+
+    return response.slice(0, 64);
+}
+
+async function signUpdateBakerKeys(
+    transport: Transport,
+    path: number[],
+    transaction: UpdateBakerKeys
+): Promise<Buffer> {
+    const payload = serializeUpdateBakerKeys(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const part1 = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        Uint8Array.of(TransactionKindId.Update_baker_keys),
+    ]);
+
+    const part2 = serializeBakerVerifyKeys(transaction.payload);
+    const part3 = serializeBakerKeyProofs(transaction.payload);
+
+    let p1 = 0x00;
+    const p2 = 0x01;
+    await transport.send(0xe0, INS_ADD_OR_UPDATE_BAKER, p1, p2, part1);
+    p1 = 0x01;
+    await transport.send(0xe0, INS_ADD_OR_UPDATE_BAKER, p1, p2, part2);
+    p1 = 0x02;
+    const response = await transport.send(
+        0xe0,
+        INS_ADD_OR_UPDATE_BAKER,
+        p1,
+        p2,
+        part3
+    );
+
+    return response.slice(0, 64);
+}
+
+async function signRemoveBaker(
+    transport: Transport,
+    path: number[],
+    transaction: RemoveBaker
+): Promise<Buffer> {
+    const payload = serializeRemoveBaker();
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const cdata = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        Uint8Array.of(TransactionKindId.Remove_baker),
+    ]);
+
+    const p1 = 0x00;
+    const p2 = 0x00;
+
+    const response = await transport.send(
+        0xe0,
+        INS_REMOVE_BAKER,
+        p1,
+        p2,
+        cdata
+    );
+
+    return response.slice(0, 64);
+}
+
+async function signUpdateBakerStake(
+    transport: Transport,
+    path: number[],
+    transaction: UpdateBakerStake
+): Promise<Buffer> {
+    const payload = serializeUpdateBakerStake(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const cdata = Buffer.concat([pathAsBuffer(path), header, payload]);
+
+    const p1 = 0x00;
+    const p2 = 0x00;
+
+    const response = await transport.send(
+        0xe0,
+        INS_UPDATE_BAKER_STAKE,
+        p1,
+        p2,
+        cdata
+    );
+
+    return response.slice(0, 64);
+}
+
+async function signUpdateBakerRestakeEarnings(
+    transport: Transport,
+    path: number[],
+    transaction: UpdateBakerRestakeEarnings
+): Promise<Buffer> {
+    const payload = serializeUpdateBakerRestakeEarnings(transaction.payload);
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const cdata = Buffer.concat([pathAsBuffer(path), header, payload]);
+
+    const p1 = 0x00;
+    const p2 = 0x00;
+
+    const response = await transport.send(
+        0xe0,
+        INS_UPDATE_BAKER_RESTAKE_EARNINGS,
+        p1,
+        p2,
+        cdata
+    );
 
     return response.slice(0, 64);
 }
@@ -277,6 +437,18 @@ export default async function signTransfer(
     }
     if (instanceOfAddBaker(transaction)) {
         return signAddBaker(transport, path, transaction);
+    }
+    if (instanceOfUpdateBakerKeys(transaction)) {
+        return signUpdateBakerKeys(transport, path, transaction);
+    }
+    if (instanceOfRemoveBaker(transaction)) {
+        return signRemoveBaker(transport, path, transaction);
+    }
+    if (instanceOfUpdateBakerStake(transaction)) {
+        return signUpdateBakerStake(transport, path, transaction);
+    }
+    if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
+        return signUpdateBakerRestakeEarnings(transport, path, transaction);
     }
     throw new Error(
         `The received transaction was not a supported transaction type`

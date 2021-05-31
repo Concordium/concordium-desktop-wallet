@@ -35,7 +35,6 @@ import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import CloseProposalModal from './CloseProposalModal';
 import { fileListToFileArray } from '~/components/Form/FileInput/util';
 import SignatureCheckboxes from './SignatureCheckboxes';
-import TransactionExpirationDetails from '~/components/TransactionExpirationDetails';
 import { getCheckboxName } from './SignatureCheckboxes/SignatureCheckboxes';
 import { submittedProposalRoute } from '~/utils/routerHelper';
 import getTransactionSignDigest from '~/utils/transactionHash';
@@ -227,10 +226,6 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                         transaction={transaction}
                                     />
                                 )}
-                                <TransactionExpirationDetails
-                                    title="Transaction must be submitted before:"
-                                    expirationDate={expiry}
-                                />
                                 <br />
                                 <Button
                                     size="tiny"
