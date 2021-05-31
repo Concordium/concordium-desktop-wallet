@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
+import { RegisterOptions } from 'react-hook-form';
 import { RejectReason } from './node/RejectReasonHelper';
 
 export type Dispatch = GenericDispatch<AnyAction>;
@@ -1182,3 +1183,8 @@ export interface CredentialExportFormat {
     credential: CredentialDeploymentInformation;
     address: string;
 }
+
+export type ValidationRules = Omit<
+    RegisterOptions,
+    'valueAsNumber' | 'valueAsDate' | 'setValueAs'
+>;

@@ -8,7 +8,7 @@ import MessageModal from '../../components/MessageModal';
 import FileInput from '../../components/Form/FileInput';
 import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import {
-    validatePassword,
+    passwordValidationRules,
     validateImportStructure,
     validateEncryptedStructure,
 } from '../../utils/importHelpers';
@@ -95,9 +95,7 @@ export default function Import() {
                 title="Enter your password"
                 text="Please enter the password you chose upon exporting your file."
                 buttonText="Continue"
-                validValue={(password) =>
-                    validatePassword(password) ? undefined : 'Invalid password'
-                }
+                validationRules={passwordValidationRules}
                 buttonOnClick={decryptAndParseData}
                 placeholder="Enter your password"
                 onClose={() => setPasswordModalOpen(false)}
