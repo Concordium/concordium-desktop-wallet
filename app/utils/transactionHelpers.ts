@@ -21,6 +21,11 @@ import {
     AccountInfo,
     AddBaker,
     AddBakerPayload,
+    RemoveBaker,
+    UpdateBakerKeysPayload,
+    UpdateBakerKeys,
+    UpdateBakerStakePayload,
+    UpdateBakerRestakeEarningsPayload,
     AddressBookEntry,
 } from './types';
 import {
@@ -28,7 +33,7 @@ import {
     getTransactionKindEnergy,
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
-import { toMicroUnits, isValidGTUString } from './gtu';
+import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 import {
     getNextAccountNonce,
     getTransactionStatus,
@@ -312,6 +317,65 @@ export function createAddBakerTransaction(
     });
 }
 
+export function createUpdateBakerKeysTransaction(
+    fromAddress: string,
+    payload: UpdateBakerKeysPayload,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): Promise<UpdateBakerKeys> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_baker_keys,
+        payload,
+        signatureAmount,
+    });
+}
+
+export function createRemoveBakerTransaction(
+    fromAddress: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): Promise<RemoveBaker> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Remove_baker,
+        payload: {},
+        signatureAmount,
+    });
+}
+
+export function createUpdateBakerStakeTransaction(
+    fromAddress: string,
+    payload: UpdateBakerStakePayload,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): Promise<RemoveBaker> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_baker_stake,
+        payload,
+        signatureAmount,
+    });
+}
+
+export function createUpdateBakerRestakeEarningsTransaction(
+    fromAddress: string,
+    payload: UpdateBakerRestakeEarningsPayload,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): Promise<RemoveBaker> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_baker_restake_earnings,
+        payload,
+        signatureAmount,
+    });
+}
+
 export interface StatusResponse {
     status: TransactionStatus;
     outcomes: Record<string, TransactionEvent>;
@@ -436,7 +500,7 @@ export function validateShieldedAmount(
     return undefined;
 }
 
-export function validateAmount(
+export function validateTransferAmount(
     amountToValidate: string,
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
@@ -454,5 +518,38 @@ export function validateAmount(
     if (toMicroUnits(amountToValidate) === 0n) {
         return 'Amount may not be zero';
     }
+    return undefined;
+}
+
+function amountToStakeAtDisposal(accountInfo: AccountInfo): bigint {
+    const unShielded = BigInt(accountInfo.accountAmount);
+    const scheduled = accountInfo.accountReleaseSchedule
+        ? BigInt(accountInfo.accountReleaseSchedule.total)
+        : 0n;
+    return unShielded - scheduled;
+}
+
+export function validateBakerStake(
+    bakerStakeThreshold: bigint | undefined,
+    amountToValidate: string,
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (!isValidGTUString(amountToValidate)) {
+        return 'Value is not a valid GTU amount';
+    }
+    const amount = toMicroUnits(amountToValidate);
+    if (bakerStakeThreshold && bakerStakeThreshold > amount) {
+        return `Stake is below the threshold (${displayAsGTU(
+            bakerStakeThreshold
+        )}) for baking `;
+    }
+    if (
+        accountInfo &&
+        amountToStakeAtDisposal(accountInfo) < amount + (estimatedFee || 0n)
+    ) {
+        return 'Insufficient funds';
+    }
+
     return undefined;
 }

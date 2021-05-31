@@ -21,6 +21,25 @@ export const useUpdateEffect: typeof useEffect = (effect, deps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, deps);
 };
+
+/** Calls function at a given rate */
+export function useInterval(fn: () => void, rate: number, enable = true) {
+    useEffect(() => {
+        if (enable) {
+            const interval = setInterval(fn, rate);
+            return () => clearInterval(interval);
+        }
+        return () => {};
+    }, [enable, fn, rate]);
+}
+
+/** Hook for reading the current time, given a refresh rate. */
+export function useCurrentTime(refreshRate: number) {
+    const [time, setTime] = useState(new Date());
+    useInterval(() => setTime(new Date()), refreshRate);
+    return time;
+}
+
 /**
  * Like a regular useState hook, but resets to initial value after given timeout (in MS).
  */

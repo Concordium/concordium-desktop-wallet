@@ -1,7 +1,6 @@
 import React from 'react';
-import { AddBaker } from '~/utils/types';
-import { displayAsGTU } from '~/utils/gtu';
-import DisplayFee from '~/components/DisplayFee';
+import { UpdateBakerKeys } from '~/utils/types';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { useAccountName } from '~/utils/dataHooks';
 import styles from './transferDetails.module.scss';
 import PublicKey from '~/pages/multisig/common/PublicKey/PublicKey';
@@ -9,29 +8,21 @@ import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/Displa
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
-    transaction: AddBaker;
+    transaction: UpdateBakerKeys;
 }
 
 /**
- * Displays an overview of an Add-Baker-Transaction.
+ * Displays an overview of an Update-Baker-Keys-Transaction.
  */
-export default function DisplayAddBaker({ transaction }: Props) {
+export default function DisplayUpdateBakerKeys({ transaction }: Props) {
     const senderName = useAccountName(transaction.sender);
     return (
         <>
-            <h5 className={styles.title}>From Account:</h5>
+            <p className={styles.title}>From Account:</p>
             <p className={styles.name}>{senderName}</p>
             <p className={styles.address}>{transaction.sender}</p>
-            <h5 className={styles.title}>Staked amount:</h5>
-            <p className={styles.amount}>
-                {displayAsGTU(transaction.payload.bakingStake)}
-            </p>
-            <DisplayFee className={styles.fee} transaction={transaction} />
-            <h5 className={styles.title}>Restake earnings:</h5>
-            <p className={styles.amount}>
-                {transaction.payload.restakeEarnings ? 'Yes' : 'No'}
-            </p>
-            <h5 className={styles.title}>Public keys:</h5>
+            <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            <p className={styles.title}>Public keys:</p>
             <PublicKey
                 name="Election verify key"
                 publicKey={transaction.payload.electionVerifyKey}

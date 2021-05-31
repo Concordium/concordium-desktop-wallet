@@ -1,8 +1,13 @@
-import { useEffect, useState } from 'react';
-import { getAccountInfoOfAddress } from '../node/nodeHelpers';
+import { useEffect, useMemo, useState } from 'react';
+import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
+import {
+    fetchLastFinalizedBlockSummary,
+    getAccountInfoOfAddress,
+} from '../node/nodeHelpers';
+import { getDefaultExpiry, isFutureDate } from './timeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
 import { lookupName } from './transactionHelpers';
-import { AccountInfo, Fraction, TransactionKindId } from './types';
+import { AccountInfo, Amount, Fraction, TransactionKindId } from './types';
 
 /** Hook for looking up an account name from an address */
 export function useAccountName(address: string) {
@@ -39,4 +44,52 @@ export function useTransactionCostEstimate(
             .catch(() => {});
     }, [kind, payloadSize, signatureAmount]);
     return fee;
+}
+
+/** Hook for fetching last finalized block summary */
+export function useLastFinalizedBlockSummary() {
+    const [summary, setSummary] = useState<{
+        lastFinalizedBlockSummary: BlockSummary;
+        consensusStatus: ConsensusStatus;
+    }>();
+    useEffect(() => {
+        fetchLastFinalizedBlockSummary()
+            .then(setSummary)
+            .catch(() => {});
+    }, []);
+    return summary;
+}
+
+/** Hook for fetching staked amount for a given account address, Returns undefined while loading and 0 if account is not a baker */
+export function useStakedAmount(accountAddress: string): Amount | undefined {
+    const accountInfo = useAccountInfo(accountAddress);
+    if (accountInfo === undefined) {
+        return undefined;
+    }
+    return BigInt(accountInfo.accountBaker?.stakedAmount ?? '0');
+}
+
+/** Hook for accessing chain parameters of the last finalized block */
+export function useChainParameters() {
+    const lastFinalizedBlock = useLastFinalizedBlockSummary();
+    return lastFinalizedBlock?.lastFinalizedBlockSummary.updates
+        .chainParameters;
+}
+
+/** Hook for creating transaction exiry state and error */
+export function useTransactionExpiryState(
+    validation?: (expiry: Date | undefined) => string | undefined
+) {
+    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
+        getDefaultExpiry()
+    );
+
+    const expiryTimeError = useMemo(
+        () =>
+            expiryTime === undefined || isFutureDate(expiryTime)
+                ? validation?.(expiryTime)
+                : 'Transaction expiry time must be in the future',
+        [expiryTime, validation]
+    );
+    return [expiryTime, setExpiryTime, expiryTimeError] as const;
 }
