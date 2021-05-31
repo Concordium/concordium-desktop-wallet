@@ -956,8 +956,13 @@ export interface HigherLevelKeyUpdate {
     threshold: number;
 }
 
+export interface KeyIndexWithStatus {
+    index: Word16;
+    status: KeyUpdateEntryStatus;
+}
+
 export interface AccessStructure {
-    publicKeyIndicies: Word16[];
+    publicKeyIndicies: KeyIndexWithStatus[];
     threshold: Word16;
 }
 

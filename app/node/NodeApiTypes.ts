@@ -52,6 +52,7 @@ export interface Key {
 }
 
 export interface Authorizations {
+    emergency: Authorization;
     microGTUPerEuro: Authorization;
     euroPerEnergy: Authorization;
     transactionFeeDistribution: Authorization;
@@ -61,6 +62,8 @@ export interface Authorizations {
     paramGASRewards: Authorization;
     bakerStakeThreshold: Authorization;
     electionDifficulty: Authorization;
+    addAnonymityRevoker: Authorization;
+    addIdentityProvider: Authorization;
     keys: Key[];
 }
 

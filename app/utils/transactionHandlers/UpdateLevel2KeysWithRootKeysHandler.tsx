@@ -17,14 +17,14 @@ import {
 } from '../types';
 import { serializeAuthorizationKeysUpdate } from '../UpdateSerialization';
 import { UpdateInstructionHandler } from '../transactionTypes';
-import UpdateLevel2KeysWithRootKeys from '~/pages/multisig/updates/UpdateAuthorizationKeys/UpdateLevel2KeysWithRootKeys';
-import AuthorizationKeysView from '~/pages/multisig/updates/UpdateAuthorizationKeys/AuthorizationKeysView';
+import AuthorizationKeysView from '~/pages/multisig/updates/UpdateGovernanceKeys/AuthorizationKeysView';
+import UpdateLevel2KeysWithRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/UpdateLevel2KeysWithRootKeys';
 
 const TYPE = 'Update Level 2 Governance Keys using root keys';
 
 type TransactionType = UpdateInstruction<AuthorizationKeysUpdate>;
 
-export default class UpdateLevel1KeysUsingRootKeysHandler
+export default class UpdateLevel2KeysUsingRootKeysHandler
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(

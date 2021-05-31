@@ -13,6 +13,7 @@ import {
     HigherLevelKeyUpdate,
     AccountTransaction,
     Schedule,
+    AuthorizationKeysUpdate,
 } from './types';
 
 export interface TransactionInput {
@@ -31,6 +32,11 @@ export interface UpdateProps {
         effectiveTime: Date,
         expiryTime: Date,
         higherLevelKeyUpdate: HigherLevelKeyUpdate
+    ): Promise<void>;
+    handleAuthorizationKeySubmit?(
+        effectiveTime: Date,
+        expiryTime: Date,
+        higherLevelKeyUpdate: AuthorizationKeysUpdate
     ): Promise<void>;
 }
 

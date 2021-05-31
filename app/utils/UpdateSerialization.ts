@@ -68,13 +68,13 @@ function serializeAccessStructure(accessStructure: AccessStructure) {
     // is unique.
     const sortedIndicies = accessStructure.publicKeyIndicies.sort(
         (index1, index2) => {
-            return index1 - index2;
+            return index1.index - index2.index;
         }
     );
     const serializedIndicies = Buffer.concat(
         sortedIndicies.map((index) => {
             const serializedIndex = Buffer.alloc(2);
-            serializedIndex.writeUInt16BE(index, 0);
+            serializedIndex.writeUInt16BE(index.index, 0);
             return serializedIndex;
         })
     );
@@ -424,9 +424,9 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
         case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
             return OnChainUpdateType.UpdateLevel1Keys;
         case UpdateType.UpdateLevel2KeysUsingRootKeys:
-            return OnChainUpdateType.UpdateRootKeys;
+            return OnChainUpdateType.UpdateLevel2Keys;
         case UpdateType.UpdateLevel2KeysUsingLevel1Keys:
-            return OnChainUpdateType.UpdateLevel1Keys;
+            return OnChainUpdateType.UpdateLevel2Keys;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }
