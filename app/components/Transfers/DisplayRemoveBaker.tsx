@@ -2,6 +2,8 @@ import React from 'react';
 import { RemoveBaker } from '~/utils/types';
 import styles from './transferDetails.module.scss';
 import { useAccountName } from '~/utils/hooks';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: RemoveBaker;
@@ -17,6 +19,9 @@ export default function DisplayAddBaker({ transaction }: Props) {
             <p className={styles.title}>From Account:</p>
             <p className={styles.name}>{senderName}</p>
             <p className={styles.address}>{transaction.sender}</p>
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
         </>
     );
 }

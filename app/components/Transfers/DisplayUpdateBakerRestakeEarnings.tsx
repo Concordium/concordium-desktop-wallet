@@ -3,6 +3,8 @@ import { UpdateBakerRestakeEarnings } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { useAccountName } from '~/utils/hooks';
 import styles from './transferDetails.module.scss';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: UpdateBakerRestakeEarnings;
@@ -25,6 +27,9 @@ export default function DisplayUpdateBakerRestakeEarnings({
                 {transaction.payload.restakeEarnings ? 'Yes' : 'No'}
             </p>
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
         </>
     );
 }

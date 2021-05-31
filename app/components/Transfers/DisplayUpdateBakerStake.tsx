@@ -4,6 +4,8 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import { useAccountName } from '~/utils/hooks';
 import styles from './transferDetails.module.scss';
 import { displayAsGTU } from '~/utils/gtu';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: UpdateBakerStake;
@@ -24,6 +26,9 @@ export default function DisplayUpdateBakerStake({ transaction }: Props) {
                 {displayAsGTU(transaction.payload.stake)}
             </p>
             <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
         </>
     );
 }
