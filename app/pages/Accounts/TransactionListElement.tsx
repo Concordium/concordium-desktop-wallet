@@ -101,7 +101,7 @@ function parseShieldedAmount(
         ) {
             return buildCostFreeAmountString(
                 BigInt(transaction.decryptedAmount),
-                true
+                !isOutgoingTransaction
             );
         }
         return buildCostFreeAmountString(BigInt(transaction.decryptedAmount));
@@ -184,6 +184,18 @@ function displayType(kind: TransactionKindString) {
             return <i>Block reward</i>;
         case TransactionKindString.FinalizationReward:
             return <i>Finalization reward</i>;
+        case TransactionKindString.AddBaker:
+            return <i>Add baker</i>;
+        case TransactionKindString.RemoveBaker:
+            return <i>Remove baker</i>;
+        case TransactionKindString.UpdateBakerStake:
+            return <i>Update baker stake</i>;
+        case TransactionKindString.UpdateBakerRestakeEarnings:
+            return <i>Update baker restake Earnings</i>;
+        case TransactionKindString.UpdateBakerKeys:
+            return <i>Update baker keys</i>;
+        case TransactionKindString.UpdateCredentials:
+            return <i>Update account credentials</i>;
         default:
             return '';
     }
