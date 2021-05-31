@@ -93,7 +93,12 @@ export default function UpdateBakerKeysPage() {
             proofSignature: bakerKeys.proofSignature,
             proofAggregation: bakerKeys.proofAggregation,
         };
-        createUpdateBakerKeysTransaction(account.address, payload)
+        createUpdateBakerKeysTransaction(
+            account.address,
+            payload,
+            account?.signatureThreshold,
+            expiryTime
+        )
             .then(setTransaction)
             .catch((e: Error) =>
                 setError(`Failed create transaction: ${e.message}`)
