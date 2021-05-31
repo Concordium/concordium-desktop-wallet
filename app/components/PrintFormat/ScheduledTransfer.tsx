@@ -15,7 +15,7 @@ import {
     fee,
     displayStatus,
     standardPageFooter,
-    hashRow,
+    HashRows,
     standardTableHeader,
     timeFormat,
     displayExpiry,
@@ -58,7 +58,7 @@ function PrintFormatScheduledTransfer({
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}
-                    {hashRow(transaction)}
+                    <HashRows transaction={transaction} />
                     {Boolean(image) && (
                         <tr>
                             <td>Identicon:</td>
