@@ -8,7 +8,7 @@ import {
     formatNote,
     PlainDetail,
 } from './shared';
-import { useStakedAmount } from '~/utils/hooks';
+import { useStakedAmount } from '~/utils/dataHooks';
 import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
@@ -81,7 +81,7 @@ function StakedAmountNote({ accountAddress, stake }: StakedAmountNoteProps) {
                 `Decrease of ${displayAsGTU(
                     difference * -1n
                 )} from ${displayAsGTU(stakedAlready)}`
-            )}{' '}
+            )}
         </>
     );
 }

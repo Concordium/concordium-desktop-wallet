@@ -4,7 +4,7 @@ import styles from './UpdateAccountCredentials.module.scss';
 
 interface Props {
     currentThreshold: number;
-    newCredentialAmount: number;
+    // newCredentialAmount: number;
     newThreshold: number | undefined;
     setNewThreshold: (threshold: number | undefined) => void;
 }
@@ -24,7 +24,7 @@ export function validateThreshold(threshold: number, max: number) {
  */
 export default function ChangeThreshold({
     currentThreshold,
-    newCredentialAmount,
+    // newCredentialAmount,
     newThreshold,
     setNewThreshold,
 }: Props): JSX.Element {
@@ -58,9 +58,6 @@ export default function ChangeThreshold({
                 value={
                     newThreshold !== undefined ? newThreshold.toString() : ''
                 }
-                min={1}
-                max={newCredentialAmount}
-                step={1}
             />
         </div>
     );

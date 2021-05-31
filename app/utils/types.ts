@@ -268,6 +268,7 @@ export interface AccountTransaction<
     nonce: string;
     energyAmount: string;
     estimatedFee?: Fraction;
+    cost?: string;
     expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;

@@ -1,6 +1,6 @@
 /* eslint-disable promise/catch-or-return */
 import React from 'react';
-import { useAccountName } from '~/utils/hooks';
+import { useAccountName } from '~/utils/dataHooks';
 import {
     MultiSignatureTransactionStatus,
     UpdateBakerRestakeEarnings,

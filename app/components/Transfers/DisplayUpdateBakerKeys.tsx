@@ -1,9 +1,11 @@
 import React from 'react';
 import { UpdateBakerKeys } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import { useAccountName } from '~/utils/hooks';
+import { useAccountName } from '~/utils/dataHooks';
 import styles from './transferDetails.module.scss';
 import PublicKey from '~/pages/multisig/common/PublicKey/PublicKey';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: UpdateBakerKeys;
@@ -32,6 +34,9 @@ export default function DisplayUpdateBakerKeys({ transaction }: Props) {
             <PublicKey
                 name="Aggregation verify key"
                 publicKey={transaction.payload.aggregationVerifyKey}
+            />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
             />
         </>
     );

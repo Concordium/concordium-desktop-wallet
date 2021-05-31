@@ -26,7 +26,7 @@ import {
     useStakedAmount,
     useTransactionCostEstimate,
     useTransactionExpiryState,
-} from '~/utils/hooks';
+} from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
 import PickAmount from './PickAmount';
 import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';

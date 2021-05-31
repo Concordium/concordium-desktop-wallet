@@ -34,7 +34,7 @@ import {
     useChainParameters,
     useTransactionCostEstimate,
     useTransactionExpiryState,
-} from '~/utils/hooks';
+} from '~/utils/dataHooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     signUsingLedger,

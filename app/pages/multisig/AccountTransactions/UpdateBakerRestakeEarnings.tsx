@@ -21,7 +21,7 @@ import {
     useAccountInfo,
     useTransactionCostEstimate,
     useTransactionExpiryState,
-} from '~/utils/hooks';
+} from '~/utils/dataHooks';
 import SignTransaction from './SignTransaction';
 import ButtonGroup from '~/components/ButtonGroup';
 import UpdateBakerRestakeEarningsProposalDetails from './proposal-details/UpdateBakerRestakeEarnings';

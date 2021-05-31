@@ -29,7 +29,7 @@ import routes from '~/constants/routes.json';
 import {
     useTransactionCostEstimate,
     useTransactionExpiryState,
-} from '~/utils/hooks';
+} from '~/utils/dataHooks';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import { DownloadBakerCredentialsStep } from './AddBaker';
