@@ -99,63 +99,16 @@ export default async function signAuthorizationKeysUpdate(
 
     const authorizationKeysUpdate: AuthorizationKeysUpdate =
         transaction.payload;
-    await sendAccessStructure(
-        authorizationKeysUpdate.emergency,
-        transport,
-        INS
-    );
-    await sendAccessStructure(authorizationKeysUpdate.protocol, transport, INS);
-    await sendAccessStructure(
-        authorizationKeysUpdate.electionDifficulty,
-        transport,
-        INS
-    );
-    await sendAccessStructure(
-        authorizationKeysUpdate.euroPerEnergy,
-        transport,
-        INS
-    );
-    await sendAccessStructure(
-        authorizationKeysUpdate.microGtuPerEuro,
-        transport,
-        INS
-    );
-    await sendAccessStructure(
-        authorizationKeysUpdate.foundationAccount,
-        transport,
-        INS
-    );
-    await sendAccessStructure(
-        authorizationKeysUpdate.mintDistribution,
-        transport,
-        INS
-    );
-    await sendAccessStructure(
-        authorizationKeysUpdate.transactionFeeDistribution,
-        transport,
-        INS
-    );
-    await sendAccessStructure(
-        authorizationKeysUpdate.gasRewards,
-        transport,
-        INS
-    );
-    await sendAccessStructure(
-        authorizationKeysUpdate.bakerStakeThreshold,
-        transport,
-        INS
-    );
-    await sendAccessStructure(
-        authorizationKeysUpdate.addAnonymityRevoker,
-        transport,
-        INS
-    );
 
-    const response = await sendAccessStructure(
-        authorizationKeysUpdate.addIdentityProvider,
-        transport,
-        INS
-    );
+    let response;
+    for (const accessStructure of authorizationKeysUpdate.accessStructures) {
+        response = await sendAccessStructure(accessStructure, transport, INS);
+    }
+
+    if (!response) {
+        throw new Error('The signature was not returned correctly.');
+    }
+
     const signature = response.slice(0, 64);
     return signature;
 }

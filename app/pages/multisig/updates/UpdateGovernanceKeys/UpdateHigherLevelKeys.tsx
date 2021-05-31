@@ -22,7 +22,7 @@ import {
     subtractHours,
     TimeConstants,
 } from '~/utils/timeHelpers';
-import KeyUpdateEntry from './KeyUpdateEntry';
+import { KeyUpdateEntry } from './KeyUpdateEntry';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 
 interface Props {

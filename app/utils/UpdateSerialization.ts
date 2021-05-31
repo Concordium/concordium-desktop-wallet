@@ -108,22 +108,11 @@ export function serializeAuthorizationKeysUpdate(
         authorizationKeysUpdate.keys.map((key) => serializeVerifyKey(key))
     );
 
-    const serializedAccessStructures: Buffer = Buffer.concat([
-        serializeAccessStructure(authorizationKeysUpdate.emergency),
-        serializeAccessStructure(authorizationKeysUpdate.protocol),
-        serializeAccessStructure(authorizationKeysUpdate.electionDifficulty),
-        serializeAccessStructure(authorizationKeysUpdate.euroPerEnergy),
-        serializeAccessStructure(authorizationKeysUpdate.microGtuPerEuro),
-        serializeAccessStructure(authorizationKeysUpdate.foundationAccount),
-        serializeAccessStructure(authorizationKeysUpdate.mintDistribution),
-        serializeAccessStructure(
-            authorizationKeysUpdate.transactionFeeDistribution
-        ),
-        serializeAccessStructure(authorizationKeysUpdate.gasRewards),
-        serializeAccessStructure(authorizationKeysUpdate.bakerStakeThreshold),
-        serializeAccessStructure(authorizationKeysUpdate.addAnonymityRevoker),
-        serializeAccessStructure(authorizationKeysUpdate.addIdentityProvider),
-    ]);
+    const serializedAccessStructures: Buffer = Buffer.concat(
+        authorizationKeysUpdate.accessStructures.map((accessStructure) => {
+            return serializeAccessStructure(accessStructure);
+        })
+    );
 
     return Buffer.concat([
         serializedAuthorizationKeysUpdate,

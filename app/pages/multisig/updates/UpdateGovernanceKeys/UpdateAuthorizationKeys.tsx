@@ -13,13 +13,15 @@ import {
 import {
     AccessStructure,
     AuthorizationKeysUpdate,
-    KeyUpdateEntryStatus,
     KeyWithStatus,
     UpdateType,
 } from '~/utils/types';
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
-import KeyUpdateEntry from './KeyUpdateEntry';
-import mapCurrentAuthorizationsToUpdate from './util';
+import { KeyUpdateEntry } from './KeyUpdateEntry';
+import {
+    mapCurrentAuthorizationsToUpdate,
+    getAccessStructureTitle,
+} from './util';
 
 interface Props {
     blockSummary: BlockSummary;
@@ -47,12 +49,47 @@ export default function UpdateAuthorizationKeys({
     const currentKeySetSize = currentKeys.length;
     const currentAuthorizations = blockSummary.updates.keys.level2Keys;
 
-    const [newLevel2Keys] = useState<AuthorizationKeysUpdate>(
+    const [newLevel2Keys, setNewLevel2Keys] = useState<AuthorizationKeysUpdate>(
         mapCurrentAuthorizationsToUpdate(currentAuthorizations)
     );
 
-    function updateKey(keyToUpdate: KeyWithStatus) {
-        return keyToUpdate;
+    function updateKey(accessStructure: AccessStructure) {
+        return (keyToUpdate: KeyWithStatus) => {
+            // let removeAddedKey = false;
+            const keyIndex = newLevel2Keys.keys.findIndex(
+                (value) => value.verifyKey === keyToUpdate.key.verifyKey
+            );
+
+            const updatedAccessStructures = newLevel2Keys.accessStructures.map(
+                (currentAccessStructure) => {
+                    if (accessStructure.type === currentAccessStructure.type) {
+                        const updatedAccessStructureIndicies = accessStructure.publicKeyIndicies.map(
+                            (value) => {
+                                if (value.index === keyIndex) {
+                                    return {
+                                        index: value.index,
+                                        status: keyToUpdate.status,
+                                    };
+                                }
+                                return value;
+                            }
+                        );
+                        return {
+                            ...currentAccessStructure,
+                            publicKeyIndicies: updatedAccessStructureIndicies,
+                        };
+                    }
+                    return currentAccessStructure;
+                }
+            );
+
+            const updatedLevel2Keys = {
+                ...newLevel2Keys,
+                accessStructures: updatedAccessStructures,
+            };
+
+            setNewLevel2Keys(updatedLevel2Keys);
+        };
     }
 
     const expiryTimeError = useMemo(() => {
@@ -70,34 +107,33 @@ export default function UpdateAuthorizationKeys({
 
     function displayAccessStructure(
         accessStructure: AccessStructure,
-        title: string,
         keys: Key[]
     ) {
         return (
-            <div>
-                <h2>{title}</h2>
+            <div key={accessStructure.type}>
+                <h2>{getAccessStructureTitle(accessStructure.type)}</h2>
                 <ul>
-                    {keys
-                        .map((key, index) => {
-                            return { key, index };
-                        })
-                        .filter((result) =>
-                            accessStructure.publicKeyIndicies
-                                .map((idx) => idx.index)
-                                .includes(result.index)
-                        )
-                        .map((value) => {
-                            return (
-                                <KeyUpdateEntry
-                                    key={value.key.verifyKey}
-                                    updateKey={updateKey}
-                                    keyInput={{
-                                        status: KeyUpdateEntryStatus.Unchanged,
-                                        key: value.key,
-                                    }}
-                                />
+                    {accessStructure.publicKeyIndicies.map((publicKeyIndex) => {
+                        const matchingKey = keys.find(
+                            (_, index) => index === publicKeyIndex.index
+                        );
+                        if (!matchingKey) {
+                            throw new Error(
+                                'A matching key was not found for the key index. This should never occur.'
                             );
-                        })}
+                        }
+
+                        return (
+                            <KeyUpdateEntry
+                                key={matchingKey.verifyKey}
+                                updateKey={updateKey(accessStructure)}
+                                keyInput={{
+                                    status: publicKeyIndex.status,
+                                    key: matchingKey,
+                                }}
+                            />
+                        );
+                    })}
                 </ul>
             </div>
         );
@@ -129,6 +165,12 @@ export default function UpdateAuthorizationKeys({
                         New size of level 2 key set:{' '}
                         <b>{newLevel2Keys.keys.length}</b>
                     </p>
+                    {newLevel2Keys.accessStructures.map((accessStructure) => {
+                        return displayAccessStructure(
+                            accessStructure,
+                            newLevel2Keys.keys
+                        );
+                    })}
                     <h5>Effective time</h5>
                     <InputTimestamp
                         value={effectiveTime}
@@ -151,66 +193,6 @@ export default function UpdateAuthorizationKeys({
                             )
                         </p>
                     ) : undefined}
-                    {displayAccessStructure(
-                        newLevel2Keys.emergency,
-                        'Emergency',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.protocol,
-                        'Protocol update',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.electionDifficulty,
-                        'Election difficulty',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.euroPerEnergy,
-                        'Euro per energy',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.microGtuPerEuro,
-                        'Micro GTU per Euro',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.foundationAccount,
-                        'Foundation account',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.mintDistribution,
-                        'Mint distribution',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.transactionFeeDistribution,
-                        'Transaction fee distribution',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.gasRewards,
-                        'GAS rewards',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.bakerStakeThreshold,
-                        'Baker stake threshold',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.addAnonymityRevoker,
-                        'Add anonymity revoker',
-                        currentKeys
-                    )}
-                    {displayAccessStructure(
-                        newLevel2Keys.addIdentityProvider,
-                        'Add identity provider',
-                        currentKeys
-                    )}
                 </div>
             </Columns.Column>
             <Columns.Column>

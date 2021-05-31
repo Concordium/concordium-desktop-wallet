@@ -961,9 +961,25 @@ export interface KeyIndexWithStatus {
     status: KeyUpdateEntryStatus;
 }
 
+export enum AccessStructureEnum {
+    emergency,
+    protocol,
+    electionDifficulty,
+    euroPerEnergy,
+    microGtuPerEuro,
+    foundationAccount,
+    mintDistribution,
+    transactionFeeDistribution,
+    gasRewards,
+    bakerStakeThreshold,
+    addAnonymityRevoker,
+    addIdentityProvider,
+}
+
 export interface AccessStructure {
     publicKeyIndicies: KeyIndexWithStatus[];
     threshold: Word16;
+    type: AccessStructureEnum;
 }
 
 // Root keys updating = 2, level 1 keys updating = 1.
@@ -971,18 +987,19 @@ export type AuthorizationKeysUpdateType = 1 | 2;
 export interface AuthorizationKeysUpdate {
     keyUpdateType: AuthorizationKeysUpdateType;
     keys: VerifyKey[];
-    emergency: AccessStructure;
-    protocol: AccessStructure;
-    electionDifficulty: AccessStructure;
-    euroPerEnergy: AccessStructure;
-    microGtuPerEuro: AccessStructure;
-    foundationAccount: AccessStructure;
-    mintDistribution: AccessStructure;
-    transactionFeeDistribution: AccessStructure;
-    gasRewards: AccessStructure;
-    bakerStakeThreshold: AccessStructure;
-    addAnonymityRevoker: AccessStructure;
-    addIdentityProvider: AccessStructure;
+    accessStructures: AccessStructure[];
+    // emergency: AccessStructure;
+    // protocol: AccessStructure;
+    // electionDifficulty: AccessStructure;
+    // euroPerEnergy: AccessStructure;
+    // microGtuPerEuro: AccessStructure;
+    // foundationAccount: AccessStructure;
+    // mintDistribution: AccessStructure;
+    // transactionFeeDistribution: AccessStructure;
+    // gasRewards: AccessStructure;
+    // bakerStakeThreshold: AccessStructure;
+    // addAnonymityRevoker: AccessStructure;
+    // addIdentityProvider: AccessStructure;
 }
 
 export interface TransactionDetails {

@@ -7,6 +7,7 @@ import {
     VerifyKey,
 } from '~/utils/types';
 import withChainData, { ChainData } from '../../common/withChainData';
+import { getAccessStructureTitle } from './util';
 
 interface Props extends ChainData {
     authorizationKeysUpdate: AuthorizationKeysUpdate;
@@ -31,13 +32,12 @@ function findKeysForAccessStructure(
 
 function accessStructureView(
     accessStructure: AccessStructure,
-    title: string,
     keys: VerifyKey[]
 ) {
     const keysInStructure = findKeysForAccessStructure(accessStructure, keys);
     return (
         <div>
-            <h2>{title}</h2>
+            <h2>{getAccessStructureTitle(accessStructure.type)}</h2>
             <p>Threshold: {accessStructure.threshold}</p>
             <ul>
                 {keysInStructure.map((key) => {
@@ -63,66 +63,12 @@ function AuthorizationKeysView({
     return (
         <>
             {type}
-            {accessStructureView(
-                authorizationKeysUpdate.emergency,
-                'Emergency',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.protocol,
-                'Protocol update',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.electionDifficulty,
-                'Election difficulty',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.euroPerEnergy,
-                'Euro per energy',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.microGtuPerEuro,
-                'Micro GTU per Euro',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.foundationAccount,
-                'Foundation account',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.mintDistribution,
-                'Mint distribution',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.transactionFeeDistribution,
-                'Transaction fee distribution',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.gasRewards,
-                'GAS rewards',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.bakerStakeThreshold,
-                'Baker stake threshold',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.addAnonymityRevoker,
-                'Add anonymity revoker',
-                authorizationKeysUpdate.keys
-            )}
-            {accessStructureView(
-                authorizationKeysUpdate.addIdentityProvider,
-                'Add identity provider',
-                authorizationKeysUpdate.keys
-            )}
+            {authorizationKeysUpdate.accessStructures.map((accessStructure) => {
+                return accessStructureView(
+                    accessStructure,
+                    authorizationKeysUpdate.keys
+                );
+            })}
         </>
     );
 }

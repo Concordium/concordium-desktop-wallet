@@ -56,10 +56,7 @@ function updateKeyStatus(key: KeyWithStatus) {
  * can be updated by clicking the button to remove the key, or to revert
  * the removal of the key, depending on the status of the entry.
  */
-export default function KeyUpdateEntry({
-    keyInput,
-    updateKey,
-}: KeyUpdateEntryProps) {
+export function KeyUpdateEntry({ keyInput, updateKey }: KeyUpdateEntryProps) {
     return (
         <>
             <li className={styles.listItem}>
