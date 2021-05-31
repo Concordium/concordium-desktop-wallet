@@ -14,7 +14,6 @@ import {
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
-import styles from './MultisignatureAccountTransactions.module.scss';
 import { toMicroUnits } from '~/utils/gtu';
 import PickAmount from './PickAmount';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -44,6 +43,8 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+
+import styles from './MultisignatureAccountTransactions.module.scss';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
@@ -171,6 +172,7 @@ export default function AddBakerPage() {
         <MultiSignatureLayout
             pageTitle={pageTitle}
             stepTitle="Transaction Proposal - Add Baker"
+            delegateScroll
         >
             <SimpleErrorModal
                 show={Boolean(error)}
@@ -178,33 +180,43 @@ export default function AddBakerPage() {
                 content={error}
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
-            <Columns divider columnScroll>
-                <Columns.Column header="Transaction Details" verticalPadding>
-                    <AddBakerProposalDetails
-                        identity={identity}
-                        account={account}
-                        stake={stake}
-                        estimatedFee={estimatedFee}
-                        restakeEarnings={restakeEnabled}
-                        expiryTime={expiryTime}
-                        bakerVerifyKeys={
-                            bakerKeys === undefined
-                                ? undefined
-                                : {
-                                      electionVerifyKey:
-                                          bakerKeys.electionPublic,
-                                      signatureVerifyKey:
-                                          bakerKeys.signaturePublic,
-                                      aggregationVerifyKey:
-                                          bakerKeys.aggregationPublic,
-                                  }
-                        }
-                    />
+            <Columns
+                divider
+                columnScroll
+                className={styles.subtractContainerPadding}
+                columnClassName={styles.column}
+            >
+                <Columns.Column header="Transaction Details">
+                    <div className={styles.columnContent}>
+                        <AddBakerProposalDetails
+                            identity={identity}
+                            account={account}
+                            stake={stake}
+                            estimatedFee={estimatedFee}
+                            restakeEarnings={restakeEnabled}
+                            expiryTime={expiryTime}
+                            bakerVerifyKeys={
+                                bakerKeys === undefined
+                                    ? undefined
+                                    : {
+                                          electionVerifyKey:
+                                              bakerKeys.electionPublic,
+                                          signatureVerifyKey:
+                                              bakerKeys.signaturePublic,
+                                          aggregationVerifyKey:
+                                              bakerKeys.aggregationPublic,
+                                      }
+                            }
+                        />
+                    </div>
                 </Columns.Column>
                 <Switch>
                     <Route exact path={path}>
-                        <Columns.Column header="Identities">
-                            <div className={styles.descriptionStep}>
+                        <Columns.Column
+                            header="Identities"
+                            className={styles.stretchColumn}
+                        >
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickIdentity
                                         setIdentity={setIdentity}
@@ -212,6 +224,7 @@ export default function AddBakerPage() {
                                     />
                                 </div>
                                 <Button
+                                    className={styles.listSelectButton}
                                     disabled={identity === undefined}
                                     onClick={() =>
                                         dispatch(
@@ -228,8 +241,11 @@ export default function AddBakerPage() {
                     </Route>
 
                     <Route path={`${path}/${BuildSubRoutes.accounts}`}>
-                        <Columns.Column header="Accounts">
-                            <div className={styles.descriptionStep}>
+                        <Columns.Column
+                            header="Accounts"
+                            className={styles.stretchColumn}
+                        >
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickAccount
                                         identity={identity}
@@ -241,6 +257,7 @@ export default function AddBakerPage() {
                                     />
                                 </div>
                                 <Button
+                                    className={styles.listSelectButton}
                                     disabled={account === undefined}
                                     onClick={() =>
                                         dispatch(
@@ -257,10 +274,13 @@ export default function AddBakerPage() {
                     </Route>
 
                     <Route path={`${path}/${BuildSubRoutes.stake}`}>
-                        <Columns.Column header="Stake">
-                            <div className={styles.descriptionStep}>
+                        <Columns.Column
+                            header="Stake"
+                            className={styles.stretchColumn}
+                        >
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
-                                    <p>
+                                    <p className="mT0">
                                         To add a baker you must choose an amount
                                         to stake on the account. The staked
                                         amount will be part of the balance, but
@@ -308,6 +328,7 @@ export default function AddBakerPage() {
                                     />
                                 </div>
                                 <Button
+                                    className="mT40"
                                     disabled={stake === undefined}
                                     onClick={() => {
                                         dispatch(
@@ -324,10 +345,13 @@ export default function AddBakerPage() {
                     </Route>
 
                     <Route path={`${path}/${BuildSubRoutes.expiry}`}>
-                        <Columns.Column header="Transaction expiry time">
-                            <div className={styles.descriptionStep}>
+                        <Columns.Column
+                            header="Transaction expiry time"
+                            className={styles.stretchColumn}
+                        >
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
-                                    <p>
+                                    <p className="mT0">
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
@@ -341,12 +365,13 @@ export default function AddBakerPage() {
                                         value={expiryTime}
                                         onChange={setExpiryTime}
                                     />
-                                    <p>
+                                    <p className="mB0">
                                         Committing the transaction after this
                                         date, will be rejected.
                                     </p>
                                 </div>
                                 <Button
+                                    className="mT40"
                                     disabled={
                                         expiryTime === undefined ||
                                         expiryTimeError !== undefined
@@ -368,23 +393,25 @@ export default function AddBakerPage() {
 
                     <Route path={`${path}/${BuildSubRoutes.keys}`}>
                         <Columns.Column header="Baker keys">
-                            {bakerKeys !== undefined &&
-                            account !== undefined ? (
-                                <DownloadBakerCredentialsStep
-                                    accountAddress={account.address}
-                                    bakerKeys={bakerKeys}
-                                    onContinue={() => {
-                                        onCreateTransaction();
-                                        dispatch(
-                                            push(
-                                                `${url}/${BuildSubRoutes.sign}`
-                                            )
-                                        );
-                                    }}
-                                />
-                            ) : (
-                                <p>Generating keys...</p>
-                            )}
+                            <div className={styles.columnContent}>
+                                {bakerKeys !== undefined &&
+                                account !== undefined ? (
+                                    <DownloadBakerCredentialsStep
+                                        accountAddress={account.address}
+                                        bakerKeys={bakerKeys}
+                                        onContinue={() => {
+                                            onCreateTransaction();
+                                            dispatch(
+                                                push(
+                                                    `${url}/${BuildSubRoutes.sign}`
+                                                )
+                                            );
+                                        }}
+                                    />
+                                ) : (
+                                    <p>Generating keys...</p>
+                                )}
+                            </div>
                         </Columns.Column>
                     </Route>
 
@@ -438,7 +465,7 @@ export function DownloadBakerCredentialsStep({
     };
 
     return (
-        <div className={styles.descriptionStep}>
+        <div className={styles.columnContent}>
             <div className={styles.flex1}>
                 <p>
                     Your baker keys have been generated, and the public keys can
