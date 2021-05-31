@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
 import {
     fetchLastFinalizedBlockSummary,
@@ -13,7 +14,13 @@ import {
 } from './timeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
 import { lookupName } from './transactionHelpers';
-import { AccountInfo, Amount, Fraction, TransactionKindId } from './types';
+import {
+    AccountInfo,
+    Amount,
+    Fraction,
+    TransactionKindId,
+    Account,
+} from './types';
 
 /** Hook for looking up an account name from an address */
 export function useAccountName(address: string) {
@@ -24,6 +31,17 @@ export function useAccountName(address: string) {
             .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
     }, [address]);
     return name;
+}
+
+/** Hook for looking up an account, is undefined while loading and null if account is not found */
+export function useAccount(address: string) {
+    const [account, setAccount] = useState<Account | undefined | null>();
+    useEffect(() => {
+        getAccount(address)
+            .then((a) => setAccount(a ?? null))
+            .catch(() => {});
+    }, [address]);
+    return account;
 }
 
 /** Hook for fetching account info given an account address */
