@@ -12,22 +12,26 @@ import {
     TransactionAccountSignature,
     Signature,
     TransactionCredentialSignature,
+    AddBakerPayload,
+    UpdateBakerKeysPayload,
+    BakerVerifyKeys,
+    BakerKeyProofs,
+    UpdateBakerStakePayload,
+    UpdateBakerRestakeEarningsPayload,
 } from './types';
 import {
     encodeWord32,
     encodeWord64,
     put,
+    putHexString,
     putInt8,
     putBase58Check,
     hashSha256,
     serializeMap,
     serializeList,
     serializeCredentialDeploymentInformation,
+    serializeBoolean,
 } from './serializationHelpers';
-
-function putString(value: string) {
-    return Buffer.from(value, 'hex');
-}
 
 function serializeSimpleTransfer(payload: SimpleTransferPayload) {
     const size = 1 + 32 + 8;
@@ -92,17 +96,17 @@ function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
     const serializedRemovedCredentials = serializeList(
         payload.removedCredIds,
         putInt8,
-        putString
+        putHexString
     );
 
-    const newThreshold = Buffer.alloc(1);
-    newThreshold.writeUInt8(payload.newThreshold, 0);
+    const threshold = Buffer.alloc(1);
+    threshold.writeUInt8(payload.threshold, 0);
 
     return Buffer.concat([
         transactionType,
         serializedNewCredentials,
         serializedRemovedCredentials,
-        newThreshold,
+        threshold,
     ]);
 }
 
@@ -163,6 +167,66 @@ export function serializeTransactionHeader(
     return Buffer.from(serialized);
 }
 
+export function serializeBakerVerifyKeys(payload: BakerVerifyKeys) {
+    return Buffer.concat([
+        putHexString(payload.electionVerifyKey),
+        putHexString(payload.signatureVerifyKey),
+        putHexString(payload.aggregationVerifyKey),
+    ]);
+}
+
+export function serializeBakerKeyProofs(payload: BakerKeyProofs) {
+    return Buffer.concat([
+        putHexString(payload.proofSignature),
+        putHexString(payload.proofElection),
+        putHexString(payload.proofAggregation),
+    ]);
+}
+
+export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
+    return Buffer.concat([
+        serializeBakerKeyProofs(payload),
+        encodeWord64(BigInt(payload.bakingStake)),
+        serializeBoolean(payload.restakeEarnings),
+    ]);
+}
+
+export function serializeAddBaker(payload: AddBakerPayload) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Add_baker),
+        serializeBakerVerifyKeys(payload),
+        serializeAddBakerProofsStakeRestake(payload),
+    ]);
+}
+
+export function serializeUpdateBakerKeys(payload: UpdateBakerKeysPayload) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Update_baker_keys),
+        serializeBakerVerifyKeys(payload),
+        serializeBakerKeyProofs(payload),
+    ]);
+}
+
+export function serializeRemoveBaker() {
+    return Buffer.from(Uint8Array.of(TransactionKind.Remove_baker));
+}
+
+export function serializeUpdateBakerStake(payload: UpdateBakerStakePayload) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Update_baker_stake),
+        encodeWord64(BigInt(payload.stake)),
+    ]);
+}
+
+export function serializeUpdateBakerRestakeEarnings(
+    payload: UpdateBakerRestakeEarningsPayload
+) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Update_baker_restake_earnings),
+        serializeBoolean(payload.restakeEarnings),
+    ]);
+}
+
 export function serializeTransferPayload(
     kind: TransactionKind,
     payload: TransactionPayload
@@ -186,8 +250,23 @@ export function serializeTransferPayload(
             return serializeTransferToPublic(
                 payload as TransferToPublicPayload
             );
+        case TransactionKind.Add_baker:
+            return serializeAddBaker(payload as AddBakerPayload);
+        case TransactionKind.Update_baker_keys:
+            return serializeUpdateBakerKeys(payload as UpdateBakerKeysPayload);
+
+        case TransactionKind.Remove_baker:
+            return serializeRemoveBaker();
+        case TransactionKind.Update_baker_stake:
+            return serializeUpdateBakerStake(
+                payload as UpdateBakerStakePayload
+            );
+        case TransactionKind.Update_baker_restake_earnings:
+            return serializeUpdateBakerRestakeEarnings(
+                payload as UpdateBakerRestakeEarningsPayload
+            );
         default:
-            throw new Error('Unsupported transactionkind');
+            throw new Error('Unsupported transaction kind');
     }
 }
 
@@ -197,9 +276,10 @@ function serializeSignature(signatures: TransactionAccountSignature) {
     // index ( 1 ) + Length of signature ( 2 ) + actual signature ( variable )
 
     const putSignature = (signature: Signature) => {
+        const signatureBytes = Buffer.from(signature, 'hex');
         const length = Buffer.alloc(2);
-        length.writeUInt16BE(signature.length, 0);
-        return Buffer.concat([length, signature]);
+        length.writeUInt16BE(signatureBytes.length, 0);
+        return Buffer.concat([length, signatureBytes]);
     };
     const putCredentialSignatures = (credSig: TransactionCredentialSignature) =>
         serializeMap(credSig, putInt8, putInt8, putSignature);
@@ -255,6 +335,10 @@ export function serializeTransaction(
     return serialized;
 }
 
+/**
+ * Returns the transactionHash, which includes the signature, and is used as the
+ * submissionId on chain.
+ */
 export function getAccountTransactionHash(
     transaction: AccountTransaction,
     signFunction: SignFunction

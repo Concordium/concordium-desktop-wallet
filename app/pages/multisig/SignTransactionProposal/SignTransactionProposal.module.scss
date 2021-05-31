@@ -1,21 +1,22 @@
 @import 'config/bundle';
 @import '../common/MultiSignatureFlowPage.module';
 
-.column {
-    flex-basis: 560px;
+.detailsColumnContent,
+.signColumnContent {
+    composes: columnContent;
+    min-height: 100%;
+    max-width: 450px;
+    width: 100%;
+    margin: 0 auto;
 }
 
 .signColumnContent {
-    composes: columnContent;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    flex: 1;
 
     h5 {
         margin-top: 0;
     }
-}
-
-.submit {
-    margin-top: 10px;
 }

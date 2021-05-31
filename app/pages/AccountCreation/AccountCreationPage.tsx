@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { Switch, Route, useLocation } from 'react-router-dom';
-import routes from '../../constants/routes.json';
+import { push } from 'connected-react-router';
+import { useDispatch } from 'react-redux';
+import { Switch, Route, useLocation, Redirect } from 'react-router-dom';
+import routes from '~/constants/routes.json';
+import { ChosenAttributes, Identity } from '~/utils/types';
+import PageLayout from '~/components/PageLayout';
 import PickName from './PickName';
 import PickIdentity from './PickIdentity';
 import PickAttributes from './PickAttributes';
-import GeneratePage from './GeneratePage';
+import GeneratePage from './GeneratePage/GeneratePage';
 import FinalPage from './FinalPage';
-import { Identity } from '../../utils/types';
-import PageLayout from '../../components/PageLayout';
+
+import styles from './AccountCreation.module.scss';
 
 function getSubtitle(location: string) {
     switch (location) {
@@ -26,9 +30,13 @@ function getSubtitle(location: string) {
 
 // The entrance into the flow is the last Route (which should have no path), otherwise the flow is controlled by the components themselves
 export default function AccountCreationPage(): JSX.Element {
+    const dispatch = useDispatch();
     const [accountName, setAccountName] = useState('');
     const [identity, setIdentity] = useState<Identity | undefined>();
-    const [chosenAttributes, setChosenAttributes] = useState<string[]>([]);
+    const [chosenAttributes, setChosenAttributes] = useState<
+        Array<keyof ChosenAttributes>
+    >([]);
+    const { pathname } = useLocation();
 
     function renderGeneratePage() {
         if (identity) {
@@ -40,7 +48,8 @@ export default function AccountCreationPage(): JSX.Element {
                 />
             );
         }
-        throw new Error('Unexpected missing identity!');
+
+        return <Redirect to={routes.ACCOUNTS} />;
     }
 
     function renderPickAttributes() {
@@ -49,10 +58,12 @@ export default function AccountCreationPage(): JSX.Element {
                 <PickAttributes
                     identity={identity}
                     setChosenAttributes={setChosenAttributes}
+                    chosenAttributes={chosenAttributes}
                 />
             );
         }
-        throw new Error('Unexpected missing identity!');
+
+        return <Redirect to={routes.ACCOUNTS} />;
     }
 
     return (
@@ -60,27 +71,53 @@ export default function AccountCreationPage(): JSX.Element {
             <PageLayout.Header>
                 <h1> New Account | {getSubtitle(useLocation().pathname)}</h1>
             </PageLayout.Header>
-            <Switch>
-                <Route
-                    path={routes.ACCOUNTCREATION_PICKIDENTITY}
-                    render={() => <PickIdentity setIdentity={setIdentity} />}
-                />
-                <Route
-                    path={routes.ACCOUNTCREATION_FINAL}
-                    render={() => <FinalPage accountName={accountName} />}
-                />
-                <Route
-                    path={routes.ACCOUNTCREATION_GENERATE}
-                    render={renderGeneratePage}
-                />
-                <Route
-                    path={routes.ACCOUNTCREATION_PICKATTRIBUTES}
-                    render={renderPickAttributes}
-                />
-                <Route
-                    render={() => <PickName setAccountName={setAccountName} />}
-                />
-            </Switch>
+            <PageLayout.Container
+                className={styles.container}
+                closeRoute={routes.ACCOUNTS}
+                disableBack={pathname === routes.ACCOUNTCREATION_FINAL}
+            >
+                <Switch>
+                    <Route
+                        path={routes.ACCOUNTCREATION_PICKIDENTITY}
+                        render={() => (
+                            <PickIdentity
+                                resetChosenAttributes={() =>
+                                    setChosenAttributes([])
+                                }
+                                setIdentity={setIdentity}
+                                identity={identity}
+                            />
+                        )}
+                    />
+                    <Route
+                        path={routes.ACCOUNTCREATION_FINAL}
+                        component={FinalPage}
+                    />
+                    <Route
+                        path={routes.ACCOUNTCREATION_GENERATE}
+                        render={renderGeneratePage}
+                    />
+                    <Route
+                        path={routes.ACCOUNTCREATION_PICKATTRIBUTES}
+                        render={renderPickAttributes}
+                    />
+                    <Route
+                        render={() => (
+                            <PickName
+                                name={accountName}
+                                submitName={(name: string) => {
+                                    setAccountName(name);
+                                    dispatch(
+                                        push(
+                                            routes.ACCOUNTCREATION_PICKIDENTITY
+                                        )
+                                    );
+                                }}
+                            />
+                        )}
+                    />
+                </Switch>
+            </PageLayout.Container>
         </PageLayout>
     );
 }

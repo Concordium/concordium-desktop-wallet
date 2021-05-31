@@ -1,7 +1,9 @@
 {
     "appGetPath": "APP_GET_PATH",
+    "print": "PRINT",
     "openFileDialog": "OPEN_FILE_DIALOG",
     "saveFileDialog": "SAVE_FILE_DIALOG",
     "grpcSetLocation": "GRPC_SET_LOCATION",
-    "grpcCall": "GRPC_CALL"
+    "grpcCall": "GRPC_CALL",
+    "grpcNodeConsensusAndGlobal": "GRPC_NODE_CONSENSUS_GLOBAL"
 }

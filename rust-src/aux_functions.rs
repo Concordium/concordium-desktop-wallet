@@ -1,3 +1,4 @@
+use crate::external_functions::BakerKeyVariant;
 use crate::{
     helpers::*,
     types::*,
@@ -16,10 +17,12 @@ use elgamal::BabyStepGiantStep;
 use dodis_yampolskiy_prf::secret as prf;
 use hex::FromHex;
 use pairing::bls12_381::{Bls12, Fr, G1};
-use serde_json::{from_str, from_value, Value as SerdeValue};
+use serde_json::{from_str, Value as SerdeValue};
 use std::{cmp::max, collections::BTreeMap, convert::TryInto};
 type ExampleCurve = G1;
 use ed25519_dalek as ed25519;
+use eddsa_ed25519::dlog_ed25519;
+use random_oracle::RandomOracle;
 use sha2::{Digest, Sha256};
 
 use rand::thread_rng;
@@ -31,25 +34,7 @@ use id::{
     types::*,
     ffi::AttributeKind,
 };
-use keygen_bls::keygen_bls;
 use pedersen_scheme::value::Value;
-
-/// Try to extract a field with a given name from the JSON value.
-fn try_get<A: serde::de::DeserializeOwned>(v: &SerdeValue, fname: &str) -> Fallible<A> {
-    match v.get(fname) {
-        Some(v) => Ok(from_value(v.clone())?),
-        None => Err(format_err!("Field {} not present, but should be.", fname)),
-    }
-}
-
-pub fn generate_bls(seed: &str) -> Fallible<Fr> {
-    let key_info = b"";
-
-    match keygen_bls(seed.as_bytes(), key_info) {
-        Ok(s) => Ok(s),
-        Err(_) => Err(format_err!("unable to build parse id_cred_sec.")),
-    }
-}
 
 pub fn build_pub_info_for_ip_aux(
     input: &str,
@@ -58,13 +43,10 @@ pub fn build_pub_info_for_ip_aux(
 ) -> Fallible<String> {
     let v: SerdeValue = from_str(input)?;
 
-    let ip_info: IpInfo<Bls12> = try_get(&v, "ipInfo")?;
     let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
-    let ars_infos: BTreeMap<ArIdentity, ArInfo<ExampleCurve>> = try_get(&v, "arsInfos")?;
-    let context = IPContext::new(&ip_info, &ars_infos, &global_context);
 
-    let id_cred_sec = Value::new(generate_bls(id_cred_sec_seed)?);
-    let prf_key = prf::SecretKey::new(generate_bls(prf_key_seed)?);
+    let id_cred_sec = Value::new(generate_bls_key(id_cred_sec_seed)?);
+    let prf_key = prf::SecretKey::new(generate_bls_key(prf_key_seed)?);
 
     let initial_acc_data = InitialAccountDataStruct {
         public_keys: try_get(&v, "publicKeys")?,
@@ -72,7 +54,7 @@ pub fn build_pub_info_for_ip_aux(
     };
 
     let pub_info_for_ip =
-        match build_pub_info_for_ip(&context, &id_cred_sec, &prf_key, &initial_acc_data) {
+        match build_pub_info_for_ip(&global_context, &id_cred_sec, &prf_key, &initial_acc_data) {
             Some(x) => x,
             None => return Err(format_err!("failed building pub_info_for_ip.")),
         };
@@ -101,8 +83,8 @@ pub fn create_id_request_aux(
         Threshold(max((l - 1).try_into().unwrap_or(255), 1))
     };
 
-    let id_cred_sec = Value::new(generate_bls(id_cred_sec_seed)?);
-    let prf_key = prf::SecretKey::new(generate_bls(prf_key_seed)?);
+    let id_cred_sec = Value::new(generate_bls_key(id_cred_sec_seed)?);
+    let prf_key = prf::SecretKey::new(generate_bls_key(prf_key_seed)?);
 
     let chi = CredentialHolderInfo::<ExampleCurve> {
         id_cred: IdCredentials { id_cred_sec },
@@ -161,10 +143,10 @@ pub fn generate_unsigned_credential_aux(
     };
 
     let id_string: String = try_get(&v, "idCredSec")?;
-    let id_cred_sec = Value::new(generate_bls(&id_string)?);
+    let id_cred_sec = Value::new(generate_bls_key(&id_string)?);
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key = prf::SecretKey::new(generate_bls(&prf_key_string)?);
+    let prf_key = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let chi = CredentialHolderInfo::<ExampleCurve> {
         id_cred: IdCredentials { id_cred_sec },
@@ -331,7 +313,7 @@ pub fn decrypt_amounts_aux(
     let encrypted_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "encryptedAmounts")?;
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let credential_number: u8 = try_get(&v, "credentialNumber")?;
 
@@ -363,7 +345,7 @@ pub fn create_sec_to_pub_aux(
     let v: SerdeValue = from_str(input)?;
 
     let prf_key_string: String = try_get(&v, "prfKey")?;
-    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls(&prf_key_string)?);
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
 
     let account_number: u8 = try_get(&v, "accountNumber")?;
 
@@ -426,4 +408,66 @@ pub fn create_sec_to_pub_aux(
         });
 
     Ok(response.to_string())
+}
+
+#[derive(SerdeSerialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BakerKeys {
+    #[serde(serialize_with = "base16_encode")]
+    election_secret: ed25519::SecretKey,
+    #[serde(serialize_with = "base16_encode")]
+    election_public: ed25519::PublicKey,
+    #[serde(serialize_with = "base16_encode")]
+    signature_secret: ed25519::SecretKey,
+    #[serde(serialize_with = "base16_encode")]
+    signature_public: ed25519::PublicKey,
+    #[serde(serialize_with = "base16_encode")]
+    aggregation_secret: aggregate_sig::SecretKey<Bls12>,
+    #[serde(serialize_with = "base16_encode")]
+    aggregation_public: aggregate_sig::PublicKey<Bls12>,
+    #[serde(serialize_with = "base16_encode")]
+    proof_election: dlog_ed25519::Ed25519DlogProof,
+    #[serde(serialize_with = "base16_encode")]
+    proof_signature: dlog_ed25519::Ed25519DlogProof,
+    #[serde(serialize_with = "base16_encode")]
+    proof_aggregation: aggregate_sig::Proof<Bls12>
+}
+
+pub fn generate_baker_keys(sender: &AccountAddress, key_variant: BakerKeyVariant) -> BakerKeys {
+    let mut csprng = thread_rng();
+    let election = ed25519::Keypair::generate(&mut csprng);
+    let signature = ed25519::Keypair::generate(&mut csprng);
+    let aggregation_secret = aggregate_sig::SecretKey::<Bls12>::generate(&mut csprng);
+    let aggregation_public = aggregate_sig::PublicKey::<Bls12>::from_secret(aggregation_secret);
+
+    let mut challenge = match key_variant {
+        BakerKeyVariant::ADD => b"addBaker".to_vec(),
+        BakerKeyVariant::UPDATE => b"updateBakerKeys".to_vec()
+    };
+
+    sender.serial(&mut challenge);
+    election.public.serial(&mut challenge);
+    signature.public.serial(&mut challenge);
+    aggregation_public.serial(&mut challenge);
+
+    let proof_election = dlog_ed25519::prove_dlog_ed25519(&mut RandomOracle::domain(&challenge), &election.public, &election.secret);
+    let proof_signature = dlog_ed25519::prove_dlog_ed25519(&mut RandomOracle::domain(&challenge), &signature.public, &signature.secret);
+    let proof_aggregation = aggregation_secret.prove(&mut csprng, &mut RandomOracle::domain(&challenge));
+
+    BakerKeys {
+        election_secret: election.secret,
+        election_public: election.public,
+        signature_secret: signature.secret,
+        signature_public: signature.public,
+        aggregation_secret,
+        aggregation_public,
+        proof_election,
+        proof_signature,
+        proof_aggregation
+    }
+}
+
+pub fn get_address_from_cred_id(cred_id: &str) -> Fallible<String> {
+    let cred_id_parsed: ExampleCurve = base16_decode_string(cred_id)?;
+    Ok(AccountAddress::new(&cred_id_parsed).to_string())
 }

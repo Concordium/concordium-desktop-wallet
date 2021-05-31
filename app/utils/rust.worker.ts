@@ -3,28 +3,9 @@ import registerPromiseWorker from 'promise-worker/register';
 import { parse } from './JSONHelper';
 import workerCommands from '../constants/workerCommands.json';
 
-interface RustInterface {
-    buildPublicInformationForIp(
-        context: string,
-        idCredSec: string,
-        prfKey: string
-    ): string;
-    createIdRequest(
-        context: string,
-        signature: string,
-        idCredSec: string,
-        prfKey: string
-    ): string;
-    generateUnsignedCredential(context: string): string;
-    getDeploymentInfo(signature: string, unsignedInfo: string): string;
-    getDeploymentDetails(
-        signature: string,
-        unsignedInfo: string,
-        expiry: bigint
-    ): string;
-    decrypt_amounts_ext(amounts: string): string;
-    createTransferToPublicData(inputblob: string): string;
-}
+type RustInterface = typeof import('@pkg/index');
+
+export type BakerKeyVariants = 'ADD' | 'UPDATE';
 
 let rustReference: RustInterface;
 async function getRust(): Promise<RustInterface> {
@@ -91,6 +72,36 @@ function createTransferToPublicData(
     return rust.createTransferToPublicData(message.input);
 }
 
+function createGenesisAccount(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.createGenesisAccount(
+        message.context,
+        message.idCredSec,
+        message.prfKey
+    );
+}
+
+function generateBakerKeys(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.generateBakerKeys(
+        message.sender,
+        message.keyVariant === 'ADD'
+            ? rust.BakerKeyVariant.ADD
+            : rust.BakerKeyVariant.UPDATE
+    );
+}
+
+function getAddressFromCredId(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.getAddressFromCredId(message.credId);
+}
+
 function mapCommand(command: string) {
     switch (command) {
         case workerCommands.buildPublicInformationForIp:
@@ -107,6 +118,12 @@ function mapCommand(command: string) {
             return decryptAmounts;
         case workerCommands.createTransferToPublicData:
             return createTransferToPublicData;
+        case workerCommands.createGenesisAccount:
+            return createGenesisAccount;
+        case workerCommands.generateBakerKeys:
+            return generateBakerKeys;
+        case workerCommands.getAddressFromCredId:
+            return getAddressFromCredId;
         default:
             return () => 'unknown command';
     }

@@ -8,6 +8,13 @@
     }
 }
 
+.name {
+    @include overflowEllipsis;
+
+    max-width: 90%;
+    margin: 0 auto;
+}
+
 .identityIcon {
     height: 25px;
     fill: $color-grey;

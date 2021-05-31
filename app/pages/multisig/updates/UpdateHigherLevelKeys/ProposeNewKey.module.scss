@@ -1,0 +1,16 @@
+@import 'config/bundle';
+
+/* TODO: How to do this in a proper way? */
+.close {
+    position: absolute;
+    right: 20px;
+}
+
+.checkbox {
+    margin-bottom: 20px;
+}
+
+.fileInput {
+    flex: 1 0 200px;
+    margin: 40px 0;
+}

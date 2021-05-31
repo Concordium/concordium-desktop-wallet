@@ -16,9 +16,7 @@ import {
     AccountTransaction,
     Dispatch,
     TransactionEvent,
-    RejectReason,
     Global,
-    RewardFilter,
 } from '../utils/types';
 import {
     attachNames,
@@ -28,29 +26,61 @@ import {
     convertIncomingTransaction,
     convertAccountTransaction,
 } from '../utils/TransactionConverters';
-import { updateAccount } from '../database/AccountDao';
 // eslint-disable-next-line import/no-cycle
-import { loadAccounts } from './AccountSlice';
+import { updateMaxTransactionId } from './AccountSlice';
+import AbortController from '~/utils/AbortController';
+import { RejectReason } from '~/utils/node/RejectReasonHelper';
+
+const updateTransactionInterval = 5000;
+
+interface State {
+    transactions: TransferTransaction[];
+    viewingShielded: boolean;
+    moreTransactions: boolean;
+    loadingTransactions: boolean;
+}
 
 const transactionSlice = createSlice({
     name: 'transactions',
     initialState: {
         transactions: [],
         viewingShielded: false,
-    },
+        moreTransactions: false,
+        loadingTransactions: false,
+    } as State,
     reducers: {
-        setTransactions(state, transactions) {
-            state.transactions = transactions.payload;
+        setTransactions(state, update) {
+            state.transactions = update.payload.transactions;
+            state.moreTransactions = update.payload.more;
         },
         setViewingShielded(state, viewingShielded) {
             state.viewingShielded = viewingShielded.payload;
+        },
+        setLoadingTransactions(state, loading) {
+            state.loadingTransactions = loading.payload;
+        },
+        updateTransactionFields(state, update) {
+            const { hash, updatedFields } = update.payload;
+            const index = state.transactions.findIndex(
+                (transaction) => transaction.transactionHash === hash
+            );
+            if (index > -1) {
+                state.transactions[index] = {
+                    ...state.transactions[index],
+                    ...updatedFields,
+                };
+            }
         },
     },
 });
 
 export const { setViewingShielded } = transactionSlice.actions;
 
-const { setTransactions } = transactionSlice.actions;
+const {
+    setTransactions,
+    updateTransactionFields,
+    setLoadingTransactions,
+} = transactionSlice.actions;
 
 // Decrypts the encrypted transfers in the given transacion list, using the prfKey.
 // This function expects the prfKey to match the account's prfKey,
@@ -105,6 +135,8 @@ function filterUnShieldedBalanceTransaction(transaction: TransferTransaction) {
     switch (transaction.transactionKind) {
         case TransactionKindString.Transfer:
         case TransactionKindString.BakingReward:
+        case TransactionKindString.FinalizationReward:
+        case TransactionKindString.BlockReward:
         case TransactionKindString.TransferWithSchedule:
         case TransactionKindString.TransferToEncrypted:
         case TransactionKindString.TransferToPublic:
@@ -128,53 +160,89 @@ function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
     }
 }
 
-// Load transactions from storage.
-// Filters according to viewingShielded parameter
-export async function loadTransactions(account: Account, dispatch: Dispatch) {
-    let filter;
-
-    if (account.rewardFilter === RewardFilter.AllButFinalization) {
-        filter = (transaction: TransferTransaction) =>
-            transaction.transactionKind !==
-            TransactionKindString.FinalizationReward;
-    } else if (account.rewardFilter === RewardFilter.None) {
-        filter = (transaction: TransferTransaction) =>
-            ![
-                TransactionKindString.BakingReward,
-                TransactionKindString.BlockReward,
-                TransactionKindString.FinalizationReward,
-            ].includes(transaction.transactionKind);
+/**
+ * Load transactions from storage.
+ * Filters out reward transactions based on the account's rewardFilter.
+ */
+export async function loadTransactions(
+    account: Account,
+    dispatch: Dispatch,
+    showLoading = false,
+    controller?: AbortController
+) {
+    if (showLoading) {
+        dispatch(setLoadingTransactions(true));
     }
-
-    let transactions = await getTransactionsOfAccount(
+    const { transactions, more } = await getTransactionsOfAccount(
         account,
-        'blockTime',
-        filter
+        JSON.parse(account.rewardFilter)
     );
-    transactions = await attachNames(transactions);
-    dispatch(setTransactions(transactions));
+
+    const namedTransactions = await attachNames(transactions);
+    if (!controller?.isAborted) {
+        if (showLoading) {
+            dispatch(setLoadingTransactions(false));
+        }
+        dispatch(setTransactions({ transactions: namedTransactions, more }));
+    }
 }
 
-// Update the transaction from remote source.
-export async function updateTransactions(dispatch: Dispatch, account: Account) {
-    await loadTransactions(account, dispatch);
-    const fromId = account.maxTransactionId || 0;
-    const transactions = await getTransactions(account.address, fromId);
-    if (transactions.length > 0) {
-        await insertTransactions(
-            transactions.map((transaction) =>
-                convertIncomingTransaction(transaction, account.address)
-            )
-        );
-        await updateAccount(account.address, {
-            maxTransactionId: transactions.reduce(
-                (id, t) => Math.max(id, t.id),
-                0
-            ),
-        });
-        loadAccounts(dispatch);
-        loadTransactions(account, dispatch);
+async function fetchTransactions(address: string, currentMaxId: number) {
+    const { transactions, full } = await getTransactions(address, currentMaxId);
+
+    const newMaxId = transactions.reduce((id, t) => Math.max(id, t.id), 0);
+    const isFinished = !full;
+
+    await insertTransactions(
+        transactions.map((transaction) =>
+            convertIncomingTransaction(transaction, address)
+        )
+    );
+    return { newMaxId, isFinished };
+}
+
+// Update the transactions from remote source.
+// will fetch transactions in intervals, updating the state each time.
+// stops when it reaches the newest transaction, or it is told to abort by the controller.
+export async function updateTransactions(
+    dispatch: Dispatch,
+    account: Account,
+    controller: AbortController
+) {
+    async function updateSubroutine(maxId: number) {
+        if (controller.isAborted) {
+            controller.onAborted();
+            return;
+        }
+        const result = await fetchTransactions(account.address, maxId);
+
+        if (maxId !== result.newMaxId) {
+            await updateMaxTransactionId(
+                dispatch,
+                account.address,
+                result.newMaxId
+            );
+        }
+
+        if (controller.isAborted) {
+            controller.onAborted();
+            return;
+        }
+        if (maxId !== result.newMaxId) {
+            await loadTransactions(account, dispatch);
+            if (!result.isFinished) {
+                setTimeout(
+                    updateSubroutine,
+                    updateTransactionInterval,
+                    result.newMaxId
+                );
+                return;
+            }
+        }
+        controller.finish();
     }
+
+    updateSubroutine(account.maxTransactionId || 0);
 }
 
 // Add a pending transaction to storage
@@ -189,47 +257,63 @@ export async function addPendingTransaction(
     return insertTransactions([convertedTransaction]);
 }
 
-// Set the transaction's status to confirmed, update the cost and whether it succeded.
-// TODO: update Total to reflect change in cost.
+/**
+ * Set the transaction's status to confirmed, update the cost and whether it suceeded
+ * or not.
+ */
 export async function confirmTransaction(
+    dispatch: Dispatch,
     transactionHash: string,
-    outcomeRecord: Record<string, TransactionEvent>
+    blockHash: string,
+    event: TransactionEvent
 ) {
-    const outcomes = Object.values(outcomeRecord);
-    const success = isSuccessfulTransaction(outcomes);
-    const cost = outcomes.reduce(
-        (accu, event) => accu + parseInt(event.cost, 10),
-        0
-    );
+    const success = isSuccessfulTransaction(event);
+    const { cost } = event;
+
     let rejectReason;
     if (!success) {
-        const failure = outcomes.find(
-            (event) => event.result.outcome !== 'success'
-        );
-        if (!failure) {
-            throw new Error('unexpected missing failure, when not successful');
+        if (!event.result.rejectReason) {
+            throw new Error('Missing rejection reason in transaction event');
         }
+
         rejectReason =
             RejectReason[
-                failure.result.rejectReason as keyof typeof RejectReason
+                event.result.rejectReason.tag as keyof typeof RejectReason
             ];
-    }
-    return updateTransaction(
-        { transactionHash },
-        {
-            status: TransactionStatus.Finalized,
-            cost: cost.toString(),
-            success,
-            rejectReason,
+        if (rejectReason === undefined) {
+            // If the reject reason was not known, then just store it directly as a string anyway.
+            rejectReason = event.result.rejectReason.tag;
         }
+    }
+
+    const update = {
+        status: TransactionStatus.Finalized,
+        cost: cost.toString(),
+        success,
+        rejectReason,
+        blockHash,
+    };
+    updateTransaction({ transactionHash }, update);
+    return dispatch(
+        updateTransactionFields({
+            hash: transactionHash,
+            updatedFields: update,
+        })
     );
 }
 
 // Set the transaction's status to rejected.
-export async function rejectTransaction(transactionHash: string) {
-    return updateTransaction(
-        { transactionHash },
-        { status: TransactionStatus.Rejected }
+export async function rejectTransaction(
+    dispatch: Dispatch,
+    transactionHash: string
+) {
+    const status = { status: TransactionStatus.Rejected };
+    updateTransaction({ transactionHash }, status);
+    return dispatch(
+        updateTransactionFields({
+            hash: transactionHash,
+            updatedFields: status,
+        })
     );
 }
 
@@ -242,5 +326,11 @@ export const transactionsSelector = (state: RootState) => {
 
 export const viewingShieldedSelector = (state: RootState) =>
     state.transactions.viewingShielded;
+
+export const moreTransactionsSelector = (state: RootState) =>
+    state.transactions.moreTransactions;
+
+export const loadingTransactionsSelector = (state: RootState) =>
+    state.transactions.loadingTransactions;
 
 export default transactionSlice.reducer;

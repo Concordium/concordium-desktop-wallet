@@ -14,37 +14,11 @@ import path from 'path';
 import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import knex from './database/knex';
-import WebpackMigrationSource from './database/WebpackMigrationSource';
 import ipcCommands from './constants/ipcCommands.json';
-import { setClientLocation, grpcCall } from './main/GRPCClient';
-
-/**
- * Runs the knex migrations for the embedded sqlite database. This ensures that the
- * database is up-to-date before the application opens. If a migration fails, then
- * an error prompt is displayed to the user, and the application is terminated.
- */
-async function migrate() {
-    const config = {
-        migrationSource: new WebpackMigrationSource(
-            require.context('./database/migrations', false, /.ts$/)
-        ),
-    };
-
-    knex()
-        .then((db) => {
-            return db.migrate.latest(config);
-        })
-        .catch((error: Error) => {
-            dialog.showErrorBox(
-                'Migration error',
-                `An unexpected error occurred while attempting to migrate the database. ${error}`
-            );
-            process.nextTick(() => {
-                process.exit(0);
-            });
-        });
-}
+import { setClientLocation, grpcCall } from './node/GRPCClient';
+import ConcordiumNodeClient from './node/ConcordiumNodeClient';
+import { ConsensusStatus } from './node/NodeApiTypes';
+import { JsonResponse } from './proto/concordium_p2p_rpc_pb';
 
 export default class AppUpdater {
     constructor() {
@@ -57,6 +31,7 @@ export default class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let printWindow: BrowserWindow | null = null;
 
 if (process.env.NODE_ENV === 'production') {
     const sourceMapSupport = require('source-map-support');
@@ -91,19 +66,13 @@ const createWindow = async () => {
         await installExtensions();
     }
 
-    const RESOURCES_PATH = app.isPackaged
-        ? path.join(process.resourcesPath, 'resources')
-        : path.join(__dirname, '../resources');
-
-    const getAssetPath = (...paths: string[]): string => {
-        return path.join(RESOURCES_PATH, ...paths);
-    };
+    const titleSuffix = process.env.TARGET_NET || '';
 
     mainWindow = new BrowserWindow({
+        title: `Concordium Wallet ${titleSuffix}`,
         show: false,
         width: 4096,
         height: 2912,
-        icon: getAssetPath('icon.png'),
         webPreferences:
             (process.env.NODE_ENV === 'development' ||
                 process.env.E2E_BUILD === 'true') &&
@@ -116,6 +85,16 @@ const createWindow = async () => {
                       preload: path.join(__dirname, 'dist/renderer.prod.js'),
                       webviewTag: true,
                   },
+    });
+
+    printWindow = new BrowserWindow({
+        parent: mainWindow,
+        modal: false,
+        show: false,
+        webPreferences: {
+            nodeIntegration: false,
+            devTools: false,
+        },
     });
 
     mainWindow.loadURL(`file://${__dirname}/app.html`);
@@ -143,10 +122,6 @@ const createWindow = async () => {
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line
     new AppUpdater();
-
-    // Migrate database to ensure it is always up-to-date before opening the
-    // application.
-    migrate();
 };
 
 // Provides access to the userData path from renderer processes.
@@ -160,11 +135,8 @@ ipcMain.handle(ipcCommands.openFileDialog, async (_event, title) => {
 });
 
 // Provides access to save file dialog from renderer processes.
-ipcMain.handle(ipcCommands.saveFileDialog, async (_event, title, extension) => {
-    return dialog.showSaveDialog({
-        title,
-        filters: [{ name: extension, extensions: [extension] }],
-    });
+ipcMain.handle(ipcCommands.saveFileDialog, async (_event, opts) => {
+    return dialog.showSaveDialog(opts);
 });
 
 // Updates the location of the grpc endpoint.
@@ -187,6 +159,69 @@ ipcMain.handle(
         }
     }
 );
+
+// Creates a standalone GRPC client for testing the connection
+// to a node. This is used to verify that when changing connection
+// that the new node is on the same blockchain as the wallet was previously connected to.
+ipcMain.handle(
+    ipcCommands.grpcNodeConsensusAndGlobal,
+    async (_event, address: string, port: string) => {
+        try {
+            const nodeClient = new ConcordiumNodeClient(
+                address,
+                Number.parseInt(port, 10)
+            );
+            const consensusStatusSerialized = await nodeClient.getConsensusStatus();
+            const consensusStatus: ConsensusStatus = JSON.parse(
+                JsonResponse.deserializeBinary(
+                    consensusStatusSerialized
+                ).getValue()
+            );
+            const globalSerialized = await nodeClient.getCryptographicParameters(
+                consensusStatus.lastFinalizedBlock
+            );
+            return {
+                successful: true,
+                response: {
+                    consensus: consensusStatusSerialized,
+                    global: globalSerialized,
+                },
+            };
+        } catch (error) {
+            return { successful: false, error };
+        }
+    }
+);
+
+enum PrintErrorTypes {
+    Cancelled = 'cancelled',
+    Failed = 'failed',
+    NoPrinters = 'no valid printers available',
+}
+
+// Prints the given body.
+ipcMain.handle(ipcCommands.print, (_event, body) => {
+    return new Promise<string | void>((resolve, reject) => {
+        if (!printWindow) {
+            reject(new Error('Internal error: Unable to print'));
+        } else {
+            printWindow.loadURL(`data:text/html;charset=utf-8,${body}`);
+            const content = printWindow.webContents;
+            content.on('did-finish-load', () => {
+                content.print({}, (success, errorType) => {
+                    if (!success) {
+                        if (errorType === PrintErrorTypes.Cancelled) {
+                            resolve();
+                        }
+                        resolve(errorType);
+                    } else {
+                        resolve();
+                    }
+                });
+            });
+        }
+    });
+});
 
 /**
  * Add event listeners...
@@ -212,3 +247,10 @@ app.on('activate', () => {
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) createWindow();
 });
+
+// The default changed after Electron 8, this sets the value
+// equal to the Electron 8 value to avoid having to rework what
+// is broken by the change in value.
+// Note that in future Electron releases we will not have the option
+// to set this to false.
+app.allowRendererProcessReuse = false;

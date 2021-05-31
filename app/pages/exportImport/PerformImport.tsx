@@ -1,122 +1,54 @@
 import React, { useEffect, useState } from 'react';
+import clsx from 'clsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
-import {
-    Grid,
-    Button,
-    List,
-    Header,
-    Segment,
-    Divider,
-} from 'semantic-ui-react';
+import CheckmarkIcon from '@resources/svg/logo-checkmark.svg';
+import { Redirect } from 'react-router';
+import Button from '~/cross-app-components/Button';
 import {
     AddressBookEntry,
     Account,
     Identity,
-    Credential,
     ExportData,
     Dispatch,
-} from '../../utils/types';
-import routes from '../../constants/routes.json';
-import {
-    loadIdentities,
-    importIdentities,
-    identitiesSelector,
-} from '../../features/IdentitySlice';
-import {
-    loadAccounts,
-    importAccount,
-    accountsSelector,
-} from '../../features/AccountSlice';
+} from '~/utils/types';
+import routes from '~/constants/routes.json';
+import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
+import { loadAccounts, accountsSelector } from '~/features/AccountSlice';
 import {
     loadAddressBook,
     importAddressBookEntry,
     addressBookSelector,
-} from '../../features/AddressBookSlice';
+} from '~/features/AddressBookSlice';
 import {
-    importCredentials,
     credentialsSelector,
     loadCredentials,
-} from '../../features/CredentialSlice';
-import MessageModal from '../../components/MessageModal';
-import { checkDuplicates } from '../../utils/importHelpers';
-import { partition } from '../../utils/basicHelpers';
+} from '~/features/CredentialSlice';
+import MessageModal from '~/components/MessageModal';
+import { hasNoDuplicate, importWallets } from '~/utils/importHelpers';
+import { partition } from '~/utils/basicHelpers';
+import PageLayout from '~/components/PageLayout';
+import Columns from '~/components/Columns';
+import styles from './ExportImport.module.scss';
+import { getAllWallets } from '~/database/WalletDao';
 
-type IdentityKey = keyof Identity;
-type AccountKey = keyof Account;
 type AddressBookEntryKey = keyof AddressBookEntry;
-type CredentialKey = keyof Credential;
 
-export const identityFields: IdentityKey[] = ['id', 'name', 'randomness']; // TODO are there any other fields we should check?
-export const accountFields: AccountKey[] = ['name', 'address', 'identityId'];
 export const addressBookFields: AddressBookEntryKey[] = [
     'name',
     'address',
     'note',
 ];
-export const credentialFields: CredentialKey[] = [
-    'accountAddress',
-    'credentialNumber',
-    'credId',
-];
 
-export async function importNewIdentities(
-    newIdentities: Identity[],
-    existingIdentities: Identity[]
-): Promise<Identity[]> {
-    const [nonDuplicates, duplicates] = partition(
-        newIdentities,
-        (newIdentity) =>
-            checkDuplicates(newIdentity, existingIdentities, identityFields, [])
-    );
-    if (nonDuplicates.length > 0) {
-        await importIdentities(nonDuplicates);
-    }
-    return duplicates;
-}
-
-export async function importAccounts(
-    newAccounts: Account[],
-    existingAccounts: Account[]
-): Promise<Account[]> {
-    const [nonDuplicates, duplicates] = partition(newAccounts, (newAccount) =>
-        checkDuplicates(newAccount, existingAccounts, accountFields, [])
-    );
-    if (nonDuplicates.length > 0) {
-        await importAccount(nonDuplicates);
-    }
-    return duplicates;
-}
-
-export async function importEntries(
+export async function importAddressBookEntries(
     entries: AddressBookEntry[],
     addressBook: AddressBookEntry[]
 ): Promise<AddressBookEntry[]> {
     const [nonDuplicates, duplicates] = partition(entries, (entry) =>
-        checkDuplicates(entry, addressBook, addressBookFields, ['note'])
+        hasNoDuplicate(entry, addressBook, addressBookFields, ['note'])
     );
     if (nonDuplicates.length > 0) {
         await importAddressBookEntry(nonDuplicates);
-    }
-    return duplicates;
-}
-
-export async function importNewCredentials(
-    newCredentials: Credential[],
-    existingCredentials: Credential[]
-): Promise<Credential[]> {
-    const [nonDuplicates, duplicates] = partition(
-        newCredentials,
-        (newCredential) =>
-            checkDuplicates(
-                newCredential,
-                existingCredentials,
-                credentialFields,
-                []
-            )
-    );
-    if (nonDuplicates.length > 0) {
-        await importCredentials(nonDuplicates);
     }
     return duplicates;
 }
@@ -129,44 +61,34 @@ interface Props {
     location: Location;
 }
 
-interface SetDuplicates {
-    identities(duplicates: Identity[]): void;
-    accounts(duplicates: Account[]): void;
-    addressBook(duplicates: AddressBookEntry[]): void;
-}
-
 async function performImport(
     importedData: ExportData,
     existingData: ExportData,
-    setDuplicates: SetDuplicates,
     dispatch: Dispatch
 ) {
-    const duplicateIdentities = await importNewIdentities(
+    const existingWallets = await getAllWallets();
+    const existingDataWithWallets = {
+        ...existingData,
+        wallets: existingWallets,
+    };
+
+    await importWallets(
+        existingDataWithWallets,
+        importedData.wallets,
         importedData.identities,
-        existingData.identities
-    );
-    loadIdentities(dispatch);
-    setDuplicates.identities(duplicateIdentities);
-
-    const duplicateAccounts = await importAccounts(
         importedData.accounts,
-        existingData.accounts
+        importedData.credentials
     );
-    loadAccounts(dispatch);
-    setDuplicates.accounts(duplicateAccounts);
 
-    const duplicateEntries = await importEntries(
+    await importAddressBookEntries(
         importedData.addressBook,
         existingData.addressBook
     );
-    loadAddressBook(dispatch);
-    setDuplicates.addressBook(duplicateEntries);
 
-    await importNewCredentials(
-        importedData.credentials,
-        existingData.credentials
-    );
-    loadCredentials(dispatch);
+    await loadIdentities(dispatch);
+    await loadAccounts(dispatch);
+    await loadAddressBook(dispatch);
+    await loadCredentials(dispatch);
 }
 
 /**
@@ -182,24 +104,13 @@ export default function PerformImport({ location }: Props) {
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
     const credentials = useSelector(credentialsSelector);
-    const [duplicateIdentities, setDuplicateIdentities] = useState<Identity[]>(
-        []
-    );
-    const [duplicateAccounts, setDuplicateAccounts] = useState<Account[]>([]);
-    const [duplicateEntries, setDuplicateEntries] = useState<
-        AddressBookEntry[]
-    >([]);
+
     const [open, setOpen] = useState(false);
     const [started, setStarted] = useState(false);
 
     useEffect(() => {
-        if (!started) {
+        if (!started && importedData) {
             setStarted(true);
-            const setters = {
-                identities: setDuplicateIdentities,
-                accounts: setDuplicateAccounts,
-                addressBook: setDuplicateEntries,
-            };
             performImport(
                 importedData,
                 {
@@ -207,8 +118,8 @@ export default function PerformImport({ location }: Props) {
                     accounts,
                     addressBook,
                     credentials,
+                    wallets: [],
                 },
-                setters,
                 dispatch
             ).catch(() => setOpen(true));
         }
@@ -218,99 +129,109 @@ export default function PerformImport({ location }: Props) {
         accounts,
         credentials,
         addressBook,
-        setDuplicateEntries,
-        setDuplicateAccounts,
-        setDuplicateIdentities,
         dispatch,
         started,
     ]);
 
-    const accountList = (identity: Identity) => (
-        <List.List relaxed="false">
-            {importedData.accounts
-                .filter(
-                    (account: Account) => account.identityId === identity.id
-                )
-                .map((account: Account) => (
-                    <List.Item key={account.address}>
-                        {account.name}
-                        {duplicateAccounts.includes(account)
-                            ? ' (Already existed)'
-                            : ''}
-                    </List.Item>
-                ))}
-        </List.List>
-    );
+    if (!importedData) {
+        return <Redirect to={routes.EXPORTIMPORT} />;
+    }
 
-    const AddressBookList = (
-        <List size="big">
-            <List.Item>
-                <List.Header>Recipient accounts:</List.Header>
-            </List.Item>
-            {importedData.addressBook.map((entry: AddressBookEntry) => (
-                <List.Item key={entry.address}>
-                    {entry.name}
-                    {duplicateEntries.includes(entry)
-                        ? ' (Already existed)'
-                        : ''}
-                </List.Item>
-            ))}
-        </List>
+    const accountList = (identity: Identity) =>
+        importedData.accounts
+            .filter((account: Account) => account.identityId === identity.id)
+            .map((account: Account) => (
+                <p key={account.address}>{account.name}</p>
+            ));
+
+    const AddressBookList = importedData.addressBook.map(
+        (entry: AddressBookEntry) => (
+            <p key={entry.address} className={styles.importedAddress}>
+                {entry.name}
+            </p>
+        )
     );
 
     return (
         <>
             <MessageModal
-                title="Unable to complete import!"
-                buttonText="return!"
+                title="Unable to complete import"
+                buttonText="Okay"
                 onClose={() => dispatch(push(routes.EXPORTIMPORT))}
                 open={open}
             />
-
-            <Segment textAlign="center">
-                <Grid columns="equal" divided>
-                    <Grid.Column>
-                        <Segment basic>
-                            <Header size="large">Import successful</Header>
-                            That&apos;s it! Your import completed successfully.
-                            <Divider hidden />
-                            <Button
-                                fluid
-                                primary
-                                onClick={() =>
-                                    dispatch(push(routes.EXPORTIMPORT))
-                                }
-                            >
-                                Okay, thanks!
-                            </Button>
-                        </Segment>
-                    </Grid.Column>
-                    <Grid.Column>
-                        <List size="big" relaxed="very">
-                            {importedData.identities.map(
-                                (identity: Identity) => (
-                                    <List.Item key={identity.id}>
-                                        <List.Header>
-                                            ID: {identity.name}
-                                            {duplicateIdentities.includes(
-                                                identity
-                                            )
-                                                ? ' (Already existed)'
-                                                : ''}
-                                        </List.Header>
-                                        <List.Content>
-                                            Accounts:
-                                            {accountList(identity)}
-                                        </List.Content>
-                                    </List.Item>
-                                )
-                            )}
-                        </List>
-                        <Header>Address Book</Header>
-                        {AddressBookList}
-                    </Grid.Column>
-                </Grid>
-            </Segment>
+            <PageLayout>
+                <PageLayout.Header>
+                    <h1>Export and Import</h1>
+                </PageLayout.Header>
+                <PageLayout.Container disableBack>
+                    <Columns divider columnScroll>
+                        <Columns.Column>
+                            <div className={styles.successfulImport}>
+                                <h2 className={styles.title}>
+                                    Import successful
+                                </h2>
+                                <div>
+                                    <CheckmarkIcon
+                                        className={styles.checkmark}
+                                    />
+                                    <p>
+                                        That’s it! Your import completed
+                                        successfully.
+                                    </p>
+                                </div>
+                                <Button
+                                    onClick={() =>
+                                        dispatch(push(routes.EXPORTIMPORT))
+                                    }
+                                >
+                                    Okay, thanks!
+                                </Button>
+                            </div>
+                        </Columns.Column>
+                        <Columns.Column>
+                            <div className={styles.importedList}>
+                                <div className="flexChildFill flexColumn justifyCenter">
+                                    {importedData.identities.map(
+                                        (identity: Identity) => (
+                                            <div
+                                                key={identity.id}
+                                                className={styles.importSection}
+                                            >
+                                                <h3>
+                                                    <b>ID:</b> {identity.name}
+                                                </h3>
+                                                <div
+                                                    className={
+                                                        styles.importedAccounts
+                                                    }
+                                                >
+                                                    <p className={styles.bold}>
+                                                        Accounts:
+                                                    </p>
+                                                    {accountList(identity)}
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
+                                    <div className={styles.importSection}>
+                                        <h3>Address book</h3>
+                                        <p
+                                            className={clsx(
+                                                styles.bold,
+                                                styles.importedAddress
+                                            )}
+                                        >
+                                            Recipient accounts:
+                                        </p>
+                                        {AddressBookList}
+                                    </div>
+                                </div>
+                            </div>
+                        </Columns.Column>
+                    </Columns>
+                </PageLayout.Container>
+            </PageLayout>
         </>
     );
 }

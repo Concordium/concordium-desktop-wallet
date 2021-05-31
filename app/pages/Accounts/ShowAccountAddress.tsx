@@ -1,8 +1,10 @@
 import React from 'react';
-import { Header, Button } from 'semantic-ui-react';
 import QRCode from 'qrcode.react';
 import { Account } from '../../utils/types';
 import CopyButton from '../../components/CopyButton';
+import CloseButton from '~/cross-app-components/CloseButton';
+import Card from '~/cross-app-components/Card';
+import styles from './Accounts.module.scss';
 
 interface Props {
     account: Account;
@@ -14,18 +16,17 @@ interface Props {
  */
 export default function ShowAccountAddress({ account, returnFunction }: Props) {
     return (
-        <>
-            <Button onClick={returnFunction}>x</Button>
-            <Header textAlign="center">
-                Address
-                <Header.Subheader>
-                    <QRCode value={account.address} />
-                </Header.Subheader>
-                <Header.Subheader textAlign="center">
-                    {account.address}
-                </Header.Subheader>
-            </Header>
-            <CopyButton value={account.address} />
-        </>
+        <Card className="flexColumn alignCenter relative pH50">
+            <CloseButton
+                className={styles.closeButton}
+                onClick={returnFunction}
+            />
+            <h3 className="m0">Address</h3>
+            <QRCode className="m20" value={account.address} />
+            <div className="flex">
+                <p className="body4 mL20">{account.address}</p>
+                <CopyButton className="mL20" value={account.address} />
+            </div>
+        </Card>
     );
 }

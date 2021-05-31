@@ -1,20 +1,20 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    loadAccounts,
-    decryptAccountBalance,
-} from '../../features/AccountSlice';
-import { globalSelector } from '../../features/GlobalSlice';
+import { loadAccounts, decryptAccountBalance } from '~/features/AccountSlice';
+import { globalSelector } from '~/features/GlobalSlice';
 import {
     transactionsSelector,
     decryptTransactions,
     loadTransactions,
-    viewingShieldedSelector,
-} from '../../features/TransactionSlice';
-import { Account } from '../../utils/types';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import SimpleLedger from '../../components/ledger/SimpleLedger';
-import { getCredentialsOfAccount } from '~/database/CredentialDao';
+} from '~/features/TransactionSlice';
+import { Account } from '~/utils/types';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import Ledger from '~/components/ledger/Ledger';
+import { asyncNoOp } from '~/utils/basicHelpers';
+import Card from '~/cross-app-components/Card';
+import Button from '~/cross-app-components/Button';
+import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
+import errorMessages from '~/constants/errorMessages.json';
 
 interface Props {
     account: Account;
@@ -27,34 +27,38 @@ interface Props {
 export default function DecryptComponent({ account }: Props) {
     const dispatch = useDispatch();
     const transactions = useSelector(transactionsSelector);
-    const viewingShielded = useSelector(viewingShieldedSelector);
     const global = useSelector(globalSelector);
-
-    if (!viewingShielded || account.allDecrypted) {
-        return null;
-    }
 
     async function ledgerCall(
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
         if (!global) {
-            throw new Error('Unexpected missing global object');
+            throw new Error(errorMessages.missingGlobal);
         }
-        setMessage('Please confirm exporting prf key on device');
-        const prfKeySeed = await ledger.getPrfKey(account.identityId);
+
+        if (account.identityNumber === undefined) {
+            throw new Error(
+                'The account is missing an identity number. This is an internal error that should be reported'
+            );
+        }
+
+        const credential = await findLocalDeployedCredentialWithWallet(
+            account.address,
+            ledger
+        );
+        const credentialNumber = credential?.credentialNumber;
+        if (credentialNumber === undefined) {
+            throw new Error(
+                'Unable to decrypt shielded balance and encrypted transfers. Please verify that the connected wallet is for this account.'
+            );
+        }
+
+        setMessage('Please confirm exporting PRF key on device');
+        const prfKeySeed = await ledger.getPrfKey(account.identityNumber);
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
 
-        const credentialNumber = (
-            await getCredentialsOfAccount(account.address)
-        ).find((cred) => cred.credentialIndex === 0)?.credentialNumber;
-
-        if (credentialNumber === undefined) {
-            throw new Error(
-                'Unable to decrypt amounts, because we were unable to find original credential'
-            );
-        }
         await decryptAccountBalance(prfKey, account, credentialNumber, global);
         await decryptTransactions(
             transactions,
@@ -66,5 +70,22 @@ export default function DecryptComponent({ account }: Props) {
         await loadAccounts(dispatch);
     }
 
-    return <SimpleLedger ledgerCall={ledgerCall} />;
+    return (
+        <Ledger ledgerCallback={ledgerCall}>
+            {({ isReady, statusView, submitHandler = asyncNoOp }) => (
+                <Card className="flexColumn textCenter">
+                    <h3 className="mB40">Decrypt shielded balance</h3>
+                    {statusView}
+                    <Button
+                        size="big"
+                        disabled={!isReady}
+                        className="m40"
+                        onClick={submitHandler}
+                    >
+                        Decrypt
+                    </Button>
+                </Card>
+            )}
+        </Ledger>
+    );
 }

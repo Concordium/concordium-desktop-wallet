@@ -1,9 +1,7 @@
 const validSubtrees = [0, 1, 2];
 
-// TODO[MAINNET]: A Concordium specific purpose and coin type has to be decided before mainnet.
-// TODO: Probably move this into the Ledger device as we will be restricting it anyway.
-const concordiumPurpose = 583;
-const concordiumCoinType = 691;
+const concordiumPurpose = 1105;
+const concordiumCoinType = 0;
 
 export interface AccountPathInput {
     identityIndex: number;
@@ -37,14 +35,31 @@ export function getAccountPath(accountPath: AccountPathInput): number[] {
 }
 
 /**
+ * Constructs the path for the public-key that is used to pair a hardware
+ * wallet with the desktop wallet. The path used is the root path of the
+ * derivation scheme used.
+ *
+ * - m/purpose'/coin_type'/
+ *
+ * Note that this results in an empty path, as the purpose and coin_type
+ * are globally defined and automatically inserted when serializing the path.
+ *
+ * @returns the derivation path used to retrieve the public-key used for pairing
+ * the hardware wallet with the desktop wallet.
+ */
+export function getPairingPath(): number[] {
+    return [];
+}
+
+/**
  * Constructs a path to a governance signature key. The governance key derivation path structure
  * is given by:
  *
- *  - m/purpose'/coin_type'/2'/gov_purpose’/key_index'/
+ *  - m/purpose'/coin_type'/1'/gov_purpose’/key_index'/
  * @param governancePath
  */
 export function getGovernancePath(governancePath: GovernancePathInput) {
-    return [2, governancePath.purpose, governancePath.keyIndex];
+    return [1, governancePath.purpose, governancePath.keyIndex];
 }
 
 /**
@@ -76,12 +91,12 @@ export default function pathAsBuffer(keyDerivationPath: number[]): Buffer {
     const buffer = Buffer.alloc(1 + (2 + keyDerivationPath.length) * 4);
 
     const subtree = keyDerivationPath[0];
-    if (validSubtrees.indexOf(subtree) === -1) {
+    if (subtree !== undefined && validSubtrees.indexOf(subtree) === -1) {
         throw new Error(`An invalid subtree was provided: ${subtree}`);
     }
 
     // Governance subtree has a depth of exactly 3.
-    if (subtree === 2 && keyDerivationPath.length !== 3) {
+    if (subtree === 1 && keyDerivationPath.length !== 3) {
         throw new Error(
             `A governance derivation path was supplied, but the path does not have length 3: ${keyDerivationPath.length}`
         );

@@ -25,15 +25,18 @@ export function convertIncomingTransaction(
     transaction: IncomingTransaction,
     accountAddress: string
 ): TransferTransaction {
+    const transactionKind = transaction.details.type;
+    const originType = transaction.origin.type;
+
     let fromAddress = '';
     if (transaction.details.transferSource) {
         fromAddress = transaction.details.transferSource;
     } else if (
-        transaction.origin.type === OriginType.Account &&
+        originType === OriginType.Account &&
         transaction.origin.address
     ) {
         fromAddress = transaction.origin.address;
-    } else if (transaction.origin.type === OriginType.Self) {
+    } else if (originType === OriginType.Self) {
         fromAddress = accountAddress;
     }
 
@@ -48,41 +51,58 @@ export function convertIncomingTransaction(
         encrypted = JSON.stringify(transaction.encrypted);
     }
 
+    const success = transaction.details.outcome === 'success';
+
     let { subtotal } = transaction;
-    if (!subtotal) {
+
+    if (!success) {
+        subtotal = subtotal || '0';
+    } else if (!subtotal) {
         subtotal = (
             BigInt(transaction.total) - BigInt(transaction.cost || '0')
         ).toString();
     }
+    if (BigInt(subtotal) < 0n) {
+        subtotal = (-BigInt(subtotal)).toString();
+    }
 
     let decryptedAmount;
     if (
-        transaction.details.type === TransactionKindString.TransferToEncrypted
+        [
+            TransactionKindString.TransferToEncrypted,
+            TransactionKindString.TransferToPublic,
+        ].includes(transactionKind)
     ) {
-        let value = BigInt(subtotal);
-        value = value > 0n ? value : -value;
-        decryptedAmount = value.toString();
+        // The subtotal is always non-negative;
+        const value = BigInt(subtotal);
+        if (transactionKind === TransactionKindString.TransferToEncrypted) {
+            // transfer to encrypted increases the decryptedAmount;
+            decryptedAmount = value.toString();
+        }
+        if (transactionKind === TransactionKindString.TransferToPublic) {
+            // transfer to encrypted decreases the decryptedAmount;
+            decryptedAmount = (-value).toString();
+        }
     }
 
     return {
         remote: true,
-        originType: transaction.origin.type,
-        transactionKind: transaction.details.type,
+        originType,
+        transactionKind,
         id: transaction.id,
         blockHash: transaction.blockHash,
         blockTime: transaction.blockTime,
-        total: transaction.total,
-        success: transaction.details.outcome === 'success',
+        success,
         transactionHash: transaction.transactionHash,
         subtotal,
         cost: transaction.cost,
         origin: JSON.stringify(transaction.origin),
         details: JSON.stringify(transaction.details),
-        rejectReason: transaction.details.rejectReason,
         encrypted,
         decryptedAmount,
         fromAddress,
         toAddress,
+        rejectReason: transaction.details.rawRejectReason?.tag,
         status: TransactionStatus.Finalized,
     };
 }
@@ -91,7 +111,6 @@ export function convertIncomingTransaction(
 type TypeSpecific = Pick<
     TransferTransaction,
     | 'transactionKind'
-    | 'total'
     | 'subtotal'
     | 'schedule'
     | 'toAddress'
@@ -100,17 +119,12 @@ type TypeSpecific = Pick<
 
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a simple transfer, which cannot be converted by the generic function .
-function convertSimpleTransfer(
-    transaction: SimpleTransfer,
-    cost: bigint
-): TypeSpecific {
+function convertSimpleTransfer(transaction: SimpleTransfer): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
-    const estimatedTotal = amount + cost;
 
     return {
         transactionKind: TransactionKindString.Transfer,
-        total: (-estimatedTotal).toString(),
-        subtotal: (-amount).toString(),
+        subtotal: amount.toString(),
         toAddress: transaction.payload.toAddress,
     };
 }
@@ -118,16 +132,13 @@ function convertSimpleTransfer(
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a transfer to encrypted, which cannot be converted by the generic function .
 function convertTransferToEncrypted(
-    transaction: TransferToEncrypted,
-    cost: bigint
+    transaction: TransferToEncrypted
 ): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
-    const estimatedTotal = amount + cost;
 
     return {
         transactionKind: TransactionKindString.TransferToEncrypted,
-        total: (-estimatedTotal).toString(),
-        subtotal: (-amount).toString(),
+        subtotal: amount.toString(),
         decryptedAmount: amount.toString(),
         toAddress: transaction.sender,
     };
@@ -135,16 +146,11 @@ function convertTransferToEncrypted(
 
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a transfer to public, which cannot be converted by the generic function .
-function convertTransferToPublic(
-    transaction: TransferToPublic,
-    cost: bigint
-): TypeSpecific {
+function convertTransferToPublic(transaction: TransferToPublic): TypeSpecific {
     const amount = BigInt(transaction.payload.transferAmount);
-    const estimatedTotal = amount - cost;
 
     return {
         transactionKind: TransactionKindString.TransferToPublic,
-        total: estimatedTotal.toString(),
         subtotal: amount.toString(),
         decryptedAmount: (-amount).toString(),
         toAddress: transaction.sender,
@@ -154,16 +160,13 @@ function convertTransferToPublic(
 // Helper function for converting Account Transaction to TransferTransaction.
 // Handles the fields of a scheduled transfer, which cannot be converted by the generic function .
 function convertScheduledTransfer(
-    transaction: ScheduledTransfer,
-    cost: bigint
+    transaction: ScheduledTransfer
 ): TypeSpecific {
     const amount = getScheduledTransferAmount(transaction);
-    const estimatedTotal = amount + cost;
 
     return {
         transactionKind: TransactionKindString.TransferWithSchedule,
-        total: (-estimatedTotal).toString(),
-        subtotal: (-amount).toString(),
+        subtotal: amount.toString(),
         schedule: JSON.stringify(transaction.payload.schedule),
         toAddress: transaction.payload.toAddress,
     };
@@ -183,19 +186,19 @@ export async function convertAccountTransaction(
 
     let typeSpecific;
     if (instanceOfSimpleTransfer(transaction)) {
-        typeSpecific = convertSimpleTransfer(transaction, cost);
+        typeSpecific = convertSimpleTransfer(transaction);
     } else if (instanceOfScheduledTransfer(transaction)) {
-        typeSpecific = convertScheduledTransfer(transaction, cost);
+        typeSpecific = convertScheduledTransfer(transaction);
     } else if (instanceOfTransferToEncrypted(transaction)) {
-        typeSpecific = convertTransferToEncrypted(transaction, cost);
+        typeSpecific = convertTransferToEncrypted(transaction);
     } else if (instanceOfTransferToPublic(transaction)) {
-        typeSpecific = convertTransferToPublic(transaction, cost);
+        typeSpecific = convertTransferToPublic(transaction);
     } else {
         throw new Error('unsupported transaction type - please implement');
     }
 
     return {
-        blockHash: 'pending',
+        blockHash: '',
         remote: false,
         originType: OriginType.Self,
         transactionHash: hash,

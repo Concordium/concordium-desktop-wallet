@@ -1,17 +1,33 @@
 import clsx from 'clsx';
-import React, { PropsWithChildren } from 'react';
+import React, { ElementType, PropsWithChildren } from 'react';
+import { PolymorphicComponentProps } from '~/utils/types';
 
 import styles from './Card.module.scss';
 
-export interface CardProps {
-    className?: string;
-}
+export type CardProps<
+    TAs extends ElementType = 'div'
+> = PolymorphicComponentProps<
+    TAs,
+    {
+        className?: string;
+        header?: string | JSX.Element;
+    }
+>;
 
-function Card({
+function Card<TAs extends ElementType = 'div'>({
     children,
     className,
-}: PropsWithChildren<CardProps>): JSX.Element {
-    return <div className={clsx(styles.root, className)}>{children}</div>;
+    header,
+    as,
+    ...props
+}: PropsWithChildren<CardProps<TAs>>): JSX.Element {
+    const Component = as ?? 'div';
+    return (
+        <Component className={clsx(styles.root, className)} {...props}>
+            {header && <h2 className={styles.header}>{header}</h2>}
+            {children}
+        </Component>
+    );
 }
 
 export default Card;

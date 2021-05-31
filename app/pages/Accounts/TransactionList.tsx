@@ -1,33 +1,78 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Menu } from 'semantic-ui-react';
 import TransactionListElement from './TransactionListElement';
-import { TransferTransaction } from '../../utils/types';
-import { transactionsSelector } from '../../features/TransactionSlice';
+import { TransferTransaction } from '~/utils/types';
+import {
+    moreTransactionsSelector,
+    loadingTransactionsSelector,
+} from '~/features/TransactionSlice';
+import LoadingComponent from '~/cross-app-components/Loading';
 
 interface Props {
+    transactions: TransferTransaction[];
     onTransactionClick: (transaction: TransferTransaction) => void;
 }
 
 /**
- * Displays the currently chosen transactions
- * Takes a function chooseElement, to allows the parent
- * to get notified of clicked transactions.
+ * Displays a list of transactions, and executes the provided onTransactionClick
+ * function when a specific transaction is clicked.
  */
-function TransactionList({ onTransactionClick }: Props): JSX.Element {
-    const transactions = useSelector(transactionsSelector);
+function TransactionList({
+    onTransactionClick,
+    transactions,
+}: Props): JSX.Element | null {
+    const more = useSelector(moreTransactionsSelector);
+    const loading = useSelector(loadingTransactionsSelector);
+    const [showLoading, setShowLoading] = useState(false);
+
+    useEffect(() => {
+        if (loading) {
+            const timerId = setTimeout(() => setShowLoading(true), 500);
+            return () => clearInterval(timerId);
+        }
+        setShowLoading(false);
+        return () => {};
+    }, [loading]);
+
+    if (showLoading) {
+        return (
+            <div className="flex">
+                <LoadingComponent
+                    inline
+                    className="marginCenter mV40"
+                    text="loading transactions"
+                />
+            </div>
+        );
+    }
+
+    if (loading) {
+        return null;
+    }
+
+    if (transactions.length === 0) {
+        return (
+            <h3 className="flex justifyCenter pB20">
+                This balance has no transactions yet.
+            </h3>
+        );
+    }
 
     return (
-        <Menu vertical fluid>
+        <>
             {transactions.map((transaction: TransferTransaction) => (
-                <Menu.Item
+                <TransactionListElement
                     onClick={() => onTransactionClick(transaction)}
-                    key={transaction.transactionHash}
-                >
-                    <TransactionListElement transaction={transaction} />
-                </Menu.Item>
+                    key={transaction.transactionHash || transaction.id}
+                    transaction={transaction}
+                />
             ))}
-        </Menu>
+            {more && (
+                <h3 className="flex justifyCenter mT10 pB10">
+                    Export to see older transactions
+                </h3>
+            )}
+        </>
     );
 }
 

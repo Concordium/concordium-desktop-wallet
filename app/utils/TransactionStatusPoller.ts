@@ -1,4 +1,4 @@
-import { parse } from './JSONHelper';
+import { parse, stringify } from './JSONHelper';
 import { getAll, updateEntry } from '~/database/MultiSignatureProposalDao';
 import { loadProposals } from '~/features/MultiSignatureSlice';
 import {
@@ -8,6 +8,7 @@ import {
     Dispatch,
     instanceOfAccountTransaction,
     instanceOfUpdateAccountCredentials,
+    UpdateAccountCredentials,
     Transaction,
 } from './types';
 import {
@@ -15,38 +16,29 @@ import {
     rejectTransaction,
 } from '~/features/TransactionSlice';
 import { getPendingTransactions } from '~/database/TransactionDao';
+import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
+import { getTransactionHash } from './transactionHash';
 import {
-    getStatus,
-    StatusResponse,
-    isSuccessfulTransaction,
-} from './transactionHelpers';
-import getTransactionHash from './transactionHash';
-import { updateSignatureThreshold } from '~/features/AccountSlice';
-import { updateCredentialIndex } from '~/features/CredentialSlice';
+    updateAccountInfoOfAddress,
+    updateSignatureThreshold,
+} from '~/features/AccountSlice';
 
-export function transactionPerformConsequence(
+/**
+ * Given an UpdateAccountCredentials transaction, update the local state
+ * according to the transaction's changes.
+ * For each added credential, add it to the local database.
+ * For each removed credential, remove its index to indicate that it has been removed.
+ * Update the signatureThreshold of the account.
+ */
+export function updateAccountCredentialsPerformConsequence(
     dispatch: Dispatch,
-    transaction: Transaction,
-    response: StatusResponse
+    transaction: UpdateAccountCredentials
 ) {
-    if (isSuccessfulTransaction(Object.values(response.outcomes))) {
-        if (instanceOfAccountTransaction(transaction)) {
-            if (instanceOfUpdateAccountCredentials(transaction)) {
-                transaction.payload.addedCredentials.forEach(
-                    ({ index, value }) =>
-                        updateCredentialIndex(dispatch, value.credId, index)
-                );
-                transaction.payload.removedCredIds.forEach((credId) =>
-                    updateCredentialIndex(dispatch, credId, undefined)
-                );
-                updateSignatureThreshold(
-                    dispatch,
-                    transaction.sender,
-                    transaction.payload.newThreshold
-                );
-            }
-        }
-    }
+    updateSignatureThreshold(
+        dispatch,
+        transaction.sender,
+        transaction.payload.threshold
+    );
 }
 
 /**
@@ -59,9 +51,9 @@ export async function getMultiSignatureTransactionStatus(
     proposal: MultiSignatureTransaction,
     dispatch: Dispatch
 ) {
-    const transaction = parse(proposal.transaction);
+    const transaction: Transaction = parse(proposal.transaction);
 
-    const transactionHash = getTransactionHash(transaction);
+    const transactionHash = await getTransactionHash(transaction);
 
     const response = await getStatus(transactionHash);
 
@@ -71,12 +63,34 @@ export async function getMultiSignatureTransactionStatus(
 
     switch (response.status) {
         case TransactionStatus.Rejected:
-            updatedProposal.status = MultiSignatureTransactionStatus.Failed;
+            updatedProposal.status = MultiSignatureTransactionStatus.Rejected;
             break;
-        case TransactionStatus.Finalized:
-            transactionPerformConsequence(dispatch, transaction, response);
-            updatedProposal.status = MultiSignatureTransactionStatus.Finalized;
+        case TransactionStatus.Finalized: {
+            // A finalized transaction will always have exactly one outcome.
+            const outcome = Object.values(response.outcomes)[0];
+            if (isSuccessfulTransaction(outcome)) {
+                if (
+                    instanceOfAccountTransaction(transaction) &&
+                    instanceOfUpdateAccountCredentials(transaction)
+                ) {
+                    updateAccountCredentialsPerformConsequence(
+                        dispatch,
+                        transaction
+                    );
+                }
+                updatedProposal.status =
+                    MultiSignatureTransactionStatus.Finalized;
+            } else {
+                updatedProposal.status = MultiSignatureTransactionStatus.Failed;
+            }
+            if (instanceOfAccountTransaction(transaction)) {
+                updatedProposal.transaction = stringify({
+                    ...transaction,
+                    cost: outcome.cost,
+                });
+            }
             break;
+        }
         default:
             throw new Error('Unexpected status was returned by the poller!');
     }
@@ -89,19 +103,28 @@ export async function getMultiSignatureTransactionStatus(
 /**
  * Wait for the transaction to be finalized (or rejected) and update accordingly
  */
-export async function monitorTransactionStatus(transactionHash: string) {
+export async function monitorTransactionStatus(
+    dispatch: Dispatch,
+    transactionHash: string,
+    senderAddress: string
+) {
     const response = await getStatus(transactionHash);
     switch (response.status) {
         case TransactionStatus.Rejected:
-            rejectTransaction(transactionHash);
+            rejectTransaction(dispatch, transactionHash);
             break;
         case TransactionStatus.Finalized: {
-            confirmTransaction(transactionHash, response.outcomes);
+            // A finalized transaction will always result in exactly one outcome,
+            // which we can extract directly here.
+            const blockHash = Object.keys(response.outcomes)[0];
+            const event = Object.values(response.outcomes)[0];
+            confirmTransaction(dispatch, transactionHash, blockHash, event);
             break;
         }
         default:
             throw new Error('Unexpected status was returned by the poller!');
     }
+    updateAccountInfoOfAddress(senderAddress, dispatch);
 }
 
 /**
@@ -111,7 +134,11 @@ export async function monitorTransactionStatus(transactionHash: string) {
 export default async function listenForTransactionStatus(dispatch: Dispatch) {
     const transfers = await getPendingTransactions();
     transfers.forEach((transfer) =>
-        monitorTransactionStatus(transfer.transactionHash)
+        monitorTransactionStatus(
+            dispatch,
+            transfer.transactionHash,
+            transfer.fromAddress
+        )
     );
 
     const allProposals = await getAll();

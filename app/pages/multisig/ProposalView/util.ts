@@ -12,10 +12,8 @@ import {
 } from '~/utils/types';
 import { parse, stringify } from '~/utils/JSONHelper';
 import { ModalErrorInput } from '~/components/SimpleErrorModal';
-import { getBlockSummary, getConsensusStatus } from '~/utils/nodeRequests';
-import { BlockSummary, ConsensusStatus } from '~/utils/NodeApiTypes';
 import { updateCurrentProposal } from '~/features/MultiSignatureSlice';
-import getTransactionHash from '~/utils/transactionHash';
+import getTransactionSignDigest from '~/utils/transactionHash';
 
 async function HandleAccountTransactionSignatureFile(
     dispatch: Dispatch,
@@ -48,7 +46,7 @@ async function HandleAccountTransactionSignatureFile(
             show: true,
             header: 'Duplicate Credential',
             content:
-                'The loaded signature file contains a signature, from a credential, which is already has a signature on the proposal.',
+                'The loaded signature file contains a signature, from a credential, which already has a signature on the proposal.',
         };
     }
 
@@ -65,24 +63,18 @@ async function HandleAccountTransactionSignatureFile(
 
 /**
  * Returns whether or not the given signature is valid for the proposal. The signature is valid if
- * one of the authorized verification keys can verify the signature successfully on the hash
+ * the verification key in the signature can verify the signature successfully on the hash
  * of the serialized transaction.
  */
 async function isSignatureValid(
     proposal: UpdateInstruction,
-    signature: UpdateInstructionSignature,
-    blockSummary: BlockSummary
+    signature: UpdateInstructionSignature
 ): Promise<boolean> {
-    const transactionHash = getTransactionHash(proposal);
-
-    const matchingKey =
-        blockSummary.updates.authorizations.keys[
-            signature.authorizationKeyIndex
-        ];
+    const transactionSignatureDigest = getTransactionSignDigest(proposal);
     return ed.verify(
         signature.signature,
-        transactionHash,
-        matchingKey.verifyKey
+        transactionSignatureDigest,
+        signature.authorizationPublicKey
     );
 }
 
@@ -91,12 +83,6 @@ async function HandleUpdateInstructionSignatureFile(
     transactionObject: UpdateInstruction,
     currentProposal: MultiSignatureTransaction
 ): Promise<ModalErrorInput | undefined> {
-    if (!currentProposal) {
-        return {
-            show: true,
-            header: 'Unexpected missing current proposal',
-        };
-    }
     const proposal: UpdateInstruction = parse(currentProposal.transaction);
 
     // We currently restrict the amount of signatures imported at the same time to be 1, as it
@@ -128,25 +114,7 @@ async function HandleUpdateInstructionSignatureFile(
     }
 
     let validSignature = false;
-    try {
-        const consensusStatus: ConsensusStatus = await getConsensusStatus();
-        const blockSummary = await getBlockSummary(
-            consensusStatus.lastFinalizedBlock
-        );
-        validSignature = await isSignatureValid(
-            proposal,
-            signature,
-            blockSummary
-        );
-    } catch (error) {
-        // Can happen if the node is not reachable.
-        return {
-            show: true,
-            header: 'Unable to reach node',
-            content:
-                'It was not possible to reach the node, which is required to validate that the loaded signature verifies against an authorization key.',
-        };
-    }
+    validSignature = await isSignatureValid(proposal, signature);
 
     // Prevent the user from adding an invalid signature.
     if (!validSignature) {

@@ -1,0 +1,49 @@
+@import 'config/bundle';
+
+.listItem {
+    list-style-type: none;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #dcdcdc;
+}
+
+ul {
+    margin-top: 36px;
+    padding: 0;
+}
+
+/* No border-bottom for the final key entry in the list. */
+.listItem:last-child {
+    border-bottom: none;
+}
+
+.button {
+    flex: 0 0 85px;
+    margin-right: 10px;
+}
+
+.keyText {
+    line-height: 1em;
+    overflow: hidden;
+    flex: 0 1 auto;
+    margin: 0;
+}
+
+.status {
+    margin-bottom: 5px;
+}
+
+.removed {
+    composes: status;
+    color: $color-danger;
+}
+
+.unchanged {
+    composes: status;
+    color: $color-text-faded;
+}
+
+.added {
+    composes: status;
+    color: #2caa00;
+}

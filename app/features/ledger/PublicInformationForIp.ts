@@ -1,4 +1,4 @@
-import type Transport from '@ledgerhq/hw-transport';
+import { Transport } from './Transport';
 import pathAsBuffer from './Path';
 import { serializeVerifyKey } from '../../utils/serializationHelpers';
 import { PublicInformationForIp } from '../../utils/types';

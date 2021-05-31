@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { LocationDescriptorObject } from 'history';
 import AdmZip from 'adm-zip';
 import { Account, TransactionKindString } from '~/utils/types';
@@ -11,7 +11,7 @@ import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Timestamp from '~/components/Form/InputTimestamp';
-import PickAccount from '~/pages/UpdateAccountCredentials/PickAccount';
+import PickAccount from '~/pages/multisig/AccountTransactions/PickAccount';
 import Checkbox from '~/components/Form/Checkbox';
 import ErrorModal from '~/components/SimpleErrorModal';
 
@@ -96,8 +96,11 @@ export default function AccountReport({ location }: Props) {
                         fromDate,
                         toDate
                     ),
-                    'Save Account Report',
-                    'csv'
+                    {
+                        title: 'Save Account Report',
+                        defaultPath: `${accounts[0].name}.csv`,
+                        filters: [{ name: 'csv', extensions: ['csv'] }],
+                    }
                 );
             }
             const zip = new AdmZip();
@@ -116,7 +119,11 @@ export default function AccountReport({ location }: Props) {
                     )
                 );
             }
-            return saveFile(zip.toBuffer(), 'Save Account Reports', 'zip');
+            return saveFile(zip.toBuffer(), {
+                title: 'Save Account Reports',
+                defaultPath: 'reports.zip',
+                filters: [{ name: 'zip', extensions: ['zip'] }],
+            });
         } catch (e) {
             setModalOpen(true);
             return Promise.resolve(false);
@@ -136,21 +143,21 @@ export default function AccountReport({ location }: Props) {
         );
     }
 
-    function RightColumn() {
+    const RightColumn = useCallback(() => {
         if (adding) {
             return (
-                <>
+                <div className="relative">
                     <CloseButton
                         className={styles.addingCloseButton}
                         onClick={() => setAdding(false)}
                     />
                     <PickAccount
-                        onClick={addAccount}
+                        setAccount={addAccount}
                         filter={(account: Account) =>
                             !accounts.includes(account)
                         }
                     />
-                </>
+                </div>
             );
         }
         return (
@@ -186,8 +193,7 @@ export default function AccountReport({ location }: Props) {
                 </Button>
             </div>
         );
-    }
-
+    }, [adding, accounts]);
     return (
         <>
             <ErrorModal
@@ -256,7 +262,10 @@ export default function AccountReport({ location }: Props) {
                                     )}
                                 </div>
                             </Columns.Column>
-                            <Columns.Column header="Accounts to include">
+                            <Columns.Column
+                                header="Accounts to include"
+                                className="relative"
+                            >
                                 <RightColumn />
                             </Columns.Column>
                         </Columns>

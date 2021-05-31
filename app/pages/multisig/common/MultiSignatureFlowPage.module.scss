@@ -1,26 +1,24 @@
 @import 'config/bundle';
 
-.body {
-    flex: 1 1 100%;
-
-    &SubtractPadding {
-        margin-bottom: -$page-container-padding-vertical;
-    }
+.subtractContainerPadding {
+    height: calc(100% + #{$page-container-padding-vertical});
+    margin-bottom: -$page-container-padding-vertical;
 }
 
-.column,
-.columnContent {
+.column {
     height: 100%;
 }
 
 .columnContent {
-    padding-top: 30px;
-    padding-bottom: 30px;
-    height: 100%;
+    padding-top: 40px;
+    padding-bottom: 40px;
     word-break: break-word;
+    max-width: 450px;
+    margin: 0 auto;
 
     .stretchColumn & {
         display: flex;
+        min-height: 100%;
         flex-direction: column;
         justify-content: space-between;
     }

@@ -1,0 +1,29 @@
+@import 'config/bundle';
+
+.actionButtonsCard {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
+    height: 90px;
+}
+
+.actionButton {
+    width: 32%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 20px;
+    font-size: $font-size-body3;
+    box-shadow: 0 0 0 1px $color-grey inset;
+}
+
+.disabledActionButton {
+    > * {
+        opacity: 0.3;
+    }
+}
+
+.actionImage {
+    margin-bottom: 5px;
+}

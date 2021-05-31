@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Form, Input, Button, Header, Label, Segment } from 'semantic-ui-react';
-import { updateSettingEntry } from '../../features/SettingsSlice';
-import { Setting } from '../../utils/types';
-import { getNodeInfo } from '../../utils/nodeRequests';
-import startClient from '../../utils/nodeConnector';
+import { ipcRenderer } from 'electron';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateSettingEntry } from '~/features/SettingsSlice';
+import { globalSelector } from '~/features/GlobalSlice';
+import { Global, Setting, Versioned } from '~/utils/types';
+import startClient from '~/node/nodeConnector';
+import Card from '~/cross-app-components/Card';
+import Form from '~/components/Form';
+import styles from './ConnectionSettingElement.module.scss';
+import ConnectionStatusComponent, {
+    Status,
+} from '~/components/ConnectionStatusComponent';
+import ipcCommands from '../../constants/ipcCommands.json';
+import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
+import { ConsensusStatus } from '~/node/NodeApiTypes';
+import { getGenesis } from '~/database/GenesisDao';
+import setGenesisAndGlobal from '~/database/DatabaseHelpers';
 
 interface Props {
     displayText: string;
@@ -12,42 +23,52 @@ interface Props {
 }
 
 const portRangeMax = 65535;
-// Determine whether the given string represent a valid port value.
-// TODO: improve this not allow non-integer input like ''100adadaifo'.
-function validatePort(port: string) {
-    try {
-        const portValue = parseInt(port, 10);
-        return portValue <= portRangeMax && portValue > 0;
-    } catch (e) {
-        return false;
+
+/**
+ * Retrieves the consesus status and global cryptographic parameters from the
+ * node with the given address and port.
+ */
+async function getConsensusAndGlobalFromNode(address: string, port: string) {
+    const result = await ipcRenderer.invoke(
+        ipcCommands.grpcNodeConsensusAndGlobal,
+        address,
+        port
+    );
+    if (!result.successful) {
+        throw new Error(
+            'The node consensus status and cryptographic parameters could not be retrieved'
+        );
     }
+
+    const consensusStatus: ConsensusStatus = JSON.parse(
+        JsonResponse.deserializeBinary(result.response.consensus).getValue()
+    );
+
+    const nodeVersionedGlobal: Versioned<Global> = JSON.parse(
+        JsonResponse.deserializeBinary(result.response.global).getValue()
+    );
+    const nodeGlobal = nodeVersionedGlobal.value;
+
+    return { consensusStatus, nodeGlobal };
 }
 
 /**
  * A component for connection settings that are updated automatically on changes.
- *  N.B. right now is fixed to node location setting.
+ * N.B. right now is fixed to node location setting.
  */
 export default function ConnectionSetting({ displayText, setting }: Props) {
     const dispatch = useDispatch();
     const startValues = JSON.parse(setting.value);
+    const global = useSelector(globalSelector);
     const [address, setAddress] = useState(startValues.address);
     const [port, setPort] = useState(startValues.port);
-    const [testResult, setTestResult] = useState<string>('');
+    const [connected, setConnected] = useState<boolean>();
+    const [hasBeenTested, setHasBeenTested] = useState<boolean>(false);
     const [testingConnection, setTestingConnection] = useState<boolean>(false);
-    const [inputValid, setInputValid] = useState<boolean>(true);
+    const [failedMessage, setFailedMessage] = useState<string>();
 
-    // Ideally this should have a debounce, so that we wait a little before actually
-    // storing to the database. As we are uncertain if there will be a submit button
-    // or not, we will keep it as is for now.
-    function updateValues(newAddress: string, newPort: string) {
-        if (validatePort(newPort)) {
-            setInputValid(true);
-        } else {
-            setInputValid(false);
-            return;
-        }
-
-        startClient(dispatch, newAddress, newPort); // TODO: generalize
+    async function updateValues(newAddress: string, newPort: string) {
+        startClient(dispatch, newAddress, newPort);
         updateSettingEntry(dispatch, {
             ...setting,
             value: JSON.stringify({
@@ -57,56 +78,96 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
         });
     }
 
-    async function testConnection() {
-        // TODO: generalize
+    async function setConnection() {
         setTestingConnection(true);
-        setTestResult('contacting node...');
         try {
-            const result = await getNodeInfo();
-            setTestResult(`Connected to node with id: ${result.getNodeId()}`);
+            const {
+                consensusStatus,
+                nodeGlobal,
+            } = await getConsensusAndGlobalFromNode(address, port);
+            const genesis = await getGenesis();
+            if (genesis) {
+                if (consensusStatus.genesisBlock !== genesis.genesisBlock) {
+                    setFailedMessage(
+                        'Connecting to a node running on a separate blockchain is not allowed'
+                    );
+                    setConnected(false);
+                    setHasBeenTested(true);
+                    setTestingConnection(false);
+                    return;
+                }
+            }
+
+            if (!global && !genesis) {
+                await setGenesisAndGlobal(
+                    consensusStatus.genesisBlock,
+                    nodeGlobal
+                );
+            }
+            await updateValues(address, port);
+            setConnected(true);
         } catch (e) {
-            setTestResult('Unable to connect');
+            setConnected(false);
         }
+        setHasBeenTested(true);
         setTestingConnection(false);
     }
 
+    let status = Status.Pending;
+    if (!connected && hasBeenTested && !testingConnection) {
+        status = Status.Failed;
+    } else if (testingConnection) {
+        status = Status.Loading;
+    } else if (!testingConnection && connected) {
+        status = Status.Successful;
+    }
+
     return (
-        <Segment>
-            <Form.Field>
-                <Header>{displayText}</Header>
-                <Form.Field>
-                    <Input
-                        label="Address"
-                        defaultValue={address}
-                        onChange={(event) => {
-                            const newAddress = event.target.value;
-                            setAddress(newAddress);
-                            updateValues(newAddress, port);
-                        }}
+        <Card className={styles.connection}>
+            <h3>{displayText}</h3>
+            <Form
+                onSubmit={() => {
+                    if (!testingConnection) {
+                        setConnection();
+                    }
+                }}
+            >
+                <Form.Input
+                    className={styles.input}
+                    name="address"
+                    label="Address"
+                    placeholder="Insert node IP address here"
+                    defaultValue={address}
+                    onChange={(event) => {
+                        const newAddress = event.target.value;
+                        setAddress(newAddress);
+                    }}
+                />
+                <Form.Input
+                    className={styles.input}
+                    name="port"
+                    label="Port"
+                    placeholder="Insert port here"
+                    defaultValue={port}
+                    onChange={(event) => {
+                        const newPort = event.target.value;
+                        setPort(newPort);
+                    }}
+                    rules={{
+                        min: 1,
+                        max: portRangeMax,
+                    }}
+                />
+                <div className={styles.status}>
+                    <ConnectionStatusComponent
+                        status={status}
+                        failedMessage={failedMessage}
                     />
-                </Form.Field>
-                <Form.Field>
-                    <Input
-                        label="Port"
-                        defaultValue={port}
-                        onChange={(event) => {
-                            const newPort = event.target.value;
-                            setPort(newPort);
-                            updateValues(address, newPort);
-                        }}
-                    />
-                </Form.Field>
-                <Button as="div" labelPosition="right">
-                    <Button
-                        positive
-                        disabled={testingConnection || !inputValid}
-                        onClick={testConnection}
-                    >
-                        Test connection
-                    </Button>
-                    <Label basic>{testResult}</Label>
-                </Button>
-            </Form.Field>
-        </Segment>
+                </div>
+                <Form.Submit className={styles.submit}>
+                    Set connection
+                </Form.Submit>
+            </Form>
+        </Card>
     );
 }

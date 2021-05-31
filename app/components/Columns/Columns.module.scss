@@ -1,45 +1,28 @@
 @import 'config/bundle';
 
-$columns-headers-inset: 31px;
+$columns-vertical-gutter: 20px;
+$columns-header-height: 28px;
 
 .root {
     position: relative;
     display: flex;
     flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: flex-start;
-
-    &WithHeaders {
-        border-top: 1px solid $color-grey;
-        margin-top: $columns-headers-inset;
-    }
 
     &ColumnScroll {
         height: 100%;
-
-        &.rootWithHeaders {
-            height: calc(100% - #{$columns-headers-inset});
-        }
     }
-}
 
-.divider {
-    flex-basis: 1px;
-    flex-shrink: 0;
-    background-color: $color-grey;
-    height: 100%;
-
-    .root:not(.rootWithHeaders) & {
-        margin: 20px 0;
-        height: calc(100% - 40px);
+    &Padded {
+        padding-top: $columns-vertical-gutter;
+        padding-bottom: $columns-vertical-gutter;
     }
 }
 
 .column {
     position: relative;
-    flex: 0 1 100%;
+    flex-basis: 100%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
 
     .rootColumnScroll & {
         height: 100%;
@@ -50,7 +33,7 @@ $columns-headers-inset: 31px;
     }
 
     .rootVariableSize & {
-        flex: 1 0 auto;
+        flex: 1;
 
         &NoResize {
             flex-grow: 0;
@@ -61,26 +44,45 @@ $columns-headers-inset: 31px;
 .header,
 .content {
     padding: 0 $page-gutter;
+    width: 100%;
 }
 
 .header {
-    position: absolute;
-    transform: translateY(-100%);
     text-align: center;
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     margin: 0;
-    padding-bottom: 10px;
+    height: $columns-header-height;
+    border-bottom: 1px solid $color-grey;
+}
+
+.contentWrapper {
+    width: 100%;
+    height: 100%;
+
+    .header + & {
+        height: calc(100% - #{$columns-header-height});
+    }
+
+    .rootDivided .column:not(:last-child) & {
+        border-right: 1px solid $color-grey;
+    }
 }
 
 .content {
     width: 100%;
+    height: 100%;
 
     .rootColumnScroll & {
-        height: 100%;
         overflow-y: overlay;
+    }
+
+    .rootPadded & {
+        height: calc(100% + (2 * #{$columns-vertical-gutter}));
+        margin-top: -$columns-vertical-gutter;
+        margin-bottom: -$columns-vertical-gutter;
     }
 
     &VertPadding {

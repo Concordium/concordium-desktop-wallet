@@ -1,9 +1,10 @@
 import React from 'react';
+import clsx from 'clsx';
 import { useSelector } from 'react-redux';
-import { Grid, Header } from 'semantic-ui-react';
-import attributeNamesJson from '../../constants/attributeNames.json';
-import { chosenAccountInfoSelector } from '../../features/AccountSlice';
-import SidedRow from '../../components/SidedRow';
+import attributeNamesJson from '~/constants/attributeNames.json';
+import { chosenAccountInfoSelector } from '~/features/AccountSlice';
+import SidedRow from '~/components/SidedRow';
+import styles from './Accounts.module.scss';
 
 const attributeNames: Record<string, string> = attributeNamesJson;
 
@@ -18,29 +19,43 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
         return null;
     }
 
-    const attributes =
-        accountInfo.accountCredentials[0].value.contents.policy
-            .revealedAttributes;
-    const attributeKeys = Object.keys(attributes);
-
-    if (attributeKeys.length === 0) {
-        return (
-            <Header textAlign="center">
-                This account has no revealed attributes!
-            </Header>
-        );
-    }
     return (
-        <Grid container columns={2} divided="vertically">
-            {attributeKeys.map((attributeKey: string) => {
+        <>
+            {Object.values(accountInfo.accountCredentials).map((credential) => {
+                const attributes =
+                    credential.value.contents.policy.revealedAttributes;
+                const attributeKeys = Object.keys(attributes);
+
+                if (attributeKeys.length === 0) {
+                    return (
+                        <h3
+                            key={credential.value.contents.credId}
+                            className={clsx(
+                                styles.identityAttributesOfCredential,
+                                'flex justifyCenter pB20'
+                            )}
+                        >
+                            This credential has no revealed attributes!
+                        </h3>
+                    );
+                }
+
                 return (
-                    <SidedRow
-                        key={attributeKey}
-                        left={attributeNames[attributeKey]}
-                        right={attributes[attributeKey]}
-                    />
+                    <div
+                        key={credential.value.contents.credId}
+                        className={styles.identityAttributesOfCredential}
+                    >
+                        {attributeKeys.map((attributeKey: string) => (
+                            <SidedRow
+                                className={styles.identityAttribute}
+                                key={attributeKey}
+                                left={attributeNames[attributeKey]}
+                                right={attributes[attributeKey]}
+                            />
+                        ))}
+                    </div>
                 );
             })}
-        </Grid>
+        </>
     );
 }

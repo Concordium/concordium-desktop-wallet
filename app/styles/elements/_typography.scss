@@ -82,8 +82,16 @@ h6,
     font-weight: $font-weight-emphasized;
 }
 
+.textLeft {
+    text-align: left;
+}
+
 .textRight {
     text-align: right;
+}
+
+.textCenter {
+    text-align: center;
 }
 
 .textFaded {

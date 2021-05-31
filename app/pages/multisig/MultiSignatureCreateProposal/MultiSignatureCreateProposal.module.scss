@@ -7,7 +7,7 @@
 }
 
 .details {
-    composes: body;
+    flex: 1 1 auto;
     width: 450px;
     margin: 0 auto;
     display: flex;
@@ -17,10 +17,6 @@
 
 .proposal {
     margin: 40px 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 40%;
 
     > *:not(:last-child) {
         margin-bottom: 60px;

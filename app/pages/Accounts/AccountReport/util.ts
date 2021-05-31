@@ -52,7 +52,7 @@ export async function getAccountCSV(
     fromTime?: Date,
     toTime?: Date
 ) {
-    let transactions = await getTransactionsOfAccount(account); // load from database
+    let { transactions } = await getTransactionsOfAccount(account, [], 1000000); // load from database
     transactions = transactions.filter(
         (transaction) =>
             (!fromTime ||

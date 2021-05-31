@@ -1,73 +1,48 @@
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import findAuthorizationKey from '~/utils/updates/AuthorizationHelper';
-import { BlockSummary } from '~/utils/NodeApiTypes';
+import { getUpdateKey } from '~/utils/updates/AuthorizationHelper';
 import {
     AccountTransaction,
-    instanceOfLocalCredential,
-    instanceOfDeployedCredential,
+    CredentialWithIdentityNumber,
+    DeployedCredential,
     UpdateInstruction,
     UpdateInstructionSignature,
 } from '~/utils/types';
 import {
     findAccountTransactionHandler,
     findUpdateInstructionHandler,
-} from '~/utils/updates/HandlerFinder';
-import { getCredentialsOfAccount } from '~/database/CredentialDao';
+} from '~/utils/transactionHandlers/HandlerFinder';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 
 export async function signUpdateInstruction(
     instruction: UpdateInstruction,
-    ledger: ConcordiumLedgerClient,
-    blockSummary: BlockSummary
-): Promise<UpdateInstructionSignature> {
-    const transactionHandler = await findUpdateInstructionHandler(
-        instruction.type
-    );
-    const authorizationKey = await findAuthorizationKey(
-        ledger,
-        transactionHandler,
-        blockSummary.updates.authorizations
-    );
-    if (!authorizationKey) {
-        throw new Error('Unable to get authorizationKey.');
-    }
-
+    ledger: ConcordiumLedgerClient
+): Promise<UpdateInstructionSignature[]> {
+    const transactionHandler = findUpdateInstructionHandler(instruction.type);
+    const publicKey = await getUpdateKey(ledger, instruction);
     const signatureBytes = await transactionHandler.signTransaction(
         instruction,
         ledger
     );
-
-    return {
-        signature: signatureBytes.toString('hex'),
-        authorizationKeyIndex: authorizationKey.index,
-    };
+    return [
+        {
+            signature: signatureBytes.toString('hex'),
+            authorizationPublicKey: publicKey,
+        },
+    ];
 }
 
 export async function signAccountTransaction(
     transaction: AccountTransaction,
-    ledger: ConcordiumLedgerClient
+    ledger: ConcordiumLedgerClient,
+    credential: CredentialWithIdentityNumber & DeployedCredential
 ) {
+    // TODO: Remove assumption that a credential only has 1 signature
+    // We presently assume that there is only 1 key on a credential. If support
+    // for multiple signatures is added, then this has to be updated.
     const signatureIndex = 0;
 
-    const credential = (await getCredentialsOfAccount(transaction.sender)).find(
-        (cred) =>
-            instanceOfLocalCredential(cred) &&
-            instanceOfDeployedCredential(cred)
-    );
-
-    // TODO: can we avoid checking instances twice?
-    if (
-        !credential ||
-        !instanceOfLocalCredential(credential) ||
-        !instanceOfDeployedCredential(credential)
-    ) {
-        throw new Error(
-            'Unable to sign transfer, because we were unable to find local and deployed credential'
-        );
-    }
-
     const path = {
-        identityIndex: credential.identityId,
+        identityIndex: credential.identityNumber,
         accountIndex: credential.credentialNumber,
         signatureIndex,
     };

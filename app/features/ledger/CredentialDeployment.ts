@@ -1,9 +1,9 @@
-import type Transport from '@ledgerhq/hw-transport';
+import { Transport } from './Transport';
 import {
     UnsignedCredentialDeploymentInformation,
     IdOwnershipProofs,
     CredentialDeploymentValues,
-    ChosenAttributes,
+    ChosenAttributesKeys,
 } from '../../utils/types';
 import {
     putBase58Check,
@@ -89,7 +89,7 @@ export async function signCredentialValues(
     const revealedAttributeTags: [number, string][] = Object.entries(
         credentialDeployment.policy.revealedAttributes
     ).map(([tagName, value]) => [
-        ChosenAttributes[tagName as keyof typeof ChosenAttributes],
+        ChosenAttributesKeys[tagName as keyof typeof ChosenAttributesKeys],
         value,
     ]);
     revealedAttributeTags.sort((a, b) => a[0] - b[0]);
@@ -152,14 +152,18 @@ function serializeIdOwnerShipProofs(proofs: IdOwnershipProofs) {
         Object.entries(proofs.proofIdCredPub).length,
         0
     );
-    // TODO: Make sure that these are sorted, otherwise sort them.
     const idCredPubProofs = Buffer.concat(
-        Object.entries(proofs.proofIdCredPub).map(([index, value]) => {
-            const proof = Buffer.alloc(4 + 96);
-            proof.writeUInt32BE(parseInt(index, 10), 0);
-            proof.write(value, 4, 100, 'hex');
-            return proof;
-        })
+        Object.entries(proofs.proofIdCredPub)
+            .sort(
+                ([indexA], [indexB]) =>
+                    parseInt(indexA, 10) - parseInt(indexB, 10)
+            )
+            .map(([index, value]) => {
+                const proof = Buffer.alloc(4 + 96);
+                proof.writeUInt32BE(parseInt(index, 10), 0);
+                proof.write(value, 4, 100, 'hex');
+                return proof;
+            })
     );
 
     return Buffer.concat([

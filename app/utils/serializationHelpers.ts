@@ -1,6 +1,11 @@
 import * as crypto from 'crypto';
 import * as bs58check from 'bs58check';
-import { VerifyKey, SchemeId, CredentialDeploymentInformation } from './types';
+import {
+    VerifyKey,
+    YearMonth,
+    SchemeId,
+    CredentialDeploymentInformation,
+} from './types';
 
 export function putBase58Check(
     array: Uint8Array,
@@ -21,25 +26,25 @@ export function put(array: Indexable, start: number, input: Indexable) {
     }
 }
 
-export function encodeWord16(value: number): Uint8Array {
+export function encodeWord16(value: number): Buffer {
     const arr = new ArrayBuffer(2); // an Int16 takes 2 bytes
     const view = new DataView(arr);
     view.setUint16(0, value, false); // byteOffset = 0; litteEndian = false
-    return new Uint8Array(arr);
+    return Buffer.from(new Uint8Array(arr));
 }
 
-export function encodeWord32(value: number): Uint8Array {
+export function encodeWord32(value: number): Buffer {
     const arr = new ArrayBuffer(4); // an Int32 takes 4 bytes
     const view = new DataView(arr);
     view.setUint32(0, value, false); // byteOffset = 0; litteEndian = false
-    return new Uint8Array(arr);
+    return Buffer.from(new Uint8Array(arr));
 }
 
-export function encodeWord64(value: bigint): Uint8Array {
+export function encodeWord64(value: bigint): Buffer {
     const arr = new ArrayBuffer(8); // an Int64 takes 8 bytes
     const view = new DataView(arr);
     view.setBigUint64(0, value, false); // byteOffset = 0; litteEndian = false
-    return new Uint8Array(arr);
+    return Buffer.from(new Uint8Array(arr));
 }
 
 export function hashSha256(...inputs: Indexable[]): Buffer {
@@ -64,7 +69,7 @@ export function toHex(value: number, minLength = 2) {
     return hex;
 }
 
-export function serializeVerifyKey(key: VerifyKey) {
+export function serializeVerifyKey(key: VerifyKey): Buffer {
     const scheme = key.schemeId as keyof typeof SchemeId;
     let schemeId;
     if (SchemeId[scheme] !== undefined) {
@@ -80,9 +85,9 @@ export function serializeVerifyKey(key: VerifyKey) {
 
 export function serializeMap<K extends string | number | symbol, T>(
     map: Record<K, T>,
-    putSize: (size: number) => Buffer | Uint8Array,
-    putKey: (k: K) => Buffer | Uint8Array,
-    putValue: (t: T) => Buffer | Uint8Array
+    putSize: (size: number) => Buffer,
+    putKey: (k: K) => Buffer,
+    putValue: (t: T) => Buffer
 ): Buffer {
     const keys = Object.keys(map) as K[];
     const buffers = [putSize(keys.length)];
@@ -105,7 +110,7 @@ export function serializeList<T>(
     return Buffer.concat(buffers);
 }
 
-export function serializeYearMonth(yearMonth: string) {
+export function serializeYearMonth(yearMonth: YearMonth) {
     const year = parseInt(yearMonth.substring(0, 4), 10);
     const month = parseInt(yearMonth.substring(4, 6), 10);
 
@@ -116,6 +121,12 @@ export function serializeYearMonth(yearMonth: string) {
 }
 
 export const putInt8 = (i: number) => Buffer.from(Uint8Array.of(i));
+
+export const putHexString = (s: string) => Buffer.from(s, 'hex');
+
+export function serializeBoolean(b: boolean): Buffer {
+    return Buffer.from(Uint8Array.of(b ? 1 : 0));
+}
 
 export function serializeCredentialDeploymentInformation(
     credential: CredentialDeploymentInformation

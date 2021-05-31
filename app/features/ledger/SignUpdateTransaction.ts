@@ -1,4 +1,4 @@
-import type Transport from '@ledgerhq/hw-transport';
+import { Transport } from './Transport';
 import { UpdateInstruction, UpdateInstructionPayload } from '../../utils/types';
 import pathAsBuffer from './Path';
 import { serializeUpdateInstructionHeaderAndPayload } from '../../utils/UpdateSerialization';

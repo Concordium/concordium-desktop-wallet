@@ -1,0 +1,45 @@
+@import 'config/bundle';
+
+.flex {
+    display: flex;
+}
+
+.details {
+    text-align: center;
+
+    b {
+        display: block;
+        margin-top: 20px;
+    }
+    h2 {
+        margin: 0;
+    }
+
+    margin-bottom: 20px;
+}
+
+.errorLabel {
+    text-align: center;
+    color: $color-error;
+}
+
+.buildSchedule {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.descriptionStep {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 2em;
+}
+
+.flex1 {
+    flex: 1;
+}
+
+.alignSelfNormal {
+    align-self: normal;
+}

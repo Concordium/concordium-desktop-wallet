@@ -6,7 +6,7 @@ import React, {
     useCallback,
     useEffect,
     useMemo,
-    useState,
+    useReducer,
 } from 'react';
 import { AnimatePresence, motion, Variants, Transition } from 'framer-motion';
 import CloseButton from '../CloseButton';
@@ -15,6 +15,13 @@ import Portal from '../Portal';
 import styles from './Modal.module.scss';
 import DetectClickOutside from '../DetectClickOutside';
 import DetectKeyPress from '../DetectKeyPress';
+import {
+    closeAction,
+    closedAction,
+    modalReducer,
+    openAction,
+} from './modalReducer';
+import { noOp } from '~/utils/basicHelpers';
 
 const transition: Transition = {
     ease: 'easeOut',
@@ -52,8 +59,8 @@ export interface ModalProps<TTrigger extends WithOnClick = WithOnClick> {
      * Control whether modal is open or not.
      */
     open: boolean;
-    onOpen(): void;
-    onClose(): void;
+    onOpen?(): void;
+    onClose?(): void;
 }
 
 /**
@@ -70,34 +77,45 @@ export default function Modal<TTrigger extends WithOnClick = WithOnClick>({
     closeOnEscape = true,
     disableClose = false,
     open: isOpenOverride,
-    onOpen,
-    onClose,
+    onOpen = noOp,
+    onClose = noOp,
     children,
 }: PropsWithChildren<ModalProps<TTrigger>>): JSX.Element | null {
-    const [isExiting, setIsExiting] = useState<boolean>(false);
-    const [isOpen, setIsOpen] = useState<boolean>(isOpenOverride);
+    const [{ isOpen, isExiting }, dispatch] = useReducer(modalReducer, {
+        isOpen: isOpenOverride,
+        isExiting: false,
+    });
 
     const open = useCallback(() => {
-        setIsOpen(true);
+        dispatch(openAction());
         onOpen();
     }, [onOpen]);
 
     const close = useCallback(
         (ignoreDisable = false) => {
             if (!disableClose || ignoreDisable) {
-                setIsExiting(true);
+                dispatch(closeAction());
             }
         },
         [disableClose]
     );
 
+    const handleExitComplete = useCallback(() => {
+        dispatch(closedAction());
+        onClose();
+    }, [onClose]);
+
     useEffect(() => {
+        if (isExiting) {
+            return;
+        }
         if (isOpenOverride && !isOpen) {
             open();
         } else if (!isOpenOverride && isOpen) {
             close(true);
         }
-    }, [isOpenOverride, open, close, isOpen]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpenOverride]);
 
     const onTriggerClick: MouseEventHandler = useCallback(
         (e) => {
@@ -129,12 +147,6 @@ export default function Modal<TTrigger extends WithOnClick = WithOnClick>({
         },
         [closeOnEscape, close]
     );
-
-    const handleExitComplete = useCallback(() => {
-        setIsExiting(false);
-        setIsOpen(false);
-        onClose();
-    }, [onClose]);
 
     return (
         <>

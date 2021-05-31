@@ -1,0 +1,13 @@
+@import './KeyUpdateEntry.module.scss';
+
+.listItem {
+    list-style-type: none;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #dcdcdc;
+}
+
+.content {
+    height: 100%;
+    word-break: break-word;
+}

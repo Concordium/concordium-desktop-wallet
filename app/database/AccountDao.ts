@@ -1,16 +1,26 @@
 import { Account } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import {
     accountsTable,
     identitiesTable,
 } from '../constants/databaseNames.json';
+
+function convertBooleans(accounts: Account[]) {
+    return accounts.map((account) => {
+        return {
+            ...account,
+            allDecrypted: Boolean(account.allDecrypted),
+            isInitial: Boolean(account.isInitial),
+        };
+    });
+}
 
 /**
  * Returns all stored accounts
  *  - Attaches the identityName unto the account object.
  */
 export async function getAllAccounts(): Promise<Account[]> {
-    return (await knex())
+    const accounts = await (await knex())
         .table(accountsTable)
         .join(
             identitiesTable,
@@ -20,8 +30,31 @@ export async function getAllAccounts(): Promise<Account[]> {
         )
         .select(
             `${accountsTable}.*`,
-            `${identitiesTable}.name as identityName`
+            `${identitiesTable}.name as identityName`,
+            `${identitiesTable}.identityNumber as identityNumber`
         );
+    return convertBooleans(accounts);
+}
+
+export async function getAccount(
+    address: string
+): Promise<Account | undefined> {
+    const accounts = await (await knex())
+        .table(accountsTable)
+        .join(
+            identitiesTable,
+            `${accountsTable}.identityId`,
+            '=',
+            `${identitiesTable}.id`
+        )
+        .where({ address })
+        .select(
+            `${accountsTable}.*`,
+            `${identitiesTable}.name as identityName`,
+            `${identitiesTable}.identityNumber as identityNumber`
+        );
+
+    return convertBooleans(accounts)[0];
 }
 
 export async function insertAccount(account: Account | Account[]) {
@@ -38,9 +71,18 @@ export async function updateAccount(
 }
 
 export async function findAccounts(condition: Record<string, unknown>) {
-    return (await knex()).select().table(accountsTable).where(condition);
+    const accounts = await (await knex())
+        .select()
+        .table(accountsTable)
+        .where(condition);
+    return convertBooleans(accounts);
 }
 
+/**
+ * Extracts all accounts for a given identity.
+ * @param identityId the id of the identity to get the accounts for
+ * @returns all accounts attached to the provided identity
+ */
 export async function getAccountsOfIdentity(
     identityId: number
 ): Promise<Account[]> {
@@ -53,13 +95,10 @@ export async function removeAccount(accountAddress: string) {
         .del();
 }
 
-export async function updateSignatureThreshold(
-    address: string,
-    signatureThreshold: number
-) {
+export async function removeInitialAccount(identityId: number) {
     return (await knex())(accountsTable)
-        .where({ address })
-        .update({ signatureThreshold });
+        .where({ identityId, isInitial: 1 })
+        .del();
 }
 
 export async function confirmInitialAccount(

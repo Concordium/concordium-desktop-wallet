@@ -13,22 +13,23 @@ import {
     EqualRecord,
     NotOptional,
     PolymorphicComponentProps,
-} from '../../utils/types';
-import { isValidAddress } from '../../utils/accountHelpers';
+} from '~/utils/types';
+import { commonAddressValidators } from '~/utils/accountHelpers';
 import {
     addressBookSelector,
     addToAddressBook,
     updateAddressBookEntry,
-} from '../../features/AddressBookSlice';
+} from '~/features/AddressBookSlice';
+import Modal from '~/cross-app-components/Modal';
+import Button from '~/cross-app-components/Button';
+import Card from '~/cross-app-components/Card';
 import Form from '../Form';
 
 import styles from './UpsertAddress.module.scss';
-import Modal from '../../cross-app-components/Modal';
-import Button from '../../cross-app-components/Button';
-import Card from '../../cross-app-components/Card';
 
 type Props = PropsWithChildren<{
     initialValues?: AddressBookEntryForm;
+    readOnly?: boolean;
     onSubmit?(name: string, address: string, note?: string): void;
 }>;
 
@@ -44,14 +45,12 @@ const fieldNames: NotOptional<EqualRecord<AddressBookEntryForm>> = {
     note: 'note',
 };
 
-const noteMaxLength = 255;
-
-const addressFormat: Validate = (address: string) =>
-    isValidAddress(address) || 'Address format is invalid';
+const noteMaxLength = 100;
 
 export default function UpsertAddress<TAs extends ElementType = typeof Button>({
     onSubmit,
     initialValues,
+    readOnly = false,
     as,
     ...asProps
 }: UpsertAddressProps<TAs>) {
@@ -69,19 +68,23 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
 
     const upsertAddress = useCallback(
         (values: AddressBookEntryForm) => {
-            const entry: AddressBookEntry = { ...values, readOnly: false };
+            const entry: AddressBookEntry = { ...values, readOnly };
 
             if (isEditMode && initialValues) {
-                updateAddressBookEntry(dispatch, initialValues.name, entry);
+                updateAddressBookEntry(dispatch, initialValues.address, entry);
             } else {
                 addToAddressBook(dispatch, entry);
             }
         },
-        [isEditMode, initialValues, dispatch]
+        [isEditMode, initialValues, dispatch, readOnly]
     );
 
     const addressUnique: Validate = useCallback(
         (address: string) => {
+            if (address === initialValues?.address) {
+                return true;
+            }
+
             const existing = entries.find((e) => e.address === address);
 
             return (
@@ -89,7 +92,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                 `Address already exists under name: ${existing.name}`
             );
         },
-        [entries]
+        [entries, initialValues]
     );
 
     const handleSubmit: SubmitHandler<AddressBookEntryForm> = useCallback(
@@ -121,41 +124,41 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                         <Form.Input
                             className={styles.name}
                             name={fieldNames.name}
-                            rules={{ required: 'Name required' }}
+                            rules={{
+                                required: 'Name required',
+                                maxLength: {
+                                    value: 40,
+                                    message:
+                                        'Name cannot exceed 40 characters.',
+                                },
+                            }}
                             placeholder="Recipient Name"
                             defaultValue={initialValues?.name}
+                            readOnly={readOnly}
                         />
                         <Form.TextArea
                             className={styles.input}
                             name={fieldNames.address}
                             rules={{
                                 required: 'Address required',
-                                minLength: {
-                                    value: 50,
-                                    message: 'Address should be 50 characters',
-                                },
-                                maxLength: {
-                                    value: 50,
-                                    message: 'Address should be 50 characters',
-                                },
+                                ...commonAddressValidators,
                                 validate: {
-                                    addressFormat,
+                                    ...commonAddressValidators.validate,
                                     addressUnique,
                                 },
                             }}
                             placeholder="Paste the account address here"
                             defaultValue={initialValues?.address}
-                            autoScale
+                            readOnly={readOnly}
                         />
-                        <Form.Input
+                        <Form.TextArea
                             className={styles.input}
                             name={fieldNames.note}
                             label={<span className="h3">Notes</span>}
                             rules={{
                                 maxLength: {
                                     value: noteMaxLength,
-                                    message:
-                                        'Message cannot be longer than 255 characters',
+                                    message: `Message cannot be longer than ${noteMaxLength} characters`,
                                 },
                             }}
                             placeholder="You can add a note here"

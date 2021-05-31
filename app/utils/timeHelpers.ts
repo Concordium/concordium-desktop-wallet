@@ -1,16 +1,37 @@
 import { ensureNumberLength } from './basicHelpers';
-import { TimeStampUnit, YearMonth } from './types';
+import { TimeStampUnit, YearMonth, YearMonthDate } from './types';
 
-// given a YearMonth string (YYYYMM), returns
-// a displayable format eg:
-// given "202001" => "January 2020"
-export function formatDate(date: YearMonth) {
+/**
+ * given a YearMonth | YearMonthDate string (YYYYMM | YYYYMMDD), returns
+ * a displayable format.
+ *
+ * @example
+ * formatDate("202001") => "January 2020"
+ * formatDate("20200101") => "01 January 2020"
+ */
+export function formatDate(date: YearMonth | YearMonthDate) {
+    const y = date.slice(0, 4);
+    const m = date.slice(4, 6);
+    const d = date.slice(6, 8);
+
     const dtFormat = new Intl.DateTimeFormat('en-GB', {
+        day: d ? '2-digit' : undefined,
         month: 'long',
         year: 'numeric',
         timeZone: 'UTC',
     });
-    return dtFormat.format(new Date(`${date.slice(0, 4)}-${date.slice(4, 6)}`));
+
+    return dtFormat.format(new Date(`${y}-${m}${d ? `-${d}` : ''}`));
+}
+
+// Returns the YearMonth string (YYYYMM), of the current time.
+export function getCurrentYearMonth(): YearMonth {
+    const date = new Date();
+    let month = (date.getMonth() + 1).toString();
+    if (month.length === 1) {
+        month = `0${month}`;
+    }
+    return date.getFullYear() + month;
 }
 
 /**
@@ -25,7 +46,7 @@ export function parseTime(
         timeStyle: 'short',
     }
 ) {
-    const dtFormat = new Intl.DateTimeFormat('en-GB', formatOptions);
+    const dtFormat = new Intl.DateTimeFormat('en-ZA', formatOptions);
 
     const timeStampCorrectUnit = parseInt(timeStamp, 10) * unit;
     return dtFormat.format(new Date(timeStampCorrectUnit));
@@ -54,11 +75,36 @@ export enum TimeConstants {
     Month = 30 * Day,
 }
 
-// default expiry on transactions (1 hour from now), given in seconds.
-export function getDefaultExpiry(): bigint {
-    return BigInt(
-        Math.floor((new Date().getTime() + TimeConstants.Hour) / 1000)
-    );
+// default expiry on transactions (1 hour from now).
+export function getDefaultExpiry() {
+    return new Date(Date.now() + TimeConstants.Hour);
+}
+
+/** Convert a date to seconds since Unix epoch */
+export function secondsSinceUnixEpoch(date: Date) {
+    return Math.floor(date.getTime() / 1000);
+}
+
+/**
+ * Given a date, return a new date, which is the next whole hour, i.e. f(13.14) = 14.00.
+ * N.B. if the given date is already the whole hour, the same date is returned. i.e. f(13.00:00) = 13.00:00.
+ *  @param baseline the date from which to get the next whole hour.
+ *  @param hoursToIncrease optional parameter, increases the output by the given number of hours. i.e. f(13.14, 2) = 16.
+ */
+export function getNextWholeHour(baseline: Date, hoursToIncrease = 0) {
+    const date = new Date(baseline.getTime());
+    if (date.getSeconds() === 0 && date.getMinutes() === 0) {
+        date.setHours(date.getHours() + hoursToIncrease);
+    } else {
+        date.setSeconds(0);
+        date.setMinutes(0);
+        date.setHours(date.getHours() + hoursToIncrease + 1);
+    }
+    return date;
+}
+
+export function getDefaultScheduledStartTime() {
+    return getNextWholeHour(new Date(), 2);
 }
 
 export function getNow(
@@ -74,6 +120,42 @@ export interface DateParts {
     hours: string;
     minutes: string;
     seconds: string;
+}
+
+interface TimeParts {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+}
+
+/**
+ * Converts miliseconds into days, hours, minutes, and seconds.
+ *
+ * @param miliseconds time to convert in ms.
+ *
+ * @example
+ * convertMiliseconds(1000) => { ..., seconds: 1 };
+ * convertMiliseconds(1000 * 3603) => { days: 0, hours: 1, minutes: 0, seconds: 3 };
+ * convertMiliseconds(1000 * 3600 * 36) => { days: 1, hours: 12, minutes: 0, seconds: 0 };
+ */
+export function msToTimeParts(
+    miliseconds: number | undefined
+): TimeParts | undefined {
+    if (!miliseconds) {
+        return undefined;
+    }
+
+    const totalSeconds = Math.floor(miliseconds / 1000);
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    const totalHours = Math.floor(totalMinutes / 60);
+    const days = Math.floor(totalHours / 24);
+
+    const seconds = totalSeconds % 60;
+    const minutes = totalMinutes % 60;
+    const hours = totalHours % 24;
+
+    return { days, hours, minutes, seconds };
 }
 
 export function datePartsFromDate(date?: Date): DateParts | undefined {
@@ -134,3 +216,38 @@ export const getFormattedDateString = (date: Date): string => {
 
     return `${year}-${month}-${d} at ${hours}:${minutes}:${seconds}`;
 };
+
+/** Calculates the epoch index from a given date */
+export function getEpochIndexAt(
+    epochAtDate: Date,
+    epochDurationMillis: number,
+    genesisTime: Date
+) {
+    const genesis = genesisTime.getTime();
+    const now = epochAtDate.getTime();
+    const millisSinceGenesis = now - genesis;
+    return Math.floor(millisSinceGenesis / epochDurationMillis);
+}
+
+/** Calculates the start date of an epoch index */
+export function epochDate(
+    epochIndex: number,
+    epochDurationMillis: number,
+    genesisTime: Date
+): Date {
+    return new Date(genesisTime.getTime() + epochIndex * epochDurationMillis);
+}
+
+/** Predicates whether a date is in the future based on the current time,
+ * sampled at time of call */
+export function isFutureDate(date: Date) {
+    const now = new Date();
+    return now < date;
+}
+
+/** Subtract a number of hours from a date */
+export function subtractHours(hours: number, date: Date) {
+    const before = new Date(date);
+    before.setHours(before.getHours() - hours);
+    return before;
+}

@@ -87,9 +87,6 @@ export default function RewardDistributionField({
                     ensureDigits={3}
                     fallbackValue={toPercentage(value)} // value holds the last valid value.
                     fallbackOnInvalid
-                    min={0}
-                    max={100}
-                    step={0.001}
                     isInvalid={!isValid(innerValue)}
                 />
                 %

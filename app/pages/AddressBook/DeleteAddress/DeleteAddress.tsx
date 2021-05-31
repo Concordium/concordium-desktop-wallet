@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { AddressBookEntry } from '../../../utils/types';
-import BinIcon from '../../../../resources/svg/bin.svg';
-import Button from '../../../cross-app-components/Button';
-import Modal from '../../../cross-app-components/Modal';
+import BinIcon from '@resources/svg/bin.svg';
+import { AddressBookEntry } from '~/utils/types';
+import Button from '~/cross-app-components/Button';
+import Modal from '~/cross-app-components/Modal';
 
 import styles from './DeleteAddress.module.scss';
 
@@ -30,13 +30,13 @@ export default function DeleteAddress({ entry, onRemove }: DeleteAddressProps) {
                 </Button>
             }
         >
-            <h2>
+            <h2 className="mV50">
                 Are you sure you want to delete this entry? The address will be
                 lost.
             </h2>
             <div className={styles.actions}>
                 <Button onClick={() => setOpen(false)}>Cancel</Button>
-                <Button onClick={remove} danger>
+                <Button onClick={remove} negative>
                     Delete
                 </Button>
             </div>

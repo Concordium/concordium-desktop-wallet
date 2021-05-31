@@ -16,15 +16,16 @@
 .clear {
     position: relative;
     border: none;
+    font-family: $font-family;
 
     &:hover,
     &:focus {
         outline: none;
     }
-}
 
-.disabled {
-    cursor: default;
+    &:disabled {
+        cursor: default;
+    }
 }
 
 .clear {
@@ -49,32 +50,24 @@
     }
 
     &Tiny {
-        &:not(.rootClear) {
-            min-height: 28px;
-            font-size: $font-size-button2;
-            padding: 0 15px;
-        }
+        height: 28px;
+        font-size: $font-size-button2;
+        padding: 0 15px;
     }
 
     &Small {
-        &:not(.rootClear) {
-            min-height: 36px;
-            font-size: $font-size-button2;
-            padding: 0 15px;
-        }
+        height: 36px;
+        font-size: $font-size-button2;
+        padding: 0 15px;
     }
 
     &Big {
-        &:not(.rootClear) {
-            min-height: 58px;
-        }
+        height: 58px;
     }
 
     &Huge {
-        &:not(.rootClear) {
-            min-height: 76px;
-            font-size: $font-size-h2;
-        }
+        height: 76px;
+        font-size: $font-size-h2;
     }
 
     &WithIcon {
@@ -86,34 +79,44 @@
         border-color: $color-grey;
     }
 
-    &Danger {
-        @include button($color-danger);
+    &Negative {
+        @include button($color-salmon-red);
     }
 
     &Inverted {
+        @include shadowBorder($color-text);
+
         background-color: $color-white;
         color: $color-text;
-        box-shadow: 0 0 0 1px $color-text inset;
-        transition: box-shadow $anim-easing $anim-timing;
+        transition: box-shadow $anim-easing $anim-timing,
+            color $anim-easing $anim-timing;
 
         &:disabled {
+            @include shadowBorder($color-text-faded);
+
             color: $color-text-faded;
         }
 
-        &:hover,
-        &:focus,
-        &:global(.active) {
-            box-shadow: 0 0 0 2px $color-pale-blue inset;
+        &:not(:disabled) {
+            &:hover,
+            &:focus,
+            &:global(.active) {
+                @include shadowBorder($color-pale-blue, 2px);
+
+                color: $color-pale-blue;
+            }
         }
 
-        &.rootDanger:not(:disabled) {
-            color: $color-danger;
-            box-shadow: 0 0 0 1px $color-danger inset;
+        &.rootNegative:not(:disabled) {
+            @include shadowBorder($color-salmon-red);
+
+            color: $color-salmon-red;
+            box-shadow: 0 0 0 1px $color-salmon-red inset;
 
             &:hover,
             &:focus,
             &:global(.active) {
-                box-shadow: 0 0 0 2px $color-danger inset;
+                @include shadowBorder($color-salmon-red, 2px);
             }
         }
     }

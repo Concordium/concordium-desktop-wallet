@@ -5,16 +5,25 @@ import React, {
     useCallback,
     useEffect,
     useLayoutEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
 import { noOp } from '~/utils/basicHelpers';
 import { useUpdateEffect } from '~/utils/hooks';
 import { scaleFieldWidth } from '~/utils/htmlHelpers';
+import {
+    formatNumberStringWithDigits,
+    trimLeadingZeros as trimLeadingZerosHelper,
+} from '~/utils/numberStringHelpers';
 import { ClassName } from '~/utils/types';
 import { CommonFieldProps } from '../common';
 
 import styles from './InlineNumber.module.scss';
+
+const withTrimLeadingZeros = (f: (v: string | undefined) => string) => (
+    v = ''
+) => f(trimLeadingZerosHelper(v));
 
 const ensureValidBigInt = (v = ''): string => {
     try {
@@ -25,23 +34,16 @@ const ensureValidBigInt = (v = ''): string => {
     }
 };
 
-const formatNumberString = (fractionDigits: number) => (v = ''): string => {
-    const parsed = parseFloat(v);
+const ensureValue = (v = '') => v;
 
-    if (Number.isNaN(parsed)) {
-        return '';
-    }
-
-    const valueFractionDigits = v.split('.')[1]?.length ?? 0;
-
-    return parsed.toFixed(Math.max(fractionDigits, valueFractionDigits));
-};
+const isNumber = <T extends unknown>(v: T | number): v is number =>
+    typeof v === 'number';
 
 export interface InlineNumberProps
     extends ClassName,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            'step' | 'min' | 'max' | 'disabled'
+            'disabled' | 'autoFocus' | 'readOnly' | 'title'
         >,
         Pick<CommonFieldProps, 'isInvalid'> {
     /**
@@ -49,9 +51,13 @@ export interface InlineNumberProps
      */
     ensureDigits?: number;
     /**
-     * Whether to work with floats or integers. Defaults to `false`.
+     * Whether to work with floats or integers. If set to a number, value is rounded to amount of digits specified. Defaults to `false`.
      */
-    allowFractions?: boolean;
+    allowFractions?: boolean | number;
+    /**
+     * Allow value in the form of f.x. 1e-5. Defaults to false.
+     */
+    allowExponent?: boolean;
     value: string | undefined;
     /**
      * Defaults to `0`. This is the value used if field is unfocused without a value.
@@ -61,7 +67,12 @@ export interface InlineNumberProps
      * If true, falls back to `fallbackValue` when fields `isInvalid` prop is set to `true` on blur. Defaults to `false`.
      */
     fallbackOnInvalid?: boolean;
-    onChange(v?: string): void;
+    /**
+     * Trims leading zeros from value ("01" => "1").
+     */
+    trimLeadingZeros?: boolean;
+    customFormatter?(v?: string): string;
+    onChange?(v?: string): void;
     /**
      * As internal formatting functionality is triggered on blur, settings value on blur externally is prone to trigger an infinite loop. Please take caution!
      */
@@ -73,29 +84,57 @@ export interface InlineNumberProps
  * Number input that aligns with surrouding content in an inline fashion. Is also available as sub-component on \<Form /\>
  *
  * @example
- * I would like to submit the transaction in <InlineNumber value={value} onChange={setValue} label=" Releases" />.
+ * I would like to submit the transaction in <InlineNumber value={value} onChange={setValue} /> releases.
  */
 export default function InlineNumber({
     ensureDigits = 0,
     fallbackValue = 0,
     fallbackOnInvalid = false,
     value,
-    onChange,
+    customFormatter,
+    onChange = noOp,
     onBlur = noOp,
     onFocus = noOp,
     allowFractions = false,
+    allowExponent = false,
     className,
     isInvalid = false,
+    trimLeadingZeros = false,
     ...inputProps
 }: InlineNumberProps): JSX.Element {
-    const format = useCallback(
-        allowFractions ? formatNumberString(ensureDigits) : ensureValidBigInt,
-        [ensureDigits, allowFractions]
-    );
+    const format = useMemo(() => {
+        let f: (v: string | undefined) => string;
 
-    const [innerValue, setInnerValue] = useState<string>(
-        format(value ?? fallbackValue.toString())
-    );
+        if (customFormatter !== undefined) {
+            f = customFormatter;
+        } else if (allowFractions === false && !allowExponent) {
+            f = ensureValidBigInt;
+        } else if (
+            isNumber(allowFractions) ||
+            !allowExponent ||
+            ensureDigits !== 0
+        ) {
+            f = formatNumberStringWithDigits(
+                ensureDigits,
+                isNumber(allowFractions) ? allowFractions : undefined,
+                !allowExponent
+            );
+        } else {
+            f = ensureValue;
+        }
+
+        return trimLeadingZeros ? withTrimLeadingZeros(f) : f;
+    }, [ensureDigits, allowFractions, customFormatter, trimLeadingZeros]);
+
+    const formattedFallback = format(fallbackValue.toString());
+    const initialFormatted = useMemo(() => {
+        try {
+            return format(value) || formattedFallback;
+        } catch {
+            return formattedFallback;
+        }
+    }, []);
+    const [innerValue, setInnerValue] = useState<string>(initialFormatted);
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
     const ref = useRef<HTMLInputElement>(null);
@@ -106,9 +145,16 @@ export default function InlineNumber({
     const handleBlur = useCallback(() => {
         // Basically ensure correct formatting of field and that field has a value (otherwise it'll be invisible on screen)
         if (!innerValue || (fallbackOnInvalid && isInvalid)) {
-            setInnerValue(format(fallbackValue.toString()));
+            setInnerValue(formattedFallback);
         } else {
-            setInnerValue(format(value));
+            try {
+                const formatted = format(value);
+                if (formatted !== '') {
+                    setInnerValue(formatted);
+                }
+            } catch {
+                // Do nothing..
+            }
         }
 
         setIsFocused(false);
@@ -117,7 +163,7 @@ export default function InlineNumber({
         format,
         onBlur,
         innerValue,
-        fallbackValue,
+        formattedFallback,
         value,
         fallbackOnInvalid,
         isInvalid,
@@ -145,7 +191,7 @@ export default function InlineNumber({
                 isInvalid && styles.invalid,
                 className
             )}
-            type="number"
+            type="text"
             value={innerValue}
             onChange={(e) => setInnerValue(e.target.value)}
             onBlur={handleBlur}

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal } from 'semantic-ui-react';
+import Button from '~/cross-app-components/Button';
+import Modal from '~/cross-app-components/Modal';
 
 export interface ModalErrorInput {
     show: boolean;
@@ -22,18 +23,12 @@ export default function SimpleErrorModal({
     onClick,
 }: Props) {
     return (
-        <Modal
-            open={show}
-            header={header}
-            content={content}
-            actions={[
-                {
-                    key: 'okay',
-                    content: 'Okay',
-                    positive: true,
-                    onClick,
-                },
-            ]}
-        />
+        <Modal open={show} disableClose>
+            <h2>{header}</h2>
+            <p>{content}</p>
+            <Button className="mT40" onClick={onClick}>
+                Okay
+            </Button>
+        </Modal>
     );
 }

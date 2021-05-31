@@ -1,15 +1,20 @@
 import { AddressBookEntry } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import { addressBookTable } from '../constants/databaseNames.json';
 
 function sanitizeAddressBookEntry(e: AddressBookEntry): AddressBookEntry {
     return { ...e, readOnly: Boolean(e.readOnly) };
 }
 
+/**
+ * Get all entries of the address book from the database, ordered
+ * by their name.
+ */
 export async function getAddressBook(): Promise<AddressBookEntry[]> {
     return (await knex())
         .select()
         .table(addressBookTable)
+        .orderByRaw('name COLLATE NOCASE ASC')
         .then((e) => e.map(sanitizeAddressBookEntry));
 }
 
@@ -20,11 +25,11 @@ export async function insertEntry(
 }
 
 export async function updateEntry(
-    name: string,
+    address: string,
     updatedValues: Partial<AddressBookEntry>
 ) {
     return (await knex())(addressBookTable)
-        .where({ name })
+        .where({ address })
         .update(updatedValues);
 }
 

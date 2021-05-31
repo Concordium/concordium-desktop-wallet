@@ -2,10 +2,13 @@ import {
     Account,
     TransferTransaction,
     TransactionStatus,
+    TransactionKindString,
 } from '../utils/types';
-import knex from './knex';
+import { knex } from './knex';
 import { transactionTable } from '../constants/databaseNames.json';
-import { partition } from '../utils/basicHelpers';
+import { partition, chunkArray } from '../utils/basicHelpers';
+
+const chunkSize = 50;
 
 function convertBooleans(transactions: TransferTransaction[]) {
     return transactions.map((transaction) => {
@@ -22,19 +25,30 @@ function convertBooleans(transactions: TransferTransaction[]) {
     });
 }
 
+interface GetTransactionsOutput {
+    transactions: TransferTransaction[];
+    more: boolean;
+}
+
 export async function getTransactionsOfAccount(
     account: Account,
-    orderBy = 'id',
-    filter: (transaction: TransferTransaction) => boolean = () => true
-): Promise<TransferTransaction[]> {
+    filteredTypes: TransactionKindString[] = [],
+    limit = 100
+): Promise<GetTransactionsOutput> {
     const { address } = account;
     const transactions = await (await knex())
         .select()
         .table(transactionTable)
-        .where({ toAddress: address })
+        .whereNotIn('transactionKind', filteredTypes)
+        .andWhere({ toAddress: address })
         .orWhere({ fromAddress: address })
-        .orderBy(orderBy);
-    return convertBooleans(transactions).filter(filter);
+        .orderBy('blockTime', 'desc')
+        .orderBy('id', 'desc')
+        .limit(limit + 1);
+    return {
+        transactions: convertBooleans(transactions).slice(0, limit),
+        more: transactions.length > limit,
+    };
 }
 
 export async function updateTransaction(
@@ -56,9 +70,11 @@ export async function insertTransactions(
             (t_) => t.transactionHash === t_.transactionHash
         )
     );
-    for (let i = 0; i < additions.length; i += 1) {
+
+    const additionChunks = chunkArray(additions, chunkSize);
+    for (let i = 0; i < additionChunks.length; i += 1) {
         // eslint-disable-next-line no-await-in-loop
-        await table.insert(additions[i]);
+        await table.insert(additionChunks[i]);
     }
 
     return Promise.all(

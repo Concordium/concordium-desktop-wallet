@@ -1,6 +1,42 @@
 @import 'config/bundle';
 
-.actions {
+p {
+    font-size: $font-size-body2;
+}
+
+.container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    padding-bottom: 0;
+}
+
+.printButton {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+.details {
+    width: 650px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card {
+    position: relative;
+    margin-top: 40px;
+}
+
+.button {
+    margin: auto;
+    margin-top: 50px;
+    display: block;
+}
+
+.finish {
+    margin: auto;
+    margin-bottom: 60px;
+    width: 450px;
 }

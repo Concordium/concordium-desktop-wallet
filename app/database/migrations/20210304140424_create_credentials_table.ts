@@ -1,4 +1,4 @@
-import * as Knex from 'knex';
+import { Knex } from 'knex';
 import {
     identitiesTable,
     credentialsTable,
@@ -8,16 +8,15 @@ export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(
         credentialsTable,
         (table: Knex.TableBuilder) => {
-            table.string('accountAddress');
-            table.string('credId').primary();
-            table.boolean('external');
-            table.integer('credentialNumber');
-            table.integer('credentialIndex');
             table
                 .integer('identityId')
-                .unsigned()
                 .references('id')
-                .inTable(identitiesTable);
+                .inTable(identitiesTable)
+                .notNullable();
+            table.string('accountAddress');
+            table.string('credId').primary();
+            table.integer('credentialNumber');
+            table.integer('credentialIndex');
             table.json('policy');
             table.unique(['credentialIndex', 'accountAddress']);
             table.unique(['credentialNumber', 'identityId']);

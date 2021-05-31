@@ -8,7 +8,7 @@ import {
     UpdateInstruction,
     UpdateInstructionPayload,
 } from '~/utils/types';
-import findHandler from '~/utils/updates/HandlerFinder';
+import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import ProposalStatusView, {
     ProposalStatusViewProps,
 } from '../ProposalStatusView';

@@ -1,6 +1,7 @@
 use wasm_bindgen::prelude::*;
 use crate::{
     aux_functions::*,
+    genesis_account::*,
 };
 
 #[wasm_bindgen(js_name = buildPublicInformationForIp)]
@@ -78,5 +79,47 @@ pub fn create_sec_to_pub_ext(
     match create_sec_to_pub_aux(input) {
         Ok(s) => s,
         Err(e) => format!("unable to create transfer to public due to: {}", e),
+    }
+}
+
+#[wasm_bindgen(js_name = createGenesisAccount)]
+pub fn create_genesis_account_ext(
+    input: &str,
+    id_cred_sec_string: &str,
+    prf_key_string: &str,
+) -> String {
+    match create_genesis_account(input, id_cred_sec_string, prf_key_string) {
+        Ok(s) => s,
+        Err(e) => format!("unable to create genesis account due to: {}", e),
+    }
+}
+
+#[wasm_bindgen]
+pub enum BakerKeyVariant {
+    ADD,
+    UPDATE
+}
+
+#[wasm_bindgen(js_name = generateBakerKeys)]
+pub fn _generate_baker_keys(
+    sender: &str,
+    key_variant: BakerKeyVariant
+) -> String {
+    let sender = match sender.parse() {
+        Ok(sender) => sender,
+        Err(e) => return format!("unable to parse sender account address: {}.", e)
+    };
+
+    serde_json::to_string(&generate_baker_keys(&sender, key_variant))
+        .unwrap_or_else(|e| format!("unable to serialize baker keys: {}", e))
+}
+
+#[wasm_bindgen(js_name = getAddressFromCredId)]
+pub fn get_address_from_cred_id_ext(
+    cred_id: &str,
+) -> String {
+    match get_address_from_cred_id(cred_id) {
+        Ok(s) => s,
+        Err(e) => format!("unable to create genesis account due to: {}", e),
     }
 }

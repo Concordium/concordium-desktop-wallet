@@ -1,4 +1,4 @@
-import { putBase58Check } from './serializationHelpers';
+import { putBase58Check, serializeVerifyKey } from './serializationHelpers';
 import {
     BakerStakeThreshold,
     BlockItemKind,
@@ -6,15 +6,36 @@ import {
     ExchangeRate,
     FoundationAccount,
     GasRewards,
+    HigherLevelKeyUpdate,
     MintDistribution,
     ProtocolUpdate,
     TransactionFeeDistribution,
     UpdateHeader,
     UpdateInstruction,
     UpdateInstructionPayload,
-    UpdateInstructionSignature,
     UpdateType,
+    UpdateInstructionSignatureWithIndex,
 } from './types';
+
+/**
+ * Update type enumeration. The numbering/order is important as it corresponds
+ * to the byte written when serializing the update instruction. Therefore it is
+ * important that it matches the chain serialization values.
+ */
+export enum OnChainUpdateType {
+    UpdateProtocol = 1,
+    UpdateElectionDifficulty = 2,
+    UpdateEuroPerEnergy = 3,
+    UpdateMicroGTUPerEuro = 4,
+    UpdateFoundationAccount = 5,
+    UpdateMintDistribution = 6,
+    UpdateTransactionFeeDistribution = 7,
+    UpdateGASRewards = 8,
+    UpdateBakerStakeThreshold = 9,
+    UpdateRootKeys = 10,
+    UpdateLevel1Keys = 11,
+    UpdateLevel2Keys = 12,
+}
 
 export interface SerializedString {
     length: Buffer;
@@ -32,6 +53,39 @@ export interface SerializedProtocolUpdate {
     specificationUrl: SerializedString;
     transactionHash: Buffer;
     auxiliaryData: Buffer;
+}
+
+/**
+ * Serializes a HigherLevelKeyUpdate to the byte format
+ * expected by the chain.
+ */
+export function serializeHigherLevelKeyUpdate(
+    higherLevelKeyUpdate: HigherLevelKeyUpdate
+) {
+    const serializedHigherLevelKeyUpdate = Buffer.alloc(3);
+    serializedHigherLevelKeyUpdate.writeInt8(
+        higherLevelKeyUpdate.keyUpdateType,
+        0
+    );
+    serializedHigherLevelKeyUpdate.writeUInt16BE(
+        higherLevelKeyUpdate.updateKeys.length,
+        1
+    );
+
+    const serializedKeys = Buffer.concat(
+        higherLevelKeyUpdate.updateKeys.map((updateKey) =>
+            serializeVerifyKey(updateKey.key)
+        )
+    );
+
+    const threshold = Buffer.alloc(2);
+    threshold.writeUInt16BE(higherLevelKeyUpdate.threshold, 0);
+
+    return Buffer.concat([
+        serializedHigherLevelKeyUpdate,
+        serializedKeys,
+        threshold,
+    ]);
 }
 
 /**
@@ -240,7 +294,7 @@ export function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
  * @param signatures list of update instruction signatures, i.e. pairs of (key index, signature)
  */
 function serializeUpdateSignatures(
-    signatures: UpdateInstructionSignature[]
+    signatures: UpdateInstructionSignatureWithIndex[]
 ): Buffer {
     // To ensure a unique serialization, the signatures must be serialized in order of their index.
     const sortedSignatures = signatures.sort((sig1, sig2) => {
@@ -262,11 +316,52 @@ function serializeUpdateSignatures(
 }
 
 /**
- * Serializes an update type to its byte representation.
+ * Maps the internal wallet update type to the corresponding on chain update types. This
+ * mapping is necessary as there are more internal update types, than there are
+ * on-chain update types.
+ */
+function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
+    switch (type) {
+        case UpdateType.UpdateProtocol:
+            return OnChainUpdateType.UpdateProtocol;
+        case UpdateType.UpdateElectionDifficulty:
+            return OnChainUpdateType.UpdateElectionDifficulty;
+        case UpdateType.UpdateEuroPerEnergy:
+            return OnChainUpdateType.UpdateEuroPerEnergy;
+        case UpdateType.UpdateMicroGTUPerEuro:
+            return OnChainUpdateType.UpdateMicroGTUPerEuro;
+        case UpdateType.UpdateFoundationAccount:
+            return OnChainUpdateType.UpdateFoundationAccount;
+        case UpdateType.UpdateMintDistribution:
+            return OnChainUpdateType.UpdateMintDistribution;
+        case UpdateType.UpdateTransactionFeeDistribution:
+            return OnChainUpdateType.UpdateTransactionFeeDistribution;
+        case UpdateType.UpdateGASRewards:
+            return OnChainUpdateType.UpdateGASRewards;
+        case UpdateType.UpdateBakerStakeThreshold:
+            return OnChainUpdateType.UpdateBakerStakeThreshold;
+        case UpdateType.UpdateRootKeys:
+            return OnChainUpdateType.UpdateRootKeys;
+        case UpdateType.UpdateLevel1KeysUsingRootKeys:
+            return OnChainUpdateType.UpdateRootKeys;
+        case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
+            return OnChainUpdateType.UpdateLevel1Keys;
+        case UpdateType.UpdateLevel2KeysUsingRootKeys:
+            return OnChainUpdateType.UpdateRootKeys;
+        case UpdateType.UpdateLevel2KeysUsingLevel1Keys:
+            return OnChainUpdateType.UpdateLevel1Keys;
+        default:
+            throw new Error(`An invalid update type was given: ${type}`);
+    }
+}
+
+/**
+ * Serializes an on chain update type to its byte representation.
  */
 export function serializeUpdateType(updateType: UpdateType) {
     const serializedUpdateType = Buffer.alloc(1);
-    serializedUpdateType.writeInt8(updateType, 0);
+    const onChainUpdateType = mapUpdateTypeToOnChainUpdateType(updateType);
+    serializedUpdateType.writeInt8(onChainUpdateType, 0);
     return serializedUpdateType;
 }
 
@@ -303,6 +398,7 @@ export function serializeUpdateInstructionHeaderAndPayload(
  */
 export function serializeUpdateInstruction(
     updateInstruction: UpdateInstruction<UpdateInstructionPayload>,
+    signaturesWithIndices: UpdateInstructionSignatureWithIndex[],
     serializedPayload: Buffer
 ) {
     const serializedHeaderAndPayload = serializeUpdateInstructionHeaderAndPayload(
@@ -310,7 +406,7 @@ export function serializeUpdateInstruction(
         serializedPayload
     );
     const serializedSignatures = serializeUpdateSignatures(
-        updateInstruction.signatures
+        signaturesWithIndices
     );
 
     const blockItemKind = Buffer.alloc(1);
@@ -331,6 +427,7 @@ export function serializeUpdateInstruction(
  */
 export function serializeForSubmission(
     updateInstruction: UpdateInstruction<UpdateInstructionPayload>,
+    signaturesWithIndices: UpdateInstructionSignatureWithIndex[],
     serializedPayload: Buffer
 ) {
     // Currently versioning is hardcoded to 0. This value might be changed if
@@ -340,6 +437,7 @@ export function serializeForSubmission(
 
     const serializedTransaction = serializeUpdateInstruction(
         updateInstruction,
+        signaturesWithIndices,
         serializedPayload
     );
     return Buffer.concat([version, serializedTransaction]);

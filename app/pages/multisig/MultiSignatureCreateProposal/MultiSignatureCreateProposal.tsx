@@ -6,27 +6,34 @@ import { useParams } from 'react-router';
 
 import { FieldValues } from 'react-hook-form';
 import {
+    HigherLevelKeyUpdate,
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
     UpdateType,
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
-import { findUpdateInstructionHandler } from '~/utils/updates/HandlerFinder';
+import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import Loading from '~/cross-app-components/Loading';
 import Modal from '~/cross-app-components/Modal';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { parse } from '~/utils/JSONHelper';
 import Form from '~/components/Form';
-import { getNow, TimeConstants } from '~/utils/timeHelpers';
-import { futureDate } from '~/components/Form/util/validation';
+import {
+    getDefaultExpiry,
+    getNow,
+    secondsSinceUnixEpoch,
+    TimeConstants,
+} from '~/utils/timeHelpers';
+import { futureDate, maxDate } from '~/components/Form/util/validation';
 
 import styles from './MultiSignatureCreateProposal.module.scss';
-import withBlockSummary, { WithBlockSummary } from '../common/withBlockSummary';
+import withChainData, { ChainData } from '../common/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 
-interface MultiSignatureCreateProposalForm {
+export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
+    expiryTime: Date;
 }
 
 /**
@@ -36,11 +43,16 @@ interface MultiSignatureCreateProposalForm {
  * The component retrieves the block summary of the last finalized block, which
  * is used to get the threshold and sequence number required for update instructions.
  */
-function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
-    const loading = !blockSummary;
+function MultiSignatureCreateProposal({
+    blockSummary,
+    consensusStatus,
+}: ChainData) {
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const dispatch = useDispatch();
+    const [effective, setEffective] = useState<Date | undefined>(
+        new Date(getNow() + 5 * TimeConstants.Minute)
+    );
 
     // TODO Add support for account transactions.
     const { updateType } = useParams<{ updateType: string }>();
@@ -92,15 +104,46 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
             return;
         }
 
-        const { effectiveTime, ...dynamicFields } = fields;
-        const timeInSeconds = BigInt(
-            Math.round(effectiveTime.getTime() / 1000)
+        const { effectiveTime, expiryTime, ...dynamicFields } = fields;
+        const effectiveTimeInSeconds = BigInt(
+            secondsSinceUnixEpoch(effectiveTime)
         );
+        const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
 
         const proposal = await handler.createTransaction(
             blockSummary,
             dynamicFields,
-            timeInSeconds
+            effectiveTimeInSeconds,
+            expiryTimeInSeconds
+        );
+
+        if (proposal) {
+            forwardTransactionToSigningPage(proposal);
+        }
+    }
+
+    /**
+     * Form submit function used for the higher level keys updates. They do not
+     * use Form element to input all the keys, so therefore it cannot use the
+     * regular handleSubmit function.
+     */
+    async function handleKeySubmit(
+        effectiveTime: Date,
+        expiryTime: Date,
+        higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
+    ) {
+        if (!blockSummary) {
+            return;
+        }
+        const effectiveTimeInSeconds = BigInt(
+            secondsSinceUnixEpoch(effectiveTime)
+        );
+        const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
+        const proposal = await handler.createTransaction(
+            blockSummary,
+            higherLevelKeyUpdate,
+            effectiveTimeInSeconds,
+            expiryTimeInSeconds
         );
 
         if (proposal) {
@@ -123,6 +166,35 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
         setRestrictionModalOpen(true);
     }
 
+    if (
+        [
+            UpdateType.UpdateRootKeys,
+            UpdateType.UpdateLevel1KeysUsingRootKeys,
+            UpdateType.UpdateLevel1KeysUsingLevel1Keys,
+        ].includes(type)
+    ) {
+        return (
+            <MultiSignatureLayout
+                pageTitle={handler.title}
+                stepTitle={`Transaction Proposal - ${handler.type}`}
+                delegateScroll
+            >
+                {RestrictionModal}
+                {!blockSummary || !consensusStatus ? (
+                    <Loading text="Getting current settings from chain" />
+                ) : (
+                    <div className={styles.subtractContainerPadding}>
+                        <UpdateComponent
+                            blockSummary={blockSummary}
+                            consensusStatus={consensusStatus}
+                            handleKeySubmit={handleKeySubmit}
+                        />
+                    </div>
+                )}
+            </MultiSignatureLayout>
+        );
+    }
+
     return (
         <MultiSignatureLayout
             pageTitle={handler.title}
@@ -135,24 +207,21 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                 onSubmit={handleSubmit}
             >
                 <div className={styles.proposal}>
-                    <p>
+                    <p className="mT0">
                         Add all the details for the {displayType} transaction
                         below.
                     </p>
-                    {loading && (
-                        <Loading text="Getting current settings from chain" />
-                    )}
-                    {blockSummary && (
+                    {blockSummary && consensusStatus ? (
                         <>
-                            <UpdateComponent blockSummary={blockSummary} />
+                            <UpdateComponent
+                                blockSummary={blockSummary}
+                                consensusStatus={consensusStatus}
+                            />
                             <Form.Timestamp
                                 name="effectiveTime"
                                 label="Effective Time"
-                                defaultValue={
-                                    new Date(
-                                        getNow() + 5 * TimeConstants.Minute
-                                    )
-                                }
+                                onChange={setEffective}
+                                defaultValue={effective}
                                 rules={{
                                     required: 'Effective time is required',
                                     validate: futureDate(
@@ -160,7 +229,31 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
                                     ),
                                 }}
                             />
+                            <Form.Timestamp
+                                name="expiryTime"
+                                label="Transaction Expiry Time"
+                                defaultValue={getDefaultExpiry()}
+                                rules={{
+                                    required:
+                                        'Transaction expiry time is required',
+                                    validate: {
+                                        ...(effective !== undefined
+                                            ? {
+                                                  beforeEffective: maxDate(
+                                                      effective,
+                                                      'Transaction expiry time must be before the effective time'
+                                                  ),
+                                              }
+                                            : undefined),
+                                        future: futureDate(
+                                            'Transaction expiry time must be in the future'
+                                        ),
+                                    },
+                                }}
+                            />
                         </>
+                    ) : (
+                        <Loading text="Getting current settings from chain" />
                     )}
                 </div>
                 <Form.Submit disabled={!blockSummary}>Continue</Form.Submit>
@@ -169,4 +262,4 @@ function MultiSignatureCreateProposal({ blockSummary }: WithBlockSummary) {
     );
 }
 
-export default withBlockSummary(MultiSignatureCreateProposal);
+export default withChainData(MultiSignatureCreateProposal);

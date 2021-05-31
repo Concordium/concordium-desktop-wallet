@@ -1,5 +1,4 @@
 import React from 'react';
-import { List, Header } from 'semantic-ui-react';
 import {
     TransferToEncrypted,
     TransferToPublic,
@@ -7,6 +6,9 @@ import {
 } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import styles from './transferDetails.module.scss';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: TransferToEncrypted | TransferToPublic;
@@ -35,18 +37,22 @@ export default function DisplayInternalTransfer({
 }: Props) {
     const transactionDetails = getDetails(transaction);
     return (
-        <List relaxed="very">
+        <>
             <h2>{transactionDetails.title}</h2>
-            <List.Item>
-                On Account:
-                <Header>{fromName}</Header>
-                {transaction.sender}
-            </List.Item>
-            <List.Item>
-                Amount:
-                <Header>{displayAsGTU(transactionDetails.amount)}</Header>
-                <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
-            </List.Item>
-        </List>
+            <h5 className={styles.title}>From Account:</h5>
+            <p className={styles.name}>{fromName}</p>
+            <p className={styles.address}>{transaction.sender}</p>
+            <h5 className={styles.title}>Amount:</h5>
+            <p className={styles.amount}>
+                {displayAsGTU(transactionDetails.amount)}
+            </p>
+            <DisplayEstimatedFee
+                className={styles.fee}
+                estimatedFee={transaction.estimatedFee}
+            />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
+        </>
     );
 }

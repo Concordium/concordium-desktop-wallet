@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import {
     AccountTransaction,
     instanceOfSimpleTransfer,
@@ -7,13 +6,26 @@ import {
     instanceOfTransferToPublic,
     instanceOfScheduledTransfer,
     instanceOfUpdateAccountCredentials,
+    instanceOfAddBaker,
+    instanceOfRemoveBaker,
+    instanceOfUpdateBakerKeys,
+    instanceOfUpdateBakerStake,
+    instanceOfUpdateBakerRestakeEarnings,
+    AddressBookEntry,
 } from '../../utils/types';
-import { lookupName } from '../../utils/transactionHelpers';
-import { chosenAccountSelector } from '../../features/AccountSlice';
+import {
+    lookupAddressBookEntry,
+    lookupName,
+} from '../../utils/transactionHelpers';
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
 import DisplayInternalTransfer from './DisplayInternalTransfer';
 import DisplaySimpleTransfer from './DisplaySimpleTransfer';
+import DisplayAddBaker from './DisplayAddBaker';
+import DisplayUpdateBakerKeys from './DisplayUpdateBakerKeys';
+import DisplayRemoveBaker from './DisplayRemoveBaker';
 import DisplayAccountCredentialsUpdate from '../DisplayAccountCredentialUpdate';
+import DisplayUpdateBakerStake from './DisplayUpdateBakerStake';
+import DisplayUpdateBakerRestakeEarnings from './DisplayUpdateBakerRestakeEarnings';
 
 interface Props {
     transaction: AccountTransaction;
@@ -24,15 +36,18 @@ interface Props {
  * @param {AccountTransaction} transaction: The transaction, which details is displayed.
  */
 export default function AccountTransactionDetails({ transaction }: Props) {
-    const account = useSelector(chosenAccountSelector);
-    const fromName = account?.name;
-    const [toName, setToName] = useState<string | undefined>();
+    const [fromName, setFromName] = useState<string | undefined>();
+    const [to, setTo] = useState<AddressBookEntry | undefined>();
 
     useEffect(() => {
+        lookupName(transaction.sender)
+            .then((name) => setFromName(name))
+            .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
+
         if ('toAddress' in transaction.payload) {
-            lookupName(transaction.payload.toAddress)
-                .then((name) => setToName(name))
-                .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
+            lookupAddressBookEntry(transaction.payload.toAddress)
+                .then((entry) => setTo(entry))
+                .catch(() => {}); // lookupAddressBookEntry will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
         }
     });
 
@@ -40,10 +55,25 @@ export default function AccountTransactionDetails({ transaction }: Props) {
         return (
             <DisplaySimpleTransfer
                 transaction={transaction}
-                toName={toName}
+                to={to}
                 fromName={fromName}
             />
         );
+    }
+    if (instanceOfAddBaker(transaction)) {
+        return <DisplayAddBaker transaction={transaction} />;
+    }
+    if (instanceOfUpdateBakerKeys(transaction)) {
+        return <DisplayUpdateBakerKeys transaction={transaction} />;
+    }
+    if (instanceOfUpdateBakerStake(transaction)) {
+        return <DisplayUpdateBakerStake transaction={transaction} />;
+    }
+    if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
+        return <DisplayUpdateBakerRestakeEarnings transaction={transaction} />;
+    }
+    if (instanceOfRemoveBaker(transaction)) {
+        return <DisplayRemoveBaker transaction={transaction} />;
     }
     if (
         instanceOfTransferToEncrypted(transaction) ||
@@ -60,7 +90,7 @@ export default function AccountTransactionDetails({ transaction }: Props) {
         return (
             <DisplayScheduleTransfer
                 transaction={transaction}
-                toName={toName}
+                to={to}
                 fromName={fromName}
             />
         );

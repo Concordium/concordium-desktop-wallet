@@ -1,13 +1,15 @@
 import React from 'react';
-import { List, Header } from 'semantic-ui-react';
-import { SimpleTransfer } from '~/utils/types';
+import { AddressBookEntry, SimpleTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import DisplayFee from '~/components/DisplayFee';
+import styles from './transferDetails.module.scss';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: SimpleTransfer;
     fromName?: string;
-    toName?: string;
+    to?: AddressBookEntry;
 }
 
 /**
@@ -16,25 +18,25 @@ interface Props {
 export default function DisplaySimpleTransfer({
     transaction,
     fromName,
-    toName,
+    to,
 }: Props) {
     return (
-        <List relaxed="very">
-            <List.Item>
-                From Account:
-                <Header>{fromName}</Header>
-                {transaction.sender}
-            </List.Item>
-            <List.Item>
-                To Account:
-                <Header>{toName} </Header>
-                {transaction.payload.toAddress}
-            </List.Item>
-            <List.Item>
-                Amount:
-                <Header>{displayAsGTU(transaction.payload.amount)}</Header>
-                <DisplayEstimatedFee estimatedFee={transaction.estimatedFee} />
-            </List.Item>
-        </List>
+        <>
+            <h5 className={styles.title}>From Account:</h5>
+            <p className={styles.name}>{fromName}</p>
+            <p className={styles.address}>{transaction.sender}</p>
+            <h5 className={styles.title}>To Account:</h5>
+            <p className={styles.name}>{to?.name}</p>
+            <p className={styles.address}>{transaction.payload.toAddress}</p>
+            {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
+            <h5 className={styles.title}>Amount:</h5>
+            <p className={styles.amount}>
+                {displayAsGTU(transaction.payload.amount)}
+            </p>
+            <DisplayFee className={styles.fee} transaction={transaction} />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
+        </>
     );
 }

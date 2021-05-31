@@ -78,7 +78,7 @@ export default function SimpleTransfer({ account }: Props) {
             );
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [JSON.stringify(account)]
+        [JSON.stringify(account), estimatedFee]
     );
 
     return (
@@ -92,7 +92,9 @@ export default function SimpleTransfer({ account }: Props) {
                 estimatedFee={estimatedFee}
                 toConfirmTransfer={toConfirmTransfer}
                 exitFunction={() => dispatch(push(routes.ACCOUNTS))}
-                amountHeader="Send funds"
+                amountHeader="Send GTU"
+                senderAddress={account.address}
+                transactionKind={TransactionKindId.Simple_transfer}
             />
         </>
     );

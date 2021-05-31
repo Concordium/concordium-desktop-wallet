@@ -1,4 +1,4 @@
-import type Transport from '@ledgerhq/hw-transport';
+import { Transport } from './Transport';
 import {
     UpdateAccountCredentials,
     TransactionKindId,
@@ -96,7 +96,7 @@ export default async function signUpdateCredentials(
 
     p2 = 0x05;
     data = Buffer.alloc(1);
-    data.writeUInt8(transaction.payload.newThreshold, 0);
+    data.writeUInt8(transaction.payload.threshold, 0);
 
     const response = await transport.send(0xe0, ins, p1, p2, data);
 

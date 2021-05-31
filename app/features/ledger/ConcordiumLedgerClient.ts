@@ -1,4 +1,5 @@
-import type Transport from '@ledgerhq/hw-transport';
+import type HwTransport from '@ledgerhq/hw-transport';
+import { Transport, TransportImpl } from './Transport';
 import {
     getPublicKey,
     getPublicKeySilent,
@@ -25,13 +26,16 @@ import {
     TransactionFeeDistribution,
     UpdateInstruction,
     UnsignedCredentialDeploymentInformation,
+    HigherLevelKeyUpdate,
     UpdateAccountCredentials,
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
 import signUpdateTransaction from './SignUpdateTransaction';
 import signUpdateProtocolTransaction from './SignProtocolUpdate';
+import signHigherLevelKeyUpdate from './SignHigherLevelKeyUpdate';
 import signUpdateCredentialTransaction from './SignUpdateCredentials';
+
 /**
  * Concordium Ledger API.
  *
@@ -42,20 +46,8 @@ import signUpdateCredentialTransaction from './SignUpdateCredentials';
 export default class ConcordiumLedgerClient {
     transport: Transport;
 
-    constructor(transport: Transport) {
-        this.transport = transport;
-
-        transport.decorateAppAPIMethods(
-            this,
-            [
-                'getPublicKey',
-                'getIdCredSec',
-                'getPrfKey',
-                'signTransfer',
-                'signAccountChallenge',
-            ],
-            'GTU'
-        );
+    constructor(transport: HwTransport) {
+        this.transport = new TransportImpl(transport);
     }
 
     closeTransport(): Promise<void> {
@@ -260,6 +252,21 @@ export default class ConcordiumLedgerClient {
             path,
             transaction,
             serializedPayload
+        );
+    }
+
+    signHigherLevelKeysUpdate(
+        transaction: UpdateInstruction<HigherLevelKeyUpdate>,
+        serializedPayload: Buffer,
+        path: number[],
+        INS: number
+    ): Promise<Buffer> {
+        return signHigherLevelKeyUpdate(
+            this.transport,
+            path,
+            transaction,
+            serializedPayload,
+            INS
         );
     }
 
