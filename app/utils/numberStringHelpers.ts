@@ -54,7 +54,8 @@ export function isPowOf10(resolution: bigint | number): boolean {
 const isValidNumberString = (
     allowNegative = false,
     allowFractionDigits: number | true = true,
-    allowLeadingZeros = true
+    allowLeadingZeros = true,
+    allowExponent = true
 ) => {
     let re: RegExp;
     const signedPart = allowNegative ? '(-)?' : '';
@@ -63,7 +64,7 @@ const isValidNumberString = (
         allowFractionDigits === true
             ? '(\\.\\d*)?'
             : `(\\.\\d{1,${allowFractionDigits}})?(0)*`;
-    const exponentPart = '(e[+,-]?\\d+)?';
+    const exponentPart = allowExponent ? '(e[+,-]?\\d+)?' : '';
 
     re = new RegExp(`^${signedPart}${intPart}\\.?(0)*${exponentPart}$`);
 
@@ -96,12 +97,14 @@ const isValidNumberString = (
 export const isValidResolutionString = (
     resolution: bigint | number,
     allowNegative = false,
-    allowLeadingZeros = true
+    allowLeadingZeros = true,
+    allowExponent = true
 ) =>
     isValidNumberString(
         allowNegative,
         getPowerOf10(resolution),
-        allowLeadingZeros
+        allowLeadingZeros,
+        allowExponent
     );
 
 const withValidResolution = <TReturn>(

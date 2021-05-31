@@ -43,6 +43,10 @@ test('An empty string is not allowed', () => {
     expect(isValidGTUString('')).toBe(false);
 });
 
+test("Doesn't allow exponent", () => {
+    expect(isValidGTUString('10e2')).toBe(false);
+});
+
 test('Undefined is not allowed', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(isValidGTUString(undefined as any)).toBe(false);

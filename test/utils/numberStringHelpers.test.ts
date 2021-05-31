@@ -65,6 +65,12 @@ describe(isValidResolutionString, () => {
         expect(invalidateNegative100('0.10')).toBe(true);
         expect(invalidateNegative100('-0.10')).toBe(false);
     });
+
+    test('Invalidates values with exponent, when not allowed', () => {
+        expect(
+            isValidResolutionString(BigInt(100), false, false, false)('1.2e1')
+        ).toBe(false);
+    });
 });
 
 describe('Valid resolution common check', () => {

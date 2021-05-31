@@ -35,6 +35,7 @@ function toBigInt(input: bigint | string): bigint {
 export const isValidGTUString = isValidResolutionString(
     microGTUPerGTU,
     false,
+    false,
     false
 );
 
