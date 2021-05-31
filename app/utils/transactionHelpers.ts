@@ -470,3 +470,13 @@ export function validateAmount(
     }
     return undefined;
 }
+
+export function validateFee(
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
+        return 'Insufficient funds';
+    }
+    return undefined;
+}

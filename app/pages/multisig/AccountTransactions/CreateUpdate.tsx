@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Account, AccountTransaction, AddedCredential } from '~/utils/types';
+import {
+    Account,
+    AccountTransaction,
+    AddedCredential,
+    Fraction,
+} from '~/utils/types';
 import SignTransaction from './SignTransaction';
 import { createUpdateCredentialsTransaction } from '~/utils/transactionHelpers';
 import { ensureNonce } from '~/components/Transfers/withNonce';
@@ -12,6 +17,7 @@ interface Props {
     currentCredentialAmount: number;
     newThreshold: number;
     nonce: string;
+    estimatedFee?: Fraction;
 }
 
 /**
@@ -24,23 +30,23 @@ function CreateUpdate({
     currentCredentialAmount,
     newThreshold,
     nonce,
+    estimatedFee,
 }: Props): JSX.Element | null {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
     >();
 
     useEffect(() => {
-        setTransaction(
-            createUpdateCredentialsTransaction(
-                account.address,
-                addedCredentials,
-                removedCredIds,
-                newThreshold,
-                currentCredentialAmount,
-                nonce,
-                account.signatureThreshold
-            )
+        const t = createUpdateCredentialsTransaction(
+            account.address,
+            addedCredentials,
+            removedCredIds,
+            newThreshold,
+            currentCredentialAmount,
+            nonce,
+            account.signatureThreshold
         );
+        setTransaction({ ...t, estimatedFee });
     }, [
         setTransaction,
         account,

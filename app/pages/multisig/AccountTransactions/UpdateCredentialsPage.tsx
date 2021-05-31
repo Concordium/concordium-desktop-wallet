@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -6,9 +6,11 @@ import clsx from 'clsx';
 import Button from '~/cross-app-components/Button';
 import {
     Account,
+    AccountInfo,
     Identity,
     CredentialDeploymentInformation,
     TransactionKindId,
+    Fraction,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from './PickAccount';
@@ -17,11 +19,18 @@ import ChangeSignatureThreshold from './ChangeSignatureThreshold';
 import routes from '~/constants/routes.json';
 import CreateUpdate from './CreateUpdate';
 import { CredentialStatus } from './CredentialStatus';
-import styles from './UpdateAccountCredentials.module.scss';
 import UpdateAccountCredentialsHandler from '~/utils/transactionHandlers/UpdateAccountCredentialsHandler';
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
+import { getUpdateCredentialsCost } from '~/utils/transactionCosts';
+import { useAccountInfo } from '~/utils/hooks';
+import { collapseFraction } from '~/utils/basicHelpers';
+import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import LoadingComponent from './LoadingComponent';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
+import { validateFee } from '~/utils/transactionHelpers';
+
+import styles from './UpdateAccountCredentials.module.scss';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -77,7 +86,7 @@ function displayAccount(account: Account | undefined) {
     return (
         <>
             <h5 className={styles.PropertyName}>Account:</h5>
-            <h2 className={styles.LargePropertyValue}>
+            <h2 className="mV0">
                 {account ? account.name : 'Choose an account on the right'}
             </h2>
         </>
@@ -181,11 +190,15 @@ interface AccountInfoCredential {
     credential: CredentialDeploymentInformation;
 }
 
+interface Props {
+    exchangeRate: Fraction;
+}
+
 /**
  * This component controls the flow of creating a updateAccountCredential transaction.
  * It contains the logic for displaying the current parameters.
  */
-export default function UpdateCredentialPage(): JSX.Element {
+function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     const dispatch = useDispatch();
     const transactionKind = TransactionKindId.Update_credentials;
     const location = useLocation().pathname.replace(
@@ -210,14 +223,15 @@ export default function UpdateCredentialPage(): JSX.Element {
         CredentialDeploymentInformation[]
     >([]);
 
+    const accountInfo = useAccountInfo(account?.address);
+
     /**
      * Loads the credential information for the given account, and updates
      * the state accordingly with the information.
      */
-    async function getCredentialInfo(inputAccount: Account) {
-        const accountInfo = await getAccountInfoOfAddress(inputAccount.address);
+    async function getCredentialInfo(currentAccountInfo: AccountInfo) {
         const credentialsForAccount: AccountInfoCredential[] = Object.entries(
-            accountInfo.accountCredentials
+            currentAccountInfo.accountCredentials
         ).map((accountCredential) => {
             const credentialIndex = parseInt(accountCredential[0], 10);
             const cred = accountCredential[1].value.contents;
@@ -232,7 +246,7 @@ export default function UpdateCredentialPage(): JSX.Element {
         setCurrentCredentials(credentialsForAccount);
 
         setNewThreshold(
-            (previous) => inputAccount.signatureThreshold || previous
+            (previous) => currentAccountInfo.accountThreshold || previous
         );
 
         setCredentialIds(
@@ -247,11 +261,50 @@ export default function UpdateCredentialPage(): JSX.Element {
         );
     }
 
+    const [estimatedFee, setFee] = useState<Fraction>();
+    const error = useMemo(() => {
+        if (accountInfo && estimatedFee) {
+            return validateFee(accountInfo, collapseFraction(estimatedFee));
+        }
+        return undefined;
+    }, [accountInfo, estimatedFee]);
+
     useEffect(() => {
         if (account) {
-            getCredentialInfo(account);
+            // Create a payload with the current settings, to estimate the fee.
+            const payload = {
+                addedCredentials: assignIndices(newCredentials, []),
+                removedCredIds: credentialIds
+                    .filter(([, status]) => status === CredentialStatus.Removed)
+                    .map(([id]) => id),
+                threshold: newThreshold || 1,
+            };
+            setFee(
+                getUpdateCredentialsCost(
+                    exchangeRate,
+                    payload,
+                    currentCredentials.length,
+                    account.signatureThreshold
+                )
+            );
+        } else {
+            setFee(undefined);
         }
-    }, [account]);
+    }, [
+        account,
+        setFee,
+        exchangeRate,
+        newThreshold,
+        newCredentials,
+        credentialIds,
+        currentCredentials.length,
+    ]);
+
+    useEffect(() => {
+        if (accountInfo) {
+            getCredentialInfo(accountInfo);
+        }
+    }, [accountInfo]);
 
     function updateCredentialStatus([removedId, status]: [
         string,
@@ -322,6 +375,7 @@ export default function UpdateCredentialPage(): JSX.Element {
                         .map(([id]) => id)}
                     newThreshold={newThreshold}
                     currentCredentialAmount={currentCredentials.length}
+                    estimatedFee={estimatedFee}
                 />
             </div>
         );
@@ -342,6 +396,10 @@ export default function UpdateCredentialPage(): JSX.Element {
                     <div className={styles.columnContainer}>
                         {displayIdentity(identity)}
                         {displayAccount(account)}
+                        <DisplayEstimatedFee
+                            className={styles.LargePropertyValue}
+                            estimatedFee={estimatedFee}
+                        />
                         {displaySignatureThreshold(
                             account?.signatureThreshold,
                             newThreshold
@@ -437,24 +495,26 @@ export default function UpdateCredentialPage(): JSX.Element {
                             />
                         </Switch>
                         {showButton && (
-                            <Button
-                                disabled={!isReady}
-                                className={styles.continueButton}
-                                onClick={() => {
-                                    setReady(false);
-                                    dispatch(
-                                        push({
-                                            pathname: handler.creationLocationHandler(
-                                                location
-                                            ),
-                                            state:
-                                                TransactionKindId.Update_credentials,
-                                        })
-                                    );
-                                }}
-                            >
-                                Continue
-                            </Button>
+                            <div className="flexColumn mT40">
+                                <p className={styles.errorLabel}>{error}</p>
+                                <Button
+                                    disabled={!isReady || Boolean(error)}
+                                    onClick={() => {
+                                        setReady(false);
+                                        dispatch(
+                                            push({
+                                                pathname: handler.creationLocationHandler(
+                                                    location
+                                                ),
+                                                state:
+                                                    TransactionKindId.Update_credentials,
+                                            })
+                                        );
+                                    }}
+                                >
+                                    Continue
+                                </Button>
+                            </div>
                         )}
                     </div>
                 </Columns.Column>
@@ -462,3 +522,5 @@ export default function UpdateCredentialPage(): JSX.Element {
         </MultiSignatureLayout>
     );
 }
+
+export default ensureExchangeRate(UpdateCredentialPage, LoadingComponent);

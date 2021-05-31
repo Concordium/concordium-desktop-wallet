@@ -45,12 +45,16 @@ export function useAccountName(address: string) {
 }
 
 /** Hook for fetching account info given an account address */
-export function useAccountInfo(address: string) {
+export function useAccountInfo(address?: string) {
     const [accountInfo, setAccountInfo] = useState<AccountInfo>();
     useEffect(() => {
-        getAccountInfoOfAddress(address)
-            .then(setAccountInfo)
-            .catch(() => {});
+        if (address) {
+            getAccountInfoOfAddress(address)
+                .then(setAccountInfo)
+                .catch(() => {});
+        } else {
+            setAccountInfo(undefined);
+        }
     }, [address]);
     return accountInfo;
 }
