@@ -38,6 +38,7 @@ interface UpdateQueues {
     bakerStakeThreshold: UpdateQueue;
     rootKeys: UpdateQueue;
     level1Keys: UpdateQueue;
+    level2Keys: UpdateQueue;
 }
 
 export interface Authorization {

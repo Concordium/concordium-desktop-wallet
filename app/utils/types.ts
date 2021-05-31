@@ -616,7 +616,8 @@ export type UpdateInstructionPayload =
     | GasRewards
     | BakerStakeThreshold
     | ElectionDifficulty
-    | HigherLevelKeyUpdate;
+    | HigherLevelKeyUpdate
+    | AuthorizationKeysUpdate;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -800,7 +801,7 @@ export function isUpdateLevel1KeysWithRootKeys(
 
 export function isUpdateLevel2KeysWithRootKeys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): transaction is UpdateInstruction<AuthorizationKeysUpdate> {
     return UpdateType.UpdateLevel2KeysUsingRootKeys === transaction.type;
 }
 
@@ -960,7 +961,10 @@ export interface AccessStructure {
     threshold: Word16;
 }
 
+// Root keys updating = 2, level 1 keys updating = 1.
+export type AuthorizationKeysUpdateType = 1 | 2;
 export interface AuthorizationKeysUpdate {
+    keyUpdateType: AuthorizationKeysUpdateType;
     keys: VerifyKey[];
     emergency: AccessStructure;
     protocol: AccessStructure;
