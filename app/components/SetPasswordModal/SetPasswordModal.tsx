@@ -53,7 +53,7 @@ export default function SetPasswordModal({
         <Modal onClose={onClose} open={open}>
             <h2>{title}</h2>
             <p className={styles.text}>{description}</p>
-            <Form<FormFields> onSubmit={handleSubmit} {...form}>
+            <Form<FormFields> onSubmit={handleSubmit} formMethods={form}>
                 <Form.Input
                     className={styles.field}
                     name="password"
