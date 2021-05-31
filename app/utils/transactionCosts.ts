@@ -22,6 +22,10 @@ export const energyConstants = {
     UpdateCredentialsCostPerCurrentCredential: 500n,
     UpdateCredentialsCostPerNewCredential: 54000n + 100n * 1n, // TODO: remove assumption that a credential has 1 key.
     AddBaker: 4050n,
+    UpdateBakerKeys: 4050n,
+    RemoveBaker: 300n,
+    UpdateBakerStake: 300n,
+    UpdateBakerRestakeEarnings: 300n,
 };
 
 /**
@@ -35,6 +39,10 @@ export const payloadSizeEstimate = {
     TransferToEncrypted: 9, // Amount (Word64) + TransactionKind (Word8)
     TransferToPublic: 1405, // Amount (Word64) + TransactionKind (Word8) + EncryptedAmount (192 bytes) + index (Word64) + Proofs (Assumed 1189 bytes)
     AddBaker: 362, // TransactionKind (Word8) + keys (160 bytes) + proofs(192 bytes) + stakedAmount (8 bytes) + restake_earnings (1 byte)
+    UpdateBakerKeys: 353, // TransactionKind (Word8) + keys (160 bytes) + proofs(192 bytes)
+    RemoveBaker: 1, // TransactionKind (Word8)
+    UpdateBakerStake: 1 + 8, // TransactionKind (Word8) + staked amount (8 bytes)
+    UpdateBakerRestakeEarnings: 1 + 1, // TransactionKind (Word8) + restake earnings (1 byte)
 };
 
 /**
@@ -80,6 +88,14 @@ function getPayloadSizeEstimate(transactionKind: TransactionKindId) {
             return payloadSizeEstimate.TransferToPublic;
         case TransactionKindId.Add_baker:
             return payloadSizeEstimate.AddBaker;
+        case TransactionKindId.Update_baker_keys:
+            return payloadSizeEstimate.UpdateBakerKeys;
+        case TransactionKindId.Remove_baker:
+            return payloadSizeEstimate.RemoveBaker;
+        case TransactionKindId.Update_baker_stake:
+            return payloadSizeEstimate.UpdateBakerStake;
+        case TransactionKindId.Update_baker_restake_earnings:
+            return payloadSizeEstimate.UpdateBakerStake;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }
@@ -97,6 +113,14 @@ function getEnergyCostOfType(transactionKind: TransactionKindId) {
             return energyConstants.TransferToPublicCost;
         case TransactionKindId.Add_baker:
             return energyConstants.AddBaker;
+        case TransactionKindId.Update_baker_keys:
+            return energyConstants.UpdateBakerKeys;
+        case TransactionKindId.Remove_baker:
+            return energyConstants.RemoveBaker;
+        case TransactionKindId.Update_baker_stake:
+            return energyConstants.UpdateBakerStake;
+        case TransactionKindId.Update_baker_restake_earnings:
+            return energyConstants.UpdateBakerStake;
         default:
             throw new Error(`Unsupported transaction type: ${transactionKind}`);
     }

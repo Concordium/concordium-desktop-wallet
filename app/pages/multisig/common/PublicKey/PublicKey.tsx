@@ -10,7 +10,7 @@ export type PublicKeyProps = {
 export default function PublicKey({ name, publicKey }: PublicKeyProps) {
     return (
         <>
-            <b>{name}</b>
+            <div className={styles.name}>{name}</div>
             <p className={styles.key}>
                 {chunkString(publicKey, 32).join('\n')}
             </p>

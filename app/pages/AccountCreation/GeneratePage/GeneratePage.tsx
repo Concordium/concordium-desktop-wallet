@@ -5,12 +5,7 @@ import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import { createCredentialDetails } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import {
-    Identity,
-    CredentialDeploymentDetails,
-    Dispatch,
-    AccountStatus,
-} from '~/utils/types';
+import { Identity, CredentialDeploymentDetails, Dispatch } from '~/utils/types';
 import { sendTransaction } from '~/node/nodeRequests';
 import {
     addPendingAccount,
@@ -28,10 +23,10 @@ import ErrorModal from '~/components/SimpleErrorModal';
 import pairWallet from '~/utils/WalletPairing';
 import Columns from '~/components/Columns';
 import IdentityCard from '~/components/IdentityCard';
-import AccountCard from '~/components/AccountCard';
 import CardList from '~/cross-app-components/CardList';
 import { AttributeKey } from '~/utils/identityHelpers';
 import errorMessages from '~/constants/errorMessages.json';
+import { AccountCardView } from '~/components/AccountCard/AccountCard';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
@@ -188,21 +183,13 @@ export default function AccountCreationGenerate({
                             identity={identity}
                             showAttributes={attributes}
                         />
-                        <AccountCard
+                        <AccountCardView
                             className={clsx(
                                 generalStyles.card,
                                 styles.alignRight
                             )}
-                            account={{
-                                name: accountName,
-                                address: '',
-                                isInitial: false,
-                                status: AccountStatus.Confirmed,
-                                identityId: -1,
-                                maxTransactionId: -1,
-                                identityName: identity.name,
-                                rewardFilter: '[]',
-                            }}
+                            accountName={accountName}
+                            identityName={identity.name}
                         />
                     </CardList>
                 </Columns.Column>
