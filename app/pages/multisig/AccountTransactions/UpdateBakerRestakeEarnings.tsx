@@ -97,7 +97,7 @@ export default function UpdateBakerRestakeEarningsPage() {
                 <Switch>
                     <Route exact path={path}>
                         <Columns.Column header="Identities">
-                            <div className={styles.descriptionStep}>
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickIdentity
                                         setIdentity={setIdentity}
@@ -119,7 +119,7 @@ export default function UpdateBakerRestakeEarningsPage() {
                     </Route>
                     <Route path={`${path}/${SubRoutes.accounts}`}>
                         <Columns.Column header="Accounts">
-                            <div className={styles.descriptionStep}>
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickAccount
                                         identity={identity}
@@ -145,7 +145,7 @@ export default function UpdateBakerRestakeEarningsPage() {
                     </Route>
                     <Route path={`${path}/${SubRoutes.restake}`}>
                         <Columns.Column header="Restake earnings">
-                            <div className={styles.descriptionStep}>
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     {account !== undefined ? (
                                         <RestakeEarnings
@@ -171,7 +171,7 @@ export default function UpdateBakerRestakeEarningsPage() {
 
                     <Route path={`${path}/${SubRoutes.expiry}`}>
                         <Columns.Column header="Transaction expiry time">
-                            <div className={styles.descriptionStep}>
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <p>
                                         Choose the expiry date for the

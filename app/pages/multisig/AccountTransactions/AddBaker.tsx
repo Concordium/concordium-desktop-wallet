@@ -392,26 +392,27 @@ export default function AddBakerPage() {
                     </Route>
 
                     <Route path={`${path}/${BuildSubRoutes.keys}`}>
-                        <Columns.Column header="Baker keys">
-                            <div className={styles.columnContent}>
-                                {bakerKeys !== undefined &&
-                                account !== undefined ? (
-                                    <DownloadBakerCredentialsStep
-                                        accountAddress={account.address}
-                                        bakerKeys={bakerKeys}
-                                        onContinue={() => {
-                                            onCreateTransaction();
-                                            dispatch(
-                                                push(
-                                                    `${url}/${BuildSubRoutes.sign}`
-                                                )
-                                            );
-                                        }}
-                                    />
-                                ) : (
-                                    <p>Generating keys...</p>
-                                )}
-                            </div>
+                        <Columns.Column
+                            header="Baker keys"
+                            className={styles.stretchColumn}
+                        >
+                            {bakerKeys !== undefined &&
+                            account !== undefined ? (
+                                <DownloadBakerCredentialsStep
+                                    accountAddress={account.address}
+                                    bakerKeys={bakerKeys}
+                                    onContinue={() => {
+                                        onCreateTransaction();
+                                        dispatch(
+                                            push(
+                                                `${url}/${BuildSubRoutes.sign}`
+                                            )
+                                        );
+                                    }}
+                                />
+                            ) : (
+                                <p>Generating keys...</p>
+                            )}
                         </Columns.Column>
                     </Route>
 
@@ -467,7 +468,7 @@ export function DownloadBakerCredentialsStep({
     return (
         <div className={styles.columnContent}>
             <div className={styles.flex1}>
-                <p>
+                <p className="mT0">
                     Your baker keys have been generated, and the public keys can
                     be seen to the left.
                 </p>
