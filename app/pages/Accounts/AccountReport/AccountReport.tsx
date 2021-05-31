@@ -87,7 +87,7 @@ export default function AccountReport({ location }: Props) {
     /** Constructs the account report(s).
      * If there are multiple chosen accounts, the reports will be bundled into a zip file
      */
-    async function makeReport() {
+    const makeReport = useCallback(async () => {
         try {
             const accountsLength = accounts.length;
             if (accountsLength === 1) {
@@ -130,7 +130,7 @@ export default function AccountReport({ location }: Props) {
             setModalOpen(true);
             return Promise.resolve(false);
         }
-    }
+    }, [accounts, currentFilters, fromDate, toDate]);
 
     // add account to the list of chosen accounts, and exit adding mode.
     function addAccount(account: Account) {
@@ -202,7 +202,7 @@ export default function AccountReport({ location }: Props) {
                 </Button>
             </div>
         );
-    }, [adding, accounts]);
+    }, [adding, accounts, makeReport]);
     return (
         <>
             <ErrorModal
