@@ -21,6 +21,7 @@ import {
 } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
 import {
+    useCalcBakerStakeCooldownUntil,
     useChainParameters,
     useStakedAmount,
     useTransactionCostEstimate,
@@ -31,6 +32,7 @@ import PickAmount from './PickAmount';
 import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';
 import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 
 enum SubRoutes {
     accounts,
@@ -163,10 +165,10 @@ export default function UpdateBakerStakePage() {
                                     {account !== undefined ? (
                                         <PickNewStake
                                             account={account}
-                                            setNewStake={setStake}
+                                            stake={stake}
+                                            setStake={setStake}
                                         />
                                     ) : null}
-                                    <p>Enter your new stake here</p>
                                 </div>
                                 <Button
                                     disabled={stake === undefined}
@@ -240,25 +242,42 @@ export default function UpdateBakerStakePage() {
 
 type PickNewStakeProps = {
     account: Account;
-    setNewStake: (s: string | undefined) => void;
+    stake?: string;
+    setStake: (s: string | undefined) => void;
 };
 
-function PickNewStake({ account, setNewStake }: PickNewStakeProps) {
+function PickNewStake({ account, stake, setStake }: PickNewStakeProps) {
     const stakedAlready = useStakedAmount(account.address);
     const chainParameters = useChainParameters();
     const minimumThresholdForBaking =
         chainParameters !== undefined
             ? BigInt(chainParameters.minimumThresholdForBaking)
             : undefined;
+    const cooldownUntil = useCalcBakerStakeCooldownUntil();
+    const stakeGtu = toMicroUnitsSafe(stake);
 
     return (
-        <PickAmount
-            account={account}
-            amount={microGtuToGtu(stakedAlready)}
-            setAmount={setNewStake}
-            validateAmount={(...args) =>
-                validateBakerStake(minimumThresholdForBaking, ...args)
-            }
-        />
+        <>
+            <PickAmount
+                account={account}
+                amount={microGtuToGtu(stakedAlready)}
+                setAmount={setStake}
+                validateAmount={(...args) =>
+                    validateBakerStake(minimumThresholdForBaking, ...args)
+                }
+            />
+            <p>Enter your new stake here</p>
+            {cooldownUntil !== undefined &&
+            stakeGtu !== undefined &&
+            stakedAlready !== undefined &&
+            stakeGtu < stakedAlready ? (
+                <p>
+                    You are decreasing the baker stake and the stake will be
+                    frozen until <br />
+                    {getFormattedDateString(cooldownUntil)}
+                    <br /> where the actual decrease will take effect.
+                </p>
+            ) : null}
+        </>
     );
 }

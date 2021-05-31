@@ -11,7 +11,12 @@ import {
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
 } from '../node/nodeHelpers';
-import { getDefaultExpiry, isFutureDate } from './timeHelpers';
+import {
+    epochDate,
+    getDefaultExpiry,
+    getEpochIndexAt,
+    isFutureDate,
+} from './timeHelpers';
 import { getTransactionKindCost } from './transactionCosts';
 import { lookupName } from './transactionHelpers';
 import { AccountInfo, Amount, Fraction, TransactionKindId } from './types';
@@ -159,4 +164,35 @@ export function useTransactionExpiryState(
         [expiryTime, validation]
     );
     return [expiryTime, setExpiryTime, expiryTimeError] as const;
+}
+
+/** Hook for calculating the date of the baking stake cooldown ending, will result in undefined while loading */
+export function useCalcBakerStakeCooldownUntil() {
+    const lastFinalizedBlockSummary = useLastFinalizedBlockSummary();
+    const now = useCurrentTime(60000);
+
+    if (lastFinalizedBlockSummary === undefined) {
+        return undefined;
+    }
+
+    const { consensusStatus } = lastFinalizedBlockSummary;
+    const {
+        chainParameters,
+    } = lastFinalizedBlockSummary.lastFinalizedBlockSummary.updates;
+    const genesisTime = new Date(consensusStatus.genesisTime);
+    const currentEpochIndex = getEpochIndexAt(
+        now,
+        consensusStatus.epochDuration,
+        genesisTime
+    );
+    const nextEpochIndex = currentEpochIndex + 1;
+
+    const cooldownUntilEpochIndex =
+        nextEpochIndex + chainParameters.bakerCooldownEpochs;
+
+    return epochDate(
+        cooldownUntilEpochIndex,
+        consensusStatus.epochDuration,
+        genesisTime
+    );
 }
