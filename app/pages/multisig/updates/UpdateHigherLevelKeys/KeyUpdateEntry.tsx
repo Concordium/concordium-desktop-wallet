@@ -63,15 +63,17 @@ export default function KeyUpdateEntry({
     return (
         <>
             <li className={styles.listItem}>
-                <Button
-                    size="tiny"
-                    onClick={() => updateKey(updateKeyStatus(keyInput))}
-                    className={styles.button}
-                >
-                    {generateButtonText(keyInput.status)}
-                </Button>
-                <p className={styles.keyText}>{keyInput.key.verifyKey}</p>
                 {generateStatusLabel(keyInput.status)}
+                <div className="flex alignCenter">
+                    <Button
+                        size="tiny"
+                        onClick={() => updateKey(updateKeyStatus(keyInput))}
+                        className={styles.button}
+                    >
+                        {generateButtonText(keyInput.status)}
+                    </Button>
+                    <p className={styles.keyText}>{keyInput.key.verifyKey}</p>
+                </div>
             </li>
         </>
     );

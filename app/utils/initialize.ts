@@ -6,7 +6,7 @@ import { loadIdentities } from '~/features/IdentitySlice';
 import { loadProposals } from '~/features/MultiSignatureSlice';
 import { findSetting, updateSettings } from '~/features/SettingsSlice';
 import listenForIdentityStatus from './IdentityStatusPoller';
-import startClient from './nodeConnector';
+import startClient from '../node/nodeConnector';
 import { Dispatch } from './types';
 import settingKeys from '../constants/settingKeys.json';
 

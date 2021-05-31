@@ -39,13 +39,15 @@ export function createUpdateMultiSignatureTransaction(
     updateType: UpdateType,
     sequenceNumber: bigint,
     threshold: number,
-    effectiveTime: bigint
+    effectiveTime: bigint,
+    expiryTime: bigint
 ) {
     const updateInstruction = createUpdateInstruction(
         payload,
         updateType,
         sequenceNumber,
-        effectiveTime
+        effectiveTime,
+        expiryTime
     );
     return createMultiSignatureTransaction(
         updateInstruction,

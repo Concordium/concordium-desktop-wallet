@@ -3,7 +3,11 @@ import HigherLevelKeysView from '~/pages/multisig/updates/UpdateHigherLevelKeys/
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel1Path } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorization, Authorizations, BlockSummary } from '../NodeApiTypes';
+import {
+    Authorization,
+    Authorizations,
+    BlockSummary,
+} from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -36,7 +40,8 @@ export default class UpdateLevel1KeysWithLevel1KeysHandler
     async createTransaction(
         blockSummary: BlockSummary,
         higherLevelKeyUpdate: HigherLevelKeyUpdate,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -51,7 +56,8 @@ export default class UpdateLevel1KeysWithLevel1KeysHandler
             UpdateType.UpdateLevel1KeysUsingLevel1Keys,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

@@ -7,7 +7,7 @@ import UpdateMicroGtuPerEuro, {
 } from '~/pages/multisig/updates/MicroGtuPerEuro/UpdateMicroGtuPerEuro';
 import { getReducedExchangeRate } from '../exchangeRateHelpers';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorizations, BlockSummary } from '../NodeApiTypes';
+import { Authorizations, BlockSummary } from '../../node/NodeApiTypes';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import {
     ExchangeRate,
@@ -38,7 +38,8 @@ export default class MicroGtuPerEuroHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { microGtuPerEuroRate }: UpdateMicroGtuPerEuroRateFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -61,7 +62,8 @@ export default class MicroGtuPerEuroHandler
             UpdateType.UpdateMicroGTUPerEuro,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 
