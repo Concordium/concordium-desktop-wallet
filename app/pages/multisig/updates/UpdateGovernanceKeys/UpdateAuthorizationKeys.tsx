@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
+import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns/Columns';
 import InputTimestamp from '~/components/Form/InputTimestamp/InputTimestamp';
-import Button from '~/cross-app-components/Button';
 import { BlockSummary, Key } from '~/node/NodeApiTypes';
 import {
     getDefaultExpiry,
@@ -13,15 +13,22 @@ import {
 import {
     AccessStructure,
     AuthorizationKeysUpdate,
+    KeyUpdateEntryStatus,
     KeyWithStatus,
+    PublicKeyExportFormat,
     UpdateType,
+    VerifyKey,
 } from '~/utils/types';
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
 import { KeyUpdateEntry } from './KeyUpdateEntry';
 import {
     mapCurrentAuthorizationsToUpdate,
     getAccessStructureTitle,
+    keyIsInUse,
 } from './util';
+import routes from '~/constants/routes.json';
+import ProposeNewKey from './ProposeNewKey';
+import Button from '~/cross-app-components/Button';
 
 interface Props {
     blockSummary: BlockSummary;
@@ -53,9 +60,41 @@ export default function UpdateAuthorizationKeys({
         mapCurrentAuthorizationsToUpdate(currentAuthorizations)
     );
 
+    /**
+     * A new key is always added to all access structures. This is done to
+     * simplify the current implementation, not due to any requirements.
+     */
+    function addNewKey(publicKey: PublicKeyExportFormat) {
+        const updatedKeys: VerifyKey[] = [...newLevel2Keys.keys, publicKey.key];
+        const addedKeyIndex = updatedKeys.length - 1;
+
+        const updatedAccessStructures = newLevel2Keys.accessStructures.map(
+            (accessStructure) => {
+                const updatedAccessStructure: AccessStructure = {
+                    ...accessStructure,
+                    publicKeyIndicies: [
+                        ...accessStructure.publicKeyIndicies,
+                        {
+                            index: addedKeyIndex,
+                            status: KeyUpdateEntryStatus.Added,
+                        },
+                    ],
+                };
+                return updatedAccessStructure;
+            }
+        );
+
+        const updatedLevel2Keys: AuthorizationKeysUpdate = {
+            keys: updatedKeys,
+            keyUpdateType: newLevel2Keys.keyUpdateType,
+            accessStructures: updatedAccessStructures,
+        };
+        setNewLevel2Keys(updatedLevel2Keys);
+    }
+
     function updateKey(accessStructure: AccessStructure) {
         return (keyToUpdate: KeyWithStatus) => {
-            // let removeAddedKey = false;
+            let removeAddedKey = false;
             const keyIndex = newLevel2Keys.keys.findIndex(
                 (value) => value.verifyKey === keyToUpdate.key.verifyKey
             );
@@ -63,17 +102,35 @@ export default function UpdateAuthorizationKeys({
             const updatedAccessStructures = newLevel2Keys.accessStructures.map(
                 (currentAccessStructure) => {
                     if (accessStructure.type === currentAccessStructure.type) {
-                        const updatedAccessStructureIndicies = accessStructure.publicKeyIndicies.map(
-                            (value) => {
+                        const updatedAccessStructureIndicies = accessStructure.publicKeyIndicies
+                            .map((value) => {
                                 if (value.index === keyIndex) {
+                                    // For the special case where the key was not in the current key set, i.e. it was added,
+                                    // then we remove it entirely if set to removed instead of just updating the status.
+                                    if (
+                                        value.status ===
+                                            KeyUpdateEntryStatus.Added &&
+                                        keyToUpdate.status ===
+                                            KeyUpdateEntryStatus.Removed
+                                    ) {
+                                        removeAddedKey = true;
+                                    }
+
                                     return {
                                         index: value.index,
                                         status: keyToUpdate.status,
                                     };
                                 }
                                 return value;
-                            }
-                        );
+                            })
+                            .filter(
+                                (value) =>
+                                    !(
+                                        removeAddedKey &&
+                                        keyIndex === value.index
+                                    )
+                            );
+
                         return {
                             ...currentAccessStructure,
                             publicKeyIndicies: updatedAccessStructureIndicies,
@@ -83,8 +140,21 @@ export default function UpdateAuthorizationKeys({
                 }
             );
 
-            const updatedLevel2Keys = {
+            // If removing an added key, and no access structure refers to it anymore,
+            // then we remove the key entirely.
+            let updatedKeys = newLevel2Keys.keys;
+            if (
+                removeAddedKey &&
+                !keyIsInUse(keyIndex, updatedAccessStructures)
+            ) {
+                updatedKeys = newLevel2Keys.keys.filter(
+                    (_, index) => index !== keyIndex
+                );
+            }
+
+            const updatedLevel2Keys: AuthorizationKeysUpdate = {
                 ...newLevel2Keys,
+                keys: updatedKeys,
                 accessStructures: updatedAccessStructures,
             };
 
@@ -193,10 +263,24 @@ export default function UpdateAuthorizationKeys({
                             )
                         </p>
                     ) : undefined}
+                    <Button onClick={submitFunction}>TEST</Button>
                 </div>
             </Columns.Column>
-            <Columns.Column>
-                <Button onClick={submitFunction}>Submit</Button>
+            <Columns.Column className={styles.stretchColumn} header={' '}>
+                <div className={styles.columnContent}>
+                    <Switch>
+                        <Route
+                            path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
+                            render={() => (
+                                <ProposeNewKey
+                                    type={type}
+                                    addKey={addNewKey}
+                                    newKeys={newLevel2Keys.keys}
+                                />
+                            )}
+                        />
+                    </Switch>
+                </div>
             </Columns.Column>
         </Columns>
     );

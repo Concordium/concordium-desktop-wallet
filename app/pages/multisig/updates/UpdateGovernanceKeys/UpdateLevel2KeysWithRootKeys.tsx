@@ -14,7 +14,7 @@ export default function UpdateLevel2KeysWithRootKeys({
     return (
         <UpdateAuthorizationKeys
             blockSummary={blockSummary}
-            type={UpdateType.UpdateLevel1KeysUsingRootKeys}
+            type={UpdateType.UpdateLevel2KeysUsingRootKeys}
             handleKeySubmit={handleAuthorizationKeySubmit}
         />
     );

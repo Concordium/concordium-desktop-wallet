@@ -11,7 +11,10 @@ import {
  * Checks whether there are any references left to key with the provided index
  * in any access structure.
  */
-function keyIsInUse(keyIndex: number, accessStructures: AccessStructure[]) {
+export function keyIsInUse(
+    keyIndex: number,
+    accessStructures: AccessStructure[]
+) {
     const result = accessStructures.find((accessStructure) => {
         const found = accessStructure.publicKeyIndicies.find(
             (publicKeyIndex) => publicKeyIndex.index === keyIndex

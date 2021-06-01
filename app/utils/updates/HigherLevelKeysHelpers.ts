@@ -56,9 +56,11 @@ export function typeToDisplay(type: UpdateType) {
             return 'level 1';
         case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
             return 'level 1';
+        case UpdateType.UpdateLevel2KeysUsingRootKeys:
+            return 'level 2';
         default:
             throw new Error(
-                `The update type is not a higher level key update: ${type}`
+                `The update type is not a governance key update: ${type}`
             );
     }
 }

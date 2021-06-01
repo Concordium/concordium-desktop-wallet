@@ -258,7 +258,7 @@ export default function UpdateHigherLevelKeys({
                                 <ProposeNewKey
                                     type={type}
                                     addKey={addNewKey}
-                                    newKeys={newKeys}
+                                    newKeys={newKeys.map((key) => key.key)}
                                 />
                             )}
                         />
