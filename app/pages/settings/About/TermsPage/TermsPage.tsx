@@ -30,7 +30,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
     return (
         <PageLayout>
             <PageLayout.Header>
-                <h1>Terms & Conditions</h1>
+                <h1>Terms and Conditions</h1>
             </PageLayout.Header>
             <PageLayout.Container
                 disableBack={mustAccept}
@@ -39,7 +39,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
             >
                 <iframe
                     className={styles.frame}
-                    title="Terms and conditions"
+                    title="Terms and Conditions"
                     src={terms}
                     onLoad={(e) => {
                         const el = e.target as HTMLIFrameElement;
