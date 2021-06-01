@@ -46,6 +46,7 @@ function assignIndices<T>(items: T[], usedIndices: number[]) {
                 value: items[i],
             });
             i += 1;
+            candidate += 1;
         }
     }
     return assigned;
