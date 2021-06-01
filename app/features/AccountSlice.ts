@@ -304,6 +304,11 @@ export async function loadAccountInfos(
             );
             map[address] = accountInfo;
         } else {
+            if (!accountInfo) {
+                throw new Error(
+                    'A confirmed account does not exist on the connected node. Please check that your node is up to date with the blockchain.'
+                );
+            }
             map[account.address] = accountInfo;
             // eslint-disable-next-line no-await-in-loop
             await updateAccountFromAccountInfo(dispatch, account, accountInfo);
