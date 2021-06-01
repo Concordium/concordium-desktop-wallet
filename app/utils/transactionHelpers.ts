@@ -1,6 +1,6 @@
 import { findEntries } from '../database/AddressBookDao';
 import { getTransactionStatus } from '../node/nodeRequests';
-import { getDefaultExpiry, getNow } from './timeHelpers';
+import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
 import {
     TransactionKindId,
     TransferTransaction,
@@ -8,6 +8,7 @@ import {
     TransactionEvent,
     TransactionStatus,
     ScheduledTransfer,
+    EncryptedTransfer,
     Schedule,
     TransferToEncrypted,
     instanceOfUpdateInstruction,
@@ -22,14 +23,21 @@ import {
     AccountInfo,
     AddBaker,
     AddBakerPayload,
+    RemoveBaker,
+    UpdateBakerKeysPayload,
+    UpdateBakerKeys,
+    UpdateBakerStakePayload,
+    UpdateBakerRestakeEarningsPayload,
     AddressBookEntry,
+    UpdateBakerStake,
+    UpdateBakerRestakeEarnings,
 } from './types';
 import {
     getTransactionEnergyCost,
     getTransactionKindEnergy,
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
-import { toMicroUnits, isValidGTUString } from './gtu';
+import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 
 export async function lookupAddressBookEntry(
     address: string
@@ -77,7 +85,7 @@ export async function attachNames(
 
 interface CreateAccountTransactionInput<T> {
     fromAddress: string;
-    expiry: bigint;
+    expiry: Date;
     transactionKind: TransactionKindId;
     payload: T;
     estimatedEnergyAmount?: bigint;
@@ -107,7 +115,7 @@ function createAccountTransaction<T extends TransactionPayload>({
     const transaction: AccountTransaction<T> = {
         sender: fromAddress,
         nonce,
-        expiry,
+        expiry: BigInt(secondsSinceUnixEpoch(expiry)),
         energyAmount: '',
         transactionKind,
         payload,
@@ -133,7 +141,7 @@ export function createSimpleTransferTransaction(
     toAddress: string,
     nonce: string,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): SimpleTransfer {
     const payload = {
         toAddress,
@@ -149,11 +157,40 @@ export function createSimpleTransferTransaction(
     });
 }
 
+/**
+ *  Constructs an encrypted transfer object,
+ * Given the fromAddress, toAddress and the amount.
+ * N.B. Does not contain the actual payload, as this is done without access to the decryption key.
+ */
+export function createEncryptedTransferTransaction(
+    fromAddress: string,
+    amount: bigint,
+    toAddress: string,
+    nonce: string,
+    expiry = getDefaultExpiry()
+): EncryptedTransfer {
+    const payload = {
+        toAddress,
+        plainTransferAmount: amount.toString(),
+    };
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Encrypted_transfer,
+        nonce,
+        payload,
+        // Supply the energy, so that the cost is not computed using the incomplete payload.
+        estimatedEnergyAmount: getTransactionKindEnergy(
+            TransactionKindId.Encrypted_transfer
+        ),
+    });
+}
+
 export function createShieldAmountTransaction(
     fromAddress: string,
     amount: bigint,
     nonce: string,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): TransferToEncrypted {
     const payload = {
         amount: amount.toString(),
@@ -171,7 +208,7 @@ export function createUnshieldAmountTransaction(
     fromAddress: string,
     amount: BigInt,
     nonce: string,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ) {
     const payload = {
         transferAmount: amount.toString(),
@@ -256,7 +293,7 @@ export function createScheduledTransferTransaction(
     schedule: Schedule,
     nonce: string,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ) {
     const payload = {
         toAddress,
@@ -284,7 +321,7 @@ export function createUpdateCredentialsTransaction(
     currentCredentialAmount: number,
     nonce: string,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ) {
     const payload = {
         addedCredentials,
@@ -311,7 +348,7 @@ export function createAddBakerTransaction(
     payload: AddBakerPayload,
     nonce: string,
     signatureAmount = 1,
-    expiry: bigint = getDefaultExpiry()
+    expiry = getDefaultExpiry()
 ): AddBaker {
     return createAccountTransaction({
         fromAddress,
@@ -319,6 +356,73 @@ export function createAddBakerTransaction(
         transactionKind: TransactionKindId.Add_baker,
         payload,
         nonce,
+        signatureAmount,
+    });
+}
+
+export function createUpdateBakerKeysTransaction(
+    fromAddress: string,
+    payload: UpdateBakerKeysPayload,
+    nonce: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): UpdateBakerKeys {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_baker_keys,
+        nonce,
+        payload,
+        signatureAmount,
+    });
+}
+
+export function createRemoveBakerTransaction(
+    fromAddress: string,
+    nonce: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): RemoveBaker {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Remove_baker,
+        nonce,
+        payload: {},
+        signatureAmount,
+    });
+}
+
+export function createUpdateBakerStakeTransaction(
+    fromAddress: string,
+    payload: UpdateBakerStakePayload,
+    nonce: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): UpdateBakerStake {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_baker_stake,
+        nonce,
+        payload,
+        signatureAmount,
+    });
+}
+
+export function createUpdateBakerRestakeEarningsTransaction(
+    fromAddress: string,
+    payload: UpdateBakerRestakeEarningsPayload,
+    nonce: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): UpdateBakerRestakeEarnings {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_baker_restake_earnings,
+        nonce,
+        payload,
         signatureAmount,
     });
 }
@@ -408,11 +512,8 @@ export function buildTransactionAccountSignature(
     return transactionAccountSignature;
 }
 
-export function isSuccessfulTransaction(outcomes: TransactionEvent[]) {
-    return outcomes.reduce(
-        (accu, event) => accu && event.result.outcome === 'success',
-        true
-    );
+export function isSuccessfulTransaction(event: TransactionEvent) {
+    return event.result.outcome === 'success';
 }
 
 export const isExpired = (transaction: Transaction) =>
@@ -438,19 +539,23 @@ export function validateShieldedAmount(
     if (!isValidGTUString(amountToValidate)) {
         return 'Value is not a valid GTU amount';
     }
+    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
         return 'Insufficient public funds to cover fee';
     }
     if (
         account?.totalDecrypted &&
-        BigInt(account.totalDecrypted) < toMicroUnits(amountToValidate)
+        BigInt(account.totalDecrypted) < amountToValidateMicroGTU
     ) {
         return 'Insufficient shielded funds';
+    }
+    if (amountToValidateMicroGTU === 0n) {
+        return 'Amount may not be zero';
     }
     return undefined;
 }
 
-export function validateAmount(
+export function validateTransferAmount(
     amountToValidate: string,
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
@@ -458,15 +563,49 @@ export function validateAmount(
     if (!isValidGTUString(amountToValidate)) {
         return 'Value is not a valid GTU amount';
     }
+    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (
         accountInfo &&
         amountAtDisposal(accountInfo) <
-            toMicroUnits(amountToValidate) + (estimatedFee || 0n)
+            amountToValidateMicroGTU + (estimatedFee || 0n)
     ) {
         return 'Insufficient funds';
     }
-    if (toMicroUnits(amountToValidate) === 0n) {
+    if (amountToValidateMicroGTU === 0n) {
         return 'Amount may not be zero';
     }
+    return undefined;
+}
+
+function amountToStakeAtDisposal(accountInfo: AccountInfo): bigint {
+    const unShielded = BigInt(accountInfo.accountAmount);
+    const scheduled = accountInfo.accountReleaseSchedule
+        ? BigInt(accountInfo.accountReleaseSchedule.total)
+        : 0n;
+    return unShielded - scheduled;
+}
+
+export function validateBakerStake(
+    bakerStakeThreshold: bigint | undefined,
+    amountToValidate: string,
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (!isValidGTUString(amountToValidate)) {
+        return 'Value is not a valid GTU amount';
+    }
+    const amount = toMicroUnits(amountToValidate);
+    if (bakerStakeThreshold && bakerStakeThreshold > amount) {
+        return `Stake is below the threshold (${displayAsGTU(
+            bakerStakeThreshold
+        )}) for baking `;
+    }
+    if (
+        accountInfo &&
+        amountToStakeAtDisposal(accountInfo) < amount + (estimatedFee || 0n)
+    ) {
+        return 'Insufficient funds';
+    }
+
     return undefined;
 }

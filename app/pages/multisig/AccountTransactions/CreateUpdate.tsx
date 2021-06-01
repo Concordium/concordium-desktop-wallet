@@ -12,6 +12,7 @@ interface Props {
     currentCredentialAmount: number;
     newThreshold: number;
     nonce: string;
+    expiry: Date;
 }
 
 /**
@@ -24,6 +25,7 @@ function CreateUpdate({
     currentCredentialAmount,
     newThreshold,
     nonce,
+    expiry,
 }: Props): JSX.Element | null {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
@@ -38,7 +40,8 @@ function CreateUpdate({
                 newThreshold,
                 currentCredentialAmount,
                 nonce,
-                account.signatureThreshold
+                account.signatureThreshold,
+                expiry
             )
         );
     }, [
@@ -49,6 +52,7 @@ function CreateUpdate({
         removedCredIds,
         nonce,
         newThreshold,
+        expiry,
     ]);
 
     if (!transaction) {

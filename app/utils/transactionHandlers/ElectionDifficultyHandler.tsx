@@ -39,7 +39,8 @@ export default class ElectionDifficultyHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { electionDifficulty }: ElectionDifficultyField,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -66,7 +67,8 @@ export default class ElectionDifficultyHandler
             UpdateType.UpdateElectionDifficulty,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

@@ -1,7 +1,7 @@
 import PromiseWorker from 'promise-worker';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error : has no default export.
-import RustWorker from './rust.worker';
+import RustWorker, { BakerKeyVariants } from './rust.worker';
 import {
     PublicInformationForIp,
     Identity,
@@ -18,7 +18,7 @@ import {
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
-import { getDefaultExpiry } from './timeHelpers';
+import { getDefaultExpiry, secondsSinceUnixEpoch } from './timeHelpers';
 import { getAccountPath } from '~/features/ledger/Path';
 import { stringify, parse } from './JSONHelper';
 import CredentialInfoLedgerDetails from '~/components/ledger/CredentialInfoLedgerDetails';
@@ -269,7 +269,7 @@ export async function createCredentialDetails(
     displayMessage(CredentialInfoLedgerDetails(parsed));
 
     // Adding credential on a new account
-    const expiry = getDefaultExpiry();
+    const expiry = BigInt(secondsSinceUnixEpoch(getDefaultExpiry()));
     const path = getAccountPath({
         identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,
@@ -322,7 +322,6 @@ export async function decryptAmounts(
         prfKey,
         encryptedAmounts,
     };
-
     const decryptedAmounts = await worker.postMessage({
         command: workerCommands.decryptAmounts,
         input: JSON.stringify(input),
@@ -354,6 +353,34 @@ export async function makeTransferToPublicData(
         input: JSON.stringify(input),
     });
     return JSON.parse(transferToPublicData);
+}
+
+export async function makeEncryptedTransferData(
+    amount: string,
+    receiverPublicKey: string,
+    prfKey: string,
+    global: Global,
+    accountEncryptedAmount: AccountEncryptedAmount,
+    accountNumber: number
+) {
+    const input = {
+        global,
+        amount,
+        receiverPublicKey,
+        prfKey,
+        accountNumber,
+        incomingAmounts: accountEncryptedAmount.incomingAmounts,
+        encryptedSelfAmount: accountEncryptedAmount.selfAmount,
+        aggIndex:
+            accountEncryptedAmount.startIndex +
+            accountEncryptedAmount.incomingAmounts.length,
+    };
+
+    const encryptedTransferData = await worker.postMessage({
+        command: workerCommands.createEncryptedTransferData,
+        input: JSON.stringify(input),
+    });
+    return JSON.parse(encryptedTransferData);
 }
 
 export async function createGenesisAccount(
@@ -420,10 +447,14 @@ export type BakerKeys = {
     proofAggregation: string;
 };
 
-export async function generateBakerKeys(sender: string): Promise<BakerKeys> {
+export async function generateBakerKeys(
+    sender: string,
+    keyVariant: BakerKeyVariants
+): Promise<BakerKeys> {
     const response = await worker.postMessage({
         command: workerCommands.generateBakerKeys,
         sender,
+        keyVariant,
     });
     return JSON.parse(response);
 }

@@ -2,9 +2,11 @@ import React from 'react';
 import { AddressBookEntry, ScheduledTransfer } from '~/utils/types';
 import { getScheduledTransferAmount } from '~/utils/transactionHelpers';
 import { displayAsGTU } from '~/utils/gtu';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
+import DisplayFee from '~/components/DisplayFee';
 import styles from './transferDetails.module.scss';
 import ScheduleList from '~/components/ScheduleList';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: ScheduledTransfer;
@@ -32,12 +34,12 @@ export default function DisplayScheduledTransfer({
             {to?.note && <p className={styles.note}>Note: {to?.note}</p>}
             <h5 className={styles.title}>Amount:</h5>
             <p className={styles.amount}>{displayAsGTU(amount)}</p>
-            <DisplayEstimatedFee
-                className={styles.fee}
-                estimatedFee={transaction.estimatedFee}
-            />
+            <DisplayFee className={styles.fee} transaction={transaction} />
             <h5 className={styles.title}>Individual Releases:</h5>
             <ScheduleList schedule={transaction.payload.schedule} />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
+            />
         </div>
     );
 }

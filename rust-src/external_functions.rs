@@ -82,6 +82,16 @@ pub fn create_sec_to_pub_ext(
     }
 }
 
+#[wasm_bindgen(js_name = createEncryptedTransferData)]
+pub fn create_encrypted_transfer_ext(
+    input: &str
+) -> String {
+    match create_encrypted_transfer_aux(input) {
+        Ok(s) => s,
+        Err(e) => format!("unable to create encrypted transfer due to: {}", e),
+    }
+}
+
 #[wasm_bindgen(js_name = createGenesisAccount)]
 pub fn create_genesis_account_ext(
     input: &str,
@@ -94,16 +104,23 @@ pub fn create_genesis_account_ext(
     }
 }
 
+#[wasm_bindgen]
+pub enum BakerKeyVariant {
+    ADD,
+    UPDATE
+}
+
 #[wasm_bindgen(js_name = generateBakerKeys)]
 pub fn _generate_baker_keys(
-    input: &str
+    sender: &str,
+    key_variant: BakerKeyVariant
 ) -> String {
-    let sender = match input.parse() {
+    let sender = match sender.parse() {
         Ok(sender) => sender,
         Err(e) => return format!("unable to parse sender account address: {}.", e)
     };
 
-    serde_json::to_string(&generate_baker_keys(&sender))
+    serde_json::to_string(&generate_baker_keys(&sender, key_variant))
         .unwrap_or_else(|e| format!("unable to serialize baker keys: {}", e))
 }
 

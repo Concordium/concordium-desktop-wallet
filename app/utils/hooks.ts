@@ -1,15 +1,4 @@
-import {
-    Dispatch,
-    SetStateAction,
-    useEffect,
-    useRef,
-    useState,
-    useMemo,
-} from 'react';
-import { getAccountInfoOfAddress } from '../node/nodeHelpers';
-import { getTransactionKindCost } from './transactionCosts';
-import { lookupName } from './transactionHelpers';
-import { AccountInfo, Fraction, TransactionKindId } from './types';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
 export const useIsFirstRender = () => {
     const ref = useRef<boolean>(false);
@@ -33,45 +22,23 @@ export const useUpdateEffect: typeof useEffect = (effect, deps) => {
     }, deps);
 };
 
-/** Hook for looking up an account name from an address */
-export function useAccountName(address: string) {
-    const [name, setName] = useState<string | undefined>();
+/** Calls function at a given rate */
+export function useInterval(fn: () => void, rate: number, enable = true) {
     useEffect(() => {
-        lookupName(address)
-            .then(setName)
-            .catch(() => {}); // lookupName will only reject if there is a problem with the database. In that case we ignore the error and just display the address only.
-    }, [address]);
-    return name;
+        if (enable) {
+            const interval = setInterval(fn, rate);
+            return () => clearInterval(interval);
+        }
+        return () => {};
+    }, [enable, fn, rate]);
 }
 
-/** Hook for fetching account info given an account address */
-export function useAccountInfo(address: string) {
-    const [accountInfo, setAccountInfo] = useState<AccountInfo>();
-    useEffect(() => {
-        getAccountInfoOfAddress(address)
-            .then(setAccountInfo)
-            .catch(() => {});
-    }, [address]);
-    return accountInfo;
-}
-
-/** Hook for estimating transaction cost */
-export function useTransactionCostEstimate(
-    kind: TransactionKindId,
-    exchangeRate: Fraction,
-    signatureAmount?: number,
-    payloadSize?: number
-) {
-    return useMemo(
-        () =>
-            getTransactionKindCost(
-                kind,
-                exchangeRate,
-                signatureAmount,
-                payloadSize
-            ),
-        [kind, exchangeRate, payloadSize, signatureAmount]
-    );
+/** Hook for getting the current time, optionally taking a refresh frequency in
+ * milliseconds defaulting to 1 second */
+export function useCurrentTime(refreshRate = 1000) {
+    const [time, setTime] = useState(new Date());
+    useInterval(() => setTime(new Date()), refreshRate);
+    return time;
 }
 
 /**

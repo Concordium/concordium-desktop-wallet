@@ -1,10 +1,12 @@
 import React from 'react';
 import { AddBaker } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import { useAccountName } from '~/utils/hooks';
+import DisplayFee from '~/components/DisplayFee';
+import { useAccountName } from '~/utils/dataHooks';
 import styles from './transferDetails.module.scss';
 import PublicKey from '~/pages/multisig/common/PublicKey/PublicKey';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: AddBaker;
@@ -24,10 +26,7 @@ export default function DisplayAddBaker({ transaction }: Props) {
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.bakingStake)}
             </p>
-            <DisplayEstimatedFee
-                className={styles.fee}
-                estimatedFee={transaction.estimatedFee}
-            />
+            <DisplayFee className={styles.fee} transaction={transaction} />
             <h5 className={styles.title}>Restake earnings:</h5>
             <p className={styles.amount}>
                 {transaction.payload.restakeEarnings ? 'Yes' : 'No'}
@@ -44,6 +43,9 @@ export default function DisplayAddBaker({ transaction }: Props) {
             <PublicKey
                 name="Aggregation verify key"
                 publicKey={transaction.payload.aggregationVerifyKey}
+            />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
             />
         </>
     );

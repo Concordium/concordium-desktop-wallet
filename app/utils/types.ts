@@ -184,6 +184,15 @@ export interface SimpleTransferPayload {
     toAddress: string;
 }
 
+export interface EncryptedTransferPayload {
+    plainTransferAmount: string;
+    toAddress: string;
+    remainingEncryptedAmount?: EncryptedAmount;
+    transferAmount?: EncryptedAmount;
+    index?: string;
+    proof?: string;
+}
+
 export interface TransferToEncryptedPayload {
     amount: string;
 }
@@ -217,16 +226,35 @@ export interface UpdateAccountCredentialsPayload {
     threshold: number;
 }
 
-export interface AddBakerPayload {
+export type BakerVerifyKeys = {
     electionVerifyKey: Hex;
     signatureVerifyKey: Hex;
     aggregationVerifyKey: Hex;
+};
+
+export type BakerKeyProofs = {
     proofElection: Hex;
     proofSignature: Hex;
     proofAggregation: Hex;
-    bakingStake: Amount;
+};
+
+export type AddBakerPayload = BakerVerifyKeys &
+    BakerKeyProofs & {
+        bakingStake: Amount;
+        restakeEarnings: boolean;
+    };
+
+export type UpdateBakerKeysPayload = BakerVerifyKeys & BakerKeyProofs;
+
+export type RemoveBakerPayload = {};
+
+export type UpdateBakerStakePayload = {
+    stake: Amount;
+};
+
+export type UpdateBakerRestakeEarningsPayload = {
     restakeEarnings: boolean;
-}
+};
 
 export type TransactionPayload =
     | UpdateAccountCredentialsPayload
@@ -234,7 +262,12 @@ export type TransactionPayload =
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
     | SimpleTransferPayload
-    | AddBakerPayload;
+    | EncryptedTransferPayload
+    | AddBakerPayload
+    | UpdateBakerKeysPayload
+    | RemoveBakerPayload
+    | UpdateBakerStakePayload
+    | UpdateBakerRestakeEarningsPayload;
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
@@ -245,6 +278,7 @@ export interface AccountTransaction<
     nonce: string;
     energyAmount: string;
     estimatedFee?: Fraction;
+    cost?: string;
     expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;
@@ -253,10 +287,15 @@ export interface AccountTransaction<
 export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
+export type EncryptedTransfer = AccountTransaction<EncryptedTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 export type AddBaker = AccountTransaction<AddBakerPayload>;
+export type UpdateBakerKeys = AccountTransaction<UpdateBakerKeysPayload>;
+export type RemoveBaker = AccountTransaction<RemoveBakerPayload>;
+export type UpdateBakerStake = AccountTransaction<UpdateBakerStakePayload>;
+export type UpdateBakerRestakeEarnings = AccountTransaction<UpdateBakerRestakeEarningsPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -451,12 +490,14 @@ type AccountReleaseSchedule = any; // TODO
 interface AccountBakerDetails {
     stakedAmount: string;
     bakerId: string;
+    restakeEarnings: boolean;
 }
 
 // Reflects the structure given by the node,
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
+    accountEncryptionKey: string;
     accountThreshold: number;
     accountReleaseSchedule: AccountReleaseSchedule;
     accountBaker?: AccountBakerDetails;
@@ -715,6 +756,12 @@ export function instanceOfTransferToPublic(
     return object.transactionKind === TransactionKindId.Transfer_to_public;
 }
 
+export function instanceOfEncryptedTransfer(
+    object: AccountTransaction<TransactionPayload>
+): object is EncryptedTransfer {
+    return object.transactionKind === TransactionKindId.Encrypted_transfer;
+}
+
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
@@ -731,6 +778,33 @@ export function instanceOfAddBaker(
     object: AccountTransaction<TransactionPayload>
 ): object is AddBaker {
     return object.transactionKind === TransactionKindId.Add_baker;
+}
+
+export function instanceOfUpdateBakerKeys(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateBakerKeys {
+    return object.transactionKind === TransactionKindId.Update_baker_keys;
+}
+
+export function instanceOfRemoveBaker(
+    object: AccountTransaction<TransactionPayload>
+): object is AddBaker {
+    return object.transactionKind === TransactionKindId.Remove_baker;
+}
+
+export function instanceOfUpdateBakerStake(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateBakerStake {
+    return object.transactionKind === TransactionKindId.Update_baker_stake;
+}
+
+export function instanceOfUpdateBakerRestakeEarnings(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateBakerRestakeEarnings {
+    return (
+        object.transactionKind ===
+        TransactionKindId.Update_baker_restake_earnings
+    );
 }
 
 export function isExchangeRate(

@@ -57,15 +57,17 @@ export default function CopiableIdenticon({ data, setScreenshot }: Props) {
                 disabled={showCopied}
             >
                 <Identicon string={data} size={imageWidth} />
-                <div
-                    className={clsx(
-                        styles.copied,
-                        showCopied && styles.copiedVisible
-                    )}
-                >
-                    <CheckmarkIcon />
-                    Copied!
-                </div>
+                {image && (
+                    <div
+                        className={clsx(
+                            styles.copied,
+                            showCopied && styles.copiedVisible
+                        )}
+                    >
+                        <CheckmarkIcon />
+                        Copied!
+                    </div>
+                )}
             </button>
         </>
     );

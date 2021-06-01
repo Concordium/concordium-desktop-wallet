@@ -21,6 +21,7 @@ interface Props {
     amount: string;
     schedule?: Schedule;
     nonce: string;
+    expiryTime: Date;
 }
 
 function CreateTransaction({
@@ -31,6 +32,7 @@ function CreateTransaction({
     schedule,
     estimatedFee,
     nonce,
+    expiryTime,
 }: Props) {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
@@ -43,6 +45,7 @@ function CreateTransaction({
             amount: toMicroUnits(amount),
             recipient: recipient.address,
             signatureAmount: account.signatureThreshold,
+            expiryTime,
             schedule,
             nonce,
         });
@@ -56,6 +59,7 @@ function CreateTransaction({
         transactionKind,
         estimatedFee,
         nonce,
+        expiryTime,
     ]);
 
     if (!transaction) {

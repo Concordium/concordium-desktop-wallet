@@ -36,7 +36,8 @@ export default class ProtocolUpdateHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { specificationAuxiliaryData: files, ...fields }: UpdateProtocolFields,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -64,7 +65,8 @@ export default class ProtocolUpdateHandler
             UpdateType.UpdateProtocol,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 
