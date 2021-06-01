@@ -1,11 +1,11 @@
-import { Authorization, Authorizations } from '~/node/NodeApiTypes';
+import { Authorization, Authorizations } from '../../../../node/NodeApiTypes';
 import {
     AccessStructure,
     AccessStructureEnum,
     AuthorizationKeysUpdate,
     KeyIndexWithStatus,
     KeyUpdateEntryStatus,
-} from '~/utils/types';
+} from '../../../../utils/types';
 
 /**
  * Checks whether there are any references left to key with the provided index
@@ -67,8 +67,6 @@ function reduceIndicesByOne(
  *   - If there is not, then remove the key and update all
  *     later indices to be (currentIndex - 1).
  */
-
-// TODO Consider if this really works. I am not certain that it does.
 export function removeRemovedKeys(
     payload: AuthorizationKeysUpdate
 ): AuthorizationKeysUpdate {
@@ -84,14 +82,20 @@ export function removeRemovedKeys(
 
     let currentAccessStructures = accessStructuresWithoutRemovedIndices;
     const keysToRemove: number[] = [];
-    for (let i = 0; i < payload.keys.length; i += 1) {
+
+    for (let i = 0; i < payload.keys.length - keysToRemove.length; i += 1) {
         if (!keyIsInUse(i, currentAccessStructures)) {
             currentAccessStructures = reduceIndicesByOne(
                 currentAccessStructures,
                 i
             );
-            keysToRemove.push(i);
-            i = -1;
+            keysToRemove.push(i + keysToRemove.length);
+
+            if (i === payload.keys.length - 1) {
+                break;
+            } else {
+                i = -1;
+            }
         }
     }
 
