@@ -15,7 +15,7 @@ import PickAmount from '../PickAmount';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
 import PickIdentity from '~/components/PickIdentity';
-import PickAccount from '../PickAccount';
+import PickAccount from '~/components/PickAccount';
 import Button from '~/cross-app-components/Button';
 import TransactionProposalDetails from '../proposal-details/TransferProposalDetails';
 import CreateTransaction from '../CreateTransaction';

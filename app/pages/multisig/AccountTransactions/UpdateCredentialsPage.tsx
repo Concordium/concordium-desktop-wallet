@@ -11,7 +11,7 @@ import {
     TransactionKindId,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
-import PickAccount from './PickAccount';
+import PickAccount from '~/components/PickAccount';
 import AddCredential from './AddCredential';
 import ChangeSignatureThreshold, {
     validateThreshold,
