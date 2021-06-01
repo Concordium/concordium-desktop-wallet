@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import terms from 'url-loader!@resources/html/Termsandconditions.html';
 import routes from '~/constants/routes.json';
+import localStorageKeys from '~/constants/localStorage.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import PageLayout from '~/components/PageLayout';
 
@@ -21,6 +22,10 @@ function sanitizeDocument(iframeEl: HTMLIFrameElement): void {
     const classes: string[] = [];
     iframeEl.contentDocument?.body.classList.forEach((v) => classes.push(v));
     classes.forEach((v) => iframeEl.contentDocument?.body.classList.remove(v));
+}
+
+function acceptTerms() {
+    window.localStorage.setItem(localStorageKeys.TERMS_ACCEPTED, terms);
 }
 
 export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
@@ -54,6 +59,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
                         to={routes.HOME}
                         size="regular"
                         inverted={false}
+                        onClick={acceptTerms}
                     >
                         Yes, I Accept
                     </ButtonNavLink>
