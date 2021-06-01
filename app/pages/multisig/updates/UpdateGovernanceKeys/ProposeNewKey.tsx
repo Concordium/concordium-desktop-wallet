@@ -23,7 +23,7 @@ import SimpleErrorModal, {
 } from '~/components/SimpleErrorModal';
 
 interface Props {
-    newKeys: VerifyKey[];
+    newKeys?: VerifyKey[];
     type: UpdateType;
     addKey: (publicKey: PublicKeyExportFormat) => void;
 }
@@ -94,17 +94,19 @@ export default function ProposeNewKey({ type, addKey, newKeys }: Props) {
                 return;
             }
 
-            const duplicateKey = newKeys
-                .map((key) => key.verifyKey)
-                .includes(exportedPublicKey.key.verifyKey);
-            if (duplicateKey) {
-                setShowError({
-                    show: true,
-                    header: 'Duplicate key',
-                    content:
-                        'The loaded key file contains a key that is already present on the proposal. Please try another governance key file.',
-                });
-                return;
+            if (newKeys) {
+                const duplicateKey = newKeys
+                    .map((key) => key.verifyKey)
+                    .includes(exportedPublicKey.key.verifyKey);
+                if (duplicateKey) {
+                    setShowError({
+                        show: true,
+                        header: 'Duplicate key',
+                        content:
+                            'The loaded key file contains a key that is already present on the proposal. Please try another governance key file.',
+                    });
+                    return;
+                }
             }
 
             setLoadedKey(exportedPublicKey);

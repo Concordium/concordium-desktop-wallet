@@ -94,15 +94,32 @@ export default function UpdateAuthorizationKeys({
      * A new key is always added to all access structures. This is done to
      * simplify the current implementation, not due to any requirements.
      */
-
-    // TODO Only add to access structures where it is not already present.
-
     function addNewKey(publicKey: PublicKeyExportFormat) {
-        const updatedKeys: VerifyKey[] = [...newLevel2Keys.keys, publicKey.key];
-        const addedKeyIndex = updatedKeys.length - 1;
+        let updatedKeys: VerifyKey[] = [...newLevel2Keys.keys, publicKey.key];
+        let addedKeyIndex = updatedKeys.length - 1;
+
+        // Find the key in the existing key set. If it already has an index,
+        // then use that index to update the access structures. In that case
+        // we don't have to add the key to the array of keys either.
+        const existingKeyIndex = newLevel2Keys.keys.findIndex(
+            (value) => value.verifyKey === publicKey.key.verifyKey
+        );
+        if (existingKeyIndex) {
+            addedKeyIndex = existingKeyIndex;
+            updatedKeys = newLevel2Keys.keys;
+        }
 
         const updatedAccessStructures = newLevel2Keys.accessStructures.map(
             (accessStructure) => {
+                // If the key already exists in the access structure, then there is nothing to add.
+                if (
+                    accessStructure.publicKeyIndicies
+                        .map((idx) => idx.index)
+                        .includes(existingKeyIndex)
+                ) {
+                    return accessStructure;
+                }
+
                 const updatedAccessStructure: AccessStructure = {
                     ...accessStructure,
                     publicKeyIndicies: [
@@ -125,6 +142,10 @@ export default function UpdateAuthorizationKeys({
         setNewLevel2Keys(updatedLevel2Keys);
     }
 
+    /**
+     * Returns a function that can update a provided key in the access
+     * structure that was given as input.
+     */
     function updateKey(accessStructure: AccessStructure) {
         return (keyToUpdate: KeyWithStatus) => {
             let removeAddedKey = false;
@@ -148,7 +169,6 @@ export default function UpdateAuthorizationKeys({
                                     ) {
                                         removeAddedKey = true;
                                     }
-
                                     return {
                                         index: value.index,
                                         status: keyToUpdate.status,
@@ -215,6 +235,11 @@ export default function UpdateAuthorizationKeys({
         return (
             <div key={accessStructure.type}>
                 <h2>{getAccessStructureTitle(accessStructure.type)}</h2>
+                <h3>
+                    Current threshold:{' '}
+                    {currentThresholds.get(accessStructure.type)}
+                </h3>
+                <h3>New threshold: {accessStructure.threshold}</h3>
                 <ul>
                     {accessStructure.publicKeyIndicies.map((publicKeyIndex) => {
                         const matchingKey = keys.find(
@@ -226,6 +251,8 @@ export default function UpdateAuthorizationKeys({
                             );
                         }
 
+                        // TODO The index of the key has to be displayed somewhere, as that is what we
+                        // show on the Ledger to be signed.
                         return (
                             <KeyUpdateEntry
                                 key={matchingKey.verifyKey}
@@ -329,11 +356,7 @@ export default function UpdateAuthorizationKeys({
                         <Route
                             path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
                             render={() => (
-                                <ProposeNewKey
-                                    type={type}
-                                    addKey={addNewKey}
-                                    newKeys={newLevel2Keys.keys}
-                                />
+                                <ProposeNewKey type={type} addKey={addNewKey} />
                             )}
                         />
                     </Switch>
