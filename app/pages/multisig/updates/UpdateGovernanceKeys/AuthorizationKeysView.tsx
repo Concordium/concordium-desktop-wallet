@@ -3,21 +3,22 @@ import Loading from '~/cross-app-components/Loading';
 import {
     AccessStructure,
     AuthorizationKeysUpdate,
-    UpdateType,
+    KeyWithStatus,
     VerifyKey,
 } from '~/utils/types';
 import withChainData, { ChainData } from '../../common/withChainData';
+import { generateStatusLabel } from './KeyUpdateEntry';
 import { getAccessStructureTitle } from './util';
+import styles from './HigherLevelKeysView.module.scss';
 
 interface Props extends ChainData {
     authorizationKeysUpdate: AuthorizationKeysUpdate;
-    type: UpdateType;
 }
 
 function findKeysForAccessStructure(
     accessStructure: AccessStructure,
     keys: VerifyKey[]
-): VerifyKey[] {
+): KeyWithStatus[] {
     return keys
         .map((key, index) => {
             return { key, index };
@@ -27,7 +28,20 @@ function findKeysForAccessStructure(
                 .map((idx) => idx.index)
                 .includes(result.index)
         )
-        .map((result) => result.key);
+        .map((result) => {
+            const matchingIndex = accessStructure.publicKeyIndicies.find(
+                (idx) => idx.index === result.index
+            );
+            if (!matchingIndex) {
+                throw new Error(
+                    'This should not happen as the filter above ensures that a value will be found.'
+                );
+            }
+            return {
+                key: result.key,
+                status: matchingIndex.status,
+            };
+        });
 }
 
 function accessStructureView(
@@ -41,7 +55,14 @@ function accessStructureView(
             <p>Threshold: {accessStructure.threshold}</p>
             <ul>
                 {keysInStructure.map((key) => {
-                    return <li key={key.verifyKey}>{key.verifyKey}</li>;
+                    return (
+                        <li className={styles.listItem} key={key.key.verifyKey}>
+                            {generateStatusLabel(key.status)}
+                            <p className={styles.keyText}>
+                                {key.key.verifyKey}
+                            </p>
+                        </li>
+                    );
                 })}
             </ul>
         </div>
@@ -53,7 +74,6 @@ function accessStructureView(
  */
 function AuthorizationKeysView({
     authorizationKeysUpdate,
-    type,
     blockSummary,
 }: Props) {
     if (!blockSummary) {
@@ -62,7 +82,6 @@ function AuthorizationKeysView({
 
     return (
         <>
-            {type}
             {authorizationKeysUpdate.accessStructures.map((accessStructure) => {
                 return accessStructureView(
                     accessStructure,

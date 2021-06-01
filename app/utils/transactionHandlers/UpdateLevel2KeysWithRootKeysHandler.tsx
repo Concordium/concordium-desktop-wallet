@@ -94,7 +94,6 @@ export default class UpdateLevel2KeysUsingRootKeysHandler
         return (
             <AuthorizationKeysView
                 authorizationKeysUpdate={transaction.payload}
-                type={transaction.type}
             />
         );
     }
