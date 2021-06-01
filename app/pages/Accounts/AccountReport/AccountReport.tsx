@@ -159,8 +159,13 @@ export default function AccountReport({ location }: Props) {
                     className="flexColumn"
                     closeRoute={routes.ACCOUNTS}
                 >
-                    <h2 className="pT30">Make Account Report</h2>
-                    <div className="pT10 flexColumn flexChildFill">
+                    <h2 className={styles.header}>Make Account Report</h2>
+                    <div
+                        className={clsx(
+                            'pT10 flexColumn flexChildFill',
+                            styles.container
+                        )}
+                    >
                         <Columns
                             divider
                             columnScroll

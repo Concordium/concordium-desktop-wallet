@@ -1,5 +1,16 @@
 @import 'config/bundle';
 
+$header-height: 75px;
+
+.header {
+    padding-top: 30px;
+    max-height: $header-height;
+}
+
+.container {
+    height: calc(100% - #{$header-height});
+}
+
 .heightFull {
     height: 100%;
 }
