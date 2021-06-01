@@ -1,24 +1,18 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useCallback, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useController, useFormContext } from 'react-hook-form';
 import { Redirect } from 'react-router';
 import clsx from 'clsx';
 import routes from '~/constants/routes.json';
-import {
-    createCredentialInfo,
-    exportKeysFromLedger,
-} from '~/utils/rustInterface';
+import { createCredentialInfo } from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { getNextCredentialNumber } from '~/database/CredentialDao';
 import { globalSelector } from '~/features/GlobalSlice';
 import pairWallet from '~/utils/WalletPairing';
 import { AccountForm, CredentialBlob, fieldNames } from '../types';
 import { CreationKeys } from '~/utils/types';
 import errorMessages from '~/constants/errorMessages.json';
-import Card from '~/cross-app-components/Card';
-import Button from '~/cross-app-components/Button';
-import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
+import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
 
 import generalStyles from '../GenerateCredential.module.scss';
 import splitViewStyles from '../SplitViewRouter/SplitViewRouter.module.scss';
@@ -28,8 +22,6 @@ import savedStateContext from '../savedStateContext';
 interface Props {
     onSigned(): void;
 }
-
-type KeysAndCredentialNumber = CreationKeys & { credentialNumber: number };
 
 /**
  * Component for creating the credential information. The user is prompted to sign
@@ -54,126 +46,97 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
         control,
     });
 
-    const [keys, setKeys] = useState<KeysAndCredentialNumber>();
-    const [finishedComparing, setFinishedComparing] = useState(false);
-
     const shouldRedirect = !address || !identity;
+
+    const [credentialNumber, setCredentialNumber] = useState<number>();
+    useEffect(() => {
+        if (identity?.id === undefined) {
+            throw new Error(
+                'An identity has to be supplied. This is an internal error.'
+            );
+        }
+        getNextCredentialNumber(identity.id)
+            .then(setCredentialNumber)
+            .catch(() => {
+                throw new Error('Unable to read from database.');
+            });
+    }, [identity?.id]);
+
+    const sign = useCallback(
+        (keys: CreationKeys) => {
+            return async (
+                ledger: ConcordiumLedgerClient,
+                setMessage: (message: string | JSX.Element) => void
+            ) => {
+                if (!credentialNumber) {
+                    throw new Error(
+                        'The credentialNumber has to be supplied. This is an internal error.'
+                    );
+                }
+                if (!identity) {
+                    throw new Error(
+                        'An identity has to be supplied. This is an internal error.'
+                    );
+                } else if (!address) {
+                    throw new Error(
+                        'An account adress has to be supplied. This is an internal error.'
+                    );
+                } else if (!global) {
+                    throw new Error(errorMessages.missingGlobal);
+                }
+
+                const credential = await createCredentialInfo(
+                    identity,
+                    credentialNumber,
+                    keys,
+                    global,
+                    chosenAttributes as string[],
+                    setMessage,
+                    ledger,
+                    address
+                );
+                const blob: CredentialBlob = {
+                    credential,
+                    address,
+                    credentialNumber,
+                    identityId: identity.id,
+                };
+                onChange(blob);
+                onBlur();
+                setMessage('Credential generated succesfully!');
+                onSigned();
+            };
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [global, credentialNumber, identity, address, chosenAttributes]
+    );
+
+    async function checkWallet(ledger: ConcordiumLedgerClient) {
+        const walletId = await pairWallet(ledger, dispatch);
+        if (walletId !== identity?.walletId) {
+            throw new Error(
+                'The chosen identity was not created using the connected wallet.'
+            );
+        }
+    }
 
     if (shouldRedirect) {
         return <Redirect to={routes.GENERATE_CREDENTIAL_PICKIDENTITY} />;
     }
 
-    async function exportKeys(
-        ledger: ConcordiumLedgerClient,
-        setMessage: (message: string | JSX.Element) => void
-    ) {
-        let credentialNumber;
-        if (!identity) {
-            throw new Error(
-                'An identity has to be supplied. This is an internal error.'
-            );
-        }
-
-        const walletId = await pairWallet(ledger, dispatch);
-        if (walletId !== identity.walletId) {
-            throw new Error(
-                'The chosen identity was not created using the connected wallet.'
-            );
-        }
-
-        try {
-            credentialNumber = await getNextCredentialNumber(identity.id);
-        } catch (e) {
-            throw new Error(`Unable to create account due to ${e}`);
-            return;
-        }
-
-        const exportedKeys = await exportKeysFromLedger(
-            identity,
-            credentialNumber,
-            setMessage,
-            ledger
-        );
-        setKeys({ ...exportedKeys, credentialNumber });
-    }
-
-    async function sign(
-        ledger: ConcordiumLedgerClient,
-        setMessage: (message: string | JSX.Element) => void
-    ) {
-        if (!identity) {
-            throw new Error(
-                'An identity has to be supplied. This is an internal error.'
-            );
-        } else if (!address) {
-            throw new Error(
-                'An account adress has to be supplied. This is an internal error.'
-            );
-        } else if (!global) {
-            throw new Error(errorMessages.missingGlobal);
-        }
-        if (!keys) {
-            throw new Error(
-                'Missing Keys, which should have been exported already.'
-            );
-        }
-
-        const credentialNumber = await getNextCredentialNumber(identity.id);
-        const credential = await createCredentialInfo(
-            identity,
-            credentialNumber,
-            keys,
-            global,
-            chosenAttributes as string[],
-            setMessage,
-            ledger,
-            address
-        );
-        const blob: CredentialBlob = {
-            credential,
-            address,
-            credentialNumber,
-            identityId: identity.id,
-        };
-        onChange(blob);
-        onBlur();
-        setMessage('Credential generated succesfully!');
-        onSigned();
-    }
-
-    const showComparing = keys && !finishedComparing;
-
     return (
-        <>
-            {showComparing && (
-                <Card
-                    className={clsx(
-                        generalStyles.card,
-                        splitViewStyles.sign,
-                        styles.root,
-                        'textCenter flexColumn'
-                    )}
-                    header="Compare public key"
-                >
-                    <PublicKeyDetails publickey={keys?.publicKey || ''} />
-                    <Button
-                        className={styles.compareButton}
-                        onClick={() => setFinishedComparing(true)}
-                    >
-                        Confirm
-                    </Button>
-                </Card>
+        <SimpleLedgerWithCreationKeys
+            identityNumber={identity?.identityNumber || 0}
+            className={clsx(
+                generalStyles.card,
+                splitViewStyles.sign,
+                styles.root,
+                'textCenter flexColumn'
             )}
-            {!showComparing && (
-                <SimpleLedger
-                    className={clsx(
-                        generalStyles.card,
-                        splitViewStyles.sign,
-                        styles.root
-                    )}
-                    ledgerCall={keys ? sign : exportKeys}
-                />
-            )}
-        </>
+            compareButtonClassName={styles.compareButton}
+            ledgerCallback={sign}
+            credentialNumber={credentialNumber}
+            preCallback={checkWallet}
+        />
     );
 }

@@ -1,17 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import routes from '~/constants/routes.json';
 import { getIdentityProviders } from '~/utils/httpRequests';
-import { IdentityProvider, PublicInformationForIp } from '~/utils/types';
+import {
+    IdentityProvider,
+    PublicInformationForIp,
+    CreationKeys,
+} from '~/utils/types';
 import Card from '~/cross-app-components/Card';
-import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { globalSelector } from '~/features/GlobalSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getNextIdentityNumber } from '~/database/IdentityDao';
 import { createIdentityRequestObjectLedger } from '~/utils/rustInterface';
 import errorMessages from '~/constants/errorMessages.json';
+import SimpleLedgerWithCreationKeys from '~/components/ledger/SimpleLedgerWithCreationKeys';
 
 import styles from './PickProvider.module.scss';
 import { ExternalIssuanceLocationState } from '../ExternalIssuance/ExternalIssuance';
@@ -76,37 +80,46 @@ export default function IdentityIssuanceChooseProvider({
         setProvider(p);
     }
 
-    async function withLedger(
-        ledger: ConcordiumLedgerClient,
-        setMessage: (message: string | JSX.Element) => void
-    ) {
-        if (!provider) {
-            return;
-        }
+    const withLedger = useCallback(
+        (keys: CreationKeys) => {
+            return async (
+                ledger: ConcordiumLedgerClient,
+                setMessage: (message: string | JSX.Element) => void
+            ) => {
+                if (!provider) {
+                    return;
+                }
 
-        if (!global) {
-            onError(errorMessages.missingGlobal);
-            return;
-        }
+                if (!global) {
+                    onError(errorMessages.missingGlobal);
+                    return;
+                }
 
+                const walletId = await pairWallet(ledger, dispatch);
+                const identityNumber = await getNextIdentityNumber(walletId);
+
+                const idObj = await createIdentityRequestObjectLedger(
+                    identityNumber,
+                    keys,
+                    provider.ipInfo,
+                    provider.arsInfos,
+                    global,
+                    setMessage,
+                    ledger,
+                    IPDetails
+                );
+
+                setNextLocationState({ ...idObj, walletId, identityNumber });
+            };
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [global, provider, IPDetails]
+    );
+
+    async function getIdentityNumber(ledger: ConcordiumLedgerClient) {
         const walletId = await pairWallet(ledger, dispatch);
         const identityNumber = await getNextIdentityNumber(walletId);
-
-        const idObj = await createIdentityRequestObjectLedger(
-            identityNumber,
-            provider.ipInfo,
-            provider.arsInfos,
-            global,
-            setMessage,
-            ledger,
-            IPDetails
-        );
-
-        setNextLocationState({
-            ...idObj,
-            identityNumber,
-            walletId,
-        });
+        return { identityNumber };
     }
 
     return (
@@ -147,7 +160,12 @@ export default function IdentityIssuanceChooseProvider({
                 ))}
             </CardList>
             <div className={styles.container}>
-                <SimpleLedger ledgerCall={withLedger} disabled={!provider} />
+                <SimpleLedgerWithCreationKeys
+                    credentialNumber={0}
+                    ledgerCallback={withLedger}
+                    preCallback={getIdentityNumber}
+                    disabled={!provider}
+                />
             </div>
         </>
     );
