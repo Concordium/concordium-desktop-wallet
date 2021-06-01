@@ -1,9 +1,9 @@
 import React from 'react';
 import { Route, Switch } from 'react-router';
-import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
+import routes from '~/constants/routes.json';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import SettingsList from './SettingsList';
 import SettingsView from './SettingsView';
-import routes from '~/constants/routes.json';
 
 const { Header, Master, Detail } = MasterDetailPageLayout;
 

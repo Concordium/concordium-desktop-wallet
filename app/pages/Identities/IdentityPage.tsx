@@ -9,7 +9,7 @@ import { identitiesSelector } from '~/features/IdentitySlice';
 import routes from '~/constants/routes.json';
 
 import PageLayout from '~/components/PageLayout';
-import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 
 const { Header, Master, Detail } = MasterDetailPageLayout;
 

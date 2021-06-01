@@ -16,7 +16,7 @@ import { Account, AccountInfo } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import { sumToBigInt } from '~/utils/basicHelpers';
 import PageLayout from '~/components/PageLayout';
-import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import BuildSchedule from './BuildSchedule';
 
 function getUnshieldedAmount(accountsInfo: AccountInfo[]) {

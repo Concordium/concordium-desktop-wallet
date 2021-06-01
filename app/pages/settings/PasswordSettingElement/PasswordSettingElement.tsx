@@ -4,8 +4,9 @@ import { knex as externalKnex } from 'knex';
 import Form from '~/components/Form/Form';
 import Card from '~/cross-app-components/Card/Card';
 import { invalidateKnexSingleton, knex, setPassword } from '~/database/knex';
+import config from '~/database/knexfile';
+
 import styles from './PasswordSettingElement.module.scss';
-import config from '../../database/knexfile';
 
 const environment = process.env.NODE_ENV;
 
