@@ -111,10 +111,6 @@ function parseShieldedAmount(
         amount: `${negative} ${getGTUSymbol()} ?`,
         amountFormula: '',
     };
-
-    throw new Error(
-        'Unexpected transaction type when viewing shielded balance.'
-    );
 }
 
 function parseAmount(
