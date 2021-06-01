@@ -516,14 +516,18 @@ export function validateShieldedAmount(
     if (!isValidGTUString(amountToValidate)) {
         return 'Value is not a valid GTU amount';
     }
+    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
         return 'Insufficient public funds to cover fee';
     }
     if (
         account?.totalDecrypted &&
-        BigInt(account.totalDecrypted) < toMicroUnits(amountToValidate)
+        BigInt(account.totalDecrypted) < amountToValidateMicroGTU
     ) {
         return 'Insufficient shielded funds';
+    }
+    if (amountToValidateMicroGTU === 0n) {
+        return 'Amount may not be zero';
     }
     return undefined;
 }
@@ -536,14 +540,15 @@ export function validateTransferAmount(
     if (!isValidGTUString(amountToValidate)) {
         return 'Value is not a valid GTU amount';
     }
+    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (
         accountInfo &&
         amountAtDisposal(accountInfo) <
-            toMicroUnits(amountToValidate) + (estimatedFee || 0n)
+            amountToValidateMicroGTU + (estimatedFee || 0n)
     ) {
         return 'Insufficient funds';
     }
-    if (toMicroUnits(amountToValidate) === 0n) {
+    if (amountToValidateMicroGTU === 0n) {
         return 'Amount may not be zero';
     }
     return undefined;
