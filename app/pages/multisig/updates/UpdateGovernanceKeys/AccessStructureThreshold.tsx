@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import InlineNumber from '~/components/Form/InlineNumber';
 import Button from '~/cross-app-components/Button';
-import { AccessStructure, AccessStructureEnum } from '~/utils/types';
+import {
+    AccessStructure,
+    AccessStructureEnum,
+    KeyUpdateEntryStatus,
+} from '~/utils/types';
 import styles from './KeySetThreshold.module.scss';
 import { getAccessStructureTitle } from './util';
 
@@ -27,7 +31,10 @@ function isInvalid(
             if (threshold) {
                 return (
                     threshold <= 0 ||
-                    threshold > accessStructure.publicKeyIndicies.length
+                    threshold >
+                        accessStructure.publicKeyIndicies.filter(
+                            (idx) => idx.status !== KeyUpdateEntryStatus.Removed
+                        ).length
                 );
             }
             return true;

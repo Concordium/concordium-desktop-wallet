@@ -72,8 +72,7 @@ export default async function signAuthorizationKeysUpdate(
     const p2 = 0x00;
 
     const serializedKeyUpdateType = Buffer.alloc(1);
-    // TODO This should be dynamic!
-    serializedKeyUpdateType.writeInt8(2, 0);
+    serializedKeyUpdateType.writeInt8(transaction.payload.keyUpdateType, 0);
 
     const updateKeysLength = transaction.payload.keys.length;
     const serializedNumberOfUpdateKeys = Buffer.alloc(2);

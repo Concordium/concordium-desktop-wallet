@@ -14,6 +14,7 @@ import {
     AccessStructure,
     AccessStructureEnum,
     AuthorizationKeysUpdate,
+    AuthorizationKeysUpdateType,
     KeyUpdateEntryStatus,
     KeyWithStatus,
     PublicKeyExportFormat,
@@ -55,16 +56,19 @@ export default function UpdateAuthorizationKeys({
         getDefaultExpiry()
     );
 
+    const keyUpdateType: AuthorizationKeysUpdateType =
+        UpdateType.UpdateLevel2KeysUsingRootKeys === type ? 2 : 1;
     const currentKeys = blockSummary.updates.keys.level2Keys.keys;
     const currentKeySetSize = currentKeys.length;
     const currentAuthorizations = blockSummary.updates.keys.level2Keys;
-    const currentAccessStructures = mapCurrentAuthorizationsToUpdate(
-        currentAuthorizations
-    ).accessStructures;
+    // const currentAccessStructures = mapCurrentAuthorizationsToUpdate(
+    //     keyUpdateType,
+    //     currentAuthorizations
+    // ).accessStructures;
     const currentThresholds = getCurrentThresholds(currentAuthorizations);
 
     const [newLevel2Keys, setNewLevel2Keys] = useState<AuthorizationKeysUpdate>(
-        mapCurrentAuthorizationsToUpdate(currentAuthorizations)
+        mapCurrentAuthorizationsToUpdate(keyUpdateType, currentAuthorizations)
     );
 
     function setThreshold(
@@ -286,7 +290,6 @@ export default function UpdateAuthorizationKeys({
         <Columns divider columnScroll columnClassName={styles.column}>
             <Columns.Column header="Transaction Details">
                 <div className={styles.columnContent}>
-                    <p>{type}</p>
                     <p>
                         Current size of level 2 key set:{' '}
                         <b>{currentKeySetSize}</b>
@@ -334,7 +337,9 @@ export default function UpdateAuthorizationKeys({
                             }
                             render={() => (
                                 <AccessStructureThreshold
-                                    accessStructures={currentAccessStructures}
+                                    accessStructures={
+                                        newLevel2Keys.accessStructures
+                                    }
                                     currentThresholds={currentThresholds}
                                     setThreshold={setThreshold}
                                     submitFunction={submitFunction}

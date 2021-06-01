@@ -52,7 +52,6 @@ export default class UpdateLevel2KeysUsingRootKeysHandler
         const { threshold } = blockSummary.updates.keys.rootKeys;
 
         return createUpdateMultiSignatureTransaction(
-            // TODO We probably need to send something that differentiates using root vs. level1.
             authorizationKeysUpdate,
             UpdateType.UpdateLevel2KeysUsingRootKeys,
             sequenceNumber,

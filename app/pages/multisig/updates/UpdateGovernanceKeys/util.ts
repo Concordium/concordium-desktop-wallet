@@ -3,6 +3,7 @@ import {
     AccessStructure,
     AccessStructureEnum,
     AuthorizationKeysUpdate,
+    AuthorizationKeysUpdateType,
     KeyIndexWithStatus,
     KeyUpdateEntryStatus,
 } from '../../../../utils/types';
@@ -222,6 +223,7 @@ function mapAuthorizationToAccessStructure(
 }
 
 export function mapCurrentAuthorizationsToUpdate(
+    type: AuthorizationKeysUpdateType,
     authorizations: Authorizations
 ) {
     const accessStructures = [
@@ -276,8 +278,7 @@ export function mapCurrentAuthorizationsToUpdate(
     ];
 
     const update: AuthorizationKeysUpdate = {
-        // TODO The key update type has to be dynamic here.
-        keyUpdateType: 2,
+        keyUpdateType: type,
         keys: authorizations.keys,
         accessStructures,
     };

@@ -63,7 +63,7 @@ function serializeAccessStructure(accessStructure: AccessStructure) {
         0
     );
 
-    // The indicies must be sorted in ascending order to ensure that the serialization
+    // The indices must be sorted in ascending order to ensure that the serialization
     // is unique.
     const sortedIndicies = accessStructure.publicKeyIndicies.sort(
         (index1, index2) => {
@@ -96,8 +96,10 @@ export function serializeAuthorizationKeysUpdate(
     authorizationKeysUpdate: AuthorizationKeysUpdate
 ) {
     const serializedAuthorizationKeysUpdate = Buffer.alloc(3);
-    // TODO Uncertain if this prefix is still required.
-    serializedAuthorizationKeysUpdate.writeInt8(2, 0);
+    serializedAuthorizationKeysUpdate.writeInt8(
+        authorizationKeysUpdate.keyUpdateType,
+        0
+    );
     serializedAuthorizationKeysUpdate.writeUInt16BE(
         authorizationKeysUpdate.keys.length,
         1

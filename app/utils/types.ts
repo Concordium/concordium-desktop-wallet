@@ -988,18 +988,6 @@ export interface AuthorizationKeysUpdate {
     keyUpdateType: AuthorizationKeysUpdateType;
     keys: VerifyKey[];
     accessStructures: AccessStructure[];
-    // emergency: AccessStructure;
-    // protocol: AccessStructure;
-    // electionDifficulty: AccessStructure;
-    // euroPerEnergy: AccessStructure;
-    // microGtuPerEuro: AccessStructure;
-    // foundationAccount: AccessStructure;
-    // mintDistribution: AccessStructure;
-    // transactionFeeDistribution: AccessStructure;
-    // gasRewards: AccessStructure;
-    // bakerStakeThreshold: AccessStructure;
-    // addAnonymityRevoker: AccessStructure;
-    // addIdentityProvider: AccessStructure;
 }
 
 export interface TransactionDetails {
