@@ -11,8 +11,9 @@ export interface AccountInfoPair {
     accountInfo: AccountInfo;
 }
 
-// gets the accountInfos for each given accounts. returns a list of objects
-// each containing an account and its accountInfo.
+/** Gets the accountInfos for each given accounts. returns a list of objects
+ *   each containing an account and its accountInfo.
+ */
 export async function getAccountInfos(
     accounts: Account[]
 ): Promise<AccountInfoPair[]> {
@@ -30,7 +31,7 @@ export async function getAccountInfos(
     return accountInfos;
 }
 
-// gets the accountInfo for the given address.
+/** Gets the accountInfo for the given address. */
 export async function getAccountInfoOfAddress(
     address: string
 ): Promise<AccountInfo> {
