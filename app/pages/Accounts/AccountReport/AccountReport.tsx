@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import clsx from 'clsx';
 import { LocationDescriptorObject } from 'history';
 import AdmZip from 'adm-zip';
 import PlusIcon from '@resources/svg/plus.svg';
@@ -13,14 +14,13 @@ import Card from '~/cross-app-components/Card';
 import Button from '~/cross-app-components/Button';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Timestamp from '~/components/Form/InputTimestamp';
-import PickAccount from '~/pages/multisig/AccountTransactions/PickAccount';
+import PickAccount from '~/components/PickAccount';
 import Checkbox from '~/components/Form/Checkbox';
 import ErrorModal from '~/components/SimpleErrorModal';
 
 import { saveFile } from '~/utils/FileHelper';
 import { FilterOption, filterKind, getAccountCSV } from './util';
 
-import multiSigLayout from '~/pages/multisig/MultiSignatureLayout/MultiSignatureLayout.module.scss';
 import styles from './AccountReport.module.scss';
 
 const transactionTypeFilters: FilterOption[] = [
@@ -144,65 +144,6 @@ export default function AccountReport({ location }: Props) {
             currentAccounts.filter((acc) => acc.address !== account.address)
         );
     }
-
-    const RightColumn = useCallback(() => {
-        if (adding) {
-            return (
-                <div className="relative">
-                    <CloseButton
-                        className={styles.addingCloseButton}
-                        onClick={() => setAdding(false)}
-                    />
-                    <PickAccount
-                        setAccount={addAccount}
-                        filter={(account: Account) =>
-                            !accounts.includes(account)
-                        }
-                    />
-                </div>
-            );
-        }
-        return (
-            <div className={styles.rightColumn}>
-                <Card className={styles.AddAnotherAccountButton}>
-                    <Button clear onClick={() => setAdding(true)}>
-                        <span>Add another account</span>
-                        <PlusIcon />
-                    </Button>
-                </Card>
-                <div className={styles.accountList}>
-                    {accounts.map((account) => (
-                        <div
-                            key={account.address}
-                            className={styles.accountListElement}
-                        >
-                            <div>
-                                <p>{account.name}</p>
-                                <br />
-                                <p className={styles.address}>
-                                    {account.address}
-                                </p>
-                            </div>
-                            <Button
-                                size="small"
-                                onClick={() => removeAccount(account)}
-                            >
-                                Remove
-                            </Button>
-                        </div>
-                    ))}
-                </div>
-                <Button
-                    size="big"
-                    className={styles.makeReportButton}
-                    disabled={accounts.length === 0}
-                    onClick={makeReport}
-                >
-                    Make Account Report
-                </Button>
-            </div>
-        );
-    }, [adding, accounts, makeReport]);
     return (
         <>
             <ErrorModal
@@ -215,67 +156,140 @@ export default function AccountReport({ location }: Props) {
                     <AccountPageHeader />
                 </PageLayout.Header>
                 <PageLayout.Container
-                    className={multiSigLayout.container}
-                    padding="vertical"
+                    className="flexColumn"
                     closeRoute={routes.ACCOUNTS}
-                    disableBack={false}
                 >
-                    <h2 className={multiSigLayout.header}>
-                        Make Account Report
-                    </h2>
-                    <div className={multiSigLayout.content}>
+                    <h2 className="pT30">Make Account Report</h2>
+                    <div className="pT10 flexColumn flexChildFill">
                         <Columns
                             divider
                             columnScroll
-                            columnClassName={styles.column}
+                            className={styles.heightFull}
+                            columnClassName={styles.heightFull}
                         >
                             <Columns.Column header="Time Period & Filters">
-                                <h5>Time Period to include</h5>
-                                <div className={styles.timestamp}>
-                                    <Timestamp
-                                        value={fromDate}
-                                        onChange={setFrom}
-                                        name="from"
-                                        label="From:"
-                                    />
-                                </div>
-                                <div className={styles.timestamp}>
-                                    <Timestamp
-                                        value={toDate}
-                                        onChange={setTo}
-                                        name="to"
-                                        label="To:"
-                                    />
-                                </div>
-                                <h5>Transaction Types to be included</h5>
-                                <div className={styles.filters}>
-                                    {transactionTypeFilters.map(
-                                        (filterOption) => (
-                                            <Checkbox
-                                                className={
-                                                    styles.filterCheckbox
-                                                }
-                                                key={filterOption.key}
-                                                checked={currentFilters.some(
-                                                    (currentFilter) =>
-                                                        filterOption.key ===
-                                                        currentFilter.key
-                                                )}
-                                                onChange={() =>
-                                                    flipStatus(filterOption)
-                                                }
-                                            >
-                                                {filterOption.label}
-                                            </Checkbox>
-                                        )
-                                    )}
+                                <div className={styles.wrapper}>
+                                    <h5>Time Period to include</h5>
+                                    <div className={styles.timestamp}>
+                                        <Timestamp
+                                            value={fromDate}
+                                            onChange={setFrom}
+                                            name="from"
+                                            label="From:"
+                                        />
+                                    </div>
+                                    <div className={styles.timestamp}>
+                                        <Timestamp
+                                            value={toDate}
+                                            onChange={setTo}
+                                            name="to"
+                                            label="To:"
+                                        />
+                                    </div>
+                                    <h5>Transaction Types to be included</h5>
+                                    <div className={styles.filters}>
+                                        {transactionTypeFilters.map(
+                                            (filterOption) => (
+                                                <Checkbox
+                                                    className="m10"
+                                                    key={filterOption.key}
+                                                    checked={currentFilters.some(
+                                                        (currentFilter) =>
+                                                            filterOption.key ===
+                                                            currentFilter.key
+                                                    )}
+                                                    onChange={() =>
+                                                        flipStatus(filterOption)
+                                                    }
+                                                >
+                                                    {filterOption.label}
+                                                </Checkbox>
+                                            )
+                                        )}
+                                    </div>
                                 </div>
                             </Columns.Column>
-                            <Columns.Column
-                                header="Accounts to include"
-                                className="relative"
-                            >
-                                <RightColumn />
+                            <Columns.Column header="Accounts to include">
+                                {adding && (
+                                    <div
+                                        className={clsx(
+                                            styles.wrapper,
+                                            'relative'
+                                        )}
+                                    >
+                                        <CloseButton
+                                            className={styles.addingCloseButton}
+                                            onClick={() => setAdding(false)}
+                                        />
+                                        <PickAccount
+                                            setAccount={addAccount}
+                                            filter={(account: Account) =>
+                                                !accounts.includes(account)
+                                            }
+                                        />
+                                    </div>
+                                )}
+                                {!adding && (
+                                    <div
+                                        className={clsx(
+                                            styles.wrapper,
+                                            'flexColumn',
+                                            styles.heightFull
+                                        )}
+                                    >
+                                        <Card
+                                            className={
+                                                styles.AddAnotherAccountButton
+                                            }
+                                        >
+                                            <Button
+                                                clear
+                                                onClick={() => setAdding(true)}
+                                            >
+                                                <span>Add another account</span>
+                                                <PlusIcon />
+                                            </Button>
+                                        </Card>
+                                        <div className={styles.accountList}>
+                                            {accounts.map((account) => (
+                                                <div
+                                                    key={account.address}
+                                                    className={
+                                                        styles.accountListElement
+                                                    }
+                                                >
+                                                    <div>
+                                                        <p>{account.name}</p>
+                                                        <p
+                                                            className={
+                                                                styles.address
+                                                            }
+                                                        >
+                                                            {account.address}
+                                                        </p>
+                                                    </div>
+                                                    <Button
+                                                        size="tiny"
+                                                        onClick={() =>
+                                                            removeAccount(
+                                                                account
+                                                            )
+                                                        }
+                                                    >
+                                                        Remove
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <Button
+                                            className={styles.makeReportButton}
+                                            disabled={accounts.length === 0}
+                                            onClick={makeReport}
+                                        >
+                                            Make Account Report
+                                        </Button>
+                                    </div>
+                                )}
                             </Columns.Column>
                         </Columns>
                     </div>

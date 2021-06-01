@@ -1,9 +1,13 @@
 @import 'config/bundle';
 
-.column {
-    > div {
-        padding: 40px;
-    }
+.heightFull {
+    height: 100%;
+}
+
+.wrapper {
+    padding: 40px 0;
+    max-width: 428px;
+    margin: 0 auto;
 }
 
 .rightColumn {
@@ -14,6 +18,7 @@
 
 .makeReportButton {
     margin-top: auto;
+    margin-bottom: 20px;
 }
 
 .accountList {
@@ -45,6 +50,7 @@
 .address {
     font-size: $font-size-body3;
     color: $color-text-faded;
+    max-width: 75%;
     word-break: break-all;
 }
 
@@ -55,14 +61,10 @@
     margin: 0 auto;
 }
 
-.filterCheckbox {
-    margin: 10px;
-}
-
 .addingCloseButton {
     position: absolute;
     right: -40px;
-    top: 0;
+    top: 20px;
 }
 
 .AddAnotherAccountButton {

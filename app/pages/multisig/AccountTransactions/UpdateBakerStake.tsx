@@ -12,7 +12,7 @@ import {
     RemoveBaker,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
-import PickAccount from './PickAccount';
+import PickAccount from '~/components/PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import {
