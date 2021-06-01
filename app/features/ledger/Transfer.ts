@@ -5,11 +5,13 @@ import {
     SimpleTransfer,
     ScheduledTransfer,
     TransferToEncrypted,
+    EncryptedTransfer,
     instanceOfSimpleTransfer,
     instanceOfScheduledTransfer,
     instanceOfTransferToEncrypted,
     TransferToPublic,
     instanceOfTransferToPublic,
+    instanceOfEncryptedTransfer,
     instanceOfAddBaker,
     AddBaker,
     instanceOfRemoveBaker,
@@ -37,13 +39,18 @@ import {
     serializeUpdateBakerRestakeEarnings,
 } from '~/utils/transactionSerialization';
 import pathAsBuffer from './Path';
-import { encodeWord16 } from '~/utils/serializationHelpers';
+import {
+    encodeWord16,
+    encodeWord64,
+    base58ToBuffer,
+} from '../../utils/serializationHelpers';
 import { chunkBuffer, chunkArray } from '~/utils/basicHelpers';
 
 const INS_SIMPLE_TRANSFER = 0x02;
 const INS_TRANSFER_TO_ENCRYPTED = 0x11;
 const INS_TRANSFER_TO_PUBLIC = 0x12;
 const INS_TRANSFER_WITH_SCHEDULE = 0x03;
+const INS_ENCRYPTED_TRANSFER = 0x10;
 const INS_ADD_OR_UPDATE_BAKER = 0x13;
 const INS_REMOVE_BAKER = 0x14;
 const INS_UPDATE_BAKER_STAKE = 0x15;
@@ -172,6 +179,96 @@ async function signTransferToPublic(
         response = await transport.send(
             0xe0,
             INS_TRANSFER_TO_PUBLIC,
+            p1,
+            p2,
+            Buffer.from(chunks[i])
+        );
+    }
+    if (!response) {
+        throw new Error('Unexpected missing response from ledger;');
+    }
+    const signature = response.slice(0, 64);
+    return signature;
+}
+
+async function signEncryptedTransfer(
+    transport: Transport,
+    path: number[],
+    transaction: EncryptedTransfer
+) {
+    if (!transaction.payload.proof) {
+        throw new Error('Unexpected missing proof');
+    }
+    if (
+        !transaction.payload.remainingEncryptedAmount ||
+        !transaction.payload.transferAmount
+    ) {
+        throw new Error('Unexpected missing payload data');
+    }
+
+    const payload = serializeTransferPayload(
+        TransactionKindId.Encrypted_transfer,
+        transaction.payload
+    );
+
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    const kind = Buffer.alloc(1);
+    kind.writeInt8(TransactionKindId.Encrypted_transfer, 0);
+
+    const data = Buffer.concat([
+        pathAsBuffer(path),
+        header,
+        kind,
+        base58ToBuffer(transaction.payload.toAddress),
+    ]);
+
+    let p1 = 0x00;
+    const p2 = 0x00;
+
+    await transport.send(0xe0, INS_ENCRYPTED_TRANSFER, p1, p2, data);
+
+    p1 = 0x01;
+    await transport.send(
+        0xe0,
+        INS_ENCRYPTED_TRANSFER,
+        p1,
+        p2,
+        Buffer.concat([
+            Buffer.from(transaction.payload.remainingEncryptedAmount, 'hex'),
+        ])
+    );
+
+    p1 = 0x02;
+    const proof = Buffer.from(transaction.payload.proof, 'hex');
+
+    await transport.send(
+        0xe0,
+        INS_ENCRYPTED_TRANSFER,
+        p1,
+        p2,
+        Buffer.concat([
+            Buffer.from(transaction.payload.transferAmount, 'hex'),
+            encodeWord64(BigInt(transaction.payload.index)),
+            encodeWord16(proof.length),
+        ])
+    );
+
+    p1 = 0x03;
+
+    let response;
+    const chunks = chunkBuffer(proof, 255);
+    for (let i = 0; i < chunks.length; i += 1) {
+        // eslint-disable-next-line  no-await-in-loop
+        response = await transport.send(
+            0xe0,
+            INS_ENCRYPTED_TRANSFER,
             p1,
             p2,
             Buffer.from(chunks[i])
@@ -434,6 +531,9 @@ export default async function signTransfer(
     }
     if (instanceOfTransferToPublic(transaction)) {
         return signTransferToPublic(transport, path, transaction);
+    }
+    if (instanceOfEncryptedTransfer(transaction)) {
+        return signEncryptedTransfer(transport, path, transaction);
     }
     if (instanceOfAddBaker(transaction)) {
         return signAddBaker(transport, path, transaction);

@@ -18,6 +18,10 @@ export function putBase58Check(
     }
 }
 
+export function base58ToBuffer(base58Sstring: string) {
+    return bs58check.decode(base58Sstring).slice(1); // remove the first check byte
+}
+
 type Indexable = Buffer | Uint8Array;
 
 export function put(array: Indexable, start: number, input: Indexable) {

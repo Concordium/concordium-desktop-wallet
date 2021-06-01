@@ -9,6 +9,7 @@ import {
     TransferToEncryptedPayload,
     UpdateAccountCredentialsPayload,
     TransferToPublicPayload,
+    EncryptedTransferPayload,
     TransactionAccountSignature,
     Signature,
     TransactionCredentialSignature,
@@ -28,6 +29,7 @@ import {
     putBase58Check,
     hashSha256,
     serializeMap,
+    base58ToBuffer,
     serializeList,
     serializeCredentialDeploymentInformation,
     serializeBoolean,
@@ -113,11 +115,7 @@ function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
 export function serializeTransferToPublicData(
     payload: TransferToPublicPayload
 ) {
-    if (
-        !payload.proof ||
-        payload.index === undefined ||
-        !payload.remainingEncryptedAmount
-    ) {
+    if (payload.index === undefined || !payload.remainingEncryptedAmount) {
         throw new Error('unexpected missing data of Transfer to Public data');
     }
     const remainingEncryptedAmount = Buffer.from(
@@ -143,6 +141,46 @@ function serializeTransferToPublic(payload: TransferToPublicPayload) {
     const serialized = new Uint8Array(size);
 
     serialized[0] = TransactionKind.Transfer_to_public;
+    put(serialized, 1, data);
+    put(serialized, 1 + data.length, proof);
+    return Buffer.from(serialized);
+}
+
+export function serializeEncryptedTransferData(
+    payload: EncryptedTransferPayload
+) {
+    if (
+        payload.index === undefined ||
+        !payload.remainingEncryptedAmount ||
+        !payload.transferAmount
+    ) {
+        throw new Error('unexpected missing data of Encrypted Transfer data');
+    }
+    const remainingEncryptedAmount = Buffer.from(
+        payload.remainingEncryptedAmount,
+        'hex'
+    );
+    const transferAmount = Buffer.from(payload.transferAmount, 'hex');
+
+    return Buffer.concat([
+        base58ToBuffer(payload.toAddress),
+        remainingEncryptedAmount,
+        transferAmount,
+        encodeWord64(BigInt(payload.index)),
+    ]);
+}
+
+function serializeEncryptedTransfer(payload: EncryptedTransferPayload) {
+    if (!payload.proof) {
+        throw new Error('unexpected missing proof of Encrypted Transfer data');
+    }
+
+    const proof = Buffer.from(payload.proof, 'hex');
+    const data = serializeEncryptedTransferData(payload);
+    const size = 1 + data.length + proof.length;
+    const serialized = new Uint8Array(size);
+
+    serialized[0] = TransactionKind.Encrypted_transfer;
     put(serialized, 1, data);
     put(serialized, 1 + data.length, proof);
     return Buffer.from(serialized);
@@ -249,6 +287,10 @@ export function serializeTransferPayload(
         case TransactionKind.Transfer_to_public:
             return serializeTransferToPublic(
                 payload as TransferToPublicPayload
+            );
+        case TransactionKind.Encrypted_transfer:
+            return serializeEncryptedTransfer(
+                payload as EncryptedTransferPayload
             );
         case TransactionKind.Add_baker:
             return serializeAddBaker(payload as AddBakerPayload);

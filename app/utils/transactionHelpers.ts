@@ -7,6 +7,7 @@ import {
     TransactionEvent,
     TransactionStatus,
     ScheduledTransfer,
+    EncryptedTransfer,
     Schedule,
     TransferToEncrypted,
     instanceOfUpdateInstruction,
@@ -150,6 +151,33 @@ export function createSimpleTransferTransaction(
         transactionKind: TransactionKindId.Simple_transfer,
         payload,
         signatureAmount,
+    });
+}
+
+/**
+ *  Constructs an encrypted transfer object,
+ * Given the fromAddress, toAddress and the amount.
+ * N.B. Does not contain the actual payload, as this is done without access to the decryption key.
+ */
+export function createEncryptedTransferTransaction(
+    fromAddress: string,
+    amount: bigint,
+    toAddress: string,
+    expiry = getDefaultExpiry()
+): Promise<EncryptedTransfer> {
+    const payload = {
+        toAddress,
+        plainTransferAmount: amount.toString(),
+    };
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Encrypted_transfer,
+        payload,
+        // Supply the energy, so that the cost is not computed using the incomplete payload.
+        estimatedEnergyAmount: getTransactionKindEnergy(
+            TransactionKindId.Encrypted_transfer
+        ),
     });
 }
 
@@ -488,14 +516,18 @@ export function validateShieldedAmount(
     if (!isValidGTUString(amountToValidate)) {
         return 'Value is not a valid GTU amount';
     }
+    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
         return 'Insufficient public funds to cover fee';
     }
     if (
         account?.totalDecrypted &&
-        BigInt(account.totalDecrypted) < toMicroUnits(amountToValidate)
+        BigInt(account.totalDecrypted) < amountToValidateMicroGTU
     ) {
         return 'Insufficient shielded funds';
+    }
+    if (amountToValidateMicroGTU === 0n) {
+        return 'Amount may not be zero';
     }
     return undefined;
 }
@@ -508,14 +540,15 @@ export function validateTransferAmount(
     if (!isValidGTUString(amountToValidate)) {
         return 'Value is not a valid GTU amount';
     }
+    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (
         accountInfo &&
         amountAtDisposal(accountInfo) <
-            toMicroUnits(amountToValidate) + (estimatedFee || 0n)
+            amountToValidateMicroGTU + (estimatedFee || 0n)
     ) {
         return 'Insufficient funds';
     }
-    if (toMicroUnits(amountToValidate) === 0n) {
+    if (amountToValidateMicroGTU === 0n) {
         return 'Amount may not be zero';
     }
     return undefined;

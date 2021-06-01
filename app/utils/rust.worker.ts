@@ -72,6 +72,13 @@ function createTransferToPublicData(
     return rust.createTransferToPublicData(message.input);
 }
 
+function createEncryptedTransferData(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.createEncryptedTransferData(message.input);
+}
+
 function createGenesisAccount(
     rust: RustInterface,
     message: Record<string, string>
@@ -118,6 +125,8 @@ function mapCommand(command: string) {
             return decryptAmounts;
         case workerCommands.createTransferToPublicData:
             return createTransferToPublicData;
+        case workerCommands.createEncryptedTransferData:
+            return createEncryptedTransferData;
         case workerCommands.createGenesisAccount:
             return createGenesisAccount;
         case workerCommands.generateBakerKeys:

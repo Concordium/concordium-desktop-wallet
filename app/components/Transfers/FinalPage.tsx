@@ -15,6 +15,7 @@ import {
     instanceOfSimpleTransfer,
     instanceOfTransferToEncrypted,
     instanceOfTransferToPublic,
+    instanceOfEncryptedTransfer,
     TimeStampUnit,
 } from '~/utils/types';
 
@@ -55,6 +56,9 @@ function getSpecificsHandler(transaction: AccountTransaction) {
     } else if (instanceOfTransferToEncrypted(transaction)) {
         title = 'Shielding submitted!';
         amount = transaction.payload.amount;
+    } else if (instanceOfEncryptedTransfer(transaction)) {
+        title = 'Shielded transfer submitted!';
+        amount = transaction.payload.plainTransferAmount;
     } else {
         throw new Error(
             `Unsupported transaction type - please implement: ${transaction}`

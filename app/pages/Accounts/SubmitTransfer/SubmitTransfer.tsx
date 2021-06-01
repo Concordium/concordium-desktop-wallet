@@ -3,6 +3,7 @@ import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
+import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
 import { sendTransaction } from '~/node/nodeRequests';
@@ -18,6 +19,7 @@ import {
     CredentialWithIdentityNumber,
     Global,
     instanceOfTransferToPublic,
+    instanceOfEncryptedTransfer,
     MultiSignatureTransactionStatus,
 } from '~/utils/types';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -26,7 +28,10 @@ import { accountsInfoSelector } from '~/features/AccountSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import { getAccountPath } from '~/features/ledger/Path';
 import TransactionDetails from '~/components/TransactionDetails';
-import { makeTransferToPublicData } from '~/utils/rustInterface';
+import {
+    makeTransferToPublicData,
+    makeEncryptedTransferData,
+} from '~/utils/rustInterface';
 import PageLayout from '~/components/PageLayout';
 import { buildTransactionAccountSignature } from '~/utils/transactionHelpers';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
@@ -78,6 +83,29 @@ async function attachCompletedPayload(
             remainingEncryptedAmount: data.payload.remainingAmount,
         };
 
+        return { ...transaction, payload };
+    }
+    if (instanceOfEncryptedTransfer(transaction)) {
+        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
+        const receiverAccountInfo = await getAccountInfoOfAddress(
+            transaction.payload.toAddress
+        );
+        const data = await makeEncryptedTransferData(
+            transaction.payload.plainTransferAmount,
+            receiverAccountInfo.accountEncryptionKey,
+            prfKeySeed.toString('hex'),
+            global,
+            accountInfo.accountEncryptedAmount,
+            credential.credentialNumber
+        );
+
+        const payload = {
+            ...transaction.payload,
+            proof: data.payload.proof,
+            index: data.payload.index,
+            transferAmount: data.payload.transferAmount,
+            remainingEncryptedAmount: data.payload.remainingAmount,
+        };
         return { ...transaction, payload };
     }
     return transaction;

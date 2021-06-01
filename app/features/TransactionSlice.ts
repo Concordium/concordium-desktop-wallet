@@ -27,7 +27,7 @@ import {
     convertAccountTransaction,
 } from '../utils/TransactionConverters';
 // eslint-disable-next-line import/no-cycle
-import { updateMaxTransactionId } from './AccountSlice';
+import { updateMaxTransactionId, updateAllDecrypted } from './AccountSlice';
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 
@@ -95,10 +95,11 @@ export async function decryptTransactions(
         (t) =>
             t.transactionKind ===
                 TransactionKindString.EncryptedAmountTransfer &&
-            t.decryptedAmount === null
+            t.decryptedAmount === null &&
+            t.success
     );
 
-    if (encryptedTransfers.length > 0) {
+    if (encryptedTransfers.length === 0) {
         return Promise.resolve();
     }
 
@@ -131,25 +132,23 @@ export async function decryptTransactions(
 /**
  * Determine whether the transaction affects unshielded balance.
  */
-function filterUnShieldedBalanceTransaction(transaction: TransferTransaction) {
-    switch (transaction.transactionKind) {
-        case TransactionKindString.Transfer:
-        case TransactionKindString.BakingReward:
-        case TransactionKindString.FinalizationReward:
-        case TransactionKindString.BlockReward:
-        case TransactionKindString.TransferWithSchedule:
-        case TransactionKindString.TransferToEncrypted:
-        case TransactionKindString.TransferToPublic:
-            return true;
-        default:
-            return false;
-    }
+function isUnshieldedBalanceTransaction(
+    transaction: TransferTransaction,
+    currentAddress: string
+) {
+    return !(
+        transaction.transactionKind ===
+            TransactionKindString.EncryptedAmountTransfer &&
+        transaction.fromAddress !== currentAddress
+    );
 }
 
 /**
  * Determine whether the transaction affects shielded balance.
  */
-function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
+function isShieldedBalanceTransaction(
+    transaction: Partial<TransferTransaction>
+) {
     switch (transaction.transactionKind) {
         case TransactionKindString.EncryptedAmountTransfer:
         case TransactionKindString.TransferToEncrypted:
@@ -193,17 +192,20 @@ async function fetchTransactions(address: string, currentMaxId: number) {
     const newMaxId = transactions.reduce((id, t) => Math.max(id, t.id), 0);
     const isFinished = !full;
 
-    await insertTransactions(
+    const newTransactions = await insertTransactions(
         transactions.map((transaction) =>
             convertIncomingTransaction(transaction, address)
         )
     );
-    return { newMaxId, isFinished };
+    const newEncrypted = newTransactions.some(isShieldedBalanceTransaction);
+
+    return { newMaxId, isFinished, newEncrypted };
 }
 
-// Update the transactions from remote source.
-// will fetch transactions in intervals, updating the state each time.
-// stops when it reaches the newest transaction, or it is told to abort by the controller.
+/** Update the transactions from remote source.
+ * will fetch transactions in intervals, updating the state each time.
+ * stops when it reaches the newest transaction, or it is told to abort by the controller.
+ * */
 export async function updateTransactions(
     dispatch: Dispatch,
     account: Account,
@@ -222,6 +224,10 @@ export async function updateTransactions(
                 account.address,
                 result.newMaxId
             );
+        }
+
+        if (result.newEncrypted) {
+            await updateAllDecrypted(dispatch, account.address, false);
         }
 
         if (controller.isAborted) {
@@ -318,10 +324,18 @@ export async function rejectTransaction(
 }
 
 export const transactionsSelector = (state: RootState) => {
-    const filter = state.transactions.viewingShielded
-        ? filterShieldedBalanceTransaction
-        : filterUnShieldedBalanceTransaction;
-    return state.transactions.transactions.filter(filter);
+    if (state.transactions.viewingShielded) {
+        return state.transactions.transactions.filter(
+            isShieldedBalanceTransaction
+        );
+    }
+    const address = state.accounts.chosenAccount?.address;
+    if (!address) {
+        return [];
+    }
+    return state.transactions.transactions.filter((transaction) =>
+        isUnshieldedBalanceTransaction(transaction, address)
+    );
 };
 
 export const viewingShieldedSelector = (state: RootState) =>
