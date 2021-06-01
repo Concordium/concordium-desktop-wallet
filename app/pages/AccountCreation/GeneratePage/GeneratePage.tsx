@@ -3,9 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import routes from '~/constants/routes.json';
-import { createCredentialDetails } from '~/utils/rustInterface';
+import {
+    exportKeysFromLedger,
+    createCredentialDetails,
+} from '~/utils/rustInterface';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import { Identity, CredentialDeploymentDetails, Dispatch } from '~/utils/types';
+import {
+    Identity,
+    CredentialDeploymentDetails,
+    CreationKeys,
+    Dispatch,
+} from '~/utils/types';
 import { sendTransaction } from '~/node/nodeRequests';
 import {
     addPendingAccount,
@@ -24,9 +32,12 @@ import pairWallet from '~/utils/WalletPairing';
 import Columns from '~/components/Columns';
 import IdentityCard from '~/components/IdentityCard';
 import CardList from '~/cross-app-components/CardList';
+import Card from '~/cross-app-components/Card';
+import Button from '~/cross-app-components/Button';
 import { AttributeKey } from '~/utils/identityHelpers';
 import errorMessages from '~/constants/errorMessages.json';
 import { AccountCardView } from '~/components/AccountCard/AccountCard';
+import PublicKeyDetails from '~/components/ledger/PublicKeyDetails';
 
 import generalStyles from '../AccountCreation.module.scss';
 import styles from './GeneratePage.module.scss';
@@ -36,6 +47,8 @@ interface Props {
     identity: Identity;
     attributes: AttributeKey[];
 }
+
+type KeysAndCredentialNumber = CreationKeys & { credentialNumber: number };
 
 function removeFailed(dispatch: Dispatch, accountAddress: string) {
     removeAccount(dispatch, accountAddress);
@@ -49,6 +62,8 @@ export default function AccountCreationGenerate({
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const global = useSelector(globalSelector);
+    const [keys, setKeys] = useState<KeysAndCredentialNumber>();
+    const [finishedComparing, setFinishedComparing] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalContent, setModalContent] = useState('');
 
@@ -106,15 +121,11 @@ export default function AccountCreationGenerate({
         setModalOpen(true);
     }
 
-    async function createAccount(
+    async function exportKeys(
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string | JSX.Element) => void
     ) {
         let credentialNumber;
-        if (!global) {
-            onError(errorMessages.missingGlobal);
-            return;
-        }
 
         const walletId = await pairWallet(ledger, dispatch);
         if (walletId !== identity.walletId) {
@@ -130,9 +141,34 @@ export default function AccountCreationGenerate({
             return;
         }
 
-        const credentialDeploymentDetails = await createCredentialDetails(
+        const exportedKeys = await exportKeysFromLedger(
             identity,
             credentialNumber,
+            setMessage,
+            ledger
+        );
+        setKeys({ ...exportedKeys, credentialNumber });
+    }
+
+    async function createAccount(
+        ledger: ConcordiumLedgerClient,
+        setMessage: (message: string | JSX.Element) => void
+    ) {
+        if (!keys) {
+            throw new Error(
+                'Missing Keys, which should have been exported already.'
+            );
+        }
+
+        if (!global) {
+            onError(errorMessages.missingGlobal);
+            return;
+        }
+
+        const credentialDeploymentDetails = await createCredentialDetails(
+            identity,
+            keys.credentialNumber,
+            keys,
             global,
             attributes,
             setMessage,
@@ -140,7 +176,10 @@ export default function AccountCreationGenerate({
         );
 
         try {
-            await saveAccount(credentialDeploymentDetails, credentialNumber);
+            await saveAccount(
+                credentialDeploymentDetails,
+                keys.credentialNumber
+            );
             await sendCredential(credentialDeploymentDetails);
             confirmAccount(
                 dispatch,
@@ -157,6 +196,8 @@ export default function AccountCreationGenerate({
             onError(`Unable to create account due to ${e}`);
         }
     }
+
+    const showComparing = keys && !finishedComparing;
 
     return (
         <div className={generalStyles.singleColumn}>
@@ -194,10 +235,28 @@ export default function AccountCreationGenerate({
                     </CardList>
                 </Columns.Column>
                 <Columns.Column>
-                    <SimpleLedger
-                        className={generalStyles.card}
-                        ledgerCall={createAccount}
-                    />
+                    {showComparing && (
+                        <Card
+                            className={generalStyles.card}
+                            header="Compare public key"
+                        >
+                            <PublicKeyDetails
+                                publickey={keys?.publicKey || ''}
+                            />
+                            <Button
+                                onClick={() => setFinishedComparing(true)}
+                                className="mT50"
+                            >
+                                Confirm
+                            </Button>
+                        </Card>
+                    )}
+                    {!showComparing && (
+                        <SimpleLedger
+                            className={generalStyles.card}
+                            ledgerCall={keys ? createAccount : exportKeys}
+                        />
+                    )}
                 </Columns.Column>
             </Columns>
         </div>

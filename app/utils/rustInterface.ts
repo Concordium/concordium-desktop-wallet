@@ -15,6 +15,7 @@ import {
     GenesisAccount,
     SignedIdRequest,
     UnsignedCredentialDeploymentInformation,
+    CreationKeys,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
@@ -126,15 +127,12 @@ export async function createIdentityRequestObjectLedger(
     };
 }
 
-async function createUnsignedCredentialInfo(
+export async function exportKeysFromLedger(
     identity: Identity,
     credentialNumber: number,
-    global: Global,
-    attributes: string[],
     displayMessage: (message: string) => void,
-    ledger: ConcordiumLedgerClient,
-    address?: string
-) {
+    ledger: ConcordiumLedgerClient
+): Promise<CreationKeys> {
     const path = getAccountPath({
         identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,
@@ -147,9 +145,19 @@ async function createUnsignedCredentialInfo(
         identity.identityNumber
     );
     displayMessage('Please confirm exporting public key on device');
-    const publicKey = await ledger.getPublicKey(path);
-    displayMessage('Please wait');
+    const publicKey = (await ledger.getPublicKey(path)).toString('hex');
+    displayMessage(`Please confirm exported public key: ${publicKey}`);
+    return { prfKey, idCredSec, publicKey };
+}
 
+async function createUnsignedCredentialInfo(
+    identity: Identity,
+    credentialNumber: number,
+    keys: CreationKeys,
+    global: Global,
+    attributes: string[],
+    address?: string
+) {
     const identityProvider = JSON.parse(identity.identityProvider);
 
     const credentialInput: Record<string, unknown> = {
@@ -160,7 +168,7 @@ async function createUnsignedCredentialInfo(
         publicKeys: [
             {
                 schemeId: 'Ed25519',
-                verifyKey: publicKey.toString('hex'),
+                verifyKey: keys.publicKey,
             },
         ],
         threshold: 1,
@@ -169,8 +177,8 @@ async function createUnsignedCredentialInfo(
         randomness: {
             randomness: identity.randomness,
         },
-        prfKey,
-        idCredSec,
+        prfKey: keys.prfKey,
+        idCredSec: keys.idCredSec,
     };
     if (address) {
         credentialInput.address = address;
@@ -204,6 +212,7 @@ async function createUnsignedCredentialInfo(
 export async function createCredentialInfo(
     identity: Identity,
     credentialNumber: number,
+    keys: CreationKeys,
     global: Global,
     attributes: string[],
     displayMessage: (message: string | JSX.Element) => void,
@@ -213,10 +222,9 @@ export async function createCredentialInfo(
     const { raw, parsed } = await createUnsignedCredentialInfo(
         identity,
         credentialNumber,
+        keys,
         global,
         attributes,
-        displayMessage,
-        ledger,
         address
     );
 
@@ -252,6 +260,7 @@ export async function createCredentialInfo(
 export async function createCredentialDetails(
     identity: Identity,
     credentialNumber: number,
+    keys: CreationKeys,
     global: Global,
     attributes: string[],
     displayMessage: (message: string | JSX.Element) => void,
@@ -260,10 +269,9 @@ export async function createCredentialDetails(
     const { raw, parsed } = await createUnsignedCredentialInfo(
         identity,
         credentialNumber,
+        keys,
         global,
-        attributes,
-        displayMessage,
-        ledger
+        attributes
     );
 
     displayMessage(CredentialInfoLedgerDetails(parsed));
