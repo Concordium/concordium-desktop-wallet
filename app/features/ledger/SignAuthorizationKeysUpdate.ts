@@ -36,9 +36,9 @@ async function sendAccessStructure(
     // Chunk into bits of at most 127, as that is the maximum amount of data that
     // the Ledger can receive in one go.
     const chunkedIndicies = chunkArray(accessStructure.publicKeyIndicies, 127);
-    for (const incidies of chunkedIndicies) {
+    for (const indices of chunkedIndicies) {
         const serializedIndicies = Buffer.concat(
-            incidies.map((index) => {
+            indices.map((index) => {
                 const serializedIndex = Buffer.alloc(2);
                 serializedIndex.writeUInt16BE(index.index, 0);
                 return serializedIndex;
@@ -92,8 +92,6 @@ export default async function signAuthorizationKeysUpdate(
     for (let i = 0; i < updateKeysLength; i += 1) {
         const verificationKey = transaction.payload.keys[i];
         const data = serializeVerifyKey(verificationKey);
-
-        // eslint-disable-next-line  no-await-in-loop
         await transport.send(0xe0, INS, p1, p2, data);
     }
 
@@ -109,6 +107,5 @@ export default async function signAuthorizationKeysUpdate(
         throw new Error('The signature was not returned correctly.');
     }
 
-    const signature = response.slice(0, 64);
-    return signature;
+    return response.slice(0, 64);
 }

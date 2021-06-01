@@ -7,6 +7,57 @@ import {
     KeyUpdateEntryStatus,
 } from '../../../../utils/types';
 
+export function getCurrentThresholds(
+    authorizations: Authorizations
+): Map<AccessStructureEnum, number> {
+    const currentThresholds = new Map<AccessStructureEnum, number>();
+    currentThresholds.set(
+        AccessStructureEnum.emergency,
+        authorizations.emergency.threshold
+    );
+    currentThresholds.set(
+        AccessStructureEnum.protocol,
+        authorizations.protocol.threshold
+    );
+    currentThresholds.set(
+        AccessStructureEnum.electionDifficulty,
+        authorizations.electionDifficulty.threshold
+    );
+    currentThresholds.set(
+        AccessStructureEnum.euroPerEnergy,
+        authorizations.euroPerEnergy.threshold
+    );
+    currentThresholds.set(
+        AccessStructureEnum.microGtuPerEuro,
+        authorizations.microGTUPerEuro.threshold
+    );
+    currentThresholds.set(
+        AccessStructureEnum.foundationAccount,
+        authorizations.foundationAccount.threshold
+    );
+    currentThresholds.set(
+        AccessStructureEnum.mintDistribution,
+        authorizations.mintDistribution.threshold
+    );
+    currentThresholds.set(
+        AccessStructureEnum.gasRewards,
+        authorizations.paramGASRewards.threshold
+    );
+    currentThresholds.set(
+        AccessStructureEnum.bakerStakeThreshold,
+        authorizations.bakerStakeThreshold.threshold
+    );
+    currentThresholds.set(
+        AccessStructureEnum.addAnonymityRevoker,
+        authorizations.addAnonymityRevoker.threshold
+    );
+    currentThresholds.set(
+        AccessStructureEnum.addIdentityProvider,
+        authorizations.addIdentityProvider.threshold
+    );
+    return currentThresholds;
+}
+
 /**
  * Checks whether there are any references left to key with the provided index
  * in any access structure.

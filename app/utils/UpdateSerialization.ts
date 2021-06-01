@@ -36,7 +36,6 @@ export enum OnChainUpdateType {
     UpdateBakerStakeThreshold = 9,
     UpdateRootKeys = 10,
     UpdateLevel1Keys = 11,
-    UpdateLevel2Keys = 12,
 }
 
 export interface SerializedString {
@@ -413,9 +412,9 @@ function mapUpdateTypeToOnChainUpdateType(type: UpdateType): OnChainUpdateType {
         case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
             return OnChainUpdateType.UpdateLevel1Keys;
         case UpdateType.UpdateLevel2KeysUsingRootKeys:
-            return OnChainUpdateType.UpdateLevel2Keys;
+            return OnChainUpdateType.UpdateRootKeys;
         case UpdateType.UpdateLevel2KeysUsingLevel1Keys:
-            return OnChainUpdateType.UpdateLevel2Keys;
+            return OnChainUpdateType.UpdateLevel1Keys;
         default:
             throw new Error(`An invalid update type was given: ${type}`);
     }

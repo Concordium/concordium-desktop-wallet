@@ -25,10 +25,12 @@ import {
     mapCurrentAuthorizationsToUpdate,
     getAccessStructureTitle,
     keyIsInUse,
+    getCurrentThresholds,
 } from './util';
 import routes from '~/constants/routes.json';
 import ProposeNewKey from './ProposeNewKey';
-import Button from '~/cross-app-components/Button';
+import AccessStructureKeySetSize from './AccessStructureKeySetSize';
+import AccessStructureThreshold from './AccessStructureThreshold';
 
 interface Props {
     blockSummary: BlockSummary;
@@ -55,6 +57,10 @@ export default function UpdateAuthorizationKeys({
     const currentKeys = blockSummary.updates.keys.level2Keys.keys;
     const currentKeySetSize = currentKeys.length;
     const currentAuthorizations = blockSummary.updates.keys.level2Keys;
+    const currentAccessStructures = mapCurrentAuthorizationsToUpdate(
+        currentAuthorizations
+    ).accessStructures;
+    const currentThresholds = getCurrentThresholds(currentAuthorizations);
 
     const [newLevel2Keys, setNewLevel2Keys] = useState<AuthorizationKeysUpdate>(
         mapCurrentAuthorizationsToUpdate(currentAuthorizations)
@@ -263,12 +269,31 @@ export default function UpdateAuthorizationKeys({
                             )
                         </p>
                     ) : undefined}
-                    <Button onClick={submitFunction}>TEST</Button>
                 </div>
             </Columns.Column>
             <Columns.Column className={styles.stretchColumn} header={' '}>
                 <div className={styles.columnContent}>
                     <Switch>
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_THRESHOLD
+                            }
+                            render={() => (
+                                <AccessStructureThreshold
+                                    accessStructures={currentAccessStructures}
+                                    currentThresholds={currentThresholds}
+                                    submitFunction={submitFunction}
+                                />
+                            )}
+                        />
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_SIZE
+                            }
+                            render={() => (
+                                <AccessStructureKeySetSize type={type} />
+                            )}
+                        />
                         <Route
                             path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
                             render={() => (

@@ -50,7 +50,7 @@ function accessStructureView(
 ) {
     const keysInStructure = findKeysForAccessStructure(accessStructure, keys);
     return (
-        <div>
+        <div key={accessStructure.type}>
             <h2>{getAccessStructureTitle(accessStructure.type)}</h2>
             <p>Threshold: {accessStructure.threshold}</p>
             <ul>
