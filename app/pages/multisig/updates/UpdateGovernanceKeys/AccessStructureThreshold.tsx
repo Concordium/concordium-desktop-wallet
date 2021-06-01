@@ -8,19 +8,37 @@ import { getAccessStructureTitle } from './util';
 interface Props {
     accessStructures: AccessStructure[];
     currentThresholds: Map<AccessStructureEnum, number>;
+    setThreshold(type: AccessStructureEnum, threshold: number): void;
     submitFunction(): void;
 }
 
-// function isInvalid(
-//     threshold: string | undefined,
-//     maxThreshold: number
-// ): boolean {
-//     if (threshold === undefined) {
-//         return true;
-//     }
-//     const thresholdAsNumber = Number.parseInt(threshold, 10);
-//     return thresholdAsNumber <= 0 || thresholdAsNumber > maxThreshold;
-// }
+/**
+ * Checks if any of the thresholds exceeds the number of key indices for
+ * that access structure. If that is the case, then the transaction is considered
+ * invalid.
+ */
+function isInvalid(
+    thresholds: Map<AccessStructureEnum, number>,
+    accessStructures: AccessStructure[]
+): boolean {
+    const accountStructureWithInvalidThreshold = accessStructures.find(
+        (accessStructure) => {
+            const threshold = thresholds.get(accessStructure.type);
+            if (threshold) {
+                return (
+                    threshold <= 0 ||
+                    threshold > accessStructure.publicKeyIndicies.length
+                );
+            }
+            return true;
+        }
+    );
+
+    if (accountStructureWithInvalidThreshold) {
+        return true;
+    }
+    return false;
+}
 
 /**
  * Component for displaying the current signature thresholds for each access structure,
@@ -31,6 +49,7 @@ export default function AccessStructureThreshold({
     accessStructures,
     currentThresholds,
     submitFunction,
+    setThreshold,
 }: Props) {
     const [thresholds, setLocalThresholds] = useState<
         Map<AccessStructureEnum, number>
@@ -79,9 +98,13 @@ export default function AccessStructureThreshold({
                                         v,
                                         accessStructure.type
                                     );
-                                    // setThresholds(
-                                    //     Number.parseInt(v !== undefined ? v : '0', 10)
-                                    // );
+                                    setThreshold(
+                                        accessStructure.type,
+                                        Number.parseInt(
+                                            v !== undefined ? v : '1',
+                                            10
+                                        )
+                                    );
                                 }}
                                 fallbackValue={1}
                             />
@@ -89,7 +112,12 @@ export default function AccessStructureThreshold({
                     );
                 })}
             </div>
-            <Button onClick={submitFunction}>Continue</Button>
+            <Button
+                onClick={submitFunction}
+                disabled={isInvalid(thresholds, accessStructures)}
+            >
+                Continue
+            </Button>
         </>
     );
 }

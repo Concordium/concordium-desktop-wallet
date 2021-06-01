@@ -12,6 +12,7 @@ import {
 } from '~/utils/timeHelpers';
 import {
     AccessStructure,
+    AccessStructureEnum,
     AuthorizationKeysUpdate,
     KeyUpdateEntryStatus,
     KeyWithStatus,
@@ -65,6 +66,29 @@ export default function UpdateAuthorizationKeys({
     const [newLevel2Keys, setNewLevel2Keys] = useState<AuthorizationKeysUpdate>(
         mapCurrentAuthorizationsToUpdate(currentAuthorizations)
     );
+
+    function setThreshold(
+        accessStructureType: AccessStructureEnum,
+        threshold: number
+    ) {
+        const updatedAccessStructures = newLevel2Keys.accessStructures.map(
+            (accessStructure) => {
+                if (accessStructure.type === accessStructureType) {
+                    return {
+                        ...accessStructure,
+                        threshold,
+                    };
+                }
+                return accessStructure;
+            }
+        );
+
+        const updatedLevel2Keys: AuthorizationKeysUpdate = {
+            ...newLevel2Keys,
+            accessStructures: updatedAccessStructures,
+        };
+        setNewLevel2Keys(updatedLevel2Keys);
+    }
 
     /**
      * A new key is always added to all access structures. This is done to
@@ -285,6 +309,7 @@ export default function UpdateAuthorizationKeys({
                                 <AccessStructureThreshold
                                     accessStructures={currentAccessStructures}
                                     currentThresholds={currentThresholds}
+                                    setThreshold={setThreshold}
                                     submitFunction={submitFunction}
                                 />
                             )}
