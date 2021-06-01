@@ -54,7 +54,7 @@ export default function AccessStructureThreshold({
                 <p>
                     If you want to update the amount of required signatures to
                     make transactions, then you can do so below. If you do not
-                    want to make any changes to the setThresholds, then you can
+                    want to make any changes to the thresholds, then you can
                     just leave it as is.
                 </p>
                 {accessStructures.map((accessStructure) => {

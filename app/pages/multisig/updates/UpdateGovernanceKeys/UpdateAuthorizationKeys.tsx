@@ -29,8 +29,8 @@ import {
 } from './util';
 import routes from '~/constants/routes.json';
 import ProposeNewKey from './ProposeNewKey';
-import AccessStructureKeySetSize from './AccessStructureKeySetSize';
 import AccessStructureThreshold from './AccessStructureThreshold';
+import KeySetSize from './KeySetSize';
 
 interface Props {
     blockSummary: BlockSummary;
@@ -70,6 +70,9 @@ export default function UpdateAuthorizationKeys({
      * A new key is always added to all access structures. This is done to
      * simplify the current implementation, not due to any requirements.
      */
+
+    // TODO Only add to access structures where it is not already present.
+
     function addNewKey(publicKey: PublicKeyExportFormat) {
         const updatedKeys: VerifyKey[] = [...newLevel2Keys.keys, publicKey.key];
         const addedKeyIndex = updatedKeys.length - 1;
@@ -291,7 +294,11 @@ export default function UpdateAuthorizationKeys({
                                 routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_SIZE
                             }
                             render={() => (
-                                <AccessStructureKeySetSize type={type} />
+                                <KeySetSize
+                                    type={type}
+                                    currentKeySetSize={currentKeySetSize}
+                                    newKeySetSize={newLevel2Keys.keys.length}
+                                />
                             )}
                         />
                         <Route
