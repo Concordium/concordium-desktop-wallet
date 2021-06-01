@@ -126,6 +126,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
         <Card className={styles.connection}>
             <h3>{displayText}</h3>
             <Form
+                className="mT50"
                 onSubmit={() => {
                     if (!testingConnection) {
                         setConnection();

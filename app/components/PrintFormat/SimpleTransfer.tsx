@@ -10,7 +10,7 @@ import {
     fee,
     standardPageFooter,
     displayStatus,
-    hashRow,
+    HashRows,
     standardTableHeader,
     displayExpiry,
 } from '~/utils/printUtility';
@@ -50,7 +50,7 @@ function PrintFormatSimpleTransfer({
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}
-                    {hashRow(transaction)}
+                    <HashRows transaction={transaction} />
                     {Boolean(image) && (
                         <tr>
                             <td>Identicon:</td>

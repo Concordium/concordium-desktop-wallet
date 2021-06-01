@@ -21,6 +21,7 @@ import {
 } from '~/utils/transactionHelpers';
 import routes from '~/constants/routes.json';
 import {
+    useCalcBakerStakeCooldownUntil,
     useChainParameters,
     useStakedAmount,
     useTransactionCostEstimate,
@@ -31,6 +32,7 @@ import PickAmount from './PickAmount';
 import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStakeProposalDetails';
 import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+import { getFormattedDateString } from '~/utils/timeHelpers';
 
 enum SubRoutes {
     accounts,
@@ -81,7 +83,12 @@ export default function UpdateBakerStakePage() {
         }
 
         const payload = { stake: toMicroUnits(stake) };
-        createUpdateBakerStakeTransaction(account.address, payload)
+        createUpdateBakerStakeTransaction(
+            account.address,
+            payload,
+            account?.signatureThreshold,
+            expiryTime
+        )
             .then(setTransaction)
             .catch((err) => setError(`Failed create transaction ${err}`));
     };
@@ -90,6 +97,7 @@ export default function UpdateBakerStakePage() {
         <MultiSignatureLayout
             pageTitle="Multi Signature Transactions | Update Baker Stake"
             stepTitle="Transaction Proposal - Update Baker Stake"
+            delegateScroll
         >
             <SimpleErrorModal
                 show={Boolean(error)}
@@ -97,20 +105,29 @@ export default function UpdateBakerStakePage() {
                 content={error}
                 onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
             />
-            <Columns divider columnScroll>
-                <Columns.Column header="Transaction Details" verticalPadding>
-                    <UpdateBakerStakeProposalDetails
-                        identity={identity}
-                        account={account}
-                        estimatedFee={estimatedFee}
-                        stake={toMicroUnitsSafe(stake)}
-                        expiryTime={expiryTime}
-                    />
+            <Columns
+                divider
+                columnScroll
+                className={styles.subtractContainerPadding}
+            >
+                <Columns.Column header="Transaction Details">
+                    <div className={styles.columnContent}>
+                        <UpdateBakerStakeProposalDetails
+                            identity={identity}
+                            account={account}
+                            estimatedFee={estimatedFee}
+                            stake={toMicroUnitsSafe(stake)}
+                            expiryTime={expiryTime}
+                        />
+                    </div>
                 </Columns.Column>
                 <Switch>
                     <Route exact path={path}>
-                        <Columns.Column header="Identities">
-                            <div className={styles.descriptionStep}>
+                        <Columns.Column
+                            header="Identities"
+                            className={styles.stretchColumn}
+                        >
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickIdentity
                                         setIdentity={setIdentity}
@@ -118,6 +135,7 @@ export default function UpdateBakerStakePage() {
                                     />
                                 </div>
                                 <Button
+                                    className={styles.listSelectButton}
                                     disabled={identity === undefined}
                                     onClick={() =>
                                         dispatch(
@@ -131,8 +149,11 @@ export default function UpdateBakerStakePage() {
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${SubRoutes.accounts}`}>
-                        <Columns.Column header="Accounts">
-                            <div className={styles.descriptionStep}>
+                        <Columns.Column
+                            header="Accounts"
+                            className={styles.stretchColumn}
+                        >
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickAccount
                                         identity={identity}
@@ -144,6 +165,7 @@ export default function UpdateBakerStakePage() {
                                     />
                                 </div>
                                 <Button
+                                    className={styles.listSelectButton}
                                     disabled={account === undefined}
                                     onClick={() => {
                                         dispatch(
@@ -157,18 +179,22 @@ export default function UpdateBakerStakePage() {
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${SubRoutes.stake}`}>
-                        <Columns.Column header="New staked amount">
-                            <div className={styles.descriptionStep}>
+                        <Columns.Column
+                            header="New staked amount"
+                            className={styles.stretchColumn}
+                        >
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     {account !== undefined ? (
                                         <PickNewStake
                                             account={account}
-                                            setNewStake={setStake}
+                                            stake={stake}
+                                            setStake={setStake}
                                         />
                                     ) : null}
-                                    <p>Enter your new stake here</p>
                                 </div>
                                 <Button
+                                    className="mT40"
                                     disabled={stake === undefined}
                                     onClick={() => {
                                         dispatch(
@@ -182,10 +208,13 @@ export default function UpdateBakerStakePage() {
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${SubRoutes.expiry}`}>
-                        <Columns.Column header="Transaction expiry time">
-                            <div className={styles.descriptionStep}>
+                        <Columns.Column
+                            header="Transaction expiry time"
+                            className={styles.stretchColumn}
+                        >
+                            <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
-                                    <p>
+                                    <p className="mT0">
                                         Choose the expiry date for the
                                         transaction.
                                     </p>
@@ -199,12 +228,13 @@ export default function UpdateBakerStakePage() {
                                         value={expiryTime}
                                         onChange={setExpiryTime}
                                     />
-                                    <p>
+                                    <p className="mB0">
                                         Committing the transaction after this
                                         date, will be rejected.
                                     </p>
                                 </div>
                                 <Button
+                                    className="mT40"
                                     disabled={
                                         expiryTime === undefined ||
                                         expiryTimeError !== undefined
@@ -222,7 +252,10 @@ export default function UpdateBakerStakePage() {
                         </Columns.Column>
                     </Route>
                     <Route path={`${path}/${SubRoutes.sign}`}>
-                        <Columns.Column header="Signature and Hardware Wallet">
+                        <Columns.Column
+                            header="Signature and Hardware Wallet"
+                            className={styles.stretchColumn}
+                        >
                             {transaction !== undefined &&
                             account !== undefined ? (
                                 <SignTransaction
@@ -240,25 +273,42 @@ export default function UpdateBakerStakePage() {
 
 type PickNewStakeProps = {
     account: Account;
-    setNewStake: (s: string | undefined) => void;
+    stake?: string;
+    setStake: (s: string | undefined) => void;
 };
 
-function PickNewStake({ account, setNewStake }: PickNewStakeProps) {
+function PickNewStake({ account, stake, setStake }: PickNewStakeProps) {
     const stakedAlready = useStakedAmount(account.address);
     const chainParameters = useChainParameters();
     const minimumThresholdForBaking =
         chainParameters !== undefined
             ? BigInt(chainParameters.minimumThresholdForBaking)
             : undefined;
+    const cooldownUntil = useCalcBakerStakeCooldownUntil();
+    const stakeGtu = toMicroUnitsSafe(stake);
 
     return (
-        <PickAmount
-            account={account}
-            amount={microGtuToGtu(stakedAlready)}
-            setAmount={setNewStake}
-            validateAmount={(...args) =>
-                validateBakerStake(minimumThresholdForBaking, ...args)
-            }
-        />
+        <>
+            <PickAmount
+                account={account}
+                amount={microGtuToGtu(stakedAlready)}
+                setAmount={setStake}
+                validateAmount={(...args) =>
+                    validateBakerStake(minimumThresholdForBaking, ...args)
+                }
+            />
+            <p>Enter your new stake here</p>
+            {cooldownUntil !== undefined &&
+            stakeGtu !== undefined &&
+            stakedAlready !== undefined &&
+            stakeGtu < stakedAlready ? (
+                <p>
+                    You are decreasing the baker stake and the stake will be
+                    frozen until <br />
+                    {getFormattedDateString(cooldownUntil)}
+                    <br /> where the actual decrease will take effect.
+                </p>
+            ) : null}
+        </>
     );
 }

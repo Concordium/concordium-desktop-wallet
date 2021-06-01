@@ -21,7 +21,7 @@ export default function UpdateBakerRestakeEarningsProposalDetails({
 }: Props) {
     return (
         <Details>
-            <PlainDetail title="Identity" value={identity?.name} />
+            <PlainDetail title="Identity" value={identity?.name} first />
             <AccountDetail title="Account" value={account} />
             <EnabledDetail title="Restake Earnings" value={restakeEarnings} />
             <DisplayEstimatedFee estimatedFee={estimatedFee} />

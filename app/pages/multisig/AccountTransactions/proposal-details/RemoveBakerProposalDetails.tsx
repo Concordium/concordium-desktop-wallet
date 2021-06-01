@@ -19,7 +19,7 @@ export default function RemoveBakerProposalDetails({
 }: Props) {
     return (
         <Details>
-            <PlainDetail title="Identity" value={identity?.name} />
+            <PlainDetail title="Identity" value={identity?.name} first />
             <AccountDetail title="Account" value={account} />
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <DisplayTransactionExpiryTime expiryTime={expiryTime} />
