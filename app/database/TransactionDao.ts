@@ -60,6 +60,11 @@ export async function updateTransaction(
         .update(updatedValues);
 }
 
+/** Given a list of transactions, checks which already exists.
+ *  New transactions are added to the table, while duplicates are treated
+ *  as updates to the current transactions.
+ * @Return the list of new transactions.
+ * */
 export async function insertTransactions(
     transactions: Partial<TransferTransaction>[]
 ) {
@@ -77,7 +82,7 @@ export async function insertTransactions(
         await table.insert(additionChunks[i]);
     }
 
-    return Promise.all(
+    await Promise.all(
         updates.map(async (transaction) => {
             const { transactionHash, ...otherFields } = transaction;
             return updateTransaction(
@@ -86,6 +91,8 @@ export async function insertTransactions(
             );
         })
     );
+
+    return additions;
 }
 
 export async function getMaxTransactionsIdOfAccount(

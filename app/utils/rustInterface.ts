@@ -322,7 +322,6 @@ export async function decryptAmounts(
         prfKey,
         encryptedAmounts,
     };
-
     const decryptedAmounts = await worker.postMessage({
         command: workerCommands.decryptAmounts,
         input: JSON.stringify(input),
@@ -354,6 +353,34 @@ export async function makeTransferToPublicData(
         input: JSON.stringify(input),
     });
     return JSON.parse(transferToPublicData);
+}
+
+export async function makeEncryptedTransferData(
+    amount: string,
+    receiverPublicKey: string,
+    prfKey: string,
+    global: Global,
+    accountEncryptedAmount: AccountEncryptedAmount,
+    accountNumber: number
+) {
+    const input = {
+        global,
+        amount,
+        receiverPublicKey,
+        prfKey,
+        accountNumber,
+        incomingAmounts: accountEncryptedAmount.incomingAmounts,
+        encryptedSelfAmount: accountEncryptedAmount.selfAmount,
+        aggIndex:
+            accountEncryptedAmount.startIndex +
+            accountEncryptedAmount.incomingAmounts.length,
+    };
+
+    const encryptedTransferData = await worker.postMessage({
+        command: workerCommands.createEncryptedTransferData,
+        input: JSON.stringify(input),
+    });
+    return JSON.parse(encryptedTransferData);
 }
 
 export async function createGenesisAccount(

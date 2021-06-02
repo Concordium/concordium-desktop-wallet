@@ -184,6 +184,15 @@ export interface SimpleTransferPayload {
     toAddress: string;
 }
 
+export interface EncryptedTransferPayload {
+    plainTransferAmount: string;
+    toAddress: string;
+    remainingEncryptedAmount?: EncryptedAmount;
+    transferAmount?: EncryptedAmount;
+    index?: string;
+    proof?: string;
+}
+
 export interface TransferToEncryptedPayload {
     amount: string;
 }
@@ -253,6 +262,7 @@ export type TransactionPayload =
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
     | SimpleTransferPayload
+    | EncryptedTransferPayload
     | AddBakerPayload
     | UpdateBakerKeysPayload
     | RemoveBakerPayload
@@ -277,6 +287,7 @@ export interface AccountTransaction<
 export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
+export type EncryptedTransfer = AccountTransaction<EncryptedTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
@@ -486,6 +497,7 @@ interface AccountBakerDetails {
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
+    accountEncryptionKey: string;
     accountThreshold: number;
     accountReleaseSchedule: AccountReleaseSchedule;
     accountBaker?: AccountBakerDetails;
@@ -742,6 +754,12 @@ export function instanceOfTransferToPublic(
     object: AccountTransaction<TransactionPayload>
 ): object is TransferToPublic {
     return object.transactionKind === TransactionKindId.Transfer_to_public;
+}
+
+export function instanceOfEncryptedTransfer(
+    object: AccountTransaction<TransactionPayload>
+): object is EncryptedTransfer {
+    return object.transactionKind === TransactionKindId.Encrypted_transfer;
 }
 
 export function instanceOfScheduledTransfer(

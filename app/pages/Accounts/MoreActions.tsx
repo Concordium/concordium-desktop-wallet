@@ -8,7 +8,6 @@ import routes from '../../constants/routes.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
 import ScheduleTransfer from './ScheduleTransfer';
-import ExportTransactions from './ExportTransactions';
 import TransferLogFilters from './TransferLogFilters';
 import CredentialInformation from './CredentialInformation';
 import CloseButton from '~/cross-app-components/CloseButton';
@@ -34,12 +33,12 @@ const items = [
         requiresCredentials: true,
     },
     {
-        name: 'Export Transactions',
-        location: routes.ACCOUNTS_MORE_EXPORT_TRANSACTIONS,
-    },
-    {
         name: 'Transfer Log Filters',
         location: routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS,
+    },
+    {
+        name: 'Make Account Report',
+        location: routes.ACCOUNT_REPORT,
     },
     {
         name: 'Credential Information',
@@ -73,7 +72,10 @@ export default function MoreActions({ account, accountInfo }: Props) {
                         !accountHasDeployedCredentials;
                     return (
                         <ButtonNavLink
-                            to={item.location}
+                            to={{
+                                pathname: item.location,
+                                state: account,
+                            }}
                             key={item.location}
                             disabled={isDisabled}
                             className={clsx(
@@ -113,15 +115,6 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 path={routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER}
                 render={() => (
                     <ScheduleTransfer
-                        account={account}
-                        returnFunction={returnFunction}
-                    />
-                )}
-            />
-            <Route
-                path={routes.ACCOUNTS_MORE_EXPORT_TRANSACTIONS}
-                render={() => (
-                    <ExportTransactions
                         account={account}
                         returnFunction={returnFunction}
                     />

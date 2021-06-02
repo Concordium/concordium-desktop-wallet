@@ -1,17 +1,17 @@
-import { instanceOfTransferToPublic, TransferToPublic } from '../types';
+import { instanceOfEncryptedTransfer, EncryptedTransfer } from '../types';
 import TransferHandler from './TransferHandler';
 import { AccountTransactionHandler } from '../transactionTypes';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 
-type TransactionType = TransferToPublic;
+type TransactionType = EncryptedTransfer;
 
-const TYPE = 'Unshield GTU';
+const TYPE = 'Send shielded GTU';
 
-export default class TransferToPublicHandler
+export default class EncryptedTransferHandler
     extends TransferHandler<TransactionType>
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
     constructor() {
-        super(TYPE, instanceOfTransferToPublic);
+        super(TYPE, instanceOfEncryptedTransfer);
     }
 }

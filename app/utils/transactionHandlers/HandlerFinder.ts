@@ -38,6 +38,7 @@ import UpdateLevel1KeysWithRootKeysHandler from './UpdateLevel1KeysWithRootKeysH
 import UpdateLevel1KeysWithLevel1KeysHandler from './UpdateLevel1KeysWithLevel1KeysHandler';
 import TransferToEncryptedHandler from './TransferToEncryptedHandler';
 import TransferToPublicHandler from './TransferToPublicHandler';
+import EncryptedTransferHandler from './EncryptedTransferHandler';
 import BakerHandler from './BakerHandler';
 
 export function findAccountTransactionHandler(
@@ -82,6 +83,9 @@ export function findAccountTransactionHandler(
                 instanceOfUpdateBakerRestakeEarnings
             )
         );
+    }
+    if (transactionKind === TransactionKindId.Encrypted_transfer) {
+        return new AccountHandlerTypeMiddleware(new EncryptedTransferHandler());
     }
     if (transactionKind === TransactionKindId.Transfer_with_schedule) {
         return new AccountHandlerTypeMiddleware(new ScheduledTransferHandler());

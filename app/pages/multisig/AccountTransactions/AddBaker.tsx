@@ -13,7 +13,7 @@ import {
     AddBakerPayload,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
-import PickAccount from './PickAccount';
+import PickAccount from '~/components/PickAccount';
 import { toMicroUnits } from '~/utils/gtu';
 import PickAmount from './PickAmount';
 import SimpleErrorModal from '~/components/SimpleErrorModal';

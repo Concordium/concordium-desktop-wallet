@@ -5,6 +5,7 @@ import {
     instanceOfTransferToEncrypted,
     instanceOfTransferToPublic,
     instanceOfScheduledTransfer,
+    instanceOfEncryptedTransfer,
     instanceOfUpdateAccountCredentials,
     instanceOfAddBaker,
     instanceOfRemoveBaker,
@@ -20,6 +21,7 @@ import {
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
 import DisplayInternalTransfer from './DisplayInternalTransfer';
 import DisplaySimpleTransfer from './DisplaySimpleTransfer';
+import DisplayEncryptedTransfer from './DisplayEncryptedTransfer';
 import DisplayAddBaker from './DisplayAddBaker';
 import DisplayUpdateBakerKeys from './DisplayUpdateBakerKeys';
 import DisplayRemoveBaker from './DisplayRemoveBaker';
@@ -54,6 +56,15 @@ export default function AccountTransactionDetails({ transaction }: Props) {
     if (instanceOfSimpleTransfer(transaction)) {
         return (
             <DisplaySimpleTransfer
+                transaction={transaction}
+                to={to}
+                fromName={fromName}
+            />
+        );
+    }
+    if (instanceOfEncryptedTransfer(transaction)) {
+        return (
+            <DisplayEncryptedTransfer
                 transaction={transaction}
                 to={to}
                 fromName={fromName}

@@ -35,7 +35,7 @@ export const energyConstants = {
  */
 export const payloadSizeEstimate = {
     SimpleTransfer: 41, // AccountAddress (FBS 32) + Amount (Word64) + TransactionKind (Word8)
-    EncryptedTransfer: 2617, // AccountAddress (FBS 32) + Amount (Word64) + TransactionKind (Word8) + EncryptedAmount (192 bytes) + index (Word64) + Proofs (Assumed 2369 bytes)
+    EncryptedTransfer: 2617, // AccountAddress (FBS 32) + EncryptedRemainingAmount (192 bytes) + TransactionKind (Word8) + EncryptedTransferAmount (192 bytes) + index (Word64) + Proofs (Assumed 2192 bytes)
     TransferToEncrypted: 9, // Amount (Word64) + TransactionKind (Word8)
     TransferToPublic: 1405, // Amount (Word64) + TransactionKind (Word8) + EncryptedAmount (192 bytes) + index (Word64) + Proofs (Assumed 1189 bytes)
     AddBaker: 362, // TransactionKind (Word8) + keys (160 bytes) + proofs(192 bytes) + stakedAmount (8 bytes) + restake_earnings (1 byte)
