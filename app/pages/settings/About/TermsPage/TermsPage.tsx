@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import terms from 'url-loader!@resources/html/Termsandconditions.html';
+import { useDispatch } from 'react-redux';
 import routes from '~/constants/routes.json';
 import localStorageKeys from '~/constants/localStorage.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import PageLayout from '~/components/PageLayout';
 
 import styles from './TermsPage.module.scss';
+import { acceptTerms } from '~/features/SettingsSlice';
 
 interface Props {
     /**
@@ -24,14 +26,17 @@ function sanitizeDocument(iframeEl: HTMLIFrameElement): void {
     classes.forEach((v) => iframeEl.contentDocument?.body.classList.remove(v));
 }
 
-function acceptTerms() {
-    window.localStorage.setItem(localStorageKeys.TERMS_ACCEPTED, terms);
-}
-
 export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
+    const dispatch = useDispatch();
     const [frameHeight, setFrameHeight] = useState<number | undefined>(
         undefined
     );
+
+    const handleAccept = useCallback(() => {
+        window.localStorage.setItem(localStorageKeys.TERMS_ACCEPTED, terms);
+        dispatch(acceptTerms());
+    }, [dispatch]);
+
     return (
         <PageLayout>
             <PageLayout.Header>
@@ -59,7 +64,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
                         to={routes.HOME}
                         size="regular"
                         inverted={false}
-                        onClick={acceptTerms}
+                        onClick={handleAccept}
                     >
                         Yes, I Accept
                     </ButtonNavLink>

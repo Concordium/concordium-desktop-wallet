@@ -11,6 +11,7 @@ import MainLayout from '~/cross-app-components/MainLayout';
 import Routes from '../Routes';
 import Sidebar from '../Sidebar';
 import styles from './Root.module.scss';
+import TermsAcceptanceGuard from '../TermsAcceptanceGuard';
 
 type Props = {
     store: Store;
@@ -25,7 +26,9 @@ const Root = ({ store, history }: Props) => (
                 className={styles.root}
                 style={{ backgroundImage: `url(${BgImage})` }}
             >
-                <Routes />
+                <TermsAcceptanceGuard>
+                    <Routes />
+                </TermsAcceptanceGuard>
             </MainLayout>
         </ConnectedRouter>
     </Provider>
