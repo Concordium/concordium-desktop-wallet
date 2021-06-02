@@ -3,6 +3,7 @@ import { SubmitHandler } from 'react-hook-form';
 import Modal from '~/cross-app-components/Modal';
 import Form from '~/components/Form';
 import styles from './InputModal.module.scss';
+import { ValidationRules } from '~/utils/types';
 
 interface Props {
     title: string;
@@ -12,7 +13,7 @@ interface Props {
     type?: string;
     onClose(): void;
     placeholder: string;
-    validValue(value: string): string | undefined;
+    validationRules: ValidationRules;
     buttonOnClick(value: string): void;
 }
 
@@ -24,7 +25,7 @@ function InputModal({
     title,
     text,
     buttonText,
-    validValue,
+    validationRules,
     buttonOnClick,
     placeholder,
     type = 'text',
@@ -47,11 +48,11 @@ function InputModal({
                 <Form.Input
                     className={styles.formInput}
                     name="value"
-                    rules={{ validate: validValue }}
+                    rules={validationRules}
                     placeholder={placeholder}
                     type={type}
                 />
-                <Form.Submit>{buttonText}</Form.Submit>
+                <Form.Submit className="mT100">{buttonText}</Form.Submit>
             </Form>
         </Modal>
     );
