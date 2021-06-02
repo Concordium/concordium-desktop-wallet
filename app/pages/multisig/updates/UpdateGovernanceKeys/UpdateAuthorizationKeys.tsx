@@ -34,6 +34,7 @@ import routes from '~/constants/routes.json';
 import ProposeNewKey from './ProposeNewKey';
 import AccessStructureThreshold from './AccessStructureThreshold';
 import KeySetSize from './KeySetSize';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 interface Props {
     blockSummary: BlockSummary;
@@ -56,6 +57,8 @@ export default function UpdateAuthorizationKeys({
     const [expiryTime, setExpiryTime] = useState<Date | undefined>(
         getDefaultExpiry()
     );
+
+    const [error, setError] = useState<string>();
 
     const keyUpdateType: AuthorizationKeysUpdateType =
         UpdateType.UpdateLevel2KeysUsingRootKeys === type ? 2 : 1;
@@ -174,6 +177,7 @@ export default function UpdateAuthorizationKeys({
                                     ) {
                                         removeAddedKey = true;
                                     }
+
                                     return {
                                         index: value.index,
                                         status: keyToUpdate.status,
@@ -197,6 +201,27 @@ export default function UpdateAuthorizationKeys({
                     return currentAccessStructure;
                 }
             );
+
+            // Check if the update resulted in any access structure only having
+            // removed indices, as it is not valid to remove all keys for one
+            // access structure. Display the error to the user.
+            const acccessStructureWithNoIndices = updatedAccessStructures.find(
+                (acs) => {
+                    const notRemovedIndex = acs.publicKeyIndicies.find(
+                        (index) => index.status !== KeyUpdateEntryStatus.Removed
+                    );
+                    if (!notRemovedIndex) {
+                        return true;
+                    }
+                    return false;
+                }
+            );
+            if (acccessStructureWithNoIndices) {
+                setError(
+                    'It is not allowed to remove all keys for a given parameter.'
+                );
+                return;
+            }
 
             // If removing an added key, and no access structure refers to it anymore,
             // then we remove the key entirely.
@@ -286,109 +311,124 @@ export default function UpdateAuthorizationKeys({
     }
 
     return (
-        <Columns divider columnScroll columnClassName={styles.column}>
-            <Columns.Column header="Transaction Details">
-                <div className={styles.columnContent}>
-                    <h2>Level 2 keys and their indices</h2>
-                    <p>
-                        Current size of level 2 key set:{' '}
-                        <b>{currentKeySetSize}</b>
-                    </p>
-                    <p>
-                        New size of level 2 key set:{' '}
-                        <b>{newLevel2Keys.keys.length}</b>
-                    </p>
-                    <ul>
-                        {newLevel2Keys.keys.map((key, index) => {
-                            return (
-                                <li
-                                    className={localStyles.listItem}
-                                    key={key.verifyKey}
-                                >
-                                    <div className="flex alignCenter">
-                                        <p className={localStyles.index}>
-                                            {index}
-                                        </p>
-                                        <p className={localStyles.keyText}>
-                                            {key.verifyKey}
-                                        </p>
-                                    </div>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                    {newLevel2Keys.accessStructures.map((accessStructure) => {
-                        return displayAccessStructure(
-                            accessStructure,
-                            newLevel2Keys.keys
-                        );
-                    })}
-                    <h5>Effective time</h5>
-                    <InputTimestamp
-                        value={effectiveTime}
-                        onChange={setEffectiveTime}
-                    />
-                    <h5>Transaction expiry time</h5>
-                    <InputTimestamp
-                        value={expiryTime}
-                        onChange={setExpiryTime}
-                        isInvalid={expiryTimeError !== undefined}
-                        error={expiryTimeError}
-                    />
-                    {expiryTime !== undefined ? (
+        <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                content={error}
+                onClick={() => setError(undefined)}
+                header="Error"
+            />
+            <Columns divider columnScroll columnClassName={styles.column}>
+                <Columns.Column header="Transaction Details">
+                    <div className={styles.columnContent}>
+                        <h2>Level 2 keys and their indices</h2>
                         <p>
-                            Note: A transaction can only be submitted in the 2
-                            hours before the expiry <br /> (
-                            {getFormattedDateString(
-                                subtractHours(2, expiryTime)
-                            )}
-                            )
+                            Current size of level 2 key set:{' '}
+                            <b>{currentKeySetSize}</b>
                         </p>
-                    ) : undefined}
-                </div>
-            </Columns.Column>
-            <Columns.Column className={styles.stretchColumn} header={' '}>
-                <div className={styles.columnContent}>
-                    <Switch>
-                        <Route
-                            path={
-                                routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_THRESHOLD
+                        <p>
+                            New size of level 2 key set:{' '}
+                            <b>{newLevel2Keys.keys.length}</b>
+                        </p>
+                        <ul>
+                            {newLevel2Keys.keys.map((key, index) => {
+                                return (
+                                    <li
+                                        className={localStyles.listItem}
+                                        key={key.verifyKey}
+                                    >
+                                        <div className="flex alignCenter">
+                                            <p className={localStyles.index}>
+                                                {index}
+                                            </p>
+                                            <p className={localStyles.keyText}>
+                                                {key.verifyKey}
+                                            </p>
+                                        </div>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                        {newLevel2Keys.accessStructures.map(
+                            (accessStructure) => {
+                                return displayAccessStructure(
+                                    accessStructure,
+                                    newLevel2Keys.keys
+                                );
                             }
-                            render={() => (
-                                <AccessStructureThreshold
-                                    currentAccessStructures={
-                                        currentAccessStructures
-                                    }
-                                    newAccessStructures={
-                                        newLevel2Keys.accessStructures
-                                    }
-                                    currentThresholds={currentThresholds}
-                                    setThreshold={setThreshold}
-                                    submitFunction={submitFunction}
-                                />
-                            )}
+                        )}
+                        <h5>Effective time</h5>
+                        <InputTimestamp
+                            value={effectiveTime}
+                            onChange={setEffectiveTime}
                         />
-                        <Route
-                            path={
-                                routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_SIZE
-                            }
-                            render={() => (
-                                <KeySetSize
-                                    type={type}
-                                    currentKeySetSize={currentKeySetSize}
-                                    newKeySetSize={newLevel2Keys.keys.length}
-                                />
-                            )}
+                        <h5>Transaction expiry time</h5>
+                        <InputTimestamp
+                            value={expiryTime}
+                            onChange={setExpiryTime}
+                            isInvalid={expiryTimeError !== undefined}
+                            error={expiryTimeError}
                         />
-                        <Route
-                            path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
-                            render={() => (
-                                <ProposeNewKey type={type} addKey={addNewKey} />
-                            )}
-                        />
-                    </Switch>
-                </div>
-            </Columns.Column>
-        </Columns>
+                        {expiryTime !== undefined ? (
+                            <p>
+                                Note: A transaction can only be submitted in the
+                                2 hours before the expiry <br /> (
+                                {getFormattedDateString(
+                                    subtractHours(2, expiryTime)
+                                )}
+                                )
+                            </p>
+                        ) : undefined}
+                    </div>
+                </Columns.Column>
+                <Columns.Column className={styles.stretchColumn} header={' '}>
+                    <div className={styles.columnContent}>
+                        <Switch>
+                            <Route
+                                path={
+                                    routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_THRESHOLD
+                                }
+                                render={() => (
+                                    <AccessStructureThreshold
+                                        currentAccessStructures={
+                                            currentAccessStructures
+                                        }
+                                        newAccessStructures={
+                                            newLevel2Keys.accessStructures
+                                        }
+                                        currentThresholds={currentThresholds}
+                                        setThreshold={setThreshold}
+                                        submitFunction={submitFunction}
+                                    />
+                                )}
+                            />
+                            <Route
+                                path={
+                                    routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_SIZE
+                                }
+                                render={() => (
+                                    <KeySetSize
+                                        type={type}
+                                        currentKeySetSize={currentKeySetSize}
+                                        newKeySetSize={
+                                            newLevel2Keys.keys.length
+                                        }
+                                    />
+                                )}
+                            />
+                            <Route
+                                path={routes.MULTISIGTRANSACTIONS_PROPOSAL}
+                                render={() => (
+                                    <ProposeNewKey
+                                        type={type}
+                                        addKey={addNewKey}
+                                    />
+                                )}
+                            />
+                        </Switch>
+                    </div>
+                </Columns.Column>
+            </Columns>
+        </>
     );
 }
