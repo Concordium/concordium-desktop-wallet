@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
@@ -6,7 +6,11 @@ import { MultiSignatureTransaction } from '~/utils/types';
 import { expireProposals } from '~/utils/ProposalHelper';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import ProposalStatus from '../../ProposalStatus';
+
 import styles from './ProposalList.module.scss';
+import Button from '~/cross-app-components/Button';
+
+const PAGE_SIZE = 20;
 
 /**
  * Sorts so that the newest multi signature transaction is first.
@@ -24,6 +28,8 @@ function newestFirst(
 export default function ProposalList(): JSX.Element {
     const dispatch = useDispatch();
     const proposals = useSelector(proposalsSelector);
+    const [listSize, setListSize] = useState(PAGE_SIZE);
+    const hasMore = listSize < proposals.length;
 
     useEffect(() => {
         return expireProposals(proposals, dispatch);
@@ -34,6 +40,7 @@ export default function ProposalList(): JSX.Element {
             {proposals
                 .slice()
                 .sort(newestFirst)
+                .slice(0, hasMore ? listSize : undefined)
                 .map((p) => (
                     <Link
                         className={styles.link}
@@ -43,6 +50,14 @@ export default function ProposalList(): JSX.Element {
                         <ProposalStatus className={styles.item} proposal={p} />
                     </Link>
                 ))}
+            {hasMore && (
+                <Button
+                    className={styles.button}
+                    onClick={() => setListSize((v) => v + PAGE_SIZE)}
+                >
+                    Show {PAGE_SIZE} more
+                </Button>
+            )}
         </>
     );
 }
