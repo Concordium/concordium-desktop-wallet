@@ -1,21 +1,29 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
-import { loadAllSettings, updateEntry } from '../database/SettingsDao';
+import { loadAllSettings, updateEntry } from '~/database/SettingsDao';
 // eslint-disable-next-line import/no-cycle
-import { RootState } from '../store/store';
-import { Setting, Settings } from '../utils/types';
+import { RootState } from '~/store/store';
+import { hasAcceptedTerms } from '~/utils/termsHelpers';
+import { Setting, Settings } from '~/utils/types';
 
 interface SettingsState {
     settings: Settings[];
+    termsAccepted: boolean;
 }
+
+const termsAccepted = hasAcceptedTerms();
 
 const settingsSlice = createSlice({
     name: 'settings',
     initialState: {
         settings: [],
+        termsAccepted,
     } as SettingsState,
     reducers: {
         updateSettings: (state, index) => {
             state.settings = index.payload;
+        },
+        acceptTerms: (state) => {
+            state.termsAccepted = true;
         },
     },
 });
@@ -50,7 +58,10 @@ export const foundationTransactionsEnabledSelector = (
     return false;
 };
 
-export const { updateSettings } = settingsSlice.actions;
+export const termsAcceptedSelector = ({ settings }: RootState) =>
+    settings.termsAccepted;
+
+export const { updateSettings, acceptTerms } = settingsSlice.actions;
 
 /**
  * Updates the given Setting in the database, and dispatches an update to the state

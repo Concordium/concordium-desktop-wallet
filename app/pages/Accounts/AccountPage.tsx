@@ -6,7 +6,7 @@ import AccountView from './AccountView';
 import NoIdentities from '~/components/NoIdentities';
 import { accountsSelector } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
-import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import BuildSchedule from './BuildSchedule';
 import AccountPageHeader from './AccountPageHeader';
 
