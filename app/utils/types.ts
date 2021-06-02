@@ -807,7 +807,7 @@ export function isUpdateLevel2KeysWithRootKeys(
 
 export function isUpdateUsingRootKeys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): boolean {
     return (
         isUpdateRootKeys(transaction) ||
         isUpdateLevel1KeysWithRootKeys(transaction) ||
@@ -829,7 +829,7 @@ export function isUpdateLevel2KeysWithLevel1Keys(
 
 export function isUpdateUsingLevel1Keys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): boolean {
     return (
         isUpdateLevel1KeysWithLevel1Keys(transaction) ||
         isUpdateLevel2KeysWithLevel1Keys(transaction)
