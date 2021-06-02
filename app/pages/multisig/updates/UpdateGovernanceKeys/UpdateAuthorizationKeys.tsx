@@ -62,6 +62,10 @@ export default function UpdateAuthorizationKeys({
     const currentKeys = blockSummary.updates.keys.level2Keys.keys;
     const currentKeySetSize = currentKeys.length;
     const currentAuthorizations = blockSummary.updates.keys.level2Keys;
+    const currentAccessStructures = mapCurrentAuthorizationsToUpdate(
+        keyUpdateType,
+        currentAuthorizations
+    ).accessStructures;
     const currentThresholds = getCurrentThresholds(currentAuthorizations);
 
     const [newLevel2Keys, setNewLevel2Keys] = useState<AuthorizationKeysUpdate>(
@@ -352,7 +356,10 @@ export default function UpdateAuthorizationKeys({
                             }
                             render={() => (
                                 <AccessStructureThreshold
-                                    accessStructures={
+                                    currentAccessStructures={
+                                        currentAccessStructures
+                                    }
+                                    newAccessStructures={
                                         newLevel2Keys.accessStructures
                                     }
                                     currentThresholds={currentThresholds}

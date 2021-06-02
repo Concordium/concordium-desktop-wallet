@@ -10,10 +10,20 @@ import styles from './KeySetThreshold.module.scss';
 import { getAccessStructureTitle } from './util';
 
 interface Props {
-    accessStructures: AccessStructure[];
+    currentAccessStructures: AccessStructure[];
+    newAccessStructures: AccessStructure[];
     currentThresholds: Map<AccessStructureEnum, number>;
     setThreshold(type: AccessStructureEnum, threshold: number): void;
     submitFunction(): void;
+}
+
+function getThreshold(
+    type: AccessStructureEnum,
+    accessStructures: AccessStructure[]
+) {
+    return accessStructures.find((accessStructure) => {
+        return accessStructure.type === type;
+    })?.threshold;
 }
 
 /**
@@ -23,9 +33,9 @@ interface Props {
  */
 function isInvalid(
     thresholds: Map<AccessStructureEnum, number>,
-    accessStructures: AccessStructure[]
+    newAccessStructures: AccessStructure[]
 ): boolean {
-    const accountStructureWithInvalidThreshold = accessStructures.find(
+    const accountStructureWithInvalidThreshold = newAccessStructures.find(
         (accessStructure) => {
             const threshold = thresholds.get(accessStructure.type);
             if (threshold) {
@@ -53,7 +63,8 @@ function isInvalid(
  * structures.
  */
 export default function AccessStructureThreshold({
-    accessStructures,
+    currentAccessStructures,
+    newAccessStructures,
     currentThresholds,
     submitFunction,
     setThreshold,
@@ -83,30 +94,37 @@ export default function AccessStructureThreshold({
                     want to make any changes to the thresholds, then you can
                     just leave it as is.
                 </p>
-                {accessStructures.map((accessStructure) => {
+                {newAccessStructures.map((newAccessStructure) => {
                     return (
                         <div
-                            key={accessStructure.type}
+                            key={newAccessStructure.type}
                             className={styles.accessStructure}
                         >
                             <h2>
-                                {getAccessStructureTitle(accessStructure.type)}
+                                {getAccessStructureTitle(
+                                    newAccessStructure.type
+                                )}
                             </h2>
                             <h3>Current signature threshold</h3>
-                            <h1>{accessStructure.threshold}</h1>
+                            <h1>
+                                {getThreshold(
+                                    newAccessStructure.type,
+                                    currentAccessStructures
+                                )}
+                            </h1>
                             <h3>New signature threshold</h3>
                             <InlineNumber
                                 className={styles.inputField}
                                 value={thresholds
-                                    .get(accessStructure.type)
+                                    .get(newAccessStructure.type)
                                     ?.toString()}
                                 onChange={(v) => {
                                     updateLocalThreshold(
                                         v,
-                                        accessStructure.type
+                                        newAccessStructure.type
                                     );
                                     setThreshold(
-                                        accessStructure.type,
+                                        newAccessStructure.type,
                                         Number.parseInt(
                                             v !== undefined ? v : '1',
                                             10
@@ -121,7 +139,7 @@ export default function AccessStructureThreshold({
             </div>
             <Button
                 onClick={submitFunction}
-                disabled={isInvalid(thresholds, accessStructures)}
+                disabled={isInvalid(thresholds, newAccessStructures)}
             >
                 Continue
             </Button>
