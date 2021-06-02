@@ -14,6 +14,7 @@ import { parse, stringify } from '~/utils/JSONHelper';
 import { ModalErrorInput } from '~/components/SimpleErrorModal';
 import { updateCurrentProposal } from '~/features/MultiSignatureSlice';
 import getTransactionSignDigest from '~/utils/transactionHash';
+import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 
 async function HandleAccountTransactionSignatureFile(
     dispatch: Dispatch,
@@ -47,6 +48,29 @@ async function HandleAccountTransactionSignatureFile(
             header: 'Duplicate Credential',
             content:
                 'The loaded signature file contains a signature, from a credential, which already has a signature on the proposal.',
+        };
+    }
+
+    // TODO: Remove assumption that a credential only has 1 signature
+    const signatureIndex = 0;
+
+    const accountInfo = await getAccountInfoOfAddress(transactionObject.sender);
+    const verificationKey =
+        accountInfo.accountCredentials[credentialIndex].value.contents
+            .credentialPublicKeys.keys[signatureIndex];
+    // Prevent the user from adding a signature which is not valid on the proposal.
+    if (
+        ed.verify(
+            signature[signatureIndex],
+            getTransactionSignDigest(proposal),
+            verificationKey.verifyKey
+        )
+    ) {
+        return {
+            show: true,
+            header: 'Incorrect Signature',
+            content:
+                'The loaded signature is not valid for the current transaction.',
         };
     }
 
