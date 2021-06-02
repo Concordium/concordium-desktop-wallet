@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { push } from 'connected-react-router';
 import { Identity, Account, AccountInfo } from '~/utils/types';
 import AccountCard from '~/components/AccountCard';
 import {
@@ -9,6 +10,8 @@ import {
     loadAccountInfos,
 } from '~/features/AccountSlice';
 import CardList from '~/cross-app-components/CardList';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
+import routes from '~/constants/routes.json';
 
 interface Props {
     chosenAccount?: Account;
@@ -48,30 +51,41 @@ export default function PickAccount({
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+    const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
         if (accounts && !loaded) {
             setLoaded(true);
-            loadAccountInfos(accounts, dispatch);
+            loadAccountInfos(accounts, dispatch).catch((e) =>
+                setError(e.message)
+            );
         }
     }, [accounts, dispatch, loaded]);
 
     return (
-        <CardList>
-            {accounts
-                .filter((a) => filter?.(a, accountsInfo[a.address]) ?? true)
-                .map((account: Account, index: number) => (
-                    <AccountCard
-                        key={account.address}
-                        active={index === chosenIndex}
-                        account={account}
-                        accountInfo={accountsInfo[account.address]}
-                        onClick={() => {
-                            setChosenIndex(index);
-                            setAccount(account);
-                        }}
-                    />
-                ))}
-        </CardList>
+        <>
+            <SimpleErrorModal
+                show={Boolean(error)}
+                header="Unable to load Accounts"
+                content={error}
+                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
+            />
+            <CardList>
+                {accounts
+                    .filter((a) => filter?.(a, accountsInfo[a.address]) ?? true)
+                    .map((account: Account, index: number) => (
+                        <AccountCard
+                            key={account.address}
+                            active={index === chosenIndex}
+                            account={account}
+                            accountInfo={accountsInfo[account.address]}
+                            onClick={() => {
+                                setChosenIndex(index);
+                                setAccount(account);
+                            }}
+                        />
+                    ))}
+            </CardList>
+        </>
     );
 }
