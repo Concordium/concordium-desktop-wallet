@@ -43,7 +43,6 @@ export default async function signUpdateCredentials(
         index,
         value,
     ]);
-    addedCredentials.sort();
 
     const addedCredentialsLength = addedCredentials.length;
     const removedCredentialsLength = transaction.payload.removedCredIds.length;

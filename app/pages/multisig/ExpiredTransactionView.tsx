@@ -1,5 +1,7 @@
 import React from 'react';
-import { isExpired } from '~/utils/transactionHelpers';
+import { useCurrentTime } from '~/utils/hooks';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import { getTimeout } from '~/utils/transactionHelpers';
 import {
     Transaction,
     MultiSignatureTransaction,
@@ -19,10 +21,13 @@ export default function ExpiredTransactionView({
     // effective time. This makes sense currently as the expiration is always 1 second earlier than the
     // effective time, but that might not be the case we end up with. If we change that, then this
     // should be reconsidered.
+
+    const now = useCurrentTime();
+    const expiry = dateFromTimeStamp(getTimeout(transaction));
+
     if (
-        (!proposal ||
-            proposal.status === MultiSignatureTransactionStatus.Expired) &&
-        isExpired(transaction)
+        proposal?.status === MultiSignatureTransactionStatus.Expired ||
+        expiry < now
     ) {
         return <span className="textError">The transaction has expired</span>;
     }

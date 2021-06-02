@@ -13,6 +13,8 @@ import {
     instanceOfTransferToEncrypted,
     instanceOfTransferToPublic,
     TransferToPublic,
+    instanceOfEncryptedTransfer,
+    EncryptedTransfer,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 import getTransactionCost from './transactionCosts';
@@ -172,6 +174,21 @@ function convertScheduledTransfer(
     };
 }
 
+// Helper function for converting Account Transaction to TransferTransaction.
+// Handles the fields of a encrypted transfer, which cannot be converted by the generic function .
+function convertEncryptedTransfer(
+    transaction: EncryptedTransfer
+): TypeSpecific {
+    const amount = transaction.payload.plainTransferAmount;
+
+    return {
+        transactionKind: TransactionKindString.EncryptedAmountTransfer,
+        subtotal: amount.toString(),
+        decryptedAmount: (-amount).toString(),
+        toAddress: transaction.payload.toAddress,
+    };
+}
+
 /**
  * Converts an Account Transaction, so that it fits local Transfer Transaction model and
  * can be entered into the local database.
@@ -193,6 +210,8 @@ export async function convertAccountTransaction(
         typeSpecific = convertTransferToEncrypted(transaction);
     } else if (instanceOfTransferToPublic(transaction)) {
         typeSpecific = convertTransferToPublic(transaction);
+    } else if (instanceOfEncryptedTransfer(transaction)) {
+        typeSpecific = convertEncryptedTransfer(transaction);
     } else {
         throw new Error('unsupported transaction type - please implement');
     }

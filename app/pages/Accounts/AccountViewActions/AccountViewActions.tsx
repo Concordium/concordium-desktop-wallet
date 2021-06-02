@@ -13,21 +13,33 @@ import ButtonNavLink from '~/components/ButtonNavLink';
 import styles from './AccountViewAction.module.scss';
 import { Account } from '~/utils/types';
 
-const more = {
+interface ActionObject {
+    route: string;
+    label: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Image: any;
+    imageClassName: string;
+    height: number;
+    width?: number;
+    isDisabled(hasCredential: boolean): boolean;
+}
+
+const more: ActionObject = {
     route: routes.ACCOUNTS_MORE,
     label: 'More',
     Image: MoreImage,
     imageClassName: 'mB15',
-    height: '10',
+    height: 30,
+    width: 30,
     isDisabled: () => false,
 };
-const viewingShieldedbuttons = [
+const viewingShieldedbuttons: ActionObject[] = [
     {
         route: routes.ACCOUNTS_ENCRYPTEDTRANSFER,
         label: 'Send',
         Image: SendEncryptedImage,
         imageClassName: styles.actionImage,
-        height: '35',
+        height: 35,
         isDisabled: (hasCredential: boolean) => !hasCredential,
     },
     {
@@ -35,18 +47,18 @@ const viewingShieldedbuttons = [
         label: 'Unshield',
         Image: UnshieldImage,
         imageClassName: styles.actionImage,
-        height: '40',
+        height: 40,
         isDisabled: (hasCredential: boolean) => !hasCredential,
     },
     more,
 ];
-const viewingUnshieldedbuttons = [
+const viewingUnshieldedbuttons: ActionObject[] = [
     {
         route: routes.ACCOUNTS_SIMPLETRANSFER,
         label: 'Send',
         Image: SendImage,
         imageClassName: styles.actionImage,
-        height: '30',
+        height: 30,
         isDisabled: (hasCredential: boolean) => !hasCredential,
     },
     {
@@ -54,7 +66,7 @@ const viewingUnshieldedbuttons = [
         label: 'Shield',
         Image: ShieldImage,
         imageClassName: styles.actionImage,
-        height: '30',
+        height: 30,
         isDisabled: (hasCredential: boolean) => !hasCredential,
     },
     more,
@@ -86,6 +98,7 @@ export default function AccountViewActions({ account }: Props) {
                     Image,
                     imageClassName,
                     height,
+                    width,
                     isDisabled,
                 }) => (
                     <ButtonNavLink
@@ -98,7 +111,11 @@ export default function AccountViewActions({ account }: Props) {
                         disabled={isDisabled(accountHasDeployedCredentials)}
                         to={route}
                     >
-                        <Image height={height} className={imageClassName} />
+                        <Image
+                            height={height}
+                            width={width}
+                            className={imageClassName}
+                        />
                         {label}
                     </ButtonNavLink>
                 )

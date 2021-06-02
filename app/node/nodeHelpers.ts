@@ -11,8 +11,9 @@ export interface AccountInfoPair {
     accountInfo: AccountInfo;
 }
 
-// gets the accountInfos for each given accounts. returns a list of objects
-// each containing an account and its accountInfo.
+/** Gets the accountInfos for each given accounts. returns a list of objects
+ *   each containing an account and its accountInfo.
+ */
 export async function getAccountInfos(
     accounts: Account[]
 ): Promise<AccountInfoPair[]> {
@@ -30,12 +31,24 @@ export async function getAccountInfos(
     return accountInfos;
 }
 
+/** Gets the accountInfo for the given address. */
 export async function getAccountInfoOfAddress(
     address: string
 ): Promise<AccountInfo> {
     const consensusStatus = await getConsensusStatus();
     const blockHash = consensusStatus.lastFinalizedBlock;
     return getAccountInfo(address, blockHash);
+}
+
+export async function fetchLastFinalizedBlockSummary() {
+    const consensusStatus = await getConsensusStatus();
+    const lastFinalizedBlockSummary = await getBlockSummary(
+        consensusStatus.lastFinalizedBlock
+    );
+    return {
+        consensusStatus,
+        lastFinalizedBlockSummary,
+    };
 }
 
 export async function fetchGlobal(specificBlockHash?: string): Promise<Global> {

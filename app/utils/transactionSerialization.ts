@@ -9,10 +9,16 @@ import {
     TransferToEncryptedPayload,
     UpdateAccountCredentialsPayload,
     TransferToPublicPayload,
+    EncryptedTransferPayload,
     TransactionAccountSignature,
     Signature,
     TransactionCredentialSignature,
     AddBakerPayload,
+    UpdateBakerKeysPayload,
+    BakerVerifyKeys,
+    BakerKeyProofs,
+    UpdateBakerStakePayload,
+    UpdateBakerRestakeEarningsPayload,
 } from './types';
 import {
     encodeWord32,
@@ -23,6 +29,7 @@ import {
     putBase58Check,
     hashSha256,
     serializeMap,
+    base58ToBuffer,
     serializeList,
     serializeCredentialDeploymentInformation,
     serializeBoolean,
@@ -108,11 +115,7 @@ function serializeUpdateCredentials(payload: UpdateAccountCredentialsPayload) {
 export function serializeTransferToPublicData(
     payload: TransferToPublicPayload
 ) {
-    if (
-        !payload.proof ||
-        payload.index === undefined ||
-        !payload.remainingEncryptedAmount
-    ) {
+    if (payload.index === undefined || !payload.remainingEncryptedAmount) {
         throw new Error('unexpected missing data of Transfer to Public data');
     }
     const remainingEncryptedAmount = Buffer.from(
@@ -143,6 +146,46 @@ function serializeTransferToPublic(payload: TransferToPublicPayload) {
     return Buffer.from(serialized);
 }
 
+export function serializeEncryptedTransferData(
+    payload: EncryptedTransferPayload
+) {
+    if (
+        payload.index === undefined ||
+        !payload.remainingEncryptedAmount ||
+        !payload.transferAmount
+    ) {
+        throw new Error('unexpected missing data of Encrypted Transfer data');
+    }
+    const remainingEncryptedAmount = Buffer.from(
+        payload.remainingEncryptedAmount,
+        'hex'
+    );
+    const transferAmount = Buffer.from(payload.transferAmount, 'hex');
+
+    return Buffer.concat([
+        base58ToBuffer(payload.toAddress),
+        remainingEncryptedAmount,
+        transferAmount,
+        encodeWord64(BigInt(payload.index)),
+    ]);
+}
+
+function serializeEncryptedTransfer(payload: EncryptedTransferPayload) {
+    if (!payload.proof) {
+        throw new Error('unexpected missing proof of Encrypted Transfer data');
+    }
+
+    const proof = Buffer.from(payload.proof, 'hex');
+    const data = serializeEncryptedTransferData(payload);
+    const size = 1 + data.length + proof.length;
+    const serialized = new Uint8Array(size);
+
+    serialized[0] = TransactionKind.Encrypted_transfer;
+    put(serialized, 1, data);
+    put(serialized, 1 + data.length, proof);
+    return Buffer.from(serialized);
+}
+
 export function serializeTransactionHeader(
     sender: string,
     nonce: string,
@@ -162,7 +205,7 @@ export function serializeTransactionHeader(
     return Buffer.from(serialized);
 }
 
-export function serializeAddBakerKeys(payload: AddBakerPayload) {
+export function serializeBakerVerifyKeys(payload: BakerVerifyKeys) {
     return Buffer.concat([
         putHexString(payload.electionVerifyKey),
         putHexString(payload.signatureVerifyKey),
@@ -170,11 +213,17 @@ export function serializeAddBakerKeys(payload: AddBakerPayload) {
     ]);
 }
 
-export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
+export function serializeBakerKeyProofs(payload: BakerKeyProofs) {
     return Buffer.concat([
         putHexString(payload.proofSignature),
         putHexString(payload.proofElection),
         putHexString(payload.proofAggregation),
+    ]);
+}
+
+export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
+    return Buffer.concat([
+        serializeBakerKeyProofs(payload),
         encodeWord64(BigInt(payload.bakingStake)),
         serializeBoolean(payload.restakeEarnings),
     ]);
@@ -182,9 +231,37 @@ export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
 
 export function serializeAddBaker(payload: AddBakerPayload) {
     return Buffer.concat([
-        Uint8Array.of(4),
-        serializeAddBakerKeys(payload),
+        Uint8Array.of(TransactionKind.Add_baker),
+        serializeBakerVerifyKeys(payload),
         serializeAddBakerProofsStakeRestake(payload),
+    ]);
+}
+
+export function serializeUpdateBakerKeys(payload: UpdateBakerKeysPayload) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Update_baker_keys),
+        serializeBakerVerifyKeys(payload),
+        serializeBakerKeyProofs(payload),
+    ]);
+}
+
+export function serializeRemoveBaker() {
+    return Buffer.from(Uint8Array.of(TransactionKind.Remove_baker));
+}
+
+export function serializeUpdateBakerStake(payload: UpdateBakerStakePayload) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Update_baker_stake),
+        encodeWord64(BigInt(payload.stake)),
+    ]);
+}
+
+export function serializeUpdateBakerRestakeEarnings(
+    payload: UpdateBakerRestakeEarningsPayload
+) {
+    return Buffer.concat([
+        Uint8Array.of(TransactionKind.Update_baker_restake_earnings),
+        serializeBoolean(payload.restakeEarnings),
     ]);
 }
 
@@ -211,10 +288,27 @@ export function serializeTransferPayload(
             return serializeTransferToPublic(
                 payload as TransferToPublicPayload
             );
+        case TransactionKind.Encrypted_transfer:
+            return serializeEncryptedTransfer(
+                payload as EncryptedTransferPayload
+            );
         case TransactionKind.Add_baker:
             return serializeAddBaker(payload as AddBakerPayload);
+        case TransactionKind.Update_baker_keys:
+            return serializeUpdateBakerKeys(payload as UpdateBakerKeysPayload);
+
+        case TransactionKind.Remove_baker:
+            return serializeRemoveBaker();
+        case TransactionKind.Update_baker_stake:
+            return serializeUpdateBakerStake(
+                payload as UpdateBakerStakePayload
+            );
+        case TransactionKind.Update_baker_restake_earnings:
+            return serializeUpdateBakerRestakeEarnings(
+                payload as UpdateBakerRestakeEarningsPayload
+            );
         default:
-            throw new Error('Unsupported transactionkind');
+            throw new Error('Unsupported transaction kind');
     }
 }
 

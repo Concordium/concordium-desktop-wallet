@@ -1,4 +1,5 @@
 const numberSeparator = '.';
+const thousandSeparator = ',';
 const pow10Format = /^1(0*)$/;
 const fractionRenderSeperator = new Intl.NumberFormat()
     .format(0.1)
@@ -53,7 +54,8 @@ export function isPowOf10(resolution: bigint | number): boolean {
 const isValidNumberString = (
     allowNegative = false,
     allowFractionDigits: number | true = true,
-    allowLeadingZeros = true
+    allowLeadingZeros = true,
+    allowExponent = true
 ) => {
     let re: RegExp;
     const signedPart = allowNegative ? '(-)?' : '';
@@ -62,7 +64,7 @@ const isValidNumberString = (
         allowFractionDigits === true
             ? '(\\.\\d*)?'
             : `(\\.\\d{1,${allowFractionDigits}})?(0)*`;
-    const exponentPart = '(e[+,-]?\\d*)?';
+    const exponentPart = allowExponent ? '(e[+,-]?\\d+)?' : '';
 
     re = new RegExp(`^${signedPart}${intPart}\\.?(0)*${exponentPart}$`);
 
@@ -95,12 +97,14 @@ const isValidNumberString = (
 export const isValidResolutionString = (
     resolution: bigint | number,
     allowNegative = false,
-    allowLeadingZeros = true
+    allowLeadingZeros = true,
+    allowExponent = true
 ) =>
     isValidNumberString(
         allowNegative,
         getPowerOf10(resolution),
-        allowLeadingZeros
+        allowLeadingZeros,
+        allowExponent
     );
 
 const withValidResolution = <TReturn>(
@@ -444,8 +448,53 @@ export const formatNumberStringWithDigits = (
 };
 
 /**
+ * Ensures input function can handle negative numbers, by passing absolute values, and adding sign after execution.
+ */
+const handleNegativeNumbers = (f: (v?: string) => string) => (value = '') => {
+    const negative = value.startsWith('-');
+    const abs = value.replace('-', '');
+    return negative ? `-${f(abs)}` : f(value);
+};
+
+/**
  * Trims leading zeros from number string. Returns input value if valid number string cannot be parsed.
  */
-export const trimLeadingZeros = (value = ''): string => {
+export const trimLeadingZeros = handleNegativeNumbers((value = ''): string => {
     return value.replace(/^0+(?=\d)/, '');
-};
+});
+
+/**
+ * Adds thousand separators to number string. Returns input value if given invalid number string.
+ */
+export const addThousandSeparators = handleNegativeNumbers(
+    (value = ''): string => {
+        if (!isValidNumberString(true)(value)) {
+            return value;
+        }
+
+        const trimmed = trimLeadingZeros(value);
+        const { whole, fractions = '', exponent } = getNumberParts(trimmed);
+
+        const amountOfSeparators = Math.floor((whole.length || 1) / 3);
+        const firstSeparatorIndex = Number(BigInt(whole.length) % 3n);
+        const separatorIndexes = [
+            firstSeparatorIndex,
+            ...Array(amountOfSeparators)
+                .fill(0)
+                .map((_, i) => firstSeparatorIndex + (i + 1) * 3),
+        ].slice(0, amountOfSeparators);
+
+        const withThousandSeparator = [
+            whole.substr(0, firstSeparatorIndex),
+            ...separatorIndexes.map((si) => whole.substr(si, 3)),
+        ]
+            .filter((part) => part !== '')
+            .join(thousandSeparator);
+
+        return formatRounded(!fractions)(
+            withThousandSeparator,
+            fractions,
+            exponent
+        );
+    }
+);

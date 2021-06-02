@@ -72,7 +72,7 @@ export default function PasswordSettingElement({ displayText }: Props) {
 
     return (
         <Card className={styles.top}>
-            <h3>{displayText}</h3>
+            <h3 className="mB0">{displayText}</h3>
             <Form onSubmit={handleSubmit}>
                 <Form.Input
                     type="password"

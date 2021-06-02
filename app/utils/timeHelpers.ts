@@ -217,6 +217,27 @@ export const getFormattedDateString = (date: Date): string => {
     return `${year}-${month}-${d} at ${hours}:${minutes}:${seconds}`;
 };
 
+/** Calculates the epoch index from a given date */
+export function getEpochIndexAt(
+    epochAtDate: Date,
+    epochDurationMillis: number,
+    genesisTime: Date
+) {
+    const genesis = genesisTime.getTime();
+    const now = epochAtDate.getTime();
+    const millisSinceGenesis = now - genesis;
+    return Math.floor(millisSinceGenesis / epochDurationMillis);
+}
+
+/** Calculates the start date of an epoch index */
+export function epochDate(
+    epochIndex: number,
+    epochDurationMillis: number,
+    genesisTime: Date
+): Date {
+    return new Date(genesisTime.getTime() + epochIndex * epochDurationMillis);
+}
+
 /** Predicates whether a date is in the future based on the current time,
  * sampled at time of call */
 export function isFutureDate(date: Date) {

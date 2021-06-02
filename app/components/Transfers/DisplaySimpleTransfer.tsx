@@ -1,10 +1,10 @@
 import React from 'react';
 import { AddressBookEntry, SimpleTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
-import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import styles from './transferDetails.module.scss';
+import DisplayFee from '~/components/DisplayFee';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import styles from './transferDetails.module.scss';
 
 interface Props {
     transaction: SimpleTransfer;
@@ -33,10 +33,7 @@ export default function DisplaySimpleTransfer({
             <p className={styles.amount}>
                 {displayAsGTU(transaction.payload.amount)}
             </p>
-            <DisplayEstimatedFee
-                className={styles.fee}
-                estimatedFee={transaction.estimatedFee}
-            />
+            <DisplayFee className={styles.fee} transaction={transaction} />
             <DisplayTransactionExpiryTime
                 expiryTime={dateFromTimeStamp(transaction.expiry)}
             />

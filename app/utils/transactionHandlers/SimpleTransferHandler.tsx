@@ -3,7 +3,6 @@ import {
     MultiSignatureTransactionStatus,
     SimpleTransfer,
     AccountTransaction,
-    TransactionPayload,
     instanceOfSimpleTransfer,
     TransactionKindId,
 } from '../types';
@@ -25,13 +24,8 @@ export default class SimpleTransferHandler
     extends TransferHandler<TransactionType>
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: AccountTransaction<TransactionPayload>
-    ): TransactionType {
-        if (instanceOfSimpleTransfer(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, instanceOfSimpleTransfer);
     }
 
     creationLocationHandler(currentLocation: string) {
@@ -91,8 +85,4 @@ export default class SimpleTransferHandler
             />
         );
     }
-
-    title = `Account Transaction | ${TYPE}`;
-
-    type = TYPE;
 }
