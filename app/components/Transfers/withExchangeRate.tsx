@@ -42,7 +42,7 @@ export default function withExchangeRate<TProps extends ExchangeRate>(
                     content={unableToReachNode}
                     onClick={() => dispatch(routerActions.goBack())}
                 />
-                <Component {...propsWithExchangeRate} />;
+                <Component {...propsWithExchangeRate} />
             </>
         );
     };
