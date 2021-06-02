@@ -38,8 +38,7 @@ export default function withExchangeRate<TProps extends ExchangeRate>(
             <>
                 <SimpleErrorModal
                     show={showError}
-                    header="Unable to reach node"
-                    content={unableToReachNode}
+                    header={unableToReachNode}
                     onClick={() => dispatch(routerActions.goBack())}
                 />
                 <Component {...propsWithExchangeRate} />

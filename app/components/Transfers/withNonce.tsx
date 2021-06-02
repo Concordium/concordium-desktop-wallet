@@ -43,8 +43,7 @@ export default function withNonce<TProps extends WithAccount>(
             <>
                 <SimpleErrorModal
                     show={showError}
-                    header="Unable to reach node"
-                    content={unableToReachNode}
+                    header={unableToReachNode}
                     onClick={() => dispatch(routerActions.goBack())}
                 />
                 <Component {...propsWithNonce} />
