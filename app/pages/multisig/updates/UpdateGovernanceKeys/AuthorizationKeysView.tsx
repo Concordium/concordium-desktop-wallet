@@ -10,6 +10,7 @@ import withChainData, { ChainData } from '../../common/withChainData';
 import { generateStatusLabel } from './KeyUpdateEntry';
 import { getAccessStructureTitle } from './util';
 import styles from './HigherLevelKeysView.module.scss';
+import localStyles from './UpdateAuthorizationKeys.module.scss';
 
 interface Props extends ChainData {
     authorizationKeysUpdate: AuthorizationKeysUpdate;
@@ -82,6 +83,28 @@ function AuthorizationKeysView({
 
     return (
         <>
+            <h2>Level 2 keys and their indices</h2>
+            <p>
+                New size of level 2 key set:{' '}
+                <b>{authorizationKeysUpdate.keys.length}</b>
+            </p>
+            <ul>
+                {authorizationKeysUpdate.keys.map((key, index) => {
+                    return (
+                        <li
+                            className={localStyles.listItem}
+                            key={key.verifyKey}
+                        >
+                            <div className="flex alignCenter">
+                                <p className={localStyles.index}>{index}</p>
+                                <p className={localStyles.keyText}>
+                                    {key.verifyKey}
+                                </p>
+                            </div>
+                        </li>
+                    );
+                })}
+            </ul>
             {authorizationKeysUpdate.accessStructures.map((accessStructure) => {
                 return accessStructureView(
                     accessStructure,
