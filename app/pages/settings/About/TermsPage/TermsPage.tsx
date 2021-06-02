@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import terms from 'url-loader!@resources/html/Termsandconditions.html';
+import terms from 'url-loader!@resources/html/terms.html';
 import { useDispatch } from 'react-redux';
 import routes from '~/constants/routes.json';
 import localStorageKeys from '~/constants/localStorage.json';

@@ -1,6 +1,6 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import terms from 'url-loader!@resources/html/Termsandconditions.html';
+import terms from 'url-loader!@resources/html/terms.html';
 import localStorageKeys from '~/constants/localStorage.json';
 import { loadAllSettings, updateEntry } from '~/database/SettingsDao';
 // eslint-disable-next-line import/no-cycle

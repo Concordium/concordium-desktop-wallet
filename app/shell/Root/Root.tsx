@@ -10,8 +10,9 @@ import MainLayout from '~/cross-app-components/MainLayout';
 
 import Routes from '../Routes';
 import Sidebar from '../Sidebar';
-import styles from './Root.module.scss';
 import TermsAcceptanceGuard from '../TermsAcceptanceGuard';
+
+import styles from './Root.module.scss';
 
 type Props = {
     store: Store;
