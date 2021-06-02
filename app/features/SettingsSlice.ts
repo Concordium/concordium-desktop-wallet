@@ -1,10 +1,8 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
-// eslint-disable-next-line import/no-webpack-loader-syntax
-import terms from 'url-loader!@resources/html/terms.html';
-import localStorageKeys from '~/constants/localStorage.json';
 import { loadAllSettings, updateEntry } from '~/database/SettingsDao';
 // eslint-disable-next-line import/no-cycle
 import { RootState } from '~/store/store';
+import { hasAcceptedTerms } from '~/utils/termsHelpers';
 import { Setting, Settings } from '~/utils/types';
 
 interface SettingsState {
@@ -12,8 +10,7 @@ interface SettingsState {
     termsAccepted: boolean;
 }
 
-const termsAccepted =
-    (localStorage.getItem(localStorageKeys.TERMS_ACCEPTED) ?? '') === terms;
+const termsAccepted = hasAcceptedTerms();
 
 const settingsSlice = createSlice({
     name: 'settings',

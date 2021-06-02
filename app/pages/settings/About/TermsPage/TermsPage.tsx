@@ -1,14 +1,12 @@
 import React, { useCallback, useState } from 'react';
-// eslint-disable-next-line import/no-webpack-loader-syntax
-import terms from 'url-loader!@resources/html/terms.html';
 import { useDispatch } from 'react-redux';
 import routes from '~/constants/routes.json';
-import localStorageKeys from '~/constants/localStorage.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import PageLayout from '~/components/PageLayout';
+import { acceptTerms } from '~/features/SettingsSlice';
+import { storeTerms, termsUrlBase64 } from '~/utils/termsHelpers';
 
 import styles from './TermsPage.module.scss';
-import { acceptTerms } from '~/features/SettingsSlice';
 
 interface Props {
     /**
@@ -33,7 +31,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
     );
 
     const handleAccept = useCallback(() => {
-        window.localStorage.setItem(localStorageKeys.TERMS_ACCEPTED, terms);
+        storeTerms();
         dispatch(acceptTerms());
     }, [dispatch]);
 
@@ -50,7 +48,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
                 <iframe
                     className={styles.frame}
                     title="Terms and Conditions"
-                    src={terms}
+                    src={termsUrlBase64}
                     onLoad={(e) => {
                         const el = e.target as HTMLIFrameElement;
                         sanitizeDocument(el);
