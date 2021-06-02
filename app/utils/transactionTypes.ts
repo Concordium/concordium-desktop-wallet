@@ -36,7 +36,7 @@ export interface UpdateProps {
     handleAuthorizationKeySubmit?(
         effectiveTime: Date,
         expiryTime: Date,
-        higherLevelKeyUpdate: AuthorizationKeysUpdate
+        authorizationKeysUpdate: AuthorizationKeysUpdate
     ): Promise<void>;
 }
 

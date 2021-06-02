@@ -121,6 +121,7 @@ function reduceIndicesByOne(
  *   - If there is, then just skip to next key.
  *   - If there is not, then remove the key and update all
  *     later indices to be (currentIndex - 1).
+ * - Remove all keys that no longer have a reference to it.
  */
 export function removeRemovedKeys(
     payload: AuthorizationKeysUpdate
