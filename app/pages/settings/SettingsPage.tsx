@@ -4,7 +4,7 @@ import routes from '~/constants/routes.json';
 import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import SettingsList from './SettingsList';
 import SettingsView from './SettingsView';
-import About from './About/About';
+import About from './About';
 
 const { Header, Master, Detail } = MasterDetailPageLayout;
 
