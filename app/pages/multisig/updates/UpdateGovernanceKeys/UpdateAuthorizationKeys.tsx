@@ -62,7 +62,9 @@ export default function UpdateAuthorizationKeys({
     const [error, setError] = useState<string>();
 
     const keyUpdateType: AuthorizationKeysUpdateType =
-        UpdateType.UpdateLevel2KeysUsingRootKeys === type ? 2 : 1;
+        UpdateType.UpdateLevel2KeysUsingRootKeys === type
+            ? AuthorizationKeysUpdateType.Root
+            : AuthorizationKeysUpdateType.Level1;
     const currentKeys = blockSummary.updates.keys.level2Keys.keys;
     const currentKeySetSize = currentKeys.length;
     const currentAuthorizations = blockSummary.updates.keys.level2Keys;

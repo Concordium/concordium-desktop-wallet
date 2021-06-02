@@ -5,9 +5,9 @@ import UpdateHigherLevelKeys from './UpdateHigherLevelKeys';
 
 export default function UpdateLevel1KeysWithLevel1Keys({
     blockSummary,
-    handleKeySubmit,
+    handleHigherLevelKeySubmit,
 }: UpdateProps): JSX.Element | null {
-    if (!handleKeySubmit) {
+    if (!handleHigherLevelKeySubmit) {
         throw new Error('A key submission function must be supplied.');
     }
 
@@ -15,7 +15,7 @@ export default function UpdateLevel1KeysWithLevel1Keys({
         <UpdateHigherLevelKeys
             blockSummary={blockSummary}
             type={UpdateType.UpdateLevel1KeysUsingLevel1Keys}
-            handleKeySubmit={handleKeySubmit}
+            handleHigherLevelKeySubmit={handleHigherLevelKeySubmit}
         />
     );
 }

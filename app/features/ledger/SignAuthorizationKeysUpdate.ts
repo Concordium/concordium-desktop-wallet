@@ -33,8 +33,8 @@ async function sendAccessStructure(
     await transport.send(0xe0, INS, p1, p2, serializedAccessStructureSize);
 
     p1 = 0x03;
-    // Chunk into bits of at most 127, as that is the maximum amount of data that
-    // the Ledger can receive in one go.
+    // Chunk into section of at most 127, so that we will send no more than 2 * 127 = 254
+    // bytes at the same time, to stay within the maximum that the Ledger supports.
     const chunkedIndicies = chunkArray(accessStructure.publicKeyIndicies, 127);
     for (const indices of chunkedIndicies) {
         const serializedIndicies = Buffer.concat(

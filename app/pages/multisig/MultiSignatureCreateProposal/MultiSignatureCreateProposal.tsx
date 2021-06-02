@@ -192,7 +192,7 @@ function MultiSignatureCreateProposal({
                 <UpdateComponent
                     blockSummary={blockSummary}
                     consensusStatus={consensusStatus}
-                    handleKeySubmit={handleKeySubmit}
+                    handleHigherLevelKeySubmit={handleKeySubmit}
                 />
             </div>
         );

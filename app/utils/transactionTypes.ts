@@ -28,7 +28,7 @@ export interface TransactionInput {
 export interface UpdateProps {
     blockSummary: BlockSummary;
     consensusStatus: ConsensusStatus;
-    handleKeySubmit?(
+    handleHigherLevelKeySubmit?(
         effectiveTime: Date,
         expiryTime: Date,
         higherLevelKeyUpdate: HigherLevelKeyUpdate

@@ -40,7 +40,7 @@ function createAccessStructure(indices: KeyIndexWithStatus[]) {
 
 function createKeyIndicesWithStatus(amount: number, offset = 0) {
     const keys: KeyIndexWithStatus[] = [];
-    for (let i = offset; i < amount; i += 1) {
+    for (let i = offset; i < amount + offset; i += 1) {
         keys.push({
             index: i,
             status: KeyUpdateEntryStatus.Removed,

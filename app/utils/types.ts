@@ -1056,8 +1056,10 @@ export interface AccessStructure {
     type: AccessStructureEnum;
 }
 
-// Root keys updating = 2, level 1 keys updating = 1.
-export type AuthorizationKeysUpdateType = 1 | 2;
+export enum AuthorizationKeysUpdateType {
+    Level1 = 1,
+    Root = 2,
+}
 export interface AuthorizationKeysUpdate {
     keyUpdateType: AuthorizationKeysUpdateType;
     keys: VerifyKey[];

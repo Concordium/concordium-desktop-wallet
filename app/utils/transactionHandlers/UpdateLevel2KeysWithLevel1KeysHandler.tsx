@@ -2,11 +2,7 @@ import React from 'react';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel1Path } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import {
-    Authorization,
-    Authorizations,
-    BlockSummary,
-} from '../../node/NodeApiTypes';
+import { Authorization, BlockSummary } from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
@@ -98,7 +94,7 @@ export default class UpdateLevel2KeysUsingLevel1KeysHandler
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getAuthorization(_authorizations: Authorizations): Authorization {
+    getAuthorization(): Authorization {
         throw new Error(
             'If this method was invoked, then it happened due to an implementation error.'
         );

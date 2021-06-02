@@ -106,13 +106,11 @@ export function serializeAuthorizationKeysUpdate(
     );
 
     const serializedKeys = Buffer.concat(
-        authorizationKeysUpdate.keys.map((key) => serializeVerifyKey(key))
+        authorizationKeysUpdate.keys.map(serializeVerifyKey)
     );
 
     const serializedAccessStructures: Buffer = Buffer.concat(
-        authorizationKeysUpdate.accessStructures.map((accessStructure) => {
-            return serializeAccessStructure(accessStructure);
-        })
+        authorizationKeysUpdate.accessStructures.map(serializeAccessStructure)
     );
 
     return Buffer.concat([

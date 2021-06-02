@@ -28,7 +28,7 @@ import { useTransactionExpiryState } from '~/utils/dataHooks';
 interface Props {
     blockSummary: BlockSummary;
     type: UpdateType;
-    handleKeySubmit(
+    handleHigherLevelKeySubmit(
         effectiveTime: Date,
         expiryTime: Date,
         higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
@@ -64,7 +64,7 @@ function getCurrentKeysWithThreshold(
 export default function UpdateHigherLevelKeys({
     blockSummary,
     type,
-    handleKeySubmit,
+    handleHigherLevelKeySubmit,
 }: Props) {
     // Current values on the blockchain received from the node.
     const currentKeysWithThreshold = getCurrentKeysWithThreshold(
@@ -166,7 +166,11 @@ export default function UpdateHigherLevelKeys({
             updateKeys: newKeys,
         };
 
-        handleKeySubmit(effectiveTime, expiryTime, higherLevelKeyUpdate);
+        handleHigherLevelKeySubmit(
+            effectiveTime,
+            expiryTime,
+            higherLevelKeyUpdate
+        );
     }
 
     return (
