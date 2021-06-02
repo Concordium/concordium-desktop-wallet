@@ -1256,3 +1256,12 @@ export interface CredentialExportFormat {
     credential: CredentialDeploymentInformation;
     address: string;
 }
+
+/**
+ * Object that contains the keys, which are needed to create a new credential.
+ */
+export interface CreationKeys {
+    prfKey: string;
+    idCredSec: string;
+    publicKey: string;
+}
