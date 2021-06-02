@@ -823,7 +823,7 @@ export function isUpdateLevel1KeysWithLevel1Keys(
 
 export function isUpdateLevel2KeysWithLevel1Keys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): transaction is UpdateInstruction<AuthorizationKeysUpdate> {
     return UpdateType.UpdateLevel2KeysUsingLevel1Keys === transaction.type;
 }
 

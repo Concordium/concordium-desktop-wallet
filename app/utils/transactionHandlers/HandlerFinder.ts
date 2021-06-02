@@ -35,6 +35,7 @@ import AddBakerHandler from './AddBakerHandler';
 import TransferToEncryptedHandler from './TransferToEncryptedHandler';
 import TransferToPublicHandler from './TransferToPublicHandler';
 import UpdateLevel2KeysUsingRootKeysHandler from './UpdateLevel2KeysWithRootKeysHandler';
+import UpdateLevel2KeysUsingLevel1KeysHandler from './UpdateLevel2KeysWithLevel1KeysHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -127,6 +128,10 @@ export function findUpdateInstructionHandler(
         case UpdateType.UpdateLevel2KeysUsingRootKeys:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new UpdateLevel2KeysUsingRootKeysHandler()
+            );
+        case UpdateType.UpdateLevel2KeysUsingLevel1Keys:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new UpdateLevel2KeysUsingLevel1KeysHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);

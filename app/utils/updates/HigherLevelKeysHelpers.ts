@@ -45,7 +45,7 @@ export function removeRemovedKeys(
 }
 
 /**
- * Maps a higher level key update type to a display
+ * Maps a key update type to a display
  * text string that can be used to show in the UI.
  */
 export function typeToDisplay(type: UpdateType) {
@@ -57,6 +57,8 @@ export function typeToDisplay(type: UpdateType) {
         case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
             return 'level 1';
         case UpdateType.UpdateLevel2KeysUsingRootKeys:
+            return 'level 2';
+        case UpdateType.UpdateLevel2KeysUsingLevel1Keys:
             return 'level 2';
         default:
             throw new Error(

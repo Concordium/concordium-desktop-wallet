@@ -173,7 +173,10 @@ function MultiSignatureCreateProposal({
         if (!blockSummary || !consensusStatus) {
             return <Loading text="Getting current settings from chain" />;
         }
-        if (UpdateType.UpdateLevel2KeysUsingRootKeys === type) {
+        if (
+            UpdateType.UpdateLevel2KeysUsingRootKeys === type ||
+            UpdateType.UpdateLevel2KeysUsingLevel1Keys === type
+        ) {
             return (
                 <div className={styles.subtractContainerPadding}>
                     <UpdateComponent
@@ -201,6 +204,7 @@ function MultiSignatureCreateProposal({
             UpdateType.UpdateLevel1KeysUsingRootKeys,
             UpdateType.UpdateLevel1KeysUsingLevel1Keys,
             UpdateType.UpdateLevel2KeysUsingRootKeys,
+            UpdateType.UpdateLevel2KeysUsingLevel1Keys,
         ].includes(type)
     ) {
         return (
