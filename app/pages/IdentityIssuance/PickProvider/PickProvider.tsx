@@ -86,6 +86,7 @@ export default function IdentityIssuanceChooseProvider({
                 ledger: ConcordiumLedgerClient,
                 setMessage: (message: string | JSX.Element) => void
             ) => {
+                setMessage('Please wait');
                 if (!provider) {
                     return;
                 }

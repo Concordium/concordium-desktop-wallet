@@ -102,7 +102,7 @@ export default function SimpleLedgerWithCreationKeys({
                                 }}
                                 className={compareButtonClassName}
                             >
-                                Confirm
+                                Continue
                             </Button>
                         </Card>
                     )}

@@ -68,6 +68,7 @@ export default function SignCredential({ onSigned }: Props): JSX.Element {
                 ledger: ConcordiumLedgerClient,
                 setMessage: (message: string | JSX.Element) => void
             ) => {
+                setMessage('Please wait');
                 if (!credentialNumber) {
                     throw new Error(
                         'The credentialNumber has to be supplied. This is an internal error.'

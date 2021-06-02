@@ -124,6 +124,7 @@ export default function AccountCreationGenerate({
                 ledger: ConcordiumLedgerClient,
                 setMessage: (message: string | JSX.Element) => void
             ) => {
+                setMessage('Please wait');
                 if (!credentialNumber) {
                     onError(
                         'Missing credentialNumber, which is required. This is an internal error.'
