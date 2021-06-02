@@ -29,6 +29,7 @@ import {
     getAccessStructureTitle,
     keyIsInUse,
     getCurrentThresholds,
+    removeRemovedKeys,
 } from './util';
 import routes from '~/constants/routes.json';
 import ProposeNewKey from './ProposeNewKey';
@@ -306,7 +307,7 @@ export default function UpdateAuthorizationKeys({
         }
         handleKeySubmit(effectiveTime, expiryTime, {
             ...newLevel2Keys,
-            keyUpdateType: 2,
+            keyUpdateType,
         });
     }
 
@@ -331,23 +332,33 @@ export default function UpdateAuthorizationKeys({
                             <b>{newLevel2Keys.keys.length}</b>
                         </p>
                         <ul>
-                            {newLevel2Keys.keys.map((key, index) => {
-                                return (
-                                    <li
-                                        className={localStyles.listItem}
-                                        key={key.verifyKey}
-                                    >
-                                        <div className="flex alignCenter">
-                                            <p className={localStyles.index}>
-                                                {index}
-                                            </p>
-                                            <p className={localStyles.keyText}>
-                                                {key.verifyKey}
-                                            </p>
-                                        </div>
-                                    </li>
-                                );
-                            })}
+                            {removeRemovedKeys(newLevel2Keys).keys.map(
+                                (key, index) => {
+                                    return (
+                                        <li
+                                            className={localStyles.listItem}
+                                            key={key.verifyKey}
+                                        >
+                                            <div className="flex alignCenter">
+                                                <p
+                                                    className={
+                                                        localStyles.index
+                                                    }
+                                                >
+                                                    {index}
+                                                </p>
+                                                <p
+                                                    className={
+                                                        localStyles.keyText
+                                                    }
+                                                >
+                                                    {key.verifyKey}
+                                                </p>
+                                            </div>
+                                        </li>
+                                    );
+                                }
+                            )}
                         </ul>
                         {newLevel2Keys.accessStructures.map(
                             (accessStructure) => {
@@ -411,7 +422,8 @@ export default function UpdateAuthorizationKeys({
                                         type={type}
                                         currentKeySetSize={currentKeySetSize}
                                         newKeySetSize={
-                                            newLevel2Keys.keys.length
+                                            removeRemovedKeys(newLevel2Keys)
+                                                .keys.length
                                         }
                                     />
                                 )}
