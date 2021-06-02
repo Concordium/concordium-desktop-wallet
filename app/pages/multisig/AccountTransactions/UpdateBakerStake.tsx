@@ -34,9 +34,10 @@ import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStake
 import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
-import withExchangeRate from '~/components/Transfers/withExchangeRate';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
+import LoadingComponent from './LoadingComponent';
 
 enum SubRoutes {
     accounts,
@@ -332,4 +333,4 @@ function PickNewStake({ account, stake, setStake }: PickNewStakeProps) {
     );
 }
 
-export default withExchangeRate(UpdateBakerStakePage);
+export default ensureExchangeRate(UpdateBakerStakePage, LoadingComponent);

@@ -36,9 +36,10 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import { DownloadBakerCredentialsStep } from './AddBaker';
 import UpdateBakerKeysProposalDetails from './proposal-details/UpdateBakerKeysProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
-import withExchangeRate from '~/components/Transfers/withExchangeRate';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
+import LoadingComponent from './LoadingComponent';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
@@ -335,4 +336,4 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     );
 }
 
-export default withExchangeRate(UpdateBakerKeysPage);
+export default ensureExchangeRate(UpdateBakerKeysPage, LoadingComponent);

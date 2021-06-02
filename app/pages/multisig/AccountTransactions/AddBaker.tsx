@@ -22,7 +22,7 @@ import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 import errorMessages from '~/constants/errorMessages.json';
 
-import withExchangeRate from '~/components/Transfers/withExchangeRate';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 
 import {
@@ -47,6 +47,7 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+import LoadingComponent from './LoadingComponent';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -509,4 +510,4 @@ export function DownloadBakerCredentialsStep({
     );
 }
 
-export default withExchangeRate(AddBakerPage);
+export default ensureExchangeRate(AddBakerPage, LoadingComponent);

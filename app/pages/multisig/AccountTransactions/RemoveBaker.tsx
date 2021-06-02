@@ -27,9 +27,10 @@ import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
-import withExchangeRate from '~/components/Transfers/withExchangeRate';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
+import LoadingComponent from './LoadingComponent';
 
 enum SubRoutes {
     accounts,
@@ -252,4 +253,4 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
     );
 }
 
-export default withExchangeRate(RemoveBakerPage);
+export default ensureExchangeRate(RemoveBakerPage, LoadingComponent);

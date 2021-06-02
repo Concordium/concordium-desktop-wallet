@@ -27,9 +27,10 @@ import SignTransaction from './SignTransaction';
 import ButtonGroup from '~/components/ButtonGroup';
 import UpdateBakerRestakeEarningsProposalDetails from './proposal-details/UpdateBakerRestakeEarnings';
 import InputTimestamp from '~/components/Form/InputTimestamp';
-import withExchangeRate from '~/components/Transfers/withExchangeRate';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
+import LoadingComponent from './LoadingComponent';
 
 enum SubRoutes {
     accounts,
@@ -325,4 +326,7 @@ function RestakeEarnings({
     );
 }
 
-export default withExchangeRate(UpdateBakerRestakeEarningsPage);
+export default ensureExchangeRate(
+    UpdateBakerRestakeEarningsPage,
+    LoadingComponent
+);
