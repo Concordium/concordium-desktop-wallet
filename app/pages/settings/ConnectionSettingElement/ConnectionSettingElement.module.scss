@@ -1,0 +1,20 @@
+@import 'config/bundle';
+
+.connection {
+    text-align: center;
+    padding: 30px 60px;
+}
+
+.input {
+    font-size: $font-size-body2;
+    margin-bottom: 25px;
+}
+
+.status {
+    margin-top: 15px;
+    height: 150px;
+}
+
+.submit {
+    margin-top: 14px;
+}

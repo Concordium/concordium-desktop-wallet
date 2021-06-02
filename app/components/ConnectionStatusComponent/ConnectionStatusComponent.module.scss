@@ -1,0 +1,17 @@
+@import 'config/bundle';
+
+.icon {
+    width: 100px;
+    height: 100px;
+}
+
+.error {
+    font-size: $font-size-body2;
+    margin-top: 10px;
+    color: $color-danger;
+}
+
+.success {
+    font-size: $font-size-body2;
+    margin-top: 10px;
+}

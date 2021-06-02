@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router';
+import { useSelector } from 'react-redux';
 import Sidebar, { SidebarLink } from '../cross-app-components/Sidebar';
 import routes from '../constants/routes.json';
 import pkg from '../package.json';
@@ -11,6 +12,7 @@ import ImportExportIcon from '../../resources/svg/import-export.svg';
 import MultiSigIcon from '../../resources/svg/multisig.svg';
 import SettingsIcon from '../../resources/svg/settings.svg';
 import LedgerStatus from './LedgerStatus';
+import { termsAcceptedSelector } from '~/features/SettingsSlice';
 
 const links: SidebarLink[] = [
     {
@@ -47,7 +49,9 @@ const links: SidebarLink[] = [
 
 export default function ConnectedSidebar() {
     const location = useLocation();
-    const disableSidebar = location.pathname.startsWith(routes.HOME_PASSWORD);
+    const termsAccepted = useSelector(termsAcceptedSelector);
+    const disableSidebar =
+        location.pathname.startsWith(routes.HOME_PASSWORD) || !termsAccepted;
     let ledgerStatus;
     if (!disableSidebar) {
         ledgerStatus = <LedgerStatus />;

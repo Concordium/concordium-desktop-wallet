@@ -43,13 +43,7 @@ export interface InlineNumberProps
     extends ClassName,
         Pick<
             InputHTMLAttributes<HTMLInputElement>,
-            | 'step'
-            | 'min'
-            | 'max'
-            | 'disabled'
-            | 'autoFocus'
-            | 'readOnly'
-            | 'title'
+            'disabled' | 'autoFocus' | 'readOnly' | 'title'
         >,
         Pick<CommonFieldProps, 'isInvalid'> {
     /**
@@ -90,7 +84,7 @@ export interface InlineNumberProps
  * Number input that aligns with surrouding content in an inline fashion. Is also available as sub-component on \<Form /\>
  *
  * @example
- * I would like to submit the transaction in <InlineNumber value={value} onChange={setValue} label=" Releases" />.
+ * I would like to submit the transaction in <InlineNumber value={value} onChange={setValue} /> releases.
  */
 export default function InlineNumber({
     ensureDigits = 0,
@@ -132,10 +126,14 @@ export default function InlineNumber({
         return trimLeadingZeros ? withTrimLeadingZeros(f) : f;
     }, [ensureDigits, allowFractions, customFormatter, trimLeadingZeros]);
 
-    const initialFormatted = useMemo(
-        () => format(value) || format(fallbackValue.toString()),
-        []
-    );
+    const formattedFallback = format(fallbackValue.toString());
+    const initialFormatted = useMemo(() => {
+        try {
+            return format(value) || formattedFallback;
+        } catch {
+            return formattedFallback;
+        }
+    }, []);
     const [innerValue, setInnerValue] = useState<string>(initialFormatted);
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
@@ -147,11 +145,15 @@ export default function InlineNumber({
     const handleBlur = useCallback(() => {
         // Basically ensure correct formatting of field and that field has a value (otherwise it'll be invisible on screen)
         if (!innerValue || (fallbackOnInvalid && isInvalid)) {
-            setInnerValue(format(fallbackValue.toString()));
+            setInnerValue(formattedFallback);
         } else {
-            const formatted = format(value);
-            if (formatted !== '') {
-                setInnerValue(formatted);
+            try {
+                const formatted = format(value);
+                if (formatted !== '') {
+                    setInnerValue(formatted);
+                }
+            } catch {
+                // Do nothing..
             }
         }
 
@@ -161,7 +163,7 @@ export default function InlineNumber({
         format,
         onBlur,
         innerValue,
-        fallbackValue,
+        formattedFallback,
         value,
         fallbackOnInvalid,
         isInvalid,
@@ -189,7 +191,7 @@ export default function InlineNumber({
                 isInvalid && styles.invalid,
                 className
             )}
-            type="number"
+            type="text"
             value={innerValue}
             onChange={(e) => setInnerValue(e.target.value)}
             onBlur={handleBlur}

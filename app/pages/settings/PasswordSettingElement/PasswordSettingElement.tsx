@@ -4,8 +4,9 @@ import { knex as externalKnex } from 'knex';
 import Form from '~/components/Form/Form';
 import Card from '~/cross-app-components/Card/Card';
 import { invalidateKnexSingleton, knex, setPassword } from '~/database/knex';
+import config from '~/database/knexfile';
+
 import styles from './PasswordSettingElement.module.scss';
-import config from '../../database/knexfile';
 
 const environment = process.env.NODE_ENV;
 
@@ -72,7 +73,7 @@ export default function PasswordSettingElement({ displayText }: Props) {
 
     return (
         <Card className={styles.top}>
-            <h3>{displayText}</h3>
+            <h3 className="mB0">{displayText}</h3>
             <Form onSubmit={handleSubmit}>
                 <Form.Input
                     type="password"

@@ -9,10 +9,10 @@ export enum LedgerStatusType {
     AWAITING_USER_INPUT,
 }
 
-export type LedgerCallback = (
+export type LedgerCallback<ReturnType = void> = (
     client: ConcordiumLedgerClient,
     setStatusText: (message: string | JSX.Element) => void
-) => Promise<void>;
+) => Promise<ReturnType>;
 
 export type LedgerSubmitHandler = () => Promise<void>;
 

@@ -2,9 +2,9 @@ import React from 'react';
 import { AddressBookEntry, SimpleTransfer } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayFee from '~/components/DisplayFee';
-import styles from './transferDetails.module.scss';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { dateFromTimeStamp } from '~/utils/timeHelpers';
+import styles from './transferDetails.module.scss';
 
 interface Props {
     transaction: SimpleTransfer;

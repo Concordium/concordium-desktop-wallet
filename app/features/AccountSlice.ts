@@ -421,7 +421,8 @@ export async function decryptAccountBalance(
     prfKey: string,
     account: Account,
     credentialNumber: number,
-    global: Global
+    global: Global,
+    dispatch: Dispatch
 ) {
     if (!account.incomingAmounts) {
         throw new Error('Unexpected missing field!');
@@ -440,10 +441,14 @@ export async function decryptAccountBalance(
         .reduce((acc, amount) => acc + BigInt(amount), 0n)
         .toString();
 
-    return updateAccount(account.address, {
+    const updatedFields = {
         totalDecrypted,
         allDecrypted: true,
-    });
+    };
+    updateAccount(account.address, updatedFields);
+    return dispatch(
+        updateAccountFields({ address: account.address, updatedFields })
+    );
 }
 
 // Add an account with pending status.
@@ -495,6 +500,16 @@ export async function updateMaxTransactionId(
     maxTransactionId: number
 ) {
     const updatedFields = { maxTransactionId };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
+}
+
+export async function updateAllDecrypted(
+    dispatch: Dispatch,
+    address: string,
+    allDecrypted: boolean
+) {
+    const updatedFields = { allDecrypted };
     updateAccount(address, updatedFields);
     return dispatch(updateAccountFields({ address, updatedFields }));
 }

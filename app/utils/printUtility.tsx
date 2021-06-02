@@ -3,12 +3,14 @@ import {
     MultiSignatureTransactionStatus,
     AccountTransaction,
     TimeStampUnit,
+    AccountTransactionWithSignature,
 } from '~/utils/types';
 import { getAccountTransactionHash } from './transactionSerialization';
 import { displayAsGTU } from '~/utils/gtu';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { getStatusText } from '~/pages/multisig/ProposalStatus/util';
 import { parseTime, getNow } from '~/utils/timeHelpers';
+import { useAccount } from './dataHooks';
 
 export const timeFormat: Intl.DateTimeFormatOptions = {
     dateStyle: 'short',
@@ -93,14 +95,39 @@ export const fee = (transaction: AccountTransaction) => {
     );
 };
 
-export const hashRow = (transaction: AccountTransaction) => (
-    <tr>
-        <td>Digest to sign</td>
-        <td>
-            {getAccountTransactionHash(transaction, () => []).toString('hex')}
-        </td>
-    </tr>
-);
+type HashRowsProps = {
+    transaction: AccountTransactionWithSignature | AccountTransaction;
+};
+
+export function HashRows({ transaction }: HashRowsProps) {
+    const acc = useAccount(transaction.sender);
+    const threshold = acc?.signatureThreshold ?? 0;
+
+    return (
+        <>
+            <tr>
+                <td>Digest to sign</td>
+                <td>
+                    {getAccountTransactionHash(transaction, () => []).toString(
+                        'hex'
+                    )}
+                </td>
+            </tr>
+            {'signatures' in transaction &&
+            Object.keys(transaction.signatures).length >= threshold ? (
+                <tr>
+                    <td>Transaction hash</td>
+                    <td>
+                        {getAccountTransactionHash(
+                            transaction,
+                            () => transaction.signatures
+                        ).toString('hex')}
+                    </td>
+                </tr>
+            ) : null}
+        </>
+    );
+}
 
 export function getStatusColor(
     status: MultiSignatureTransactionStatus
@@ -141,9 +168,9 @@ export const displayExpiry = (expiry: bigint) => (
     </tr>
 );
 
-const hashHeader = (transaction: AccountTransaction) => (
+const digestToSignFooter = (transaction: AccountTransaction) => (
     <p style={{ textAlign: 'right', paddingLeft: '10px' }}>
-        Hash:{' '}
+        Digest to sign:{' '}
         {getAccountTransactionHash(transaction, () => [])
             .toString('hex')
             .substring(0, 8)}
@@ -164,7 +191,7 @@ const timestamp = () => (
 
 export const standardPageFooter = (transaction: AccountTransaction) => (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        {hashHeader(transaction)} {timestamp()}
+        {digestToSignFooter(transaction)} {timestamp()}
     </div>
 );
 

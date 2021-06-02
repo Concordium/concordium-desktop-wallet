@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
+import { abs } from '~/utils/basicHelpers';
 import { parseTime } from '~/utils/timeHelpers';
 import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import {
@@ -76,10 +77,10 @@ function buildOutgoingAmountStrings(subtotal: bigint, fee: bigint) {
     };
 }
 
-function buildCostFreeAmountString(amount: bigint, negative = false) {
-    const sign = negative ? -1n : 1n;
+function buildCostFreeAmountString(amount: bigint, absolute = false) {
+    const displayAmount = absolute ? abs(amount) : amount;
     return {
-        amount: `${displayAsGTU(sign * amount)}`,
+        amount: `${displayAsGTU(displayAmount)}`,
         amountFormula: '',
     };
 }
@@ -100,20 +101,16 @@ function parseShieldedAmount(
         ) {
             return buildCostFreeAmountString(
                 BigInt(transaction.decryptedAmount),
-                isOutgoingTransaction
+                !isOutgoingTransaction
             );
         }
-    } else {
-        const negative = isOutgoingTransaction ? '-' : '';
-        return {
-            amount: `${negative} ${getGTUSymbol()} ?`,
-            amountFormula: '',
-        };
+        return buildCostFreeAmountString(BigInt(transaction.decryptedAmount));
     }
-
-    throw new Error(
-        'Unexpected transaction type when viewing shielded balance.'
-    );
+    const negative = isOutgoingTransaction ? '-' : '';
+    return {
+        amount: `${negative} ${getGTUSymbol()} ?`,
+        amountFormula: '',
+    };
 }
 
 function parseAmount(
@@ -125,6 +122,15 @@ function parseAmount(
         case OriginType.Account:
             if (isOutgoingTransaction) {
                 const cost = BigInt(transaction.cost || '0');
+                if (
+                    transaction.transactionKind ===
+                    TransactionKindString.EncryptedAmountTransfer
+                ) {
+                    return {
+                        amount: `${displayAsGTU(-cost)}`,
+                        amountFormula: `${displayAsGTU(cost)} Fee`,
+                    };
+                }
 
                 if (
                     TransactionKindString.TransferToPublic ===
@@ -143,7 +149,10 @@ function parseAmount(
                 );
             }
             // incoming transaction:
-            return buildCostFreeAmountString(BigInt(transaction.subtotal));
+            return buildCostFreeAmountString(
+                BigInt(transaction.subtotal),
+                true
+            );
 
         case OriginType.Reward:
             return buildCostFreeAmountString(BigInt(transaction.subtotal));
@@ -163,12 +172,26 @@ function displayType(kind: TransactionKindString) {
             return <i>Shielded amount</i>;
         case TransactionKindString.TransferToPublic:
             return <i>Unshielded amount</i>;
+        case TransactionKindString.EncryptedAmountTransfer:
+            return <i className="mL10">(Encrypted)</i>;
         case TransactionKindString.BakingReward:
             return <i>Baker reward</i>;
         case TransactionKindString.BlockReward:
             return <i>Block reward</i>;
         case TransactionKindString.FinalizationReward:
             return <i>Finalization reward</i>;
+        case TransactionKindString.AddBaker:
+            return <i>Add baker</i>;
+        case TransactionKindString.RemoveBaker:
+            return <i>Remove baker</i>;
+        case TransactionKindString.UpdateBakerStake:
+            return <i>Update baker stake</i>;
+        case TransactionKindString.UpdateBakerRestakeEarnings:
+            return <i>Update baker restake Earnings</i>;
+        case TransactionKindString.UpdateBakerKeys:
+            return <i>Update baker keys</i>;
+        case TransactionKindString.UpdateCredentials:
+            return <i>Update account credentials</i>;
         default:
             return '';
     }

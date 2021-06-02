@@ -7,6 +7,7 @@ import {
     TransactionEvent,
     TransactionStatus,
     ScheduledTransfer,
+    EncryptedTransfer,
     Schedule,
     TransferToEncrypted,
     instanceOfUpdateInstruction,
@@ -21,6 +22,11 @@ import {
     AccountInfo,
     AddBaker,
     AddBakerPayload,
+    RemoveBaker,
+    UpdateBakerKeysPayload,
+    UpdateBakerKeys,
+    UpdateBakerStakePayload,
+    UpdateBakerRestakeEarningsPayload,
     AddressBookEntry,
 } from './types';
 import {
@@ -28,7 +34,7 @@ import {
     getTransactionKindEnergy,
     getUpdateAccountCredentialEnergy,
 } from './transactionCosts';
-import { toMicroUnits, isValidGTUString } from './gtu';
+import { toMicroUnits, isValidGTUString, displayAsGTU } from './gtu';
 import {
     getNextAccountNonce,
     getTransactionStatus,
@@ -145,6 +151,33 @@ export function createSimpleTransferTransaction(
         transactionKind: TransactionKindId.Simple_transfer,
         payload,
         signatureAmount,
+    });
+}
+
+/**
+ *  Constructs an encrypted transfer object,
+ * Given the fromAddress, toAddress and the amount.
+ * N.B. Does not contain the actual payload, as this is done without access to the decryption key.
+ */
+export function createEncryptedTransferTransaction(
+    fromAddress: string,
+    amount: bigint,
+    toAddress: string,
+    expiry = getDefaultExpiry()
+): Promise<EncryptedTransfer> {
+    const payload = {
+        toAddress,
+        plainTransferAmount: amount.toString(),
+    };
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Encrypted_transfer,
+        payload,
+        // Supply the energy, so that the cost is not computed using the incomplete payload.
+        estimatedEnergyAmount: getTransactionKindEnergy(
+            TransactionKindId.Encrypted_transfer
+        ),
     });
 }
 
@@ -312,6 +345,65 @@ export function createAddBakerTransaction(
     });
 }
 
+export function createUpdateBakerKeysTransaction(
+    fromAddress: string,
+    payload: UpdateBakerKeysPayload,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): Promise<UpdateBakerKeys> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_baker_keys,
+        payload,
+        signatureAmount,
+    });
+}
+
+export function createRemoveBakerTransaction(
+    fromAddress: string,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): Promise<RemoveBaker> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Remove_baker,
+        payload: {},
+        signatureAmount,
+    });
+}
+
+export function createUpdateBakerStakeTransaction(
+    fromAddress: string,
+    payload: UpdateBakerStakePayload,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): Promise<RemoveBaker> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_baker_stake,
+        payload,
+        signatureAmount,
+    });
+}
+
+export function createUpdateBakerRestakeEarningsTransaction(
+    fromAddress: string,
+    payload: UpdateBakerRestakeEarningsPayload,
+    signatureAmount = 1,
+    expiry = getDefaultExpiry()
+): Promise<RemoveBaker> {
+    return createAccountTransaction({
+        fromAddress,
+        expiry,
+        transactionKind: TransactionKindId.Update_baker_restake_earnings,
+        payload,
+        signatureAmount,
+    });
+}
+
 export interface StatusResponse {
     status: TransactionStatus;
     outcomes: Record<string, TransactionEvent>;
@@ -424,19 +516,23 @@ export function validateShieldedAmount(
     if (!isValidGTUString(amountToValidate)) {
         return 'Value is not a valid GTU amount';
     }
+    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
         return 'Insufficient public funds to cover fee';
     }
     if (
         account?.totalDecrypted &&
-        BigInt(account.totalDecrypted) < toMicroUnits(amountToValidate)
+        BigInt(account.totalDecrypted) < amountToValidateMicroGTU
     ) {
         return 'Insufficient shielded funds';
+    }
+    if (amountToValidateMicroGTU === 0n) {
+        return 'Amount may not be zero';
     }
     return undefined;
 }
 
-export function validateAmount(
+export function validateTransferAmount(
     amountToValidate: string,
     accountInfo: AccountInfo | undefined,
     estimatedFee: bigint | undefined
@@ -444,15 +540,49 @@ export function validateAmount(
     if (!isValidGTUString(amountToValidate)) {
         return 'Value is not a valid GTU amount';
     }
+    const amountToValidateMicroGTU = toMicroUnits(amountToValidate);
     if (
         accountInfo &&
         amountAtDisposal(accountInfo) <
-            toMicroUnits(amountToValidate) + (estimatedFee || 0n)
+            amountToValidateMicroGTU + (estimatedFee || 0n)
     ) {
         return 'Insufficient funds';
     }
-    if (toMicroUnits(amountToValidate) === 0n) {
+    if (amountToValidateMicroGTU === 0n) {
         return 'Amount may not be zero';
     }
+    return undefined;
+}
+
+function amountToStakeAtDisposal(accountInfo: AccountInfo): bigint {
+    const unShielded = BigInt(accountInfo.accountAmount);
+    const scheduled = accountInfo.accountReleaseSchedule
+        ? BigInt(accountInfo.accountReleaseSchedule.total)
+        : 0n;
+    return unShielded - scheduled;
+}
+
+export function validateBakerStake(
+    bakerStakeThreshold: bigint | undefined,
+    amountToValidate: string,
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (!isValidGTUString(amountToValidate)) {
+        return 'Value is not a valid GTU amount';
+    }
+    const amount = toMicroUnits(amountToValidate);
+    if (bakerStakeThreshold && bakerStakeThreshold > amount) {
+        return `Stake is below the threshold (${displayAsGTU(
+            bakerStakeThreshold
+        )}) for baking `;
+    }
+    if (
+        accountInfo &&
+        amountToStakeAtDisposal(accountInfo) < amount + (estimatedFee || 0n)
+    ) {
+        return 'Insufficient funds';
+    }
+
     return undefined;
 }

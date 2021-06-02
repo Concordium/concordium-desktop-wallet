@@ -112,6 +112,26 @@ const accountTransactionTypes: [
         TransactionKind.Add_baker,
         'Add Baker',
     ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_keys,
+        'Update Baker Keys',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Remove_baker,
+        'Remove Baker',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_stake,
+        'Update Baker Stake',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_restake_earnings,
+        'Update Baker Restake Earnings',
+    ],
 ];
 
 /**

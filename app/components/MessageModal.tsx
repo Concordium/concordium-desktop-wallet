@@ -18,7 +18,9 @@ export default function MessageModal({
     return (
         <Modal onClose={onClose} onOpen={() => {}} open={open}>
             <h2>{title}</h2>
-            <Button onClick={onClose}>{buttonText}</Button>
+            <Button onClick={onClose} className="mT50">
+                {buttonText}
+            </Button>
         </Modal>
     );
 }

@@ -11,7 +11,7 @@ import {
     TransactionKindId,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
-import PickAccount from './PickAccount';
+import PickAccount from '~/components/PickAccount';
 import AddCredential from './AddCredential';
 import ChangeSignatureThreshold, {
     validateThreshold,
@@ -19,14 +19,15 @@ import ChangeSignatureThreshold, {
 import routes from '~/constants/routes.json';
 import CreateUpdate from './CreateUpdate';
 import { CredentialStatus } from './CredentialStatus';
-import styles from './UpdateAccountCredentials.module.scss';
 import UpdateAccountCredentialsHandler from '~/utils/transactionHandlers/UpdateAccountCredentialsHandler';
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import { getDefaultExpiry, isFutureDate } from '~/utils/timeHelpers';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
+import { useTransactionExpiryState } from '~/utils/dataHooks';
+
+import styles from './UpdateAccountCredentials.module.scss';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -45,6 +46,7 @@ function assignIndices<T>(items: T[], usedIndices: number[]) {
                 value: items[i],
             });
             i += 1;
+            candidate += 1;
         }
     }
     return assigned;
@@ -216,16 +218,11 @@ export default function UpdateCredentialPage(): JSX.Element {
     const [newCredentials, setNewCredentials] = useState<
         CredentialDeploymentInformation[]
     >([]);
-    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
-        getDefaultExpiry()
-    );
-    const expiryTimeError = useMemo(
-        () =>
-            expiryTime === undefined || isFutureDate(expiryTime)
-                ? undefined
-                : 'Transaction expiry time must be in the future',
-        [expiryTime]
-    );
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState();
 
     const newCredentialAmount = credentialIds.filter(
         ([, status]) => status !== CredentialStatus.Removed
@@ -433,9 +430,6 @@ export default function UpdateCredentialPage(): JSX.Element {
                                     <ChangeSignatureThreshold
                                         currentThreshold={
                                             account?.signatureThreshold || 1
-                                        }
-                                        newCredentialAmount={
-                                            newCredentialAmount
                                         }
                                         newThreshold={newThreshold}
                                         setNewThreshold={setNewThreshold}

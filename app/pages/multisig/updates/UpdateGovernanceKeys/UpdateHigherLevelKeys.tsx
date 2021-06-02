@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
 import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
@@ -18,12 +18,12 @@ import InputTimestamp from '~/components/Form/InputTimestamp';
 import {
     getDefaultExpiry,
     getFormattedDateString,
-    isFutureDate,
     subtractHours,
     TimeConstants,
 } from '~/utils/timeHelpers';
 import { KeyUpdateEntry } from './KeyUpdateEntry';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
+import { useTransactionExpiryState } from '~/utils/dataHooks';
 
 interface Props {
     blockSummary: BlockSummary;
@@ -92,22 +92,25 @@ export default function UpdateHigherLevelKeys({
     const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
         new Date(getDefaultExpiry().getTime() + 5 * TimeConstants.Minute)
     );
-    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
-        getDefaultExpiry()
+
+    const checkIsBeforeEffective = useCallback(
+        (expiry: Date | undefined) => {
+            if (expiry === undefined) {
+                return undefined;
+            }
+            if (effectiveTime !== undefined && effectiveTime < expiry) {
+                return 'Expiry must be before the effective time';
+            }
+            return undefined;
+        },
+        [effectiveTime]
     );
 
-    const expiryTimeError = useMemo(() => {
-        if (expiryTime === undefined) {
-            return undefined;
-        }
-        if (!isFutureDate(expiryTime)) {
-            return 'Transaction expiry time must be in the future';
-        }
-        if (effectiveTime !== undefined && effectiveTime < expiryTime) {
-            return 'Expiry must be before the effective time';
-        }
-        return undefined;
-    }, [effectiveTime, expiryTime]);
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState(checkIsBeforeEffective);
 
     function addNewKey(publicKey: PublicKeyExportFormat) {
         const addedKey = {

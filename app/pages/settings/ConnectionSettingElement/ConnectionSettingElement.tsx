@@ -7,15 +7,16 @@ import { Global, Setting, Versioned } from '~/utils/types';
 import startClient from '~/node/nodeConnector';
 import Card from '~/cross-app-components/Card';
 import Form from '~/components/Form';
-import styles from './ConnectionSettingElement.module.scss';
 import ConnectionStatusComponent, {
     Status,
 } from '~/components/ConnectionStatusComponent';
-import ipcCommands from '../../constants/ipcCommands.json';
+import ipcCommands from '~/constants/ipcCommands.json';
 import { JsonResponse } from '~/proto/concordium_p2p_rpc_pb';
 import { ConsensusStatus } from '~/node/NodeApiTypes';
 import { getGenesis } from '~/database/GenesisDao';
 import setGenesisAndGlobal from '~/database/DatabaseHelpers';
+
+import styles from './ConnectionSettingElement.module.scss';
 
 interface Props {
     displayText: string;
@@ -126,6 +127,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
         <Card className={styles.connection}>
             <h3>{displayText}</h3>
             <Form
+                className="mT50"
                 onSubmit={() => {
                     if (!testingConnection) {
                         setConnection();

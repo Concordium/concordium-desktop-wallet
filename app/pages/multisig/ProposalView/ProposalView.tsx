@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Redirect, useParams } from 'react-router';
@@ -42,6 +42,9 @@ import { HandleSignatureFile, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
 
 import styles from './ProposalView.module.scss';
+import { dateFromTimeStamp, subtractHours } from '~/utils/timeHelpers';
+import { getTimeout } from '~/utils/transactionHelpers';
+import { useCurrentTime } from '~/utils/hooks';
 import TransactionHashView from '~/components/TransactionHash';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING;
@@ -67,7 +70,15 @@ function ProposalView({ proposal }: ProposalViewProps) {
     const dispatch = useDispatch();
     const form = useForm();
 
-    const transaction: Transaction = parse(proposal.transaction);
+    const transaction: Transaction = useMemo(
+        () => parse(proposal.transaction),
+        [proposal]
+    );
+
+    const now = useCurrentTime();
+    const expiry = dateFromTimeStamp(getTimeout(transaction));
+    const submissionWindowStart = subtractHours(2, expiry);
+    const isBeforeSubmissionWindow = now < submissionWindowStart;
 
     const signatures = getSignatures(transaction);
 
@@ -249,7 +260,11 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     I understand this is the final submission
                                     and cannot be reverted
                                 </Form.Checkbox>
-                                <Form.Submit disabled={!isOpen}>
+                                <Form.Submit
+                                    disabled={
+                                        !isOpen || isBeforeSubmissionWindow
+                                    }
+                                >
                                     Submit transaction to chain
                                 </Form.Submit>
                             </div>

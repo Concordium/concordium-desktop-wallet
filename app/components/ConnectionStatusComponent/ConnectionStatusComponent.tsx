@@ -1,8 +1,9 @@
 import React from 'react';
 import ErrorIcon from '@resources/svg/logo-error.svg';
 import SuccessIcon from '@resources/svg/logo-checkmark.svg';
-import styles from '~/pages/settings/ConnectionSettingElement.module.scss';
 import LoadingComponent from '~/cross-app-components/Loading';
+
+import styles from './ConnectionStatusComponent.module.scss';
 
 export enum Status {
     Pending,

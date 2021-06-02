@@ -164,6 +164,7 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
             {!isRevealAttributesRoute && accountInfo && (
                 <Button
                     className={clsx(
+                        'bgOffWhite',
                         generalStyles.continueButton,
                         styles.button
                     )}
