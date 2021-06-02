@@ -22,6 +22,7 @@ import {
     VerifyKey,
 } from '~/utils/types';
 import styles from '../../common/MultiSignatureFlowPage.module.scss';
+import localStyles from './UpdateAuthorizationKeys.module.scss';
 import { KeyUpdateEntry } from './KeyUpdateEntry';
 import {
     mapCurrentAuthorizationsToUpdate,
@@ -61,10 +62,6 @@ export default function UpdateAuthorizationKeys({
     const currentKeys = blockSummary.updates.keys.level2Keys.keys;
     const currentKeySetSize = currentKeys.length;
     const currentAuthorizations = blockSummary.updates.keys.level2Keys;
-    // const currentAccessStructures = mapCurrentAuthorizationsToUpdate(
-    //     keyUpdateType,
-    //     currentAuthorizations
-    // ).accessStructures;
     const currentThresholds = getCurrentThresholds(currentAuthorizations);
 
     const [newLevel2Keys, setNewLevel2Keys] = useState<AuthorizationKeysUpdate>(
@@ -108,7 +105,7 @@ export default function UpdateAuthorizationKeys({
         const existingKeyIndex = newLevel2Keys.keys.findIndex(
             (value) => value.verifyKey === publicKey.key.verifyKey
         );
-        if (existingKeyIndex) {
+        if (existingKeyIndex > -1) {
             addedKeyIndex = existingKeyIndex;
             updatedKeys = newLevel2Keys.keys;
         }
@@ -255,8 +252,6 @@ export default function UpdateAuthorizationKeys({
                             );
                         }
 
-                        // TODO The index of the key has to be displayed somewhere, as that is what we
-                        // show on the Ledger to be signed.
                         return (
                             <KeyUpdateEntry
                                 key={matchingKey.verifyKey}
@@ -290,6 +285,7 @@ export default function UpdateAuthorizationKeys({
         <Columns divider columnScroll columnClassName={styles.column}>
             <Columns.Column header="Transaction Details">
                 <div className={styles.columnContent}>
+                    <h2>Level 2 keys and their indices</h2>
                     <p>
                         Current size of level 2 key set:{' '}
                         <b>{currentKeySetSize}</b>
@@ -298,6 +294,25 @@ export default function UpdateAuthorizationKeys({
                         New size of level 2 key set:{' '}
                         <b>{newLevel2Keys.keys.length}</b>
                     </p>
+                    <ul>
+                        {newLevel2Keys.keys.map((key, index) => {
+                            return (
+                                <li
+                                    className={localStyles.listItem}
+                                    key={key.verifyKey}
+                                >
+                                    <div className="flex alignCenter">
+                                        <p className={localStyles.index}>
+                                            {index}
+                                        </p>
+                                        <p className={localStyles.keyText}>
+                                            {key.verifyKey}
+                                        </p>
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
                     {newLevel2Keys.accessStructures.map((accessStructure) => {
                         return displayAccessStructure(
                             accessStructure,
