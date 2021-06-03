@@ -14,7 +14,7 @@
     fill: $color-pale-blue;
 }
 
-.ViewingShielded {
+.viewingShielded {
     display: flex;
     justify-content: space-between;
     margin: 0 20px;
@@ -26,13 +26,13 @@
 
 .bakerRow,
 .amountRow,
-.ViewingShieldedButton,
+.viewingShieldedButton,
 .shieldedAmount,
 .blueText {
     color: $color-pale-blue;
 }
 
-.ViewingShieldedButton,
+.viewingShieldedButton,
 .amountRow {
     font-size: $font-size-body2;
 }
