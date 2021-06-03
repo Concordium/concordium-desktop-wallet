@@ -18,7 +18,6 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
 import styles from './UpdateAccountCredentials.module.scss';
-import { hasDuplicateWalletId } from '~/database/CredentialDao';
 
 interface Props {
     accountAddress?: string;
@@ -99,29 +98,15 @@ export default function AddCredential({
                 });
                 return;
             }
-            const credentialId = credentialExport.credential.credId;
-            if (credentialIds.find(([credId]) => credId === credentialId)) {
-                setShowError({
-                    show: true,
-                    header: 'Invalid Credential',
-                    content: 'No duplicate credentials allowed',
-                });
-                return;
-            }
-            const currentCredentialIds = credentialIds
-                .filter(([, status]) => status !== CredentialStatus.Removed)
-                .map(([id]) => id);
             if (
-                await hasDuplicateWalletId(
-                    accountAddress,
-                    credentialId,
-                    currentCredentialIds
+                credentialIds.find(
+                    ([credId]) => credId === credentialExport.credential.credId
                 )
             ) {
                 setShowError({
                     show: true,
                     header: 'Invalid Credential',
-                    content: 'Only one credential for each device is allowed',
+                    content: 'No duplicate credentials allowed',
                 });
             } else {
                 setCurrentCredential(credentialExport.credential);
