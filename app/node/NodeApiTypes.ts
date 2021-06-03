@@ -59,6 +59,7 @@ interface UpdateQueues {
     bakerStakeThreshold: UpdateQueue;
     rootKeys: UpdateQueue;
     level1Keys: UpdateQueue;
+    level2Keys: UpdateQueue;
 }
 
 export interface Authorization {
@@ -72,6 +73,7 @@ export interface Key {
 }
 
 export interface Authorizations {
+    emergency: Authorization;
     microGTUPerEuro: Authorization;
     euroPerEnergy: Authorization;
     transactionFeeDistribution: Authorization;
@@ -81,6 +83,8 @@ export interface Authorizations {
     paramGASRewards: Authorization;
     bakerStakeThreshold: Authorization;
     electionDifficulty: Authorization;
+    addAnonymityRevoker: Authorization;
+    addIdentityProvider: Authorization;
     keys: Key[];
 }
 

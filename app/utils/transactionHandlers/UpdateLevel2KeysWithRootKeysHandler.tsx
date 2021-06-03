@@ -1,37 +1,33 @@
 import React from 'react';
-import HigherLevelKeysView from '~/pages/multisig/updates/UpdateGovernanceKeys/HigherLevelKeysView';
-import UpdateRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/UpdateRootKeys';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import {
-    Authorization,
-    Authorizations,
-    BlockSummary,
-} from '../../node/NodeApiTypes';
+import { Authorization, BlockSummary } from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
     UpdateInstructionPayload,
     MultiSignatureTransaction,
     UpdateType,
-    HigherLevelKeyUpdate,
-    isUpdateRootKeys,
+    isUpdateLevel2KeysWithRootKeys,
+    AuthorizationKeysUpdate,
 } from '../types';
-import { serializeHigherLevelKeyUpdate } from '../UpdateSerialization';
-import { removeRemovedKeys } from '../updates/HigherLevelKeysHelpers';
+import { serializeAuthorizationKeysUpdate } from '../UpdateSerialization';
 import { UpdateInstructionHandler } from '../transactionTypes';
+import AuthorizationKeysView from '~/pages/multisig/updates/UpdateGovernanceKeys/AuthorizationKeysView';
+import UpdateLevel2KeysWithRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/UpdateLevel2KeysWithRootKeys';
+import { removeRemovedKeys } from '~/pages/multisig/updates/UpdateGovernanceKeys/util';
 
-const TYPE = 'Update Root Governance Keys';
+const TYPE = 'Update Level 2 Governance Keys using root keys';
 
-type TransactionType = UpdateInstruction<HigherLevelKeyUpdate>;
+type TransactionType = UpdateInstruction<AuthorizationKeysUpdate>;
 
-export default class UpdateRootKeysHandler
+export default class UpdateLevel2KeysUsingRootKeysHandler
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
     confirmType(
         transaction: UpdateInstruction<UpdateInstructionPayload>
     ): TransactionType {
-        if (isUpdateRootKeys(transaction)) {
+        if (isUpdateLevel2KeysWithRootKeys(transaction)) {
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
@@ -39,7 +35,7 @@ export default class UpdateRootKeysHandler
 
     async createTransaction(
         blockSummary: BlockSummary,
-        higherLevelKeyUpdate: HigherLevelKeyUpdate,
+        authorizationKeysUpdate: AuthorizationKeysUpdate,
         effectiveTime: bigint,
         expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
@@ -48,12 +44,12 @@ export default class UpdateRootKeysHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.rootKeys.nextSequenceNumber;
+            blockSummary.updates.updateQueues.level2Keys.nextSequenceNumber;
         const { threshold } = blockSummary.updates.keys.rootKeys;
 
         return createUpdateMultiSignatureTransaction(
-            { ...higherLevelKeyUpdate, keyUpdateType: 0 },
-            UpdateType.UpdateRootKeys,
+            authorizationKeysUpdate,
+            UpdateType.UpdateLevel2KeysUsingRootKeys,
             sequenceNumber,
             threshold,
             effectiveTime,
@@ -65,7 +61,7 @@ export default class UpdateRootKeysHandler
         const payloadWithoutRemovedKeys = removeRemovedKeys(
             transaction.payload
         );
-        return serializeHigherLevelKeyUpdate(payloadWithoutRemovedKeys);
+        return serializeAuthorizationKeysUpdate(payloadWithoutRemovedKeys);
     }
 
     signTransaction(
@@ -81,25 +77,24 @@ export default class UpdateRootKeysHandler
             payload: payloadWithoutRemovedKeys,
         };
 
-        return ledger.signHigherLevelKeysUpdate(
+        return ledger.signAuthorizationKeysUpdate(
             transactionWithoutRemoved,
-            this.serializePayload(transactionWithoutRemoved),
+            this.serializePayload(transaction),
             path,
-            0x28
+            0x2a
         );
     }
 
     view(transaction: TransactionType) {
         return (
-            <HigherLevelKeysView
-                higherLevelKeyUpdate={transaction.payload}
-                type={transaction.type}
+            <AuthorizationKeysView
+                authorizationKeysUpdate={transaction.payload}
             />
         );
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getAuthorization(_authorizations: Authorizations): Authorization {
+    getAuthorization(): Authorization {
         throw new Error(
             'If this method was invoked, then it happened due to an implementation error.'
         );
@@ -107,7 +102,7 @@ export default class UpdateRootKeysHandler
 
     print = () => undefined;
 
-    update = UpdateRootKeys;
+    update = UpdateLevel2KeysWithRootKeys;
 
     title = `Foundation Transaction | ${TYPE}`;
 

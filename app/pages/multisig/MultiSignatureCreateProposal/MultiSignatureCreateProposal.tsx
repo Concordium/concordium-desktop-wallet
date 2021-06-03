@@ -6,6 +6,7 @@ import { useParams } from 'react-router';
 
 import { FieldValues } from 'react-hook-form';
 import {
+    AuthorizationKeysUpdate,
     HigherLevelKeyUpdate,
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
@@ -130,7 +131,9 @@ function MultiSignatureCreateProposal({
     async function handleKeySubmit(
         effectiveTime: Date,
         expiryTime: Date,
-        higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
+        keyUpdate:
+            | Partial<HigherLevelKeyUpdate>
+            | Partial<AuthorizationKeysUpdate>
     ) {
         if (!blockSummary) {
             return;
@@ -141,7 +144,7 @@ function MultiSignatureCreateProposal({
         const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
         const proposal = await handler.createTransaction(
             blockSummary,
-            higherLevelKeyUpdate,
+            keyUpdate,
             effectiveTimeInSeconds,
             expiryTimeInSeconds
         );
@@ -166,11 +169,42 @@ function MultiSignatureCreateProposal({
         setRestrictionModalOpen(true);
     }
 
+    function keyUpdateComponent() {
+        if (!blockSummary || !consensusStatus) {
+            return <Loading text="Getting current settings from chain" />;
+        }
+        if (
+            UpdateType.UpdateLevel2KeysUsingRootKeys === type ||
+            UpdateType.UpdateLevel2KeysUsingLevel1Keys === type
+        ) {
+            return (
+                <div className={styles.subtractContainerPadding}>
+                    <UpdateComponent
+                        blockSummary={blockSummary}
+                        consensusStatus={consensusStatus}
+                        handleAuthorizationKeySubmit={handleKeySubmit}
+                    />
+                </div>
+            );
+        }
+        return (
+            <div className={styles.subtractContainerPadding}>
+                <UpdateComponent
+                    blockSummary={blockSummary}
+                    consensusStatus={consensusStatus}
+                    handleHigherLevelKeySubmit={handleKeySubmit}
+                />
+            </div>
+        );
+    }
+
     if (
         [
             UpdateType.UpdateRootKeys,
             UpdateType.UpdateLevel1KeysUsingRootKeys,
             UpdateType.UpdateLevel1KeysUsingLevel1Keys,
+            UpdateType.UpdateLevel2KeysUsingRootKeys,
+            UpdateType.UpdateLevel2KeysUsingLevel1Keys,
         ].includes(type)
     ) {
         return (
@@ -180,17 +214,7 @@ function MultiSignatureCreateProposal({
                 delegateScroll
             >
                 {RestrictionModal}
-                {!blockSummary || !consensusStatus ? (
-                    <Loading text="Getting current settings from chain" />
-                ) : (
-                    <div className={styles.subtractContainerPadding}>
-                        <UpdateComponent
-                            blockSummary={blockSummary}
-                            consensusStatus={consensusStatus}
-                            handleKeySubmit={handleKeySubmit}
-                        />
-                    </div>
-                )}
+                {keyUpdateComponent()}
             </MultiSignatureLayout>
         );
     }

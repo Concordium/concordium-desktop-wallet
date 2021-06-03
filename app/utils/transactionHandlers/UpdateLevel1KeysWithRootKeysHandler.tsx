@@ -1,5 +1,5 @@
 import React from 'react';
-import HigherLevelKeysView from '~/pages/multisig/updates/UpdateHigherLevelKeys/HigherLevelKeysView';
+import HigherLevelKeysView from '~/pages/multisig/updates/UpdateGovernanceKeys/HigherLevelKeysView';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
@@ -19,7 +19,7 @@ import {
 import { serializeHigherLevelKeyUpdate } from '../UpdateSerialization';
 import { removeRemovedKeys } from '../updates/HigherLevelKeysHelpers';
 import { UpdateInstructionHandler } from '../transactionTypes';
-import UpdateLevel1KeysWithRootKeys from '~/pages/multisig/updates/UpdateHigherLevelKeys/UpdateLevel1KeysWithRootKeys';
+import UpdateLevel1KeysWithRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/UpdateLevel1KeysWithRootKeys';
 
 const TYPE = 'Update Level 1 Governance Keys using root keys';
 
