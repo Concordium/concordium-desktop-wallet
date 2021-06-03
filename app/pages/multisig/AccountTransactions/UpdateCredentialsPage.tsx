@@ -86,9 +86,10 @@ function displayAccount(account: Account | undefined) {
     return (
         <>
             <h5 className={styles.PropertyName}>Account:</h5>
-            <h2 className={styles.LargePropertyValue}>
+            <h2 className="m0">
                 {account ? account.name : 'Choose an account on the right'}
             </h2>
+            <p className="textFaded mB40 mT5 body4">{account?.address}</p>
         </>
     );
 }
@@ -102,7 +103,7 @@ function displaySignatureThreshold(
         body = placeHolderText;
     } else {
         body = (
-            <p>
+            <p className="mT5">
                 Current amount of required signatures: <b>{currentThreshold}</b>
                 <br />
                 New amount of required signatures: <b>{newThreshold || '?'}</b>
@@ -126,7 +127,7 @@ function displayCredentialCount(
         body = placeHolderText;
     } else {
         body = (
-            <p>
+            <p className="mT5">
                 Current amount of credentials: <b>{currentAmount}</b>
                 <br />
                 New amount of credentials: <b>{newAmount}</b>
