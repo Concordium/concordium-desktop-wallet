@@ -9,7 +9,10 @@ import {
     serializeUpdateInstruction,
     serializeUpdateInstructionHeaderAndPayload,
 } from './UpdateSerialization';
-import { getAccountTransactionHash } from './transactionSerialization';
+import {
+    getAccountTransactionHash,
+    getAccountTransactionSignDigest,
+} from './transactionSerialization';
 import { hashSha256 } from './serializationHelpers';
 import { getBlockSummary, getConsensusStatus } from '~/node/nodeRequests';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
@@ -55,7 +58,7 @@ export default function getTransactionSignDigest(transaction: Transaction) {
             )
         ).toString('hex');
     }
-    return getAccountTransactionHash(transaction, () => []).toString('hex');
+    return getAccountTransactionSignDigest(transaction).toString('hex');
 }
 
 /**
@@ -68,7 +71,7 @@ export function getTransactionHash(transaction: Transaction) {
     if (instanceOfAccountTransactionWithSignature(transaction)) {
         return getAccountTransactionHash(
             transaction,
-            () => transaction.signatures
+            transaction.signatures
         ).toString('hex');
     }
     throw new Error(

@@ -182,11 +182,11 @@ export default function SubmitTransfer({ location }: Props) {
         );
         const serializedTransaction = serializeTransaction(
             transaction,
-            () => signatureStructured
+            signatureStructured
         );
         const transactionHash = getAccountTransactionHash(
             transaction,
-            () => signatureStructured
+            signatureStructured
         ).toString('hex');
         const response = await sendTransaction(serializedTransaction);
 
