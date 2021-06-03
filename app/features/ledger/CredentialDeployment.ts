@@ -5,12 +5,12 @@ import {
     CredentialDeploymentValues,
     ChosenAttributesKeys,
     Hex,
-} from '../../utils/types';
+} from '~/utils/types';
 import {
     putBase58Check,
     serializeVerifyKey,
     serializeYearMonth,
-} from '../../utils/serializationHelpers';
+} from '~/utils/serializationHelpers';
 import pathAsBuffer from './Path';
 
 export async function signCredentialValues(
