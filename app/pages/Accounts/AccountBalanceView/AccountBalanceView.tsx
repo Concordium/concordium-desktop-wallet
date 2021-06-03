@@ -33,6 +33,10 @@ export default function AccountBalanceView(): JSX.Element | null {
 
     const isMultiSig = Object.values(accountInfo.accountCredentials).length > 1;
 
+    if (isMultiSig && viewingShielded) {
+        dispatch(setViewingShielded(false));
+    }
+
     const buttons = (
         <div
             className={clsx(
