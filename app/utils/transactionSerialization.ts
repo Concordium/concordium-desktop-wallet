@@ -330,7 +330,7 @@ function serializeSignature(signatures: TransactionAccountSignature) {
 
 function serializeUnversionedTransaction(
     transaction: AccountTransaction,
-    signature?: TransactionAccountSignature
+    signature: TransactionAccountSignature
 ) {
     const payload = serializeTransferPayload(
         transaction.transactionKind,
@@ -344,10 +344,7 @@ function serializeUnversionedTransaction(
         transaction.expiry
     );
 
-    const serialSignature = signature
-        ? serializeSignature(signature)
-        : Buffer.alloc(0);
-
+    const serialSignature = serializeSignature(signature);
     const serialized = new Uint8Array(
         1 + serialSignature.length + header.length + payload.length
     );
@@ -387,6 +384,17 @@ export function getAccountTransactionHash(
 export function getAccountTransactionSignDigest(
     transaction: AccountTransaction
 ) {
-    const serialized = serializeUnversionedTransaction(transaction);
-    return hashSha256(serialized);
+    const payload = serializeTransferPayload(
+        transaction.transactionKind,
+        transaction.payload
+    );
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    return hashSha256(Buffer.concat([header, payload]));
 }
