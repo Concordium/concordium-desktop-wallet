@@ -5,6 +5,7 @@ import {
     YearMonth,
     SchemeId,
     CredentialDeploymentInformation,
+    ChosenAttributesKeys,
 } from './types';
 
 export function putBase58Check(
@@ -164,14 +165,24 @@ export function serializeCredentialDeploymentInformation(
     const attributesLength = Buffer.alloc(2);
     attributesLength.writeUInt16BE(revealedAttributes.length, 0);
     buffers.push(attributesLength);
-    revealedAttributes.forEach(([tag, value]) => {
-        const serializedAttributeValue = Buffer.from(value, 'utf-8');
-        const data = Buffer.alloc(2);
-        data.writeUInt8(parseInt(tag, 10), 0);
-        data.writeUInt8(serializedAttributeValue.length, 1);
-        buffers.push(data);
-        buffers.push(serializedAttributeValue);
-    });
+
+    const revealedAttributeTags: [
+        number,
+        string
+    ][] = revealedAttributes.map(([tagName, value]) => [
+        ChosenAttributesKeys[tagName as keyof typeof ChosenAttributesKeys],
+        value,
+    ]);
+    revealedAttributeTags
+        .sort((a, b) => a[0] - b[0])
+        .forEach(([tag, value]) => {
+            const serializedAttributeValue = Buffer.from(value, 'utf-8');
+            const data = Buffer.alloc(2);
+            data.writeUInt8(tag, 0);
+            data.writeUInt8(serializedAttributeValue.length, 1);
+            buffers.push(data);
+            buffers.push(serializedAttributeValue);
+        });
     const proofs = Buffer.from(credential.proofs, 'hex');
     buffers.push(encodeWord32(proofs.length));
     buffers.push(proofs);
