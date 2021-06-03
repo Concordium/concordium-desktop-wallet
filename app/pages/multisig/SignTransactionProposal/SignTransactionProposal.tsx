@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { LocationDescriptorObject } from 'history';
-import { parse, stringify } from 'json-bigint';
+import { parse } from 'json-bigint';
 import { Redirect } from 'react-router';
 import routes from '~/constants/routes.json';
 import {
@@ -28,6 +28,7 @@ import SignTransaction from './SignTransaction';
 
 import styles from './SignTransactionProposal.module.scss';
 import MultiSignatureLayout from '../MultiSignatureLayout';
+import { stringify } from '~/utils/JSONHelper';
 
 export interface SignInput {
     multiSignatureTransaction: MultiSignatureTransaction;
