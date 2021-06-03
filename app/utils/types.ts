@@ -490,10 +490,25 @@ export interface TypedCredentialDeploymentInformation {
 type AccountReleaseSchedule = any; // TODO
 
 interface AccountBakerDetails {
-    stakedAmount: string;
-    bakerId: string;
     restakeEarnings: boolean;
+    bakerId: number;
+    bakerAggregationVerifyKey: string;
+    bakerElectionVerifyKey: string;
+    bakerSignatureVerifyKey: string;
+    stakedAmount: string;
+    pendingChange?: BakerPendingChange;
 }
+
+export type BakerPendingChange =
+    | {
+          change: 'ReduceStake';
+          newStake: string;
+          epoch: number;
+      }
+    | {
+          change: 'RemoveBaker';
+          epoch: number;
+      };
 
 // Reflects the structure given by the node,
 // in a getAccountInforequest

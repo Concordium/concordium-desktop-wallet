@@ -162,6 +162,12 @@ export default function UpdateBakerStakePage() {
                                         filter={(_, info) =>
                                             info?.accountBaker !== undefined
                                         }
+                                        isDisabled={(_, info) =>
+                                            info?.accountBaker
+                                                ?.pendingChange !== undefined
+                                                ? 'Stake is frozen, because of the pending change'
+                                                : undefined
+                                        }
                                     />
                                 </div>
                                 <Button

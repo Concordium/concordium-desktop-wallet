@@ -12,12 +12,14 @@ import {
 import CardList from '~/cross-app-components/CardList';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import routes from '~/constants/routes.json';
+import ErrorMessage from './Form/ErrorMessage';
 
 interface Props {
     chosenAccount?: Account;
     identity?: Identity;
     setAccount: (account: Account) => void;
     filter?: (account: Account, info?: AccountInfo) => boolean;
+    isDisabled?: (account: Account, info?: AccountInfo) => string | undefined;
 }
 
 /**
@@ -28,6 +30,7 @@ export default function PickAccount({
     setAccount,
     identity,
     filter,
+    isDisabled,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
 
@@ -73,18 +76,35 @@ export default function PickAccount({
             <CardList>
                 {accounts
                     .filter((a) => filter?.(a, accountsInfo[a.address]) ?? true)
-                    .map((account: Account, index: number) => (
-                        <AccountCard
-                            key={account.address}
-                            active={index === chosenIndex}
-                            account={account}
-                            accountInfo={accountsInfo[account.address]}
-                            onClick={() => {
-                                setChosenIndex(index);
-                                setAccount(account);
-                            }}
-                        />
-                    ))}
+                    .map((account: Account, index: number) => {
+                        const disabledReason = isDisabled?.(
+                            account,
+                            accountsInfo[account.address]
+                        );
+                        return (
+                            <div key={account.address}>
+                                <AccountCard
+                                    active={index === chosenIndex}
+                                    disabled={disabledReason !== undefined}
+                                    account={account}
+                                    accountInfo={accountsInfo[account.address]}
+                                    onClick={
+                                        disabledReason === undefined
+                                            ? () => {
+                                                  setChosenIndex(index);
+                                                  setAccount(account);
+                                              }
+                                            : undefined
+                                    }
+                                />
+                                {disabledReason && (
+                                    <ErrorMessage>
+                                        {disabledReason}
+                                    </ErrorMessage>
+                                )}
+                            </div>
+                        );
+                    })}
             </CardList>
         </>
     );
