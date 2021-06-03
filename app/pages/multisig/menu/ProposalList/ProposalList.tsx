@@ -10,7 +10,7 @@ import ProposalStatus from '../../ProposalStatus';
 import styles from './ProposalList.module.scss';
 import Button from '~/cross-app-components/Button';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 50;
 
 /**
  * Sorts so that the newest multi signature transaction is first.
