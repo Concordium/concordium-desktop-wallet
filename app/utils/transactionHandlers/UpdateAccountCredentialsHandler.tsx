@@ -12,6 +12,7 @@ import {
 } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
 import routes from '~/constants/routes.json';
+import { noOp } from '../basicHelpers';
 
 const TYPE = 'Update Account Credentials';
 
@@ -71,23 +72,20 @@ export default class UpdateAccountCredentialsHandler
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient,
         path: AccountPathInput,
-        displayMessage?: (message: string | JSX.Element) => void
+        displayMessage: (message: string | JSX.Element) => void = noOp
     ) {
         return ledger.signUpdateCredentialTransaction(
             transaction,
             getAccountPath(path),
             (key) => {
-                if (!displayMessage) {
-                    return;
-                }
-
                 displayMessage(
                     <>
                         <b>Verification key:</b>
                         <p className="m0">{key}</p>
                     </>
                 );
-            }
+            },
+            () => displayMessage('Please verify transaction details')
         );
     }
 

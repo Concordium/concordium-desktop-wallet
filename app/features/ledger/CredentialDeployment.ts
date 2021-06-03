@@ -18,7 +18,8 @@ export async function signCredentialValues(
     credentialDeployment: CredentialDeploymentValues,
     ins: number,
     p2: number,
-    onAwaitVerificationKeyConfirmation?: (key: Hex) => void
+    onAwaitVerificationKeyConfirmation?: (key: Hex) => void,
+    onVerificationKeysConfirmed?: () => void
 ) {
     let p1 = 0x0a;
 
@@ -48,6 +49,10 @@ export async function signCredentialValues(
 
         // eslint-disable-next-line  no-await-in-loop
         await transport.send(0xe0, ins, p1, p2, data);
+    }
+
+    if (onVerificationKeysConfirmed) {
+        onVerificationKeysConfirmed();
     }
 
     const signatureThreshold = Uint8Array.of(publicKeys.threshold);

@@ -21,7 +21,8 @@ export default async function signUpdateCredentials(
     transport: Transport,
     path: number[],
     transaction: UpdateAccountCredentials,
-    onAwaitVerificationKeyConfirmation: (key: Hex) => void
+    onAwaitVerificationKeyConfirmation: (key: Hex) => void,
+    onVerificationKeysConfirmed: () => void
 ): Promise<Buffer> {
     const pathPrefix = pathAsBuffer(path);
     const ins = INS_UPDATE_CREDENTIALS;
@@ -75,7 +76,8 @@ export default async function signUpdateCredentials(
             credentialInformation,
             ins,
             p2,
-            onAwaitVerificationKeyConfirmation
+            onAwaitVerificationKeyConfirmation,
+            onVerificationKeysConfirmed
         );
         // eslint-disable-next-line  no-await-in-loop
         await signCredentialProofs(

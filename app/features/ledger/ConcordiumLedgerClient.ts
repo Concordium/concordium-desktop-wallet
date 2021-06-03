@@ -87,13 +87,15 @@ export default class ConcordiumLedgerClient {
     signUpdateCredentialTransaction(
         transaction: UpdateAccountCredentials,
         path: number[],
-        onAwaitVerificationKeyConfirmation: (key: Hex) => void
+        onAwaitVerificationKeyConfirmation: (key: Hex) => void,
+        onVerificationKeysConfirmed: () => void
     ): Promise<Buffer> {
         return signUpdateCredentialTransaction(
             this.transport,
             path,
             transaction,
-            onAwaitVerificationKeyConfirmation
+            onAwaitVerificationKeyConfirmation,
+            onVerificationKeysConfirmed
         );
     }
 
