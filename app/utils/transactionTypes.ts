@@ -136,7 +136,8 @@ export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
     signTransaction: (
         transaction: T,
         signer: S,
-        path: AccountPathInput
+        path: AccountPathInput,
+        displayMessage?: (message: string | JSX.Element) => void
     ) => Promise<Buffer>;
     /**
      * Returns a React element, in which the details of the transaction are displayed

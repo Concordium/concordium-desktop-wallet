@@ -19,6 +19,7 @@ import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 import { selectedProposalRoute } from '~/utils/routerHelper';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 import errorMessages from '~/constants/errorMessages.json';
+import { noOp } from '~/utils/basicHelpers';
 
 interface Props {
     transaction: AccountTransaction;
@@ -28,7 +29,8 @@ interface Props {
 export async function signUsingLedger(
     ledger: ConcordiumLedgerClient,
     transaction: AccountTransaction,
-    account: Account
+    account: Account,
+    displayMessage?: (message: string | JSX.Element) => void
 ) {
     const signatureIndex = 0;
 
@@ -49,7 +51,12 @@ export async function signUsingLedger(
     };
 
     const handler = findAccountTransactionHandler(transaction.transactionKind);
-    const signature = await handler.signTransaction(transaction, ledger, path);
+    const signature = await handler.signTransaction(
+        transaction,
+        ledger,
+        path,
+        displayMessage
+    );
     return buildTransactionAccountSignature(
         credential.credentialIndex,
         signatureIndex,
@@ -100,7 +107,10 @@ export default function SignTransaction({
     /** Creates the transaction, and if the ledger parameter is provided, also
      *  adds a signature on the transaction.
      */
-    async function sign(ledger?: ConcordiumLedgerClient) {
+    async function sign(
+        ledger?: ConcordiumLedgerClient,
+        setMessage: (message: string | JSX.Element) => void = noOp
+    ) {
         if (!global) {
             throw new Error(errorMessages.missingGlobal);
         }
@@ -110,7 +120,12 @@ export default function SignTransaction({
         }
         let signatures = {};
         if (ledger) {
-            signatures = await signUsingLedger(ledger, transaction, account);
+            signatures = await signUsingLedger(
+                ledger,
+                transaction,
+                account,
+                setMessage
+            );
         }
         const proposal = await createMultisignatureTransaction(
             transaction,

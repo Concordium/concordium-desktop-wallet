@@ -1,6 +1,7 @@
-import AccountTransactionDetails from '../../components/Transfers/AccountTransactionDetails';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { AccountPathInput, getAccountPath } from '../../features/ledger/Path';
+import React from 'react';
+import AccountTransactionDetails from '~/components/Transfers/AccountTransactionDetails';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
 import { AccountTransactionHandler } from '../transactionTypes';
 import {
     UpdateAccountCredentials,
@@ -69,16 +70,29 @@ export default class UpdateAccountCredentialsHandler
     async signTransaction(
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient,
-        path: AccountPathInput
+        path: AccountPathInput,
+        displayMessage?: (message: string | JSX.Element) => void
     ) {
         return ledger.signUpdateCredentialTransaction(
             transaction,
-            getAccountPath(path)
+            getAccountPath(path),
+            (key) => {
+                if (!displayMessage) {
+                    return;
+                }
+
+                displayMessage(
+                    <>
+                        <b>Verification key:</b>
+                        <p className="m0">{key}</p>
+                    </>
+                );
+            }
         );
     }
 
     view(transaction: TransactionType) {
-        return AccountTransactionDetails({ transaction });
+        return <AccountTransactionDetails transaction={transaction} />;
     }
 
     print = () => undefined;

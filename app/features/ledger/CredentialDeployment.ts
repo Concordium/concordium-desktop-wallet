@@ -4,6 +4,7 @@ import {
     IdOwnershipProofs,
     CredentialDeploymentValues,
     ChosenAttributesKeys,
+    Hex,
 } from '../../utils/types';
 import {
     putBase58Check,
@@ -16,7 +17,8 @@ export async function signCredentialValues(
     transport: Transport,
     credentialDeployment: CredentialDeploymentValues,
     ins: number,
-    p2: number
+    p2: number,
+    onAwaitVerificationKeyConfirmation?: (key: Hex) => void
 ) {
     let p1 = 0x0a;
 
@@ -39,6 +41,10 @@ export async function signCredentialValues(
             Uint8Array.of(index),
             serializeVerifyKey(verificationKey),
         ]);
+
+        if (onAwaitVerificationKeyConfirmation) {
+            onAwaitVerificationKeyConfirmation(verificationKey.verifyKey);
+        }
 
         // eslint-disable-next-line  no-await-in-loop
         await transport.send(0xe0, ins, p1, p2, data);
