@@ -9,13 +9,7 @@ import BakerImage from '@resources/svg/baker.svg';
 import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
 import { displayAsGTU } from '~/utils/gtu';
-import {
-    AccountInfo,
-    Account,
-    AccountStatus,
-    ClassName,
-    BakerPendingChange,
-} from '~/utils/types';
+import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
 import { isInitialAccount } from '~/utils/accountHelpers';
 import SidedRow from '~/components/SidedRow';
 import { walletIdSelector } from '~/features/WalletSlice';
@@ -23,8 +17,6 @@ import { findLocalDeployedCredential } from '~/utils/credentialHelper';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 
 import styles from './AccountCard.module.scss';
-import BakerChange from '../BakerPendingChange/BakerPendingChange';
-import { useConsensusStatus } from '~/utils/dataHooks';
 
 interface ViewProps extends ClassName {
     accountName: string;
@@ -43,9 +35,6 @@ interface ViewProps extends ClassName {
     unShielded?: bigint;
     amountAtDisposal?: bigint;
     stakedAmount?: bigint;
-    bakerPendingChange?: BakerPendingChange;
-    epochDuration?: number;
-    genesisTime?: Date;
 }
 
 export function AccountCardView({
@@ -66,9 +55,6 @@ export function AccountCardView({
     hasEncryptedFunds = false,
     amountAtDisposal = 0n,
     stakedAmount = 0n,
-    bakerPendingChange,
-    epochDuration,
-    genesisTime,
 }: ViewProps): JSX.Element {
     const hidden = hasEncryptedFunds && (
         <>
@@ -163,17 +149,6 @@ export function AccountCardView({
                 left="- Staked:"
                 right={displayAsGTU(stakedAmount)}
             />
-            {bakerPendingChange !== undefined &&
-                epochDuration !== undefined &&
-                genesisTime !== undefined && (
-                    <div className={styles.row}>
-                        <BakerChange
-                            pending={bakerPendingChange}
-                            epochDuration={epochDuration}
-                            genesisTime={genesisTime}
-                        />
-                    </div>
-                )}
             <div className={styles.dividingLine} />
             <SidedRow
                 className={clsx(styles.row, 'mB0')}
@@ -238,8 +213,6 @@ export default function AccountCard({
     const stakedAmount = accountBaker ? BigInt(accountBaker.stakedAmount) : 0n;
     const amountAtDisposal = unShielded - scheduled - stakedAmount;
 
-    const consensusStatus = useConsensusStatus();
-
     return (
         <AccountCardView
             {...viewProps}
@@ -259,11 +232,6 @@ export default function AccountCard({
             identityName={account.identityName}
             isBaker={Boolean(accountBaker)}
             initialAccount={isInitialAccount(account)}
-            bakerPendingChange={accountInfo?.accountBaker?.pendingChange}
-            genesisTime={
-                consensusStatus && new Date(consensusStatus.genesisTime)
-            }
-            epochDuration={consensusStatus && consensusStatus.epochDuration}
         />
     );
 }

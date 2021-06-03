@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, ReactNode } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Identity, Account, AccountInfo } from '~/utils/types';
@@ -19,7 +19,10 @@ interface Props {
     identity?: Identity;
     setAccount: (account: Account) => void;
     filter?: (account: Account, info?: AccountInfo) => boolean;
-    isDisabled?: (account: Account, info?: AccountInfo) => string | undefined;
+    isDisabled?: (
+        account: Account,
+        info?: AccountInfo
+    ) => ReactNode | undefined;
 }
 
 /**

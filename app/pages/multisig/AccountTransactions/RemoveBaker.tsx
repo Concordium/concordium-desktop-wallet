@@ -26,6 +26,7 @@ import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
+import PendingChange from '~/components/BakerPendingChange/BakerPendingChange';
 
 enum SubRoutes {
     accounts,
@@ -141,9 +142,19 @@ export default function RemoveBakerPage() {
                                         }
                                         isDisabled={(_, info) =>
                                             info?.accountBaker
-                                                ?.pendingChange !== undefined
-                                                ? 'Stake is frozen, because of the pending change'
-                                                : undefined
+                                                ?.pendingChange !==
+                                            undefined ? (
+                                                <>
+                                                    The stake is frozen because:
+                                                    <br />
+                                                    <PendingChange
+                                                        pending={
+                                                            info.accountBaker
+                                                                .pendingChange
+                                                        }
+                                                    />
+                                                </>
+                                            ) : undefined
                                         }
                                     />
                                 </div>
