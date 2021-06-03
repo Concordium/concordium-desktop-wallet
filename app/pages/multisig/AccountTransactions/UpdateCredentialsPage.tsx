@@ -28,6 +28,7 @@ import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
 
 import styles from './UpdateAccountCredentials.module.scss';
+import { hasEncryptedBalance } from '~/utils/accountHelpers';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -465,6 +466,9 @@ export default function UpdateCredentialPage(): JSX.Element {
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         identity={identity}
+                                        filter={(_, info) =>
+                                            !!info && !hasEncryptedBalance(info)
+                                        }
                                     />
                                 )}
                             />
