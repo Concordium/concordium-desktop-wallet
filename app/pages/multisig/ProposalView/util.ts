@@ -54,18 +54,29 @@ async function HandleAccountTransactionSignatureFile(
     // TODO: Remove assumption that a credential only has 1 signature
     const signatureIndex = 0;
 
-    const accountInfo = await getAccountInfoOfAddress(transactionObject.sender);
+    let accountInfo;
+    try {
+        accountInfo = await getAccountInfoOfAddress(transactionObject.sender);
+    } catch (e) {
+        return {
+            show: true,
+            header: 'Unable to reach node',
+            content: 'Unable to verify signature without connection to node.',
+        };
+    }
+
     const verificationKey =
         accountInfo.accountCredentials[credentialIndex].value.contents
             .credentialPublicKeys.keys[signatureIndex];
+
+    const validSignature = await ed.verify(
+        signature[signatureIndex],
+        getTransactionSignDigest(proposal),
+        verificationKey.verifyKey
+    );
+
     // Prevent the user from adding a signature which is not valid on the proposal.
-    if (
-        ed.verify(
-            signature[signatureIndex],
-            getTransactionSignDigest(proposal),
-            verificationKey.verifyKey
-        )
-    ) {
+    if (!validSignature) {
         return {
             show: true,
             header: 'Incorrect Signature',
