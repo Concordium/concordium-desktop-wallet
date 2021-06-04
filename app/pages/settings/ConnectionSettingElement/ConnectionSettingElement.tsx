@@ -142,6 +142,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
             await updateValues(address, port);
             setConnected(true);
         } catch (e) {
+            setFailedMessage('Connection failed');
             setConnected(false);
         }
         setHasBeenTested(true);
