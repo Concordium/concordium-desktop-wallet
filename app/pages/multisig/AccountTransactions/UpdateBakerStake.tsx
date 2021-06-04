@@ -34,6 +34,7 @@ import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStake
 import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
+import PendingChange from '~/components/BakerPendingChange/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -172,6 +173,22 @@ function UpdateBakerStakePage({ exchangeRate }: PageProps) {
                                         chosenAccount={account}
                                         filter={(_, info) =>
                                             info?.accountBaker !== undefined
+                                        }
+                                        isDisabled={(_, info) =>
+                                            info?.accountBaker
+                                                ?.pendingChange !==
+                                            undefined ? (
+                                                <>
+                                                    The stake is frozen because:
+                                                    <br />
+                                                    <PendingChange
+                                                        pending={
+                                                            info.accountBaker
+                                                                .pendingChange
+                                                        }
+                                                    />
+                                                </>
+                                            ) : undefined
                                         }
                                     />
                                 </div>

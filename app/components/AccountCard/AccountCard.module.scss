@@ -25,6 +25,10 @@ $horizontal-padding: 30px;
     box-shadow: 0 0 0 2px $color-pale-blue inset;
 }
 
+.disabled {
+    opacity: 0.4;
+}
+
 .clickable {
     cursor: pointer;
 
