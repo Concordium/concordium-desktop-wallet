@@ -87,6 +87,7 @@ const createWindow = async () => {
                       webviewTag: true,
                       nodeIntegration: false,
                       contextIsolation: true,
+                      devTools: false,
                   },
     });
 
