@@ -3,12 +3,13 @@ import {
     UpdateAccountCredentials,
     TransactionKindId,
     CredentialDeploymentInformation,
-} from '../../utils/types';
+    Hex,
+} from '~/utils/types';
 import pathAsBuffer from './Path';
 import {
     serializeTransactionHeader,
     serializeTransferPayload,
-} from '../../utils/transactionSerialization';
+} from '~/utils/transactionSerialization';
 import {
     signCredentialValues,
     signCredentialProofs,
@@ -19,7 +20,9 @@ const INS_UPDATE_CREDENTIALS = 0x31;
 export default async function signUpdateCredentials(
     transport: Transport,
     path: number[],
-    transaction: UpdateAccountCredentials
+    transaction: UpdateAccountCredentials,
+    onAwaitVerificationKeyConfirmation: (key: Hex) => void,
+    onVerificationKeysConfirmed: () => void
 ): Promise<Buffer> {
     const pathPrefix = pathAsBuffer(path);
     const ins = INS_UPDATE_CREDENTIALS;
@@ -68,7 +71,14 @@ export default async function signUpdateCredentials(
         await transport.send(0xe0, ins, p1, p2, data);
         p2 = 0x02;
         // eslint-disable-next-line  no-await-in-loop
-        await signCredentialValues(transport, credentialInformation, ins, p2);
+        await signCredentialValues(
+            transport,
+            credentialInformation,
+            ins,
+            p2,
+            onAwaitVerificationKeyConfirmation,
+            onVerificationKeysConfirmed
+        );
         // eslint-disable-next-line  no-await-in-loop
         await signCredentialProofs(
             transport,

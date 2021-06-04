@@ -10,6 +10,7 @@ import {
     Account,
     TransactionKindId,
     RemoveBaker,
+    Fraction,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
@@ -26,6 +27,10 @@ import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
+import { getNextAccountNonce } from '~/node/nodeRequests';
+import errorMessages from '~/constants/errorMessages.json';
+import LoadingComponent from './LoadingComponent';
 
 enum SubRoutes {
     accounts,
@@ -33,7 +38,11 @@ enum SubRoutes {
     expiry,
 }
 
-export default function RemoveBakerPage() {
+interface PageProps {
+    exchangeRate: Fraction;
+}
+
+function RemoveBakerPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
@@ -45,6 +54,7 @@ export default function RemoveBakerPage() {
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Remove_baker,
+        exchangeRate,
         account?.signatureThreshold
     );
     const [
@@ -53,19 +63,21 @@ export default function RemoveBakerPage() {
         expiryTimeError,
     ] = useTransactionExpiryState();
 
-    const onCreateTransaction = () => {
+    const onCreateTransaction = async () => {
         if (account === undefined) {
             setError('Account is needed to make transaction');
             return;
         }
 
-        createRemoveBakerTransaction(
-            account.address,
-            account?.signatureThreshold,
-            expiryTime
-        )
-            .then(setTransaction)
-            .catch(() => setError('Failed create transaction'));
+        const accountNonce = await getNextAccountNonce(account.address);
+        setTransaction(
+            createRemoveBakerTransaction(
+                account.address,
+                accountNonce.nonce,
+                account?.signatureThreshold,
+                expiryTime
+            )
+        );
     };
 
     return (
@@ -200,12 +212,21 @@ export default function RemoveBakerPage() {
                                         expiryTime === undefined ||
                                         expiryTimeError !== undefined
                                     }
-                                    onClick={() => {
-                                        onCreateTransaction();
-                                        dispatch(
-                                            push(`${url}/${SubRoutes.sign}`)
-                                        );
-                                    }}
+                                    onClick={() =>
+                                        onCreateTransaction()
+                                            .then(() =>
+                                                dispatch(
+                                                    push(
+                                                        `${url}/${SubRoutes.sign}`
+                                                    )
+                                                )
+                                            )
+                                            .catch(() =>
+                                                setError(
+                                                    errorMessages.unableToReachNode
+                                                )
+                                            )
+                                    }
                                 >
                                     Continue
                                 </Button>
@@ -231,3 +252,5 @@ export default function RemoveBakerPage() {
         </MultiSignatureLayout>
     );
 }
+
+export default ensureExchangeRate(RemoveBakerPage, LoadingComponent);

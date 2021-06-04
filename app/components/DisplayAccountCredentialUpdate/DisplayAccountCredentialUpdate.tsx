@@ -3,6 +3,7 @@ import { dateFromTimeStamp } from '~/utils/timeHelpers';
 import { UpdateAccountCredentials } from '~/utils/types';
 import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import styles from './DisplayAccountCredentialUpdate.module.scss';
+import DisplayEstimatedFee from '../DisplayEstimatedFee';
 
 interface Props {
     transaction: UpdateAccountCredentials;
@@ -22,6 +23,10 @@ export default function DisplayAccountCredentialUpdate({
             <h5 className="mB0">Account:</h5>
             <h3 className="mV10">{fromName}</h3>
             <p className={styles.address}>{transaction.sender}</p>
+            <DisplayEstimatedFee
+                className="mT0"
+                estimatedFee={transaction.estimatedFee}
+            />
             <h5>
                 New Threshold: <b>{transaction.payload.threshold}</b>
             </h5>

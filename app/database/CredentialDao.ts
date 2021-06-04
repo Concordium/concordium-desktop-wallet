@@ -121,3 +121,28 @@ export async function updateCredential(
         .where({ credId })
         .update(updatedValues);
 }
+
+export async function hasDuplicateWalletId(
+    accountAddress: string,
+    credId: string,
+    otherCredIds: string[]
+) {
+    const credentials = await getCredentialsOfAccount(accountAddress);
+    const credential = credentials.find((cred) => cred.credId === credId);
+    if (!credential) {
+        return false;
+    }
+    const { walletId } = credential;
+    const otherWalletIds = credentials
+        .filter((cred) => otherCredIds.includes(cred.credId))
+        .map((cred) => cred.walletId);
+    return otherWalletIds.includes(walletId);
+}
+
+export async function hasExistingCredential(
+    accountAddress: string,
+    currentWalletId: number
+) {
+    const credentials = await getCredentialsOfAccount(accountAddress);
+    return credentials.some((cred) => cred.walletId === currentWalletId);
+}

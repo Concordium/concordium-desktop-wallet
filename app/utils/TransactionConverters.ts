@@ -17,8 +17,7 @@ import {
     EncryptedTransfer,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
-import getTransactionCost from './transactionCosts';
-import { collapseFraction } from './basicHelpers';
+import { collapseFraction, abs } from './basicHelpers';
 
 /*
  * Converts the given transaction into the structure, which is used in the database.
@@ -61,7 +60,8 @@ export function convertIncomingTransaction(
         subtotal = subtotal || '0';
     } else if (!subtotal) {
         subtotal = (
-            BigInt(transaction.total) - BigInt(transaction.cost || '0')
+            abs(BigInt(transaction.total)) -
+            abs(BigInt(transaction.cost || '0'))
         ).toString();
     }
     if (BigInt(subtotal) < 0n) {
@@ -197,9 +197,11 @@ export async function convertAccountTransaction(
     transaction: AccountTransaction,
     hash: string
 ): Promise<TransferTransaction> {
-    const cost = collapseFraction(
-        transaction.estimatedFee || (await getTransactionCost(transaction))
-    );
+    if (!transaction.estimatedFee) {
+        throw new Error('unexpected estimated fee');
+    }
+
+    const cost = collapseFraction(transaction.estimatedFee);
 
     let typeSpecific;
     if (instanceOfSimpleTransfer(transaction)) {

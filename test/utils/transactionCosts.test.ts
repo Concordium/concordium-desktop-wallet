@@ -26,7 +26,8 @@ function getMockedScheduledTransfer(scheduleLength: number) {
     return createScheduledTransferTransaction(
         address,
         address,
-        createRegularIntervalSchedule(100n, scheduleLength, 0, 1)
+        createRegularIntervalSchedule(100n, scheduleLength, 0, 1),
+        '1'
     );
 }
 

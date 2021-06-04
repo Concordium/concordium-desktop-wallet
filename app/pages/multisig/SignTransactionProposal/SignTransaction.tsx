@@ -10,7 +10,7 @@ import { ClassName } from '~/utils/types';
 interface Props extends ClassName {
     signingFunction: (
         ledger: ConcordiumLedgerClient,
-        setMessage: (message: string) => void
+        setMessage: (message: string | JSX.Element) => void
     ) => Promise<void>;
     onSkip: () => void;
 }

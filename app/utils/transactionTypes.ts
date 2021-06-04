@@ -116,6 +116,7 @@ export interface CreateTransactionInput {
     amount: bigint;
     schedule: Schedule;
     signatureAmount: number;
+    nonce: string;
     expiryTime: Date;
 }
 
@@ -136,7 +137,8 @@ export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
     signTransaction: (
         transaction: T,
         signer: S,
-        path: AccountPathInput
+        path: AccountPathInput,
+        displayMessage?: (message: string | JSX.Element) => void
     ) => Promise<Buffer>;
     /**
      * Returns a React element, in which the details of the transaction are displayed
@@ -146,9 +148,7 @@ export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
      * Returns a React element, which contains the details of the transaction for print
      */
     print: PrintComponent<P>;
-    createTransaction: (
-        informationBlob: Partial<CreateTransactionInput>
-    ) => Promise<T>;
+    createTransaction: (informationBlob: Partial<CreateTransactionInput>) => T;
     creationLocationHandler: (currentLocation: string) => string;
     type: string;
     title: string;

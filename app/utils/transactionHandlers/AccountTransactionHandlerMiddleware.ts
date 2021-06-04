@@ -47,12 +47,14 @@ export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
     signTransaction(
         transaction: AccountTransaction,
         ledger: ConcordiumLedgerClient,
-        path: AccountPathInput
+        path: AccountPathInput,
+        displayMessage?: (message: string | JSX.Element) => void
     ) {
         return this.base.signTransaction(
             this.base.confirmType(transaction),
             ledger,
-            path
+            path,
+            displayMessage
         );
     }
 

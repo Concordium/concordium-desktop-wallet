@@ -58,7 +58,7 @@ export default abstract class TransferHandler<
 
     createTransaction(
         _input: Partial<CreateTransactionInput>
-    ): Promise<TransactionType> {
+    ): TransactionType {
         throw new Error(
             'Not Supported - This transaction type does not use createTransaction'
         );
