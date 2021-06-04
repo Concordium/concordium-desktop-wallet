@@ -1,6 +1,7 @@
-import AccountTransactionDetails from '../../components/Transfers/AccountTransactionDetails';
-import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
-import { AccountPathInput, getAccountPath } from '../../features/ledger/Path';
+import React from 'react';
+import AccountTransactionDetails from '~/components/Transfers/AccountTransactionDetails';
+import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
 import { AccountTransactionHandler } from '../transactionTypes';
 import {
     UpdateAccountCredentials,
@@ -11,6 +12,7 @@ import {
 } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
 import routes from '~/constants/routes.json';
+import { noOp } from '../basicHelpers';
 
 const TYPE = 'Update Account Credentials';
 
@@ -67,16 +69,26 @@ export default class UpdateAccountCredentialsHandler
     async signTransaction(
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient,
-        path: AccountPathInput
+        path: AccountPathInput,
+        displayMessage: (message: string | JSX.Element) => void = noOp
     ) {
         return ledger.signUpdateCredentialTransaction(
             transaction,
-            getAccountPath(path)
+            getAccountPath(path),
+            (key) => {
+                displayMessage(
+                    <>
+                        <b>Verification key:</b>
+                        <p className="m0">{key}</p>
+                    </>
+                );
+            },
+            () => displayMessage('Please verify transaction details')
         );
     }
 
     view(transaction: TransactionType) {
-        return AccountTransactionDetails({ transaction });
+        return <AccountTransactionDetails transaction={transaction} />;
     }
 
     print = () => undefined;

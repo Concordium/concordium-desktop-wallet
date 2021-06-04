@@ -29,7 +29,8 @@ import {
     HigherLevelKeyUpdate,
     UpdateAccountCredentials,
     AuthorizationKeysUpdate,
-} from '../../utils/types';
+    Hex,
+} from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
 import signUpdateTransaction from './SignUpdateTransaction';
@@ -85,12 +86,16 @@ export default class ConcordiumLedgerClient {
 
     signUpdateCredentialTransaction(
         transaction: UpdateAccountCredentials,
-        path: number[]
+        path: number[],
+        onAwaitVerificationKeyConfirmation: (key: Hex) => void,
+        onVerificationKeysConfirmed: () => void
     ): Promise<Buffer> {
         return signUpdateCredentialTransaction(
             this.transport,
             path,
-            transaction
+            transaction,
+            onAwaitVerificationKeyConfirmation,
+            onVerificationKeysConfirmed
         );
     }
 
