@@ -5,7 +5,10 @@ import {
     TimeStampUnit,
     AccountTransactionWithSignature,
 } from '~/utils/types';
-import { getAccountTransactionHash } from './transactionSerialization';
+import {
+    getAccountTransactionHash,
+    getAccountTransactionSignDigest,
+} from './transactionSerialization';
 import { displayAsGTU } from '~/utils/gtu';
 import { collapseFraction } from '~/utils/basicHelpers';
 import { getStatusText } from '~/pages/multisig/ProposalStatus/util';
@@ -108,7 +111,7 @@ export function HashRows({ transaction }: HashRowsProps) {
             <tr>
                 <td>Digest to sign</td>
                 <td>
-                    {getAccountTransactionHash(transaction, () => []).toString(
+                    {getAccountTransactionSignDigest(transaction).toString(
                         'hex'
                     )}
                 </td>
@@ -120,7 +123,7 @@ export function HashRows({ transaction }: HashRowsProps) {
                     <td>
                         {getAccountTransactionHash(
                             transaction,
-                            () => transaction.signatures
+                            transaction.signatures
                         ).toString('hex')}
                     </td>
                 </tr>
@@ -171,7 +174,7 @@ export const displayExpiry = (expiry: bigint) => (
 const digestToSignFooter = (transaction: AccountTransaction) => (
     <p style={{ textAlign: 'right', paddingLeft: '10px' }}>
         Digest to sign:{' '}
-        {getAccountTransactionHash(transaction, () => [])
+        {getAccountTransactionSignDigest(transaction)
             .toString('hex')
             .substring(0, 8)}
         ...
