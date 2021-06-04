@@ -119,7 +119,7 @@ const SubmittedProposalView = withChainData<Props>(
             } else if (instanceOfAccountTransactionWithSignature(transaction)) {
                 payload = serializeTransaction(
                     transaction,
-                    () => transaction.signatures
+                    transaction.signatures
                 );
             } else {
                 throw new Error(`Unexpected Transaction type: ${transaction}`);

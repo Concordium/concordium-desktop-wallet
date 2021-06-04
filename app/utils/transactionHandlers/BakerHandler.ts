@@ -45,7 +45,7 @@ export default class BakerHandler<
         return AccountTransactionDetails({ transaction });
     }
 
-    createTransaction(): Promise<A> {
+    createTransaction(): A {
         throw new Error('Unimplemented');
     }
 

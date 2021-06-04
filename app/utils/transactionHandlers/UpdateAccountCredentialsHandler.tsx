@@ -60,11 +60,9 @@ export default class UpdateAccountCredentialsHandler
         );
     }
 
-    createTransaction() {
-        return Promise.reject(
-            new Error(
-                'Unsupported function: UpdateAccountCredentials transactions should be created explicitly and not through handler.'
-            )
+    createTransaction(): TransactionType {
+        throw new Error(
+            'Unsupported function: UpdateAccountCredentials transactions should be created explicitly and not through handler.'
         );
     }
 

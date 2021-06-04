@@ -11,6 +11,7 @@ import {
     TransactionKindId,
     UpdateBakerKeysPayload,
     UpdateBakerKeys,
+    Fraction,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
@@ -35,6 +36,10 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import { DownloadBakerCredentialsStep } from './AddBaker';
 import UpdateBakerKeysProposalDetails from './proposal-details/UpdateBakerKeysProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
+import { getNextAccountNonce } from '~/node/nodeRequests';
+import errorMessages from '~/constants/errorMessages.json';
+import LoadingComponent from './LoadingComponent';
 
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
@@ -44,8 +49,11 @@ enum BuildSubRoutes {
     sign = 'sign',
     expiry = 'expiry',
 }
+interface PageProps {
+    exchangeRate: Fraction;
+}
 
-export default function UpdateBakerKeysPage() {
+function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
@@ -56,6 +64,7 @@ export default function UpdateBakerKeysPage() {
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Remove_baker,
+        exchangeRate,
         account?.signatureThreshold
     );
 
@@ -75,7 +84,7 @@ export default function UpdateBakerKeysPage() {
             .catch(() => setError('Failed generating baker keys'));
     };
 
-    const onCreateTransaction = () => {
+    const onCreateTransaction = async () => {
         if (bakerKeys === undefined) {
             setError('Baker keys are needed to make transaction');
             return;
@@ -93,16 +102,17 @@ export default function UpdateBakerKeysPage() {
             proofSignature: bakerKeys.proofSignature,
             proofAggregation: bakerKeys.proofAggregation,
         };
-        createUpdateBakerKeysTransaction(
-            account.address,
-            payload,
-            account?.signatureThreshold,
-            expiryTime
-        )
-            .then(setTransaction)
-            .catch((e: Error) =>
-                setError(`Failed create transaction: ${e.message}`)
-            );
+
+        const accountNonce = await getNextAccountNonce(account.address);
+        setTransaction(
+            createUpdateBakerKeysTransaction(
+                account.address,
+                payload,
+                accountNonce.nonce,
+                account?.signatureThreshold,
+                expiryTime
+            )
+        );
     };
 
     const signingFunction = async (ledger?: ConcordiumLedgerClient) => {
@@ -291,14 +301,21 @@ export default function UpdateBakerKeysPage() {
                                 <DownloadBakerCredentialsStep
                                     accountAddress={account.address}
                                     bakerKeys={bakerKeys}
-                                    onContinue={() => {
-                                        onCreateTransaction();
-                                        dispatch(
-                                            push(
-                                                `${url}/${BuildSubRoutes.sign}`
+                                    onContinue={() =>
+                                        onCreateTransaction()
+                                            .then(() =>
+                                                dispatch(
+                                                    push(
+                                                        `${url}/${BuildSubRoutes.sign}`
+                                                    )
+                                                )
                                             )
-                                        );
-                                    }}
+                                            .catch(() =>
+                                                setError(
+                                                    errorMessages.unableToReachNode
+                                                )
+                                            )
+                                    }
                                 />
                             ) : (
                                 <p>Generating keys...</p>
@@ -318,3 +335,5 @@ export default function UpdateBakerKeysPage() {
         </MultiSignatureLayout>
     );
 }
+
+export default ensureExchangeRate(UpdateBakerKeysPage, LoadingComponent);

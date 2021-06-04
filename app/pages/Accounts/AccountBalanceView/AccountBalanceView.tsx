@@ -31,30 +31,43 @@ export default function AccountBalanceView(): JSX.Element | null {
         return null; // TODO: add display for pending account (which have no accountinfo)
     }
 
+    const isMultiSig = Object.values(accountInfo.accountCredentials).length > 1;
+
+    if (isMultiSig && viewingShielded) {
+        dispatch(setViewingShielded(false));
+    }
+
     const buttons = (
-        <div className={styles.ViewingShielded}>
+        <div
+            className={clsx(
+                styles.viewingShielded,
+                isMultiSig && 'justifyCenter'
+            )}
+        >
             <Button
                 clear
                 disabled={!viewingShielded}
                 className={clsx(
-                    styles.ViewingShieldedButton,
+                    styles.viewingShieldedButton,
                     !viewingShielded && styles.bold
                 )}
                 onClick={() => dispatch(setViewingShielded(false))}
             >
                 Balance
             </Button>
-            <Button
-                clear
-                disabled={viewingShielded}
-                className={clsx(
-                    styles.ViewingShieldedButton,
-                    viewingShielded && styles.bold
-                )}
-                onClick={() => dispatch(setViewingShielded(true))}
-            >
-                Shielded Balance
-            </Button>
+            {!isMultiSig && (
+                <Button
+                    clear
+                    disabled={viewingShielded}
+                    className={clsx(
+                        styles.viewingShieldedButton,
+                        viewingShielded && styles.bold
+                    )}
+                    onClick={() => dispatch(setViewingShielded(true))}
+                >
+                    Shielded Balance
+                </Button>
+            )}
         </div>
     );
 
