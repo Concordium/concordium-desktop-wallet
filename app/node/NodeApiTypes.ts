@@ -12,13 +12,34 @@ import {
 /**
  * Model that matches what is returned by the node when getting the
  * current consensus status.
- * Currently only the fields required by existing functionality has been
- * added. If additional fields are required, then extend the interface.
  */
 export interface ConsensusStatus {
-    slotDuration: number;
-    lastFinalizedBlock: string;
+    bestBlock: string;
+    bestBlockHeight: number;
+    blockArriveLatencyEMA: number;
+    blockArriveLatencyEMSD: number;
+    blockArrivePeriodEMA: number;
+    blockArrivePeriodEMSD: number;
+    blockLastArrivedTime: string;
+    blockLastReceivedTime: string | null;
+    blockReceiveLatencyEMA: number;
+    blockReceiveLatencyEMSD: number;
+    blockReceivePeriodEMA: number;
+    blockReceivePeriodEMSD: number;
+    blocksReceivedCount: number;
+    blocksVerifiedCount: number;
+    epochDuration: number;
+    finalizationCount: number;
+    finalizationPeriodEMA: number;
+    finalizationPeriodEMSD: number;
     genesisBlock: string;
+    genesisTime: string;
+    lastFinalizedBlock: string;
+    lastFinalizedBlockHeight: number;
+    lastFinalizedTime: string | null;
+    slotDuration: number;
+    transactionsPerBlockEMA: number;
+    transactionsPerBlockEMSD: number;
 }
 
 interface UpdateQueue {
@@ -38,6 +59,7 @@ interface UpdateQueues {
     bakerStakeThreshold: UpdateQueue;
     rootKeys: UpdateQueue;
     level1Keys: UpdateQueue;
+    level2Keys: UpdateQueue;
 }
 
 export interface Authorization {
@@ -51,6 +73,7 @@ export interface Key {
 }
 
 export interface Authorizations {
+    emergency: Authorization;
     microGTUPerEuro: Authorization;
     euroPerEnergy: Authorization;
     transactionFeeDistribution: Authorization;
@@ -60,6 +83,8 @@ export interface Authorizations {
     paramGASRewards: Authorization;
     bakerStakeThreshold: Authorization;
     electionDifficulty: Authorization;
+    addAnonymityRevoker: Authorization;
+    addIdentityProvider: Authorization;
     keys: Key[];
 }
 
@@ -83,6 +108,7 @@ interface ChainParameters {
     euroPerEnergy: ExchangeRate;
     rewardParameters: RewardParameters;
     minimumThresholdForBaking: bigint;
+    bakerCooldownEpochs: number;
     electionDifficulty: number;
 }
 
@@ -118,4 +144,16 @@ export interface BlockSummary {
 
 export interface AccountNonce {
     nonce: string;
+}
+
+export interface BirkParametersBaker {
+    bakerAccount: string;
+    bakerId: number;
+    bakerLotteryPower: number;
+}
+
+export interface BirkParametersInfo {
+    bakers: BirkParametersBaker[];
+    electionDifficulty: number;
+    electionNonce: string;
 }

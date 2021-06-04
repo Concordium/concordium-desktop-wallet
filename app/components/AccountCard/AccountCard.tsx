@@ -9,7 +9,7 @@ import BakerImage from '@resources/svg/baker.svg';
 import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
 import { displayAsGTU } from '~/utils/gtu';
-import { AccountInfo, Account, AccountStatus } from '~/utils/types';
+import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
 import { isInitialAccount } from '~/utils/accountHelpers';
 import SidedRow from '~/components/SidedRow';
 import { walletIdSelector } from '~/features/WalletSlice';
@@ -18,78 +18,49 @@ import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlic
 
 import styles from './AccountCard.module.scss';
 
-function displayIdentity(
-    account: Account,
-    accountInfo: AccountInfo | undefined
-) {
-    if (
-        accountInfo &&
-        Object.values(accountInfo.accountCredentials).length > 1
-    ) {
-        return (
-            <>
-                {account.identityName} +{' '}
-                <MultiSigIcon className={styles.multisig} />
-            </>
-        );
-    }
-    return account.identityName;
-}
-
-interface Props {
-    account: Account;
-    accountInfo?: AccountInfo;
+interface ViewProps extends ClassName {
+    accountName: string;
+    identityName?: string;
     onClick?(shielded: boolean): void;
     active?: boolean;
-    className?: string;
+    initialAccount?: boolean;
+    accountStatus?: AccountStatus;
+    connected?: boolean;
+    multiSig?: boolean;
+    isBaker?: boolean;
+    hasEncryptedFunds?: boolean;
+    hasDeployedCredentials?: boolean;
+    shielded?: bigint;
+    unShielded?: bigint;
+    amountAtDisposal?: bigint;
+    stakedAmount?: bigint;
 }
 
-/**
- * Displays the information and balances of the given account.
- * Takes an onClick, which is triggered by when clicking either
- * the shielded balance (with argument true)
- * or the public balances (with argument false)
- */
-export default function AccountCard({
-    account,
-    accountInfo,
-    onClick,
+export function AccountCardView({
     className,
     active = false,
-}: Props): JSX.Element {
-    const walletId = useSelector(walletIdSelector);
-    const [connected, setConnected] = useState(false);
-    const accountHasDeployedCredentials = useSelector(
-        accountHasDeployedCredentialsSelector(account)
-    );
-
-    useEffect(() => {
-        if (walletId) {
-            findLocalDeployedCredential(walletId, account.address)
-                .then((cred) => setConnected(Boolean(cred)))
-                .catch(() => setConnected(false));
-        } else {
-            setConnected(false);
-        }
-    }, [walletId, account.address]);
-
-    const shielded = account.totalDecrypted
-        ? BigInt(account.totalDecrypted)
-        : 0n;
-    const unShielded = accountInfo ? BigInt(accountInfo.accountAmount) : 0n;
-    const scheduled =
-        accountInfo && accountInfo.accountReleaseSchedule
-            ? BigInt(accountInfo.accountReleaseSchedule.total)
-            : 0n;
-    const hidden = account.allDecrypted || (
+    onClick,
+    accountName,
+    initialAccount = false,
+    isBaker = false,
+    accountStatus,
+    hasDeployedCredentials = false,
+    connected = false,
+    multiSig = false,
+    identityName,
+    shielded = 0n,
+    unShielded = 0n,
+    hasEncryptedFunds = false,
+    amountAtDisposal = 0n,
+    stakedAmount = 0n,
+}: ViewProps): JSX.Element {
+    const hidden = hasEncryptedFunds && !multiSig && (
         <>
             {' '}
             + <ShieldImage height="15" />
         </>
     );
-    const accountBaker = accountInfo?.accountBaker;
-    const stakedAmount = accountBaker ? BigInt(accountBaker.stakedAmount) : 0n;
-    const amountAtDisposal = unShielded - scheduled - stakedAmount;
+
     return (
         <div
             className={clsx(
@@ -106,30 +77,28 @@ export default function AccountCard({
             <SidedRow
                 left={
                     <>
-                        <b className={styles.inline}>{account.name}</b>
-                        {isInitialAccount(account) && (
-                            <span className="mL10">(Initial)</span>
-                        )}
-                        {account.status === AccountStatus.Pending && (
+                        <b className={styles.inline}>{accountName}</b>
+                        {initialAccount && <>&nbsp;(Initial)</>}
+                        {accountStatus === AccountStatus.Pending && (
                             <PendingImage
                                 height="24"
                                 className={styles.statusImage}
                             />
                         )}
-                        {account.status === AccountStatus.Rejected && (
+                        {accountStatus === AccountStatus.Rejected && (
                             <RejectedImage
                                 height="28"
                                 className={styles.statusImage}
                             />
                         )}
-                        {accountInfo?.accountBaker && (
+                        {isBaker && (
                             <BakerImage
                                 height="25"
                                 className={styles.bakerImage}
                             />
                         )}
-                        {account.status === AccountStatus.Confirmed &&
-                            !accountHasDeployedCredentials && (
+                        {accountStatus === AccountStatus.Confirmed &&
+                            !hasDeployedCredentials && (
                                 <ReadonlyImage
                                     height="15"
                                     className={styles.statusImage}
@@ -140,7 +109,14 @@ export default function AccountCard({
                 right={
                     <>
                         {connected && <LedgerImage className="mR20" />}
-                        {displayIdentity(account, accountInfo)}
+                        {multiSig ? (
+                            <>
+                                {identityName} +{' '}
+                                <MultiSigIcon className={styles.multisig} />
+                            </>
+                        ) : (
+                            identityName
+                        )}
                     </>
                 }
             />
@@ -186,5 +162,72 @@ export default function AccountCard({
                 }}
             />
         </div>
+    );
+}
+
+interface Props extends Pick<ViewProps, 'active' | 'onClick' | 'className'> {
+    account: Account;
+    accountInfo?: AccountInfo;
+}
+
+/**
+ * Displays the information and balances of the given account.
+ * Takes an onClick, which is triggered by when clicking either
+ * the shielded balance (with argument true)
+ * or the public balances (with argument false)
+ */
+export default function AccountCard({
+    account,
+    accountInfo,
+    ...viewProps
+}: Props): JSX.Element {
+    const walletId = useSelector(walletIdSelector);
+    const [connected, setConnected] = useState(false);
+    const accountHasDeployedCredentials = useSelector(
+        accountHasDeployedCredentialsSelector(account)
+    );
+
+    useEffect(() => {
+        if (walletId) {
+            findLocalDeployedCredential(walletId, account.address)
+                .then((cred) => setConnected(Boolean(cred)))
+                .catch(() => setConnected(false));
+        } else {
+            setConnected(false);
+        }
+    }, [walletId, account.address]);
+
+    const shielded = account.totalDecrypted
+        ? BigInt(account.totalDecrypted)
+        : 0n;
+    const unShielded = accountInfo ? BigInt(accountInfo.accountAmount) : 0n;
+    const scheduled =
+        accountInfo && accountInfo.accountReleaseSchedule
+            ? BigInt(accountInfo.accountReleaseSchedule.total)
+            : 0n;
+    const accountBaker = accountInfo?.accountBaker;
+    const stakedAmount = accountBaker ? BigInt(accountBaker.stakedAmount) : 0n;
+    const amountAtDisposal = unShielded - scheduled - stakedAmount;
+
+    return (
+        <AccountCardView
+            {...viewProps}
+            hasEncryptedFunds={!account.allDecrypted}
+            shielded={shielded}
+            unShielded={unShielded}
+            amountAtDisposal={amountAtDisposal}
+            stakedAmount={stakedAmount}
+            connected={connected}
+            hasDeployedCredentials={accountHasDeployedCredentials}
+            accountName={account.name}
+            accountStatus={account.status}
+            multiSig={
+                accountInfo &&
+                Object.values(accountInfo.accountCredentials).length > 1
+            }
+            identityName={account.identityName}
+            isBaker={Boolean(accountBaker)}
+            initialAccount={isInitialAccount(account)}
+        />
     );
 }

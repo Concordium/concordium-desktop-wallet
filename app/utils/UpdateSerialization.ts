@@ -15,6 +15,8 @@ import {
     UpdateInstructionPayload,
     UpdateType,
     UpdateInstructionSignatureWithIndex,
+    AuthorizationKeysUpdate,
+    AccessStructure,
 } from './types';
 
 /**
@@ -34,7 +36,6 @@ export enum OnChainUpdateType {
     UpdateBakerStakeThreshold = 9,
     UpdateRootKeys = 10,
     UpdateLevel1Keys = 11,
-    UpdateLevel2Keys = 12,
 }
 
 export interface SerializedString {
@@ -53,6 +54,70 @@ export interface SerializedProtocolUpdate {
     specificationUrl: SerializedString;
     transactionHash: Buffer;
     auxiliaryData: Buffer;
+}
+
+function serializeAccessStructure(accessStructure: AccessStructure) {
+    const seralizedAccessStructure = Buffer.alloc(2);
+    seralizedAccessStructure.writeUInt16BE(
+        accessStructure.publicKeyIndicies.length,
+        0
+    );
+
+    // The indices must be sorted in ascending order to ensure that the serialization
+    // is unique.
+    const sortedIndicies = accessStructure.publicKeyIndicies.sort(
+        (index1, index2) => {
+            return index1.index - index2.index;
+        }
+    );
+    const serializedIndicies = Buffer.concat(
+        sortedIndicies.map((index) => {
+            const serializedIndex = Buffer.alloc(2);
+            serializedIndex.writeUInt16BE(index.index, 0);
+            return serializedIndex;
+        })
+    );
+
+    const threshold = Buffer.alloc(2);
+    threshold.writeUInt16BE(accessStructure.threshold, 0);
+
+    return Buffer.concat([
+        seralizedAccessStructure,
+        serializedIndicies,
+        threshold,
+    ]);
+}
+
+/**
+ * Serializes an AuthorizationKeysUpdate to the byte format
+ * expected by the chain.
+ */
+export function serializeAuthorizationKeysUpdate(
+    authorizationKeysUpdate: AuthorizationKeysUpdate
+) {
+    const serializedAuthorizationKeysUpdate = Buffer.alloc(3);
+    serializedAuthorizationKeysUpdate.writeInt8(
+        authorizationKeysUpdate.keyUpdateType,
+        0
+    );
+    serializedAuthorizationKeysUpdate.writeUInt16BE(
+        authorizationKeysUpdate.keys.length,
+        1
+    );
+
+    const serializedKeys = Buffer.concat(
+        authorizationKeysUpdate.keys.map(serializeVerifyKey)
+    );
+
+    const serializedAccessStructures: Buffer = Buffer.concat(
+        authorizationKeysUpdate.accessStructures.map(serializeAccessStructure)
+    );
+
+    return Buffer.concat([
+        serializedAuthorizationKeysUpdate,
+        serializedKeys,
+        serializedAccessStructures,
+    ]);
 }
 
 /**

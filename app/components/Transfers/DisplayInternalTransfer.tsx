@@ -7,6 +7,8 @@ import {
 import { displayAsGTU } from '~/utils/gtu';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import styles from './transferDetails.module.scss';
+import DisplayTransactionExpiryTime from '../DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+import { dateFromTimeStamp } from '~/utils/timeHelpers';
 
 interface Props {
     transaction: TransferToEncrypted | TransferToPublic;
@@ -47,6 +49,9 @@ export default function DisplayInternalTransfer({
             <DisplayEstimatedFee
                 className={styles.fee}
                 estimatedFee={transaction.estimatedFee}
+            />
+            <DisplayTransactionExpiryTime
+                expiryTime={dateFromTimeStamp(transaction.expiry)}
             />
         </>
     );

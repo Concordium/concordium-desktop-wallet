@@ -18,9 +18,9 @@ import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
 import styles from './UpdateAccountCredentials.module.scss';
+import { hasDuplicateWalletId } from '~/database/CredentialDao';
 
 interface Props {
-    setReady: (ready: boolean) => void;
     accountAddress?: string;
     credentialIds: [string, CredentialStatus][];
     addCredentialId: (id: [string, CredentialStatus]) => void;
@@ -37,7 +37,6 @@ interface Props {
  * TODO: Add a checkbox, which must be checked before the user can add the credential.
  */
 export default function AddCredential({
-    setReady,
     accountAddress,
     credentialIds,
     addCredentialId,
@@ -50,10 +49,6 @@ export default function AddCredential({
     const [currentCredential, setCurrentCredential] = useState<
         CredentialDeploymentInformation | undefined
     >();
-
-    useEffect(() => {
-        setReady(currentCredential === undefined);
-    }, [setReady, currentCredential]);
 
     useEffect(() => {
         if (showError) {
@@ -104,15 +99,29 @@ export default function AddCredential({
                 });
                 return;
             }
+            const credentialId = credentialExport.credential.credId;
+            if (credentialIds.find(([credId]) => credId === credentialId)) {
+                setShowError({
+                    show: true,
+                    header: 'Invalid Credential',
+                    content: 'No duplicate credentials allowed',
+                });
+                return;
+            }
+            const currentCredentialIds = credentialIds
+                .filter(([, status]) => status !== CredentialStatus.Removed)
+                .map(([id]) => id);
             if (
-                credentialIds.find(
-                    ([credId]) => credId === credentialExport.credential.credId
+                await hasDuplicateWalletId(
+                    accountAddress,
+                    credentialId,
+                    currentCredentialIds
                 )
             ) {
                 setShowError({
                     show: true,
                     header: 'Invalid Credential',
-                    content: 'No duplicate credentials allowed',
+                    content: 'Only one credential for each device is allowed',
                 });
             } else {
                 setCurrentCredential(credentialExport.credential);

@@ -1,4 +1,5 @@
 import {
+    addThousandSeparators,
     formatNumberStringWithDigits,
     isPowOf10,
     isValidResolutionString,
@@ -33,6 +34,7 @@ describe(isValidResolutionString, () => {
         expect(isValidResolutionString(BigInt(10), true)('0.1')).toBe(true);
         expect(isValidResolutionString(BigInt(10), true)('-0.3')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('0.1')).toBe(true);
+        expect(isValidResolutionString(BigInt(100), true)('0.1e-1')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('0.20')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('-0.22')).toBe(true);
         expect(isValidResolutionString(BigInt(100), true)('0.0100')).toBe(true);
@@ -54,6 +56,7 @@ describe(isValidResolutionString, () => {
         expect(isValidResolutionString(BigInt(100), true, false)('01.2')).toBe(
             false
         );
+        expect(isValidResolutionString(BigInt(100))('1.2e')).toBe(false);
     });
 
     test('Invalidates negative values when not allowed', () => {
@@ -61,6 +64,12 @@ describe(isValidResolutionString, () => {
 
         expect(invalidateNegative100('0.10')).toBe(true);
         expect(invalidateNegative100('-0.10')).toBe(false);
+    });
+
+    test('Invalidates values with exponent, when not allowed', () => {
+        expect(
+            isValidResolutionString(BigInt(100), false, false, false)('1.2e1')
+        ).toBe(false);
     });
 });
 
@@ -205,13 +214,40 @@ describe(trimLeadingZeros, () => {
         expect(trimLeadingZeros('01')).toBe('1');
         expect(trimLeadingZeros('01.')).toBe('1.');
         expect(trimLeadingZeros('1.1')).toBe('1.1');
+        expect(trimLeadingZeros('-1.1')).toBe('-1.1');
         expect(trimLeadingZeros('.1')).toBe('.1');
         expect(trimLeadingZeros('1.1e')).toBe('1.1e');
         expect(trimLeadingZeros('012.1e')).toBe('12.1e');
         expect(trimLeadingZeros('012.1e1')).toBe('12.1e1');
         expect(trimLeadingZeros('012.1e12')).toBe('12.1e12');
+        expect(trimLeadingZeros('-012.1e12')).toBe('-12.1e12');
         expect(trimLeadingZeros('012.1e+12')).toBe('12.1e+12');
         expect(trimLeadingZeros('012.1e-12')).toBe('12.1e-12');
         expect(trimLeadingZeros('012.1e12')).toBe('12.1e12');
+    });
+});
+
+describe(addThousandSeparators, () => {
+    test('Adds thousand separators correctly', () => {
+        expect(addThousandSeparators('0')).toBe('0');
+        expect(addThousandSeparators('10')).toBe('10');
+        expect(addThousandSeparators('100')).toBe('100');
+        expect(addThousandSeparators('1000')).toBe('1,000');
+        expect(addThousandSeparators('12345')).toBe('12,345');
+        expect(addThousandSeparators('123456')).toBe('123,456');
+        expect(addThousandSeparators('1234567890')).toBe('1,234,567,890');
+        expect(addThousandSeparators('12345.123')).toBe('12,345.123');
+        expect(addThousandSeparators('123456789.123')).toBe('123,456,789.123');
+        expect(addThousandSeparators('-12345')).toBe('-12,345');
+        expect(addThousandSeparators('-123456')).toBe('-123,456');
+        expect(addThousandSeparators('-12345.123')).toBe('-12,345.123');
+        expect(addThousandSeparators('-12345.123e-12')).toBe('-12,345.123e-12');
+    });
+
+    test('Returns input value when given invalid values', () => {
+        expect(addThousandSeparators('')).toBe('');
+        expect(addThousandSeparators('test')).toBe('test');
+        expect(addThousandSeparators('-test')).toBe('-test');
+        expect(addThousandSeparators('I am a horse')).toBe('I am a horse');
     });
 });

@@ -17,12 +17,18 @@ interface Props {
     account: Account;
     returnFunction(): void;
     exchangeRate: Fraction;
+    nonce: string;
 }
 
 /**
  * Controls the flow of creating a scheduled transfer.
  */
-function ScheduleTransfer({ account, returnFunction, exchangeRate }: Props) {
+function ScheduleTransfer({
+    account,
+    returnFunction,
+    exchangeRate,
+    nonce,
+}: Props) {
     const dispatch = useDispatch();
 
     function toBuildSchedule(amount: string, recipient: AddressBookEntry) {
@@ -31,6 +37,7 @@ function ScheduleTransfer({ account, returnFunction, exchangeRate }: Props) {
                 pathname: routes.ACCOUNTS_SCHEDULED_TRANSFER,
                 state: {
                     account,
+                    nonce,
                     amount: toMicroUnits(amount).toString(),
                     recipient,
                     exchangeRate: stringify(exchangeRate),

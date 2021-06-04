@@ -75,11 +75,14 @@ export enum TimeConstants {
     Month = 30 * Day,
 }
 
-// default expiry on transactions (1 hour from now), given in seconds.
-export function getDefaultExpiry(): bigint {
-    return BigInt(
-        Math.floor((new Date().getTime() + TimeConstants.Hour) / 1000)
-    );
+// default expiry on transactions (1 hour from now).
+export function getDefaultExpiry() {
+    return new Date(Date.now() + TimeConstants.Hour);
+}
+
+/** Convert a date to seconds since Unix epoch */
+export function secondsSinceUnixEpoch(date: Date) {
+    return Math.floor(date.getTime() / 1000);
 }
 
 /**
@@ -213,3 +216,38 @@ export const getFormattedDateString = (date: Date): string => {
 
     return `${year}-${month}-${d} at ${hours}:${minutes}:${seconds}`;
 };
+
+/** Calculates the epoch index from a given date */
+export function getEpochIndexAt(
+    epochAtDate: Date,
+    epochDurationMillis: number,
+    genesisTime: Date
+) {
+    const genesis = genesisTime.getTime();
+    const now = epochAtDate.getTime();
+    const millisSinceGenesis = now - genesis;
+    return Math.floor(millisSinceGenesis / epochDurationMillis);
+}
+
+/** Calculates the start date of an epoch index */
+export function epochDate(
+    epochIndex: number,
+    epochDurationMillis: number,
+    genesisTime: Date
+): Date {
+    return new Date(genesisTime.getTime() + epochIndex * epochDurationMillis);
+}
+
+/** Predicates whether a date is in the future based on the current time,
+ * sampled at time of call */
+export function isFutureDate(date: Date) {
+    const now = new Date();
+    return now < date;
+}
+
+/** Subtract a number of hours from a date */
+export function subtractHours(hours: number, date: Date) {
+    const before = new Date(date);
+    before.setHours(before.getHours() - hours);
+    return before;
+}

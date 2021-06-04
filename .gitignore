@@ -66,3 +66,7 @@ Cargo.lock
 
 #VSCode
 .vscode/
+
+# Generated license disclaimer
+scripts/disclaimer.rst
+scripts/disclaimer.txt

@@ -13,6 +13,7 @@ import {
     HigherLevelKeyUpdate,
     AccountTransaction,
     Schedule,
+    AuthorizationKeysUpdate,
 } from './types';
 
 export interface TransactionInput {
@@ -27,9 +28,15 @@ export interface TransactionInput {
 export interface UpdateProps {
     blockSummary: BlockSummary;
     consensusStatus: ConsensusStatus;
-    handleKeySubmit?(
+    handleHigherLevelKeySubmit?(
         effectiveTime: Date,
+        expiryTime: Date,
         higherLevelKeyUpdate: HigherLevelKeyUpdate
+    ): Promise<void>;
+    handleAuthorizationKeySubmit?(
+        effectiveTime: Date,
+        expiryTime: Date,
+        authorizationKeysUpdate: AuthorizationKeysUpdate
     ): Promise<void>;
 }
 
@@ -81,7 +88,8 @@ export interface UpdateInstructionHandler<T, S, P = UpdateInstruction> {
         blockSummary: BlockSummary,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         fields: any,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ) => Promise<Partial<MultiSignatureTransaction> | undefined>;
     serializePayload: (transaction: T) => Buffer;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
@@ -109,6 +117,7 @@ export interface CreateTransactionInput {
     schedule: Schedule;
     signatureAmount: number;
     nonce: string;
+    expiryTime: Date;
 }
 
 /**

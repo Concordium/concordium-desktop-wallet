@@ -1,6 +1,6 @@
 import React from 'react';
-import HigherLevelKeysView from '~/pages/multisig/updates/UpdateHigherLevelKeys/HigherLevelKeysView';
-import UpdateRootKeys from '~/pages/multisig/updates/UpdateHigherLevelKeys/UpdateRootKeys';
+import HigherLevelKeysView from '~/pages/multisig/updates/UpdateGovernanceKeys/HigherLevelKeysView';
+import UpdateRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/UpdateRootKeys';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
@@ -40,7 +40,8 @@ export default class UpdateRootKeysHandler
     async createTransaction(
         blockSummary: BlockSummary,
         higherLevelKeyUpdate: HigherLevelKeyUpdate,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
@@ -55,7 +56,8 @@ export default class UpdateRootKeysHandler
             UpdateType.UpdateRootKeys,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

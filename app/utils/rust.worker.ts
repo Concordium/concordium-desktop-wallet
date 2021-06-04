@@ -3,35 +3,9 @@ import registerPromiseWorker from 'promise-worker/register';
 import { parse } from './JSONHelper';
 import workerCommands from '../constants/workerCommands.json';
 
-interface RustInterface {
-    buildPublicInformationForIp(
-        context: string,
-        idCredSec: string,
-        prfKey: string
-    ): string;
-    createIdRequest(
-        context: string,
-        signature: string,
-        idCredSec: string,
-        prfKey: string
-    ): string;
-    generateUnsignedCredential(context: string): string;
-    getDeploymentInfo(signature: string, unsignedInfo: string): string;
-    getDeploymentDetails(
-        signature: string,
-        unsignedInfo: string,
-        expiry: bigint
-    ): string;
-    decrypt_amounts_ext(amounts: string): string;
-    createTransferToPublicData(inputblob: string): string;
-    createGenesisAccount(
-        context: string,
-        idCredSec: string,
-        prfKey: string
-    ): string;
-    generateBakerKeys(sender: string): string;
-    getAddressFromCredId(credId: string): string;
-}
+type RustInterface = typeof import('@pkg/index');
+
+export type BakerKeyVariants = 'ADD' | 'UPDATE';
 
 let rustReference: RustInterface;
 async function getRust(): Promise<RustInterface> {
@@ -98,6 +72,13 @@ function createTransferToPublicData(
     return rust.createTransferToPublicData(message.input);
 }
 
+function createEncryptedTransferData(
+    rust: RustInterface,
+    message: Record<string, string>
+) {
+    return rust.createEncryptedTransferData(message.input);
+}
+
 function createGenesisAccount(
     rust: RustInterface,
     message: Record<string, string>
@@ -113,7 +94,12 @@ function generateBakerKeys(
     rust: RustInterface,
     message: Record<string, string>
 ) {
-    return rust.generateBakerKeys(message.sender);
+    return rust.generateBakerKeys(
+        message.sender,
+        message.keyVariant === 'ADD'
+            ? rust.BakerKeyVariant.ADD
+            : rust.BakerKeyVariant.UPDATE
+    );
 }
 
 function getAddressFromCredId(
@@ -139,6 +125,8 @@ function mapCommand(command: string) {
             return decryptAmounts;
         case workerCommands.createTransferToPublicData:
             return createTransferToPublicData;
+        case workerCommands.createEncryptedTransferData:
+            return createEncryptedTransferData;
         case workerCommands.createGenesisAccount:
             return createGenesisAccount;
         case workerCommands.generateBakerKeys:

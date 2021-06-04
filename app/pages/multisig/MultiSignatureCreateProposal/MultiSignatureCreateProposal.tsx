@@ -6,6 +6,7 @@ import { useParams } from 'react-router';
 
 import { FieldValues } from 'react-hook-form';
 import {
+    AuthorizationKeysUpdate,
     HigherLevelKeyUpdate,
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
@@ -19,8 +20,13 @@ import Modal from '~/cross-app-components/Modal';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { parse } from '~/utils/JSONHelper';
 import Form from '~/components/Form';
-import { getNow, TimeConstants } from '~/utils/timeHelpers';
-import { futureDate } from '~/components/Form/util/validation';
+import {
+    getDefaultExpiry,
+    getNow,
+    secondsSinceUnixEpoch,
+    TimeConstants,
+} from '~/utils/timeHelpers';
+import { futureDate, maxDate } from '~/components/Form/util/validation';
 
 import styles from './MultiSignatureCreateProposal.module.scss';
 import withChainData, { ChainData } from '../common/withChainData';
@@ -28,6 +34,7 @@ import MultiSignatureLayout from '../MultiSignatureLayout';
 
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
+    expiryTime: Date;
 }
 
 /**
@@ -44,6 +51,9 @@ function MultiSignatureCreateProposal({
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const dispatch = useDispatch();
+    const [effective, setEffective] = useState<Date | undefined>(
+        new Date(getNow() + 5 * TimeConstants.Minute)
+    );
 
     // TODO Add support for account transactions.
     const { updateType } = useParams<{ updateType: string }>();
@@ -95,15 +105,17 @@ function MultiSignatureCreateProposal({
             return;
         }
 
-        const { effectiveTime, ...dynamicFields } = fields;
-        const timeInSeconds = BigInt(
-            Math.round(effectiveTime.getTime() / 1000)
+        const { effectiveTime, expiryTime, ...dynamicFields } = fields;
+        const effectiveTimeInSeconds = BigInt(
+            secondsSinceUnixEpoch(effectiveTime)
         );
+        const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
 
         const proposal = await handler.createTransaction(
             blockSummary,
             dynamicFields,
-            timeInSeconds
+            effectiveTimeInSeconds,
+            expiryTimeInSeconds
         );
 
         if (proposal) {
@@ -118,18 +130,23 @@ function MultiSignatureCreateProposal({
      */
     async function handleKeySubmit(
         effectiveTime: Date,
-        higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate>
+        expiryTime: Date,
+        keyUpdate:
+            | Partial<HigherLevelKeyUpdate>
+            | Partial<AuthorizationKeysUpdate>
     ) {
         if (!blockSummary) {
             return;
         }
-        const timeInSeconds = BigInt(
-            Math.round(effectiveTime.getTime() / 1000)
+        const effectiveTimeInSeconds = BigInt(
+            secondsSinceUnixEpoch(effectiveTime)
         );
+        const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
         const proposal = await handler.createTransaction(
             blockSummary,
-            higherLevelKeyUpdate,
-            timeInSeconds
+            keyUpdate,
+            effectiveTimeInSeconds,
+            expiryTimeInSeconds
         );
 
         if (proposal) {
@@ -152,11 +169,42 @@ function MultiSignatureCreateProposal({
         setRestrictionModalOpen(true);
     }
 
+    function keyUpdateComponent() {
+        if (!blockSummary || !consensusStatus) {
+            return <Loading text="Getting current settings from chain" />;
+        }
+        if (
+            UpdateType.UpdateLevel2KeysUsingRootKeys === type ||
+            UpdateType.UpdateLevel2KeysUsingLevel1Keys === type
+        ) {
+            return (
+                <div className={styles.subtractContainerPadding}>
+                    <UpdateComponent
+                        blockSummary={blockSummary}
+                        consensusStatus={consensusStatus}
+                        handleAuthorizationKeySubmit={handleKeySubmit}
+                    />
+                </div>
+            );
+        }
+        return (
+            <div className={styles.subtractContainerPadding}>
+                <UpdateComponent
+                    blockSummary={blockSummary}
+                    consensusStatus={consensusStatus}
+                    handleHigherLevelKeySubmit={handleKeySubmit}
+                />
+            </div>
+        );
+    }
+
     if (
         [
             UpdateType.UpdateRootKeys,
             UpdateType.UpdateLevel1KeysUsingRootKeys,
             UpdateType.UpdateLevel1KeysUsingLevel1Keys,
+            UpdateType.UpdateLevel2KeysUsingRootKeys,
+            UpdateType.UpdateLevel2KeysUsingLevel1Keys,
         ].includes(type)
     ) {
         return (
@@ -166,17 +214,7 @@ function MultiSignatureCreateProposal({
                 delegateScroll
             >
                 {RestrictionModal}
-                {!blockSummary || !consensusStatus ? (
-                    <Loading text="Getting current settings from chain" />
-                ) : (
-                    <div className={styles.subtractContainerPadding}>
-                        <UpdateComponent
-                            blockSummary={blockSummary}
-                            consensusStatus={consensusStatus}
-                            handleKeySubmit={handleKeySubmit}
-                        />
-                    </div>
-                )}
+                {keyUpdateComponent()}
             </MultiSignatureLayout>
         );
     }
@@ -206,16 +244,35 @@ function MultiSignatureCreateProposal({
                             <Form.Timestamp
                                 name="effectiveTime"
                                 label="Effective Time"
-                                defaultValue={
-                                    new Date(
-                                        getNow() + 5 * TimeConstants.Minute
-                                    )
-                                }
+                                onChange={setEffective}
+                                defaultValue={effective}
                                 rules={{
                                     required: 'Effective time is required',
                                     validate: futureDate(
                                         'Effective time must be in the future'
                                     ),
+                                }}
+                            />
+                            <Form.Timestamp
+                                name="expiryTime"
+                                label="Transaction Expiry Time"
+                                defaultValue={getDefaultExpiry()}
+                                rules={{
+                                    required:
+                                        'Transaction expiry time is required',
+                                    validate: {
+                                        ...(effective !== undefined
+                                            ? {
+                                                  beforeEffective: maxDate(
+                                                      effective,
+                                                      'Transaction expiry time must be before the effective time'
+                                                  ),
+                                              }
+                                            : undefined),
+                                        future: futureDate(
+                                            'Transaction expiry time must be in the future'
+                                        ),
+                                    },
                                 }}
                             />
                         </>

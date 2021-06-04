@@ -1,6 +1,4 @@
 import React from 'react';
-import { microGTUPerGTU } from '~/utils/gtu';
-import { getPowerOf10 } from '~/utils/numberStringHelpers';
 import InlineNumber, { InlineNumberProps } from './InlineNumber';
 
 export type GtuInputProps = Omit<
@@ -11,8 +9,6 @@ export type GtuInputProps = Omit<
     | 'fallbackOnInvalid'
     | 'trimLeadingZeros'
     | 'customFormatter'
-    | 'step'
-    | 'min'
 >;
 
 export default function GtuInput(props: GtuInputProps): JSX.Element {
@@ -22,8 +18,6 @@ export default function GtuInput(props: GtuInputProps): JSX.Element {
             ensureDigits={2}
             allowFractions
             trimLeadingZeros
-            min={0}
-            step={`0.${'0'.repeat(getPowerOf10(microGTUPerGTU) - 1)}1`}
         />
     );
 }

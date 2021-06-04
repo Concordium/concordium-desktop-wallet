@@ -75,6 +75,16 @@ const updateInstructionTypes: [TransactionTypes, UpdateType, string][] = [
         UpdateType.UpdateLevel1KeysUsingLevel1Keys,
         'Update level 1 keys using level 1 keys',
     ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.UpdateLevel2KeysUsingRootKeys,
+        'Update level 2 keys using root keys',
+    ],
+    [
+        TransactionTypes.UpdateInstruction,
+        UpdateType.UpdateLevel2KeysUsingLevel1Keys,
+        'Update level 2 keys using level 1 keys',
+    ],
 ];
 
 const accountTransactionTypes: [
@@ -101,6 +111,26 @@ const accountTransactionTypes: [
         TransactionTypes.AccountTransaction,
         TransactionKind.Add_baker,
         'Add Baker',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_keys,
+        'Update Baker Keys',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Remove_baker,
+        'Remove Baker',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_stake,
+        'Update Baker Stake',
+    ],
+    [
+        TransactionTypes.AccountTransaction,
+        TransactionKind.Update_baker_restake_earnings,
+        'Update Baker Restake Earnings',
     ],
 ];
 

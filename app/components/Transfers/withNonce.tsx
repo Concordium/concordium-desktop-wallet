@@ -15,8 +15,8 @@ export interface WithAccount extends Nonce {
 }
 
 /**
- * Component that injects the names of the transaction sender (and recipient) into the props.
- * Requires the component to have prop transaction containing an AccountTransaction.
+ * Component that injects the next nonce on the given account.
+ * Requires the component to have prop account containing an Account.
  */
 export default function withNonce<TProps extends WithAccount>(
     Component: ComponentType<TProps>
@@ -43,8 +43,7 @@ export default function withNonce<TProps extends WithAccount>(
             <>
                 <SimpleErrorModal
                     show={showError}
-                    header="Unable to reach node"
-                    content={unableToReachNode}
+                    header={unableToReachNode}
                     onClick={() => dispatch(routerActions.goBack())}
                 />
                 <Component {...propsWithNonce} />

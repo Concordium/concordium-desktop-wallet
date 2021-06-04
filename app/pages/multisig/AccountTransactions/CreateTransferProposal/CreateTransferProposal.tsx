@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
@@ -12,14 +12,12 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickAmount from '../PickAmount';
-import PickRecipient from '../PickRecipientWrapper';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
 import PickIdentity from '~/components/PickIdentity';
-import PickAccount from '../PickAccount';
+import PickAccount from '~/components/PickAccount';
 import Button from '~/cross-app-components/Button';
-import TransactionProposalDetails from '../TransactionProposalDetails';
-import { isValidGTUString } from '~/utils/gtu';
+import TransactionProposalDetails from '../proposal-details/TransferProposalDetails';
 import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
@@ -34,6 +32,9 @@ import {
 } from '~/utils/transactionCosts';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import LoadingComponent from '../LoadingComponent';
+import InputTimestamp from '~/components/Form/InputTimestamp';
+import PickRecipient from '~/components/Transfers/PickRecipient';
+import { useTransactionExpiryState } from '~/utils/dataHooks';
 
 import styles from './CreateTransferProposal.module.scss';
 
@@ -47,6 +48,8 @@ function subTitle(currentLocation: string) {
             return 'Input amount';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
             return 'Select recipient';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
+            return 'Select transaction expiry time';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
             return 'Signature and Hardware Wallet';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
@@ -57,8 +60,10 @@ function subTitle(currentLocation: string) {
 }
 
 interface Props {
-    transactionKind: TransactionKindId;
     exchangeRate: Fraction;
+    transactionKind:
+        | TransactionKindId.Simple_transfer
+        | TransactionKindId.Transfer_with_schedule;
 }
 /**
  * This component controls the flow of creating a multisignature account transaction.
@@ -78,19 +83,54 @@ function CreateTransferProposal({
 
     const handler = findAccountTransactionHandler(transactionKind);
 
-    const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
     const [identity, setIdentity] = useState<Identity | undefined>();
-    const [amount, setAmount] = useState<string>('0.00'); // This is a string, to allows user input in GTU
+    const [amount, setAmount] = useState<string | undefined>();
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState();
 
     const [schedule, setSchedule] = useState<Schedule>();
     const [
         scheduleDefaults,
         setScheduleDefaults,
     ] = useState<BuildScheduleDefaults>();
+    const [isScheduleReady, setScheduleReady] = useState(true);
 
     const [estimatedFee, setFee] = useState<Fraction>();
+
+    const isReady = useMemo(() => {
+        switch (location) {
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
+                return identity !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
+                return isScheduleReady;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
+                return account !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
+                return amount !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
+                return recipient !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
+                return (
+                    expiryTime !== undefined && expiryTimeError === undefined
+                );
+            default:
+                return false;
+        }
+    }, [
+        account,
+        amount,
+        expiryTime,
+        expiryTimeError,
+        identity,
+        isScheduleReady,
+        location,
+        recipient,
+    ]);
 
     useEffect(() => {
         if (account) {
@@ -117,16 +157,11 @@ function CreateTransferProposal({
         }
     }, [account, transactionKind, setFee, schedule, exchangeRate]);
 
-    function updateAmount(newAmount: string) {
-        if (isValidGTUString(newAmount)) {
-            setReady(true);
-        }
-        setAmount(newAmount);
-    }
-
     function renderSignTransaction() {
-        if (!account || !recipient) {
-            throw new Error('Unexpected missing account and/or recipient');
+        if (!account || !recipient || !expiryTime || !amount) {
+            throw new Error(
+                'Unexpected missing account, amount, recipient and/or expiry time'
+            );
         }
         return (
             <CreateTransaction
@@ -136,15 +171,16 @@ function CreateTransferProposal({
                 account={account}
                 schedule={schedule}
                 estimatedFee={estimatedFee}
+                expiryTime={expiryTime}
             />
         );
     }
 
     function continueAction() {
-        setReady(false);
+        const nextLocation = handler.creationLocationHandler(location);
         dispatch(
             push({
-                pathname: handler.creationLocationHandler(location),
+                pathname: nextLocation,
                 state: transactionKind,
             })
         );
@@ -155,8 +191,10 @@ function CreateTransferProposal({
     }
 
     function renderBuildSchedule() {
-        if (!account || !recipient) {
-            throw new Error('Unexpected missing account and/or recipient');
+        if (!account || !recipient || !amount) {
+            throw new Error(
+                'Unexpected missing account, amount and/or recipient'
+            );
         }
         return (
             <BuildSchedule
@@ -167,7 +205,7 @@ function CreateTransferProposal({
                 }}
                 amount={amount}
                 ref={scheduleBuilderRef}
-                setReady={setReady}
+                setReady={setScheduleReady}
                 defaults={scheduleDefaults}
             />
         );
@@ -206,6 +244,7 @@ function CreateTransferProposal({
                                 recipient={recipient}
                                 schedule={schedule}
                                 estimatedFee={estimatedFee}
+                                expiryTime={expiryTime}
                             />
                             {showButton && (
                                 <Button
@@ -247,7 +286,6 @@ function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickAccount
-                                            setReady={setReady}
                                             setAccount={setAccount}
                                             identity={identity}
                                             chosenAccount={account}
@@ -268,10 +306,9 @@ function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickAmount
-                                            setReady={setReady}
                                             account={account}
                                             amount={amount}
-                                            setAmount={updateAmount}
+                                            setAmount={setAmount}
                                             estimatedFee={estimatedFee}
                                         />
                                     </div>
@@ -284,11 +321,36 @@ function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickRecipient
-                                            setReady={setReady}
-                                            setRecipient={setRecipient}
-                                            recipient={recipient}
+                                            pickRecipient={setRecipient}
                                             senderAddress={account?.address}
                                         />
+                                    </div>
+                                )}
+                            />
+                            <Route
+                                path={
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY
+                                }
+                                render={() => (
+                                    <div className={styles.columnContent}>
+                                        <InputTimestamp
+                                            label="Transaction expiry time"
+                                            name="expiry"
+                                            isInvalid={
+                                                expiryTimeError !== undefined
+                                            }
+                                            error={expiryTimeError}
+                                            value={expiryTime}
+                                            onChange={setExpiryTime}
+                                        />
+                                        <p>
+                                            Choose the expiry date for the
+                                            transaction.
+                                        </p>
+                                        <p>
+                                            Committing the transaction after
+                                            this date, will be rejected.
+                                        </p>
                                     </div>
                                 )}
                             />
@@ -299,7 +361,6 @@ function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickIdentity
-                                            setReady={setReady}
                                             setIdentity={setIdentity}
                                             chosenIdentity={identity}
                                         />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadAccounts, decryptAccountBalance } from '~/features/AccountSlice';
+import { decryptAccountBalance } from '~/features/AccountSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import {
     transactionsSelector,
@@ -47,27 +47,32 @@ export default function DecryptComponent({ account }: Props) {
             account.address,
             ledger
         );
-        const credentialNumber = credential?.credentialNumber;
-        if (credentialNumber === undefined) {
+        if (credential === undefined) {
             throw new Error(
                 'Unable to decrypt shielded balance and encrypted transfers. Please verify that the connected wallet is for this account.'
             );
         }
+        const { credentialNumber } = credential;
 
         setMessage('Please confirm exporting PRF key on device');
-        const prfKeySeed = await ledger.getPrfKey(account.identityNumber);
+        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
         setMessage('Please wait');
         const prfKey = prfKeySeed.toString('hex');
 
-        await decryptAccountBalance(prfKey, account, credentialNumber, global);
         await decryptTransactions(
             transactions,
             prfKey,
             credentialNumber,
             global
         );
+        await decryptAccountBalance(
+            prfKey,
+            account,
+            credentialNumber,
+            global,
+            dispatch
+        );
         await loadTransactions(account, dispatch);
-        await loadAccounts(dispatch);
     }
 
     return (

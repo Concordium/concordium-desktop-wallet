@@ -5,8 +5,13 @@ import {
     instanceOfTransferToEncrypted,
     instanceOfTransferToPublic,
     instanceOfScheduledTransfer,
+    instanceOfEncryptedTransfer,
     instanceOfUpdateAccountCredentials,
     instanceOfAddBaker,
+    instanceOfRemoveBaker,
+    instanceOfUpdateBakerKeys,
+    instanceOfUpdateBakerStake,
+    instanceOfUpdateBakerRestakeEarnings,
     AddressBookEntry,
 } from '../../utils/types';
 import {
@@ -16,8 +21,13 @@ import {
 import DisplayScheduleTransfer from './DisplayScheduledTransferDetails';
 import DisplayInternalTransfer from './DisplayInternalTransfer';
 import DisplaySimpleTransfer from './DisplaySimpleTransfer';
+import DisplayEncryptedTransfer from './DisplayEncryptedTransfer';
 import DisplayAddBaker from './DisplayAddBaker';
+import DisplayUpdateBakerKeys from './DisplayUpdateBakerKeys';
+import DisplayRemoveBaker from './DisplayRemoveBaker';
 import DisplayAccountCredentialsUpdate from '../DisplayAccountCredentialUpdate';
+import DisplayUpdateBakerStake from './DisplayUpdateBakerStake';
+import DisplayUpdateBakerRestakeEarnings from './DisplayUpdateBakerRestakeEarnings';
 
 interface Props {
     transaction: AccountTransaction;
@@ -52,8 +62,29 @@ export default function AccountTransactionDetails({ transaction }: Props) {
             />
         );
     }
+    if (instanceOfEncryptedTransfer(transaction)) {
+        return (
+            <DisplayEncryptedTransfer
+                transaction={transaction}
+                to={to}
+                fromName={fromName}
+            />
+        );
+    }
     if (instanceOfAddBaker(transaction)) {
         return <DisplayAddBaker transaction={transaction} />;
+    }
+    if (instanceOfUpdateBakerKeys(transaction)) {
+        return <DisplayUpdateBakerKeys transaction={transaction} />;
+    }
+    if (instanceOfUpdateBakerStake(transaction)) {
+        return <DisplayUpdateBakerStake transaction={transaction} />;
+    }
+    if (instanceOfUpdateBakerRestakeEarnings(transaction)) {
+        return <DisplayUpdateBakerRestakeEarnings transaction={transaction} />;
+    }
+    if (instanceOfRemoveBaker(transaction)) {
+        return <DisplayRemoveBaker transaction={transaction} />;
     }
     if (
         instanceOfTransferToEncrypted(transaction) ||

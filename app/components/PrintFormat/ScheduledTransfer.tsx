@@ -15,7 +15,7 @@ import {
     fee,
     displayStatus,
     standardPageFooter,
-    hashRow,
+    HashRows,
     standardTableHeader,
     timeFormat,
     displayExpiry,
@@ -52,13 +52,13 @@ function PrintFormatScheduledTransfer({
                 <tbody>
                     {sender(transaction.sender, fromName)}
                     {recipient(transaction.payload.toAddress, toName)}
-                    {totalWithdrawn(amount, transaction.estimatedFee)}
+                    {totalWithdrawn(amount, transaction)}
                     {displayAmount(amount)}
-                    {fee(transaction.estimatedFee)}
+                    {fee(transaction)}
                     {displayStatus(status)}
                     {status === MultiSignatureTransactionStatus.Open &&
                         displayExpiry(transaction.expiry)}
-                    {hashRow(transaction)}
+                    <HashRows transaction={transaction} />
                     {Boolean(image) && (
                         <tr>
                             <td>Identicon:</td>

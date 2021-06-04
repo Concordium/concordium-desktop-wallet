@@ -27,7 +27,7 @@ import {
     convertAccountTransaction,
 } from '../utils/TransactionConverters';
 // eslint-disable-next-line import/no-cycle
-import { updateMaxTransactionId } from './AccountSlice';
+import { updateMaxTransactionId, updateAllDecrypted } from './AccountSlice';
 import AbortController from '~/utils/AbortController';
 import { RejectReason } from '~/utils/node/RejectReasonHelper';
 
@@ -95,10 +95,11 @@ export async function decryptTransactions(
         (t) =>
             t.transactionKind ===
                 TransactionKindString.EncryptedAmountTransfer &&
-            t.decryptedAmount === null
+            t.decryptedAmount === null &&
+            t.success
     );
 
-    if (encryptedTransfers.length > 0) {
+    if (encryptedTransfers.length === 0) {
         return Promise.resolve();
     }
 
@@ -131,25 +132,23 @@ export async function decryptTransactions(
 /**
  * Determine whether the transaction affects unshielded balance.
  */
-function filterUnShieldedBalanceTransaction(transaction: TransferTransaction) {
-    switch (transaction.transactionKind) {
-        case TransactionKindString.Transfer:
-        case TransactionKindString.BakingReward:
-        case TransactionKindString.FinalizationReward:
-        case TransactionKindString.BlockReward:
-        case TransactionKindString.TransferWithSchedule:
-        case TransactionKindString.TransferToEncrypted:
-        case TransactionKindString.TransferToPublic:
-            return true;
-        default:
-            return false;
-    }
+function isUnshieldedBalanceTransaction(
+    transaction: TransferTransaction,
+    currentAddress: string
+) {
+    return !(
+        transaction.transactionKind ===
+            TransactionKindString.EncryptedAmountTransfer &&
+        transaction.fromAddress !== currentAddress
+    );
 }
 
 /**
  * Determine whether the transaction affects shielded balance.
  */
-function filterShieldedBalanceTransaction(transaction: TransferTransaction) {
+function isShieldedBalanceTransaction(
+    transaction: Partial<TransferTransaction>
+) {
     switch (transaction.transactionKind) {
         case TransactionKindString.EncryptedAmountTransfer:
         case TransactionKindString.TransferToEncrypted:
@@ -171,18 +170,17 @@ export async function loadTransactions(
     controller?: AbortController
 ) {
     if (showLoading) {
-        await dispatch(setLoadingTransactions(true));
+        dispatch(setLoadingTransactions(true));
     }
     const { transactions, more } = await getTransactionsOfAccount(
         account,
-        'id',
         JSON.parse(account.rewardFilter)
     );
 
     const namedTransactions = await attachNames(transactions);
     if (!controller?.isAborted) {
         if (showLoading) {
-            await dispatch(setLoadingTransactions(false));
+            dispatch(setLoadingTransactions(false));
         }
         dispatch(setTransactions({ transactions: namedTransactions, more }));
     }
@@ -194,17 +192,20 @@ async function fetchTransactions(address: string, currentMaxId: number) {
     const newMaxId = transactions.reduce((id, t) => Math.max(id, t.id), 0);
     const isFinished = !full;
 
-    await insertTransactions(
+    const newTransactions = await insertTransactions(
         transactions.map((transaction) =>
             convertIncomingTransaction(transaction, address)
         )
     );
-    return { newMaxId, isFinished };
+    const newEncrypted = newTransactions.some(isShieldedBalanceTransaction);
+
+    return { newMaxId, isFinished, newEncrypted };
 }
 
-// Update the transactions from remote source.
-// will fetch transactions in intervals, updating the state each time.
-// stops when it reaches the newest transaction, or it is told to abort by the controller.
+/** Update the transactions from remote source.
+ * will fetch transactions in intervals, updating the state each time.
+ * stops when it reaches the newest transaction, or it is told to abort by the controller.
+ * */
 export async function updateTransactions(
     dispatch: Dispatch,
     account: Account,
@@ -223,6 +224,10 @@ export async function updateTransactions(
                 account.address,
                 result.newMaxId
             );
+        }
+
+        if (result.newEncrypted) {
+            await updateAllDecrypted(dispatch, account.address, false);
         }
 
         if (controller.isAborted) {
@@ -258,41 +263,32 @@ export async function addPendingTransaction(
     return insertTransactions([convertedTransaction]);
 }
 
-// Set the transaction's status to confirmed, update the cost and whether it succeded.
-// TODO: update Total to reflect change in cost.
+/**
+ * Set the transaction's status to confirmed, update the cost and whether it suceeded
+ * or not.
+ */
 export async function confirmTransaction(
     dispatch: Dispatch,
     transactionHash: string,
-    outcomeRecord: Record<string, TransactionEvent>
+    blockHash: string,
+    event: TransactionEvent
 ) {
-    const outcomes = Object.values(outcomeRecord);
-    const success = isSuccessfulTransaction(outcomes);
-    const cost = outcomes.reduce(
-        (accu, event) => accu + parseInt(event.cost, 10),
-        0
-    );
+    const success = isSuccessfulTransaction(event);
+    const { cost } = event;
+
     let rejectReason;
     if (!success) {
-        const failure = outcomes.find(
-            (event) => event.result.outcome !== 'success'
-        );
-        if (!failure) {
-            throw new Error('Missing failure for unsuccessful transaction');
-        }
-        if (!failure.result) {
-            throw new Error('Missing failure result');
-        }
-        if (!failure.result.rejectReason) {
-            throw new Error('Missing rejection reason in failure result');
+        if (!event.result.rejectReason) {
+            throw new Error('Missing rejection reason in transaction event');
         }
 
         rejectReason =
             RejectReason[
-                failure.result.rejectReason.tag as keyof typeof RejectReason
+                event.result.rejectReason.tag as keyof typeof RejectReason
             ];
         if (rejectReason === undefined) {
             // If the reject reason was not known, then just store it directly as a string anyway.
-            rejectReason = failure.result.rejectReason.tag;
+            rejectReason = event.result.rejectReason.tag;
         }
     }
 
@@ -301,6 +297,7 @@ export async function confirmTransaction(
         cost: cost.toString(),
         success,
         rejectReason,
+        blockHash,
     };
     updateTransaction({ transactionHash }, update);
     return dispatch(
@@ -327,10 +324,18 @@ export async function rejectTransaction(
 }
 
 export const transactionsSelector = (state: RootState) => {
-    const filter = state.transactions.viewingShielded
-        ? filterShieldedBalanceTransaction
-        : filterUnShieldedBalanceTransaction;
-    return state.transactions.transactions.filter(filter);
+    if (state.transactions.viewingShielded) {
+        return state.transactions.transactions.filter(
+            isShieldedBalanceTransaction
+        );
+    }
+    const address = state.accounts.chosenAccount?.address;
+    if (!address) {
+        return [];
+    }
+    return state.transactions.transactions.filter((transaction) =>
+        isUnshieldedBalanceTransaction(transaction, address)
+    );
 };
 
 export const viewingShieldedSelector = (state: RootState) =>

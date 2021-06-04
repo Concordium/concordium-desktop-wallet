@@ -1,4 +1,5 @@
 @import 'config/bundle';
+@import '../common/MultiSignatureFlowPage.module.scss';
 
 .flex {
     display: flex;
@@ -29,18 +30,15 @@
     flex: 1;
 }
 
-.descriptionStep {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    padding: 2em;
-}
-
 .flex1 {
     flex: 1;
 }
 
 .alignSelfNormal {
     align-self: normal;
+}
+
+.listSelectButton {
+    margin-top: 40px;
+    flex-shrink: 0;
 }

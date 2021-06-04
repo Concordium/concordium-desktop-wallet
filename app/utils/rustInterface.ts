@@ -1,7 +1,7 @@
 import PromiseWorker from 'promise-worker';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error : has no default export.
-import RustWorker from './rust.worker';
+import RustWorker, { BakerKeyVariants } from './rust.worker';
 import {
     PublicInformationForIp,
     Identity,
@@ -15,10 +15,11 @@ import {
     GenesisAccount,
     SignedIdRequest,
     UnsignedCredentialDeploymentInformation,
+    CreationKeys,
 } from './types';
 import ConcordiumLedgerClient from '../features/ledger/ConcordiumLedgerClient';
 import workerCommands from '../constants/workerCommands.json';
-import { getDefaultExpiry } from './timeHelpers';
+import { getDefaultExpiry, secondsSinceUnixEpoch } from './timeHelpers';
 import { getAccountPath } from '~/features/ledger/Path';
 import { stringify, parse } from './JSONHelper';
 import CredentialInfoLedgerDetails from '~/components/ledger/CredentialInfoLedgerDetails';
@@ -45,12 +46,36 @@ async function getSecretsFromLedger(
     return { prfKey, idCredSec };
 }
 
+export async function exportKeysFromLedger(
+    identityNumber: number,
+    credentialNumber: number,
+    displayMessage: (message: string) => void,
+    ledger: ConcordiumLedgerClient
+): Promise<CreationKeys> {
+    const path = getAccountPath({
+        identityIndex: identityNumber,
+        accountIndex: credentialNumber,
+        signatureIndex: 0,
+    });
+
+    const { prfKey, idCredSec } = await getSecretsFromLedger(
+        ledger,
+        displayMessage,
+        identityNumber
+    );
+    displayMessage('Please confirm exporting public key on device');
+    const publicKey = (await ledger.getPublicKey(path)).toString('hex');
+    displayMessage(`Please confirm exported public key: ${publicKey}`);
+    return { prfKey, idCredSec, publicKey };
+}
+
 /**
  *  This function creates an IdentityObjectRequest using the ledger, given the nesessary information and the identity number on the ledger.
  * Returns the IdentityObjectRequest and the randomness used to generate it.
  */
 export async function createIdentityRequestObjectLedger(
     identityNumber: number,
+    keys: CreationKeys,
     ipInfo: IpInfo,
     arsInfos: Record<string, ArInfo>,
     global: Global,
@@ -58,22 +83,6 @@ export async function createIdentityRequestObjectLedger(
     ledger: ConcordiumLedgerClient,
     signDetailsView: (info: PublicInformationForIp) => JSX.Element
 ): Promise<SignedIdRequest> {
-    const { prfKey, idCredSec } = await getSecretsFromLedger(
-        ledger,
-        displayMessage,
-        identityNumber
-    );
-    displayMessage('Please confirm exporting public key on device');
-    const publicKey = await ledger.getPublicKey([
-        0,
-        0,
-        identityNumber,
-        2,
-        0,
-        0,
-    ]);
-    displayMessage('Please wait');
-
     const context = {
         ipInfo,
         arsInfos,
@@ -81,7 +90,7 @@ export async function createIdentityRequestObjectLedger(
         publicKeys: [
             {
                 schemeId: 'Ed25519',
-                verifyKey: publicKey.toString('hex'),
+                verifyKey: keys.publicKey,
             },
         ],
         threshold: 1,
@@ -92,8 +101,8 @@ export async function createIdentityRequestObjectLedger(
     const pubInfoForIpString = await worker.postMessage({
         command: workerCommands.buildPublicInformationForIp,
         context: contextString,
-        idCredSec,
-        prfKey,
+        idCredSec: keys.idCredSec,
+        prfKey: keys.prfKey,
     });
 
     const pubInfoForIp: PublicInformationForIp = JSON.parse(pubInfoForIpString);
@@ -115,8 +124,8 @@ export async function createIdentityRequestObjectLedger(
         command: workerCommands.createIdRequest,
         context: contextString,
         signature: signature.toString('hex'),
-        idCredSec,
-        prfKey,
+        idCredSec: keys.idCredSec,
+        prfKey: keys.prfKey,
     });
     const data = JSON.parse(dataString);
 
@@ -129,27 +138,11 @@ export async function createIdentityRequestObjectLedger(
 async function createUnsignedCredentialInfo(
     identity: Identity,
     credentialNumber: number,
+    keys: CreationKeys,
     global: Global,
     attributes: string[],
-    displayMessage: (message: string) => void,
-    ledger: ConcordiumLedgerClient,
     address?: string
 ) {
-    const path = getAccountPath({
-        identityIndex: identity.identityNumber,
-        accountIndex: credentialNumber,
-        signatureIndex: 0,
-    });
-
-    const { prfKey, idCredSec } = await getSecretsFromLedger(
-        ledger,
-        displayMessage,
-        identity.identityNumber
-    );
-    displayMessage('Please confirm exporting public key on device');
-    const publicKey = await ledger.getPublicKey(path);
-    displayMessage('Please wait');
-
     const identityProvider = JSON.parse(identity.identityProvider);
 
     const credentialInput: Record<string, unknown> = {
@@ -160,7 +153,7 @@ async function createUnsignedCredentialInfo(
         publicKeys: [
             {
                 schemeId: 'Ed25519',
-                verifyKey: publicKey.toString('hex'),
+                verifyKey: keys.publicKey,
             },
         ],
         threshold: 1,
@@ -169,8 +162,8 @@ async function createUnsignedCredentialInfo(
         randomness: {
             randomness: identity.randomness,
         },
-        prfKey,
-        idCredSec,
+        prfKey: keys.prfKey,
+        idCredSec: keys.idCredSec,
     };
     if (address) {
         credentialInput.address = address;
@@ -204,6 +197,7 @@ async function createUnsignedCredentialInfo(
 export async function createCredentialInfo(
     identity: Identity,
     credentialNumber: number,
+    keys: CreationKeys,
     global: Global,
     attributes: string[],
     displayMessage: (message: string | JSX.Element) => void,
@@ -213,10 +207,9 @@ export async function createCredentialInfo(
     const { raw, parsed } = await createUnsignedCredentialInfo(
         identity,
         credentialNumber,
+        keys,
         global,
         attributes,
-        displayMessage,
-        ledger,
         address
     );
 
@@ -252,6 +245,7 @@ export async function createCredentialInfo(
 export async function createCredentialDetails(
     identity: Identity,
     credentialNumber: number,
+    keys: CreationKeys,
     global: Global,
     attributes: string[],
     displayMessage: (message: string | JSX.Element) => void,
@@ -260,16 +254,15 @@ export async function createCredentialDetails(
     const { raw, parsed } = await createUnsignedCredentialInfo(
         identity,
         credentialNumber,
+        keys,
         global,
-        attributes,
-        displayMessage,
-        ledger
+        attributes
     );
 
     displayMessage(CredentialInfoLedgerDetails(parsed));
 
     // Adding credential on a new account
-    const expiry = getDefaultExpiry();
+    const expiry = BigInt(secondsSinceUnixEpoch(getDefaultExpiry()));
     const path = getAccountPath({
         identityIndex: identity.identityNumber,
         accountIndex: credentialNumber,
@@ -322,7 +315,6 @@ export async function decryptAmounts(
         prfKey,
         encryptedAmounts,
     };
-
     const decryptedAmounts = await worker.postMessage({
         command: workerCommands.decryptAmounts,
         input: JSON.stringify(input),
@@ -354,6 +346,34 @@ export async function makeTransferToPublicData(
         input: JSON.stringify(input),
     });
     return JSON.parse(transferToPublicData);
+}
+
+export async function makeEncryptedTransferData(
+    amount: string,
+    receiverPublicKey: string,
+    prfKey: string,
+    global: Global,
+    accountEncryptedAmount: AccountEncryptedAmount,
+    accountNumber: number
+) {
+    const input = {
+        global,
+        amount,
+        receiverPublicKey,
+        prfKey,
+        accountNumber,
+        incomingAmounts: accountEncryptedAmount.incomingAmounts,
+        encryptedSelfAmount: accountEncryptedAmount.selfAmount,
+        aggIndex:
+            accountEncryptedAmount.startIndex +
+            accountEncryptedAmount.incomingAmounts.length,
+    };
+
+    const encryptedTransferData = await worker.postMessage({
+        command: workerCommands.createEncryptedTransferData,
+        input: JSON.stringify(input),
+    });
+    return JSON.parse(encryptedTransferData);
 }
 
 export async function createGenesisAccount(
@@ -420,10 +440,14 @@ export type BakerKeys = {
     proofAggregation: string;
 };
 
-export async function generateBakerKeys(sender: string): Promise<BakerKeys> {
+export async function generateBakerKeys(
+    sender: string,
+    keyVariant: BakerKeyVariants
+): Promise<BakerKeys> {
     const response = await worker.postMessage({
         command: workerCommands.generateBakerKeys,
         sender,
+        keyVariant,
     });
     return JSON.parse(response);
 }

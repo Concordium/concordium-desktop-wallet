@@ -3,7 +3,6 @@ import {
     MultiSignatureTransactionStatus,
     ScheduledTransfer,
     AccountTransaction,
-    TransactionPayload,
     instanceOfScheduledTransfer,
     TransactionKindId,
 } from '../types';
@@ -25,13 +24,8 @@ export default class ScheduledTransferHandler
     extends TransferHandler<TransactionType>
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: AccountTransaction<TransactionPayload>
-    ): TransactionType {
-        if (instanceOfScheduledTransfer(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, instanceOfScheduledTransfer);
     }
 
     creationLocationHandler(currentLocation: string) {
@@ -63,6 +57,7 @@ export default class ScheduledTransferHandler
         recipient,
         signatureAmount,
         nonce,
+        expiryTime,
     }: Partial<CreateTransactionInput>) {
         if (!sender || !recipient || !schedule || !nonce) {
             throw new Error(
@@ -74,7 +69,8 @@ export default class ScheduledTransferHandler
             recipient,
             schedule,
             nonce,
-            signatureAmount
+            signatureAmount,
+            expiryTime
         );
     }
 
@@ -91,8 +87,4 @@ export default class ScheduledTransferHandler
             />
         );
     }
-
-    title = `Account Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

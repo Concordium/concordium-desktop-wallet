@@ -3,7 +3,6 @@ import {
     MultiSignatureTransactionStatus,
     SimpleTransfer,
     AccountTransaction,
-    TransactionPayload,
     instanceOfSimpleTransfer,
     TransactionKindId,
 } from '../types';
@@ -25,13 +24,8 @@ export default class SimpleTransferHandler
     extends TransferHandler<TransactionType>
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: AccountTransaction<TransactionPayload>
-    ): TransactionType {
-        if (instanceOfSimpleTransfer(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, instanceOfSimpleTransfer);
     }
 
     creationLocationHandler(currentLocation: string) {
@@ -44,6 +38,8 @@ export default class SimpleTransferHandler
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
                 default:
                     throw new Error('unknown location');
@@ -61,6 +57,7 @@ export default class SimpleTransferHandler
         recipient,
         signatureAmount,
         nonce,
+        expiryTime,
     }: Partial<CreateTransactionInput>) {
         if (!sender || !recipient || amount === undefined || !nonce) {
             throw new Error(
@@ -77,7 +74,8 @@ export default class SimpleTransferHandler
             amount,
             recipient,
             nonce,
-            signatureAmount
+            signatureAmount,
+            expiryTime
         );
     }
 
@@ -94,8 +92,4 @@ export default class SimpleTransferHandler
             />
         );
     }
-
-    title = `Account Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

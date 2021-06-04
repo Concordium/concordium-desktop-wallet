@@ -5,6 +5,7 @@ import {
     YearMonth,
     SchemeId,
     CredentialDeploymentInformation,
+    ChosenAttributesKeys,
 } from './types';
 
 export function putBase58Check(
@@ -16,6 +17,10 @@ export function putBase58Check(
     for (let i = 1; i < decoded.length; i += 1) {
         array[startIndex + i - 1] = decoded[i];
     }
+}
+
+export function base58ToBuffer(base58Sstring: string) {
+    return bs58check.decode(base58Sstring).slice(1); // remove the first check byte
 }
 
 type Indexable = Buffer | Uint8Array;
@@ -160,14 +165,24 @@ export function serializeCredentialDeploymentInformation(
     const attributesLength = Buffer.alloc(2);
     attributesLength.writeUInt16BE(revealedAttributes.length, 0);
     buffers.push(attributesLength);
-    revealedAttributes.forEach(([tag, value]) => {
-        const serializedAttributeValue = Buffer.from(value, 'utf-8');
-        const data = Buffer.alloc(2);
-        data.writeUInt8(parseInt(tag, 10), 0);
-        data.writeUInt8(serializedAttributeValue.length, 1);
-        buffers.push(data);
-        buffers.push(serializedAttributeValue);
-    });
+
+    const revealedAttributeTags: [
+        number,
+        string
+    ][] = revealedAttributes.map(([tagName, value]) => [
+        ChosenAttributesKeys[tagName as keyof typeof ChosenAttributesKeys],
+        value,
+    ]);
+    revealedAttributeTags
+        .sort((a, b) => a[0] - b[0])
+        .forEach(([tag, value]) => {
+            const serializedAttributeValue = Buffer.from(value, 'utf-8');
+            const data = Buffer.alloc(2);
+            data.writeUInt8(tag, 0);
+            data.writeUInt8(serializedAttributeValue.length, 1);
+            buffers.push(data);
+            buffers.push(serializedAttributeValue);
+        });
     const proofs = Buffer.from(credential.proofs, 'hex');
     buffers.push(encodeWord32(proofs.length));
     buffers.push(proofs);

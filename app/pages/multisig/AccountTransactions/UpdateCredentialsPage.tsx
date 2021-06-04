@@ -13,9 +13,11 @@ import {
     Fraction,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
-import PickAccount from './PickAccount';
+import PickAccount from '~/components/PickAccount';
 import AddCredential from './AddCredential';
-import ChangeSignatureThreshold from './ChangeSignatureThreshold';
+import ChangeSignatureThreshold, {
+    validateThreshold,
+} from './ChangeSignatureThreshold';
 import routes from '~/constants/routes.json';
 import CreateUpdate from './CreateUpdate';
 import { CredentialStatus } from './CredentialStatus';
@@ -23,12 +25,17 @@ import UpdateAccountCredentialsHandler from '~/utils/transactionHandlers/UpdateA
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
 import { getUpdateCredentialsCost } from '~/utils/transactionCosts';
-import { useAccountInfo } from '~/utils/hooks';
+import { useAccountInfo, useTransactionExpiryState } from '~/utils/dataHooks';
 import { collapseFraction } from '~/utils/basicHelpers';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import LoadingComponent from './LoadingComponent';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { validateFee } from '~/utils/transactionHelpers';
+
+import InputTimestamp from '~/components/Form/InputTimestamp';
+import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
+
+import { hasEncryptedBalance } from '~/utils/accountHelpers';
 
 import styles from './UpdateAccountCredentials.module.scss';
 
@@ -49,6 +56,7 @@ function assignIndices<T>(items: T[], usedIndices: number[]) {
                 value: items[i],
             });
             i += 1;
+            candidate += 1;
         }
     }
     return assigned;
@@ -64,6 +72,8 @@ function subTitle(currentLocation: string) {
             return 'New Credentials';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
             return ' ';
+        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
+            return 'Transaction expiry time';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION:
             return 'Signature and Hardware Wallet';
         default:
@@ -206,7 +216,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
         ':transactionKind'
     );
 
-    const [isReady, setReady] = useState(false);
+    // const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [currentCredentials, setCurrentCredentials] = useState<
@@ -222,6 +232,45 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     const [newCredentials, setNewCredentials] = useState<
         CredentialDeploymentInformation[]
     >([]);
+    const [
+        expiryTime,
+        setExpiryTime,
+        expiryTimeError,
+    ] = useTransactionExpiryState();
+
+    const newCredentialAmount = credentialIds.filter(
+        ([, status]) => status !== CredentialStatus.Removed
+    ).length;
+
+    const isReady = useMemo(() => {
+        switch (location) {
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
+                return identity !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
+                return account !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
+                return currentCredentials !== undefined;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_CHANGESIGNATURETHRESHOLD:
+                return newThreshold !== undefined
+                    ? validateThreshold(newThreshold, newCredentialAmount)
+                    : false;
+            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
+                return (
+                    expiryTime !== undefined && expiryTimeError === undefined
+                );
+            default:
+                return false;
+        }
+    }, [
+        account,
+        currentCredentials,
+        expiryTime,
+        expiryTimeError,
+        identity,
+        location,
+        newCredentialAmount,
+        newThreshold,
+    ]);
 
     const accountInfo = useAccountInfo(account?.address);
 
@@ -342,6 +391,10 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
             throw new Error('Unexpected missing account');
         }
 
+        if (!expiryTime) {
+            throw new Error('Unexpected missing expiry');
+        }
+
         const usedIndices: number[] = currentCredentials
             .filter(({ credential }) => {
                 const { credId } = credential;
@@ -376,8 +429,19 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                     newThreshold={newThreshold}
                     currentCredentialAmount={currentCredentials.length}
                     estimatedFee={estimatedFee}
+                    expiry={expiryTime}
                 />
             </div>
+        );
+    }
+
+    function onContinue() {
+        const nextLocation = handler.creationLocationHandler(location);
+        dispatch(
+            push({
+                pathname: nextLocation,
+                state: TransactionKindId.Update_credentials,
+            })
         );
     }
 
@@ -408,6 +472,10 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                             currentCredentials.length,
                             credentialIds.length
                         )}
+                        <DisplayTransactionExpiryTime
+                            expiryTime={expiryTime}
+                            placeholder="To be determined"
+                        />
                         {listCredentials(
                             credentialIds,
                             updateCredentialStatus,
@@ -425,16 +493,8 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                 }
                                 render={() => (
                                     <ChangeSignatureThreshold
-                                        setReady={setReady}
                                         currentThreshold={
                                             account?.signatureThreshold || 1
-                                        }
-                                        newCredentialAmount={
-                                            credentialIds.filter(
-                                                ([, status]) =>
-                                                    status !==
-                                                    CredentialStatus.Removed
-                                            ).length
                                         }
                                         newThreshold={newThreshold}
                                         setNewThreshold={setNewThreshold}
@@ -447,7 +507,6 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                 }
                                 render={() => (
                                     <AddCredential
-                                        setReady={setReady}
                                         accountAddress={account?.address}
                                         credentialIds={credentialIds}
                                         addCredentialId={(newId) =>
@@ -468,11 +527,40 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                 }
                                 render={() => (
                                     <PickAccount
-                                        setReady={setReady}
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         identity={identity}
+                                        filter={(_, info) =>
+                                            !!info && !hasEncryptedBalance(info)
+                                        }
                                     />
+                                )}
+                            />
+                            <Route
+                                path={
+                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY
+                                }
+                                render={() => (
+                                    <div>
+                                        <InputTimestamp
+                                            label="Transaction expiry time"
+                                            name="expiry"
+                                            isInvalid={
+                                                expiryTimeError !== undefined
+                                            }
+                                            error={expiryTimeError}
+                                            value={expiryTime}
+                                            onChange={setExpiryTime}
+                                        />
+                                        <p>
+                                            Choose the expiry date for the
+                                            transaction.
+                                        </p>
+                                        <p>
+                                            Committing the transaction after
+                                            this date, will result in rejection.
+                                        </p>
+                                    </div>
                                 )}
                             />
                             <Route
@@ -488,7 +576,6 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                 render={() => (
                                     <PickIdentity
                                         chosenIdentity={identity}
-                                        setReady={setReady}
                                         setIdentity={setIdentity}
                                     />
                                 )}
@@ -499,18 +586,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                 <p className={styles.errorLabel}>{error}</p>
                                 <Button
                                     disabled={!isReady || Boolean(error)}
-                                    onClick={() => {
-                                        setReady(false);
-                                        dispatch(
-                                            push({
-                                                pathname: handler.creationLocationHandler(
-                                                    location
-                                                ),
-                                                state:
-                                                    TransactionKindId.Update_credentials,
-                                            })
-                                        );
-                                    }}
+                                    onClick={onContinue}
                                 >
                                     Continue
                                 </Button>

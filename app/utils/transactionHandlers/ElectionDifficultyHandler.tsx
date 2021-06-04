@@ -39,14 +39,15 @@ export default class ElectionDifficultyHandler
     async createTransaction(
         blockSummary: BlockSummary,
         { electionDifficulty }: ElectionDifficultyField,
-        effectiveTime: bigint
+        effectiveTime: bigint,
+        expiryTime: bigint
     ): Promise<Partial<MultiSignatureTransaction> | undefined> {
         if (!blockSummary) {
             return undefined;
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.foundationAccount
+            blockSummary.updates.updateQueues.electionDifficulty
                 .nextSequenceNumber;
         const {
             threshold,
@@ -66,7 +67,8 @@ export default class ElectionDifficultyHandler
             UpdateType.UpdateElectionDifficulty,
             sequenceNumber,
             threshold,
-            effectiveTime
+            effectiveTime,
+            expiryTime
         );
     }
 

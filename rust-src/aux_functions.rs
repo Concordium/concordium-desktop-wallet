@@ -1,3 +1,4 @@
+use crate::external_functions::BakerKeyVariant;
 use crate::{
     helpers::*,
     types::*,
@@ -328,7 +329,7 @@ pub fn decrypt_amounts_aux(
     let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
 
     let amounts: Vec<Amount> = encrypted_amounts.iter().map(|encrypted_amount| {
-        encrypted_transfers::decrypt_amount::<id::constants::ArCurve>(
+        encrypted_transfers::decrypt_amount::<ExampleCurve>(
             &table,
             &secret_key,
             &encrypted_amount,
@@ -409,6 +410,81 @@ pub fn create_sec_to_pub_aux(
     Ok(response.to_string())
 }
 
+pub fn create_encrypted_transfer_aux(
+    input: &str,
+) -> Fallible<String> {
+    let v: SerdeValue = from_str(input)?;
+
+    let prf_key_string: String = try_get(&v, "prfKey")?;
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
+
+    let account_number: u8 = try_get(&v, "accountNumber")?;
+
+    let scalar: Fr = prf_key.prf_exponent(account_number)?;
+
+    let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
+
+    let secret_key = elgamal::SecretKey {
+        generator: *global_context.elgamal_generator(),
+        scalar,
+    };
+
+    let receiver_pk = try_get(&v, "receiverPublicKey")?;
+
+    let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
+    let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
+    let agg_index: u64 = try_get(&v, "aggIndex")?;
+    let to_transfer: Amount = try_get(&v, "amount")?;
+
+    let input_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));
+    let m = 1 << 16;
+    let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
+
+    let decrypted_amount =
+        encrypted_transfers::decrypt_amount::<ExampleCurve>(
+            &table,
+            &secret_key,
+            &input_amount,
+        );
+
+    let agg_decrypted_amount = AggregatedDecryptedAmount {
+        agg_encrypted_amount: input_amount,
+        agg_amount: decrypted_amount,
+        agg_index
+    };
+
+    let mut csprng = thread_rng();
+
+    let payload =encrypted_transfers::make_transfer_data(
+        &global_context,
+        &receiver_pk,
+        &secret_key,
+        &agg_decrypted_amount,
+        to_transfer,
+        &mut csprng,
+    );
+
+    let payload = match payload {
+        Some(payload) => payload,
+        None => bail!("Could not produce payload."),
+    };
+
+    let decrypted_remaining =
+        encrypted_transfers::decrypt_amount::<ExampleCurve>(
+            &table,
+            &secret_key,
+            &payload.remaining_amount,
+        );
+
+    let response = json!({
+        "payload": payload,
+        "remaining": payload.remaining_amount,
+        "decryptedRemaining": decrypted_remaining,
+        });
+
+        Ok(response.to_string())
+}
+
 #[derive(SerdeSerialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BakerKeys {
@@ -432,15 +508,18 @@ pub struct BakerKeys {
     proof_aggregation: aggregate_sig::Proof<Bls12>
 }
 
-pub fn generate_baker_keys(sender: &AccountAddress) -> BakerKeys {
+pub fn generate_baker_keys(sender: &AccountAddress, key_variant: BakerKeyVariant) -> BakerKeys {
     let mut csprng = thread_rng();
     let election = ed25519::Keypair::generate(&mut csprng);
     let signature = ed25519::Keypair::generate(&mut csprng);
     let aggregation_secret = aggregate_sig::SecretKey::<Bls12>::generate(&mut csprng);
     let aggregation_public = aggregate_sig::PublicKey::<Bls12>::from_secret(aggregation_secret);
 
+    let mut challenge = match key_variant {
+        BakerKeyVariant::ADD => b"addBaker".to_vec(),
+        BakerKeyVariant::UPDATE => b"updateBakerKeys".to_vec()
+    };
 
-    let mut challenge = b"addBaker".to_vec();
     sender.serial(&mut challenge);
     election.public.serial(&mut challenge);
     signature.public.serial(&mut challenge);

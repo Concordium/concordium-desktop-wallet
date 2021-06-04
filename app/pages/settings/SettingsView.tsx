@@ -1,8 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router';
-import { settingsSelector } from '../../features/SettingsSlice';
-import settingKeys from '../../constants/settingKeys.json';
+import { Redirect, useParams } from 'react-router';
+import { settingsSelector } from '~/features/SettingsSlice';
+import settingKeys from '~/constants/settingKeys.json';
+import routes from '~/constants/routes.json';
 import { Setting, SettingTypeEnum } from '~/utils/types';
 import BooleanSetting from './BooleanSettingElement';
 import ConnectionSettingElement from './ConnectionSettingElement';
@@ -27,9 +28,12 @@ export default function SettingsView() {
     const { type } = useParams<{ type: string }>();
 
     const settings = useSelector(settingsSelector);
-    const subSettings = settings.find((subSetting) => subSetting.type === type);
+    const subSettings = settings?.find(
+        (subSetting) => subSetting.type === type
+    );
+
     if (!subSettings) {
-        throw new Error(`An invalid type of setting was selected: ${type}`);
+        return <Redirect to={routes.SETTINGS} />;
     }
 
     return (

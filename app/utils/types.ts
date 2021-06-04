@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
+import { RegisterOptions } from 'react-hook-form';
 import { RejectReason } from './node/RejectReasonHelper';
 
 export type Dispatch = GenericDispatch<AnyAction>;
@@ -9,6 +10,7 @@ export type Hex = string;
 type Proofs = Hex;
 type Word64 = bigint;
 type Word32 = number;
+type Word16 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 export type Amount = bigint;
@@ -184,6 +186,15 @@ export interface SimpleTransferPayload {
     toAddress: string;
 }
 
+export interface EncryptedTransferPayload {
+    plainTransferAmount: string;
+    toAddress: string;
+    remainingEncryptedAmount?: EncryptedAmount;
+    transferAmount?: EncryptedAmount;
+    index?: string;
+    proof?: string;
+}
+
 export interface TransferToEncryptedPayload {
     amount: string;
 }
@@ -217,16 +228,35 @@ export interface UpdateAccountCredentialsPayload {
     threshold: number;
 }
 
-export interface AddBakerPayload {
+export type BakerVerifyKeys = {
     electionVerifyKey: Hex;
     signatureVerifyKey: Hex;
     aggregationVerifyKey: Hex;
+};
+
+export type BakerKeyProofs = {
     proofElection: Hex;
     proofSignature: Hex;
     proofAggregation: Hex;
-    bakingStake: Amount;
+};
+
+export type AddBakerPayload = BakerVerifyKeys &
+    BakerKeyProofs & {
+        bakingStake: Amount;
+        restakeEarnings: boolean;
+    };
+
+export type UpdateBakerKeysPayload = BakerVerifyKeys & BakerKeyProofs;
+
+export type RemoveBakerPayload = {};
+
+export type UpdateBakerStakePayload = {
+    stake: Amount;
+};
+
+export type UpdateBakerRestakeEarningsPayload = {
     restakeEarnings: boolean;
-}
+};
 
 export type TransactionPayload =
     | UpdateAccountCredentialsPayload
@@ -234,7 +264,12 @@ export type TransactionPayload =
     | TransferToEncryptedPayload
     | ScheduledTransferPayload
     | SimpleTransferPayload
-    | AddBakerPayload;
+    | EncryptedTransferPayload
+    | AddBakerPayload
+    | UpdateBakerKeysPayload
+    | RemoveBakerPayload
+    | UpdateBakerStakePayload
+    | UpdateBakerRestakeEarningsPayload;
 
 // Structure of an accountTransaction, which is expected
 // the blockchain's nodes
@@ -245,6 +280,7 @@ export interface AccountTransaction<
     nonce: string;
     energyAmount: string;
     estimatedFee?: Fraction;
+    cost?: string;
     expiry: bigint;
     transactionKind: TransactionKindId;
     payload: PayloadType;
@@ -253,10 +289,15 @@ export interface AccountTransaction<
 export type ScheduledTransfer = AccountTransaction<ScheduledTransferPayload>;
 
 export type SimpleTransfer = AccountTransaction<SimpleTransferPayload>;
+export type EncryptedTransfer = AccountTransaction<EncryptedTransferPayload>;
 export type TransferToEncrypted = AccountTransaction<TransferToEncryptedPayload>;
 export type UpdateAccountCredentials = AccountTransaction<UpdateAccountCredentialsPayload>;
 export type TransferToPublic = AccountTransaction<TransferToPublicPayload>;
 export type AddBaker = AccountTransaction<AddBakerPayload>;
+export type UpdateBakerKeys = AccountTransaction<UpdateBakerKeysPayload>;
+export type RemoveBaker = AccountTransaction<RemoveBakerPayload>;
+export type UpdateBakerStake = AccountTransaction<UpdateBakerStakePayload>;
+export type UpdateBakerRestakeEarnings = AccountTransaction<UpdateBakerRestakeEarningsPayload>;
 
 // Types of block items, and their identifier numbers
 export enum BlockItemKind {
@@ -451,12 +492,14 @@ type AccountReleaseSchedule = any; // TODO
 interface AccountBakerDetails {
     stakedAmount: string;
     bakerId: string;
+    restakeEarnings: boolean;
 }
 
 // Reflects the structure given by the node,
 // in a getAccountInforequest
 export interface AccountInfo {
     accountAmount: string;
+    accountEncryptionKey: string;
     accountThreshold: number;
     accountReleaseSchedule: AccountReleaseSchedule;
     accountBaker?: AccountBakerDetails;
@@ -614,7 +657,8 @@ export type UpdateInstructionPayload =
     | GasRewards
     | BakerStakeThreshold
     | ElectionDifficulty
-    | HigherLevelKeyUpdate;
+    | HigherLevelKeyUpdate
+    | AuthorizationKeysUpdate;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -715,6 +759,12 @@ export function instanceOfTransferToPublic(
     return object.transactionKind === TransactionKindId.Transfer_to_public;
 }
 
+export function instanceOfEncryptedTransfer(
+    object: AccountTransaction<TransactionPayload>
+): object is EncryptedTransfer {
+    return object.transactionKind === TransactionKindId.Encrypted_transfer;
+}
+
 export function instanceOfScheduledTransfer(
     object: AccountTransaction<TransactionPayload>
 ): object is ScheduledTransfer {
@@ -731,6 +781,33 @@ export function instanceOfAddBaker(
     object: AccountTransaction<TransactionPayload>
 ): object is AddBaker {
     return object.transactionKind === TransactionKindId.Add_baker;
+}
+
+export function instanceOfUpdateBakerKeys(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateBakerKeys {
+    return object.transactionKind === TransactionKindId.Update_baker_keys;
+}
+
+export function instanceOfRemoveBaker(
+    object: AccountTransaction<TransactionPayload>
+): object is AddBaker {
+    return object.transactionKind === TransactionKindId.Remove_baker;
+}
+
+export function instanceOfUpdateBakerStake(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateBakerStake {
+    return object.transactionKind === TransactionKindId.Update_baker_stake;
+}
+
+export function instanceOfUpdateBakerRestakeEarnings(
+    object: AccountTransaction<TransactionPayload>
+): object is UpdateBakerRestakeEarnings {
+    return (
+        object.transactionKind ===
+        TransactionKindId.Update_baker_restake_earnings
+    );
 }
 
 export function isExchangeRate(
@@ -798,13 +875,13 @@ export function isUpdateLevel1KeysWithRootKeys(
 
 export function isUpdateLevel2KeysWithRootKeys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): transaction is UpdateInstruction<AuthorizationKeysUpdate> {
     return UpdateType.UpdateLevel2KeysUsingRootKeys === transaction.type;
 }
 
 export function isUpdateUsingRootKeys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): boolean {
     return (
         isUpdateRootKeys(transaction) ||
         isUpdateLevel1KeysWithRootKeys(transaction) ||
@@ -820,13 +897,13 @@ export function isUpdateLevel1KeysWithLevel1Keys(
 
 export function isUpdateLevel2KeysWithLevel1Keys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): transaction is UpdateInstruction<AuthorizationKeysUpdate> {
     return UpdateType.UpdateLevel2KeysUsingLevel1Keys === transaction.type;
 }
 
 export function isUpdateUsingLevel1Keys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): boolean {
     return (
         isUpdateLevel1KeysWithLevel1Keys(transaction) ||
         isUpdateLevel2KeysWithLevel1Keys(transaction)
@@ -953,6 +1030,42 @@ export interface HigherLevelKeyUpdate {
     threshold: number;
 }
 
+export interface KeyIndexWithStatus {
+    index: Word16;
+    status: KeyUpdateEntryStatus;
+}
+
+export enum AccessStructureEnum {
+    emergency,
+    protocol,
+    electionDifficulty,
+    euroPerEnergy,
+    microGtuPerEuro,
+    foundationAccount,
+    mintDistribution,
+    transactionFeeDistribution,
+    gasRewards,
+    bakerStakeThreshold,
+    addAnonymityRevoker,
+    addIdentityProvider,
+}
+
+export interface AccessStructure {
+    publicKeyIndicies: KeyIndexWithStatus[];
+    threshold: Word16;
+    type: AccessStructureEnum;
+}
+
+export enum AuthorizationKeysUpdateType {
+    Level1 = 1,
+    Root = 2,
+}
+export interface AuthorizationKeysUpdate {
+    keyUpdateType: AuthorizationKeysUpdateType;
+    keys: VerifyKey[];
+    accessStructures: AccessStructure[];
+}
+
 export interface TransactionDetails {
     events: string[];
     rawRejectReason: RejectReasonWithContents;
@@ -996,25 +1109,6 @@ export interface WalletEntry {
     id: number;
     identifier: string;
     type: WalletType;
-}
-
-/**
- * The basic color types supported by Semantic UI components color property.
- */
-export enum ColorType {
-    Blue = 'blue',
-    Olive = 'olive',
-    Green = 'green',
-    Red = 'red',
-    Grey = 'grey',
-    Orange = 'orange',
-    Yellow = 'yellow',
-    Teal = 'teal',
-    Violet = 'violet',
-    Purple = 'purple',
-    Pink = 'pink',
-    Brown = 'brown',
-    Black = 'black',
 }
 
 // Makes all properties of type T non-optional.
@@ -1181,4 +1275,18 @@ export interface SignedIdRequest {
 export interface CredentialExportFormat {
     credential: CredentialDeploymentInformation;
     address: string;
+}
+
+export type ValidationRules = Omit<
+    RegisterOptions,
+    'valueAsNumber' | 'valueAsDate' | 'setValueAs'
+>;
+
+/**
+ * Object that contains the keys, which are needed to create a new credential.
+ */
+export interface CreationKeys {
+    prfKey: string;
+    idCredSec: string;
+    publicKey: string;
 }

@@ -28,7 +28,6 @@ EnsureTwoDigits.args = {
     allowFractions: true,
     ensureDigits: 2,
     fallbackValue: 0,
-    step: 0.01,
 };
 
 const LabelTemplate: Story<InlineNumberProps> = (args) => {
@@ -49,7 +48,6 @@ export const Labelled = LabelTemplate.bind({});
 Labelled.args = {
     allowFractions: true,
     fallbackValue: 0,
-    step: 0.01,
 };
 
 export const Disabled = LabelTemplate.bind({});
@@ -57,7 +55,6 @@ Disabled.args = {
     allowFractions: true,
     ensureDigits: 2,
     fallbackValue: 0,
-    step: 0.01,
     disabled: true,
 };
 
@@ -66,7 +63,6 @@ ReadOnly.args = {
     allowFractions: true,
     ensureDigits: 2,
     fallbackValue: 0,
-    step: 0.01,
     readOnly: true,
 };
 
@@ -75,7 +71,6 @@ Invalid.args = {
     allowFractions: true,
     ensureDigits: 2,
     fallbackValue: 0,
-    step: 0.01,
     isInvalid: true,
     value: '-100',
 };

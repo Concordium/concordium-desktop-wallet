@@ -13,6 +13,11 @@ import {
     UpdateInstructionPayload,
     UpdateType,
     Transaction,
+    instanceOfAddBaker,
+    instanceOfUpdateBakerKeys,
+    instanceOfRemoveBaker,
+    instanceOfUpdateBakerStake,
+    instanceOfUpdateBakerRestakeEarnings,
 } from '~/utils/types';
 import BakerStakeThresholdHandler from './BakerStakeThresholdHandler';
 import ElectionDifficultyHandler from './ElectionDifficultyHandler';
@@ -31,9 +36,12 @@ import UpdateInstructionHandlerTypeMiddleware from './UpdateInstructionHandlerMi
 import UpdateRootKeysHandler from './UpdateRootsKeysHandler';
 import UpdateLevel1KeysWithRootKeysHandler from './UpdateLevel1KeysWithRootKeysHandler';
 import UpdateLevel1KeysWithLevel1KeysHandler from './UpdateLevel1KeysWithLevel1KeysHandler';
-import AddBakerHandler from './AddBakerHandler';
 import TransferToEncryptedHandler from './TransferToEncryptedHandler';
 import TransferToPublicHandler from './TransferToPublicHandler';
+import UpdateLevel2KeysUsingRootKeysHandler from './UpdateLevel2KeysWithRootKeysHandler';
+import UpdateLevel2KeysUsingLevel1KeysHandler from './UpdateLevel2KeysWithLevel1KeysHandler';
+import EncryptedTransferHandler from './EncryptedTransferHandler';
+import BakerHandler from './BakerHandler';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId
@@ -51,7 +59,35 @@ export function findAccountTransactionHandler(
         return new AccountHandlerTypeMiddleware(new SimpleTransferHandler());
     }
     if (transactionKind === TransactionKindId.Add_baker) {
-        return new AccountHandlerTypeMiddleware(new AddBakerHandler());
+        return new AccountHandlerTypeMiddleware(
+            new BakerHandler('Add Baker', instanceOfAddBaker)
+        );
+    }
+    if (transactionKind === TransactionKindId.Update_baker_keys) {
+        return new AccountHandlerTypeMiddleware(
+            new BakerHandler('Update Baker Keys', instanceOfUpdateBakerKeys)
+        );
+    }
+    if (transactionKind === TransactionKindId.Remove_baker) {
+        return new AccountHandlerTypeMiddleware(
+            new BakerHandler('Remove Baker', instanceOfRemoveBaker)
+        );
+    }
+    if (transactionKind === TransactionKindId.Update_baker_stake) {
+        return new AccountHandlerTypeMiddleware(
+            new BakerHandler('Update Baker Stake', instanceOfUpdateBakerStake)
+        );
+    }
+    if (transactionKind === TransactionKindId.Update_baker_restake_earnings) {
+        return new AccountHandlerTypeMiddleware(
+            new BakerHandler(
+                'Update Baker Restake Earnings',
+                instanceOfUpdateBakerRestakeEarnings
+            )
+        );
+    }
+    if (transactionKind === TransactionKindId.Encrypted_transfer) {
+        return new AccountHandlerTypeMiddleware(new EncryptedTransferHandler());
     }
     if (transactionKind === TransactionKindId.Transfer_with_schedule) {
         return new AccountHandlerTypeMiddleware(new ScheduledTransferHandler());
@@ -122,6 +158,14 @@ export function findUpdateInstructionHandler(
         case UpdateType.UpdateLevel1KeysUsingLevel1Keys:
             return new UpdateInstructionHandlerTypeMiddleware(
                 new UpdateLevel1KeysWithLevel1KeysHandler()
+            );
+        case UpdateType.UpdateLevel2KeysUsingRootKeys:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new UpdateLevel2KeysUsingRootKeysHandler()
+            );
+        case UpdateType.UpdateLevel2KeysUsingLevel1Keys:
+            return new UpdateInstructionHandlerTypeMiddleware(
+                new UpdateLevel2KeysUsingLevel1KeysHandler()
             );
         default:
             throw new Error(`Unsupported transaction type: ${type}`);

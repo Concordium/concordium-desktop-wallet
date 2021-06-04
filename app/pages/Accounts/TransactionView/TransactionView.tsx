@@ -90,7 +90,7 @@ function TransactionView({ transaction, returnFunction }: Props) {
             />
             <CopiableListElement
                 title="Block Hash"
-                value={transaction.blockHash}
+                value={transaction.blockHash || 'Awaiting finalization'}
             />
         </Card>
     );

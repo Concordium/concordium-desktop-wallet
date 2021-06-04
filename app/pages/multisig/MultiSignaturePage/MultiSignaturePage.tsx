@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router';
 import ButtonNavLink from '~/components/ButtonNavLink';
-import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 import routes from '~/constants/routes.json';
 
 import BrowseTransactionFile from '../menu/BrowseTransactionFile';

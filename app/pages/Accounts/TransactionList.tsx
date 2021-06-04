@@ -3,23 +3,24 @@ import { useSelector } from 'react-redux';
 import TransactionListElement from './TransactionListElement';
 import { TransferTransaction } from '~/utils/types';
 import {
-    transactionsSelector,
     moreTransactionsSelector,
     loadingTransactionsSelector,
 } from '~/features/TransactionSlice';
 import LoadingComponent from '~/cross-app-components/Loading';
 
 interface Props {
+    transactions: TransferTransaction[];
     onTransactionClick: (transaction: TransferTransaction) => void;
 }
 
 /**
- * Displays the currently chosen transactions
- * Takes a function chooseElement, to allows the parent
- * to get notified of clicked transactions.
+ * Displays a list of transactions, and executes the provided onTransactionClick
+ * function when a specific transaction is clicked.
  */
-function TransactionList({ onTransactionClick }: Props): JSX.Element | null {
-    const transactions = useSelector(transactionsSelector);
+function TransactionList({
+    onTransactionClick,
+    transactions,
+}: Props): JSX.Element | null {
     const more = useSelector(moreTransactionsSelector);
     const loading = useSelector(loadingTransactionsSelector);
     const [showLoading, setShowLoading] = useState(false);
