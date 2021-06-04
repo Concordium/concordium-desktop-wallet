@@ -28,6 +28,7 @@ import {
     UnsignedCredentialDeploymentInformation,
     HigherLevelKeyUpdate,
     UpdateAccountCredentials,
+    AuthorizationKeysUpdate,
 } from '../../utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -35,6 +36,7 @@ import signUpdateTransaction from './SignUpdateTransaction';
 import signUpdateProtocolTransaction from './SignProtocolUpdate';
 import signHigherLevelKeyUpdate from './SignHigherLevelKeyUpdate';
 import signUpdateCredentialTransaction from './SignUpdateCredentials';
+import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 
 /**
  * Concordium Ledger API.
@@ -262,6 +264,21 @@ export default class ConcordiumLedgerClient {
         INS: number
     ): Promise<Buffer> {
         return signHigherLevelKeyUpdate(
+            this.transport,
+            path,
+            transaction,
+            serializedPayload,
+            INS
+        );
+    }
+
+    signAuthorizationKeysUpdate(
+        transaction: UpdateInstruction<AuthorizationKeysUpdate>,
+        serializedPayload: Buffer,
+        path: number[],
+        INS: number
+    ): Promise<Buffer> {
+        return signAuthorizationKeysUpdate(
             this.transport,
             path,
             transaction,

@@ -10,11 +10,6 @@
     margin-bottom: 25px;
 }
 
-.icon {
-    width: 100px;
-    height: 100px;
-}
-
 .status {
     margin-top: 15px;
     height: 150px;
@@ -22,15 +17,4 @@
 
 .submit {
     margin-top: 14px;
-}
-
-.error {
-    font-size: $font-size-body2;
-    margin-top: 10px;
-    color: $color-danger;
-}
-
-.success {
-    font-size: $font-size-body2;
-    margin-top: 10px;
 }

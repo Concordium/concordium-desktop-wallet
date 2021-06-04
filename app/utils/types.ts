@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
+import { RegisterOptions } from 'react-hook-form';
 import { RejectReason } from './node/RejectReasonHelper';
 
 export type Dispatch = GenericDispatch<AnyAction>;
@@ -9,6 +10,7 @@ export type Hex = string;
 type Proofs = Hex;
 type Word64 = bigint;
 type Word32 = number;
+type Word16 = number;
 export type Word8 = number;
 type JSONString = string; // indicates that it is some object that has been stringified.
 export type Amount = bigint;
@@ -655,7 +657,8 @@ export type UpdateInstructionPayload =
     | GasRewards
     | BakerStakeThreshold
     | ElectionDifficulty
-    | HigherLevelKeyUpdate;
+    | HigherLevelKeyUpdate
+    | AuthorizationKeysUpdate;
 
 // An actual signature, which goes into an account transaction.
 export type Signature = Hex;
@@ -872,13 +875,13 @@ export function isUpdateLevel1KeysWithRootKeys(
 
 export function isUpdateLevel2KeysWithRootKeys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): transaction is UpdateInstruction<AuthorizationKeysUpdate> {
     return UpdateType.UpdateLevel2KeysUsingRootKeys === transaction.type;
 }
 
 export function isUpdateUsingRootKeys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): boolean {
     return (
         isUpdateRootKeys(transaction) ||
         isUpdateLevel1KeysWithRootKeys(transaction) ||
@@ -894,13 +897,13 @@ export function isUpdateLevel1KeysWithLevel1Keys(
 
 export function isUpdateLevel2KeysWithLevel1Keys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): transaction is UpdateInstruction<AuthorizationKeysUpdate> {
     return UpdateType.UpdateLevel2KeysUsingLevel1Keys === transaction.type;
 }
 
 export function isUpdateUsingLevel1Keys(
     transaction: UpdateInstruction<UpdateInstructionPayload>
-): transaction is UpdateInstruction<HigherLevelKeyUpdate> {
+): boolean {
     return (
         isUpdateLevel1KeysWithLevel1Keys(transaction) ||
         isUpdateLevel2KeysWithLevel1Keys(transaction)
@@ -1027,6 +1030,42 @@ export interface HigherLevelKeyUpdate {
     threshold: number;
 }
 
+export interface KeyIndexWithStatus {
+    index: Word16;
+    status: KeyUpdateEntryStatus;
+}
+
+export enum AccessStructureEnum {
+    emergency,
+    protocol,
+    electionDifficulty,
+    euroPerEnergy,
+    microGtuPerEuro,
+    foundationAccount,
+    mintDistribution,
+    transactionFeeDistribution,
+    gasRewards,
+    bakerStakeThreshold,
+    addAnonymityRevoker,
+    addIdentityProvider,
+}
+
+export interface AccessStructure {
+    publicKeyIndicies: KeyIndexWithStatus[];
+    threshold: Word16;
+    type: AccessStructureEnum;
+}
+
+export enum AuthorizationKeysUpdateType {
+    Level1 = 1,
+    Root = 2,
+}
+export interface AuthorizationKeysUpdate {
+    keyUpdateType: AuthorizationKeysUpdateType;
+    keys: VerifyKey[];
+    accessStructures: AccessStructure[];
+}
+
 export interface TransactionDetails {
     events: string[];
     rawRejectReason: RejectReasonWithContents;
@@ -1070,25 +1109,6 @@ export interface WalletEntry {
     id: number;
     identifier: string;
     type: WalletType;
-}
-
-/**
- * The basic color types supported by Semantic UI components color property.
- */
-export enum ColorType {
-    Blue = 'blue',
-    Olive = 'olive',
-    Green = 'green',
-    Red = 'red',
-    Grey = 'grey',
-    Orange = 'orange',
-    Yellow = 'yellow',
-    Teal = 'teal',
-    Violet = 'violet',
-    Purple = 'purple',
-    Pink = 'pink',
-    Brown = 'brown',
-    Black = 'black',
 }
 
 // Makes all properties of type T non-optional.
@@ -1255,4 +1275,18 @@ export interface SignedIdRequest {
 export interface CredentialExportFormat {
     credential: CredentialDeploymentInformation;
     address: string;
+}
+
+export type ValidationRules = Omit<
+    RegisterOptions,
+    'valueAsNumber' | 'valueAsDate' | 'setValueAs'
+>;
+
+/**
+ * Object that contains the keys, which are needed to create a new credential.
+ */
+export interface CreationKeys {
+    prfKey: string;
+    idCredSec: string;
+    publicKey: string;
 }

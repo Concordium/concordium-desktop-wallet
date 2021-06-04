@@ -1,9 +1,10 @@
 @import 'config/bundle';
 
-.text {
+.text,
+.formInput {
     font-size: $font-size-body2;
 }
 
 .formInput {
-    margin: 40px 0;
+    margin: 50px 0;
 }

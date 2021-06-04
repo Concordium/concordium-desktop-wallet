@@ -47,7 +47,7 @@ export default class ElectionDifficultyHandler
         }
 
         const sequenceNumber =
-            blockSummary.updates.updateQueues.foundationAccount
+            blockSummary.updates.updateQueues.electionDifficulty
                 .nextSequenceNumber;
         const {
             threshold,

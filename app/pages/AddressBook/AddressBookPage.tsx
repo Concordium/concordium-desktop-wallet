@@ -5,7 +5,7 @@ import PlusIcon from '@resources/svg/plus.svg';
 import UpsertAddress from '~/components/UpsertAddress';
 import PageLayout from '~/components/PageLayout';
 import routes from '~/constants/routes.json';
-import MasterDetailPageLayout from '~/components/MasterDetailPageLayout/MasterDetailPageLayout';
+import MasterDetailPageLayout from '~/components/MasterDetailPageLayout';
 
 import AddressBookList from './AddressBookList';
 import AddressBookSelected from './AddressBookSelected';

@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { encrypt } from '../../utils/encryption';
-import { validatePassword } from '../../utils/importHelpers';
 import { saveFile } from '../../utils/FileHelper';
 import { identitiesSelector } from '../../features/IdentitySlice';
 import { accountsSelector } from '../../features/AccountSlice';
 import { addressBookSelector } from '../../features/AddressBookSlice';
 import { credentialsSelector } from '../../features/CredentialSlice';
-import InputModal from '../../components/InputModal';
 import MessageModal from '../../components/MessageModal';
 import Button from '~/cross-app-components/Button';
 import styles from './ExportImport.module.scss';
 import { getAllWallets } from '~/database/WalletDao';
+import SetPasswordModal from '~/components/SetPasswordModal';
 
 /**
  * Component for exporting wallets, identities, credentials, accounts and
@@ -85,17 +84,12 @@ export default function Export() {
 
     return (
         <>
-            <InputModal
+            <SetPasswordModal
                 title="Enter a password"
-                text="Please enter a password for your export"
+                description="Please enter a password for your export"
                 buttonText="Continue"
-                validValue={(password) =>
-                    validatePassword(password) ? undefined : 'Invalid password'
-                }
-                buttonOnClick={exportData}
-                placeholder="Enter your password"
+                onSubmit={exportData}
                 onClose={() => setOpenPasswordModal(false)}
-                type="password"
                 open={openPasswordModal}
             />
             <MessageModal

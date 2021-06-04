@@ -7,7 +7,6 @@ import IdentityPage from '../pages/Identities/IdentityPage';
 import AddressBookPage from '../pages/AddressBook/AddressBookPage';
 import IssuancePage from '../pages/IdentityIssuance/IdentityIssuancePage';
 import AccountCreation from '../pages/AccountCreation/AccountCreationPage';
-import SettingsPage from '../pages/settings/SettingsPage';
 import MultiSignatureRouter from '../pages/multisig/MultiSignatureRouter';
 import ExportImport from '../pages/exportImport/ExportImportPage';
 import PerformImport from '../pages/exportImport/PerformImport';
@@ -16,6 +15,7 @@ import GenerateCredential from '../pages/GenerateCredential/GenerateCredentialPa
 import AccountReport from '~/pages/Accounts/AccountReport';
 import genesisAccount from '../pages/GenesisAccount/GenesisAccount';
 import DefaultPage from '~/pages/Home/DefaultPage';
+import SettingsRouter from '~/pages/settings/SettingsRouter';
 
 export default function Routes(): JSX.Element {
     return (
@@ -41,7 +41,7 @@ export default function Routes(): JSX.Element {
                 path={routes.MULTISIGTRANSACTIONS}
                 component={MultiSignatureRouter}
             />
-            <Route path={routes.SETTINGS} component={SettingsPage} />
+            <Route path={routes.SETTINGS} component={SettingsRouter} />
             <Route path={routes.HOME} component={HomePage} />
             <Route path="/" component={DefaultPage} />
         </Switch>

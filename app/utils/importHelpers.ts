@@ -13,6 +13,7 @@ import {
     EncryptedData,
     ExportData,
     Identity,
+    ValidationRules,
     WalletEntry,
 } from './types';
 
@@ -596,6 +597,10 @@ export function validateImportStructure(data: ExportData): Validation {
     return { isValid: true };
 }
 
-export function validatePassword(password: string) {
-    return password.length >= 6;
-}
+export const passwordValidationRules: ValidationRules = {
+    required: 'Password is required',
+    minLength: {
+        value: 6,
+        message: 'Password has to be at least 6 characters',
+    },
+};

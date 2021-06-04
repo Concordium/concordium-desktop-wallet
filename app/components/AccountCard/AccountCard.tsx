@@ -54,7 +54,7 @@ export function AccountCardView({
     amountAtDisposal = 0n,
     stakedAmount = 0n,
 }: ViewProps): JSX.Element {
-    const hidden = hasEncryptedFunds && (
+    const hidden = hasEncryptedFunds && !multiSig && (
         <>
             {' '}
             + <ShieldImage height="15" />

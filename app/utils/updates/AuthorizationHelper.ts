@@ -109,42 +109,6 @@ function findAuthorizationKey(
 }
 
 /**
- * Attempts to find the authorized key for the connected hardware wallet. If the public-key
- * is not authorization on chain, then undefined will be returned.
- *
- * The type of authorization key (root, level 1 or level 2) is derived directly from
- * the update type, as the type of key used to sign a given update is determined by its type.
- */
-export async function findKey(
-    ledger: ConcordiumLedgerClient,
-    keys: Keys,
-    transaction: UpdateInstruction<UpdateInstructionPayload>,
-    transactionHandler: UpdateInstructionHandler<
-        UpdateInstruction<UpdateInstructionPayload>,
-        ConcordiumLedgerClient
-    >
-): Promise<AuthorizationKey | undefined> {
-    if (isUpdateUsingRootKeys(transaction)) {
-        const publicKey = (
-            await ledger.getPublicKeySilent(getGovernanceRootPath())
-        ).toString('hex');
-        return findHigherLevelKey(publicKey, keys.rootKeys);
-    }
-
-    if (isUpdateUsingLevel1Keys(transaction)) {
-        const publicKey = (
-            await ledger.getPublicKeySilent(getGovernanceLevel1Path())
-        ).toString('hex');
-        return findHigherLevelKey(publicKey, keys.level1Keys);
-    }
-
-    const publicKey = (
-        await ledger.getPublicKeySilent(getGovernanceLevel2Path())
-    ).toString('hex');
-    return findAuthorizationKey(publicKey, transactionHandler, keys.level2Keys);
-}
-
-/**
  * Attempts to find the key index of the given public key in the authorization.
  * If the public-key is not in the authorization on chain, then undefined will be returned.
  */
