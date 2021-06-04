@@ -17,7 +17,7 @@ import {
     EncryptedTransfer,
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
-import { collapseFraction } from './basicHelpers';
+import { collapseFraction, abs } from './basicHelpers';
 
 /*
  * Converts the given transaction into the structure, which is used in the database.
@@ -60,7 +60,8 @@ export function convertIncomingTransaction(
         subtotal = subtotal || '0';
     } else if (!subtotal) {
         subtotal = (
-            BigInt(transaction.total) - BigInt(transaction.cost || '0')
+            abs(BigInt(transaction.total)) -
+            abs(BigInt(transaction.cost || '0'))
         ).toString();
     }
     if (BigInt(subtotal) < 0n) {
