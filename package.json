@@ -18,6 +18,7 @@
     "lint-fix": "yarn --silent lint --fix; exit 0",
     "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
     "lint-styles-fix": "yarn --silent lint-styles --fix; exit 0",
+    "make-disclaimer": "yarn --prod true licenses generate-disclaimer > scripts/disclaimer.txt && node scripts/disclaimer.js && rimraf ./scripts/disclaimer.txt",
     "name": "echo $npm_package_productName-$TARGET_NET",
     "package": "yarn build && node ./scripts/build.js",
     "package-mac-no-notarize": "export NOTARIZE=skip && yarn build && node ./scripts/build.js",
