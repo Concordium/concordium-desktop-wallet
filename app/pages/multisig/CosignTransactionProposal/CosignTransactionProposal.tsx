@@ -43,13 +43,13 @@ import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';
 interface CosignTransactionProposalForm {
     transactionDetailsMatch: boolean;
     identiconMatch: boolean;
-    hashMatch: boolean;
+    signDigestMatch: boolean;
 }
 
 const fieldNames: EqualRecord<CosignTransactionProposalForm> = {
     transactionDetailsMatch: 'transactionDetailsMatch',
     identiconMatch: 'identiconMatch',
-    hashMatch: 'hashMatch',
+    signDigestMatch: 'signDigestMatch',
 };
 
 interface CosignTransactionProposalProps {
@@ -242,15 +242,17 @@ function CosignTransactionProposal({
                                                     one received exactly
                                                 </Form.Checkbox>
                                                 <Form.Checkbox
-                                                    name={fieldNames.hashMatch}
+                                                    name={
+                                                        fieldNames.signDigestMatch
+                                                    }
                                                     rules={{
                                                         required:
-                                                            'Make sure hashes match',
+                                                            'Make sure the digest to sign matches',
                                                     }}
                                                     disabled={!!signature}
                                                 >
-                                                    The hash matches the one
-                                                    received exactly
+                                                    The digest to sign matches
+                                                    the one received exactly
                                                 </Form.Checkbox>
                                             </div>
                                             {signature ? (
