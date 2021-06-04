@@ -9,7 +9,8 @@ import {
     Identity,
     Account,
     TransactionKindId,
-    RemoveBaker,
+    UpdateBakerStake,
+    Fraction,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
@@ -33,6 +34,10 @@ import UpdateBakerStakeProposalDetails from './proposal-details/UpdateBakerStake
 import { microGtuToGtu, toMicroUnits } from '~/utils/gtu';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
+import { getNextAccountNonce } from '~/node/nodeRequests';
+import errorMessages from '~/constants/errorMessages.json';
+import LoadingComponent from './LoadingComponent';
 
 enum SubRoutes {
     accounts,
@@ -51,18 +56,22 @@ function toMicroUnitsSafe(str: string | undefined) {
         return undefined;
     }
 }
+interface PageProps {
+    exchangeRate: Fraction;
+}
 
-export default function UpdateBakerStakePage() {
+function UpdateBakerStakePage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account>();
     const [stake, setStake] = useState<string>();
     const [error, setError] = useState<string>();
-    const [transaction, setTransaction] = useState<RemoveBaker>();
+    const [transaction, setTransaction] = useState<UpdateBakerStake>();
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Update_baker_stake,
+        exchangeRate,
         account?.signatureThreshold
     );
     const [
@@ -71,7 +80,7 @@ export default function UpdateBakerStakePage() {
         expiryTimeError,
     ] = useTransactionExpiryState();
 
-    const onCreateTransaction = () => {
+    const onCreateTransaction = async () => {
         if (account === undefined) {
             setError('Account is needed to make transaction');
             return;
@@ -83,14 +92,16 @@ export default function UpdateBakerStakePage() {
         }
 
         const payload = { stake: toMicroUnits(stake) };
-        createUpdateBakerStakeTransaction(
-            account.address,
-            payload,
-            account?.signatureThreshold,
-            expiryTime
-        )
-            .then(setTransaction)
-            .catch((err) => setError(`Failed create transaction ${err}`));
+        const accountNonce = await getNextAccountNonce(account.address);
+        setTransaction(
+            createUpdateBakerStakeTransaction(
+                account.address,
+                payload,
+                accountNonce.nonce,
+                account?.signatureThreshold,
+                expiryTime
+            )
+        );
     };
 
     return (
@@ -239,12 +250,21 @@ export default function UpdateBakerStakePage() {
                                         expiryTime === undefined ||
                                         expiryTimeError !== undefined
                                     }
-                                    onClick={() => {
-                                        onCreateTransaction();
-                                        dispatch(
-                                            push(`${url}/${SubRoutes.sign}`)
-                                        );
-                                    }}
+                                    onClick={() =>
+                                        onCreateTransaction()
+                                            .then(() =>
+                                                dispatch(
+                                                    push(
+                                                        `${url}/${SubRoutes.sign}`
+                                                    )
+                                                )
+                                            )
+                                            .catch(() =>
+                                                setError(
+                                                    errorMessages.unableToReachNode
+                                                )
+                                            )
+                                    }
                                 >
                                     Continue
                                 </Button>
@@ -312,3 +332,5 @@ function PickNewStake({ account, stake, setStake }: PickNewStakeProps) {
         </>
     );
 }
+
+export default ensureExchangeRate(UpdateBakerStakePage, LoadingComponent);

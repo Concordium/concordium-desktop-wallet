@@ -9,7 +9,8 @@ import {
     Identity,
     Account,
     TransactionKindId,
-    RemoveBaker,
+    UpdateBakerRestakeEarnings,
+    Fraction,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
@@ -26,6 +27,10 @@ import SignTransaction from './SignTransaction';
 import ButtonGroup from '~/components/ButtonGroup';
 import UpdateBakerRestakeEarningsProposalDetails from './proposal-details/UpdateBakerRestakeEarnings';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
+import { getNextAccountNonce } from '~/node/nodeRequests';
+import errorMessages from '~/constants/errorMessages.json';
+import LoadingComponent from './LoadingComponent';
 
 enum SubRoutes {
     accounts,
@@ -33,18 +38,25 @@ enum SubRoutes {
     sign,
     expiry,
 }
+interface PageProps {
+    exchangeRate: Fraction;
+}
 
-export default function UpdateBakerRestakeEarningsPage() {
+function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account>();
     const [restakeEarnings, setRestakeEarnings] = useState<boolean>();
     const [error, setError] = useState<string>();
-    const [transaction, setTransaction] = useState<RemoveBaker>();
+    const [
+        transaction,
+        setTransaction,
+    ] = useState<UpdateBakerRestakeEarnings>();
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Update_baker_stake,
+        exchangeRate,
         account?.signatureThreshold
     );
 
@@ -54,7 +66,7 @@ export default function UpdateBakerRestakeEarningsPage() {
         expiryTimeError,
     ] = useTransactionExpiryState();
 
-    const onCreateTransaction = () => {
+    const onCreateTransaction = async () => {
         if (account === undefined) {
             setError('Account is needed to make transaction');
             return;
@@ -68,14 +80,16 @@ export default function UpdateBakerRestakeEarningsPage() {
         }
 
         const payload = { restakeEarnings };
-        createUpdateBakerRestakeEarningsTransaction(
-            account.address,
-            payload,
-            account?.signatureThreshold,
-            expiryTime
-        )
-            .then(setTransaction)
-            .catch((err) => setError(`Failed create transaction ${err}`));
+        const accountNonce = await getNextAccountNonce(account.address);
+        setTransaction(
+            createUpdateBakerRestakeEarningsTransaction(
+                account.address,
+                payload,
+                accountNonce.nonce,
+                account?.signatureThreshold,
+                expiryTime
+            )
+        );
     };
 
     return (
@@ -224,12 +238,21 @@ export default function UpdateBakerRestakeEarningsPage() {
                                         expiryTime === undefined ||
                                         expiryTimeError !== undefined
                                     }
-                                    onClick={() => {
-                                        onCreateTransaction();
-                                        dispatch(
-                                            push(`${url}/${SubRoutes.sign}`)
-                                        );
-                                    }}
+                                    onClick={() =>
+                                        onCreateTransaction()
+                                            .then(() =>
+                                                dispatch(
+                                                    push(
+                                                        `${url}/${SubRoutes.sign}`
+                                                    )
+                                                )
+                                            )
+                                            .catch(() =>
+                                                setError(
+                                                    errorMessages.unableToReachNode
+                                                )
+                                            )
+                                    }
                                 >
                                     Continue
                                 </Button>
@@ -302,3 +325,8 @@ function RestakeEarnings({
         </>
     );
 }
+
+export default ensureExchangeRate(
+    UpdateBakerRestakeEarningsPage,
+    LoadingComponent
+);
