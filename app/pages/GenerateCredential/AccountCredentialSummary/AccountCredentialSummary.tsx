@@ -1,4 +1,4 @@
-import React, { useContext, useCallback, useState, useEffect } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import { useFormContext, Validate } from 'react-hook-form';
@@ -18,43 +18,39 @@ interface Props extends ClassName {
     Button?: () => JSX.Element | null;
 }
 
+const errorMessage =
+    'We already have a credential on this account with the current device';
+
 export default function AccountCredentialSummary({
     Button = () => null,
     className,
 }: Props) {
     const location = useLocation().pathname;
-    const { watch, trigger } = useFormContext();
+    const { watch } = useFormContext();
     const {
         identity: savedIdentity,
         address,
         accountName,
         credential: savedCredential,
     } = useContext(savedStateContext);
-    const {
-        credential = savedCredential,
-        identity = savedIdentity,
-        address: currentAddress,
-    } = watch([fieldNames.identity, fieldNames.credential, fieldNames.address]);
-
-    const [duplicate, setDuplicate] = useState(false);
-
-    useEffect(() => {
-        if (currentAddress && identity) {
-            hasExistingCredential(currentAddress, identity.walletId)
-                .then((dup) => {
-                    setDuplicate(dup);
-                    return trigger(fieldNames.address);
-                })
-                .catch(() => {});
-        }
-    }, [currentAddress, identity, trigger]);
+    const { credential = savedCredential, identity = savedIdentity } = watch([
+        fieldNames.identity,
+        fieldNames.credential,
+    ]);
 
     const validateNoDuplicate: Validate = useCallback(
-        () =>
-            duplicate
-                ? 'We already have a credential on this account with the current device'
-                : undefined,
-        [duplicate]
+        async (currentAddress: string) => {
+            try {
+                const existing = await hasExistingCredential(
+                    currentAddress,
+                    identity.walletId
+                );
+                return !existing || errorMessage;
+            } catch {
+                return errorMessage;
+            }
+        },
+        [identity]
     );
 
     return (
