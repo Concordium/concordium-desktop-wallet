@@ -58,16 +58,20 @@ export function useAccountInfo(address: string) {
 /** Hook for estimating transaction cost */
 export function useTransactionCostEstimate(
     kind: TransactionKindId,
+    exchangeRate: Fraction,
     signatureAmount?: number,
     payloadSize?: number
 ) {
-    const [fee, setFee] = useState<Fraction>();
-    useEffect(() => {
-        getTransactionKindCost(kind, signatureAmount, payloadSize)
-            .then(setFee)
-            .catch(() => {});
-    }, [kind, payloadSize, signatureAmount]);
-    return fee;
+    return useMemo(
+        () =>
+            getTransactionKindCost(
+                kind,
+                exchangeRate,
+                signatureAmount,
+                payloadSize
+            ),
+        [kind, exchangeRate, payloadSize, signatureAmount]
+    );
 }
 
 /** Hook for fetching last finalized block summary */

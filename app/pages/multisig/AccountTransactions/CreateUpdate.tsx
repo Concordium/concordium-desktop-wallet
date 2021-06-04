@@ -2,53 +2,55 @@ import React, { useState, useEffect } from 'react';
 import { Account, AccountTransaction, AddedCredential } from '~/utils/types';
 import SignTransaction from './SignTransaction';
 import { createUpdateCredentialsTransaction } from '~/utils/transactionHelpers';
+import { ensureNonce } from '~/components/Transfers/withNonce';
+import LoadingComponent from './LoadingComponent';
 
 interface Props {
-    account: Account | undefined;
+    account: Account;
     addedCredentials: AddedCredential[];
     removedCredIds: string[];
     currentCredentialAmount: number;
     newThreshold: number;
+    nonce: string;
     expiry: Date;
 }
 
 /**
  * Creates the accountCredentialUpdate, and prompts the user to sign it.
  */
-export default function CreateUpdate({
+function CreateUpdate({
     account,
     addedCredentials,
     removedCredIds,
     currentCredentialAmount,
     newThreshold,
+    nonce,
     expiry,
 }: Props): JSX.Element | null {
     const [transaction, setTransaction] = useState<
         AccountTransaction | undefined
     >();
 
-    if (!account) {
-        throw new Error('Unexpected missing account');
-    }
-
     useEffect(() => {
-        createUpdateCredentialsTransaction(
-            account.address,
-            addedCredentials,
-            removedCredIds,
-            newThreshold,
-            currentCredentialAmount,
-            account.signatureThreshold,
-            expiry
-        )
-            .then(setTransaction)
-            .catch(() => {});
+        setTransaction(
+            createUpdateCredentialsTransaction(
+                account.address,
+                addedCredentials,
+                removedCredIds,
+                newThreshold,
+                currentCredentialAmount,
+                nonce,
+                account.signatureThreshold,
+                expiry
+            )
+        );
     }, [
         setTransaction,
         account,
         addedCredentials,
         currentCredentialAmount,
         removedCredIds,
+        nonce,
         newThreshold,
         expiry,
     ]);
@@ -60,3 +62,5 @@ export default function CreateUpdate({
 
     return <SignTransaction transaction={transaction} account={account} />;
 }
+
+export default ensureNonce(CreateUpdate, LoadingComponent);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from '../../utils/JSONHelper';
@@ -15,28 +15,28 @@ import { createSimpleTransferTransaction } from '../../utils/transactionHelpers'
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 
 import { getTransactionKindCost } from '~/utils/transactionCosts';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
+import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
 
 interface Props {
     account: Account;
+    exchangeRate: Fraction;
+    nonce: string;
 }
 
 /**
  * Controls the flow of creating a simple transfer.
  */
-export default function SimpleTransfer({ account }: Props) {
+function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
     const dispatch = useDispatch();
 
-    const [error, setError] = useState<string | undefined>();
-    const [estimatedFee, setEstimatedFee] = useState<Fraction | undefined>();
-
-    useEffect(() => {
-        getTransactionKindCost(TransactionKindId.Simple_transfer)
-            .then((transferCost) => setEstimatedFee(transferCost))
-            .catch((e) =>
-                setError(`Unable to get transaction cost due to: ${e}`)
-            );
-    }, [setEstimatedFee]);
+    const estimatedFee = useMemo(
+        () =>
+            getTransactionKindCost(
+                TransactionKindId.Simple_transfer,
+                exchangeRate
+            ),
+        [exchangeRate]
+    );
 
     const toConfirmTransfer = useCallback(
         async (amount: string, recipient: AddressBookEntry) => {
@@ -47,7 +47,8 @@ export default function SimpleTransfer({ account }: Props) {
             const transaction = await createSimpleTransferTransaction(
                 account.address,
                 toMicroUnits(amount),
-                recipient.address
+                recipient.address,
+                nonce
             );
             transaction.estimatedFee = estimatedFee;
 
@@ -82,20 +83,15 @@ export default function SimpleTransfer({ account }: Props) {
     );
 
     return (
-        <>
-            <SimpleErrorModal
-                show={Boolean(error)}
-                content={error}
-                onClick={() => dispatch(push(routes.ACCOUNTS))}
-            />
-            <ExternalTransfer
-                estimatedFee={estimatedFee}
-                toConfirmTransfer={toConfirmTransfer}
-                exitFunction={() => dispatch(push(routes.ACCOUNTS))}
-                amountHeader="Send GTU"
-                senderAddress={account.address}
-                transactionKind={TransactionKindId.Simple_transfer}
-            />
-        </>
+        <ExternalTransfer
+            estimatedFee={estimatedFee}
+            toConfirmTransfer={toConfirmTransfer}
+            exitFunction={() => dispatch(push(routes.ACCOUNTS))}
+            amountHeader="Send GTU"
+            senderAddress={account.address}
+            transactionKind={TransactionKindId.Simple_transfer}
+        />
     );
 }
+
+export default ensureExchangeRateAndNonce(SimpleTransfer);

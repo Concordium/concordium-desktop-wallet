@@ -13,6 +13,7 @@ import {
     HigherLevelKeyUpdate,
     AccountTransaction,
     Schedule,
+    AuthorizationKeysUpdate,
 } from './types';
 
 export interface TransactionInput {
@@ -27,10 +28,15 @@ export interface TransactionInput {
 export interface UpdateProps {
     blockSummary: BlockSummary;
     consensusStatus: ConsensusStatus;
-    handleKeySubmit?(
+    handleHigherLevelKeySubmit?(
         effectiveTime: Date,
         expiryTime: Date,
         higherLevelKeyUpdate: HigherLevelKeyUpdate
+    ): Promise<void>;
+    handleAuthorizationKeySubmit?(
+        effectiveTime: Date,
+        expiryTime: Date,
+        authorizationKeysUpdate: AuthorizationKeysUpdate
     ): Promise<void>;
 }
 
@@ -110,6 +116,7 @@ export interface CreateTransactionInput {
     amount: bigint;
     schedule: Schedule;
     signatureAmount: number;
+    nonce: string;
     expiryTime: Date;
 }
 
@@ -140,9 +147,7 @@ export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
      * Returns a React element, which contains the details of the transaction for print
      */
     print: PrintComponent<P>;
-    createTransaction: (
-        informationBlob: Partial<CreateTransactionInput>
-    ) => Promise<T>;
+    createTransaction: (informationBlob: Partial<CreateTransactionInput>) => T;
     creationLocationHandler: (currentLocation: string) => string;
     type: string;
     title: string;

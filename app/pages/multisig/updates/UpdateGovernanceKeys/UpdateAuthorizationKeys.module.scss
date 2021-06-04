@@ -1,0 +1,18 @@
+.listItem {
+    list-style-type: none;
+    padding-bottom: 14px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #dcdcdc;
+}
+
+.index {
+    flex: 0 0 85px;
+    margin-right: 10px;
+}
+
+.keyText {
+    line-height: 1em;
+    overflow: hidden;
+    flex: 0 1 auto;
+    margin: 0;
+}

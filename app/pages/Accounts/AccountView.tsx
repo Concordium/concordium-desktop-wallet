@@ -94,7 +94,7 @@ export default function AccountView() {
     return (
         <>
             <AccountBalanceView />
-            <AccountViewActions account={account} />
+            <AccountViewActions account={account} accountInfo={accountInfo} />
             <Switch>
                 <Route
                     path={routes.ACCOUNTS_MORE}

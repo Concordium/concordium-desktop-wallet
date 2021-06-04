@@ -10,6 +10,8 @@ import {
     Fraction,
 } from '~/utils/types';
 import SignTransaction from './SignTransaction';
+import { ensureNonce } from '~/components/Transfers/withNonce';
+import LoadingComponent from './LoadingComponent';
 
 interface Props {
     transactionKind: TransactionKindId;
@@ -18,16 +20,18 @@ interface Props {
     estimatedFee?: Fraction;
     amount: string;
     schedule?: Schedule;
+    nonce: string;
     expiryTime: Date;
 }
 
-export default function CreateTransaction({
+function CreateTransaction({
     transactionKind,
     account,
     recipient,
     amount,
     schedule,
     estimatedFee,
+    nonce,
     expiryTime,
 }: Props) {
     const [transaction, setTransaction] = useState<
@@ -36,17 +40,16 @@ export default function CreateTransaction({
 
     useEffect(() => {
         const handler = findAccountTransactionHandler(transactionKind);
-        handler
-            .createTransaction({
-                sender: account.address,
-                amount: toMicroUnits(amount),
-                recipient: recipient.address,
-                signatureAmount: account.signatureThreshold,
-                expiryTime,
-                schedule,
-            })
-            .then((t) => setTransaction({ ...t, estimatedFee }))
-            .catch(() => {}); // The failure happens if we are unable to get the nonce. // TODO This should be refactored to not happen here.
+        const t = handler.createTransaction({
+            sender: account.address,
+            amount: toMicroUnits(amount),
+            recipient: recipient.address,
+            signatureAmount: account.signatureThreshold,
+            expiryTime,
+            schedule,
+            nonce,
+        });
+        setTransaction({ ...t, estimatedFee });
     }, [
         setTransaction,
         account,
@@ -55,6 +58,7 @@ export default function CreateTransaction({
         schedule,
         transactionKind,
         estimatedFee,
+        nonce,
         expiryTime,
     ]);
 
@@ -64,3 +68,5 @@ export default function CreateTransaction({
 
     return <SignTransaction transaction={transaction} account={account} />;
 }
+
+export default ensureNonce(CreateTransaction, LoadingComponent);

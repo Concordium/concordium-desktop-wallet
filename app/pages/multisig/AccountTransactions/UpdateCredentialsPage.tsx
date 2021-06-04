@@ -28,6 +28,7 @@ import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
 
 import styles from './UpdateAccountCredentials.module.scss';
+import { hasEncryptedBalance } from '~/utils/accountHelpers';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -332,9 +333,15 @@ export default function UpdateCredentialPage(): JSX.Element {
         if (!newThreshold) {
             throw new Error('Unexpected missing threshold');
         }
+
+        if (!account) {
+            throw new Error('Unexpected missing account');
+        }
+
         if (!expiryTime) {
             throw new Error('Unexpected missing expiry');
         }
+
         const usedIndices: number[] = currentCredentials
             .filter(({ credential }) => {
                 const { credId } = credential;
@@ -465,6 +472,9 @@ export default function UpdateCredentialPage(): JSX.Element {
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         identity={identity}
+                                        filter={(_, info) =>
+                                            !!info && !hasEncryptedBalance(info)
+                                        }
                                     />
                                 )}
                             />

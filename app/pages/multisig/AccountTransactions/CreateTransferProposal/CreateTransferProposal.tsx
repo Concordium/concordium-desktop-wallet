@@ -30,8 +30,9 @@ import {
     scheduledTransferCost,
     getTransactionKindCost,
 } from '~/utils/transactionCosts';
-import SimpleErrorModal from '~/components/SimpleErrorModal';
 import styles from './CreateTransferProposal.module.scss';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
+import LoadingComponent from '../LoadingComponent';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
@@ -58,6 +59,7 @@ function subTitle(currentLocation: string) {
 }
 
 interface Props {
+    exchangeRate: Fraction;
     transactionKind:
         | TransactionKindId.Simple_transfer
         | TransactionKindId.Transfer_with_schedule;
@@ -66,8 +68,9 @@ interface Props {
  * This component controls the flow of creating a multisignature account transaction.
  * It contains the logic for displaying the current parameters.
  */
-export default function CreateTransferProposal({
+function CreateTransferProposal({
     transactionKind,
+    exchangeRate,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
     const location = useLocation().pathname.replace(
@@ -97,7 +100,6 @@ export default function CreateTransferProposal({
     const [isScheduleReady, setScheduleReady] = useState(true);
 
     const [estimatedFee, setFee] = useState<Fraction>();
-    const [error, setError] = useState<string>();
 
     const isReady = useMemo(() => {
         switch (location) {
@@ -133,22 +135,26 @@ export default function CreateTransferProposal({
         if (account) {
             if (transactionKind === TransactionKindId.Transfer_with_schedule) {
                 if (schedule) {
-                    scheduledTransferCost(account.signatureThreshold)
-                        .then((feeCalculator) =>
-                            setFee(feeCalculator(schedule.length))
-                        )
-                        .catch(() => setError('Unable to reach Node.'));
+                    setFee(
+                        scheduledTransferCost(
+                            exchangeRate,
+                            account.signatureThreshold
+                        )(schedule.length)
+                    );
+                } else {
+                    setFee(undefined);
                 }
             } else {
-                getTransactionKindCost(
-                    transactionKind,
-                    account.signatureThreshold
-                )
-                    .then((fee) => setFee(fee))
-                    .catch(() => setError('Unable to reach Node.'));
+                setFee(
+                    getTransactionKindCost(
+                        transactionKind,
+                        exchangeRate,
+                        account.signatureThreshold
+                    )
+                );
             }
         }
-    }, [account, transactionKind, setFee, schedule]);
+    }, [account, transactionKind, setFee, schedule, exchangeRate]);
 
     function renderSignTransaction() {
         if (!account || !recipient || !expiryTime || !amount) {
@@ -219,12 +225,6 @@ export default function CreateTransferProposal({
             stepTitle={`Transaction Proposal - ${handler.type}`}
             delegateScroll
         >
-            <SimpleErrorModal
-                show={Boolean(error)}
-                header="Unable to perform transfer"
-                content={error}
-                onClick={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
-            />
             <div className={styles.subtractContainerPadding}>
                 <Columns divider columnScroll columnClassName={styles.column}>
                     <Columns.Column
@@ -373,3 +373,5 @@ export default function CreateTransferProposal({
         </MultiSignatureLayout>
     );
 }
+
+export default ensureExchangeRate(CreateTransferProposal, LoadingComponent);
