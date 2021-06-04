@@ -17,6 +17,8 @@ import { getGenesis } from '~/database/GenesisDao';
 import setGenesisAndGlobal from '~/database/DatabaseHelpers';
 
 import styles from './ConnectionSettingElement.module.scss';
+import { displayTargetNet, getTargetNet, Net } from '~/utils/ConfigHelper';
+import genesisBlocks from '~/constants/genesis.json';
 
 interface Props {
     displayText: string;
@@ -24,6 +26,23 @@ interface Props {
 }
 
 const portRangeMax = 65535;
+
+/**
+ * Validates whether the provided genesis block hash matches the net that
+ * the application was built for. This is used to prevent users from connecting
+ * to nodes on a testnet or stagenet.
+ *
+ * We do not validate the genesis block hash for testnet and stagenet, as they
+ * can change often.
+ * @param genesisBlockHash the genesis block hash from the node
+ * @returns true if the genesis block hash is valid for the application
+ */
+function isMatchingGenesisBlock(genesisBlockHash: string, targetNet: Net) {
+    if (targetNet === Net.Mainnet) {
+        return genesisBlocks.mainnet === genesisBlockHash;
+    }
+    return true;
+}
 
 /**
  * Retrieves the consesus status and global cryptographic parameters from the
@@ -99,6 +118,21 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
                 }
             }
 
+            const targetNet = getTargetNet();
+            if (
+                !isMatchingGenesisBlock(consensusStatus.genesisBlock, targetNet)
+            ) {
+                setFailedMessage(
+                    `The node is not part of ${displayTargetNet(
+                        targetNet
+                    )}. Please connect to another node.`
+                );
+                setConnected(false);
+                setHasBeenTested(true);
+                setTestingConnection(false);
+                return;
+            }
+
             if (!global && !genesis) {
                 await setGenesisAndGlobal(
                     consensusStatus.genesisBlock,
@@ -108,6 +142,7 @@ export default function ConnectionSetting({ displayText, setting }: Props) {
             await updateValues(address, port);
             setConnected(true);
         } catch (e) {
+            setFailedMessage('Connection failed');
             setConnected(false);
         }
         setHasBeenTested(true);
