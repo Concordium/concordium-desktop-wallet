@@ -3,8 +3,6 @@ import clsx from 'clsx';
 import { LocationDescriptorObject } from 'history';
 import AdmZip from 'adm-zip';
 import PlusIcon from '@resources/svg/plus.svg';
-import { useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
 import { Account, TransactionKindString } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
 import AccountPageHeader from '../AccountPageHeader';
@@ -57,7 +55,6 @@ interface Props {
  * Allows the user to enable filters and to choose accounts.
  */
 export default function AccountReport({ location }: Props) {
-    const dispatch = useDispatch();
     const [modalOpen, setModalOpen] = useState(false);
     const [accounts, setAccounts] = useState<Account[]>(
         location?.state ? [location?.state] : []
@@ -157,12 +154,6 @@ export default function AccountReport({ location }: Props) {
             <PageLayout>
                 <PageLayout.Header>
                     <AccountPageHeader />
-                    <PageLayout.HeaderButton
-                        align="right"
-                        onClick={() => dispatch(push(routes.ACCOUNTCREATION))}
-                    >
-                        <PlusIcon height="20" />
-                    </PageLayout.HeaderButton>
                 </PageLayout.Header>
                 <PageLayout.Container
                     className="flexColumn"
