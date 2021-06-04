@@ -1,4 +1,3 @@
-import { parse } from 'json-bigint';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import {
     UpdateInstructionHandler,
@@ -42,6 +41,7 @@ import UpdateLevel2KeysUsingRootKeysHandler from './UpdateLevel2KeysWithRootKeys
 import UpdateLevel2KeysUsingLevel1KeysHandler from './UpdateLevel2KeysWithLevel1KeysHandler';
 import EncryptedTransferHandler from './EncryptedTransferHandler';
 import BakerHandler from './BakerHandler';
+import { parse } from '../JSONHelper';
 
 export function findAccountTransactionHandler(
     transactionKind: TransactionKindId

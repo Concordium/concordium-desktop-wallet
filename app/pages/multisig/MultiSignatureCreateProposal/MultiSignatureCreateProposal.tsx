@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
-import { stringify } from 'json-bigint';
 import { useParams } from 'react-router';
 
 import { FieldValues } from 'react-hook-form';
@@ -18,7 +17,7 @@ import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/Handle
 import Loading from '~/cross-app-components/Loading';
 import Modal from '~/cross-app-components/Modal';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
-import { parse } from '~/utils/JSONHelper';
+import { parse, stringify } from '~/utils/JSONHelper';
 import Form from '~/components/Form';
 import {
     getDefaultExpiry,
