@@ -152,9 +152,7 @@ export default function AccountReport({ location }: Props) {
                 onClick={() => setModalOpen(false)}
             />
             <PageLayout>
-                <PageLayout.Header>
-                    <AccountPageHeader />
-                </PageLayout.Header>
+                <AccountPageHeader />
                 <PageLayout.Container
                     className="flexColumn"
                     closeRoute={routes.ACCOUNTS}

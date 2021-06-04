@@ -28,9 +28,7 @@ export default function AccountsPage() {
 
     return (
         <MasterDetailPageLayout>
-            <Header>
-                <AccountPageHeader />
-            </Header>
+            <AccountPageHeader />
             <Master>
                 <AccountList />
             </Master>

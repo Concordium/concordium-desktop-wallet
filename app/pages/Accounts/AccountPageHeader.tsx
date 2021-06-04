@@ -65,7 +65,7 @@ export default function AccountPageHeader() {
     );
 
     return (
-        <>
+        <PageLayout.Header>
             <h1>Accounts</h1>
             <h1 className="mH40">|</h1>
             <h3 className="mR20">
@@ -93,6 +93,6 @@ export default function AccountPageHeader() {
             >
                 <PlusIcon height="20" />
             </PageLayout.HeaderButton>
-        </>
+        </PageLayout.Header>
     );
 }
