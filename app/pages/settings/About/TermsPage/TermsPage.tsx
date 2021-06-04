@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { ipcRenderer } from 'electron/renderer';
+import { ipcRenderer } from 'electron';
 import ipcCommands from '~/constants/ipcCommands.json';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
