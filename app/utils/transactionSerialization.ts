@@ -328,14 +328,9 @@ function serializeSignature(signatures: TransactionAccountSignature) {
     return serializeMap(signatures, putInt8, putInt8, putCredentialSignatures);
 }
 
-type SignFunction = (
-    transaction: AccountTransaction,
-    hash: Buffer
-) => TransactionAccountSignature;
-
 function serializeUnversionedTransaction(
     transaction: AccountTransaction,
-    signFunction: SignFunction
+    signature: TransactionAccountSignature
 ) {
     const payload = serializeTransferPayload(
         transaction.transactionKind,
@@ -349,10 +344,7 @@ function serializeUnversionedTransaction(
         transaction.expiry
     );
 
-    const hash = hashSha256(header, payload);
-    const signatures = signFunction(transaction, hash);
-    const serialSignature = serializeSignature(signatures);
-
+    const serialSignature = serializeSignature(signature);
     const serialized = new Uint8Array(
         1 + serialSignature.length + header.length + payload.length
     );
@@ -365,12 +357,9 @@ function serializeUnversionedTransaction(
 
 export function serializeTransaction(
     transaction: AccountTransaction,
-    signFunction: SignFunction
+    signature: TransactionAccountSignature
 ) {
-    const unversioned = serializeUnversionedTransaction(
-        transaction,
-        signFunction
-    );
+    const unversioned = serializeUnversionedTransaction(transaction, signature);
     const serialized = new Uint8Array(1 + unversioned.length);
     serialized[0] = 0; // Version number
     put(serialized, 1, unversioned);
@@ -383,11 +372,29 @@ export function serializeTransaction(
  */
 export function getAccountTransactionHash(
     transaction: AccountTransaction,
-    signFunction: SignFunction
+    signature: TransactionAccountSignature
 ) {
-    const serialized = serializeUnversionedTransaction(
-        transaction,
-        signFunction
-    );
+    const serialized = serializeUnversionedTransaction(transaction, signature);
     return hashSha256(serialized);
+}
+
+/**
+ * Returns the "digest to be signed"", which is the hash that is signed.
+ */
+export function getAccountTransactionSignDigest(
+    transaction: AccountTransaction
+) {
+    const payload = serializeTransferPayload(
+        transaction.transactionKind,
+        transaction.payload
+    );
+    const header = serializeTransactionHeader(
+        transaction.sender,
+        transaction.nonce,
+        transaction.energyAmount,
+        payload.length,
+        transaction.expiry
+    );
+
+    return hashSha256(Buffer.concat([header, payload]));
 }

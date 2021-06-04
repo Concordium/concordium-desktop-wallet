@@ -11,6 +11,7 @@ import {
     TransactionKindId,
     AccountTransaction,
     AddBakerPayload,
+    Fraction,
 } from '~/utils/types';
 import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
@@ -20,6 +21,9 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { BakerKeys, generateBakerKeys } from '~/utils/rustInterface';
 import SignTransactionColumn from '../SignTransactionProposal/SignTransaction';
 import errorMessages from '~/constants/errorMessages.json';
+
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
+import { getNextAccountNonce } from '~/node/nodeRequests';
 
 import {
     createAddBakerTransaction,
@@ -43,6 +47,7 @@ import { addProposal } from '~/features/MultiSignatureSlice';
 import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
+import LoadingComponent from './LoadingComponent';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
@@ -56,7 +61,11 @@ enum BuildSubRoutes {
     sign = 'sign',
 }
 
-export default function AddBakerPage() {
+interface PageProps {
+    exchangeRate: Fraction;
+}
+
+function AddBakerPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
@@ -81,6 +90,7 @@ export default function AddBakerPage() {
 
     const estimatedFee = useTransactionCostEstimate(
         TransactionKindId.Add_baker,
+        exchangeRate,
         account?.signatureThreshold
     );
 
@@ -94,7 +104,7 @@ export default function AddBakerPage() {
             .catch(() => setError('Failed generating baker keys'));
     };
 
-    const onCreateTransaction = () => {
+    const onCreateTransaction = async () => {
         if (bakerKeys === undefined) {
             setError('Baker keys are needed to make transaction');
             return;
@@ -122,14 +132,16 @@ export default function AddBakerPage() {
             bakingStake: toMicroUnits(stake),
             restakeEarnings: restakeEnabled,
         };
-        createAddBakerTransaction(
-            account.address,
-            payload,
-            account.signatureThreshold,
-            expiryTime
-        )
-            .then(setTransaction)
-            .catch(() => setError('Failed create transaction'));
+        const accountNonce = await getNextAccountNonce(account.address);
+        setTransaction(
+            createAddBakerTransaction(
+                account.address,
+                payload,
+                accountNonce.nonce,
+                account.signatureThreshold,
+                expiryTime
+            )
+        );
     };
 
     /** Creates the transaction, and if the ledger parameter is provided, also
@@ -401,14 +413,21 @@ export default function AddBakerPage() {
                                 <DownloadBakerCredentialsStep
                                     accountAddress={account.address}
                                     bakerKeys={bakerKeys}
-                                    onContinue={() => {
-                                        onCreateTransaction();
-                                        dispatch(
-                                            push(
-                                                `${url}/${BuildSubRoutes.sign}`
+                                    onContinue={() =>
+                                        onCreateTransaction()
+                                            .then(() =>
+                                                dispatch(
+                                                    push(
+                                                        `${url}/${BuildSubRoutes.sign}`
+                                                    )
+                                                )
                                             )
-                                        );
-                                    }}
+                                            .catch(() =>
+                                                setError(
+                                                    errorMessages.unableToReachNode
+                                                )
+                                            )
+                                    }
                                 />
                             ) : (
                                 <p>Generating keys...</p>
@@ -490,3 +509,5 @@ export function DownloadBakerCredentialsStep({
         </div>
     );
 }
+
+export default ensureExchangeRate(AddBakerPage, LoadingComponent);

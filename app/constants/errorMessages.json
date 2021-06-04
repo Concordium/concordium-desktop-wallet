@@ -1,3 +1,4 @@
 {
-    "missingGlobal": "Missing cryptographic parameters, please connect to a node to load these."
+    "missingGlobal": "Missing cryptographic parameters, please connect to a node to load these.",
+    "unableToReachNode": "Unable to reach node."
 }

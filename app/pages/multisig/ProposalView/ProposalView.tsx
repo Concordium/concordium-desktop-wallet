@@ -115,7 +115,10 @@ function ProposalView({ proposal }: ProposalViewProps) {
     }, [signatures]);
 
     const handler = findHandler(transaction);
-    const transactionSignDigest = getTransactionSignDigest(transaction);
+    const transactionSignDigest = useMemo(
+        () => getTransactionSignDigest(transaction),
+        [transaction]
+    );
 
     function submitTransaction() {
         dispatch(

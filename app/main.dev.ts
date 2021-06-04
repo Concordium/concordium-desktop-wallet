@@ -11,7 +11,7 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ipcCommands from './constants/ipcCommands.json';
@@ -80,10 +80,14 @@ const createWindow = async () => {
                 ? {
                       nodeIntegration: true,
                       webviewTag: true,
+                      contextIsolation: true,
                   }
                 : {
                       preload: path.join(__dirname, 'dist/renderer.prod.js'),
                       webviewTag: true,
+                      nodeIntegration: false,
+                      contextIsolation: true,
+                      devTools: false,
                   },
     });
 
@@ -221,6 +225,13 @@ ipcMain.handle(ipcCommands.print, (_event, body) => {
             });
         }
     });
+});
+
+ipcMain.handle(ipcCommands.openUrl, (_event, url: string) => {
+    if (!mainWindow) {
+        return;
+    }
+    shell.openExternal(url);
 });
 
 /**

@@ -1,6 +1,6 @@
 import bs58check from 'bs58check';
 import { RegisterOptions, Validate } from 'react-hook-form';
-import { Account } from './types';
+import { Account, AccountInfo } from './types';
 
 /**
  * Verifies whether an address string is a valid Base58check string.
@@ -47,4 +47,17 @@ export const commonAddressValidators: RegisterOptions = {
  */
 export function isInitialAccount(account: Account): boolean {
     return account.isInitial;
+}
+
+const ENCRYPTED_ZERO =
+    'c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
+
+/**
+ * If an account has ever had an ecrypted balance different from 0, this will return true.
+ */
+export function hasEncryptedBalance(accountInfo: AccountInfo): boolean {
+    return (
+        accountInfo.accountEncryptedAmount.selfAmount !== ENCRYPTED_ZERO ||
+        accountInfo.accountEncryptedAmount.incomingAmounts.length > 0
+    );
 }

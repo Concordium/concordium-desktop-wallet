@@ -120,7 +120,7 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
                 accountInfo={accountInfo}
             />
         );
-    } else if (address) {
+    } else if (address && !errors.address) {
         accountDisplay = (
             <div
                 className={clsx(

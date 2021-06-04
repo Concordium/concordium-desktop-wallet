@@ -5,7 +5,6 @@ import {
     TransactionKindId,
     UpdateAccountCredentialsPayload,
 } from './types';
-import { getEnergyToMicroGtuRate } from '../node/nodeHelpers';
 import { serializeTransferPayload } from './transactionSerialization';
 
 /**
@@ -229,12 +228,12 @@ function energyToCost(energy: bigint, exchangeRate: Fraction): Fraction {
 /**
  *  Given the signatureAmount and payloadSize, returns the estimated MicroGTU cost of the transaction type.
  */
-export async function getTransactionKindCost(
+export function getTransactionKindCost(
     transactionKind: TransactionKindId,
+    energyToMicroGtu: Fraction,
     signatureAmount = 1,
     payloadSize: number = getPayloadSizeEstimate(transactionKind)
-): Promise<Fraction> {
-    const energyToMicroGtu = await getEnergyToMicroGtuRate();
+): Fraction {
     const energy = getTransactionKindEnergy(
         transactionKind,
         payloadSize,
@@ -247,11 +246,11 @@ export async function getTransactionKindCost(
  *  Given the signatureAmount and a transaction returns
  * the estimated MicroGTU cost of the transaction.
  */
-export default async function getTransactionCost(
+export default function getTransactionCost(
     transaction: AccountTransaction,
+    energyToMicroGtu: Fraction,
     signatureAmount = 1
-): Promise<Fraction> {
-    const energyToMicroGtu = await getEnergyToMicroGtuRate();
+): Fraction {
     const energy = getTransactionEnergyCost(transaction, signatureAmount);
     return energyToCost(energy, energyToMicroGtu);
 }
@@ -260,10 +259,10 @@ export default async function getTransactionCost(
  *  Given the signatureAmount returns a function, which given the current schedule length,
  * will return the estimated MicroGTU cost of a scheduled transfer.
  */
-export async function scheduledTransferCost(
+export function scheduledTransferCost(
+    energyToMicroGtu: Fraction,
     signatureAmount = 1
-): Promise<(scheduleLength: number) => Fraction> {
-    const energyToMicroGtu = await getEnergyToMicroGtuRate();
+): (scheduleLength: number) => Fraction {
     return (scheduleLength: number) => {
         const energy = getScheduledTransferEnergy(
             scheduleLength,
@@ -271,4 +270,18 @@ export async function scheduledTransferCost(
         );
         return energyToCost(energy, energyToMicroGtu);
     };
+}
+
+export function getUpdateCredentialsCost(
+    energyToMicroGtu: Fraction,
+    payload: UpdateAccountCredentialsPayload,
+    currentCredentialAmount: number,
+    signatureAmount = 1
+): Fraction {
+    const energy = getUpdateAccountCredentialEnergy(
+        payload,
+        currentCredentialAmount,
+        signatureAmount
+    );
+    return energyToCost(energy, energyToMicroGtu);
 }

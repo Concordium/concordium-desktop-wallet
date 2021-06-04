@@ -1,17 +1,13 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { push } from 'connected-react-router';
-import PlusIcon from '@resources/svg/plus.svg';
+import { useSelector } from 'react-redux';
 import ShieldImage from '@resources/svg/shield.svg';
 import {
     accountsSelector,
     accountsInfoSelector,
 } from '~/features/AccountSlice';
-import routes from '~/constants/routes.json';
 import { Account, AccountInfo } from '~/utils/types';
 import { displayAsGTU } from '~/utils/gtu';
 import { sumToBigInt } from '~/utils/basicHelpers';
-import PageLayout from '~/components/PageLayout';
 
 function getUnshieldedAmount(accountsInfo: AccountInfo[]) {
     return sumToBigInt(accountsInfo, (accountInfo) =>
@@ -44,8 +40,6 @@ function isAllDecrypted(accounts: Account[]) {
 }
 
 export default function AccountPageHeader() {
-    const dispatch = useDispatch();
-
     const accounts = useSelector(accountsSelector);
     const accountInfoMap = useSelector(accountsInfoSelector);
     const accountsInfo = Object.values(accountInfoMap);
@@ -87,12 +81,6 @@ export default function AccountPageHeader() {
             <h3 className="mR20">
                 Stake: <b>{displayAsGTU(totalStaked)}</b>
             </h3>
-            <PageLayout.HeaderButton
-                align="right"
-                onClick={() => dispatch(push(routes.ACCOUNTCREATION))}
-            >
-                <PlusIcon height="20" />
-            </PageLayout.HeaderButton>
         </>
     );
 }
