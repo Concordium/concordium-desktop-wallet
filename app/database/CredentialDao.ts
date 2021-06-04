@@ -138,3 +138,11 @@ export async function hasDuplicateWalletId(
         .map((cred) => cred.walletId);
     return otherWalletIds.includes(walletId);
 }
+
+export async function hasExistingCredential(
+    accountAddress: string,
+    currentWalletId: number
+) {
+    const credentials = await getCredentialsOfAccount(accountAddress);
+    return credentials.some((cred) => cred.walletId === currentWalletId);
+}
