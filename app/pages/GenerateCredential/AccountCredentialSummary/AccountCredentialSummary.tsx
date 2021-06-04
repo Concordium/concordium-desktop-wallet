@@ -1,7 +1,7 @@
-import React, { useContext } from 'react';
+import React, { useContext, useCallback, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import clsx from 'clsx';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, Validate } from 'react-hook-form';
 import Identicon from '~/components/CopiableIdenticon/CopiableIdenticon';
 import Form from '~/components/Form';
 import routes from '~/constants/routes.json';
@@ -9,10 +9,10 @@ import { commonAddressValidators } from '~/utils/accountHelpers';
 import { ClassName } from '~/utils/types';
 import Label from '~/components/Label';
 import Card from '~/cross-app-components/Card';
-
 import styles from './AccountCredentialSummary.module.scss';
 import { fieldNames } from '../types';
 import savedStateContext from '../savedStateContext';
+import { hasExistingCredential } from '~/database/CredentialDao';
 
 interface Props extends ClassName {
     Button?: () => JSX.Element | null;
@@ -23,17 +23,39 @@ export default function AccountCredentialSummary({
     className,
 }: Props) {
     const location = useLocation().pathname;
-    const { watch } = useFormContext();
+    const { watch, trigger } = useFormContext();
     const {
         identity: savedIdentity,
         address,
         accountName,
         credential: savedCredential,
     } = useContext(savedStateContext);
-    const { credential = savedCredential, identity = savedIdentity } = watch([
-        fieldNames.identity,
-        fieldNames.credential,
-    ]);
+    const {
+        credential = savedCredential,
+        identity = savedIdentity,
+        address: currentAddress,
+    } = watch([fieldNames.identity, fieldNames.credential, fieldNames.address]);
+
+    const [duplicate, setDuplicate] = useState(false);
+
+    useEffect(() => {
+        if (currentAddress && identity) {
+            hasExistingCredential(currentAddress, identity.walletId)
+                .then((dup) => {
+                    setDuplicate(dup);
+                    return trigger(fieldNames.address);
+                })
+                .catch(() => {});
+        }
+    }, [currentAddress, identity, trigger]);
+
+    const validateNoDuplicate: Validate = useCallback(
+        () =>
+            duplicate
+                ? 'We already have a credential on this account with the current device'
+                : undefined,
+        [duplicate]
+    );
 
     return (
         <Card
@@ -56,6 +78,10 @@ export default function AccountCredentialSummary({
                     rules={{
                         required: 'Please enter address',
                         ...commonAddressValidators,
+                        validate: {
+                            ...commonAddressValidators.validate,
+                            validateNoDuplicate,
+                        },
                     }}
                 />
             ) : (
