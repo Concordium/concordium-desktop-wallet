@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { shell } from 'electron';
+import { ipcRenderer } from 'electron/renderer';
+import ipcCommands from '~/constants/ipcCommands.json';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import PageLayout from '~/components/PageLayout';
 import { acceptTerms } from '~/features/SettingsSlice';
 import { storeTerms, termsUrlBase64 } from '~/utils/termsHelpers';
+import { noOp } from '~/utils/basicHelpers';
 
 import styles from './TermsPage.module.scss';
-import { noOp } from '~/utils/basicHelpers';
 
 interface Props {
     /**
@@ -33,7 +34,7 @@ function interceptClickEvent(e: MouseEvent) {
         const href = target.getAttribute('href');
 
         if (href) {
-            shell.openExternal(href);
+            ipcRenderer.invoke(ipcCommands.openUrl, href);
         }
     }
 }
