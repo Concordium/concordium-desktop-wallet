@@ -1,4 +1,3 @@
-import { parse } from 'json-bigint';
 import React, { useMemo } from 'react';
 import {
     instanceOfScheduledTransfer,
@@ -21,6 +20,7 @@ import UpdateBakerKeysProposalStatus from './UpdateBakerKeysStatus';
 import RemoveBakerProposalStatus from './RemoveBakerStatus';
 import UpdateBakerStakeProposalStatus from './UpdateBakerStake';
 import UpdateBakerRestakeEarningsProposalStatus from './UpdateBakerRestakeEarnings';
+import { parse } from '~/utils/JSONHelper';
 
 interface ProposalStatusProps
     extends Pick<ProposalStatusViewProps, 'className'> {
