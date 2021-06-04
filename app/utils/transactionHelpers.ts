@@ -577,6 +577,16 @@ export function validateTransferAmount(
     return undefined;
 }
 
+export function validateFee(
+    accountInfo: AccountInfo | undefined,
+    estimatedFee: bigint | undefined
+): string | undefined {
+    if (accountInfo && amountAtDisposal(accountInfo) < (estimatedFee || 0n)) {
+        return 'Insufficient funds';
+    }
+    return undefined;
+}
+
 function amountToStakeAtDisposal(accountInfo: AccountInfo): bigint {
     const unShielded = BigInt(accountInfo.accountAmount);
     const scheduled = accountInfo.accountReleaseSchedule

@@ -271,3 +271,17 @@ export function scheduledTransferCost(
         return energyToCost(energy, energyToMicroGtu);
     };
 }
+
+export function getUpdateCredentialsCost(
+    energyToMicroGtu: Fraction,
+    payload: UpdateAccountCredentialsPayload,
+    currentCredentialAmount: number,
+    signatureAmount = 1
+): Fraction {
+    const energy = getUpdateAccountCredentialEnergy(
+        payload,
+        currentCredentialAmount,
+        signatureAmount
+    );
+    return energyToCost(energy, energyToMicroGtu);
+}
