@@ -11,7 +11,7 @@ import { viewingShieldedSelector } from '~/features/TransactionSlice';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import styles from './AccountViewAction.module.scss';
-import { Account } from '~/utils/types';
+import { Account, AccountInfo } from '~/utils/types';
 
 interface ActionObject {
     route: string;
@@ -21,7 +21,7 @@ interface ActionObject {
     imageClassName: string;
     height: number;
     width?: number;
-    isDisabled(hasCredential: boolean): boolean;
+    isDisabled(hasCredential: boolean, isMultiSig: boolean): boolean;
 }
 
 const more: ActionObject = {
@@ -67,20 +67,55 @@ const viewingUnshieldedbuttons: ActionObject[] = [
         Image: ShieldImage,
         imageClassName: styles.actionImage,
         height: 30,
-        isDisabled: (hasCredential: boolean) => !hasCredential,
+        isDisabled: (hasCredential: boolean, isMultiSig: boolean) =>
+            !hasCredential || isMultiSig,
     },
     more,
 ];
 
-interface Props {
-    account: Account;
+function AccountViewAction({
+    route,
+    label,
+    Image,
+    imageClassName,
+    height,
+    width,
+    isDisabled,
+    hasCredentials,
+    isMultiSig,
+}: ActionObject & {
+    isMultiSig: boolean;
+    hasCredentials: boolean;
+}): JSX.Element {
+    const disabled = isDisabled(hasCredentials, isMultiSig);
+
+    return (
+        <ButtonNavLink
+            key={route}
+            className={clsx(
+                styles.actionButton,
+                disabled && styles.disabledActionButton
+            )}
+            disabled={disabled}
+            to={route}
+        >
+            <Image height={height} width={width} className={imageClassName} />
+            {label}
+        </ButtonNavLink>
+    );
 }
 
-export default function AccountViewActions({ account }: Props) {
+interface Props {
+    account: Account;
+    accountInfo: AccountInfo;
+}
+
+export default function AccountViewActions({ account, accountInfo }: Props) {
     const viewingShielded = useSelector(viewingShieldedSelector);
     const accountHasDeployedCredentials = useSelector(
         accountHasDeployedCredentialsSelector(account)
     );
+    const isMultiSig = Object.values(accountInfo.accountCredentials).length > 1;
 
     let buttons = [];
     if (viewingShielded) {
@@ -91,35 +126,14 @@ export default function AccountViewActions({ account }: Props) {
 
     return (
         <div className={styles.actionButtonsCard}>
-            {buttons.map(
-                ({
-                    route,
-                    label,
-                    Image,
-                    imageClassName,
-                    height,
-                    width,
-                    isDisabled,
-                }) => (
-                    <ButtonNavLink
-                        key={route}
-                        className={clsx(
-                            styles.actionButton,
-                            isDisabled(accountHasDeployedCredentials) &&
-                                styles.disabledActionButton
-                        )}
-                        disabled={isDisabled(accountHasDeployedCredentials)}
-                        to={route}
-                    >
-                        <Image
-                            height={height}
-                            width={width}
-                            className={imageClassName}
-                        />
-                        {label}
-                    </ButtonNavLink>
-                )
-            )}
+            {buttons.map((props) => (
+                <AccountViewAction
+                    key={props.route}
+                    {...props}
+                    isMultiSig={isMultiSig}
+                    hasCredentials={accountHasDeployedCredentials}
+                />
+            ))}
         </div>
     );
 }
