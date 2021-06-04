@@ -27,6 +27,7 @@ import SignTransaction from './SignTransaction';
 import RemoveBakerProposalDetails from './proposal-details/RemoveBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import { getFormattedDateString } from '~/utils/timeHelpers';
+import PendingChange from '~/components/BakerPendingChange/BakerPendingChange';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
@@ -150,6 +151,22 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         chosenAccount={account}
                                         filter={(_, info) =>
                                             info?.accountBaker !== undefined
+                                        }
+                                        isDisabled={(_, info) =>
+                                            info?.accountBaker
+                                                ?.pendingChange !==
+                                            undefined ? (
+                                                <>
+                                                    The stake is frozen because:
+                                                    <br />
+                                                    <PendingChange
+                                                        pending={
+                                                            info.accountBaker
+                                                                .pendingChange
+                                                        }
+                                                    />
+                                                </>
+                                            ) : undefined
                                         }
                                     />
                                 </div>

@@ -23,6 +23,7 @@ interface ViewProps extends ClassName {
     identityName?: string;
     onClick?(shielded: boolean): void;
     active?: boolean;
+    disabled?: boolean;
     initialAccount?: boolean;
     accountStatus?: AccountStatus;
     connected?: boolean;
@@ -39,6 +40,7 @@ interface ViewProps extends ClassName {
 export function AccountCardView({
     className,
     active = false,
+    disabled = false,
     onClick,
     accountName,
     initialAccount = false,
@@ -67,6 +69,7 @@ export function AccountCardView({
                 styles.accountListElement,
                 className,
                 active && styles.active,
+                disabled && styles.disabled,
                 Boolean(onClick) && styles.clickable
             )}
             onClick={() => onClick && onClick(false)}
@@ -165,7 +168,8 @@ export function AccountCardView({
     );
 }
 
-interface Props extends Pick<ViewProps, 'active' | 'onClick' | 'className'> {
+interface Props
+    extends Pick<ViewProps, 'active' | 'onClick' | 'className' | 'disabled'> {
     account: Account;
     accountInfo?: AccountInfo;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getAccount } from '~/database/AccountDao';
 import { BlockSummary, ConsensusStatus } from '~/node/NodeApiTypes';
+import { getConsensusStatus } from '~/node/nodeRequests';
 import {
     fetchLastFinalizedBlockSummary,
     getAccountInfoOfAddress,
@@ -90,6 +91,17 @@ export function useLastFinalizedBlockSummary() {
             .catch(() => {});
     }, []);
     return summary;
+}
+
+/** Hook for fetching consensus status */
+export function useConsensusStatus() {
+    const [status, setStatus] = useState<ConsensusStatus>();
+    useEffect(() => {
+        getConsensusStatus()
+            .then(setStatus)
+            .catch(() => {});
+    }, []);
+    return status;
 }
 
 /** Hook for fetching staked amount for a given account address, Returns undefined while loading and 0 if account is not a baker */
