@@ -80,10 +80,13 @@ const createWindow = async () => {
                 ? {
                       nodeIntegration: true,
                       webviewTag: true,
+                      contextIsolation: true,
                   }
                 : {
                       preload: path.join(__dirname, 'dist/renderer.prod.js'),
                       webviewTag: true,
+                      nodeIntegration: false,
+                      contextIsolation: true,
                   },
     });
 
