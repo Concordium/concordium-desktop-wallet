@@ -13,7 +13,8 @@ export const formatNote = (text: ReactNode) => (
 const formatAccount = (account: Account | AddressBookEntry) => (
     <>
         {formatValue(account.name)}
-        {formatNote('note' in account ? account.note : account.address)}
+        {formatNote(account.address)}
+        {'note' in account && formatNote(account.note)}
     </>
 );
 const formatAmount = (amount: string) =>
