@@ -101,8 +101,8 @@ export default function ElectionDifficultyInput({
             }`,
         },
         max: {
-            value: 1,
-            message: 'Value can not be above 1',
+            value: 0.99999,
+            message: 'Value can not be above 0.99999',
         },
         validate: {
             validateResolutionConversion,
@@ -125,7 +125,7 @@ export default function ElectionDifficultyInput({
                 readOnly={readOnly}
                 step={1 / electionDifficultyResolution}
                 min={0}
-                max={1}
+                max={0.99999}
                 ref={shouldRegister ? registration : undefined}
             />
             {blockTime && (
