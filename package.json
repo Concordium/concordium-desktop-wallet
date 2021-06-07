@@ -54,7 +54,7 @@
     ]
   },
     "build": {
-    "appId": "org.Concordium.DesktopWallet",
+    "appId": "com.Concordium.Software.DesktopWallet",
     "files": [
       "dist/",
       "node_modules/",
@@ -88,7 +88,7 @@
       "oneClick": false,
       "perMachine": true,
       "allowToChangeInstallationDirectory": true
-	 },
+    },
     "linux": {
       "artifactName": "${name}-${version}.${ext}",
       "target": [
@@ -123,8 +123,8 @@
     "url": "git+https://gitlab.com/Concordium/desktopwallet"
   },
   "author": {
-    "name": "Concordium",
-    "email": "shj@concordium.com",
+    "name": "Concordium Software",
+    "email": "support@concordium.software",
     "url": "https://concordium.com"
   },
   "license": "MIT",
