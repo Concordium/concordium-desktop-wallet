@@ -78,7 +78,7 @@ export default class UpdateAccountCredentialsHandler
             (key) => {
                 displayMessage(
                     <>
-                        <b>Verification key:</b>
+                        <b>Public key:</b>
                         <p className="m0">{key}</p>
                     </>
                 );
