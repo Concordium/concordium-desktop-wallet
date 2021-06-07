@@ -84,6 +84,11 @@
         "nsis"
       ]
     },
+    "nsis": {
+	      "oneClick": false,
+		    "perMachine": true,
+		    "allowToChangeInstallationDirectory": true
+	 },
     "linux": {
       "artifactName": "${name}-${version}.${ext}",
       "target": [
