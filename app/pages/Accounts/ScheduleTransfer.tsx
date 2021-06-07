@@ -1,4 +1,5 @@
 import React from 'react';
+import { Redirect } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import {
@@ -12,6 +13,7 @@ import { toMicroUnits } from '~/utils/gtu';
 import { stringify } from '~/utils/JSONHelper';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
+import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 
 interface Props {
     account: Account;
@@ -30,6 +32,17 @@ function ScheduleTransfer({
     nonce,
 }: Props) {
     const dispatch = useDispatch();
+
+    if (account.signatureThreshold && account.signatureThreshold > 1) {
+        return (
+            <Redirect
+                to={createTransferWithAccountRoute(
+                    TransactionKindId.Transfer_with_schedule,
+                    account
+                )}
+            />
+        );
+    }
 
     function toBuildSchedule(amount: string, recipient: AddressBookEntry) {
         dispatch(

@@ -5,7 +5,6 @@ import {
     TransactionKindId,
     ExportKeyType,
 } from './types';
-// eslint-disable-next-line import/no-cycle
 
 export const selectedAddressBookEntryRoute = (address: string) =>
     routes.ADDRESSBOOK_SELECTED.replace(':address', address);

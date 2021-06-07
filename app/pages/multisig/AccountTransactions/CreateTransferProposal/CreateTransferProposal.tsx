@@ -59,6 +59,10 @@ function subTitle(currentLocation: string) {
     }
 }
 
+interface State {
+    account?: Account;
+}
+
 interface Props {
     exchangeRate: Fraction;
     transactionKind:
@@ -74,16 +78,16 @@ function CreateTransferProposal({
     exchangeRate,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const location = useLocation().pathname.replace(
-        `${transactionKind}`,
-        ':transactionKind'
-    );
+
+    const { pathname, state } = useLocation<State>();
+
+    const location = pathname.replace(`${transactionKind}`, ':transactionKind');
 
     const scheduleBuilderRef = useRef<ScheduledTransferBuilderRef>(null);
 
     const handler = findAccountTransactionHandler(transactionKind);
 
-    const [account, setAccount] = useState<Account | undefined>();
+    const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [identity, setIdentity] = useState<Identity | undefined>();
     const [amount, setAmount] = useState<string | undefined>();
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
@@ -175,7 +179,6 @@ function CreateTransferProposal({
             />
         );
     }
-
     function continueAction() {
         const nextLocation = handler.creationLocationHandler(location);
         dispatch(
