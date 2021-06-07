@@ -23,8 +23,12 @@ interface Props {
  */
 function sanitizeDocument(iframeEl: HTMLIFrameElement): void {
     const classes: string[] = [];
-    iframeEl.contentDocument?.body.classList.forEach((v) => classes.push(v));
-    classes.forEach((v) => iframeEl.contentDocument?.body.classList.remove(v));
+    const iframeBody = iframeEl.contentDocument?.body;
+    if (iframeBody) {
+        iframeBody.style.margin = '0';
+    }
+    iframeBody?.classList.forEach((v) => classes.push(v));
+    classes.forEach((v) => iframeBody?.classList.remove(v));
 }
 
 function interceptClickEvent(e: MouseEvent) {
@@ -68,7 +72,10 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
         }
 
         sanitizeDocument(frameEl);
-        setFrameHeight(frameEl.contentDocument?.body.scrollHeight);
+        setFrameHeight(
+            (frameEl.contentDocument?.body.getBoundingClientRect().height ??
+                -1) + 1 || undefined
+        );
         return hijackLinks(frameEl);
     }, [frameEl]);
 
