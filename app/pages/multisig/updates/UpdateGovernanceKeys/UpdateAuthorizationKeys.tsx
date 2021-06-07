@@ -30,6 +30,7 @@ import {
     keyIsInUse,
     getCurrentThresholds,
     removeRemovedKeys,
+    reduceIndicesByOne,
 } from './util';
 import routes from '~/constants/routes.json';
 import ProposeNewKey from './ProposeNewKey';
@@ -164,7 +165,7 @@ export default function UpdateAuthorizationKeys({
                 (value) => value.verifyKey === keyToUpdate.key.verifyKey
             );
 
-            const updatedAccessStructures = newLevel2Keys.accessStructures.map(
+            let updatedAccessStructures = newLevel2Keys.accessStructures.map(
                 (currentAccessStructure) => {
                     if (accessStructure.type === currentAccessStructure.type) {
                         const updatedAccessStructureIndicies = accessStructure.publicKeyIndicies
@@ -235,6 +236,10 @@ export default function UpdateAuthorizationKeys({
             ) {
                 updatedKeys = newLevel2Keys.keys.filter(
                     (_, index) => index !== keyIndex
+                );
+                updatedAccessStructures = reduceIndicesByOne(
+                    updatedAccessStructures,
+                    keyIndex
                 );
             }
 
