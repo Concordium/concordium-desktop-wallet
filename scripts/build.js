@@ -10,12 +10,15 @@ const targetNet = process.env.TARGET_NET;
 
 let name;
 let productName;
+let appId;
 if (targetNet) {
     name = `${process.env.npm_package_name}-${targetNet}`;
     productName = `${process.env.npm_package_productName} ${targetNet}`;
+    appId = `${process.env.npm_package_build_appId}-${targetNet}`;
 } else {
     name = process.env.npm_package_name;
     productName = process.env.npm_package_productName;
+    appId = process.env.npm_package_build_appId;
 }
 
 builder.build({
@@ -24,6 +27,7 @@ builder.build({
             name,
             productName,
         },
+        appId,
     },
     publish: 'never',
 });
