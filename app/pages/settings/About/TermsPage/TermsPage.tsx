@@ -83,6 +83,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
     }, [frameEl]);
     useWindowResize(handleResize);
     useIpcRendererEvent(ipcRendererCommands.readyToShow, handleResize);
+    useIpcRendererEvent(ipcRendererCommands.didFinishLoad, handleResize);
 
     const handleAccept = useCallback(() => {
         storeTerms();

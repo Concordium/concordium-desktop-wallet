@@ -103,7 +103,7 @@ const createWindow = async () => {
 
     mainWindow.loadURL(`file://${__dirname}/app.html`);
 
-    mainWindow.on('ready-to-show', () => {
+    mainWindow.webContents.on('did-finish-load', () => {
         if (!mainWindow) {
             throw new Error('"mainWindow" is not defined');
         }
@@ -115,7 +115,11 @@ const createWindow = async () => {
             mainWindow.focus();
         }
 
-        mainWindow.webContents.send(ipcRendererCommands.readyToShow);
+        mainWindow.webContents.send(ipcRendererCommands.didFinishLoad);
+    });
+
+    mainWindow.on('ready-to-show', () => {
+        mainWindow?.webContents.send(ipcRendererCommands.readyToShow);
     });
 
     mainWindow.on('closed', () => {
