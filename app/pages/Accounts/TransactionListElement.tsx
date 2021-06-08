@@ -10,14 +10,17 @@ import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import {
     TransferTransaction,
     TransactionStatus,
-    OriginType,
     TransactionKindString,
     Account,
 } from '~/utils/types';
 import { chosenAccountSelector } from '~/features/AccountSlice';
 import { viewingShieldedSelector } from '~/features/TransactionSlice';
 import SidedRow from '~/components/SidedRow';
-import { isFailed } from '~/utils/transactionHelpers';
+import {
+    isFailed,
+    isTransferKind,
+    isRewardKind,
+} from '~/utils/transactionHelpers';
 import styles from './Transactions.module.scss';
 
 const isInternalTransfer = (transaction: TransferTransaction) =>
@@ -77,6 +80,13 @@ function buildOutgoingAmountStrings(subtotal: bigint, fee: bigint) {
     };
 }
 
+function buildCostString(fee: bigint) {
+    return {
+        amount: `${displayAsGTU(-fee)}`,
+        amountFormula: `${displayAsGTU(fee)} Fee`,
+    };
+}
+
 function buildCostFreeAmountString(amount: bigint, absolute = false) {
     const displayAmount = absolute ? abs(amount) : amount;
     return {
@@ -117,51 +127,42 @@ function parseAmount(
     transaction: TransferTransaction,
     isOutgoingTransaction: boolean
 ) {
-    switch (transaction.originType) {
-        case OriginType.Self:
-        case OriginType.Account:
-            if (isOutgoingTransaction) {
-                const cost = BigInt(transaction.cost || '0');
-                if (
-                    transaction.transactionKind ===
-                    TransactionKindString.EncryptedAmountTransfer
-                ) {
-                    return {
-                        amount: `${displayAsGTU(-cost)}`,
-                        amountFormula: `${displayAsGTU(cost)} Fee`,
-                    };
-                }
+    if (isTransferKind(transaction.transactionKind)) {
+        if (isOutgoingTransaction) {
+            const cost = BigInt(transaction.cost || '0');
+            if (
+                transaction.transactionKind ===
+                TransactionKindString.EncryptedAmountTransfer
+            ) {
+                return {
+                    amount: `${displayAsGTU(-cost)}`,
+                    amountFormula: `${displayAsGTU(cost)} Fee`,
+                };
+            }
 
-                if (
-                    TransactionKindString.TransferToPublic ===
-                    transaction.transactionKind
-                ) {
-                    // A transfer to public is the only transaction, where we pay a cost and receive gtu on the public balance.
-                    return buildOutgoingAmountStrings(
-                        -BigInt(transaction.subtotal),
-                        cost
-                    );
-                }
-
+            if (
+                TransactionKindString.TransferToPublic ===
+                transaction.transactionKind
+            ) {
+                // A transfer to public is the only transaction, where we pay a cost and receive gtu on the public balance.
                 return buildOutgoingAmountStrings(
-                    BigInt(transaction.subtotal),
+                    -BigInt(transaction.subtotal),
                     cost
                 );
             }
-            // incoming transaction:
-            return buildCostFreeAmountString(
-                BigInt(transaction.subtotal),
-                true
-            );
 
-        case OriginType.Reward:
-            return buildCostFreeAmountString(BigInt(transaction.subtotal));
-        default:
-            return {
-                amount: `${getGTUSymbol()} ?`,
-                amountFormula: 'Parsing failed',
-            };
+            return buildOutgoingAmountStrings(
+                BigInt(transaction.subtotal),
+                cost
+            );
+        }
+        // incoming transaction:
+        return buildCostFreeAmountString(BigInt(transaction.subtotal), true);
     }
+    if (isRewardKind(transaction.transactionKind)) {
+        return buildCostFreeAmountString(BigInt(transaction.subtotal));
+    }
+    return buildCostString(BigInt(transaction.cost || '0'));
 }
 
 function displayType(kind: TransactionKindString) {
