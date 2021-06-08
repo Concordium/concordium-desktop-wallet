@@ -119,8 +119,6 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
                         const el = e.target as HTMLIFrameElement;
                         setFrameEl(el);
                     }}
-                    width="100%"
-                    style={{ maxWidth: '1000px' }}
                 />
                 {mustAccept && frameEl !== null && (
                     <ButtonNavLink
