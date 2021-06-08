@@ -88,7 +88,7 @@ pub fn create_pub_to_sec_ext(
 ) -> String {
     match create_pub_to_sec_aux(input) {
         Ok(s) => s,
-        Err(e) => format!("unable to create transfer to public due to: {}", e),
+        Err(e) => format!("unable to create transfer to encrypted data due to: {}", e),
     }
 }
 
