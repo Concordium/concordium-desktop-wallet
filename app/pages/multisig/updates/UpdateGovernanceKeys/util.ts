@@ -41,6 +41,10 @@ export function getCurrentThresholds(
         authorizations.mintDistribution.threshold
     );
     currentThresholds.set(
+        AccessStructureEnum.transactionFeeDistribution,
+        authorizations.transactionFeeDistribution.threshold
+    );
+    currentThresholds.set(
         AccessStructureEnum.gasRewards,
         authorizations.paramGASRewards.threshold
     );
