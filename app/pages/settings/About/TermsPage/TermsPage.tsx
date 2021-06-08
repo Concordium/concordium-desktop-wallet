@@ -122,7 +122,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
                     width="100%"
                     style={{ maxWidth: '1000px' }}
                 />
-                {mustAccept && (
+                {mustAccept && frameEl !== null && (
                     <ButtonNavLink
                         className={styles.accept}
                         to={routes.HOME}
