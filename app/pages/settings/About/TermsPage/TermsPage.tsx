@@ -2,13 +2,17 @@ import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ipcRenderer } from 'electron';
 import ipcCommands from '~/constants/ipcCommands.json';
+import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
 import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import PageLayout from '~/components/PageLayout';
 import { acceptTerms } from '~/features/SettingsSlice';
 import { storeTerms, termsUrlBase64 } from '~/utils/termsHelpers';
 import { noOp } from '~/utils/basicHelpers';
-import { useWindowResize } from '~/cross-app-components/util/eventHooks';
+import {
+    useWindowResize,
+    useIpcRendererEvent,
+} from '~/cross-app-components/util/eventHooks';
 
 import styles from './TermsPage.module.scss';
 
@@ -78,6 +82,7 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
             height !== undefined ? Math.ceil(height).toString() : '';
     }, [frameEl]);
     useWindowResize(handleResize);
+    useIpcRendererEvent(ipcRendererCommands.readyToShow, handleResize);
 
     const handleAccept = useCallback(() => {
         storeTerms();

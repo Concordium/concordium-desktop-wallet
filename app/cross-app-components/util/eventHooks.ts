@@ -1,4 +1,5 @@
 import { RefCallback, useCallback, useEffect, useState } from 'react';
+import { ipcRenderer } from 'electron';
 
 /**
  * @description
@@ -61,3 +62,15 @@ export function useWindowResize(handleResize: (e: UIEvent) => void) {
         };
     }, [handleResize]);
 }
+
+export const useIpcRendererEvent: (
+    ...args: Parameters<typeof ipcRenderer.on>
+) => void = (channel, listener) => {
+    useEffect(() => {
+        ipcRenderer.on(channel, listener);
+
+        return () => {
+            ipcRenderer.off(channel, listener);
+        };
+    }, [channel, listener]);
+};

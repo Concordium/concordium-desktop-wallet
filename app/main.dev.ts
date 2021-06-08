@@ -15,6 +15,7 @@ import { app, shell, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ipcCommands from './constants/ipcCommands.json';
+import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import { setClientLocation, grpcCall } from './node/GRPCClient';
 import ConcordiumNodeClient from './node/ConcordiumNodeClient';
 import { ConsensusStatus } from './node/NodeApiTypes';
@@ -102,18 +103,19 @@ const createWindow = async () => {
 
     mainWindow.loadURL(`file://${__dirname}/app.html`);
 
-    // @TODO: Use 'ready-to-show' event
-    //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
-    mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.on('ready-to-show', () => {
         if (!mainWindow) {
             throw new Error('"mainWindow" is not defined');
         }
+
         if (process.env.START_MINIMIZED) {
             mainWindow.minimize();
         } else {
             mainWindow.show();
             mainWindow.focus();
         }
+
+        mainWindow.webContents.send(ipcRendererCommands.readyToShow);
     });
 
     mainWindow.on('closed', () => {
