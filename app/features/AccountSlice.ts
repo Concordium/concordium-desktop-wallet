@@ -38,6 +38,7 @@ import { getStatus } from '../utils/transactionHelpers';
 import { isValidAddress } from '../utils/accountHelpers';
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
+import { hasPendingTransactions } from '~/database/TransactionDao';
 
 interface AccountState {
     accounts: Account[];
@@ -148,19 +149,20 @@ export async function loadAccounts(dispatch: Dispatch) {
 // given an account and the accountEncryptedAmount from the accountInfo
 // determine whether the account has received or sent new funds,
 // and in that case return the the state of the account that should be updated to reflect that.
-function updateAccountEncryptedAmount(
+async function updateAccountEncryptedAmount(
     account: Account,
     accountEncryptedAmount: AccountEncryptedAmount
-): Partial<Account> {
+): Promise<Partial<Account>> {
     const { incomingAmounts } = accountEncryptedAmount;
     const selfAmounts = accountEncryptedAmount.selfAmount;
     const incomingAmountsString = JSON.stringify(incomingAmounts);
-    if (
-        !(
-            account.incomingAmounts === incomingAmountsString &&
-            account.selfAmounts === selfAmounts
-        )
-    ) {
+
+    const incoming = account.incomingAmounts !== incomingAmountsString;
+    const checkExternalSelfUpdate =
+        account.selfAmounts !== selfAmounts &&
+        !(await hasPendingTransactions(account.address));
+
+    if (incoming || checkExternalSelfUpdate) {
         return {
             incomingAmounts: incomingAmountsString,
             selfAmounts,
@@ -251,7 +253,7 @@ async function updateAccountFromAccountInfo(
         accountUpdate.signatureThreshold = accountInfo.accountThreshold;
     }
 
-    const encryptedAmountsUpdate = updateAccountEncryptedAmount(
+    const encryptedAmountsUpdate = await updateAccountEncryptedAmount(
         account,
         accountInfo.accountEncryptedAmount
     );

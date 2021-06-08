@@ -142,7 +142,7 @@ export async function monitorTransactionStatus(
             confirmTransaction(dispatch, transactionHash, blockHash, event);
             if (isSuccessfulTransaction(event)) {
                 if (isShieldedBalanceTransaction(transaction)) {
-                    ShieldedTransferConsequence(dispatch, transaction);
+                    await ShieldedTransferConsequence(dispatch, transaction);
                 }
             }
 
