@@ -38,7 +38,6 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
     } = useContext(savedStateContext);
     const {
         errors,
-        trigger,
         setError,
         clearErrors,
         formState,
@@ -91,7 +90,7 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
                 })
                 .catch(() => {
                     setStatus(Status.Failed);
-                    trigger(fieldNames.accountInfo);
+                    clearErrors(fieldNames.accountInfo);
                 });
         } else {
             setAccountInfo(undefined);
