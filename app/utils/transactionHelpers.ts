@@ -31,6 +31,7 @@ import {
     AddressBookEntry,
     UpdateBakerStake,
     UpdateBakerRestakeEarnings,
+    TransactionKindString,
 } from './types';
 import {
     getTransactionEnergyCost,
@@ -618,4 +619,28 @@ export function validateBakerStake(
     }
 
     return undefined;
+}
+
+export function isTransferKind(kind: TransactionKindString) {
+    switch (kind) {
+        case TransactionKindString.Transfer:
+        case TransactionKindString.TransferToEncrypted:
+        case TransactionKindString.TransferToPublic:
+        case TransactionKindString.TransferWithSchedule:
+        case TransactionKindString.EncryptedAmountTransfer:
+            return true;
+        default:
+            return false;
+    }
+}
+
+export function isRewardKind(kind: TransactionKindString) {
+    switch (kind) {
+        case TransactionKindString.BakingReward:
+        case TransactionKindString.BlockReward:
+        case TransactionKindString.FinalizationReward:
+            return true;
+        default:
+            return false;
+    }
 }
