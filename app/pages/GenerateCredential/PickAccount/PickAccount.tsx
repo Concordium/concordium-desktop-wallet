@@ -38,7 +38,7 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
     } = useContext(savedStateContext);
     const {
         errors,
-        trigger,
+        setError,
         clearErrors,
         formState,
         watch,
@@ -78,15 +78,19 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
                 .then((loadedAccountInfo) => {
                     // eslint-disable-next-line promise/always-return
                     if (!loadedAccountInfo) {
-                        throw new Error();
+                        setStatus(Status.Failed);
+                        setError(fieldNames.accountInfo, {
+                            type: 'manual',
+                            message: mustBeDeployedMessage,
+                        });
+                    } else {
+                        setStatus(Status.Successful);
+                        setAccountInfo(loadedAccountInfo);
                     }
-
-                    setStatus(Status.Successful);
-                    setAccountInfo(loadedAccountInfo);
                 })
                 .catch(() => {
                     setStatus(Status.Failed);
-                    trigger(fieldNames.accountInfo);
+                    clearErrors(fieldNames.accountInfo);
                 });
         } else {
             setAccountInfo(undefined);
@@ -125,7 +129,8 @@ export default function PickAccount({ onNext }: Props): JSX.Element {
             <div
                 className={clsx(
                     generalStyles.card,
-                    styles.accountListElementPlaceholder
+                    styles.accountListElementPlaceholder,
+                    'textCenter'
                 )}
             >
                 <ConnectionStatusComponent
