@@ -159,8 +159,9 @@ function MultiSignatureCreateProposal({
             onOpen={() => {}}
             onClose={() => dispatch(push(routes.MULTISIGTRANSACTIONS))}
         >
-            An update of this type is already open, and must be submitted or
-            closed, before opening a new update of the same kind.
+            An unsubmitted update of this type already exists, and must be
+            submitted or cancelled, before a new update of the same kind can be
+            created.
         </Modal>
     );
 
