@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
+import { Redirect } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { stringify } from '../../utils/JSONHelper';
@@ -14,6 +15,7 @@ import locations from '../../constants/transferLocations.json';
 import { createSimpleTransferTransaction } from '../../utils/transactionHelpers';
 import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 
+import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
 import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
 
@@ -81,6 +83,17 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [JSON.stringify(account), estimatedFee]
     );
+
+    if (account.signatureThreshold && account.signatureThreshold > 1) {
+        return (
+            <Redirect
+                to={createTransferWithAccountRoute(
+                    TransactionKindId.Simple_transfer,
+                    account
+                )}
+            />
+        );
+    }
 
     return (
         <ExternalTransfer
