@@ -107,16 +107,18 @@ export default function AccountBalanceView(): JSX.Element | null {
         main = (
             <>
                 <h1 className={styles.blueText}>{displayAsGTU(unShielded)}</h1>
-                <SidedRow
-                    className={styles.amountRow}
-                    left="At disposal:"
-                    right={displayAsGTU(amountAtDisposal)}
-                />
-                <SidedRow
-                    className={styles.amountRow}
-                    left="Staked:"
-                    right={displayAsGTU(stakedAmount)}
-                />
+                <div className={styles.details}>
+                    <SidedRow
+                        className={clsx(styles.amountRow, 'mT0')}
+                        left={<span className="mR5">At disposal:</span>}
+                        right={displayAsGTU(amountAtDisposal)}
+                    />
+                    <SidedRow
+                        className={clsx(styles.amountRow, 'mB0')}
+                        left={<span className="mR5">Staked:</span>}
+                        right={displayAsGTU(stakedAmount)}
+                    />
+                </div>
                 {accountBaker && (
                     <div className={styles.bakerRow}>
                         <BakerImage className={styles.bakerImage} height="18" />
