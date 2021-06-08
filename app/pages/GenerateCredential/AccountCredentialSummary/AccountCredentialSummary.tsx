@@ -70,6 +70,7 @@ export default function AccountCredentialSummary({
                     className={clsx('body1', styles.value)}
                     defaultValue={address}
                     name={fieldNames.address}
+                    spellCheck="false"
                     placeholder="Paste the account address here"
                     rules={{
                         required: 'Please enter address',
