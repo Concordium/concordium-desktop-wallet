@@ -139,6 +139,7 @@ export default function UpsertAddress<TAs extends ElementType = typeof Button>({
                         <Form.TextArea
                             className={styles.input}
                             name={fieldNames.address}
+                            spellCheck="false"
                             rules={{
                                 required: 'Address required',
                                 ...commonAddressValidators,
