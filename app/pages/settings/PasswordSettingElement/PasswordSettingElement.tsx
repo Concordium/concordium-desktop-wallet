@@ -4,6 +4,7 @@ import { knex as externalKnex } from 'knex';
 import Form from '~/components/Form/Form';
 import Card from '~/cross-app-components/Card/Card';
 import { invalidateKnexSingleton, knex, setPassword } from '~/database/knex';
+import { passwordValidators } from '~/utils/passwordHelpers';
 import config from '~/database/knexfile';
 
 import styles from './PasswordSettingElement.module.scss';
@@ -85,6 +86,7 @@ export default function PasswordSettingElement({ displayText }: Props) {
                     type="password"
                     className={styles.input}
                     name="password"
+                    rules={passwordValidators}
                     placeholder="Enter new password"
                 />
                 <Form.Input
