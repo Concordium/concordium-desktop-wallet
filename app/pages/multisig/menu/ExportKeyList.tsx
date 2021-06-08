@@ -35,7 +35,8 @@ export default function ExportKeyList(): JSX.Element {
             ([keyType]) =>
                 keyType !== ExportKeyType.Root &&
                 keyType !== ExportKeyType.Level1 &&
-                keyType !== ExportKeyType.Level2
+                keyType !== ExportKeyType.Level2 &&
+                keyType !== ExportKeyType.Genesis
         );
     }
 

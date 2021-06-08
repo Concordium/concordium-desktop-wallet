@@ -10,8 +10,7 @@ interface Props extends UnsignedCredentialDeploymentInformation {
 const CredentialInfoLedgerDetails = (props: Props) => (
     <div className="textLeft">
         <p className="mT0">
-            <b>Verification key:</b>{' '}
-            {props.credentialPublicKeys.keys[0].verifyKey}
+            <b>Public key:</b> {props.credentialPublicKeys.keys[0].verifyKey}
         </p>
         <p>
             <b>Signature threshold:</b> {props.credentialPublicKeys.threshold}

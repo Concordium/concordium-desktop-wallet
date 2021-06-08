@@ -31,7 +31,7 @@ const IPDetails = (info: PublicInformationForIp) => (
             <b>Registration ID (RegId):</b> {info.regId}
         </p>
         <p>
-            <b>Verification key:</b> {info.publicKeys.keys[0].verifyKey}
+            <b>Public key:</b> {info.publicKeys.keys[0].verifyKey}
         </p>
         <p>
             <b>Threshold:</b> {info.publicKeys.threshold}
