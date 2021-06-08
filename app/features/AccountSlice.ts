@@ -519,4 +519,15 @@ export async function updateAllDecrypted(
     return dispatch(updateAccountFields({ address, updatedFields }));
 }
 
+export async function updateShieldedBalance(
+    dispatch: Dispatch,
+    address: string,
+    selfAmounts: string,
+    totalDecrypted: string
+) {
+    const updatedFields = { selfAmounts, totalDecrypted };
+    updateAccount(address, updatedFields);
+    return dispatch(updateAccountFields({ address, updatedFields }));
+}
+
 export default accountsSlice.reducer;

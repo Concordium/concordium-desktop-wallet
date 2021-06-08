@@ -10,10 +10,12 @@ import {
     instanceOfUpdateAccountCredentials,
     UpdateAccountCredentials,
     Transaction,
+    TransferTransaction,
 } from './types';
 import {
     confirmTransaction,
     rejectTransaction,
+    isShieldedBalanceTransaction,
 } from '~/features/TransactionSlice';
 import { getPendingTransactions } from '~/database/TransactionDao';
 import { getStatus, isSuccessfulTransaction } from './transactionHelpers';
@@ -21,6 +23,7 @@ import { getTransactionHash } from './transactionHash';
 import {
     updateAccountInfoOfAddress,
     updateSignatureThreshold,
+    updateShieldedBalance,
 } from '~/features/AccountSlice';
 
 /**
@@ -38,6 +41,24 @@ export function updateAccountCredentialsPerformConsequence(
         dispatch,
         transaction.sender,
         transaction.payload.threshold
+    );
+}
+
+function ShieldedTransferConsequence(
+    dispatch: Dispatch,
+    transaction: TransferTransaction
+) {
+    if (!transaction.encrypted) {
+        throw new Error('Unexpected missing encrypted information');
+    }
+    const { newSelfEncryptedAmount, remainingDecryptedAmount } = parse(
+        transaction.encrypted
+    );
+    return updateShieldedBalance(
+        dispatch,
+        transaction.fromAddress,
+        newSelfEncryptedAmount,
+        remainingDecryptedAmount
     );
 }
 
@@ -105,9 +126,9 @@ export async function getMultiSignatureTransactionStatus(
  */
 export async function monitorTransactionStatus(
     dispatch: Dispatch,
-    transactionHash: string,
-    senderAddress: string
+    transaction: TransferTransaction
 ) {
+    const { transactionHash, fromAddress } = transaction;
     const response = await getStatus(transactionHash);
     switch (response.status) {
         case TransactionStatus.Rejected:
@@ -119,12 +140,18 @@ export async function monitorTransactionStatus(
             const blockHash = Object.keys(response.outcomes)[0];
             const event = Object.values(response.outcomes)[0];
             confirmTransaction(dispatch, transactionHash, blockHash, event);
+            if (isSuccessfulTransaction(event)) {
+                if (isShieldedBalanceTransaction(transaction)) {
+                    ShieldedTransferConsequence(dispatch, transaction);
+                }
+            }
+
             break;
         }
         default:
             throw new Error('Unexpected status was returned by the poller!');
     }
-    updateAccountInfoOfAddress(senderAddress, dispatch);
+    updateAccountInfoOfAddress(fromAddress, dispatch);
 }
 
 /**
@@ -134,11 +161,7 @@ export async function monitorTransactionStatus(
 export default async function listenForTransactionStatus(dispatch: Dispatch) {
     const transfers = await getPendingTransactions();
     transfers.forEach((transfer) =>
-        monitorTransactionStatus(
-            dispatch,
-            transfer.transactionHash,
-            transfer.fromAddress
-        )
+        monitorTransactionStatus(dispatch, transfer)
     );
 
     const allProposals = await getAll();

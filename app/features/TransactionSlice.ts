@@ -146,7 +146,7 @@ function isUnshieldedBalanceTransaction(
 /**
  * Determine whether the transaction affects shielded balance.
  */
-function isShieldedBalanceTransaction(
+export function isShieldedBalanceTransaction(
     transaction: Partial<TransferTransaction>
 ) {
     switch (transaction.transactionKind) {
@@ -260,7 +260,8 @@ export async function addPendingTransaction(
         transaction,
         hash
     );
-    return insertTransactions([convertedTransaction]);
+    await insertTransactions([convertedTransaction]);
+    return convertedTransaction;
 }
 
 /**
