@@ -1,10 +1,6 @@
 .row {
     display: flex;
-
-    .left,
-    .right {
-        width: 50%;
-    }
+    justify-content: space-between;
 }
 
 .left {
