@@ -19,6 +19,7 @@ import {
     CredentialWithIdentityNumber,
     Global,
     instanceOfTransferToPublic,
+    instanceOfTransferToEncrypted,
     instanceOfEncryptedTransfer,
     MultiSignatureTransactionStatus,
 } from '~/utils/types';
@@ -29,6 +30,7 @@ import { globalSelector } from '~/features/GlobalSlice';
 import { getAccountPath } from '~/features/ledger/Path';
 import TransactionDetails from '~/components/TransactionDetails';
 import {
+    makeTransferToEncryptedData,
     makeTransferToPublicData,
     makeEncryptedTransferData,
 } from '~/utils/rustInterface';
@@ -67,6 +69,24 @@ async function attachCompletedPayload(
     credential: CredentialWithIdentityNumber,
     accountInfo: AccountInfo
 ) {
+    if (instanceOfTransferToEncrypted(transaction)) {
+        const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
+        const data = await makeTransferToEncryptedData(
+            transaction.payload.amount,
+            prfKeySeed.toString('hex'),
+            global,
+            accountInfo.accountEncryptedAmount,
+            credential.credentialNumber
+        );
+
+        const payload = {
+            ...transaction.payload,
+            newSelfEncryptedAmount: data.newSelfEncryptedAmount,
+            remainingDecryptedAmount: data.decryptedRemaining,
+        };
+
+        return { ...transaction, payload };
+    }
     if (instanceOfTransferToPublic(transaction)) {
         const prfKeySeed = await ledger.getPrfKey(credential.identityNumber);
         const data = await makeTransferToPublicData(
@@ -81,6 +101,7 @@ async function attachCompletedPayload(
             proof: data.payload.proof,
             index: data.payload.index,
             remainingEncryptedAmount: data.payload.remainingAmount,
+            remainingDecryptedAmount: data.decryptedRemaining,
         };
 
         return { ...transaction, payload };
@@ -105,6 +126,7 @@ async function attachCompletedPayload(
             index: data.payload.index,
             transferAmount: data.payload.transferAmount,
             remainingEncryptedAmount: data.payload.remainingAmount,
+            remainingDecryptedAmount: data.decryptedRemaining,
         };
         return { ...transaction, payload };
     }
@@ -191,12 +213,11 @@ export default function SubmitTransfer({ location }: Props) {
         const response = await sendTransaction(serializedTransaction);
 
         if (response.getValue()) {
-            await addPendingTransaction(transaction, transactionHash);
-            monitorTransactionStatus(
-                dispatch,
-                transactionHash,
-                account.address
+            const convertedTransaction = await addPendingTransaction(
+                transaction,
+                transactionHash
             );
+            monitorTransactionStatus(dispatch, convertedTransaction);
 
             const confirmedStateWithHash = {
                 transactionHash,

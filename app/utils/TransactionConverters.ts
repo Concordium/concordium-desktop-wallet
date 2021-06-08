@@ -18,6 +18,7 @@ import {
 } from './types';
 import { getScheduledTransferAmount } from './transactionHelpers';
 import { collapseFraction, abs } from './basicHelpers';
+import { stringify } from './JSONHelper';
 
 /*
  * Converts the given transaction into the structure, which is used in the database.
@@ -117,6 +118,7 @@ type TypeSpecific = Pick<
     | 'schedule'
     | 'toAddress'
     | 'decryptedAmount'
+    | 'encrypted'
 >;
 
 // Helper function for converting Account Transaction to TransferTransaction.
@@ -138,11 +140,24 @@ function convertTransferToEncrypted(
 ): TypeSpecific {
     const amount = BigInt(transaction.payload.amount);
 
+    const {
+        newSelfEncryptedAmount,
+        remainingDecryptedAmount,
+    } = transaction.payload;
+    if (!newSelfEncryptedAmount || !remainingDecryptedAmount) {
+        throw new Error('Unexpected missing remaining amount');
+    }
+    const encrypted = stringify({
+        newSelfEncryptedAmount,
+        remainingDecryptedAmount,
+    });
+
     return {
         transactionKind: TransactionKindString.TransferToEncrypted,
         subtotal: amount.toString(),
         decryptedAmount: amount.toString(),
         toAddress: transaction.sender,
+        encrypted,
     };
 }
 
@@ -151,11 +166,24 @@ function convertTransferToEncrypted(
 function convertTransferToPublic(transaction: TransferToPublic): TypeSpecific {
     const amount = BigInt(transaction.payload.transferAmount);
 
+    const {
+        remainingEncryptedAmount,
+        remainingDecryptedAmount,
+    } = transaction.payload;
+    if (!remainingEncryptedAmount || !remainingDecryptedAmount) {
+        throw new Error('Unexpected missing remaining amount');
+    }
+    const encrypted = stringify({
+        newSelfEncryptedAmount: remainingEncryptedAmount,
+        remainingDecryptedAmount,
+    });
+
     return {
         transactionKind: TransactionKindString.TransferToPublic,
         subtotal: amount.toString(),
         decryptedAmount: (-amount).toString(),
         toAddress: transaction.sender,
+        encrypted,
     };
 }
 
@@ -181,11 +209,24 @@ function convertEncryptedTransfer(
 ): TypeSpecific {
     const amount = transaction.payload.plainTransferAmount;
 
+    const {
+        remainingEncryptedAmount,
+        remainingDecryptedAmount,
+    } = transaction.payload;
+    if (!remainingEncryptedAmount || !remainingDecryptedAmount) {
+        throw new Error('Unexpected missing remaining amount');
+    }
+    const encrypted = stringify({
+        newSelfEncryptedAmount: remainingEncryptedAmount,
+        remainingDecryptedAmount,
+    });
+
     return {
         transactionKind: TransactionKindString.EncryptedAmountTransfer,
         subtotal: amount.toString(),
         decryptedAmount: (-amount).toString(),
         toAddress: transaction.payload.toAddress,
+        encrypted,
     };
 }
 

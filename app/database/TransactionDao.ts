@@ -109,6 +109,17 @@ export async function getMaxTransactionsIdOfAccount(
     return query?.maxId;
 }
 
+export async function hasPendingTransactions(
+    fromAddress: string
+): Promise<boolean> {
+    const transaction = await (await knex())
+        .select()
+        .table(transactionTable)
+        .where({ status: TransactionStatus.Pending, fromAddress })
+        .first();
+    return Boolean(transaction);
+}
+
 export async function getPendingTransactions(
     orderBy = 'id'
 ): Promise<TransferTransaction[]> {

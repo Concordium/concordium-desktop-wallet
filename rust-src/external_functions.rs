@@ -82,6 +82,16 @@ pub fn create_sec_to_pub_ext(
     }
 }
 
+#[wasm_bindgen(js_name = createTransferToEncryptedData)]
+pub fn create_pub_to_sec_ext(
+    input: &str
+) -> String {
+    match create_pub_to_sec_aux(input) {
+        Ok(s) => s,
+        Err(e) => format!("unable to create transfer to encrypted data due to: {}", e),
+    }
+}
+
 #[wasm_bindgen(js_name = createEncryptedTransferData)]
 pub fn create_encrypted_transfer_ext(
     input: &str

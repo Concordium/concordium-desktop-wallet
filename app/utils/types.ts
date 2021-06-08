@@ -190,6 +190,7 @@ export interface EncryptedTransferPayload {
     plainTransferAmount: string;
     toAddress: string;
     remainingEncryptedAmount?: EncryptedAmount;
+    remainingDecryptedAmount?: string;
     transferAmount?: EncryptedAmount;
     index?: string;
     proof?: string;
@@ -197,11 +198,14 @@ export interface EncryptedTransferPayload {
 
 export interface TransferToEncryptedPayload {
     amount: string;
+    newSelfEncryptedAmount?: EncryptedAmount;
+    remainingDecryptedAmount?: string;
 }
 
 export interface TransferToPublicPayload {
     transferAmount: string;
     remainingEncryptedAmount?: EncryptedAmount;
+    remainingDecryptedAmount?: string;
     index?: string;
     proof?: string;
 }

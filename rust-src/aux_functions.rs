@@ -410,6 +410,52 @@ pub fn create_sec_to_pub_aux(
     Ok(response.to_string())
 }
 
+pub fn create_pub_to_sec_aux(
+    input: &str,
+) -> Fallible<String> {
+    let v: SerdeValue = from_str(input)?;
+
+    let prf_key_string: String = try_get(&v, "prfKey")?;
+    let prf_key: prf::SecretKey<ExampleCurve> = prf::SecretKey::new(generate_bls_key(&prf_key_string)?);
+
+    let account_number: u8 = try_get(&v, "accountNumber")?;
+
+    let scalar: Fr = prf_key.prf_exponent(account_number)?;
+
+    let global_context: GlobalContext<ExampleCurve> = try_get(&v, "global")?;
+
+    let secret_key = elgamal::SecretKey {
+        generator: *global_context.elgamal_generator(),
+        scalar,
+    };
+
+    let incoming_amounts: Vec<EncryptedAmount<ExampleCurve>> = try_get(&v, "incomingAmounts")?;
+    let self_amount: EncryptedAmount<ExampleCurve> = try_get(&v, "encryptedSelfAmount")?;
+    let to_transfer: Amount = try_get(&v, "amount")?;
+
+    let to_transfer_encrypted = encrypted_transfers::encrypt_amount_with_fixed_randomness(&global_context, to_transfer);
+
+    let current_amount = incoming_amounts.iter().fold(self_amount, |acc, amount| encrypted_transfers::aggregate(&acc,amount));
+    let m = 1 << 16;
+    let table = BabyStepGiantStep::new(global_context.encryption_in_exponent_generator(), m);
+
+    let remaining_amount = encrypted_transfers::aggregate(&current_amount, &to_transfer_encrypted);
+
+    let decrypted_remaining =
+        encrypted_transfers::decrypt_amount::<ExampleCurve>(
+            &table,
+            &secret_key,
+            &remaining_amount,
+        );
+
+    let response = json!({
+        "newSelfEncryptedAmount": remaining_amount,
+        "decryptedRemaining": decrypted_remaining,
+        });
+
+    Ok(response.to_string())
+}
+
 pub fn create_encrypted_transfer_aux(
     input: &str,
 ) -> Fallible<String> {
