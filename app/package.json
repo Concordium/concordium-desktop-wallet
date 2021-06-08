@@ -2,13 +2,13 @@
     "name": "concordium-desktop-wallet",
     "productName": "concordium-desktop-wallet",
     "description": "concordium-desktop-wallet",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "main": "./main.prod.js",
     "author": {
-        "name": "Concordium",
-        "email": "contact@concordium.com",
+        "name": "Concordium Software",
+        "email": "support@concordium.software",
         "url": "https://concordium.com"
-    },
+      },
     "scripts": {
         "electron-rebuild": "node ../internals/scripts/ElectronRebuild.js",
         "postinstall": "yarn electron-rebuild install-app-deps"
