@@ -5,6 +5,7 @@ import {
     AttributeKey,
     attributeNamesMap,
     formatAttributeValue,
+    compareAttributes,
 } from '~/utils/identityHelpers';
 import { ClassName, Identity, IdentityObject } from '~/utils/types';
 import Checkbox from '../Form/Checkbox';
@@ -51,6 +52,9 @@ export default function SelectIdentityAttributes({
             {Object.entries(attributes)
                 .filter(([tag]) =>
                     revealableAttributes.includes(tag as AttributeKey)
+                )
+                .sort(([k1], [k2]) =>
+                    compareAttributes(k1 as AttributeKey, k2 as AttributeKey)
                 )
                 .map(([tag, value]) => (
                     <Checkbox

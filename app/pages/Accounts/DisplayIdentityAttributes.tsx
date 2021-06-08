@@ -5,7 +5,11 @@ import attributeNamesJson from '~/constants/attributeNames.json';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
 import SidedRow from '~/components/SidedRow';
 import styles from './Accounts.module.scss';
-import { AttributeKey, formatAttributeValue } from '~/utils/identityHelpers';
+import {
+    AttributeKey,
+    formatAttributeValue,
+    compareAttributes,
+} from '~/utils/identityHelpers';
 
 const attributeNames: Record<string, string> = attributeNamesJson;
 
@@ -46,17 +50,20 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
                         key={credential.value.contents.credId}
                         className={styles.identityAttributesOfCredential}
                     >
-                        {attributeKeys.map((attributeKey: string) => (
-                            <SidedRow
-                                className={styles.identityAttribute}
-                                key={attributeKey}
-                                left={attributeNames[attributeKey]}
-                                right={formatAttributeValue(
-                                    attributeKey as AttributeKey,
-                                    attributes[attributeKey]
-                                )}
-                            />
-                        ))}
+                        {attributeKeys
+                            .map((k) => k as AttributeKey)
+                            .sort(compareAttributes)
+                            .map((attributeKey: AttributeKey) => (
+                                <SidedRow
+                                    className={styles.identityAttribute}
+                                    key={attributeKey}
+                                    left={attributeNames[attributeKey]}
+                                    right={formatAttributeValue(
+                                        attributeKey,
+                                        attributes[attributeKey]
+                                    )}
+                                />
+                            ))}
                     </div>
                 );
             })}

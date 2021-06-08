@@ -11,6 +11,7 @@ import {
     AttributeKey,
     attributeNamesMap,
     formatAttributeValue,
+    compareAttributes,
 } from '~/utils/identityHelpers';
 
 import styles from './IdentityCard.module.scss';
@@ -39,7 +40,6 @@ function statusImage(status: IdentityStatus) {
 
 /**
  * Displays the information of the Identity.
- * TODO: Simplify structure
  */
 function IdentityListElement({
     identity,
@@ -100,6 +100,12 @@ function IdentityListElement({
                             ([k]) =>
                                 showAttributes === true ||
                                 showAttributes.includes(k as AttributeKey)
+                        )
+                        .sort(([k1], [k2]) =>
+                            compareAttributes(
+                                k1 as AttributeKey,
+                                k2 as AttributeKey
+                            )
                         )
                         .map(([k, v]) => (
                             <SidedRow

@@ -1,5 +1,5 @@
 import { formatDate } from './timeHelpers';
-import { ChosenAttributes } from './types';
+import { ChosenAttributes, ChosenAttributesKeys } from './types';
 
 export type AttributeKey = keyof ChosenAttributes;
 
@@ -81,3 +81,13 @@ export const formatAttributeValue = (
             return value;
     }
 };
+
+export function compareAttributes(
+    AttributeTag1: AttributeKey,
+    AttributeTag2: AttributeKey
+) {
+    return (
+        ChosenAttributesKeys[AttributeTag1] -
+        ChosenAttributesKeys[AttributeTag2]
+    );
+}
