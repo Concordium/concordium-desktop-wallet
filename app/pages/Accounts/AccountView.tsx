@@ -48,7 +48,12 @@ export default function AccountView() {
         }
         return noOp;
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [account?.address, account?.status]);
+    }, [
+        account?.address,
+        account?.status,
+        account?.selfAmounts,
+        account?.incomingAmounts,
+    ]);
 
     useEffect(() => {
         if (
