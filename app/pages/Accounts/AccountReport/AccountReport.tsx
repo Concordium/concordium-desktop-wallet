@@ -19,7 +19,12 @@ import Checkbox from '~/components/Form/Checkbox';
 import ErrorModal from '~/components/SimpleErrorModal';
 
 import { saveFile } from '~/utils/FileHelper';
-import { FilterOption, filterKind, getAccountCSV } from './util';
+import {
+    FilterOption,
+    filterKind,
+    filterKindGroup,
+    getAccountCSV,
+} from './util';
 
 import styles from './AccountReport.module.scss';
 
@@ -44,6 +49,17 @@ const transactionTypeFilters: FilterOption[] = [
     ),
     filterKind('Baker Rewards', TransactionKindString.BakingReward),
     filterKind('Block Rewards', TransactionKindString.BlockReward),
+    filterKind(
+        'Update account credentials',
+        TransactionKindString.UpdateCredentials
+    ),
+    filterKindGroup('Baker Transactions', [
+        TransactionKindString.AddBaker,
+        TransactionKindString.RemoveBaker,
+        TransactionKindString.UpdateBakerKeys,
+        TransactionKindString.UpdateBakerRestakeEarnings,
+        TransactionKindString.UpdateBakerStake,
+    ]),
 ];
 
 interface Props {
