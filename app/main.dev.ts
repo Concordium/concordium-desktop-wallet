@@ -14,6 +14,7 @@ import path from 'path';
 import { app, shell, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import fs from 'fs';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import { setClientLocation, grpcCall } from './node/GRPCClient';
@@ -130,14 +131,21 @@ const createWindow = async () => {
     new AppUpdater();
 };
 
+ipcMain.handle(
+    ipcCommands.saveFile,
+    (_event, filepath: string, data: string | Buffer) => {
+        fs.writeFile(filepath, data, (err) => {
+            if (err) {
+                return Promise.reject(new Error(`Unable to save file: ${err}`));
+            }
+            return Promise.resolve(true);
+        });
+    }
+);
+
 // Provides access to the userData path from renderer processes.
 ipcMain.handle(ipcCommands.appGetPath, () => {
     return app.getPath('userData');
-});
-
-// Provides access to file dialog windows from renderer processes.
-ipcMain.handle(ipcCommands.openFileDialog, async (_event, title) => {
-    return dialog.showOpenDialog({ title });
 });
 
 // Provides access to save file dialog from renderer processes.

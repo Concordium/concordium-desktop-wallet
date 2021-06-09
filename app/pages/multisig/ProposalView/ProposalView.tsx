@@ -18,7 +18,7 @@ import {
     instanceOfAccountTransaction,
     TransactionCredentialSignature,
 } from '~/utils/types';
-import { saveFile } from '~/utils/FileHelper';
+import saveFile from '~/utils/FileHelper';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';

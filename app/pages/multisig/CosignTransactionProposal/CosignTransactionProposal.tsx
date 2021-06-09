@@ -35,7 +35,7 @@ import ExpiredTransactionView from '../ExpiredTransactionView';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import styles from './CosignTransactionProposal.module.scss';
 import { signUpdateInstruction, signAccountTransaction } from './util';
-import { saveFile } from '~/utils/FileHelper';
+import saveFile from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
 import { LedgerCallback } from '~/components/ledger/util';
 import findLocalDeployedCredentialWithWallet from '~/utils/credentialHelper';

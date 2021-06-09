@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { encrypt } from '../../utils/encryption';
-import { saveFile } from '../../utils/FileHelper';
+import saveFile from '../../utils/FileHelper';
 import { identitiesSelector } from '../../features/IdentitySlice';
 import { accountsSelector } from '../../features/AccountSlice';
 import { addressBookSelector } from '../../features/AddressBookSlice';

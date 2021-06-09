@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Redirect } from 'react-router';
-import { saveFile } from '~/utils/FileHelper';
+import saveFile from '~/utils/FileHelper';
 import Button from '~/cross-app-components/Button';
 import { insertNewCredential } from '~/features/CredentialSlice';
 import { addExternalAccount } from '~/features/AccountSlice';

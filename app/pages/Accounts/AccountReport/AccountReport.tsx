@@ -18,7 +18,7 @@ import PickAccount from '~/components/PickAccount';
 import Checkbox from '~/components/Form/Checkbox';
 import ErrorModal from '~/components/SimpleErrorModal';
 
-import { saveFile } from '~/utils/FileHelper';
+import saveFile from '~/utils/FileHelper';
 import { FilterOption, filterKind, getAccountCSV } from './util';
 
 import styles from './AccountReport.module.scss';
