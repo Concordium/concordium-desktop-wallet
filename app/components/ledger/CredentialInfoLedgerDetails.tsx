@@ -9,7 +9,8 @@ interface Props extends UnsignedCredentialDeploymentInformation {
 
 const CredentialInfoLedgerDetails = (props: Props) => (
     <div className="textLeft">
-        <p className="mT0">
+        <p className="mT0">Please confirm details on ledger:</p>
+        <p>
             <b>Public key:</b> {props.credentialPublicKeys.keys[0].verifyKey}
         </p>
         <p>
