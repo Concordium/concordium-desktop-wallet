@@ -26,9 +26,7 @@ test('CheckDuplicates should throw an error, if sharing non-common fields', () =
     const fields: Array<keyof typeof x> = ['a', 'b'];
     const commonFields: Array<keyof typeof x> = [];
 
-    expect(() => hasNoDuplicate(x, xs, fields, commonFields)).toThrow(
-        'disallowed'
-    );
+    expect(() => hasNoDuplicate(x, xs, fields, commonFields)).toThrow();
 });
 
 test('CheckDuplicates should return true, if only sharing common fields', () => {
