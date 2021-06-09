@@ -90,7 +90,7 @@ export default function ExportKeyView(): JSX.Element {
         const publicKeyExportJson = JSON.stringify(publicKeyExport);
         await saveFile(publicKeyExportJson, {
             title: 'Save exported public-key',
-            defaultPath: 'public-key.json',
+            defaultPath: `public-key-${exportKeyType}.json`,
         });
     }
 
