@@ -1090,6 +1090,7 @@ export interface TransactionDetails {
     rawRejectReason: RejectReasonWithContents;
     transferSource?: Hex;
     transferDestination?: Hex;
+    inputEncryptedAmount?: EncryptedAmount;
     type: TransactionKindString;
     outcome: string;
 }
