@@ -531,9 +531,7 @@ export function hasNoDuplicate<T>(
     );
 
     if (anyEqual) {
-        throw new Error(
-            'Entry shares shares unique fields with existing elements.'
-        );
+        throw new Error('Entry shares unique fields with existing elements.');
     }
 
     // TODO inform of commonField collision.
