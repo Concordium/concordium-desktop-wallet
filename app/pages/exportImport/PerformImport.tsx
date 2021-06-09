@@ -71,13 +71,13 @@ async function performImport(
         const genesis = await getGenesis();
         if (!genesis) {
             throw new Error(
-                'The imported data exists on a specific blockchain, please connect to a node to load genesis hash.'
+                'The imported data exists on a specific network, please connect to a node on the same network before importing the data.'
             );
         }
 
         if (genesis.genesisBlock !== importedData.genesis) {
             throw new Error(
-                'The imported data was created on a different blockchain.'
+                'The imported data was created on a different network.'
             );
         }
     }
