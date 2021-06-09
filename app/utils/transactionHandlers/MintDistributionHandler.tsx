@@ -14,25 +14,21 @@ import {
     MintDistribution,
     MultiSignatureTransaction,
     UpdateInstruction,
-    UpdateInstructionPayload,
     UpdateType,
 } from '../types';
 import { serializeMintDistribution } from '../UpdateSerialization';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Mint Distribution';
 
 type TransactionType = UpdateInstruction<MintDistribution>;
 
 export default class MintDistributionHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isMintDistribution(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isMintDistribution);
     }
 
     async createTransaction(
@@ -93,11 +89,5 @@ export default class MintDistributionHandler
         return authorizations.mintDistribution;
     }
 
-    print = () => undefined;
-
     update = UpdateMintDistribution;
-
-    title = `Foundation Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

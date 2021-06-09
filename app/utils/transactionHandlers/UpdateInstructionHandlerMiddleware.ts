@@ -1,6 +1,7 @@
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { Authorizations, BlockSummary } from '~/node/NodeApiTypes';
 import {
+    TransactionExportType,
     UpdateComponent,
     UpdateInstructionHandler,
 } from '~/utils/transactionTypes';
@@ -40,6 +41,16 @@ export default class UpdateInstructionHandlerTypeMiddleware<T>
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    getFileNameForExport(
+        transaction: UpdateInstruction<UpdateInstructionPayload>,
+        exportType: TransactionExportType
+    ): string {
+        return this.base.getFileNameForExport(
+            this.base.confirmType(transaction),
+            exportType
+        );
     }
 
     createTransaction(
