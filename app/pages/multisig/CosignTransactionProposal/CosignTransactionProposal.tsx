@@ -124,6 +124,9 @@ function CosignTransactionProposal({
         try {
             const fileSaved = await saveFile(signedTransactionJson, {
                 title: 'Export signed transaction',
+                defaultPath: `${transactionHandler.type
+                    .toLowerCase()
+                    .replace(/\s/g, '-')}_signature.json`,
             });
 
             if (fileSaved) {

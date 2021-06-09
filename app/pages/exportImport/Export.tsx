@@ -68,6 +68,7 @@ export default function Export() {
         try {
             const completed = await saveFile(JSON.stringify(encrypted), {
                 title: 'Export your data',
+                defaultPath: 'wallet-export.json',
             });
             if (completed) {
                 setModalMessage('Export was successful');

@@ -248,6 +248,12 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                         () =>
                                             saveFile(proposal.transaction, {
                                                 title: 'Export transaction',
+                                                defaultPath: `${handler.type
+                                                    .toLowerCase()
+                                                    .replace(
+                                                        /\s/g,
+                                                        '-'
+                                                    )}_proposal.json`,
                                             })
                                         // TODO Handle failure
                                     }
