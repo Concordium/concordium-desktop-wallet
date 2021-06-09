@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { push } from 'connected-react-router';
 import { useParams } from 'react-router';
-
-import { FieldValues } from 'react-hook-form';
+import { FieldValues, useForm } from 'react-hook-form';
 import {
     AuthorizationKeysUpdate,
     HigherLevelKeyUpdate,
@@ -21,7 +20,6 @@ import { parse, stringify } from '~/utils/JSONHelper';
 import Form from '~/components/Form';
 import {
     getDefaultExpiry,
-    getNow,
     secondsSinceUnixEpoch,
     TimeConstants,
 } from '~/utils/timeHelpers';
@@ -50,9 +48,10 @@ function MultiSignatureCreateProposal({
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
     const dispatch = useDispatch();
-    const [effective, setEffective] = useState<Date | undefined>(
-        new Date(getNow() + 5 * TimeConstants.Minute)
-    );
+    const form = useForm<FieldValues & MultiSignatureCreateProposalForm>({
+        mode: 'onTouched',
+    });
+    const { effectiveTime: effective } = form.watch(['effectiveTime']);
 
     // TODO Add support for account transactions.
     const { updateType } = useParams<{ updateType: string }>();
@@ -226,6 +225,7 @@ function MultiSignatureCreateProposal({
             {RestrictionModal}
             <h3 className={styles.subHeader}>Transaction details</h3>
             <Form<FieldValues & MultiSignatureCreateProposalForm>
+                formMethods={form}
                 className={styles.details}
                 onSubmit={handleSubmit}
             >
@@ -243,8 +243,12 @@ function MultiSignatureCreateProposal({
                             <Form.Timestamp
                                 name="effectiveTime"
                                 label="Effective Time"
-                                onChange={setEffective}
-                                defaultValue={effective}
+                                defaultValue={
+                                    new Date(
+                                        getDefaultExpiry().getTime() +
+                                            5 * TimeConstants.Minute
+                                    )
+                                }
                                 rules={{
                                     required: 'Effective time is required',
                                     validate: futureDate(
