@@ -7,5 +7,6 @@
     "grpcSetLocation": "GRPC_SET_LOCATION",
     "grpcCall": "GRPC_CALL",
     "grpcNodeConsensusAndGlobal": "GRPC_NODE_CONSENSUS_GLOBAL",
-    "openUrl": "OPEN_URL"
+    "openUrl": "OPEN_URL",
+    "isValidBase58": "IS_VALID_BASE_58"
 }

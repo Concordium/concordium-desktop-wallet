@@ -1,25 +1,22 @@
-import bs58check from 'bs58check';
 import { RegisterOptions, Validate } from 'react-hook-form';
 import { Account, AccountInfo } from './types';
+import ipcCommands from '../constants/ipcCommands.json';
 
 /**
  * Verifies whether an address string is a valid Base58check string.
  * @param address the string to check whether is a valid Base58check string or not
  * @returns true if the address is a valid Base58check string, otherwise false
  */
-export function isValidAddress(address: string): boolean {
+export async function isValidAddress(address: string): Promise<boolean> {
     if (!address) {
         return false;
     }
 
-    try {
-        // This call throws an error if the input is not a valid
-        bs58check.decode(address);
-    } catch (e) {
-        return false;
-    }
-
-    return true;
+    const isAddressValid = await window.ipcRenderer.invoke(
+        ipcCommands.isValidBase58,
+        address
+    );
+    return isAddressValid;
 }
 
 const addressFormat: Validate = (address: string) =>

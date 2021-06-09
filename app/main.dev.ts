@@ -15,6 +15,7 @@ import { app, shell, BrowserWindow, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import fs from 'fs';
+import bs58check from 'bs58check';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import { setClientLocation, grpcCall } from './node/GRPCClient';
@@ -130,6 +131,16 @@ const createWindow = async () => {
     // eslint-disable-next-line
     new AppUpdater();
 };
+
+ipcMain.handle(ipcCommands.isValidBase58, (_event, address: string) => {
+    try {
+        // This call throws an error if the input is not a valid
+        bs58check.decode(address);
+    } catch (e) {
+        return Promise.resolve(false);
+    }
+    return Promise.resolve(true);
+});
 
 ipcMain.handle(
     ipcCommands.saveFile,
