@@ -1165,6 +1165,7 @@ export interface ExportData {
     addressBook: AddressBookEntry[];
     credentials: Credential[];
     wallets: WalletEntry[];
+    genesis?: string;
 }
 
 interface RejectReasonWithContents {

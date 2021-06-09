@@ -531,7 +531,9 @@ export function hasNoDuplicate<T>(
     );
 
     if (anyEqual) {
-        throw new Error('disallowed'); // TODO use custom error
+        throw new Error(
+            'Entry shares shares unique fields with existing elements.'
+        );
     }
 
     // TODO inform of commonField collision.

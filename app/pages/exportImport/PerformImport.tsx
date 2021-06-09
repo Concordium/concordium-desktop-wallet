@@ -24,13 +24,14 @@ import {
     credentialsSelector,
     loadCredentials,
 } from '~/features/CredentialSlice';
-import MessageModal from '~/components/MessageModal';
+import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { hasNoDuplicate, importWallets } from '~/utils/importHelpers';
 import { partition } from '~/utils/basicHelpers';
 import PageLayout from '~/components/PageLayout';
 import Columns from '~/components/Columns';
 import styles from './ExportImport.module.scss';
 import { getAllWallets } from '~/database/WalletDao';
+import { getGenesis } from '~/database/GenesisDao';
 
 type AddressBookEntryKey = keyof AddressBookEntry;
 
@@ -66,24 +67,51 @@ async function performImport(
     existingData: ExportData,
     dispatch: Dispatch
 ) {
+    if (importedData.genesis) {
+        const genesis = await getGenesis();
+        if (!genesis) {
+            throw new Error(
+                'The imported data exists on a specific blockchain, please connect to a node to load genesis hash.'
+            );
+        }
+
+        if (genesis.genesisBlock !== importedData.genesis) {
+            throw new Error(
+                'The imported data was created on a different blockchain.'
+            );
+        }
+    }
+
     const existingWallets = await getAllWallets();
     const existingDataWithWallets = {
         ...existingData,
         wallets: existingWallets,
     };
 
-    await importWallets(
-        existingDataWithWallets,
-        importedData.wallets,
-        importedData.identities,
-        importedData.accounts,
-        importedData.credentials
-    );
+    try {
+        await importWallets(
+            existingDataWithWallets,
+            importedData.wallets,
+            importedData.identities,
+            importedData.accounts,
+            importedData.credentials
+        );
+    } catch (e) {
+        throw new Error(
+            'The imported data is not compatible with existing data.'
+        );
+    }
 
-    await importAddressBookEntries(
-        importedData.addressBook,
-        existingData.addressBook
-    );
+    try {
+        await importAddressBookEntries(
+            importedData.addressBook,
+            existingData.addressBook
+        );
+    } catch (e) {
+        throw new Error(
+            'The imported address book is not compatible with existing address book.'
+        );
+    }
 
     await loadIdentities(dispatch);
     await loadAccounts(dispatch);
@@ -105,7 +133,7 @@ export default function PerformImport({ location }: Props) {
     const addressBook = useSelector(addressBookSelector);
     const credentials = useSelector(credentialsSelector);
 
-    const [open, setOpen] = useState(false);
+    const [error, setError] = useState<string>();
     const [started, setStarted] = useState(false);
 
     useEffect(() => {
@@ -121,7 +149,7 @@ export default function PerformImport({ location }: Props) {
                     wallets: [],
                 },
                 dispatch
-            ).catch(() => setOpen(true));
+            ).catch((e) => setError(e.message));
         }
     }, [
         importedData,
@@ -154,11 +182,11 @@ export default function PerformImport({ location }: Props) {
 
     return (
         <>
-            <MessageModal
-                title="Unable to complete import"
-                buttonText="Okay"
-                onClose={() => dispatch(push(routes.EXPORTIMPORT))}
-                open={open}
+            <SimpleErrorModal
+                header="Unable to complete import"
+                content={error}
+                onClick={() => dispatch(push(routes.EXPORTIMPORT))}
+                show={Boolean(error)}
             />
             <PageLayout>
                 <PageLayout.Header>
