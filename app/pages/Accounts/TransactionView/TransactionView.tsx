@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 import TransactionListElement from '../TransactionListElement';
 import { TransferTransaction, TransactionStatus } from '~/utils/types';
 import { isFailed } from '~/utils/transactionHelpers';
@@ -48,7 +49,7 @@ function CopiableListElement({
 function displayRejectReason(transaction: TransferTransaction) {
     if (isFailed(transaction)) {
         return (
-            <p className={styles.errorMessage}>
+            <p className={clsx(styles.errorMessage, 'mT0')}>
                 Failed:{' '}
                 {transaction.status === TransactionStatus.Rejected
                     ? 'Transaction was rejected'
@@ -72,11 +73,13 @@ function TransactionView({ transaction, returnFunction }: Props) {
             />
             <TransactionListElement transaction={transaction} />
             {displayRejectReason(transaction)}
-            <CopiableListElement
-                title="From Address:"
-                value={`${transaction.fromAddress}`}
-                note={transaction.fromAddressName}
-            />
+            {!!transaction.fromAddress && (
+                <CopiableListElement
+                    title="From Address:"
+                    value={`${transaction.fromAddress}`}
+                    note={transaction.fromAddressName}
+                />
+            )}
             {transaction.toAddress ? (
                 <CopiableListElement
                     title="To Address:"
