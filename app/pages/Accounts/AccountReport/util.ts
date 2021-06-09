@@ -11,6 +11,26 @@ import { dateFromTimeStamp, getISOFormat } from '~/utils/timeHelpers';
 
 type Filter = (transaction: TransferTransaction) => boolean;
 
+function calculateTotal(
+    transaction: TransferTransaction,
+    address: string
+): string {
+    const outgoing = transaction.fromAddress === address;
+    if (!outgoing) {
+        return transaction.subtotal || '0';
+    }
+    if (
+        TransactionKindString.TransferToPublic === transaction.transactionKind
+    ) {
+        return (
+            BigInt(transaction.subtotal) - BigInt(transaction.cost || 0)
+        ).toString();
+    }
+    return (
+        -BigInt(transaction.subtotal) - BigInt(transaction.cost || 0)
+    ).toString();
+}
+
 export interface FilterOption {
     filter: Filter;
     label: string;
@@ -29,18 +49,31 @@ export function filterKind(
     };
 }
 
+export function filterKindGroup(
+    label: string,
+    kinds: TransactionKindString[]
+): FilterOption {
+    return {
+        label,
+        key: label,
+        filter: (transaction: TransferTransaction) =>
+            kinds.includes(transaction.transactionKind),
+    };
+}
+
 const getName = (i: string[]) => i[0];
 const getLabel = (i: string[]) => i[1];
 const exportedFields = Object.entries(exportTransactionFields);
 
 // Parse a transaction into a array of values, corresponding to those of the exported fields.
-function parseTransaction(transaction: TransferTransaction) {
+function parseTransaction(transaction: TransferTransaction, address: string) {
     const fieldValues: Record<string, string> = {};
     Object.entries(transaction).forEach(([key, value]) => {
         fieldValues[key] = value?.toString();
     });
 
     fieldValues.dateTime = getISOFormat(transaction.blockTime);
+    fieldValues.total = calculateTotal(transaction, address)?.toString();
 
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }
@@ -65,7 +98,7 @@ export async function getAccountCSV(
     transactions = await attachNames(transactions);
 
     return toCSV(
-        transactions.map(parseTransaction),
+        transactions.map((t) => parseTransaction(t, account.address)),
         exportedFields.map(getLabel)
     );
 }
