@@ -75,19 +75,16 @@ const createWindow = async () => {
         width: 4096,
         height: 2912,
         webPreferences:
-            (process.env.NODE_ENV === 'development' ||
-                process.env.E2E_BUILD === 'true') &&
-            process.env.ERB_SECURE !== 'true'
+            process.env.NODE_ENV === 'development'
                 ? {
                       nodeIntegration: true,
                       webviewTag: true,
                   }
                 : {
-                      preload: path.join(__dirname, 'dist/renderer.prod.js'),
+                      preload: path.join(__dirname, 'preload.js'),
                       webviewTag: true,
-                      nodeIntegration: false,
-                      contextIsolation: true,
-                      devTools: false,
+                      nodeIntegration: true,
+                      devTools: true,
                   },
     });
 
