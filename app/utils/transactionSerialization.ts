@@ -370,10 +370,10 @@ export function serializeTransaction(
  * Returns the transactionHash, which includes the signature, and is used as the
  * submissionId on chain.
  */
-export function getAccountTransactionHash(
+export async function getAccountTransactionHash(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
-) {
+): Promise<Buffer> {
     const serialized = serializeUnversionedTransaction(transaction, signature);
     return hashSha256(serialized);
 }
@@ -381,7 +381,7 @@ export function getAccountTransactionHash(
 /**
  * Returns the "digest to be signed"", which is the hash that is signed.
  */
-export function getAccountTransactionSignDigest(
+export async function getAccountTransactionSignDigest(
     transaction: AccountTransaction
 ) {
     const payload = serializeTransferPayload(

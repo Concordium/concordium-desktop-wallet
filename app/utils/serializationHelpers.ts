@@ -1,5 +1,7 @@
-import * as crypto from 'crypto';
+// TODO Uncertain if bs58check is a node dependency or not.
 import * as bs58check from 'bs58check';
+import ipcCommands from '../constants/ipcCommands.json';
+
 import {
     VerifyKey,
     YearMonth,
@@ -52,12 +54,9 @@ export function encodeWord64(value: bigint): Buffer {
     return Buffer.from(new Uint8Array(arr));
 }
 
-export function hashSha256(...inputs: Indexable[]): Buffer {
-    const hash = crypto.createHash('sha256');
-
-    inputs.forEach((input) => hash.update(input));
-
-    return hash.digest();
+export async function hashSha256(...inputs: Indexable[]): Promise<Buffer> {
+    const hash = await window.ipcRenderer.invoke(ipcCommands.sha256, inputs);
+    return Buffer.from(hash);
 }
 
 export function parseHexString(hexString: string): Buffer {

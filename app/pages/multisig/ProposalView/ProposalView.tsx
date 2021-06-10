@@ -115,10 +115,15 @@ function ProposalView({ proposal }: ProposalViewProps) {
     }, [signatures]);
 
     const handler = findHandler(transaction);
-    const transactionSignDigest = useMemo(
-        () => getTransactionSignDigest(transaction),
-        [transaction]
-    );
+    const [
+        transactionSignDigest,
+        setTransactionSignDigest,
+    ] = useState<string>();
+    useEffect(() => {
+        getTransactionSignDigest(transaction)
+            .then((digest) => setTransactionSignDigest(digest))
+            .catch(() => {});
+    }, [transaction]);
 
     function submitTransaction() {
         dispatch(
@@ -139,6 +144,10 @@ function ProposalView({ proposal }: ProposalViewProps) {
     const missingSignatures = signatures.length !== proposal.threshold;
 
     const isOpen = proposal.status === MultiSignatureTransactionStatus.Open;
+
+    if (!transactionSignDigest) {
+        return null;
+    }
 
     return (
         <MultiSignatureLayout

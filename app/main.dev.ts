@@ -18,6 +18,7 @@ import fs from 'fs';
 import bs58check from 'bs58check';
 import axios from 'axios';
 import * as https from 'https';
+import * as crypto from 'crypto';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import { setClientLocation, grpcCall } from './node/GRPCClient';
@@ -27,6 +28,7 @@ import { JsonResponse } from './proto/concordium_p2p_rpc_pb';
 import { getTargetNet, Net } from './utils/ConfigHelper';
 import urls from './constants/urls.json';
 import { walletProxytransactionLimit } from './constants/externalConstants.json';
+import { getDatabaseFilename } from './database/knexfile';
 
 export default class AppUpdater {
     constructor() {
@@ -67,10 +69,7 @@ const installExtensions = async () => {
 };
 
 const createWindow = async () => {
-    if (
-        process.env.NODE_ENV === 'development' ||
-        process.env.DEBUG_PROD === 'true'
-    ) {
+    if (process.env.DEBUG_PROD === 'true') {
         await installExtensions();
     }
 
@@ -84,6 +83,7 @@ const createWindow = async () => {
         webPreferences:
             process.env.NODE_ENV === 'development'
                 ? {
+                      preload: path.join(__dirname, 'preload.js'),
                       nodeIntegration: true,
                       webviewTag: true,
                   }
@@ -155,6 +155,28 @@ const walletProxy = axios.create({
     baseURL: getWalletProxy(),
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ipcMain.handle(ipcCommands.databaseExists, async (_event) => {
+    console.log('Doing stuff');
+    const databaseFilename = await getDatabaseFilename();
+    if (!fs.existsSync(databaseFilename)) {
+        console.log('No database');
+        return false;
+    }
+    console.log('Database');
+    const stats = fs.statSync(databaseFilename);
+    return stats.size > 0;
+});
+
+ipcMain.handle(
+    ipcCommands.sha256,
+    async (_event, data: (Buffer | Uint8Array)[]) => {
+        const hash = crypto.createHash('sha256');
+        data.forEach((input) => hash.update(input));
+        return hash.digest();
+    }
+);
+
 ipcMain.handle(
     ipcCommands.getTransactions,
     async (_event, address: string, id: number) => {
@@ -196,6 +218,16 @@ ipcMain.handle(ipcCommands.createAxios, (_event, baseUrl) => {
     return axios.create({
         baseURL: baseUrl,
     });
+});
+
+ipcMain.handle(ipcCommands.decodeBase58, (_event, address: string) => {
+    try {
+        // This call throws an error if the input is not a valid
+        const decoded = bs58check.decode(address);
+        return { successful: true, decoded };
+    } catch (e) {
+        return { successful: false, error: e };
+    }
 });
 
 ipcMain.handle(ipcCommands.isValidBase58, (_event, address: string) => {

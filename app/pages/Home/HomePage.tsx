@@ -1,31 +1,15 @@
 import React, { useEffect } from 'react';
-import fs from 'fs';
 import { Route, Switch } from 'react-router';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import routes from '~/constants/routes.json';
-import { getDatabaseFilename } from '~/database/knexfile';
 import PageLayout from '~/components/PageLayout';
 import { loadAllSettings } from '~/database/SettingsDao';
 import SelectPassword from './SelectPassword';
 import NewUserInit from './NewUserInit';
 import PasswordHasBeenSet from './PasswordHasBeenSet';
 import Unlock from './Unlock';
-
-/**
- * Checks whether the database has already been created or not.
- * We cannot just check whether the file exists, as the knex configuration
- * will have created an empty file, therefore the check actually checks
- * whether the file has a non-empty size.
- */
-async function databaseExists(): Promise<boolean> {
-    const databaseFilename = await getDatabaseFilename();
-    if (!fs.existsSync(databaseFilename)) {
-        return false;
-    }
-    const stats = fs.statSync(databaseFilename);
-    return stats.size > 0;
-}
+import databaseExists from './util';
 
 export default function HomePage() {
     const dispatch = useDispatch();

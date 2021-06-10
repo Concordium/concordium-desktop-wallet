@@ -86,8 +86,11 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
     useIpcRendererEvent(ipcRendererCommands.didFinishLoad, handleResize);
 
     const handleAccept = useCallback(() => {
-        storeTerms();
-        dispatch(acceptTerms());
+        storeTerms()
+            .then(() => {
+                return dispatch(acceptTerms());
+            })
+            .catch(() => {});
     }, [dispatch]);
 
     useLayoutEffect(() => {

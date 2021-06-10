@@ -1,4 +1,3 @@
-import { ipcRenderer } from 'electron';
 import ipcCommands from '../constants/ipcCommands.json';
 
 export default async function printContent(target: HTMLIFrameElement) {
@@ -8,7 +7,7 @@ export default async function printContent(target: HTMLIFrameElement) {
     }
     let error;
     try {
-        error = await ipcRenderer.invoke(
+        error = await window.ipcRenderer.invoke(
             ipcCommands.print,
             encodeURI(window.document.body.outerHTML)
         );

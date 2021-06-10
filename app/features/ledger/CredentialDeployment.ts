@@ -243,6 +243,8 @@ export async function signCredentialDeploymentOnExistingAccount(
 ): Promise<Buffer> {
     const accountBuffer = Buffer.alloc(1 + 32);
     accountBuffer.writeUInt8(1, 0);
+
+    // TODO Figure out if this has to be async.
     putBase58Check(accountBuffer, 1, accountAddress);
     return signCredentialDeployment(
         transport,

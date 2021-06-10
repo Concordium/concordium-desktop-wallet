@@ -71,7 +71,7 @@ async function HandleAccountTransactionSignatureFile(
 
     const validSignature = await ed.verify(
         signature[signatureIndex],
-        getTransactionSignDigest(proposal),
+        await getTransactionSignDigest(proposal),
         verificationKey.verifyKey
     );
 
@@ -105,7 +105,7 @@ async function isSignatureValid(
     proposal: UpdateInstruction,
     signature: UpdateInstructionSignature
 ): Promise<boolean> {
-    const transactionSignatureDigest = getTransactionSignDigest(proposal);
+    const transactionSignatureDigest = await getTransactionSignDigest(proposal);
     return ed.verify(
         signature.signature,
         transactionSignatureDigest,
