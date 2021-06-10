@@ -40,12 +40,14 @@ export default function Unlock() {
 
     const unlock = useCallback(
         async ({ password }: UnlockForm) => {
+            await window.ipcRenderer.invoke('setPassword', password);
             setPassword(password);
             invalidateKnexSingleton();
 
             try {
                 await loadAllSettings();
                 await migrate();
+                await window.ipcRenderer.invoke('dbMigrate');
                 await initApplication(dispatch);
                 dispatch(push({ pathname: routes.ACCOUNTS }));
             } catch (error) {

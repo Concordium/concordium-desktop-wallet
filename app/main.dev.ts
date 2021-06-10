@@ -29,7 +29,28 @@ import { getTargetNet, Net } from './utils/ConfigHelper';
 import urls from './constants/urls.json';
 import { walletProxytransactionLimit } from './constants/externalConstants.json';
 import { getDatabaseFilename } from './database/knexfile';
-import { EncryptedData } from './utils/types';
+import {
+    Account,
+    EncryptedData,
+    Hex,
+    MultiSignatureTransaction,
+    Setting,
+    TransactionKindString,
+    TransactionStatus,
+    TransferTransaction,
+    WalletEntry,
+    WalletType,
+} from './utils/types';
+import { knex, setPassword } from './database/knex';
+import {
+    walletTable,
+    transactionTable,
+    settingsTable,
+    multiSignatureProposalTable,
+} from './constants/databaseNames.json';
+import migrate from './database/migration';
+import { convertBooleans } from './database/TransactionDao';
+import { chunkArray, partition } from './utils/basicHelpers';
 
 export default class AppUpdater {
     constructor() {
@@ -155,6 +176,161 @@ function getWalletProxy() {
 const walletProxy = axios.create({
     baseURL: getWalletProxy(),
 });
+
+// TODO Refactor.
+ipcMain.handle('setPassword', (_event, password: string) => {
+    setPassword(password);
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ipcMain.handle('dbMigrate', (_event) => {
+    migrate();
+});
+
+ipcMain.handle(
+    'dbInsertMultiSignatureProposal',
+    async (_event, transaction: Partial<MultiSignatureTransaction>) => {
+        return (await knex())
+            .table(multiSignatureProposalTable)
+            .insert(transaction);
+    }
+);
+
+ipcMain.handle(
+    'dbUpdateMultiSignatureProposal',
+    async (_event, multiSigTransaction: MultiSignatureTransaction) => {
+        return (await knex())(multiSignatureProposalTable)
+            .where({ id: multiSigTransaction.id })
+            .update(multiSigTransaction);
+    }
+);
+
+ipcMain.handle('dbUpdateSettingsEntry', async (_event, setting: Setting) => {
+    return (await knex())(settingsTable)
+        .where({ name: setting.name })
+        .update(setting);
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ipcMain.handle('dbGetPendingTransactions', async (_event) => {
+    const transactions = await (await knex())
+        .select()
+        .table(transactionTable)
+        .where({ status: TransactionStatus.Pending })
+        .orderBy('id');
+    return convertBooleans(transactions);
+});
+
+ipcMain.handle('dbGetMaxTransactionId', async (_event, account: Account) => {
+    const { address } = account;
+    const query = await (await knex())
+        .table<TransferTransaction>(transactionTable)
+        .where({ toAddress: address })
+        .orWhere({ fromAddress: address })
+        .max<{ maxId: TransferTransaction['id'] }>('id as maxId')
+        .first();
+    return query?.maxId;
+});
+
+ipcMain.handle(
+    'dbGetTransactionsOfAccount',
+    async (
+        _event,
+        account: Account,
+        filteredTypes: TransactionKindString[],
+        limit: number
+    ) => {
+        const { address } = account;
+        const transactions = await (await knex())
+            .select()
+            .table(transactionTable)
+            .whereNotIn('transactionKind', filteredTypes)
+            .andWhere({ toAddress: address })
+            .orWhere({ fromAddress: address })
+            .orderBy('blockTime', 'desc')
+            .orderBy('id', 'desc')
+            .limit(limit + 1);
+        return {
+            transactions: convertBooleans(transactions).slice(0, limit),
+            more: transactions.length > limit,
+        };
+    }
+);
+
+async function updateTransaction(
+    identifier: Record<string, unknown>,
+    updatedValues: Partial<TransferTransaction>
+) {
+    return (await knex())(transactionTable)
+        .where(identifier)
+        .update(updatedValues);
+}
+
+ipcMain.handle(
+    'dbUpdateTransaction',
+    async (
+        _event,
+        identifier: Record<string, unknown>,
+        updatedValues: Partial<TransferTransaction>
+    ) => {
+        return updateTransaction(identifier, updatedValues);
+    }
+);
+
+ipcMain.handle(
+    'dbInsertTransactions',
+    async (_event, transactions: Partial<TransferTransaction>[]) => {
+        const table = (await knex())(transactionTable);
+        const existingTransactions: TransferTransaction[] = await table.select();
+        const [updates, additions] = partition(transactions, (t) =>
+            existingTransactions.some(
+                (t_) => t.transactionHash === t_.transactionHash
+            )
+        );
+
+        const additionChunks = chunkArray(additions, 50);
+        for (let i = 0; i < additionChunks.length; i += 1) {
+            // eslint-disable-next-line no-await-in-loop
+            await table.insert(additionChunks[i]);
+        }
+
+        await Promise.all(
+            updates.map(async (transaction) => {
+                const { transactionHash, ...otherFields } = transaction;
+                return updateTransaction(
+                    { transactionHash: transaction.transactionHash },
+                    otherFields
+                );
+            })
+        );
+
+        return additions;
+    }
+);
+
+ipcMain.handle(ipcCommands.dbSelectAll, async (_event, tableName: string) => {
+    const table = (await knex())(tableName);
+    return table.select();
+});
+
+ipcMain.handle(ipcCommands.dbGetWalletId, async (_event, identifier: Hex) => {
+    const table = (await knex())(walletTable);
+    const result: WalletEntry = await table
+        .where('identifier', identifier)
+        .first();
+    if (result === undefined) {
+        return undefined;
+    }
+    return result.id;
+});
+
+ipcMain.handle(
+    ipcCommands.dbInsertWallet,
+    async (_event, identifier: Hex, type: WalletType) => {
+        const table = (await knex())(walletTable);
+        return (await table.insert({ identifier, type }))[0];
+    }
+);
 
 const encoding = 'base64';
 
@@ -289,13 +465,10 @@ ipcMain.handle(
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 ipcMain.handle(ipcCommands.databaseExists, async (_event) => {
-    console.log('Doing stuff');
     const databaseFilename = await getDatabaseFilename();
     if (!fs.existsSync(databaseFilename)) {
-        console.log('No database');
         return false;
     }
-    console.log('Database');
     const stats = fs.statSync(databaseFilename);
     return stats.size > 0;
 });
@@ -383,11 +556,6 @@ ipcMain.handle(
         });
     }
 );
-
-// Provides access to the userData path from renderer processes.
-ipcMain.handle(ipcCommands.appGetPath, () => {
-    return app.getPath('userData');
-});
 
 // Provides access to save file dialog from renderer processes.
 ipcMain.handle(ipcCommands.saveFileDialog, async (_event, opts) => {

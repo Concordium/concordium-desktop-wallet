@@ -26,6 +26,8 @@ export default function SelectPassword() {
     const handleSubmit: SubmitHandler<PasswordForm> = useCallback(
         async (values) => {
             setPassword(values.password);
+            await window.ipcRenderer.invoke('setPassword', values.password);
+            await window.ipcRenderer.invoke('dbMigrate');
             await migrate();
             await initApplication(dispatch);
             dispatch(push({ pathname: routes.HOME_PASSWORD_SET }));

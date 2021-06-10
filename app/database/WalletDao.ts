@@ -1,14 +1,13 @@
 import { Hex, WalletEntry, WalletType } from '../utils/types';
-import { knex } from './knex';
 import { walletTable } from '../constants/databaseNames.json';
+import ipcCommands from '../constants/ipcCommands.json';
 
 /**
  * Extracts all wallet entries from the database
- * @returns all wallet enetries
+ * @returns all rows in the wallet table
  */
 export async function getAllWallets(): Promise<WalletEntry[]> {
-    const table = (await knex())(walletTable);
-    return table.select();
+    return window.ipcRenderer.invoke(ipcCommands.dbSelectAll, walletTable);
 }
 
 /**
@@ -17,14 +16,7 @@ export async function getAllWallets(): Promise<WalletEntry[]> {
  * @returns primary key for the wallet entry
  */
 export async function getId(identifier: Hex): Promise<number | undefined> {
-    const table = (await knex())(walletTable);
-    const result: WalletEntry = await table
-        .where('identifier', identifier)
-        .first();
-    if (result === undefined) {
-        return undefined;
-    }
-    return result.id;
+    return window.ipcRenderer.invoke(ipcCommands.dbGetWalletId, identifier);
 }
 
 /**
@@ -33,7 +25,13 @@ export async function getId(identifier: Hex): Promise<number | undefined> {
  * @param identifier the pairing identifier that identities the wallet uniquely
  * @returns the id of the inserted row
  */
-export async function insertWallet(identifier: Hex, type: WalletType) {
-    const table = (await knex())(walletTable);
-    return (await table.insert({ identifier, type }))[0];
+export async function insertWallet(
+    identifier: Hex,
+    type: WalletType
+): Promise<number> {
+    return window.ipcRenderer.invoke(
+        ipcCommands.dbInsertWallet,
+        identifier,
+        type
+    );
 }

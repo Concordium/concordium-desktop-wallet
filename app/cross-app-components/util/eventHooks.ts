@@ -1,5 +1,5 @@
 import { RefCallback, useCallback, useEffect, useState } from 'react';
-import { ipcRenderer } from 'electron';
+import { ipcRenderer } from '~/global';
 
 /**
  * @description
@@ -67,10 +67,10 @@ export const useIpcRendererEvent: (
     ...args: Parameters<typeof ipcRenderer.on>
 ) => void = (channel, listener) => {
     useEffect(() => {
-        ipcRenderer.on(channel, listener);
+        window.ipcRenderer.on(channel, listener);
 
         return () => {
-            ipcRenderer.off(channel, listener);
+            window.ipcRenderer.off(channel, listener);
         };
     }, [channel, listener]);
 };

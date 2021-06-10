@@ -17,5 +17,8 @@
     "sha256": "SHA_256",
     "databaseExists": "DATABASE_EXISTS",
     "encrypt": "ENCRYPT",
-    "decrypt": "DECRYPT"
+    "decrypt": "DECRYPT",
+    "dbSelectAll": "DB_SELECT_ALL",
+    "dbGetWalletId": "DB_GET_WALLET_ID",
+    "dbInsertWallet": "DB_INSERT_WALLET"
 }
