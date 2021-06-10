@@ -244,7 +244,8 @@ function TransactionListElement({ transaction, onClick }: Props): JSX.Element {
         <div
             className={clsx(
                 styles.transactionListElement,
-                !failed || styles.failedElement
+                !failed || styles.failedElement,
+                Boolean(onClick) && styles.clickableElement
             )}
             onClick={onClick}
             onKeyPress={onClick}
