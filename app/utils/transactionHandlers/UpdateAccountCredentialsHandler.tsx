@@ -1,40 +1,26 @@
 import React from 'react';
-import AccountTransactionDetails from '~/components/Transfers/AccountTransactionDetails';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
 import { AccountTransactionHandler } from '../transactionTypes';
 import {
     UpdateAccountCredentials,
-    AccountTransaction,
-    TransactionPayload,
     instanceOfUpdateAccountCredentials,
     TransactionKindId,
 } from '../types';
-import { serializeTransferPayload } from '../transactionSerialization';
 import routes from '~/constants/routes.json';
 import { noOp } from '../basicHelpers';
+import TransferHandler from './TransferHandler';
 
 const TYPE = 'Update Account Credentials';
 
 type TransactionType = UpdateAccountCredentials;
 
 export default class UpdateAccountCredentialsHandler
+    extends TransferHandler<TransactionType>
     implements
         AccountTransactionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: AccountTransaction<TransactionPayload>
-    ): TransactionType {
-        if (instanceOfUpdateAccountCredentials(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
-    }
-
-    serializePayload(transaction: TransactionType) {
-        return serializeTransferPayload(
-            transaction.transactionKind,
-            transaction.payload
-        );
+    constructor() {
+        super(TYPE, instanceOfUpdateAccountCredentials);
     }
 
     creationLocationHandler(currentLocation: string) {
@@ -60,12 +46,6 @@ export default class UpdateAccountCredentialsHandler
         );
     }
 
-    createTransaction(): TransactionType {
-        throw new Error(
-            'Unsupported function: UpdateAccountCredentials transactions should be created explicitly and not through handler.'
-        );
-    }
-
     async signTransaction(
         transaction: TransactionType,
         ledger: ConcordiumLedgerClient,
@@ -86,14 +66,4 @@ export default class UpdateAccountCredentialsHandler
             () => displayMessage('Please verify transaction details')
         );
     }
-
-    view(transaction: TransactionType) {
-        return <AccountTransactionDetails transaction={transaction} />;
-    }
-
-    print = () => undefined;
-
-    title = `Account Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

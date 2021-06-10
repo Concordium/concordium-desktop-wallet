@@ -3,12 +3,14 @@ import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import {
     CreateTransactionInput,
     AccountTransactionHandler,
+    TransactionExportType,
 } from '~/utils/transactionTypes';
 import {
     MultiSignatureTransactionStatus,
     AccountTransaction,
     instanceOfAccountTransaction,
     Transaction,
+    TransactionPayload,
 } from '~/utils/types';
 
 export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
@@ -38,6 +40,16 @@ export default class AccountHandlerTypeMiddleware<T extends AccountTransaction>
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    getFileNameForExport(
+        transaction: AccountTransaction<TransactionPayload>,
+        exportType: TransactionExportType
+    ): string {
+        return this.base.getFileNameForExport(
+            this.base.confirmType(transaction),
+            exportType
+        );
     }
 
     serializePayload(transaction: AccountTransaction) {
