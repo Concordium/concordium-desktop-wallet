@@ -210,6 +210,7 @@ export async function HandleSignatureFiles(
     };
 
     updateCurrentProposal(dispatch, updatedProposal);
+    return undefined;
 }
 
 export function getSignatures(
