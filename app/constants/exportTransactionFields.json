@@ -8,5 +8,6 @@
     "toAddress": "to address",
     "cost": "fee amount",
     "subtotal": "amount",
-    "total": "balance change"
+    "publicBalance": "Public balance change",
+    "shieldedBalance": "Shielded balance change"
 }

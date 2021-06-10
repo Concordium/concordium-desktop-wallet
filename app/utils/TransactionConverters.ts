@@ -223,8 +223,8 @@ function convertEncryptedTransfer(
 
     return {
         transactionKind: TransactionKindString.EncryptedAmountTransfer,
-        subtotal: amount.toString(),
-        decryptedAmount: (-amount).toString(),
+        subtotal: '0',
+        decryptedAmount: amount.toString(),
         toAddress: transaction.payload.toAddress,
         encrypted,
     };
