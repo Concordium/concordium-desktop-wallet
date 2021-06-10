@@ -111,7 +111,9 @@ export function AccountCardView({
                 }
                 right={
                     <>
-                        {connected && <LedgerImage className="mR20" />}
+                        {connected && (
+                            <LedgerImage height="15" className="mR20" />
+                        )}
                         {multiSig ? (
                             <>
                                 {identityName} +{' '}
