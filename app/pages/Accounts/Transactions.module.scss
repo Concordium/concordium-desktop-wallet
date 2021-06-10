@@ -28,8 +28,20 @@
     position: relative;
     padding: 10px 20px;
 
+    &:focus {
+        outline: none;
+    }
+
     &:not(:last-child) {
         border-bottom: 0.5px solid $color-soft-grey;
+    }
+}
+
+.clickableElement {
+    cursor: pointer;
+
+    &:focus {
+        box-shadow: 0 0 0 2px $color-pale-blue;
     }
 }
 
