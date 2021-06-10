@@ -19,6 +19,7 @@ import { singletonHook } from 'react-singleton-hook';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import getErrorDescription from '~/features/ledger/ErrorCodes';
 import ledgerReducer, {
+    cleanupAction,
     connectedAction,
     errorAction,
     finishedAction,
@@ -155,6 +156,7 @@ export default function ExternalHook(
         return function cleanup() {
             if (client) {
                 client.closeTransport();
+                dispatch(cleanupAction());
             }
         };
     }, [client]);
