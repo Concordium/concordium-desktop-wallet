@@ -16,15 +16,15 @@ import { updateCurrentProposal } from '~/features/MultiSignatureSlice';
 import getTransactionSignDigest from '~/utils/transactionHash';
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 
+/**
+ * @param transactionObject, transaction object, which contains a signature, which is to be added to the current proposal
+ * @param proposal, transaction object, from the current proposal. If the incoming signature is valid, it will be added.
+ * @returns either a ModalErrorInput, which describes why the signature was not added, or the updatedProposal transaction, in case the signature was added
+ */
 async function HandleAccountTransactionSignatureFile(
-    dispatch: Dispatch,
     transactionObject: AccountTransactionWithSignature,
-    currentProposal: MultiSignatureTransaction
-): Promise<ModalErrorInput | undefined> {
-    const proposal: AccountTransactionWithSignature = parse(
-        currentProposal.transaction
-    );
-
+    proposal: AccountTransactionWithSignature
+): Promise<ModalErrorInput | AccountTransactionWithSignature> {
     const credentialIndexList = Object.keys(transactionObject.signatures);
     // We currently restrict the amount of credential signatures imported at the same time to be 1, as it
     // simplifies error handling and currently it is only possible to export a file signed once.
@@ -87,13 +87,7 @@ async function HandleAccountTransactionSignatureFile(
 
     proposal.signatures[credentialIndex] = signature;
 
-    const updatedProposal = {
-        ...currentProposal,
-        transaction: stringify(proposal),
-    };
-
-    updateCurrentProposal(dispatch, updatedProposal);
-    return undefined;
+    return proposal;
 }
 
 /**
@@ -113,13 +107,15 @@ async function isSignatureValid(
     );
 }
 
+/**
+ * @param transactionObject, transaction object, which contains a signature, which is to be added to the current proposal
+ * @param proposal, transaction object, from the current proposal. If the incoming signature is valid, it will be added.
+ * @returns either a ModalErrorInput, which describes why the signature was not added, or the updatedProposal transaction, in case the signature was added
+ */
 async function HandleUpdateInstructionSignatureFile(
-    dispatch: Dispatch,
     transactionObject: UpdateInstruction,
-    currentProposal: MultiSignatureTransaction
-): Promise<ModalErrorInput | undefined> {
-    const proposal: UpdateInstruction = parse(currentProposal.transaction);
-
+    proposal: UpdateInstruction
+): Promise<ModalErrorInput | UpdateInstruction> {
     // We currently restrict the amount of signatures imported at the same time to be 1, as it
     // simplifies error handling and currently it is only possible to export a file signed once.
     // This can be expanded to support multiple signatures at a later point in time if need be.
@@ -164,18 +160,13 @@ async function HandleUpdateInstructionSignatureFile(
     proposal.signatures = proposal.signatures.concat(
         transactionObject.signatures
     );
-    const updatedProposal = {
-        ...currentProposal,
-        transaction: stringify(proposal),
-    };
 
-    updateCurrentProposal(dispatch, updatedProposal);
-    return undefined;
+    return proposal;
 }
 
-export async function HandleSignatureFile(
+export async function HandleSignatureFiles(
     dispatch: Dispatch,
-    file: Buffer,
+    files: Buffer[],
     currentProposal: MultiSignatureTransaction
 ): Promise<ModalErrorInput | undefined> {
     const invalidFile = {
@@ -185,28 +176,40 @@ export async function HandleSignatureFile(
             'The chosen file was invalid. A file containing a signed multi signature transaction proposal in JSON format was expected.',
     };
 
-    let transactionObject;
-    try {
-        transactionObject = parse(file.toString('utf-8'));
-    } catch (error) {
-        return invalidFile;
+    let transaction = parse(currentProposal.transaction);
+    let signatureFileHandler;
+
+    if (instanceOfUpdateInstruction(transaction)) {
+        signatureFileHandler = HandleUpdateInstructionSignatureFile;
+    } else if (instanceOfAccountTransactionWithSignature(transaction)) {
+        signatureFileHandler = HandleAccountTransactionSignatureFile;
+    } else {
+        throw new Error('currentProposal is an unknown transaction type');
     }
 
-    if (instanceOfUpdateInstruction(transactionObject)) {
-        return HandleUpdateInstructionSignatureFile(
-            dispatch,
-            transactionObject,
-            currentProposal
+    for (const file of files) {
+        let transactionInFile;
+        try {
+            transactionInFile = parse(file.toString('utf-8'));
+        } catch (error) {
+            return invalidFile;
+        }
+        const result = await signatureFileHandler(
+            transactionInFile,
+            transaction
         );
+        if ('show' in result) {
+            return result;
+        }
+        transaction = result;
     }
-    if (instanceOfAccountTransactionWithSignature(transactionObject)) {
-        return HandleAccountTransactionSignatureFile(
-            dispatch,
-            transactionObject,
-            currentProposal
-        );
-    }
-    return invalidFile;
+
+    const updatedProposal = {
+        ...currentProposal,
+        transaction: stringify(transaction),
+    };
+
+    updateCurrentProposal(dispatch, updatedProposal);
 }
 
 export function getSignatures(
