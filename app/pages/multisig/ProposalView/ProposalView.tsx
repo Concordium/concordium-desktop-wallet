@@ -46,6 +46,7 @@ import { dateFromTimeStamp, subtractHours } from '~/utils/timeHelpers';
 import { getTimeout } from '~/utils/transactionHelpers';
 import { useCurrentTime } from '~/utils/hooks';
 import TransactionHashView from '~/components/TransactionHash';
+import { TransactionExportType } from '~/utils/transactionTypes';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING;
 
@@ -248,12 +249,10 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                         () =>
                                             saveFile(proposal.transaction, {
                                                 title: 'Export transaction',
-                                                defaultPath: `${handler.type
-                                                    .toLowerCase()
-                                                    .replace(
-                                                        /\s/g,
-                                                        '-'
-                                                    )}_proposal.json`,
+                                                defaultPath: handler.getFileNameForExport(
+                                                    transaction,
+                                                    TransactionExportType.Proposal
+                                                ),
                                             })
                                         // TODO Handle failure
                                     }

@@ -81,7 +81,7 @@ interface TransactionHandlerBase<T, P> {
      */
     confirmType(transaction: P): T;
     getFileNameForExport(
-        transaction: T,
+        transaction: P,
         exportType: TransactionExportType
     ): string;
     serializePayload(transaction: T): Buffer;

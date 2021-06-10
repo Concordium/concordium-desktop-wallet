@@ -47,10 +47,7 @@ export default class UpdateInstructionHandlerTypeMiddleware<T>
         transaction: UpdateInstruction<UpdateInstructionPayload>,
         exportType: TransactionExportType
     ): string {
-        return this.base.getFileNameForExport(
-            this.base.confirmType(transaction),
-            exportType
-        );
+        return this.base.getFileNameForExport(transaction, exportType);
     }
 
     createTransaction(

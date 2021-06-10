@@ -15,7 +15,10 @@ import {
     TransactionAccountSignature,
     MultiSignatureTransactionStatus,
 } from '~/utils/types';
-import { TransactionInput } from '~/utils/transactionTypes';
+import {
+    TransactionExportType,
+    TransactionInput,
+} from '~/utils/transactionTypes';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
@@ -124,9 +127,10 @@ function CosignTransactionProposal({
         try {
             const fileSaved = await saveFile(signedTransactionJson, {
                 title: 'Export signed transaction',
-                defaultPath: `${transactionHandler.type
-                    .toLowerCase()
-                    .replace(/\s/g, '-')}_signature.json`,
+                defaultPath: transactionHandler.getFileNameForExport(
+                    transactionObject,
+                    TransactionExportType.Signature
+                ),
             });
 
             if (fileSaved) {
