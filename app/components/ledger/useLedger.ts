@@ -159,7 +159,7 @@ export default function ExternalHook(
                 dispatch(cleanupAction());
             }
         };
-    }, [client]);
+    }, [client, dispatch]);
 
     const submitHandler: LedgerSubmitHandler = useCallback(async () => {
         dispatch(pendingAction(AWAITING_USER_INPUT));
