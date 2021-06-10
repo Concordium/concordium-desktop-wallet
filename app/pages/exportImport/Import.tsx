@@ -44,7 +44,7 @@ export default function Import() {
         }
         let decryptedData;
         try {
-            decryptedData = decrypt(encryptedData, password);
+            decryptedData = await decrypt(encryptedData, password);
         } catch (e) {
             fail('Unable to decrypt file');
             return;

@@ -63,7 +63,7 @@ export default function Export() {
             credentials: cleanCredentials,
             wallets,
         };
-        const encrypted = encrypt(JSON.stringify(data), password);
+        const encrypted = await encrypt(JSON.stringify(data), password);
 
         try {
             const completed = await saveFile(JSON.stringify(encrypted), {

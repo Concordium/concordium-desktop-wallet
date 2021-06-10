@@ -15,5 +15,7 @@
     "getTransactions": "WALLET_PROXY_GET_TRANSACTIONS",
     "getIdProviders": "WALLET_PROXY_GET_ID_PROVIDERS",
     "sha256": "SHA_256",
-    "databaseExists": "DATABASE_EXISTS"
+    "databaseExists": "DATABASE_EXISTS",
+    "encrypt": "ENCRYPT",
+    "decrypt": "DECRYPT"
 }
