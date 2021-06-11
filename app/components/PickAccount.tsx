@@ -13,12 +13,14 @@ import CardList from '~/cross-app-components/CardList';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import routes from '~/constants/routes.json';
 import ErrorMessage from './Form/ErrorMessage';
+import { noOp } from '~/utils/basicHelpers';
 
 interface Props {
     chosenAccount?: Account;
     identity?: Identity;
     setAccount: (account: Account) => void;
     filter?: (account: Account, info?: AccountInfo) => boolean;
+    onAccountClicked?(): void;
     isDisabled?: (
         account: Account,
         info?: AccountInfo
@@ -34,6 +36,7 @@ export default function PickAccount({
     identity,
     filter,
     isDisabled,
+    onAccountClicked = noOp,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
 
@@ -96,6 +99,7 @@ export default function PickAccount({
                                             ? () => {
                                                   setChosenIndex(index);
                                                   setAccount(account);
+                                                  onAccountClicked();
                                               }
                                             : undefined
                                     }

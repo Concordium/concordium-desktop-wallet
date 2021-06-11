@@ -5,7 +5,6 @@ import { push } from 'connected-react-router';
 import clsx from 'clsx';
 import {
     Account,
-    Identity,
     TransactionKindId,
     AddressBookEntry,
     Schedule,
@@ -14,7 +13,6 @@ import {
 import PickAmount from '../PickAmount';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
-import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
 import Button from '~/cross-app-components/Button';
 import TransactionProposalDetails from '../proposal-details/TransferProposalDetails';
@@ -37,12 +35,11 @@ import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
 
 import styles from './CreateTransferProposal.module.scss';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-            return 'Select a proposer';
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
             return 'Select sender account';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
             return 'Input amount';
@@ -80,15 +77,12 @@ function CreateTransferProposal({
     const dispatch = useDispatch();
 
     const { pathname, state } = useLocation<State>();
-
     const location = pathname.replace(`${transactionKind}`, ':transactionKind');
-
     const scheduleBuilderRef = useRef<ScheduledTransferBuilderRef>(null);
 
     const handler = findAccountTransactionHandler(transactionKind);
 
     const [account, setAccount] = useState<Account | undefined>(state?.account);
-    const [identity, setIdentity] = useState<Identity | undefined>();
     const [amount, setAmount] = useState<string | undefined>();
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
     const [
@@ -109,11 +103,9 @@ function CreateTransferProposal({
     const isReady = useMemo(() => {
         switch (location) {
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-                return identity !== undefined;
+                return account !== undefined;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
                 return isScheduleReady;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
-                return account !== undefined;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
                 return amount !== undefined;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
@@ -130,7 +122,6 @@ function CreateTransferProposal({
         amount,
         expiryTime,
         expiryTimeError,
-        identity,
         isScheduleReady,
         location,
         recipient,
@@ -242,7 +233,6 @@ function CreateTransferProposal({
                             <TransactionProposalDetails
                                 transactionType={transactionKind}
                                 account={account}
-                                identity={identity}
                                 amount={amount}
                                 recipient={recipient}
                                 schedule={schedule}
@@ -284,20 +274,6 @@ function CreateTransferProposal({
                             />
                             <Route
                                 path={
-                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
-                                }
-                                render={() => (
-                                    <div className={styles.columnContent}>
-                                        <PickAccount
-                                            setAccount={setAccount}
-                                            identity={identity}
-                                            chosenAccount={account}
-                                        />
-                                    </div>
-                                )}
-                            />
-                            <Route
-                                path={
                                     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION
                                 }
                                 render={renderSignTransaction}
@@ -324,8 +300,10 @@ function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickRecipient
+                                            recipient={recipient}
                                             pickRecipient={setRecipient}
                                             senderAddress={account?.address}
+                                            onClickedRecipient={continueAction}
                                         />
                                     </div>
                                 )}
@@ -361,15 +339,16 @@ function CreateTransferProposal({
                                 path={
                                     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
                                 }
-                                render={() => (
-                                    <div className={styles.columnContent}>
-                                        <PickIdentity
-                                            setIdentity={setIdentity}
-                                            chosenIdentity={identity}
-                                        />
-                                    </div>
-                                )}
-                            />
+                            >
+                                <div className={styles.columnContent}>
+                                    <PickAccount
+                                        setAccount={setAccount}
+                                        chosenAccount={account}
+                                        filter={(a) => isMultiSig(a)}
+                                        onAccountClicked={continueAction}
+                                    />
+                                </div>
+                            </Route>
                         </Switch>
                     </Columns.Column>
                 </Columns>

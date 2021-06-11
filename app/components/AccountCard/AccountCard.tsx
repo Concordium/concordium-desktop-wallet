@@ -10,7 +10,7 @@ import ReadonlyImage from '@resources/svg/read-only.svg';
 import LedgerImage from '@resources/svg/ledger.svg';
 import { displayAsGTU } from '~/utils/gtu';
 import { AccountInfo, Account, AccountStatus, ClassName } from '~/utils/types';
-import { isInitialAccount } from '~/utils/accountHelpers';
+import { isInitialAccount, isMultiCred } from '~/utils/accountHelpers';
 import SidedRow from '~/components/SidedRow';
 import { walletIdSelector } from '~/features/WalletSlice';
 import { findLocalDeployedCredential } from '~/utils/credentialHelper';
@@ -227,10 +227,7 @@ export default function AccountCard({
             hasDeployedCredentials={accountHasDeployedCredentials}
             accountName={account.name}
             accountStatus={account.status}
-            multiSig={
-                accountInfo &&
-                Object.values(accountInfo.accountCredentials).length > 1
-            }
+            multiSig={accountInfo && isMultiCred(accountInfo)}
             identityName={account.identityName}
             isBaker={Boolean(accountBaker)}
             initialAccount={isInitialAccount(account)}
