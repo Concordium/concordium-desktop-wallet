@@ -6,6 +6,7 @@ import UpdateAuthorizationKeys from './UpdateAuthorizationKeys';
 export default function UpdateLevel2KeysWithLevel1Keys({
     blockSummary,
     handleAuthorizationKeySubmit,
+    defaults,
 }: UpdateProps): JSX.Element | null {
     if (!handleAuthorizationKeySubmit) {
         throw new Error('A key submission function has to be provided.');
@@ -13,6 +14,7 @@ export default function UpdateLevel2KeysWithLevel1Keys({
 
     return (
         <UpdateAuthorizationKeys
+            defaults={defaults}
             blockSummary={blockSummary}
             type={UpdateType.UpdateLevel2KeysUsingLevel1Keys}
             handleKeySubmit={handleAuthorizationKeySubmit}

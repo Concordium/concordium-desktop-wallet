@@ -26,6 +26,7 @@ export interface TransactionInput {
  * transactions.
  */
 export interface UpdateProps {
+    defaults: any;
     blockSummary: BlockSummary;
     consensusStatus: ConsensusStatus;
     handleHigherLevelKeySubmit?(

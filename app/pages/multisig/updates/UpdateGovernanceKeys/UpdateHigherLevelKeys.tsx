@@ -26,6 +26,7 @@ import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
 
 interface Props {
+    defaults: any;
     blockSummary: BlockSummary;
     type: UpdateType;
     handleHigherLevelKeySubmit(

@@ -39,6 +39,7 @@ import KeySetSize from './KeySetSize';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 
 interface Props {
+    defaults: any;
     blockSummary: BlockSummary;
     type: UpdateType;
     handleKeySubmit(
@@ -49,15 +50,16 @@ interface Props {
 }
 
 export default function UpdateAuthorizationKeys({
+    defaults,
     blockSummary,
     type,
     handleKeySubmit,
 }: Props) {
     const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
-        new Date(getDefaultExpiry().getTime() + 5 * TimeConstants.Minute)
+        defaults.effectiveTime || new Date(getDefaultExpiry().getTime() + 5 * TimeConstants.Minute)
     );
     const [expiryTime, setExpiryTime] = useState<Date | undefined>(
-        getDefaultExpiry()
+        defaults.expiryTime || getDefaultExpiry()
     );
 
     const [error, setError] = useState<string>();
@@ -73,10 +75,10 @@ export default function UpdateAuthorizationKeys({
         keyUpdateType,
         currentAuthorizations
     ).accessStructures;
-    const currentThresholds = getCurrentThresholds(currentAuthorizations);
+    const currentThresholds = getCurrentThresholds(currentAuthorizations); // TODO fix threshold when we have a default
 
     const [newLevel2Keys, setNewLevel2Keys] = useState<AuthorizationKeysUpdate>(
-        mapCurrentAuthorizationsToUpdate(keyUpdateType, currentAuthorizations)
+        defaults.keyUpdate || mapCurrentAuthorizationsToUpdate(keyUpdateType, currentAuthorizations)
     );
 
     function setThreshold(
