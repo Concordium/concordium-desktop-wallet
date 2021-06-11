@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
-import { push } from 'connected-react-router';
+import { push, replace } from 'connected-react-router';
 import clsx from 'clsx';
 import {
     Account,
@@ -33,9 +33,10 @@ import LoadingComponent from '../LoadingComponent';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
+import { isMultiSig } from '~/utils/accountHelpers';
+import { accountsSelector } from '~/features/AccountSlice';
 
 import styles from './CreateTransferProposal.module.scss';
-import { isMultiSig } from '~/utils/accountHelpers';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
@@ -77,6 +78,9 @@ function CreateTransferProposal({
     const dispatch = useDispatch();
 
     const { pathname, state } = useLocation<State>();
+    const accounts = useSelector(accountsSelector)
+        .filter(isMultiSig)
+        .filter((_, i) => i === 0);
     const location = pathname.replace(`${transactionKind}`, ':transactionKind');
     const scheduleBuilderRef = useRef<ScheduledTransferBuilderRef>(null);
 
@@ -152,6 +156,32 @@ function CreateTransferProposal({
         }
     }, [account, transactionKind, setFee, schedule, exchangeRate]);
 
+    function continueAction(routerAction: typeof push = push) {
+        const nextLocation = handler.creationLocationHandler(location);
+        dispatch(
+            routerAction({
+                pathname: nextLocation,
+                state: transactionKind,
+            })
+        );
+    }
+
+    function submitSchedule() {
+        scheduleBuilderRef?.current?.submitSchedule();
+    }
+
+    useEffect(() => {
+        if (
+            !account &&
+            accounts.length === 1 &&
+            location === routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
+        ) {
+            setAccount(accounts[0]);
+            continueAction(replace);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account, accounts]);
+
     function renderSignTransaction() {
         if (!account || !recipient || !expiryTime || !amount) {
             throw new Error(
@@ -169,19 +199,6 @@ function CreateTransferProposal({
                 expiryTime={expiryTime}
             />
         );
-    }
-    function continueAction() {
-        const nextLocation = handler.creationLocationHandler(location);
-        dispatch(
-            push({
-                pathname: nextLocation,
-                state: transactionKind,
-            })
-        );
-    }
-
-    function submitSchedule() {
-        scheduleBuilderRef?.current?.submitSchedule();
     }
 
     function renderBuildSchedule() {
@@ -248,7 +265,7 @@ function CreateTransferProposal({
                                     onClick={
                                         isBuildSchedulePage
                                             ? submitSchedule
-                                            : continueAction
+                                            : () => continueAction()
                                     }
                                 >
                                     Continue
@@ -346,7 +363,7 @@ function CreateTransferProposal({
                                     <PickAccount
                                         setAccount={setAccount}
                                         chosenAccount={account}
-                                        filter={(a) => isMultiSig(a)}
+                                        filter={isMultiSig}
                                         onAccountClicked={continueAction}
                                     />
                                 </div>
