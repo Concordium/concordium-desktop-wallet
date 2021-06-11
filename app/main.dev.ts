@@ -21,6 +21,7 @@ import * as https from 'https';
 import * as crypto from 'crypto';
 import { Knex } from 'knex';
 import ipcCommands from './constants/ipcCommands.json';
+import ledgerIpcCommands from './constants/ledgerIpcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import { setClientLocation, grpcCall } from './node/GRPCClient';
 import ConcordiumNodeClient from './node/ConcordiumNodeClient';
@@ -32,16 +33,30 @@ import { walletProxytransactionLimit } from './constants/externalConstants.json'
 import { getDatabaseFilename } from './database/knexfile';
 import {
     Account,
+    AccountTransaction,
     AddressBookEntry,
+    AuthorizationKeysUpdate,
+    BakerStakeThreshold,
+    ElectionDifficulty,
     EncryptedData,
+    ExchangeRate,
+    FoundationAccount,
+    GasRewards,
     Global,
     Hex,
+    HigherLevelKeyUpdate,
     Identity,
+    MintDistribution,
     MultiSignatureTransaction,
+    ProtocolUpdate,
+    PublicInformationForIp,
     Setting,
+    TransactionFeeDistribution,
     TransactionKindString,
     TransactionStatus,
     TransferTransaction,
+    UnsignedCredentialDeploymentInformation,
+    UpdateInstruction,
     WalletEntry,
     WalletType,
 } from './utils/types';
@@ -63,6 +78,8 @@ import { convertBooleans } from './database/TransactionDao';
 import { chunkArray, partition } from './utils/basicHelpers';
 import { sanitizeAddressBookEntry } from './database/AddressBookDao';
 import { convertAccountBooleans } from './database/AccountDao';
+import { getLedgerClient, subscribeLedger } from './ledgerObserver';
+import { AccountPathInput } from './features/ledger/Path';
 
 export default class AppUpdater {
     constructor() {
@@ -118,7 +135,7 @@ const createWindow = async () => {
             process.env.NODE_ENV === 'development'
                 ? {
                       preload: path.join(__dirname, 'preload.js'),
-                      nodeIntegration: false,
+                      nodeIntegration: true,
                       webviewTag: true,
                   }
                 : {
@@ -154,6 +171,8 @@ const createWindow = async () => {
         }
 
         mainWindow.webContents.send(ipcRendererCommands.didFinishLoad);
+        // Start ledger listener
+        subscribeLedger(mainWindow);
     });
 
     mainWindow.on('ready-to-show', () => {
@@ -187,6 +206,270 @@ function getWalletProxy() {
 
 const walletProxy = axios.create({
     baseURL: getWalletProxy(),
+});
+
+ipcMain.handle(ledgerIpcCommands.getPublicKey, (_event, keypath: number[]) => {
+    return getLedgerClient().getPublicKey(keypath);
+});
+
+ipcMain.handle(
+    ledgerIpcCommands.getPublicKeySilent,
+    (_event, keypath: number[]) => {
+        return getLedgerClient().getPublicKeySilent(keypath);
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.getSignedPublicKey,
+    (_event, keypath: number[]) => {
+        return getLedgerClient().getSignedPublicKey(keypath);
+    }
+);
+
+ipcMain.handle(ledgerIpcCommands.getIdCredSec, (_event, identity: number) => {
+    return getLedgerClient().getIdCredSec(identity);
+});
+
+ipcMain.handle(ledgerIpcCommands.getPrfKey, (_event, identity: number) => {
+    return getLedgerClient().getPrfKey(identity);
+});
+
+ipcMain.handle(
+    ledgerIpcCommands.signTransfer,
+    (_event, transaction: AccountTransaction, keypath: number[]) => {
+        return getLedgerClient().signTransfer(transaction, keypath);
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signPublicInformationForIp,
+    (
+        _event,
+        publicInfoForIp: PublicInformationForIp,
+        accountPathInput: AccountPathInput
+    ) => {
+        return getLedgerClient().signPublicInformationForIp(
+            publicInfoForIp,
+            accountPathInput
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signCredentialDeploymentOnExistingAccount,
+    (
+        _event,
+        credentialDeployment: UnsignedCredentialDeploymentInformation,
+        address: string,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signCredentialDeploymentOnExistingAccount(
+            credentialDeployment,
+            address,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signCredentialDeploymentOnNewAccount,
+    (
+        _event,
+        credentialDeployment: UnsignedCredentialDeploymentInformation,
+        expiry: bigint,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signCredentialDeploymentOnNewAccount(
+            credentialDeployment,
+            expiry,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signMicroGtuPerEuro,
+    (
+        _event,
+        transaction: UpdateInstruction<ExchangeRate>,
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signMicroGtuPerEuro(
+            transaction,
+            serializedPayload,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signEuroPerEnergy,
+    (
+        _event,
+        transaction: UpdateInstruction<ExchangeRate>,
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signEuroPerEnergy(
+            transaction,
+            serializedPayload,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signTransactionFeeDistribution,
+    (
+        _event,
+        transaction: UpdateInstruction<TransactionFeeDistribution>,
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signTransactionFeeDistribution(
+            transaction,
+            serializedPayload,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signFoundationAccount,
+    (
+        _event,
+        transaction: UpdateInstruction<FoundationAccount>,
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signFoundationAccount(
+            transaction,
+            serializedPayload,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signMintDistribution,
+    (
+        _event,
+        transaction: UpdateInstruction<MintDistribution>,
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signMintDistribution(
+            transaction,
+            serializedPayload,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signProtocolUpdate,
+    (
+        _event,
+        transaction: UpdateInstruction<ProtocolUpdate>,
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signProtocolUpdate(
+            transaction,
+            serializedPayload,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signGasRewards,
+    (
+        _event,
+        transaction: UpdateInstruction<GasRewards>,
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signGasRewards(
+            transaction,
+            serializedPayload,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signBakerStakeThreshold,
+    (
+        _event,
+        transaction: UpdateInstruction<BakerStakeThreshold>,
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signBakerStakeThreshold(
+            transaction,
+            serializedPayload,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signElectionDifficulty,
+    (
+        _event,
+        transaction: UpdateInstruction<ElectionDifficulty>,
+        serializedPayload: Buffer,
+        keypath: number[]
+    ) => {
+        return getLedgerClient().signElectionDifficulty(
+            transaction,
+            serializedPayload,
+            keypath
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signHigherLevelKeysUpdate,
+    (
+        _event,
+        transaction: UpdateInstruction<HigherLevelKeyUpdate>,
+        serializedPayload: Buffer,
+        keypath: number[],
+        INS: number
+    ) => {
+        return getLedgerClient().signHigherLevelKeysUpdate(
+            transaction,
+            serializedPayload,
+            keypath,
+            INS
+        );
+    }
+);
+
+ipcMain.handle(
+    ledgerIpcCommands.signAuthorizationKeysUpdate,
+    (
+        _event,
+        transaction: UpdateInstruction<AuthorizationKeysUpdate>,
+        serializedPayload: Buffer,
+        keypath: number[],
+        INS: number
+    ) => {
+        return getLedgerClient().signAuthorizationKeysUpdate(
+            transaction,
+            serializedPayload,
+            keypath,
+            INS
+        );
+    }
+);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ipcMain.handle(ledgerIpcCommands.getAppAndVersion, (_event) => {
+    return getLedgerClient().getAppAndVersion();
 });
 
 // TODO Refactor.

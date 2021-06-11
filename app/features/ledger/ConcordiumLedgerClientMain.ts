@@ -1,4 +1,17 @@
-/* eslint no-console: off */
+import type HwTransport from '@ledgerhq/hw-transport';
+import { Transport, TransportImpl } from './Transport';
+import {
+    getPublicKey,
+    getPublicKeySilent,
+    getSignedPublicKey,
+} from './GetPublicKey';
+import signTransfer from './Transfer';
+import signPublicInformationForIp from './PublicInformationForIp';
+import { getIdCredSec, getPrfKey } from './ExportPrivateKeySeed';
+import {
+    signCredentialDeploymentOnNewAccount,
+    signCredentialDeploymentOnExistingAccount,
+} from './CredentialDeployment';
 import {
     AccountTransaction,
     BakerStakeThreshold,
@@ -18,81 +31,85 @@ import {
     AuthorizationKeysUpdate,
     Hex,
 } from '~/utils/types';
-import { AccountPathInput } from './Path';
-import { AppAndVersion } from './GetAppAndVersion';
-import ledgerIpcCommands from '../../constants/ledgerIpcCommands.json';
+import { AccountPathInput, getAccountPath } from './Path';
+import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
+import signUpdateTransaction from './SignUpdateTransaction';
+import signUpdateProtocolTransaction from './SignProtocolUpdate';
+import signHigherLevelKeyUpdate from './SignHigherLevelKeyUpdate';
+import signUpdateCredentialTransaction from './SignUpdateCredentials';
+import signAuthorizationKeysUpdate from './SignAuthorizationKeysUpdate';
 
 /**
  * Concordium Ledger API.
+ *
+ * This MUST be called from the main thread.
  *
  * @example
  * import ConcordiumLedgerClient from "..."
  * const client = new ConcordiumLedgerClient(transport);
  */
-export default class ConcordiumLedgerClient {
+export default class ConcordiumLedgerClientMain {
+    transport: Transport;
+
+    constructor(transport: HwTransport) {
+        this.transport = new TransportImpl(transport);
+    }
+
+    closeTransport(): Promise<void> {
+        return this.transport.close();
+    }
+
     getPublicKey(path: number[]): Promise<Buffer> {
-        return window.ipcRenderer.invoke(ledgerIpcCommands.getPublicKey, path);
+        return getPublicKey(this.transport, path);
     }
 
     getPublicKeySilent(path: number[]): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.getPublicKeySilent,
-            path
-        );
+        return getPublicKeySilent(this.transport, path);
     }
 
     getSignedPublicKey(path: number[]): Promise<SignedPublicKey> {
-        console.log('Get signed key');
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.getSignedPublicKey,
-            path
-        );
+        return getSignedPublicKey(this.transport, path);
     }
 
     getIdCredSec(identity: number): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.getIdCredSec,
-            identity
-        );
+        return getIdCredSec(this.transport, identity);
     }
 
     getPrfKey(identity: number): Promise<Buffer> {
-        return window.ipcRenderer.invoke(ledgerIpcCommands.getPrfKey, identity);
+        return getPrfKey(this.transport, identity);
     }
 
     signTransfer(
         transaction: AccountTransaction,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signTransfer,
-            transaction,
-            path
-        );
+        return signTransfer(this.transport, path, transaction);
     }
 
-    // TODO Fix this by sending messages back to the renderer thread instead.
     signUpdateCredentialTransaction(
         transaction: UpdateAccountCredentials,
         path: number[],
         onAwaitVerificationKeyConfirmation: (key: Hex) => void,
         onVerificationKeysConfirmed: () => void
     ): Promise<Buffer> {
-        console.log(transaction);
-        console.log(path);
-        console.log(onAwaitVerificationKeyConfirmation('test'));
-        console.log(onVerificationKeysConfirmed());
-        throw new Error('Testing');
+        return signUpdateCredentialTransaction(
+            this.transport,
+            path,
+            transaction,
+            onAwaitVerificationKeyConfirmation,
+            onVerificationKeysConfirmed
+        );
     }
 
     signPublicInformationForIp(
         publicInfoForIp: PublicInformationForIp,
         accountPathInput: AccountPathInput
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signTransfer,
-            publicInfoForIp,
-            accountPathInput
+        const accountPath = getAccountPath(accountPathInput);
+        return signPublicInformationForIp(
+            this.transport,
+            accountPath,
+            publicInfoForIp
         );
     }
 
@@ -101,8 +118,8 @@ export default class ConcordiumLedgerClient {
         address: string,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signCredentialDeploymentOnExistingAccount,
+        return signCredentialDeploymentOnExistingAccount(
+            this.transport,
             credentialDeployment,
             address,
             path
@@ -114,8 +131,8 @@ export default class ConcordiumLedgerClient {
         expiry: bigint,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signCredentialDeploymentOnNewAccount,
+        return signCredentialDeploymentOnNewAccount(
+            this.transport,
             credentialDeployment,
             expiry,
             path
@@ -127,11 +144,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signMicroGtuPerEuro,
+        return signUpdateTransaction(
+            this.transport,
+            0x06,
+            path,
             transaction,
-            serializedPayload,
-            path
+            serializedPayload
         );
     }
 
@@ -140,11 +158,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signEuroPerEnergy,
+        return signUpdateTransaction(
+            this.transport,
+            0x06,
+            path,
             transaction,
-            serializedPayload,
-            path
+            serializedPayload
         );
     }
 
@@ -153,11 +172,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signTransactionFeeDistribution,
+        return signUpdateTransaction(
+            this.transport,
+            0x22,
+            path,
             transaction,
-            serializedPayload,
-            path
+            serializedPayload
         );
     }
 
@@ -166,11 +186,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signFoundationAccount,
+        return signUpdateTransaction(
+            this.transport,
+            0x24,
+            path,
             transaction,
-            serializedPayload,
-            path
+            serializedPayload
         );
     }
 
@@ -179,11 +200,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signMintDistribution,
+        return signUpdateTransaction(
+            this.transport,
+            0x25,
+            path,
             transaction,
-            serializedPayload,
-            path
+            serializedPayload
         );
     }
 
@@ -192,11 +214,11 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signProtocolUpdate,
+        return signUpdateProtocolTransaction(
+            this.transport,
+            path,
             transaction,
-            serializedPayload,
-            path
+            serializedPayload
         );
     }
 
@@ -205,11 +227,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signGasRewards,
+        return signUpdateTransaction(
+            this.transport,
+            0x23,
+            path,
             transaction,
-            serializedPayload,
-            path
+            serializedPayload
         );
     }
 
@@ -218,11 +241,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signBakerStakeThreshold,
+        return signUpdateTransaction(
+            this.transport,
+            0x27,
+            path,
             transaction,
-            serializedPayload,
-            path
+            serializedPayload
         );
     }
 
@@ -231,11 +255,12 @@ export default class ConcordiumLedgerClient {
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signElectionDifficulty,
+        return signUpdateTransaction(
+            this.transport,
+            0x26,
+            path,
             transaction,
-            serializedPayload,
-            path
+            serializedPayload
         );
     }
 
@@ -245,11 +270,11 @@ export default class ConcordiumLedgerClient {
         path: number[],
         INS: number
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signHigherLevelKeysUpdate,
+        return signHigherLevelKeyUpdate(
+            this.transport,
+            path,
             transaction,
             serializedPayload,
-            path,
             INS
         );
     }
@@ -260,16 +285,16 @@ export default class ConcordiumLedgerClient {
         path: number[],
         INS: number
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signAuthorizationKeysUpdate,
+        return signAuthorizationKeysUpdate(
+            this.transport,
+            path,
             transaction,
             serializedPayload,
-            path,
             INS
         );
     }
 
     getAppAndVersion(): Promise<AppAndVersion> {
-        return window.ipcRenderer.invoke(ledgerIpcCommands.getAppAndVersion);
+        return getAppAndVersion(this.transport);
     }
 }
