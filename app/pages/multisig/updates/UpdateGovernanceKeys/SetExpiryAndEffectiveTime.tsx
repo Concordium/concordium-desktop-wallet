@@ -31,12 +31,17 @@ export default function SetExpiryAndEffectiveTime({ onContinue }: Props) {
     }
 
     return (
-        <Form formMethods={form} onSubmit={handleSubmit}>
+        <Form
+            formMethods={form}
+            onSubmit={handleSubmit}
+            className="displayContents"
+        >
             <div>
                 <h3>Choose effective time and expiry of the update</h3>
                 <Form.Timestamp
                     name="effectiveTime"
                     label="Effective Time"
+                    className="mV40"
                     defaultValue={
                         new Date(
                             getDefaultExpiry().getTime() +
