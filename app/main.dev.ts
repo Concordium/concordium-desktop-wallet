@@ -19,6 +19,7 @@ import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import { setClientLocation, grpcCall } from './node/GRPCClient';
 import ConcordiumNodeClient from './node/ConcordiumNodeClient';
 import { ConsensusStatus } from './node/NodeApiTypes';
+import { PrintErrorTypes } from './utils/types';
 import { JsonResponse } from './proto/concordium_p2p_rpc_pb';
 
 export default class AppUpdater {
@@ -201,12 +202,6 @@ ipcMain.handle(
         }
     }
 );
-
-enum PrintErrorTypes {
-    Cancelled = 'cancelled',
-    Failed = 'failed',
-    NoPrinters = 'no valid printers available',
-}
 
 // Prints the given body.
 ipcMain.handle(ipcCommands.print, (_event, body) => {
