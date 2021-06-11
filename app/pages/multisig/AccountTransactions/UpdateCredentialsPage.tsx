@@ -7,12 +7,10 @@ import Button from '~/cross-app-components/Button';
 import {
     Account,
     AccountInfo,
-    Identity,
     CredentialDeploymentInformation,
     TransactionKindId,
     Fraction,
 } from '~/utils/types';
-import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
 import AddCredential from './AddCredential';
 import ChangeSignatureThreshold, {
@@ -65,8 +63,6 @@ function assignIndices<T>(items: T[], usedIndices: number[]) {
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-            return 'Identities';
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
             return 'Accounts';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
             return 'New Credentials';
@@ -79,17 +75,6 @@ function subTitle(currentLocation: string) {
         default:
             throw new Error('unknown location');
     }
-}
-
-function displayIdentity(identity: Identity | undefined) {
-    return (
-        <>
-            <h5 className={styles.PropertyName}>Identity:</h5>
-            <h2 className={styles.LargePropertyValue}>
-                {identity ? identity.name : 'Choose an ID on the right'}
-            </h2>
-        </>
-    );
 }
 
 function displayAccount(account: Account | undefined) {
@@ -219,7 +204,6 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
 
     // const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>();
-    const [identity, setIdentity] = useState<Identity | undefined>();
     const [currentCredentials, setCurrentCredentials] = useState<
         AccountInfoCredential[]
     >([]);
@@ -246,8 +230,6 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     const isReady = useMemo(() => {
         switch (location) {
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-                return identity !== undefined;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
                 return account !== undefined;
             case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_ADDCREDENTIAL:
                 return currentCredentials !== undefined;
@@ -267,7 +249,6 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
         currentCredentials,
         expiryTime,
         expiryTimeError,
-        identity,
         location,
         newCredentialAmount,
         newThreshold,
@@ -446,9 +427,10 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
         );
     }
 
-    const showButton =
-        location !==
-        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
+    const showButton = ![
+        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION,
+        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION,
+    ].includes(location);
 
     return (
         <MultiSignatureLayout
@@ -459,7 +441,6 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
             <Columns className={styles.columns} columnScroll divider>
                 <Columns.Column header="Transaction Details">
                     <div className={styles.columnContainer}>
-                        {displayIdentity(identity)}
                         {displayAccount(account)}
                         <DisplayEstimatedFee
                             className={styles.LargePropertyValue}
@@ -524,20 +505,6 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                             />
                             <Route
                                 path={
-                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
-                                }
-                                render={() => (
-                                    <PickAccount
-                                        setAccount={setAccount}
-                                        chosenAccount={account}
-                                        filter={(_, info) =>
-                                            !!info && !hasEncryptedBalance(info)
-                                        }
-                                    />
-                                )}
-                            />
-                            <Route
-                                path={
                                     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY
                                 }
                                 render={() => (
@@ -574,9 +541,13 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
                                 }
                                 render={() => (
-                                    <PickIdentity
-                                        chosenIdentity={identity}
-                                        setIdentity={setIdentity}
+                                    <PickAccount
+                                        setAccount={setAccount}
+                                        chosenAccount={account}
+                                        filter={(_, info) =>
+                                            !!info && !hasEncryptedBalance(info)
+                                        }
+                                        onAccountClicked={onContinue}
                                     />
                                 )}
                             />

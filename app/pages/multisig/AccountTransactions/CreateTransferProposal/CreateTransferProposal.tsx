@@ -212,7 +212,9 @@ function CreateTransferProposal({
         location ===
         routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
 
-    const showButton = !isSignPage;
+    const showButton =
+        !isSignPage &&
+        location !== routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION;
 
     return (
         <MultiSignatureLayout
