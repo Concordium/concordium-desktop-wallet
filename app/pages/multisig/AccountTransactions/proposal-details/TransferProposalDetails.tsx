@@ -37,7 +37,7 @@ export default function TransferProposalDetails({
 
     return (
         <Details>
-            <AccountDetail title="Account" value={account} />
+            <AccountDetail title="Account" value={account} first />
             <AmountDetail title="Amount" value={amount} />
             <DisplayEstimatedFee className="mT5" estimatedFee={estimatedFee} />
             <AccountDetail title="Recipient" value={recipient} />
