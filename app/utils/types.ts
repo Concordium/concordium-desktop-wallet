@@ -3,6 +3,7 @@ import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
 import { RegisterOptions } from 'react-hook-form';
 import { RejectReason } from './node/RejectReasonHelper';
+import { Genesis } from '~/database/types';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -91,6 +92,7 @@ export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
 
@@ -115,6 +117,7 @@ export enum AccountStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
 
@@ -1166,7 +1169,7 @@ export interface ExportData {
     addressBook: AddressBookEntry[];
     credentials: Credential[];
     wallets: WalletEntry[];
-    genesis?: string;
+    genesis?: Genesis;
 }
 
 interface RejectReasonWithContents {
@@ -1271,6 +1274,7 @@ export enum ExportKeyType {
     Level1 = 'level1',
     Level2 = 'level2',
     Credential = 'credential',
+    // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
 
