@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
 import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
@@ -14,16 +14,9 @@ import {
     UpdateType,
 } from '~/utils/types';
 import KeySetThreshold from './KeySetThreshold';
-import InputTimestamp from '~/components/Form/InputTimestamp';
-import {
-    getDefaultExpiry,
-    getFormattedDateString,
-    subtractHours,
-    TimeConstants,
-} from '~/utils/timeHelpers';
 import { KeyUpdateEntry } from './KeyUpdateEntry';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
-import { useTransactionExpiryState } from '~/utils/dataHooks';
+import SetExpiryAndEffectiveTime from './SetExpiryAndEffectiveTime';
 
 interface Props {
     defaults: any;
@@ -63,6 +56,7 @@ function getCurrentKeysWithThreshold(
  * higher level key sets (root keys and level 1 keys).
  */
 export default function UpdateHigherLevelKeys({
+    defaults,
     blockSummary,
     type,
     handleHigherLevelKeySubmit,
@@ -76,42 +70,25 @@ export default function UpdateHigherLevelKeys({
     const currentKeySetSize = currentKeys.length;
     const currentThreshold = currentKeysWithThreshold.threshold;
 
+    console.log(defaults);
+
     // The values for the transaction proposal, i.e. the updated key set and threshold.
     const [newKeys, setNewKeys] = useState<KeyWithStatus[]>(
-        currentKeys.map((key) => {
-            return {
-                key,
-                status: KeyUpdateEntryStatus.Unchanged,
-            };
-        })
+        defaults.keyUpdate?.updateKeys ||
+            currentKeys.map((key) => {
+                return {
+                    key,
+                    status: KeyUpdateEntryStatus.Unchanged,
+                };
+            })
     );
     const newKeySetSize = newKeys.filter(
         (key) => key.status !== KeyUpdateEntryStatus.Removed
     ).length;
 
-    const [threshold, setThreshold] = useState<number>(currentThreshold);
-    const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
-        new Date(getDefaultExpiry().getTime() + 5 * TimeConstants.Minute)
+    const [threshold, setThreshold] = useState<number>(
+        defaults.keyUpdate?.threshold || currentThreshold
     );
-
-    const checkIsBeforeEffective = useCallback(
-        (expiry: Date | undefined) => {
-            if (expiry === undefined) {
-                return undefined;
-            }
-            if (effectiveTime !== undefined && effectiveTime < expiry) {
-                return 'Expiry must be before the effective time';
-            }
-            return undefined;
-        },
-        [effectiveTime]
-    );
-
-    const [
-        expiryTime,
-        setExpiryTime,
-        expiryTimeError,
-    ] = useTransactionExpiryState(checkIsBeforeEffective);
 
     function addNewKey(publicKey: PublicKeyExportFormat) {
         const addedKey = {
@@ -155,13 +132,7 @@ export default function UpdateHigherLevelKeys({
         setNewKeys(updatedKeys);
     }
 
-    function submitFunction() {
-        if (!effectiveTime) {
-            return;
-        }
-        if (!expiryTime) {
-            return;
-        }
+    function submitFunction(effectiveTime: Date, expiryTime: Date) {
         const higherLevelKeyUpdate: Partial<HigherLevelKeyUpdate> = {
             threshold,
             updateKeys: newKeys,
@@ -207,33 +178,22 @@ export default function UpdateHigherLevelKeys({
                             );
                         })}
                     </ul>
-                    <h5>Effective time</h5>
-                    <InputTimestamp
-                        value={effectiveTime}
-                        onChange={setEffectiveTime}
-                    />
-                    <h5>Transaction expiry time</h5>
-                    <InputTimestamp
-                        value={expiryTime}
-                        onChange={setExpiryTime}
-                        isInvalid={expiryTimeError !== undefined}
-                        error={expiryTimeError}
-                    />
-                    {expiryTime !== undefined ? (
-                        <p>
-                            Note: A transaction can only be submitted in the 2
-                            hours before the expiry <br /> (
-                            {getFormattedDateString(
-                                subtractHours(2, expiryTime)
-                            )}
-                            )
-                        </p>
-                    ) : undefined}
                 </div>
             </Columns.Column>
             <Columns.Column className={styles.stretchColumn} header={' '}>
                 <div className={styles.columnContent}>
                     <Switch>
+                        <Route
+                            path={
+                                routes.MULTISIGTRANSACTIONS_PROPOSAL_SET_EFFECTIVE_EXPIRY
+                            }
+                            render={() => (
+                                <SetExpiryAndEffectiveTime
+                                    defaults={defaults}
+                                    onContinue={submitFunction}
+                                />
+                            )}
+                        />
                         <Route
                             path={
                                 routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_THRESHOLD
@@ -243,8 +203,8 @@ export default function UpdateHigherLevelKeys({
                                     type={type}
                                     maxThreshold={newKeySetSize}
                                     currentThreshold={currentThreshold}
+                                    defaultThreshold={threshold}
                                     setThreshold={setThreshold}
-                                    submitFunction={submitFunction}
                                 />
                             )}
                         />

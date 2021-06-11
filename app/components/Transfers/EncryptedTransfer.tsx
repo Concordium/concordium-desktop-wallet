@@ -32,7 +32,7 @@ function EncryptedTransfer({ account, exchangeRate, nonce }: Props) {
     const estimatedFee = useMemo(
         () =>
             getTransactionKindCost(
-                TransactionKindId.Simple_transfer,
+                TransactionKindId.Encrypted_transfer,
                 exchangeRate
             ),
         [exchangeRate]

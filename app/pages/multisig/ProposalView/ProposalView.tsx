@@ -38,7 +38,7 @@ import SignatureCheckboxes from './SignatureCheckboxes';
 import { getCheckboxName } from './SignatureCheckboxes/SignatureCheckboxes';
 import { submittedProposalRoute } from '~/utils/routerHelper';
 import getTransactionSignDigest from '~/utils/transactionHash';
-import { HandleSignatureFile, getSignatures } from './util';
+import { HandleSignatureFiles, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
 
 import styles from './ProposalView.module.scss';
@@ -87,9 +87,12 @@ function ProposalView({ proposal }: ProposalViewProps) {
         return expirationEffect(proposal, dispatch);
     }, [proposal, dispatch]);
 
-    async function loadSignatureFile(file: Buffer) {
+    async function loadSignatureFiles(signatureFiles: File[]) {
         setCurrentlyLoadingFile(true);
-        const error = await HandleSignatureFile(dispatch, file, proposal);
+        const buffers = (
+            await Promise.all(signatureFiles.map((f) => f.arrayBuffer()))
+        ).map((f) => Buffer.from(f));
+        const error = await HandleSignatureFiles(dispatch, buffers, proposal);
         if (error) {
             setShowError(error);
         }
@@ -98,9 +101,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
 
     // Every time a signature file is dropped, try loading as signature.
     useEffect(() => {
-        fileListToFileArray(files)
-            .map(async (f) => Buffer.from(await f.arrayBuffer()))
-            .forEach((p) => p.then(loadSignatureFile));
+        loadSignatureFiles(fileListToFileArray(files));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [files]);
 
