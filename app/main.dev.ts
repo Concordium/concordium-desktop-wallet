@@ -19,6 +19,7 @@ import bs58check from 'bs58check';
 import axios from 'axios';
 import * as https from 'https';
 import * as crypto from 'crypto';
+import { Knex } from 'knex';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
 import { setClientLocation, grpcCall } from './node/GRPCClient';
@@ -31,8 +32,11 @@ import { walletProxytransactionLimit } from './constants/externalConstants.json'
 import { getDatabaseFilename } from './database/knexfile';
 import {
     Account,
+    AddressBookEntry,
     EncryptedData,
+    Global,
     Hex,
+    Identity,
     MultiSignatureTransaction,
     Setting,
     TransactionKindString,
@@ -47,10 +51,18 @@ import {
     transactionTable,
     settingsTable,
     multiSignatureProposalTable,
+    identitiesTable,
+    globalTable,
+    genesisTable,
+    credentialsTable,
+    addressBookTable,
+    accountsTable,
 } from './constants/databaseNames.json';
 import migrate from './database/migration';
 import { convertBooleans } from './database/TransactionDao';
 import { chunkArray, partition } from './utils/basicHelpers';
+import { sanitizeAddressBookEntry } from './database/AddressBookDao';
+import { convertAccountBooleans } from './database/AccountDao';
 
 export default class AppUpdater {
     constructor() {
@@ -106,7 +118,7 @@ const createWindow = async () => {
             process.env.NODE_ENV === 'development'
                 ? {
                       preload: path.join(__dirname, 'preload.js'),
-                      nodeIntegration: true,
+                      nodeIntegration: false,
                       webviewTag: true,
                   }
                 : {
@@ -185,6 +197,340 @@ ipcMain.handle('setPassword', (_event, password: string) => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 ipcMain.handle('dbMigrate', (_event) => {
     migrate();
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ipcMain.handle('dbGetAllAccounts', async (_event) => {
+    const accounts = await (await knex())
+        .table(accountsTable)
+        .join(
+            identitiesTable,
+            `${accountsTable}.identityId`,
+            '=',
+            `${identitiesTable}.id`
+        )
+        .select(
+            `${accountsTable}.*`,
+            `${identitiesTable}.name as identityName`,
+            `${identitiesTable}.identityNumber as identityNumber`
+        );
+    return convertAccountBooleans(accounts);
+});
+
+ipcMain.handle('dbGetAccount', async (_event, address: string) => {
+    const accounts = await (await knex())
+        .table(accountsTable)
+        .join(
+            identitiesTable,
+            `${accountsTable}.identityId`,
+            '=',
+            `${identitiesTable}.id`
+        )
+        .where({ address })
+        .select(
+            `${accountsTable}.*`,
+            `${identitiesTable}.name as identityName`,
+            `${identitiesTable}.identityNumber as identityNumber`
+        );
+
+    return convertAccountBooleans(accounts)[0];
+});
+
+ipcMain.handle(
+    'insertAccount',
+    async (_event, account: Account | Account[]) => {
+        return (await knex())(accountsTable).insert(account);
+    }
+);
+
+ipcMain.handle(
+    'updateAccount',
+    async (_event, address: string, updatedValues: Partial<Account>) => {
+        return (await knex())(accountsTable)
+            .where({ address })
+            .update(updatedValues);
+    }
+);
+
+ipcMain.handle(
+    'dbFindAccounts',
+    async (_event, condition: Record<string, unknown>) => {
+        const accounts = await (await knex())
+            .select()
+            .table(accountsTable)
+            .where(condition);
+        return convertAccountBooleans(accounts);
+    }
+);
+
+ipcMain.handle('dbRemoveAccount', async (_event, accountAddress: string) => {
+    return (await knex())(accountsTable)
+        .where({ address: accountAddress })
+        .del();
+});
+
+ipcMain.handle('dbRemoveInitialAccount', async (_event, identityId: number) => {
+    return (await knex())(accountsTable)
+        .where({ identityId, isInitial: 1 })
+        .del();
+});
+
+ipcMain.handle(
+    'dbConfirmInitialAccount',
+    async (_event, identityId: number, updatedValues: Partial<Account>) => {
+        return (await knex())
+            .select()
+            .table(accountsTable)
+            .where({ identityId, isInitial: 1 })
+            .first()
+            .update(updatedValues);
+    }
+);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ipcMain.handle('dbGetAddressBook', async (_event) => {
+    return (await knex())
+        .select()
+        .table(addressBookTable)
+        .orderByRaw('name COLLATE NOCASE ASC')
+        .then((e) => e.map(sanitizeAddressBookEntry));
+});
+
+ipcMain.handle(
+    'dbInsertAddressBookEntry',
+    async (_event, entry: AddressBookEntry | AddressBookEntry[]) => {
+        return (await knex())(addressBookTable).insert(entry);
+    }
+);
+
+ipcMain.handle(
+    'dbUpdateAddressBookEntry',
+    async (
+        _event,
+        address: string,
+        updatedValues: Partial<AddressBookEntry>
+    ) => {
+        return (await knex())(addressBookTable)
+            .where({ address })
+            .update(updatedValues);
+    }
+);
+
+ipcMain.handle(
+    'dbRemoveAddressBookEntry',
+    async (_event, entry: Partial<AddressBookEntry>) => {
+        return (await knex())(addressBookTable).where(entry).del();
+    }
+);
+
+ipcMain.handle(
+    'dbFindAddressBookEntries',
+    async (_event, condition: Partial<AddressBookEntry>) => {
+        return (await knex())
+            .select()
+            .table(addressBookTable)
+            .where(condition)
+            .then((e) => e.map(sanitizeAddressBookEntry));
+    }
+);
+
+ipcMain.handle('dbInsertCredential', async (_event, credential: Credential) => {
+    return (await knex())(credentialsTable).insert(credential);
+});
+
+ipcMain.handle('dbDeleteCredential', async (_event, credential: Credential) => {
+    return (await knex())(credentialsTable).where(credential).del();
+});
+
+ipcMain.handle(
+    'dbDeleteCredentialsForAccount',
+    async (_event, accountAddress: string) => {
+        return (await knex())(credentialsTable).where({ accountAddress }).del();
+    }
+);
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ipcMain.handle('dbGetCredentials', async (_event) => {
+    const credentials = await (await knex())
+        .select()
+        .table(credentialsTable)
+        .join(
+            identitiesTable,
+            `${credentialsTable}.identityId`,
+            '=',
+            `${identitiesTable}.id`
+        )
+        .select(
+            `${credentialsTable}.*`,
+            `${identitiesTable}.identityNumber as identityNumber`
+        );
+    return credentials;
+});
+
+ipcMain.handle(
+    'dbGetCredentialsForIdentity',
+    async (_event, identityId: number) => {
+        return (await knex())
+            .select()
+            .table(credentialsTable)
+            .where({ identityId });
+    }
+);
+
+async function getCredentialsOfAccount(accountAddress: string) {
+    const credentials = await (await knex())
+        .select()
+        .table(credentialsTable)
+        .join(
+            identitiesTable,
+            `${credentialsTable}.identityId`,
+            '=',
+            `${identitiesTable}.id`
+        )
+        .join(
+            walletTable,
+            `${identitiesTable}.walletId`,
+            '=',
+            `${walletTable}.id`
+        )
+        .where({ accountAddress })
+        .select(
+            `${credentialsTable}.*`,
+            `${identitiesTable}.identityNumber as identityNumber`,
+            `${walletTable}.id as walletId`
+        );
+    return credentials;
+}
+
+ipcMain.handle(
+    'dbGetCredentialsOfAccount',
+    async (_event, accountAddress: string) => {
+        return getCredentialsOfAccount(accountAddress);
+    }
+);
+
+ipcMain.handle(
+    'dbGetNextCredentialNumber',
+    async (_event, identityId: number) => {
+        const credentials = await (await knex())
+            .select()
+            .table(credentialsTable)
+            .where({ identityId });
+        if (credentials.length === 0) {
+            return 0;
+        }
+        const currentNumber = credentials.reduce(
+            (num, cred) => Math.max(num, cred.credentialNumber),
+            0
+        );
+        return currentNumber + 1;
+    }
+);
+
+ipcMain.handle(
+    'dbUpdateCredentialIndex',
+    async (_event, credId: string, credentialIndex: number | undefined) => {
+        if (credentialIndex === undefined) {
+            return (await knex())(credentialsTable)
+                .where({ credId })
+                .update({ credentialIndex: null });
+        }
+        return (await knex())(credentialsTable)
+            .where({ credId })
+            .update({ credentialIndex });
+    }
+);
+
+ipcMain.handle(
+    'dbUpdateCredential',
+    async (_event, credId: string, updatedValues: Partial<Credential>) => {
+        return (await knex())(credentialsTable)
+            .where({ credId })
+            .update(updatedValues);
+    }
+);
+
+ipcMain.handle(
+    'dbHasDuplicateWalletId',
+    async (
+        _event,
+        accountAddress: string,
+        credId: string,
+        otherCredIds: string[]
+    ) => {
+        const credentials = await getCredentialsOfAccount(accountAddress);
+        const credential = credentials.find((cred) => cred.credId === credId);
+        if (!credential) {
+            return false;
+        }
+        const { walletId } = credential;
+        const otherWalletIds = credentials
+            .filter((cred) => otherCredIds.includes(cred.credId))
+            .map((cred) => cred.walletId);
+        return otherWalletIds.includes(walletId);
+    }
+);
+
+ipcMain.handle(
+    'dbHasExistingCredential',
+    async (_event, accountAddress: string, currentWalletId: number) => {
+        const credentials = await getCredentialsOfAccount(accountAddress);
+        return credentials.some((cred) => cred.walletId === currentWalletId);
+    }
+);
+
+async function setGenesis(genesisBlock: string, trx: Knex.Transaction) {
+    const table = (await knex())(genesisTable).transacting(trx);
+    return table.insert({ genesisBlock });
+}
+
+async function setGlobal(global: Global, trx: Knex.Transaction) {
+    const table = (await knex())(globalTable).transacting(trx);
+    return table.insert(global);
+}
+
+ipcMain.handle(
+    'dbSetGenesisAndGlobal',
+    async (_event, genesisBlock: string, global: Global) => {
+        const db = await knex();
+        await db.transaction((trx) => {
+            setGenesis(genesisBlock, trx)
+                .then(() => {
+                    return setGlobal(global, trx);
+                })
+                .then(trx.commit)
+                .catch(trx.rollback);
+        });
+    }
+);
+
+ipcMain.handle('dbSelectFirst', async (_event, tableName: string) => {
+    return (await knex()).table(tableName).first();
+});
+
+ipcMain.handle('dbInsertIdentitiy', async (_event, identity: Identity) => {
+    return (await knex())(identitiesTable).insert(identity);
+});
+
+ipcMain.handle(
+    'dbUpdateIdentity',
+    async (_event, id: number, updatedValues: Record<string, unknown>) => {
+        return (await knex())(identitiesTable)
+            .where({ id })
+            .update(updatedValues);
+    }
+);
+
+ipcMain.handle('dbGetIdentitiesForWallet', async (_event, walletId: number) => {
+    return (await knex()).select().table(identitiesTable).where({ walletId });
+});
+
+ipcMain.handle('dbGetNextIdentityNumber', async (_event, walletId: number) => {
+    const model = (await knex())
+        .table(identitiesTable)
+        .where('walletId', walletId);
+    const totalCount = await model.clone().count();
+    return parseInt(totalCount[0]['count(*)'].toString(), 10);
 });
 
 ipcMain.handle(
