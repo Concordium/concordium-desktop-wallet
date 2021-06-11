@@ -35,7 +35,10 @@ import {
     TransactionKindString,
 } from '../utils/types';
 import { getStatus } from '../utils/transactionHelpers';
-import { isValidAddress } from '../utils/accountHelpers';
+import {
+    isValidAddress,
+    getInitialEncryptedAmount,
+} from '../utils/accountHelpers';
 
 import { getAccountInfos, getAccountInfoOfAddress } from '../node/nodeHelpers';
 import { hasPendingTransactions } from '~/database/TransactionDao';
@@ -363,6 +366,9 @@ export async function addPendingAccount(
         isInitial,
         deploymentTransactionId,
         rewardFilter: '[]',
+        selfAmounts: getInitialEncryptedAmount(),
+        incomingAmounts: '[]',
+        totalDecrypted: '0',
     };
     await insertAccount(account);
     return loadAccounts(dispatch);

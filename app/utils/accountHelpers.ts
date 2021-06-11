@@ -69,3 +69,7 @@ export function isMultiSig(account: Account): boolean {
 export function isMultiCred(accountInfo: AccountInfo): boolean {
     return Object.values(accountInfo.accountCredentials).length > 1;
 }
+
+export function getInitialEncryptedAmount() {
+    return ENCRYPTED_ZERO;
+}
