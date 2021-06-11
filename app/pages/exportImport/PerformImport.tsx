@@ -75,7 +75,7 @@ async function performImport(
             );
         }
 
-        if (genesis.genesisBlock !== importedData.genesis) {
+        if (genesis.genesisBlock !== importedData.genesis.genesisBlock) {
             throw new Error(
                 'The imported data was created on a different network.'
             );

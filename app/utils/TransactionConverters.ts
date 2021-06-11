@@ -50,7 +50,11 @@ export function convertIncomingTransaction(
     }
     let encrypted;
     if (transaction.encrypted) {
-        encrypted = JSON.stringify(transaction.encrypted);
+        const { inputEncryptedAmount } = transaction.details;
+        encrypted = JSON.stringify({
+            ...transaction.encrypted,
+            inputEncryptedAmount,
+        });
     }
 
     const success = transaction.details.outcome === 'success';
