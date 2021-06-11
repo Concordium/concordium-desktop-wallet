@@ -51,10 +51,12 @@ function MultiSignatureCreateProposal({
 }: ChainData) {
     const proposals = useSelector(proposalsSelector);
     const [restrictionModalOpen, setRestrictionModalOpen] = useState(false);
-    const [defaults, setDefaults] = useState<Partial<FieldValues & MultiSignatureCreateProposalForm>>({});
+    const [defaults, setDefaults] = useState<
+        Partial<FieldValues & MultiSignatureCreateProposalForm>
+    >({});
 
     const [proposal, setProposal] = useState<
-    Partial<MultiSignatureTransaction>
+        Partial<MultiSignatureTransaction>
     >();
     const dispatch = useDispatch();
 
@@ -126,7 +128,7 @@ function MultiSignatureCreateProposal({
             secondsSinceUnixEpoch(effectiveTime)
         );
 
-        setDefaults({effectiveTime, expiryTime, keyUpdate});
+        setDefaults({ effectiveTime, expiryTime, keyUpdate });
 
         const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
         const newProposal = await handler.createTransaction(
@@ -192,9 +194,9 @@ function MultiSignatureCreateProposal({
                                 />
                             )}
                             {isKeyUpdate &&
-                             (!blockSummary || !consensusStatus) && (
-                                 <Loading text="Getting current settings from chain" />
-                            )}
+                                (!blockSummary || !consensusStatus) && (
+                                    <Loading text="Getting current settings from chain" />
+                                )}
                             {blockSummary && consensusStatus && isKeyUpdate && (
                                 <UpdateComponent
                                     defaults={defaults}
@@ -202,7 +204,7 @@ function MultiSignatureCreateProposal({
                                     consensusStatus={consensusStatus}
                                     handleHigherLevelKeySubmit={handleKeySubmit}
                                     handleAuthorizationKeySubmit={
-                                    handleKeySubmit
+                                        handleKeySubmit
                                     }
                                 />
                             )}

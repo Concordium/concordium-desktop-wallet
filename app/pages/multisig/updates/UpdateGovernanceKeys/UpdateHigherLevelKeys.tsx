@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FieldValues } from 'react-hook-form';
 import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
 import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
@@ -19,7 +20,7 @@ import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 import SetExpiryAndEffectiveTime from './SetExpiryAndEffectiveTime';
 
 interface Props {
-    defaults: any;
+    defaults: FieldValues;
     blockSummary: BlockSummary;
     type: UpdateType;
     handleHigherLevelKeySubmit(
@@ -69,8 +70,6 @@ export default function UpdateHigherLevelKeys({
     const currentKeys = currentKeysWithThreshold.keys;
     const currentKeySetSize = currentKeys.length;
     const currentThreshold = currentKeysWithThreshold.threshold;
-
-    console.log(defaults);
 
     // The values for the transaction proposal, i.e. the updated key set and threshold.
     const [newKeys, setNewKeys] = useState<KeyWithStatus[]>(

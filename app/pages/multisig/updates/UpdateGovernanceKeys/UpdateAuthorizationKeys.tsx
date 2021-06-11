@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Route, Switch } from 'react-router';
+import { FieldValues } from 'react-hook-form';
 import Columns from '~/components/Columns/Columns';
 import { BlockSummary, Key } from '~/node/NodeApiTypes';
 import {
@@ -32,7 +33,7 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import SetExpiryAndEffectiveTime from './SetExpiryAndEffectiveTime';
 
 interface Props {
-    defaults: any;
+    defaults: FieldValues;
     blockSummary: BlockSummary;
     type: UpdateType;
     handleKeySubmit(

@@ -15,7 +15,7 @@ export interface MultiSignatureCreateProposalForm {
 }
 
 interface Props extends ChainData {
-    defaults: any;
+    defaults: FieldValues;
     type: UpdateType;
     handleSubmit: (
         fields: FieldValues & MultiSignatureCreateProposalForm
@@ -27,7 +27,7 @@ export default function BuildProposal({
     blockSummary,
     consensusStatus,
     handleSubmit,
-    defaults
+    defaults,
 }: Props) {
     const handler = findUpdateInstructionHandler(type);
     const form = useForm<FieldValues & MultiSignatureCreateProposalForm>({
@@ -61,11 +61,11 @@ export default function BuildProposal({
                                 name="effectiveTime"
                                 label="Effective Time"
                                 defaultValue={
-                                defaults.effectiveTime ||
-                                new Date(
-                                    getDefaultExpiry().getTime() +
-                                    5 * TimeConstants.Minute
-                                )
+                                    defaults.effectiveTime ||
+                                    new Date(
+                                        getDefaultExpiry().getTime() +
+                                            5 * TimeConstants.Minute
+                                    )
                                 }
                                 rules={{
                                     required: 'Effective time is required',
@@ -77,20 +77,21 @@ export default function BuildProposal({
                             <Form.Timestamp
                                 name="expiryTime"
                                 label="Transaction Expiry Time"
-                                defaultValue={                                defaults.expiryTime ||
-                                                                              getDefaultExpiry()}
+                                defaultValue={
+                                    defaults.expiryTime || getDefaultExpiry()
+                                }
                                 rules={{
                                     required:
                                         'Transaction expiry time is required',
                                     validate: {
                                         ...(effective !== undefined
-                                          ? {
-                                              beforeEffective: maxDate(
-                                                  effective,
-                                                  'Transaction expiry time must be before the effective time'
-                                              ),
-                                          }
-                                          : undefined),
+                                            ? {
+                                                  beforeEffective: maxDate(
+                                                      effective,
+                                                      'Transaction expiry time must be before the effective time'
+                                                  ),
+                                              }
+                                            : undefined),
                                         future: futureDate(
                                             'Transaction expiry time must be in the future'
                                         ),

@@ -77,7 +77,9 @@ export default function UpdateMintDistribution({
                 <h5>New Mint Distribution</h5>
                 <FormMintRateInput
                     name={fieldNames.mintPerSlot}
-                    defaultValue={defaults.mintPerSlot || mintPerSlot.toString()}
+                    defaultValue={
+                        defaults.mintPerSlot || mintPerSlot.toString()
+                    }
                     slotsPerYear={slotsPerYear}
                     className="mB20"
                     rules={{
@@ -94,7 +96,9 @@ export default function UpdateMintDistribution({
                 />
                 <FormRewardDistribution
                     name={fieldNames.rewardDistribution}
-                    defaultValue={defaults.rewardDistribution || currentDistribitionRatio}
+                    defaultValue={
+                        defaults.rewardDistribution || currentDistribitionRatio
+                    }
                     labels={rewardDistributionLabels}
                     rules={{ required: 'Reward distribution is required' }}
                 />

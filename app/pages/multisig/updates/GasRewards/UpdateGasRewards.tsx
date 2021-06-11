@@ -10,7 +10,10 @@ export type { UpdateGasRewardsFields } from './GasRewardsForm';
  * The component used for creating an update transaction for updating the
  * GAS rewards chain parameters.
  */
-export default function UpdateGasRewards({ defaults, blockSummary }: UpdateProps) {
+export default function UpdateGasRewards({
+    defaults,
+    blockSummary,
+}: UpdateProps) {
     const currentRewards: GasRewards = useMemo(
         () => toRewardFractions(getCurrentValue(blockSummary)),
         [blockSummary]
@@ -18,8 +21,8 @@ export default function UpdateGasRewards({ defaults, blockSummary }: UpdateProps
 
     const defaultRewards = {
         ...currentRewards,
-        ...defaults
-    }
+        ...defaults,
+    };
 
     return (
         <>

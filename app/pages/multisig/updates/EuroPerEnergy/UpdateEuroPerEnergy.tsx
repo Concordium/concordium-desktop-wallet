@@ -21,7 +21,10 @@ const fieldNames: EqualRecord<UpdateEuroPerEnergyFields> = {
     euroPerEnergyRate: 'euroPerEnergyRate',
 };
 
-export default function UpdateEuroPerEnergy({ defaults, blockSummary }: UpdateProps) {
+export default function UpdateEuroPerEnergy({
+    defaults,
+    blockSummary,
+}: UpdateProps) {
     const exchangeRate = getCurrentValue(blockSummary);
     const currentValue: RelativeRateValue = fromExchangeRate(exchangeRate);
 

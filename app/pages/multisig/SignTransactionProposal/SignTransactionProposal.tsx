@@ -46,8 +46,6 @@ function SignTransactionProposalView({ proposal }: Props) {
         transaction
     );
 
-    console.log(updateInstruction);
-
     const transactionHandler = useMemo<
         UpdateInstructionHandler<UpdateInstruction, ConcordiumLedgerClient>
     >(() => findUpdateInstructionHandler(updateInstruction.type), [

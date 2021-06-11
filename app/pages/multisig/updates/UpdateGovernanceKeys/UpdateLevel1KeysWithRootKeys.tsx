@@ -8,7 +8,7 @@ export default function UpdateLevel1KeysWithRootKeys({
     handleHigherLevelKeySubmit,
     defaults,
 }: UpdateProps): JSX.Element | null {
-        if (!handleHigherLevelKeySubmit) {
+    if (!handleHigherLevelKeySubmit) {
         throw new Error('A key submission function must be supplied.');
     }
 

@@ -10,7 +10,7 @@ import { UpdateProps } from '~/utils/transactionTypes';
 const auxiliaryDataMaxSizeKb = 2048;
 
 export interface UpdateProtocolFields
-extends Omit<ProtocolUpdate, 'specificationAuxiliaryData'> {
+    extends Omit<ProtocolUpdate, 'specificationAuxiliaryData'> {
     specificationAuxiliaryData: FileList;
 }
 
@@ -32,7 +32,9 @@ const validateHex: Validate = (v: string) =>
 /**
  * Component for creating an update protocol transaction.
  */
-export default function UpdateProtocol({ defaults }: UpdateProps): JSX.Element | null {
+export default function UpdateProtocol({
+    defaults,
+}: UpdateProps): JSX.Element | null {
     return (
         <>
             <Form.TextArea
