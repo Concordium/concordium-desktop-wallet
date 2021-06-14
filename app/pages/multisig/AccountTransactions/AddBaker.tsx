@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Route, Switch, useRouteMatch } from 'react-router';
+import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
@@ -65,11 +65,22 @@ interface PageProps {
     exchangeRate: Fraction;
 }
 
+export function getLocationAfterAccounts(url: string) {
+    return `${url}/${BuildSubRoutes.stake}`;
+}
+
+interface State {
+    account?: Account;
+}
+
 function AddBakerPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
+
+    const { state } = useLocation<State>();
+
     const { path, url } = useRouteMatch();
     const [identity, setIdentity] = useState<Identity>();
-    const [account, setAccount] = useState<Account>();
+    const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [stake, setStake] = useState<string>();
     const [restakeEnabled, setRestakeEnabled] = useState(true);
     const [error, setError] = useState<string>();
@@ -273,9 +284,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                                     disabled={account === undefined}
                                     onClick={() =>
                                         dispatch(
-                                            push(
-                                                `${url}/${BuildSubRoutes.stake}`
-                                            )
+                                            push(getLocationAfterAccounts(url))
                                         )
                                     }
                                 >

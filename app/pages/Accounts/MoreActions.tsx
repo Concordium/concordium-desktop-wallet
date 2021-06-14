@@ -42,6 +42,11 @@ const items = [
         noEncrypted: true,
     },
     {
+        name: 'Add baker',
+        location: routes.ACCOUNTS_MORE_ADD_BAKER,
+        requiresCredentials: true,
+    },
+    {
         name: 'Transfer Log Filters',
         location: routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS,
     },
@@ -155,6 +160,17 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     <Redirect
                         to={createTransferWithAccountRoute(
                             TransactionKindId.Update_credentials,
+                            account
+                        )}
+                    />
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_ADD_BAKER}
+                render={() => (
+                    <Redirect
+                        to={createTransferWithAccountRoute(
+                            TransactionKindId.Add_baker,
                             account
                         )}
                     />
