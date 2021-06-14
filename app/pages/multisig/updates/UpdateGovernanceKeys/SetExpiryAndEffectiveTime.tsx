@@ -4,20 +4,24 @@ import Form from '~/components/Form';
 import { futureDate, maxDate } from '~/components/Form/util/validation';
 import { getDefaultExpiry, TimeConstants } from '~/utils/timeHelpers';
 
-interface Props {
-    onContinue(expiry: Date, effectiveTime: Date): void;
-}
-
 export interface MultiSignatureCreateProposalForm {
     effectiveTime: Date;
-    expiry: Date;
+    expiryTime: Date;
+}
+
+interface Props {
+    defaults: Partial<MultiSignatureCreateProposalForm>;
+    onContinue(expiry: Date, effectiveTime: Date): void;
 }
 
 /**
  * Component for displaying the current signature threshold for the key set, and for
  * letting the user input an updated signature threshold.
  */
-export default function SetExpiryAndEffectiveTime({ onContinue }: Props) {
+export default function SetExpiryAndEffectiveTime({
+    defaults,
+    onContinue,
+}: Props) {
     const form = useForm<MultiSignatureCreateProposalForm>({
         mode: 'onTouched',
     });
@@ -26,8 +30,8 @@ export default function SetExpiryAndEffectiveTime({ onContinue }: Props) {
     async function handleSubmit(
         fields: MultiSignatureCreateProposalForm
     ): Promise<void> {
-        const { effectiveTime: effective, expiry } = fields;
-        onContinue(effective, expiry);
+        const { effectiveTime: effective, expiryTime } = fields;
+        onContinue(effective, expiryTime);
     }
 
     return (
@@ -43,6 +47,7 @@ export default function SetExpiryAndEffectiveTime({ onContinue }: Props) {
                     label="Effective Time"
                     className="mV40"
                     defaultValue={
+                        defaults.effectiveTime ||
                         new Date(
                             getDefaultExpiry().getTime() +
                                 5 * TimeConstants.Minute
@@ -56,9 +61,9 @@ export default function SetExpiryAndEffectiveTime({ onContinue }: Props) {
                     }}
                 />
                 <Form.Timestamp
-                    name="expiry"
+                    name="expiryTime"
                     label="Transaction Expiry Time"
-                    defaultValue={getDefaultExpiry()}
+                    defaultValue={defaults.expiryTime || getDefaultExpiry()}
                     rules={{
                         required: 'Transaction expiry time is required',
                         validate: {

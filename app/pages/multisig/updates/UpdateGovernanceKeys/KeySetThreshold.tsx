@@ -12,6 +12,7 @@ interface Props {
     type: UpdateType;
     currentThreshold: number;
     maxThreshold: number;
+    defaultThreshold?: number;
     setThreshold: React.Dispatch<React.SetStateAction<number>>;
 }
 
@@ -34,11 +35,14 @@ export default function KeySetThreshold({
     type,
     maxThreshold,
     currentThreshold,
+    defaultThreshold,
     setThreshold,
 }: Props) {
     const dispatch = useDispatch();
     const [threshold, setLocalThreshold] = useState<string | undefined>(
-        currentThreshold.toString()
+        defaultThreshold
+            ? defaultThreshold.toString()
+            : currentThreshold.toString()
     );
 
     return (

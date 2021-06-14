@@ -6,6 +6,7 @@ import ElectionDifficultyInput from './ElectionDifficultyInput';
  * Component for creating an election difficulty update.
  */
 export default function UpdateElectionDifficulty({
+    defaults,
     blockSummary,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
@@ -22,7 +23,7 @@ export default function UpdateElectionDifficulty({
             />
             <ElectionDifficultyInput
                 label="New election difficulty"
-                value={currentElectionDifficulty}
+                value={defaults.electionDifficulty || currentElectionDifficulty}
                 timePerSlot={slotDuration}
             />
         </>

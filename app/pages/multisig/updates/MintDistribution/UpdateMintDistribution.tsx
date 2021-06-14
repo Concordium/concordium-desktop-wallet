@@ -45,6 +45,7 @@ const isValidFloat = isValidNumber(parseFloat);
  * Component for creating an update mint distribution transaction.
  */
 export default function UpdateMintDistribution({
+    defaults,
     blockSummary,
     consensusStatus,
 }: UpdateProps): JSX.Element | null {
@@ -76,7 +77,9 @@ export default function UpdateMintDistribution({
                 <h5>New Mint Distribution</h5>
                 <FormMintRateInput
                     name={fieldNames.mintPerSlot}
-                    defaultValue={mintPerSlot.toString()}
+                    defaultValue={
+                        defaults.mintPerSlot || mintPerSlot.toString()
+                    }
                     slotsPerYear={slotsPerYear}
                     className="mB20"
                     rules={{
@@ -93,7 +96,9 @@ export default function UpdateMintDistribution({
                 />
                 <FormRewardDistribution
                     name={fieldNames.rewardDistribution}
-                    defaultValue={currentDistribitionRatio}
+                    defaultValue={
+                        defaults.rewardDistribution || currentDistribitionRatio
+                    }
                     labels={rewardDistributionLabels}
                     rules={{ required: 'Reward distribution is required' }}
                 />
