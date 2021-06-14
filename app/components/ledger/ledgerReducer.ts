@@ -100,7 +100,7 @@ function getStatusMessage(
 ): string {
     switch (status) {
         case LedgerStatusType.LOADING:
-            return 'Waiting for device';
+            return 'Waiting for device. Please connect your Ledger.';
         case LedgerStatusType.AWAITING_USER_INPUT:
             return 'Waiting for user to finish the process on device';
         case LedgerStatusType.ERROR:
