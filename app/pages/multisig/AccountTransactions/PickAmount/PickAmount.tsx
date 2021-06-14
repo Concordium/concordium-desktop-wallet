@@ -66,6 +66,7 @@ export default function PickAmount({
                     value={state}
                     onChange={onChange}
                     isInvalid={Boolean(error)}
+                    autoFocus
                 />
             </div>
             <ErrorMessage>{error}</ErrorMessage>

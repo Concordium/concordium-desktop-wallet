@@ -6,14 +6,12 @@ import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import {
-    Identity,
     Account,
     TransactionKindId,
     UpdateBakerKeysPayload,
     UpdateBakerKeys,
     Fraction,
 } from '~/utils/types';
-import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -44,7 +42,6 @@ import LoadingComponent from './LoadingComponent';
 const pageTitle = 'Multi Signature Transactions | Update Baker Keys';
 
 enum BuildSubRoutes {
-    accounts = 'accounts',
     keys = 'keys',
     sign = 'sign',
     expiry = 'expiry',
@@ -56,7 +53,6 @@ interface PageProps {
 function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
-    const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account>();
     const [error, setError] = useState<string>();
     const [bakerKeys, setBakerKeys] = useState<BakerKeys>();
@@ -165,7 +161,6 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                 <Columns.Column header="Transaction Details">
                     <div className={styles.columnContent}>
                         <UpdateBakerKeysProposalDetails
-                            identity={identity}
                             account={account}
                             estimatedFee={estimatedFee}
                             bakerVerifyKeys={
@@ -187,61 +182,26 @@ function UpdateBakerKeysPage({ exchangeRate }: PageProps) {
                 <Switch>
                     <Route exact path={path}>
                         <Columns.Column
-                            header="Identities"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <PickIdentity
-                                        setIdentity={setIdentity}
-                                        chosenIdentity={identity}
-                                    />
-                                </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={identity === undefined}
-                                    onClick={() =>
-                                        dispatch(
-                                            push(
-                                                `${url}/${BuildSubRoutes.accounts}`
-                                            )
-                                        )
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            </div>
-                        </Columns.Column>
-                    </Route>
-                    <Route path={`${path}/${BuildSubRoutes.accounts}`}>
-                        <Columns.Column
                             header="Accounts"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickAccount
-                                        identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={(_, info) =>
                                             info?.accountBaker !== undefined
                                         }
+                                        onAccountClicked={() => {
+                                            dispatch(
+                                                push(
+                                                    `${url}/${BuildSubRoutes.expiry}`
+                                                )
+                                            );
+                                        }}
                                     />
                                 </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={account === undefined}
-                                    onClick={() => {
-                                        dispatch(
-                                            push(
-                                                `${url}/${BuildSubRoutes.expiry}`
-                                            )
-                                        );
-                                    }}
-                                >
-                                    Continue
-                                </Button>
                             </div>
                         </Columns.Column>
                     </Route>

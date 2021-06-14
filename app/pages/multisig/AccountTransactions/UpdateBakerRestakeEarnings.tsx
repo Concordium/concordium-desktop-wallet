@@ -6,13 +6,11 @@ import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import {
-    Identity,
     Account,
     TransactionKindId,
     UpdateBakerRestakeEarnings,
     Fraction,
 } from '~/utils/types';
-import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -33,7 +31,6 @@ import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from './LoadingComponent';
 
 enum SubRoutes {
-    accounts,
     restake,
     sign,
     expiry,
@@ -45,7 +42,6 @@ interface PageProps {
 function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();
-    const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account>();
     const [restakeEarnings, setRestakeEarnings] = useState<boolean>();
     const [error, setError] = useState<string>();
@@ -111,7 +107,6 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                 >
                     <div className={styles.columnContent}>
                         <UpdateBakerRestakeEarningsProposalDetails
-                            identity={identity}
                             account={account}
                             estimatedFee={estimatedFee}
                             restakeEarnings={restakeEarnings}
@@ -122,57 +117,26 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                 <Switch>
                     <Route exact path={path}>
                         <Columns.Column
-                            header="Identities"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <PickIdentity
-                                        setIdentity={setIdentity}
-                                        chosenIdentity={identity}
-                                    />
-                                </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={identity === undefined}
-                                    onClick={() =>
-                                        dispatch(
-                                            push(`${url}/${SubRoutes.accounts}`)
-                                        )
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            </div>
-                        </Columns.Column>
-                    </Route>
-                    <Route path={`${path}/${SubRoutes.accounts}`}>
-                        <Columns.Column
                             header="Accounts"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickAccount
-                                        identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={(_, info) =>
                                             info?.accountBaker !== undefined
                                         }
+                                        onAccountClicked={() => {
+                                            dispatch(
+                                                push(
+                                                    `${url}/${SubRoutes.restake}`
+                                                )
+                                            );
+                                        }}
                                     />
                                 </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={account === undefined}
-                                    onClick={() => {
-                                        dispatch(
-                                            push(`${url}/${SubRoutes.restake}`)
-                                        );
-                                    }}
-                                >
-                                    Continue
-                                </Button>
                             </div>
                         </Columns.Column>
                     </Route>

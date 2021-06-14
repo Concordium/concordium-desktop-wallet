@@ -1,11 +1,10 @@
 import React from 'react';
-import { Account, Fraction, Identity } from '~/utils/types';
+import { Account, Fraction } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import { AccountDetail, Details, EnabledDetail, PlainDetail } from './shared';
+import { AccountDetail, Details, EnabledDetail } from './shared';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 interface Props {
-    identity?: Identity;
     account?: Account;
     restakeEarnings?: boolean;
     estimatedFee?: Fraction;
@@ -13,7 +12,6 @@ interface Props {
 }
 
 export default function UpdateBakerRestakeEarningsProposalDetails({
-    identity,
     account,
     restakeEarnings,
     estimatedFee,
@@ -21,8 +19,7 @@ export default function UpdateBakerRestakeEarningsProposalDetails({
 }: Props) {
     return (
         <Details>
-            <PlainDetail title="Identity" value={identity?.name} first />
-            <AccountDetail title="Account" value={account} />
+            <AccountDetail title="Account" value={account} first />
             <EnabledDetail title="Restake Earnings" value={restakeEarnings} />
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <DisplayTransactionExpiryTime expiryTime={expiryTime} />

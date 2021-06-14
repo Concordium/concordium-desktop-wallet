@@ -1,19 +1,12 @@
 import React from 'react';
-import { Account, Amount, Fraction, Identity } from '~/utils/types';
+import { Account, Amount, Fraction } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import {
-    AccountDetail,
-    AmountDetail,
-    Details,
-    formatNote,
-    PlainDetail,
-} from './shared';
+import { AccountDetail, AmountDetail, Details, formatNote } from './shared';
 import { useStakedAmount } from '~/utils/dataHooks';
 import { displayAsGTU, microGtuToGtu } from '~/utils/gtu';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 
 interface Props {
-    identity?: Identity;
     account?: Account;
     stake?: Amount;
     estimatedFee?: Fraction;
@@ -21,7 +14,6 @@ interface Props {
 }
 
 export default function UpdateBakerStakeProposalDetails({
-    identity,
     account,
     stake,
     estimatedFee,
@@ -29,8 +21,7 @@ export default function UpdateBakerStakeProposalDetails({
 }: Props) {
     return (
         <Details>
-            <PlainDetail title="Identity" value={identity?.name} first />
-            <AccountDetail title="Account" value={account} />
+            <AccountDetail title="Account" value={account} first />
             <AmountDetail
                 title="Amount to stake"
                 value={microGtuToGtu(stake)}

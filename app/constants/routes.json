@@ -60,7 +60,6 @@
     "GENERATE_CREDENTIAL_REVEALATTRIBUTES": "/multi-signature-transaction/generate-credential/reveal-attributes",
     "GENERATE_CREDENTIAL_PICKACCOUNT": "/multi-signature-transaction/generate-credential/pick-account",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION": "/multi-signature-transaction/account-transaction/:transactionKind",
-    "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT": "/multi-signature-transaction/account-transaction/:transactionKind/pick-account",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT": "/multi-signature-transaction/account-transaction/:transactionKind/pick_amount",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT": "/multi-signature-transaction/account-transaction/:transactionKind/pick_recipient",
     "MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY": "/multi-signature-transaction/account-transaction/:transactionKind/pick_expiry",

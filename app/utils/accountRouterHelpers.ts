@@ -9,7 +9,7 @@ export function createTransferWithAccountRoute(
 ) {
     const handler = findAccountTransactionHandler(transactionKind);
     const pathname = handler.creationLocationHandler(
-        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
+        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
     );
 
     return {
