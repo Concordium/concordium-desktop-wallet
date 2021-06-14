@@ -31,7 +31,7 @@ interface Props {
 export default function PickAccount({
     chosenAccount,
     setAccount,
-    filter,
+    filter = () => true,
     isDisabled,
     onAccountClicked = noOp,
 }: Props): JSX.Element {
@@ -41,9 +41,7 @@ export default function PickAccount({
     const [chosenIndex, setChosenIndex] = useState<number | undefined>();
     const [loaded, setLoaded] = useState(false);
 
-    const filtered = accounts.filter(
-        (a) => filter?.(a, accountsInfo[a.address]) ?? true
-    );
+    const filtered = accounts.filter((a) => filter(a, accountsInfo[a.address]));
 
     useEffect(() => {
         if (chosenAccount) {
@@ -58,13 +56,15 @@ export default function PickAccount({
     const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
-        if (filtered && !loaded) {
+        if (accounts && !loaded) {
             setLoaded(true);
-            loadAccountInfos(filtered, dispatch).catch((e) =>
+            loadAccountInfos(accounts, dispatch).catch((e) =>
                 setError(e.message)
             );
         }
-    }, [filtered, dispatch, loaded]);
+    }, [accounts, dispatch, loaded]);
+
+    console.log(filtered);
 
     return (
         <>
