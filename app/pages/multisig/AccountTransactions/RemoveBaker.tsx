@@ -43,6 +43,10 @@ interface PageProps {
     exchangeRate: Fraction;
 }
 
+export function getLocationAfterAccounts(url: string) {
+    return `${url}/${SubRoutes.expiry}`;
+}
+
 function RemoveBakerPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
     const { path, url } = useRouteMatch();

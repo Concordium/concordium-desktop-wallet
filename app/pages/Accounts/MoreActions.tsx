@@ -24,7 +24,17 @@ interface Props {
     accountInfo: AccountInfo;
 }
 
-const items = [
+interface MoreActionObject {
+    name: string;
+    location: string;
+    isDisabled?: (
+        hasCredential: boolean,
+        usedEncrypted: boolean,
+        isBaker: boolean
+    ) => boolean;
+}
+
+const items: MoreActionObject[] = [
     { name: 'Account Address', location: routes.ACCOUNTS_MORE_ADDRESS },
     {
         name: 'Inspect release schedule',
@@ -33,18 +43,25 @@ const items = [
     {
         name: 'Send GTU with a schedule',
         location: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
-        requiresCredentials: true,
+        isDisabled: (hasCredential) => !hasCredential,
     },
     {
         name: 'Update credentials',
         location: routes.ACCOUNTS_MORE_UPDATE_CREDENTIALS,
-        requiresCredentials: true,
-        noEncrypted: true,
+        isDisabled: (hasCredential, usedEncrypted) =>
+            !hasCredential || usedEncrypted,
     },
     {
         name: 'Add baker',
         location: routes.ACCOUNTS_MORE_ADD_BAKER,
-        requiresCredentials: true,
+        isDisabled: (hasCredential, _encrypted, isBaker) =>
+            !hasCredential || isBaker,
+    },
+    {
+        name: 'Remove Baker',
+        location: routes.ACCOUNTS_MORE_REMOVE_BAKER,
+        isDisabled: (hasCredential, _encrypted, isBaker) =>
+            !hasCredential || !isBaker,
     },
     {
         name: 'Transfer Log Filters',
@@ -71,6 +88,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
     const accountHasDeployedCredentials = useSelector(
         accountHasDeployedCredentialsSelector(account)
     );
+    const hasUsedEncrypted = hasEncryptedBalance(accountInfo);
 
     function MoreActionsMenu() {
         return (
@@ -82,9 +100,12 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 />
                 {items.map((item) => {
                     const isDisabled =
-                        (item.requiresCredentials &&
-                            !accountHasDeployedCredentials) ||
-                        (item.noEncrypted && hasEncryptedBalance(accountInfo));
+                        item.isDisabled &&
+                        item.isDisabled(
+                            accountHasDeployedCredentials,
+                            hasUsedEncrypted,
+                            Boolean(accountInfo.accountBaker)
+                        );
                     return (
                         <ButtonNavLink
                             to={{
@@ -176,7 +197,17 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     />
                 )}
             />
-
+            <Route
+                path={routes.ACCOUNTS_MORE_REMOVE_BAKER}
+                render={() => (
+                    <Redirect
+                        to={createTransferWithAccountRoute(
+                            TransactionKindId.Remove_baker,
+                            account
+                        )}
+                    />
+                )}
+            />
             <Route component={MoreActionsMenu} />
         </Switch>
     );
