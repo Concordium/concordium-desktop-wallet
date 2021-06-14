@@ -64,8 +64,6 @@ export default function PickAccount({
         }
     }, [accounts, dispatch, loaded]);
 
-    console.log(filtered);
-
     return (
         <>
             <SimpleErrorModal
