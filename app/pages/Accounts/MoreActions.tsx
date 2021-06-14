@@ -30,7 +30,8 @@ interface MoreActionObject {
     isDisabled?: (
         hasCredential: boolean,
         usedEncrypted: boolean,
-        isBaker: boolean
+        isBaker: boolean,
+        bakerCooldown: boolean
     ) => boolean;
 }
 
@@ -72,8 +73,8 @@ const items: MoreActionObject[] = [
     {
         name: 'Remove baker',
         location: routes.ACCOUNTS_MORE_REMOVE_BAKER,
-        isDisabled: (hasCredential, _encrypted, isBaker) =>
-            !hasCredential || !isBaker,
+        isDisabled: (hasCredential, _encrypted, isBaker, bakerCooldown) =>
+            !hasCredential || !isBaker || bakerCooldown,
     },
     {
         name: 'Update baker keys',
@@ -84,8 +85,8 @@ const items: MoreActionObject[] = [
     {
         name: 'Update baker stake',
         location: routes.ACCOUNTS_MORE_UPDATE_BAKER_STAKE,
-        isDisabled: (hasCredential, _encrypted, isBaker) =>
-            !hasCredential || !isBaker,
+        isDisabled: (hasCredential, _encrypted, isBaker, bakerCooldown) =>
+            !hasCredential || !isBaker || bakerCooldown,
     },
     {
         name: 'Update baker restake earnings',
@@ -107,6 +108,7 @@ export default function MoreActions({ account, accountInfo }: Props) {
         accountHasDeployedCredentialsSelector(account)
     );
     const hasUsedEncrypted = hasEncryptedBalance(accountInfo);
+    const hasBakerCooldown = Boolean(accountInfo?.accountBaker?.pendingChange);
 
     function MoreActionsMenu() {
         return (
@@ -122,7 +124,8 @@ export default function MoreActions({ account, accountInfo }: Props) {
                         item.isDisabled(
                             accountHasDeployedCredentials,
                             hasUsedEncrypted,
-                            Boolean(accountInfo.accountBaker)
+                            Boolean(accountInfo.accountBaker),
+                            hasBakerCooldown
                         );
                     return (
                         <ButtonNavLink
