@@ -121,9 +121,7 @@ export default function AccessStructureThreshold({
                             <h3>New signature threshold</h3>
                             <InlineNumber
                                 className={styles.inputField}
-                                value={thresholds
-                                    .get(newAccessStructure.type)
-                                    ?.toString()}
+                                value={newAccessStructure.threshold?.toString()}
                                 onChange={(v) => {
                                     updateLocalThreshold(
                                         v,

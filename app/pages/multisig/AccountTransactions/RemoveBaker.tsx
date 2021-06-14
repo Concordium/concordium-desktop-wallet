@@ -6,13 +6,11 @@ import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import {
-    Identity,
     Account,
     TransactionKindId,
     RemoveBaker,
     Fraction,
 } from '~/utils/types';
-import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -34,7 +32,6 @@ import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from './LoadingComponent';
 
 enum SubRoutes {
-    accounts,
     sign,
     expiry,
 }
@@ -57,7 +54,6 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
     const { state } = useLocation<State>();
 
     const { path, url } = useRouteMatch();
-    const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [error, setError] = useState<string>();
     const [transaction, setTransaction] = useState<RemoveBaker>();
@@ -115,7 +111,6 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                 >
                     <div className={styles.columnContent}>
                         <RemoveBakerProposalDetails
-                            identity={identity}
                             account={account}
                             estimatedFee={estimatedFee}
                             expiryTime={expiryTime}
@@ -125,44 +120,26 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                 <Switch>
                     <Route exact path={path}>
                         <Columns.Column
-                            header="Identities"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <PickIdentity
-                                        setIdentity={setIdentity}
-                                        chosenIdentity={identity}
-                                    />
-                                </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={identity === undefined}
-                                    onClick={() =>
-                                        dispatch(
-                                            push(`${url}/${SubRoutes.accounts}`)
-                                        )
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            </div>
-                        </Columns.Column>
-                    </Route>
-                    <Route path={`${path}/${SubRoutes.accounts}`}>
-                        <Columns.Column
                             header="Accounts"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickAccount
-                                        identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={(_, info) =>
                                             info?.accountBaker !== undefined
                                         }
+                                        onAccountClicked={() => {
+                                            dispatch(
+                                                push(
+                                                    getLocationAfterAccounts(
+                                                        url
+                                                    )
+                                                )
+                                            );
+                                        }}
                                         isDisabled={(_, info) =>
                                             info?.accountBaker
                                                 ?.pendingChange !==
@@ -181,17 +158,6 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         }
                                     />
                                 </div>
-                                <Button
-                                    className={styles.stretchColumn}
-                                    disabled={account === undefined}
-                                    onClick={() => {
-                                        dispatch(
-                                            push(`${url}/${SubRoutes.expiry}`)
-                                        );
-                                    }}
-                                >
-                                    Continue
-                                </Button>
                             </div>
                         </Columns.Column>
                     </Route>

@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     Account,
-    Identity,
     AddressBookEntry,
     TransactionKindId,
     Schedule,
@@ -17,7 +16,6 @@ interface Props {
         | TransactionKindId.Simple_transfer
         | TransactionKindId.Transfer_with_schedule;
     account?: Account;
-    identity?: Identity;
     amount?: string;
     recipient?: AddressBookEntry;
     schedule?: Schedule;
@@ -26,7 +24,6 @@ interface Props {
 }
 
 export default function TransferProposalDetails({
-    identity,
     account,
     amount,
     recipient,
@@ -40,8 +37,7 @@ export default function TransferProposalDetails({
 
     return (
         <Details>
-            <PlainDetail title="Identity" value={identity?.name} first />
-            <AccountDetail title="Account" value={account} />
+            <AccountDetail title="Account" value={account} first />
             <AmountDetail title="Amount" value={amount} />
             <DisplayEstimatedFee className="mT5" estimatedFee={estimatedFee} />
             <AccountDetail title="Recipient" value={recipient} />

@@ -6,14 +6,12 @@ import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import {
-    Identity,
     Account,
     TransactionKindId,
     AccountTransaction,
     AddBakerPayload,
     Fraction,
 } from '~/utils/types';
-import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
 import { toMicroUnits } from '~/utils/gtu';
 import PickAmount from './PickAmount';
@@ -54,7 +52,6 @@ import styles from './MultisignatureAccountTransactions.module.scss';
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
 enum BuildSubRoutes {
-    accounts = 'accounts',
     stake = 'stake',
     keys = 'keys',
     expiry = 'expiry',
@@ -79,7 +76,6 @@ function AddBakerPage({ exchangeRate }: PageProps) {
     const { state } = useLocation<State>();
 
     const { path, url } = useRouteMatch();
-    const [identity, setIdentity] = useState<Identity>();
     const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [stake, setStake] = useState<string>();
     const [restakeEnabled, setRestakeEnabled] = useState(true);
@@ -212,7 +208,6 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                 <Columns.Column header="Transaction Details">
                     <div className={styles.columnContent}>
                         <AddBakerProposalDetails
-                            identity={identity}
                             account={account}
                             stake={stake}
                             estimatedFee={estimatedFee}
@@ -236,60 +231,28 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                 <Switch>
                     <Route exact path={path}>
                         <Columns.Column
-                            header="Identities"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <PickIdentity
-                                        setIdentity={setIdentity}
-                                        chosenIdentity={identity}
-                                    />
-                                </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={identity === undefined}
-                                    onClick={() =>
-                                        dispatch(
-                                            push(
-                                                `${url}/${BuildSubRoutes.accounts}`
-                                            )
-                                        )
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            </div>
-                        </Columns.Column>
-                    </Route>
-
-                    <Route path={`${path}/${BuildSubRoutes.accounts}`}>
-                        <Columns.Column
                             header="Accounts"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickAccount
-                                        identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={(_, info) =>
                                             info?.accountBaker === undefined
                                         }
+                                        onAccountClicked={() =>
+                                            dispatch(
+                                                push(
+                                                    getLocationAfterAccounts(
+                                                        url
+                                                    )
+                                                )
+                                            )
+                                        }
                                     />
                                 </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={account === undefined}
-                                    onClick={() =>
-                                        dispatch(
-                                            push(getLocationAfterAccounts(url))
-                                        )
-                                    }
-                                >
-                                    Continue
-                                </Button>
                             </div>
                         </Columns.Column>
                     </Route>

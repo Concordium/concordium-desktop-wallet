@@ -21,15 +21,14 @@ import { futureDate } from '../../Form/util/validation';
 import ScheduleList from '../../ScheduleList';
 import Button from '~/cross-app-components/Button';
 import Card from '~/cross-app-components/Card';
-
-import styles from './BuildExplicitSchedule.module.scss';
 import {
     ScheduledTransferBuilderBaseProps,
     ScheduledTransferBuilderRef,
     ExplicitScheduleDefaults,
 } from '../util';
-import { noOp } from '~/utils/basicHelpers';
 import Label from '~/components/Label';
+
+import styles from './BuildExplicitSchedule.module.scss';
 
 const maxScheduleAmount = 255;
 
@@ -63,8 +62,7 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             amount,
             defaults,
             setScheduleLength,
-            hideSubmitButton = false,
-            onValidChange = noOp,
+            submitButtonSize,
         },
         ref
     ) => {
@@ -80,8 +78,6 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
 
         const canSubmit =
             usedAmount === amount && schedule.length <= maxScheduleAmount;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        useEffect(() => onValidChange(canSubmit), [canSubmit]);
 
         const submit = useCallback(
             () => submitSchedule(schedule, { schedule, explicit: true }),
@@ -202,16 +198,14 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                         />
                     ) : null}
                 </div>
-                {!hideSubmitButton && (
-                    <Button
-                        size="big"
-                        className={styles.submitButton}
-                        disabled={!canSubmit}
-                        onClick={submit}
-                    >
-                        Continue
-                    </Button>
-                )}
+                <Button
+                    className={styles.submitButton}
+                    disabled={!canSubmit}
+                    size={submitButtonSize}
+                    onClick={submit}
+                >
+                    Continue
+                </Button>
             </>
         );
     }

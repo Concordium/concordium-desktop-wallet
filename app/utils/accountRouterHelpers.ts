@@ -55,7 +55,7 @@ export function createTransferWithAccountRoute(
     } else {
         const handler = findAccountTransactionHandler(transactionKind);
         pathname = handler.creationLocationHandler(
-            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
+            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
         );
     }
 

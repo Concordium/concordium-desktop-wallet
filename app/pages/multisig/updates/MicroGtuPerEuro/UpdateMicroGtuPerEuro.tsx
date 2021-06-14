@@ -23,6 +23,7 @@ const fieldNames: EqualRecord<UpdateMicroGtuPerEuroRateFields> = {
 };
 
 export default function UpdateMicroGtuPerEuroRate({
+    defaults,
     blockSummary,
 }: UpdateProps): JSX.Element | null {
     const exchangeRate = getCurrentValue(blockSummary);
@@ -40,7 +41,7 @@ export default function UpdateMicroGtuPerEuroRate({
                 {...commonFieldProps}
                 name={fieldNames.microGtuPerEuroRate}
                 label="New micro GTU per euro rate"
-                defaultValue={currentValue}
+                defaultValue={defaults.microGtuPerEuroRate || currentValue}
                 rules={{
                     validate: {
                         isPositiveNumber,

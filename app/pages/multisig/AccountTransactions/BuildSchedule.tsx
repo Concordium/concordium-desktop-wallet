@@ -18,7 +18,6 @@ interface Props {
         defaults: BuildScheduleDefaults
     ) => void;
     amount: string;
-    setReady(isReady: boolean): void;
     defaults?: BuildScheduleDefaults;
 }
 
@@ -27,7 +26,7 @@ interface Props {
  * Allows the user to build the schedule of a scheduled transfer.
  */
 const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
-    ({ amount, submitSchedule, setReady, defaults }, ref) => {
+    ({ amount, submitSchedule, defaults }, ref) => {
         const [explicit, setExplicit] = useState<boolean>(
             defaults?.explicit || false
         );
@@ -56,9 +55,7 @@ const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                     submitSchedule={submitSchedule}
                     setScheduleLength={() => {}}
                     amount={toMicroUnits(amount)}
-                    hideSubmitButton
                     ref={ref}
-                    onValidChange={setReady}
                 />
             </div>
         );
