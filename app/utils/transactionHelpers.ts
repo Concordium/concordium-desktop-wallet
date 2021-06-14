@@ -644,3 +644,10 @@ export function isRewardKind(kind: TransactionKindString) {
             return false;
     }
 }
+
+export function isOutgoingTransaction(
+    transaction: TransferTransaction,
+    accountAddress: string
+) {
+    return transaction.fromAddress === accountAddress;
+}
