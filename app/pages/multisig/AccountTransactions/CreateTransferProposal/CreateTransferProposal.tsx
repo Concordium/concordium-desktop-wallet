@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push, replace } from 'connected-react-router';
@@ -20,10 +20,7 @@ import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import {
-    ScheduledTransferBuilderRef,
-    BuildScheduleDefaults,
-} from '~/components/BuildSchedule/util';
+import { BuildScheduleDefaults } from '~/components/BuildSchedule/util';
 import {
     scheduledTransferCost,
     getTransactionKindCost,
@@ -57,6 +54,36 @@ function subTitle(currentLocation: string) {
     }
 }
 
+// interface RightColumnWrapperProps {
+//     location: string;
+//     isReady: boolean;
+// }
+
+// function RightColumnWrapper({ isReady, location }: RightColumnWrapperProps) {
+//     const showButton = ![
+//         routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION,
+//         routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION,
+//     ].includes(location);
+
+//     return (
+//         <>
+//             {showButton && (
+//                 <Button
+//                     disabled={!isReady}
+//                     className={styles.submitButton}
+//                     onClick={
+//                         isBuildSchedulePage
+//                             ? submitSchedule
+//                             : () => continueAction()
+//                     }
+//                 >
+//                     Continue
+//                 </Button>
+//             )}
+//         </>
+//     );
+// }
+
 interface State {
     account?: Account;
 }
@@ -78,11 +105,8 @@ function CreateTransferProposal({
     const dispatch = useDispatch();
 
     const { pathname, state } = useLocation<State>();
-    const accounts = useSelector(accountsSelector)
-        .filter(isMultiSig)
-        .filter((_, i) => i === 0);
+    const accounts = useSelector(accountsSelector).filter(isMultiSig);
     const location = pathname.replace(`${transactionKind}`, ':transactionKind');
-    const scheduleBuilderRef = useRef<ScheduledTransferBuilderRef>(null);
 
     const handler = findAccountTransactionHandler(transactionKind);
 
@@ -166,9 +190,9 @@ function CreateTransferProposal({
         );
     }
 
-    function submitSchedule() {
-        scheduleBuilderRef?.current?.submitSchedule();
-    }
+    // function submitSchedule() {
+    //     scheduleBuilderRef?.current?.submitSchedule();
+    // }
 
     useEffect(() => {
         if (
@@ -215,23 +239,18 @@ function CreateTransferProposal({
                     continueAction();
                 }}
                 amount={amount}
-                ref={scheduleBuilderRef}
                 setReady={setScheduleReady}
                 defaults={scheduleDefaults}
             />
         );
     }
 
-    const isSignPage =
-        location ===
-        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-    const isBuildSchedulePage =
-        location ===
-        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
-
-    const showButton =
-        !isSignPage &&
-        location !== routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION;
+    // const isSignPage =
+    //     location ===
+    //     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
+    // const isBuildSchedulePage =
+    //     location ===
+    //     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
 
     return (
         <MultiSignatureLayout
@@ -258,27 +277,11 @@ function CreateTransferProposal({
                                 estimatedFee={estimatedFee}
                                 expiryTime={expiryTime}
                             />
-                            {showButton && (
-                                <Button
-                                    disabled={!isReady}
-                                    className={styles.submitButton}
-                                    onClick={
-                                        isBuildSchedulePage
-                                            ? submitSchedule
-                                            : () => continueAction()
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            )}
                         </div>
                     </Columns.Column>
                     <Columns.Column
                         header={subTitle(location)}
-                        className={clsx(
-                            (isSignPage || isBuildSchedulePage) &&
-                                styles.stretchColumn
-                        )}
+                        className={styles.stretchColumn}
                     >
                         <Switch>
                             <Route
@@ -309,6 +312,13 @@ function CreateTransferProposal({
                                             setAmount={setAmount}
                                             estimatedFee={estimatedFee}
                                         />
+                                        <Button
+                                            disabled={!isReady}
+                                            className={styles.submitButton}
+                                            onClick={() => continueAction()}
+                                        >
+                                            Continue
+                                        </Button>
                                     </div>
                                 )}
                             />
@@ -351,6 +361,13 @@ function CreateTransferProposal({
                                             Committing the transaction after
                                             this date, will be rejected.
                                         </p>
+                                        <Button
+                                            disabled={!isReady}
+                                            className={styles.submitButton}
+                                            onClick={() => continueAction()}
+                                        >
+                                            Continue
+                                        </Button>
                                     </div>
                                 )}
                             />

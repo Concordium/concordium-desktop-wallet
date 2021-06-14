@@ -56,7 +56,6 @@ const BuildSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
                     submitSchedule={submitSchedule}
                     setScheduleLength={() => {}}
                     amount={toMicroUnits(amount)}
-                    hideSubmitButton
                     ref={ref}
                     onValidChange={setReady}
                 />
