@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import DoubleCheckmarkIcon from '@resources/svg/double-grey-checkmark.svg';
 import CheckmarkIcon from '@resources/svg/grey-checkmark.svg';
 import Warning from '@resources/svg/warning.svg';
-import { abs } from '~/utils/basicHelpers';
 import { parseTime } from '~/utils/timeHelpers';
 import { getGTUSymbol, displayAsGTU } from '~/utils/gtu';
 import {
@@ -80,8 +79,8 @@ function buildCostString(fee: bigint) {
     };
 }
 
-function buildCostFreeAmountString(amount: bigint, absolute = false) {
-    const displayAmount = absolute ? abs(amount) : amount;
+function buildCostFreeAmountString(amount: bigint, flipSign = false) {
+    const displayAmount = flipSign ? -amount : amount;
     return {
         amount: `${displayAsGTU(displayAmount)}`,
         amountFormula: '',
@@ -104,7 +103,7 @@ function parseShieldedAmount(
         ) {
             return buildCostFreeAmountString(
                 BigInt(transaction.decryptedAmount),
-                !isOutgoing
+                isOutgoing
             );
         }
         return buildCostFreeAmountString(BigInt(transaction.decryptedAmount));
@@ -147,7 +146,7 @@ function parseAmount(transaction: TransferTransaction, isOutgoing: boolean) {
             );
         }
         // incoming transaction:
-        return buildCostFreeAmountString(BigInt(transaction.subtotal), true);
+        return buildCostFreeAmountString(BigInt(transaction.subtotal));
     }
     if (isRewardKind(transaction.transactionKind)) {
         return buildCostFreeAmountString(BigInt(transaction.subtotal));
