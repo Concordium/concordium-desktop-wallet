@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push, replace } from 'connected-react-router';
@@ -54,36 +54,6 @@ function subTitle(currentLocation: string) {
     }
 }
 
-// interface RightColumnWrapperProps {
-//     location: string;
-//     isReady: boolean;
-// }
-
-// function RightColumnWrapper({ isReady, location }: RightColumnWrapperProps) {
-//     const showButton = ![
-//         routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION,
-//         routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION,
-//     ].includes(location);
-
-//     return (
-//         <>
-//             {showButton && (
-//                 <Button
-//                     disabled={!isReady}
-//                     className={styles.submitButton}
-//                     onClick={
-//                         isBuildSchedulePage
-//                             ? submitSchedule
-//                             : () => continueAction()
-//                     }
-//                 >
-//                     Continue
-//                 </Button>
-//             )}
-//         </>
-//     );
-// }
-
 interface State {
     account?: Account;
 }
@@ -124,36 +94,8 @@ function CreateTransferProposal({
         scheduleDefaults,
         setScheduleDefaults,
     ] = useState<BuildScheduleDefaults>();
-    const [isScheduleReady, setScheduleReady] = useState(true);
 
     const [estimatedFee, setFee] = useState<Fraction>();
-
-    const isReady = useMemo(() => {
-        switch (location) {
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-                return account !== undefined;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
-                return isScheduleReady;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
-                return amount !== undefined;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
-                return recipient !== undefined;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
-                return (
-                    expiryTime !== undefined && expiryTimeError === undefined
-                );
-            default:
-                return false;
-        }
-    }, [
-        account,
-        amount,
-        expiryTime,
-        expiryTimeError,
-        isScheduleReady,
-        location,
-        recipient,
-    ]);
 
     useEffect(() => {
         if (account) {
@@ -189,10 +131,6 @@ function CreateTransferProposal({
             })
         );
     }
-
-    // function submitSchedule() {
-    //     scheduleBuilderRef?.current?.submitSchedule();
-    // }
 
     useEffect(() => {
         if (
@@ -239,18 +177,10 @@ function CreateTransferProposal({
                     continueAction();
                 }}
                 amount={amount}
-                setReady={setScheduleReady}
                 defaults={scheduleDefaults}
             />
         );
     }
-
-    // const isSignPage =
-    //     location ===
-    //     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-    // const isBuildSchedulePage =
-    //     location ===
-    //     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
 
     return (
         <MultiSignatureLayout
@@ -313,7 +243,7 @@ function CreateTransferProposal({
                                             estimatedFee={estimatedFee}
                                         />
                                         <Button
-                                            disabled={!isReady}
+                                            disabled={amount !== undefined}
                                             className={styles.submitButton}
                                             onClick={() => continueAction()}
                                         >
@@ -362,7 +292,10 @@ function CreateTransferProposal({
                                             this date, will be rejected.
                                         </p>
                                         <Button
-                                            disabled={!isReady}
+                                            disabled={
+                                                expiryTime !== undefined &&
+                                                expiryTimeError === undefined
+                                            }
                                             className={styles.submitButton}
                                             onClick={() => continueAction()}
                                         >

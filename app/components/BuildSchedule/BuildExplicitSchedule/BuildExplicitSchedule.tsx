@@ -26,7 +26,6 @@ import {
     ScheduledTransferBuilderRef,
     ExplicitScheduleDefaults,
 } from '../util';
-import { noOp } from '~/utils/basicHelpers';
 import Label from '~/components/Label';
 
 import styles from './BuildExplicitSchedule.module.scss';
@@ -63,7 +62,6 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
             amount,
             defaults,
             setScheduleLength,
-            onValidChange = noOp,
             submitButtonSize,
         },
         ref
@@ -80,8 +78,6 @@ const BuildExplicitSchedule = forwardRef<ScheduledTransferBuilderRef, Props>(
 
         const canSubmit =
             usedAmount === amount && schedule.length <= maxScheduleAmount;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        useEffect(() => onValidChange(canSubmit), [canSubmit]);
 
         const submit = useCallback(
             () => submitSchedule(schedule, { schedule, explicit: true }),

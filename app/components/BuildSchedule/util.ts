@@ -10,7 +10,6 @@ export interface ScheduledTransferBuilderRef {
 
 export interface ScheduledTransferBuilderBaseProps {
     submitButtonSize?: ButtonProps['size'];
-    onValidChange?(isValid: boolean): void;
 }
 
 export interface RegularIntervalDefaults {

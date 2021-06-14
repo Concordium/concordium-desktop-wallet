@@ -22,7 +22,6 @@ import {
     ScheduledTransferBuilderRef,
     RegularIntervalDefaults,
 } from '../util';
-import { noOp } from '~/utils/basicHelpers';
 import Label from '~/components/Label';
 import ErrorMessage from '~/components/Form/ErrorMessage';
 
@@ -71,7 +70,6 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
             amount,
             defaults,
             setScheduleLength,
-            onValidChange = noOp,
             submitButtonSize,
         },
         ref
@@ -111,9 +109,6 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         }
         const formSubmit = handleSubmit(createSchedule);
         const canSubmit = true;
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        useEffect(() => onValidChange(canSubmit), [canSubmit]);
 
         useImperativeHandle(
             ref,
