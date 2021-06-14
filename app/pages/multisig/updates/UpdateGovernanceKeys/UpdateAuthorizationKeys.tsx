@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Route, Switch } from 'react-router';
+import { FieldValues } from 'react-hook-form';
 import Columns from '~/components/Columns/Columns';
 import { BlockSummary, Key } from '~/node/NodeApiTypes';
 import {
@@ -32,6 +33,7 @@ import SimpleErrorModal from '~/components/SimpleErrorModal';
 import SetExpiryAndEffectiveTime from './SetExpiryAndEffectiveTime';
 
 interface Props {
+    defaults: FieldValues;
     blockSummary: BlockSummary;
     type: UpdateType;
     handleKeySubmit(
@@ -42,6 +44,7 @@ interface Props {
 }
 
 export default function UpdateAuthorizationKeys({
+    defaults,
     blockSummary,
     type,
     handleKeySubmit,
@@ -59,10 +62,14 @@ export default function UpdateAuthorizationKeys({
         keyUpdateType,
         currentAuthorizations
     ).accessStructures;
-    const currentThresholds = getCurrentThresholds(currentAuthorizations);
+    const currentThresholds = getCurrentThresholds(currentAuthorizations); // TODO fix threshold when we have a default
 
     const [newLevel2Keys, setNewLevel2Keys] = useState<AuthorizationKeysUpdate>(
-        mapCurrentAuthorizationsToUpdate(keyUpdateType, currentAuthorizations)
+        defaults.keyUpdate ||
+            mapCurrentAuthorizationsToUpdate(
+                keyUpdateType,
+                currentAuthorizations
+            )
     );
 
     function setThreshold(
@@ -353,6 +360,7 @@ export default function UpdateAuthorizationKeys({
                                 }
                                 render={() => (
                                     <SetExpiryAndEffectiveTime
+                                        defaults={defaults}
                                         onContinue={submitFunction}
                                     />
                                 )}

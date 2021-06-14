@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FieldValues } from 'react-hook-form';
 import { Route, Switch } from 'react-router';
 import Columns from '~/components/Columns';
 import { BlockSummary, KeysWithThreshold } from '~/node/NodeApiTypes';
@@ -19,6 +20,7 @@ import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 import SetExpiryAndEffectiveTime from './SetExpiryAndEffectiveTime';
 
 interface Props {
+    defaults: FieldValues;
     blockSummary: BlockSummary;
     type: UpdateType;
     handleHigherLevelKeySubmit(
@@ -55,6 +57,7 @@ function getCurrentKeysWithThreshold(
  * higher level key sets (root keys and level 1 keys).
  */
 export default function UpdateHigherLevelKeys({
+    defaults,
     blockSummary,
     type,
     handleHigherLevelKeySubmit,
@@ -70,18 +73,21 @@ export default function UpdateHigherLevelKeys({
 
     // The values for the transaction proposal, i.e. the updated key set and threshold.
     const [newKeys, setNewKeys] = useState<KeyWithStatus[]>(
-        currentKeys.map((key) => {
-            return {
-                key,
-                status: KeyUpdateEntryStatus.Unchanged,
-            };
-        })
+        defaults.keyUpdate?.updateKeys ||
+            currentKeys.map((key) => {
+                return {
+                    key,
+                    status: KeyUpdateEntryStatus.Unchanged,
+                };
+            })
     );
     const newKeySetSize = newKeys.filter(
         (key) => key.status !== KeyUpdateEntryStatus.Removed
     ).length;
 
-    const [threshold, setThreshold] = useState<number>(currentThreshold);
+    const [threshold, setThreshold] = useState<number>(
+        defaults.keyUpdate?.threshold || currentThreshold
+    );
 
     function addNewKey(publicKey: PublicKeyExportFormat) {
         const addedKey = {
@@ -182,6 +188,7 @@ export default function UpdateHigherLevelKeys({
                             }
                             render={() => (
                                 <SetExpiryAndEffectiveTime
+                                    defaults={defaults}
                                     onContinue={submitFunction}
                                 />
                             )}
@@ -195,6 +202,7 @@ export default function UpdateHigherLevelKeys({
                                     type={type}
                                     maxThreshold={newKeySetSize}
                                     currentThreshold={currentThreshold}
+                                    defaultThreshold={threshold}
                                     setThreshold={setThreshold}
                                 />
                             )}

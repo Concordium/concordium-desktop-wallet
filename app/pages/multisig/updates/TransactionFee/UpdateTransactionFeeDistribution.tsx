@@ -18,6 +18,7 @@ const fieldNames: EqualRecord<UpdateTransactionFeeDistributionFields> = {
 };
 
 export default function UpdateTransactionFeeDistribution({
+    defaults,
     blockSummary,
 }: UpdateProps) {
     const currentValue: RewardDistributionValue = getCurrentValue(blockSummary);
@@ -36,7 +37,7 @@ export default function UpdateTransactionFeeDistribution({
                 <h5>New Transaction Fee Distribuition</h5>
                 <FormRewardDistribution
                     name={fieldNames.rewardDistribution}
-                    defaultValue={currentValue}
+                    defaultValue={defaults.rewardDistribution || currentValue}
                     labels={rewardDistributionLabels}
                     rules={{
                         required: 'Must specify a valid reward distribution',
