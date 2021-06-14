@@ -5,8 +5,6 @@ import { useParams, Route, Switch } from 'react-router';
 import { FieldValues } from 'react-hook-form';
 import Modal from '~/cross-app-components/Modal';
 import {
-    AuthorizationKeysUpdate,
-    HigherLevelKeyUpdate,
     instanceOfUpdateInstruction,
     MultiSignatureTransaction,
     MultiSignatureTransactionStatus,
@@ -15,15 +13,14 @@ import {
 } from '~/utils/types';
 import routes from '~/constants/routes.json';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
-import Loading from '~/cross-app-components/Loading';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
 import { parse } from '~/utils/JSONHelper';
-import { secondsSinceUnixEpoch } from '~/utils/timeHelpers';
 
 import withChainData, { ChainData } from '../common/withChainData';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import SignTransactionProposal from '../SignTransactionProposal';
 import BuildProposal from './BuildProposal';
+import BuildKeyProposal from './BuildKeyProposal';
 import { createProposalRoute } from '~/utils/routerHelper';
 
 export interface MultiSignatureCreateProposalForm {
@@ -66,8 +63,6 @@ function MultiSignatureCreateProposal({
 
     const handler = findUpdateInstructionHandler(type);
 
-    const UpdateComponent = handler.update;
-
     function openDuplicateTypeExists(): boolean {
         return proposals.some((existingProposal) => {
             const existingUpdateInstruction = parse(
@@ -82,67 +77,13 @@ function MultiSignatureCreateProposal({
         });
     }
 
-    async function handleSubmit(
-        fields: FieldValues & MultiSignatureCreateProposalForm
-    ): Promise<void> {
-        if (!blockSummary) {
-            return;
-        }
-        const { effectiveTime, expiryTime, ...dynamicFields } = fields;
-        const effectiveTimeInSeconds = BigInt(
-            secondsSinceUnixEpoch(effectiveTime)
-        );
-        const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
-
-        const newProposal = await handler.createTransaction(
-            blockSummary,
-            dynamicFields,
-            effectiveTimeInSeconds,
-            expiryTimeInSeconds
-        );
-
-        setDefaults(fields);
-        setProposal(newProposal);
-
-        if (newProposal) {
-            dispatch(push(getSigningRoute(type)));
-        }
-    }
-
-    /**
-     * Form submit function used for the higher level keys updates. They do not
-     * use Form element to input all the keys, so therefore it cannot use the
-     * regular handleSubmit function.
-     */
-    async function handleKeySubmit(
-        effectiveTime: Date,
-        expiryTime: Date,
-        keyUpdate:
-            | Partial<HigherLevelKeyUpdate>
-            | Partial<AuthorizationKeysUpdate>
+    function handleProposal(
+        newProposal: Partial<MultiSignatureTransaction>,
+        newDefaults: FieldValues
     ) {
-        if (!blockSummary) {
-            return;
-        }
-        const effectiveTimeInSeconds = BigInt(
-            secondsSinceUnixEpoch(effectiveTime)
-        );
-
-        setDefaults({ effectiveTime, expiryTime, keyUpdate });
-
-        const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
-        const newProposal = await handler.createTransaction(
-            blockSummary,
-            keyUpdate,
-            effectiveTimeInSeconds,
-            expiryTimeInSeconds
-        );
-
+        setDefaults(newDefaults);
         setProposal(newProposal);
-
-        if (newProposal) {
-            dispatch(push(getSigningRoute(type)));
-        }
+        dispatch(push(getSigningRoute(type)));
     }
 
     if (!restrictionModalOpen && openDuplicateTypeExists()) {
@@ -156,6 +97,8 @@ function MultiSignatureCreateProposal({
         UpdateType.UpdateLevel2KeysUsingRootKeys,
         UpdateType.UpdateLevel2KeysUsingLevel1Keys,
     ].includes(type);
+
+    const BuildComponent = isKeyUpdate ? BuildKeyProposal : BuildProposal;
 
     return (
         <>
@@ -184,30 +127,13 @@ function MultiSignatureCreateProposal({
                             stepTitle={`Transaction Proposal - ${handler.type}`}
                             delegateScroll
                         >
-                            {isKeyUpdate || (
-                                <BuildProposal
-                                    type={type}
-                                    handleSubmit={handleSubmit}
-                                    blockSummary={blockSummary}
-                                    consensusStatus={consensusStatus}
-                                    defaults={defaults}
-                                />
-                            )}
-                            {isKeyUpdate &&
-                                (!blockSummary || !consensusStatus) && (
-                                    <Loading text="Getting current settings from chain" />
-                                )}
-                            {blockSummary && consensusStatus && isKeyUpdate && (
-                                <UpdateComponent
-                                    defaults={defaults}
-                                    blockSummary={blockSummary}
-                                    consensusStatus={consensusStatus}
-                                    handleHigherLevelKeySubmit={handleKeySubmit}
-                                    handleAuthorizationKeySubmit={
-                                        handleKeySubmit
-                                    }
-                                />
-                            )}
+                            <BuildComponent
+                                type={type}
+                                onFinish={handleProposal}
+                                blockSummary={blockSummary}
+                                consensusStatus={consensusStatus}
+                                defaults={defaults}
+                            />
                         </MultiSignatureLayout>
                     )}
                 />

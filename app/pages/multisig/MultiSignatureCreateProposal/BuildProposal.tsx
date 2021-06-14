@@ -1,8 +1,12 @@
 import React from 'react';
 import { FieldValues, useForm } from 'react-hook-form';
-import { getDefaultExpiry, TimeConstants } from '~/utils/timeHelpers';
+import {
+    getDefaultExpiry,
+    TimeConstants,
+    secondsSinceUnixEpoch,
+} from '~/utils/timeHelpers';
 import { ChainData } from '../common/withChainData';
-import { UpdateType } from '~/utils/types';
+import { UpdateType, MultiSignatureTransaction } from '~/utils/types';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import styles from './MultiSignatureCreateProposal.module.scss';
 import Form from '~/components/Form';
@@ -17,8 +21,9 @@ export interface MultiSignatureCreateProposalForm {
 interface Props extends ChainData {
     defaults: FieldValues;
     type: UpdateType;
-    handleSubmit: (
-        fields: FieldValues & MultiSignatureCreateProposalForm
+    onFinish: (
+        proposal: Partial<MultiSignatureTransaction>,
+        defaults: FieldValues
     ) => void;
 }
 
@@ -26,7 +31,7 @@ export default function BuildProposal({
     type,
     blockSummary,
     consensusStatus,
-    handleSubmit,
+    onFinish,
     defaults,
 }: Props) {
     const handler = findUpdateInstructionHandler(type);
@@ -37,13 +42,37 @@ export default function BuildProposal({
     const { effectiveTime: effective } = form.watch(['effectiveTime']);
     const UpdateComponent = handler.update;
 
+    async function handleProposalSubmit(
+        fields: FieldValues & MultiSignatureCreateProposalForm
+    ): Promise<void> {
+        if (!blockSummary) {
+            return;
+        }
+        const { effectiveTime, expiryTime, ...dynamicFields } = fields;
+        const effectiveTimeInSeconds = BigInt(
+            secondsSinceUnixEpoch(effectiveTime)
+        );
+        const expiryTimeInSeconds = BigInt(secondsSinceUnixEpoch(expiryTime));
+
+        const newProposal = await handler.createTransaction(
+            blockSummary,
+            dynamicFields,
+            effectiveTimeInSeconds,
+            expiryTimeInSeconds
+        );
+
+        if (newProposal) {
+            onFinish(newProposal, fields);
+        }
+    }
+
     return (
         <>
             <h3 className={styles.subHeader}>Transaction details</h3>
             <Form<FieldValues & MultiSignatureCreateProposalForm>
                 formMethods={form}
                 className={styles.details}
-                onSubmit={handleSubmit}
+                onSubmit={handleProposalSubmit}
             >
                 <div className={styles.proposal}>
                     <p className="mT0">
