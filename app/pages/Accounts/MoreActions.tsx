@@ -41,6 +41,18 @@ const items: MoreActionObject[] = [
         location: routes.ACCOUNTS_MORE_INSPECTRELEASESCHEDULE,
     },
     {
+        name: 'Transfer Log Filters',
+        location: routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS,
+    },
+    {
+        name: 'Make Account Report',
+        location: routes.ACCOUNT_REPORT,
+    },
+    {
+        name: 'Credential Information',
+        location: routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION,
+    },
+    {
         name: 'Send GTU with a schedule',
         location: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
         isDisabled: (hasCredential) => !hasCredential,
@@ -58,22 +70,28 @@ const items: MoreActionObject[] = [
             !hasCredential || isBaker,
     },
     {
-        name: 'Remove Baker',
+        name: 'Remove baker',
         location: routes.ACCOUNTS_MORE_REMOVE_BAKER,
         isDisabled: (hasCredential, _encrypted, isBaker) =>
             !hasCredential || !isBaker,
     },
     {
-        name: 'Transfer Log Filters',
-        location: routes.ACCOUNTS_MORE_TRANSFER_LOG_FILTERS,
+        name: 'Update baker keys',
+        location: routes.ACCOUNTS_MORE_UPDATE_BAKER_KEYS,
+        isDisabled: (hasCredential, _encrypted, isBaker) =>
+            !hasCredential || !isBaker,
     },
     {
-        name: 'Make Account Report',
-        location: routes.ACCOUNT_REPORT,
+        name: 'Update baker stake',
+        location: routes.ACCOUNTS_MORE_UPDATE_BAKER_STAKE,
+        isDisabled: (hasCredential, _encrypted, isBaker) =>
+            !hasCredential || !isBaker,
     },
     {
-        name: 'Credential Information',
-        location: routes.ACCOUNTS_MORE_CREDENTIAL_INFORMATION,
+        name: 'Update baker restake earnings',
+        location: routes.ACCOUNTS_MORE_UPDATE_BAKER_RESTAKE,
+        isDisabled: (hasCredential, _encrypted, isBaker) =>
+            !hasCredential || !isBaker,
     },
 ];
 
@@ -203,6 +221,39 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     <Redirect
                         to={createTransferWithAccountRoute(
                             TransactionKindId.Remove_baker,
+                            account
+                        )}
+                    />
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_UPDATE_BAKER_KEYS}
+                render={() => (
+                    <Redirect
+                        to={createTransferWithAccountRoute(
+                            TransactionKindId.Update_baker_keys,
+                            account
+                        )}
+                    />
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_UPDATE_BAKER_STAKE}
+                render={() => (
+                    <Redirect
+                        to={createTransferWithAccountRoute(
+                            TransactionKindId.Update_baker_stake,
+                            account
+                        )}
+                    />
+                )}
+            />
+            <Route
+                path={routes.ACCOUNTS_MORE_UPDATE_BAKER_RESTAKE}
+                render={() => (
+                    <Redirect
+                        to={createTransferWithAccountRoute(
+                            TransactionKindId.Update_baker_restake_earnings,
                             account
                         )}
                     />

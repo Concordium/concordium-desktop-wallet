@@ -5,6 +5,9 @@ import { createProposalRoute } from '~/utils/routerHelper';
 import routes from '~/constants/routes.json';
 import { getLocationAfterAccounts as addBakerLocation } from '~/pages/multisig/AccountTransactions/AddBaker';
 import { getLocationAfterAccounts as removeBakerLocation } from '~/pages/multisig/AccountTransactions/RemoveBaker';
+import { getLocationAfterAccounts as updateBakerKeysLocation } from '~/pages/multisig/AccountTransactions/UpdateBakerKeys';
+import { getLocationAfterAccounts as updateBakerStakeLocation } from '~/pages/multisig/AccountTransactions/UpdateBakerStake';
+import { getLocationAfterAccounts as updateBakerRestakeLocation } from '~/pages/multisig/AccountTransactions/UpdateBakerRestakeEarnings';
 
 export function createTransferWithAccountRoute(
     transactionKind: TransactionKindId,
@@ -21,6 +24,29 @@ export function createTransferWithAccountRoute(
         );
     } else if (transactionKind === TransactionKindId.Remove_baker) {
         pathname = removeBakerLocation(
+            createProposalRoute(
+                TransactionTypes.AccountTransaction,
+                transactionKind
+            )
+        );
+    } else if (transactionKind === TransactionKindId.Update_baker_keys) {
+        pathname = updateBakerKeysLocation(
+            createProposalRoute(
+                TransactionTypes.AccountTransaction,
+                transactionKind
+            )
+        );
+    } else if (transactionKind === TransactionKindId.Update_baker_stake) {
+        pathname = updateBakerStakeLocation(
+            createProposalRoute(
+                TransactionTypes.AccountTransaction,
+                transactionKind
+            )
+        );
+    } else if (
+        transactionKind === TransactionKindId.Update_baker_restake_earnings
+    ) {
+        pathname = updateBakerRestakeLocation(
             createProposalRoute(
                 TransactionTypes.AccountTransaction,
                 transactionKind
