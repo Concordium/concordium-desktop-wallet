@@ -243,7 +243,7 @@ function CreateTransferProposal({
                                             estimatedFee={estimatedFee}
                                         />
                                         <Button
-                                            disabled={amount !== undefined}
+                                            disabled={amount === undefined}
                                             className={styles.submitButton}
                                             onClick={() => continueAction()}
                                         >
@@ -293,8 +293,8 @@ function CreateTransferProposal({
                                         </p>
                                         <Button
                                             disabled={
-                                                expiryTime !== undefined &&
-                                                expiryTimeError === undefined
+                                                expiryTime === undefined ||
+                                                expiryTimeError !== undefined
                                             }
                                             className={styles.submitButton}
                                             onClick={() => continueAction()}
