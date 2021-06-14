@@ -5,7 +5,7 @@ import {
 } from '~/utils/types';
 import { getTransactionsOfAccount } from '~/database/TransactionDao';
 import { toCSV } from '~/utils/basicHelpers';
-import { attachNames } from '~/utils/transactionHelpers';
+import { attachNames, isOutgoingTransaction } from '~/utils/transactionHelpers';
 import exportTransactionFields from '~/constants/exportTransactionFields.json';
 import { dateFromTimeStamp, getISOFormat } from '~/utils/timeHelpers';
 import { isShieldedBalanceTransaction } from '~/features/TransactionSlice';
@@ -14,10 +14,9 @@ type Filter = (transaction: TransferTransaction) => boolean;
 
 function calculatePublicBalanceChange(
     transaction: TransferTransaction,
-    address: string
+    isOutgoing: boolean
 ): string {
-    const outgoing = transaction.fromAddress === address;
-    if (!outgoing) {
+    if (!isOutgoing) {
         return transaction.subtotal || '0';
     }
     if (
@@ -34,7 +33,7 @@ function calculatePublicBalanceChange(
 
 function calculateShieldedBalanceChange(
     transaction: TransferTransaction,
-    address: string
+    isOutgoing: boolean
 ): string {
     if (isShieldedBalanceTransaction(transaction)) {
         if (!transaction.decryptedAmount) {
@@ -45,7 +44,7 @@ function calculateShieldedBalanceChange(
             case TransactionKindString.TransferToEncrypted:
                 return transaction.decryptedAmount;
             case TransactionKindString.EncryptedAmountTransfer:
-                return transaction.fromAddress === address
+                return isOutgoing
                     ? '-'.concat(transaction.decryptedAmount)
                     : transaction.decryptedAmount;
             default:
@@ -98,14 +97,19 @@ function parseTransaction(transaction: TransferTransaction, address: string) {
     });
 
     fieldValues.dateTime = getISOFormat(transaction.blockTime);
+
+    const isOutgoing = isOutgoingTransaction(transaction, address);
     fieldValues.publicBalance = calculatePublicBalanceChange(
         transaction,
-        address
+        isOutgoing
     );
     fieldValues.shieldedBalance = calculateShieldedBalanceChange(
         transaction,
-        address
+        isOutgoing
     );
+    if (!isOutgoing) {
+        fieldValues.cost = '';
+    }
 
     return exportedFields.map((field) => fieldValues[getName(field)]);
 }
