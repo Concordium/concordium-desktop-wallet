@@ -14,6 +14,7 @@ import {
 import routes from '~/constants/routes.json';
 import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { proposalsSelector } from '~/features/MultiSignatureSlice';
+import { getUpdateQueueTypes } from '~/utils/UpdateInstructionHelper';
 import { parse } from '~/utils/JSONHelper';
 
 import withChainData, { ChainData } from '../common/withChainData';
@@ -64,6 +65,7 @@ function MultiSignatureCreateProposal({
     const handler = findUpdateInstructionHandler(type);
 
     function openDuplicateTypeExists(): boolean {
+        const updateQueueTypes = getUpdateQueueTypes(type);
         return proposals.some((existingProposal) => {
             const existingUpdateInstruction = parse(
                 existingProposal.transaction
@@ -72,7 +74,7 @@ function MultiSignatureCreateProposal({
                 instanceOfUpdateInstruction(existingUpdateInstruction) &&
                 existingProposal.status ===
                     MultiSignatureTransactionStatus.Open &&
-                existingUpdateInstruction.type === type
+                updateQueueTypes.includes(existingUpdateInstruction.type)
             );
         });
     }

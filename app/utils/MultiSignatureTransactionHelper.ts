@@ -7,7 +7,7 @@ import {
     UpdateInstructionPayload,
     UpdateType,
 } from './types';
-import createUpdateInstruction from './UpdateInstructionHelper';
+import { createUpdateInstruction } from './UpdateInstructionHelper';
 
 /**
  * Creates a multi signature transaction for the given input.
