@@ -14,6 +14,7 @@
     "SUBMITTRANSFER": "/accounts/submit-transfer",
     "ACCOUNTS_MORE": "/accounts/more",
     "ACCOUNTS_MORE_ADDRESS": "/accounts/more/address",
+    "ACCOUNTS_MORE_UPDATE_CREDENTIALS": "/accounts/more/update-credentials",
     "ACCOUNTS_MORE_INSPECTRELEASESCHEDULE": "/accounts/more/inspect-release-schedule",
     "ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER": "/accounts/more/create-scheduled-transfer",
     "ACCOUNTS_MORE_TRANSFER_LOG_FILTERS": "/accounts/more/transfer-log-filters",

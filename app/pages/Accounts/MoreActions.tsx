@@ -1,9 +1,10 @@
 import React from 'react';
 import clsx from 'clsx';
+import { Redirect } from 'react-router';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Switch, Route } from 'react-router-dom';
-import { Account, AccountInfo } from '../../utils/types';
+import { Account, AccountInfo, TransactionKindId } from '../../utils/types';
 import routes from '../../constants/routes.json';
 import ShowAccountAddress from './ShowAccountAddress';
 import ShowReleaseSchedule from './ShowReleaseSchedule';
@@ -15,6 +16,8 @@ import Card from '~/cross-app-components/Card';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import styles from './Accounts.module.scss';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
+import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
+import { hasEncryptedBalance } from '~/utils/accountHelpers';
 
 interface Props {
     account: Account;
@@ -31,6 +34,12 @@ const items = [
         name: 'Send GTU with a schedule',
         location: routes.ACCOUNTS_MORE_CREATESCHEDULEDTRANSFER,
         requiresCredentials: true,
+    },
+    {
+        name: 'Update credentials',
+        location: routes.ACCOUNTS_MORE_UPDATE_CREDENTIALS,
+        requiresCredentials: true,
+        noEncrypted: true,
     },
     {
         name: 'Transfer Log Filters',
@@ -68,8 +77,9 @@ export default function MoreActions({ account, accountInfo }: Props) {
                 />
                 {items.map((item) => {
                     const isDisabled =
-                        item.requiresCredentials &&
-                        !accountHasDeployedCredentials;
+                        (item.requiresCredentials &&
+                            !accountHasDeployedCredentials) ||
+                        (item.noEncrypted && hasEncryptedBalance(accountInfo));
                     return (
                         <ButtonNavLink
                             to={{
@@ -139,6 +149,18 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     />
                 )}
             />
+            <Route
+                path={routes.ACCOUNTS_MORE_UPDATE_CREDENTIALS}
+                render={() => (
+                    <Redirect
+                        to={createTransferWithAccountRoute(
+                            TransactionKindId.Update_credentials,
+                            account
+                        )}
+                    />
+                )}
+            />
+
             <Route component={MoreActionsMenu} />
         </Switch>
     );
