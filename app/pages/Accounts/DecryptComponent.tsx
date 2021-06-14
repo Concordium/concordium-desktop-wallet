@@ -61,6 +61,7 @@ export default function DecryptComponent({ account }: Props) {
 
         await decryptTransactions(
             transactions,
+            account.address,
             prfKey,
             credentialNumber,
             global

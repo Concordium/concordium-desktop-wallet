@@ -32,6 +32,7 @@
     "MULTISIGTRANSACTIONS": "/multi-signature-transaction",
     "MULTISIGTRANSACTIONS_PROPOSAL": "/multi-signature-transaction/create/:updateType",
     "MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_SIZE": "/multi-signature-transaction/create/:updateType/keysetsize",
+    "MULTISIGTRANSACTIONS_PROPOSAL_SET_EFFECTIVE_EXPIRY": "/multi-signature-transaction/create/:updateType/seteffectiveexpiry",
     "MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_THRESHOLD": "/multi-signature-transaction/create/:updateType/threshold",
     "MULTISIGTRANSACTIONS_PROPOSAL_KEY_SIGN": "/multi-signature-transaction/create/:updateType/sign",
     "MULTISIGTRANSACTIONS_PROPOSAL_EXISTING": "/multi-signature-transaction/existing",

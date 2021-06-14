@@ -38,7 +38,7 @@ import SignatureCheckboxes from './SignatureCheckboxes';
 import { getCheckboxName } from './SignatureCheckboxes/SignatureCheckboxes';
 import { submittedProposalRoute } from '~/utils/routerHelper';
 import getTransactionSignDigest from '~/utils/transactionHash';
-import { HandleSignatureFile, getSignatures } from './util';
+import { HandleSignatureFiles, getSignatures } from './util';
 import ProposalViewStatusText from './ProposalViewStatusText';
 
 import styles from './ProposalView.module.scss';
@@ -46,6 +46,7 @@ import { dateFromTimeStamp, subtractHours } from '~/utils/timeHelpers';
 import { getTimeout } from '~/utils/transactionHelpers';
 import { useCurrentTime } from '~/utils/hooks';
 import TransactionHashView from '~/components/TransactionHash';
+import { TransactionExportType } from '~/utils/transactionTypes';
 
 const CLOSE_ROUTE = routes.MULTISIGTRANSACTIONS_PROPOSAL_EXISTING;
 
@@ -86,9 +87,12 @@ function ProposalView({ proposal }: ProposalViewProps) {
         return expirationEffect(proposal, dispatch);
     }, [proposal, dispatch]);
 
-    async function loadSignatureFile(file: Buffer) {
+    async function loadSignatureFiles(signatureFiles: File[]) {
         setCurrentlyLoadingFile(true);
-        const error = await HandleSignatureFile(dispatch, file, proposal);
+        const buffers = (
+            await Promise.all(signatureFiles.map((f) => f.arrayBuffer()))
+        ).map((f) => Buffer.from(f));
+        const error = await HandleSignatureFiles(dispatch, buffers, proposal);
         if (error) {
             setShowError(error);
         }
@@ -97,9 +101,7 @@ function ProposalView({ proposal }: ProposalViewProps) {
 
     // Every time a signature file is dropped, try loading as signature.
     useEffect(() => {
-        fileListToFileArray(files)
-            .map(async (f) => Buffer.from(await f.arrayBuffer()))
-            .forEach((p) => p.then(loadSignatureFile));
+        loadSignatureFiles(fileListToFileArray(files));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [files]);
 
@@ -196,19 +198,21 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     />
                                 </div>
                             </div>
-                            <FileInput
-                                placeholder="Drag and drop signatures here"
-                                buttonTitle="or browse to file"
-                                value={files}
-                                onChange={setFiles}
-                                multiple
-                                className={styles.fileInput}
-                                disabled={
-                                    !missingSignatures ||
-                                    currentlyLoadingFile ||
-                                    !isOpen
-                                }
-                            />
+                            {isOpen && (
+                                <FileInput
+                                    placeholder="Drag and drop signatures here"
+                                    buttonTitle="or browse to file"
+                                    value={files}
+                                    onChange={setFiles}
+                                    multiple
+                                    className={styles.fileInput}
+                                    disabled={
+                                        !missingSignatures ||
+                                        currentlyLoadingFile ||
+                                        !isOpen
+                                    }
+                                />
+                            )}
                         </div>
                     </Columns.Column>
                     <Columns.Column
@@ -230,47 +234,50 @@ function ProposalView({ proposal }: ProposalViewProps) {
                                     />
                                 )}
                                 <br />
-                                <Button
-                                    size="tiny"
-                                    inverted
-                                    className={styles.closeProposalButton}
-                                    onClick={() => setShowCloseModal(true)}
-                                    disabled={!isOpen}
-                                >
-                                    Cancel proposal
-                                </Button>
+                                {isOpen && (
+                                    <Button
+                                        size="tiny"
+                                        inverted
+                                        className={styles.closeProposalButton}
+                                        onClick={() => setShowCloseModal(true)}
+                                    >
+                                        Cancel proposal
+                                    </Button>
+                                )}
                             </div>
-                            <div className={styles.actions}>
-                                <Button
-                                    className={styles.exportButton}
-                                    disabled={!isOpen}
-                                    onClick={
-                                        () =>
-                                            saveFile(proposal.transaction, {
-                                                title: 'Export transaction',
-                                            })
-                                        // TODO Handle failure
-                                    }
-                                >
-                                    Export transaction proposal
-                                </Button>
-                                <Form.Checkbox
-                                    className={styles.finalCheckbox}
-                                    name="finalCheck"
-                                    rules={{ required: true }}
-                                    disabled={!isOpen}
-                                >
-                                    I understand this is the final submission
-                                    and cannot be reverted
-                                </Form.Checkbox>
-                                <Form.Submit
-                                    disabled={
-                                        !isOpen || isBeforeSubmissionWindow
-                                    }
-                                >
-                                    Submit transaction to chain
-                                </Form.Submit>
-                            </div>
+                            {isOpen && (
+                                <div className={styles.actions}>
+                                    <Button
+                                        className={styles.exportButton}
+                                        onClick={
+                                            () =>
+                                                saveFile(proposal.transaction, {
+                                                    title: 'Export transaction',
+                                                    defaultPath: handler.getFileNameForExport(
+                                                        transaction,
+                                                        TransactionExportType.Proposal
+                                                    ),
+                                                })
+                                            // TODO Handle failure
+                                        }
+                                    >
+                                        Export transaction proposal
+                                    </Button>
+                                    <Form.Checkbox
+                                        className={styles.finalCheckbox}
+                                        name="finalCheck"
+                                        rules={{ required: true }}
+                                    >
+                                        I understand this is the final
+                                        submission and cannot be reverted
+                                    </Form.Checkbox>
+                                    <Form.Submit
+                                        disabled={isBeforeSubmissionWindow}
+                                    >
+                                        Submit transaction to chain
+                                    </Form.Submit>
+                                </div>
+                            )}
                         </div>
                     </Columns.Column>
                 </Columns>

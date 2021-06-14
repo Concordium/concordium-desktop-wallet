@@ -3,14 +3,9 @@ import HigherLevelKeysView from '~/pages/multisig/updates/UpdateGovernanceKeys/H
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import {
-    Authorization,
-    Authorizations,
-    BlockSummary,
-} from '../../node/NodeApiTypes';
+import { BlockSummary } from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
-    UpdateInstructionPayload,
     MultiSignatureTransaction,
     UpdateType,
     HigherLevelKeyUpdate,
@@ -20,21 +15,18 @@ import { serializeHigherLevelKeyUpdate } from '../UpdateSerialization';
 import { removeRemovedKeys } from '../updates/HigherLevelKeysHelpers';
 import { UpdateInstructionHandler } from '../transactionTypes';
 import UpdateLevel1KeysWithRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/UpdateLevel1KeysWithRootKeys';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Level 1 Governance Keys using root keys';
 
 type TransactionType = UpdateInstruction<HigherLevelKeyUpdate>;
 
 export default class UpdateLevel1KeysUsingRootKeysHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isUpdateLevel1KeysWithRootKeys(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isUpdateLevel1KeysWithRootKeys);
     }
 
     async createTransaction(
@@ -98,18 +90,5 @@ export default class UpdateLevel1KeysUsingRootKeysHandler
         );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getAuthorization(_authorizations: Authorizations): Authorization {
-        throw new Error(
-            'If this method was invoked, then it happened due to an implementation error.'
-        );
-    }
-
-    print = () => undefined;
-
     update = UpdateLevel1KeysWithRootKeys;
-
-    title = `Foundation Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

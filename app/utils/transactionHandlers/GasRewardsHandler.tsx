@@ -13,25 +13,21 @@ import {
     isGasRewards,
     MultiSignatureTransaction,
     UpdateInstruction,
-    UpdateInstructionPayload,
     UpdateType,
 } from '../types';
 import { serializeGasRewards } from '../UpdateSerialization';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Gas Rewards';
 
 type TransactionType = UpdateInstruction<GasRewards>;
 
 export default class GasRewardsHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isGasRewards(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isGasRewards);
     }
 
     async createTransaction(
@@ -84,11 +80,5 @@ export default class GasRewardsHandler
         return authorizations.paramGASRewards;
     }
 
-    print = () => undefined;
-
     update = UpdateGasRewards;
-
-    title = `Foundation Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

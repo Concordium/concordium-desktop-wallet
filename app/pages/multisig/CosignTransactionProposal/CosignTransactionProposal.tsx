@@ -15,7 +15,10 @@ import {
     TransactionAccountSignature,
     MultiSignatureTransactionStatus,
 } from '~/utils/types';
-import { TransactionInput } from '~/utils/transactionTypes';
+import {
+    TransactionExportType,
+    TransactionInput,
+} from '~/utils/transactionTypes';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
@@ -122,15 +125,19 @@ function CosignTransactionProposal({
         const signedTransactionJson = stringify(signedTransaction);
 
         try {
-            const fileSaved = await saveFile(signedTransactionJson, {
+            await saveFile(signedTransactionJson, {
                 title: 'Export signed transaction',
+                defaultPath: transactionHandler.getFileNameForExport(
+                    transactionObject,
+                    TransactionExportType.Signature
+                ),
             });
-
-            if (fileSaved) {
-                dispatch(push({ pathname: routes.MULTISIGTRANSACTIONS }));
-            }
         } catch (err) {
-            // TODO Handle error by showing it to the user.
+            setShowError({
+                show: true,
+                header: 'Signature was not saved ',
+                content: `An error was encountered while attempting to saving the signature: ${err.message}`,
+            });
         }
     }
 

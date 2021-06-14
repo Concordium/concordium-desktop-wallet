@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
+import { push } from 'connected-react-router';
+import { useDispatch } from 'react-redux';
 import InlineNumber from '~/components/Form/InlineNumber';
 import Button from '~/cross-app-components/Button';
 import {
     AccessStructure,
     AccessStructureEnum,
     KeyUpdateEntryStatus,
+    UpdateType,
+    TransactionTypes,
 } from '~/utils/types';
 import styles from './KeySetThreshold.module.scss';
 import { getAccessStructureTitle } from './util';
+import { createProposalRoute } from '~/utils/routerHelper';
 
 interface Props {
     currentAccessStructures: AccessStructure[];
     newAccessStructures: AccessStructure[];
     currentThresholds: Map<AccessStructureEnum, number>;
     setThreshold(type: AccessStructureEnum, threshold: number): void;
-    submitFunction(): void;
+    type: UpdateType;
 }
 
 function getThreshold(
@@ -66,20 +71,21 @@ export default function AccessStructureThreshold({
     currentAccessStructures,
     newAccessStructures,
     currentThresholds,
-    submitFunction,
     setThreshold,
+    type,
 }: Props) {
+    const dispatch = useDispatch();
     const [thresholds, setLocalThresholds] = useState<
         Map<AccessStructureEnum, number>
     >(currentThresholds);
 
     function updateLocalThreshold(
         threshold: string | undefined,
-        type: AccessStructureEnum
+        structureType: AccessStructureEnum
     ) {
         if (threshold) {
             const updatedThresholds = thresholds;
-            updatedThresholds?.set(type, parseInt(threshold, 10));
+            updatedThresholds?.set(structureType, parseInt(threshold, 10));
             setLocalThresholds(updatedThresholds);
         }
     }
@@ -138,7 +144,16 @@ export default function AccessStructureThreshold({
                 })}
             </div>
             <Button
-                onClick={submitFunction}
+                onClick={() =>
+                    dispatch(
+                        push(
+                            `${createProposalRoute(
+                                TransactionTypes.UpdateInstruction,
+                                type
+                            )}/seteffectiveexpiry`
+                        )
+                    )
+                }
                 disabled={isInvalid(thresholds, newAccessStructures)}
             >
                 Continue

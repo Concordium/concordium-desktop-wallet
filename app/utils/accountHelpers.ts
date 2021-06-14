@@ -61,3 +61,7 @@ export function hasEncryptedBalance(accountInfo: AccountInfo): boolean {
         accountInfo.accountEncryptedAmount.incomingAmounts.length > 0
     );
 }
+
+export function getInitialEncryptedAmount() {
+    return ENCRYPTED_ZERO;
+}

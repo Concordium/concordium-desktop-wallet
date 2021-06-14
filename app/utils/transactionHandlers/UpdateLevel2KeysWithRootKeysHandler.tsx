@@ -2,10 +2,9 @@ import React from 'react';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import { Authorization, BlockSummary } from '../../node/NodeApiTypes';
+import { BlockSummary } from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
-    UpdateInstructionPayload,
     MultiSignatureTransaction,
     UpdateType,
     isUpdateLevel2KeysWithRootKeys,
@@ -16,21 +15,18 @@ import { UpdateInstructionHandler } from '../transactionTypes';
 import AuthorizationKeysView from '~/pages/multisig/updates/UpdateGovernanceKeys/AuthorizationKeysView';
 import UpdateLevel2KeysWithRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/UpdateLevel2KeysWithRootKeys';
 import { removeRemovedKeys } from '~/pages/multisig/updates/UpdateGovernanceKeys/util';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Level 2 Governance Keys using root keys';
 
 type TransactionType = UpdateInstruction<AuthorizationKeysUpdate>;
 
 export default class UpdateLevel2KeysUsingRootKeysHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isUpdateLevel2KeysWithRootKeys(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isUpdateLevel2KeysWithRootKeys);
     }
 
     async createTransaction(
@@ -93,18 +89,5 @@ export default class UpdateLevel2KeysUsingRootKeysHandler
         );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getAuthorization(): Authorization {
-        throw new Error(
-            'If this method was invoked, then it happened due to an implementation error.'
-        );
-    }
-
-    print = () => undefined;
-
     update = UpdateLevel2KeysWithRootKeys;
-
-    title = `Foundation Transaction | ${TYPE}`;
-
-    type = TYPE;
 }
