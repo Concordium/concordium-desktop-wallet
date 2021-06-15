@@ -18,14 +18,8 @@ DeleteSourceMaps();
 
 module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
     devtool: process.env.DEBUG_PROD === 'true' ? 'source-map' : 'none',
-
     mode: 'production',
-
-    target:
-        process.env.E2E_BUILD || process.env.ERB_SECURE !== 'true'
-            ? 'electron-renderer'
-            : 'electron-preload',
-
+    target: 'web',
     entry: [
         'core-js',
         'regenerator-runtime/runtime',
