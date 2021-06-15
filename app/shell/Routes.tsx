@@ -5,7 +5,7 @@ import HomePage from '../pages/Home/HomePage';
 import AccountPage from '../pages/Accounts/AccountPage';
 import IdentityPage from '../pages/Identities/IdentityPage';
 import AddressBookPage from '../pages/AddressBook/AddressBookPage';
-import IssuancePage from '../pages/IdentityIssuance/IdentityIssuancePage';
+// import IssuancePage from '../pages/IdentityIssuance/IdentityIssuancePage';
 import AccountCreation from '../pages/AccountCreation/AccountCreationPage';
 import MultiSignatureRouter from '../pages/multisig/MultiSignatureRouter';
 import ExportImport from '../pages/exportImport/ExportImportPage';
@@ -16,6 +16,7 @@ import AccountReport from '~/pages/Accounts/AccountReport';
 import genesisAccount from '../pages/GenesisAccount/GenesisAccount';
 import DefaultPage from '~/pages/Home/DefaultPage';
 import SettingsRouter from '~/pages/settings/SettingsRouter';
+import IssuancePage from '~/pages/Recovery/Recovery';
 
 export default function Routes(): JSX.Element {
     return (

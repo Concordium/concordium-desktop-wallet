@@ -18,9 +18,7 @@ use id::{
     ffi::AttributeKind,
     constants::BaseField,
 };
-use pedersen_scheme::{
-    randomness::Randomness as PedersenRandomness, value::Value,
-};
+use pedersen_scheme::value::Value;
 
 type ExampleAttributeList = AttributeList<BaseField, AttributeKind>;
 
@@ -59,21 +57,7 @@ pub fn create_genesis_account (
         threshold: try_get(&v, "threshold")?,
     };
 
-    let cred_id_exponent = match prf_key.prf_exponent(cred_counter) {
-        Ok(exp) => exp,
-        Err(_) => bail!(
-            "Cannot create CDI with this account number because K + {} = 0.",
-            cred_counter
-        ),
-    };
-
-    let cred_id = global_context
-        .on_chain_commitment_key
-        .hide(
-            &Value::<ExampleCurve>::new(cred_id_exponent),
-            &PedersenRandomness::zero(),
-        )
-        .0;
+    let cred_id = generate_cred_id(&prf_key, cred_counter, &global_context)?;
 
     let ar_data = {
         let mut ar_data = BTreeMap::new();

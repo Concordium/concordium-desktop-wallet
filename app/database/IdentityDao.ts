@@ -31,6 +31,10 @@ export async function updateIdentity(
     return (await knex())(identitiesTable).where({ id }).update(updatedValues);
 }
 
+export async function removeIdentity(id: number) {
+    return (await knex())(identitiesTable).where({ id }).del();
+}
+
 /**
  * Find all the identities for a given wallet.
  * @returns a list of identities that have been created from the supplied wallet
