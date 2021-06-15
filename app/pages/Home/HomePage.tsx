@@ -4,12 +4,12 @@ import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import routes from '~/constants/routes.json';
 import PageLayout from '~/components/PageLayout';
-import { loadAllSettings } from '~/database/SettingsDao';
 import SelectPassword from './SelectPassword';
 import NewUserInit from './NewUserInit';
 import PasswordHasBeenSet from './PasswordHasBeenSet';
 import Unlock from './Unlock';
 import databaseExists from './util';
+import ipcCommands from '~/constants/ipcCommands.json';
 
 export default function HomePage() {
     const dispatch = useDispatch();
@@ -22,11 +22,10 @@ export default function HomePage() {
                 if (!exists) {
                     dispatch(push({ pathname: routes.HOME_NEW_USER }));
                 } else {
-                    try {
-                        // TODO Refine this, as it throws an error in the handler in the main thread. So we should make
-                        // a method specifically for testing this instead of trying to select all.
-                        await loadAllSettings();
-                    } catch (error) {
+                    const databaseIsAccessible = await window.ipcRenderer.invoke(
+                        ipcCommands.database.checkAccess
+                    );
+                    if (!databaseIsAccessible) {
                         // Either an invalid password has been set, or no password has been set
                         // yet, so let the user input a password.
                         dispatch(

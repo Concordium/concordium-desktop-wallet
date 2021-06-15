@@ -24,6 +24,7 @@
     "database": {
         "migrate": "DB_MIGRATE",
         "rekeyDatabase": "DB_REKEY_DATABASE",
+        "checkAccess": "DB_CHECK_ACCESS",
         "setPassword": "DB_SET_PASSWORD",
         "invalidateKnexSingleton": "DB_INVALIDATE_KNEX_SINGLETON"
     }

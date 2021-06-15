@@ -505,6 +505,17 @@ ipcMain.handle(
     }
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ipcMain.handle(ipcCommands.database.checkAccess, async (_event) => {
+    try {
+        const table = (await knex())(settingsTable);
+        await table.select();
+        return true;
+    } catch {
+        return false;
+    }
+});
+
 ipcMain.handle(ipcCommands.database.setPassword, (_event, password: string) => {
     setPassword(password);
 });
