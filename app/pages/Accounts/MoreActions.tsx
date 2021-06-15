@@ -1,5 +1,4 @@
 import React from 'react';
-import clsx from 'clsx';
 import { useSelector, useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
 import { Switch, Route } from 'react-router-dom';
@@ -13,10 +12,11 @@ import CredentialInformation from './CredentialInformation';
 import CloseButton from '~/cross-app-components/CloseButton';
 import Card from '~/cross-app-components/Card';
 import ButtonNavLink from '~/components/ButtonNavLink';
-import styles from './Accounts.module.scss';
 import { accountHasDeployedCredentialsSelector } from '~/features/CredentialSlice';
 import { createTransferWithAccountPathName } from '~/utils/accountRouterHelpers';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
+
+import styles from './Accounts.module.scss';
 
 interface Props {
     account: Account;
@@ -131,35 +131,36 @@ export default function MoreActions({ account, accountInfo }: Props) {
                     className={styles.closeButton}
                     onClick={() => dispatch(push(routes.ACCOUNTS))}
                 />
-                {items.map((item) => {
-                    const isDisabled =
-                        item.isDisabled &&
-                        item.isDisabled(
-                            accountHasDeployedCredentials,
-                            hasUsedEncrypted,
-                            Boolean(accountInfo.accountBaker),
-                            hasBakerCooldown
+                {items
+                    .filter(
+                        (item) =>
+                            !(
+                                item.isDisabled &&
+                                item.isDisabled(
+                                    accountHasDeployedCredentials,
+                                    hasUsedEncrypted,
+                                    Boolean(accountInfo.accountBaker),
+                                    hasBakerCooldown
+                                )
+                            )
+                    )
+                    .map((item) => {
+                        return (
+                            <ButtonNavLink
+                                to={{
+                                    pathname: item.location,
+                                    state: {
+                                        account,
+                                    },
+                                }}
+                                key={item.location}
+                                className="h3 mV10"
+                                size="big"
+                            >
+                                {item.name}
+                            </ButtonNavLink>
                         );
-                    return (
-                        <ButtonNavLink
-                            to={{
-                                pathname: item.location,
-                                state: {
-                                    account,
-                                },
-                            }}
-                            key={item.location}
-                            disabled={isDisabled}
-                            className={clsx(
-                                'h3 mV10',
-                                isDisabled && styles.disabledAction
-                            )}
-                            size="big"
-                        >
-                            {item.name}
-                        </ButtonNavLink>
-                    );
-                })}
+                    })}
             </Card>
         );
     }
