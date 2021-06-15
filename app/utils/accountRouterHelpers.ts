@@ -44,28 +44,30 @@ export function getLocationAfterAccounts(
     }
 }
 
-export function createTransferWithAccountRoute(
-    transactionKind: TransactionKindId,
-    account: Account
+export function createTransferWithAccountPathName(
+    transactionKind: TransactionKindId
 ) {
-    let pathname;
     if (isBakerTransaction(transactionKind)) {
-        pathname = getLocationAfterAccounts(
+        return getLocationAfterAccounts(
             createProposalRoute(
                 TransactionTypes.AccountTransaction,
                 transactionKind
             ),
             transactionKind
         );
-    } else {
-        const handler = findAccountTransactionHandler(transactionKind);
-        pathname = handler.creationLocationHandler(
-            routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
-        );
     }
+    const handler = findAccountTransactionHandler(transactionKind);
+    return handler.creationLocationHandler(
+        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
+    );
+}
 
+export function createTransferWithAccountRoute(
+    transactionKind: TransactionKindId,
+    account: Account
+) {
     return {
-        pathname,
+        pathname: createTransferWithAccountPathName(transactionKind),
         state: {
             account,
         },
