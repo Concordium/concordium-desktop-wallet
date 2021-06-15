@@ -29,18 +29,13 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from './LoadingComponent';
+import {
+    BakerSubRoutes,
+    getLocationAfterAccounts,
+} from '~/utils/accountRouterHelpers';
 
-enum SubRoutes {
-    restake,
-    sign,
-    expiry,
-}
 interface PageProps {
     exchangeRate: Fraction;
-}
-
-export function getLocationAfterAccounts(url: string) {
-    return `${url}/${SubRoutes.restake}`;
 }
 
 interface State {
@@ -62,7 +57,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
     ] = useState<UpdateBakerRestakeEarnings>();
 
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Update_baker_stake,
+        TransactionKindId.Update_baker_restake_earnings,
         exchangeRate,
         account?.signatureThreshold
     );
@@ -143,7 +138,8 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                             dispatch(
                                                 push(
                                                     getLocationAfterAccounts(
-                                                        url
+                                                        url,
+                                                        TransactionKindId.Update_baker_restake_earnings
                                                     )
                                                 )
                                             );
@@ -153,7 +149,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.restake}`}>
+                    <Route path={`${path}/${BakerSubRoutes.restake}`}>
                         <Columns.Column
                             header="Restake earnings"
                             className={styles.stretchColumn}
@@ -173,7 +169,9 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                     disabled={restakeEarnings === undefined}
                                     onClick={() => {
                                         dispatch(
-                                            push(`${url}/${SubRoutes.expiry}`)
+                                            push(
+                                                `${url}/${BakerSubRoutes.expiry}`
+                                            )
                                         );
                                     }}
                                 >
@@ -183,7 +181,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${SubRoutes.expiry}`}>
+                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -220,7 +218,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${SubRoutes.sign}`
+                                                        `${url}/${BakerSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -236,7 +234,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.sign}`}>
+                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column
                             header="Signature and Hardware Wallet"
                             className={styles.stretchColumn}

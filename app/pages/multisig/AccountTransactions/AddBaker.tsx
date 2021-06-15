@@ -46,24 +46,17 @@ import ButtonGroup from '~/components/ButtonGroup';
 import AddBakerProposalDetails from './proposal-details/AddBakerProposalDetails';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import LoadingComponent from './LoadingComponent';
+import {
+    BakerSubRoutes,
+    getLocationAfterAccounts,
+} from '~/utils/accountRouterHelpers';
 
 import styles from './MultisignatureAccountTransactions.module.scss';
 
 const pageTitle = 'Multi Signature Transactions | Add Baker';
 
-enum BuildSubRoutes {
-    stake = 'stake',
-    keys = 'keys',
-    expiry = 'expiry',
-    sign = 'sign',
-}
-
 interface PageProps {
     exchangeRate: Fraction;
-}
-
-export function getLocationAfterAccounts(url: string) {
-    return `${url}/${BuildSubRoutes.stake}`;
 }
 
 interface State {
@@ -246,7 +239,8 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                                             dispatch(
                                                 push(
                                                     getLocationAfterAccounts(
-                                                        url
+                                                        url,
+                                                        TransactionKindId.Add_baker
                                                     )
                                                 )
                                             )
@@ -257,7 +251,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BuildSubRoutes.stake}`}>
+                    <Route path={`${path}/${BakerSubRoutes.stake}`}>
                         <Columns.Column
                             header="Stake"
                             className={styles.stretchColumn}
@@ -317,7 +311,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                                     onClick={() => {
                                         dispatch(
                                             push(
-                                                `${url}/${BuildSubRoutes.expiry}`
+                                                `${url}/${BakerSubRoutes.expiry}`
                                             )
                                         );
                                     }}
@@ -328,7 +322,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BuildSubRoutes.expiry}`}>
+                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -364,7 +358,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                                         onGenerateKeys();
                                         dispatch(
                                             push(
-                                                `${url}/${BuildSubRoutes.keys}`
+                                                `${url}/${BakerSubRoutes.keys}`
                                             )
                                         );
                                     }}
@@ -375,7 +369,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BuildSubRoutes.keys}`}>
+                    <Route path={`${path}/${BakerSubRoutes.keys}`}>
                         <Columns.Column
                             header="Baker keys"
                             className={styles.stretchColumn}
@@ -390,7 +384,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${BuildSubRoutes.sign}`
+                                                        `${url}/${BakerSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -407,7 +401,7 @@ function AddBakerPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${BuildSubRoutes.sign}`}>
+                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column header="Signature and Hardware Wallet">
                             <SignTransactionColumn
                                 signingFunction={signingFunction}

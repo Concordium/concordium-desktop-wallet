@@ -37,16 +37,10 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from './LoadingComponent';
-
-enum SubRoutes {
-    stake,
-    sign,
-    expiry,
-}
-
-export function getLocationAfterAccounts(url: string) {
-    return `${url}/${SubRoutes.stake}`;
-}
+import {
+    BakerSubRoutes,
+    getLocationAfterAccounts,
+} from '~/utils/accountRouterHelpers';
 
 function toMicroUnitsSafe(str: string | undefined) {
     if (str === undefined) {
@@ -157,7 +151,8 @@ function UpdateBakerStakePage({ exchangeRate }: PageProps) {
                                             dispatch(
                                                 push(
                                                     getLocationAfterAccounts(
-                                                        url
+                                                        url,
+                                                        TransactionKindId.Update_baker_stake
                                                     )
                                                 )
                                             );
@@ -183,7 +178,7 @@ function UpdateBakerStakePage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.stake}`}>
+                    <Route path={`${path}/${BakerSubRoutes.stake}`}>
                         <Columns.Column
                             header="New staked amount"
                             className={styles.stretchColumn}
@@ -203,7 +198,9 @@ function UpdateBakerStakePage({ exchangeRate }: PageProps) {
                                     disabled={stake === undefined}
                                     onClick={() => {
                                         dispatch(
-                                            push(`${url}/${SubRoutes.expiry}`)
+                                            push(
+                                                `${url}/${BakerSubRoutes.expiry}`
+                                            )
                                         );
                                     }}
                                 >
@@ -212,7 +209,7 @@ function UpdateBakerStakePage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.expiry}`}>
+                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -249,7 +246,7 @@ function UpdateBakerStakePage({ exchangeRate }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${SubRoutes.sign}`
+                                                        `${url}/${BakerSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -265,7 +262,7 @@ function UpdateBakerStakePage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.sign}`}>
+                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column
                             header="Signature and Hardware Wallet"
                             className={styles.stretchColumn}

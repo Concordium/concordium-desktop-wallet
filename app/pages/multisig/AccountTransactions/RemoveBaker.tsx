@@ -30,11 +30,10 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from './LoadingComponent';
-
-enum SubRoutes {
-    sign,
-    expiry,
-}
+import {
+    BakerSubRoutes,
+    getLocationAfterAccounts,
+} from '~/utils/accountRouterHelpers';
 
 interface PageProps {
     exchangeRate: Fraction;
@@ -42,10 +41,6 @@ interface PageProps {
 
 interface State {
     account?: Account;
-}
-
-export function getLocationAfterAccounts(url: string) {
-    return `${url}/${SubRoutes.expiry}`;
 }
 
 function RemoveBakerPage({ exchangeRate }: PageProps) {
@@ -135,7 +130,8 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                             dispatch(
                                                 push(
                                                     getLocationAfterAccounts(
-                                                        url
+                                                        url,
+                                                        TransactionKindId.Remove_baker
                                                     )
                                                 )
                                             );
@@ -161,7 +157,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.expiry}`}>
+                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -211,7 +207,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${SubRoutes.sign}`
+                                                        `${url}/${BakerSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -227,7 +223,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.sign}`}>
+                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column
                             header="Signature and Hardware Wallet"
                             className={styles.stretchColumn}
