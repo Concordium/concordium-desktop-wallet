@@ -28,10 +28,8 @@ import findHandler, {
 } from '~/utils/transactionHandlers/HandlerFinder';
 import { serializeForSubmission } from '~/utils/UpdateSerialization';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
-
 import { serializeTransaction } from '~/utils/transactionSerialization';
 import { attachKeyIndex } from '~/utils/updates/AuthorizationHelper';
-
 import withChainData, { ChainData } from '../common/withChainData';
 import TransactionHashView from '~/components/TransactionHash';
 
@@ -117,7 +115,7 @@ const SubmittedProposalView = withChainData<Props>(
                     return;
                 }
             } else if (instanceOfAccountTransactionWithSignature(transaction)) {
-                payload = serializeTransaction(
+                payload = await serializeTransaction(
                     transaction,
                     transaction.signatures
                 );

@@ -154,13 +154,15 @@ function getScheduledTransferEnergy(
  *  Given the signatureAmount and a transaction returns
  * the energy cost of the transaction.
  */
-export function getTransactionEnergyCost(
+export async function getTransactionEnergyCost(
     transaction: AccountTransaction,
     signatureAmount = 1
-): bigint {
-    const payloadSize = serializeTransferPayload(
-        transaction.transactionKind,
-        transaction.payload
+): Promise<bigint> {
+    const payloadSize = (
+        await serializeTransferPayload(
+            transaction.transactionKind,
+            transaction.payload
+        )
     ).length;
     let transactionTypeCost;
     if (instanceOfScheduledTransfer(transaction)) {
@@ -193,14 +195,16 @@ export function getTransactionKindEnergy(
     );
 }
 
-export function getUpdateAccountCredentialEnergy(
+export async function getUpdateAccountCredentialEnergy(
     payload: UpdateAccountCredentialsPayload,
     currentCredentialAmount: number,
     signatureAmount = 1
 ) {
-    const payloadSize = serializeTransferPayload(
-        TransactionKindId.Update_credentials,
-        payload
+    const payloadSize = (
+        await serializeTransferPayload(
+            TransactionKindId.Update_credentials,
+            payload
+        )
     ).length;
 
     const newCredentialAmount = BigInt(payload.addedCredentials.length);
@@ -246,12 +250,12 @@ export function getTransactionKindCost(
  *  Given the signatureAmount and a transaction returns
  * the estimated MicroGTU cost of the transaction.
  */
-export default function getTransactionCost(
+export default async function getTransactionCost(
     transaction: AccountTransaction,
     energyToMicroGtu: Fraction,
     signatureAmount = 1
-): Fraction {
-    const energy = getTransactionEnergyCost(transaction, signatureAmount);
+): Promise<Fraction> {
+    const energy = await getTransactionEnergyCost(transaction, signatureAmount);
     return energyToCost(energy, energyToMicroGtu);
 }
 
@@ -272,13 +276,13 @@ export function scheduledTransferCost(
     };
 }
 
-export function getUpdateCredentialsCost(
+export async function getUpdateCredentialsCost(
     energyToMicroGtu: Fraction,
     payload: UpdateAccountCredentialsPayload,
     currentCredentialAmount: number,
     signatureAmount = 1
-): Fraction {
-    const energy = getUpdateAccountCredentialEnergy(
+): Promise<Fraction> {
+    const energy = await getUpdateAccountCredentialEnergy(
         payload,
         currentCredentialAmount,
         signatureAmount

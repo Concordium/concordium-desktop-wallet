@@ -19,7 +19,8 @@ import bs58check from 'bs58check';
 import axios from 'axios';
 import * as https from 'https';
 import * as crypto from 'crypto';
-import { Knex } from 'knex';
+import { Knex, knex as externalKnex } from 'knex';
+import { Buffer as AltBuffer } from 'buffer/';
 import ipcCommands from './constants/ipcCommands.json';
 import ledgerIpcCommands from './constants/ledgerIpcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
@@ -30,7 +31,7 @@ import { JsonResponse } from './proto/concordium_p2p_rpc_pb';
 import { getTargetNet, Net } from './utils/ConfigHelper';
 import urls from './constants/urls.json';
 import { walletProxytransactionLimit } from './constants/externalConstants.json';
-import { getDatabaseFilename } from './database/knexfile';
+import config, { getDatabaseFilename } from './database/knexfile';
 import {
     Account,
     AccountTransaction,
@@ -60,7 +61,7 @@ import {
     WalletEntry,
     WalletType,
 } from './utils/types';
-import { knex, setPassword } from './database/knex';
+import { invalidateKnexSingleton, knex, setPassword } from './database/knex';
 import {
     walletTable,
     transactionTable,
@@ -126,6 +127,10 @@ const createWindow = async () => {
 
     const titleSuffix = process.env.TARGET_NET || '';
 
+    /**
+     * Do not change any of the webpreference settings without consulting the
+     * security documentation provided
+     */
     mainWindow = new BrowserWindow({
         title: `Concordium Wallet ${titleSuffix}`,
         show: false,
@@ -134,14 +139,15 @@ const createWindow = async () => {
         webPreferences:
             process.env.NODE_ENV === 'development'
                 ? {
-                      preload: path.join(__dirname, 'preload.js'),
+                      preload: path.join(__dirname, 'dist/preload.prod.js'),
                       nodeIntegration: true,
                       webviewTag: true,
+                      devTools: true,
                   }
                 : {
-                      preload: path.join(__dirname, 'preload.js'),
+                      preload: path.join(__dirname, 'dist/preload.prod.js'),
                       webviewTag: true,
-                      nodeIntegration: true,
+                      nodeIntegration: false,
                       devTools: true,
                   },
     });
@@ -206,6 +212,10 @@ function getWalletProxy() {
 
 const walletProxy = axios.create({
     baseURL: getWalletProxy(),
+});
+
+ipcMain.handle('toBase64', (_event, arrayBuffer: ArrayBuffer) => {
+    return Buffer.from(arrayBuffer).toString('base64');
 });
 
 ipcMain.handle(ledgerIpcCommands.getPublicKey, (_event, keypath: number[]) => {
@@ -292,7 +302,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<ExchangeRate>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[]
     ) => {
         return getLedgerClient().signMicroGtuPerEuro(
@@ -308,7 +318,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<ExchangeRate>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[]
     ) => {
         return getLedgerClient().signEuroPerEnergy(
@@ -324,7 +334,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<TransactionFeeDistribution>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[]
     ) => {
         return getLedgerClient().signTransactionFeeDistribution(
@@ -340,7 +350,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<FoundationAccount>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[]
     ) => {
         return getLedgerClient().signFoundationAccount(
@@ -356,7 +366,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<MintDistribution>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[]
     ) => {
         return getLedgerClient().signMintDistribution(
@@ -372,7 +382,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<ProtocolUpdate>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[]
     ) => {
         return getLedgerClient().signProtocolUpdate(
@@ -388,7 +398,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<GasRewards>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[]
     ) => {
         return getLedgerClient().signGasRewards(
@@ -404,7 +414,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<BakerStakeThreshold>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[]
     ) => {
         return getLedgerClient().signBakerStakeThreshold(
@@ -420,7 +430,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<ElectionDifficulty>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[]
     ) => {
         return getLedgerClient().signElectionDifficulty(
@@ -436,7 +446,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<HigherLevelKeyUpdate>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[],
         INS: number
     ) => {
@@ -454,7 +464,7 @@ ipcMain.handle(
     (
         _event,
         transaction: UpdateInstruction<AuthorizationKeysUpdate>,
-        serializedPayload: Buffer,
+        serializedPayload: AltBuffer,
         keypath: number[],
         INS: number
     ) => {
@@ -472,14 +482,41 @@ ipcMain.handle(ledgerIpcCommands.getAppAndVersion, (_event) => {
     return getLedgerClient().getAppAndVersion();
 });
 
-// TODO Refactor.
-ipcMain.handle('setPassword', (_event, password: string) => {
+ipcMain.handle(
+    ipcCommands.database.rekeyDatabase,
+    async (_event, oldPassword: string, newPassword: string) => {
+        const environment = process.env.NODE_ENV;
+        if (!environment) {
+            throw new Error(
+                'The environment variable was not available as expected.'
+            );
+        }
+
+        const configuration = await config(environment, oldPassword);
+
+        try {
+            const db = externalKnex(configuration);
+            await db.select().table('setting');
+        } catch (e) {
+            return false;
+        }
+        await (await knex()).raw('PRAGMA rekey = ??', newPassword);
+        return true;
+    }
+);
+
+ipcMain.handle(ipcCommands.database.setPassword, (_event, password: string) => {
     setPassword(password);
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-ipcMain.handle('dbMigrate', (_event) => {
-    migrate();
+ipcMain.handle(ipcCommands.database.invalidateKnexSingleton, (_event) => {
+    invalidateKnexSingleton();
+});
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ipcMain.handle(ipcCommands.database.migrate, async (_event) => {
+    return migrate();
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -576,7 +613,8 @@ ipcMain.handle('dbGetAddressBook', async (_event) => {
         .select()
         .table(addressBookTable)
         .orderByRaw('name COLLATE NOCASE ASC')
-        .then((e) => e.map(sanitizeAddressBookEntry));
+        .then((e) => e.map(sanitizeAddressBookEntry))
+        .catch(() => {});
 });
 
 ipcMain.handle(
@@ -613,7 +651,8 @@ ipcMain.handle(
             .select()
             .table(addressBookTable)
             .where(condition)
-            .then((e) => e.map(sanitizeAddressBookEntry));
+            .then((e) => e.map(sanitizeAddressBookEntry))
+            .catch(() => {});
     }
 );
 

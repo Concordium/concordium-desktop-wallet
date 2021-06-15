@@ -1,14 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import { SubmitHandler } from 'react-hook-form';
-import { knex as externalKnex } from 'knex';
 import Form from '~/components/Form/Form';
 import Card from '~/cross-app-components/Card/Card';
-import { invalidateKnexSingleton, knex, setPassword } from '~/database/knex';
-import config from '~/database/knexfile';
-
+import ipcCommands from '../../../constants/ipcCommands.json';
 import styles from './PasswordSettingElement.module.scss';
-
-const environment = process.env.NODE_ENV;
 
 interface Props {
     displayText: string;
@@ -39,30 +34,24 @@ export default function PasswordSettingElement({ displayText }: Props) {
             }
 
             // Re-key the database with the new password.
-            try {
-                if (!environment) {
-                    throw new Error('Unable to determine environment');
-                }
-
-                // Check that the current password input is correct. An error will be
-                // thrown if it was incorrect. This requires a new knex configuration,
-                // to use the key that was given as input here.
-                const configuration = await config(
-                    environment,
-                    values.currentPassword
+            const rekeyed = await window.ipcRenderer.invoke(
+                ipcCommands.database.rekeyDatabase,
+                values.currentPassword,
+                values.password
+            );
+            if (rekeyed) {
+                await window.ipcRenderer.invoke(
+                    ipcCommands.database.setPassword,
+                    values.password
                 );
-                const db = externalKnex(configuration);
-                await db.select().table('setting');
-
-                // Re-key the database, update the password in memory and invalidate
-                // the current knex singleton.
-                await (await knex()).raw('PRAGMA rekey = ??', values.password);
-                setPassword(values.password);
-                invalidateKnexSingleton();
+                await window.ipcRenderer.invoke(
+                    ipcCommands.database.invalidateKnexSingleton,
+                    values.password
+                );
                 setValidationError(undefined);
                 setSuccess('Your password was successfully updated');
                 setKeyingDatabase(false);
-            } catch (error) {
+            } else {
                 setKeyingDatabase(false);
                 setSuccess(undefined);
                 setValidationError('Invalid password');

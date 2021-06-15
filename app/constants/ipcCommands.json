@@ -20,5 +20,11 @@
     "decrypt": "DECRYPT",
     "dbSelectAll": "DB_SELECT_ALL",
     "dbGetWalletId": "DB_GET_WALLET_ID",
-    "dbInsertWallet": "DB_INSERT_WALLET"
+    "dbInsertWallet": "DB_INSERT_WALLET",
+    "database": {
+        "migrate": "DB_MIGRATE",
+        "rekeyDatabase": "DB_REKEY_DATABASE",
+        "setPassword": "DB_SET_PASSWORD",
+        "invalidateKnexSingleton": "DB_INVALIDATE_KNEX_SINGLETON"
+    }
 }

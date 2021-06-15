@@ -1,4 +1,5 @@
 /* eslint no-console: off */
+import type { Buffer } from 'buffer/';
 import {
     AccountTransaction,
     BakerStakeThreshold,

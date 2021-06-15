@@ -3,14 +3,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { FieldValues, useForm } from 'react-hook-form';
 import Card from '~/cross-app-components/Card';
-import { invalidateKnexSingleton, setPassword } from '~/database/knex';
-import migrate from '~/database/migration';
-import { loadAllSettings } from '~/database/SettingsDao';
 import initApplication from '~/utils/initialize';
 import routes from '~/constants/routes.json';
 import Form from '~/components/Form';
 import { useUpdateEffect } from '~/utils/hooks';
-
+import ipcCommands from '~/constants/ipcCommands.json';
 import styles from './Unlock.module.scss';
 
 interface UnlockForm extends FieldValues {
@@ -40,17 +37,20 @@ export default function Unlock() {
 
     const unlock = useCallback(
         async ({ password }: UnlockForm) => {
-            await window.ipcRenderer.invoke('setPassword', password);
-            setPassword(password);
-            invalidateKnexSingleton();
-
-            try {
-                await loadAllSettings();
-                await migrate();
-                await window.ipcRenderer.invoke('dbMigrate');
+            await window.ipcRenderer.invoke(
+                ipcCommands.database.setPassword,
+                password
+            );
+            await window.ipcRenderer.invoke(
+                ipcCommands.database.invalidateKnexSingleton
+            );
+            const dbMigrated = await window.ipcRenderer.invoke(
+                ipcCommands.database.migrate
+            );
+            if (dbMigrated) {
                 await initApplication(dispatch);
                 dispatch(push({ pathname: routes.ACCOUNTS }));
-            } catch (error) {
+            } else {
                 // The password was incorrect.
                 setValidationError('Invalid password');
                 form.trigger();

@@ -74,12 +74,12 @@ function useLedger(): {
         };
     }, []);
 
-    // useEffect(() => {
-    //     // TODO I am uncertain if we need to do this or not.
-    //     return function cleanup() {
-    //         dispatch(resetAction());
-    //     };
-    // }, []);
+    useEffect(() => {
+        // TODO I am uncertain if we need to do this or not.
+        return function cleanup() {
+            dispatch(resetAction());
+        };
+    }, []);
 
     return {
         isReady: status === CONNECTED || (status === ERROR && Boolean(client)),

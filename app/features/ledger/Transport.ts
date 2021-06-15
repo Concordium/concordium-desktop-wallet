@@ -1,4 +1,5 @@
 import type HWTransport from '@ledgerhq/hw-transport';
+import { Buffer as AltBuffer } from 'buffer/';
 import ClosedWhileSendingError from './ClosedWhileSendingError';
 
 export type Transport = {
@@ -8,8 +9,8 @@ export type Transport = {
         ins: number,
         p1: number,
         p2: number,
-        data?: Buffer
-    ) => Promise<Buffer>;
+        data?: AltBuffer
+    ) => Promise<AltBuffer>;
     closed: boolean;
 };
 
@@ -32,15 +33,25 @@ export class TransportImpl implements Transport {
         ins: number,
         p1: number,
         p2: number,
-        data?: Buffer
+        data?: AltBuffer
     ) {
         this.closed = false;
         try {
-            const response = await this.transport.send(cla, ins, p1, p2, data);
+            let dataAsNodeBuffer: Buffer | undefined;
+            if (data) {
+                dataAsNodeBuffer = Buffer.from(data);
+            }
+            const response = await this.transport.send(
+                cla,
+                ins,
+                p1,
+                p2,
+                dataAsNodeBuffer
+            );
             if (this.closed) {
                 throw new ClosedWhileSendingError();
             } else {
-                return response;
+                return AltBuffer.from(response);
             }
         } catch (e) {
             if (this.closed) {

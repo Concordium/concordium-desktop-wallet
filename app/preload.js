@@ -2,7 +2,6 @@
 window.ipcRenderer = require('electron').ipcRenderer;
 
 // TODO Rework to use the context bridge, when all functionality has been protected correctly.
-
 // contextBridge.exposeInMainWorld(
 //     "api", {
 //         appGetPath: async () => {
@@ -10,3 +9,6 @@ window.ipcRenderer = require('electron').ipcRenderer;
 //         }
 //     }
 // );
+
+
+

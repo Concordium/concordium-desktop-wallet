@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
 import {
     UnsignedCredentialDeploymentInformation,
@@ -218,6 +219,7 @@ async function signCredentialDeployment(
     return signature;
 }
 
+// TODO Fix to support big ints and not just use Number directly.
 export async function signCredentialDeploymentOnNewAccount(
     transport: Transport,
     credentialDeployment: UnsignedCredentialDeploymentInformation,
@@ -226,7 +228,7 @@ export async function signCredentialDeploymentOnNewAccount(
 ): Promise<Buffer> {
     const expiryBuffer = Buffer.alloc(1 + 8);
     expiryBuffer.writeUInt8(0, 0);
-    expiryBuffer.writeBigUInt64BE(expiry, 1);
+    expiryBuffer.writeBigUInt64BE(Number(expiry), 1);
     return signCredentialDeployment(
         transport,
         credentialDeployment,
@@ -243,9 +245,7 @@ export async function signCredentialDeploymentOnExistingAccount(
 ): Promise<Buffer> {
     const accountBuffer = Buffer.alloc(1 + 32);
     accountBuffer.writeUInt8(1, 0);
-
-    // TODO Figure out if this has to be async.
-    putBase58Check(accountBuffer, 1, accountAddress);
+    await putBase58Check(accountBuffer, 1, accountAddress);
     return signCredentialDeployment(
         transport,
         credentialDeployment,

@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import {
     AccountTransaction,
     TransactionKindId as TransactionKind,
@@ -328,15 +329,15 @@ function serializeSignature(signatures: TransactionAccountSignature) {
     return serializeMap(signatures, putInt8, putInt8, putCredentialSignatures);
 }
 
-function serializeUnversionedTransaction(
+async function serializeUnversionedTransaction(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
 ) {
-    const payload = serializeTransferPayload(
+    const payload = await serializeTransferPayload(
         transaction.transactionKind,
         transaction.payload
     );
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -355,11 +356,14 @@ function serializeUnversionedTransaction(
     return serialized;
 }
 
-export function serializeTransaction(
+export async function serializeTransaction(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
 ) {
-    const unversioned = serializeUnversionedTransaction(transaction, signature);
+    const unversioned = await serializeUnversionedTransaction(
+        transaction,
+        signature
+    );
     const serialized = new Uint8Array(1 + unversioned.length);
     serialized[0] = 0; // Version number
     put(serialized, 1, unversioned);
@@ -374,7 +378,10 @@ export async function getAccountTransactionHash(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
 ): Promise<Buffer> {
-    const serialized = serializeUnversionedTransaction(transaction, signature);
+    const serialized = await serializeUnversionedTransaction(
+        transaction,
+        signature
+    );
     return hashSha256(serialized);
 }
 

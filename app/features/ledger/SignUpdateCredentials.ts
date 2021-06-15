@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
 import {
     UpdateAccountCredentials,
@@ -27,12 +28,12 @@ export default async function signUpdateCredentials(
     const pathPrefix = pathAsBuffer(path);
     const ins = INS_UPDATE_CREDENTIALS;
 
-    const payload = serializeTransferPayload(
+    const payload = await serializeTransferPayload(
         TransactionKindId.Update_credentials,
         transaction.payload
     );
 
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,

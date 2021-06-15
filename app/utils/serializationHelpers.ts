@@ -1,5 +1,4 @@
-// TODO Uncertain if bs58check is a node dependency or not.
-import * as bs58check from 'bs58check';
+import { Buffer } from 'buffer/';
 import ipcCommands from '../constants/ipcCommands.json';
 
 import {
@@ -10,19 +9,29 @@ import {
     ChosenAttributesKeys,
 } from './types';
 
+// TODO Fix base58 encodings here
 export function putBase58Check(
     array: Uint8Array,
     startIndex: number,
     base58Sstring: string
 ) {
-    const decoded = bs58check.decode(base58Sstring);
+    if (!base58Sstring) {
+        return;
+    }
+    const decoded: Buffer = Buffer.alloc(2);
     for (let i = 1; i < decoded.length; i += 1) {
         array[startIndex + i - 1] = decoded[i];
     }
 }
 
+// TODO Fix base58 encodings here
 export function base58ToBuffer(base58Sstring: string) {
-    return bs58check.decode(base58Sstring).slice(1); // remove the first check byte
+    if (!base58Sstring) {
+        return Buffer.alloc(1);
+    }
+    // Remove the first check byte
+    const test = Buffer.alloc(51);
+    return test.slice(1);
 }
 
 type Indexable = Buffer | Uint8Array;

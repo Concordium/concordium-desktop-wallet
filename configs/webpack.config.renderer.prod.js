@@ -33,6 +33,7 @@ module.exports = merge(baseConfig, assetsConfig, stylesConfig(true), {
     ],
 
     output: {
+        libraryTarget: 'var',
         path: fromRoot('./app/dist'),
         publicPath: './dist/',
         filename: 'renderer.prod.js',

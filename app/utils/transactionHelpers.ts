@@ -1,3 +1,4 @@
+import type { Buffer } from 'buffer/';
 import { findEntries } from '../database/AddressBookDao';
 import { getTransactionStatus } from '../node/nodeRequests';
 import { getDefaultExpiry, getNow, secondsSinceUnixEpoch } from './timeHelpers';
@@ -313,7 +314,7 @@ export function createScheduledTransferTransaction(
 /**
  *  Constructs an account credential update transaction,
  */
-export function createUpdateCredentialsTransaction(
+export async function createUpdateCredentialsTransaction(
     fromAddress: string,
     addedCredentials: AddedCredential[],
     removedCredIds: string[],
@@ -335,7 +336,7 @@ export function createUpdateCredentialsTransaction(
         transactionKind: TransactionKindId.Update_credentials,
         payload,
         nonce,
-        estimatedEnergyAmount: getUpdateAccountCredentialEnergy(
+        estimatedEnergyAmount: await getUpdateAccountCredentialEnergy(
             payload,
             currentCredentialAmount,
             signatureAmount

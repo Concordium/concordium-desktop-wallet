@@ -53,7 +53,10 @@ export default class ProtocolUpdateHandler
             throw new Error('No auxiliary data file in update transaction');
         }
         const ab = await file.arrayBuffer();
-        const specificationAuxiliaryData = Buffer.from(ab).toString('base64');
+        const specificationAuxiliaryData = await window.ipcRenderer.invoke(
+            'toBase64',
+            ab
+        );
 
         const protocolUpdate: ProtocolUpdate = {
             ...fields,

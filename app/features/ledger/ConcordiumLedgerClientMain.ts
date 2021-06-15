@@ -1,4 +1,5 @@
 import type HwTransport from '@ledgerhq/hw-transport';
+import { Buffer } from 'buffer/';
 import { Transport, TransportImpl } from './Transport';
 import {
     getPublicKey,

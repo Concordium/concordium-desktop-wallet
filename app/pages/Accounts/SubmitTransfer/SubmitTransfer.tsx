@@ -3,6 +3,7 @@ import { LocationDescriptorObject } from 'history';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Redirect } from 'react-router';
+import type { Buffer } from 'buffer/';
 import { getAccountInfoOfAddress } from '~/node/nodeHelpers';
 import { parse } from '~/utils/JSONHelper';
 import SimpleLedger from '~/components/ledger/SimpleLedger';
@@ -180,7 +181,7 @@ export default function SubmitTransfer({ location }: Props) {
             signatureIndex,
             signature
         );
-        const serializedTransaction = serializeTransaction(
+        const serializedTransaction = await serializeTransaction(
             transaction,
             signatureStructured
         );

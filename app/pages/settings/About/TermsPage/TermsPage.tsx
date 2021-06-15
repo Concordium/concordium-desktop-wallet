@@ -1,6 +1,5 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { ipcRenderer } from 'electron';
 import ipcCommands from '~/constants/ipcCommands.json';
 import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
 import routes from '~/constants/routes.json';
@@ -13,7 +12,6 @@ import {
     useWindowResize,
     useIpcRendererEvent,
 } from '~/cross-app-components/util/eventHooks';
-
 import styles from './TermsPage.module.scss';
 
 interface Props {
@@ -51,7 +49,7 @@ function interceptClickEvent(e: MouseEvent) {
         const href = target.getAttribute('href');
 
         if (href) {
-            ipcRenderer.invoke(ipcCommands.openUrl, href);
+            window.ipcRenderer.invoke(ipcCommands.openUrl, href);
         }
     }
 }

@@ -2,7 +2,7 @@
 import { app } from 'electron';
 
 async function getProductionFilename(): Promise<string> {
-    const userDataPath = app.getAppPath();
+    const userDataPath = app.getPath('userData');
     const productionDatabaseName = 'concordium-desktop-wallet-database.sqlite3';
     const productionDatabaseLocation = `${userDataPath}/${productionDatabaseName}`;
     return productionDatabaseLocation;

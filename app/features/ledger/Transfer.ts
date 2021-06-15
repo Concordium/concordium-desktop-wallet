@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import { Transport } from './Transport';
 import {
     AccountTransaction,
@@ -61,12 +62,12 @@ async function signSimpleTransfer(
     path: number[],
     transaction: SimpleTransfer
 ): Promise<Buffer> {
-    const payload = serializeTransferPayload(
+    const payload = await serializeTransferPayload(
         TransactionKindId.Simple_transfer,
         transaction.payload
     );
 
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -95,12 +96,12 @@ async function signTransferToEncrypted(
     path: number[],
     transaction: TransferToEncrypted
 ) {
-    const payload = serializeTransferPayload(
+    const payload = await serializeTransferPayload(
         TransactionKindId.Transfer_to_encrypted,
         transaction.payload
     );
 
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -133,12 +134,12 @@ async function signTransferToPublic(
         throw new Error('Unexpected missing proof');
     }
 
-    const payload = serializeTransferPayload(
+    const payload = await serializeTransferPayload(
         TransactionKindId.Transfer_to_public,
         transaction.payload
     );
 
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -286,12 +287,12 @@ async function signTransferWithSchedule(
     path: number[],
     transaction: ScheduledTransfer
 ): Promise<Buffer> {
-    const payload = serializeTransferPayload(
+    const payload = await serializeTransferPayload(
         TransactionKindId.Transfer_with_schedule,
         transaction.payload
     );
 
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -302,7 +303,7 @@ async function signTransferWithSchedule(
     const data = Buffer.concat([
         pathAsBuffer(path),
         header,
-        serializeScheduledTransferPayloadBase(transaction.payload),
+        await serializeScheduledTransferPayloadBase(transaction.payload),
     ]);
 
     let p1 = 0x00;
@@ -342,7 +343,7 @@ async function signAddBaker(
 ): Promise<Buffer> {
     const payload = serializeAddBaker(transaction.payload);
 
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -384,7 +385,7 @@ async function signUpdateBakerKeys(
 ): Promise<Buffer> {
     const payload = serializeUpdateBakerKeys(transaction.payload);
 
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -425,7 +426,7 @@ async function signRemoveBaker(
 ): Promise<Buffer> {
     const payload = serializeRemoveBaker();
 
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -460,7 +461,7 @@ async function signUpdateBakerStake(
 ): Promise<Buffer> {
     const payload = serializeUpdateBakerStake(transaction.payload);
 
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -491,7 +492,7 @@ async function signUpdateBakerRestakeEarnings(
 ): Promise<Buffer> {
     const payload = serializeUpdateBakerRestakeEarnings(transaction.payload);
 
-    const header = serializeTransactionHeader(
+    const header = await serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,

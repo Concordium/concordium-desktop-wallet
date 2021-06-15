@@ -329,14 +329,18 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                     .map(([id]) => id),
                 threshold: newThreshold || 1,
             };
-            setFee(
-                getUpdateCredentialsCost(
-                    exchangeRate,
-                    payload,
-                    currentCredentials.length,
-                    account.signatureThreshold
-                )
-            );
+
+            getUpdateCredentialsCost(
+                exchangeRate,
+                payload,
+                currentCredentials.length,
+                account.signatureThreshold
+            )
+                .then((result) => {
+                    setFee(result);
+                    return true;
+                })
+                .catch(() => {});
         } else {
             setFee(undefined);
         }

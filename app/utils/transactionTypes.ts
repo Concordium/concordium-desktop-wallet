@@ -1,3 +1,4 @@
+import type { Buffer } from 'buffer/';
 import { AccountPathInput } from '~/features/ledger/Path';
 import {
     Authorization,
