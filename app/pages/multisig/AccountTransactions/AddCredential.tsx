@@ -11,14 +11,15 @@ import {
     FileInputRef,
     FileInputValue,
 } from '~/components/Form/FileInput/FileInput';
-import Button from '~/cross-app-components/Button';
 import CloseButton from '~/cross-app-components/CloseButton';
 import { CredentialStatus } from './CredentialStatus';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
-import styles from './UpdateAccountCredentials.module.scss';
 import { hasDuplicateWalletId } from '~/database/CredentialDao';
+import Form from '~/components/Form';
+
+import styles from './UpdateAccountCredentials.module.scss';
 
 interface Props {
     accountAddress?: string;
@@ -153,9 +154,21 @@ export default function AddCredential({
                         string={JSON.stringify(currentCredential)}
                     />
                 </div>
-                <Button onClick={() => addCurrentCredential(currentCredential)}>
-                    Add Credential to Proposal
-                </Button>
+                <Form onSubmit={() => addCurrentCredential(currentCredential)}>
+                    <Form.Checkbox
+                        className="mH20"
+                        name="match"
+                        rules={{
+                            required: 'Please verify that the details match.',
+                        }}
+                    >
+                        The key and identicons matches those of the new
+                        custodian exactly
+                    </Form.Checkbox>
+                    <Form.Submit className="mT20">
+                        Add Credential to Proposal
+                    </Form.Submit>
+                </Form>
             </Card>
         );
     } else {
