@@ -146,7 +146,7 @@ function listCredentials(
         return null;
     }
     return credentialIds.map((credDetails) => {
-        const [credId, status] = credDetails;
+        const [credId, status, note] = credDetails;
 
         let buttonText = 'Remove';
         let statusText = null;
@@ -177,7 +177,10 @@ function listCredentials(
                         </Button>
                     )}
                 </div>
-                <h5>{credId}</h5>
+                <h5>
+                    <div>{note}</div>
+                    <div className="textFaded">{credId}</div>
+                </h5>
                 <div className="mL20">{statusText}</div>
             </div>
         );
