@@ -31,6 +31,9 @@ export default function SettingsList() {
             <ButtonNavLink className={styles.item} to={routes.SETTINGS_ABOUT}>
                 About
             </ButtonNavLink>
+            <ButtonNavLink className={styles.item} to={routes.RECOVERY}>
+                Recover old accounts
+            </ButtonNavLink>
         </>
     );
 }

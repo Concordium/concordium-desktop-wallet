@@ -39,6 +39,12 @@ export default function NoIdentities() {
                 >
                     Request new
                 </Button>
+                <Button
+                    className={styles.button}
+                    onClick={() => dispatch(push(routes.RECOVERY))}
+                >
+                    Recover old
+                </Button>
             </footer>
         </Card>
     );

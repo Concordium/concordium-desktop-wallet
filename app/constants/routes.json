@@ -24,6 +24,7 @@
     "ADDRESSBOOK_SELECTED": "/addressbook/:address",
     "EXPORTIMPORT": "/export_import",
     "IMPORT": "/export_import/import",
+    "RECOVERY": "/recovery",
     "SETTINGS": "/settings",
     "SETTINGS_SELECTED": "/settings/:type",
     "SETTINGS_ABOUT": "/settings/about",

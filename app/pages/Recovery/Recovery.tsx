@@ -134,18 +134,18 @@ export default function DefaultPage() {
             <PageLayout.Header>
                 <h1>Recovery</h1>
             </PageLayout.Header>
-            <PageLayout.Container
-                closeRoute={routes.IDENTITIES}
-                disableBack
-                padding="vertical"
-                className="flex"
-            >
+            <PageLayout.Container padding="vertical" className="flexColumn">
                 <SimpleErrorModal
                     header="Unable to recover credentials"
                     content={error}
                     show={Boolean(error)}
                     onClick={() => dispatch(push(routes.IDENTITIES))}
                 />
+                <h2>Account Recovery</h2>
+                <p>
+                    Here you can recover the credentials and their accounts from
+                    your current ledger device.{' '}
+                </p>
                 <Columns className="flexChildFill">
                     <Columns.Column>
                         <div className={styles.ledgerDiv}>
@@ -157,7 +157,7 @@ export default function DefaultPage() {
                     </Columns.Column>
                     <Columns.Column>
                         <div className={styles.messages}>
-                            <h1 className={styles.messagesTitle}>Messages:</h1>
+                            <h2 className={styles.messagesTitle}>Messages:</h2>
                             {messages.map((m) => (
                                 <>
                                     <p>{m}</p>
