@@ -181,6 +181,10 @@ function listCredentials(
     });
 }
 
+interface State {
+    account?: Account;
+}
+
 interface AccountInfoCredential {
     credentialIndex: number;
     credential: CredentialDeploymentInformation;
@@ -197,13 +201,13 @@ interface Props {
 function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     const dispatch = useDispatch();
     const transactionKind = TransactionKindId.Update_credentials;
-    const location = useLocation().pathname.replace(
-        `${transactionKind}`,
-        ':transactionKind'
-    );
+
+    const { pathname, state } = useLocation<State>();
+
+    const location = pathname.replace(`${transactionKind}`, ':transactionKind');
 
     // const [isReady, setReady] = useState(false);
-    const [account, setAccount] = useState<Account | undefined>();
+    const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [currentCredentials, setCurrentCredentials] = useState<
         AccountInfoCredential[]
     >([]);

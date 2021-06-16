@@ -62,8 +62,12 @@ const transactionTypeFilters: FilterOption[] = [
     ]),
 ];
 
+interface State {
+    account: Account;
+}
+
 interface Props {
-    location: LocationDescriptorObject<Account>;
+    location: LocationDescriptorObject<State>;
 }
 
 /**
@@ -73,7 +77,7 @@ interface Props {
 export default function AccountReport({ location }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     const [accounts, setAccounts] = useState<Account[]>(
-        location?.state ? [location?.state] : []
+        location?.state ? [location?.state.account] : []
     );
     const [adding, setAdding] = useState(false);
     const [fromDate, setFrom] = useState<Date | undefined>(

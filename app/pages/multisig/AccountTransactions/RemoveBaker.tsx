@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Route, Switch, useRouteMatch } from 'react-router';
+import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
@@ -30,20 +30,26 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from './LoadingComponent';
-
-enum SubRoutes {
-    sign,
-    expiry,
-}
+import {
+    BakerSubRoutes,
+    getLocationAfterAccounts,
+} from '~/utils/accountRouterHelpers';
 
 interface PageProps {
     exchangeRate: Fraction;
 }
 
+interface State {
+    account?: Account;
+}
+
 function RemoveBakerPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
+
+    const { state } = useLocation<State>();
+
     const { path, url } = useRouteMatch();
-    const [account, setAccount] = useState<Account>();
+    const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [error, setError] = useState<string>();
     const [transaction, setTransaction] = useState<RemoveBaker>();
 
@@ -123,7 +129,10 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                         onAccountClicked={() => {
                                             dispatch(
                                                 push(
-                                                    `${url}/${SubRoutes.expiry}`
+                                                    getLocationAfterAccounts(
+                                                        url,
+                                                        TransactionKindId.Remove_baker
+                                                    )
                                                 )
                                             );
                                         }}
@@ -148,7 +157,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.expiry}`}>
+                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -198,7 +207,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${SubRoutes.sign}`
+                                                        `${url}/${BakerSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -214,7 +223,7 @@ function RemoveBakerPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.sign}`}>
+                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column
                             header="Signature and Hardware Wallet"
                             className={styles.stretchColumn}
