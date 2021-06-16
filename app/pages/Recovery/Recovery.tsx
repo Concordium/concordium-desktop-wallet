@@ -20,7 +20,7 @@ import {
     importCredentials,
 } from '~/features/CredentialSlice';
 import { globalSelector } from '~/features/GlobalSlice';
-import { loadIdentities } from '~/features/IdentitySlice';
+import { loadIdentities, identitiesSelector } from '~/features/IdentitySlice';
 import {
     Account,
     AccountStatus,
@@ -35,6 +35,7 @@ import {
     insertIdentity,
     removeIdentity,
 } from '~/database/IdentityDao';
+import { getNextCredentialNumber } from '~/database/CredentialDao';
 import pairWallet from '~/utils/WalletPairing';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import routes from '~/constants/routes.json';
@@ -167,11 +168,12 @@ async function recoverCredentials(
     identityId: number,
     blockHash: string,
     global: Global,
+    startingCredNumber = 0,
     allowedSpaces = 10
 ) {
     const credentials = [];
     const accounts = [];
-    let credNumber = 0;
+    let credNumber = startingCredNumber;
     let skipsRemaining = allowedSpaces;
     while (skipsRemaining >= 0 && credNumber < maxCredentialsOnAccount) {
         const credId = await getCredId(prfKeySeed, credNumber, global);
@@ -204,28 +206,36 @@ async function addAccounts(accounts: Account[]) {
     }
 }
 
+const addedMessage = (identityName: string, count: number) =>
+    `Recovered ${count} credentials on ${identityName}`;
+const newIdentityMessage = (identityNumber: number, count: number) =>
+    `Recovered ${count} credentials on lost identity - ${identityNumber}`;
+const noIdentityMessage = (identityNumber: number) =>
+    `There is no Identity with number ${identityNumber} on the chain`;
+
 async function recoverIdentity(
     prfKeySeed: string,
     identityId: number,
     blockHash: string,
-    global: Global
+    global: Global,
+    nextCredentialNumber?: number
 ) {
     const { credentials, accounts } = await recoverCredentials(
         prfKeySeed,
         identityId,
         blockHash,
-        global
+        global,
+        nextCredentialNumber
     );
 
-    const exists = credentials.length > 0;
-
-    if (exists) {
+    if (credentials.length > 0) {
         await addAccounts(accounts);
         await importCredentials(credentials);
-    } else {
+    } else if (!nextCredentialNumber) {
+        // Remove if new identity, and there exists no credentials
         await removeIdentity(identityId);
     }
-    return exists;
+    return credentials.length;
 }
 
 /**
@@ -234,8 +244,10 @@ async function recoverIdentity(
  */
 export default function DefaultPage() {
     const dispatch = useDispatch();
+    const identities = useSelector(identitiesSelector);
     const global = useSelector(globalSelector);
     const [error, setError] = useState<string>();
+    const [messages, setMessages] = useState<string[]>([]);
 
     async function performRecovery(
         ledger: ConcordiumLedgerClient,
@@ -250,6 +262,30 @@ export default function DefaultPage() {
 
         const walletId = await pairWallet(ledger, dispatch);
 
+        // Check for accounts on current identities
+        for (const identity of identities) {
+            if (identity.walletId === walletId) {
+                setMessage('Please confirm export of PRF key');
+                const prfKeySeed = await ledger.getPrfKey(
+                    identity.identityNumber
+                );
+                setMessage('Recovering credentials');
+
+                const added = await recoverIdentity(
+                    prfKeySeed.toString('hex'),
+                    identity.id,
+                    blockHash,
+                    global,
+                    await getNextCredentialNumber(identity.id)
+                );
+                setMessages((ms) => [
+                    ...ms,
+                    addedMessage(identity.name, added),
+                ]);
+            }
+        }
+
+        // Check next identities
         let recovered = true;
         while (recovered) {
             const identityNumber = await getNextIdentityNumber(walletId);
@@ -260,12 +296,21 @@ export default function DefaultPage() {
             setMessage('Please confirm export of PRF key');
             const prfKeySeed = await ledger.getPrfKey(identityNumber);
             setMessage('Recovering credentials');
-            recovered = await recoverIdentity(
+            const addedCount = await recoverIdentity(
                 prfKeySeed.toString('hex'),
                 identityId,
                 blockHash,
                 global
             );
+            if (addedCount) {
+                setMessages((ms) => [
+                    ...ms,
+                    newIdentityMessage(identityNumber, addedCount),
+                ]);
+            } else {
+                setMessages((ms) => [...ms, noIdentityMessage(identityNumber)]);
+            }
+            recovered = Boolean(addedCount);
         }
 
         loadAccounts(dispatch);
@@ -309,6 +354,14 @@ export default function DefaultPage() {
                         )}
                     </Ledger>
                 </Card>
+                <div className={styles.messages}>
+                    <h3>Messages:</h3>
+                    {messages.map((m) => (
+                        <>
+                            <p>{m}</p>
+                        </>
+                    ))}
+                </div>
             </PageLayout.Container>
         </PageLayout>
     );
