@@ -227,6 +227,7 @@ export interface ScheduledTransferPayload {
 export interface AddedCredential {
     index: Word8;
     value: CredentialDeploymentInformation;
+    note?: string;
 }
 
 export interface UpdateAccountCredentialsPayload {

@@ -10,6 +10,7 @@ import {
     CredentialDeploymentInformation,
     TransactionKindId,
     Fraction,
+    AddedCredential,
 } from '~/utils/types';
 import PickAccount from '~/components/PickAccount';
 import AddCredential from './AddCredential';
@@ -41,22 +42,29 @@ const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
 );
 
-function assignIndices<T>(items: T[], usedIndices: number[]) {
+function assignIndices(
+    items: Omit<AddedCredential, 'index'>[],
+    usedIndices: number[]
+): AddedCredential[] {
     let candidate = 1;
     let i = 0;
-    const assigned = [];
+    const assigned: AddedCredential[] = [];
+
     while (i < items.length) {
         if (usedIndices.includes(candidate)) {
             candidate += 1;
         } else {
+            const { value, note } = items[i];
             assigned.push({
                 index: candidate,
-                value: items[i],
+                value,
+                note,
             });
             i += 1;
             candidate += 1;
         }
     }
+
     return assigned;
 }
 
@@ -136,6 +144,13 @@ function displayCredentialCount(
         </>
     );
 }
+
+const toWrapperWithNote = (credDetails: CredentialDetails[]) => (
+    cred: CredentialDeploymentInformation
+): Omit<AddedCredential, 'index'> => ({
+    value: cred,
+    note: credDetails.find((d) => d[0] === cred.credId)?.[2],
+});
 
 function listCredentials(
     credentialIds: CredentialDetails[],
@@ -312,7 +327,10 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
         if (account) {
             // Create a payload with the current settings, to estimate the fee.
             const payload = {
-                addedCredentials: assignIndices(newCredentials, []),
+                addedCredentials: assignIndices(
+                    newCredentials.map(toWrapperWithNote(credentialIds)),
+                    []
+                ),
                 removedCredIds: credentialIds
                     .filter(([, status]) => status === CredentialStatus.Removed)
                     .map(([id]) => id),
@@ -405,7 +423,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                 <CreateUpdate
                     account={account}
                     addedCredentials={assignIndices(
-                        newCredentials,
+                        newCredentials.map(toWrapperWithNote(credentialIds)),
                         usedIndices
                     )}
                     removedCredIds={credentialIds
