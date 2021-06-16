@@ -39,6 +39,8 @@ import pairWallet from '~/utils/WalletPairing';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import routes from '~/constants/routes.json';
 import errorMessages from '~/constants/errorMessages.json';
+import PageLayout from '~/components/PageLayout';
+import styles from './Recovery.module.scss';
 
 const maxCredentialsOnAccount = 200;
 
@@ -272,25 +274,42 @@ export default function DefaultPage() {
     }
 
     return (
-        <div className="flex">
-            <SimpleErrorModal
-                header="Unable to recover credentials"
-                content={error}
-                show={Boolean(error)}
-                onClick={() => dispatch(push(routes.IDENTITIES))}
-            />
-            <Card className="marginCenter flexColumn">
-                <Ledger ledgerCallback={performRecovery}>
-                    {({ isReady, statusView, submitHandler = asyncNoOp }) => (
-                        <>
-                            {statusView}
-                            <Button onClick={submitHandler} disabled={!isReady}>
-                                Submit
-                            </Button>
-                        </>
-                    )}
-                </Ledger>
-            </Card>
-        </div>
+        <PageLayout>
+            <PageLayout.Header>
+                <h1>Recovery</h1>
+            </PageLayout.Header>
+            <PageLayout.Container
+                closeRoute={routes.IDENTITIES}
+                disableBack
+                padding="vertical"
+                className="flex"
+            >
+                <SimpleErrorModal
+                    header="Unable to recover credentials"
+                    content={error}
+                    show={Boolean(error)}
+                    onClick={() => dispatch(push(routes.IDENTITIES))}
+                />
+                <Card className={styles.card}>
+                    <Ledger ledgerCallback={performRecovery}>
+                        {({
+                            isReady,
+                            statusView,
+                            submitHandler = asyncNoOp,
+                        }) => (
+                            <>
+                                {statusView}
+                                <Button
+                                    onClick={submitHandler}
+                                    disabled={!isReady}
+                                >
+                                    Submit
+                                </Button>
+                            </>
+                        )}
+                    </Ledger>
+                </Card>
+            </PageLayout.Container>
+        </PageLayout>
     );
 }
