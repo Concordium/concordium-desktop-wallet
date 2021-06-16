@@ -12,24 +12,23 @@ import {
     FileInputValue,
 } from '~/components/Form/FileInput/FileInput';
 import CloseButton from '~/cross-app-components/CloseButton';
-import { CredentialStatus } from './CredentialStatus';
 import SimpleErrorModal, {
     ModalErrorInput,
 } from '~/components/SimpleErrorModal';
 import { hasDuplicateWalletId } from '~/database/CredentialDao';
 import Form from '~/components/Form';
+import { CredentialDetails, CredentialStatus } from './util';
 
 import styles from './UpdateAccountCredentials.module.scss';
 
+interface AddCredentialForm {
+    note?: string;
+}
+
 interface Props {
     accountAddress?: string;
-    credentialIds: [string, CredentialStatus][];
-    addCredentialId: (id: [string, CredentialStatus]) => void;
-    setNewCredentials: (
-        update: (
-            current: CredentialDeploymentInformation[]
-        ) => CredentialDeploymentInformation[]
-    ) => void;
+    credentialIds: CredentialDetails[];
+    onAddCredential(cred: CredentialDeploymentInformation, note?: string): void;
 }
 
 /**
@@ -40,8 +39,7 @@ interface Props {
 export default function AddCredential({
     accountAddress,
     credentialIds,
-    addCredentialId,
-    setNewCredentials,
+    onAddCredential,
 }: Props): JSX.Element {
     const fileInputRef = useRef<FileInputRef>(null);
     const [showError, setShowError] = useState<ModalErrorInput>({
@@ -130,9 +128,11 @@ export default function AddCredential({
         }
     }
 
-    function addCurrentCredential(credential: CredentialDeploymentInformation) {
-        addCredentialId([credential.credId, CredentialStatus.Added]);
-        setNewCredentials((newCredentials) => [...newCredentials, credential]);
+    function addCurrentCredential(
+        credential: CredentialDeploymentInformation,
+        note?: string
+    ) {
+        onAddCredential(credential, note);
         setCurrentCredential(undefined);
     }
 
@@ -154,7 +154,16 @@ export default function AddCredential({
                         string={JSON.stringify(currentCredential)}
                     />
                 </div>
-                <Form onSubmit={() => addCurrentCredential(currentCredential)}>
+                <Form<AddCredentialForm>
+                    onSubmit={({ note }) =>
+                        addCurrentCredential(currentCredential, note)
+                    }
+                >
+                    <Form.Input
+                        className="mV30"
+                        name="note"
+                        placeholder="Who owns the key?"
+                    />
                     <Form.Checkbox
                         className="mH20"
                         name="match"

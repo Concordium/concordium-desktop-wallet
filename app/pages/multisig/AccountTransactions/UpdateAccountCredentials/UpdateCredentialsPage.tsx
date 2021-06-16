@@ -18,7 +18,6 @@ import ChangeSignatureThreshold, {
 } from './ChangeSignatureThreshold';
 import routes from '~/constants/routes.json';
 import CreateUpdate from './CreateUpdate';
-import { CredentialStatus } from './CredentialStatus';
 import UpdateAccountCredentialsHandler from '~/utils/transactionHandlers/UpdateAccountCredentialsHandler';
 import Columns from '~/components/Columns';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
@@ -26,7 +25,7 @@ import { getUpdateCredentialsCost } from '~/utils/transactionCosts';
 import { useAccountInfo, useTransactionExpiryState } from '~/utils/dataHooks';
 import { collapseFraction } from '~/utils/basicHelpers';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
-import LoadingComponent from './LoadingComponent';
+import LoadingComponent from '../LoadingComponent';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { validateFee } from '~/utils/transactionHelpers';
 
@@ -36,6 +35,7 @@ import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryT
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
 
 import styles from './UpdateAccountCredentials.module.scss';
+import { CredentialDetails, CredentialStatus } from './util';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -138,16 +138,19 @@ function displayCredentialCount(
 }
 
 function listCredentials(
-    credentialIds: [string, CredentialStatus][],
-    updateCredential: (credId: [string, CredentialStatus]) => void,
+    credentialIds: CredentialDetails[],
+    updateCredential: (credId: CredentialDetails) => void,
     isEditing: boolean
 ) {
     if (credentialIds.length === 0) {
         return null;
     }
-    return credentialIds.map(([credId, status]) => {
+    return credentialIds.map((credDetails) => {
+        const [credId, status] = credDetails;
+
         let buttonText = 'Remove';
         let statusText = null;
+
         if (status === CredentialStatus.Added) {
             statusText = <h2 className={clsx(styles.green, 'mB0')}>Added</h2>;
         } else if (status === CredentialStatus.Unchanged) {
@@ -167,7 +170,7 @@ function listCredentials(
                     {buttonText && isEditing && (
                         <Button
                             size="tiny"
-                            onClick={() => updateCredential([credId, status])}
+                            onClick={() => updateCredential(credDetails)}
                             disabled={status === CredentialStatus.Original}
                         >
                             {buttonText}
@@ -215,9 +218,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     const handler = new UpdateAccountCredentialsHandler();
 
     const [newThreshold, setNewThreshold] = useState<number | undefined>();
-    const [credentialIds, setCredentialIds] = useState<
-        [string, CredentialStatus][]
-    >([]);
+    const [credentialIds, setCredentialIds] = useState<CredentialDetails[]>([]);
     const [newCredentials, setNewCredentials] = useState<
         CredentialDeploymentInformation[]
     >([]);
@@ -291,7 +292,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                     credentialIndex === 0
                         ? CredentialStatus.Original
                         : CredentialStatus.Unchanged;
-                return [credId, status];
+                return [credId, status, undefined];
             })
         );
     }
@@ -341,10 +342,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
         }
     }, [accountInfo]);
 
-    function updateCredentialStatus([removedId, status]: [
-        string,
-        CredentialStatus
-    ]) {
+    function updateCredentialStatus([removedId, status]: CredentialDetails) {
         if (status === CredentialStatus.Added) {
             setCredentialIds((currentCredentialIds) =>
                 currentCredentialIds.filter(([credId]) => credId !== removedId)
@@ -362,7 +360,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                     : CredentialStatus.Unchanged;
             setCredentialIds((currentCredentialIds) =>
                 currentCredentialIds.map((item) =>
-                    item[0] !== removedId ? item : [item[0], newStatus]
+                    item[0] !== removedId ? item : [item[0], newStatus, item[2]]
                 )
             );
         }
@@ -495,15 +493,20 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                                     <AddCredential
                                         accountAddress={account?.address}
                                         credentialIds={credentialIds}
-                                        addCredentialId={(newId) =>
-                                            setCredentialIds(
-                                                (currentCredentialIds) => [
-                                                    ...currentCredentialIds,
-                                                    newId,
-                                                ]
-                                            )
-                                        }
-                                        setNewCredentials={setNewCredentials}
+                                        onAddCredential={(cred, note) => {
+                                            setCredentialIds((cur) => [
+                                                ...cur,
+                                                [
+                                                    cred.credId,
+                                                    CredentialStatus.Added,
+                                                    note,
+                                                ],
+                                            ]);
+                                            setNewCredentials((cur) => [
+                                                ...cur,
+                                                cred,
+                                            ]);
+                                        }}
                                     />
                                 )}
                             />
@@ -558,7 +561,9 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                         </Switch>
                         {showButton && (
                             <div className="flexColumn mT40">
-                                <p className={styles.errorLabel}>{error}</p>
+                                {error && (
+                                    <p className={styles.errorLabel}>{error}</p>
+                                )}
                                 <Button
                                     disabled={!isReady || Boolean(error)}
                                     onClick={onContinue}
