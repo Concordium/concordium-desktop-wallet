@@ -49,7 +49,7 @@ export async function createLostIdentity(
         name: getLostIdentityName(identityNumber),
         identityNumber,
         identityObject: JSON.stringify(identityObject),
-        status: IdentityStatus.Genesis,
+        status: IdentityStatus.Placeholder,
         detail: '',
         codeUri: '',
         identityProvider: '{}',

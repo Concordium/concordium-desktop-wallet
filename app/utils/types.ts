@@ -92,6 +92,7 @@ export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    Placeholder = 'placeholder',
     // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
