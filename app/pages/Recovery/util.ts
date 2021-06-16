@@ -19,6 +19,10 @@ import { insertIdentity, removeIdentity } from '~/database/IdentityDao';
 
 const maxCredentialsOnAccount = 256;
 
+export function getLostIdentityName(identityNumber: number) {
+    return `Lost Identity - ${identityNumber}`;
+}
+
 /**
  * Creates a genesis identity for the given wallet if one does not already exist.
  * @param walletId the wallet connected when creating the genesis account
@@ -29,8 +33,7 @@ export async function createLostIdentity(
     identityNumber: number
 ): Promise<number> {
     const createdAt = getCurrentYearMonth();
-    // ValidTo is set to be 5 years after the created at date.
-    const validTo = (parseInt(createdAt, 10) + 500).toString();
+    const validTo = getCurrentYearMonth();
     const identityObject = {
         v: 0,
         value: {
@@ -43,7 +46,7 @@ export async function createLostIdentity(
     };
 
     const identity = {
-        name: `Lost Identity - ${identityNumber}`,
+        name: getLostIdentityName(identityNumber),
         identityNumber,
         identityObject: JSON.stringify(identityObject),
         status: IdentityStatus.Genesis,
@@ -158,14 +161,19 @@ async function recoverCredentials(
             credNumber,
             identityId
         );
-        credNumber += 1;
+
         if (!recovered) {
+            if (credNumber === 0) {
+                // If the first credential does not exist, then this index has not been used to create an identity
+                break;
+            }
             skipsRemaining -= 1;
         } else {
             skipsRemaining = allowedSpaces;
             credentials.push(recovered.credential);
             accounts.push(recovered.account);
         }
+        credNumber += 1;
     }
 
     return { credentials, accounts };

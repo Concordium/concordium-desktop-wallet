@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { push } from 'connected-react-router';
 import { useDispatch, useSelector } from 'react-redux';
-import Ledger from '~/components/ledger/Ledger';
+import Columns from '~/components/Columns';
+import SimpleLedger from '~/components/ledger/SimpleLedger';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
-import Button from '~/cross-app-components/Button';
-import Card from '~/cross-app-components/Card';
-import { asyncNoOp } from '~/utils/basicHelpers';
 import { getConsensusStatus } from '~/node/nodeRequests';
 import { loadAccounts } from '~/features/AccountSlice';
 import { loadCredentials } from '~/features/CredentialSlice';
@@ -19,14 +17,32 @@ import routes from '~/constants/routes.json';
 import errorMessages from '~/constants/errorMessages.json';
 import PageLayout from '~/components/PageLayout';
 import styles from './Recovery.module.scss';
-import { createLostIdentity, recoverIdentity } from './util';
+import {
+    getLostIdentityName,
+    createLostIdentity,
+    recoverIdentity,
+} from './util';
 
 const addedMessage = (identityName: string, count: number) =>
-    `Recovered ${count} credentials on ${identityName}`;
+    `Recovered ${count} credentials on ${identityName}.`;
 const newIdentityMessage = (identityNumber: number, count: number) =>
-    `Recovered ${count} credentials on lost identity - ${identityNumber}`;
+    `Recovered ${count} credentials from identity on key index ${identityNumber}, naming identity: ${getLostIdentityName(
+        identityNumber
+    )}`;
 const noIdentityMessage = (identityNumber: number) =>
-    `There is no Identity with number ${identityNumber} on the chain`;
+    `Key index ${identityNumber} has not been used to create an identity yet.`;
+const finishedMessage = 'Finished recovering credentials';
+
+async function getPrfKeySeed(
+    ledger: ConcordiumLedgerClient,
+    setMessage: (message: string) => void,
+    identityNumber: number
+) {
+    setMessage('Please confirm export of PRF key');
+    const prfKeySeed = await ledger.getPrfKey(identityNumber);
+    setMessage('Recovering credentials');
+    return prfKeySeed.toString('hex');
+}
 
 /**
  * The default page loaded on the base path. Always
@@ -47,6 +63,8 @@ export default function DefaultPage() {
             setError(errorMessages.missingGlobal);
             return;
         }
+        setMessages([]);
+
         const consensusStatus = await getConsensusStatus();
         const blockHash = consensusStatus.lastFinalizedBlock;
 
@@ -55,14 +73,13 @@ export default function DefaultPage() {
         // Check for accounts on current identities
         for (const identity of identities) {
             if (identity.walletId === walletId) {
-                setMessage('Please confirm export of PRF key');
-                const prfKeySeed = await ledger.getPrfKey(
+                const prfKeySeed = await getPrfKeySeed(
+                    ledger,
+                    setMessage,
                     identity.identityNumber
                 );
-                setMessage('Recovering credentials');
-
                 const added = await recoverIdentity(
-                    prfKeySeed.toString('hex'),
+                    prfKeySeed,
                     identity.id,
                     blockHash,
                     global,
@@ -83,11 +100,13 @@ export default function DefaultPage() {
                 walletId,
                 identityNumber
             );
-            setMessage('Please confirm export of PRF key');
-            const prfKeySeed = await ledger.getPrfKey(identityNumber);
-            setMessage('Recovering credentials');
+            const prfKeySeed = await getPrfKeySeed(
+                ledger,
+                setMessage,
+                identityNumber
+            );
             const addedCount = await recoverIdentity(
-                prfKeySeed.toString('hex'),
+                prfKeySeed,
                 identityId,
                 blockHash,
                 global
@@ -106,6 +125,8 @@ export default function DefaultPage() {
         loadAccounts(dispatch);
         loadCredentials(dispatch);
         loadIdentities(dispatch);
+
+        setMessages((ms) => [...ms, finishedMessage]);
     }
 
     return (
@@ -125,33 +146,26 @@ export default function DefaultPage() {
                     show={Boolean(error)}
                     onClick={() => dispatch(push(routes.IDENTITIES))}
                 />
-                <Card className={styles.card}>
-                    <Ledger ledgerCallback={performRecovery}>
-                        {({
-                            isReady,
-                            statusView,
-                            submitHandler = asyncNoOp,
-                        }) => (
-                            <>
-                                {statusView}
-                                <Button
-                                    onClick={submitHandler}
-                                    disabled={!isReady}
-                                >
-                                    Submit
-                                </Button>
-                            </>
-                        )}
-                    </Ledger>
-                </Card>
-                <div className={styles.messages}>
-                    <h3>Messages:</h3>
-                    {messages.map((m) => (
-                        <>
-                            <p>{m}</p>
-                        </>
-                    ))}
-                </div>
+                <Columns className="flexChildFill">
+                    <Columns.Column>
+                        <div className={styles.ledgerDiv}>
+                            <SimpleLedger
+                                className={styles.card}
+                                ledgerCall={performRecovery}
+                            />
+                        </div>
+                    </Columns.Column>
+                    <Columns.Column>
+                        <div className={styles.messages}>
+                            <h1 className={styles.messagesTitle}>Messages:</h1>
+                            {messages.map((m) => (
+                                <>
+                                    <p>{m}</p>
+                                </>
+                            ))}
+                        </div>
+                    </Columns.Column>
+                </Columns>
             </PageLayout.Container>
         </PageLayout>
     );

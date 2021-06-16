@@ -1,14 +1,27 @@
 .card {
-    composes: flexColumn from global;
-    margin: auto;
+    flex-grow: 1;
     max-width: 428px;
-    text-align: center;
-    position: relative;
-    max-height: 600px;
-    flex: 1;
 }
 
 .messages {
-    composes: flexColumn from global;
-    margin: auto;
+    margin: auto auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.messagesTitle {
+    text-align: center;
+}
+
+.messages,
+.ledgerDiv {
+    height: 100%;
+}
+
+.ledgerDiv {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
