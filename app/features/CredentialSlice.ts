@@ -9,6 +9,7 @@ import {
     getCredentialsOfAccount,
 } from '~/database/CredentialDao';
 import {
+    Policy,
     Credential,
     CredentialDeploymentInformation,
     Account,
@@ -74,6 +75,24 @@ export async function importCredentials(credentials: Credential[]) {
     return Promise.all(credentials.map(insertCredential));
 }
 
+export function createNewCredential(
+    accountAddress: string,
+    credentialNumber: number,
+    identityId: number,
+    credentialIndex: number | undefined,
+    credId: string,
+    policy: Policy
+) {
+    return {
+        credId,
+        policy: JSON.stringify(policy),
+        accountAddress,
+        credentialNumber,
+        identityId,
+        credentialIndex,
+    };
+}
+
 export async function insertNewCredential(
     dispatch: Dispatch,
     accountAddress: string,
@@ -82,15 +101,16 @@ export async function insertNewCredential(
     credentialIndex: number | undefined,
     credential: Pick<CredentialDeploymentInformation, 'credId' | 'policy'>
 ) {
-    const parsed = {
-        credId: credential.credId,
-        policy: JSON.stringify(credential.policy),
-        accountAddress,
-        credentialNumber,
-        identityId,
-        credentialIndex,
-    };
-    await insertCredential(parsed);
+    await insertCredential(
+        createNewCredential(
+            accountAddress,
+            credentialNumber,
+            identityId,
+            credentialIndex,
+            credential.credId,
+            credential.policy
+        )
+    );
     return loadCredentials(dispatch);
 }
 

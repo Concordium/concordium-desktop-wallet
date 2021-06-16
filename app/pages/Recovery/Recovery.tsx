@@ -9,12 +9,21 @@ import { asyncNoOp } from '~/utils/basicHelpers';
 import { getConsensusStatus, getAccountInfo } from '~/node/nodeRequests';
 import { getAddressFromCredentialId, getCredId } from '~/utils/rustInterface';
 import { findAccounts } from '~/database/AccountDao';
-import { addExternalAccount } from '~/features/AccountSlice';
-import { insertNewCredential } from '~/features/CredentialSlice';
+import {
+    createAccount,
+    importAccount,
+    loadAccounts,
+} from '~/features/AccountSlice';
+import {
+    loadCredentials,
+    createNewCredential,
+    importCredentials,
+} from '~/features/CredentialSlice';
 import { globalSelector } from '~/features/GlobalSlice';
 import { loadIdentities } from '~/features/IdentitySlice';
 import {
-    Dispatch,
+    Account,
+    AccountStatus,
     AccountInfo,
     Global,
     CredentialDeploymentInformation,
@@ -85,7 +94,6 @@ function getCredentialOnChain(
             (cred.value.contents.credId || cred.value.contents.regId) === credId
     );
     if (!credentialOnChain) {
-        console.log(accountInfo);
         return [
             undefined,
             {
@@ -106,7 +114,6 @@ function getCredentialOnChain(
 }
 
 async function recoverCredential(
-    dispatch: Dispatch,
     credId: string,
     blockHash: string,
     credentialNumber: number,
@@ -115,7 +122,7 @@ async function recoverCredential(
     const accountInfo = await getAccountInfo(credId, blockHash);
 
     if (!accountInfo) {
-        return false;
+        return undefined;
     }
 
     const firstCredential = accountInfo.accountCredentials[0].value.contents;
@@ -123,53 +130,51 @@ async function recoverCredential(
         firstCredential.regId || firstCredential.credId
     );
 
-    const accountExists = (await findAccounts({ address })).length > 0;
-    if (!accountExists) {
-        addExternalAccount(
-            dispatch,
-            address,
-            address.substr(0, 8),
-            identityId,
-            1
-        );
-    }
-
-    const [credentialIndex, credential] = getCredentialOnChain(
+    const [credentialIndex, credentialDeploymentInfo] = getCredentialOnChain(
         credId,
         accountInfo
     );
 
-    if (!credential.credId) {
-        credential.credId = credential.regId || '';
+    if (!credentialDeploymentInfo.credId) {
+        credentialDeploymentInfo.credId = credentialDeploymentInfo.regId || '';
     }
 
-    insertNewCredential(
-        dispatch,
+    const account = createAccount(
+        identityId,
+        address,
+        address.substr(0, 8),
+        accountInfo.accountThreshold,
+        AccountStatus.Confirmed,
+        credentialNumber === 0
+    );
+
+    const credential = createNewCredential(
         address,
         credentialNumber,
         identityId,
         credentialIndex,
-        credential
+        credentialDeploymentInfo.credId,
+        credentialDeploymentInfo.policy
     );
 
-    return true;
+    return { account, credential };
 }
 
-async function recoverAccounts(
-    dispatch: Dispatch,
+async function recoverCredentials(
     prfKeySeed: string,
     identityId: number,
     blockHash: string,
     global: Global,
     allowedSpaces = 10
 ) {
-    let recovered = true;
+    const credentials = [];
+    const accounts = [];
     let credNumber = 0;
     let skipsRemaining = allowedSpaces;
     while (skipsRemaining >= 0 && credNumber < maxCredentialsOnAccount) {
         const credId = await getCredId(prfKeySeed, credNumber, global);
-        recovered = await recoverCredential(
-            dispatch,
+
+        const recovered = await recoverCredential(
             credId,
             blockHash,
             credNumber,
@@ -178,32 +183,47 @@ async function recoverAccounts(
         credNumber += 1;
         if (!recovered) {
             skipsRemaining -= 1;
+        } else {
+            credentials.push(recovered.credential);
+            accounts.push(recovered.account);
         }
     }
 
-    return credNumber > 1;
+    return { credentials, accounts };
+}
+
+async function addAccounts(accounts: Account[]) {
+    for (const account of accounts) {
+        const { address } = account;
+        const accountExists = (await findAccounts({ address })).length > 0;
+        if (!accountExists) {
+            importAccount(account);
+        }
+    }
 }
 
 async function recoverIdentity(
-    dispatch: Dispatch,
     prfKeySeed: string,
     identityId: number,
     blockHash: string,
     global: Global
 ) {
-    const recovered = await recoverAccounts(
-        dispatch,
+    const { credentials, accounts } = await recoverCredentials(
         prfKeySeed,
         identityId,
         blockHash,
         global
     );
 
-    if (!recovered) {
-        removeIdentity(identityId);
-    }
+    const exists = credentials.length > 0;
 
-    return recovered;
+    if (exists) {
+        await addAccounts(accounts);
+        await importCredentials(credentials);
+    } else {
+        await removeIdentity(identityId);
+    }
+    return exists;
 }
 
 /**
@@ -215,7 +235,7 @@ export default function DefaultPage() {
     const global = useSelector(globalSelector);
     const [error, setError] = useState<string>();
 
-    async function createAccount(
+    async function performRecovery(
         ledger: ConcordiumLedgerClient,
         setMessage: (message: string) => void
     ) {
@@ -239,7 +259,6 @@ export default function DefaultPage() {
             const prfKeySeed = await ledger.getPrfKey(identityNumber);
             setMessage('Recovering credentials');
             recovered = await recoverIdentity(
-                dispatch,
                 prfKeySeed.toString('hex'),
                 identityId,
                 blockHash,
@@ -247,6 +266,8 @@ export default function DefaultPage() {
             );
         }
 
+        loadAccounts(dispatch);
+        loadCredentials(dispatch);
         loadIdentities(dispatch);
     }
 
@@ -259,7 +280,7 @@ export default function DefaultPage() {
                 onClick={() => dispatch(push(routes.IDENTITIES))}
             />
             <Card className="marginCenter flexColumn">
-                <Ledger ledgerCallback={createAccount}>
+                <Ledger ledgerCallback={performRecovery}>
                     {({ isReady, statusView, submitHandler = asyncNoOp }) => (
                         <>
                             {statusView}

@@ -347,6 +347,31 @@ export async function updateAccountInfo(account: Account, dispatch: Dispatch) {
     return Promise.resolve();
 }
 
+export function createAccount(
+    identityId: number,
+    address: string,
+    name = address.substr(0, 8),
+    signatureThreshold = 1,
+    status: AccountStatus = AccountStatus.Confirmed,
+    isInitial = false,
+    deploymentTransactionId?: string
+): Account {
+    return {
+        name,
+        identityId,
+        status,
+        address,
+        signatureThreshold,
+        isInitial,
+        deploymentTransactionId,
+        maxTransactionId: 0,
+        rewardFilter: '[]',
+        selfAmounts: getInitialEncryptedAmount(),
+        incomingAmounts: '[]',
+        totalDecrypted: '0',
+    };
+}
+
 // Add an account with pending status..
 export async function addPendingAccount(
     dispatch: Dispatch,
@@ -356,20 +381,15 @@ export async function addPendingAccount(
     accountAddress = '',
     deploymentTransactionId: string | undefined = undefined
 ) {
-    const account: Account = {
-        name: accountName,
+    const account = createAccount(
         identityId,
-        status: AccountStatus.Pending,
-        address: accountAddress,
-        signatureThreshold: 1,
-        maxTransactionId: 0,
+        accountAddress,
+        accountName,
+        1,
+        AccountStatus.Pending,
         isInitial,
-        deploymentTransactionId,
-        rewardFilter: '[]',
-        selfAmounts: getInitialEncryptedAmount(),
-        incomingAmounts: '[]',
-        totalDecrypted: '0',
-    };
+        deploymentTransactionId
+    );
     await insertAccount(account);
     return loadAccounts(dispatch);
 }
