@@ -1,11 +1,10 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import routes from '../constants/routes.json';
-import AddressBookPage from '../pages/AddressBook/AddressBookPage';
-import DefaultPage from '~/pages/Home/DefaultPage';
 import HomePage from '../pages/Home/HomePage';
 import AccountPage from '../pages/Accounts/AccountPage';
 import IdentityPage from '../pages/Identities/IdentityPage';
+import AddressBookPage from '../pages/AddressBook/AddressBookPage';
 import IssuancePage from '../pages/IdentityIssuance/IdentityIssuancePage';
 import AccountCreation from '../pages/AccountCreation/AccountCreationPage';
 import MultiSignatureRouter from '../pages/multisig/MultiSignatureRouter';
@@ -15,6 +14,7 @@ import SubmitTransfer from '../pages/Accounts/SubmitTransfer';
 import GenerateCredential from '../pages/GenerateCredential/GenerateCredentialPage';
 import AccountReport from '~/pages/Accounts/AccountReport';
 import genesisAccount from '../pages/GenesisAccount/GenesisAccount';
+import DefaultPage from '~/pages/Home/DefaultPage';
 import SettingsRouter from '~/pages/settings/SettingsRouter';
 
 export default function Routes(): JSX.Element {
@@ -30,6 +30,7 @@ export default function Routes(): JSX.Element {
             <Route path={routes.ACCOUNTS} component={AccountPage} />
             <Route path={routes.IDENTITYISSUANCE} component={IssuancePage} />
             <Route path={routes.IDENTITIES} component={IdentityPage} />
+            <Route path={routes.ADDRESSBOOK} component={AddressBookPage} />
             <Route path={routes.IMPORT} component={PerformImport} />
             <Route path={routes.EXPORTIMPORT} component={ExportImport} />
             <Route
@@ -40,7 +41,6 @@ export default function Routes(): JSX.Element {
                 path={routes.MULTISIGTRANSACTIONS}
                 component={MultiSignatureRouter}
             />
-            <Route path={routes.ADDRESSBOOK} component={AddressBookPage} />
             <Route path={routes.SETTINGS} component={SettingsRouter} />
             <Route path={routes.HOME} component={HomePage} />
             <Route path="/" component={DefaultPage} />

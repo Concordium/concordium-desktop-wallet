@@ -314,7 +314,7 @@ export function createScheduledTransferTransaction(
 /**
  *  Constructs an account credential update transaction,
  */
-export async function createUpdateCredentialsTransaction(
+export function createUpdateCredentialsTransaction(
     fromAddress: string,
     addedCredentials: AddedCredential[],
     removedCredIds: string[],
@@ -336,7 +336,7 @@ export async function createUpdateCredentialsTransaction(
         transactionKind: TransactionKindId.Update_credentials,
         payload,
         nonce,
-        estimatedEnergyAmount: await getUpdateAccountCredentialEnergy(
+        estimatedEnergyAmount: getUpdateAccountCredentialEnergy(
             payload,
             currentCredentialAmount,
             signatureAmount

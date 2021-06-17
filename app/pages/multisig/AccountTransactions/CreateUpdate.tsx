@@ -39,7 +39,7 @@ function CreateUpdate({
     >();
 
     useEffect(() => {
-        createUpdateCredentialsTransaction(
+        const t = createUpdateCredentialsTransaction(
             account.address,
             addedCredentials,
             removedCredIds,
@@ -48,9 +48,8 @@ function CreateUpdate({
             nonce,
             account.signatureThreshold,
             expiry
-        )
-            .then((t) => setTransaction({ ...t, estimatedFee }))
-            .catch(() => {});
+        );
+        setTransaction({ ...t, estimatedFee });
     }, [
         setTransaction,
         account,

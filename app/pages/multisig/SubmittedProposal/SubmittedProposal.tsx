@@ -115,7 +115,7 @@ const SubmittedProposalView = withChainData<Props>(
                     return;
                 }
             } else if (instanceOfAccountTransactionWithSignature(transaction)) {
-                payload = await serializeTransaction(
+                payload = serializeTransaction(
                     transaction,
                     transaction.signatures
                 );

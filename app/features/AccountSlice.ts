@@ -279,22 +279,17 @@ export async function loadAccountInfos(
 ) {
     const map: Record<string, AccountInfo> = {};
 
-    const confirmedAccounts: Account[] = [];
-    for (const account of accounts) {
-        const validAddress = await isValidAddress(account.address);
-
-        // We don't check that the address is valid for genesis account, because they have a credId as placeholder.
-        // The lookup for accountInfo will still succeed, because the node will, given an invalid address, interpret it as a credId,
-        // and return the associated accounts's info.
-        // Can only be safely removed, if there are no more genesis accounts in circulation, either in
-        // databases or in old exports.
-        if (
-            (validAddress && account.status === AccountStatus.Confirmed) ||
+    // We don't check that the address is valid for genesis account, because they have a credId as placeholder.
+    // The lookup for accountInfo will still succeed, because the node will, given an invalid address, interpret it as a credId,
+    // and return the associated accounts's info.
+    // Can only be safely removed, if there are no more genesis accounts in circulation, either in
+    // databases or in old exports.
+    const confirmedAccounts = accounts.filter(
+        (account) =>
+            (isValidAddress(account.address) &&
+                account.status === AccountStatus.Confirmed) ||
             AccountStatus.Genesis === account.status
-        ) {
-            confirmedAccounts.push(account);
-        }
-    }
+    );
 
     if (confirmedAccounts.length === 0) {
         return Promise.resolve();

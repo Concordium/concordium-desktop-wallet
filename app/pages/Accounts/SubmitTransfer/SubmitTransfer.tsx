@@ -181,7 +181,7 @@ export default function SubmitTransfer({ location }: Props) {
             signatureIndex,
             signature
         );
-        const serializedTransaction = await serializeTransaction(
+        const serializedTransaction = serializeTransaction(
             transaction,
             signatureStructured
         );

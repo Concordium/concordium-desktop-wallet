@@ -83,7 +83,6 @@ function CosignTransactionProposal({
         setTransactionSignDigest,
     ] = useState<string>();
     useEffect(() => {
-        // TODO This should never occur, but show error if it does.
         getTransactionSignDigest(transactionObject)
             .then((digest) => setTransactionSignDigest(digest))
             .catch(() => {});
