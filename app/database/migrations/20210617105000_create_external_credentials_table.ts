@@ -10,7 +10,9 @@ export async function up(knex: Knex): Promise<void> {
             .string('address')
             .references('address')
             .inTable(accountsTable)
-            .notNullable();
+            .notNullable()
+            .onUpdate('CASCADE')
+            .onDelete('CASCADE');
         table.string('credId').primary();
         table.string('note').defaultTo('');
     });
