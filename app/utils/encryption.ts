@@ -1,5 +1,6 @@
 import { EncryptedData } from './types';
 import ipcCommands from '../constants/ipcCommands.json';
+import { DecryptionData, DecryptionResult } from '~/ipc/encryption';
 
 /**
  * Encrypts the data using PBKDF2 to generate a key from the password, and
@@ -26,10 +27,16 @@ export async function decrypt(
     { cipherText, metadata }: EncryptedData,
     password: string
 ): Promise<string> {
-    const decryptedResult = await window.ipcRenderer.invoke(
+    const decryptedResult: DecryptionResult = await window.ipcRenderer.invoke(
         ipcCommands.decrypt,
         { cipherText, metadata },
         password
     );
-    return decryptedResult;
+
+    if (decryptedResult.error) {
+        throw decryptedResult.error;
+    } else {
+        const decryptedData: DecryptionData = decryptedResult as DecryptionData;
+        return decryptedData.data;
+    }
 }
