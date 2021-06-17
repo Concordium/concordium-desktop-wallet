@@ -3,23 +3,9 @@ import {
     TransferTransaction,
     TransactionKindString,
 } from '../utils/types';
+import ipcCommands from '~/constants/ipcCommands.json';
 
-export function convertBooleans(transactions: TransferTransaction[]) {
-    return transactions.map((transaction) => {
-        const remote = Boolean(transaction.remote);
-        const success =
-            transaction.success === null
-                ? transaction.success
-                : Boolean(transaction.success);
-        return {
-            ...transaction,
-            remote,
-            success,
-        };
-    });
-}
-
-interface GetTransactionsOutput {
+export interface GetTransactionsOutput {
     transactions: TransferTransaction[];
     more: boolean;
 }
@@ -30,7 +16,7 @@ export async function getTransactionsOfAccount(
     limit = 100
 ): Promise<GetTransactionsOutput> {
     return window.ipcRenderer.invoke(
-        'dbGetTransactionsOfAccount',
+        ipcCommands.database.transactions.getTransactionsForAccount,
         account,
         filteredTypes,
         limit
@@ -42,7 +28,7 @@ export async function updateTransaction(
     updatedValues: Partial<TransferTransaction>
 ) {
     return window.ipcRenderer.invoke(
-        'dbUpdateTransaction',
+        ipcCommands.database.transactions.update,
         identifier,
         updatedValues
     );
@@ -56,15 +42,23 @@ export async function updateTransaction(
 export async function insertTransactions(
     transactions: Partial<TransferTransaction>[]
 ) {
-    return window.ipcRenderer.invoke('dbInsertTransactions', transactions);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.transactions.insert,
+        transactions
+    );
 }
 
 export async function getMaxTransactionsIdOfAccount(
     account: Account
 ): Promise<number | undefined> {
-    return window.ipcRenderer.invoke('dbGetMaxTransactionId', account);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.transactions.getMaxTransactionId,
+        account
+    );
 }
 
 export async function getPendingTransactions(): Promise<TransferTransaction[]> {
-    return window.ipcRenderer.invoke('dbGetPendingTransactions');
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.transactions.getPending
+    );
 }

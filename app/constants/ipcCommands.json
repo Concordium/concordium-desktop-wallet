@@ -24,6 +24,60 @@
         "rekeyDatabase": "DB_REKEY_DATABASE",
         "checkAccess": "DB_CHECK_ACCESS",
         "setPassword": "DB_SET_PASSWORD",
-        "invalidateKnexSingleton": "DB_INVALIDATE_KNEX_SINGLETON"
+        "invalidateKnexSingleton": "DB_INVALIDATE_KNEX_SINGLETON",
+        "selectFirst": "DB_SELECT_FIRST",
+        "accounts": {
+            "getAll": "DB_ACCOUNTS_GET_ALL",
+            "getAccount": "DB_ACCOUNTS_GET_ACCOUNT",
+            "insertAccount": "DB_ACCOUNTS_INSERT",
+            "removeAccount": "DB_ACCOUNTS_REMOVE",
+            "updateAccount": "DB_ACCOUNTS_UPDATE",
+            "findAccounts": "DB_ACCOUNTS_FIND",
+            "removeInitialAccount": "DB_ACCOUNTS_REMOVE_INITIAL",
+            "confirmInitialAccount": "DB_ACCOUNTS_CONFIRM_INITIAL"
+        },
+        "addressBook": {
+            "getAll": "DB_ADDRESS_BOOK_GET_ALL",
+            "insert": "DB_ADDRESS_BOOK_INSERT",
+            "update": "DB_ADDRESS_BOOK_UPDATE",
+            "remove": "DB_ADDRESS_BOOK_REMOVE",
+            "findEntries": "DB_ADDRESS_BOOK_FIND"
+        },
+        "credentials": {
+            "insert": "DB_CREDENTIAL_INSERT",
+            "delete": "DB_CREDENTIAL_DELETE",
+            "deleteForAccount": "DB_CREDENTIAL_DELETE_FOR_ACCOUNT",
+            "getAll": "DB_CREDENTIAL_GET_ALL",
+            "getForIdentity": "DB_CREDENTIAL_GET_FOR_IDENTITY",
+            "getForAccount": "DB_CREDENTIAL_GET_FOR_ACCOUNT",
+            "getNextNumber": "DB_CREDENTIAL_GET_NEXT_NUMBER",
+            "updateIndex": "DB_CREDENTIAL_UPDATE_INDEX",
+            "update": "DB_CREDENTIAL_UPDATE",
+            "hasDuplicateWalletId": "DB_CREDENTIAL_HAS_DUPLICATE_WALLET_ID",
+            "hasExistingCredential": "DB_CREDENTIAL_HAS_EXISTING_CREDENTIAL"
+        },
+        "identity": {
+            "getNextIdentityNumber": "DB_IDENTITY_GET_NEXT_IDENTITY_NUMBER",
+            "insert": "DB_IDENTITY_INSERT",
+            "update": "DB_IDENTITY_UPDATE",
+            "getIdentitiesForWallet": "DB_IDENTITY_GET_FOR_WALLET"
+        },
+        "genesisAndGlobal": {
+            "setValue": "DB_GENESIS_AND_GLOBAL_SET"
+        },
+        "multiSignatureTransaction": {
+            "insert": "DB_MULTI_SIGNATURE_TRANSACTION_INSERT",
+            "update": "DB_MULTI_SIGNATURE_TRANSACTION_UPDATE"
+        },
+        "settings": {
+            "update": "DB_SETITNGS_UPDATE"
+        },
+        "transactions": {
+            "getPending": "DB_TRANSACTIONS_GET_PENDING",
+            "getMaxTransactionId": "DB_TRANSACTIONS_GET_MAX_TRANSACTION_ID",
+            "getTransactionsForAccount": "DB_TRANSACTIONS_GET_TRANSACTIONS_FOR_ACCOUNT",
+            "update": "DB_TRANSACTIONS_UPDATE",
+            "insert": "DB_TRANSACTIONS_INSERT"
+        }
     }
 }

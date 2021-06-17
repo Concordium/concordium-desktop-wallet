@@ -8,7 +8,7 @@ import ipcCommands from '../constants/ipcCommands.json';
  */
 export async function insert(transaction: Partial<MultiSignatureTransaction>) {
     return window.ipcRenderer.invoke(
-        'dbInsertMultiSignatureProposal',
+        ipcCommands.database.multiSignatureTransaction.insert,
         transaction
     );
 }
@@ -20,7 +20,7 @@ export async function updateEntry(
     multiSigTransaction: MultiSignatureTransaction
 ) {
     return window.ipcRenderer.invoke(
-        'dbUpdateMultiSignatureProposal',
+        ipcCommands.database.multiSignatureTransaction.update,
         multiSigTransaction
     );
 }

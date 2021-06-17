@@ -9,7 +9,10 @@ import ipcCommands from '../constants/ipcCommands.json';
  * @returns the id for the next identity to be created by the given wallet
  */
 export async function getNextIdentityNumber(walletId: number): Promise<number> {
-    return window.ipcRenderer.invoke('dbGetNextIdentityNumber', walletId);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.identity.getNextIdentityNumber,
+        walletId
+    );
 }
 
 export async function getAllIdentities(): Promise<Identity[]> {
@@ -17,14 +20,21 @@ export async function getAllIdentities(): Promise<Identity[]> {
 }
 
 export async function insertIdentity(identity: Partial<Identity> | Identity[]) {
-    return window.ipcRenderer.invoke('dbInsertIdentitiy', identity);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.identity.insert,
+        identity
+    );
 }
 
 export async function updateIdentity(
     id: number,
     updatedValues: Record<string, unknown>
 ) {
-    return window.ipcRenderer.invoke('dbUpdateIdentity', id, updatedValues);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.identity.update,
+        id,
+        updatedValues
+    );
 }
 
 /**
@@ -34,5 +44,8 @@ export async function updateIdentity(
 export async function getIdentitiesForWallet(
     walletId: number
 ): Promise<Identity[]> {
-    return window.ipcRenderer.invoke('dbGetIdentitiesForWallet', walletId);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.identity.getIdentitiesForWallet,
+        walletId
+    );
 }

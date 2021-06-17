@@ -1,42 +1,46 @@
 import { Account } from '../utils/types';
-
-export function convertAccountBooleans(accounts: Account[]) {
-    return accounts.map((account) => {
-        return {
-            ...account,
-            allDecrypted: Boolean(account.allDecrypted),
-            isInitial: Boolean(account.isInitial),
-        };
-    });
-}
+import ipcCommands from '~/constants/ipcCommands.json';
 
 /**
  * Returns all stored accounts from the database. Attaches the identityName
  * and identityNumber from the identity table.
  */
 export async function getAllAccounts(): Promise<Account[]> {
-    return window.ipcRenderer.invoke('dbGetAllAccounts');
+    return window.ipcRenderer.invoke(ipcCommands.database.accounts.getAll);
 }
 
 export async function getAccount(
     address: string
 ): Promise<Account | undefined> {
-    return window.ipcRenderer.invoke('dbGetAccount', address);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.accounts.getAccount,
+        address
+    );
 }
 
 export async function insertAccount(account: Account | Account[]) {
-    return window.ipcRenderer.invoke('insertAccount', account);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.accounts.insertAccount,
+        account
+    );
 }
 
 export async function updateAccount(
     address: string,
     updatedValues: Partial<Account>
 ) {
-    return window.ipcRenderer.invoke('updateAccount', address, updatedValues);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.accounts.updateAccount,
+        address,
+        updatedValues
+    );
 }
 
 export async function findAccounts(condition: Record<string, unknown>) {
-    return window.ipcRenderer.invoke('dbFindAccounts', condition);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.accounts.findAccounts,
+        condition
+    );
 }
 
 /**
@@ -51,11 +55,17 @@ export async function getAccountsOfIdentity(
 }
 
 export async function removeAccount(accountAddress: string) {
-    return window.ipcRenderer.invoke('dbRemoveAccount', accountAddress);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.accounts.removeAccount,
+        accountAddress
+    );
 }
 
 export async function removeInitialAccount(identityId: number) {
-    return window.ipcRenderer.invoke('dbRemoveInitialAccount', identityId);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.accounts.removeInitialAccount,
+        identityId
+    );
 }
 
 export async function confirmInitialAccount(
@@ -63,7 +73,7 @@ export async function confirmInitialAccount(
     updatedValues: Partial<Account>
 ) {
     return window.ipcRenderer.invoke(
-        'dbConfirmInitialAccount',
+        ipcCommands.database.accounts.confirmInitialAccount,
         identityId,
         updatedValues
     );

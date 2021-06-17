@@ -23,7 +23,10 @@ export async function getSettingGroups(): Promise<SettingGroup[]> {
 }
 
 export async function updateEntry(setting: Setting) {
-    return window.ipcRenderer.invoke('dbUpdateSettingsEntry', setting);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.settings.update,
+        setting
+    );
 }
 
 /**

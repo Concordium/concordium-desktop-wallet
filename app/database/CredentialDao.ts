@@ -1,16 +1,23 @@
 import { Credential, CredentialWithIdentityNumber } from '../utils/types';
+import ipcCommands from '~/constants/ipcCommands.json';
 
 export async function insertCredential(credential: Credential) {
-    return window.ipcRenderer.invoke('dbInsertCredential', credential);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.insert,
+        credential
+    );
 }
 
 export async function removeCredential(credential: Partial<Credential>) {
-    return window.ipcRenderer.invoke('dbDeleteCredential', credential);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.delete,
+        credential
+    );
 }
 
 export async function removeCredentialsOfAccount(accountAddress: string) {
     return window.ipcRenderer.invoke(
-        'dbDeleteCredentialsForAccount',
+        ipcCommands.database.credentials.deleteForAccount,
         accountAddress
     );
 }
@@ -18,7 +25,7 @@ export async function removeCredentialsOfAccount(accountAddress: string) {
 export async function getCredentials(): Promise<
     CredentialWithIdentityNumber[]
 > {
-    return window.ipcRenderer.invoke('dbGetCredentials');
+    return window.ipcRenderer.invoke(ipcCommands.database.credentials.getAll);
 }
 
 /**
@@ -28,7 +35,10 @@ export async function getCredentials(): Promise<
 export async function getCredentialsForIdentity(
     identityId: number
 ): Promise<Credential[]> {
-    return window.ipcRenderer.invoke('dbGetCredentialsForIdentity', identityId);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.getForIdentity,
+        identityId
+    );
 }
 
 /**
@@ -42,13 +52,16 @@ export async function getCredentialsOfAccount(
     accountAddress: string
 ): Promise<CredentialWithIdentityNumber[]> {
     return window.ipcRenderer.invoke(
-        'dbGetCredentialsOfAccount',
+        ipcCommands.database.credentials.getForAccount,
         accountAddress
     );
 }
 
 export async function getNextCredentialNumber(identityId: number) {
-    return window.ipcRenderer.invoke('dbGetNextCredentialNumber', identityId);
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.credentials.getNextNumber,
+        identityId
+    );
 }
 
 export async function updateCredentialIndex(
@@ -56,7 +69,7 @@ export async function updateCredentialIndex(
     credentialIndex: number | undefined
 ) {
     return window.ipcRenderer.invoke(
-        'dbUpdateCredentialIndex',
+        ipcCommands.database.credentials.updateIndex,
         credId,
         credentialIndex
     );
@@ -67,7 +80,7 @@ export async function updateCredential(
     updatedValues: Partial<Credential>
 ) {
     return window.ipcRenderer.invoke(
-        'dbUpdateCredential',
+        ipcCommands.database.credentials.update,
         credId,
         updatedValues
     );
@@ -79,7 +92,7 @@ export async function hasDuplicateWalletId(
     otherCredIds: string[]
 ) {
     return window.ipcRenderer.invoke(
-        'dbHasDuplicateWalletId',
+        ipcCommands.database.credentials.hasDuplicateWalletId,
         accountAddress,
         credId,
         otherCredIds
@@ -91,7 +104,7 @@ export async function hasExistingCredential(
     currentWalletId: number
 ) {
     return window.ipcRenderer.invoke(
-        'dbHasExistingCredential',
+        ipcCommands.database.credentials.hasExistingCredential,
         accountAddress,
         accountAddress,
         currentWalletId
