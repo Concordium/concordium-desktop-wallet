@@ -25,7 +25,7 @@ import ledgerIpcCommands from '../../constants/ledgerIpcCommands.json';
 import { stringify } from '~/utils/JSONHelper';
 import { LedgerIpcMessage } from './ConcordiumLedgerClientMain';
 
-function unwrapLedgerIpcMessage(message: LedgerIpcMessage): Buffer {
+function unwrapLedgerIpcMessage(message: LedgerIpcMessage<Buffer>): Buffer {
     if (message.error) {
         throw message.error;
     }
@@ -52,20 +52,28 @@ export default class ConcordiumLedgerClient {
     }
 
     async getPublicKeySilent(path: number[]): Promise<Buffer> {
-        const result: LedgerIpcMessage = await window.ipcRenderer.invoke(
+        const result: LedgerIpcMessage<Buffer> = await window.ipcRenderer.invoke(
             ledgerIpcCommands.getPublicKeySilent,
             path
         );
         return unwrapLedgerIpcMessage(result);
     }
 
-    // TODO Support this later.
     async getSignedPublicKey(path: number[]): Promise<SignedPublicKey> {
-        const result = await window.ipcRenderer.invoke(
+        const result: LedgerIpcMessage<SignedPublicKey> = await window.ipcRenderer.invoke(
             ledgerIpcCommands.getSignedPublicKey,
             path
         );
-        return result;
+
+        if (result.error) {
+            throw result.error;
+        }
+
+        if (!result.result) {
+            throw new Error('Missing result');
+        }
+
+        return result.result;
     }
 
     async getIdCredSec(identity: number): Promise<Buffer> {
