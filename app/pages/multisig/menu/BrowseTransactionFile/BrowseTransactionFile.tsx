@@ -47,6 +47,16 @@ export default function BrowseTransactionFile() {
             type = 'UpdateInstruction';
         } else if (instanceOfAccountTransaction(transactionObject)) {
             type = 'AccountTransaction';
+
+            if (!transactionObject.nonce) {
+                setShowError({
+                    show: true,
+                    header: 'Missing nonce',
+                    content:
+                        'The chosen file contains an account transaction without a nonce value and it is therefore invalid.',
+                });
+                return;
+            }
         } else {
             setShowError({
                 show: true,
