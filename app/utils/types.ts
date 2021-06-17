@@ -1316,3 +1316,5 @@ export interface CreationKeys {
     idCredSec: string;
     publicKey: string;
 }
+
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & Pick<T, K>;
