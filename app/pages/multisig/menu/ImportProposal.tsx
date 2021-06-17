@@ -76,9 +76,12 @@ async function loadTransactionFile(
                 BigInt(accountNonce.nonce) + BigInt(index)
             ).toString();
         }
-        if (!transactionObject.cost) {
-            const cost = getTransactionEnergyCost(transactionObject, threshold);
-            transactionObject.cost = cost.toString();
+        if (!transactionObject.energyAmount) {
+            const energyAmount = getTransactionEnergyCost(
+                transactionObject,
+                threshold
+            );
+            transactionObject.energyAmount = energyAmount.toString();
         }
         if (!transactionObject.estimatedFee) {
             const estimatedFee = getTransactionCost(
