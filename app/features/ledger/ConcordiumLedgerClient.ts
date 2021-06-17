@@ -27,13 +27,11 @@ import { LedgerIpcMessage } from './ConcordiumLedgerClientMain';
 
 function unwrapLedgerIpcMessage(message: LedgerIpcMessage): Buffer {
     if (message.error) {
-        console.log(message.error);
         throw message.error;
     }
     if (!message.result) {
         throw new Error('Missing result');
     }
-    console.log(message.result);
     return Buffer.from(message.result);
 }
 
@@ -54,12 +52,10 @@ export default class ConcordiumLedgerClient {
     }
 
     async getPublicKeySilent(path: number[]): Promise<Buffer> {
-        console.log('Hello');
         const result: LedgerIpcMessage = await window.ipcRenderer.invoke(
             ledgerIpcCommands.getPublicKeySilent,
             path
         );
-        console.log('Error!');
         return unwrapLedgerIpcMessage(result);
     }
 
@@ -92,7 +88,6 @@ export default class ConcordiumLedgerClient {
         transaction: AccountTransaction,
         path: number[]
     ): Promise<Buffer> {
-        console.log('Go now!');
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signTransfer,
             stringify(transaction),

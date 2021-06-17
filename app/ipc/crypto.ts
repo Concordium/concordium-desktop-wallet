@@ -99,7 +99,7 @@ function encrypt(data: string, password: string): EncryptedData {
  * Decrypts the data using the metadata in the file that was given as input
  * and the provided password.
  */
-export function decrypt(
+function decrypt(
     { cipherText, metadata }: EncryptedData,
     password: string
 ): string {
@@ -131,6 +131,12 @@ export function decrypt(
     return data;
 }
 
+async function hashSha256(data: (Buffer | Uint8Array)[]) {
+    const hash = crypto.createHash('sha256');
+    data.forEach((input) => hash.update(input));
+    return hash.digest();
+}
+
 export default function initializeIpcHandlers(ipcMain: IpcMain) {
     ipcMain.handle(
         ipcCommands.encrypt,
@@ -147,6 +153,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
             } catch (e) {
                 return { error: e };
             }
+        }
+    );
+
+    ipcMain.handle(
+        ipcCommands.sha256,
+        async (_event, data: (Buffer | Uint8Array)[]) => {
+            return hashSha256(data);
         }
     );
 }

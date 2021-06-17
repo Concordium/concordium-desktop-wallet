@@ -1,6 +1,6 @@
 import { EncryptedData } from './types';
 import ipcCommands from '../constants/ipcCommands.json';
-import { DecryptionData, DecryptionResult } from '~/ipc/encryption';
+import { DecryptionData, DecryptionResult } from '~/ipc/crypto';
 
 /**
  * Encrypts the data using PBKDF2 to generate a key from the password, and

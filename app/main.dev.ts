@@ -11,22 +11,16 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, shell, BrowserWindow, dialog, ipcMain } from 'electron';
+import { app, shell, BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import fs from 'fs';
-import * as crypto from 'crypto';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
-import { setClientLocation, grpcCall } from './node/GRPCClient';
-import ConcordiumNodeClient from './node/ConcordiumNodeClient';
-import { ConsensusStatus } from './node/NodeApiTypes';
-import { JsonResponse } from './proto/concordium_p2p_rpc_pb';
-import { getDatabaseFilename } from './database/knexfile';
+
 import { subscribeLedger } from './ledgerObserver';
 import initializeIpcHandlers from './ipc/http';
 import initializeLedgerIpcHandlers from './ipc/ledger';
-import initializeEncryptionIpcHandlers from './ipc/encryption';
+import initializeCryptoIpcHandlers from './ipc/crypto';
 import initializeDatabaseGeneralIpcHandlers from './ipc/database/general';
 import initializeDatabaseAccountIpcHandlers from './ipc/database/accountDao';
 import initializeDatabaseAddressBookIpcHandlers from './ipc/database/addressBookDao';
@@ -37,6 +31,8 @@ import initializeDatabaseMultiSignatureTransactionIpcHandlers from './ipc/databa
 import initializeDatabaseSettingsIpcHandlers from './ipc/database/settingsDao';
 import initializeDatabaseTransactionsIpcHandlers from './ipc/database/transactionsDao';
 import initializeDatabaseWalletIpcHandlers from './ipc/database/walletDao';
+import initializeFilesIpcHandlers from './ipc/files';
+import initializeGrpcIpcHandlers from './ipc/grpc';
 
 export default class AppUpdater {
     constructor() {
@@ -156,11 +152,13 @@ const createWindow = async () => {
     new AppUpdater();
 };
 
-// TODO move to preload script as that is where the context isolated code will be as well.
+// Setup the IPC methods, so that the renderer threads
+// can access the exposed methods.
 initializeIpcHandlers(ipcMain);
 initializeLedgerIpcHandlers(ipcMain);
-initializeEncryptionIpcHandlers(ipcMain);
-
+initializeCryptoIpcHandlers(ipcMain);
+initializeFilesIpcHandlers(ipcMain);
+initializeGrpcIpcHandlers(ipcMain);
 initializeDatabaseGeneralIpcHandlers(ipcMain);
 initializeDatabaseAccountIpcHandlers(ipcMain);
 initializeDatabaseAddressBookIpcHandlers(ipcMain);
@@ -171,96 +169,6 @@ initializeDatabaseMultiSignatureTransactionIpcHandlers(ipcMain);
 initializeDatabaseSettingsIpcHandlers(ipcMain);
 initializeDatabaseTransactionsIpcHandlers(ipcMain);
 initializeDatabaseWalletIpcHandlers(ipcMain);
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-ipcMain.handle(ipcCommands.databaseExists, async (_event) => {
-    const databaseFilename = await getDatabaseFilename();
-    if (!fs.existsSync(databaseFilename)) {
-        return false;
-    }
-    const stats = fs.statSync(databaseFilename);
-    return stats.size > 0;
-});
-
-ipcMain.handle(
-    ipcCommands.sha256,
-    async (_event, data: (Buffer | Uint8Array)[]) => {
-        const hash = crypto.createHash('sha256');
-        data.forEach((input) => hash.update(input));
-        return hash.digest();
-    }
-);
-
-ipcMain.handle(
-    ipcCommands.saveFile,
-    (_event, filepath: string, data: string | Buffer) => {
-        fs.writeFile(filepath, data, (err) => {
-            if (err) {
-                return Promise.reject(new Error(`Unable to save file: ${err}`));
-            }
-            return Promise.resolve(true);
-        });
-    }
-);
-
-// Provides access to save file dialog from renderer processes.
-ipcMain.handle(ipcCommands.saveFileDialog, async (_event, opts) => {
-    return dialog.showSaveDialog(opts);
-});
-
-// Updates the location of the grpc endpoint.
-ipcMain.handle(
-    ipcCommands.grpcSetLocation,
-    async (_event, address: string, port: string) => {
-        return setClientLocation(address, port);
-    }
-);
-
-// Performs the given grpc command, with the given input;
-ipcMain.handle(
-    ipcCommands.grpcCall,
-    async (_event, command: string, input: Record<string, string>) => {
-        try {
-            const response = await grpcCall(command, input);
-            return { successful: true, response };
-        } catch (error) {
-            return { successful: false, error };
-        }
-    }
-);
-
-// Creates a standalone GRPC client for testing the connection
-// to a node. This is used to verify that when changing connection
-// that the new node is on the same blockchain as the wallet was previously connected to.
-ipcMain.handle(
-    ipcCommands.grpcNodeConsensusAndGlobal,
-    async (_event, address: string, port: string) => {
-        try {
-            const nodeClient = new ConcordiumNodeClient(
-                address,
-                Number.parseInt(port, 10)
-            );
-            const consensusStatusSerialized = await nodeClient.getConsensusStatus();
-            const consensusStatus: ConsensusStatus = JSON.parse(
-                JsonResponse.deserializeBinary(
-                    consensusStatusSerialized
-                ).getValue()
-            );
-            const globalSerialized = await nodeClient.getCryptographicParameters(
-                consensusStatus.lastFinalizedBlock
-            );
-            return {
-                successful: true,
-                response: {
-                    consensus: consensusStatusSerialized,
-                    global: globalSerialized,
-                },
-            };
-        } catch (error) {
-            return { successful: false, error };
-        }
-    }
-);
 
 enum PrintErrorTypes {
     Cancelled = 'cancelled',
@@ -298,10 +206,6 @@ ipcMain.handle(ipcCommands.openUrl, (_event, url: string) => {
     }
     shell.openExternal(url);
 });
-
-/**
- * Add event listeners...
- */
 
 app.on('window-all-closed', () => {
     // Respect the OSX convention of having the application in memory even
