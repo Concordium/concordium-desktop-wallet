@@ -8,6 +8,7 @@ import {
     Hex,
 } from '~/utils/types';
 import {
+    encodeWord64,
     putBase58Check,
     serializeVerifyKey,
     serializeYearMonth,
@@ -219,16 +220,16 @@ async function signCredentialDeployment(
     return signature;
 }
 
-// TODO Fix to support big ints and not just use Number directly.
 export async function signCredentialDeploymentOnNewAccount(
     transport: Transport,
     credentialDeployment: UnsignedCredentialDeploymentInformation,
     expiry: bigint,
     path: number[]
 ): Promise<Buffer> {
-    const expiryBuffer = Buffer.alloc(1 + 8);
+    let expiryBuffer = Buffer.alloc(1);
     expiryBuffer.writeUInt8(0, 0);
-    expiryBuffer.writeBigUInt64BE(Number(expiry), 1);
+    const serializedExpiry = encodeWord64(expiry);
+    expiryBuffer = Buffer.concat([expiryBuffer, serializedExpiry]);
     return signCredentialDeployment(
         transport,
         credentialDeployment,
@@ -245,7 +246,7 @@ export async function signCredentialDeploymentOnExistingAccount(
 ): Promise<Buffer> {
     const accountBuffer = Buffer.alloc(1 + 32);
     accountBuffer.writeUInt8(1, 0);
-    await putBase58Check(accountBuffer, 1, accountAddress);
+    putBase58Check(accountBuffer, 1, accountAddress);
     return signCredentialDeployment(
         transport,
         credentialDeployment,

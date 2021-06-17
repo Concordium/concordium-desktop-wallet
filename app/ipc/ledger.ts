@@ -102,7 +102,7 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ) => {
             return getLedgerClient().signCredentialDeploymentOnNewAccount(
                 credentialDeployment,
-                parse(expiry).expiry,
+                parse(expiry),
                 keypath
             );
         }
