@@ -2,10 +2,10 @@
 # Run the script with one command line argument determining the path to that file.
 # The expected format of that file is a UTF-8 csv file with:
 # one row for each transfer, columns separated by ';'
-# first column contains receiver address
-# second column contains amount of first release in GTU
+# The first column contains sender address, the second one the receiver address
+# The third column contains amount of first release in GTU
 # (as decimal with 6 digits after decimal dot and possibly using '’' as thousands separator)
-# second column contains total amount of remaining releases in GTU (formatted as second column)
+# The fourth column contains total amount of remaining releases in GTU (formatted as second column)
 # The release schedules are hard-coded in this script.
 #
 # Note: The script uses dateutil, which can be installed using "pip install python-dateutil"
@@ -33,14 +33,15 @@ with open(sys.argv[1], newline='', encoding='utf-8-sig') as csvfile:
 	for row in reader:
 		rowNumber += 1
 
-		receiver = row[0]
-		initialAmount = Decimal(row[1].replace(thousandsSep, '')) # remove thousands separator used in Excel
+		senderAddress = row[0]
+		receiverAddress = row[1]
+		initialAmount = Decimal(row[2].replace(thousandsSep, '')) # remove thousands separator used in Excel
 		initialAmount = int(initialAmount * 1000000) # convert from GTU to microGTU
-		remAmount = Decimal(row[2].replace(thousandsSep, ''))
+		remAmount = Decimal(row[3].replace(thousandsSep, ''))
 		remAmount = int(remAmount * 1000000)
 
 		proposal = {
-			"sender": "", # filled by desktop wallet
+			"sender": senderAddress,
 			"nonce": 0, # filled by desktop wallet
 			"energyAmount": "", # filled by desktop wallet
 			"estimatedFee": { # filled by desktop wallet
@@ -59,7 +60,7 @@ with open(sys.argv[1], newline='', encoding='utf-8-sig') as csvfile:
 			},
 			"transactionKind": 19,
 			"payload": {
-				"toAddress": receiver,
+				"toAddress": receiverAddress,
 				"schedule": [] # filled below
 			},
 			"signatures": {}
