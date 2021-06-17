@@ -154,15 +154,13 @@ function getScheduledTransferEnergy(
  *  Given the signatureAmount and a transaction returns
  * the energy cost of the transaction.
  */
-export async function getTransactionEnergyCost(
+export function getTransactionEnergyCost(
     transaction: AccountTransaction,
     signatureAmount = 1
-): Promise<bigint> {
-    const payloadSize = (
-        await serializeTransferPayload(
-            transaction.transactionKind,
-            transaction.payload
-        )
+): bigint {
+    const payloadSize = serializeTransferPayload(
+        transaction.transactionKind,
+        transaction.payload
     ).length;
     let transactionTypeCost;
     if (instanceOfScheduledTransfer(transaction)) {

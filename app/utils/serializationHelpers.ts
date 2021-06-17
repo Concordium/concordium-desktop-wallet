@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer/';
+import bs58check from 'bs58check';
 import ipcCommands from '../constants/ipcCommands.json';
 
 import {
@@ -9,29 +10,20 @@ import {
     ChosenAttributesKeys,
 } from './types';
 
-// TODO Fix base58 encodings here
 export function putBase58Check(
     array: Uint8Array,
     startIndex: number,
     base58Sstring: string
 ) {
-    if (!base58Sstring) {
-        return;
-    }
-    const decoded: Buffer = Buffer.alloc(2);
+    const decoded = bs58check.decode(base58Sstring);
     for (let i = 1; i < decoded.length; i += 1) {
         array[startIndex + i - 1] = decoded[i];
     }
 }
 
-// TODO Fix base58 encodings here
 export function base58ToBuffer(base58Sstring: string) {
-    if (!base58Sstring) {
-        return Buffer.alloc(1);
-    }
     // Remove the first check byte
-    const test = Buffer.alloc(51);
-    return test.slice(1);
+    return bs58check.decode(base58Sstring).slice(1);
 }
 
 type Indexable = Buffer | Uint8Array;

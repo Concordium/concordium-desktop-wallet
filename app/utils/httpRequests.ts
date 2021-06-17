@@ -1,30 +1,23 @@
-import type { IncomingMessage } from 'http';
 import { IncomingTransaction } from './types';
 import ipcCommands from '../constants/ipcCommands.json';
 
-/**
- * This performs a http get Request, returning a Promise on the response.
- * @param {string} urlString: the url at which to perform the getRequest
- * @param params: Additional URL search parameters to add to the request.
- */
-export async function getPromise(
-    urlString: string,
-    params: Record<string, string> = {}
-): Promise<IncomingMessage> {
-    return window.ipcRenderer.invoke(ipcCommands.httpGet, urlString, params);
+interface HttpResponse {
+    body: string;
+    statusCode: number;
+    location?: string;
 }
 
 /**
- * Given a http response, extract its body.
+ * Performs a HTTP get request using IPC to the main thread.
+ * @param urlString the url at which to perform the http get request
+ * @param params additional URL search parameters to add to the request
+ * @returns an HttpResponse containing the body, status code and the redirect location if the status code was 302
  */
-export function getResponseBody(response: IncomingMessage): Promise<string> {
-    return new Promise((resolve) => {
-        let data = '';
-        response.on('data', (chunk) => {
-            data += chunk;
-        });
-        response.on('end', () => resolve(data));
-    });
+export async function httpGet(
+    urlString: string,
+    params: Record<string, string> = {}
+): Promise<HttpResponse> {
+    return window.ipcRenderer.invoke(ipcCommands.httpGet, urlString, params);
 }
 
 interface GetTransactionsOutput {
@@ -60,20 +53,20 @@ export async function performIdObjectRequest(
             idObjectRequest,
         }),
     };
-    const response = await getPromise(url, parameters);
+
+    const response = await httpGet(url, parameters);
     if (response.statusCode === 302) {
-        const loc = response.headers.location;
-        if (!loc) {
-            throw new Error('Unexpected no location in Response');
+        const { location } = response;
+        if (!location) {
+            throw new Error('Missing error from redirect response');
         }
-        if (loc[0] === '/') {
+        if (location[0] === '/') {
             const urlObject = new URL(url);
-            return `https://${urlObject.hostname}${loc}`;
+            return `https://${urlObject.hostname}${location}`;
         }
-        return loc;
+        return location;
     }
-    const message = await getResponseBody(response);
-    throw new Error(`Request failed: ${message}`);
+    throw new Error(`Request failed: ${response.body}`);
 }
 
 /**
@@ -84,18 +77,15 @@ export async function sleep(time: number) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
+// TODO: Handle the service being unavailable better than keep spamming.
 /**
- * This function should poll the given location, until the location returns an IdObject
- * TODO: Handle the service being unavailable
+ * Polls the provided location until a valid IdObject is returned
  */
 export async function getIdObject(location: string) {
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        // eslint-disable-next-line no-await-in-loop
-        const response = await getPromise(location);
-        // eslint-disable-next-line no-await-in-loop
-        const bodyJSON = await getResponseBody(response);
-        const data = JSON.parse(bodyJSON);
+        const response = await httpGet(location);
+        const data = JSON.parse(response.body);
         switch (data.status) {
             case 'done':
                 return data.token;
@@ -104,9 +94,8 @@ export async function getIdObject(location: string) {
             case 'pending':
                 break;
             default:
-                throw new Error(`unexpected status: ${data.status}`);
+                throw new Error(`Unknown status: ${data.status}`);
         }
-        // eslint-disable-next-line no-await-in-loop
         await sleep(10000);
     }
 }

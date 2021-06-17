@@ -1,5 +1,5 @@
 /* eslint no-console: off */
-import type { Buffer } from 'buffer/';
+import { Buffer } from 'buffer/';
 import {
     AccountTransaction,
     BakerStakeThreshold,
@@ -22,54 +22,83 @@ import {
 import { AccountPathInput } from './Path';
 import { AppAndVersion } from './GetAppAndVersion';
 import ledgerIpcCommands from '../../constants/ledgerIpcCommands.json';
+import { stringify } from '~/utils/JSONHelper';
+import { LedgerIpcMessage } from './ConcordiumLedgerClientMain';
+
+function unwrapLedgerIpcMessage(message: LedgerIpcMessage): Buffer {
+    if (message.error) {
+        console.log(message.error);
+        throw message.error;
+    }
+    if (!message.result) {
+        throw new Error('Missing result');
+    }
+    console.log(message.result);
+    return Buffer.from(message.result);
+}
 
 /**
- * Concordium Ledger API.
+ * Concordium Ledger API that can be used, safely, from a renderer thread.
  *
  * @example
  * import ConcordiumLedgerClient from "..."
  * const client = new ConcordiumLedgerClient(transport);
  */
 export default class ConcordiumLedgerClient {
-    getPublicKey(path: number[]): Promise<Buffer> {
-        return window.ipcRenderer.invoke(ledgerIpcCommands.getPublicKey, path);
+    async getPublicKey(path: number[]): Promise<Buffer> {
+        const result = await window.ipcRenderer.invoke(
+            ledgerIpcCommands.getPublicKey,
+            path
+        );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    getPublicKeySilent(path: number[]): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+    async getPublicKeySilent(path: number[]): Promise<Buffer> {
+        console.log('Hello');
+        const result: LedgerIpcMessage = await window.ipcRenderer.invoke(
             ledgerIpcCommands.getPublicKeySilent,
             path
         );
+        console.log('Error!');
+        return unwrapLedgerIpcMessage(result);
     }
 
-    getSignedPublicKey(path: number[]): Promise<SignedPublicKey> {
-        console.log('Get signed key');
-        return window.ipcRenderer.invoke(
+    // TODO Support this later.
+    async getSignedPublicKey(path: number[]): Promise<SignedPublicKey> {
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.getSignedPublicKey,
             path
         );
+        return result;
     }
 
-    getIdCredSec(identity: number): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+    async getIdCredSec(identity: number): Promise<Buffer> {
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.getIdCredSec,
             identity
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    getPrfKey(identity: number): Promise<Buffer> {
-        return window.ipcRenderer.invoke(ledgerIpcCommands.getPrfKey, identity);
+    async getPrfKey(identity: number): Promise<Buffer> {
+        const result = await window.ipcRenderer.invoke(
+            ledgerIpcCommands.getPrfKey,
+            identity
+        );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signTransfer(
+    async signTransfer(
         transaction: AccountTransaction,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        console.log('Go now!');
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signTransfer,
-            transaction,
+            stringify(transaction),
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
     // TODO Fix this by sending messages back to the renderer thread instead.
@@ -86,188 +115,202 @@ export default class ConcordiumLedgerClient {
         throw new Error('Testing');
     }
 
-    signPublicInformationForIp(
+    async signPublicInformationForIp(
         publicInfoForIp: PublicInformationForIp,
         accountPathInput: AccountPathInput
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
-            ledgerIpcCommands.signTransfer,
+        const result = await window.ipcRenderer.invoke(
+            ledgerIpcCommands.signPublicInformationForIp,
             publicInfoForIp,
             accountPathInput
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signCredentialDeploymentOnExistingAccount(
+    async signCredentialDeploymentOnExistingAccount(
         credentialDeployment: UnsignedCredentialDeploymentInformation,
         address: string,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signCredentialDeploymentOnExistingAccount,
             credentialDeployment,
             address,
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signCredentialDeploymentOnNewAccount(
+    async signCredentialDeploymentOnNewAccount(
         credentialDeployment: UnsignedCredentialDeploymentInformation,
         expiry: bigint,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signCredentialDeploymentOnNewAccount,
             credentialDeployment,
-            expiry,
+            stringify(expiry),
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signMicroGtuPerEuro(
+    async signMicroGtuPerEuro(
         transaction: UpdateInstruction<ExchangeRate>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signMicroGtuPerEuro,
             transaction,
             serializedPayload,
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signEuroPerEnergy(
+    async signEuroPerEnergy(
         transaction: UpdateInstruction<ExchangeRate>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signEuroPerEnergy,
             transaction,
             serializedPayload,
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signTransactionFeeDistribution(
+    async signTransactionFeeDistribution(
         transaction: UpdateInstruction<TransactionFeeDistribution>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signTransactionFeeDistribution,
             transaction,
             serializedPayload,
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signFoundationAccount(
+    async signFoundationAccount(
         transaction: UpdateInstruction<FoundationAccount>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signFoundationAccount,
             transaction,
             serializedPayload,
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signMintDistribution(
+    async signMintDistribution(
         transaction: UpdateInstruction<MintDistribution>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signMintDistribution,
             transaction,
             serializedPayload,
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signProtocolUpdate(
+    async signProtocolUpdate(
         transaction: UpdateInstruction<ProtocolUpdate>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signProtocolUpdate,
             transaction,
             serializedPayload,
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signGasRewards(
+    async signGasRewards(
         transaction: UpdateInstruction<GasRewards>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signGasRewards,
             transaction,
             serializedPayload,
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signBakerStakeThreshold(
+    async signBakerStakeThreshold(
         transaction: UpdateInstruction<BakerStakeThreshold>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signBakerStakeThreshold,
             transaction,
             serializedPayload,
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signElectionDifficulty(
+    async signElectionDifficulty(
         transaction: UpdateInstruction<ElectionDifficulty>,
         serializedPayload: Buffer,
         path: number[]
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signElectionDifficulty,
             transaction,
             serializedPayload,
             path
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signHigherLevelKeysUpdate(
+    async signHigherLevelKeysUpdate(
         transaction: UpdateInstruction<HigherLevelKeyUpdate>,
         serializedPayload: Buffer,
         path: number[],
         INS: number
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signHigherLevelKeysUpdate,
             transaction,
             serializedPayload,
             path,
             INS
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
-    signAuthorizationKeysUpdate(
+    async signAuthorizationKeysUpdate(
         transaction: UpdateInstruction<AuthorizationKeysUpdate>,
         serializedPayload: Buffer,
         path: number[],
         INS: number
     ): Promise<Buffer> {
-        return window.ipcRenderer.invoke(
+        const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signAuthorizationKeysUpdate,
             transaction,
             serializedPayload,
             path,
             INS
         );
+        return unwrapLedgerIpcMessage(result);
     }
 
     getAppAndVersion(): Promise<AppAndVersion> {

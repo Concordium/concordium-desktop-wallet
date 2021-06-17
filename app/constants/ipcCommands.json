@@ -8,8 +8,6 @@
     "grpcCall": "GRPC_CALL",
     "grpcNodeConsensusAndGlobal": "GRPC_NODE_CONSENSUS_GLOBAL",
     "openUrl": "OPEN_URL",
-    "isValidBase58": "IS_VALID_BASE_58",
-    "decodeBase58": "DECODE_BASE_58",
     "createAxios": "CREATE_AXIOS",
     "httpGet": "HTTP_GET",
     "getTransactions": "WALLET_PROXY_GET_TRANSACTIONS",

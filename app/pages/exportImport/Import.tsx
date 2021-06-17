@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
+import { Buffer } from 'buffer/';
 import { decrypt } from '../../utils/encryption';
 import routes from '../../constants/routes.json';
 import InputModal from '../../components/InputModal';

@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { LocationDescriptorObject } from 'history';
-import AdmZip from 'adm-zip';
 import PlusIcon from '@resources/svg/plus.svg';
 import { Account, TransactionKindString } from '~/utils/types';
 import PageLayout from '~/components/PageLayout';
@@ -105,23 +104,26 @@ export default function AccountReport({ location }: Props) {
                     }
                 );
             }
-            const zip = new AdmZip();
-            for (let i = 0; i < accounts.length; i += 1) {
-                const account = accounts[i];
-                zip.addFile(
-                    `${account.name}.csv`,
-                    Buffer.from(
-                        // eslint-disable-next-line  no-await-in-loop
-                        await getAccountCSV(
-                            account,
-                            currentFilters,
-                            fromDate,
-                            toDate
-                        )
-                    )
-                );
-            }
-            return saveFile(zip.toBuffer(), {
+            // TODO Fix this to work using IPC. But it should probably also be streaming in the future.
+
+            // const zip = new AdmZip();
+            // for (let i = 0; i < accounts.length; i += 1) {
+            //     const account = accounts[i];
+            //     zip.addFile(
+            //         `${account.name}.csv`,
+            //         Buffer.from(
+            //             // eslint-disable-next-line  no-await-in-loop
+            //             await getAccountCSV(
+            //                 account,
+            //                 currentFilters,
+            //                 fromDate,
+            //                 toDate
+            //             )
+            //         )
+            //     );
+            // }
+
+            return saveFile(Buffer.alloc(1), {
                 title: 'Save Account Reports',
                 defaultPath: 'reports.zip',
                 filters: [{ name: 'zip', extensions: ['zip'] }],

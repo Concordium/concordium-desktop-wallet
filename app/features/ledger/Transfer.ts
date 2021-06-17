@@ -62,12 +62,12 @@ async function signSimpleTransfer(
     path: number[],
     transaction: SimpleTransfer
 ): Promise<Buffer> {
-    const payload = await serializeTransferPayload(
+    const payload = serializeTransferPayload(
         TransactionKindId.Simple_transfer,
         transaction.payload
     );
 
-    const header = await serializeTransactionHeader(
+    const header = serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -96,12 +96,12 @@ async function signTransferToEncrypted(
     path: number[],
     transaction: TransferToEncrypted
 ) {
-    const payload = await serializeTransferPayload(
+    const payload = serializeTransferPayload(
         TransactionKindId.Transfer_to_encrypted,
         transaction.payload
     );
 
-    const header = await serializeTransactionHeader(
+    const header = serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -134,12 +134,12 @@ async function signTransferToPublic(
         throw new Error('Unexpected missing proof');
     }
 
-    const payload = await serializeTransferPayload(
+    const payload = serializeTransferPayload(
         TransactionKindId.Transfer_to_public,
         transaction.payload
     );
 
-    const header = await serializeTransactionHeader(
+    const header = serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -287,12 +287,12 @@ async function signTransferWithSchedule(
     path: number[],
     transaction: ScheduledTransfer
 ): Promise<Buffer> {
-    const payload = await serializeTransferPayload(
+    const payload = serializeTransferPayload(
         TransactionKindId.Transfer_with_schedule,
         transaction.payload
     );
 
-    const header = await serializeTransactionHeader(
+    const header = serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -303,7 +303,7 @@ async function signTransferWithSchedule(
     const data = Buffer.concat([
         pathAsBuffer(path),
         header,
-        await serializeScheduledTransferPayloadBase(transaction.payload),
+        serializeScheduledTransferPayloadBase(transaction.payload),
     ]);
 
     let p1 = 0x00;
@@ -343,7 +343,7 @@ async function signAddBaker(
 ): Promise<Buffer> {
     const payload = serializeAddBaker(transaction.payload);
 
-    const header = await serializeTransactionHeader(
+    const header = serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -385,7 +385,7 @@ async function signUpdateBakerKeys(
 ): Promise<Buffer> {
     const payload = serializeUpdateBakerKeys(transaction.payload);
 
-    const header = await serializeTransactionHeader(
+    const header = serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -426,7 +426,7 @@ async function signRemoveBaker(
 ): Promise<Buffer> {
     const payload = serializeRemoveBaker();
 
-    const header = await serializeTransactionHeader(
+    const header = serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -461,7 +461,7 @@ async function signUpdateBakerStake(
 ): Promise<Buffer> {
     const payload = serializeUpdateBakerStake(transaction.payload);
 
-    const header = await serializeTransactionHeader(
+    const header = serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -492,7 +492,7 @@ async function signUpdateBakerRestakeEarnings(
 ): Promise<Buffer> {
     const payload = serializeUpdateBakerRestakeEarnings(transaction.payload);
 
-    const header = await serializeTransactionHeader(
+    const header = serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,

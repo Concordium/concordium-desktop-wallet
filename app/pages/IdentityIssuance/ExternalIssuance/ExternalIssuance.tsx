@@ -5,23 +5,18 @@ import { Redirect, useLocation } from 'react-router';
 import { addPendingIdentity } from '~/features/IdentitySlice';
 import { addPendingAccount } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
-import {
-    getPromise,
-    getResponseBody,
-    performIdObjectRequest,
-} from '~/utils/httpRequests';
+import { performIdObjectRequest } from '~/utils/httpRequests';
 import { IdentityProvider, Dispatch, SignedIdRequest } from '~/utils/types';
 import { confirmIdentityAndInitialAccount } from '~/utils/IdentityStatusPoller';
 import Loading from '~/cross-app-components/Loading';
-
+import ipcCommands from '../../../constants/ipcCommands.json';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
 
 const redirectUri = 'ConcordiumRedirectToken';
 
-async function getBody(url: string) {
-    const response = await getPromise(url);
-    return getResponseBody(response);
+async function getBody(url: string): Promise<string> {
+    return window.ipcRenderer.invoke(ipcCommands.httpGet, url);
 }
 
 /**
@@ -87,7 +82,8 @@ async function generateIdentity(
             randomness,
             walletId
         );
-        await addPendingAccount(dispatch, accountName, identityId, true); // TODO: can we add the address already here?
+        // TODO: Can we add the address already here?
+        await addPendingAccount(dispatch, accountName, identityId, true);
     } catch (e) {
         onError(`Failed to create identity due to ${e}`);
         // Rethrow this to avoid redirection;
