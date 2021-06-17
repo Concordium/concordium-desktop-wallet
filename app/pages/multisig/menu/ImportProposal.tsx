@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { parse } from '~/utils/JSONHelper';
 import {
-    Dispatch,
+    Fraction,
+    MultiSignatureTransaction,
     instanceOfAccountTransaction,
     instanceOfUpdateInstruction,
     MultiSignatureTransactionStatus,
@@ -15,18 +16,28 @@ import { FileInputValue } from '~/components/Form/FileInput/FileInput';
 import styles from './BrowseTransactionFile/BrowseTransactionFile.module.scss';
 import { fileListToFileArray } from '~/components/Form/FileInput/util';
 import createMultiSignatureTransaction from '~/utils/MultiSignatureTransactionHelper';
-import { addProposal } from '~/features/MultiSignatureSlice';
+import { loadProposals } from '~/features/MultiSignatureSlice';
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { getAccount } from '~/database/AccountDao';
 import { getNextAccountNonce } from '~/node/nodeRequests';
+import { saveMultipleFiles } from '~/utils/FileHelper';
+import findHandler from '~/utils/transactionHandlers/HandlerFinder';
+import { TransactionExportType } from '~/utils/transactionTypes';
+import getTransactionCost, {
+    getTransactionEnergyCost,
+} from '~/utils/transactionCosts';
+import Loading from '~/cross-app-components/Loading';
+import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 
 async function loadTransactionFile(
-    file: Buffer,
+    file: File,
     index: number,
     fileName: string,
-    dispatch: Dispatch
-) {
-    const fileString = file.toString('utf-8');
+    exchangeRate: Fraction
+): Promise<[string, Partial<MultiSignatureTransaction>] | ModalErrorInput> {
+    const ab = await file.arrayBuffer();
+    const b = Buffer.from(ab);
+    const fileString = b.toString('utf-8');
     let transactionObject;
     try {
         transactionObject = parse(fileString);
@@ -65,6 +76,18 @@ async function loadTransactionFile(
                 BigInt(accountNonce.nonce) + BigInt(index)
             ).toString();
         }
+        if (!transactionObject.cost) {
+            const cost = getTransactionEnergyCost(transactionObject, threshold);
+            transactionObject.cost = cost.toString();
+        }
+        if (!transactionObject.estimatedFee) {
+            const estimatedFee = getTransactionCost(
+                transactionObject,
+                exchangeRate,
+                threshold
+            );
+            transactionObject.estimatedFee = estimatedFee;
+        }
     } else {
         return {
             show: true,
@@ -79,15 +102,17 @@ async function loadTransactionFile(
         MultiSignatureTransactionStatus.Open
     );
 
-    // Save to database and use the assigned id to update the local object.
-    const entryId = (await insert(proposal))[0];
-    proposal.id = entryId;
+    const handler = findHandler(transactionObject);
+    const exportName = handler.getFileNameForExport(
+        transactionObject,
+        TransactionExportType.Proposal
+    );
 
-    // Save to redux.
+    return [exportName, proposal];
+}
 
-    dispatch(addProposal(proposal));
-
-    return undefined;
+interface Props {
+    exchangeRate: Fraction;
 }
 
 /**
@@ -95,37 +120,51 @@ async function loadTransactionFile(
  * be dropped to import the proposal. A button can also be used
  * over the drag and drop field.
  */
-export default function ImportProposal() {
+function ImportProposal({ exchangeRate }: Props) {
     const [showError, setShowError] = useState<ModalErrorInput>({
         show: false,
     });
     const dispatch = useDispatch();
 
     async function handleFiles(files: File[]) {
+        const proposals: [string, Partial<MultiSignatureTransaction>][] = [];
         let index = 0;
-        let error;
+        let result;
         for (const file of files) {
-            const ab = await file.arrayBuffer();
-            const b = Buffer.from(ab);
-            error = await loadTransactionFile(b, index, file.name, dispatch);
+            result = await loadTransactionFile(
+                file,
+                index,
+                file.name,
+                exchangeRate
+            );
 
-            if (!error) {
-                index += 1;
-            } else {
+            if ('show' in result) {
+                result.content += ` (${index} files were succesfully processed and their proposals were added)`;
+                setShowError(result);
                 break;
+            } else {
+                index += 1;
+                proposals.push(result);
             }
         }
 
-        if (error) {
-            error.content += ` (${index}  files were succesfully processed and their proposals were added)`;
-            setShowError(error);
-        } else {
-            setShowError({
-                show: true,
-                header: 'Importing Completed',
-                content: `All files have been processed and ${index} proposals have been added.`,
-            });
+        for (const [, proposal] of proposals) {
+            // Save to database and use the assigned id to update the local object.
+            const entryId = (await insert(proposal))[0];
+            proposal.id = entryId;
         }
+
+        loadProposals(dispatch);
+
+        await saveMultipleFiles(
+            proposals.map(([name, prop]) => [name, prop.transaction || ''])
+        );
+
+        setShowError({
+            show: true,
+            header: 'Importing Completed',
+            content: `All files have been processed and ${index} proposals have been added.`,
+        });
     }
 
     const [files, setFiles] = useState<FileInputValue>(null);
@@ -159,3 +198,9 @@ export default function ImportProposal() {
         </>
     );
 }
+
+const loadingComponent = () => (
+    <Loading text="Fetching information from the node" />
+);
+
+export default ensureExchangeRate(ImportProposal, loadingComponent);
