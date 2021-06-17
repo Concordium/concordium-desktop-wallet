@@ -42,18 +42,9 @@ with open(sys.argv[1], newline='', encoding='utf-8-sig') as csvfile:
 
 		proposal = {
 			"sender": senderAddress,
-			"nonce": 0, # filled by desktop wallet
+			"nonce": "", # filled by desktop wallet
 			"energyAmount": "", # filled by desktop wallet
-			"estimatedFee": { # filled by desktop wallet
-				"numerator": {
-					"@type": "bigint",
-					"value": ""
-				},
-				"denominator": {
-					"@type": "bigint",
-					"value": ""
-				}
-			},
+			"estimatedFee": "", # filled by desktop wallet,
 			"expiry": {
 				"@type": "bigint",
 				"value": int(expiry.timestamp())
