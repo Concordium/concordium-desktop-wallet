@@ -183,10 +183,6 @@ initializeIpcHandlers(ipcMain);
 initializeLedgerIpcHandlers(ipcMain);
 initializeEncryptionIpcHandlers(ipcMain);
 
-ipcMain.handle('toBase64', (_event, arrayBuffer: ArrayBuffer) => {
-    return Buffer.from(arrayBuffer).toString('base64');
-});
-
 ipcMain.handle(
     ipcCommands.database.rekeyDatabase,
     async (_event, oldPassword: string, newPassword: string) => {

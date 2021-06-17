@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer/';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '~/features/ledger/Path';
 import ProtocolUpdateView from '~/pages/multisig/updates/Protocol/ProtocolUpdateView';
@@ -53,10 +54,7 @@ export default class ProtocolUpdateHandler
             throw new Error('No auxiliary data file in update transaction');
         }
         const ab = await file.arrayBuffer();
-        const specificationAuxiliaryData = await window.ipcRenderer.invoke(
-            'toBase64',
-            ab
-        );
+        const specificationAuxiliaryData = Buffer.from(ab).toString('base64');
 
         const protocolUpdate: ProtocolUpdate = {
             ...fields,
