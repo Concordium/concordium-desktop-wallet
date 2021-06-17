@@ -145,7 +145,9 @@ export function serializeCredentialDeploymentInformation(
             serializeVerifyKey
         )
     );
-    buffers.push(Uint8Array.of(credential.credentialPublicKeys.threshold));
+    buffers.push(
+        Buffer.from(Uint8Array.of(credential.credentialPublicKeys.threshold))
+    );
     buffers.push(Buffer.from(credential.credId, 'hex'));
     buffers.push(encodeWord32(credential.ipIdentity));
     buffers.push(putInt8(credential.revocationThreshold));

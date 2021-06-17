@@ -28,6 +28,7 @@ export default async function saveFile(
             new Error('No file path was selected by the user.')
         );
     }
+
     return window.ipcRenderer.invoke(
         saveFileIpc,
         saveFileDialog.filePath,

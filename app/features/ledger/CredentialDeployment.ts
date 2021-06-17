@@ -41,7 +41,7 @@ export async function signCredentialValues(
         const index = keyIndices[i];
         const verificationKey = publicKeys.keys[index];
         data = Buffer.concat([
-            Uint8Array.of(index),
+            Buffer.from(Uint8Array.of(index)),
             serializeVerifyKey(verificationKey),
         ]);
 
@@ -57,13 +57,15 @@ export async function signCredentialValues(
         onVerificationKeysConfirmed();
     }
 
-    const signatureThreshold = Uint8Array.of(publicKeys.threshold);
+    const signatureThreshold = Buffer.from(Uint8Array.of(publicKeys.threshold));
     const credId = Buffer.from(credentialDeployment.credId, 'hex');
 
     const identityProviderIdentity = Buffer.alloc(4);
     identityProviderIdentity.writeUInt32BE(credentialDeployment.ipIdentity, 0);
 
-    const arThreshold = Uint8Array.of(credentialDeployment.revocationThreshold);
+    const arThreshold = Buffer.from(
+        Uint8Array.of(credentialDeployment.revocationThreshold)
+    );
     const arListLength = Object.entries(credentialDeployment.arData).length;
     const arListLengthAsBytes = Buffer.alloc(2);
     arListLengthAsBytes.writeUInt16BE(arListLength, 0);

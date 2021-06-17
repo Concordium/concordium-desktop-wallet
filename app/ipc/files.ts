@@ -29,8 +29,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
 
     ipcMain.handle(
         ipcCommands.saveFile,
-        (_event, filepath: string, data: string | Buffer) => {
-            return saveFile(filepath, data);
+        async (_event, filepath: string, data: string | Buffer) => {
+            try {
+                await saveFile(filepath, data);
+                return true;
+            } catch {
+                return false;
+            }
         }
     );
 

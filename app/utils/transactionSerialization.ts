@@ -232,7 +232,7 @@ export function serializeAddBakerProofsStakeRestake(payload: AddBakerPayload) {
 
 export function serializeAddBaker(payload: AddBakerPayload) {
     return Buffer.concat([
-        Uint8Array.of(TransactionKind.Add_baker),
+        Buffer.from(Uint8Array.of(TransactionKind.Add_baker)),
         serializeBakerVerifyKeys(payload),
         serializeAddBakerProofsStakeRestake(payload),
     ]);
@@ -240,7 +240,7 @@ export function serializeAddBaker(payload: AddBakerPayload) {
 
 export function serializeUpdateBakerKeys(payload: UpdateBakerKeysPayload) {
     return Buffer.concat([
-        Uint8Array.of(TransactionKind.Update_baker_keys),
+        Buffer.from(Uint8Array.of(TransactionKind.Update_baker_keys)),
         serializeBakerVerifyKeys(payload),
         serializeBakerKeyProofs(payload),
     ]);
@@ -252,7 +252,7 @@ export function serializeRemoveBaker() {
 
 export function serializeUpdateBakerStake(payload: UpdateBakerStakePayload) {
     return Buffer.concat([
-        Uint8Array.of(TransactionKind.Update_baker_stake),
+        Buffer.from(Uint8Array.of(TransactionKind.Update_baker_stake)),
         encodeWord64(BigInt(payload.stake)),
     ]);
 }
@@ -261,7 +261,9 @@ export function serializeUpdateBakerRestakeEarnings(
     payload: UpdateBakerRestakeEarningsPayload
 ) {
     return Buffer.concat([
-        Uint8Array.of(TransactionKind.Update_baker_restake_earnings),
+        Buffer.from(
+            Uint8Array.of(TransactionKind.Update_baker_restake_earnings)
+        ),
         serializeBoolean(payload.restakeEarnings),
     ]);
 }
@@ -329,15 +331,15 @@ function serializeSignature(signatures: TransactionAccountSignature) {
     return serializeMap(signatures, putInt8, putInt8, putCredentialSignatures);
 }
 
-async function serializeUnversionedTransaction(
+function serializeUnversionedTransaction(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
 ) {
-    const payload = await serializeTransferPayload(
+    const payload = serializeTransferPayload(
         transaction.transactionKind,
         transaction.payload
     );
-    const header = await serializeTransactionHeader(
+    const header = serializeTransactionHeader(
         transaction.sender,
         transaction.nonce,
         transaction.energyAmount,
@@ -360,10 +362,7 @@ export async function serializeTransaction(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
 ) {
-    const unversioned = await serializeUnversionedTransaction(
-        transaction,
-        signature
-    );
+    const unversioned = serializeUnversionedTransaction(transaction, signature);
     const serialized = new Uint8Array(1 + unversioned.length);
     serialized[0] = 0; // Version number
     put(serialized, 1, unversioned);
@@ -378,10 +377,7 @@ export async function getAccountTransactionHash(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
 ): Promise<Buffer> {
-    const serialized = await serializeUnversionedTransaction(
-        transaction,
-        signature
-    );
+    const serialized = serializeUnversionedTransaction(transaction, signature);
     return hashSha256(serialized);
 }
 

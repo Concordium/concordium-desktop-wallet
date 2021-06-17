@@ -20,7 +20,7 @@ export default async function signPublicInformationForIp(
         pathAsBuffer(path),
         idCredPubBytes,
         regId,
-        Uint8Array.of(verificationKeysListLength),
+        Buffer.from(Uint8Array.of(verificationKeysListLength)),
     ]);
     let p1 = 0x00;
     const p2 = 0x00;
@@ -37,7 +37,7 @@ export default async function signPublicInformationForIp(
         const verificationKey = publicInfoForIp.publicKeys.keys[index];
 
         const keyData = Buffer.concat([
-            Uint8Array.of(index),
+            Buffer.from(Uint8Array.of(index)),
             serializeVerifyKey(verificationKey),
         ]);
 
