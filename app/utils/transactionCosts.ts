@@ -193,16 +193,14 @@ export function getTransactionKindEnergy(
     );
 }
 
-export async function getUpdateAccountCredentialEnergy(
+export function getUpdateAccountCredentialEnergy(
     payload: UpdateAccountCredentialsPayload,
     currentCredentialAmount: number,
     signatureAmount = 1
 ) {
-    const payloadSize = (
-        await serializeTransferPayload(
-            TransactionKindId.Update_credentials,
-            payload
-        )
+    const payloadSize = serializeTransferPayload(
+        TransactionKindId.Update_credentials,
+        payload
     ).length;
 
     const newCredentialAmount = BigInt(payload.addedCredentials.length);
@@ -253,7 +251,7 @@ export default async function getTransactionCost(
     energyToMicroGtu: Fraction,
     signatureAmount = 1
 ): Promise<Fraction> {
-    const energy = await getTransactionEnergyCost(transaction, signatureAmount);
+    const energy = getTransactionEnergyCost(transaction, signatureAmount);
     return energyToCost(energy, energyToMicroGtu);
 }
 
@@ -280,7 +278,7 @@ export async function getUpdateCredentialsCost(
     currentCredentialAmount: number,
     signatureAmount = 1
 ): Promise<Fraction> {
-    const energy = await getUpdateAccountCredentialEnergy(
+    const energy = getUpdateAccountCredentialEnergy(
         payload,
         currentCredentialAmount,
         signatureAmount

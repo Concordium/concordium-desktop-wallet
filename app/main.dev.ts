@@ -104,16 +104,6 @@ const createWindow = async () => {
                   },
     });
 
-    printWindow = new BrowserWindow({
-        parent: mainWindow,
-        modal: false,
-        show: false,
-        webPreferences: {
-            nodeIntegration: false,
-            devTools: false,
-        },
-    });
-
     if (process.env.NODE_ENV === 'production') {
         mainWindow.loadURL(`file://${__dirname}/app.html`);
     } else {
@@ -147,6 +137,16 @@ const createWindow = async () => {
 
     mainWindow.setMenuBarVisibility(false);
 
+    printWindow = new BrowserWindow({
+        parent: mainWindow,
+        modal: false,
+        show: false,
+        webPreferences: {
+            nodeIntegration: false,
+            devTools: false,
+        },
+    });
+
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line
     new AppUpdater();
@@ -176,8 +176,7 @@ enum PrintErrorTypes {
     NoPrinters = 'no valid printers available',
 }
 
-// Prints the given body.
-ipcMain.handle(ipcCommands.print, (_event, body) => {
+async function print(body: string) {
     return new Promise<string | void>((resolve, reject) => {
         if (!printWindow) {
             reject(new Error('Internal error: Unable to print'));
@@ -198,6 +197,11 @@ ipcMain.handle(ipcCommands.print, (_event, body) => {
             });
         }
     });
+}
+
+// Prints the given body.
+ipcMain.handle(ipcCommands.print, async (_event, body) => {
+    return print(body);
 });
 
 ipcMain.handle(ipcCommands.openUrl, (_event, url: string) => {

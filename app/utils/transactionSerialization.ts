@@ -358,7 +358,7 @@ function serializeUnversionedTransaction(
     return serialized;
 }
 
-export async function serializeTransaction(
+export function serializeTransaction(
     transaction: AccountTransaction,
     signature: TransactionAccountSignature
 ) {

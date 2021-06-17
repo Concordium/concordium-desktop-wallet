@@ -104,6 +104,7 @@ export async function createIdentityRequestObjectLedger(
         idCredSec: keys.idCredSec,
         prfKey: keys.prfKey,
     });
+
     const pubInfoForIp: PublicInformationForIp = JSON.parse(pubInfoForIpString);
 
     const path = {
