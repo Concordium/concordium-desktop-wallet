@@ -3,6 +3,7 @@
     "print": "PRINT",
     "openFileDialog": "OPEN_FILE_DIALOG",
     "saveFileDialog": "SAVE_FILE_DIALOG",
+    "saveZipFileDialog": "SAVE_ZIP_FILE_DIALOG",
     "saveFile": "SAVE_FILE",
     "grpcSetLocation": "GRPC_SET_LOCATION",
     "grpcCall": "GRPC_CALL",

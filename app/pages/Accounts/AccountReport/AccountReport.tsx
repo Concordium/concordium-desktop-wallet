@@ -21,6 +21,8 @@ import saveFile from '~/utils/FileHelper';
 import { FilterOption, filterKind, getAccountCSV } from './util';
 
 import styles from './AccountReport.module.scss';
+import { SaveFileData } from '~/ipc/files';
+import ipcCommands from '~/constants/ipcCommands.json';
 
 const transactionTypeFilters: FilterOption[] = [
     filterKind('Simple Transfers', TransactionKindString.Transfer),
@@ -104,30 +106,27 @@ export default function AccountReport({ location }: Props) {
                     }
                 );
             }
-            // TODO Fix this to work using IPC. But it should probably also be streaming in the future.
 
-            // const zip = new AdmZip();
-            // for (let i = 0; i < accounts.length; i += 1) {
-            //     const account = accounts[i];
-            //     zip.addFile(
-            //         `${account.name}.csv`,
-            //         Buffer.from(
-            //             // eslint-disable-next-line  no-await-in-loop
-            //             await getAccountCSV(
-            //                 account,
-            //                 currentFilters,
-            //                 fromDate,
-            //                 toDate
-            //             )
-            //         )
-            //     );
-            // }
+            const filesToZip: SaveFileData[] = [];
+            for (let i = 0; i < accounts.length; i += 1) {
+                const account = accounts[i];
+                const data = await getAccountCSV(
+                    account,
+                    currentFilters,
+                    fromDate,
+                    toDate
+                );
+                filesToZip.push({
+                    filename: `${account.name}.csv`,
+                    data: Buffer.from(data),
+                });
+            }
 
-            return saveFile(Buffer.alloc(1), {
-                title: 'Save Account Reports',
-                defaultPath: 'reports.zip',
-                filters: [{ name: 'zip', extensions: ['zip'] }],
-            });
+            // Let the main thread zip stuff
+            return window.ipcRenderer.invoke(
+                ipcCommands.saveZipFileDialog,
+                filesToZip
+            );
         } catch (e) {
             setModalOpen(true);
             return Promise.resolve(false);

@@ -1,3 +1,4 @@
+import AdmZip from 'adm-zip';
 import { IpcMain, dialog } from 'electron';
 import fs from 'fs';
 import ipcCommands from '~/constants/ipcCommands.json';
@@ -19,6 +20,37 @@ async function saveFile(filepath: string, data: string | Buffer) {
         }
         return Promise.resolve(true);
     });
+}
+
+export interface SaveFileData {
+    filename: string;
+    data: Buffer;
+}
+
+async function saveZipFile(files: SaveFileData[]) {
+    const zip = new AdmZip();
+    for (const file of files) {
+        zip.addFile(file.filename, file.data);
+    }
+
+    const opts = {
+        title: 'Save Account Reports',
+        defaultPath: 'reports.zip',
+        filters: [{ name: 'zip', extensions: ['zip'] }],
+    };
+
+    const saveFileDialog = await dialog.showSaveDialog(opts);
+    if (saveFileDialog.canceled) {
+        return false;
+    }
+
+    if (!saveFileDialog.filePath) {
+        return Promise.reject(
+            new Error('No file path was selected by the user.')
+        );
+    }
+
+    return saveFile(saveFileDialog.filePath, zip.toBuffer());
 }
 
 export default function initializeIpcHandlers(ipcMain: IpcMain) {
@@ -43,4 +75,11 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
     ipcMain.handle(ipcCommands.saveFileDialog, async (_event, opts) => {
         return dialog.showSaveDialog(opts);
     });
+
+    ipcMain.handle(
+        ipcCommands.saveZipFileDialog,
+        async (_event, files: SaveFileData[]) => {
+            return saveZipFile(files);
+        }
+    );
 }
