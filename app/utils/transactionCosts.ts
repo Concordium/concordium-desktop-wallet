@@ -246,11 +246,11 @@ export function getTransactionKindCost(
  *  Given the signatureAmount and a transaction returns
  * the estimated MicroGTU cost of the transaction.
  */
-export default async function getTransactionCost(
+export default function getTransactionCost(
     transaction: AccountTransaction,
     energyToMicroGtu: Fraction,
     signatureAmount = 1
-): Promise<Fraction> {
+): Fraction {
     const energy = getTransactionEnergyCost(transaction, signatureAmount);
     return energyToCost(energy, energyToMicroGtu);
 }
@@ -272,12 +272,12 @@ export function scheduledTransferCost(
     };
 }
 
-export async function getUpdateCredentialsCost(
+export function getUpdateCredentialsCost(
     energyToMicroGtu: Fraction,
     payload: UpdateAccountCredentialsPayload,
     currentCredentialAmount: number,
     signatureAmount = 1
-): Promise<Fraction> {
+): Fraction {
     const energy = getUpdateAccountCredentialEnergy(
         payload,
         currentCredentialAmount,

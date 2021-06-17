@@ -330,17 +330,14 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                 threshold: newThreshold || 1,
             };
 
-            getUpdateCredentialsCost(
-                exchangeRate,
-                payload,
-                currentCredentials.length,
-                account.signatureThreshold
-            )
-                .then((result) => {
-                    setFee(result);
-                    return true;
-                })
-                .catch(() => {});
+            setFee(
+                getUpdateCredentialsCost(
+                    exchangeRate,
+                    payload,
+                    currentCredentials.length,
+                    account.signatureThreshold
+                )
+            );
         } else {
             setFee(undefined);
         }
