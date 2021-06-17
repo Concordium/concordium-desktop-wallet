@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
 import { parse } from '~/utils/JSONHelper';
 import {
@@ -27,6 +28,7 @@ import getTransactionCost, {
     getTransactionEnergyCost,
 } from '~/utils/transactionCosts';
 import Loading from '~/cross-app-components/Loading';
+import Card from '~/cross-app-components/Card';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 
 async function loadTransactionFile(
@@ -203,7 +205,9 @@ function ImportProposal({ exchangeRate }: Props) {
 }
 
 const loadingComponent = () => (
-    <Loading text="Fetching information from the node" />
+    <Card className={clsx(styles.input, 'relative')}>
+        <Loading text="Fetching information from the node" />
+    </Card>
 );
 
 export default ensureExchangeRate(ImportProposal, loadingComponent);
