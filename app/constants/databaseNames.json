@@ -2,6 +2,7 @@
     "accountsTable": "accounts",
     "addressBookTable": "addressBook",
     "credentialsTable": "credentials",
+    "externalCredentialsTable": "external_credentials",
     "genesisTable": "genesis",
     "globalTable": "global",
     "identitiesTable": "identities",
