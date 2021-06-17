@@ -44,7 +44,7 @@ export default function MultiSignaturePage() {
                     to={routes.MULTISIGTRANSACTIONS_IMPORT_PROPOSAL}
                     className={styles.link}
                 >
-                    Import a proposal
+                    Import proposals
                 </ButtonNavLink>
                 <ButtonNavLink
                     to={routes.MULTISIGTRANSACTIONS_EXPORT_KEY}
