@@ -7,7 +7,7 @@ export interface Genesis {
 }
 
 export interface ExternalCredential {
-    address: string;
+    accountAddress: string;
     credId: string;
     note: string;
 }

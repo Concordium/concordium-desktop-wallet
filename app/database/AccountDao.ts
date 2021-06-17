@@ -1,3 +1,4 @@
+import { Knex } from 'knex';
 import { Account } from '../utils/types';
 import { knex } from './knex';
 import {
@@ -15,12 +16,8 @@ function convertBooleans(accounts: Account[]) {
     });
 }
 
-/**
- * Returns all stored accounts
- *  - Attaches the identityName unto the account object.
- */
-export async function getAllAccounts(): Promise<Account[]> {
-    const accounts = await (await knex())
+async function selectAccounts<T>() {
+    return (await knex())
         .table(accountsTable)
         .join(
             identitiesTable,
@@ -32,27 +29,25 @@ export async function getAllAccounts(): Promise<Account[]> {
             `${accountsTable}.*`,
             `${identitiesTable}.name as identityName`,
             `${identitiesTable}.identityNumber as identityNumber`
-        );
+        ) as Promise<T>;
+}
+
+/**
+ * Returns all stored accounts
+ *  - Attaches the identityName unto the account object.
+ */
+export async function getAllAccounts(): Promise<Account[]> {
+    const accounts: Account[] = await selectAccounts();
+
     return convertBooleans(accounts);
 }
 
 export async function getAccount(
     address: string
 ): Promise<Account | undefined> {
-    const accounts = await (await knex())
-        .table(accountsTable)
-        .join(
-            identitiesTable,
-            `${accountsTable}.identityId`,
-            '=',
-            `${identitiesTable}.id`
-        )
-        .where({ address })
-        .select(
-            `${accountsTable}.*`,
-            `${identitiesTable}.name as identityName`,
-            `${identitiesTable}.identityNumber as identityNumber`
-        );
+    const accounts: Account[] = await (await selectAccounts<Knex>()).where({
+        address,
+    });
 
     return convertBooleans(accounts)[0];
 }

@@ -7,7 +7,7 @@ import {
 export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable(externalCredentialsTable, (table) => {
         table
-            .string('address')
+            .string('accountAddress')
             .references('address')
             .inTable(accountsTable)
             .notNullable()

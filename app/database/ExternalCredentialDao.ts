@@ -13,3 +13,7 @@ export async function upsert(
         .onConflict('credId')
         .merge();
 }
+
+export async function getAll(): Promise<ExternalCredential[]> {
+    return (await knex()).table(externalCredentialsTable).select();
+}
