@@ -31,7 +31,7 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 
 async function loadTransactionFile(
     file: File,
-    index: number,
+    indexRecord: Record<string, number>,
     fileName: string,
     exchangeRate: Fraction
 ): Promise<[string, Partial<MultiSignatureTransaction>] | ModalErrorInput> {
@@ -72,6 +72,8 @@ async function loadTransactionFile(
 
         if (!transactionObject.nonce) {
             const accountNonce = await getNextAccountNonce(address);
+            const index = indexRecord[address] || 0;
+            indexRecord[address] = index + 1;
             transactionObject.nonce = (
                 BigInt(accountNonce.nonce) + BigInt(index)
             ).toString();
@@ -131,7 +133,7 @@ function ImportProposal({ exchangeRate }: Props) {
 
     async function handleFiles(files: File[]) {
         const proposals: [string, Partial<MultiSignatureTransaction>][] = [];
-        let index = 0;
+        const index: Record<string, number> = {};
         let result;
         for (const file of files) {
             result = await loadTransactionFile(
@@ -142,11 +144,9 @@ function ImportProposal({ exchangeRate }: Props) {
             );
 
             if ('show' in result) {
-                result.content += ` (${index} files were succesfully processed and their proposals were added)`;
                 setShowError(result);
                 break;
             } else {
-                index += 1;
                 proposals.push(result);
             }
         }
@@ -166,7 +166,7 @@ function ImportProposal({ exchangeRate }: Props) {
         setShowError({
             show: true,
             header: 'Importing Completed',
-            content: `All files have been processed and ${index} proposals have been added.`,
+            content: `All files have been processed and ${files.length} proposals have been added.`,
         });
     }
 
