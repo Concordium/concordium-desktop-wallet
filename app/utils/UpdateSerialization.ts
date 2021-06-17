@@ -1,5 +1,9 @@
 import { Buffer } from 'buffer/';
-import { putBase58Check, serializeVerifyKey } from './serializationHelpers';
+import {
+    encodeWord64,
+    putBase58Check,
+    serializeVerifyKey,
+} from './serializationHelpers';
 import {
     BakerStakeThreshold,
     BlockItemKind,
@@ -19,8 +23,6 @@ import {
     AuthorizationKeysUpdate,
     AccessStructure,
 } from './types';
-
-// TODO FIX ALL THE NUMBERS BACK TO BIG INTEGERS
 
 /**
  * Update type enumeration. The numbering/order is important as it corresponds
@@ -163,10 +165,8 @@ export function serializeHigherLevelKeyUpdate(
 export function serializeBakerStakeThreshold(
     bakerStakeThreshold: BakerStakeThreshold
 ) {
-    const serializedBakerStakeThreshold = Buffer.alloc(8);
-    serializedBakerStakeThreshold.writeBigUInt64BE(
-        Number(bakerStakeThreshold.threshold),
-        0
+    const serializedBakerStakeThreshold = encodeWord64(
+        bakerStakeThreshold.threshold
     );
     return serializedBakerStakeThreshold;
 }
@@ -189,13 +189,9 @@ export function serializeElectionDifficulty(
  * Serializes an ExchangeRate to bytes.
  */
 export function serializeExchangeRate(exchangeRate: ExchangeRate) {
-    const serializedExchangeRate = Buffer.alloc(16);
-    serializedExchangeRate.writeBigUInt64BE(Number(exchangeRate.numerator), 0);
-    serializedExchangeRate.writeBigUInt64BE(
-        Number(exchangeRate.denominator),
-        8
-    );
-    return serializedExchangeRate;
+    const serializedNumerator = encodeWord64(exchangeRate.numerator);
+    const serializedDenominator = encodeWord64(exchangeRate.denominator);
+    return Buffer.concat([serializedNumerator, serializedDenominator]);
 }
 
 /**
@@ -263,7 +259,7 @@ export function serializeUtf8String(input: string): SerializedString {
 
     const encoded = Buffer.from(new TextEncoder().encode(input));
     const serializedLength = Buffer.alloc(8);
-    serializedLength.writeBigInt64BE(Number(encoded.length), 0);
+    serializedLength.writeBigUInt64BE(encoded.length, 0);
     return { length: serializedLength, message: encoded };
 }
 
@@ -287,16 +283,15 @@ export function serializeProtocolUpdate(
         'hex'
     );
 
-    const payloadLength =
-        8 +
-        encodedMessage.message.length +
-        8 +
-        encodedSpecificationUrl.message.length +
-        specificationHash.length +
-        auxiliaryData.length;
+    const payloadLength: bigint =
+        BigInt(8) +
+        BigInt(encodedMessage.message.length) +
+        BigInt(8) +
+        BigInt(encodedSpecificationUrl.message.length) +
+        BigInt(specificationHash.length) +
+        BigInt(auxiliaryData.length);
 
-    const serializedPayloadLength = Buffer.alloc(8);
-    serializedPayloadLength.writeBigInt64BE(Number(payloadLength), 0);
+    const serializedPayloadLength = encodeWord64(payloadLength);
 
     const serialization = Buffer.concat([
         serializedPayloadLength,
@@ -335,16 +330,15 @@ export function serializeGasRewards(gasRewards: GasRewards) {
  * UpdateHeader for comments regarding the byte allocation for each field.
  */
 export function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
-    const serializedUpdateHeader = Buffer.alloc(28);
-    serializedUpdateHeader.writeBigUInt64BE(
-        Number(updateHeader.sequenceNumber),
-        0
-    );
-    serializedUpdateHeader.writeBigUInt64BE(
-        Number(updateHeader.effectiveTime),
-        8
-    );
-    serializedUpdateHeader.writeBigUInt64BE(Number(updateHeader.timeout), 16);
+    const serializedSequenceNumber = encodeWord64(updateHeader.sequenceNumber);
+    const serializedEffectiveTime = encodeWord64(updateHeader.effectiveTime);
+    const serializedTimeout = encodeWord64(updateHeader.timeout);
+    const serializedUpdateHeader = Buffer.concat([
+        serializedSequenceNumber,
+        serializedEffectiveTime,
+        serializedTimeout,
+    ]);
+
     if (!updateHeader.payloadSize) {
         throw new Error('Unexpected missing payloadSize');
     }
