@@ -21,6 +21,7 @@ import { ExternalCredential } from '~/database/types';
 import {
     deleteExternalCredentials,
     getAllExternalCredentials,
+    upsertExternalCredential,
     upsertMultipleExternalCredentials,
 } from '~/database/ExternalCredentialDao';
 
@@ -124,6 +125,14 @@ export async function insertNewCredential(
     };
     await insertCredential(parsed);
     return loadCredentials(dispatch);
+}
+
+export async function updateExternalCredential(
+    dispatch: Dispatch,
+    credential: ExternalCredential
+) {
+    await upsertExternalCredential(credential);
+    return loadExternalCredentials(dispatch);
 }
 
 export async function insertExternalCredentials(

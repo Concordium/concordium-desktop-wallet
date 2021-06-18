@@ -1,20 +1,20 @@
 import React, { useCallback } from 'react';
 import { SubmitHandler } from 'react-hook-form';
-import Modal from '~/cross-app-components/Modal';
+import Modal, { ModalProps } from '~/cross-app-components/Modal';
 import Form from '~/components/Form';
 import styles from './InputModal.module.scss';
 import { ValidationRules } from '~/utils/types';
 
-interface Props {
+interface Props
+    extends Pick<ModalProps, 'trigger' | 'open' | 'onClose' | 'onOpen'> {
     title: string;
     text?: string;
     buttonText: string;
-    open: boolean;
     type?: string;
-    onClose(): void;
     placeholder: string;
-    validationRules: ValidationRules;
+    validationRules?: ValidationRules;
     buttonOnClick(value: string): void;
+    defaultValue?: string;
 }
 
 interface InputForm {
@@ -29,8 +29,8 @@ function InputModal({
     buttonOnClick,
     placeholder,
     type = 'text',
-    open,
-    onClose,
+    defaultValue,
+    ...modalProps
 }: Props) {
     const handleSubmit: SubmitHandler<InputForm> = useCallback(
         (values) => {
@@ -41,7 +41,7 @@ function InputModal({
     );
 
     return (
-        <Modal onClose={onClose} onOpen={() => {}} open={open}>
+        <Modal {...modalProps}>
             <h2>{title}</h2>
             <p className={styles.text}>{text}</p>
             <Form onSubmit={handleSubmit}>
@@ -51,6 +51,7 @@ function InputModal({
                     rules={validationRules}
                     placeholder={placeholder}
                     type={type}
+                    defaultValue={defaultValue}
                 />
                 <Form.Submit className="mT100">{buttonText}</Form.Submit>
             </Form>

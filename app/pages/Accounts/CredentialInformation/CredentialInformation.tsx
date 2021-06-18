@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import EditIcon from '@resources/svg/edit.svg';
 import CloseButton from '~/cross-app-components/CloseButton';
 import {
     Account,
@@ -9,7 +11,23 @@ import { formatDate } from '~/utils/timeHelpers';
 import CopyButton from '~/components/CopyButton';
 import Card from '~/cross-app-components/Card';
 import SidedRow from '~/components/SidedRow';
+import {
+    credentialsSelector,
+    externalCredentialsSelector,
+    updateExternalCredential,
+} from '~/features/CredentialSlice';
+
 import styles from './CredentialInformation.module.scss';
+import InputModal from '~/components/InputModal';
+import Button from '~/cross-app-components/Button';
+import { CREDENTIAL_NOTE_MAX_LENGTH } from '~/utils/credentialHelper';
+import { identitiesSelector } from '~/features/IdentitySlice';
+
+interface CredentialOfAccount
+    extends Omit<CredentialDeploymentInformation, 'regId'> {
+    isOwn: boolean;
+    note: string | undefined;
+}
 
 interface Props {
     account: Account;
@@ -25,18 +43,53 @@ export default function CredentialInformation({
     accountInfo,
     returnFunction,
 }: Props) {
+    const dispatch = useDispatch();
+    const [showEditNote, setShowEditNote] = useState(false);
+    const externalCredentials = useSelector(externalCredentialsSelector);
+    const ownCredentials = useSelector(credentialsSelector);
+    const identities = useSelector(identitiesSelector);
+
     const credentialsOfAccount = Object.values(accountInfo.accountCredentials)
         .map((o) => o.value.contents)
         .map((cred) => {
+            let enrichedCred: CredentialOfAccount = {
+                ...cred,
+                isOwn: false,
+                note: undefined,
+            };
             // The node returns the credId in the regId field for
             // initial accounts, so we have to hack it a bit here.
             // This can safely be removed, if the node is updated to
             // be consistent and always use the credId field.
             if (cred.regId) {
-                return { ...cred, credId: cred.regId };
+                enrichedCred = { ...enrichedCred, credId: cred.regId };
             }
-            return cred;
+
+            const existingOwnCredential = ownCredentials.find(
+                (c) => c.credId === enrichedCred.credId
+            );
+            const isOwn = !!existingOwnCredential;
+            const note = isOwn
+                ? `Credential from ${`"${
+                      identities.find(
+                          (i) => i.id === existingOwnCredential?.identityId
+                      )?.name
+                  }"`}`
+                : externalCredentials.find(
+                      (c) => c.credId === enrichedCred.credId
+                  )?.note;
+
+            return { ...enrichedCred, isOwn, note };
         });
+
+    const submitNote = (credId: string) => (note: string) => {
+        updateExternalCredential(dispatch, {
+            accountAddress: account.address,
+            credId,
+            note,
+        });
+        setShowEditNote(false);
+    };
 
     return (
         <Card className="relative pB0">
@@ -51,41 +104,84 @@ export default function CredentialInformation({
                 />
             </div>
             <div className={styles.credentialList}>
-                {credentialsOfAccount.map(
-                    (credential: CredentialDeploymentInformation) => {
-                        const { policy } = credential;
-                        return (
-                            <div
-                                className={styles.listElement}
-                                key={credential.credId}
-                            >
-                                <SidedRow
-                                    className={styles.listElementRow}
-                                    left="Credential ID:"
-                                    right={
-                                        <>
-                                            <CopyButton
-                                                className={styles.copy}
-                                                value={credential.credId}
+                {credentialsOfAccount.map((credential: CredentialOfAccount) => {
+                    const { policy } = credential;
+                    return (
+                        <div
+                            className={styles.listElement}
+                            key={credential.credId}
+                        >
+                            <SidedRow
+                                className={styles.listElementRow}
+                                left="Credential ID:"
+                                right={
+                                    <>
+                                        <CopyButton
+                                            className={styles.copy}
+                                            value={credential.credId}
+                                        />
+                                        {credential.credId.substring(0, 8)}
+                                    </>
+                                }
+                            />
+                            <SidedRow
+                                className={styles.listElementRow}
+                                left="Note:"
+                                right={
+                                    <>
+                                        {credential.isOwn || (
+                                            <InputModal
+                                                open={showEditNote}
+                                                onOpen={() =>
+                                                    setShowEditNote(true)
+                                                }
+                                                onClose={() =>
+                                                    setShowEditNote(false)
+                                                }
+                                                trigger={
+                                                    <Button
+                                                        className={
+                                                            styles.editNote
+                                                        }
+                                                        clear
+                                                    >
+                                                        <EditIcon />
+                                                    </Button>
+                                                }
+                                                title="Set note for credential"
+                                                buttonText="Submit"
+                                                placeholder="Add note"
+                                                buttonOnClick={submitNote(
+                                                    credential.credId
+                                                )}
+                                                defaultValue={credential.note}
+                                                validationRules={{
+                                                    maxLength: {
+                                                        value: CREDENTIAL_NOTE_MAX_LENGTH,
+                                                        message:
+                                                            'Cannot be longer than 30 characters',
+                                                    },
+                                                }}
                                             />
-                                            {credential.credId.substring(0, 8)}
-                                        </>
-                                    }
-                                />
-                                <SidedRow
-                                    className={styles.listElementRow}
-                                    left="Date of Creation:"
-                                    right={formatDate(policy.createdAt)}
-                                />
-                                <SidedRow
-                                    className={styles.listElementRow}
-                                    left="Valid to:"
-                                    right={formatDate(policy.validTo)}
-                                />
-                            </div>
-                        );
-                    }
-                )}
+                                        )}
+                                        {credential.note ||
+                                            'No note for credential'}
+                                    </>
+                                }
+                            />
+                            <SidedRow
+                                className={styles.listElementRow}
+                                left="Date of Creation:"
+                                right={formatDate(policy.createdAt)}
+                            />
+                            <SidedRow
+                                className={styles.listElementRow}
+                                left="Valid to:"
+                                right={formatDate(policy.validTo)}
+                            />
+                        </div>
+                    );
+                })}
             </div>
         </Card>
     );

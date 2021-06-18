@@ -55,3 +55,5 @@ export default async function findLocalDeployedCredentialWithWallet(
     }
     return findLocalDeployedCredential(walletId, accountAddress);
 }
+
+export const CREDENTIAL_NOTE_MAX_LENGTH = 30;

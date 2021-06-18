@@ -18,6 +18,7 @@ import SimpleErrorModal, {
 import { hasDuplicateWalletId } from '~/database/CredentialDao';
 import Form from '~/components/Form';
 import { CredentialDetails, CredentialStatus } from './util';
+import { CREDENTIAL_NOTE_MAX_LENGTH } from '~/utils/credentialHelper';
 
 import styles from './UpdateAccountCredentials.module.scss';
 
@@ -163,6 +164,12 @@ export default function AddCredential({
                         className="mV30"
                         name="note"
                         placeholder="Who owns the key?"
+                        rules={{
+                            maxLength: {
+                                value: CREDENTIAL_NOTE_MAX_LENGTH,
+                                message: 'Cannot be longer than 30 characters',
+                            },
+                        }}
                     />
                     <Form.Checkbox
                         className="mH20"
