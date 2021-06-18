@@ -88,12 +88,6 @@ export function subscribeLedger(win: BrowserWindow) {
     }
 }
 
-export function unsubscribe() {
-    if (ledgerSubscription) {
-        ledgerSubscription.unsubscribe();
-    }
-}
-
 export function closeTransport() {
     if (concordiumClient) {
         concordiumClient.closeTransport();
