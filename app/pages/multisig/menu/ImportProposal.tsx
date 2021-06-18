@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
+import { max } from '~/utils/basicHelpers';
 import { parse } from '~/utils/JSONHelper';
 import {
     Fraction,
@@ -18,7 +19,10 @@ import styles from './BrowseTransactionFile/BrowseTransactionFile.module.scss';
 import { fileListToFileArray } from '~/components/Form/FileInput/util';
 import createMultiSignatureTransaction from '~/utils/MultiSignatureTransactionHelper';
 import { loadProposals } from '~/features/MultiSignatureSlice';
-import { insert } from '~/database/MultiSignatureProposalDao';
+import {
+    insert,
+    getMaxOpenNonceOnAccount,
+} from '~/database/MultiSignatureProposalDao';
 import { getAccount } from '~/database/AccountDao';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import { saveMultipleFiles } from '~/utils/FileHelper';
@@ -33,7 +37,7 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 
 async function loadTransactionFile(
     file: File,
-    indexRecord: Record<string, number>,
+    indexRecord: Record<string, bigint>,
     fileName: string,
     exchangeRate: Fraction
 ): Promise<[string, Partial<MultiSignatureTransaction>] | ModalErrorInput> {
@@ -73,12 +77,18 @@ async function loadTransactionFile(
         threshold = account.signatureThreshold;
 
         if (!transactionObject.nonce) {
-            const accountNonce = await getNextAccountNonce(address);
-            const index = indexRecord[address] || 0;
-            indexRecord[address] = index + 1;
-            transactionObject.nonce = (
-                BigInt(accountNonce.nonce) + BigInt(index)
-            ).toString();
+            if (address in indexRecord) {
+                indexRecord[address] += 1n;
+            } else {
+                const accountNonce = await getNextAccountNonce(address);
+                const maxOpenNonce = await getMaxOpenNonceOnAccount(address);
+                indexRecord[address] = max(
+                    BigInt(accountNonce.nonce),
+                    maxOpenNonce + 1n
+                );
+            }
+
+            transactionObject.nonce = indexRecord[address].toString();
         }
         if (!transactionObject.energyAmount) {
             const energyAmount = getTransactionEnergyCost(
@@ -110,10 +120,13 @@ async function loadTransactionFile(
     );
 
     const handler = findHandler(transactionObject);
-    const exportName = handler.getFileNameForExport(
+    const exportName = `${transactionObject.nonce.padStart(
+        3,
+        '0'
+    )}-${handler.getFileNameForExport(
         transactionObject,
         TransactionExportType.Proposal
-    );
+    )}`;
 
     return [exportName, proposal];
 }
@@ -135,7 +148,7 @@ function ImportProposal({ exchangeRate }: Props) {
 
     async function handleFiles(files: File[]) {
         const proposals: [string, Partial<MultiSignatureTransaction>][] = [];
-        const index: Record<string, number> = {};
+        const index: Record<string, bigint> = {};
         let result;
         for (const file of files) {
             result = await loadTransactionFile(
