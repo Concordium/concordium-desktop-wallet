@@ -5,6 +5,7 @@ import { EqualRecord, ProtocolUpdate } from '~/utils/types';
 import { isHex } from '~/utils/basicHelpers';
 import Form from '~/components/Form';
 import { maxFileSizeKb } from '~/components/Form/FileInput/validation';
+import { UpdateProps } from '~/utils/transactionTypes';
 
 const auxiliaryDataMaxSizeKb = 2048;
 
@@ -31,19 +32,23 @@ const validateHex: Validate = (v: string) =>
 /**
  * Component for creating an update protocol transaction.
  */
-export default function UpdateProtocol(): JSX.Element | null {
+export default function UpdateProtocol({
+    defaults,
+}: UpdateProps): JSX.Element | null {
     return (
         <>
             <Form.TextArea
                 className="body1"
                 name={fieldNames.message}
                 label="Message:"
+                defaultValue={defaults.message || undefined}
                 placeholder="Enter you message here"
                 rules={{ required: 'Message is required' }}
             />
             <Form.Input
                 className="body1"
                 name={fieldNames.specificationUrl}
+                defaultValue={defaults.specificationUrl || undefined}
                 label="Specification URL:"
                 placeholder="Enter specification URL"
                 rules={{ required: 'Specification URL is required' }}
@@ -51,6 +56,7 @@ export default function UpdateProtocol(): JSX.Element | null {
             <Form.TextArea
                 className="body1"
                 name={fieldNames.specificationHash}
+                defaultValue={defaults.specificationHash || undefined}
                 label="Specification Hash:"
                 placeholder="Paste specification hash here"
                 rules={{
@@ -65,6 +71,7 @@ export default function UpdateProtocol(): JSX.Element | null {
                 label="Specification Auxiliary Data:"
                 placeholder="Drag and drop file here"
                 buttonTitle="or browse to file"
+                defaultValue={defaults.specificationAuxiliaryData || undefined}
                 rules={{
                     required: 'Specification Auxiliary Data is required',
                     validate: maxFileSizeKb(

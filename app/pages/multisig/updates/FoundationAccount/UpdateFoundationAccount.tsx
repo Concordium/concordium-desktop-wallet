@@ -18,6 +18,7 @@ const fieldNames: EqualRecord<UpdateFoundationAccountFields> = {
 };
 
 export default function UpdateFoundationAccount({
+    defaults,
     blockSummary,
 }: UpdateProps): JSX.Element | null {
     const currentFoundationAccount = getCurrentValue(blockSummary);
@@ -33,6 +34,7 @@ export default function UpdateFoundationAccount({
             <Form.TextArea
                 className={styles.field}
                 name={fieldNames.foundationAccount}
+                defaultValue={defaults.foundationAccount}
                 label="New foundation account address:"
                 placeholder="Paste the new account address here"
                 rules={{

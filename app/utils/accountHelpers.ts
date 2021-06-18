@@ -59,3 +59,15 @@ export function hasEncryptedBalance(accountInfo: AccountInfo): boolean {
         accountInfo.accountEncryptedAmount.incomingAmounts.length > 0
     );
 }
+
+export function isMultiSig(account: Account): boolean {
+    return (account.signatureThreshold ?? 0) > 1;
+}
+
+export function isMultiCred(accountInfo: AccountInfo): boolean {
+    return Object.values(accountInfo.accountCredentials).length > 1;
+}
+
+export function getInitialEncryptedAmount() {
+    return ENCRYPTED_ZERO;
+}

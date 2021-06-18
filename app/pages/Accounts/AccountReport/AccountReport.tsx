@@ -16,13 +16,16 @@ import Timestamp from '~/components/Form/InputTimestamp';
 import PickAccount from '~/components/PickAccount';
 import Checkbox from '~/components/Form/Checkbox';
 import ErrorModal from '~/components/SimpleErrorModal';
-
-import saveFile from '~/utils/FileHelper';
-import { FilterOption, filterKind, getAccountCSV } from './util';
-
+import {
+    FilterOption,
+    filterKind,
+    filterKindGroup,
+    getAccountCSV,
+} from './util';
 import styles from './AccountReport.module.scss';
 import { SaveFileData } from '~/ipc/files';
 import ipcCommands from '~/constants/ipcCommands.json';
+import saveFile from '~/utils/FileHelper';
 
 const transactionTypeFilters: FilterOption[] = [
     filterKind('Simple Transfers', TransactionKindString.Transfer),
@@ -45,10 +48,25 @@ const transactionTypeFilters: FilterOption[] = [
     ),
     filterKind('Baker Rewards', TransactionKindString.BakingReward),
     filterKind('Block Rewards', TransactionKindString.BlockReward),
+    filterKind(
+        'Update account credentials',
+        TransactionKindString.UpdateCredentials
+    ),
+    filterKindGroup('Baker Transactions', [
+        TransactionKindString.AddBaker,
+        TransactionKindString.RemoveBaker,
+        TransactionKindString.UpdateBakerKeys,
+        TransactionKindString.UpdateBakerRestakeEarnings,
+        TransactionKindString.UpdateBakerStake,
+    ]),
 ];
 
+interface State {
+    account: Account;
+}
+
 interface Props {
-    location: LocationDescriptorObject<Account>;
+    location: LocationDescriptorObject<State>;
 }
 
 /**
@@ -58,7 +76,7 @@ interface Props {
 export default function AccountReport({ location }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     const [accounts, setAccounts] = useState<Account[]>(
-        location?.state ? [location?.state] : []
+        location?.state ? [location?.state.account] : []
     );
     const [adding, setAdding] = useState(false);
     const [fromDate, setFrom] = useState<Date | undefined>(

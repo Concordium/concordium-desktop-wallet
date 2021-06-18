@@ -57,6 +57,15 @@ export async function getMaxTransactionsIdOfAccount(
     );
 }
 
+export async function hasPendingTransactions(
+    fromAddress: string
+): Promise<boolean> {
+    return window.ipcRenderer.invoke(
+        ipcCommands.database.transactions.hasPending,
+        fromAddress
+    );
+}
+
 export async function getPendingTransactions(): Promise<TransferTransaction[]> {
     return window.ipcRenderer.invoke(
         ipcCommands.database.transactions.getPending

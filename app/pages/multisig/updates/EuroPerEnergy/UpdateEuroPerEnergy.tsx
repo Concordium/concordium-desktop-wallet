@@ -21,7 +21,10 @@ const fieldNames: EqualRecord<UpdateEuroPerEnergyFields> = {
     euroPerEnergyRate: 'euroPerEnergyRate',
 };
 
-export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
+export default function UpdateEuroPerEnergy({
+    defaults,
+    blockSummary,
+}: UpdateProps) {
     const exchangeRate = getCurrentValue(blockSummary);
     const currentValue: RelativeRateValue = fromExchangeRate(exchangeRate);
 
@@ -37,7 +40,7 @@ export default function UpdateEuroPerEnergy({ blockSummary }: UpdateProps) {
                 {...commonFieldProps}
                 name={fieldNames.euroPerEnergyRate}
                 label="New euro per energy rate"
-                defaultValue={currentValue}
+                defaultValue={defaults.euroPerEnergyRate || currentValue}
                 rules={{
                     validate: {
                         isPositiveNumber,

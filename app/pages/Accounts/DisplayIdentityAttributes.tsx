@@ -5,6 +5,7 @@ import attributeNamesJson from '~/constants/attributeNames.json';
 import { chosenAccountInfoSelector } from '~/features/AccountSlice';
 import SidedRow from '~/components/SidedRow';
 import styles from './Accounts.module.scss';
+import { AttributeKey, formatAttributeValue } from '~/utils/identityHelpers';
 
 const attributeNames: Record<string, string> = attributeNamesJson;
 
@@ -50,7 +51,10 @@ export default function DisplayIdentityAttributes(): JSX.Element | null {
                                 className={styles.identityAttribute}
                                 key={attributeKey}
                                 left={attributeNames[attributeKey]}
-                                right={attributes[attributeKey]}
+                                right={formatAttributeValue(
+                                    attributeKey as AttributeKey,
+                                    attributes[attributeKey]
+                                )}
                             />
                         ))}
                     </div>

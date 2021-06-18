@@ -11,6 +11,7 @@ import TransferHandler from './TransferHandler';
 import {
     AccountTransactionHandler,
     CreateTransactionInput,
+    TransactionExportType,
 } from '../transactionTypes';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { createSimpleTransferTransaction } from '../transactionHelpers';
@@ -32,8 +33,6 @@ export default class SimpleTransferHandler
         const getNewLocation = () => {
             switch (currentLocation) {
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
-                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
@@ -77,6 +76,17 @@ export default class SimpleTransferHandler
             signatureAmount,
             expiryTime
         );
+    }
+
+    getFileNameForExport(
+        transaction: SimpleTransfer,
+        exportType: TransactionExportType
+    ) {
+        const sender = transaction.sender.substring(0, 6);
+        const receiver = transaction.payload.toAddress.substring(0, 6);
+        const { amount } = transaction.payload;
+
+        return `transfer-${amount}_${sender}-to-${receiver}_${exportType}.json`;
     }
 
     print(

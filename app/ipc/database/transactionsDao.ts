@@ -35,13 +35,22 @@ async function updateTransaction(
         .update(updatedValues);
 }
 
-export async function getPendingTransactions(): Promise<TransferTransaction[]> {
+async function getPendingTransactions(): Promise<TransferTransaction[]> {
     const transactions = await (await knex())
         .select()
         .table(transactionTable)
         .where({ status: TransactionStatus.Pending })
         .orderBy('id');
     return convertBooleans(transactions);
+}
+
+async function hasPendingTransactions(fromAddress: string) {
+    const transaction = await (await knex())
+        .select()
+        .table(transactionTable)
+        .where({ status: TransactionStatus.Pending, fromAddress })
+        .first();
+    return Boolean(transaction);
 }
 
 async function getMaxTransactionsIdOfAccount(
@@ -114,6 +123,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (_event) => {
             return getPendingTransactions();
+        }
+    );
+
+    ipcMain.handle(
+        ipcCommands.database.transactions.hasPending,
+        async (_event, fromAddress: string) => {
+            return hasPendingTransactions(fromAddress);
         }
     );
 

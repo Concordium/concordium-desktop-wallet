@@ -75,6 +75,7 @@ export default function SelectPassword() {
                                 },
                             }}
                             placeholder="Enter password"
+                            autoFocus
                         />
                         <Form.Input
                             type="password"

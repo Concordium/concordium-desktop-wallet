@@ -1,3 +1,4 @@
+import { ButtonProps } from '~/cross-app-components/Button';
 import { Schedule } from '~/utils/types';
 
 export interface ScheduledTransferBuilderRef {
@@ -8,11 +9,7 @@ export interface ScheduledTransferBuilderRef {
 }
 
 export interface ScheduledTransferBuilderBaseProps {
-    /**
-     * Defaults to false.
-     */
-    hideSubmitButton?: boolean;
-    onValidChange?(isValid: boolean): void;
+    submitButtonSize?: ButtonProps['size'];
 }
 
 export interface RegularIntervalDefaults {

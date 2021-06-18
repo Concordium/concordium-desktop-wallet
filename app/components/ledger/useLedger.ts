@@ -3,6 +3,7 @@ import { useEffect, useCallback, useReducer, Dispatch } from 'react';
 import { singletonHook } from 'react-singleton-hook';
 import getErrorDescription from '~/features/ledger/ErrorCodes';
 import ledgerReducer, {
+    cleanupAction,
     connectedAction,
     errorAction,
     finishedAction,
@@ -113,6 +114,16 @@ export default function ExternalHook(
     submitHandler: LedgerSubmitHandler;
 } {
     const { isReady, status, statusText, client, dispatch } = hook();
+
+    // TODO Fix this so it works as before.
+    useEffect(() => {
+        return function cleanup() {
+            if (client) {
+                // client.closeTransport();
+                dispatch(cleanupAction());
+            }
+        };
+    }, [client, dispatch]);
 
     const submitHandler: LedgerSubmitHandler = useCallback(async () => {
         dispatch(pendingAction(AWAITING_USER_INPUT));

@@ -54,8 +54,16 @@ export function AccountDetail({
     title,
     value,
     format = formatAccount,
+    first = false,
 }: DetailProps<Account | AddressBookEntry>) {
-    return <PlainDetail title={title} value={value} format={format} />;
+    return (
+        <PlainDetail
+            title={title}
+            value={value}
+            format={format}
+            first={first}
+        />
+    );
 }
 
 export function AmountDetail({

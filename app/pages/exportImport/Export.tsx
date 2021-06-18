@@ -11,6 +11,7 @@ import Button from '~/cross-app-components/Button';
 import styles from './ExportImport.module.scss';
 import { getAllWallets } from '~/database/WalletDao';
 import SetPasswordModal from '~/components/SetPasswordModal';
+import getGenesis from '~/database/GenesisDao';
 
 /**
  * Component for exporting wallets, identities, credentials, accounts and
@@ -55,6 +56,7 @@ export default function Export() {
         });
 
         const wallets = await getAllWallets();
+        const genesis = await getGenesis();
 
         const data = {
             accounts: cleanAccounts,
@@ -62,12 +64,14 @@ export default function Export() {
             addressBook,
             credentials: cleanCredentials,
             wallets,
+            genesis,
         };
         const encrypted = await encrypt(JSON.stringify(data), password);
 
         try {
             const completed = await saveFile(JSON.stringify(encrypted), {
                 title: 'Export your data',
+                defaultPath: 'wallet-export.json',
             });
             if (completed) {
                 setModalMessage('Export was successful');

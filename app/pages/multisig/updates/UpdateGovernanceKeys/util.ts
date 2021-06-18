@@ -41,6 +41,10 @@ export function getCurrentThresholds(
         authorizations.mintDistribution.threshold
     );
     currentThresholds.set(
+        AccessStructureEnum.transactionFeeDistribution,
+        authorizations.transactionFeeDistribution.threshold
+    );
+    currentThresholds.set(
         AccessStructureEnum.gasRewards,
         authorizations.paramGASRewards.threshold
     );
@@ -83,7 +87,7 @@ export function keyIsInUse(
  * Reduces the indices of all keys in all access structures that have a
  * current index higher than the provided index.
  */
-function reduceIndicesByOne(
+export function reduceIndicesByOne(
     accessStructures: AccessStructure[],
     index: number
 ): AccessStructure[] {

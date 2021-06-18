@@ -11,10 +11,14 @@ import TransferHandler from './TransferHandler';
 import {
     AccountTransactionHandler,
     CreateTransactionInput,
+    TransactionExportType,
 } from '../transactionTypes';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import PrintFormatScheduledTransfer from '~/components/PrintFormat/ScheduledTransfer';
-import { createScheduledTransferTransaction } from '../transactionHelpers';
+import {
+    createScheduledTransferTransaction,
+    getScheduledTransferAmount,
+} from '../transactionHelpers';
 
 type TransactionType = ScheduledTransfer;
 
@@ -32,14 +36,14 @@ export default class ScheduledTransferHandler
         const getNewLocation = () => {
             switch (currentLocation) {
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT;
-                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
                 case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
+                    return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY;
+                case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
                     return routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
                 default:
                     throw new Error('unknown location');
@@ -72,6 +76,17 @@ export default class ScheduledTransferHandler
             signatureAmount,
             expiryTime
         );
+    }
+
+    getFileNameForExport(
+        transaction: ScheduledTransfer,
+        exportType: TransactionExportType
+    ) {
+        const sender = transaction.sender.substring(0, 6);
+        const receiver = transaction.payload.toAddress.substring(0, 6);
+        const amount = getScheduledTransferAmount(transaction);
+
+        return `scheduled-transfer-${amount}_${sender}-to-${receiver}_${exportType}.json`;
     }
 
     print(

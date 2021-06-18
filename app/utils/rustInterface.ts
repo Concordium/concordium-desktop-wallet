@@ -348,6 +348,32 @@ export async function makeTransferToPublicData(
     return JSON.parse(transferToPublicData);
 }
 
+export async function makeTransferToEncryptedData(
+    amount: string,
+    prfKey: string,
+    global: Global,
+    accountEncryptedAmount: AccountEncryptedAmount,
+    accountNumber: number
+) {
+    const input = {
+        global,
+        amount,
+        prfKey,
+        accountNumber,
+        incomingAmounts: accountEncryptedAmount.incomingAmounts,
+        encryptedSelfAmount: accountEncryptedAmount.selfAmount,
+        aggIndex:
+            accountEncryptedAmount.startIndex +
+            accountEncryptedAmount.incomingAmounts.length,
+    };
+
+    const transferToSecretData = await worker.postMessage({
+        command: workerCommands.createTransferToEncryptedData,
+        input: JSON.stringify(input),
+    });
+    return JSON.parse(transferToSecretData);
+}
+
 export async function makeEncryptedTransferData(
     amount: string,
     receiverPublicKey: string,

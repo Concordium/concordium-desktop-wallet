@@ -1,11 +1,10 @@
-import React, { useRef, useState, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
-import { push } from 'connected-react-router';
+import { push, replace } from 'connected-react-router';
 import clsx from 'clsx';
 import {
     Account,
-    Identity,
     TransactionKindId,
     AddressBookEntry,
     Schedule,
@@ -14,7 +13,6 @@ import {
 import PickAmount from '../PickAmount';
 import Columns from '~/components/Columns';
 import routes from '~/constants/routes.json';
-import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
 import Button from '~/cross-app-components/Button';
 import TransactionProposalDetails from '../proposal-details/TransferProposalDetails';
@@ -22,10 +20,7 @@ import CreateTransaction from '../CreateTransaction';
 import { findAccountTransactionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import BuildSchedule from '../BuildSchedule';
 import MultiSignatureLayout from '~/pages/multisig/MultiSignatureLayout';
-import {
-    ScheduledTransferBuilderRef,
-    BuildScheduleDefaults,
-} from '~/components/BuildSchedule/util';
+import { BuildScheduleDefaults } from '~/components/BuildSchedule/util';
 import {
     scheduledTransferCost,
     getTransactionKindCost,
@@ -35,14 +30,14 @@ import LoadingComponent from '../LoadingComponent';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import PickRecipient from '~/components/Transfers/PickRecipient';
 import { useTransactionExpiryState } from '~/utils/dataHooks';
+import { isMultiSig } from '~/utils/accountHelpers';
+import { accountsSelector } from '~/features/AccountSlice';
 
 import styles from './CreateTransferProposal.module.scss';
 
 function subTitle(currentLocation: string) {
     switch (currentLocation) {
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-            return 'Select a proposer';
-        case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
             return 'Select sender account';
         case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
             return 'Input amount';
@@ -57,6 +52,10 @@ function subTitle(currentLocation: string) {
         default:
             throw new Error('unknown location');
     }
+}
+
+interface State {
+    account?: Account;
 }
 
 interface Props {
@@ -74,17 +73,14 @@ function CreateTransferProposal({
     exchangeRate,
 }: Props): JSX.Element {
     const dispatch = useDispatch();
-    const location = useLocation().pathname.replace(
-        `${transactionKind}`,
-        ':transactionKind'
-    );
 
-    const scheduleBuilderRef = useRef<ScheduledTransferBuilderRef>(null);
+    const { pathname, state } = useLocation<State>();
+    const accounts = useSelector(accountsSelector).filter(isMultiSig);
+    const location = pathname.replace(`${transactionKind}`, ':transactionKind');
 
     const handler = findAccountTransactionHandler(transactionKind);
 
-    const [account, setAccount] = useState<Account | undefined>();
-    const [identity, setIdentity] = useState<Identity | undefined>();
+    const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [amount, setAmount] = useState<string | undefined>();
     const [recipient, setRecipient] = useState<AddressBookEntry | undefined>();
     const [
@@ -98,39 +94,8 @@ function CreateTransferProposal({
         scheduleDefaults,
         setScheduleDefaults,
     ] = useState<BuildScheduleDefaults>();
-    const [isScheduleReady, setScheduleReady] = useState(true);
 
     const [estimatedFee, setFee] = useState<Fraction>();
-
-    const isReady = useMemo(() => {
-        switch (location) {
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION:
-                return identity !== undefined;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE:
-                return isScheduleReady;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT:
-                return account !== undefined;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKAMOUNT:
-                return amount !== undefined;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKRECIPIENT:
-                return recipient !== undefined;
-            case routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKEXPIRY:
-                return (
-                    expiryTime !== undefined && expiryTimeError === undefined
-                );
-            default:
-                return false;
-        }
-    }, [
-        account,
-        amount,
-        expiryTime,
-        expiryTimeError,
-        identity,
-        isScheduleReady,
-        location,
-        recipient,
-    ]);
 
     useEffect(() => {
         if (account) {
@@ -157,6 +122,28 @@ function CreateTransferProposal({
         }
     }, [account, transactionKind, setFee, schedule, exchangeRate]);
 
+    function continueAction(routerAction: typeof push = push) {
+        const nextLocation = handler.creationLocationHandler(location);
+        dispatch(
+            routerAction({
+                pathname: nextLocation,
+                state: transactionKind,
+            })
+        );
+    }
+
+    useEffect(() => {
+        if (
+            !account &&
+            accounts.length === 1 &&
+            location === routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
+        ) {
+            setAccount(accounts[0]);
+            continueAction(replace);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account, accounts]);
+
     function renderSignTransaction() {
         if (!account || !recipient || !expiryTime || !amount) {
             throw new Error(
@@ -176,20 +163,6 @@ function CreateTransferProposal({
         );
     }
 
-    function continueAction() {
-        const nextLocation = handler.creationLocationHandler(location);
-        dispatch(
-            push({
-                pathname: nextLocation,
-                state: transactionKind,
-            })
-        );
-    }
-
-    function submitSchedule() {
-        scheduleBuilderRef?.current?.submitSchedule();
-    }
-
     function renderBuildSchedule() {
         if (!account || !recipient || !amount) {
             throw new Error(
@@ -204,21 +177,10 @@ function CreateTransferProposal({
                     continueAction();
                 }}
                 amount={amount}
-                ref={scheduleBuilderRef}
-                setReady={setScheduleReady}
                 defaults={scheduleDefaults}
             />
         );
     }
-
-    const isSignPage =
-        location ===
-        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_SIGNTRANSACTION;
-    const isBuildSchedulePage =
-        location ===
-        routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_BUILDSCHEDULE;
-
-    const showButton = !isSignPage;
 
     return (
         <MultiSignatureLayout
@@ -239,34 +201,17 @@ function CreateTransferProposal({
                             <TransactionProposalDetails
                                 transactionType={transactionKind}
                                 account={account}
-                                identity={identity}
                                 amount={amount}
                                 recipient={recipient}
                                 schedule={schedule}
                                 estimatedFee={estimatedFee}
                                 expiryTime={expiryTime}
                             />
-                            {showButton && (
-                                <Button
-                                    disabled={!isReady}
-                                    className={styles.submitButton}
-                                    onClick={
-                                        isBuildSchedulePage
-                                            ? submitSchedule
-                                            : continueAction
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            )}
                         </div>
                     </Columns.Column>
                     <Columns.Column
                         header={subTitle(location)}
-                        className={clsx(
-                            (isSignPage || isBuildSchedulePage) &&
-                                styles.stretchColumn
-                        )}
+                        className={styles.stretchColumn}
                     >
                         <Switch>
                             <Route
@@ -276,20 +221,6 @@ function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         {renderBuildSchedule()}
-                                    </div>
-                                )}
-                            />
-                            <Route
-                                path={
-                                    routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION_PICKACCOUNT
-                                }
-                                render={() => (
-                                    <div className={styles.columnContent}>
-                                        <PickAccount
-                                            setAccount={setAccount}
-                                            identity={identity}
-                                            chosenAccount={account}
-                                        />
                                     </div>
                                 )}
                             />
@@ -311,6 +242,13 @@ function CreateTransferProposal({
                                             setAmount={setAmount}
                                             estimatedFee={estimatedFee}
                                         />
+                                        <Button
+                                            disabled={amount === undefined}
+                                            className={styles.submitButton}
+                                            onClick={() => continueAction()}
+                                        >
+                                            Continue
+                                        </Button>
                                     </div>
                                 )}
                             />
@@ -321,8 +259,10 @@ function CreateTransferProposal({
                                 render={() => (
                                     <div className={styles.columnContent}>
                                         <PickRecipient
+                                            recipient={recipient}
                                             pickRecipient={setRecipient}
                                             senderAddress={account?.address}
+                                            onClickedRecipient={continueAction}
                                         />
                                     </div>
                                 )}
@@ -351,6 +291,16 @@ function CreateTransferProposal({
                                             Committing the transaction after
                                             this date, will be rejected.
                                         </p>
+                                        <Button
+                                            disabled={
+                                                expiryTime === undefined ||
+                                                expiryTimeError !== undefined
+                                            }
+                                            className={styles.submitButton}
+                                            onClick={() => continueAction()}
+                                        >
+                                            Continue
+                                        </Button>
                                     </div>
                                 )}
                             />
@@ -358,15 +308,16 @@ function CreateTransferProposal({
                                 path={
                                     routes.MULTISIGTRANSACTIONS_CREATE_ACCOUNT_TRANSACTION
                                 }
-                                render={() => (
-                                    <div className={styles.columnContent}>
-                                        <PickIdentity
-                                            setIdentity={setIdentity}
-                                            chosenIdentity={identity}
-                                        />
-                                    </div>
-                                )}
-                            />
+                            >
+                                <div className={styles.columnContent}>
+                                    <PickAccount
+                                        setAccount={setAccount}
+                                        chosenAccount={account}
+                                        filter={isMultiSig}
+                                        onAccountClicked={continueAction}
+                                    />
+                                </div>
+                            </Route>
                         </Switch>
                     </Columns.Column>
                 </Columns>

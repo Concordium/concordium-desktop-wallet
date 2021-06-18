@@ -39,6 +39,10 @@ export default function ExportCredential({ onExported }: Props): JSX.Element {
 
         const success = await saveFile(JSON.stringify(exportData), {
             title: 'Save credential',
+            defaultPath: `credential-to-${credential.address.substring(
+                0,
+                8
+            )}.json`,
         });
         if (success) {
             insertNewCredential(

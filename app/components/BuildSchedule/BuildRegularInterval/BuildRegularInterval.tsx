@@ -17,15 +17,15 @@ import {
 import Form from '../../Form';
 import { futureDate } from '../../Form/util/validation';
 import ButtonGroup from '../../ButtonGroup';
-import styles from './BuildRegularInterval.module.scss';
 import {
     ScheduledTransferBuilderBaseProps,
     ScheduledTransferBuilderRef,
     RegularIntervalDefaults,
 } from '../util';
-import { noOp } from '~/utils/basicHelpers';
 import Label from '~/components/Label';
 import ErrorMessage from '~/components/Form/ErrorMessage';
+
+import styles from './BuildRegularInterval.module.scss';
 
 export interface Interval {
     label: string;
@@ -70,8 +70,7 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
             amount,
             defaults,
             setScheduleLength,
-            hideSubmitButton = false,
-            onValidChange = noOp,
+            submitButtonSize,
         },
         ref
     ) => {
@@ -110,9 +109,6 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
         }
         const formSubmit = handleSubmit(createSchedule);
         const canSubmit = true;
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        useEffect(() => onValidChange(canSubmit), [canSubmit]);
 
         useImperativeHandle(
             ref,
@@ -186,15 +182,13 @@ const RegularInterval = forwardRef<ScheduledTransferBuilderRef, Props>(
                             validate: futureDate('Time must be in the future'),
                         }}
                     />
-                    {!hideSubmitButton && (
-                        <Form.Submit
-                            className={styles.submitButton}
-                            size="big"
-                            disabled={!canSubmit}
-                        >
-                            Continue
-                        </Form.Submit>
-                    )}
+                    <Form.Submit
+                        className={styles.submitButton}
+                        size={submitButtonSize}
+                        disabled={!canSubmit}
+                    >
+                        Continue
+                    </Form.Submit>
                 </Form>
             </>
         );

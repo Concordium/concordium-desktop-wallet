@@ -3,6 +3,7 @@ import { Dispatch as GenericDispatch, AnyAction } from 'redux';
 import { HTMLAttributes } from 'react';
 import { RegisterOptions } from 'react-hook-form';
 import { RejectReason } from './node/RejectReasonHelper';
+import { Genesis } from '~/database/types';
 
 export type Dispatch = GenericDispatch<AnyAction>;
 
@@ -91,6 +92,7 @@ export enum IdentityStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
 
@@ -115,6 +117,7 @@ export enum AccountStatus {
     Confirmed = 'confirmed',
     Rejected = 'rejected',
     Pending = 'pending',
+    // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
 
@@ -190,6 +193,7 @@ export interface EncryptedTransferPayload {
     plainTransferAmount: string;
     toAddress: string;
     remainingEncryptedAmount?: EncryptedAmount;
+    remainingDecryptedAmount?: string;
     transferAmount?: EncryptedAmount;
     index?: string;
     proof?: string;
@@ -197,11 +201,14 @@ export interface EncryptedTransferPayload {
 
 export interface TransferToEncryptedPayload {
     amount: string;
+    newSelfEncryptedAmount?: EncryptedAmount;
+    remainingDecryptedAmount?: string;
 }
 
 export interface TransferToPublicPayload {
     transferAmount: string;
     remainingEncryptedAmount?: EncryptedAmount;
+    remainingDecryptedAmount?: string;
     index?: string;
     proof?: string;
 }
@@ -1086,6 +1093,7 @@ export interface TransactionDetails {
     rawRejectReason: RejectReasonWithContents;
     transferSource?: Hex;
     transferDestination?: Hex;
+    inputEncryptedAmount?: EncryptedAmount;
     type: TransactionKindString;
     outcome: string;
 }
@@ -1161,6 +1169,7 @@ export interface ExportData {
     addressBook: AddressBookEntry[];
     credentials: Credential[];
     wallets: WalletEntry[];
+    genesis?: Genesis;
 }
 
 interface RejectReasonWithContents {
@@ -1265,6 +1274,7 @@ export enum ExportKeyType {
     Level1 = 'level1',
     Level2 = 'level2',
     Credential = 'credential',
+    // eslint-disable-next-line no-shadow
     Genesis = 'genesis',
 }
 

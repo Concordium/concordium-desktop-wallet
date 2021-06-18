@@ -1,15 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Route, Switch } from 'react-router';
+import { FieldValues } from 'react-hook-form';
 import Columns from '~/components/Columns/Columns';
-import InputTimestamp from '~/components/Form/InputTimestamp/InputTimestamp';
 import { BlockSummary, Key } from '~/node/NodeApiTypes';
-import {
-    getDefaultExpiry,
-    getFormattedDateString,
-    isFutureDate,
-    subtractHours,
-    TimeConstants,
-} from '~/utils/timeHelpers';
 import {
     AccessStructure,
     AccessStructureEnum,
@@ -30,14 +23,17 @@ import {
     keyIsInUse,
     getCurrentThresholds,
     removeRemovedKeys,
+    reduceIndicesByOne,
 } from './util';
 import routes from '~/constants/routes.json';
 import ProposeNewKey from './ProposeNewKey';
 import AccessStructureThreshold from './AccessStructureThreshold';
 import KeySetSize from './KeySetSize';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
+import SetExpiryAndEffectiveTime from './SetExpiryAndEffectiveTime';
 
 interface Props {
+    defaults: FieldValues;
     blockSummary: BlockSummary;
     type: UpdateType;
     handleKeySubmit(
@@ -48,17 +44,11 @@ interface Props {
 }
 
 export default function UpdateAuthorizationKeys({
+    defaults,
     blockSummary,
     type,
     handleKeySubmit,
 }: Props) {
-    const [effectiveTime, setEffectiveTime] = useState<Date | undefined>(
-        new Date(getDefaultExpiry().getTime() + 5 * TimeConstants.Minute)
-    );
-    const [expiryTime, setExpiryTime] = useState<Date | undefined>(
-        getDefaultExpiry()
-    );
-
     const [error, setError] = useState<string>();
 
     const keyUpdateType: AuthorizationKeysUpdateType =
@@ -72,10 +62,14 @@ export default function UpdateAuthorizationKeys({
         keyUpdateType,
         currentAuthorizations
     ).accessStructures;
-    const currentThresholds = getCurrentThresholds(currentAuthorizations);
+    const currentThresholds = getCurrentThresholds(currentAuthorizations); // TODO fix threshold when we have a default
 
     const [newLevel2Keys, setNewLevel2Keys] = useState<AuthorizationKeysUpdate>(
-        mapCurrentAuthorizationsToUpdate(keyUpdateType, currentAuthorizations)
+        defaults.keyUpdate ||
+            mapCurrentAuthorizationsToUpdate(
+                keyUpdateType,
+                currentAuthorizations
+            )
     );
 
     function setThreshold(
@@ -164,7 +158,7 @@ export default function UpdateAuthorizationKeys({
                 (value) => value.verifyKey === keyToUpdate.key.verifyKey
             );
 
-            const updatedAccessStructures = newLevel2Keys.accessStructures.map(
+            let updatedAccessStructures = newLevel2Keys.accessStructures.map(
                 (currentAccessStructure) => {
                     if (accessStructure.type === currentAccessStructure.type) {
                         const updatedAccessStructureIndicies = accessStructure.publicKeyIndicies
@@ -236,6 +230,10 @@ export default function UpdateAuthorizationKeys({
                 updatedKeys = newLevel2Keys.keys.filter(
                     (_, index) => index !== keyIndex
                 );
+                updatedAccessStructures = reduceIndicesByOne(
+                    updatedAccessStructures,
+                    keyIndex
+                );
             }
 
             const updatedLevel2Keys: AuthorizationKeysUpdate = {
@@ -247,19 +245,6 @@ export default function UpdateAuthorizationKeys({
             setNewLevel2Keys(updatedLevel2Keys);
         };
     }
-
-    const expiryTimeError = useMemo(() => {
-        if (expiryTime === undefined) {
-            return undefined;
-        }
-        if (!isFutureDate(expiryTime)) {
-            return 'Transaction expiry time must be in the future';
-        }
-        if (effectiveTime !== undefined && effectiveTime < expiryTime) {
-            return 'Expiry must be before the effective time';
-        }
-        return undefined;
-    }, [effectiveTime, expiryTime]);
 
     function displayAccessStructure(
         accessStructure: AccessStructure,
@@ -300,13 +285,7 @@ export default function UpdateAuthorizationKeys({
         );
     }
 
-    function submitFunction() {
-        if (!effectiveTime) {
-            return;
-        }
-        if (!expiryTime) {
-            return;
-        }
+    function submitFunction(effectiveTime: Date, expiryTime: Date) {
         handleKeySubmit(effectiveTime, expiryTime, {
             ...newLevel2Keys,
             keyUpdateType,
@@ -370,33 +349,22 @@ export default function UpdateAuthorizationKeys({
                                 );
                             }
                         )}
-                        <h5>Effective time</h5>
-                        <InputTimestamp
-                            value={effectiveTime}
-                            onChange={setEffectiveTime}
-                        />
-                        <h5>Transaction expiry time</h5>
-                        <InputTimestamp
-                            value={expiryTime}
-                            onChange={setExpiryTime}
-                            isInvalid={expiryTimeError !== undefined}
-                            error={expiryTimeError}
-                        />
-                        {expiryTime !== undefined ? (
-                            <p>
-                                Note: A transaction can only be submitted in the
-                                2 hours before the expiry <br /> (
-                                {getFormattedDateString(
-                                    subtractHours(2, expiryTime)
-                                )}
-                                )
-                            </p>
-                        ) : undefined}
                     </div>
                 </Columns.Column>
                 <Columns.Column className={styles.stretchColumn} header={' '}>
                     <div className={styles.columnContent}>
                         <Switch>
+                            <Route
+                                path={
+                                    routes.MULTISIGTRANSACTIONS_PROPOSAL_SET_EFFECTIVE_EXPIRY
+                                }
+                                render={() => (
+                                    <SetExpiryAndEffectiveTime
+                                        defaults={defaults}
+                                        onContinue={submitFunction}
+                                    />
+                                )}
+                            />
                             <Route
                                 path={
                                     routes.MULTISIGTRANSACTIONS_PROPOSAL_KEY_SET_THRESHOLD
@@ -411,7 +379,7 @@ export default function UpdateAuthorizationKeys({
                                         }
                                         currentThresholds={currentThresholds}
                                         setThreshold={setThreshold}
-                                        submitFunction={submitFunction}
+                                        type={type}
                                     />
                                 )}
                             />

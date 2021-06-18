@@ -87,6 +87,7 @@ const {
 // and that the account is the receiver of the transactions.
 export async function decryptTransactions(
     transactions: TransferTransaction[],
+    accountAddress: string,
     prfKey: string,
     credentialNumber: number,
     global: Global
@@ -106,6 +107,9 @@ export async function decryptTransactions(
     const encryptedAmounts = encryptedTransfers.map((t) => {
         if (!t.encrypted) {
             throw new Error('Unexpected missing field');
+        }
+        if (t.fromAddress === accountAddress) {
+            return JSON.parse(t.encrypted).inputEncryptedAmount;
         }
         return JSON.parse(t.encrypted).encryptedAmount;
     });
@@ -146,7 +150,7 @@ function isUnshieldedBalanceTransaction(
 /**
  * Determine whether the transaction affects shielded balance.
  */
-function isShieldedBalanceTransaction(
+export function isShieldedBalanceTransaction(
     transaction: Partial<TransferTransaction>
 ) {
     switch (transaction.transactionKind) {
@@ -260,7 +264,8 @@ export async function addPendingTransaction(
         transaction,
         hash
     );
-    return insertTransactions([convertedTransaction]);
+    await insertTransactions([convertedTransaction]);
+    return convertedTransaction;
 }
 
 /**

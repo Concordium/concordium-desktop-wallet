@@ -4,14 +4,9 @@ import UpdateRootKeys from '~/pages/multisig/updates/UpdateGovernanceKeys/Update
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceRootPath } from '../../features/ledger/Path';
 import { createUpdateMultiSignatureTransaction } from '../MultiSignatureTransactionHelper';
-import {
-    Authorization,
-    Authorizations,
-    BlockSummary,
-} from '../../node/NodeApiTypes';
+import { BlockSummary } from '../../node/NodeApiTypes';
 import {
     UpdateInstruction,
-    UpdateInstructionPayload,
     MultiSignatureTransaction,
     UpdateType,
     HigherLevelKeyUpdate,
@@ -20,21 +15,18 @@ import {
 import { serializeHigherLevelKeyUpdate } from '../UpdateSerialization';
 import { removeRemovedKeys } from '../updates/HigherLevelKeysHelpers';
 import { UpdateInstructionHandler } from '../transactionTypes';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Root Governance Keys';
 
 type TransactionType = UpdateInstruction<HigherLevelKeyUpdate>;
 
 export default class UpdateRootKeysHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isUpdateRootKeys(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isUpdateRootKeys);
     }
 
     async createTransaction(
@@ -98,18 +90,5 @@ export default class UpdateRootKeysHandler
         );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getAuthorization(_authorizations: Authorizations): Authorization {
-        throw new Error(
-            'If this method was invoked, then it happened due to an implementation error.'
-        );
-    }
-
-    print = () => undefined;
-
     update = UpdateRootKeys;
-
-    title = `Foundation Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

@@ -17,10 +17,9 @@ import {
     termsUrlBase64,
 } from '~/utils/termsHelpers';
 import { noOp } from '~/utils/basicHelpers';
-import {
-    useWindowResize,
-    useIpcRendererEvent,
-} from '~/cross-app-components/util/eventHooks';
+import { useIpcRendererEvent } from '~/cross-app-components/util/nativeEventHooks';
+import { useWindowResize } from '~/cross-app-components/util/eventHooks';
+
 import styles from './TermsPage.module.scss';
 
 interface Props {

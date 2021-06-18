@@ -24,7 +24,8 @@ import pairWallet from '~/utils/WalletPairing';
 
 const IPDetails = (info: PublicInformationForIp) => (
     <div className="textLeft">
-        <p className="mT0">
+        <p className="mT0">Please confirm details on ledger:</p>
+        <p>
             <b>Identity Credentials Public (IdCredPub):</b> {info.idCredPub}
         </p>
         <p>
