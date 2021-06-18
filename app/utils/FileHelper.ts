@@ -110,10 +110,15 @@ export async function saveMultipleFiles(
     datas: [string, Buffer | string][],
     title = 'Choose directory'
 ): Promise<void> {
-    const fileLocation = await openFileDestination({
-        title,
-        properties: ['openDirectory'],
-    });
+    let fileLocation;
+    try {
+        fileLocation = await openFileDestination({
+            title,
+            properties: ['openDirectory'],
+        });
+    } catch (e) {
+        return;
+    }
     for (const [fileName, data] of datas) {
         saveFileDirect(data, `${fileLocation}/${fileName}`);
     }

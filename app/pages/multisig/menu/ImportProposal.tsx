@@ -189,7 +189,8 @@ function ImportProposal({ exchangeRate }: Props) {
         loadProposals(dispatch);
 
         await saveMultipleFiles(
-            proposals.map(([name, prop]) => [name, prop.transaction || ''])
+            proposals.map(([name, prop]) => [name, prop.transaction || '']),
+            'Choose Directory to save updated versions of proposals'
         );
 
         setShowError({
@@ -218,6 +219,7 @@ function ImportProposal({ exchangeRate }: Props) {
                 content={showError.content}
                 onClick={() => setShowError({ show: false })}
             />
+            <h1 className="textCenter">Import Proposals</h1>
             <FileInput
                 className={styles.input}
                 placeholder="Drag and drop file here"
@@ -232,9 +234,12 @@ function ImportProposal({ exchangeRate }: Props) {
 }
 
 const loadingComponent = () => (
-    <Card className={clsx(styles.input, 'relative')}>
-        <Loading text="Fetching information from the node" />
-    </Card>
+    <>
+        <h1 className="textCenter">Import Proposals</h1>
+        <Card className={clsx(styles.input, 'relative')}>
+            <Loading text="Fetching information from the node" />
+        </Card>
+    </>
 );
 
 export default ensureExchangeRate(ImportProposal, loadingComponent);
