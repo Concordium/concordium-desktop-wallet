@@ -153,7 +153,8 @@ const createWindow = async () => {
 };
 
 // Setup the IPC methods, so that the renderer threads
-// can access the exposed methods.
+// can access the exposed methods. This will be moved to
+// the pre-load script when turning on context isolation.
 initializeIpcHandlers(ipcMain);
 initializeLedgerIpcHandlers(ipcMain);
 initializeCryptoIpcHandlers(ipcMain);
