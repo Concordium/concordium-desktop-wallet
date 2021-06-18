@@ -24,7 +24,8 @@ import {
     getMaxOpenNonceOnAccount,
 } from '~/database/MultiSignatureProposalDao';
 import { getAccount } from '~/database/AccountDao';
-import { getNextAccountNonce } from '~/node/nodeRequests';
+import { getNextAccountNonce, getAccountInfo } from '~/node/nodeRequests';
+import { getLastestBlockHash } from '~/node/nodeHelpers';
 import { saveMultipleFiles } from '~/utils/FileHelper';
 import findHandler from '~/utils/transactionHandlers/HandlerFinder';
 import { TransactionExportType } from '~/utils/transactionTypes';
@@ -39,7 +40,8 @@ async function loadTransactionFile(
     file: File,
     indexRecord: Record<string, bigint>,
     fileName: string,
-    exchangeRate: Fraction
+    exchangeRate: Fraction,
+    blockHash: string
 ): Promise<[string, Partial<MultiSignatureTransaction>] | ModalErrorInput> {
     const ab = await file.arrayBuffer();
     const b = Buffer.from(ab);
@@ -105,6 +107,20 @@ async function loadTransactionFile(
             );
             transactionObject.estimatedFee = estimatedFee;
         }
+        if ('toAddress' in transactionObject.payload) {
+            // Check that the recipient exists.
+            const receiverAccountInfo = await getAccountInfo(
+                transactionObject.payload.toAddress,
+                blockHash
+            );
+            if (!receiverAccountInfo) {
+                return {
+                    show: true,
+                    header: 'Invalid file',
+                    content: `The transaction within "${fileName}" contains a recipient address, which does not exists on the blockchain.`,
+                };
+            }
+        }
     } else {
         return {
             show: true,
@@ -147,20 +163,21 @@ function ImportProposal({ exchangeRate }: Props) {
         const proposals: [string, Partial<MultiSignatureTransaction>][] = [];
         const index: Record<string, bigint> = {};
         let result;
+        const blockHash = await getLastestBlockHash();
         for (const file of files) {
             result = await loadTransactionFile(
                 file,
                 index,
                 file.name,
-                exchangeRate
+                exchangeRate,
+                blockHash
             );
 
             if ('show' in result) {
                 setShowError(result);
-                break;
-            } else {
-                proposals.push(result);
+                return;
             }
+            proposals.push(result);
         }
 
         for (const [, proposal] of proposals) {
