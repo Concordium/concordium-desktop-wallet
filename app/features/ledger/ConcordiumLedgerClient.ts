@@ -175,7 +175,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signMicroGtuPerEuro,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path
         );
@@ -189,7 +189,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signEuroPerEnergy,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path
         );
@@ -203,7 +203,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signTransactionFeeDistribution,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path
         );
@@ -217,7 +217,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signFoundationAccount,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path
         );
@@ -231,7 +231,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signMintDistribution,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path
         );
@@ -245,7 +245,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signProtocolUpdate,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path
         );
@@ -259,7 +259,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signGasRewards,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path
         );
@@ -273,7 +273,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signBakerStakeThreshold,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path
         );
@@ -287,7 +287,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signElectionDifficulty,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path
         );
@@ -302,7 +302,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signHigherLevelKeysUpdate,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path,
             INS
@@ -318,7 +318,7 @@ export default class ConcordiumLedgerClient {
     ): Promise<Buffer> {
         const result = await window.ipcRenderer.invoke(
             ledgerIpcCommands.signAuthorizationKeysUpdate,
-            transaction,
+            stringify(transaction),
             serializedPayload,
             path,
             INS

@@ -126,10 +126,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signMicroGtuPerEuro,
         (
             _event,
-            transaction: UpdateInstruction<ExchangeRate>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
+            const transaction: UpdateInstruction<ExchangeRate> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signMicroGtuPerEuro(
                 transaction,
                 serializedPayload,
@@ -142,10 +145,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signEuroPerEnergy,
         (
             _event,
-            transaction: UpdateInstruction<ExchangeRate>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
+            const transaction: UpdateInstruction<ExchangeRate> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signEuroPerEnergy(
                 transaction,
                 serializedPayload,
@@ -158,10 +164,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signTransactionFeeDistribution,
         (
             _event,
-            transaction: UpdateInstruction<TransactionFeeDistribution>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
+            const transaction: UpdateInstruction<TransactionFeeDistribution> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signTransactionFeeDistribution(
                 transaction,
                 serializedPayload,
@@ -174,10 +183,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signFoundationAccount,
         (
             _event,
-            transaction: UpdateInstruction<FoundationAccount>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
+            const transaction: UpdateInstruction<FoundationAccount> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signFoundationAccount(
                 transaction,
                 serializedPayload,
@@ -190,10 +202,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signMintDistribution,
         (
             _event,
-            transaction: UpdateInstruction<MintDistribution>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
+            const transaction: UpdateInstruction<MintDistribution> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signMintDistribution(
                 transaction,
                 serializedPayload,
@@ -206,10 +221,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signProtocolUpdate,
         (
             _event,
-            transaction: UpdateInstruction<ProtocolUpdate>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
+            const transaction: UpdateInstruction<ProtocolUpdate> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signProtocolUpdate(
                 transaction,
                 serializedPayload,
@@ -222,10 +240,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signGasRewards,
         (
             _event,
-            transaction: UpdateInstruction<GasRewards>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
+            const transaction: UpdateInstruction<GasRewards> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signGasRewards(
                 transaction,
                 serializedPayload,
@@ -238,10 +259,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signBakerStakeThreshold,
         (
             _event,
-            transaction: UpdateInstruction<BakerStakeThreshold>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
+            const transaction: UpdateInstruction<BakerStakeThreshold> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signBakerStakeThreshold(
                 transaction,
                 serializedPayload,
@@ -254,10 +278,13 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signElectionDifficulty,
         (
             _event,
-            transaction: UpdateInstruction<ElectionDifficulty>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[]
         ) => {
+            const transaction: UpdateInstruction<ElectionDifficulty> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signElectionDifficulty(
                 transaction,
                 serializedPayload,
@@ -270,11 +297,14 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signHigherLevelKeysUpdate,
         (
             _event,
-            transaction: UpdateInstruction<HigherLevelKeyUpdate>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[],
             INS: number
         ) => {
+            const transaction: UpdateInstruction<HigherLevelKeyUpdate> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signHigherLevelKeysUpdate(
                 transaction,
                 serializedPayload,
@@ -288,11 +318,14 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
         ledgerIpcCommands.signAuthorizationKeysUpdate,
         (
             _event,
-            transaction: UpdateInstruction<AuthorizationKeysUpdate>,
+            transactionAsJson: string,
             serializedPayload: Buffer,
             keypath: number[],
             INS: number
         ) => {
+            const transaction: UpdateInstruction<AuthorizationKeysUpdate> = parse(
+                transactionAsJson
+            );
             return getLedgerClient().signAuthorizationKeysUpdate(
                 transaction,
                 serializedPayload,
