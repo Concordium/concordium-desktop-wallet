@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { push } from 'connected-react-router';
 import clsx from 'clsx';
@@ -29,14 +29,13 @@ import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import LoadingComponent from '../LoadingComponent';
 import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { validateFee } from '~/utils/transactionHelpers';
-
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
-
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
+import { externalCredentialsSelector } from '~/features/CredentialSlice';
+import { CredentialDetails, CredentialStatus } from './util';
 
 import styles from './UpdateAccountCredentials.module.scss';
-import { CredentialDetails, CredentialStatus } from './util';
 
 const placeHolderText = (
     <h2 className={styles.LargePropertyValue}>To be determined</h2>
@@ -224,8 +223,8 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     const transactionKind = TransactionKindId.Update_credentials;
 
     const { pathname, state } = useLocation<State>();
-
     const location = pathname.replace(`${transactionKind}`, ':transactionKind');
+    const externalCredentials = useSelector(externalCredentialsSelector);
 
     // const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>(state?.account);
@@ -310,7 +309,11 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                     credentialIndex === 0
                         ? CredentialStatus.Original
                         : CredentialStatus.Unchanged;
-                return [credId, status, undefined];
+                return [
+                    credId,
+                    status,
+                    externalCredentials.find((e) => e.credId === credId)?.note,
+                ];
             })
         );
     }
@@ -361,6 +364,7 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
         if (accountInfo) {
             getCredentialInfo(accountInfo);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [accountInfo]);
 
     function updateCredentialStatus([removedId, status]: CredentialDetails) {
