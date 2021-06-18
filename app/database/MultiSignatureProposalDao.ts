@@ -45,5 +45,5 @@ export async function getMaxOpenNonceOnAccount(
     const transactions = openProposals
         .map((prop) => parse(prop.transaction))
         .filter((transaction) => transaction.sender === address);
-    return transactions.reduce((acc, x) => max(acc, BigInt(x)), 0n);
+    return transactions.reduce((acc, x) => max(acc, BigInt(x.nonce)), 0n);
 }
