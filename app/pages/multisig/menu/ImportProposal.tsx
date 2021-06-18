@@ -120,13 +120,10 @@ async function loadTransactionFile(
     );
 
     const handler = findHandler(transactionObject);
-    const exportName = `${transactionObject.nonce.padStart(
-        3,
-        '0'
-    )}-${handler.getFileNameForExport(
+    const exportName = handler.getFileNameForExport(
         transactionObject,
         TransactionExportType.Proposal
-    )}`;
+    );
 
     return [exportName, proposal];
 }
