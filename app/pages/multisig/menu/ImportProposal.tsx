@@ -117,7 +117,7 @@ async function loadTransactionFile(
                 return {
                     show: true,
                     header: 'Invalid file',
-                    content: `The transaction within "${fileName}" contains a recipient address, which does not exists on the blockchain.`,
+                    content: `The transaction within "${fileName}" contains a recipient address, which does not exist on the blockchain.`,
                 };
             }
         }
@@ -125,7 +125,7 @@ async function loadTransactionFile(
         return {
             show: true,
             header: 'Invalid file',
-            content: `The transaction within "${fileName}" was neither an account transaction nor an update instruction, and it is therefore invalid.`,
+            content: `The transaction within "${fileName}" was neither an account transaction nor an update instruction, and is therefore invalid.`,
         };
     }
 
