@@ -1,7 +1,10 @@
 import { loadAllSettings } from '~/database/SettingsDao';
 import { loadAccounts } from '~/features/AccountSlice';
 import { loadAddressBook } from '~/features/AddressBookSlice';
-import { loadCredentials } from '~/features/CredentialSlice';
+import {
+    loadCredentials,
+    loadExternalCredentials,
+} from '~/features/CredentialSlice';
 import { loadIdentities } from '~/features/IdentitySlice';
 import { loadProposals } from '~/features/MultiSignatureSlice';
 import { findSetting, updateSettings } from '~/features/SettingsSlice';
@@ -40,6 +43,7 @@ export default async function initApplication(dispatch: Dispatch) {
         loadIdentities(dispatch),
         loadProposals(dispatch),
         loadCredentials(dispatch),
+        loadExternalCredentials(dispatch),
     ]);
 
     listenForIdentityStatus(dispatch);

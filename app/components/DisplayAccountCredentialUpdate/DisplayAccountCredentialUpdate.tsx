@@ -50,7 +50,10 @@ export default function DisplayAccountCredentialUpdate({
                             className={styles.credId}
                         >
                             {addedCredential.note !== undefined && (
-                                <div>{addedCredential.note}</div>
+                                <>
+                                    {addedCredential.note}
+                                    <br />
+                                </>
                             )}
                             <span className="textFaded">
                                 {addedCredential.value.credId}
