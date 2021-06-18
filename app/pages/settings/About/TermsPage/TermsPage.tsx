@@ -1,4 +1,9 @@
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useState,
+} from 'react';
 import { useDispatch } from 'react-redux';
 import ipcCommands from '~/constants/ipcCommands.json';
 import ipcRendererCommands from '~/constants/ipcRendererCommands.json';
@@ -6,7 +11,11 @@ import routes from '~/constants/routes.json';
 import ButtonNavLink from '~/components/ButtonNavLink';
 import PageLayout from '~/components/PageLayout';
 import { acceptTerms } from '~/features/SettingsSlice';
-import { storeTerms, termsUrlBase64 } from '~/utils/termsHelpers';
+import {
+    hasAcceptedTerms,
+    storeTerms,
+    termsUrlBase64,
+} from '~/utils/termsHelpers';
 import { noOp } from '~/utils/basicHelpers';
 import {
     useWindowResize,
@@ -101,6 +110,17 @@ export default function TermsPage({ mustAccept = false }: Props): JSX.Element {
 
         return hijackLinks(frameEl);
     }, [frameEl, handleResize]);
+
+    useEffect(() => {
+        hasAcceptedTerms()
+            .then((accepted) => {
+                if (accepted) {
+                    dispatch(acceptTerms());
+                }
+                return accepted;
+            })
+            .catch(() => {});
+    }, [dispatch]);
 
     return (
         <PageLayout>

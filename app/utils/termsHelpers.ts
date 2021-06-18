@@ -6,8 +6,8 @@ import ipcCommands from '~/constants/ipcCommands.json';
 export const termsUrlBase64 = terms;
 
 const getHash = async (v: string) => {
-    return (
-        await window.ipcRenderer.invoke(ipcCommands.sha256, Buffer.from(v))
+    return Buffer.from(
+        await window.ipcRenderer.invoke(ipcCommands.sha256, [Buffer.from(v)])
     ).toString('hex');
 };
 
@@ -20,15 +20,13 @@ const getAcceptedTerms = (): string | null => {
     return window.localStorage.getItem(localStorageKeys.TERMS_ACCEPTED);
 };
 
-export const hasAcceptedTerms = (): boolean => {
+export const hasAcceptedTerms = async (): Promise<boolean> => {
     const accepted = getAcceptedTerms();
 
     if (!accepted) {
-        return true;
+        return false;
     }
-    return true;
 
-    // TODO Fix this later.
-    // const hash = await getHash(termsUrlBase64);
-    // return accepted === hash;
+    const hash = await getHash(termsUrlBase64);
+    return accepted === hash;
 };
