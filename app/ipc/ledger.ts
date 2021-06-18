@@ -19,6 +19,7 @@ import {
     ElectionDifficulty,
     HigherLevelKeyUpdate,
     AuthorizationKeysUpdate,
+    UpdateAccountCredentials,
 } from '~/utils/types';
 
 export default function initializeIpcHandlers(ipcMain: IpcMain) {
@@ -72,6 +73,19 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
             return getLedgerClient().signPublicInformationForIp(
                 publicInfoForIp,
                 accountPathInput
+            );
+        }
+    );
+
+    ipcMain.handle(
+        ledgerIpcCommands.signUpdateCredentialTransaction,
+        (_event, transactionAsJson: string, path: number[]) => {
+            const transaction: UpdateAccountCredentials = parse(
+                transactionAsJson
+            );
+            return getLedgerClient().signUpdateCredentialTransaction(
+                transaction,
+                path
             );
         }
     );

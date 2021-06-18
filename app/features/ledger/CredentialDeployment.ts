@@ -1,11 +1,11 @@
 import { Buffer } from 'buffer/';
+import { BrowserWindow } from 'electron';
 import { Transport } from './Transport';
 import {
     UnsignedCredentialDeploymentInformation,
     IdOwnershipProofs,
     CredentialDeploymentValues,
     ChosenAttributesKeys,
-    Hex,
 } from '~/utils/types';
 import {
     encodeWord64,
@@ -14,14 +14,16 @@ import {
     serializeYearMonth,
 } from '~/utils/serializationHelpers';
 import pathAsBuffer from './Path';
+import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 
 export async function signCredentialValues(
     transport: Transport,
     credentialDeployment: CredentialDeploymentValues,
     ins: number,
     p2: number,
-    onAwaitVerificationKeyConfirmation?: (key: Hex) => void,
-    onVerificationKeysConfirmed?: () => void
+    onAwaitVerificationKeyConfirmation: boolean,
+    onVerificationKeysConfirmed: boolean,
+    mainWindow?: BrowserWindow
 ) {
     let p1 = 0x0a;
 
@@ -45,16 +47,21 @@ export async function signCredentialValues(
             serializeVerifyKey(verificationKey),
         ]);
 
-        if (onAwaitVerificationKeyConfirmation) {
-            onAwaitVerificationKeyConfirmation(verificationKey.verifyKey);
+        if (onAwaitVerificationKeyConfirmation && mainWindow) {
+            mainWindow.webContents.send(
+                ledgerIpcCommands.onAwaitVerificationKey,
+                verificationKey.verifyKey
+            );
         }
 
         // eslint-disable-next-line  no-await-in-loop
         await transport.send(0xe0, ins, p1, p2, data);
     }
 
-    if (onVerificationKeysConfirmed) {
-        onVerificationKeysConfirmed();
+    if (onVerificationKeysConfirmed && mainWindow) {
+        mainWindow.webContents.send(
+            ledgerIpcCommands.onVerificationKeysConfirmed
+        );
     }
 
     const signatureThreshold = Buffer.from(Uint8Array.of(publicKeys.threshold));
@@ -209,7 +216,14 @@ async function signCredentialDeployment(
 
     await transport.send(0xe0, ins, p1, p2, pathPrefix);
 
-    await signCredentialValues(transport, credentialDeployment, ins, p2);
+    await signCredentialValues(
+        transport,
+        credentialDeployment,
+        ins,
+        p2,
+        false,
+        false
+    );
 
     const proofs = serializeIdOwnerShipProofs(credentialDeployment.proofs);
 

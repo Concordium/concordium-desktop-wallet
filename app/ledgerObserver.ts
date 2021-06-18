@@ -30,7 +30,10 @@ const ledgerObserver: Observer<DescriptorEvent<string>> = {
         if (event.type === 'add') {
             const deviceName = event.deviceModel.productName;
             const transport = await TransportNodeHid.open();
-            concordiumClient = new ConcordiumLedgerClientMain(transport);
+            concordiumClient = new ConcordiumLedgerClientMain(
+                transport,
+                window
+            );
             const appAndVersion = await concordiumClient.getAppAndVersion();
 
             if (isConcordiumApp(appAndVersion)) {

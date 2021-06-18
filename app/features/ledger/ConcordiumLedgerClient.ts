@@ -104,18 +104,28 @@ export default class ConcordiumLedgerClient {
         return unwrapLedgerIpcMessage(result);
     }
 
-    // TODO Fix this by sending messages back to the renderer thread instead.
-    signUpdateCredentialTransaction(
+    async signUpdateCredentialTransaction(
         transaction: UpdateAccountCredentials,
         path: number[],
         onAwaitVerificationKeyConfirmation: (key: Hex) => void,
         onVerificationKeysConfirmed: () => void
     ): Promise<Buffer> {
-        console.log(transaction);
-        console.log(path);
-        console.log(onAwaitVerificationKeyConfirmation('test'));
-        console.log(onVerificationKeysConfirmed());
-        throw new Error('Testing');
+        window.ipcRenderer.once(
+            ledgerIpcCommands.onAwaitVerificationKey,
+            (_event, key) => onAwaitVerificationKeyConfirmation(key)
+        );
+        window.ipcRenderer.once(
+            ledgerIpcCommands.onVerificationKeysConfirmed,
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            (_event) => onVerificationKeysConfirmed()
+        );
+
+        const result = await window.ipcRenderer.invoke(
+            ledgerIpcCommands.signUpdateCredentialTransaction,
+            stringify(transaction),
+            path
+        );
+        return unwrapLedgerIpcMessage(result);
     }
 
     async signPublicInformationForIp(

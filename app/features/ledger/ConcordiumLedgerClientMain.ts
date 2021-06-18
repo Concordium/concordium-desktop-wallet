@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type HwTransport from '@ledgerhq/hw-transport';
 import { Buffer } from 'buffer/';
+import { BrowserWindow } from 'electron';
 import { Transport, TransportImpl } from './Transport';
 import {
     getPublicKey,
@@ -31,7 +32,6 @@ import {
     HigherLevelKeyUpdate,
     UpdateAccountCredentials,
     AuthorizationKeysUpdate,
-    Hex,
 } from '~/utils/types';
 import { AccountPathInput, getAccountPath } from './Path';
 import getAppAndVersion, { AppAndVersion } from './GetAppAndVersion';
@@ -75,8 +75,11 @@ async function wrapResult<T>(
 export default class ConcordiumLedgerClientMain {
     transport: Transport;
 
-    constructor(transport: HwTransport) {
+    mainWindow: BrowserWindow;
+
+    constructor(transport: HwTransport, mainWindow: BrowserWindow) {
         this.transport = new TransportImpl(transport);
+        this.mainWindow = mainWindow;
     }
 
     closeTransport(): Promise<void> {
@@ -114,16 +117,14 @@ export default class ConcordiumLedgerClientMain {
 
     signUpdateCredentialTransaction(
         transaction: UpdateAccountCredentials,
-        path: number[],
-        onAwaitVerificationKeyConfirmation: (key: Hex) => void,
-        onVerificationKeysConfirmed: () => void
-    ): Promise<Buffer> {
-        return signUpdateCredentialTransaction(
+        path: number[]
+    ): Promise<LedgerIpcMessage<Buffer>> {
+        return wrapResult(
+            signUpdateCredentialTransaction,
             this.transport,
             path,
             transaction,
-            onAwaitVerificationKeyConfirmation,
-            onVerificationKeysConfirmed
+            this.mainWindow
         );
     }
 
