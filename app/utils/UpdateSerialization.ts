@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer/';
 import {
+    encodeWord32,
     encodeWord64,
     putBase58Check,
     serializeVerifyKey,
@@ -166,7 +167,7 @@ export function serializeBakerStakeThreshold(
     bakerStakeThreshold: BakerStakeThreshold
 ) {
     const serializedBakerStakeThreshold = encodeWord64(
-        bakerStakeThreshold.threshold
+        BigInt(bakerStakeThreshold.threshold)
     );
     return serializedBakerStakeThreshold;
 }
@@ -189,8 +190,10 @@ export function serializeElectionDifficulty(
  * Serializes an ExchangeRate to bytes.
  */
 export function serializeExchangeRate(exchangeRate: ExchangeRate) {
-    const serializedNumerator = encodeWord64(exchangeRate.numerator);
-    const serializedDenominator = encodeWord64(exchangeRate.denominator);
+    const serializedNumerator = encodeWord64(BigInt(exchangeRate.numerator));
+    const serializedDenominator = encodeWord64(
+        BigInt(exchangeRate.denominator)
+    );
     return Buffer.concat([serializedNumerator, serializedDenominator]);
 }
 
@@ -330,9 +333,13 @@ export function serializeGasRewards(gasRewards: GasRewards) {
  * UpdateHeader for comments regarding the byte allocation for each field.
  */
 export function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
-    const serializedSequenceNumber = encodeWord64(updateHeader.sequenceNumber);
-    const serializedEffectiveTime = encodeWord64(updateHeader.effectiveTime);
-    const serializedTimeout = encodeWord64(updateHeader.timeout);
+    const serializedSequenceNumber = encodeWord64(
+        BigInt(updateHeader.sequenceNumber)
+    );
+    const serializedEffectiveTime = encodeWord64(
+        BigInt(updateHeader.effectiveTime)
+    );
+    const serializedTimeout = encodeWord64(BigInt(updateHeader.timeout));
     const serializedUpdateHeader = Buffer.concat([
         serializedSequenceNumber,
         serializedEffectiveTime,
@@ -342,8 +349,8 @@ export function serializeUpdateHeader(updateHeader: UpdateHeader): Buffer {
     if (!updateHeader.payloadSize) {
         throw new Error('Unexpected missing payloadSize');
     }
-    serializedUpdateHeader.writeInt32BE(updateHeader.payloadSize, 24);
-    return serializedUpdateHeader;
+    const serializedPayloadSize = encodeWord32(updateHeader.payloadSize);
+    return Buffer.concat([serializedUpdateHeader, serializedPayloadSize]);
 }
 
 /**
