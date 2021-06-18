@@ -22,5 +22,8 @@
     "signAuthorizationKeysUpdate": "LEDGER_SIGN_AUTHORIZATION_KEYS_UPDATE",
     "getAppAndVersion": "LEDGER_GET_APP_AND_VERSION",
     "onAwaitVerificationKey": "LEDGER_ON_AWAIT_VERIFICATION_KEY",
-    "onVerificationKeysConfirmed": "LEDGER_ON_VERIFICATION_KEY_CONFIRMED"
+    "onVerificationKeysConfirmed": "LEDGER_ON_VERIFICATION_KEY_CONFIRMED",
+    "subscribe": "LEDGER_SUBSCRIBE",
+    "closeTransport": "LEDGER_CLOSE_TRANSPORT",
+    "listenChannel": "LEDGER_LISTEN_CHANNEL"
 }

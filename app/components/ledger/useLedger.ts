@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useReducer, Dispatch } from 'react';
+import { useEffect, useCallback, useReducer, Dispatch, useState } from 'react';
 
 import { singletonHook } from 'react-singleton-hook';
 import getErrorDescription from '~/features/ledger/ErrorCodes';
@@ -20,6 +20,7 @@ import {
 } from './util';
 import { instanceOfClosedWhileSendingError } from '~/features/ledger/ClosedWhileSendingError';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
+import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 
 const { CONNECTED, ERROR, OPEN_APP, AWAITING_USER_INPUT } = LedgerStatusType;
 
@@ -38,14 +39,16 @@ function useLedger(): {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dispatch: Dispatch<any>;
 } {
-    const [{ status, client, text }, dispatch] = useReducer(
+    const [{ status, text, client }, dispatch] = useReducer(
         ledgerReducer,
         getInitialState()
     );
 
+    const [subscribed, setSubscribed] = useState<boolean>();
+
     useEffect(() => {
         window.ipcRenderer.on(
-            'ledger',
+            ledgerIpcCommands.listenChannel,
             (_event, action: LedgerSubscriptionAction, deviceName: string) => {
                 switch (action) {
                     case LedgerSubscriptionAction.ERROR_SUBSCRIPTION:
@@ -71,16 +74,20 @@ function useLedger(): {
             }
         );
         return () => {
-            window.ipcRenderer.removeAllListeners('ledger');
+            window.ipcRenderer.removeAllListeners(
+                ledgerIpcCommands.listenChannel
+            );
         };
     }, []);
 
-    // useEffect(() => {
-    //     // TODO I am uncertain if we need to do this or not.
-    //     return function cleanup() {
-    //         dispatch(resetAction());
-    //     };
-    // }, []);
+    useEffect(() => {
+        if (!subscribed) {
+            window.ipcRenderer
+                .invoke(ledgerIpcCommands.subscribe)
+                .then(() => setSubscribed(true))
+                .catch(() => {});
+        }
+    }, [subscribed]);
 
     return {
         isReady: (status === CONNECTED || status === ERROR) && Boolean(client),
@@ -92,7 +99,7 @@ function useLedger(): {
 }
 
 const init = () => {
-    const { status, client, text } = getInitialState();
+    const { status, text, client } = getInitialState();
     return {
         isReady: false,
         status,
@@ -115,12 +122,13 @@ export default function ExternalHook(
 } {
     const { isReady, status, statusText, client, dispatch } = hook();
 
-    // TODO Fix this so it works as before.
     useEffect(() => {
         return function cleanup() {
             if (client) {
-                // client.closeTransport();
-                dispatch(cleanupAction());
+                window.ipcRenderer
+                    .invoke(ledgerIpcCommands.closeTransport)
+                    .then(() => dispatch(cleanupAction()))
+                    .catch(() => {});
             }
         };
     }, [client, dispatch]);
@@ -133,8 +141,8 @@ export default function ExternalHook(
                 await ledgerCallback(client, (t) =>
                     dispatch(setStatusTextAction(t))
                 );
-                dispatch(finishedAction());
             }
+            dispatch(finishedAction());
         } catch (e) {
             if (instanceOfClosedWhileSendingError(e)) {
                 dispatch(finishedAction());

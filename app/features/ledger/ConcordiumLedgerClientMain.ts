@@ -57,7 +57,7 @@ async function wrapResult<T>(
         return result;
     } catch (e) {
         const error: LedgerIpcMessage<T> = {
-            error: e,
+            error: JSON.stringify(e),
         };
         return error;
     }
@@ -335,7 +335,7 @@ export default class ConcordiumLedgerClientMain {
         );
     }
 
-    getAppAndVersion(): Promise<AppAndVersion> {
-        return getAppAndVersion(this.transport);
+    getAppAndVersion(): Promise<LedgerIpcMessage<AppAndVersion>> {
+        return wrapResult(getAppAndVersion, this.transport);
     }
 }

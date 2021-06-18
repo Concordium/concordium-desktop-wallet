@@ -1,8 +1,12 @@
-import { IpcMain } from 'electron';
+import { BrowserWindow, IpcMain } from 'electron';
 import { Buffer } from 'buffer/';
 import ledgerIpcCommands from '~/constants/ledgerIpcCommands.json';
 import { parse } from '~/utils/JSONHelper';
-import { getLedgerClient } from '~/ledgerObserver';
+import {
+    closeTransport,
+    getLedgerClient,
+    subscribeLedger,
+} from '~/ledgerObserver';
 import { AccountPathInput } from '~/features/ledger/Path';
 import {
     AccountTransaction,
@@ -22,7 +26,10 @@ import {
     UpdateAccountCredentials,
 } from '~/utils/types';
 
-export default function initializeIpcHandlers(ipcMain: IpcMain) {
+export default function initializeIpcHandlers(
+    ipcMain: IpcMain,
+    mainWindow: BrowserWindow
+) {
     ipcMain.handle(
         ledgerIpcCommands.getPublicKey,
         (_event, keypath: number[]) => {
@@ -338,5 +345,15 @@ export default function initializeIpcHandlers(ipcMain: IpcMain) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ipcMain.handle(ledgerIpcCommands.getAppAndVersion, (_event) => {
         return getLedgerClient().getAppAndVersion();
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ipcMain.handle(ledgerIpcCommands.subscribe, (_event) => {
+        return subscribeLedger(mainWindow);
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ipcMain.handle(ledgerIpcCommands.closeTransport, (_event) => {
+        return closeTransport();
     });
 }

@@ -27,7 +27,7 @@ import { LedgerIpcMessage } from './ConcordiumLedgerClientMain';
 
 function unwrapLedgerIpcMessage(message: LedgerIpcMessage<Buffer>): Buffer {
     if (message.error) {
-        throw message.error;
+        throw JSON.parse(message.error);
     }
     if (!message.result) {
         throw new Error('Missing result');
@@ -326,7 +326,18 @@ export default class ConcordiumLedgerClient {
         return unwrapLedgerIpcMessage(result);
     }
 
-    getAppAndVersion(): Promise<AppAndVersion> {
-        return window.ipcRenderer.invoke(ledgerIpcCommands.getAppAndVersion);
+    async getAppAndVersion(): Promise<AppAndVersion> {
+        const result = await window.ipcRenderer.invoke(
+            ledgerIpcCommands.getAppAndVersion
+        );
+        if (result.error) {
+            throw result.error;
+        }
+
+        if (!result.result) {
+            throw new Error('Missing result');
+        }
+
+        return result.result;
     }
 }

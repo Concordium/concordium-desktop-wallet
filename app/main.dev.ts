@@ -16,8 +16,6 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import ipcCommands from './constants/ipcCommands.json';
 import ipcRendererCommands from './constants/ipcRendererCommands.json';
-
-import { subscribeLedger } from './ledgerObserver';
 import initializeIpcHandlers from './ipc/http';
 import initializeLedgerIpcHandlers from './ipc/ledger';
 import initializeCryptoIpcHandlers from './ipc/crypto';
@@ -123,8 +121,6 @@ const createWindow = async () => {
         }
 
         mainWindow.webContents.send(ipcRendererCommands.didFinishLoad);
-        // Start ledger listener
-        subscribeLedger(mainWindow);
     });
 
     mainWindow.on('ready-to-show', () => {
@@ -150,26 +146,26 @@ const createWindow = async () => {
     // Remove this if your app does not use auto updates
     // eslint-disable-next-line
     new AppUpdater();
-};
 
-// Setup the IPC methods, so that the renderer threads
-// can access the exposed methods. This will be moved to
-// the pre-load script when turning on context isolation.
-initializeIpcHandlers(ipcMain);
-initializeLedgerIpcHandlers(ipcMain);
-initializeCryptoIpcHandlers(ipcMain);
-initializeFilesIpcHandlers(ipcMain);
-initializeGrpcIpcHandlers(ipcMain);
-initializeDatabaseGeneralIpcHandlers(ipcMain);
-initializeDatabaseAccountIpcHandlers(ipcMain);
-initializeDatabaseAddressBookIpcHandlers(ipcMain);
-initializeDatabaseCredentialIpcHandlers(ipcMain);
-initializeDatabaseIdentityIpcHandlers(ipcMain);
-initializeDatabaseGenesisAndGlobalIpcHandlers(ipcMain);
-initializeDatabaseMultiSignatureTransactionIpcHandlers(ipcMain);
-initializeDatabaseSettingsIpcHandlers(ipcMain);
-initializeDatabaseTransactionsIpcHandlers(ipcMain);
-initializeDatabaseWalletIpcHandlers(ipcMain);
+    // Setup the IPC methods, so that the renderer threads
+    // can access the exposed methods. This will be moved to
+    // the pre-load script when turning on context isolation.
+    initializeIpcHandlers(ipcMain);
+    initializeLedgerIpcHandlers(ipcMain, mainWindow);
+    initializeCryptoIpcHandlers(ipcMain);
+    initializeFilesIpcHandlers(ipcMain);
+    initializeGrpcIpcHandlers(ipcMain);
+    initializeDatabaseGeneralIpcHandlers(ipcMain);
+    initializeDatabaseAccountIpcHandlers(ipcMain);
+    initializeDatabaseAddressBookIpcHandlers(ipcMain);
+    initializeDatabaseCredentialIpcHandlers(ipcMain);
+    initializeDatabaseIdentityIpcHandlers(ipcMain);
+    initializeDatabaseGenesisAndGlobalIpcHandlers(ipcMain);
+    initializeDatabaseMultiSignatureTransactionIpcHandlers(ipcMain);
+    initializeDatabaseSettingsIpcHandlers(ipcMain);
+    initializeDatabaseTransactionsIpcHandlers(ipcMain);
+    initializeDatabaseWalletIpcHandlers(ipcMain);
+};
 
 enum PrintErrorTypes {
     Cancelled = 'cancelled',
