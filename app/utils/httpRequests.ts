@@ -3,7 +3,7 @@ import * as http from 'http';
 import * as https from 'https';
 import urls from '../constants/urls.json';
 import { walletProxytransactionLimit } from '../constants/externalConstants.json';
-import { IncomingTransaction } from './types';
+import { IdObjectRequest, IncomingTransaction, Versioned } from './types';
 import { getTargetNet, Net } from './ConfigHelper';
 
 function getWalletProxy() {
@@ -92,7 +92,7 @@ export async function getIdentityProviders() {
 export async function performIdObjectRequest(
     url: string,
     redirectUri: string,
-    idObjectRequest: string
+    idObjectRequest: Versioned<IdObjectRequest>
 ) {
     const parameters = {
         scope: 'identity',
