@@ -38,7 +38,7 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 
 async function loadTransactionFile(
     file: File,
-    indexRecord: Record<string, bigint>,
+    nonceTracker: Record<string, bigint>,
     fileName: string,
     exchangeRate: Fraction,
     blockHash: string
@@ -107,18 +107,18 @@ async function loadTransactionFile(
     }
 
     // Set the nonce
-    if (address in indexRecord) {
-        indexRecord[address] += 1n;
+    if (address in nonceTracker) {
+        nonceTracker[address] += 1n;
     } else {
         const accountNonce = await getNextAccountNonce(address);
         const maxOpenNonce = await getMaxOpenNonceOnAccount(address);
-        indexRecord[address] = max(
+        nonceTracker[address] = max(
             BigInt(accountNonce.nonce),
             maxOpenNonce + 1n
         );
     }
 
-    transactionObject.nonce = indexRecord[address].toString();
+    transactionObject.nonce = nonceTracker[address].toString();
 
     // Set the energyAmount
     const energyAmount = getTransactionEnergyCost(transactionObject, threshold);
@@ -179,12 +179,12 @@ function ImportProposal({ exchangeRate }: Props) {
 
     async function handleFiles(files: File[]) {
         const proposals: [string, Partial<MultiSignatureTransaction>][] = [];
-        const index: Record<string, bigint> = {};
+        const nonceTracker: Record<string, bigint> = {};
         const blockHash = await getlastFinalizedBlockHash();
         for (const file of files) {
             const result = await loadTransactionFile(
                 file,
-                index,
+                nonceTracker,
                 file.name,
                 exchangeRate,
                 blockHash
