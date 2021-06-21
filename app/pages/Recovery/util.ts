@@ -16,8 +16,10 @@ import {
 } from '~/utils/types';
 import { getCurrentYearMonth } from '~/utils/timeHelpers';
 import { insertIdentity, removeIdentity } from '~/database/IdentityDao';
-
-const maxCredentialsOnAccount = 256;
+import {
+    maxCredentialsOnAccount,
+    allowedSpacesCredentials,
+} from '~/constants/recoveryConstants.json';
 
 export function getLostIdentityName(identityNumber: number) {
     return `Lost Identity - ${identityNumber}`;
@@ -146,7 +148,7 @@ async function recoverCredentials(
     blockHash: string,
     global: Global,
     startingCredNumber = 0,
-    allowedSpaces = 10
+    allowedSpaces = allowedSpacesCredentials
 ) {
     const credentials = [];
     const accounts = [];

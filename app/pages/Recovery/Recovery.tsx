@@ -22,6 +22,7 @@ import {
     createLostIdentity,
     recoverIdentity,
 } from './util';
+import { allowedSpacesIdentities } from '~/constants/recoveryConstants.json';
 
 const addedMessage = (identityName: string, count: number) =>
     `Recovered ${count} credentials on ${identityName}.`;
@@ -92,8 +93,7 @@ export default function DefaultPage() {
         }
 
         // Check next identities
-        const skipsAllowed = 2;
-        let skipsRemaining = skipsAllowed;
+        let skipsRemaining = allowedSpacesIdentities;
         let identityNumber = await getNextIdentityNumber(walletId);
         while (skipsRemaining >= 0) {
             const identityId = await createLostIdentity(
@@ -114,7 +114,7 @@ export default function DefaultPage() {
             identityNumber += 1;
             if (addedCount) {
                 addMessage(newIdentityMessage(identityNumber, addedCount));
-                skipsRemaining = skipsAllowed;
+                skipsRemaining = allowedSpacesIdentities;
             } else {
                 addMessage(noIdentityMessage(identityNumber));
                 skipsRemaining -= 1;
@@ -143,7 +143,7 @@ export default function DefaultPage() {
                 <h2>Account Recovery</h2>
                 <p>
                     Here you can recover the credentials and their accounts from
-                    your current ledger device.{' '}
+                    your current ledger device.
                 </p>
                 <Columns className="flexChildFill">
                     <Columns.Column>
@@ -158,9 +158,7 @@ export default function DefaultPage() {
                         <div className={styles.messages}>
                             <h2 className={styles.messagesTitle}>Messages:</h2>
                             {messages.map((m) => (
-                                <>
-                                    <p>{m}</p>
-                                </>
+                                <p key={m}>{m}</p>
                             ))}
                         </div>
                     </Columns.Column>
