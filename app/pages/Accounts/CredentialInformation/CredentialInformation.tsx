@@ -18,7 +18,10 @@ import {
 } from '~/features/CredentialSlice';
 import InputModal from '~/components/InputModal';
 import Button from '~/cross-app-components/Button';
-import { CREDENTIAL_NOTE_MAX_LENGTH } from '~/utils/credentialHelper';
+import {
+    CREDENTIAL_NOTE_MAX_LENGTH,
+    getNoteForOwnCredential,
+} from '~/utils/credentialHelper';
 import { identitiesSelector } from '~/features/IdentitySlice';
 
 import styles from './CredentialInformation.module.scss';
@@ -70,11 +73,7 @@ export default function CredentialInformation({
             );
             const isOwn = !!existingOwnCredential;
             const note = isOwn
-                ? `Credential from ${`"${
-                      identities.find(
-                          (i) => i.id === existingOwnCredential?.identityId
-                      )?.name
-                  }"`}`
+                ? getNoteForOwnCredential(identities, existingOwnCredential)
                 : externalCredentials.find(
                       (c) => c.credId === enrichedCred.credId
                   )?.note;

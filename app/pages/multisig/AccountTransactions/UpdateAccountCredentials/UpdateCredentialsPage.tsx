@@ -32,7 +32,12 @@ import { validateFee } from '~/utils/transactionHelpers';
 import InputTimestamp from '~/components/Form/InputTimestamp';
 import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryTime/DisplayTransactionExpiryTime';
 import { hasEncryptedBalance } from '~/utils/accountHelpers';
-import { externalCredentialsSelector } from '~/features/CredentialSlice';
+import {
+    credentialsSelector,
+    externalCredentialsSelector,
+} from '~/features/CredentialSlice';
+import { getNoteForOwnCredential } from '~/utils/credentialHelper';
+import { identitiesSelector } from '~/features/IdentitySlice';
 import { CredentialDetails, CredentialStatus } from './util';
 
 import styles from './UpdateAccountCredentials.module.scss';
@@ -192,7 +197,7 @@ function listCredentials(
                     )}
                 </div>
                 <h5>
-                    <div>{note}</div>
+                    {note && <div className="mB5">{note}</div>}
                     <div className="textFaded">{credId}</div>
                 </h5>
                 <div className="mL20">{statusText}</div>
@@ -225,6 +230,8 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
     const { pathname, state } = useLocation<State>();
     const location = pathname.replace(`${transactionKind}`, ':transactionKind');
     const externalCredentials = useSelector(externalCredentialsSelector);
+    const ownCredentials = useSelector(credentialsSelector);
+    const identities = useSelector(identitiesSelector);
 
     // const [isReady, setReady] = useState(false);
     const [account, setAccount] = useState<Account | undefined>(state?.account);
@@ -309,11 +316,18 @@ function UpdateCredentialPage({ exchangeRate }: Props): JSX.Element {
                     credentialIndex === 0
                         ? CredentialStatus.Original
                         : CredentialStatus.Unchanged;
-                return [
-                    credId,
-                    status,
-                    externalCredentials.find((e) => e.credId === credId)?.note,
-                ];
+                let note = externalCredentials.find((e) => e.credId === credId)
+                    ?.note;
+
+                if (!note) {
+                    const ownCred = ownCredentials.find(
+                        (c) => c.credId === credId
+                    );
+
+                    note = getNoteForOwnCredential(identities, ownCred);
+                }
+
+                return [credId, status, note];
             })
         );
     }
