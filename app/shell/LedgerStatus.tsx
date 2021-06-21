@@ -59,7 +59,7 @@ export default function LedgerStatus(): JSX.Element {
     const { isReady, status, submitHandler } = useLedger(callback, asyncNoOp);
 
     useEffect(() => {
-        if (status === LedgerStatusType.LOADING) {
+        if (status === LedgerStatusType.DISCONNECTED) {
             setDisconnected(true);
             dispatch(setCurrentWalletId(undefined));
             setStatusText('No wallet');

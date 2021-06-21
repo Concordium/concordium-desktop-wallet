@@ -99,7 +99,7 @@ function getStatusMessage(
     deviceName?: string
 ): string {
     switch (status) {
-        case LedgerStatusType.LOADING:
+        case LedgerStatusType.DISCONNECTED:
             return 'Waiting for device. Please connect your Ledger.';
         case LedgerStatusType.AWAITING_USER_INPUT:
             return 'Waiting for user to finish the process on device';
@@ -115,8 +115,8 @@ function getStatusMessage(
 }
 
 export const getInitialState = (): LedgerReducerState => ({
-    status: LedgerStatusType.LOADING,
-    text: getStatusMessage(LedgerStatusType.LOADING),
+    status: LedgerStatusType.DISCONNECTED,
+    text: getStatusMessage(LedgerStatusType.DISCONNECTED),
 });
 
 const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
