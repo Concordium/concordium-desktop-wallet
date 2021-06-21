@@ -13,6 +13,7 @@
 import sys
 import json
 import csv
+import os
 from decimal import *
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -29,6 +30,9 @@ if len(sys.argv) != 2:
 	sys.exit(1)
 
 csvFileName = sys.argv[1]
+
+# Extract base name of csv file without extension and path. Outpul files will contain this name.
+baseCsvName = os.path.splitext(os.path.basename(csvFileName))[0]
 
 # read csv file
 try:
@@ -90,8 +94,13 @@ try:
 
 			proposal["payload"]["schedule"] = schedule
 
-			with open("pre-proposal_" + str(rowNumber).zfill(3) + ".json", 'w') as outfile:
-				json.dump(proposal, outfile, indent=4)
+			outFileName = "pre-proposal_" + baseCsvName + "_" + str(rowNumber).zfill(3) + ".json";
+			try:
+				with open(outFileName, 'w') as outFile:
+					json.dump(proposal, outFile, indent=4)
+			except IOError:
+				print("Error writing file \"", outFileName, "\".", sep='')
+				sys.exit(3)
 
 except IOError:
 	print("Error reading file \"", csvFileName, "\".", sep='')
