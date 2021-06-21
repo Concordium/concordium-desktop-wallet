@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { getAccountsOfIdentity, insertAccount } from '../database/AccountDao';
+import { insertAccount } from '../database/AccountDao';
 import {
     getCredentialsForIdentity,
     insertCredential,
@@ -112,54 +112,6 @@ function findAttachedEntities(
 }
 
 /**
- * Inserts an array of new identities and its attached accounts and credentials. The identities
- * must be new identities that did not already exist in the database. The accounts and credentials for
- * each identity in the array will have their identityId reference updated to point to the
- * correct id for their identity, before they are also inserted into the database.
- *
- * Note that for new identities that there cannot be existing account or credentials, so we
- * can safely insert them without checking if they already exist.
- * @param newIdentities an array of new identities to be added to the database
- * @param attachedAccounts all accounts for the current wallet import, without any changes to their identityId
- * @param attachedCredentials all credentials for the current wallet import, without any changes to their identityId
- */
-async function insertNewIdentities(
-    newIdentities: Identity[],
-    attachedAccounts: Account[],
-    attachedCredentials: Credential[]
-) {
-    for (let i = 0; i < newIdentities.length; i += 1) {
-        const { id, ...newIdentity } = newIdentities[i];
-
-        const newIdentityId = (await insertIdentity(newIdentity))[0];
-
-        const {
-            accountsOnIdentity,
-            credentialsOnIdentity,
-        } = findAccountsAndCredentialsOnIdentity(
-            id,
-            attachedAccounts,
-            attachedCredentials
-        );
-        for (let j = 0; j < accountsOnIdentity.length; j += 1) {
-            const newAccountToInsert: Account = {
-                ...accountsOnIdentity[j],
-                identityId: newIdentityId,
-            };
-            await insertAccount(newAccountToInsert);
-        }
-
-        for (let k = 0; k < credentialsOnIdentity.length; k += 1) {
-            const newCredentialToInsert = {
-                ...credentialsOnIdentity[k],
-                identityId: newIdentityId,
-            };
-            await insertCredential(newCredentialToInsert);
-        }
-    }
-}
-
-/**
  * Inserts new accounts and credentials for an identity that has already been inserted into the
  * database, so that we have its up-to-date id, which can be used to update the identityId
  * on its accounts and credentials.
@@ -168,12 +120,13 @@ async function insertNewIdentities(
 async function insertNewAccountsAndCredentials(
     identityId: number,
     accountsOnIdentity: Account[],
+    existingAccounts: Account[],
     credentialsOnIdentity: Credential[]
 ) {
     // Only consider accounts that are not already in the database.
-    const existingAccountAddressesInDatabase = (
-        await getAccountsOfIdentity(identityId)
-    ).map((account) => account.address);
+    const existingAccountAddressesInDatabase = existingAccounts.map(
+        (account) => account.address
+    );
 
     const newAccounts = accountsOnIdentity.filter(
         (accountOnIdentity) =>
@@ -181,6 +134,7 @@ async function insertNewAccountsAndCredentials(
                 accountOnIdentity.address
             )
     );
+
     for (let j = 0; j < newAccounts.length; j += 1) {
         const newAccountToInsert: Account = {
             ...newAccounts[j],
@@ -210,6 +164,48 @@ async function insertNewAccountsAndCredentials(
 }
 
 /**
+ * Inserts an array of new identities and its attached accounts and credentials. The identities
+ * must be new identities that did not already exist in the database. The accounts and credentials for
+ * each identity in the array will have their identityId reference updated to point to the
+ * correct id for their identity, before they are also inserted into the database.
+ *
+ * Note that for new identities that there cannot be existing account or credentials, so we
+ * can safely insert them without checking if they already exist.
+ * @param newIdentities an array of new identities to be added to the database
+ * @param attachedAccounts all accounts for the current wallet import, without any changes to their identityId
+ * @param attachedCredentials all credentials for the current wallet import, without any changes to their identityId
+ */
+async function insertNewIdentities(
+    newIdentities: Identity[],
+    attachedAccounts: Account[],
+    attachedCredentials: Credential[],
+    existingAccounts: Account[]
+) {
+    for (let i = 0; i < newIdentities.length; i += 1) {
+        const { id, ...newIdentity } = newIdentities[i];
+
+        const newIdentityId = (await insertIdentity(newIdentity))[0];
+
+        const {
+            accountsOnIdentity,
+            credentialsOnIdentity,
+        } = findAccountsAndCredentialsOnIdentity(
+            id,
+            attachedAccounts,
+            attachedCredentials
+        );
+
+        // TODO: Find a nice way to avoid the unnecessary check on credentials
+        await insertNewAccountsAndCredentials(
+            newIdentityId,
+            accountsOnIdentity,
+            existingAccounts,
+            credentialsOnIdentity
+        );
+    }
+}
+
+/**
  * Imports a list of completely new wallets, i.e. wallets that cannot be matched with
  * a wallet entry currently in the database. This will also import the associated identities,
  * credentials and accounts.
@@ -222,7 +218,8 @@ async function importNewWallets(
     newWallets: WalletEntry[],
     importedIdentities: Identity[],
     importedCredentials: Credential[],
-    importedAccounts: Account[]
+    importedAccounts: Account[],
+    existingAccounts: Account[]
 ) {
     const {
         attachedIdentities,
@@ -261,7 +258,8 @@ async function importNewWallets(
     await insertNewIdentities(
         identitiesWithUpdatedReferences,
         attachedAccounts,
-        attachedCredentials
+        attachedCredentials,
+        existingAccounts
     );
 }
 
@@ -301,6 +299,7 @@ async function importDuplicateWallets(
         await insertNewAccountsAndCredentials(
             newId,
             accountsOnIdentity,
+            existingData.accounts,
             credentialsOnIdentity
         );
     }
@@ -415,7 +414,8 @@ async function importDuplicateWallets(
     await insertNewIdentities(
         newIdentities,
         attachedAccounts,
-        attachedCredentials
+        attachedCredentials,
+        existingData.accounts
     );
 }
 
@@ -530,7 +530,8 @@ export async function importWallets(
         newWallets,
         importedIdentities,
         importedCredentials,
-        importedAccounts
+        importedAccounts,
+        existingData.accounts
     );
 }
 
