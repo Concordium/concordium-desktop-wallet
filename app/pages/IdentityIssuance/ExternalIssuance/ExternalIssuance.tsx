@@ -5,11 +5,19 @@ import { Redirect, useLocation } from 'react-router';
 import { addPendingIdentity } from '~/features/IdentitySlice';
 import { addPendingAccount } from '~/features/AccountSlice';
 import routes from '~/constants/routes.json';
-import { performIdObjectRequest } from '~/utils/httpRequests';
-import { IdentityProvider, Dispatch, SignedIdRequest } from '~/utils/types';
+import {
+    IdentityProvider,
+    Dispatch,
+    SignedIdRequest,
+    IdObjectRequest,
+    Versioned,
+} from '~/utils/types';
 import { confirmIdentityAndInitialAccount } from '~/utils/IdentityStatusPoller';
 import Loading from '~/cross-app-components/Loading';
 import ipcCommands from '../../../constants/ipcCommands.json';
+import { performIdObjectRequest } from '~/utils/httpRequests';
+
+import { getAddressFromCredentialId } from '~/utils/rustInterface';
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
 
@@ -47,7 +55,7 @@ async function handleIdentityProviderLocation(
 }
 
 async function generateIdentity(
-    idObjectRequest: string,
+    idObjectRequest: Versioned<IdObjectRequest>,
     randomness: string,
     identityNumber: number,
     setLocation: (location: string) => void,
@@ -82,8 +90,16 @@ async function generateIdentity(
             randomness,
             walletId
         );
-        // TODO: Can we add the address already here?
-        await addPendingAccount(dispatch, accountName, identityId, true);
+        const address = await getAddressFromCredentialId(
+            idObjectRequest.value.pubInfoForIp.regId
+        );
+        await addPendingAccount(
+            dispatch,
+            accountName,
+            identityId,
+            true,
+            address
+        );
     } catch (e) {
         onError(`Failed to create identity due to ${e}`);
         // Rethrow this to avoid redirection;

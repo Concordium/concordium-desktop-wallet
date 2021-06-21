@@ -1,4 +1,4 @@
-import { IncomingTransaction } from './types';
+import { IdObjectRequest, IncomingTransaction, Versioned } from './types';
 import ipcCommands from '../constants/ipcCommands.json';
 
 interface HttpResponse {
@@ -43,7 +43,7 @@ export async function getIdentityProviders() {
 export async function performIdObjectRequest(
     url: string,
     redirectUri: string,
-    idObjectRequest: string
+    idObjectRequest: Versioned<IdObjectRequest>
 ) {
     const parameters = {
         scope: 'identity',
