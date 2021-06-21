@@ -34,7 +34,12 @@ export async function up(knex: Knex): Promise<void> {
         });
 
         const accounts: Account[] = await t(TEMP_NAME).select();
-        await t(accountsTable).insert(ensureUniqueAccountAddresses(accounts));
+
+        if (accounts.length) {
+            await t(accountsTable).insert(
+                ensureUniqueAccountAddresses(accounts)
+            );
+        }
 
         await knex.schema.dropTableIfExists(TEMP_NAME);
     });
@@ -75,7 +80,10 @@ export async function down(knex: Knex): Promise<void> {
         });
 
         const accounts: Account[] = await t(TEMP_NAME).select();
-        await t(accountsTable).insert(revertTempAddresses(accounts));
+
+        if (accounts.length) {
+            await t(accountsTable).insert(revertTempAddresses(accounts));
+        }
 
         await knex.schema.dropTableIfExists(TEMP_NAME);
     });

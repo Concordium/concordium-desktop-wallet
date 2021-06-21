@@ -107,6 +107,12 @@ export async function importCredentials(credentials: Credential[]) {
     return Promise.all(credentials.map(insertCredential));
 }
 
+export async function importExternalCredentials(
+    credentials: ExternalCredential[]
+) {
+    return Promise.all(credentials.map(upsertExternalCredential));
+}
+
 export async function insertNewCredential(
     dispatch: Dispatch,
     accountAddress: string,

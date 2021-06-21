@@ -22,7 +22,10 @@ import {
 } from '~/features/AddressBookSlice';
 import {
     credentialsSelector,
+    externalCredentialsSelector,
+    importExternalCredentials,
     loadCredentials,
+    loadExternalCredentials,
 } from '~/features/CredentialSlice';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
 import { hasNoDuplicate, importWallets } from '~/utils/importHelpers';
@@ -113,10 +116,13 @@ async function performImport(
         );
     }
 
+    await importExternalCredentials(importedData.externalCredentials);
+
     await loadIdentities(dispatch);
     await loadAccounts(dispatch);
     await loadAddressBook(dispatch);
     await loadCredentials(dispatch);
+    await loadExternalCredentials(dispatch);
 }
 
 /**
@@ -132,6 +138,7 @@ export default function PerformImport({ location }: Props) {
     const identities = useSelector(identitiesSelector);
     const addressBook = useSelector(addressBookSelector);
     const credentials = useSelector(credentialsSelector);
+    const externalCredentials = useSelector(externalCredentialsSelector);
 
     const [error, setError] = useState<string>();
     const [started, setStarted] = useState(false);
@@ -146,6 +153,7 @@ export default function PerformImport({ location }: Props) {
                     accounts,
                     addressBook,
                     credentials,
+                    externalCredentials,
                     wallets: [],
                 },
                 dispatch
@@ -156,6 +164,7 @@ export default function PerformImport({ location }: Props) {
         identities,
         accounts,
         credentials,
+        externalCredentials,
         addressBook,
         dispatch,
         started,
