@@ -50,7 +50,11 @@ export function convertIncomingTransaction(
     }
     let encrypted;
     if (transaction.encrypted) {
-        encrypted = JSON.stringify(transaction.encrypted);
+        const { inputEncryptedAmount } = transaction.details;
+        encrypted = JSON.stringify({
+            ...transaction.encrypted,
+            inputEncryptedAmount,
+        });
     }
 
     const success = transaction.details.outcome === 'success';
@@ -223,8 +227,8 @@ function convertEncryptedTransfer(
 
     return {
         transactionKind: TransactionKindString.EncryptedAmountTransfer,
-        subtotal: amount.toString(),
-        decryptedAmount: (-amount).toString(),
+        subtotal: '0',
+        decryptedAmount: amount.toString(),
         toAddress: transaction.payload.toAddress,
         encrypted,
     };

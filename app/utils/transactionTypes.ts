@@ -1,3 +1,4 @@
+import { FieldValues } from 'react-hook-form';
 import { AccountPathInput } from '~/features/ledger/Path';
 import {
     Authorization,
@@ -26,6 +27,7 @@ export interface TransactionInput {
  * transactions.
  */
 export interface UpdateProps {
+    defaults: FieldValues;
     blockSummary: BlockSummary;
     consensusStatus: ConsensusStatus;
     handleHigherLevelKeySubmit?(
@@ -59,6 +61,8 @@ export type PrintComponent<T> = (
     identiconImage?: string
 ) => JSX.Element | undefined;
 
+export type TransactionViewComponent<T> = (transaction: T) => JSX.Element;
+
 /**
  * Interface definition for a class that handles a specific type
  * of transaction.
@@ -67,6 +71,31 @@ export type TransactionHandler<T, S> =
     | UpdateInstructionHandler<T, S>
     | AccountTransactionHandler<T, S>;
 
+export enum TransactionExportType {
+    Signature = 'signature',
+    Proposal = 'proposal',
+}
+
+interface TransactionHandlerBase<T, P> {
+    /**
+     * Used to resolve type ambiguity. N.B. If given another type of update than T,
+     * this might throw an error.
+     */
+    confirmType(transaction: P): T;
+    getFileNameForExport(
+        transaction: P,
+        exportType: TransactionExportType
+    ): string;
+    serializePayload(transaction: T): Buffer;
+    /**
+     * Returns a React element, in which the details of the transaction are displayed
+     */
+    view: TransactionViewComponent<T>;
+    print: PrintComponent<P>;
+    type: string;
+    title: string;
+}
+
 /**
  * Interface definition for a class that handles a specific type
  * of update instructions.
@@ -74,12 +103,8 @@ export type TransactionHandler<T, S> =
  * S = The class which signs the transaction
  * P = 'Parent' type of the transaction.
  */
-export interface UpdateInstructionHandler<T, S, P = UpdateInstruction> {
-    /**
-     * Used to resolve type ambiguity. N.B. If given another type of update than T,
-     * this might throw an error.
-     */
-    confirmType: (transaction: P) => T;
+export interface UpdateInstructionHandler<T, S, P = UpdateInstruction>
+    extends TransactionHandlerBase<T, P> {
     /**
      * Creates a instance of update type T.
      * if the fields are not appropiate, will return undefined
@@ -91,23 +116,15 @@ export interface UpdateInstructionHandler<T, S, P = UpdateInstruction> {
         effectiveTime: bigint,
         expiryTime: bigint
     ) => Promise<Partial<MultiSignatureTransaction> | undefined>;
-    serializePayload: (transaction: T) => Buffer;
     signTransaction: (transaction: T, signer: S) => Promise<Buffer>;
-    /**
-     * Returns a React element, in which the details of the transaction are displayed
-     */
-    view: (transaction: T) => JSX.Element;
     /**
      * Returns a React element, which contains the details of the transaction for print
      */
-    print: PrintComponent<P>;
     getAuthorization: (authorizations: Authorizations) => Authorization;
     /**
      * Returns a React element, in which the update's fields can be chosen.
      */
     update: UpdateComponent;
-    type: string;
-    title: string;
 }
 
 export interface CreateTransactionInput {
@@ -127,13 +144,8 @@ export interface CreateTransactionInput {
  * S = The class which signs the transaction
  * P = 'Parent' type of the transaction.
  */
-export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
-    /**
-     * Used to resolve type ambiguity. N.B. If given another type of transaction than T,
-     * this might throw an error.
-     */
-    confirmType: (transaction: P) => T;
-    serializePayload: (transaction: T) => Buffer;
+export interface AccountTransactionHandler<T, S, P = AccountTransaction>
+    extends TransactionHandlerBase<T, P> {
     signTransaction: (
         transaction: T,
         signer: S,
@@ -141,15 +153,8 @@ export interface AccountTransactionHandler<T, S, P = AccountTransaction> {
         displayMessage?: (message: string | JSX.Element) => void
     ) => Promise<Buffer>;
     /**
-     * Returns a React element, in which the details of the transaction are displayed
-     */
-    view: (transaction: T) => JSX.Element;
-    /**
      * Returns a React element, which contains the details of the transaction for print
      */
-    print: PrintComponent<P>;
     createTransaction: (informationBlob: Partial<CreateTransactionInput>) => T;
     creationLocationHandler: (currentLocation: string) => string;
-    type: string;
-    title: string;
 }

@@ -146,6 +146,7 @@ export default function BuildSchedule({ location }: Props) {
                 setScheduleLength={setScheduleLength}
                 submitSchedule={createTransaction}
                 amount={BigInt(amount)}
+                submitButtonSize="big"
             />
         </TransferView>
     );

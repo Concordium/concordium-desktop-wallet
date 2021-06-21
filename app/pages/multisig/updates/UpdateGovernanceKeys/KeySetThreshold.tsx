@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
+import { push } from 'connected-react-router';
+import { useDispatch } from 'react-redux';
 import InlineNumber from '~/components/Form/InlineNumber';
 import Button from '~/cross-app-components/Button';
-import { UpdateType } from '~/utils/types';
 import { typeToDisplay } from '~/utils/updates/HigherLevelKeysHelpers';
 import styles from './KeySetThreshold.module.scss';
+import { createProposalRoute } from '~/utils/routerHelper';
+import { UpdateType, TransactionTypes } from '~/utils/types';
 
 interface Props {
     type: UpdateType;
     currentThreshold: number;
     maxThreshold: number;
+    defaultThreshold?: number;
     setThreshold: React.Dispatch<React.SetStateAction<number>>;
-    submitFunction(): void;
 }
 
 function isInvalid(
@@ -32,11 +35,14 @@ export default function KeySetThreshold({
     type,
     maxThreshold,
     currentThreshold,
+    defaultThreshold,
     setThreshold,
-    submitFunction,
 }: Props) {
+    const dispatch = useDispatch();
     const [threshold, setLocalThreshold] = useState<string | undefined>(
-        currentThreshold.toString()
+        defaultThreshold
+            ? defaultThreshold.toString()
+            : currentThreshold.toString()
     );
 
     return (
@@ -49,7 +55,7 @@ export default function KeySetThreshold({
                 <p>
                     If you want to update the amount of required{' '}
                     {typeToDisplay(type)} key signatures to make transactions,
-                    then you can do so below. If you do not want to make any
+                    the n you can do so below. If you do not want to make any
                     changes to the threshold, then you can just leave it as is.
                 </p>
                 <h2>Current signature threshold</h2>
@@ -69,7 +75,16 @@ export default function KeySetThreshold({
             </div>
             <Button
                 disabled={isInvalid(threshold, maxThreshold)}
-                onClick={submitFunction}
+                onClick={() =>
+                    dispatch(
+                        push(
+                            `${createProposalRoute(
+                                TransactionTypes.UpdateInstruction,
+                                type
+                            )}/seteffectiveexpiry`
+                        )
+                    )
+                }
             >
                 Continue
             </Button>

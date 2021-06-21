@@ -12,25 +12,21 @@ import {
     MultiSignatureTransaction,
     ProtocolUpdate,
     UpdateInstruction,
-    UpdateInstructionPayload,
     UpdateType,
 } from '../types';
 import { serializeProtocolUpdate } from '../UpdateSerialization';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Chain Protocol';
 
 type TransactionType = UpdateInstruction<ProtocolUpdate>;
 
 export default class ProtocolUpdateHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isProtocolUpdate(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isProtocolUpdate);
     }
 
     async createTransaction(
@@ -94,11 +90,5 @@ export default class ProtocolUpdateHandler
         return authorizations.protocol;
     }
 
-    print = () => undefined;
-
     update = UpdateProtocol;
-
-    title = `Foundation Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

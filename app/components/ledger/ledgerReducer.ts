@@ -16,6 +16,7 @@ enum LedgerActionType {
     RESET,
     SET_STATUS_TEXT,
     FINISHED,
+    CLEANUP,
 }
 
 interface PendingAction extends Action<LedgerActionType.PENDING> {
@@ -52,6 +53,12 @@ export const resetAction = (): ResetAction => ({
     type: LedgerActionType.RESET,
 });
 
+type CleanupAction = Action<LedgerActionType.CLEANUP>;
+
+export const cleanupAction = (): CleanupAction => ({
+    type: LedgerActionType.CLEANUP,
+});
+
 interface ErrorAction extends Action<LedgerActionType.ERROR> {
     message?: string | JSX.Element;
 }
@@ -84,6 +91,7 @@ type LedgerAction =
     | ResetAction
     | ErrorAction
     | SetStatusTextAction
+    | CleanupAction
     | FinishedAction;
 
 function getStatusMessage(
@@ -92,7 +100,7 @@ function getStatusMessage(
 ): string {
     switch (status) {
         case LedgerStatusType.LOADING:
-            return 'Waiting for device';
+            return 'Waiting for device. Please connect your Ledger.';
         case LedgerStatusType.AWAITING_USER_INPUT:
             return 'Waiting for user to finish the process on device';
         case LedgerStatusType.ERROR:
@@ -149,6 +157,17 @@ const ledgerReducer: Reducer<LedgerReducerState, LedgerAction> = (
                 status: LedgerStatusType.CONNECTED,
                 text: getStatusMessage(LedgerStatusType.CONNECTED, deviceName),
             };
+        case LedgerActionType.CLEANUP: {
+            const status =
+                s.status === LedgerStatusType.ERROR
+                    ? LedgerStatusType.CONNECTED
+                    : s.status;
+            return {
+                ...s,
+                status,
+                text: getStatusMessage(status, deviceName),
+            };
+        }
         default:
             return s;
     }

@@ -15,25 +15,21 @@ import {
     isElectionDifficulty,
     MultiSignatureTransaction,
     UpdateInstruction,
-    UpdateInstructionPayload,
     UpdateType,
 } from '../types';
 import { serializeElectionDifficulty } from '../UpdateSerialization';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Election Difficulty';
 
 type TransactionType = UpdateInstruction<ElectionDifficulty>;
 
 export default class ElectionDifficultyHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isElectionDifficulty(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isElectionDifficulty);
     }
 
     async createTransaction(
@@ -100,11 +96,5 @@ export default class ElectionDifficultyHandler
         return authorizations.electionDifficulty;
     }
 
-    print = () => undefined;
-
     update = UpdateElectionDifficulty;
-
-    title = `Foundation Transaction | ${TYPE}`;
-
-    type = TYPE;
 }

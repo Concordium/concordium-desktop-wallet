@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Route, Switch, useRouteMatch } from 'react-router';
+import { Route, Switch, useRouteMatch, useLocation } from 'react-router';
 import { push } from 'connected-react-router';
 import MultiSignatureLayout from '../MultiSignatureLayout/MultiSignatureLayout';
 import Columns from '~/components/Columns';
 import Button from '~/cross-app-components/Button';
 import {
-    Identity,
     Account,
     TransactionKindId,
     UpdateBakerRestakeEarnings,
     Fraction,
 } from '~/utils/types';
-import PickIdentity from '~/components/PickIdentity';
 import PickAccount from '~/components/PickAccount';
 import styles from './MultisignatureAccountTransactions.module.scss';
 import SimpleErrorModal from '~/components/SimpleErrorModal';
@@ -31,22 +29,26 @@ import { ensureExchangeRate } from '~/components/Transfers/withExchangeRate';
 import { getNextAccountNonce } from '~/node/nodeRequests';
 import errorMessages from '~/constants/errorMessages.json';
 import LoadingComponent from './LoadingComponent';
+import {
+    BakerSubRoutes,
+    getLocationAfterAccounts,
+} from '~/utils/accountRouterHelpers';
 
-enum SubRoutes {
-    accounts,
-    restake,
-    sign,
-    expiry,
-}
 interface PageProps {
     exchangeRate: Fraction;
 }
 
+interface State {
+    account?: Account;
+}
+
 function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
     const dispatch = useDispatch();
+
+    const { state } = useLocation<State>();
+
     const { path, url } = useRouteMatch();
-    const [identity, setIdentity] = useState<Identity>();
-    const [account, setAccount] = useState<Account>();
+    const [account, setAccount] = useState<Account | undefined>(state?.account);
     const [restakeEarnings, setRestakeEarnings] = useState<boolean>();
     const [error, setError] = useState<string>();
     const [
@@ -55,7 +57,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
     ] = useState<UpdateBakerRestakeEarnings>();
 
     const estimatedFee = useTransactionCostEstimate(
-        TransactionKindId.Update_baker_stake,
+        TransactionKindId.Update_baker_restake_earnings,
         exchangeRate,
         account?.signatureThreshold
     );
@@ -111,7 +113,6 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                 >
                     <div className={styles.columnContent}>
                         <UpdateBakerRestakeEarningsProposalDetails
-                            identity={identity}
                             account={account}
                             estimatedFee={estimatedFee}
                             restakeEarnings={restakeEarnings}
@@ -122,61 +123,33 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                 <Switch>
                     <Route exact path={path}>
                         <Columns.Column
-                            header="Identities"
-                            className={styles.stretchColumn}
-                        >
-                            <div className={styles.columnContent}>
-                                <div className={styles.flex1}>
-                                    <PickIdentity
-                                        setIdentity={setIdentity}
-                                        chosenIdentity={identity}
-                                    />
-                                </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={identity === undefined}
-                                    onClick={() =>
-                                        dispatch(
-                                            push(`${url}/${SubRoutes.accounts}`)
-                                        )
-                                    }
-                                >
-                                    Continue
-                                </Button>
-                            </div>
-                        </Columns.Column>
-                    </Route>
-                    <Route path={`${path}/${SubRoutes.accounts}`}>
-                        <Columns.Column
                             header="Accounts"
                             className={styles.stretchColumn}
                         >
                             <div className={styles.columnContent}>
                                 <div className={styles.flex1}>
                                     <PickAccount
-                                        identity={identity}
                                         setAccount={setAccount}
                                         chosenAccount={account}
                                         filter={(_, info) =>
                                             info?.accountBaker !== undefined
                                         }
+                                        onAccountClicked={() => {
+                                            dispatch(
+                                                push(
+                                                    getLocationAfterAccounts(
+                                                        url,
+                                                        TransactionKindId.Update_baker_restake_earnings
+                                                    )
+                                                )
+                                            );
+                                        }}
                                     />
                                 </div>
-                                <Button
-                                    className={styles.listSelectButton}
-                                    disabled={account === undefined}
-                                    onClick={() => {
-                                        dispatch(
-                                            push(`${url}/${SubRoutes.restake}`)
-                                        );
-                                    }}
-                                >
-                                    Continue
-                                </Button>
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.restake}`}>
+                    <Route path={`${path}/${BakerSubRoutes.restake}`}>
                         <Columns.Column
                             header="Restake earnings"
                             className={styles.stretchColumn}
@@ -196,7 +169,9 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                     disabled={restakeEarnings === undefined}
                                     onClick={() => {
                                         dispatch(
-                                            push(`${url}/${SubRoutes.expiry}`)
+                                            push(
+                                                `${url}/${BakerSubRoutes.expiry}`
+                                            )
                                         );
                                     }}
                                 >
@@ -206,7 +181,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                         </Columns.Column>
                     </Route>
 
-                    <Route path={`${path}/${SubRoutes.expiry}`}>
+                    <Route path={`${path}/${BakerSubRoutes.expiry}`}>
                         <Columns.Column
                             header="Transaction expiry time"
                             className={styles.stretchColumn}
@@ -243,7 +218,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                                             .then(() =>
                                                 dispatch(
                                                     push(
-                                                        `${url}/${SubRoutes.sign}`
+                                                        `${url}/${BakerSubRoutes.sign}`
                                                     )
                                                 )
                                             )
@@ -259,7 +234,7 @@ function UpdateBakerRestakeEarningsPage({ exchangeRate }: PageProps) {
                             </div>
                         </Columns.Column>
                     </Route>
-                    <Route path={`${path}/${SubRoutes.sign}`}>
+                    <Route path={`${path}/${BakerSubRoutes.sign}`}>
                         <Columns.Column
                             header="Signature and Hardware Wallet"
                             className={styles.stretchColumn}

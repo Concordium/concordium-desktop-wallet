@@ -1,7 +1,10 @@
 import AccountTransactionDetails from '~/components/Transfers/AccountTransactionDetails';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
 import { AccountPathInput, getAccountPath } from '~/features/ledger/Path';
-import { AccountTransactionHandler } from '~/utils/transactionTypes';
+import {
+    AccountTransactionHandler,
+    TransactionExportType,
+} from '~/utils/transactionTypes';
 import { AccountTransaction, TransactionPayload } from '../types';
 import { serializeTransferPayload } from '../transactionSerialization';
 
@@ -20,6 +23,12 @@ export default class BakerHandler<
             return transaction;
         }
         throw Error('Invalid transaction type was given as input.');
+    }
+
+    getFileNameForExport(_: A, exportType: TransactionExportType): string {
+        return `${this.type
+            .toLowerCase()
+            .replace(/\s/g, '-')}_${exportType}.json`;
     }
 
     serializePayload(transaction: A) {

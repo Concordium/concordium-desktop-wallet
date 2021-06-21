@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { push } from 'connected-react-router';
-import { LocationDescriptorObject } from 'history';
 import { Redirect } from 'react-router';
 import routes from '~/constants/routes.json';
 import {
@@ -12,7 +11,7 @@ import {
     UpdateInstructionSignature,
 } from '~/utils/types';
 import { UpdateInstructionHandler } from '~/utils/transactionTypes';
-import { createUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
+import { findUpdateInstructionHandler } from '~/utils/transactionHandlers/HandlerFinder';
 import { insert } from '~/database/MultiSignatureProposalDao';
 import { addProposal } from '~/features/MultiSignatureSlice';
 import ConcordiumLedgerClient from '~/features/ledger/ConcordiumLedgerClient';
@@ -29,12 +28,8 @@ import styles from './SignTransactionProposal.module.scss';
 import MultiSignatureLayout from '../MultiSignatureLayout';
 import { parse, stringify } from '~/utils/JSONHelper';
 
-export interface SignInput {
-    multiSignatureTransaction: MultiSignatureTransaction;
-}
-
 interface Props {
-    location: LocationDescriptorObject<string>;
+    proposal: MultiSignatureTransaction;
 }
 
 /**
@@ -42,26 +37,20 @@ interface Props {
  * proposal that is to be signed before being generated and persisted
  * to the database.
  */
-function SignTransactionProposalView({ location }: Props) {
+function SignTransactionProposalView({ proposal }: Props) {
     const dispatch = useDispatch();
 
-    const { multiSignatureTransaction }: SignInput = parse(
-        location.state ?? ''
-    );
-    const { transaction } = multiSignatureTransaction;
-    const type = 'UpdateInstruction';
+    const { transaction } = proposal;
 
-    const transactionHandler = useMemo<
-        UpdateInstructionHandler<UpdateInstruction, ConcordiumLedgerClient>
-    >(() => createUpdateInstructionHandler({ transaction, type }), [
-        transaction,
-        type,
-    ]);
-
-    // TODO Add support for account transactions.
     const updateInstruction: UpdateInstruction<UpdateInstructionPayload> = parse(
         transaction
     );
+
+    const transactionHandler = useMemo<
+        UpdateInstructionHandler<UpdateInstruction, ConcordiumLedgerClient>
+    >(() => findUpdateInstructionHandler(updateInstruction.type), [
+        updateInstruction.type,
+    ]);
 
     const transactionSignDigest = useMemo(
         () => getTransactionSignDigest(updateInstruction),
@@ -90,17 +79,17 @@ function SignTransactionProposalView({ location }: Props) {
         }
         updateInstruction.signatures = signatures;
 
-        const updatedMultiSigTransaction = {
-            ...multiSignatureTransaction,
+        const updatedProposal = {
+            ...proposal,
             transaction: stringify(updateInstruction),
         };
 
         // Save to database and use the assigned id to update the local object.
-        const entryId = (await insert(updatedMultiSigTransaction))[0];
-        updatedMultiSigTransaction.id = entryId;
+        const entryId = (await insert(updatedProposal))[0];
+        updatedProposal.id = entryId;
 
         // Set the current proposal in the state to the one that was just generated.
-        dispatch(addProposal(updatedMultiSigTransaction));
+        dispatch(addProposal(updatedProposal));
 
         // Navigate to the page that displays the current proposal from the state.
         dispatch(push(selectedProposalRoute(entryId)));
@@ -150,7 +139,7 @@ function SignTransactionProposalView({ location }: Props) {
 
 const SignTransactionProposal = ensureProps(
     SignTransactionProposalView,
-    ({ location }) => !!location.state,
+    ({ proposal }) => !!proposal,
     <Redirect to={routes.MULTISIGTRANSACTIONS} />
 );
 

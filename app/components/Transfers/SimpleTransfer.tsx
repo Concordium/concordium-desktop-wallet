@@ -18,6 +18,7 @@ import ExternalTransfer from '~/components/Transfers/ExternalTransfer';
 import { createTransferWithAccountRoute } from '~/utils/accountRouterHelpers';
 import { getTransactionKindCost } from '~/utils/transactionCosts';
 import ensureExchangeRateAndNonce from '~/components/Transfers/ensureExchangeRateAndNonce';
+import { isMultiSig } from '~/utils/accountHelpers';
 
 interface Props {
     account: Account;
@@ -84,7 +85,7 @@ function SimpleTransfer({ account, exchangeRate, nonce }: Props) {
         [JSON.stringify(account), estimatedFee]
     );
 
-    if (account.signatureThreshold && account.signatureThreshold > 1) {
+    if (isMultiSig(account)) {
         return (
             <Redirect
                 to={createTransferWithAccountRoute(

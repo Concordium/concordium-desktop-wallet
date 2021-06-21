@@ -1,5 +1,4 @@
 import React from 'react';
-import { getFoundationTransactionPageTitle } from '~/pages/multisig/util';
 import ConcordiumLedgerClient from '../../features/ledger/ConcordiumLedgerClient';
 import { getGovernanceLevel2Path } from '../../features/ledger/Path';
 import TransactionFeeDistributionView from '../../pages/multisig/updates/TransactionFee/TransactionFeeDistributionView';
@@ -14,25 +13,21 @@ import {
     MultiSignatureTransaction,
     TransactionFeeDistribution,
     UpdateInstruction,
-    UpdateInstructionPayload,
     UpdateType,
 } from '../types';
 import { serializeTransactionFeeDistribution } from '../UpdateSerialization';
+import UpdateHandlerBase from './UpdateHandlerBase';
 
 const TYPE = 'Update Transaction Fee Distribution';
 
 type TransactionType = UpdateInstruction<TransactionFeeDistribution>;
 
 export default class TransactionFeeDistributionHandler
+    extends UpdateHandlerBase<TransactionType>
     implements
         UpdateInstructionHandler<TransactionType, ConcordiumLedgerClient> {
-    confirmType(
-        transaction: UpdateInstruction<UpdateInstructionPayload>
-    ): TransactionType {
-        if (isTransactionFeeDistribution(transaction)) {
-            return transaction;
-        }
-        throw Error('Invalid transaction type was given as input.');
+    constructor() {
+        super(TYPE, isTransactionFeeDistribution);
     }
 
     async createTransaction(
@@ -95,11 +90,5 @@ export default class TransactionFeeDistributionHandler
         return authorizations.transactionFeeDistribution;
     }
 
-    print = () => undefined;
-
     update = UpdateTransactionFeeDistribution;
-
-    title = getFoundationTransactionPageTitle(TYPE);
-
-    type = TYPE;
 }

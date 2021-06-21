@@ -1,5 +1,5 @@
 import React from 'react';
-import { Account, BakerVerifyKeys, Fraction, Identity } from '~/utils/types';
+import { Account, BakerVerifyKeys, Fraction } from '~/utils/types';
 import DisplayEstimatedFee from '~/components/DisplayEstimatedFee';
 import {
     AccountDetail,
@@ -13,7 +13,6 @@ import DisplayTransactionExpiryTime from '~/components/DisplayTransactionExpiryT
 
 interface Props {
     account?: Account;
-    identity?: Identity;
     stake?: string;
     estimatedFee?: Fraction;
     restakeEarnings?: boolean;
@@ -22,7 +21,6 @@ interface Props {
 }
 
 export default function AddBakerProposalDetails({
-    identity,
     account,
     stake,
     estimatedFee,
@@ -32,8 +30,7 @@ export default function AddBakerProposalDetails({
 }: Props) {
     return (
         <Details>
-            <PlainDetail title="Identity" value={identity?.name} first />
-            <AccountDetail title="Account" value={account} />
+            <AccountDetail title="Account" value={account} first />
             <AmountDetail title="Amount to stake" value={stake} />
             <DisplayEstimatedFee estimatedFee={estimatedFee} />
             <EnabledDetail title="Restake earnings" value={restakeEarnings} />
