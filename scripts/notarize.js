@@ -20,7 +20,7 @@ exports.default = async function notarizing(context) {
 
     try {
         return notarize({
-            appBundleId: 'org.Concordium.DesktopWallet',
+            appBundleId: 'com.Concordium.Software.DesktopWallet',
             appPath: `${appOutDir}/${appName}.app`,
             appleId: process.env.APPLEID,
             appleIdPassword: process.env.APPLEIDPASS,

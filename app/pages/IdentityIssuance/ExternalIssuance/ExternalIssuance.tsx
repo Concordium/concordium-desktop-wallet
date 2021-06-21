@@ -10,9 +10,16 @@ import {
     getResponseBody,
     performIdObjectRequest,
 } from '~/utils/httpRequests';
-import { IdentityProvider, Dispatch, SignedIdRequest } from '~/utils/types';
+import {
+    IdentityProvider,
+    Dispatch,
+    SignedIdRequest,
+    IdObjectRequest,
+    Versioned,
+} from '~/utils/types';
 import { confirmIdentityAndInitialAccount } from '~/utils/IdentityStatusPoller';
 import Loading from '~/cross-app-components/Loading';
+import { getAddressFromCredentialId } from '~/utils/rustInterface';
 
 import generalStyles from '../IdentityIssuance.module.scss';
 import styles from './ExternalIssuance.module.scss';
@@ -52,7 +59,7 @@ async function handleIdentityProviderLocation(
 }
 
 async function generateIdentity(
-    idObjectRequest: string,
+    idObjectRequest: Versioned<IdObjectRequest>,
     randomness: string,
     identityNumber: number,
     setLocation: (location: string) => void,
@@ -87,7 +94,16 @@ async function generateIdentity(
             randomness,
             walletId
         );
-        await addPendingAccount(dispatch, accountName, identityId, true); // TODO: can we add the address already here?
+        const address = await getAddressFromCredentialId(
+            idObjectRequest.value.pubInfoForIp.regId
+        );
+        await addPendingAccount(
+            dispatch,
+            accountName,
+            identityId,
+            true,
+            address
+        );
     } catch (e) {
         onError(`Failed to create identity due to ${e}`);
         // Rethrow this to avoid redirection;
