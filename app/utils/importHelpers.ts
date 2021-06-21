@@ -4,7 +4,7 @@ import {
     getCredentialsForIdentity,
     insertCredential,
 } from '../database/CredentialDao';
-import { insertIdentity } from '../database/IdentityDao';
+import { insertIdentity, updateIdentity } from '../database/IdentityDao';
 import { insertWallet } from '../database/WalletDao';
 import { partition } from './basicHelpers';
 import {
@@ -13,6 +13,7 @@ import {
     EncryptedData,
     ExportData,
     Identity,
+    IdentityStatus,
     ValidationRules,
     WalletEntry,
 } from './types';
@@ -287,6 +288,23 @@ async function importDuplicateWallets(
         importedAccounts
     );
 
+    async function addAccountsAndCredentials(oldId: number, newId: number) {
+        const {
+            accountsOnIdentity,
+            credentialsOnIdentity,
+        } = findAccountsAndCredentialsOnIdentity(
+            oldId,
+            attachedAccounts,
+            attachedCredentials
+        );
+
+        await insertNewAccountsAndCredentials(
+            newId,
+            accountsOnIdentity,
+            credentialsOnIdentity
+        );
+    }
+
     // Partition the identities into those that match the existing data, and those that
     // do not.
     const [
@@ -306,21 +324,7 @@ async function importDuplicateWallets(
     // check if there are new accounts or credentials and add them to the database.
     for (let i = 0; i < duplicateIdentities.length; i += 1) {
         const identityId = duplicateIdentities[i].id;
-
-        const {
-            accountsOnIdentity,
-            credentialsOnIdentity,
-        } = findAccountsAndCredentialsOnIdentity(
-            identityId,
-            attachedAccounts,
-            attachedCredentials
-        );
-
-        await insertNewAccountsAndCredentials(
-            identityId,
-            accountsOnIdentity,
-            credentialsOnIdentity
-        );
+        await addAccountsAndCredentials(identityId, identityId);
     }
 
     // The identities that are not duplicate can be partitioned into the set
@@ -328,7 +332,7 @@ async function importDuplicateWallets(
     // and those identities that are entirely new to this database.
     const [
         existingIdentities,
-        newIdentities,
+        nonExistingIdentities,
     ] = partition(nonDuplicateIdentities, (nonDuplicateIdentity) =>
         isDuplicate(nonDuplicateIdentity, existingData.identities, [
             'identityNumber',
@@ -363,21 +367,49 @@ async function importDuplicateWallets(
             );
         }
 
-        const newIdentityId = newIdentity.id;
-        const {
-            accountsOnIdentity,
-            credentialsOnIdentity,
-        } = findAccountsAndCredentialsOnIdentity(
-            existingIdentity.id,
-            attachedAccounts,
-            attachedCredentials
+        await addAccountsAndCredentials(existingIdentity.id, newIdentity.id);
+    }
+
+    // We want to find the placeholder identities, whose real version are present.
+    const [
+        recoveredIdentities,
+        newIdentities,
+    ] = partition(nonExistingIdentities, (nonExistingIdentity) =>
+        isDuplicate(nonExistingIdentity, existingData.identities, [
+            'identityNumber',
+            'walletId',
+        ])
+    );
+    for (let i = 0; i < recoveredIdentities.length; i += 1) {
+        const importedIdentity = recoveredIdentities[i];
+
+        // Find the identity as it is in the database.
+        const existingIdentity = existingData.identities.find(
+            (ident) =>
+                ident.identityNumber === importedIdentity.identityNumber &&
+                ident.walletId === importedIdentity.walletId
         );
 
-        await insertNewAccountsAndCredentials(
-            newIdentityId,
-            accountsOnIdentity,
-            credentialsOnIdentity
-        );
+        if (!existingIdentity) {
+            throw new Error(
+                'Internal error. An existing and matching identity should have been found, but was not.'
+            );
+        }
+
+        const existingId = existingIdentity.id;
+
+        if (importedIdentity.status !== IdentityStatus.Placeholder) {
+            if (existingIdentity.status !== IdentityStatus.Placeholder) {
+                throw new Error(
+                    'An existing and imported identity match on index only, but none of them are placeholders.'
+                );
+            }
+            const { id, ...properties } = importedIdentity;
+            // the identity in the database is a placeholder, so we should update it with the imported data.
+            updateIdentity(existingId, properties);
+        }
+
+        await addAccountsAndCredentials(importedIdentity.id, existingId);
     }
 
     await insertNewIdentities(

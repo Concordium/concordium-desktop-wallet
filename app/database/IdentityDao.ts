@@ -26,7 +26,7 @@ export async function insertIdentity(identity: Partial<Identity> | Identity[]) {
 
 export async function updateIdentity(
     id: number,
-    updatedValues: Record<string, unknown>
+    updatedValues: Partial<Identity>
 ) {
     return (await knex())(identitiesTable).where({ id }).update(updatedValues);
 }
