@@ -57,7 +57,6 @@ async function loadTransactionFile(
         };
     }
 
-    let threshold;
     if (instanceOfUpdateInstruction(transactionObject)) {
         return {
             show: true,
@@ -65,67 +64,87 @@ async function loadTransactionFile(
             content: `The transaction within "${fileName}" is an update instruction, which is not supported for import.`,
         };
     }
-    if (instanceOfAccountTransaction(transactionObject)) {
-        const address = transactionObject.sender;
-        const account = await getAccount(address);
-        if (!account?.signatureThreshold) {
-            return {
-                show: true,
-                header: 'Sender Account not known',
-                content: `In "${fileName}", the sender of the transaction is not an your account.`,
-            };
-        }
-        threshold = account.signatureThreshold;
-
-        if (!transactionObject.nonce) {
-            if (address in indexRecord) {
-                indexRecord[address] += 1n;
-            } else {
-                const accountNonce = await getNextAccountNonce(address);
-                const maxOpenNonce = await getMaxOpenNonceOnAccount(address);
-                indexRecord[address] = max(
-                    BigInt(accountNonce.nonce),
-                    maxOpenNonce + 1n
-                );
-            }
-
-            transactionObject.nonce = indexRecord[address].toString();
-        }
-        if (!transactionObject.energyAmount) {
-            const energyAmount = getTransactionEnergyCost(
-                transactionObject,
-                threshold
-            );
-            transactionObject.energyAmount = energyAmount.toString();
-        }
-        if (!transactionObject.estimatedFee) {
-            const estimatedFee = getTransactionCost(
-                transactionObject,
-                exchangeRate,
-                threshold
-            );
-            transactionObject.estimatedFee = estimatedFee;
-        }
-        if ('toAddress' in transactionObject.payload) {
-            // Check that the recipient exists.
-            const receiverAccountInfo = await getAccountInfo(
-                transactionObject.payload.toAddress,
-                blockHash
-            );
-            if (!receiverAccountInfo) {
-                return {
-                    show: true,
-                    header: 'Invalid file',
-                    content: `The transaction within "${fileName}" contains a recipient address, which does not exist on the blockchain.`,
-                };
-            }
-        }
-    } else {
+    if (!instanceOfAccountTransaction(transactionObject)) {
         return {
             show: true,
             header: 'Invalid file',
             content: `The transaction within "${fileName}" was neither an account transaction nor an update instruction, and is therefore invalid.`,
         };
+    }
+
+    const address = transactionObject.sender;
+    const account = await getAccount(address);
+    if (!account?.signatureThreshold) {
+        return {
+            show: true,
+            header: 'Sender Account not known',
+            content: `In "${fileName}", the sender of the transaction is not an account in this wallet.`,
+        };
+    }
+    const threshold = account.signatureThreshold;
+
+    if (transactionObject.nonce) {
+        return {
+            show: true,
+            header: 'Unexpected Field present',
+            content: `In "${fileName}", the nonce was present.`,
+        };
+    }
+    if (transactionObject.energyAmount) {
+        return {
+            show: true,
+            header: 'Unexpected Field present',
+            content: `In "${fileName}", the energyAmount was present.`,
+        };
+    }
+
+    if (transactionObject.estimatedFee) {
+        return {
+            show: true,
+            header: 'Unexpected Field present',
+            content: `In "${fileName}", the estimatedFee was present.`,
+        };
+    }
+
+    // Set the nonce
+    if (address in indexRecord) {
+        indexRecord[address] += 1n;
+    } else {
+        const accountNonce = await getNextAccountNonce(address);
+        const maxOpenNonce = await getMaxOpenNonceOnAccount(address);
+        indexRecord[address] = max(
+            BigInt(accountNonce.nonce),
+            maxOpenNonce + 1n
+        );
+    }
+
+    transactionObject.nonce = indexRecord[address].toString();
+
+    // Set the energyAmount
+    const energyAmount = getTransactionEnergyCost(transactionObject, threshold);
+    transactionObject.energyAmount = energyAmount.toString();
+
+    // Set the estimatedFee
+    const estimatedFee = getTransactionCost(
+        transactionObject,
+        exchangeRate,
+        threshold
+    );
+    transactionObject.estimatedFee = estimatedFee;
+
+    if ('toAddress' in transactionObject.payload) {
+        // Check that the recipient exists.
+        const receiverAccountInfo = await getAccountInfo(
+            transactionObject.payload.toAddress,
+            blockHash
+        );
+        if (!receiverAccountInfo) {
+            return {
+                show: true,
+                header: 'Invalid file',
+                content: `The transaction within "${fileName}" contains a recipient address, which does not exist on the blockchain.`,
+            };
+        }
     }
 
     const proposal = createMultiSignatureTransaction(
@@ -161,10 +180,9 @@ function ImportProposal({ exchangeRate }: Props) {
     async function handleFiles(files: File[]) {
         const proposals: [string, Partial<MultiSignatureTransaction>][] = [];
         const index: Record<string, bigint> = {};
-        let result;
         const blockHash = await getlastFinalizedBlockHash();
         for (const file of files) {
-            result = await loadTransactionFile(
+            const result = await loadTransactionFile(
                 file,
                 index,
                 file.name,
