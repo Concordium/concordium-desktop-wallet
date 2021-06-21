@@ -24,60 +24,75 @@ csvDelimiter = ';'
 thousandsSep = '’'
 expiry = datetime.now() + relativedelta(hours =+ 2) # proposal expires 2 hours from now
 
+if len(sys.argv) != 2:
+	print("Error: Incorrect number of arguments. Please provide the path to a csv file as the only argument.")
+	sys.exit(1)
+
+csvFileName = sys.argv[1]
+
 # read csv file
-with open(sys.argv[1], newline='', encoding='utf-8-sig') as csvfile:
-	reader = csv.reader(csvfile, delimiter=csvDelimiter)
+try:
+	with open(csvFileName, newline='', encoding='utf-8-sig') as csvfile:
+		reader = csv.reader(csvfile, delimiter=csvDelimiter)
 
-	rowNumber = 0
+		rowNumber = 0
 
-	for row in reader:
-		rowNumber += 1
+		for row in reader:
+			rowNumber += 1
 
-		senderAddress = row[0]
-		receiverAddress = row[1]
-		initialAmount = Decimal(row[2].replace(thousandsSep, '')) # remove thousands separator used in Excel
-		initialAmount = int(initialAmount * 1000000) # convert from GTU to microGTU
-		remAmount = Decimal(row[3].replace(thousandsSep, ''))
-		remAmount = int(remAmount * 1000000)
+			if len(row) != 4:
+				print("Error: Incorrect file format. Each row must contains exactly 4 entires. Row ", rowNumber, " contains ", len(row), ".", sep='')
+				sys.exit(2)
 
-		proposal = {
-			"sender": senderAddress,
-			"nonce": "", # filled by desktop wallet
-			"energyAmount": "", # filled by desktop wallet
-			"estimatedFee": "", # filled by desktop wallet,
-			"expiry": {
-				"@type": "bigint",
-				"value": int(expiry.timestamp())
-			},
-			"transactionKind": 19,
-			"payload": {
-				"toAddress": receiverAddress,
-				"schedule": [] # filled below
-			},
-			"signatures": {}
-		}
+			senderAddress = row[0]
+			receiverAddress = row[1]
+			initialAmount = Decimal(row[2].replace(thousandsSep, '')) # remove thousands separator used in Excel
+			initialAmount = int(initialAmount * 1000000) # convert from GTU to microGTU
+			remAmount = Decimal(row[3].replace(thousandsSep, ''))
+			remAmount = int(remAmount * 1000000)
 
-		schedule = [{ # start with initial release and add remaining releases below
-			"amount": initialAmount,
-			"timestamp": int(initialReleaseTime.timestamp()) * 1000 # multiply with 1000 to convert to milliseconds
-		}] 
+			proposal = {
+				"sender": senderAddress,
+				"nonce": "", # filled by desktop wallet
+				"energyAmount": "", # filled by desktop wallet
+				"estimatedFee": "", # filled by desktop wallet,
+				"expiry": {
+					"@type": "bigint",
+					"value": int(expiry.timestamp())
+				},
+				"transactionKind": 19,
+				"payload": {
+					"toAddress": receiverAddress,
+					"schedule": [] # filled below
+				},
+				"signatures": {}
+			}
 
-		# in each remaining step give fraction of amount, rounded down
-		# potentially give more in last release
-		stepAmount = remAmount // (numReleases - 1)
-		lastAmount = remAmount - (numReleases - 2) * stepAmount
+			schedule = [{ # start with initial release and add remaining releases below
+				"amount": initialAmount,
+				"timestamp": int(initialReleaseTime.timestamp()) * 1000 # multiply with 1000 to convert to milliseconds
+			}] 
 
-		rTime = firstRemReleaseTime
+			# in each remaining step give fraction of amount, rounded down
+			# potentially give more in last release
+			stepAmount = remAmount // (numReleases - 1)
+			lastAmount = remAmount - (numReleases - 2) * stepAmount
 
-		for i in range(numReleases - 2) :
-			release = {"amount": stepAmount, "timestamp": int(rTime.timestamp()) * 1000}
-			schedule.append(release)
-			rTime += relativedelta(months =+ 1) # next release is 1 month later
-		
-		lastRelease = {"amount": lastAmount, "timestamp": int(rTime.timestamp()) * 1000}
-		schedule.append(lastRelease)
+			rTime = firstRemReleaseTime
 
-		proposal["payload"]["schedule"] = schedule
+			for i in range(numReleases - 2) :
+				release = {"amount": stepAmount, "timestamp": int(rTime.timestamp()) * 1000}
+				schedule.append(release)
+				rTime += relativedelta(months =+ 1) # next release is 1 month later
+			
+			lastRelease = {"amount": lastAmount, "timestamp": int(rTime.timestamp()) * 1000}
+			schedule.append(lastRelease)
 
-		with open("pre-proposal_" + str(rowNumber).zfill(3) + ".json", 'w') as outfile:
-			json.dump(proposal, outfile, indent=4)
+			proposal["payload"]["schedule"] = schedule
+
+			with open("pre-proposal_" + str(rowNumber).zfill(3) + ".json", 'w') as outfile:
+				json.dump(proposal, outfile, indent=4)
+
+except IOError:
+	print("Error reading file \"", csvFileName, "\".", sep='')
+	sys.exit(3)
