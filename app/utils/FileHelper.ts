@@ -46,6 +46,26 @@ export async function openFile(title: string): Promise<string> {
 }
 
 /**
+ * Saves the given data to the given filepath
+ * @param data the string or buffer to save to a file
+ * @param title the path to save the file
+ * @return the promise resolves if the data has been written to file.
+ */
+function saveFileDirect(
+    data: Buffer | string,
+    filePath: string
+): Promise<void> {
+    return new Promise((resolve, reject) => {
+        fs.writeFile(filePath, data, (err) => {
+            if (err) {
+                reject(new Error(`Unable to save file: ${err}`));
+            }
+            resolve();
+        });
+    });
+}
+
+/**
  * Opens a 'save file' prompt where the user can select where to save a file, and writes
  * the data to that destination.
  * @param data the string or buffer to save to a file
@@ -66,38 +86,14 @@ export async function saveFile(
         return false;
     }
 
-    return new Promise<boolean>((resolve, reject) => {
-        if (!saveFileDialog.filePath) {
-            reject(new Error('No file path was selected by the user.'));
-        } else {
-            fs.writeFile(saveFileDialog.filePath, data, (err) => {
-                if (err) {
-                    reject(new Error(`Unable to save file: ${err}`));
-                }
-                resolve(true);
-            });
-        }
-    });
-}
+    if (!saveFileDialog.filePath) {
+        return Promise.reject(
+            new Error('No file path was selected by the user.')
+        );
+    }
 
-/**
- * Saves the given data to the given filepath
- * @param data the string or buffer to save to a file
- * @param title the path to save the file
- * @return the promise resolves if the data has been written to file.
- */
-function saveFileDirect(
-    data: Buffer | string,
-    filePath: string
-): Promise<void> {
-    return new Promise((resolve, reject) => {
-        fs.writeFile(filePath, data, (err) => {
-            if (err) {
-                reject(new Error(`Unable to save file: ${err}`));
-            }
-            resolve();
-        });
-    });
+    await saveFileDirect(data, saveFileDialog.filePath);
+    return true;
 }
 
 /**
@@ -120,6 +116,6 @@ export async function saveMultipleFiles(
         return;
     }
     for (const [fileName, data] of datas) {
-        saveFileDirect(data, `${fileLocation}/${fileName}`);
+        await saveFileDirect(data, `${fileLocation}/${fileName}`);
     }
 }
